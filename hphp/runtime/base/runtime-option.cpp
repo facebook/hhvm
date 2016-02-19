@@ -205,7 +205,7 @@ std::string RuntimeOption::DefaultCharsetName = "";
 bool RuntimeOption::ForceServerNameToHeader = false;
 bool RuntimeOption::PathDebug = false;
 
-int RuntimeOption::RequestBodyReadLimit = -1;
+int64_t RuntimeOption::RequestBodyReadLimit = -1;
 
 bool RuntimeOption::EnableSSL = false;
 int RuntimeOption::SSLPort = 443;

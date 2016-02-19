@@ -110,7 +110,7 @@ struct XboxTransport final : Transport, Synchronizable {
    * Request data.
    */
   Method getMethod() override { return Transport::Method::POST; }
-  const void *getPostData(int &size) override {
+  const void *getPostData(size_t &size) override {
     size = m_message.size();
     return m_message.data();
   }

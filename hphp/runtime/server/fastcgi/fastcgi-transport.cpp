@@ -41,7 +41,7 @@ using folly::io::Cursor;
  * NB: locking is important when accessing m_bodyQueue as the session will
  *     also write into that structure via onBody.
  */
-const void *FastCGITransport::getPostData(int& size) {
+const void *FastCGITransport::getPostData(size_t& size) {
   // the API contract is that you can call getPostData repeatedly until
   // you call getMorePostData
   if (m_firstBody) {
@@ -52,7 +52,7 @@ const void *FastCGITransport::getPostData(int& size) {
   return getMorePostData(size);
 }
 
-const void *FastCGITransport::getMorePostData(int& size) {
+const void *FastCGITransport::getMorePostData(size_t& size) {
   // session will terminate the request if we don't receive data in
   // this much time
   long maxWait = RuntimeOption::ConnectionTimeoutSeconds;

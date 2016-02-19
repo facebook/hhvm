@@ -59,12 +59,13 @@ struct HttpClient {
   /**
    * POST data to an URL and returns its response code.
    */
-  int post(const char *url, const char *data, int size, StringBuffer &response,
+  int post(const char *url, const char *data, size_t size,
+           StringBuffer &response,
            const HeaderMap *requestHeaders = nullptr,
            std::vector<String> *responseHeaders = nullptr);
 
   int request(const char* method,
-              const char *url, const char *data, int size,
+              const char *url, const char *data, size_t size,
               StringBuffer &response, const HeaderMap *requestHeaders,
               std::vector<String> *responseHeaders);
 
@@ -94,7 +95,6 @@ private:
   std::string m_proxyPassword;
 
   Array       m_stream_context_options;
-
 
   static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx);
   static size_t curl_header(char *data, size_t size, size_t nmemb, void *ctx);

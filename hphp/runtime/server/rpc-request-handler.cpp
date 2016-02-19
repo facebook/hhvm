@@ -282,7 +282,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       }
     } else {
       // single string parameter, used by xbox to avoid any en/decoding
-      int size;
+      size_t size;
       const void *data = transport->getPostData(size);
       if (data && size) {
         params.append(String((char*)data, size, CopyString));

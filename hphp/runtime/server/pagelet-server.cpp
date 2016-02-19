@@ -98,7 +98,7 @@ uint16_t PageletTransport::getRemotePort() {
   return 0;
 }
 
-const void *PageletTransport::getPostData(int &size) {
+const void *PageletTransport::getPostData(size_t &size) {
   size = m_postData.size();
   return m_postData.data();
 }

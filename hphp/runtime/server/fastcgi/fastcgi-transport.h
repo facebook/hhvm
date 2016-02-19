@@ -165,8 +165,8 @@ struct FastCGITransport final : Transport, private Synchronizable {
   void onSendEndImpl() override;
 
   // POST request data
-  const void* getPostData(int& size) override;
-  const void* getMorePostData(int& size) override;
+  const void* getPostData(size_t& size) override;
+  const void* getMorePostData(size_t& size) override;
   bool hasMorePostData() override;
 
   // HEADER data
@@ -212,8 +212,8 @@ struct FastCGITransport final : Transport, private Synchronizable {
 
   // Request parameter getters
   // These properties can be extracted directly from the request parameters
-  int getRequestSize() const override {
-    return getParamTyped<int>("CONTENT_LENGTH");
+  size_t getRequestSize() const override {
+    return getParamTyped<size_t>("CONTENT_LENGTH");
   }
 
 #define RAW_STRING const char*

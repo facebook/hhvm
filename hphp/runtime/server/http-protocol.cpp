@@ -54,11 +54,11 @@ namespace HPHP {
 // helper functions
 
 static bool read_all_post_data(Transport *transport,
-                               const void *&data, int &size) {
+                               const void *&data, size_t &size) {
   if (transport->hasMorePostData()) {
     data = buffer_duplicate(data, size);
     do {
-      int delta = 0;
+      size_t delta = 0;
       const void *extra = transport->getMorePostData(delta);
       if (size + delta < VirtualHost::GetMaxPostSize()) {
         data = buffer_append(data, size, extra, delta);
@@ -381,26 +381,28 @@ void HttpProtocol::PreparePostVariables(Array& post,
   std::string contentLength = transport->getHeader("Content-Length");
 
   bool needDelete = false;
-  int size = 0;
+  size_t size = 0;
   const void *data = transport->getPostData(size);
   if (data && size) {
     std::string boundary;
-    int content_length = atoi(contentLength.c_str());
+    auto content_length = strtoll(contentLength.c_str(), nullptr, 10);
     bool rfc1867Post = IsRfc1867(contentType, boundary);
     std::string files_str;
     if (rfc1867Post) {
-      if (content_length > VirtualHost::GetMaxPostSize()) {
+      if (content_length < 0 ||
+          content_length > VirtualHost::GetMaxPostSize()) {
         // $_POST and $_FILES are empty
-        Logger::Warning("POST Content-Length of %d bytes exceeds "
+        Logger::Warning("POST Content-Length of %lld bytes exceeds "
                         "the limit of %" PRId64 " bytes",
                         content_length, VirtualHost::GetMaxPostSize());
         while (transport->hasMorePostData()) {
-          int delta = 0;
+          size_t delta = 0;
           transport->getMorePostData(delta);
         }
         data = nullptr;
         size = 0;
       } else {
+        // content_length is a reasonable nonnegative size.
         bool invalidate = false;
         if (transport->hasMorePostData()) {
           // Calls to getMorePostData may invalidate data, so make a copy
@@ -454,7 +456,7 @@ void HttpProtocol::PreparePostVariables(Array& post,
     if (!data) {
       return;
     }
-    if (uint32_t(size) > StringData::MaxSize) {
+    if (size > StringData::MaxSize) {
       // Can't store it anywhere
       if (needDelete) {
         free((void*) data);
@@ -820,7 +822,7 @@ void HttpProtocol::ClearRecord(bool success, const std::string &tmpfile) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void HttpProtocol::DecodeParameters(Array& variables, const char *data,
-                                    int size, bool post /* = false */) {
+                                    size_t size, bool post /* = false */) {
   if (data == nullptr || size == 0) {
     return;
   }
@@ -832,17 +834,14 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
   while (s < e && (p = (const char *)memchr(s, '&', (e - s)))) {
   last_value:
     if ((val = (const char *)memchr(s, '=', (p - s)))) {
-      int len = val - s;
-      String sname = url_decode(s, len);
+      String sname = url_decode(s, val - s);
 
       val++;
-      len = p - val;
-      String value = url_decode(val, len);
+      String value = url_decode(val, p - val);
 
       register_variable(variables, (char*)sname.data(), value);
     } else if (!post) {
-      int len = p - s;
-      String sname = url_decode(s, len);
+      String sname = url_decode(s, p - s);
       register_variable(variables, (char*)sname.data(),
                         empty_string_variant_ref);
     }
@@ -870,17 +869,14 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
 
     if (var != val && *var != '\0') {
       if (val) { /* have a value */
-        int len = val - var;
-        String sname = url_decode(var, len);
+        String sname = url_decode(var, val - var);
 
         ++val;
-        len = strlen(val);
-        String value = url_decode(val, len);
+        String value = url_decode(val, strlen(val));
 
         register_variable(variables, (char*)sname.data(), value, false);
       } else {
-        int len = strlen(var);
-        String sname = url_decode(var, len);
+        String sname = url_decode(var, strlen(var));
 
         register_variable(variables, (char*)sname.data(),
                           empty_string_variant_ref, false);
@@ -927,9 +923,9 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
 void HttpProtocol::DecodeRfc1867(Transport *transport,
                                  Array& post,
                                  Array& files,
-                                 int contentLength,
+                                 size_t contentLength,
                                  const void *&data,
-                                 int &size,
+                                 size_t &size,
                                  string boundary) {
   rfc1867PostHandler(transport,
                      post,
@@ -1010,7 +1006,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
     }
   }
 
-  int size = 0;
+  size_t size = 0;
   const char *data = nullptr;
   if (transport->getMethod() == Transport::Method::POST) {
     data = (const char *)transport->getPostData(size);

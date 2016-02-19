@@ -64,14 +64,14 @@ struct HttpProtocol {
 
   static void DecodeParameters(Array& variables,
                                const char *data,
-                               int size,
+                               size_t size,
                                bool post = false);
   static void DecodeRfc1867(Transport* transport,
                             Array& post,
                             Array& files,
-                            int contentLength,
+                            size_t contentLength,
                             const void*& data,
-                            int& size,
+                            size_t& size,
                             std::string boundary);
   static void DecodeCookies(Array& variables, char *data);
   static bool IsRfc1867(std::string contentType, std::string &boundary);

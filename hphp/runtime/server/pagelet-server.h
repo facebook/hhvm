@@ -91,7 +91,7 @@ struct PageletTransport final : Transport, Synchronizable {
   const char *getUrl() override;
   const char *getRemoteHost() override;
   uint16_t getRemotePort() override;
-  const void *getPostData(int &size) override;
+  const void *getPostData(size_t &size) override;
   Method getMethod() override;
   std::string getHeader(const char *name) override;
   void getHeaders(HeaderMap &headers) override;

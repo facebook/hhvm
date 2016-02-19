@@ -264,7 +264,7 @@ uint16_t ProxygenTransport::getRemotePort() {
   return m_clientAddress.getPort();
 }
 
-const void *ProxygenTransport::getPostData(int &size) {
+const void *ProxygenTransport::getPostData(size_t &size) {
   if (m_sendEnded) {
     size = 0;
     return 0;
@@ -294,7 +294,7 @@ bool ProxygenTransport::hasMorePostData() {
   return result;
 }
 
-const void *ProxygenTransport::getMorePostData(int &size) {
+const void *ProxygenTransport::getMorePostData(size_t &size) {
   if (bufferRequest()) {
     CHECK(m_clientComplete);
     size = 0;
@@ -311,7 +311,7 @@ const void *ProxygenTransport::getMorePostData(int &size) {
     VLOG(4) << "waiting for POST data for maxWait=" << maxWait;
     wait(maxWait);
   }
-  uint32_t oldLength = m_bodyData.chainLength();
+  auto oldLength = m_bodyData.chainLength();
 
   // For chunk encodings, we way receive an EOM with no data, such that
   // hasMorePostData returns true (because client is not yet complete),
@@ -327,6 +327,7 @@ const void *ProxygenTransport::getMorePostData(int &size) {
     data = m_currentBodyBuf->data();
     break;
   }
+  // RequestBodyReadLimit is int64_t and could be -1
   if (oldLength >= RuntimeOption::RequestBodyReadLimit &&
       m_bodyData.chainLength() < RuntimeOption::RequestBodyReadLimit) {
     VLOG(4) << "resuming ingress";
@@ -349,7 +350,7 @@ std::string ProxygenTransport::getHTTPVersion() const {
   return m_request->getVersionString();
 }
 
-int ProxygenTransport::getRequestSize() const {
+size_t ProxygenTransport::getRequestSize() const {
   return m_requestBodyLength; // header length isn't tracked
 }
 

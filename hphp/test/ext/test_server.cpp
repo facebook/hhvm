@@ -496,7 +496,7 @@ struct TestTransport final : Transport {
    */
   const char *getUrl() override { return "/string"; }
   const char *getRemoteHost() override { return "remote"; }
-  const void *getPostData(int &size) override { size = 0; return nullptr; }
+  const void *getPostData(size_t &size) override { size = 0; return nullptr; }
   uint16_t getRemotePort() override { return 0; }
   Method getMethod() override { return Transport::Method::GET; }
   std::string getHeader(const char *name) override { return ""; }
@@ -661,7 +661,7 @@ struct EchoHandler final : RequestHandler {
     response += transport->getParam("name");
 
     if (transport->getMethod() == Transport::Method::POST) {
-      int size = 0;
+      size_t size = 0;
       auto const data = (const char *)transport->getPostData(size);
       response += "\nPOST data: ";
       response += std::string(data, size);

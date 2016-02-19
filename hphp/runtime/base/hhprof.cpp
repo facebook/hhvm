@@ -436,7 +436,7 @@ void HHProf::finishProfiledRequest() {
     break;
   case Transport::Method::POST: {
     // Split the '+'-delimited addresses and resolve their associated symbols.
-    int size;
+    size_t size;
     auto data = static_cast<const char *>(transport->getPostData(size));
     std::string result;
     std::vector<folly::StringPiece> addrs;

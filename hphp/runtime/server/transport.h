@@ -150,9 +150,9 @@ public:
   /**
    * POST request's data.
    */
-  virtual const void *getPostData(int &size) = 0;
+  virtual const void *getPostData(size_t &size) = 0;
   virtual bool hasMorePostData() { return false; }
-  virtual const void *getMorePostData(int &size) { size = 0; return nullptr; }
+  virtual const void *getMorePostData(size_t &size) { size = 0;return nullptr; }
   virtual bool getFiles(std::string &files) { return false; }
   /**
    * Is this a GET, POST or anything?
@@ -169,7 +169,7 @@ public:
   /**
    * Get http request size.
    */
-  virtual int getRequestSize() const;
+  virtual size_t getRequestSize() const;
 
   /**
    * Get request header(s).

@@ -73,9 +73,9 @@ struct multipart_event_end {
 void rfc1867PostHandler(Transport *transport,
                         Array& post,
                         Array& files,
-                        int content_length,
+                        size_t content_length,
                         const void*& data,
-                        int& size,
+                        size_t& size,
                         std::string boundary);
 
 bool is_uploaded_file(const std::string filename);

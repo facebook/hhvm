@@ -189,7 +189,7 @@ void Transport::parseGetParams() {
 void Transport::parsePostParams() {
   if (!m_postDataParsed) {
     assert(m_postData == nullptr);
-    int size;
+    size_t size;
     const char *data = (const char *)getPostData(size);
     if (data && *data && size) {
       // Post data may be binary, but if parsePostParams() is called, it is
@@ -526,7 +526,7 @@ std::string Transport::getHTTPVersion() const {
   return "1.1";
 }
 
-int Transport::getRequestSize() const {
+size_t Transport::getRequestSize() const {
   return 0;
 }
 
@@ -1024,7 +1024,7 @@ void Transport::debuggerInfo(InfoVec &info) {
   Add(info, "HTTP",        getHTTPVersion());
   Add(info, "Method",      getMethodName());
   if (getMethod() == Method::POST) {
-    int size; getPostData(size);
+    size_t size; getPostData(size);
     Add(info, "Post Data", FormatSize(size));
   }
 }

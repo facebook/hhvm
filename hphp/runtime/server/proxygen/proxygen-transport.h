@@ -124,9 +124,9 @@ struct ProxygenTransport final
   /**
    * POST request's data.
    */
-  const void *getPostData(int &size) override;
+  const void *getPostData(size_t &size) override;
   bool hasMorePostData() override;
-  const void *getMorePostData(int &size) override;
+  const void *getMorePostData(size_t &size) override;
 
   // TODO: is get getFiles required?
 
@@ -144,7 +144,7 @@ struct ProxygenTransport final
   /**
    * Get http request size.
    */
-  int getRequestSize() const override;
+  size_t getRequestSize() const override;
 
   /**
    * Get request header(s).

@@ -40,7 +40,7 @@ struct TestCurlRequestHandler final : RequestHandler {
     transport->addHeader("ECHOED", transport->getHeader("ECHO").c_str());
 
     if (transport->getMethod() == Transport::Method::POST) {
-      int len = 0;
+      size_t len = 0;
       const void *data = transport->getPostData(len);
       String res = "POST: ";
       res += String((char*)data, len, CopyString);

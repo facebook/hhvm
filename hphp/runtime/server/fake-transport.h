@@ -29,7 +29,7 @@ struct FakeTransport final : Transport {
   std::string m_url;
   std::string m_remoteHost;
   uint16_t m_remotePort{0};
-  int m_requestSize{0};
+  size_t m_requestSize{0};
   Method m_method{Method::GET};
   std::string m_extended_method;
   std::string m_httpVersion{"1.1"};
@@ -44,12 +44,12 @@ struct FakeTransport final : Transport {
   virtual const char *getUrl() { return m_url.c_str(); }
   virtual const char *getRemoteHost() { return m_remoteHost.c_str(); }
   virtual uint16_t getRemotePort() { return m_remotePort; }
-  virtual int getRequestSize() const { return m_requestSize; }
+  virtual size_t getRequestSize() const { return m_requestSize; }
 
   /**
    * POST request's data.
    */
-  virtual const void *getPostData(int &size) {
+  virtual const void *getPostData(size_t &size) {
     LOG(FATAL) << "FakeTransport::getPostData";
     size = 0;
     return nullptr;

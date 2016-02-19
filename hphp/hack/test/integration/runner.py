@@ -15,14 +15,14 @@ if __name__ == '__main__':
     hh_paths.hh_server = args.hh_server
     hh_paths.hh_client = args.hh_client
     import test_save_mini
-    import test_save_restore
+    import test_fresh_init
 
-    save_suite = unittest.defaultTestLoader.loadTestsFromTestCase(
-            test_save_restore.TestSaveRestore)
-    save_mini_suite = unittest.defaultTestLoader.loadTestsFromTestCase(
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(
             test_save_mini.TestSaveMiniState)
-    save_suite.addTests(save_mini_suite)
+    test_fresh_suite = unittest.defaultTestLoader.loadTestsFromTestCase(
+            test_fresh_init.TestFreshInit)
+    suite.addTests(test_fresh_suite)
 
-    result = unittest.TextTestRunner(verbosity=2).run(save_suite)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
         sys.exit(1)

@@ -23,7 +23,7 @@ function pg_connect(string $connection_string, int $connection_type = 0): ?resou
 function pg_pconnect(string $connection_string, int $connection_type = 0): ?resource;
 
 <<__Native>>
-function pg_connection_pool_stat(): ?Array;
+function pg_connection_pool_stat(): ?array;
 
 <<__Native>>
 function pg_connection_pool_sweep_free(): void;
@@ -250,4 +250,3 @@ function pg_untrace(resource $connection): bool;
 
 <<__Native>>
 function pg_version(resource $connection): ?array;
-

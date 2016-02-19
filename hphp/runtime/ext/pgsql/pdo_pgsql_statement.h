@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2016 PocketRent Ltd and contributors                   |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+ */
+
 #ifndef incl_HPHP_PDO_PGSQL_STATEMENT_H_
 #define incl_HPHP_PDO_PGSQL_STATEMENT_H_
 
@@ -15,85 +31,86 @@
 #define OIDOID      26
 
 namespace HPHP {
-    class PDOPgSqlStatement : public PDOStatement {
-        friend PDOPgSqlConnection;
 
-    public:
-        DECLARE_RESOURCE_ALLOCATION(PDOPgSqlStatement);
+struct PDOPgSqlStatement : public PDOStatement {
+  friend PDOPgSqlConnection;
 
-        PDOPgSqlStatement(req::ptr<PDOPgSqlResource> conn, PQ::Connection* server);
-        virtual ~PDOPgSqlStatement();
+  public:
+    DECLARE_RESOURCE_ALLOCATION(PDOPgSqlStatement);
 
-        bool create(const String& sql, const Array &options);
+    PDOPgSqlStatement(req::ptr<PDOPgSqlResource> conn, PQ::Connection* server);
+    virtual ~PDOPgSqlStatement();
 
-        virtual bool executer();
-        virtual bool fetcher(PDOFetchOrientation ori, long offset);
+    bool create(const String& sql, const Array &options);
 
-        virtual bool describer(int colno);
+    virtual bool executer();
+    virtual bool fetcher(PDOFetchOrientation ori, long offset);
 
-        virtual bool getColumnMeta(int64_t colno, Array &return_value);
-        virtual bool getColumn(int colno, Variant &value);
+    virtual bool describer(int colno);
 
-        virtual bool paramHook(PDOBoundParam* param, PDOParamEvent event_type);
+    virtual bool getColumnMeta(int64_t colno, Array &return_value);
+    virtual bool getColumn(int colno, Variant &value);
 
-        virtual bool cursorCloser();
+    virtual bool paramHook(PDOBoundParam* param, PDOParamEvent event_type);
 
-        virtual bool support(SupportedMethod method);
+    virtual bool cursorCloser();
 
-    private:
-        std::shared_ptr<PDOPgSqlConnection> m_conn;
-        PQ::Connection* m_server;
-        static unsigned long m_stmtNameCounter;
-        static unsigned long m_cursorNameCounter;
-        std::string m_stmtName;
-        std::string m_resolvedQuery;
-        std::string m_cursorName;
-        std::string err_msg;
-        PQ::Result m_result;
-        bool m_isPrepared;
-        bool m_hasParams;
+    virtual bool support(SupportedMethod method);
 
-        std::vector<Oid> param_types;
-        std::vector<Variant> param_values;
-        std::vector<int> param_lengths;
-        std::vector<int> param_formats;
+  private:
+    std::shared_ptr<PDOPgSqlConnection> m_conn;
+    PQ::Connection* m_server;
+    static unsigned long m_stmtNameCounter;
+    static unsigned long m_cursorNameCounter;
+    std::string m_stmtName;
+    std::string m_resolvedQuery;
+    std::string m_cursorName;
+    std::string err_msg;
+    PQ::Result m_result;
+    bool m_isPrepared;
+    bool m_hasParams;
 
-        std::vector<Oid> m_pgsql_column_types;
+    std::vector<Oid> param_types;
+    std::vector<Variant> param_values;
+    std::vector<int> param_lengths;
+    std::vector<int> param_formats;
 
-        long m_current_row;
+    std::vector<Oid> m_pgsql_column_types;
 
-        template <typename... T>
-        std::string strprintf(const char* format, T... args){
-            int size = snprintf(nullptr, 0, format, args...);
-            std::string str(size, '\0');
-            int actual_sz = snprintf(const_cast<char *>(str.c_str()), size + 1, format, args...);
-            if (actual_sz != size) {
-                throw std::exception();
-            }
-            return str;
+    long m_current_row;
+
+    template <typename... T>
+      std::string strprintf(const char* format, T... args){
+        int size = snprintf(nullptr, 0, format, args...);
+        std::string str(size, '\0');
+        int actual_sz = snprintf(const_cast<char *>(str.c_str()), size + 1, format, args...);
+        if (actual_sz != size) {
+          throw std::exception();
         }
+        return str;
+      }
 
-        std::string oriToStr(PDOFetchOrientation ori, long offset, bool& success){
-            success = true;
-            switch(ori){
-                case PDO_FETCH_ORI_NEXT:
-                    return std::string("NEXT");
-                case PDO_FETCH_ORI_PRIOR:
-                    return std::string("BACKWARD");
-                case PDO_FETCH_ORI_FIRST:
-                    return std::string("FIRST");
-                case PDO_FETCH_ORI_LAST:
-                    return std::string("LAST");
-                case PDO_FETCH_ORI_ABS:
-                    return strprintf("ABSOLUTE %ld", offset);
-                case PDO_FETCH_ORI_REL:
-                    return strprintf("RELATIVE %ld", offset);
-                default:
-                    success = false;
-                    return std::string();
-            }
-        }
-    };
+    std::string oriToStr(PDOFetchOrientation ori, long offset, bool& success){
+      success = true;
+      switch(ori){
+        case PDO_FETCH_ORI_NEXT:
+          return std::string("NEXT");
+        case PDO_FETCH_ORI_PRIOR:
+          return std::string("BACKWARD");
+        case PDO_FETCH_ORI_FIRST:
+          return std::string("FIRST");
+        case PDO_FETCH_ORI_LAST:
+          return std::string("LAST");
+        case PDO_FETCH_ORI_ABS:
+          return strprintf("ABSOLUTE %ld", offset);
+        case PDO_FETCH_ORI_REL:
+          return strprintf("RELATIVE %ld", offset);
+        default:
+          success = false;
+          return std::string();
+      }
+    }
+};
 
 }
 

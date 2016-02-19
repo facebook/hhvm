@@ -48,9 +48,9 @@ struct ScopeNonBlocking {
   bool m_mode;
 };
 
-class PGSQLConnectionPool;
+struct PGSQLConnectionPool;
 
-static class PGSQLConnectionPoolContainer {
+static struct PGSQLConnectionPoolContainer {
   private:
     std::map<std::string, PGSQLConnectionPool*> m_pools;
     Mutex m_lock;
@@ -67,7 +67,7 @@ static class PGSQLConnectionPoolContainer {
 
 } s_connectionPoolContainer;
 
-class PGSQLConnectionPool {
+struct PGSQLConnectionPool {
   private:
     int m_maximumConnections;
     Mutex m_lock;
@@ -110,7 +110,7 @@ class PGSQLConnectionPool {
     void SweepConnection(PQ::Connection& connection);
 };
 
-class PGSQL : public SweepableResourceData {
+struct PGSQL : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PGSQL);
   public:
   static bool AllowPersistent;
@@ -161,7 +161,7 @@ class PGSQL : public SweepableResourceData {
   void SetupInformation();
 };
 
-class PGSQLResult : public SweepableResourceData {
+struct PGSQLResult : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PGSQLResult);
   public:
   static req::ptr<PGSQLResult> Get(const Variant& result);
@@ -1638,7 +1638,7 @@ bool PGSQL::IgnoreNotice        = false;
 bool PGSQL::LogNotice           = false;
 
 namespace { // Anonymous Namespace
-  static class pgsqlExtension : public Extension {
+  static struct pgsqlExtension : public Extension {
     public:
       pgsqlExtension() : Extension("pgsql") {}
 

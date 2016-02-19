@@ -382,8 +382,6 @@ class Connection {
   private:
     PGconn *m_conn;
 };
-
-
 }
 
 #endif//_INCL_PQ_H

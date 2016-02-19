@@ -31,7 +31,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-const bool debug =
+constexpr bool debug =
 #ifdef DEBUG
   true
 #else
@@ -39,7 +39,7 @@ const bool debug =
 #endif
   ;
 
-const bool contiguous_heap =
+constexpr bool contiguous_heap =
 #if CONTIGUOUS_HEAP
   true
 #else
@@ -47,7 +47,7 @@ const bool contiguous_heap =
 #endif
   ;
 
-const bool hhvm_reuse_tc =
+constexpr bool hhvm_reuse_tc =
 #ifdef HHVM_REUSE_TC
   true
 #else

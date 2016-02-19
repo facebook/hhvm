@@ -68,4 +68,16 @@ class DatePeriod implements Iterator {
   function valid() {
     return ($this->current >= $this->start && $this->current < $this->end);
   }
+
+  function getStartDate() {
+    return $this->start;
+  }
+
+  function getEndDate() {
+    return $this->end;
+  }
+
+  function getDateInterval() {
+    return $this->interval;
+  }
 }

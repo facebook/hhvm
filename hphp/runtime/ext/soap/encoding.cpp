@@ -258,9 +258,13 @@ encodeStatic s_defaultEncoding[] = {
    to_zval_string, to_xml_string},
   {KindOfArray, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE,
    to_zval_array, guess_array_map},
+  {KindOfPersistentArray, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE,
+   to_zval_array, guess_array_map},
   {KindOfObject, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE,
    to_zval_object, to_xml_object},
   {KindOfArray, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE,
+   to_zval_array, guess_array_map},
+  {KindOfPersistentArray, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE,
    to_zval_array, guess_array_map},
   {KindOfObject, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE,
    to_zval_object, to_xml_object},
@@ -1468,7 +1472,8 @@ static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
              details.sdl_type->kind == XSD_TYPEKIND_RESTRICTION ||
              details.sdl_type->kind == XSD_TYPEKIND_EXTENSION) &&
             (details.sdl_type->encode == nullptr ||
-             (!isArrayType((DataType)details.sdl_type->encode->details.type) &&
+             (!isArrayDataType(
+                 (DataType)details.sdl_type->encode->details.type) &&
               details.sdl_type->encode->details.type != SOAP_ENC_ARRAY))) {
           ret = to_zval_object_ex(&sdlType->encode->details, data, ce);
         } else {
@@ -2749,7 +2754,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeType* type, const Variant& data,
     if (real_len >= buf_len) {
       buf = (char *)req::realloc(buf, real_len+1);
     }
-    strcat(buf, tzbuf);
+    strncat(buf, tzbuf, real_len);
 
     xmlNodeSetContent(xmlParam, BAD_CAST(buf));
     req::free(buf);
@@ -3014,7 +3019,7 @@ Variant sdl_guess_convert_zval(encodeType* enc, xmlNodePtr data) {
   case XSD_TYPEKIND_RESTRICTION:
   case XSD_TYPEKIND_EXTENSION:
     if (type->encode &&
-        (isArrayType((DataType)type->encode->details.type) ||
+        (isArrayDataType((DataType)type->encode->details.type) ||
          type->encode->details.type == SOAP_ENC_ARRAY)) {
       return to_zval_array(enc, data);
     }
@@ -3080,7 +3085,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeType* enc, const Variant& data,
   case XSD_TYPEKIND_RESTRICTION:
   case XSD_TYPEKIND_EXTENSION:
     if (type->encode &&
-        (isArrayType((DataType)type->encode->details.type) ||
+        (isArrayDataType((DataType)type->encode->details.type) ||
          type->encode->details.type == SOAP_ENC_ARRAY)) {
       return to_xml_array(enc, data, style, parent);
     } else {

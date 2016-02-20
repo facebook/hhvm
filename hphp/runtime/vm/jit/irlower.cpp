@@ -329,7 +329,7 @@ void genCodeImpl(IRUnit& unit, CodeCache::View code,
 
   bool do_relocate = false;
 
-  if (!mcg->useLLVM() &&
+  if (!mcg->useLLVM() && arch() == Arch::X64 &&
       !RuntimeOption::EvalEnableReusableTC &&
       RuntimeOption::EvalJitRelocationSize &&
       cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {

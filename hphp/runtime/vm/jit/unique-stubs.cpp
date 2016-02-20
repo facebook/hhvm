@@ -129,23 +129,19 @@ RegSet syncForLLVMCatch(Vout& v) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitFunctionEnterHelper(cb, us);
+  return ARCH_SWITCH_CALL(emitFunctionEnterHelper, cb, us);
 }
 
 TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitFreeLocalsHelpers(cb, us);
+  return ARCH_SWITCH_CALL(emitFreeLocalsHelpers, cb, us);
 }
 
 TCA emitCallToExit(CodeBlock& cb) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitCallToExit(cb);
+  return ARCH_SWITCH_CALL(emitCallToExit, cb);
 }
 
 TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitEndCatchHelper(cb, us);
+  return ARCH_SWITCH_CALL(emitEndCatchHelper, cb, us);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

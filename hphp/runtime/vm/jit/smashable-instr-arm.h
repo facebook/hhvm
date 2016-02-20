@@ -35,11 +35,11 @@ namespace HPHP { namespace jit { namespace arm {
  * Number of instructions (each of which is four bytes) in the sequence, plus
  * the size of the smashable immediate.
  */
-constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
+constexpr size_t smashableMovqLen() { return 8 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 3 * 4 + 8; }
-constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
-constexpr size_t smashableJccLen()  { return 3 * 4 + 8; }
+constexpr size_t smashableCallLen() { return 20; }
+constexpr size_t smashableJmpLen()  { return 8 + 8; }
+constexpr size_t smashableJccLen()  { return 24 + 16; }
 
 TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
 TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);

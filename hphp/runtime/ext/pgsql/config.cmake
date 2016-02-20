@@ -1,5 +1,4 @@
 HHVM_DEFINE_EXTENSION("pgsql"
-  IS_ENABLED EXT_PGSQL
   SOURCES
     pgsql.cpp
     pdo_pgsql_statement.cpp

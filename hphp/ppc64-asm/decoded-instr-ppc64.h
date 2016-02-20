@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | (c) Copyright IBM Corporation 2016                                   |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,29 +13,33 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/asm-x64.h"
+
+#ifndef incl_HPHP_PPC64_ASM_DECODED_INSTR_PPC64_H_
+#define incl_HPHP_PPC64_ASM_DECODED_INSTR_PPC64_H_
 
 #include <folly/Format.h>
 
-#include "hphp/util/safe-cast.h"
+#include "hphp/util/asm-x64.h"
 
-namespace HPHP { namespace jit {
+namespace ppc64_asm {
 
-// These are in order according to the binary encoding of the X64
-// condition codes.
-const char* cc_names[] = {
-  "O", "NO", "B", "AE", "E", "NE", "BE", "A",
-  "S", "NS", "P", "NP", "L", "GE", "LE", "G"
+struct DecodedInstruction {
+  explicit DecodedInstruction(uint8_t* ip) : m_ip(ip) { }
+
+  size_t size() const;
+  int32_t offset() const;
+  bool isNop() const;
+  bool isBranch(bool allowCond = true) const;
+  bool isCall() const;
+  bool isJmp() const;
+  bool isLea() const;
+  bool isClearSignBit() const;
+  HPHP::jit::ConditionCode jccCondCode() const;
+
+private:
+  uint8_t* m_ip;
 };
 
-const char* show(RoundDirection rd) {
-  switch (rd) {
-    case RoundDirection::nearest:  return "nearest";
-    case RoundDirection::floor:    return "floor";
-    case RoundDirection::ceil:     return "ceil";
-    case RoundDirection::truncate: return "truncate";
-  }
-  not_reached();
 }
 
-} }
+#endif

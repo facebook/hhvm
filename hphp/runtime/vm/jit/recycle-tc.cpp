@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/srcdb.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/decoded-instr.h"
 #include "hphp/util/trace.h"
 
 #include <folly/MoveWrapper.h>

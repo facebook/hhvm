@@ -48,6 +48,7 @@
 #include "hphp/util/bitops.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
+#include "hphp/util/decoded-instr.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"

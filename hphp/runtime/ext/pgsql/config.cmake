@@ -1,4 +1,4 @@
-HHVM_DEFINE_EXTENSION("pgsql"
+HHVM_DEFINE_EXTENSION("pgsql" IMPLICIT
   SOURCES
     pgsql.cpp
     pdo_pgsql_statement.cpp

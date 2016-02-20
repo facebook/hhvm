@@ -20,9 +20,6 @@
 
 namespace HPHP {
 
-// Initialize the extension
-static PDOPgSql s_pgsql_driver;
-
 PDOPgSql::PDOPgSql() : PDODriver("pgsql") {
   PQinitSSL(0);
 }

@@ -27,8 +27,6 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include "hphp/util/arch.h"
-
 #include <folly/ScopeGuard.h>
 
 namespace HPHP { namespace jit {
@@ -69,7 +67,6 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
   // Get the arguments in the proper registers.
   RegSet argRegs;
-  bool needsCopy = false;
   auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
     VregList argDests;
     for (size_t i = 0, n = srcs.size(); i < n; ++i) {
@@ -82,24 +79,8 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
                     v.makeTuple(std::move(argDests))};
     }
   };
-  switch (arch()) {
-    case Arch::X64:
-    case Arch::PPC64:
-      doArgs(vargs.args, rarg);
-      break;
-    case Arch::ARM:
-      if (vargs.indirect) {
-        if (vargs.args.size() > 0) {
-          // First arg is a pointer to storage for the return value.
-          v << copy{vargs.args[0], rret_indirect()};
-          VregList rem(vargs.args.begin() + 1, vargs.args.end());
-          doArgs(rem, rarg);
-          needsCopy = true;
-        }
-      } else {
-        doArgs(vargs.args, rarg);
-      }
-  }
+  doArgs(vargs.indRetArgs, rarg_ind_ret);
+  doArgs(vargs.args, rarg);
   doArgs(vargs.simdArgs, rarg_simd);
 
   // Emit the appropriate call instruction sequence.
@@ -137,12 +118,6 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   } else if (vcall.nothrow) {
     v << nothrow{};
   }
-
-  // Copy back the indirect result pointer into the return register.
-  if (needsCopy) {
-    v << copy{rret_indirect(), rret(0)};
-  }
-
   // For vinvoke, `inst' is no longer valid after this point.
 
   // Copy the call result to the destination register(s).
@@ -185,6 +160,10 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       assertx(dests.size() == 1);
       assertx(dests[0].isValid());
       v << copy{rret_simd(0), dests[0]};
+      break;
+
+    case DestType::Indirect:
+      // Already asserted above
       break;
 
     case DestType::None:

@@ -53,19 +53,21 @@ inline PhysReg rret_type() { return vixl::x1; }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
-inline PhysReg rret_indirect() { return vixl::x8; }
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
+PhysReg rarg_ind_ret(size_t i);
 
 inline PhysReg rfp() { return vixl::x29; }
 inline PhysReg rlr() { return vixl::x30; }
 
 constexpr size_t num_arg_regs() { return 8; }
 constexpr size_t num_arg_regs_simd() { return 8; }
+constexpr size_t num_arg_regs_ind_ret() { return 1; }
 
 RegSet arg_regs(size_t n);
 RegSet arg_regs_simd(size_t n);
+RegSet arg_regs_ind_ret(size_t n);
 
 PhysReg r_svcreq_req();
 PhysReg r_svcreq_stub();

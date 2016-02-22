@@ -59,16 +59,8 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
       }
 
       case Arch::ARM: {
-        using namespace vixl;
-        struct JccDecoder : public Decoder {
-          void VisitConditionalBranch(Instruction* inst) override {
-            cc = true;
-          }
-          bool cc = false;
-        };
-        JccDecoder decoder;
-        decoder.Decode(Instruction::Cast(toSmash));
-        return decoder.cc;
+        auto instr = reinterpret_cast<vixl::Instruction*>(toSmash);
+        return instr->IsCondBranchImm();
       }
 
       case Arch::PPC64:

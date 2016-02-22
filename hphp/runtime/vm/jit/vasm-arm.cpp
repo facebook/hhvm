@@ -1046,15 +1046,6 @@ void lowerVptr(Vptr& p, Vout& v) {
     DISP = 4
   };
 
-  // If p.seg is not Vreg::DS, it is a TLS address and baseless
-  if (p.seg != Vptr::DS) {
-    assertx(!p.base.isValid());
-    auto b = v.makeReg();
-    v << mrs{TPIDR_EL0, b};
-    p.seg = Vptr::DS;
-    p.base = b;
-  }
-
   uint8_t mode = (((p.base.isValid()  & 0x1) << 0) |
                   ((p.index.isValid() & 0x1) << 1) |
                   (((p.disp != 0)     & 0x1) << 2));

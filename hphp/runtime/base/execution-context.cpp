@@ -204,7 +204,6 @@ static void safe_stdout(const  void  *ptr,  size_t  size) {
 }
 
 void ExecutionContext::writeStdout(const char *s, int len) {
-  fflush(stdout);
   if (m_stdout == nullptr) {
     if (s_stdout_color) {
       safe_stdout(s_stdout_color, strlen(s_stdout_color));
@@ -216,14 +215,6 @@ void ExecutionContext::writeStdout(const char *s, int len) {
     m_stdoutBytesWritten += len;
   } else {
     m_stdout(s, len, m_stdoutData);
-  }
-}
-
-void ExecutionContext::writeTransport(const char *s, int len) {
-  if (m_transport) {
-    m_transport->sendRaw((void*)s, len, 200, false, true);
-  } else {
-    writeStdout(s, len);
   }
 }
 
@@ -239,10 +230,10 @@ void ExecutionContext::write(const char *s, int len) {
         obFlush();
       }
     }
-    if (m_implicitFlush) flush();
   } else {
-    writeTransport(s, len);
+    writeStdout(s, len);
   }
+  if (m_implicitFlush) flush();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,13 +244,12 @@ void ExecutionContext::obProtect(bool on) {
 }
 
 void ExecutionContext::obStart(const Variant& handler /* = null */,
-                               int chunk_size /* = 0 */,
-                               OBFlags flags /* = OBFlags::Default */) {
+                               int chunk_size /* = 0 */) {
   if (m_insideOBHandler) {
     raise_error("ob_start(): Cannot use output buffering "
                 "in output buffering display handlers");
   }
-  m_buffers.emplace_back(Variant(handler), chunk_size, flags);
+  m_buffers.emplace_back(Variant(handler), chunk_size);
   resetCurrentBuffer();
 }
 
@@ -303,21 +293,15 @@ void ExecutionContext::obClean(int handler_flag) {
   }
 }
 
-bool ExecutionContext::obFlush(bool force /*= false*/) {
+bool ExecutionContext::obFlush() {
   assert(m_protectedLevel >= 0);
 
-  if (m_buffers.empty()) {
+  if ((int)m_buffers.size() <= m_protectedLevel) {
     return false;
   }
 
   auto iter = m_buffers.end();
   OutputBuffer& last = *(--iter);
-  if (!force && !(last.flags & OBFlags::Flushable)) {
-    return false;
-  }
-  if (last.flags & OBFlags::OutputDisabled) {
-    return false;
-  }
 
   const int flag = k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_END;
 
@@ -358,19 +342,17 @@ bool ExecutionContext::obFlush(bool force /*= false*/) {
       }
       str = tout.toString();
     } catch (...) {
-      writeTransport(str.data(), str.size());
+      writeStdout(str.data(), str.size());
       throw;
     }
   }
 
-  writeTransport(str.data(), str.size());
+  writeStdout(str.data(), str.size());
   return true;
 }
 
 void ExecutionContext::obFlushAll() {
-  do {
-    obFlush(true);
-  } while (obEnd());
+  while (obFlush()) { obEnd();}
 }
 
 bool ExecutionContext::obEnd() {
@@ -397,7 +379,6 @@ int ExecutionContext::obGetLevel() {
 const StaticString
   s_level("level"),
   s_type("type"),
-  s_flags("flags"),
   s_name("name"),
   s_args("args"),
   s_chunk_size("chunk_size"),
@@ -416,19 +397,6 @@ Array ExecutionContext::obGetStatus(bool full) {
       status.set(s_name, buffer.handler);
       status.set(s_type, 1);
     }
-
-    int flags = 0;
-    if (buffer.flags & OBFlags::Cleanable) {
-      flags |= k_PHP_OUTPUT_HANDLER_CLEANABLE;
-    }
-    if (buffer.flags & OBFlags::Flushable) {
-      flags |= k_PHP_OUTPUT_HANDLER_FLUSHABLE;
-    }
-    if (buffer.flags & OBFlags::Removable) {
-      flags |= k_PHP_OUTPUT_HANDLER_REMOVABLE;
-    }
-    status.set(s_flags, flags);
-
     status.set(s_level, level);
     status.set(s_chunk_size, buffer.chunk_size);
     status.set(s_buffer_used, static_cast<uint64_t>(buffer.oss.size()));
@@ -441,22 +409,6 @@ Array ExecutionContext::obGetStatus(bool full) {
     level++;
   }
   return ret;
-}
-
-String ExecutionContext::obGetBufferName() {
-  if (m_buffers.empty()) {
-    return String();
-  } else if (m_buffers.size() <= m_protectedLevel) {
-    return s_default_output_handler;
-  } else {
-    auto iter = m_buffers.end();
-    OutputBuffer& buffer = *(--iter);
-    if (buffer.handler.isNull()) {
-      return s_default_output_handler;
-    } else {
-      return buffer.handler.toString();
-    }
-  }
 }
 
 void ExecutionContext::obSetImplicitFlush(bool on) {
@@ -473,16 +425,19 @@ Array ExecutionContext::obGetHandlers() {
 }
 
 void ExecutionContext::flush() {
-  if (!m_buffers.empty() &&
-      RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
-      !(m_buffers.front().flags & OBFlags::OutputDisabled)) {
-    OutputBuffer &buffer = m_buffers.front();
-    StringBuffer &oss = buffer.oss;
+  if (m_buffers.empty()) {
+    fflush(stdout);
+  } else if (RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
+             (m_transport == nullptr ||
+              (m_transport->getHTTPVersion() == "1.1" &&
+               m_transport->getMethod() != Transport::Method::HEAD))) {
+    StringBuffer &oss = m_buffers.front().oss;
     if (!oss.empty()) {
-      if (buffer.flags & OBFlags::WriteToStdout) {
-        writeStdout(oss.data(), oss.size());
+      if (m_transport) {
+        m_transport->sendRaw((void*)oss.data(), oss.size(), 200, false, true);
       } else {
-        writeTransport(oss.data(), oss.size());
+        writeStdout(oss.data(), oss.size());
+        fflush(stdout);
       }
       oss.clear();
     }

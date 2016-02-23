@@ -942,11 +942,6 @@ void Transport::sendRawInternal(const void *data, int size,
 }
 
 void Transport::onSendEnd() {
-  if (m_sendEnded) {
-    // This can happen if the request was terminated early due to it being a
-    // HEAD request
-    return;
-  }
   bool eomSent = false;
   if (m_compressor && m_chunkedEncoding) {
     assert(m_headerSent);

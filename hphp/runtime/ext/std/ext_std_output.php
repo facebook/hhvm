@@ -68,7 +68,7 @@ function ob_clean(): void;
  * buffer like ob_end_flush() does.
  */
 <<__Native>>
-function ob_flush(): bool;
+function ob_flush(): void;
 
 /* This function discards the contents of the topmost output buffer and turns
  * off this output buffering. If you want to further process the buffer's

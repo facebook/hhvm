@@ -432,13 +432,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            SourceRootInfo &sourceRootInfo,
                                            bool cacheableDynamicContent) {
   ExecutionContext *context = hphp_context_init();
-  OBFlags obFlags = OBFlags::Default;
-  if (cacheableDynamicContent ||
-      transport->getHTTPVersion() != "1.1") {
-    obFlags |= OBFlags::OutputDisabled;
-  }
-  context->obStart(uninit_null(), 0, obFlags);
-  context->obProtect(true);
   if (RuntimeOption::ImplicitFlush) {
     context->obSetImplicitFlush(true);
   }

@@ -28,9 +28,9 @@ namespace HPHP { struct StringData; }
 //////////////////////////////////////////////////////////////////////
 
 /*
- * During warmup, we profile the most common classes or interfaces
- * involved in instanceof checks in order to set up a bitmask for each
- * class to allow these checks to be performed quickly by the JIT.
+ * During warmup, we profile the most common classes or interfaces involved in
+ * instanceof checks in order to set up a bitmask for each class to allow these
+ * checks to be performed quickly by the JIT.
  */
 namespace HPHP { namespace InstanceBits {
 
@@ -45,8 +45,8 @@ using BitSet = std::bitset<128>;
  * These are only exposed in order to define ifInitElse() below, and probably
  * should not be accessed directly from anywhere else.
  */
-extern ReadWriteMutex lock;
-extern std::atomic<bool> initFlag;
+extern ReadWriteMutex g_clsInitLock;
+extern std::atomic<bool> g_initFlag;
 
 /*
  * Execute either `init' or `uninit' depending on whether the instance bits
@@ -58,11 +58,11 @@ extern std::atomic<bool> initFlag;
  */
 template<class Init, class Uninit>
 void ifInitElse(Init init, Uninit uninit) {
-  if (initFlag.load(std::memory_order_acquire)) return init();
+  if (g_initFlag.load(std::memory_order_acquire)) return init();
 
-  ReadLock l(lock);
+  ReadLock l(g_clsInitLock);
 
-  if (initFlag.load(std::memory_order_acquire)) {
+  if (g_initFlag.load(std::memory_order_acquire)) {
     init();
   } else {
     uninit();
@@ -75,24 +75,24 @@ void ifInitElse(Init init, Uninit uninit) {
 void profile(const StringData* name);
 
 /*
- * InstanceBits::init() must be called by the first translation which
- * uses instance bits, while holding the write lease.
+ * InstanceBits::init() must be called by any thread that wants to call
+ * lookup() or getMask().
  */
 void init();
 
 /*
- * Returns: the instance bit for the class or interface `name', or
- * zero if there is no allocated bit.
+ * Returns: the instance bit for the class or interface `name', or 0 if there
+ * is no allocated bit.
  *
- * This function may be called by the thread doing init(), or
- * otherwise only after init() is finished (i.e. initFlag == true).
+ * This function may only be called after init() is finished (i.e. initFlag
+ * == true).
  */
 unsigned lookup(const StringData* name);
 
 /*
- * Populate a mask and offset for checking instance bits from JIT
- * compiled code.  The offset is the offset of the byte that should be
- * tested with mask, relative to a Class*.
+ * Populate a mask and offset for checking instance bits from JIT compiled
+ * code.  The offset is the offset of the byte that should be tested with mask,
+ * relative to a Class*.
  *
  * Returns false if `name' has no instance bit.
  *

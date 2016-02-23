@@ -51,8 +51,9 @@ enum Rank {
   RankUnitCache,
   RankStatCacheNode = RankUnitCache,
 
+  RankInstanceBitsInit,
   RankInstanceCounts,
-  RankInstanceBits = RankInstanceCounts,
+  RankInstanceBitsClsInit = RankInstanceCounts,
 
   RankTreadmill,
 

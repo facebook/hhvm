@@ -222,7 +222,6 @@
 # include "hphp/util/portability/glob.h"
 # include "hphp/util/portability/rand_r.h"
 # include "hphp/util/portability/strfmon.h"
-# include "hphp/util/portability/strptime.h"
 #endif
 
 #if defined(_MSC_VER) && _MSC_FULL_VER <= 190023506 // 2015 Update 1 or below

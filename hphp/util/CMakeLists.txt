@@ -21,14 +21,12 @@ if (NOT MSVC)
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/portability/strptime.cpp
   )
   list(REMOVE_ITEM HEADER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/fnmatch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.h
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/portability/strptime.h
   )
 endif()
 

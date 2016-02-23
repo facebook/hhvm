@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <folly/MapUtil.h>
-
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
@@ -29,29 +27,28 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <boost/dynamic_bitset.hpp>
+#include <folly/MapUtil.h>
 
 #include <algorithm>
 
 /*
- * This module implements two code layout strategies for sorting the
- * Vasm blocks:
+ * This module implements two code layout strategies for sorting a Vunit's
+ * blocks:
  *
- *  1) rpoLayout() implements a simple layout that sorts the blocks in
- *     reverse post-order.  The final list of blocks is also
- *     partitioned so that any blocks assigned to the Main code area
- *     appear before the blocks assigned to the Cold area, which in
- *     turn appear before all blocks assigned to the Frozen area.
- *     This method is used when no profiling information is available.
+ *  1) rpoLayout() implements a simple layout that sorts the blocks in reverse
+ *     post-order.  The final list of blocks is also partitioned so that any
+ *     blocks assigned to the Main code area appear before the blocks assigned
+ *     to the Cold area, which in turn appear before all blocks assigned to the
+ *     Frozen area.  This method is used when no profiling information is
+ *     available.
  *
- *  2) pgoLayout() is enabled for Optimize, PGO-based regions.  This
- *     implements the algorithm described in "Profile Guided Code
- *     Positioning" (PLDI'1990) by Pettis & Hansen (more specifically,
- *     Algo2, from section 4.2.1).  This implementation uses estimated
- *     arc weights derived from a combination of profile counters
- *     inserted at the bytecode-level blocks (in Profile translations)
- *     and the JIT-time Likely/Unlikely/Unused hints (encoded in the
- *     "area" field of Vblocks).
- *
+ *  2) pgoLayout() is enabled for Optimize, PGO-based regions.  This implements
+ *     the algorithm described in "Profile Guided Code Positioning" (PLDI'1990)
+ *     by Pettis & Hansen (more specifically, Algo2, from section 4.2.1).  This
+ *     implementation uses estimated arc weights derived from a combination of
+ *     profile counters inserted at the bytecode-level blocks (in Profile
+ *     translations) and the JIT-time Likely/Unlikely/Unused hints (encoded in
+ *     the "area" field of Vblocks).
  */
 
 namespace HPHP { namespace jit {
@@ -64,21 +61,36 @@ TRACE_SET_MOD(layout);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
-  auto blocks = sortBlocks(unit);
+jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
+  auto labels = sortBlocks(unit);
+
+  auto const blk = [&] (Vlabel b) -> const Vblock& { return unit.blocks[b]; };
+
   // Partition into main/cold/frozen areas without changing relative order, and
-  // the end{} block will be last.
-  auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Main &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
+  // the fallthru{} block will be last if there is one.
+  auto coldIt = std::stable_partition(labels.begin(), labels.end(),
+    [&] (Vlabel b) {
+      return blk(b).area == AreaIndex::Main &&
+             blk(b).code.back().op != Vinstr::fallthru;
     });
-  std::stable_partition(coldIt, blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Cold &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
+  std::stable_partition(coldIt, labels.end(),
+    [&] (Vlabel b) {
+      return blk(b).area == AreaIndex::Cold &&
+             blk(b).code.back().op != Vinstr::fallthru;
     });
-  return blocks;
+
+  // We put fallthru{} blocks at the end, but we also need to make sure it's
+  // still partitioned with those blocks that share a code area.  This should
+  // always be true, so just assert it.
+  DEBUG_ONLY auto const n = labels.size();
+  assertx(n < 2 ||
+    IMPLIES(
+      blk(labels.back()).code.back().op == Vinstr::fallthru,
+      text.area(blk(labels.back()).area) == text.area(blk(labels[n - 2]).area)
+    )
+  );
+
+  return labels;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -396,24 +408,41 @@ void Clusterizer::sortClusters() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> pgoLayout(const Vunit& unit) {
-  // compute block & arc weights
+jit::vector<Vlabel> pgoLayout(const Vunit& unit, const Vtext& text) {
+  // Compute block & arc weights.
   Scale scale(unit);
   FTRACE(1, "profileGuidedLayout: Weighted CFG:\n{}\n", scale.toString());
 
-  // cluster the blocks based on weights and sort the clusters
+  // Cluster the blocks based on weights and sort the clusters.
   Clusterizer clusterizer(unit, scale);
-  return clusterizer.getBlockList();
+  auto labels = clusterizer.getBlockList();
+
+  // Partition by actual code area without changing relative order.
+  auto cold_iter = std::stable_partition(labels.begin(), labels.end(),
+    [&] (Vlabel b) {
+      return text.area(unit.blocks[b].area) == text.area(AreaIndex::Main);
+    });
+  if (cold_iter == labels.end()) return labels;
+
+  std::stable_partition(cold_iter, labels.end(),
+    [&] (Vlabel b) {
+      return text.area(unit.blocks[b].area) == text.area(AreaIndex::Cold);
+    });
+  return labels;
 }
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit, const Vtext& text) {
   Timer timer(Timer::vasm_layout);
-  return unit.transKind == TransKind::Optimize ? pgoLayout(unit)
-                                               : rpoLayout(unit);
+
+  return unit.transKind == TransKind::Optimize
+    ? pgoLayout(unit, text)
+    : rpoLayout(unit, text);
 }
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+
+}}

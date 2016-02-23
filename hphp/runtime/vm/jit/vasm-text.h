@@ -41,6 +41,9 @@ struct Varea {
     , start(cb.frontier())
   {}
 
+  bool operator==(const Varea& area) const { return start == area.start; }
+  bool operator!=(const Varea& area) const { return start != area.start; }
+
   CodeBlock& code;
   CodeAddress start;
 };
@@ -61,12 +64,18 @@ struct Vtext {
   {}
   Vtext(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen)
     : m_areas{main, cold, frozen}
-  {}
+  {
+    // Main and frozen aren't allowed to alias each other unless cold is /also/
+    // the same code region.
+    assertx(this->main() != this->frozen() ||
+            this->main() == this->cold());
+  }
 
   /*
    * Get an existing area.
    */
-  Varea& area(AreaIndex i);
+  const Varea& area(AreaIndex i) const;
+        Varea& area(AreaIndex i);
   Varea& main() { return area(AreaIndex::Main); }
   Varea& cold() { return area(AreaIndex::Cold); }
   Varea& frozen() { return area(AreaIndex::Frozen); }

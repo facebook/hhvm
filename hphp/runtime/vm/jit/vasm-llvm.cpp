@@ -1466,7 +1466,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
   // first.
-  for (auto label : layoutBlocks(m_unit)) {
+  for (auto label : layoutBlocks(m_unit, m_text)) {
     block(label);
   }
 

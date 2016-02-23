@@ -125,7 +125,7 @@ void vasm_emit(const Vunit& unit, Vtext& text, CGMeta& fixups,
   Venv env { unit, text, fixups };
   env.addrs.resize(unit.blocks.size());
 
-  auto labels = layoutBlocks(unit);
+  auto labels = layoutBlocks(unit, text);
 
   IRMetadataUpdater irmu(env, asm_info);
 

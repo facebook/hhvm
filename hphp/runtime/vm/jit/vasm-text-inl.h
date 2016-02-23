@@ -20,6 +20,11 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline const Varea& Vtext::area(AreaIndex i) const {
+  assertx(static_cast<unsigned>(i) < m_areas.size());
+  return m_areas.at(static_cast<unsigned>(i));
+}
+
 inline Varea& Vtext::area(AreaIndex i) {
   assertx(static_cast<unsigned>(i) < m_areas.size());
   return m_areas[static_cast<unsigned>(i)];

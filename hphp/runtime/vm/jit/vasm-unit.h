@@ -41,9 +41,9 @@ namespace HPHP { namespace jit {
  * should be emitted to.
  */
 struct Vblock {
-  explicit Vblock(AreaIndex area) : area(area) {}
+  explicit Vblock(AreaIndex area_idx) : area_idx(area_idx) {}
 
-  AreaIndex area;
+  AreaIndex area_idx;
   jit::vector<Vinstr> code;
 };
 

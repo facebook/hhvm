@@ -38,7 +38,7 @@ inline Vout::operator Vlabel() const {
 }
 
 inline AreaIndex Vout::area() const {
-  return m_unit.blocks[m_block].area;
+  return m_unit.blocks[m_block].area_idx;
 }
 
 inline Vreg Vout::makeReg() {

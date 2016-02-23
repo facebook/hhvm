@@ -93,7 +93,7 @@ struct BlockSorter {
   }
 
   unsigned area(Vlabel b) {
-    return (unsigned)unit.blocks[b].area;
+    return (unsigned)unit.blocks[b].area_idx;
   }
 
   void dfs(Vlabel b) {

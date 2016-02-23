@@ -70,12 +70,12 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
   // the fallthru{} block will be last if there is one.
   auto coldIt = std::stable_partition(labels.begin(), labels.end(),
     [&] (Vlabel b) {
-      return blk(b).area == AreaIndex::Main &&
+      return blk(b).area_idx == AreaIndex::Main &&
              blk(b).code.back().op != Vinstr::fallthru;
     });
   std::stable_partition(coldIt, labels.end(),
     [&] (Vlabel b) {
-      return blk(b).area == AreaIndex::Cold &&
+      return blk(b).area_idx == AreaIndex::Cold &&
              blk(b).code.back().op != Vinstr::fallthru;
     });
 
@@ -86,7 +86,8 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
   assertx(n < 2 ||
     IMPLIES(
       blk(labels.back()).code.back().op == Vinstr::fallthru,
-      text.area(blk(labels.back()).area) == text.area(blk(labels[n - 2]).area)
+      text.area(blk(labels.back()).area_idx) ==
+        text.area(blk(labels[n - 2]).area_idx)
     )
   );
 
@@ -168,7 +169,7 @@ void Scale::computeBlockWeights() {
     "need to update areaWeightFactors");
 
   for (auto b : m_blocks) {
-    auto a = unsigned(m_unit.blocks[b].area);
+    auto a = unsigned(m_unit.blocks[b].area_idx);
     assertx(a < 3);
     m_blkWgts[b] = findProfCount(b) / areaWeightFactors[a];
   }
@@ -211,7 +212,7 @@ std::string Scale::toString() const {
     out << folly::format(
       "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\","
       "shape=box,style=filled,fillcolor=\"#ff{:02x}{:02x}\"]\n",
-      b, b, weight(b), findProfTransID(b), unsigned(m_unit.blocks[b].area),
+      b, b, weight(b), findProfTransID(b), unsigned(m_unit.blocks[b].area_idx),
       findProfCount(b), coldness, coldness);
     for (auto s : succs(m_unit.blocks[b])) {
       out << folly::format("{} -> {} [label={}];\n", b, s, weight(b, s));
@@ -420,13 +421,13 @@ jit::vector<Vlabel> pgoLayout(const Vunit& unit, const Vtext& text) {
   // Partition by actual code area without changing relative order.
   auto cold_iter = std::stable_partition(labels.begin(), labels.end(),
     [&] (Vlabel b) {
-      return text.area(unit.blocks[b].area) == text.area(AreaIndex::Main);
+      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Main);
     });
   if (cold_iter == labels.end()) return labels;
 
   std::stable_partition(cold_iter, labels.end(),
     [&] (Vlabel b) {
-      return text.area(unit.blocks[b].area) == text.area(AreaIndex::Cold);
+      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Cold);
     });
   return labels;
 }

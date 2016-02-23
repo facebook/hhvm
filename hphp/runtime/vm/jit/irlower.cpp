@@ -401,7 +401,7 @@ void genCodeImpl(const IRUnit& unit, CodeCache::View code,
              area_names[(unsigned)v.area()]);
 
       auto b = env.labels[block];
-      vunit.blocks[b].area = v.area();
+      vunit.blocks[b].area_idx = v.area();
       v.use(b);
 
       hhir_count += genBlock(env, v, vasm.cold(), *block);

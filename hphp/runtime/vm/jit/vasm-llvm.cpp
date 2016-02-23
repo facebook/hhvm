@@ -1112,7 +1112,7 @@ struct LLVMEmitter {
     if (m_blocks[l] == nullptr) {
       auto& b = m_unit.blocks[l];
       auto name = folly::to<std::string>('B', size_t(l));
-      if (b.area == AreaIndex::Cold || b.area == AreaIndex::Frozen) {
+      if (b.area_idx == AreaIndex::Cold || b.area_idx == AreaIndex::Frozen) {
         name += ".cold";
       };
 

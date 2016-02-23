@@ -1338,8 +1338,8 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
 
         // Pick the hotter phidef as the hint, else prefer `next'.
         auto const next_hotter =
-          static_cast<unsigned>(unit.blocks[next].area) <=
-          static_cast<unsigned>(unit.blocks[taken].area);
+          static_cast<unsigned>(unit.blocks[next].area_idx) <=
+          static_cast<unsigned>(unit.blocks[taken].area_idx);
         auto const hint  = next_hotter ? next_defs[i] : taken_defs[i];
         auto const other = next_hotter ? taken_defs[i] : next_defs[i];
         addPhiGroupMember(variables, phi_groups,
@@ -2745,7 +2745,7 @@ void fixupBlockJumps(Vunit& unit, Vlabel label) {
     insertBlock().code.emplace_back(inst);
 
     if (inst.op == Vinstr::jcc && !inst.jcc_.targets[0].isValid()) {
-      auto newLabel = unit.makeBlock(insertBlock().area);
+      auto newLabel = unit.makeBlock(insertBlock().area_idx);
       insertBlock().code.back().jcc_.targets[0] = newLabel;
       label = newLabel;
     }

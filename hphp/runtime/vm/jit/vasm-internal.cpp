@@ -129,7 +129,7 @@ IRMetadataUpdater::block_info() {
   auto const b = m_env.current;
   auto const& block = m_env.unit.blocks[b];
 
-  return m_area_to_blockinfos[size_t(block.area)][b];
+  return m_area_to_blockinfos[size_t(block.area_idx)][b];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

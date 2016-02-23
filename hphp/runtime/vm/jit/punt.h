@@ -41,24 +41,6 @@ struct FailedTraceGen : std::runtime_error {
   FailedTraceGen(const char* file, int line, const char* why);
 };
 
-struct FailedCodeGen : std::runtime_error {
-  const char*   file;
-  const int     line;
-  const char*   func;
-  const Offset  bcOff;
-  const Func*   vmFunc;
-  const bool    resumed;
-  const TransID profTransId;
-
-  FailedCodeGen(const char* _file,
-                int _line,
-                const char* _func,
-                uint32_t _bcOff,
-                const Func* _vmFunc,
-                bool _resumed,
-                TransID _profTransId);
-};
-
 //////////////////////////////////////////////////////////////////////
 
 #define SPUNT(instr) do {                           \

@@ -710,22 +710,26 @@ To string conversions:
 
 | IsType<T>, D(Bool), S(Cell), NF
 
-  Sets D to true iff S0 holds a value that is of type T.
+  Sets D to true iff S0 holds a value that is of type T. T must not be a
+  specialized type.
 
 | IsNType<T>, D(Bool), S(Cell), NF
 
-  Sets D to true iff S0 holds a value that is not of type T.
+  Sets D to true iff S0 holds a value that is not of type T. T must not be a
+  specialized type.
 
 | IsTypeMem<T>, D(Bool), S(PtrToGen), NF
 
-  Sets D to true iff the value referenced by S0 is of type T.
+  Sets D to true iff the value referenced by S0 is of type T. T must not be a
+  specialized type.
 
   The value in S0 must not be a pointer into the evaluation stack or frame
   locals.
 
 | IsNTypeMem<T>, D(Bool), S(PtrToGen), NF
 
-  Sets D to true iff the value referenced by S0 is not of type T.
+  Sets D to true iff the value referenced by S0 is not of type T. T must not be
+  a specialized type.
 
 | IsScalarType, D(Bool), S(Cell), NF
 

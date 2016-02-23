@@ -36,26 +36,5 @@ FailedTraceGen::FailedTraceGen(const char* file, int line, const char* why)
                                      file, line, why).str())
 {}
 
-FailedCodeGen::FailedCodeGen(const char* _file,
-                             int _line,
-                             const char* _func,
-                             uint32_t _bcOff,
-                             const Func* _vmFunc,
-                             bool _resumed,
-                             TransID _profTransId)
-  : std::runtime_error(
-      folly::format("FailedCodeGen @ {}:{} in {}. {}@{}{}. tid = {}",
-                    _file, _line, _func,
-                    _vmFunc->fullName(), _bcOff,
-                    _resumed ? "r" : "", _profTransId).str())
-  , file(_file)
-  , line(_line)
-  , func(_func)
-  , bcOff(_bcOff)
-  , vmFunc(_vmFunc)
-  , resumed(_resumed)
-  , profTransId(_profTransId)
-{}
-
 //////////////////////////////////////////////////////////////////////
 }}

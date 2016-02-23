@@ -57,7 +57,6 @@
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stack-offsets-defs.h"
@@ -101,28 +100,6 @@ namespace {
  * mcg that hardcode these registers.)
  */
 using namespace jit::reg;
-
-///////////////////////////////////////////////////////////////////////////////
-
-ATTRIBUTE_NORETURN
-void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc, bool resumed,
-            TransID profTransId);
-
-void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc, bool resumed, TransID profTransId) {
-  if (dumpIREnabled()) {
-    auto const phpFile = vmFunc->filename()->data();
-    auto const phpLine = vmFunc->unit()->getLineNumber(bcOff);
-    HPHP::Trace::trace("--------- CG_PUNT %s at %s:%d from %s:%d (bcOff %d)\n",
-                       func, file, line, phpFile, phpLine, bcOff);
-  }
-  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed, profTransId);
-}
-
-#define CG_PUNT(marker, instr)                                    \
-  cgPunt(__FILE__, __LINE__, #instr, marker.bcOff(),              \
-         getFunc(marker), resumed(marker), marker.profTransID())
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -969,11 +946,6 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, Vreg sf, JmpFn doJcc) {
   auto const src = inst->src(0);
   auto const loc = srcLoc(inst, 0);
 
-  // punt if specialized object for now
-  if (inst->typeParam() < TObj || inst->typeParam() < TRes) {
-    CG_PUNT(inst->marker(), IsType-SpecializedUnsupported);
-  }
-
   if (src->isA(TPtrToGen)) {
     auto base = loc.reg();
     emitTypeTest(inst->typeParam(), base[TVOFF(m_type)],
@@ -984,9 +956,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, Vreg sf, JmpFn doJcc) {
 
   auto typeSrcReg = loc.reg(1); // type register
   if (typeSrcReg == InvalidReg) {
-    // Should only get here if the simplifier didn't run
-    // TODO: #3626251 will handle this case.
-    CG_PUNT(inst->marker(), IsType-KnownType);
+    typeSrcReg = vmain().cns(src->type().toDataType());
   }
   auto dataSrcReg = loc.reg(0); // data register
   emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg, sf, doJcc);
@@ -1025,7 +995,7 @@ void CodeGenerator::cgIsTypeCommon(IRInstruction* inst, bool negate) {
   auto const sf = v.makeReg();
   emitIsTypeTest(inst, sf,
     [&](ConditionCode cc, Vreg sfTaken) {
-      assertx(!called);
+      always_assert(!called);
       emitSetCc(inst, negate ? ccNegate(cc) : cc, sfTaken);
       called = true;
     });
@@ -1033,6 +1003,10 @@ void CodeGenerator::cgIsTypeCommon(IRInstruction* inst, bool negate) {
 
 void CodeGenerator::cgIsType(IRInstruction* inst) {
   cgIsTypeCommon(inst, false);
+}
+
+void CodeGenerator::cgIsNType(IRInstruction* inst) {
+  cgIsTypeCommon(inst, true);
 }
 
 void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
@@ -1070,10 +1044,6 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmpbi{KindOfString - KindOfBoolean, diff, sf};
   v << setcc{CC_BE, sf, dstReg};
-}
-
-void CodeGenerator::cgIsNType(IRInstruction* inst) {
-  cgIsTypeCommon(inst, true);
 }
 
 void CodeGenerator::cgIsTypeMem(IRInstruction* inst) {
@@ -5016,8 +4986,13 @@ void CodeGenerator::cgWIterNextK(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
-  bool isNextK = inst->op() == IterNextK || inst->op() == WIterNextK;
-  bool isWNext = inst->op() == WIterNext || inst->op() == WIterNextK;
+  // Nothing uses WIterNext so we intentionally don't support it here to avoid
+  // a null check in the witer_next_key helper. This will need to change if we
+  // ever start using it in an hhas file.
+  always_assert(!inst->is(WIterNext));
+
+  bool isNextK = inst->is(IterNextK, WIterNextK);
+  bool isWNext = inst->is(WIterNext, WIterNextK);
   auto fpReg = srcLoc(inst, 0).reg();
   auto args = argGroup(inst);
   auto& marker = inst->marker();
@@ -5025,11 +5000,6 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
       .addr(fpReg, localOffset(inst->extra<IterData>()->valId));
   if (isNextK) {
     args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-  } else if (isWNext) {
-    // We punt this case because nothing is using WIterNext opcodes
-    // right now, and we don't want the witer_next_key helper to need
-    // to check for null.
-    CG_PUNT(inst->marker(), WIterNext-nonKey);
   }
   TCA helperAddr = isWNext ? (TCA)witer_next_key :
     isNextK ? (TCA)iter_next_key_ind : (TCA)iter_next_ind;

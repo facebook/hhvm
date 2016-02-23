@@ -1777,16 +1777,6 @@ static TranslateResult mcGenUnit(const IRUnit& unit,
                                  ProfSrcKeySet& toInterp) {
   try {
     irlower::genCode(unit, code, fixups);
-  } catch (const FailedCodeGen& exn) {
-    SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
-    ProfSrcKey psk{exn.profTransId, sk};
-    always_assert_flog(
-      !toInterp.count(psk),
-      "code generation failed with {}\n{}", exn.what(), show(unit)
-    );
-
-    toInterp.insert(psk);
-    return TranslateResult::Retry;
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
       mcg->code().disableHot();

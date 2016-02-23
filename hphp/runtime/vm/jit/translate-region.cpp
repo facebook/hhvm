@@ -378,8 +378,6 @@ bool tryTranslateSingletonInline(IRGS& irgs,
       );
     } catch (const FailedIRGen& e) {
       return false;
-    } catch (const FailedCodeGen& e) {
-      return false;
     }
     TRACE(1, "[singleton-sloc] %s <- %s\n",
         funcd->fullName()->data(),
@@ -436,8 +434,6 @@ bool tryTranslateSingletonInline(IRGS& irgs,
         result.getCapture(0)
       );
     } catch (const FailedIRGen& e) {
-      return false;
-    } catch (const FailedCodeGen& e) {
       return false;
     }
     TRACE(1, "[singleton-sprop] %s <- %s\n",

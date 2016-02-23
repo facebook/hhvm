@@ -443,7 +443,7 @@ inline Type Type::unbox() const {
 
 inline Type Type::ptr(Ptr kind) const {
   assertx(*this <= TGen);
-  assertx(kind <= Ptr::Ptr);
+  assertx(ptrSubsetOf(kind, Ptr::Ptr));
   // Enforce a canonical representation for Bottom.
   if (m_bits == kBottom) return TBottom;
   return Type(m_bits,

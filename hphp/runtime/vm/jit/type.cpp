@@ -118,7 +118,7 @@ std::string Type::constValString() const {
 }
 
 static std::string show(Ptr ptr) {
-  always_assert(ptr <= Ptr::Ptr);
+  always_assert(ptrSubsetOf(ptr, Ptr::Ptr));
 
   switch (ptr) {
     case Ptr::Bottom:
@@ -132,7 +132,8 @@ static std::string show(Ptr ptr) {
   }
 
   std::vector<const char*> parts;
-#define PTRT(name, ...) if (Ptr::name <= ptr) parts.emplace_back(#name);
+#define PTRT(name, ...) \
+  if (ptrSubsetOf(Ptr::name, ptr)) parts.emplace_back(#name);
   PTR_PRIMITIVE(PTRT, PTR_NO_R)
 #undef PTRT
   return folly::sformat("{{{}}}", folly::join('|', parts));
@@ -183,7 +184,7 @@ std::string Type::toString() const {
     return ret;
   }
 
-  assertx(t.ptrKind() <= Ptr::NotPtr);
+  assertx(ptrSubsetOf(t.ptrKind(), Ptr::NotPtr));
 
   std::vector<std::string> parts;
   if (isSpecialized()) {
@@ -378,7 +379,7 @@ bool Type::operator<=(Type rhs) const {
   }
 
   // Make sure lhs's ptr kind is a subtype of rhs's.
-  if (!(lhs.ptrKind() <= rhs.ptrKind())) {
+  if (!ptrSubsetOf(lhs.ptrKind(), rhs.ptrKind())) {
     return false;
   }
 

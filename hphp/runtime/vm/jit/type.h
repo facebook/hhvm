@@ -173,12 +173,13 @@ constexpr Ptr operator&(Ptr a, Ptr b) {
 constexpr Ptr operator-(Ptr a, Ptr b) {
   return static_cast<Ptr>(static_cast<ptr_t>(a) & ~static_cast<ptr_t>(b));
 }
-constexpr bool operator<=(Ptr a, Ptr b) {
-  return (a & b) == a;
-}
+bool operator<=(Ptr a, Ptr b) = delete;
 bool operator>=(Ptr, Ptr) = delete;
 bool operator<(Ptr, Ptr) = delete;
 bool operator>(Ptr, Ptr) = delete;
+constexpr bool ptrSubsetOf(Ptr a, Ptr b) {
+  return (a & b) == a;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -212,14 +212,14 @@ void CodeCache::unprotect() {
 CodeCache::View CodeCache::view(bool hot, TransKind kind) {
   // Profile takes precedence over hot.
   if (kind == TransKind::Profile || kind == TransKind::Proflogue) {
-    return View{m_prof, m_frozen, m_frozen};
+    return View{m_prof, m_frozen, m_frozen, m_data};
   }
 
   if (hot && m_useHot && m_hot.available() > kMinTranslationBytes) {
-    return View{m_hot, m_cold, m_frozen};
+    return View{m_hot, m_cold, m_frozen, m_data};
   }
 
-  return View{m_main, m_cold, m_frozen};
+  return View{m_main, m_cold, m_frozen, m_data};
 }
 
 }}

@@ -68,7 +68,7 @@ TransContext prologue_context(TransID transID,
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
-                    CodeCache::View code) {
+                    CodeCache::View code, CGMeta& fixups) {
   auto context = prologue_context(transID, kind, func,
                                   func->getEntryForNumArgs(argc));
   IRGS env{context, TransFlags{}};
@@ -76,13 +76,13 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   auto& cb = code.main();
 
   // Dump the func guard in the TC before anything else.
-  emitFuncGuard(func, cb);
+  emitFuncGuard(func, cb, fixups);
   auto const start = cb.frontier();
 
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
 
-  irlower::genCode(env.unit, code, CodeKind::CrossTrace);
+  irlower::genCode(env.unit, code, fixups, CodeKind::CrossTrace);
 
   return start;
 }
@@ -93,8 +93,6 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
                                   func, func->base());
   IRGS env{context, TransFlags{}};
 
-  assertx(mcg->cgFixups().empty());
-
   auto& main = code.main();
   auto& frozen = code.frozen();
 
@@ -103,16 +101,17 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   irgen::emitFuncBodyDispatch(env, dvs);
   irgen::sealUnit(env);
 
-  irlower::genCode(env.unit, code, CodeKind::CrossTrace);
+  CGMeta fixups;
+  irlower::genCode(env.unit, code, fixups, CodeKind::CrossTrace);
 
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;
     recordPerfRelocMap(start, main.frontier(),
                        frozen.frontier(), frozen.frontier(),
                        SrcKey { func, dvs[0].second, false },
-                       0, ibs, mcg->cgFixups());
+                       0, ibs, fixups);
   }
-  mcg->cgFixups().process(nullptr);
+  fixups.process(nullptr);
 
   return start;
 }

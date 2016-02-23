@@ -83,7 +83,8 @@ constexpr int kExtraLevel = 6;
 constexpr int kExtraExtraLevel = 7;
 
 void printUnit(int level, const IRUnit&, const char* caption,
-               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);
+               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr,
+               Annotations* annot = nullptr);
 
 inline std::ostream& operator<<(std::ostream& os, const Type& t) {
   return os << t.toString();

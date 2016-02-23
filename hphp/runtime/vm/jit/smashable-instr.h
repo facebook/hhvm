@@ -25,6 +25,8 @@
 
 namespace HPHP { namespace jit {
 
+struct CGMeta;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -66,14 +68,18 @@ size_t smashableJccLen();
  *
  * For jcc_and_jmp, return a pair of (jcc_addr, jmp_addr).
  */
-TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
-TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
-TCA emitSmashableCall(CodeBlock& cb, TCA target);
-TCA emitSmashableJmp(CodeBlock& cb, TCA target);
-TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc);
+TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
+                      PhysReg d);
+TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
+                      PhysReg r, int8_t disp);
+TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
+TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
+TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
+                     ConditionCode cc);
 
 std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc);
+emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
+                       ConditionCode cc);
 
 /*
  * Logically smash the smashable operand of an instruction.

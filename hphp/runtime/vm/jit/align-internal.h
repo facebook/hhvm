@@ -17,8 +17,9 @@
 #ifndef incl_HPHP_JIT_ALIGN_INTERNAL_H_
 #define incl_HPHP_JIT_ALIGN_INTERNAL_H_
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/alignment.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/data-block.h"
 
@@ -30,8 +31,8 @@ template <class AImpl>
 bool is_aligned(TCA frontier, Alignment alignment);
 
 template <class AImpl>
-void align(CodeBlock& cb, Alignment alignment,
-           AlignContext context, bool fixups);
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context);
 
 /*
  * Used in align-*.cpp to generate an AlignInfo table within an arch namespace.

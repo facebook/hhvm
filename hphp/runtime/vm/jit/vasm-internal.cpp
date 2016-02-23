@@ -48,7 +48,7 @@ IRMetadataUpdater::IRMetadataUpdater(const Venv& env, AsmInfo* asm_info)
   }
   if (mcg->tx().isTransDBEnabled() ||
       RuntimeOption::EvalJitUseVtuneAPI) {
-    m_bcmap = &mcg->cgFixups().bcMap;
+    m_bcmap = &env.meta.bcMap;
   }
 }
 
@@ -149,54 +149,55 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
     : env.addrs[p.target];
   assertx(catch_target);
 
-  mcg->registerCatchBlock(p.instr, catch_target);
+  env.meta.catches.emplace_back(p.instr, catch_target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool emit(Venv& env, const bindjmp& i) {
-  auto const jmp = emitSmashableJmp(*env.cb, env.cb->frontier());
+  auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
-  mcg->setJmpTransID(jmp, env.unit.transKind);
+  env.meta.setJmpTransID(jmp, env.unit.transKind);
   return true;
 }
 
 bool emit(Venv& env, const bindjcc& i) {
-  auto const jcc = emitSmashableJcc(*env.cb, env.cb->frontier(), i.cc);
+  auto const jcc =
+    emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
-  mcg->setJmpTransID(jcc, env.unit.transKind);
+  env.meta.setJmpTransID(jcc, env.unit.transKind);
   return true;
 }
 
 bool emit(Venv& env, const bindjcc1st& i) {
   auto const jcc_jmp =
-    emitSmashableJccAndJmp(*env.cb, env.cb->frontier(), i.cc);
-
+    emitSmashableJccAndJmp(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({jcc_jmp.second, jcc_jmp.first, i});
 
-  mcg->setJmpTransID(jcc_jmp.first, env.unit.transKind);
-  mcg->setJmpTransID(jcc_jmp.second, env.unit.transKind);
+  env.meta.setJmpTransID(jcc_jmp.first, env.unit.transKind);
+  env.meta.setJmpTransID(jcc_jmp.second, env.unit.transKind);
   return true;
 }
 
 bool emit(Venv& env, const bindaddr& i) {
   env.stubs.push_back({nullptr, nullptr, i});
-  mcg->setJmpTransID(TCA(i.addr), env.unit.transKind);
-  mcg->cgFixups().codePointers.insert(i.addr);
+  env.meta.setJmpTransID(TCA(i.addr), env.unit.transKind);
+  env.meta.codePointers.insert(i.addr);
   return true;
 }
 
 bool emit(Venv& env, const fallback& i) {
-  auto const jmp = emitSmashableJmp(*env.cb, env.cb->frontier());
+  auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
-  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jmp, CC_None);
+  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jmp, CC_None, env.meta);
   return true;
 }
 
 bool emit(Venv& env, const fallbackcc& i) {
-  auto const jcc = emitSmashableJcc(*env.cb, env.cb->frontier(), i.cc);
+  auto const jcc =
+    emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
-  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jcc, i.cc);
+  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jcc, i.cc, env.meta);
   return true;
 }
 
@@ -216,21 +217,21 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
     case Vinstr::bindjmp:
       { auto const& i = p.svcreq.bindjmp_;
         assertx(p.jmp && !p.jcc);
-        stub = svcreq::emit_bindjmp_stub(frozen, i.spOff, p.jmp,
+        stub = svcreq::emit_bindjmp_stub(frozen, env.meta, i.spOff, p.jmp,
                                          i.target, i.trflags);
       } break;
 
     case Vinstr::bindjcc:
       { auto const& i = p.svcreq.bindjcc_;
         assertx(!p.jmp && p.jcc);
-        stub = svcreq::emit_bindjmp_stub(frozen, i.spOff, p.jcc,
+        stub = svcreq::emit_bindjmp_stub(frozen, env.meta, i.spOff, p.jcc,
                                          i.target, i.trflags);
       } break;
 
     case Vinstr::bindaddr:
       { auto const& i = p.svcreq.bindaddr_;
         assertx(!p.jmp && !p.jcc);
-        stub = svcreq::emit_bindaddr_stub(frozen, i.spOff, i.addr,
+        stub = svcreq::emit_bindaddr_stub(frozen, env.meta, i.spOff, i.addr,
                                           i.target, TransFlags{});
         *i.addr = stub;
       } break;
@@ -238,7 +239,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
     case Vinstr::bindjcc1st:
       { auto const& i = p.svcreq.bindjcc1st_;
         assertx(p.jmp && p.jcc);
-        stub = svcreq::emit_bindjcc1st_stub(frozen, i.spOff, p.jcc,
+        stub = svcreq::emit_bindjcc1st_stub(frozen, env.meta, i.spOff, p.jcc,
                                             i.targets[1], i.targets[0], i.cc);
       } break;
 

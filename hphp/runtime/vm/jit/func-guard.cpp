@@ -27,8 +27,8 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitFuncGuard(const Func* func, CodeBlock& cb) {
-  return ARCH_SWITCH_CALL(emitFuncGuard, func, cb);
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
+  return ARCH_SWITCH_CALL(emitFuncGuard, func, cb, fixups);
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* func) {

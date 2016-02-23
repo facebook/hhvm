@@ -54,7 +54,7 @@ ALWAYS_INLINE bool isPrologueStub(TCA addr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitFuncGuard(const Func* func, CodeBlock& cb) {
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   using namespace reg;
   X64Assembler a { cb };
 
@@ -63,14 +63,14 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   auto const funcImm = Immed64(func);
 
   if (funcImm.fits(sz::dword)) {
-    emitSmashableCmpq(a.code(), funcImm.l(), rvmfp(),
+    emitSmashableCmpq(a.code(), fixups, funcImm.l(), rvmfp(),
                       safe_cast<int8_t>(AROFF(m_func)));
   } else {
     // Although func doesn't fit in a signed 32-bit immediate, it may still fit
     // in an unsigned one.  Rather than deal with yet another case (which only
     // happens when we disable jemalloc), just emit a smashable mov followed by
     // a register cmp.
-    emitSmashableMovq(a.code(), uint64_t(func), rax);
+    emitSmashableMovq(a.code(), fixups, uint64_t(func), rax);
     a.  cmpq   (rax, rvmfp()[AROFF(m_func)]);
   }
   a.    jnz    (mcg->ustubs().funcPrologueRedispatch);

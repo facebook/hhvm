@@ -27,6 +27,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct CGMeta;
 struct Func;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ namespace jit {
  * the rest of it is handled by the Call instruction.
  */
 TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
-                    CodeCache::View code);
+                    CodeCache::View code, CGMeta& fixups);
 
 /*
  * Emit a func body dispatch entry point to the TC.

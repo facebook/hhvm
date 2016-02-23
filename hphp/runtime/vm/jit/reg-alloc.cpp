@@ -156,7 +156,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 // a known DataType only get one register. Assign "wide" locations when
 // possible (when all uses and defs can be wide). These will be assigned
 // SIMD registers later.
-void assignRegs(IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
+void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
                 const BlockList& blocks) {
   // visit instructions to find tmps eligible to use SIMD registers
   auto const try_wide = RuntimeOption::EvalHHIRAllocSIMDRegs;

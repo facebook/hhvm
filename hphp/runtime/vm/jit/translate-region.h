@@ -17,7 +17,7 @@
 #define incl_HPHP_TRANSLATE_REGION_H_
 
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/types.h"  // TransFlags
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
 
@@ -46,18 +46,18 @@ struct TranslateRetryContext {
 };
 
 /*
- * Translate `region'.
+ * Populate and optimize an IRUnit for `region' inside `irgs'.
  *
- * The caller is expected to continue calling translateRegion() until either
+ * The caller is expected to continue calling irGenRegion() until either
  * Success or Failure is returned.  Otherwise, Retry is returned, and the
  * caller is responsible for threading the same RetryContext through to the
  * retried translations.
  */
-TranslateResult translateRegion(IRGS& irgs,
-                                const RegionDesc& region,
-                                CodeCache::View code,
-                                TranslateRetryContext& retry,
-                                PostConditions& pconds);
+TranslateResult irGenRegion(IRGS& irgs,
+                            const RegionDesc& region,
+                            TranslateRetryContext& retry,
+                            PostConditions& pconds,
+                            Annotations& annotations);
 
 //////////////////////////////////////////////////////////////////////
 

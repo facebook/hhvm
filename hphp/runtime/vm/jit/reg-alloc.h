@@ -73,7 +73,7 @@ PhysReg forceAlloc(const SSATmp& tmp);
 /*
  * Assign virtual registers to all SSATmps used or defined in reachable blocks.
  */
-void assignRegs(IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
+void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
                 const BlockList& blocks);
 
 /*

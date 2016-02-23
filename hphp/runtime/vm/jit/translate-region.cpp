@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/punt.h"
@@ -556,12 +557,13 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   return calleeRegion;
 }
 
-TranslateResult irGenRegion(IRGS& irgs,
-                            const RegionDesc& region,
-                            TranslateRetryContext& retry,
-                            InliningDecider& inl,
-                            int32_t& budgetBCInstrs,
-                            double profFactor) {
+TranslateResult irGenRegionImpl(IRGS& irgs,
+                                const RegionDesc& region,
+                                TranslateRetryContext& retry,
+                                InliningDecider& inl,
+                                int32_t& budgetBCInstrs,
+                                double profFactor,
+                                Annotations& annotations) {
   const Timer translateRegionTimer(Timer::translateRegion);
   double prevProfFactor = irgs.profFactor;
   irgs.profFactor = profFactor;
@@ -571,7 +573,7 @@ TranslateResult irGenRegion(IRGS& irgs,
          show(irgs.context.kind), profFactor, show(region));
 
   if (RuntimeOption::EvalDumpRegion) {
-    mcg->annotations().emplace_back("RegionDesc", show(region));
+    annotations.emplace_back("RegionDesc", show(region));
   }
 
   std::string errorMsg;
@@ -750,7 +752,7 @@ TranslateResult irGenRegion(IRGS& irgs,
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
             { return show(*calleeRegion); };
 
-          // Reset block state before reentering irGenRegion
+          // Reset block state before reentering irGenRegionImpl
           irb.resetOffsetMapping();
           irb.resetGuardFailBlock();
 
@@ -765,8 +767,9 @@ TranslateResult irGenRegion(IRGS& irgs,
                                mcg->tx().profData()->transCounter(calleeTID);
           }
 
-          auto result = irGenRegion(irgs, *calleeRegion, retry, inl,
-                                    budgetBCInstrs, calleeProfFactor);
+          auto result = irGenRegionImpl(irgs, *calleeRegion, retry, inl,
+                                        budgetBCInstrs, calleeProfFactor,
+                                        annotations);
           assertx(budgetBCInstrs >= 0);
 
           inl.registerEndInlining(callee);
@@ -797,7 +800,7 @@ TranslateResult irGenRegion(IRGS& irgs,
             assertx(returnBlock->empty());
           }
 
-          // Recursive calls to irGenRegion will reset the successor block
+          // Recursive calls to irGenRegionImpl will reset the successor block
           // mapping
           setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
@@ -858,52 +861,15 @@ TranslateResult irGenRegion(IRGS& irgs,
   return TranslateResult::Success;
 }
 
-TranslateResult mcGenRegion(IRGS& irgs,
-                            const RegionDesc& region,
-                            CodeCache::View code,
-                            ProfSrcKeySet& toInterp) {
-  auto const startSk = region.start();
-  try {
-    mcg->traceCodeGen(irgs, code);
-    if (irgs.context.kind == TransKind::Profile) {
-      mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
-    }
-  } catch (const FailedCodeGen& exn) {
-    SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
-    ProfSrcKey psk{exn.profTransId, sk};
-    always_assert_log(
-      !toInterp.count(psk),
-      [&] {
-        std::ostringstream oss;
-        oss << folly::format("code generation failed with {}\n", exn.what());
-        print(oss, irgs.irb->unit());
-        return oss.str();
-      });
-    toInterp.insert(psk);
-    return TranslateResult::Retry;
-  } catch (const DataBlockFull& dbFull) {
-    if (dbFull.name == "hot") {
-      mcg->code().disableHot();
-      // We can't return Retry here because the code block selection
-      // will still say hot.
-      return TranslateResult::Failure;
-    } else {
-      always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbFull.name, dbFull.what());
-    }
-  }
-  return TranslateResult::Success;
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
 
-TranslateResult translateRegion(IRGS& irgs,
-                                const RegionDesc& region,
-                                CodeCache::View code,
-                                TranslateRetryContext& retry,
-                                PostConditions& pConds) {
+TranslateResult irGenRegion(IRGS& irgs,
+                            const RegionDesc& region,
+                            TranslateRetryContext& retry,
+                            PostConditions& pConds,
+                            Annotations& annotations) {
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
   SCOPE_ASSERT_DETAIL("IRUnit") { return show(irgs.unit); };
 
@@ -920,10 +886,11 @@ TranslateResult translateRegion(IRGS& irgs,
     irgs.unit.entry()->setProfCount(entryProfCount);
   }
   int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
-  auto irGenResult = irGenRegion(irgs, region, retry, inl, budgetBCInstrs, 1);
+  auto result = irGenRegionImpl(irgs, region, retry, inl,
+                                budgetBCInstrs, 1, annotations);
   assertx(budgetBCInstrs >= 0);
   FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
-  if (irGenResult != TranslateResult::Success) return irGenResult;
+  if (result != TranslateResult::Success) return result;
 
   // For profiling translations, grab the postconditions to be used
   // for region selection whenever we decide to retranslate.
@@ -931,16 +898,24 @@ TranslateResult translateRegion(IRGS& irgs,
   pConds.refined.clear();
   if (irgs.context.kind == TransKind::Profile &&
       RuntimeOption::EvalJitPGOUsePostConditions) {
-    auto& unit = irgs.irb->unit();
     auto  lastSrcKey = region.lastSrcKey();
-    Block* mainExit = findMainExitBlock(unit, lastSrcKey);
+    Block* mainExit = findMainExitBlock(irgs.unit, lastSrcKey);
     FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
-           mainExit->id(), show(unit));
+           mainExit->id(), show(irgs.unit));
     assertx(mainExit);
     pConds = irgs.irb->postConds(mainExit);
   }
 
-  return mcGenRegion(irgs, region, code, retry.toInterp);
+  auto finishPass = [&](const char* msg, int level) {
+    printUnit(level, irgs.unit, msg, nullptr, irgs.irb->guards());
+    assertx(checkCfg(irgs.unit));
+  };
+
+  finishPass(" after initial translation ", kIRLevel);
+  optimize(irgs.unit, irgs.context.kind);
+  finishPass(" after optimizing ", kOptLevel);
+
+  return result;
 }
 
 } }

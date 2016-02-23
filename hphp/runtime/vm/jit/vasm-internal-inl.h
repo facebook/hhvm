@@ -118,10 +118,11 @@ bool emit(Venv& env, const retransopt& i);
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Vemit>
-void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
+void vasm_emit(const Vunit& unit, Vtext& text, CGMeta& fixups,
+               AsmInfo* asm_info) {
   using namespace vasm_detail;
 
-  Venv env { unit, text };
+  Venv env { unit, text, fixups };
   env.addrs.resize(unit.blocks.size());
 
   auto labels = layoutBlocks(unit);

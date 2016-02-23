@@ -27,6 +27,8 @@ struct Func;
 
 namespace jit {
 
+struct CGMeta;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -40,7 +42,7 @@ namespace jit {
  * When we don't, rather than calling straight into the func prologue, we call
  * the func guard instead.
  */
-void emitFuncGuard(const Func* func, CodeBlock& cb);
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
 
 /*
  * Get the address of the guard preceding a `prologue' for `func'.

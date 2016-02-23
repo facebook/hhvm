@@ -99,7 +99,7 @@ struct IRLS {
  * emit code into main/cold/frozen sections, allocate RDS and global data, and
  * add fixup metadata.
  */
-void genCode(IRUnit& unit, CodeCache::View code,
+void genCode(const IRUnit& unit, CodeCache::View code, CGMeta& fixups,
              CodeKind kind = CodeKind::Trace);
 
 ///////////////////////////////////////////////////////////////////////////////

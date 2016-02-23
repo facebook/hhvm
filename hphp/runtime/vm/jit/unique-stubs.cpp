@@ -74,7 +74,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void alignJmpTarget(CodeBlock& cb) {
-  align(cb, Alignment::JmpTarget, AlignContext::Dead);
+  align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
 }
 
 void assertNativeStackAligned(Vout& v) {
@@ -562,7 +562,7 @@ TCA emitBindCallStub(CodeBlock& cb) {
 }
 
 TCA emitFCallArrayHelper(CodeBlock& cb, UniqueStubs& us) {
-  align(cb, Alignment::CacheLine, AlignContext::Dead);
+  align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
 
   TCA ret = vwrap(cb, [] (Vout& v) {
     v << movl{v.cns(0), rarg(2)};
@@ -760,7 +760,9 @@ void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us,
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitDecRefGeneric(CodeBlock& cb) {
-  return vwrap(cb, [] (Vout& v) {
+  CGMeta fixups;
+
+  auto const start = vwrap(cb, fixups, [] (Vout& v) {
     v << stublogue{};
 
     auto const rdata = rarg(0);
@@ -794,6 +796,9 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
     emitDecRefWork(v, v, rdata, destroy, false);
     v << stubret{};
   });
+
+  fixups.process(nullptr);
+  return start;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

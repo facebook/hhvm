@@ -24,6 +24,8 @@
 
 namespace HPHP { namespace jit {
 
+struct CGMeta;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -34,12 +36,12 @@ bool is_aligned(TCA frontier, Alignment alignment);
 /*
  * Align `cb' to `alignment' in `context'.
  *
- * By default, calling align() registers alignment fixups for relocation.  If
+ * By default, calling align() registers alignment metadata for relocation.  If
  * this behavior is not desired (e.g., in the relocator itself), it can be
- * disabled by passing false for `fixups'.
+ * disabled by passing nullptr for `meta'.
  */
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups = true);
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context);
 
 /*
  * Size of a cache line, in bytes.

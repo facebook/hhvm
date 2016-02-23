@@ -167,8 +167,8 @@ void printLLVMComparison(const IRUnit& ir_unit,
   }
 }
 
-void genLLVM(Vunit& vunit, Vtext& vtext, CodeKind kind,
-             AsmInfo* ai, IRUnit& unit) {
+void genLLVM(Vunit& vunit, Vtext& vtext, CGMeta& fixups, CodeKind kind,
+             AsmInfo* ai, const IRUnit& unit) {
   auto x64_unit = vunit;
   auto vasm_size = std::numeric_limits<size_t>::max();
 
@@ -177,7 +177,7 @@ void genLLVM(Vunit& vunit, Vtext& vtext, CodeKind kind,
 
   auto const resetCode = [&] {
     for (auto& marker : undos) marker.undo();
-    mcg->cgFixups().clear();
+    fixups.clear();
   };
   auto optimized = false;
 
@@ -189,13 +189,13 @@ void genLLVM(Vunit& vunit, Vtext& vtext, CodeKind kind,
   if (RuntimeOption::EvalJitLLVMKeepSize) {
     optimizeX64(x64_unit, abi(kind));
     optimized = true;
-    emitX64(x64_unit, vtext, nullptr);
+    emitX64(x64_unit, vtext, fixups, nullptr);
     vasm_size = vtext.main().code.frontier() - vtext.main().start;
     resetCode();
   }
 
   try {
-    genCodeLLVM(vunit, vtext);
+    genCodeLLVM(vunit, vtext, fixups);
 
     auto const llvm_size = vtext.main().code.frontier() -
                            vtext.main().start;
@@ -216,7 +216,7 @@ void genLLVM(Vunit& vunit, Vtext& vtext, CodeKind kind,
     mcg->setUseLLVM(false);
     resetCode();
     if (!optimized) optimizeX64(x64_unit, abi(kind));
-    emitX64(x64_unit, vtext, ai);
+    emitX64(x64_unit, vtext, fixups, ai);
 
     if (auto compare = dynamic_cast<const CompareLLVMCodeGen*>(&e)) {
       printLLVMComparison(unit, vunit, vtext.areas(), compare);
@@ -224,15 +224,16 @@ void genLLVM(Vunit& vunit, Vtext& vtext, CodeKind kind,
   }
 }
 
-void genArch(Vunit& vunit, Vtext& vtext, CodeKind kind, AsmInfo* ai) {
+void genArch(Vunit& vunit, Vtext& vtext, CGMeta& fixups,
+             CodeKind kind, AsmInfo* ai) {
   switch (arch()) {
     case Arch::X64:
       optimizeX64(vunit, abi(kind));
-      emitX64(vunit, vtext, ai);
+      emitX64(vunit, vtext, fixups, ai);
       return;
 
     case Arch::ARM:
-      finishARM(vunit, vtext, abi(kind), ai);
+      finishARM(vunit, vtext, fixups, abi(kind), ai);
       return;
 
     case Arch::PPC64:
@@ -248,8 +249,8 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
                   CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
                   CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
                   CodeBlock& frozen, CodeAddress frozen_start,
-                  AsmInfo* ai) {
-  auto const& bc_map = mcg->cgFixups().bcMap;
+                  AsmInfo* ai, CGMeta& fixups) {
+  auto const& bc_map = fixups.bcMap;
   if (!bc_map.empty()) {
     TRACE(1, "bcmaps before relocation\n");
     for (UNUSED auto const& map : bc_map) {
@@ -268,10 +269,10 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
 
   asm_count += x64::relocate(rel, main_in,
                              main.base(), main.frontier(),
-                             mcg->cgFixups(), nullptr);
+                             fixups, nullptr);
   asm_count += x64::relocate(rel, cold_in,
                              cold.base(), cold.frontier(),
-                             mcg->cgFixups(), nullptr);
+                             fixups, nullptr);
 
   TRACE(1, "hhir-inst-count %ld asm %ld\n", hhir_count, asm_count);
 
@@ -280,8 +281,8 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
                     frozen_start, frozen.frontier());
   }
   x64::adjustForRelocation(rel);
-  x64::adjustMetaDataForRelocation(rel, ai, mcg->cgFixups());
-  x64::adjustCodeForRelocation(rel, mcg->cgFixups());
+  x64::adjustMetaDataForRelocation(rel, ai, fixups);
+  x64::adjustCodeForRelocation(rel, fixups);
 
   if (ai) {
     static int64_t mainDeltaTotal = 0, coldDeltaTotal = 0;
@@ -304,7 +305,7 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
   }
 
 #ifndef NDEBUG
-  auto& ip = mcg->cgFixups().inProgressTailJumps;
+  auto& ip = fixups.inProgressTailJumps;
   for (size_t i = 0; i < ip.size(); ++i) {
     const auto& ib = ip[i];
     assertx(!main.contains(ib.toSmash()));
@@ -317,8 +318,8 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void genCodeImpl(IRUnit& unit, CodeCache::View code,
-                 CodeKind kind, AsmInfo* ai) {
+void genCodeImpl(const IRUnit& unit, CodeCache::View code,
+                 CGMeta& fixups, CodeKind kind, AsmInfo* ai) {
   Timer _t(Timer::codeGen);
   CodeBlock& main_in = code.main();
   CodeBlock& cold_in = code.cold();
@@ -367,9 +368,9 @@ void genCodeImpl(IRUnit& unit, CodeCache::View code,
   size_t hhir_count{0};
 
   {
-    mcg->cgFixups().setBlocks(&main, &cold, frozen);
+    fixups.setBlocks(&main, &cold, frozen);
     SCOPE_EXIT {
-      mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
+      fixups.setBlocks(nullptr, nullptr, nullptr);
     };
 
     Vasm vasm;
@@ -415,9 +416,9 @@ void genCodeImpl(IRUnit& unit, CodeCache::View code,
 
     if (mcg->useLLVM()) {
       always_assert(arch() == Arch::X64);
-      genLLVM(vunit, vtext, kind, ai, unit);
+      genLLVM(vunit, vtext, fixups, kind, ai, unit);
     } else {
-      genArch(vunit, vtext, kind, ai);
+      genArch(vunit, vtext, fixups, kind, ai);
     }
   }
 
@@ -428,7 +429,7 @@ void genCodeImpl(IRUnit& unit, CodeCache::View code,
     relocateCode(unit, hhir_count,
                  main, main_in, main_start,
                  cold, cold_in, cold_start,
-                 *frozen, frozen_start, ai);
+                 *frozen, frozen_start, ai, fixups);
   } else {
     cold_in.skip(cold.frontier() - cold_in.frontier());
     main_in.skip(main.frontier() - main_in.frontier());
@@ -443,13 +444,13 @@ void genCodeImpl(IRUnit& unit, CodeCache::View code,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void genCode(IRUnit& unit, CodeCache::View code,
+void genCode(const IRUnit& unit, CodeCache::View code, CGMeta& fixups,
              CodeKind kind /* = CodeKind::Trace */) {
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(unit, code, kind, &ai);
+    genCodeImpl(unit, code, fixups, kind, &ai);
   } else {
-    genCodeImpl(unit, code, kind, nullptr);
+    genCodeImpl(unit, code, fixups, kind, nullptr);
   }
 }
 

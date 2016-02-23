@@ -17,11 +17,12 @@
 #ifndef incl_HPHP_JIT_VASM_GEN_H_
 #define incl_HPHP_JIT_VASM_GEN_H_
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/util/data-block.h"
 
@@ -146,9 +147,11 @@ private:
  * it will finalize and emit any code it contains.
  */
 struct Vauto {
-  explicit Vauto(CodeBlock& code, CodeKind kind = CodeKind::Helper)
+  explicit Vauto(CodeBlock& code, CGMeta& fixups,
+                 CodeKind kind = CodeKind::Helper)
     : m_kind{kind}
     , m_text{code, code}
+    , m_fixups(fixups)
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
     , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
   {
@@ -165,6 +168,7 @@ private:
   CodeKind m_kind;
   Vunit m_unit;
   Vtext m_text;
+  CGMeta& m_fixups;
   Vout m_main;
   Vout m_cold;
 };
@@ -173,19 +177,36 @@ private:
  * Convenience wrappers around Vauto for cross-trace code.
  */
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, GenFunc gen,
+TCA vwrap(CodeBlock& cb, CGMeta& fixups, GenFunc gen,
           CodeKind kind = CodeKind::CrossTrace) {
   auto const start = cb.frontier();
-  Vauto vauto { cb, kind };
+  Vauto vauto { cb, fixups, kind };
   gen(vauto.main());
   return start;
 }
+
 template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, GenFunc gen,
+TCA vwrap(CodeBlock& cb, GenFunc gen, CodeKind kind = CodeKind::CrossTrace) {
+  CGMeta dummyFixups;
+  auto const start = vwrap(cb, dummyFixups, gen, kind);
+  always_assert(dummyFixups.empty());
+  return start;
+}
+
+template<class GenFunc>
+TCA vwrap2(CodeBlock& cb, CGMeta& fixups, GenFunc gen,
            CodeKind kind = CodeKind::CrossTrace) {
   auto const start = cb.frontier();
-  Vauto vauto { cb, kind };
+  Vauto vauto { cb, fixups, kind };
   gen(vauto.main(), vauto.cold());
+  return start;
+}
+
+template<class GenFunc>
+TCA vwrap2(CodeBlock& cb, GenFunc gen, CodeKind kind = CodeKind::CrossTrace) {
+  CGMeta dummyFixups;
+  auto const start = vwrap2(cb, dummyFixups, gen, kind);
+  always_assert(dummyFixups.empty());
   return start;
 }
 

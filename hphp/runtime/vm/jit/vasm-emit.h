@@ -22,6 +22,7 @@ namespace HPHP { namespace jit {
 
 struct Abi;
 struct AsmInfo;
+struct CGMeta;
 struct Vtext;
 struct Vunit;
 
@@ -37,17 +38,17 @@ void optimizeX64(Vunit& unit, const Abi&);
  * Emit code for the given unit using the given code areas. The unit should
  * have already been through optimizeX64().
  */
-void emitX64(const Vunit&, Vtext&, AsmInfo*);
+void emitX64(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
 
 /*
  * Optimize, register allocate, and emit ARM code for the given unit.
  */
-void finishARM(Vunit&, Vtext&, const Abi&, AsmInfo*);
+void finishARM(Vunit&, Vtext&, CGMeta&, const Abi&, AsmInfo*);
 
 /*
  * Optimize, register allocate, and emit PPC64 code for the given unit.
  */
-void finishPPC64(Vunit&, Vtext&, const Abi&, AsmInfo*);
+void finishPPC64(Vunit&, Vtext&, CGMeta&, const Abi&, AsmInfo*);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

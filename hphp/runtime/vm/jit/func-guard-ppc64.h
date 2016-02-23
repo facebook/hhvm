@@ -25,7 +25,11 @@ namespace HPHP {
 
 struct Func;
 
-namespace jit { namespace ppc64 {
+namespace jit {
+
+struct CGMeta;
+
+namespace ppc64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +37,7 @@ namespace jit { namespace ppc64 {
  * Mirrors the API of func-guard.h.
  */
 
-void emitFuncGuard(const Func* func, CodeBlock& cb);
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
 TCA funcGuardFromPrologue(TCA prologue, const Func* func);
 bool funcGuardMatches(TCA guard, const Func* func);
 void clobberFuncGuard(TCA guard, const Func* func);

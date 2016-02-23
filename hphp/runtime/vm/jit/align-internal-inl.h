@@ -65,8 +65,8 @@ bool is_aligned(TCA frontier, Alignment alignment) {
 }
 
 template <class AImpl>
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups) {
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context) {
   auto const idx = static_cast<uint32_t>(alignment);
   bool const is_jccandjmp = alignment == Alignment::SmashJccAndJmp;
 
@@ -84,8 +84,8 @@ void align(CodeBlock& cb, Alignment alignment, AlignContext context,
   assertx(IMPLIES(is_jccandjmp,
                   is_aligned(cb.frontier(), AImpl::s_table[idx + 1])));
 
-  if (fixups) {
-    mcg->cgFixups().alignFixups.emplace(
+  if (meta) {
+    meta->alignments.emplace(
       cb.frontier(),
       std::make_pair(alignment, context)
     );

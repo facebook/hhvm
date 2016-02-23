@@ -46,7 +46,7 @@ ALWAYS_INLINE bool isPrologueStub(TCA addr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitFuncGuard(const Func* func, CodeBlock& cb) {
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   ppc64_asm::Assembler a { cb };
 
   const auto tmp1 = ppc64_asm::reg::r3;
@@ -55,7 +55,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp1));
   assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp2));
 
-  emitSmashableMovq(a.code(), uint64_t(func), tmp1);
+  emitSmashableMovq(a.code(), fixups, uint64_t(func), tmp1);
   a.  ld     (tmp2, rvmfp()[AROFF(m_func)]);
   a.  cmpld  (tmp1, tmp2);
 

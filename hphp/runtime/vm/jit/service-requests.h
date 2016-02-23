@@ -34,6 +34,8 @@ struct ActRec;
 
 namespace jit {
 
+struct CGMeta;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -215,11 +217,12 @@ TCA emit_ephemeral(CodeBlock& cb,
 /*
  * Helpers for emitting specific service requests.
  */
-TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_bindjmp_stub(CodeBlock& cb, CGMeta& fixups, FPInvOffset spOff,
                       TCA jmp, SrcKey target, TransFlags trflags);
-TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff,
-                         TCA jcc, SrcKey taken, SrcKey next, ConditionCode cc);
-TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_bindjcc1st_stub(CodeBlock& cb, CGMeta& fixups,
+                         FPInvOffset spOff, TCA jcc, SrcKey taken, SrcKey next,
+                         ConditionCode cc);
+TCA emit_bindaddr_stub(CodeBlock& cb, CGMeta& fixups, FPInvOffset spOff,
                        TCA* addr, SrcKey target, TransFlags trflags);
 TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
                           SrcKey target, TransFlags trflags);

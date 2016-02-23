@@ -29,9 +29,9 @@ bool is_aligned(TCA frontier, Alignment alignment) {
   return ARCH_SWITCH_CALL(is_aligned, frontier, alignment);
 }
 
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups /* = true */) {
-  return ARCH_SWITCH_CALL(align, cb, alignment, context, fixups);
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context) {
+  return ARCH_SWITCH_CALL(align, cb, meta, alignment, context);
 }
 
 size_t cache_line_size() {

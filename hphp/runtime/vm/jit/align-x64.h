@@ -22,7 +22,11 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
+
+struct CGMeta;
+
+namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,8 +36,8 @@ namespace HPHP { namespace jit { namespace x64 {
 
 bool is_aligned(TCA frontier, Alignment alignment);
 
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups = true);
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context);
 
 constexpr size_t cache_line_size() { return 64; }
 

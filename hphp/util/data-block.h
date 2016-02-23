@@ -211,6 +211,7 @@ struct DataBlock {
   std::string name() const { return m_name; }
 
   void setFrontier(Address addr) {
+    assertx(m_base <= addr && addr <= (m_base + m_size));
     m_frontier = addr;
   }
 

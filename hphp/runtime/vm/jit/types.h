@@ -51,8 +51,13 @@ struct ctca_identity_hash {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef hphp_hash_set<TransID> TransIDSet;
-typedef std::vector<TransID>   TransIDVec;
+using TransIDSet = hphp_hash_set<TransID>;
+using TransIDVec = std::vector<TransID>;
+
+using Annotation = std::pair<std::string, std::string>;
+using Annotations = std::vector<Annotation>;
+
+using LiteralMap = hphp_hash_map<uint64_t,const uint64_t*>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

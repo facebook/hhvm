@@ -39,8 +39,9 @@ namespace HPHP { namespace jit { namespace arm {
  * does, however, entail an indirect jump.
  */
 
-TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d) {
-  align(cb, Alignment::SmashMovq, AlignContext::Live);
+TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
+                      PhysReg d) {
+  align(cb, &fixups, Alignment::SmashMovq, AlignContext::Live);
 
   vixl::MacroAssembler a { cb };
   vixl::Label imm_data;
@@ -60,12 +61,13 @@ TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   return start;
 }
 
-TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
+TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
+                      PhysReg r, int8_t disp) {
   not_implemented();
 }
 
-TCA emitSmashableCall(CodeBlock& cb, TCA target) {
-  align(cb, Alignment::SmashCall, AlignContext::Live);
+TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
+  align(cb, &fixups, Alignment::SmashCall, AlignContext::Live);
 
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
@@ -87,8 +89,8 @@ TCA emitSmashableCall(CodeBlock& cb, TCA target) {
   return start;
 }
 
-TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
-  align(cb, Alignment::SmashJmp, AlignContext::Live);
+TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target) {
+  align(cb, &fixups, Alignment::SmashJmp, AlignContext::Live);
 
   vixl::MacroAssembler a { cb };
   vixl::Label target_data;
@@ -106,8 +108,9 @@ TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
   return start;
 }
 
-TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc) {
-  align(cb, Alignment::SmashJcc, AlignContext::Live);
+TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
+                     ConditionCode cc) {
+  align(cb, &fixups, Alignment::SmashJcc, AlignContext::Live);
 
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
@@ -115,16 +118,17 @@ TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc) {
   auto const start = cb.frontier();
 
   a.    B    (&after_data, InvertCondition(arm::convertCC(cc)));
-  emitSmashableJmp(cb, target);
+  emitSmashableJmp(cb, fixups, target);
   a.    bind (&after_data);
 
   return start;
 }
 
 std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc) {
-  auto const jcc = emitSmashableJcc(cb, target, cc);
-  auto const jmp = emitSmashableJmp(cb, target);
+emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
+                       ConditionCode cc) {
+  auto const jcc = emitSmashableJcc(cb, fixups, target, cc);
+  auto const jmp = emitSmashableJmp(cb, fixups, target);
   return std::make_pair(jcc, jmp);
 }
 

@@ -44,12 +44,12 @@
 namespace HPHP { namespace jit {
 
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
-typedef hphp_hash_map<uint64_t,const uint64_t*> LiteralMap;
 
+struct AsmInfo;
+struct CGMeta;
+struct IRGS;
 struct Label;
 struct MCGenerator;
-struct AsmInfo;
-struct IRGS;
 
 extern "C" MCGenerator* mcg;
 
@@ -77,45 +77,6 @@ struct FreeStubList {
   void push(TCA stub);
  private:
   StubNode* m_list;
-};
-
-struct PendingFixup {
-  TCA m_tca;
-  Fixup m_fixup;
-  PendingFixup() { }
-  PendingFixup(TCA tca, Fixup fixup) :
-    m_tca(tca), m_fixup(fixup) { }
-};
-
-struct CodeGenFixups {
-  std::vector<PendingFixup> fixups;
-  std::vector<std::pair<CTCA, TCA>> catches;
-  std::vector<std::pair<TCA,TransID>> jmpTransIDs;
-  std::vector<TCA> reusedStubs;
-  std::set<TCA> addressImmediates;
-  std::set<TCA*> codePointers;
-  std::vector<TransBCMapping> bcMap;
-  std::multimap<TCA,std::pair<Alignment,AlignContext>> alignFixups;
-  GrowableVector<IncomingBranch> inProgressTailJumps;
-  LiteralMap literals;
-
-  CodeBlock* mainCode{nullptr};
-  CodeBlock* coldCode{nullptr};
-  CodeBlock* frozenCode{nullptr};
-
-  void setBlocks(CodeBlock* main, CodeBlock* cold, CodeBlock* frozen) {
-    mainCode = main;
-    coldCode = cold;
-    frozenCode = frozen;
-  }
-
-  void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
-  void process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
-    process_only(inProgressTailBranches);
-    clear();
-  }
-  bool empty() const;
-  void clear();
 };
 
 struct UsageInfo {
@@ -162,11 +123,8 @@ struct MCGenerator {
   const UniqueStubs& ustubs() const { return m_ustubs; }
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
-  CodeGenFixups& cgFixups() { return m_fixups; }
   FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
-  Annotations& annotations() { return m_annotations; }
-  void recordSyncPoint(CodeAddress frontier, Fixup fix);
 
   DataBlock& globalData() { return m_code.data(); }
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
@@ -205,7 +163,7 @@ struct MCGenerator {
   /*
    * Allocate a literal value in the global data section.
    */
-  const uint64_t* allocLiteral(uint64_t val);
+  const uint64_t* allocLiteral(uint64_t val, CGMeta& fixups);
 
   /*
    * enterTC is the main entry point for the translator from the bytecode
@@ -258,17 +216,14 @@ struct MCGenerator {
    * If not nullptr, isReused will be set to whether or not a reused stub was
    * returned.
    */
-  TCA getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
+  TCA getFreeStub(CodeBlock& frozen, CGMeta* fixups,
                   bool* isReused = nullptr);
-  void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   TCA getTranslatedCaller() const;
-  void setJmpTransID(TCA jmp, TransKind kind);
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen(IRGS&, CodeCache::View);
   void recordGdbStub(const CodeBlock& cb, TCA start, const std::string& name);
 
   /*
@@ -408,9 +363,7 @@ private:
   CatchTraceMap      m_catchTraceMap;
   Debug::DebugInfo   m_debugInfo;
   FreeStubList       m_freeStubs;
-  CodeGenFixups      m_fixups;
   LiteralMap         m_literals;
-  Annotations        m_annotations;
 
   // asize + acoldsize + afrozensize + gdatasize
   size_t             m_totalSize;

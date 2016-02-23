@@ -56,7 +56,11 @@ template<class T> uint64_t test_const(T val) {
   v << ret{RegSet{xmm0}};
 
   optimizeX64(vasm.unit(), test_abi);
-  emitX64(unit, text, nullptr);
+  CGMeta fixups;
+  emitX64(unit, text, fixups, nullptr);
+  // The above code might use fixups.literals but shouldn't use anything else.
+  fixups.literals.clear();
+  EXPECT_TRUE(fixups.empty());
 
   union { double d; uint64_t c; } u;
   u.d = ((testfunc)code)();

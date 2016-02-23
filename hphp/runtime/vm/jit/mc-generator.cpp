@@ -83,6 +83,7 @@
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/align.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -93,21 +94,21 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
-#include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/unwind-itanium.h"
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -191,9 +192,23 @@ struct TransLocMaker {
     loc.setMainStart(cache.main().frontier());
     loc.setColdStart(cache.cold().frontier());
     loc.setFrozenStart(cache.frozen().frontier());
+    dataStart = cache.data().frontier();
 
     cache.cold().dword(0);
     if (&cache.cold() != &cache.frozen()) cache.frozen().dword(0);
+  }
+
+  /*
+   * If loc contains a valid location, reset the frontiers of all code and data
+   * blocks to the positions recorded by the last call to markStart().
+   */
+  void rollback() {
+    if (loc.empty()) return;
+
+    cache.main().setFrontier(loc.mainStart());
+    cache.cold().setFrontier(loc.coldStart());
+    cache.frozen().setFrontier(loc.frozenStart());
+    cache.data().setFrontier(dataStart);
   }
 
   /*
@@ -249,6 +264,7 @@ struct TransLocMaker {
 private:
   CodeCache::View cache;
   TransLoc loc;
+  Address dataStart;
 };
 }
 
@@ -727,15 +743,14 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   auto const kind = profileSrcKey(funcBody) ? TransKind::Proflogue
                                             : TransKind::Prologue;
 
-  assertx(m_fixups.empty());
-
   profileSetHotFuncAttr();
   auto code = m_code.view(func->attrs() & AttrHot, kind);
   TCA mainOrig = code.main().frontier();
+  CGMeta fixups;
 
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
-  align(code.main(), Alignment::CacheLineRoundUp, AlignContext::Dead);
+  align(code.main(), &fixups, Alignment::CacheLineRoundUp, AlignContext::Dead);
 
   TransLocMaker maker(code);
   maker.markStart();
@@ -749,7 +764,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
     ? m_tx.profData()->addTransProflogue(funcBody, paramIndex)
     : kInvalidTransID;
 
-  TCA start = genFuncPrologue(transID, kind, func, argc, code);
+  TCA start = genFuncPrologue(transID, kind, func, argc, code, fixups);
 
   auto loc = maker.markEnd();
   if (RuntimeOption::EvalEnableReusableTC) {
@@ -757,7 +772,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
                cs = loc.coldStart(), ce = loc.coldEnd(),
                fs = loc.frozenStart(), fe = loc.frozenEnd(),
                oldStart = start;
-    bool did_relocate = relocateNewTranslation(loc, code, &start);
+    bool did_relocate = relocateNewTranslation(loc, code, fixups, &start);
 
     if (did_relocate) {
       FTRACE_MOD(reusetc, 1,
@@ -787,9 +802,9 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
                        loc.coldCodeStart(), loc.coldEnd(),
                        funcBody, paramIndex,
                        incomingBranches,
-                       m_fixups);
+                       fixups);
   }
-  m_fixups.process(nullptr);
+  fixups.process(nullptr);
 
   assertx(funcGuardMatches(funcGuardFromPrologue(start, func), func));
   assertx(isValidCodeAddress(start));
@@ -854,7 +869,6 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
 
     // Otherwise, fall back to code.main and retry.
     m_code.disableHot();
-    m_fixups.clear();
     try {
       return emitFuncPrologue(func, nPassed);
     } catch (const DataBlockFull& dbFull) {
@@ -1113,15 +1127,18 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
     return tDest;
   }
 
+  CGMeta fixups;
+
   auto const stub = svcreq::emit_bindjmp_stub(
     m_code.view().frozen(),
+    fixups,
     liveSpOff(),
     jccAddr,
     skWillDefer,
     TransFlags{}
   );
 
-  mcg->cgFixups().process(nullptr);
+  fixups.process(nullptr);
   smashed = true;
   assertx(Translator::WriteLease().amOwner());
 
@@ -1655,7 +1672,7 @@ MCGenerator::freeRequestStub(TCA stub) {
   return true;
 }
 
-TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
+TCA MCGenerator::getFreeStub(CodeBlock& frozen, CGMeta* fixups,
                              bool* isReused) {
   TCA ret = m_freeStubs.maybePop();
   if (isReused) *isReused = ret;
@@ -1700,13 +1717,13 @@ void MCGenerator::syncWork() {
 // If it's not there, add it to the map in m_fixups, which will
 // be committed to literals when m_fixups.process() is called.
 const uint64_t*
-MCGenerator::allocLiteral(uint64_t val) {
+MCGenerator::allocLiteral(uint64_t val, CGMeta& fixups) {
   auto it = m_literals.find(val);
   if (it != m_literals.end()) {
     assertx(*it->second == val);
     return it->second;
   }
-  auto& pending = m_fixups.literals;
+  auto& pending = fixups.literals;
   it = pending.find(val);
   if (it != pending.end()) {
     assertx(*it->second == val);
@@ -1754,84 +1771,40 @@ MCGenerator::reachedTranslationLimit(SrcKey sk,
   return false;
 }
 
-void
-MCGenerator::recordSyncPoint(CodeAddress frontier, Fixup fix) {
-  m_fixups.fixups.push_back(PendingFixup(frontier, fix));
-}
+static TranslateResult mcGenUnit(const IRUnit& unit,
+                                 CodeCache::View code,
+                                 CGMeta& fixups,
+                                 ProfSrcKeySet& toInterp) {
+  try {
+    irlower::genCode(unit, code, fixups);
+  } catch (const FailedCodeGen& exn) {
+    SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
+    ProfSrcKey psk{exn.profTransId, sk};
+    always_assert_flog(
+      !toInterp.count(psk),
+      "code generation failed with {}\n{}", exn.what(), show(unit)
+    );
 
-/*
- * Equivalent to container.clear(), but guarantees to free
- * any memory associated with the container (eg clear
- * doesn't affect std::vector's capacity).
- */
-template <typename T> void ClearContainer(T& container) {
-  T().swap(container);
-}
-
-void
-CodeGenFixups::process_only(
-  GrowableVector<IncomingBranch>* inProgressTailBranches) {
-  for (uint32_t i = 0; i < fixups.size(); i++) {
-    TCA tca = fixups[i].m_tca;
-    assertx(mcg->isValidCodeAddress(tca));
-    mcg->fixupMap().recordFixup(tca, fixups[i].m_fixup);
-  }
-  ClearContainer(fixups);
-
-  auto& ctm = mcg->catchTraceMap();
-  for (auto const& pair : catches) {
-    if (auto pos = ctm.find(pair.first)) {
-      *pos = pair.second;
+    toInterp.insert(psk);
+    return TranslateResult::Retry;
+  } catch (const DataBlockFull& dbFull) {
+    if (dbFull.name == "hot") {
+      mcg->code().disableHot();
+      // We can't return Retry here because the code block selection
+      // will still say hot.
+      return TranslateResult::Failure;
     } else {
-      ctm.insert(pair.first, pair.second);
+      always_assert_flog(0, "data block = {}\nmessage: {}\n",
+                         dbFull.name, dbFull.what());
     }
   }
-  ClearContainer(catches);
 
-  for (auto const& elm : jmpTransIDs) {
-    mcg->getJmpToTransIDMap()[elm.first] = elm.second;
+  auto const startSk = unit.context().srcKey();
+  if (unit.context().kind == TransKind::Profile) {
+    mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
   }
-  ClearContainer(jmpTransIDs);
 
-  mcg->literals().insert(literals.begin(), literals.end());
-  ClearContainer(literals);
-
-  if (inProgressTailBranches) {
-    inProgressTailJumps.swap(*inProgressTailBranches);
-  }
-  assertx(inProgressTailJumps.empty());
-
-  for (auto& stub : reusedStubs) {
-    mcg->getDebugInfo()->recordRelocMap(stub, 0, "NewStub");
-  }
-  ClearContainer(reusedStubs);
-}
-
-void CodeGenFixups::clear() {
-  ClearContainer(fixups);
-  ClearContainer(catches);
-  ClearContainer(jmpTransIDs);
-  ClearContainer(reusedStubs);
-  ClearContainer(addressImmediates);
-  ClearContainer(codePointers);
-  ClearContainer(bcMap);
-  ClearContainer(alignFixups);
-  ClearContainer(inProgressTailJumps);
-  ClearContainer(literals);
-}
-
-bool CodeGenFixups::empty() const {
-  return
-    fixups.empty() &&
-    catches.empty() &&
-    jmpTransIDs.empty() &&
-    reusedStubs.empty() &&
-    addressImmediates.empty() &&
-    codePointers.empty() &&
-    bcMap.empty() &&
-    alignFixups.empty() &&
-    inProgressTailJumps.empty() &&
-    literals.empty();
+  return TranslateResult::Success;
 }
 
 TCA MCGenerator::translateWork(const TranslArgs& args) {
@@ -1841,28 +1814,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   SKTRACE(1, sk, "translateWork\n");
   assertx(m_tx.getSrcDB().find(sk));
 
-  profileSetHotFuncAttr();
-  auto code = m_code.view(args.sk.func()->attrs() & AttrHot, args.kind);
-  TCA mainOrig = code.main().frontier();
-
-  if (args.align) {
-    // Align without registering fixups; we do so manually after translating
-    // the region because we may hit retries and need to roll back.
-    align(code.main(), Alignment::CacheLine, AlignContext::Dead, false);
-  }
-
-  TransLocMaker maker(code);
-  TCA        start             = code.main().frontier();
-  TCA DEBUG_ONLY frozenStart   = code.frozen().frontier();
-  SrcRec&    srcRec            = *m_tx.getSrcRec(sk);
-  UndoMarker undo[] = {
-    UndoMarker{code.main()},
-    UndoMarker{code.cold()},
-    UndoMarker{code.frozen()},
-    UndoMarker{m_code.data()},
-  };
-  m_annotations.clear();
-
+  SrcRec& srcRec = *m_tx.getSrcRec(sk);
   auto kind = reachedTranslationLimit(sk, srcRec) ? TransKind::Interp
                                                   : args.kind;
 
@@ -1872,17 +1824,6 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   );
   SCOPE_EXIT { setUseLLVM(false); };
 
-  auto resetState = [&] {
-    for (auto& u : undo) u.undo();
-    m_fixups.clear();
-  };
-
-  auto assertCleanState = [&] {
-    assertx(code.main().frontier() == start);
-    assertx(code.frozen().frontier() == frozenStart);
-    assertx(m_fixups.empty());
-  };
-
   FPInvOffset initSpOffset =
     args.region ? args.region->entry()->initialSpOffset()
                 : liveSpOff();
@@ -1890,6 +1831,19 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   PostConditions pconds;
   RegionDescPtr region;
   bool hasLoop = false;
+
+  profileSetHotFuncAttr();
+  auto code = m_code.view(args.sk.func()->attrs() & AttrHot, args.kind);
+  auto const preAlignMain = code.main().frontier();
+
+  if (args.align) {
+    // Align without registering fixups; we do so manually after translating
+    // the region because we may hit retries and need to roll back.
+    align(code.main(), nullptr, Alignment::CacheLine, AlignContext::Dead);
+  }
+
+  TransLocMaker maker{code};
+  CGMeta fixups;
 
   if (kind != TransKind::Interp) {
     if (kind == TransKind::Optimize) {
@@ -1931,22 +1885,27 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
              color(ANSI_COLOR_END));
 
       try {
-        assertCleanState();
-        maker.markStart();
-
-        result = translateRegion(irgs, *region, code, retry, pconds);
+        result = irGenRegion(irgs, *region, retry, pconds, fixups.annotations);
+        FTRACE(2, "irGenRegion finished with result {}\n", show(result));
         hasLoop = cfgHasLoop(irgs.unit);
-        FTRACE(2, "translateRegion finished with result {}\n", show(result));
+
+        maker.markStart();
+        if (result == TranslateResult::Success) {
+          result = mcGenUnit(irgs.unit, code, fixups, retry.toInterp);
+        }
       } catch (const std::exception& e) {
-        FTRACE(1, "translateRegion failed with '{}'\n", e.what());
+        FTRACE(1, "irGenRegion or mcGenUnit failed with '{}'\n", e.what());
         result = TranslateResult::Failure;
       }
 
       if (result != TranslateResult::Success) {
-        // Translation failed or will be retried. Free resources for this
-        // trace, rollback the translation cache frontiers, and discard any
-        // pending fixups.
-        resetState();
+        // Translation failed or will be retried. Roll back the translation
+        // cache frontiers and discard any pending fixups.
+        maker.rollback();
+        fixups.clear();
+      } else {
+        m_numTrans++;
+        assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
       }
     }
 
@@ -1963,12 +1922,10 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   }
 
   if (kind == TransKind::Interp) {
-    assertCleanState();
-    maker.markStart();
-
     FTRACE(1, "emitting dispatchBB interp request for failed "
            "translation (spOff = {})\n", initSpOffset.offset);
-    vwrap(code.main(),
+    maker.markStart();
+    vwrap(code.main(), fixups,
           [&] (Vout& v) { emitInterpReq(v, sk, initSpOffset); },
           CodeKind::Helper);
     // Fall through.
@@ -1977,7 +1934,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   auto loc = maker.markEnd();
 
   if (args.align) {
-    m_fixups.alignFixups.emplace(
+    fixups.alignments.emplace(
       loc.mainStart(),
       std::make_pair(Alignment::CacheLine, AlignContext::Dead)
     );
@@ -1986,9 +1943,8 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   if (RuntimeOption::EvalEnableReusableTC) {
     TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
                cs = loc.coldStart(), ce = loc.coldEnd(),
-               fs = loc.frozenStart(), fe = loc.frozenEnd(),
-               oldStart = start;
-    bool did_relocate = relocateNewTranslation(loc, code);
+               fs = loc.frozenStart(), fe = loc.frozenEnd();
+    bool did_relocate = relocateNewTranslation(loc, code, fixups);
 
     if (did_relocate) {
       FTRACE_MOD(reusetc, 1,
@@ -2007,15 +1963,16 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
                  sk.offset(), ms, me, cs, ce, fs, fe);
     }
 
-    if (loc.mainStart() != start) {
-      code.main().setFrontier(mainOrig); // we may have shifted to align
+    assertx(did_relocate == (loc.mainStart() != ms));
+    if (did_relocate) {
+      code.main().setFrontier(preAlignMain); // we may have shifted to align
     }
   }
 
   if (RuntimeOption::EvalProfileBC) {
     auto* unit = sk.unit();
     TransBCMapping prev{};
-    for (auto& cur : m_fixups.bcMap) {
+    for (auto& cur : fixups.bcMap) {
       if (!cur.aStart) continue;
       if (prev.aStart) {
         if (prev.bcStart < unit->bclen()) {
@@ -2038,8 +1995,8 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     m_tx.profData()->addTransProfile(region, pconds);
   }
 
-  auto tr = maker.rec(sk, kind, region, m_fixups.bcMap,
-                      std::move(m_annotations), useLLVM(), hasLoop);
+  auto tr = maker.rec(sk, kind, region, fixups.bcMap,
+                      std::move(fixups.annotations), useLLVM(), hasLoop);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
@@ -2050,11 +2007,10 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
                        loc.coldCodeStart(), loc.coldEnd(),
                        sk, -1,
                        srcRec.tailFallbackJumps(),
-                       m_fixups);
+                       fixups);
   }
   GrowableVector<IncomingBranch> inProgressTailBranches;
-  m_fixups.process(&inProgressTailBranches);
-  m_annotations.clear();
+  fixups.process(&inProgressTailBranches);
 
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
@@ -2085,26 +2041,6 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     }
   }
   return loc.mainStart();
-}
-
-void MCGenerator::traceCodeGen(IRGS& irgs, CodeCache::View code) {
-  auto& unit = irgs.unit;
-
-  auto finishPass = [&](const char* msg, int level) {
-    printUnit(level, unit, msg, nullptr, irgs.irb->guards());
-    assertx(checkCfg(unit));
-  };
-
-  finishPass(" after initial translation ", kIRLevel);
-
-  optimize(unit, irgs.context.kind);
-  finishPass(" after optimizing ", kOptLevel);
-
-  always_assert(this == mcg);
-  irlower::genCode(unit, code);
-
-  m_numTrans++;
-  assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
 }
 
 MCGenerator::MCGenerator()
@@ -2139,12 +2075,6 @@ MCGenerator::MCGenerator()
 
 void MCGenerator::initUniqueStubs() {
   m_ustubs.emitAll(m_code);
-  m_fixups.process(nullptr); // in case we generated literals
-}
-
-void MCGenerator::registerCatchBlock(CTCA ip, TCA block) {
-  FTRACE(1, "registerCatchBlock: afterCall: {} block: {}\n", ip, block);
-  m_fixups.catches.emplace_back(ip, block);
 }
 
 folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
@@ -2367,10 +2297,11 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
     if (!writer) {
       return false;
     }
-    assertx(mcg->cgFixups().empty());
+
     HPHP::Timer::GetMonotonicTime(tsBegin);
     // Doc says even find _could_ invalidate iterator, in pactice it should
     // be very rare, so go with it now.
+    CGMeta fixups;
     for (SrcDB::const_iterator it = m_tx.getSrcDB().begin();
          it != m_tx.getSrcDB().end(); ++it) {
       SrcKey const sk = SrcKey::fromAtomicInt(it->first);
@@ -2381,10 +2312,10 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
       if (sr->unitMd5() == unit->md5() &&
           !sr->hasDebuggerGuard() &&
           m_tx.isSrcKeyInBL(sk)) {
-        addDbgGuardImpl(sk, sr, main);
+        addDbgGuardImpl(sk, sr, main, fixups);
       }
     }
-    mcg->cgFixups().process(nullptr);
+    fixups.process(nullptr);
   }
   HPHP::Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
@@ -2416,13 +2347,12 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
   if (!writer) {
     return false;
   }
-  assertx(mcg->cgFixups().empty());
-  {
-    if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
-      addDbgGuardImpl(sk, sr, m_code.view().main());
-    }
+
+  CGMeta fixups;
+  if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
+    addDbgGuardImpl(sk, sr, m_code.view().main(), fixups);
   }
-  mcg->cgFixups().process(nullptr);
+  fixups.process(nullptr);
   return true;
 }
 
@@ -2541,14 +2471,6 @@ void MCGenerator::invalidateSrcKey(SrcKey sk) {
              (void*)sr);
   Trace::Indent _i;
   sr->replaceOldTranslations();
-}
-
-void MCGenerator::setJmpTransID(TCA jmp, TransKind kind) {
-  if (kind != TransKind::Profile) return;
-
-  TransID transId = m_tx.profData()->curTransID();
-  FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
-  m_fixups.jmpTransIDs.emplace_back(jmp, transId);
 }
 
 void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {

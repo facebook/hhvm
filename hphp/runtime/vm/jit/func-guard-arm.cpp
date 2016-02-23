@@ -56,14 +56,14 @@ vixl::MemOperand M(Vptr p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitFuncGuard(const Func* func, CodeBlock& cb) {
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
   vixl::Label target_data;
 
   assertx(arm::abi(CodeKind::CrossTrace).gpUnreserved.contains(vixl::x0));
 
-  emitSmashableMovq(cb, uint64_t(func), vixl::x0);
+  emitSmashableMovq(cb, fixups, uint64_t(func), vixl::x0);
   a.  Ldr   (rAsm, M(rvmfp()[AROFF(m_func)]));
   a.  Cmp   (vixl::x0, rAsm);
   a.  B     (&after_data, convertCC(CC_Z));

@@ -72,9 +72,9 @@ bool is_aligned(TCA frontier, Alignment alignment) {
   return jit::is_aligned<AlignImpl>(frontier, alignment);
 }
 
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups /* = true */) {
-  return jit::align<AlignImpl>(cb, alignment, context, fixups);
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context) {
+  return jit::align<AlignImpl>(cb, meta, alignment, context);
 }
 
 const AlignInfo& alignment_info(Alignment alignment) {

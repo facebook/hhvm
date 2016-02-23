@@ -23,7 +23,10 @@
 namespace HPHP { namespace jit {
 
 struct SrcRec;
-void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec, CodeBlock& main);
+struct CGMeta;
+
+void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec, CodeBlock& cb,
+                     CGMeta& fixup);
 
 }}
 

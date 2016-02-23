@@ -27,8 +27,8 @@ bool is_aligned(TCA frontier, Alignment alignment) {
   return true;
 }
 
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups /* = false */) {
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context) {
   vixl::MacroAssembler a { cb };
 
   switch (alignment) {

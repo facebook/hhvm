@@ -53,7 +53,6 @@ void insertAsserts(IRUnit&);
  * Run all the optimization passes.
  */
 void optimize(IRUnit& unit, TransKind kind);
-
 //////////////////////////////////////////////////////////////////////
 
 }}

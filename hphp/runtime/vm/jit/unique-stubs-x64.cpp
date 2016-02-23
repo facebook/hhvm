@@ -63,7 +63,7 @@ namespace x64 {
 ///////////////////////////////////////////////////////////////////////////////
 
 static void alignJmpTarget(CodeBlock& cb) {
-  align(cb, Alignment::JmpTarget, AlignContext::Dead);
+  align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
     v << call{TCA(hook)};
   });
 
-  us.functionEnterHelperReturn = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
+  us.functionEnterHelperReturn = vwrap2(cb, [&](Vout& v, Vout& vcold) {
     auto const sf = v.makeReg();
     v << testb{rret(), rret(), sf};
 
@@ -143,9 +143,9 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
  * The `saved' register should be a callee-saved GP register that the helper
  * can use to preserve `tv' across native calls.
  */
-static TCA emitDecRefHelper(CodeBlock& cb, PhysReg tv, PhysReg type,
-                            RegSet live) {
-  return vwrap(cb, [&] (Vout& v) {
+static TCA emitDecRefHelper(CodeBlock& cb, CGMeta& fixups, PhysReg tv,
+                            PhysReg type, RegSet live) {
+  return vwrap(cb, fixups, [&] (Vout& v) {
     // We use the first argument register for the TV data because we may pass
     // it to the release routine.  It's not live when we enter the helper.
     auto const data = rarg(0);
@@ -189,10 +189,11 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
   auto const local = rarg(1);
   auto const last = rarg(2);
   auto const type = rarg(3);
+  CGMeta fixups;
 
   // This stub is very hot; keep it cache-aligned.
-  align(cb, Alignment::CacheLine, AlignContext::Dead);
-  auto const release = emitDecRefHelper(cb, local, type, local | last);
+  align(cb, &fixups, Alignment::CacheLine, AlignContext::Dead);
+  auto const release = emitDecRefHelper(cb, fixups, local, type, local | last);
 
   auto const decref_local = [&] (Vout& v) {
     auto const sf = v.makeReg();
@@ -214,7 +215,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
 
   alignJmpTarget(cb);
 
-  us.freeManyLocalsHelper = vwrap(cb, [&] (Vout& v) {
+  us.freeManyLocalsHelper = vwrap(cb, fixups, [&] (Vout& v) {
     // We always unroll the final `kNumFreeLocalsHelpers' decrefs, so only loop
     // until we hit that point.
     v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
@@ -239,7 +240,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
   }
 
   // All the stub entrypoints share the same ret.
-  vwrap(cb, [] (Vout& v) { v << ret{}; });
+  vwrap(cb, fixups, [] (Vout& v) { v << ret{}; });
 
   // This stub is hot, so make sure to keep it small.
   // Alas, we have more work to do in this under Windows,
@@ -249,6 +250,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
                 (cb.frontier() - release <= 4 * x64::cache_line_size()));
 #endif
 
+  fixups.process(nullptr);
   return release;
 }
 
@@ -281,9 +283,11 @@ TCA emitCallToExit(CodeBlock& cb) {
   if (a.jmpDeltaFits(TCA(enterTCExit))) {
     a.jmp(TCA(enterTCExit));
   } else {
-    // can't do a near jmp - use rip-relative addressing
-    auto addr = mcg->allocLiteral((uint64_t)enterTCExit);
-    a.jmp(reg::rip[(intptr_t)addr]);
+    // can't do a near jmp and a rip-relative load/jmp would require threading
+    // through extra state to allocate a literal. use an indirect jump through
+    // a register
+    a.emitImmReg(uintptr_t(enterTCExit), reg::rax);
+    a.jmp(reg::rax);
   }
 
   // On a backtrace, gdb tries to locate the calling frame at address

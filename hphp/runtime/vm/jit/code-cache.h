@@ -131,24 +131,28 @@ private:
 };
 
 struct CodeCache::View {
-  View(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen)
+  View(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen, DataBlock& data)
     : m_main(main)
     , m_cold(cold)
     , m_frozen(frozen)
+    , m_data(data)
   {}
 
   CodeBlock& main()   { return m_main; }
   CodeBlock& cold()   { return m_cold; }
   CodeBlock& frozen() { return m_frozen; }
+  DataBlock& data()   { return m_data; }
 
   const CodeBlock& main()   const { return m_main; }
   const CodeBlock& cold()   const { return m_cold; }
   const CodeBlock& frozen() const { return m_frozen; }
+  const DataBlock& data()   const { return m_data; }
 
  private:
   CodeBlock& m_main;
   CodeBlock& m_cold;
   CodeBlock& m_frozen;
+  DataBlock& m_data;
 };
 
 }}

@@ -31,7 +31,7 @@
 namespace HPHP { namespace jit {
 ////////////////////////////////////////////////////////////////////////////////
 
-struct CodeGenFixups;
+struct CGMeta;
 struct RelocationInfo;
 
 /*
@@ -132,12 +132,19 @@ struct TransLoc {
   uint32_t coldSize()   const { return *(uint32_t*)coldStart(); }
   uint32_t frozenSize() const { return *(uint32_t*)frozenStart(); }
 
+  bool empty() const {
+    return m_mainOff == kDefaultOff && m_mainLen == 0 &&
+      m_coldOff == kDefaultOff && m_frozenOff == kDefaultOff;
+  }
+
 private:
-  uint32_t m_mainOff {std::numeric_limits<uint32_t>::max()};
+  static auto constexpr kDefaultOff = std::numeric_limits<uint32_t>::max();
+
+  uint32_t m_mainOff {kDefaultOff};
   uint32_t m_mainLen {0};
 
-  uint32_t m_coldOff   {std::numeric_limits<uint32_t>::max()};
-  uint32_t m_frozenOff {std::numeric_limits<uint32_t>::max()};
+  uint32_t m_coldOff   {kDefaultOff};
+  uint32_t m_frozenOff {kDefaultOff};
 };
 
 // Prevent unintentional growth of the SrcDB
@@ -173,7 +180,7 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
-  void registerFallbackJump(TCA from, ConditionCode cc = CC_None);
+  void registerFallbackJump(TCA from, ConditionCode cc, CGMeta& fixups);
   TCA getFallbackTranslation() const;
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);

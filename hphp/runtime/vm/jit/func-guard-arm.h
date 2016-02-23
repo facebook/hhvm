@@ -25,7 +25,11 @@ namespace HPHP {
 
 struct Func;
 
-namespace jit { namespace arm {
+namespace jit {
+
+struct CGMeta;
+
+namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +37,7 @@ namespace jit { namespace arm {
  * Mirrors the API of func-guard.h.
  */
 
-void emitFuncGuard(const Func* func, CodeBlock& cb);
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
 TCA funcGuardFromPrologue(TCA prologue, const Func* func);
 bool funcGuardMatches(TCA guard, const Func* func);
 void clobberFuncGuard(TCA guard, const Func* func);

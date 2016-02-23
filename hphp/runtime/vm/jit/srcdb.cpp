@@ -153,13 +153,14 @@ void SrcRec::chainFrom(IncomingBranch br) {
   }
 }
 
-void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
+void SrcRec::registerFallbackJump(TCA from, ConditionCode cc,
+                                  CGMeta& fixups) {
   auto incoming = cc < 0 ? IncomingBranch::jmpFrom(from)
                          : IncomingBranch::jccFrom(from);
 
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.
-  mcg->cgFixups().inProgressTailJumps.push_back(incoming);
+  fixups.inProgressTailJumps.push_back(incoming);
 }
 
 void SrcRec::newTranslation(TransLoc loc,

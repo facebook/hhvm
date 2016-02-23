@@ -85,13 +85,13 @@ Vauto::~Vauto() {
       switch (arch()) {
         case Arch::X64:
           optimizeX64(unit(), abi(m_kind));
-          emitX64(unit(), m_text, nullptr);
+          emitX64(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::ARM:
-          finishARM(unit(), m_text, abi(m_kind), nullptr);
+          finishARM(unit(), m_text, m_fixups, abi(m_kind), nullptr);
           break;
         case Arch::PPC64:
-          finishPPC64(unit(), m_text, abi(m_kind), nullptr);
+          finishPPC64(unit(), m_text, m_fixups, abi(m_kind), nullptr);
           break;
       }
       return;

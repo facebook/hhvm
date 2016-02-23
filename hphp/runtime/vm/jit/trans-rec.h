@@ -33,9 +33,6 @@ struct TransBCMapping {
   TCA    afrozenStart;
 };
 
-using Annotation = std::pair<std::string, std::string>;
-using Annotations = std::vector<Annotation>;
-
 /*
  * A record with various information about a translation.
  */

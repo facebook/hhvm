@@ -635,8 +635,9 @@ std::string banner(const char* caption) {
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
-void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
-               const GuardConstraints* guards) {
+void printUnit(int level, const IRUnit& unit, const char* caption,
+               AsmInfo* ai,
+               const GuardConstraints* guards, Annotations* annotations) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     str << banner(caption);
@@ -645,8 +646,8 @@ void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
     if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level)) {
       HPHP::Trace::traceRelease("%s\n", str.str().c_str());
     }
-    if (RuntimeOption::EvalDumpIR >= level) {
-      mcg->annotations().emplace_back(caption, str.str());
+    if (annotations && RuntimeOption::EvalDumpIR >= level) {
+      annotations->emplace_back(caption, str.str());
     }
   }
 }

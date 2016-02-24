@@ -18,6 +18,7 @@
 #define HPHP_UTIL_EH_FRAME_H_
 
 #include "hphp/util/data-block.h"
+#include "hphp/util/dwarf-reg.h"
 
 #include <boost/mpl/identity.hpp>
 #include <folly/Memory.h>
@@ -35,17 +36,6 @@
 #endif
 
 namespace HPHP {
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace dw_reg {
-
-enum X64Reg : uint8_t {
-  RAX, RDX, RCX, RBX, RSI, RDI, RBP, RSP,
-  R8,  R9,  R10, R11, R12, R13, R14, R15, RIP
-};
-
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 

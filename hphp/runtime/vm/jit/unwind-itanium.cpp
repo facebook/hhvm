@@ -31,6 +31,7 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/dwarf-reg.h"
 #include "hphp/util/eh-frame.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/unwind-itanium.h"
@@ -63,7 +64,7 @@ namespace {
 void sync_regstate(_Unwind_Context* context) {
   assertx(tl_regState == VMRegState::DIRTY);
 
-  uintptr_t fp = _Unwind_GetGR(context, dw_reg::RBP);
+  uintptr_t fp = _Unwind_GetGR(context, dw_reg::FP);
   uintptr_t ip = _Unwind_GetIP(context);
   FTRACE(2, "syncing regstate for: fp {:#x}, ip {:#x}\n", fp, ip);
 
@@ -332,21 +333,21 @@ EHFrameHandle register_unwind_region(unsigned char* start, size_t size) {
 
   EHFrameWriter ehfw;
 
-  ehfw.begin_cie(dw_reg::RIP,
+  ehfw.begin_cie(dw_reg::IP,
                  reinterpret_cast<const void*>(tc_unwind_personality));
 
   // The part of the ActRec that mirrors the native frame record is the first
   // sixteen bytes.  In particular, the "top" of the record is 16 bytes after
   // rvmfp(), and the saved fp and return addr are as usual.
-  ehfw.def_cfa(dw_reg::RBP, 16);
-  ehfw.offset_extended_sf(dw_reg::RIP, 1);
-  ehfw.offset_extended_sf(dw_reg::RBP, 2);
+  ehfw.def_cfa(dw_reg::FP, 16);
+  ehfw.offset_extended_sf(dw_reg::IP, 1);
+  ehfw.offset_extended_sf(dw_reg::FP, 2);
 
   // This is an artifact of a time when we did not spill registers onto the
   // native stack.  Now that we do, this CFI is a lie.  Fortunately, our TC
   // personality routine skips all the way back to native frames before
   // resuming the unwinder, so its brokenness goes unnoticed.
-  ehfw.same_value(dw_reg::RSP);
+  ehfw.same_value(dw_reg::SP);
   ehfw.end_cie();
 
   // Add a single FDE for the whole TC.

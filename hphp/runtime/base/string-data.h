@@ -93,8 +93,8 @@ struct StringData {
    *
    * Most strings are created this way.
    */
-  static StringData* Make(const char* data);
-  static StringData* Make(const std::string& data);
+  static StringData* Make(folly::StringPiece);
+
   static StringData* Make(const char* data, CopyStringMode);
   static StringData* Make(const char* data, size_t len, CopyStringMode);
   static StringData* Make(const StringData* s, CopyStringMode);

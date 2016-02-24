@@ -21,12 +21,8 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 // CopyString
 
-inline StringData* StringData::Make(const char* data) {
-  return Make(data, CopyString);
-}
-
-inline StringData* StringData::Make(const std::string& data) {
-  return Make(data.data(), data.length(), CopyString);
+inline StringData* StringData::Make(folly::StringPiece s) {
+  return Make(s.begin(), s.size(), CopyString);
 }
 
 inline StringData* StringData::Make(const char* data, CopyStringMode) {

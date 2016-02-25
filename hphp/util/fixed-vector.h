@@ -17,8 +17,10 @@
 #define incl_HPHP_UTIL_FIXED_VECTOR_H_
 
 #include <algorithm>
-#include <vector>
+#include <memory>
 #include <stdexcept>
+#include <vector>
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
@@ -32,7 +34,7 @@ namespace HPHP {
  * Useful when you know the exact size something will take, and don't
  * need more than that many elements.
  */
-template<class T>
+template<typename T, typename Allocator = std::allocator<T>>
 struct FixedVector {
   typedef uint32_t size_type;
   typedef T value_type;
@@ -62,11 +64,11 @@ struct FixedVector {
   }
 
   ~FixedVector() {
-    T* p = m_sp.ptr();
+    T* p = m_impl.m_sp.ptr();
     for (uint32_t i = 0, sz = size(); i < sz; ++i) {
-      p[i].~T();
+      std::allocator_traits<Allocator>::destroy(m_impl, &p[i]);
     }
-    free(p);
+    std::allocator_traits<Allocator>::deallocate(m_impl, p, size());
   }
 
   /*
@@ -84,16 +86,16 @@ struct FixedVector {
     return *this;
   }
 
-  uint32_t size()  const { return m_sp.size(); }
+  uint32_t size()  const { return m_impl.m_sp.size(); }
   bool     empty() const { return !size(); }
 
-  const T& operator[](uint32_t idx) const { return m_sp.ptr()[idx]; }
-        T& operator[](uint32_t idx)       { return m_sp.ptr()[idx]; }
+  const T& operator[](uint32_t idx) const { return m_impl.m_sp.ptr()[idx]; }
+        T& operator[](uint32_t idx)       { return m_impl.m_sp.ptr()[idx]; }
 
-  const_iterator begin() const { return m_sp.ptr(); }
-  const_iterator end()   const { return m_sp.ptr() + size(); }
-  iterator begin()             { return m_sp.ptr(); }
-  iterator end()               { return m_sp.ptr() + size(); }
+  const_iterator begin() const { return m_impl.m_sp.ptr(); }
+  const_iterator end()   const { return m_impl.m_sp.ptr() + size(); }
+  iterator begin()             { return m_impl.m_sp.ptr(); }
+  iterator end()               { return m_impl.m_sp.ptr() + size(); }
   reverse_iterator rbegin() { return reverse_iterator(end()); }
   reverse_iterator rend()   { return reverse_iterator(begin()); }
   const_reverse_iterator rbegin() const {
@@ -104,7 +106,7 @@ struct FixedVector {
   }
 
   void swap(FixedVector& fv) {
-    std::swap(m_sp, fv.m_sp);
+    std::swap(m_impl, fv.m_impl);
   }
 
 private:
@@ -116,34 +118,38 @@ private:
       throw std::runtime_error("FixedVector maximum size exceeded");
     }
 
-    auto const ptr = neededSize > 0
-      ? static_cast<T*>(malloc(neededSize * sizeof(T)))
-      : nullptr;
+    auto const ptr = neededSize > 0 ?
+      std::allocator_traits<Allocator>::allocate(m_impl, neededSize) :
+      nullptr;
 
     size_t i = 0;
     try {
       for (; i < neededSize; ++i) {
-        new (&ptr[i]) T(std::move(sourceVec[i]));
+        std::allocator_traits<Allocator>::construct(
+          m_impl,
+          &ptr[i],
+          std::move(sourceVec[i])
+        );
       }
     } catch (...) {
       for (size_t j = 0; j < i; ++j) {
-        ptr[j].~T();
+        std::allocator_traits<Allocator>::destroy(m_impl, &ptr[j]);
       }
-      free(ptr);
+      std::allocator_traits<Allocator>::deallocate(m_impl, ptr, neededSize);
       throw;
     }
     assert(i == neededSize);
-    m_sp.set(neededSize, ptr);
+    m_impl.m_sp.set(neededSize, ptr);
   }
 
 private:
-  CompactSizedPtr<T> m_sp;
+  struct Impl : Allocator {
+    CompactSizedPtr<T> m_sp;
+  };
+  Impl m_impl;
+  static_assert(sizeof(Impl) == sizeof(CompactSizedPtr<T>),
+                "Keeping this thing small is most of the point");
 };
-
-//////////////////////////////////////////////////////////////////////
-
-static_assert(sizeof(FixedVector<int>) == sizeof(CompactSizedPtr<int>),
-              "Keeping this thing small is most of the point");
 
 //////////////////////////////////////////////////////////////////////
 

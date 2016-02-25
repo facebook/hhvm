@@ -61,7 +61,7 @@ struct StreamContext;
 struct DateTime;
 struct Extension;
 template <typename T, bool isLow> struct AtomicSharedPtrImpl;
-template <typename T> struct FixedVector;
+template <typename T, typename A> struct FixedVector;
 template <typename T> struct SweepableMember;
 template <typename A, typename B, typename P> struct Either;
 template<class T, class Allocator> struct TlsPodBag;
@@ -402,8 +402,8 @@ struct IMarker {
     for (const auto& elem : p) scan(elem, *this);
   }
 
-  template <typename T>
-  void operator()(const FixedVector<T>& p) {
+  template <typename T, typename A>
+  void operator()(const FixedVector<T,A>& p) {
     for (const auto& elem : p) scan(elem, *this);
   }
 

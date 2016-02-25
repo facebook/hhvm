@@ -23,10 +23,15 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
+#include <string>
+#include <vector>
+
 namespace HPHP {
 
 struct ActRec;
 struct SrcKey;
+
+namespace Debug { struct DebugInfo; }
 
 namespace jit {
 
@@ -391,15 +396,16 @@ struct UniqueStubs {
   /////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Emit one of every unique stub.
+   * Emit the full set of unique stubs to `code'.
    */
-  void emitAll(CodeCache& code);
+  void emitAll(CodeCache& code, Debug::DebugInfo& dbg);
 
   /*
-   * Utility for logging stubs addresses during startup and registering the gdb
+   * Utility for logging stub addresses during startup and registering the gdb
    * symbols.  It's often useful to know where they were when debugging.
    */
-  TCA add(const char* name, TCA start);
+  TCA add(const char* name, TCA start, const CodeCache& code,
+          Debug::DebugInfo& dbg);
 
   /*
    * If the given address is within one of the registered stubs, return a

@@ -109,7 +109,8 @@ struct CodeCache {
   /*
    * Return the block containing addr.
    */
-  CodeBlock& blockFor(CodeAddress addr);
+  const CodeBlock& blockFor(CodeAddress addr) const;
+        CodeBlock& blockFor(CodeAddress addr);
 
   /*
    * Set a flag preventing further use of hot because it has filled up.

@@ -186,6 +186,10 @@ CodeBlock& CodeCache::blockFor(CodeAddress addr) {
   return codeBlockChoose(addr, m_main, m_hot, m_prof, m_cold, m_frozen);
 }
 
+const CodeBlock& CodeCache::blockFor(CodeAddress addr) const {
+  return const_cast<CodeCache&>(*this).blockFor(addr);
+}
+
 size_t CodeCache::totalUsed() const {
   size_t ret = 0;
   forEachBlock([&ret](const char*, const CodeBlock& b) {

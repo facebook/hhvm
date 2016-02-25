@@ -226,7 +226,6 @@ struct MCGenerator {
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void recordGdbStub(const CodeBlock& cb, TCA start, const std::string& name);
 
   /*
    * Dump translation cache.  True if successful.

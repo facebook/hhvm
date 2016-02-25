@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -58,6 +59,8 @@
 #include "hphp/util/data-block.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/trace.h"
+
+#include <folly/Format.h>
 
 #include <algorithm>
 
@@ -732,13 +735,14 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, Op op,
 }
 
 void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us,
-                            const ResumeHelperEntryPoints& rh) {
+                            const ResumeHelperEntryPoints& rh,
+                            const CodeCache& code, Debug::DebugInfo& dbg) {
   alignJmpTarget(cb);
 
   auto const emit = [&] (Op op, const char* name) {
     auto const stub = emitInterpOneCFHelper(cb, op, rh);
     us.interpOneCFHelpers[op] = stub;
-    us.add(name, stub);
+    us.add(name, stub, code, dbg);
   };
 
 #define O(name, imm, in, out, flags)          \
@@ -818,7 +822,7 @@ TCA emitThrowSwitchMode(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void UniqueStubs::emitAll(CodeCache& code) {
+void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   auto view = code.view();
   auto& main = view.main();
   auto& cold = view.cold();
@@ -829,7 +833,7 @@ void UniqueStubs::emitAll(CodeCache& code) {
     return hotBlock.available() > 512 ? hotBlock : main;
   };
 
-#define ADD(name, stub) name = add(#name, (stub))
+#define ADD(name, stub) name = add(#name, (stub), code, dbg)
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot()));
   ADD(fcallHelperThunk,       emitFCallHelperThunk(cold));
   ADD(funcBodyHelperThunk,    emitFuncBodyHelperThunk(cold));
@@ -857,17 +861,20 @@ void UniqueStubs::emitAll(CodeCache& code) {
   ADD(throwSwitchMode,  emitThrowSwitchMode(frozen));
 #undef ADD
 
-  add("freeLocalsHelpers",  emitFreeLocalsHelpers(hot(), *this));
+  add("freeLocalsHelpers", emitFreeLocalsHelpers(hot(), *this), code, dbg);
 
   ResumeHelperEntryPoints rh;
-  add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this, rh));
-  emitInterpOneCFHelpers(cold, *this, rh);
+  add("resumeInterpHelpers",
+      emitResumeInterpHelpers(main, *this, rh),
+      code, dbg);
+  emitInterpOneCFHelpers(cold, *this, rh, code, dbg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA UniqueStubs::add(const char* name, TCA start) {
-  auto& cb = mcg->code().blockFor(start);
+TCA UniqueStubs::add(const char* name, TCA start,
+                     const CodeCache& code, Debug::DebugInfo& dbg) {
+  auto& cb = code.blockFor(start);
   auto const end = cb.frontier();
 
   FTRACE(1, "unique stub: {} @ {} -- {:4} bytes: {}\n",
@@ -885,7 +892,10 @@ TCA UniqueStubs::add(const char* name, TCA start) {
           }()
          );
 
-  mcg->recordGdbStub(cb, start, folly::sformat("HHVM::{}", name));
+  if (!RuntimeOption::EvalJitNoGdb) {
+    dbg.recordStub(Debug::TCRange(start, end, &cb == &code.cold()),
+                   folly::sformat("HHVM::{}", name));
+  }
 
   auto const newStub = StubRange{name, start, end};
   auto lower = std::lower_bound(m_ranges.begin(), m_ranges.end(), newStub);

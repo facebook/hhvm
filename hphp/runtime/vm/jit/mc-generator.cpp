@@ -2063,7 +2063,7 @@ MCGenerator::MCGenerator()
 
   s_jitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
-  m_ustubs.emitAll(m_code);
+  m_ustubs.emitAll(m_code, m_debugInfo);
 
   // Write an .eh_frame section that covers the whole TC.
   EHFrameWriter ehfw;
@@ -2215,13 +2215,6 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
                                 srcFunc, exit, inPrologue);
     }
   }
-}
-
-void MCGenerator::recordGdbStub(const CodeBlock& cb,
-                                const TCA start,
-                                const std::string& name) {
-  if (RuntimeOption::EvalJitNoGdb) return;
-  m_debugInfo.recordStub(rangeFrom(cb, start, &cb == &m_code.cold()), name);
 }
 
 std::vector<UsageInfo> MCGenerator::getUsageInfo() {

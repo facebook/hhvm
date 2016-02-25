@@ -773,7 +773,7 @@ void MemoryManager::checkHeap(const char* phase) {
 
   // heap check is done. If we are not exiting, check pointers using HeapGraph
   if (Trace::moduleEnabled(Trace::heapreport)) {
-    auto g = makeHeapGraph();
+    auto g = makeHeapGraph(true /* include free blocks */);
     if (!exiting()) checkPointers(g, phase);
     if (Trace::moduleEnabled(Trace::heapreport, 2)) {
       printHeapReport(g, phase);

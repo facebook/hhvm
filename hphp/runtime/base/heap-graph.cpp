@@ -25,8 +25,6 @@
 #include "hphp/util/alloc.h"
 
 #include <vector>
-#include <boost/dynamic_bitset.hpp>
-#include <unordered_map>
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -162,8 +160,6 @@ struct PtrFilter: F {
   folly::Range<const char*> rds_; // full mmap'd rds section.
 };
 
-using NodeMap = std::unordered_map<const Header*,int>;
-
 void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
   auto& from_node = g.nodes[from];
   auto& to_node = g.nodes[to];
@@ -183,16 +179,15 @@ void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind kind, const char* seat) {
 }
 
 struct ObjMarker {
-  explicit ObjMarker(HeapGraph& g, NodeMap& ids, PtrMap& blocks,
-                     const Header* h)
-    : g_(g), ids_(ids), blocks_(blocks), from_(ids_[h]) {
+  explicit ObjMarker(HeapGraph& g, PtrMap& blocks, const Header* h)
+    : g_(g), blocks_(blocks), from_(blocks.index(h)) {
     assert(h);
   }
   void counted(const void* p) { mark(p, HeapGraph::Counted); }
   void implicit(const void* p) { mark(p, HeapGraph::Implicit); }
   void ambig(const void* p) {
-    if (auto h = blocks_.header(p)) {
-      addPtr(g_, from_, ids_[h], HeapGraph::Ambiguous);
+    if (auto r = blocks_.region(p)) {
+      addPtr(g_, from_, blocks_.index(r), HeapGraph::Ambiguous);
     }
   }
   void where(const char*) {}
@@ -200,26 +195,25 @@ struct ObjMarker {
  private:
   void mark(const void* p, HeapGraph::PtrKind kind) {
     assert(blocks_.header(p));
-    auto h = blocks_.header(p);
-    addPtr(g_, from_, ids_[h], kind);
+    auto r = blocks_.region(p);
+    addPtr(g_, from_, blocks_.index(r), kind);
   }
 
  private:
   HeapGraph& g_;
-  NodeMap& ids_;
   PtrMap& blocks_;
   int from_;
 };
 
 struct RootMarker {
-  explicit RootMarker(HeapGraph& g, NodeMap& ids, PtrMap& blocks)
-    : g_(g), ids_(ids), blocks_(blocks)
+  explicit RootMarker(HeapGraph& g, PtrMap& blocks)
+    : g_(g), blocks_(blocks)
   {}
   void counted(const void* p) { mark(p, HeapGraph::Counted); }
   void implicit(const void* p) { mark(p, HeapGraph::Implicit); }
   void ambig(const void* p) {
-    if (auto h = blocks_.header(p)) {
-      addRoot(g_, ids_[h], HeapGraph::Ambiguous, seat_);
+    if (auto r = blocks_.region(p)) {
+      addRoot(g_, blocks_.index(r), HeapGraph::Ambiguous, seat_);
     }
   }
   void where(const char* seat) {
@@ -229,13 +223,12 @@ struct RootMarker {
  private:
   void mark(const void* p, HeapGraph::PtrKind kind) {
     assert(blocks_.header(p));
-    auto h = blocks_.header(p);
-    addRoot(g_, ids_[h], kind, seat_);
+    auto r = blocks_.region(p);
+    addRoot(g_, blocks_.index(r), kind, seat_);
   }
 
  private:
   HeapGraph& g_;
-  NodeMap& ids_;
   PtrMap& blocks_;
   const char* seat_{nullptr};
 };
@@ -257,35 +250,39 @@ std::vector<int> makeParentTree(const HeapGraph& g) {
 
 // parse the heap to find valid objects and initialize metadata, then
 // add edges for every known root pointer and every known obj->obj ptr.
-HeapGraph makeHeapGraph() {
+HeapGraph makeHeapGraph(bool include_free) {
   HeapGraph g;
-  NodeMap ids;
   PtrMap blocks;
 
-  // parse the heap once to create nodes. Create one node for
-  // every parsed block, including NativeData and ResumableFrame blocks.
+  // parse the heap once to create a PtrMap for pointer filtering. Create
+  // one node for every parsed block, including NativeData and ResumableFrame
+  // blocks. Only include free blocks if requested.
   MM().forEachHeader([&](Header* h) {
-    g.nodes.push_back(HeapGraph::Node{h, -1, -1});
-    blocks.insert(h); // adds interval [h, h+h->size[
+    if (h->kind() != HeaderKind::Free || include_free) {
+      blocks.insert(h); // adds interval [h, h+h->size[
+    }
   });
   blocks.prepare();
 
-  // Give ids to all the nodes
-  ids.reserve(g.nodes.size());
-  for (int i = 0; i < g.nodes.size(); ++i) {
-    ids[g.nodes[i].h] = i;
-  }
+  // initialize nodes by iterating over PtrMap's regions
+  g.nodes.reserve(blocks.size());
+  blocks.iterate([&](const Header* h, size_t size) {
+    g.nodes.push_back(HeapGraph::Node{h, -1, -1});
+  });
 
   // find roots
-  PtrFilter<RootMarker> rmark(g, ids, blocks);
+  PtrFilter<RootMarker> rmark(g, blocks);
   scanRoots(rmark);
 
   // find heap->heap pointers
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
     auto h = g.nodes[i].h;
-    PtrFilter<ObjMarker> omark(g, ids, blocks, h);
+    PtrFilter<ObjMarker> omark(g, blocks, h);
     scanHeader(h, omark);
   }
+  g.nodes.shrink_to_fit();
+  g.ptrs.shrink_to_fit();
+  g.roots.shrink_to_fit();
   return g;
 }
 

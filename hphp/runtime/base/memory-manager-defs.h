@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include <algorithm>
 
 namespace HPHP {
 
@@ -295,36 +296,47 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
 
 // information about heap objects, indexed by valid object starts.
 struct PtrMap {
+  using Region = std::pair<const Header*, std::size_t>;
+
   void insert(const Header* h) {
     assert(!sorted_);
     regions_.emplace_back(h, h->size());
   }
 
-  const Header* header(const void* p) const {
+  const Region* region(const void* p) const {
     assert(sorted_);
     // Find the first region which begins beyond p.
-    auto it =
-      std::upper_bound(
-        regions_.begin(),
-        regions_.end(),
-        p,
-        [](const void* p,
-           const std::pair<const Header*, std::size_t>& region) {
-          return p < region.first;
-        }
-      );
+    auto it = std::upper_bound(regions_.begin(), regions_.end(), p,
+      [](const void* p, const Region& region) {
+        return p < region.first;
+      });
     // If its the first region, p is before any region, so there's no
     // header. Otherwise, backup to the previous region.
     if (it == regions_.begin()) return nullptr;
     --it;
     // p can only potentially point within this previous region, so check that.
-    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ?
-      it->first : nullptr;
+    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ? &*it :
+           nullptr;
+  }
+
+  const Header* header(const void* p) const {
+    auto r = region(p);
+    return r ? r->first : nullptr;
   }
 
   bool isHeader(const void* p) const {
     auto h = header(p);
     return h && h == p;
+  }
+
+  size_t index(const Region* r) const {
+    return r - &regions_[0];
+  }
+
+  // where does this header sit in the regions_ vector?
+  size_t index(const Header* h) const {
+    assert(header(h));
+    return region(h) - &regions_[0];
   }
 
   void prepare() {

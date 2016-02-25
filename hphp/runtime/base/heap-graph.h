@@ -31,10 +31,11 @@ struct HeapGraph {
   };
   struct Node {
     const Header* h;
-    int succ, pred;
+    int succ, pred; // first out-ptr and in-ptr, respectively
   };
   struct Ptr {
-    int from, to, succ, pred; // if root, from == -1
+    int from, to; // node ids. if root, from == -1
+    int succ, pred; // from's next out-ptr, to's next in-ptr
     PtrKind kind;
     const char* seat;
   };
@@ -73,7 +74,8 @@ struct HeapCycles {
 // in the heap so their properties or contents can be inspected.
 // With great power comes great responsibility; if you invoke anything
 // that frees or moves objects, pointers in this snapshot will be stale.
-HeapGraph makeHeapGraph();
+// if include_free is true, include free blocks, allowing dangling pointers
+HeapGraph makeHeapGraph(bool include_free = false);
 
 // Analyze the graph for cycles, then TRACE interesting things about cycles.
 void printHeapReport(const HeapGraph&, const char* phase);

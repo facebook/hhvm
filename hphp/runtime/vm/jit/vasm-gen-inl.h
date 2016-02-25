@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
+
 #include <algorithm>
 
 namespace HPHP { namespace jit {
@@ -63,4 +65,24 @@ inline Vreg Vout::cns(T v) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+template<class GenFunc>
+TCA vwrap_impl(CodeBlock& cb, CGMeta* meta, GenFunc gen, CodeKind kind) {
+  CGMeta dummy_meta;
+
+  auto const start = cb.frontier();
+  Vauto vauto { cb, meta ? *meta : dummy_meta, kind };
+  gen(vauto.main(), vauto.cold());
+
+  assertx(dummy_meta.empty());
+
+  return start;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}

@@ -2901,7 +2901,7 @@ void ExecutionContext::exitDebuggerDummyEnv() {
 
 void unwindPreventReturnToTC(ActRec* ar) {
   auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
-  always_assert_flog(mcg->isValidCodeAddress(savedRip),
+  always_assert_flog(mcg->code().isValidCodeAddress(savedRip),
                      "preventReturnToTC({}): {} isn't in TC",
                      ar, savedRip);
 
@@ -2920,7 +2920,7 @@ void unwindPreventReturnToTC(ActRec* ar) {
 
 void debuggerPreventReturnToTC(ActRec* ar) {
   auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
-  always_assert_flog(mcg->isValidCodeAddress(savedRip),
+  always_assert_flog(mcg->code().isValidCodeAddress(savedRip),
                      "preventReturnToTC({}): {} isn't in TC",
                      ar, savedRip);
 
@@ -4120,8 +4120,8 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
       // Our return address was smashed by the debugger. Do the work of the
       // debuggerRetHelper by setting some unwinder RDS info and resuming at
       // the approprate catch trace.
-      jit::unwindRdsInfo->debuggerReturnSP = vmsp();
-      jit::unwindRdsInfo->debuggerReturnOff = retInfo.soff;
+      jit::g_unwind_rds->debuggerReturnSP = vmsp();
+      jit::g_unwind_rds->debuggerReturnOff = retInfo.soff;
       return jit::popDebuggerCatch(retInfo.fp);
     }
 

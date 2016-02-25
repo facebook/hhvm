@@ -96,7 +96,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
     v << call{TCA(hook)};
   });
 
-  us.functionEnterHelperReturn = vwrap2(cb, [&](Vout& v, Vout& vcold) {
+  us.functionEnterHelperReturn = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
     auto const sf = v.makeReg();
     v << testb{rret(), rret(), sf};
 

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -56,7 +55,6 @@ namespace {
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)
-    , text(env.text)
     , a(*env.cb)
     , current(env.current)
     , next(env.next)
@@ -258,11 +256,10 @@ private:
   template<class Inst> void commute(Inst&);
   template<class Inst> void noncommute(Inst&);
 
-  CodeBlock& frozen() { return text.frozen().code; }
+  CodeBlock& frozen() { return env.text.frozen().code; }
 
 private:
   Venv& env;
-  Vtext& text;
   X64Assembler a;
 
   const Vlabel current;

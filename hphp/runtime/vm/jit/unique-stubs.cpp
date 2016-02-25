@@ -760,9 +760,9 @@ void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us,
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitDecRefGeneric(CodeBlock& cb) {
-  CGMeta fixups;
+  CGMeta meta;
 
-  auto const start = vwrap(cb, fixups, [] (Vout& v) {
+  auto const start = vwrap(cb, meta, [] (Vout& v) {
     v << stublogue{};
 
     auto const rdata = rarg(0);
@@ -797,7 +797,7 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
     v << stubret{};
   });
 
-  fixups.process(nullptr);
+  meta.process(nullptr);
   return start;
 }
 

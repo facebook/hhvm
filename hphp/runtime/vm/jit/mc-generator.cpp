@@ -43,12 +43,12 @@
 #include <folly/String.h>
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/safe-cast.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/disasm.h"
+#include "hphp/util/eh-frame.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/meta.h"
@@ -56,6 +56,7 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/safe-cast.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
@@ -729,7 +730,7 @@ MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
   if (prologue != ustubs().fcallHelperThunk) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
           func->fullName()->data(), paramIdx, prologue);
-    assertx(isValidCodeAddress(prologue));
+    assertx(m_code.isValidCodeAddress(prologue));
     return true;
   }
   return false;
@@ -807,7 +808,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   fixups.process(nullptr);
 
   assertx(funcGuardMatches(funcGuardFromPrologue(start, func), func));
-  assertx(isValidCodeAddress(start));
+  assertx(m_code.isValidCodeAddress(start));
 
   TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), argc, start);
@@ -1207,7 +1208,7 @@ MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
   }
   DepthGuard d;
 
-  assertx(isValidCodeAddress(start));
+  assertx(m_code.isValidCodeAddress(start));
   assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
@@ -1342,7 +1343,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
       auto fp = vmfp();
       auto caller = fp->func();
       vmpc() = caller->unit()->at(caller->base() +
-                                  unwindRdsInfo->debuggerReturnOff);
+                                  g_unwind_rds->debuggerReturnOff);
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
              vmpc(), fp->func()->fullName()->data());
       sk = SrcKey{fp->func(), vmpc(), fp->resumed()};
@@ -1699,7 +1700,7 @@ TCA MCGenerator::getTranslatedCaller() const {
   ActRec* framePtr = fp;  // can't directly mutate the register-mapped one
   for (; framePtr; framePtr = framePtr->m_sfp) {
     TCA rip = (TCA)framePtr->m_savedRip;
-    if (isValidCodeAddress(rip)) {
+    if (m_code.isValidCodeAddress(rip)) {
       return rip;
     }
   }
@@ -2041,7 +2042,7 @@ MCGenerator::MCGenerator()
   TRACE(1, "MCGenerator@%p startup\n", this);
   mcg = this;
 
-  m_unwindRegistrar = register_unwind_region(m_code.base(), m_code.codeSize());
+  g_unwind_rds.bind();
 
   static bool profileUp = false;
   if (!profileUp) {
@@ -2061,10 +2062,17 @@ MCGenerator::MCGenerator()
   }
 
   s_jitMaturityCounter = ServiceData::createCounter("jit.maturity");
-}
 
-void MCGenerator::initUniqueStubs() {
   m_ustubs.emitAll(m_code);
+
+  // Write an .eh_frame section that covers the whole TC.
+  EHFrameWriter ehfw;
+  write_tc_cie(ehfw);
+  ehfw.begin_fde(m_code.base());
+  ehfw.end_fde(m_code.codeSize());
+  ehfw.null_fde();
+
+  m_ehFrames.push_back(ehfw.register_and_release());
 }
 
 folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {

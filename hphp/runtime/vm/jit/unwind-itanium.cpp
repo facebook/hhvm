@@ -52,7 +52,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-rds::Link<UnwindRDS> unwindRdsInfo(rds::kInvalidHandle);
+rds::Link<UnwindRDS> g_unwind_rds(rds::kInvalidHandle);
 
 namespace {
 
@@ -140,16 +140,16 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
   if (do_side_exit) {
-    unwindRdsInfo->exn = nullptr;
+    g_unwind_rds->exn = nullptr;
 #ifndef _MSC_VER
     __cxxabiv1::__cxa_begin_catch(exn);
     __cxxabiv1::__cxa_end_catch();
 #endif
-    unwindRdsInfo->tv = unwinder_tv;
+    g_unwind_rds->tv = unwinder_tv;
   } else {
-    unwindRdsInfo->exn = exn;
+    g_unwind_rds->exn = exn;
   }
-  unwindRdsInfo->doSideExit = do_side_exit;
+  g_unwind_rds->doSideExit = do_side_exit;
 
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
@@ -261,7 +261,7 @@ tc_unwind_personality(int version,
     }
 
     FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
-    unwindRdsInfo->exn = ue;
+    g_unwind_rds->exn = ue;
     _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
     return _URC_INSTALL_CONTEXT;
   }
@@ -294,7 +294,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
       return {nullptr, newFp};
     }
 
-    auto catchTrace = lookup_catch_trace(savedRip, unwindRdsInfo->exn);
+    auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
     if (isDebuggerReturnHelper(savedRip)) {
       // If this frame had its return address smashed by the debugger, the real
       // catch trace is saved in a side table.
@@ -324,15 +324,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EHFrameHandle register_unwind_region(unsigned char* start, size_t size) {
-  FTRACE(1, "register_unwind_region: base {}, size {}\n", start, size);
-  // The first time we're called, this will dynamically link the data
-  // we need in the request data segment.  All future JIT translations
-  // of catch traces may use offsets based on this handle.
-  unwindRdsInfo.bind();
-
-  EHFrameWriter ehfw;
-
+void write_tc_cie(EHFrameWriter& ehfw) {
   ehfw.begin_cie(dw_reg::IP,
                  reinterpret_cast<const void*>(tc_unwind_personality));
 
@@ -349,18 +341,6 @@ EHFrameHandle register_unwind_region(unsigned char* start, size_t size) {
   // resuming the unwinder, so its brokenness goes unnoticed.
   ehfw.same_value(dw_reg::SP);
   ehfw.end_cie();
-
-  // Add a single FDE for the whole TC.
-  ehfw.begin_fde(start);
-  ehfw.end_fde(size);
-
-  // Add a zero-length FDE---this indicates that there are no more FDEs sharing
-  // this CIE.
-  //
-  // TODO(#9732887): Verify whether this is necessary (it's not documented).
-  ehfw.null_fde();
-
-  return ehfw.register_and_release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

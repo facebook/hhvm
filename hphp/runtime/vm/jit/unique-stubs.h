@@ -369,6 +369,8 @@ struct UniqueStubs {
    * of enterTCExit off the stack and transfers control to it.
    *
    * @reached:  phpret from TC
+   *            jmp from TC
+   * @context:  func body
    */
   TCA callToExit;
 

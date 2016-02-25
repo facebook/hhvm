@@ -42,7 +42,7 @@ void
 CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches) {
   for (auto const& pair : fixups) {
-    assertx(mcg->isValidCodeAddress(pair.first));
+    assertx(mcg->code().isValidCodeAddress(pair.first));
     mcg->fixupMap().recordFixup(pair.first, pair.second);
   }
   fixups.clear();

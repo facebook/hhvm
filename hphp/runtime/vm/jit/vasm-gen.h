@@ -149,11 +149,11 @@ private:
 struct Vauto {
   explicit Vauto(CodeBlock& code, CGMeta& fixups,
                  CodeKind kind = CodeKind::Helper)
-    : m_kind{kind}
-    , m_text{code, code}
+    : m_text{code, code}
     , m_fixups(fixups)
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
     , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
+    , m_kind{kind}
   {
     m_unit.entry = Vlabel(main());
   }
@@ -165,49 +165,35 @@ struct Vauto {
   ~Vauto();
 
 private:
-  CodeKind m_kind;
   Vunit m_unit;
   Vtext m_text;
   CGMeta& m_fixups;
   Vout m_main;
   Vout m_cold;
+  CodeKind m_kind;
 };
 
+namespace detail {
+  template<class GenFunc>
+  TCA vwrap_impl(CodeBlock& cb, CGMeta* meta, GenFunc gen, CodeKind kind);
+}
+
 /*
- * Convenience wrappers around Vauto for cross-trace code.
+ * Convenience wrappers around Vauto for cross-trace or helper code.
  */
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, CGMeta& fixups, GenFunc gen,
+TCA vwrap(CodeBlock& cb, CGMeta& meta, GenFunc gen,
           CodeKind kind = CodeKind::CrossTrace) {
-  auto const start = cb.frontier();
-  Vauto vauto { cb, fixups, kind };
-  gen(vauto.main());
-  return start;
+  return detail::vwrap_impl(cb, &meta, [&] (Vout& v, Vout&) { gen(v); }, kind);
 }
-
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, GenFunc gen, CodeKind kind = CodeKind::CrossTrace) {
-  CGMeta dummyFixups;
-  auto const start = vwrap(cb, dummyFixups, gen, kind);
-  always_assert(dummyFixups.empty());
-  return start;
+TCA vwrap(CodeBlock& cb, GenFunc gen) {
+  return detail::vwrap_impl(cb, nullptr, [&] (Vout& v, Vout&) { gen(v); },
+                            CodeKind::CrossTrace);
 }
-
 template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, CGMeta& fixups, GenFunc gen,
-           CodeKind kind = CodeKind::CrossTrace) {
-  auto const start = cb.frontier();
-  Vauto vauto { cb, fixups, kind };
-  gen(vauto.main(), vauto.cold());
-  return start;
-}
-
-template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, GenFunc gen, CodeKind kind = CodeKind::CrossTrace) {
-  CGMeta dummyFixups;
-  auto const start = vwrap2(cb, dummyFixups, gen, kind);
-  always_assert(dummyFixups.empty());
-  return start;
+TCA vwrap2(CodeBlock& cb, GenFunc gen) {
+  return detail::vwrap_impl(cb, nullptr, gen, CodeKind::CrossTrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

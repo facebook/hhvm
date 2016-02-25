@@ -120,41 +120,40 @@ struct MCGenerator {
    * Accessors.
    */
   CodeCache& code() { return m_code; }
+  DataBlock& globalData() { return m_code.data(); }
   const UniqueStubs& ustubs() const { return m_ustubs; }
   Translator& tx() { return m_tx; }
+  TcaTransIDMap& getJmpToTransIDMap() { return m_jmpToTransID; }
+  CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   FixupMap& fixupMap() { return m_fixupMap; }
+  Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
   FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
-
-  DataBlock& globalData() { return m_code.data(); }
-  Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
-
-  TcaTransIDMap& getJmpToTransIDMap() {
-    return m_jmpToTransID;
-  }
-
-  inline bool isValidCodeAddress(TCA tca) const {
-    return m_code.isValidCodeAddress(tca);
-  }
-
-  /*
-   * Handlers for function prologues.
-   */
-  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
-                      bool forRegeneratePrologue = false);
-  void smashPrologueGuards(AtomicLowPtr<uint8_t>* prologues,
-                           int numPrologues, const Func* func);
-
-  TCA getFuncBody(Func* func);
-
-  inline void sync() {
-    if (tl_regState == VMRegState::CLEAN) return;
-    syncWork();
-  }
 
   bool useLLVM() const { return m_useLLVM; }
   void setUseLLVM(bool useLLVM) { m_useLLVM = useLLVM; }
 
+  /*
+   * Look up a TCA-to-landingpad mapping.
+   */
+  folly::Optional<TCA> getCatchTrace(CTCA ip) const;
+
+  /*
+   * Look up or translate a func prologue or func body.
+   */
+  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
+                      bool forRegeneratePrologue = false);
+  TCA getFuncBody(Func* func);
+
+  /*
+   * Smash the func guards of `prologues' to point to `func'.
+   */
+  void smashPrologueGuards(AtomicLowPtr<uint8_t>* prologues,
+                           int numPrologues, const Func* func);
+
+  /*
+   * Allocate a value in the global data section.
+   */
   template<typename T, typename... Args>
   T* allocData(Args&&... args) {
     return m_code.data().alloc<T>(std::forward<Args>(args)...);
@@ -164,6 +163,11 @@ struct MCGenerator {
    * Allocate a literal value in the global data section.
    */
   const uint64_t* allocLiteral(uint64_t val, CGMeta& fixups);
+
+  inline void sync() {
+    if (tl_regState == VMRegState::CLEAN) return;
+    syncWork();
+  }
 
   /*
    * enterTC is the main entry point for the translator from the bytecode
@@ -202,7 +206,6 @@ struct MCGenerator {
    */
   void requestExit();
 
-  void initUniqueStubs();
   int numTranslations(SrcKey sk) const;
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
@@ -218,8 +221,7 @@ struct MCGenerator {
    */
   TCA getFreeStub(CodeBlock& frozen, CGMeta* fixups,
                   bool* isReused = nullptr);
-  folly::Optional<TCA> getCatchTrace(CTCA ip) const;
-  CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
+
   TCA getTranslatedCaller() const;
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
@@ -244,7 +246,6 @@ struct MCGenerator {
    */
   void codeEmittedThisRequest(size_t& requestEntry, size_t& now) const;
 
-public:
   /*
    * This function is called by translated code to handle service requests,
    * which usually involve some kind of jump smashing. The returned address
@@ -355,12 +356,17 @@ private:
   UniqueStubs m_ustubs;
   Translator m_tx;
 
-  // maps jump addresses to the ID of translation containing them.
-  TcaTransIDMap      m_jmpToTransID;
-  uint64_t           m_numTrans;
+  // Map from jump addresses to the ID of translation containing them.
+  TcaTransIDMap m_jmpToTransID;
+  // Number of translations made so far.
+  uint64_t m_numTrans;
+
+  // Handles to registered .eh_frame sections.
+  std::vector<EHFrameHandle> m_ehFrames;
+  // Landingpads for TC catch traces; used by the unwinder.
+  CatchTraceMap m_catchTraceMap;
+
   FixupMap           m_fixupMap;
-  EHFrameHandle      m_unwindRegistrar;
-  CatchTraceMap      m_catchTraceMap;
   Debug::DebugInfo   m_debugInfo;
   FreeStubList       m_freeStubs;
   LiteralMap         m_literals;

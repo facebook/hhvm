@@ -37,8 +37,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb,
-                     CGMeta& fixups) {
+void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, CGMeta& fixups) {
   TCA realCode = sr->getTopTranslation();
   if (!realCode) return;  // No translations, nothing to do.
 

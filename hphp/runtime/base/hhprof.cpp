@@ -425,6 +425,10 @@ void HHProf::finishProfiledRequest() {
     return;
   }
 
+  auto const is_valid = [] (void* p) {
+    return jit::mcg->code().isValidCodeAddress(jit::TCA(p));
+  };
+
   switch (transport->getMethod()) {
   case Transport::Method::HEAD:
     // Useful only for detecting the presence of the pprof/symbol endpoint.
@@ -450,15 +454,14 @@ void HHProf::finishProfiledRequest() {
         continue;
       }
       std::string sval(addr.data(), addr.size());
-      void* pval = (void*)std::stoull(sval, 0, 16);
-      if (phpOnly && !jit::mcg->isValidCodeAddress(jit::TCA(pval))) {
+      auto const pval = (void*)std::stoull(sval, 0, 16);
+      if (phpOnly && !is_valid(pval)) {
         continue;
       }
-      std::shared_ptr<StackTrace::Frame> frame = StackTrace::Translate(pval,
-                                                                       &pm);
+      auto frame = StackTrace::Translate(pval, &pm);
       if (frame->funcname != "TC?") {
         folly::toAppend(addr, "\t", frame->funcname, "\n", &result);
-      } else if (phpOnly || jit::mcg->isValidCodeAddress(jit::TCA(pval))) {
+      } else if (phpOnly || is_valid(pval)) {
         // Prefix address such that it can be distinguished as residing within
         // an unresolved PHP function.
         folly::toAppend(addr, "\tPHP::", sval, "\n", &result);

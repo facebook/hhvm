@@ -105,6 +105,28 @@ let test_server_busy_reponse () =
   (json_string_of_server_busy id) =
   "{\"type\":\"response\",\"id\":4,\"error\":{\"code\":1,\"message\":\"Server busy\"}}"
 
+let test_identify_function_call () =
+  let msg = "{\"type\" : \"call\", \
+              \"id\"   : 4, \
+              \"args\" : [ \
+                \"--identify-function\", \
+                \"21:37\", \
+                \"<?hh\" ]}" in
+  match call_of_string msg with
+  | Call (4, IdentifyFunctionCall ("<?hh", 21, 37)) -> true
+  | _ -> false
+
+let test_strip_json_arg () =
+  let msg = "{\"type\" : \"call\", \
+              \"id\"   : 4, \
+              \"args\" : [ \
+                \"--json\", \
+                \"--identify-function\", \
+                \"21:37\", \
+                \"<?hh\" ]}" in
+  match call_of_string msg with
+  | Call (4, IdentifyFunctionCall ("<?hh", 21, 37)) -> true
+  | _ -> false
 
 let tests = [
   "test_invalid_json", test_invalid_json;
@@ -122,6 +144,8 @@ let tests = [
   "test_autocomplete_response", test_autocomplete_response;
   "test_invalid_call_response", test_invalid_call_response;
   "test_server_busy_reponse", test_server_busy_reponse;
+  "test_identify_function_call", test_identify_function_call;
+  "test_strip_json_arg", test_strip_json_arg;
 ]
 
 let () =

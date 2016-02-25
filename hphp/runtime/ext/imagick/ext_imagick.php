@@ -232,7 +232,7 @@ class Imagick implements Countable, Iterator {
   <<__Native>>
   function blurImage(float $radius,
                      float $sigma,
-                     int $channel): bool;
+                     int $channel = Imagick::CHANNEL_ALL): bool;
 
   /**
    * Surrounds the image with a border

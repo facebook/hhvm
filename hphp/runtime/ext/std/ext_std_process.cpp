@@ -460,7 +460,7 @@ static bool pre_proc_open(const Array& descriptorspec,
   for (ArrayIter iter(descriptorspec); iter; ++iter, ++i) {
     DescriptorItem &item = items[i];
 
-    String index = iter.first();
+    auto const index = iter.first().toString();
     if (!index.isNumeric()) {
       raise_warning("descriptor spec must be an integer indexed array");
       break;

@@ -159,7 +159,7 @@ Variant php_filter_string(PHP_INPUT_FILTER_PARAM_DECL) {
   unsigned char enc[256] = {0};
 
   /* strip high/strip low ( see flags )*/
-  String stripped(php_filter_strip(value, flags));
+  auto const stripped = php_filter_strip(value, flags).toString();
 
   if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
     enc[uc('\'')] = enc[uc('"')] = 1;

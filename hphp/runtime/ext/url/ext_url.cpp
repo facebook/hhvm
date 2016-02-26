@@ -114,7 +114,7 @@ static String normalize_variable_name(const String& name) {
 
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */) {
-  String f = HHVM_FN(file_get_contents)(filename);
+  auto const f = HHVM_FN(file_get_contents)(filename).toString();
 
   Variant matches;
   preg_match_all("/<meta\\s+name=\"(.*?)\"\\s+content=\"(.*?)\".*?>/s",
@@ -158,7 +158,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
     Variant data = iter.second();
     if (data.isNull() || data.isResource()) continue;
 
-    String key = iter.first();
+    auto const key = iter.first().toString();
     bool numeric = key.isNumeric();
 
     if (data.isArray() || data.is(KindOfObject)) {
@@ -215,7 +215,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
 
   String arg_sep;
   if (arg_separator.empty()) {
-    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output);
+    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output).toString();
   } else {
     arg_sep = arg_separator;
   }

@@ -217,7 +217,7 @@ static String HHVM_FUNCTION(finfo_buffer,
   }
   return php_finfo_get_type(
       finfo, s, options, context,
-      FILEINFO_MODE_BUFFER, 0);
+      FILEINFO_MODE_BUFFER, 0).toString();
 }
 
 static String HHVM_FUNCTION(finfo_file,
@@ -230,11 +230,13 @@ static String HHVM_FUNCTION(finfo_file,
   }
   return php_finfo_get_type(
       finfo, fn, options, context,
-      FILEINFO_MODE_FILE, 0);
+      FILEINFO_MODE_FILE, 0).toString();
 }
 
 static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
-  return php_finfo_get_type(Resource{}, filename, 0, uninit_null(), -1, 1);
+  return php_finfo_get_type(
+    Resource{}, filename, 0, uninit_null(), -1, 1
+  ).toString();
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -61,7 +61,6 @@ TEST(String, Operators) {
   String s;
   s = "test1";                   VS(s.c_str(), "test1");
   s = String("test2");           VS(s.c_str(), "test2");
-  s = Variant("test3");          VS(s.c_str(), "test3");
   s = String("a") + "b";         VS(s.c_str(), "ab");
   s = String("c") + String("d"); VS(s.c_str(), "cd");
   s += "efg";                    VS(s.c_str(), "cdefg");

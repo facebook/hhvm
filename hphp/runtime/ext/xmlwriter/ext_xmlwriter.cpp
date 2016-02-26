@@ -521,7 +521,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  Variant flush(const Variant& empty /*= true*/) {
+  String flush(const Variant& empty /*= true*/) {
     if (m_ptr && m_output) {
       xmlTextWriterFlush(m_ptr);
       String ret((char*)m_output->content, CopyString);
@@ -530,7 +530,7 @@ struct XMLWriterData {
       }
       return ret;
     }
-    return empty_string_variant();
+    return empty_string();
   }
 
   String outputMemory(const Variant& flush /*= true*/) {

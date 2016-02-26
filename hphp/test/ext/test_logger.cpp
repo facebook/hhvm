@@ -109,7 +109,7 @@ Array TestLogger::postData(Array arr) {
   Array data = make_map_array("method", "recordTestResults", "args",
                               HHVM_FN(json_encode)(make_packed_array(arr)));
 
-  String str = HHVM_FN(http_build_query)(data, "", "");
+  auto const str = HHVM_FN(http_build_query)(data, "", "").toString();
 
   client.post(log_url, str.c_str(), str.length(), response);
 

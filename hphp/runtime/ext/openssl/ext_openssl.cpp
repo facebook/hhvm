@@ -759,8 +759,8 @@ static X509_STORE *setup_verify(const Array& calist) {
 
 static bool add_entries(X509_NAME *subj, const Array& items) {
   for (ArrayIter iter(items); iter; ++iter) {
-    String index = iter.first();
-    String item = iter.second();
+    auto const index = iter.first().toString();
+    auto const item = iter.second().toString();
     int nid = OBJ_txt2nid(index.data());
     if (nid != NID_undef) {
       if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC,

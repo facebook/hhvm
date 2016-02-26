@@ -34,7 +34,7 @@ String ServerNote::Get(const String& name) {
   Array &arr = s_note->m_notes;
   String ret;
   if (arr.exists(name)) {
-    ret = arr.rvalAt(name);
+    ret = arr.rvalAt(name).toString();
   }
   return ret;
 }

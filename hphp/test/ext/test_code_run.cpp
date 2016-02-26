@@ -112,8 +112,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   std::string expected;
   if (output) {
     if (fileoutput) {
-      String s = HHVM_FN(file_get_contents)(output);
-      expected = std::string(s.data(), s.size());
+      expected = HHVM_FN(file_get_contents)(output).toString().toCppString();
     } else {
       expected = output;
     }
@@ -234,8 +233,7 @@ bool TestCodeRun::RecordMulti(const char *input, const char *output,
   if (output) {
     std::ofstream s((fullPath + "/test.result").c_str());
     if (fileoutput) {
-      String expected = HHVM_FN(file_get_contents)(output);
-      s << std::string(expected.data(), expected.size());
+      s << HHVM_FN(file_get_contents)(output).toString().toCppString();
     } else {
       s << output;
     }

@@ -2614,7 +2614,7 @@ safe:
           } while (0);
         }
       } else {
-        plc->quoted = param->parameter;
+        plc->quoted = param->parameter.toString();
       }
       newbuffer_len += plc->quoted.size();
     }
@@ -2746,7 +2746,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
       param->stmt = NULL;
 
       if (iter.first().isString()) {
-        param->name = iter.first();
+        param->name = iter.first().toString();
         param->paramno = -1;
       } else {
         int64_t num_index = iter.first().toInt64();
@@ -2919,7 +2919,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
 
   switch (how & ~PDO_FETCH_FLAGS) {
   case PDO_FETCH_CLASS:
-    self->m_stmt->fetch.clsname = class_name;
+    self->m_stmt->fetch.clsname = class_name.toString();
     if (class_name.isNull()) {
       self->m_stmt->fetch.clsname = "stdclass";
     }
@@ -2947,7 +2947,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
                            "no fetch function specified");
       error = 1;
     } else {
-      self->m_stmt->fetch.func = class_name;
+      self->m_stmt->fetch.func = class_name.toString();
       do_fetch_func_prepare(self->m_stmt);
     }
     break;

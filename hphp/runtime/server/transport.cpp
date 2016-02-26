@@ -751,15 +751,16 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     String ip = this->getServerAddr();
     String key = RuntimeOption::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
-    int iv_len = HHVM_FN(openssl_cipher_iv_length)(cipher).toInt32();
-    String iv = HHVM_FN(openssl_random_pseudo_bytes)(iv_len);
-    String encrypted =
-      HHVM_FN(openssl_encrypt)(ip, cipher, key, k_OPENSSL_RAW_DATA, iv);
-    String output = StringUtil::Base64Encode(iv + encrypted);
+    auto const iv_len = HHVM_FN(openssl_cipher_iv_length)(cipher).toInt32();
+    auto const iv = HHVM_FN(openssl_random_pseudo_bytes)(iv_len).toString();
+    auto const encrypted = HHVM_FN(openssl_encrypt)(
+      ip, cipher, key, k_OPENSSL_RAW_DATA, iv
+    ).toString();
+    auto const output = StringUtil::Base64Encode(iv + encrypted);
     if (debug) {
-      String decrypted = HHVM_FN(openssl_decrypt)(
+      auto const decrypted = HHVM_FN(openssl_decrypt)(
         encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv
-      );
+      ).toString();
       assert(decrypted.get()->same(ip.get()));
     }
     addHeaderImpl("X-FB-Debug", output.c_str());

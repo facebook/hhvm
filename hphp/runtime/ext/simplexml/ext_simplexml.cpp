@@ -1649,7 +1649,7 @@ static void HHVM_METHOD(SimpleXMLElement, addAttribute,
 }
 
 static String HHVM_METHOD(SimpleXMLElement, __toString) {
-  return SimpleXMLElement_objectCast(this_, KindOfString);
+  return SimpleXMLElement_objectCast(this_, KindOfString).toString();
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, __get, const Variant& name) {

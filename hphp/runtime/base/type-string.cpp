@@ -146,8 +146,6 @@ std::string convDblToStrWithPhpFormat(double n) {
 
 String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
 
-String::String(Variant&& src) : String(src.toString()) { }
-
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
@@ -256,14 +254,6 @@ String& String::operator=(const std::string& s) {
   m_str = req::ptr<StringData>::attach(
     StringData::Make(s.c_str(), s.size(), CopyString));
   return *this;
-}
-
-String& String::operator=(const Variant& var) {
-  return operator=(var.toString());
-}
-
-String& String::operator=(Variant&& var) {
-  return operator=(var.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

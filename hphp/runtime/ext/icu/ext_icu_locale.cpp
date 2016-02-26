@@ -442,36 +442,41 @@ static String HHVM_STATIC_METHOD(Locale, getDefault) {
 static String HHVM_STATIC_METHOD(Locale, getDisplayLanguage,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_LANG);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_LANG
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayName,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_DISPLAY);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_DISPLAY
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayRegion,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_REGION);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_REGION
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayScript,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_SCRIPT);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_SCRIPT
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayVariant,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_VARIANT);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_VARIANT
+  ).toString();
 }
 
 static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
@@ -509,7 +514,7 @@ tryagain:
 
 static String HHVM_STATIC_METHOD(Locale, getPrimaryLanguage,
                                  const String& locale) {
-  return get_icu_value(localeOrDefault(locale), LOC_LANG);
+  return get_icu_value(localeOrDefault(locale), LOC_LANG).toString();
 }
 
 static Variant HHVM_STATIC_METHOD(Locale, getRegion, const String& locale) {
@@ -560,7 +565,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
     String normalized(val.toString(), CopyString);
     normalize_for_match(normalized);
     if (canonicalize) {
-      normalized = get_icu_value(normalized, LOC_CANONICALIZE);
+      normalized = get_icu_value(normalized, LOC_CANONICALIZE).toString();
       if (normalized.isNull()) {
         s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: "
                                "unable to canonicalize lang_tag");
@@ -572,7 +577,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
   }
 
   if (canonicalize) {
-    locname = get_icu_value(locname, LOC_CANONICALIZE);
+    locname = get_icu_value(locname, LOC_CANONICALIZE).toString();
     if (locname.isNull()) {
       s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: "
                              "unable to canonicalize loc_range");

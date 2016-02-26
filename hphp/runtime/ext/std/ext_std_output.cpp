@@ -92,7 +92,7 @@ Variant HHVM_FUNCTION(ob_get_contents) {
   return g_context->obCopyContents();
 }
 Variant HHVM_FUNCTION(ob_get_clean) {
-  String output = HHVM_FN(ob_get_contents)();
+  auto output = HHVM_FN(ob_get_contents)();
   if (!HHVM_FN(ob_end_clean)()) {
     return false;
   }

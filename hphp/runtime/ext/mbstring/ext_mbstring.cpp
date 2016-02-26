@@ -836,7 +836,7 @@ static int php_mb_parse_encoding_array(const Array& array,
     bauto = 0;
     n = 0;
     for (ArrayIter iter(array); iter; ++iter) {
-      String hash_entry = iter.second();
+      auto const hash_entry = iter.second().toString();
       if (strcasecmp(hash_entry.data(), "auto") == 0) {
         if (!bauto) {
           bauto = 1;
@@ -4226,7 +4226,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   static const StaticString
          s_CONTENT_TRANSFER_ENCODING("CONTENT-TRANSFER-ENCODING");
-  s = ht_headers[s_CONTENT_TRANSFER_ENCODING];
+  s = ht_headers[s_CONTENT_TRANSFER_ENCODING].toString();
   if (!s.isNull()) {
     mbfl_no_encoding _body_enc = mbfl_name2no_encoding(s.data());
     switch (_body_enc) {

@@ -208,8 +208,8 @@ bool UserFile::close() {
 int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool invoked = false;
-  String str = invoke(m_StreamRead, s_stream_read,
-                      make_packed_array(length), invoked);
+  auto const str = invoke(m_StreamRead, s_stream_read,
+                          make_packed_array(length), invoked).toString();
   if (!invoked) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());

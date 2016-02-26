@@ -753,12 +753,20 @@ struct Variant : private TypedValue {
     if (m_type == KindOfDouble) return m_data.dbl;
     return toDoubleHelper();
   }
-  String toString() const {
+
+  String toString() const& {
+    if (isStringType(m_type)) return String{m_data.pstr};
+    return toStringHelper();
+  }
+
+  String toString() && {
     if (isStringType(m_type)) {
-      return String{m_data.pstr};
+      m_type = KindOfNull;
+      return String::attach(m_data.pstr);
     }
     return toStringHelper();
   }
+
   Array toArray() const {
     if (isArrayType(m_type)) return Array(m_data.parr);
     return toArrayHelper();

@@ -508,7 +508,7 @@ String fb_compact_serialize(const Variant& thing,
 
   StringBuffer sb;
   if (fb_compact_serialize_variant(sb, thing, 0, behavior)) {
-    return init_null();
+    return String();
   }
 
   return sb.detach();

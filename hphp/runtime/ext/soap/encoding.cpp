@@ -922,8 +922,8 @@ static Variant to_zval_hexbin(encodeType* type, xmlNodePtr data) {
                data->children->next != nullptr) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
-    String str =
-      HHVM_FN(hex2bin)(String((const char*)data->children->content));
+    auto const str =
+      HHVM_FN(hex2bin)(String((const char*)data->children->content)).toString();
     if (str.isNull()) {
       throw SoapException("Encoding: Violation of encoding rules");
     }

@@ -643,7 +643,7 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
 
   for (ArrayIter iter(headers); iter; ++iter) {
     Variant key = iter.first();
-    String header = iter.second();
+    auto header = iter.second().toString();
     if (key.isString() && !key.toString().empty()) {
       pushMsg.getHeaders().add(key.toString().data(), header.data());
     } else {

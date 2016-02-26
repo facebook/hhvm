@@ -78,7 +78,7 @@ static String wordwrap(const String& str, int width /* = 75 */,
   args.append(width);
   args.append(wordbreak);
   args.append(cut);
-  return vm_call_user_func("wordwrap", args);
+  return vm_call_user_func("wordwrap", args).toString();
 }
 
 struct DebuggerExtension final : Extension {

@@ -401,7 +401,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // Make sure state is cleaned up from this load; autoloading of arbitrary
   // code below can throw
   SCOPE_EXIT {
-    String l_className = m_loading.pop();
+    DEBUG_ONLY auto const l_className = m_loading.pop().toString();
     assert(l_className == className);
   };
 

@@ -142,7 +142,10 @@ public:
 
   String(const String& str) : m_str(str.m_str) { }
   /* implicit */ String(const StaticString& str);
-  /* implicit */ String(char) = delete; // prevent unintentional promotion
+
+  /* Prevent unintentional promotion. */
+  /* implicit */ String(char) = delete;
+  /* implicit */ String(Variant&&) = delete;
 
   // Disable this---otherwise this would generally implicitly create a
   // Variant(bool) and then call String(Variant&&) ...
@@ -150,7 +153,7 @@ public:
 
   // Move ctor
   /* implicit */ String(String&& str) noexcept : m_str(std::move(str.m_str)) {}
-  /* implicit */ String(Variant&& src);
+
   // Move assign
   String& operator=(String&& src) {
     m_str = std::move(src.m_str);
@@ -161,8 +164,8 @@ public:
     return *this;
   }
 
-  // Move assign from Variant
-  String& operator=(Variant&& src);
+  String& operator=(const Variant&) = delete;
+  String& operator=(Variant&&) = delete;
 
   /* implicit */ String(const std::string &s)
   : m_str(StringData::Make(s.data(), s.size(), CopyString), NoIncRef{}) { }
@@ -300,7 +303,6 @@ public:
   }
   String& operator=(const StaticString& v);
   String& operator=(const char* v);
-  String& operator=(const Variant& v);
   String& operator=(const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
   // reference notation on lhs (http://goo.gl/LuCTo).

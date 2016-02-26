@@ -300,7 +300,7 @@ struct MemcachedData {
     } else {
       switch (m_impl->serializer) {
       case q_Memcached$$SERIALIZER_JSON:
-        encoded = HHVM_FN(json_encode)(value);
+        encoded = HHVM_FN(json_encode)(value).toString();
         flags = MEMC_VAL_IS_JSON;
         break;
       default:

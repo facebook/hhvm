@@ -1378,7 +1378,7 @@ static int php_get_xbm(const req::ptr<File>& stream, struct gfxinfo **result) {
   if (!stream->rewind()) {
     return 0;
   }
-  while (!(fline=HHVM_FN(fgets)(Resource(stream), 0)).empty()) {
+  while (!(fline = HHVM_FN(fgets)(Resource(stream), 0).toString()).empty()) {
     iname = (char *)IM_MALLOC(fline.size() + 1);
     CHECK_ALLOC_R(iname, (fline.size() + 1), 0);
     if (sscanf(fline.c_str(), "#define %s %d", iname, &value) == 2) {
@@ -2773,8 +2773,8 @@ static Variant php_imagettftext_common(int mode, int extended,
   if (mode == TTFTEXT_BBOX) {
     ptsize = arg1.toDouble();
     angle = arg2.toDouble();
-    fontname = arg3;
-    str = arg4;
+    fontname = arg3.toString();
+    str = arg4.toString();
     extrainfo = arg5;
   } else {
     Resource image = arg1.toResource();
@@ -2783,8 +2783,8 @@ static Variant php_imagettftext_common(int mode, int extended,
     x = toInt64(arg4);
     y = toInt64(arg5);
     col = toInt64(arg6);
-    fontname = arg7;
-    str = arg8;
+    fontname = arg7.toString();
+    str = arg8.toString();
     extrainfo = arg9;
     im = get_valid_image_resource(image);
     if (!im) return false;

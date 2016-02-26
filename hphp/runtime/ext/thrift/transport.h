@@ -264,8 +264,7 @@ private:
   void refill(size_t len) {
     assert(buffer_used == 0);
     len = std::max<size_t>(len, SIZE);
-    buffer =
-      m_transport->o_invoke_few_args(s_read, 1, (int64_t)len);
+    buffer = m_transport->o_invoke_few_args(s_read, 1, (int64_t)len).toString();
     buffer_used = buffer.size();
     buffer_ptr = buffer.data();
   }

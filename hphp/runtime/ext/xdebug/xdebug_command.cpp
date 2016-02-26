@@ -1088,7 +1088,7 @@ struct ContextGetCmd : XDebugCommand {
         // Iterate through the globals, filtering out non-superglobals
         Array globals = php_globals_as_array();
         for (ArrayIter iter(globals); iter; ++iter) {
-          String name = iter.first();
+          auto const name = iter.first().toString();
           if (!is_superglobal(name)) {
             continue;
           }

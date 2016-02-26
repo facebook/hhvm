@@ -108,7 +108,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
       s_remove_user_pass_replace,
       url,
       1
-    );
+    ).toString();
   }
 
   int code;

@@ -262,7 +262,9 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = HHVM_FN(hash_final)(context.toResource(), /* raw */ true);
+  auto const hashed = HHVM_FN(hash_final)(
+    context.toResource(), /* raw */ true
+  ).toString();
 
   if (s_session->hash_bits_per_character < 4 ||
       s_session->hash_bits_per_character > 6) {
@@ -1603,7 +1605,7 @@ static String HHVM_FUNCTION(session_id,
   }
 
   if (!newid.isNull()) {
-    s_session->id = newid;
+    s_session->id = newid.toString();
   }
 
   return ret;

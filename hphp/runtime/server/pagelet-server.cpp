@@ -58,8 +58,8 @@ PageletTransport::PageletTransport(
   m_remoteHost.append(remoteHost.data(), remoteHost.size());
 
   for (ArrayIter iter(headers); iter; ++iter) {
-    Variant key = iter.first();
-    String header = iter.second();
+    auto const key = iter.first();
+    auto const header = iter.second().toString();
     if (key.isString() && !key.toString().empty()) {
       m_requestHeaders[key.toString().data()].push_back(header.data());
     } else {

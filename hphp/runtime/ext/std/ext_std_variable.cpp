@@ -404,7 +404,7 @@ int64_t extract_impl(VRefParam vref_array,
       }
       int count = 0;
       for (ArrayIter iter(arr); iter; ++iter) {
-        String name = iter.first();
+        auto name = iter.first().toString();
         if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
         // The const_cast is safe because we escalated the array.  We can't use
         // arr.lvalAt(name), because arr may have been modified as a side
@@ -425,7 +425,7 @@ int64_t extract_impl(VRefParam vref_array,
 
   int count = 0;
   for (ArrayIter iter(carr); iter; ++iter) {
-    String name = iter.first();
+    auto name = iter.first().toString();
     if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
     g_context->setVar(name.get(), iter.secondRef().asTypedValue());
     ++count;

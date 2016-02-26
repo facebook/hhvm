@@ -206,13 +206,13 @@ int64_t HHVM_FUNCTION(preg_last_error) {
 String HHVM_FUNCTION(ereg_replace, const String& pattern,
                                    const String& replacement,
                                    const String& str) {
-  return HHVM_FN(mb_ereg_replace)(pattern, replacement, str);
+  return HHVM_FN(mb_ereg_replace)(pattern, replacement, str).toString();
 }
 
 String HHVM_FUNCTION(eregi_replace, const String& pattern,
                                     const String& replacement,
                                     const String& str) {
-  return HHVM_FN(mb_eregi_replace)(pattern, replacement, str);
+  return HHVM_FN(mb_eregi_replace)(pattern, replacement, str).toString();
 }
 
 Variant HHVM_FUNCTION(ereg, const String& pattern, const String& str,

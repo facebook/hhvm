@@ -189,7 +189,7 @@ bool TestExtCurl::test_curl_exec() {
                          "curl_write_func");
     HHVM_FN(ob_start)();
     HHVM_FN(curl_exec)(c.toResource());
-    String res = HHVM_FN(ob_get_contents)();
+    auto const res = HHVM_FN(ob_get_contents)().toString();
     VS(res, "curl_write_func called with OK");
     HHVM_FN(ob_end_clean)();
   }

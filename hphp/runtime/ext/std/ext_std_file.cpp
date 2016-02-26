@@ -658,7 +658,7 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfArray: {
       Array arr = data.toArray();
       for (ArrayIter iter(arr); iter; ++iter) {
-        String value = iter.second();
+        auto const value = iter.second().toString();
         if (!value.empty()) {
           numbytes += value.size();
           int written = file->writeImpl(value.data(), value.size());

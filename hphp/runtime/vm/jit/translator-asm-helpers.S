@@ -177,10 +177,11 @@ enterTCHelper:
   tst x5, x5
   beq enterTCHelper$callTC
   adr x9, enterTCExit
-  add x10, x5, 8
-  stp x9, x10, [sp, -16]!
+  ldr x10, [x5, #8]
+  stp x10, x9, [sp, -16]!
   mov x29, x5
-  bl enterTCHelper$prologue
+  ldr x30, [sp]
+  br x2
 
 enterTCHelper$callTC:
   // The translated does not follow the standard prologue of pushing frame
@@ -199,10 +200,6 @@ enterTCExit:
   ldp x29, x30, [sp], 16
   ret
 
-enterTCHelper$prologue:
-  ldr x9, [x2]
-  br x9
-
   .globl handleSRHelper
 handleSRHelper:
   // Sync VMSP and VMFP
@@ -217,6 +214,7 @@ handleSRHelper:
   // call handleServiceRequest
   adrp x0, mcg
   add x0, x0, :lo12:mcg
+  ldr x0, [x0]
   mov x1, sp
   adrp x18, MCGenerator_handleServiceRequest
   add x18, x18, :lo12:MCGenerator_handleServiceRequest

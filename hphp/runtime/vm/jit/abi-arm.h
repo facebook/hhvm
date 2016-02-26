@@ -113,21 +113,21 @@ inline jit::ConditionCode convertCC(vixl::Condition cc) {
 
   // We'll index into this array by the arm64 condition code.
   constexpr jit::ConditionCode mapping[] = {
-    jit::CC_O,   // overflow set
-    jit::CC_NO,  // overflow clear
-    jit::CC_B,   // unsigned lower
-    jit::CC_AE,  // unsigned higher or same
     jit::CC_E,   // equal
     jit::CC_NE,  // not equal
-    jit::CC_NA,  // unsigned lower or same
-    jit::CC_A,   // unsigned higher
-    jit::CC_S,   // plus (sign set)
+    jit::CC_AE,  // unsigned higher or same
+    jit::CC_B,   // unsigned lower
     jit::CC_NS,  // minus (sign clear)
-    jit::CC_P, jit::CC_NP, // invalid. These are the parity flags.
-    jit::CC_L,   // signed less than
+    jit::CC_S,   // plus (sign set)
+    jit::CC_O,   // overflow set
+    jit::CC_NO,  // overflow clear
+    jit::CC_A,   // unsigned higher
+    jit::CC_NA,  // unsigned lower or same
     jit::CC_GE,  // signed greater or equal
-    jit::CC_LE,  // signed less or equal
+    jit::CC_L,   // signed less than
     jit::CC_G,   // signed greater than
+    jit::CC_LE,  // signed less or equal
+    jit::CC_P, jit::CC_NP, // invalid. These are the parity flags.
   };
 
   return mapping[cc];

@@ -77,8 +77,17 @@ const RegSet kSF = RegSet(RegSF{0});
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Registers that can safely be used for scratch purposes in-between traces.
+ */
 const RegSet kScratchCrossTraceRegs =
   kSIMDCallerSaved | (kGPUnreserved - arm::vm_regs_with_sp());
+
+/*
+ * Helper code ABI registers.
+ */
+const RegSet kGPHelperRegs = rAsm | vixl::x14;
+const RegSet kSIMDHelperRegs = vixl::d5 | vixl::d6 | vixl::d7;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +97,8 @@ const Abi trace_abi {
   kSIMDUnreserved,
   kSIMDReserved,
   kCalleeSaved,
-  kSF
+  kSF,
+  true
 };
 
 const Abi cross_trace_abi {
@@ -97,6 +107,16 @@ const Abi cross_trace_abi {
   trace_abi.simd() & kScratchCrossTraceRegs,
   trace_abi.simd() - kScratchCrossTraceRegs,
   trace_abi.calleeSaved & kScratchCrossTraceRegs,
+  trace_abi.sf,
+  false
+};
+
+const Abi helper_abi {
+  kGPHelperRegs,
+  trace_abi.gp() - kGPHelperRegs,
+  kSIMDHelperRegs,
+  trace_abi.simd() - kSIMDHelperRegs,
+  trace_abi.calleeSaved,
   trace_abi.sf,
   false
 };
@@ -112,8 +132,9 @@ const Abi& abi(CodeKind kind) {
     case CodeKind::Trace:
       return trace_abi;
     case CodeKind::CrossTrace:
-    case CodeKind::Helper:
       return cross_trace_abi;
+    case CodeKind::Helper:
+      return helper_abi;
   }
   not_reached();
 }

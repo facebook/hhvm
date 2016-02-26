@@ -32,6 +32,7 @@ namespace HPHP { namespace jit { namespace arm {
 
 constexpr uint8_t kSmashJccFlipOff = 2;
 constexpr uint8_t kSmashJccFlopOff = 6;
+constexpr uint8_t kSmashCallTotalLen = 20;  // Total length of smashable call
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -183,7 +184,7 @@ void smashCmpq(TCA inst, uint32_t target) {
 }
 
 void smashCall(TCA inst, TCA target) {
-  smashInstr(inst, target, smashableCallLen());
+  smashInstr(inst, target, kSmashCallTotalLen);
 }
 
 void smashJmp(TCA inst, TCA target) {
@@ -197,7 +198,7 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   Instruction* b = Instruction::Cast(inst);
   always_assert(b->IsCondBranchImm());
 
-  int offset = b->ImmPCRel();
+  int offset = b->ImmPCRelHi();
   always_assert(offset == kSmashJccFlipOff || offset == kSmashJccFlopOff);
 
   // If condition has changed, switch flip<->flop
@@ -230,7 +231,7 @@ uint32_t smashableCmpqImm(TCA inst) {
 }
 
 TCA smashableCallTarget(TCA call) {
-  return *reinterpret_cast<TCA*>(call + smashableCallLen() - 8);
+  return *reinterpret_cast<TCA*>(call + kSmashCallTotalLen - 8);
 }
 
 TCA smashableJmpTarget(TCA jmp) {
@@ -242,7 +243,7 @@ TCA smashableJccTarget(TCA jmp) {
   Instruction* b = Instruction::Cast(jmp);
   always_assert(b->IsCondBranchImm());
 
-  int offset = b->ImmPCRel();
+  int offset = b->ImmPCRelHi();
   always_assert(offset == kSmashJccFlipOff || offset == kSmashJccFlopOff);
   return *reinterpret_cast<TCA*>(jmp + offset * 4 + 8);
 }

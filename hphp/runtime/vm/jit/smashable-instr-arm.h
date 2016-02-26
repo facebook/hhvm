@@ -37,7 +37,7 @@ namespace HPHP { namespace jit { namespace arm {
  */
 constexpr size_t smashableMovqLen() { return 8 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 20; }
+constexpr size_t smashableCallLen() { return 8; }  // From return address
 constexpr size_t smashableJmpLen()  { return 8 + 8; }
 constexpr size_t smashableJccLen()  { return 24 + 16; }
 

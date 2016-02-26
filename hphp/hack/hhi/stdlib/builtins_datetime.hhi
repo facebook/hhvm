@@ -200,12 +200,12 @@ class DatePeriod implements Iterator<DateTime> {
     /* ?DateTimeInterface */ $end = null, // date string converts
     int $options = 0,
   );
-  public function current(): DateTimeInterface;
+  public function current(): DateTime;
   public function rewind(): void;
   public function key();
   public function next();
   public function valid(): bool;
-  public function getStartDate(): DateTimeInterface;
-  public function getEndDate(): DateTimeInterface;
+  public function getStartDate(): DateTime;
+  public function getEndDate(): DateTime;
   public function getDateInterval(): DateInterval;
 }

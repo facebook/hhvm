@@ -70,14 +70,14 @@ class DatePeriod implements Iterator {
   }
 
   function getStartDate() {
-    return $this->start;
+    return clone $this->start;
   }
 
   function getEndDate() {
-    return $this->end;
+    return clone $this->end;
   }
 
   function getDateInterval() {
-    return $this->interval;
+    return clone $this->interval;
   }
 }

@@ -2,7 +2,7 @@
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-ldap_add($link, "dc=my-domain,dc=com", array(
+ldap_add($link, "dc=my-domain,$base", array(
 	"objectClass"	=> array(
 		"top",
 		"dcObject",
@@ -12,8 +12,8 @@ ldap_add($link, "dc=my-domain,dc=com", array(
 ));
 
 var_dump(
-	ldap_delete($link, "dc=my-domain,dc=com"),
-	@ldap_search($link, "dc=my-domain,dc=com", "(o=my-domain)")
+	ldap_delete($link, "dc=my-domain,$base"),
+	@ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
 );
 ?>
 ===DONE===
@@ -22,5 +22,5 @@ require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
-ldap_delete($link, "dc=my-domain,dc=com");
+@ldap_delete($link, "dc=my-domain,$base");
 ?>

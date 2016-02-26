@@ -1,2 +1,2 @@
-string(19) "dc=my-domain,dc=com"
+string(%d) "%s"
 ===DONE===

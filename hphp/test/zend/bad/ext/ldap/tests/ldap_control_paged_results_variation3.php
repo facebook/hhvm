@@ -2,10 +2,10 @@
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
-$dn = "dc=my-domain,dc=com";
-$filter = "(cn=*)";
+$dn = "$base";
+$filter = "(cn=user*)";
 $cookie = '';
 var_dump(
 	ldap_control_paged_result($link, 2, true, $cookie),
@@ -22,5 +22,5 @@ var_dump(
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>

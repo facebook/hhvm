@@ -2,8 +2,8 @@
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
-$result = ldap_search($link, "dc=my-domain,dc=com", "(objectclass=organization)");
+insert_dummy_data($link, $base);
+$result = ldap_search($link, "$base", "(objectclass=organization)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
 	ldap_next_attribute($link),
@@ -16,5 +16,5 @@ var_dump(
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>

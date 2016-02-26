@@ -2,9 +2,9 @@
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-insert_dummy_data($link);
+insert_dummy_data($link, $base);
 
-$dn = "dc=my-domain,dc=com";
+$dn = "$base";
 $filter = "(objectclass=person)";
 var_dump(
 	$result = ldap_search($link, $dn, $filter, array('sn'), 1, 3),
@@ -21,5 +21,5 @@ var_dump(
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-remove_dummy_data($link);
+remove_dummy_data($link, $base);
 ?>

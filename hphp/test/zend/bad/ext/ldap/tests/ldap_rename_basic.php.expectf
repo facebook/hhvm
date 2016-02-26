@@ -25,7 +25,7 @@ array(2) {
     ["count"]=>
     int(2)
     ["dn"]=>
-    string(28) "cn=userZ,dc=my-domain,dc=com"
+    string(%d) "cn=userZ,%s"
   }
 }
 ===DONE===

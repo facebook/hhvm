@@ -692,7 +692,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (RuntimeOption::EvalDumpTC ||
       RuntimeOption::EvalDumpIR ||
       RuntimeOption::EvalDumpRegion) {
-    HPHP::jit::tc_dump();
+    if (jit::mcg) jit::mcg->dumpTC();
   }
   if (xhprof) {
     Variant profileData = HHVM_FN(xhprof_disable)();

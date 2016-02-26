@@ -909,7 +909,7 @@ struct Func {
   /*
    * Get and set the `index'-th function prologue.
    */
-  unsigned char* getPrologue(int index) const;
+  uint8_t* getPrologue(int index) const;
   void setPrologue(int index, unsigned char* tca);
 
   /*
@@ -931,11 +931,6 @@ struct Func {
    */
   void resetPrologue(int numParams);
   void resetPrologues();
-
-  /*
-   * Smash prologue guards to prevent function from being called.
-   */
-  void smashPrologues() const;
 
 
   /////////////////////////////////////////////////////////////////////////////

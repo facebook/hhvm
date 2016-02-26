@@ -98,7 +98,8 @@ struct CodeCache {
   const CodeBlock& frozen() const { return m_frozen; }
   const CodeBlock& prof()   const { return m_prof; }
 
-  DataBlock& data() { return m_data; }
+  const DataBlock& data() const { return m_data; }
+        DataBlock& data()       { return m_data; }
 
   /*
    * Return a View of this CodeCache, selecting blocks approriately depending

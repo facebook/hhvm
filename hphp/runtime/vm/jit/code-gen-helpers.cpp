@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
+
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
@@ -38,6 +40,7 @@
 #include "hphp/util/immed.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
@@ -316,6 +319,12 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   v << vcall{CallSpec::direct(Trace::ringbufferMsg),
              v.makeVcallArgs({{v.cns(msg), v.cns(strlen(msg)), v.cns(t)}}),
              v.makeTuple({})};
+}
+
+void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
+  if (!force && !Stats::enabled()) return;
+  intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
+  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

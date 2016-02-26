@@ -61,9 +61,14 @@ TCA funcGuardFromPrologue(TCA prologue, const Func* func);
 bool funcGuardMatches(TCA guard, const Func* func);
 
 /*
- * Clobber `guard' so that it always fails.
+ * Clobber the `guard' for `func' so that it always fails.
  */
 void clobberFuncGuard(TCA guard, const Func* func);
+
+/*
+ * Clobber all guards for `func'.
+ */
+void clobberFuncGuards(const Func* func);
 
 ///////////////////////////////////////////////////////////////////////////////
 

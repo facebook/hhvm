@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/func-guard.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
@@ -53,6 +54,20 @@ void clobberFuncGuard(TCA guard, const Func* func) {
   return;
 #endif
   return ARCH_SWITCH_CALL(clobberFuncGuard, guard, func);
+}
+
+void clobberFuncGuards(const Func* func) {
+  int maxNumPrologues = func->getMaxNumPrologues(func->numParams());
+  int numPrologues =
+    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
+                                         : kNumFixedPrologues;
+
+  for (auto i = 0; i < numPrologues; ++i) {
+    auto const guard = funcGuardFromPrologue(func->getPrologue(i), func);
+    if (funcGuardMatches(guard, func)) {
+      clobberFuncGuard(guard, func);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

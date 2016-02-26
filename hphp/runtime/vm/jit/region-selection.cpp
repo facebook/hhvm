@@ -779,7 +779,7 @@ RegionDescPtr selectHotRegion(TransID transId,
   auto const& func = *profData->transRec(transId)->func();
   FuncId funcId = func.getFuncId();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
-               mcg->getJmpToTransIDMap());
+               mcg->jmpToTransIDMap());
   TransIDSet selectedTIDs;
   assertx(regionMode() != RegionMode::Method);
   RegionDescPtr region;

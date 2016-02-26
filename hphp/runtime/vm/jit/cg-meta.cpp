@@ -58,7 +58,7 @@ CGMeta::process_only(
   catches.clear();
 
   for (auto const& elm : jmpTransIDs) {
-    mcg->getJmpToTransIDMap()[elm.first] = elm.second;
+    mcg->jmpToTransIDMap()[elm.first] = elm.second;
   }
   jmpTransIDs.clear();
 
@@ -71,7 +71,7 @@ CGMeta::process_only(
   assertx(inProgressTailJumps.empty());
 
   for (auto& stub : reusedStubs) {
-    mcg->getDebugInfo()->recordRelocMap(stub, nullptr, "NewStub");
+    mcg->debugInfo()->recordRelocMap(stub, nullptr, "NewStub");
   }
   reusedStubs.clear();
 }

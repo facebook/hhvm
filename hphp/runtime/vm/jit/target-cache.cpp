@@ -13,14 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/target-cache.h"
 
-#include <cassert>
-#include <string>
-#include <vector>
-#include <mutex>
-#include <limits>
-
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -35,6 +31,12 @@
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/text-util.h"
+
+#include <cassert>
+#include <limits>
+#include <mutex>
+#include <string>
+#include <vector>
 
 namespace HPHP { namespace jit {
 

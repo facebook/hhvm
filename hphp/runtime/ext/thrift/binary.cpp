@@ -15,17 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
-#include "hphp/runtime/ext/thrift/spec-holder.h"
-#include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/reflection/ext_reflection.h"
-#include "hphp/runtime/ext/extension.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
+#include "hphp/runtime/ext/thrift/spec-holder.h"
+#include "hphp/runtime/ext/thrift/transport.h"
+
+#include "hphp/runtime/vm/jit/perf-counters.h"
+
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>

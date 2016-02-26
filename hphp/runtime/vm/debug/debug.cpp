@@ -44,7 +44,7 @@ void* DebugInfo::pidMapOverlayStart;
 void* DebugInfo::pidMapOverlayEnd;
 
 DebugInfo* DebugInfo::Get() {
-  return mcg->getDebugInfo();
+  return mcg->debugInfo();
 }
 
 DebugInfo::DebugInfo() {

@@ -13,10 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/relocation.h"
 
-#include "hphp/util/trace.h"
-#include "hphp/util/logger.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -24,14 +22,18 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/align.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 
 #include "hphp/tools/hfsort/jitsort.h"
 
+#include "hphp/util/logger.h"
+#include "hphp/util/trace.h"
+
+#include <algorithm>
 #include <cstdio>
 #include <vector>
-#include <algorithm>
 
 namespace HPHP { namespace jit {
 
@@ -325,7 +327,7 @@ void liveRelocate(int time) {
     return;
   }
 
-  auto relocMap = mcg->getDebugInfo()->getRelocMap();
+  auto relocMap = mcg->debugInfo()->getRelocMap();
   if (!relocMap) return;
 
   BlockingLeaseHolder writer(Translator::WriteLease());
@@ -389,7 +391,7 @@ void recordPerfRelocMap(
                                  sk, argNum,
                                  incomingBranchesIn,
                                  fixups);
-  mcg->getDebugInfo()->recordRelocMap(start, end, info);
+  mcg->debugInfo()->recordRelocMap(start, end, info);
 }
 
 String perfRelocMapInfo(
@@ -399,7 +401,7 @@ String perfRelocMapInfo(
     const GrowableVector<IncomingBranch>& incomingBranchesIn,
     CGMeta& fixups) {
   for (auto& stub : fixups.reusedStubs) {
-    mcg->getDebugInfo()->recordRelocMap(stub, 0, "NewStub");
+    mcg->debugInfo()->recordRelocMap(stub, 0, "NewStub");
   }
   swap_trick(fixups.reusedStubs);
 
@@ -454,7 +456,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
   assert(Translator::WriteLease().amOwner());
   assert(!Func::s_treadmill);
 
-  auto newRelocMapName = mcg->getDebugInfo()->getRelocMapName() + ".tmp";
+  auto newRelocMapName = mcg->debugInfo()->getRelocMapName() + ".tmp";
   auto newRelocMap = fopen(newRelocMapName.c_str(), "w+");
   if (!newRelocMap) return;
 
@@ -560,7 +562,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     }
   }
 
-  auto relocMap = mcg->getDebugInfo()->getRelocMap();
+  auto relocMap = mcg->debugInfo()->getRelocMap();
   always_assert(relocMap);
   fseek(relocMap, 0, SEEK_SET);
 
@@ -584,12 +586,12 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
   }
   x64::adjustCodeForRelocation(rel, fixups);
 
-  unlink(mcg->getDebugInfo()->getRelocMapName().c_str());
+  unlink(mcg->debugInfo()->getRelocMapName().c_str());
   rename(newRelocMapName.c_str(),
-         mcg->getDebugInfo()->getRelocMapName().c_str());
+         mcg->debugInfo()->getRelocMapName().c_str());
   fclose(newRelocMap);
   newRelocMap = nullptr;
-  freopen(mcg->getDebugInfo()->getRelocMapName().c_str(), "r+", relocMap);
+  freopen(mcg->debugInfo()->getRelocMapName().c_str(), "r+", relocMap);
   fseek(relocMap, 0, SEEK_END);
 
   okToRelocate = false;

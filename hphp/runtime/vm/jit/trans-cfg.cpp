@@ -29,7 +29,7 @@ TRACE_SET_MOD(pgo);
 static TransIDSet findPredTrans(TransID dstID,
                                 const ProfData* profData,
                                 const SrcDB& srcDB,
-                                const TcaTransIDMap& jmpToTransID) {
+                                const TCATransIDMap& jmpToTransID) {
   auto const dstRec = profData->transRec(dstID);
   auto const dstSK = dstRec->srcKey();
   const SrcRec* dstSR = srcDB.find(dstSK);
@@ -93,7 +93,7 @@ static bool inferredArcWeight(const TransCFG::ArcPtrVec& arcVec,
 TransCFG::TransCFG(FuncId funcId,
                    const ProfData* profData,
                    const SrcDB& srcDB,
-                   const TcaTransIDMap& jmpToTransID,
+                   const TCATransIDMap& jmpToTransID,
                    bool inlining /* = false */) {
   assertx(profData);
 

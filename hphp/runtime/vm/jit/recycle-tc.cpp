@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -90,7 +91,7 @@ void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
  */
 void clearTCMaps(TCA start, TCA end) {
   auto& catchMap = mcg->catchTraceMap();
-  auto& jmpMap = mcg->getJmpToTransIDMap();
+  auto& jmpMap = mcg->jmpToTransIDMap();
   while (start < end) {
     x64::DecodedInstruction di (start);
     if (di.isBranch()) {
@@ -264,7 +265,7 @@ void reclaimFunction(const Func* func) {
   auto& us = mcg->ustubs();
 
   ITRACE(1, "Smashing prologues\n");
-  func->smashPrologues();
+  clobberFuncGuards(func);
 
   for (auto& caller : data.callers) {
     ITRACE(1, "Unsmashing call @ {} (guard = {})\n",

@@ -28,10 +28,12 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/vm/repo.h"
+
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/jit/tc-info.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
@@ -1098,8 +1100,8 @@ bool AdminRequestHandler::handleCPUProfilerRequest(const std::string &cmd,
 }
 #endif
 
-bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
-                                                  Transport *transport) {
+bool AdminRequestHandler::handleConstSizeRequest(const std::string &cmd,
+                                                 Transport *transport) {
   if (!apcExtension::EnableConstLoad && cmd == "const-ss") {
     transport->sendString("Not Enabled\n");
     return true;
@@ -1177,23 +1179,14 @@ bool AdminRequestHandler::handleRandomStaticStringsRequest(
   return true;
 }
 
-namespace {
-struct PCInfo {
-  PCInfo() : count(0), unique(0) {}
-  int count;
-  int unique;
-};
-using InfoMap = std::map<int, PCInfo>;
-}
-
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(jit::mcg->getUsageString());
+    transport->sendString(jit::getTCSpace());
     return true;
   }
   if (cmd == "vm-tcaddr") {
-    transport->sendString(jit::mcg->getTCAddrs());
+    transport->sendString(jit::getTCAddrs());
     return true;
   }
   if (cmd == "vm-namedentities") {
@@ -1203,7 +1196,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (HPHP::jit::tc_dump()) {
+    if (jit::mcg && jit::mcg->dumpTC()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");

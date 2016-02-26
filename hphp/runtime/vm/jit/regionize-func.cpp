@@ -276,7 +276,7 @@ void regionizeFunc(const Func* func,
   auto const funcId = func->getFuncId();
   auto const profData = mcg->tx().profData();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
-               mcg->getJmpToTransIDMap());
+               mcg->jmpToTransIDMap());
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     auto dotFileName = folly::to<std::string>(

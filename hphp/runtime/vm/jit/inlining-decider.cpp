@@ -535,7 +535,7 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
 
   TransIDSet selectedTIDs;
   TransCFG cfg(callee->getFuncId(), profData, mcg->tx().getSrcDB(),
-               mcg->getJmpToTransIDMap(), true /* inlining */);
+               mcg->jmpToTransIDMap(), true /* inlining */);
 
   HotTransContext ctx;
   ctx.tid = dvID;

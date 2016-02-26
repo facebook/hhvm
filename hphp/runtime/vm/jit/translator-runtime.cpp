@@ -16,14 +16,29 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/minstr-state.h"
+#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit-util.h"
+#include "hphp/runtime/vm/unwind.h"
+
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -31,11 +46,8 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
-#include "hphp/runtime/vm/member-operations.h"
-#include "hphp/runtime/vm/minstr-state.h"
-#include "hphp/runtime/vm/type-constraint.h"
-#include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/unwind.h"
+
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 
@@ -1233,6 +1245,35 @@ void throwSwitchMode() {
 bool methodExistsHelper(Class* cls, StringData* meth) {
   assertx(isNormalClass(cls) && !isAbstract(cls));
   return cls->lookupMethod(meth) != nullptr;
+}
+
+int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
+  DECLARE_FRAME_POINTER(fp);
+
+  ObjectData* obj = nullptr;
+  Class* cls = nullptr;
+  StringData* invName = nullptr;
+
+  auto ar = fp->m_sfp;
+  if (LIKELY(ar->func()->isBuiltin())) {
+    ar = g_context->getOuterVMFrame(ar);
+  }
+  auto const f = vm_decode_function(tvAsVariant(&func),
+                                    ar, false,
+                                    obj, cls, invName,
+                                    false);
+  if (UNLIKELY(!f)) return false;
+
+  auto& cit = it->cuf();
+  cit.setFunc(f);
+  if (obj) {
+    cit.setCtx(obj);
+    obj->incRefCount();
+  } else {
+    cit.setCtx(cls);
+  }
+  cit.setName(invName);
+  return true;
 }
 
 namespace MInstrHelpers {

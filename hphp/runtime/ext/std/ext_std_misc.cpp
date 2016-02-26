@@ -18,30 +18,36 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include <limits>
 
-#include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-pack.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/type-profile.h"
+
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/vm/bytecode.h"
+
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/type-profile.h"
+
+#include "hphp/parser/scanner.h"
+
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
+
 #ifndef _MSC_VER
 #include <sys/param.h> // MAXPATHLEN is here
 #endif
-#include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP {
 
@@ -63,7 +69,7 @@ const int64_t k_CONNECTION_TIMEOUT = 2;
 static String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted more than 25kb of code.
   size_t begin, end;
-  jit::mcg->codeEmittedThisRequest(begin, end);
+  jit::codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
   auto constexpr kMaxTCBytes = 25 << 10;
   if (diff > kMaxTCBytes) {
@@ -86,8 +92,8 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "PGO profiling translations are still enabled.";
   }
 
-  auto tpc_diff = jit::s_perfCounters[jit::tpc_interp_bb] -
-    jit::s_perfCounters[jit::tpc_interp_bb_force];
+  auto tpc_diff = jit::tl_perf_counters[jit::tpc_interp_bb] -
+                  jit::tl_perf_counters[jit::tpc_interp_bb_force];
   if (tpc_diff) {
     return folly::sformat("Interpreted {} non-forced basic blocks.", tpc_diff);
   }

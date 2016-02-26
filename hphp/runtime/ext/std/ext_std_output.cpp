@@ -16,14 +16,18 @@
 */
 
 #include "hphp/runtime/ext/std/ext_std_output.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/ext/json/ext_json.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/perf-counters.h"
+
+#include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/server/server-stats.h"
+
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -220,13 +224,14 @@ Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
   Array ret;
 
   HardwareCounter::GetPerfEvents(
-    [](const std::string& key, int64_t value, void* data) {
+    [] (const std::string& key, int64_t value, void* data) {
       Array& ret = *reinterpret_cast<Array*>(data);
       ret.set(String(key), value);
     },
-    &ret);
+    &ret
+  );
+  jit::getPerfCounters(ret);
 
-  jit::mcg->getPerfCounters(ret);
   return ret;
 }
 

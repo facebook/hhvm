@@ -95,6 +95,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/punt.h"
@@ -104,6 +105,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc-info.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -118,60 +120,17 @@
 
 namespace HPHP { namespace jit {
 
+///////////////////////////////////////////////////////////////////////////////
+
 TRACE_SET_MOD(mcg);
 
-using namespace reg;
 using namespace Trace;
-using std::max;
-
-#define TPC(n) "jit_" #n,
-static const char* const kPerfCounterNames[] = {
-  TRANS_PERF_COUNTERS
-};
-#undef TPC
-
-#ifdef __APPLE__
-// Clang believes that it can force s_perfCounters into 16-byte alignment, and
-// thus emit an inlined version of memcpy later in this file using SSE
-// instructions which require  such alignment. It can, in fact, do this --
-// except due to what is as far as I can tell a linker bug on OS X, ld doesn't
-// actually lay this out with 16 byte alignment, and so the SSE instructions
-// crash. In order to work around this, tell clang to force it to only 8 byte
-// alignment, which causes it to emit an inlined version of memcpy which does
-// not assume 16-byte alignment. (Perversely, it also tickles the ld bug
-// differently such that it actually gets 16-byte alignment :\)
-alignas(8)
-#endif
-__thread int64_t s_perfCounters[tpc_num_counters];
-
-static __thread size_t s_initialTCSize;
-static ServiceData::ExportedCounter* s_jitMaturityCounter;
 
 // The global MCGenerator object.
 MCGenerator* mcg;
 
-CallSpec MCGenerator::getDtorCall(DataType type) {
-  switch (type) {
-    case KindOfString:
-      return CallSpec::method(&StringData::release);
-    case KindOfArray:
-      return CallSpec::method(&ArrayData::release);
-    case KindOfObject:
-      return CallSpec::method(
-        RuntimeOption::EnableObjDestructCall
-          ? &ObjectData::release
-          : &ObjectData::releaseNoObjDestructCheck
-      );
-    case KindOfResource:
-      return CallSpec::method(&ResourceHdr::release);
-    case KindOfRef:
-      return CallSpec::method(&RefData::release);
-    DT_UNCOUNTED_CASE:
-    case KindOfClass:
-      break;
-  }
-  not_reached();
-}
+static __thread size_t s_initialTCSize;
+static ServiceData::ExportedCounter* s_jitMaturityCounter;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -448,8 +407,7 @@ MCGenerator::getTranslation(const TranslArgs& args) {
   return createTranslation(args);
 }
 
-int
-MCGenerator::numTranslations(SrcKey sk) const {
+int MCGenerator::numTranslations(SrcKey sk) const {
   if (const SrcRec* sr = m_tx.getSrcDB().find(sk)) {
     return sr->translations().size();
   }
@@ -678,16 +636,6 @@ TCA MCGenerator::getFuncBody(Func* func) {
   }
 
   return tca;
-}
-
-void MCGenerator::smashPrologueGuards(AtomicLowPtr<uint8_t>* prologues,
-                                      int numPrologues, const Func* func) {
-  for (int i = 0; i < numPrologues; i++) {
-    auto const guard = funcGuardFromPrologue(prologues[i], func);
-    if (funcGuardMatches(guard, func)) {
-      clobberFuncGuard(guard, func);
-    }
-  }
 }
 
 /*
@@ -1499,135 +1447,7 @@ TCA MCGenerator::handleResume(bool interpFirst) {
   return start;
 }
 
-void handleStackOverflow(ActRec* calleeAR) {
-  /*
-   * First synchronize registers.
-   *
-   * We're called in two situations: either this is the first frame after a
-   * re-entry, in which case calleeAR->m_sfp is enterTCHelper's native stack,
-   * or we're called in the middle of one VM entry (from a func prologue).  We
-   * want to raise the exception from the caller's FCall instruction in the
-   * second case, and in the first case we have to raise in a special way
-   * inside this re-entry.
-   *
-   * Either way the stack depth is below the calleeAR by numArgs, because we
-   * haven't run func prologue duties yet.
-   */
-  auto& unsafeRegs = vmRegsUnsafe();
-  auto const isReentry = calleeAR == vmFirstAR();
-  auto const arToSync = isReentry ? calleeAR : calleeAR->m_sfp;
-  unsafeRegs.fp = arToSync;
-  unsafeRegs.stack.top() =
-    reinterpret_cast<Cell*>(calleeAR) - calleeAR->numArgs();
-  auto const func_base = arToSync->func()->base();
-  // calleeAR m_soff is 0 in the re-entry case, so we'll set pc to the func
-  // base.  But it also doesn't matter because we're going to throw a special
-  // VMReenterStackOverflow in that case so the unwinder won't worry about it.
-  unsafeRegs.pc = arToSync->func()->unit()->at(func_base + calleeAR->m_soff);
-  tl_regState = VMRegState::CLEAN;
-
-  if (!isReentry) {
-    /*
-     * The normal case - we were called via FCall, or FCallArray.  We need to
-     * construct the pc of the fcall from the return address (which will be
-     * after the fcall). Because fcall is a variable length instruction, and
-     * because we sometimes delete instructions from the instruction stream, we
-     * need to use fpi regions to find the fcall.
-     */
-    const FPIEnt* fe = liveFunc()->findPrecedingFPI(
-      liveUnit()->offsetOf(vmpc()));
-    vmpc() = liveUnit()->at(fe->m_fcallOff);
-    assertx(isFCallStar(peek_op(vmpc())));
-    raise_error("Stack overflow");
-  } else {
-    /*
-     * We were called via re-entry.  Leak the params and the actrec, and tell
-     * the unwinder that there's nothing left to do in this "entry".
-     *
-     * Also, the caller hasn't set up the m_invName area on the ActRec (unless
-     * it was a magic call), since it's the prologue's responsibility if it's a
-     * non-magic call.  We can just null it out since we're fatalling.
-     */
-    vmsp() = reinterpret_cast<Cell*>(calleeAR + 1);
-    calleeAR->setVarEnv(nullptr);
-    throw VMReenterStackOverflow();
-  }
-  not_reached();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-
-bool checkCalleeStackOverflow(const ActRec* calleeAR) {
-  auto const func = calleeAR->func();
-  auto const limit = func->maxStackCells() + kStackCheckPadding;
-
-  const void* const needed_top =
-    reinterpret_cast<const TypedValue*>(calleeAR) - limit;
-
-  const void* const limit_addr =
-    static_cast<char*>(vmRegsUnsafe().stack.getStackLowAddress()) +
-    Stack::sSurprisePageSize;
-
-  return needed_top < limit_addr;
-}
-
-void handlePossibleStackOverflow(ActRec* calleeAR) {
-  assert_native_stack_aligned();
-
-  // If it's not an overflow, it was probably a surprise flag trip.  But we
-  // can't assert that it is because background threads are allowed to clear
-  // surprise bits concurrently, so it could be cleared again by now.
-  if (!checkCalleeStackOverflow(calleeAR)) return;
-  auto const func = calleeAR->func();
-
-  /*
-   * Stack overflows in this situation are a slightly different case than
-   * handleStackOverflow:
-   *
-   * A function prologue already did all the work to prepare to enter the
-   * function, but then it found out it didn't have enough room on the stack.
-   * It may even have written uninits deeper than the stack base (but we limit
-   * it to sSurprisePageSize, so it's harmless).
-   *
-   * Most importantly, it might have pulled args /off/ the eval stack and
-   * shoved them into an ExtraArgs on the calleeAR, or into an array for a
-   * variadic capture param.  We need to get things into an appropriate state
-   * for handleStackOverflow to be able to synchronize things to throw from the
-   * PC of the caller's FCall.
-   *
-   * We don't actually need to make sure the stack is the right depth for the
-   * FCall: the unwinder will expect to see a pre-live ActRec (and we'll set it
-   * up so it will), but it doesn't care how many args (or what types of args)
-   * are below it on the stack.
-   *
-   * It is tempting to try to free the ExtraArgs structure here, but it's ok to
-   * not to:
-   *
-   *     o We're about to raise an uncatchable fatal, which will end the
-   *       request.  We leak ExtraArgs in other similar situations for this too
-   *       (e.g. if called via FCallArray and then a stack overflow happens).
-   *
-   *     o If we were going to free the ExtraArgs structure, we'd need to make
-   *       sure we can re-enter the VM right now, which means performing a
-   *       manual fixup first.  (We aren't in a situation where we can do a
-   *       normal VMRegAnchor fixup right now.)  But moreover we shouldn't be
-   *       running destructors if a fatal is happening anyway, so we don't want
-   *       that either.
-   *
-   * So, all that boils down to this: we ignore the extra args field (the
-   * unwinder will not consult the ExtraArgs field because it believes the
-   * ActRec is pre-live).  And set calleeAR->m_numArgs to indicate how many
-   * things are actually on the stack (so handleStackOverflow knows what to set
-   * the vmsp to)---we just set it to the function's numLocals, which might
-   * mean decreffing some uninits unnecessarily, but that's ok.
-   */
-
-  if (debug && func->attrs() & AttrMayUseVV && calleeAR->getExtraArgs()) {
-    calleeAR->trashVarEnv();
-  }
-  calleeAR->setNumArgs(calleeAR->m_func->numLocals());
-  handleStackOverflow(calleeAR);
-}
 
 /*
  * Support for the stub freelist.
@@ -1695,18 +1515,6 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CGMeta* fixups,
   return ret;
 }
 
-TCA MCGenerator::getTranslatedCaller() const {
-  DECLARE_FRAME_POINTER(fp);
-  ActRec* framePtr = fp;  // can't directly mutate the register-mapped one
-  for (; framePtr; framePtr = framePtr->m_sfp) {
-    TCA rip = (TCA)framePtr->m_savedRip;
-    if (m_code.isValidCodeAddress(rip)) {
-      return rip;
-    }
-  }
-  return nullptr;
-}
-
 void MCGenerator::syncWork() {
   assertx(tl_regState != VMRegState::CLEAN);
   m_fixupMap.fixup(g_context.getNoCheck());
@@ -1735,41 +1543,39 @@ MCGenerator::allocLiteral(uint64_t val, CGMeta& fixups) {
   return pending[val] = addr;
 }
 
-bool
-MCGenerator::reachedTranslationLimit(SrcKey sk,
-                                     const SrcRec& srcRec) const {
-  if (srcRec.translations().size() == RuntimeOption::EvalJitMaxTranslations) {
-    INC_TPC(max_trans);
-    if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
-      const auto& tns = srcRec.translations();
-      TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
-            tns.size(), sk.unit()->filepath()->data(),
-            sk.offset());
-      SKTRACE(2, sk, "{\n");
-      TCA topTrans = srcRec.getTopTranslation();
-      for (size_t i = 0; i < tns.size(); ++i) {
-        const TransRec* rec = m_tx.getTransRec(tns[i].mainStart());
-        assertx(rec);
-        SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
-        if (tns[i].mainStart() == topTrans) {
-          SKTRACE(2, sk, "%zd: *Top*\n", i);
-        }
-        if (rec->kind == TransKind::Anchor) {
-          SKTRACE(2, sk, "%zd: Anchor\n", i);
-        } else {
-          SKTRACE(2, sk, "%zd: guards {\n", i);
-          for (unsigned j = 0; j < rec->guards.size(); ++j) {
-            FTRACE(2, "{}\n", rec->guards[j]);
-          }
-          SKTRACE(2, sk, "%zd } guards\n", i);
-        }
-      }
-      SKTRACE(2, sk, "} /* Too many translations */\n");
-    }
-    return true;
+static bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
+  if (srcRec.translations().size() != RuntimeOption::EvalJitMaxTranslations) {
+    return false;
   }
+  INC_TPC(max_trans);
 
-  return false;
+  if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
+    const auto& tns = srcRec.translations();
+    TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
+          tns.size(), sk.unit()->filepath()->data(),
+          sk.offset());
+    SKTRACE(2, sk, "{\n");
+    TCA topTrans = srcRec.getTopTranslation();
+    for (size_t i = 0; i < tns.size(); ++i) {
+      auto const rec = mcg->tx().getTransRec(tns[i].mainStart());
+      assertx(rec);
+      SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
+      if (tns[i].mainStart() == topTrans) {
+        SKTRACE(2, sk, "%zd: *Top*\n", i);
+      }
+      if (rec->kind == TransKind::Anchor) {
+        SKTRACE(2, sk, "%zd: Anchor\n", i);
+      } else {
+        SKTRACE(2, sk, "%zd: guards {\n", i);
+        for (unsigned j = 0; j < rec->guards.size(); ++j) {
+          FTRACE(2, "{}\n", rec->guards[j]);
+        }
+        SKTRACE(2, sk, "%zd } guards\n", i);
+      }
+    }
+    SKTRACE(2, sk, "} /* Too many translations */\n");
+  }
+  return true;
 }
 
 static TranslateResult mcGenUnit(const IRUnit& unit,
@@ -2012,7 +1818,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
 
   TRACE(1, "mcg: %zd-byte tracelet\n", (ssize_t)loc.mainSize());
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-    Trace::traceRelease("%s", getUsageString().c_str());
+    Trace::traceRelease("%s", getTCSpace().c_str());
   }
 
   // Report jit maturity based on the amount of code emitted.
@@ -2081,17 +1887,16 @@ folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
   return folly::none;
 }
 
-void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
-                                         size_t& now) const {
+void codeEmittedThisRequest(size_t& requestEntry, size_t& now) {
   requestEntry = s_initialTCSize;
-  now = m_code.totalUsed();
+  now = mcg->code().totalUsed();
 }
 
 namespace {
 __thread std::unordered_map<const ActRec*, TCA>* tl_debuggerCatches{nullptr};
 }
 
-void pushDebuggerCatch(const ActRec* fp) {
+void stashDebuggerCatch(const ActRec* fp) {
   if (!tl_debuggerCatches) {
     tl_debuggerCatches = new std::unordered_map<const ActRec*, TCA>();
   }
@@ -2103,7 +1908,7 @@ void pushDebuggerCatch(const ActRec* fp) {
   tl_debuggerCatches->emplace(fp, catchBlock);
 }
 
-TCA popDebuggerCatch(const ActRec* fp) {
+TCA unstashDebuggerCatch(const ActRec* fp) {
   always_assert(tl_debuggerCatches);
   auto const it = tl_debuggerCatches->find(fp);
   always_assert(it != tl_debuggerCatches->end());
@@ -2116,7 +1921,7 @@ TCA popDebuggerCatch(const ActRec* fp) {
 void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
-  memset(&s_perfCounters, 0, sizeof(s_perfCounters));
+  memset(&tl_perf_counters, 0, sizeof(tl_perf_counters));
   Stats::init();
   s_initialTCSize = m_code.totalUsed();
 }
@@ -2136,7 +1941,7 @@ void MCGenerator::requestExit() {
                         g_context->getRequestUrl(50).c_str());
     for (int i = 0; i < tpc_num_counters; i++) {
       Trace::traceRelease("%-20s %10" PRId64 "\n",
-                          kPerfCounterNames[i], s_perfCounters[i]);
+                          kPerfCounterNames[i], tl_perf_counters[i]);
     }
     Trace::traceRelease("\n");
   }
@@ -2152,28 +1957,6 @@ void MCGenerator::requestExit() {
 
   delete tl_debuggerCatches;
   tl_debuggerCatches = nullptr;
-}
-
-void
-MCGenerator::getPerfCounters(Array& ret) {
-  for (int i = 0; i < tpc_num_counters; i++) {
-    // Until Perflab can automatically scale the values we give it to
-    // an appropriate range, we have to fudge these numbers so they
-    // look more like reasonable hardware counter values.
-    ret.set(String::FromCStr(kPerfCounterNames[i]),
-            s_perfCounters[i] * 1000);
-  }
-
-  for (auto const& pair : Timer::Counters()) {
-    if (pair.second.total == 0 && pair.second.count == 0) continue;
-
-    ret.set(String("jit_time_") + pair.first, pair.second.total);
-  }
-
-  if (RuntimeOption::EvalJitLLVMCounters) {
-    ret.set(String("jit_instr_vasm"), *g_bytecodesVasm);
-    ret.set(String("jit_instr_llvm"), *g_bytecodesLLVM);
-  }
 }
 
 MCGenerator::~MCGenerator() {
@@ -2215,67 +1998,6 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
                                 srcFunc, exit, inPrologue);
     }
   }
-}
-
-std::vector<UsageInfo> MCGenerator::getUsageInfo() {
-  std::vector<UsageInfo> tcUsageInfo;
-  m_code.forEachBlock([&](const char* name, const CodeBlock& a) {
-    tcUsageInfo.emplace_back(UsageInfo{std::string("code.") + name,
-                             a.used(),
-                             a.capacity(),
-                             true});
-  });
-  tcUsageInfo.emplace_back(UsageInfo{
-      "data",
-      m_code.data().used(),
-      m_code.data().capacity(),
-      true});
-  tcUsageInfo.emplace_back(UsageInfo{
-      "RDS",
-      rds::usedBytes(),
-      RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
-      false});
-  tcUsageInfo.emplace_back(UsageInfo{
-      "RDSLocal",
-      rds::usedLocalBytes(),
-      RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
-      false});
-  tcUsageInfo.emplace_back(UsageInfo{
-      "persistentRDS",
-      rds::usedPersistentBytes(),
-      RuntimeOption::EvalJitTargetCacheSize / 4,
-      false});
-  return tcUsageInfo;
-}
-
-std::string MCGenerator::getUsageString() {
-  std::string usage;
-  size_t totalBlockSize = 0;
-  size_t totalBlockCapacity = 0;
-  auto addRow = [&](UsageInfo blockUsageInfo) {
-    auto percent = blockUsageInfo.m_capacity ?
-      100 * blockUsageInfo.m_used / blockUsageInfo.m_capacity : 0;
-    usage += folly::format("mcg: {:9} bytes ({}%) in {}\n",
-                           blockUsageInfo.m_used,
-                           percent,
-                           blockUsageInfo.m_name).str();
-    if (blockUsageInfo.m_global) {
-      totalBlockSize += blockUsageInfo.m_used;
-      totalBlockCapacity += blockUsageInfo.m_capacity;
-    }
-  };
-  auto tcUsageInfo = getUsageInfo();
-  for_each(tcUsageInfo.begin(), tcUsageInfo.end(), addRow);
-  addRow(UsageInfo{"total", totalBlockSize, totalBlockCapacity, false});
-  return usage;
-}
-
-std::string MCGenerator::getTCAddrs() {
-  std::string addrs;
-  m_code.forEachBlock([&](const char* name, const CodeBlock& a) {
-    addrs += folly::format("{}: {}\n", name, a.base()).str();
-  });
-  return addrs;
 }
 
 bool MCGenerator::addDbgGuards(const Unit* unit) {
@@ -2380,23 +2102,13 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   return result;
 }
 
-// Returns true on success
-bool MCGenerator::dumpTC(bool ignoreLease /* =false */) {
+bool MCGenerator::dumpTC(bool ignoreLease /* = false */) {
   folly::Optional<BlockingLeaseHolder> writer;
   if (!ignoreLease) {
     writer.emplace(Translator::WriteLease());
     if (!*writer) return false;
   }
-  bool success = dumpTCData();
-  if (success) {
-    success = dumpTCCode("/tmp/tc_dump");
-  }
-  return success;
-}
-
-// Returns true on success
-bool tc_dump(bool ignoreLease /* =false */) {
-  return mcg && mcg->dumpTC(ignoreLease);
+  return dumpTCData() && dumpTCCode("/tmp/tc_dump");
 }
 
 // Returns true on success
@@ -2464,10 +2176,6 @@ void MCGenerator::invalidateSrcKey(SrcKey sk) {
   sr->replaceOldTranslations();
 }
 
-void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
-  if (!force && !Stats::enabled()) return;
-  intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
-  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
-}
+///////////////////////////////////////////////////////////////////////////////
 
 }}

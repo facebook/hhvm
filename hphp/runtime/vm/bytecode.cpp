@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/bytecode-defs.h"
 
@@ -32,6 +33,7 @@
 #include <folly/String.h>
 
 #include "hphp/util/debug.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
@@ -112,6 +114,7 @@
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -2057,7 +2060,7 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
 
 void ExecutionContext::syncGdbState() {
   if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitNoGdb) {
-    mcg->getDebugInfo()->debugSync();
+    mcg->debugInfo()->debugSync();
   }
 }
 
@@ -2929,7 +2932,7 @@ void debuggerPreventReturnToTC(ActRec* ar) {
   // We're going to smash the return address. Before we do, save the catch
   // block attached to the call in a side table so the return helpers and
   // unwinder can find it when needed.
-  jit::pushDebuggerCatch(ar);
+  jit::stashDebuggerCatch(ar);
 
   auto& ustubs = mcg->ustubs();
   if (ar->resumed()) {
@@ -4122,7 +4125,7 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
       // the approprate catch trace.
       jit::g_unwind_rds->debuggerReturnSP = vmsp();
       jit::g_unwind_rds->debuggerReturnOff = retInfo.soff;
-      return jit::popDebuggerCatch(retInfo.fp);
+      return jit::unstashDebuggerCatch(retInfo.fp);
     }
 
     // This frame was called by translated code so we can't interpret out of
@@ -7573,10 +7576,19 @@ void DumpCurUnit(int skip) {
 // callable from gdb
 void PrintTCCallerInfo() {
   VMRegAnchor _;
-  ActRec* fp = vmfp();
-  Unit* u = fp->m_func->unit();
-  fprintf(stderr, "Called from TC address %p\n",
-          mcg->getTranslatedCaller());
+
+  auto const u = vmfp()->m_func->unit();
+  auto const rip = []() -> jit::TCA {
+    DECLARE_FRAME_POINTER(reg_fp);
+    // NB: We can't directly mutate the register-mapped `reg_fp'.
+    for (ActRec* fp = reg_fp; fp; fp = fp->m_sfp) {
+      auto const rip = jit::TCA(fp->m_savedRip);
+      if (mcg->code().isValidCodeAddress(rip)) return rip;
+    }
+    return nullptr;
+  }();
+
+  fprintf(stderr, "Called from TC address %p\n", rip);
   std::cerr << u->filepath()->data() << ':'
             << u->getLineNumber(u->offsetOf(vmpc())) << '\n';
 }

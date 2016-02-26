@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_CODE_GEN_HELPERS_H_
 #define incl_HPHP_VM_CODE_GEN_HELPERS_H_
 
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/runtime/vm/jit/call-spec.h"
@@ -183,6 +184,14 @@ void emitTransCounterInc(Vout& v);
  * Write `msg' of type `t' to the global ring buffer.
  */
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
+
+/*
+ * Increment the counter for `stat' by `n'.
+ *
+ * If `force' is set, do so even if stats aren't enabled.
+ */
+void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
+                 bool force = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 

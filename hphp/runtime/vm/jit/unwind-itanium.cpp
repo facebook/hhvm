@@ -299,7 +299,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
       // If this frame had its return address smashed by the debugger, the real
       // catch trace is saved in a side table.
       assertx(catchTrace == nullptr);
-      catchTrace = popDebuggerCatch(fp);
+      catchTrace = unstashDebuggerCatch(fp);
     }
     unwindPreventReturnToTC(fp);
     if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {

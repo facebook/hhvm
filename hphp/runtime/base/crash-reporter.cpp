@@ -98,8 +98,8 @@ static void bt_handler(int sig) {
     ::close(fd);
   }
 
-  if (jit::Translator::isTransDBEnabled()) {
-    jit::tc_dump(true);
+  if (jit::mcg != nullptr && jit::Translator::isTransDBEnabled()) {
+    jit::mcg->dumpTC(true);
   }
 
   if (!RuntimeOption::CoreDumpEmail.empty()) {

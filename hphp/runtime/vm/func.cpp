@@ -26,12 +26,14 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/recycle-tc.h"
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
+
+#include "hphp/runtime/vm/jit/func-guard.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/recycle-tc.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -85,7 +87,7 @@ Func::~Func() {
   if (mcg != nullptr && !RuntimeOption::EvalEnableReusableTC) {
     // If Reusable TC is enabled then the prologue may have already been smashed
     // and the memory may now be in use by another function.
-    smashPrologues();
+    jit::clobberFuncGuards(this);
   }
 #ifdef DEBUG
   validate();
@@ -131,7 +133,7 @@ void Func::freeClone() {
     // Free TC-space associated with func
     jit::reclaimFunction(this);
   } else {
-    smashPrologues();
+    jit::clobberFuncGuards(this);
   }
 
   if (m_funcId != InvalidFuncId) {
@@ -141,15 +143,6 @@ void Func::freeClone() {
   }
 
   m_cloned.flag.clear();
-}
-
-void Func::smashPrologues() const {
-  int maxNumPrologues = getMaxNumPrologues(numParams());
-  int numPrologues =
-    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
-                                         : kNumFixedPrologues;
-  mcg->smashPrologueGuards((AtomicLowPtr<uint8_t>*)m_prologueTable,
-                           numPrologues, this);
 }
 
 Func* Func::clone(Class* cls, const StringData* name) const {

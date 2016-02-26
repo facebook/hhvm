@@ -527,7 +527,7 @@ inline void Func::setFuncBody(unsigned char* fb) {
   m_funcBody = fb;
 }
 
-inline unsigned char* Func::getPrologue(int index) const {
+inline uint8_t* Func::getPrologue(int index) const {
   return m_prologueTable[index];
 }
 

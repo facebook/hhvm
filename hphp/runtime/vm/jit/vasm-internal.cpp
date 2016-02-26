@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 
 #include "hphp/runtime/vm/jit/asm-info.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"

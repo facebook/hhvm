@@ -61,6 +61,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stack-overflow.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -2163,6 +2164,29 @@ float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
   return 0.0;
 }
 
+static CallSpec getDtorCallSpec(DataType type) {
+  switch (type) {
+    case KindOfString:
+      return CallSpec::method(&StringData::release);
+    case KindOfArray:
+      return CallSpec::method(&ArrayData::release);
+    case KindOfObject:
+      return CallSpec::method(
+        RuntimeOption::EnableObjDestructCall
+          ? &ObjectData::release
+          : &ObjectData::releaseNoObjDestructCheck
+      );
+    case KindOfResource:
+      return CallSpec::method(&ResourceHdr::release);
+    case KindOfRef:
+      return CallSpec::method(&RefData::release);
+    DT_UNCOUNTED_CASE:
+    case KindOfClass:
+      break;
+  }
+  not_reached();
+}
+
 static CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
   // LLVM backend doesn't support CallSpec::Array
   auto const llvm = mcg->useLLVM();
@@ -2188,7 +2212,7 @@ static CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
     }
   }
 
-  return ty.isKnownDataType() ? mcg->getDtorCall(ty.toDataType())
+  return ty.isKnownDataType() ? getDtorCallSpec(ty.toDataType())
                               : CallSpec::destruct(loc.reg(1));
 }
 

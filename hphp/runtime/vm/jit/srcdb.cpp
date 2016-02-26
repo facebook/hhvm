@@ -13,14 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/srcdb.h"
 
-#include <stdint.h>
-#include <stdarg.h>
-#include <string>
-
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -30,6 +29,10 @@
 #include "hphp/util/trace.h"
 
 #include <folly/MoveWrapper.h>
+
+#include <cstdarg>
+#include <cstdint>
+#include <string>
 
 namespace HPHP { namespace jit {
 
@@ -57,12 +60,12 @@ void IncomingBranch::patch(TCA dest) {
   switch (type()) {
     case Tag::JMP:
       smashJmp(toSmash(), dest);
-      mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-2");
+      mcg->debugInfo()->recordRelocMap(toSmash(), dest, "Arc-2");
       break;
 
     case Tag::JCC:
       smashJcc(toSmash(), dest);
-      mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-1");
+      mcg->debugInfo()->recordRelocMap(toSmash(), dest, "Arc-1");
       break;
 
     case Tag::ADDR: {

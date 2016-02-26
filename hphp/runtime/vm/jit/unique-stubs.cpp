@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stack-overflow.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
@@ -149,6 +150,83 @@ TCA emitCallToExit(CodeBlock& cb) {
 TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
   if (arch() != Arch::X64) not_implemented();
   return x64::emitEndCatchHelper(cb, us);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TCA fcallHelper(ActRec* ar) {
+  assert_native_stack_aligned();
+  assertx(!ar->resumed());
+
+  if (LIKELY(!RuntimeOption::EvalFailJitPrologs)) {
+    auto const tca = mcg->getFuncPrologue(
+      const_cast<Func*>(ar->func()),
+      ar->numArgs(),
+      ar
+    );
+    if (tca) return tca;
+  }
+
+  // Check for stack overflow in the same place func prologues make their
+  // StackCheck::Early check (see irgen-func-prologue.cpp).  This handler also
+  // cleans and syncs vmRegs for us.
+  if (checkCalleeStackOverflow(ar)) handleStackOverflow(ar);
+
+  try {
+    VMRegAnchor _(ar);
+    if (doFCall(ar, vmpc())) {
+      return mcg->ustubs().resumeHelperRet;
+    }
+    // We've been asked to skip the function body (fb_intercept).  The vmregs
+    // have already been fixed; indicate this with a nullptr return.
+    return nullptr;
+  } catch (...) {
+    // The VMRegAnchor above took care of us, but we need to tell the unwinder
+    // (since ~VMRegAnchor() will have reset tl_regState).
+    tl_regState = VMRegState::CLEAN;
+    throw;
+  }
+}
+
+void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
+  auto& regs = vmRegsUnsafe();
+  regs.fp = fp;
+  regs.stack.top() = (Cell*)sp;
+
+  auto const nargs = fp->numArgs();
+  auto const nparams = fp->func()->numNonVariadicParams();
+  auto const& paramInfo = fp->func()->params();
+
+  auto firstDVI = InvalidAbsoluteOffset;
+
+  for (auto i = nargs; i < nparams; ++i) {
+    auto const dvi = paramInfo[i].funcletOff;
+    if (dvi != InvalidAbsoluteOffset) {
+      firstDVI = dvi;
+      break;
+    }
+  }
+  if (firstDVI != InvalidAbsoluteOffset) {
+    regs.pc = fp->m_func->unit()->entry() + firstDVI;
+  } else {
+    regs.pc = fp->m_func->getEntry();
+  }
+}
+
+TCA funcBodyHelper(ActRec* fp) {
+  assert_native_stack_aligned();
+  void* const sp = reinterpret_cast<Cell*>(fp) - fp->func()->numSlotsInFrame();
+  syncFuncBodyVMRegs(fp, sp);
+  tl_regState = VMRegState::CLEAN;
+
+  auto const func = const_cast<Func*>(fp->m_func);
+  auto tca = mcg->getFuncBody(func);
+  if (!tca) {
+    tca = mcg->ustubs().resumeHelper;
+  }
+
+  tl_regState = VMRegState::DIRTY;
+  return tca;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -290,7 +368,7 @@ void debuggerRetImpl(Vout& v, Vreg ar) {
   v << store{rvmsp(), rvmtl()[unwinderDebuggerReturnSPOff()]};
 
   auto const ret = v.makeReg();
-  v << simplecall(v, popDebuggerCatch, ar, ret);
+  v << simplecall(v, unstashDebuggerCatch, ar, ret);
 
   auto const args = syncForLLVMCatch(v);
   v << jmpr{ret, args};

@@ -2229,6 +2229,8 @@ CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace x64 {
+
 struct DecodedInstruction {
   explicit DecodedInstruction(uint8_t* ip) { decode(ip); }
   std::string toString();
@@ -2316,6 +2318,6 @@ private:
 #undef logical_const
 #undef CCS
 
-}}
+}}}
 
 #endif

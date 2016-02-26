@@ -233,7 +233,7 @@ size_t stub_size() {
 FPInvOffset extract_spoff(TCA stub) {
   switch (arch()) {
     case Arch::X64:
-      { DecodedInstruction instr(stub);
+      { HPHP::jit::x64::DecodedInstruction instr(stub);
 
         // If it's not a lea, vasm optimized a lea{rvmfp, rvmsp} to a mov, so
         // the offset was 0.

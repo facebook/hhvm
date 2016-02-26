@@ -92,7 +92,7 @@ void clearTCMaps(TCA start, TCA end) {
   auto& catchMap = mcg->catchTraceMap();
   auto& jmpMap = mcg->getJmpToTransIDMap();
   while (start < end) {
-    DecodedInstruction di (start);
+    x64::DecodedInstruction di (start);
     if (di.isBranch()) {
       auto it = jmpMap.find(start);
       if (it != jmpMap.end()) {

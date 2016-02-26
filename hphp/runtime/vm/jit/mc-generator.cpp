@@ -1043,7 +1043,7 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
     return tDest;
   }
 
-  DecodedInstruction di(toSmash);
+  x64::DecodedInstruction di(toSmash);
   if (di.isBranch() && !di.isJmp()) {
     auto const target = smashableJccTarget(toSmash);
     assertx(target);

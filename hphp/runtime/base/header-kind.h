@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_HEADER_KIND_H_
 #define incl_HPHP_HEADER_KIND_H_
 
+#include <cstdint>
+
 namespace HPHP {
 
 enum class HeaderKind : uint8_t {

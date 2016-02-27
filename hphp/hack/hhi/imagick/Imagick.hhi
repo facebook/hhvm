@@ -501,7 +501,11 @@ class Imagick
   public function appendImages(bool $stack = false): Imagick;
   public function averageImages(): Imagick;
   public function blackThresholdImage($threshold): bool;
-  public function blurImage(float $radius, float $sigma, int $channel): bool;
+  public function blurImage(
+    float $radius,
+    float $sigma,
+    int $channel = \Imagick::CHANNEL_ALL,
+  ): bool;
   public function borderImage($bordercolor, int $width, int $height): bool;
   public function charcoalImage(float $radius, float $sigma): bool;
   public function chopImage(int $width, int $height, int $x, int $y): bool;

@@ -99,6 +99,12 @@ class DateTimeImmutable implements DateTimeInterface {
     return $out;
   }
 
+  public static function createFromMutable(DateTime $datetime) {
+    $out = new DateTimeImmutable();
+    $out->data = clone $datetime;
+    return $out;
+  }
+
   public static function getLastErrors(): array {
     return DateTime::getLastErrors();
   }

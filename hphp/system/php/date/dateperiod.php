@@ -32,7 +32,7 @@ class DatePeriod implements Iterator {
       }
       $this->end = $end_date;
     } else if ($end instanceof DateTimeInterface) {
-      $this->end = $end;
+      $this->end = clone $end;
     } else {
       throw new Exception(
         "DatePeriod::__construct(): This constructor accepts either " .

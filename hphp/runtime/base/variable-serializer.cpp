@@ -100,7 +100,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
        // fall-through
     case Type::Serialize:
     case Type::APCSerialize:
-       m_arrayIds = new ReqPtrCtrMap();;
+       m_arrayIds = req::make_raw<ReqPtrCtrMap>();
        break;
     default:
        m_arrayIds = nullptr;
@@ -705,7 +705,8 @@ void VariableSerializer::writeNull() {
   }
 }
 
-void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
+void VariableSerializer::writeOverflow(PtrWrapper ptr,
+                                       bool isObject /* = false */) {
   bool wasRef = m_referenced;
   setReferenced(false);
   switch (m_type) {
@@ -1207,7 +1208,7 @@ void VariableSerializer::indent() {
   }
 }
 
-bool VariableSerializer::incNestedLevel(void *ptr,
+bool VariableSerializer::incNestedLevel(PtrWrapper ptr,
                                         bool isObject /* = false */) {
   ++m_currentDepth;
 
@@ -1251,7 +1252,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
   return false;
 }
 
-void VariableSerializer::decNestedLevel(void *ptr) {
+void VariableSerializer::decNestedLevel(PtrWrapper ptr) {
   --m_currentDepth;
   --m_counts[ptr];
   if (m_type == Type::DebuggerSerialize && m_maxLevelDebugger > 0) {
@@ -1347,12 +1348,12 @@ static void serializeResourceImpl(const ResourceData* res,
 
 static void serializeResource(const ResourceData* res,
                               VariableSerializer* serializer) {
-  if (UNLIKELY(serializer->incNestedLevel((void*)res, true))) {
-    serializer->writeOverflow((void*)res, true);
+  if (UNLIKELY(serializer->incNestedLevel(res, true))) {
+    serializer->writeOverflow(res, true);
   } else {
     serializeResourceImpl(res, serializer);
   }
-  serializer->decNestedLevel((void*)res);
+  serializer->decNestedLevel(res);
 }
 
 static void serializeString(const String& str, VariableSerializer* serializer) {
@@ -1381,12 +1382,12 @@ static void serializeArray(const ArrayData* arr, VariableSerializer* serializer,
     return;
   }
   if (!skipNestCheck) {
-    if (serializer->incNestedLevel((void*)arr)) {
-      serializer->writeOverflow((void*)arr);
+    if (serializer->incNestedLevel(arr)) {
+      serializer->writeOverflow(arr);
     } else {
       serializeArrayImpl(arr, serializer);
     }
-    serializer->decNestedLevel((void*)arr);
+    serializer->decNestedLevel(arr);
   } else {
     // If isObject, the array is temporary and we should not check or save
     // its pointer.
@@ -1718,12 +1719,12 @@ static void serializeObjectImpl(const ObjectData* obj,
 
 static
 void serializeObject(const ObjectData* obj, VariableSerializer* serializer) {
-  if (UNLIKELY(serializer->incNestedLevel((void*)obj, true))) {
-    serializer->writeOverflow((void*)obj, true);
+  if (UNLIKELY(serializer->incNestedLevel(obj, true))) {
+    serializer->writeOverflow(obj, true);
   } else {
     serializeObjectImpl(obj, serializer);
   }
-  serializer->decNestedLevel((void*)obj);
+  serializer->decNestedLevel(obj);
 }
 
 static

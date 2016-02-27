@@ -42,8 +42,17 @@ struct XDebugExporter {
     level = new_level;
   }
 
-  /* Set of seen ObjectData and ArrayData pointers. */
-  req::hash_set<void*, pointer_hash<void>> seen;
+  /* Set of seen ObjectData and ArrayData pointers. Preferred over a void*
+   * because it preserves enough type information for the type scanner. */
+  union PtrWrapper {
+    PtrWrapper(const ArrayData* p): parr{p} {}
+    PtrWrapper(const ObjectData* p): pobj{p} {}
+    // So pointer_hash<void> works
+    /* implicit */ operator const void*() const { return parr; }
+    const ArrayData* parr;
+    const ObjectData* pobj;
+  };
+  req::hash_set<PtrWrapper, pointer_hash<void>> seen;
 
   /* Current level we are at. */
   uint32_t level{0};

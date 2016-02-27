@@ -61,7 +61,7 @@ typedef struct y_emit_state_s {
   yaml_emitter_t *emitter;
   HashTable *recursive;
   HashTable *callbacks;
-  HPHP::req::hash_map<void*, int, HPHP::pointer_hash<void> > seen;
+  HPHP::req::hash_map<HashTable*, int, HPHP::pointer_hash<HashTable> > seen;
 } y_emit_state_t;
 
 /* }}} */

@@ -54,7 +54,7 @@ struct VariableSerializer {
    */
   explicit VariableSerializer(Type type, int option = 0, int maxRecur = 3);
   ~VariableSerializer() {
-    if (m_arrayIds) delete m_arrayIds;
+    if (m_arrayIds) req::destroy_raw(m_arrayIds);
   }
 
   // Use UnlimitSerializationScope to suspend this temporarily.
@@ -69,6 +69,26 @@ struct VariableSerializer {
   // Serialize with limit size of output, always return the serialized string.
   // It does not work with Serialize, JSON, APCSerialize, DebuggerSerialize.
   String serializeWithLimit(const Variant& v, int limit);
+
+  // Generic wrapper around pointers to various countable types. Used instead of
+  // void* because it preserves enough type information for the type scanners to
+  // understand it.
+  union PtrWrapper {
+    PtrWrapper(const StringData* p): pstr{p} {}
+    PtrWrapper(const ArrayData* p): parr{p} {}
+    PtrWrapper(const ObjectData* p): pobj{p} {}
+    PtrWrapper(const RefData* p): pref{p} {}
+    PtrWrapper(const ResourceData* p): pres{p} {}
+    PtrWrapper(const Variant* p): pvar{p} {}
+    // So pointer_hash<void> works
+    /* implicit */operator const void*() const { return pstr; }
+    const StringData* pstr;
+    const ArrayData* parr;
+    const ObjectData* pobj;
+    const RefData* pref;
+    const ResourceData* pres;
+    const Variant* pvar;
+  };
 
   /**
    * Type specialized output functions.
@@ -89,7 +109,7 @@ struct VariableSerializer {
 
   void writeNull();
   // what to write if recursive level is over limit?
-  void writeOverflow(void* ptr, bool isObject = false);
+  void writeOverflow(PtrWrapper ptr, bool isObject = false);
   void writeRefCount(); // for DebugDump only
 
   void writeArrayHeader(int size, bool isVectorData);
@@ -108,8 +128,8 @@ struct VariableSerializer {
   void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
   void incMaxCount() { m_maxCount++; }
-  bool incNestedLevel(void *ptr, bool isObject = false);
-  void decNestedLevel(void *ptr);
+  bool incNestedLevel(PtrWrapper ptr, bool isObject = false);
+  void decNestedLevel(PtrWrapper ptr);
   void pushObjectInfo(const String& objClass, int objId, char objCode);
   void popObjectInfo();
   void pushResourceInfo(const String& rsrcName, int rsrcId);
@@ -117,7 +137,8 @@ struct VariableSerializer {
   Type getType() const { return m_type; }
 
 private:
-  using ReqPtrCtrMap = req::hash_map<void*, int, pointer_hash<void>>;
+
+  using ReqPtrCtrMap = req::hash_map<PtrWrapper, int, pointer_hash<void>>;
   Type m_type;
   int m_option;                  // type specific extra options
   StringBuffer *m_buf;

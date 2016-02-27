@@ -180,7 +180,8 @@ struct Indenter {
  * RAII helper for tracking seen arrays and objects.
  */
 struct Tracker {
-  explicit Tracker(XDebugExporter& exp, void* ptr): exp(exp), ptr(ptr) {
+  explicit Tracker(XDebugExporter& exp, XDebugExporter::PtrWrapper ptr)
+      : exp(exp), ptr(ptr) {
     auto const result = exp.seen.insert(ptr);
     seen = !result.second;
   }
@@ -190,7 +191,7 @@ struct Tracker {
   }
 
   XDebugExporter& exp;
-  void* ptr;
+  XDebugExporter::PtrWrapper ptr;
   bool seen;
 };
 

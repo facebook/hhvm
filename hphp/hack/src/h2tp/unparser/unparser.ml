@@ -748,6 +748,7 @@ let rec u_program v = u_of_list_spc u_def v
       | Cast _
       | Unop _
       | Binop _
+      | Pipe _
       | Eif _
       | NullCoalesce _
       | InstanceOf _
@@ -762,6 +763,7 @@ let rec u_program v = u_of_list_spc u_def v
       | Await _ -> StrParens res
       | Shape _ -> todo_with "shape"
       | Xml _ -> todo_with "xml"
+      | Dollardollar -> todo_with "Dollardollar"
   and u_expr (_pos, expr_) = u_expr_ expr_
   and u_expr_ =
     function
@@ -781,6 +783,10 @@ let rec u_program v = u_of_list_spc u_def v
                          in StrWords [ v1; v2; v3 ]))
                  v2
              in StrWords [ v1; v2 ])
+    | Dollardollar ->
+        u_todo "Dollardollar"
+          (fun () ->
+            Str "$$")
     | Collection (id, afields) ->
       let idStr = u_id id
       and fieldStr = StrBraces (u_of_list_comma u_afield afields) in
@@ -844,6 +850,8 @@ let rec u_program v = u_of_list_spc u_def v
         StrList [StrParens (u_hint hint); u_expr_nested expr];
     | Unop (uop, expr) -> u_uop expr uop
     | Binop (bop, e1, e2) -> u_bop e1 e2 bop
+    (** The pipe ID is only used for typechecking phase. *)
+    | Pipe (e1, e2) -> u_pipe e1 e2
     | Eif (condExpr, trueExprOption, falseExpr) ->
         StrWords [
           u_expr_nested condExpr;
@@ -955,6 +963,8 @@ let rec u_program v = u_of_list_spc u_def v
     match expr with
     | (_, Binop (b,_,_)) when bop = b && is_associative bop -> u_expr expr
     | _ -> u_expr_nested expr
+  and u_pipe e1 e2 =
+    StrWords [u_expr e1; Str "|>"; u_expr e2]
   and u_uop expr uop =
         let prefix_with s = StrList [Str s; u_expr_nested expr] in
         match uop with

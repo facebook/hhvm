@@ -171,6 +171,17 @@ UNSUPPORTED_FILES_CONVERTER = {
     "Unsupported collection type StableMap (Other[0])": [
         "collection_literals.php",
     ],
+    "Pipe operator currently not supported (Other[0])": [
+        "pipe_operator.php",
+        "pipe_operator_precedence.php",
+        "pipe_operator_nested.php",
+        "pipe_operator_nested_wrong_type.php",
+        "pipe_operator_precedence_wrong_type.php",
+        "pipe_operator_unused_dollardollar.php",
+        "pipe_operator_not_leaking_dollardollar.php",
+        "pipe_operator_with_assignment.php",
+        "pipe_operator_containing_assignment.php",
+    ],
     "async is currently not supported. (Other[0])": [
         'dynamic_yield/DynamicYield1.php',
         'dynamic_yield/DynamicYield2.php',

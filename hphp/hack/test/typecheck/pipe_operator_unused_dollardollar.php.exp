@@ -1,0 +1,2 @@
+File "pipe_operator_unused_dollardollar.php", line 12, characters 19-23:
+This expression does not contain a usage of the special pipe variable. Did you forget to use the ($$) variable? (Naming[2069])

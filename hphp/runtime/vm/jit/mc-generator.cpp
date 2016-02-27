@@ -1869,7 +1869,10 @@ MCGenerator::MCGenerator()
 
   s_jitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
+  // Do not initialize JIT stubs for PPC64 - port under development
+#if !defined(__powerpc64__)
   m_ustubs.emitAll(m_code, m_debugInfo);
+#endif
 
   // Write an .eh_frame section that covers the whole TC.
   EHFrameWriter ehfw;

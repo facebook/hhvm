@@ -280,9 +280,14 @@ int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
   int err = ENOENT;
 #endif
   if (err != 0) {
-    std::string errStr =
-      folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
-    Logger::Warning(errStr);
+    if (!errOk) {
+      std::string errStr =
+        folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
+      // Do not use Logger here because JEMallocInitializer() calls this
+      // function and JEMallocInitializer has the highest constructor priority.
+      // The static variables in Logger are not initialized yet.
+      fprintf(stderr, "%s\n", errStr.c_str());
+    }
     always_assert(errOk || err == 0);
   }
   return err;

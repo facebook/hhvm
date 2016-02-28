@@ -50,6 +50,10 @@ enum TransPerfCounter {
 };
 #undef TPC
 
+#ifdef __APPLE__
+// See perf-counters.cpp for an explanation of this hack.
+alignas(8)
+#endif
 extern __thread int64_t tl_perf_counters[tpc_num_counters];
 extern const char* const kPerfCounterNames[tpc_num_counters];
 

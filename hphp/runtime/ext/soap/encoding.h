@@ -251,6 +251,15 @@ encodePtr get_conversion(int encode);
 extern encodeStatic s_defaultEncoding[];
 
 ///////////////////////////////////////////////////////////////////////////////
+
+static_assert(
+  XSD_STRING  > kMaxDataType,
+  "Overlap between SOAP types and DataTypes"
+);
+
+constexpr bool isArrayDataType(int t) {
+  return t <= kMaxDataType && isArrayType((DataType)t);
+}
 }
 
 #endif

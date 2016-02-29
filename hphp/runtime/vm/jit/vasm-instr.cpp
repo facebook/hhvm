@@ -67,10 +67,6 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::phpret:
     case Vinstr::leavetc:
     case Vinstr::fallthru:
-    // arm specific
-    case Vinstr::cbcc:
-    case Vinstr::tbcc:
-    case Vinstr::brk:
       return true;
     default:
       return false;

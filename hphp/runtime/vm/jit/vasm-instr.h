@@ -124,9 +124,6 @@ struct Vunit;
   O(absdbl, Inone, U(s), D(d))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(divint, Inone, U(s0) U(s1), D(d))\
-  /* nop and trap */\
-  O(nop, Inone, Un, Dn)\
-  O(ud2, Inone, Un, Dn)\
   /* arithmetic instructions */\
   O(addl, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -858,17 +855,6 @@ struct srem { Vreg s0, s1, d; };
 struct divint { Vreg s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Unless specifically noted otherwise, instructions with Vreg{8,16,32} dsts
- * can do whatever they please with the upper bits.
- */
-
-/*
- * Nop and trap.
- */
-struct nop {};
-struct ud2 {};
 
 /*
  * Arithmetic instructions.

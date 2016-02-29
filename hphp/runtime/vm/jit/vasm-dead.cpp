@@ -175,7 +175,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::bindjcc1st:
     case Vinstr::bindjcc:
     case Vinstr::bindjmp:
-    case Vinstr::brk:
     case Vinstr::call:
     case Vinstr::callarray:
     case Vinstr::callfaststub:
@@ -184,8 +183,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::callr:
     case Vinstr::calls:
     case Vinstr::callstub:
-    case Vinstr::calltc:
-    case Vinstr::cbcc:
     case Vinstr::contenter:
     case Vinstr::cqo:
     case Vinstr::debugtrap:
@@ -195,7 +192,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::fallback:
     case Vinstr::fallbackcc:
     case Vinstr::fallthru:
-    case Vinstr::hostcall:
     case Vinstr::idiv:
     case Vinstr::inclm:
     case Vinstr::incqm:
@@ -247,7 +243,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::syncvmsp:
     case Vinstr::tailcallphp:
     case Vinstr::tailcallstub:
-    case Vinstr::tbcc:
     case Vinstr::ud2:
     case Vinstr::unwind:
     case Vinstr::vcall:

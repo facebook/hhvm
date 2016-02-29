@@ -49,6 +49,8 @@ struct VariableSerializer {
     PHPOutput, //used by compiler to output scalar values into byte code
   };
 
+  enum class ArrayKind { PHP, Dict };
+
   /**
    * Constructor and destructor.
    */
@@ -112,7 +114,7 @@ struct VariableSerializer {
   void writeOverflow(PtrWrapper ptr, bool isObject = false);
   void writeRefCount(); // for DebugDump only
 
-  void writeArrayHeader(int size, bool isVectorData);
+  void writeArrayHeader(int size, bool isVectorData, ArrayKind kind);
   void writeArrayKey(const Variant& key);
   void writeArrayValue(const Variant& value);
   void writeCollectionKey(const Variant& key);

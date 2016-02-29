@@ -49,6 +49,12 @@ const StaticString
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
   s_debugInfo("__debugInfo");
 
+static VariableSerializer::ArrayKind getKind(const ArrayData* arr) {
+  return arr->isDict()
+    ? VariableSerializer::ArrayKind::Dict
+    : VariableSerializer::ArrayKind::PHP;
+}
+
 /*
  * Serialize a Variant recursively.
  * The last param noQuotes indicates to serializer to not put the output in
@@ -774,7 +780,8 @@ void VariableSerializer::writeRefCount() {
   }
 }
 
-void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
+void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
+                                          VariableSerializer::ArrayKind kind) {
   m_arrayInfos.push_back(ArrayInfo());
   ArrayInfo &info = m_arrayInfos.back();
   info.first_element = true;
@@ -796,7 +803,14 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
       m_buf->append(m_objClass);
       m_buf->append(" Object\n");
     } else {
-      m_buf->append("Array\n");
+      switch (kind) {
+      case ArrayKind::Dict:
+        m_buf->append("Dict\n");
+        break;
+      case ArrayKind::PHP:
+        m_buf->append("Array\n");
+        break;
+      }
     }
     if (m_indent > 0) {
       m_indent += 4;
@@ -822,7 +836,14 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     } else if (!m_rsrcName.empty()) {
       m_buf->append("NULL");
     } else {
-      m_buf->append("array (\n");
+      switch (kind) {
+      case ArrayKind::Dict:
+        m_buf->append("dict (\n");
+        break;
+      case ArrayKind::PHP:
+        m_buf->append("array (\n");
+        break;
+      }
     }
     m_indent += (info.indent_delta = 2);
     break;
@@ -843,7 +864,14 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
       m_buf->append(m_objId);
       m_buf->append(' ');
     } else {
-      m_buf->append("array");
+      switch (kind) {
+      case ArrayKind::Dict:
+        m_buf->append("dict");
+        break;
+      case ArrayKind::PHP:
+        m_buf->append("array");
+        break;
+      }
     }
     m_buf->append('(');
     m_buf->append(size);
@@ -880,7 +908,14 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
       m_buf->append(size);
       m_buf->append(":{");
     } else {
-      m_buf->append("a:");
+      switch (kind) {
+      case ArrayKind::Dict:
+        m_buf->append("D:");
+        break;
+      case ArrayKind::PHP:
+        m_buf->append("a:");
+        break;
+      }
       m_buf->append(size);
       m_buf->append(":{");
     }
@@ -1366,7 +1401,7 @@ static void serializeString(const String& str, VariableSerializer* serializer) {
 
 static void serializeArrayImpl(const ArrayData* arr,
                                VariableSerializer* serializer) {
-  serializer->writeArrayHeader(arr->size(), arr->isVectorData());
+  serializer->writeArrayHeader(arr->size(), arr->isVectorData(), getKind(arr));
   for (ArrayIter iter(arr); iter; ++iter) {
     serializer->writeArrayKey(iter.first());
     serializer->writeArrayValue(iter.secondRef());
@@ -1377,7 +1412,7 @@ static void serializeArrayImpl(const ArrayData* arr,
 static void serializeArray(const ArrayData* arr, VariableSerializer* serializer,
                            bool skipNestCheck /* = false */) {
   if (arr->size() == 0) {
-    serializer->writeArrayHeader(0, arr->isVectorData());
+    serializer->writeArrayHeader(0, arr->isVectorData(), getKind(arr));
     serializer->writeArrayFooter();
     return;
   }
@@ -1406,12 +1441,13 @@ static void serializeArray(const Array& arr, VariableSerializer* serializer,
 
 static
 void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
+  using AK = VariableSerializer::ArrayKind;
   int64_t sz = collections::getSize(obj);
   auto type = obj->collectionType();
 
   if (isMapCollection(type)) {
     serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'K');
-    serializer->writeArrayHeader(sz, false);
+    serializer->writeArrayHeader(sz, false, AK::PHP);
     for (ArrayIter iter(obj); iter; ++iter) {
       serializer->writeCollectionKey(iter.first());
       serializer->writeArrayValue(iter.second());
@@ -1423,7 +1459,7 @@ void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
             isSetCollection(type) ||
             (type == CollectionType::Pair));
     serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'V');
-    serializer->writeArrayHeader(sz, true);
+    serializer->writeArrayHeader(sz, true, AK::PHP);
     auto ser_type = serializer->getType();
     if (ser_type == VariableSerializer::Type::Serialize ||
         ser_type == VariableSerializer::Type::APCSerialize ||

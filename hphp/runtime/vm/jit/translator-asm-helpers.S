@@ -158,12 +158,77 @@ ETCH_NAME(handleSRHelper):
   ETCH_SIZE(handleSRHelper)
 
 ///////////////////////////////////////////////////////////////////////////////
-#elif defined(__AARCH64EL__)
+#elif defined(__aarch64__)
   .globl enterTCHelper
 enterTCHelper:
-  .globl enterTCServiceReq
-enterTCServiceReq:
-  brk 0
+  // Prologue
+  stp x29, x30, [sp, -16]!
+
+  // Set firstAR->m_sfp to point to this frame
+  mov x9, sp
+  str x9, [x3]
+
+  // Set up special registers used for translated code
+  mov x28, x0
+  mov x27, x4
+  mov x29, x1
+
+  // Enter TC
+  tst x5, x5
+  beq enterTCHelper$callTC
+  adr x9, enterTCExit
+  ldr x10, [x5, #8]
+  stp x10, x9, [sp, -16]!
+  mov x29, x5
+  ldr x30, [sp]
+  br x2
+
+enterTCHelper$callTC:
+  // The translated does not follow the standard prologue of pushing frame
+  // pointer and return address (x29, x30). So, push them first and branch
+  adr x18, enterTCExit
+  stp x29, x18, [sp, -16]!
+  blr x2
+
+  .globl enterTCExit
+enterTCExit:
+  // VM Reg save
+  str x28, [x27, 16]
+  str x29, [x27, 32]
+
+  // Epilogue
+  ldp x29, x30, [sp], 16
+  ret
+
+  .globl handleSRHelper
+handleSRHelper:
+  // Sync VMSP and VMFP
+  str x28, [x27, 16]
+  str x29, [x27, 32]
+
+  // Push a ReqInfo struct onto the stack (arg4, arg3, arg2, arg1, stub, req)
+  stp x4, x5, [sp, -16]!
+  stp x2, x3, [sp, -16]!
+  stp x0, x1, [sp, -16]!
+
+  // call handleServiceRequest
+  adrp x0, mcg
+  add x0, x0, :lo12:mcg
+  ldr x0, [x0]
+  mov x1, sp
+  adrp x18, MCGenerator_handleServiceRequest
+  add x18, x18, :lo12:MCGenerator_handleServiceRequest
+  blr x18
+
+  // Pop the ReqInfo struct off the stack
+  add sp, sp, 0x30
+
+  // Load the VM regs
+  ldr x28, [x27, 16]
+  ldr x29, [x27, 32]
+
+  // Jump back
+  br x0
 
 #elif defined(__powerpc64__)
 ETCH_SECTION(handleSRHelper)

@@ -202,6 +202,7 @@ public:
   void onArray(Token &out, Token &pairs, int op = T_ARRAY);
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);
+  void onDict(Token &out, Token &pairs);
   void onEmptyCollection(Token &out);
   void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);

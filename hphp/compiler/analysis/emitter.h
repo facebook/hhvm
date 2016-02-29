@@ -654,7 +654,7 @@ private:
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
   std::vector<Array> m_staticArrays;
-  std::vector<folly::Optional<CollectionType>> m_staticColType;
+  std::vector<folly::Optional<HeaderKind>> m_staticColType;
   std::set<std::string,stdltistr> m_hoistables;
   OptLocation m_tempLoc;
   std::unordered_set<std::string> m_staticEmitted;
@@ -757,7 +757,7 @@ public:
                         std::vector<Label>& caseLabels, Label& done,
                         const SwitchState& state);
   void emitArrayInit(Emitter& e, ExpressionListPtr el,
-                     folly::Optional<CollectionType> ct = folly::none);
+                     folly::Optional<HeaderKind> ct = folly::none);
   void emitPairInit(Emitter&e, ExpressionListPtr el);
   void emitVectorInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
   void emitMapInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
@@ -927,7 +927,7 @@ public:
   void saveMaxStackCells(FuncEmitter* fe, int32_t stackPad);
   void finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad);
   void initScalar(TypedValue& tvVal, ExpressionPtr val,
-                  folly::Optional<CollectionType> ct = folly::none);
+                  folly::Optional<HeaderKind> ct = folly::none);
   bool requiresDeepInit(ExpressionPtr initExpr) const;
 
   void emitClassTraitPrecRule(PreClassEmitter* pce, TraitPrecStatementPtr rule);

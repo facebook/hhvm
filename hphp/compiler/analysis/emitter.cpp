@@ -3565,7 +3565,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el);
       return true;
-    } else if (op == T_ISSET) {
+    }
+
+    if (op == T_DICT) {
+      auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+      emitArrayInit(e, el, HeaderKind::Dict);
+      return true;
+    }
+
+    if (op == T_ISSET) {
       auto list = dynamic_pointer_cast<ExpressionList>(u->getExpression());
       if (list) {
         // isset($a, $b, ...)  ==>  isset($a) && isset($b) && ...
@@ -4680,8 +4688,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                                   tvAsVariant(&tvVal));
       } else {
         // Set/ImmSet, val is the key
-        if (m_staticColType.back() == CollectionType::Set ||
-            m_staticColType.back() == CollectionType::ImmSet) {
+        if (m_staticColType.back() == HeaderKind::Set ||
+            m_staticColType.back() == HeaderKind::ImmSet) {
           m_staticArrays.back().set(tvAsVariant(&tvVal),
                                     tvAsVariant(&tvVal));
         } else {
@@ -8915,13 +8923,17 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad) {
 }
 
 void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
-                                folly::Optional<CollectionType> ct) {
+                                folly::Optional<HeaderKind> kind) {
   assert(val->isScalar());
   tvVal.m_type = KindOfUninit;
   // static array initilization
-  auto initArray = [&](ExpressionPtr el) {
-    m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
-    m_staticColType.push_back(ct);
+  auto initArray = [&](ExpressionPtr el, folly::Optional<HeaderKind> k) {
+    if (k == HeaderKind::Dict) {
+      m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveDict(0)));
+    } else {
+      m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
+    }
+    m_staticColType.push_back(k);
     visit(el);
     tvVal = make_tv<KindOfPersistentArray>(
       ArrayData::GetScalarArray(m_staticArrays.back().get())
@@ -8967,13 +8979,17 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
     }
     case Expression::KindOfExpressionList: {
       // Array, possibly for collection initialization.
-      initArray(val);
+      initArray(val, kind);
       break;
     }
     case Expression::KindOfUnaryOpExpression: {
       auto u = static_pointer_cast<UnaryOpExpression>(val);
       if (u->getOp() == T_ARRAY) {
-        initArray(u->getExpression());
+        initArray(u->getExpression(), folly::none);
+        break;
+      }
+      if (u->getOp() == T_DICT) {
+        initArray(u->getExpression(), HeaderKind::Dict);
         break;
       }
       // Fall through
@@ -8991,10 +9007,15 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
 }
 
 void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
-                                   folly::Optional<CollectionType> ct) {
+                                   folly::Optional<HeaderKind> kind) {
   assert(m_staticArrays.empty());
+  auto const isDict = kind == HeaderKind::Dict;
 
   if (el == nullptr) {
+    if (isDict) {
+      e.Array(ArrayData::GetScalarArray(MixedArray::MakeReserveDict(0)));
+      return;
+    }
     e.Array(staticEmptyArray());
     return;
   }
@@ -9002,12 +9023,13 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   if (el->isScalar()) {
     TypedValue tv;
     tvWriteUninit(&tv);
-    initScalar(tv, el, ct);
+    initScalar(tv, el, kind);
     e.Array(tv.m_data.parr);
     return;
   }
 
-  auto const allowPacked = !ct || isVectorCollection(*ct);
+  auto const allowPacked =
+    !kind || (!isDict && isVectorCollection((CollectionType)*kind));
 
   int nElms;
   if (allowPacked && isPackedInit(el, &nElms)) {
@@ -9024,7 +9046,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   // can't handle that yet.  Also ignore RuntimeOption::DisableStructArray here.
   // The VM can handle the NewStructArray bytecode when struct arrays are
   // disabled.
-  auto const allowStruct = !ct;
+  auto const allowStruct = !kind;
   std::vector<std::string> keys;
   if (allowStruct && isStructInit(el, keys)) {
     for (int i = 0, n = keys.size(); i < n; i++) {
@@ -9041,6 +9063,8 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   if (capacity > 0) capacityHint = capacity;
   if (allowPacked && isPackedInit(el, &nElms, false /* ignore size */)) {
     e.NewArray(capacityHint);
+  } else if (isDict) {
+    e.NewDictArray(capacityHint);
   } else {
     e.NewMixedArray(capacityHint);
   }
@@ -9076,7 +9100,7 @@ void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
         "Keys may not be specified for Vector initialization");
     }
   }
-  emitArrayInit(e, el, ct);
+  emitArrayInit(e, el, (HeaderKind)ct);
   e.ColFromArray(static_cast<int>(ct));
   return;
 }
@@ -9125,7 +9149,7 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
   if (hasVectorData) useArray = false;
 
   if (useArray) {
-    emitArrayInit(e, el, ct);
+    emitArrayInit(e, el, (HeaderKind)ct);
     e.ColFromArray(static_cast<int>(ct));
   } else {
     if (nElms == 0) {
@@ -9190,7 +9214,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
   if (hasVectorData) useArray = false;
 
   if (useArray) {
-    emitArrayInit(e, el, ct);
+    emitArrayInit(e, el, (HeaderKind)ct);
     e.ColFromArray(static_cast<int>(ct));
   } else {
     if (nElms == 0) {
@@ -9259,7 +9283,7 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
       return !initExpr->isScalar();
     case Expression::KindOfUnaryOpExpression: {
       auto u = static_pointer_cast<UnaryOpExpression>(initExpr);
-      if (u->getOp() == T_ARRAY) {
+      if (u->getOp() == T_ARRAY || u->getOp() == T_DICT) {
         auto el = static_pointer_cast<ExpressionList>(u->getExpression());
         if (el) {
           int n = el->getCount();

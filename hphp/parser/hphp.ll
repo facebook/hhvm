@@ -166,6 +166,7 @@ static int getNextTokenType(int t) {
     case T_XHP_REQUIRED:
     case T_ENUM:
     case T_ARRAY:
+    case T_DICT:
       return NextTokenType::TypeListMaybe;
     case T_SUPER:
     case T_XHP_ATTRIBUTE:
@@ -476,6 +477,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
 
 <ST_IN_SCRIPTING>"|>"                 { HH_ONLY_KEYWORD(T_PIPE); }
+<ST_IN_SCRIPTING>"dict"               { HH_ONLY_KEYWORD(T_DICT); }
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }

@@ -761,7 +761,8 @@ const int UserTokenId_T_COALESCE = 438;
 const int UserTokenId_T_YIELD_FROM = 439;
 const int UserTokenId_T_PIPE = 440;
 const int UserTokenId_T_PIPE_VAR = 441;
-const int MaxUserTokenId = 442; // Marker, not a real user token ID
+const int UserTokenId_T_DICT = 442;
+const int MaxUserTokenId = 443; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

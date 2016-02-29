@@ -31,6 +31,7 @@
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/parser/parser.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -78,6 +79,7 @@ inline void UnaryOpExpression::ctorInit() {
     m_localEffects = CreateEffect;
     break;
   case T_ARRAY:
+  case T_DICT:
   default:
     break;
   }
@@ -118,6 +120,7 @@ bool UnaryOpExpression::isScalar() const {
   case '@':
     return m_exp->isScalar();
   case T_ARRAY:
+  case T_DICT:
     return (!m_exp || m_exp->isScalar());
   default:
     break;
@@ -155,6 +158,7 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
   case '+':
   case '-':
   case T_ARRAY:
+  case T_DICT:
     return m_exp && m_exp->containsDynamicConstant(ar);
   default:
     break;
@@ -167,10 +171,23 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
     if (m_op == T_ARRAY) {
       return m_exp->getScalarValue(value);
     }
+    if (m_op == T_DICT) {
+      if (m_exp->getScalarValue(value)) {
+        value = Array::ConvertToDict(value.toArray());
+        return true;
+      }
+      return false;
+    }
     Variant t;
     return m_exp->getScalarValue(t) &&
       preCompute(t, value);
   }
+
+  if (m_op == T_DICT) {
+    value = DictInit(0).toArray();
+    return true;
+  }
+
   if (m_op != T_ARRAY) return false;
   value = Array::Create();
   return true;
@@ -410,6 +427,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_EXIT:          cg_printf("exit(");         break;
     case '@':             cg_printf("@");             break;
     case T_ARRAY:         cg_printf("array(");        break;
+    case T_DICT:          cg_printf("dict[");         break;
     case T_PRINT:         cg_printf("print ");        break;
     case T_ISSET:         cg_printf("isset(");        break;
     case T_EMPTY:         cg_printf("empty(");        break;
@@ -437,6 +455,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_ISSET:
     case T_EMPTY:
     case T_EVAL:          cg_printf(")");  break;
+    case T_DICT:          cg_printf("]");  break;
     default:
       break;
     }

@@ -44,6 +44,8 @@ struct PDOSqliteError {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct PDOSqliteResource;
+
 struct PDOSqliteConnection : PDOConnection {
   friend struct PDOSqliteResource;
 
@@ -69,26 +71,10 @@ struct PDOSqliteConnection : PDOConnection {
   bool fetchErr(PDOStatement *stmt, Array &info) override;
   int getAttribute(int64_t attr, Variant &value) override;
 
-  bool createFunction(const String& name,
-                      const Variant& callback,
-                      int argcount);
-
-  // called at request-end to clear request local callbacks from m_udfs
-  void clearFunctions();
-
   int handleError(const char *file, int line, PDOStatement *stmt = nullptr);
-
-  template<class F> void scan(F&) const;
-
-private:
-  struct UDF : SQLite3::UserDefinedFunc {
-    // nb: UserDefinedFunc contains req-heap pointers
-    std::string name;
-  };
 
   sqlite3 *m_db;
   PDOSqliteError m_einfo;
-  std::vector<std::shared_ptr<UDF>> m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,8 +88,21 @@ struct PDOSqliteResource : PDOResource {
     return std::dynamic_pointer_cast<PDOSqliteConnection>(m_conn);
   }
 
-  void sweep() override;
+  bool createFunction(const String& name,
+                      const Variant& callback,
+                      int argcount);
+
+  DECLARE_RESOURCE_ALLOCATION(PDOSqliteResource);
   void vscan(IMarker&) const override;
+
+private:
+
+  struct UDF : SQLite3::UserDefinedFunc {
+    // nb: UserDefinedFunc contains req-heap pointers
+    std::string name;
+  };
+
+  req::vector<req::unique_ptr<UDF>> m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

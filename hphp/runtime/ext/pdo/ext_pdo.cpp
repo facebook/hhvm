@@ -1541,12 +1541,11 @@ static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
 #ifdef ENABLE_EXTENSION_PDO_SQLITE
   auto data = Native::data<PDOData>(this_);
 
-  auto conn = std::dynamic_pointer_cast<PDOSqliteConnection>(
-      data->m_dbh->conn());
-  if (conn == nullptr) {
+  auto res = dynamic_cast<PDOSqliteResource*>(data->m_dbh.get());
+  if (res == nullptr) {
     return false;
   }
-  return conn->createFunction(name, callback, argcount);
+  return res->createFunction(name, callback, argcount);
 #else
   raise_recoverable_error("PDO::sqliteCreateFunction not implemented");
   return false;

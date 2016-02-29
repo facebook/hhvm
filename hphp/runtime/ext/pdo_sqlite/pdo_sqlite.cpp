@@ -276,60 +276,60 @@ int PDOSqliteConnection::getAttribute(int64_t attr, Variant &value) {
 void php_sqlite3_callback_func(sqlite3_context* context, int argc,
                                sqlite3_value** argv);
 
-bool PDOSqliteConnection::createFunction(const String& name,
-                                         const Variant& callback,
-                                         int argcount) {
+///////////////////////////////////////////////////////////////////////////////
+
+bool PDOSqliteResource::createFunction(const String& name,
+                                       const Variant& callback,
+                                       int argcount) {
   if (!is_callable(callback)) {
     raise_warning("function '%s' is not callable", callback.toString().data());
     return false;
   }
 
-  auto udf = std::make_shared<UDF>();
+  auto udf = req::make_unique<UDF>();
 
   udf->func = callback;
   udf->argc = argcount;
   udf->name = name.toCppString();
 
-  auto stat = sqlite3_create_function(m_db, udf->name.c_str(), argcount,
-                                      SQLITE_UTF8, udf.get(),
-                                      php_sqlite3_callback_func,
-                                      nullptr, nullptr);
+  auto stat = sqlite3_create_function(
+    conn()->m_db,
+    udf->name.c_str(),
+    argcount,
+    SQLITE_UTF8,
+    static_cast<SQLite3::UserDefinedFunc*>(udf.get()),
+    php_sqlite3_callback_func,
+    nullptr,
+    nullptr
+  );
+
   if (stat != SQLITE_OK) {
     return false;
   }
-  m_udfs.push_back(udf);
+  m_udfs.emplace_back(std::move(udf));
 
   return true;
 }
 
-void PDOSqliteConnection::clearFunctions() {
-  for (auto& udf : m_udfs) {
-    sqlite3_create_function(m_db, udf->name.data(), 0, SQLITE_UTF8,
-                            nullptr, nullptr, nullptr, nullptr);
-  }
-  m_udfs.clear();
-}
-
-template<class F>
-void PDOSqliteConnection::scan(F& mark) const {
-  for (auto udf : m_udfs) udf->scan(mark);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void PDOSqliteResource::sweep() {
-  for (auto& udf : conn()->m_udfs) {
+  for (auto& udf : m_udfs) {
     udf->func.releaseForSweep();
     udf->step.releaseForSweep();
     udf->fini.releaseForSweep();
   }
-  conn()->clearFunctions();
+
+  for (auto const& udf : m_udfs) {
+    sqlite3_create_function(conn()->m_db, udf->name.data(), 0, SQLITE_UTF8,
+                            nullptr, nullptr, nullptr, nullptr);
+  }
+  m_udfs.clear();
+
   PDOResource::sweep();
 }
 
 void PDOSqliteResource::vscan(IMarker& mark) const {
   PDOResource::vscan(mark);
-  conn()->scan(mark);
+  for (auto& udf : m_udfs) udf->scan(mark);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

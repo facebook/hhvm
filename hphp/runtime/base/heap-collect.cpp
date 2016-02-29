@@ -50,7 +50,7 @@ struct Marker {
   void sweep();
 
   // scanners can tell us where the pointers are seated.
-  void where(const char* area) {}
+  void where(RootKind) {}
 
   // mark exact pointers
   void operator()(const StringData*);

@@ -44,8 +44,9 @@ class ClassForSecondCapture { }
 $echobuf = array();
 function echo_buffer($str) {
   global $echobuf;
-  $str = str_replace('cpp-stack', 'onsome-stack', $str);
-  $str = str_replace('php-stack', 'onsome-stack', $str);
+  $str = str_replace('CppStack', 'onsome-stack', $str);
+  $str = str_replace('PhpStack', 'onsome-stack', $str);
+  $str = str_replace('RdsLocal', 'rds-local', $str);
   $echobuf[] = $str;
 }
 function echo_flush() {

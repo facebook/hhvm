@@ -18,13 +18,34 @@
 #define incl_HPHP_HEAP_GRAPH_H_
 
 #include <vector>
+#include <cstdint>
 
 namespace HPHP {
 
 struct Header;
 
+// some labels for different kinds of root pointers
+enum class RootKind : uint8_t {
+  NotARoot,
+  RdsNormal,
+  RdsLocal,
+  RdsPersistent,
+  PhpStack,
+  ExecutionContext,
+  ThreadInfo,
+  CppStack,
+  CppTls,
+  ThreadLocalManager,
+  Extensions,
+  RootMaps,
+  SweepLists,
+  AsioSession,
+  GetServerNote,
+  EzcResources
+};
+
 struct HeapGraph {
-  enum PtrKind {
+  enum PtrKind : uint8_t {
     Counted, // exactly-marked, ref-counted, pointer
     Implicit, // exactly-marked but not counted
     Ambiguous, // any ambiguous pointer into a valid object
@@ -36,8 +57,8 @@ struct HeapGraph {
   struct Ptr {
     int from, to; // node ids. if root, from == -1
     int succ, pred; // from's next out-ptr, to's next in-ptr
-    PtrKind kind;
-    const char* seat;
+    PtrKind ptr_kind;
+    RootKind root_kind;
   };
   std::vector<Node> nodes;
   std::vector<Ptr> ptrs;
@@ -69,6 +90,9 @@ struct HeapCycles {
   using NodeList = std::vector<int>;
   std::vector<NodeList> live_cycles, leaked_cycles;
 };
+
+// descriptors indexable by RootKind
+extern const char* root_kind_names[];
 
 // Make a snapshot of the heap. It will contain pointers to objects
 // in the heap so their properties or contents can be inspected.

@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -208,14 +209,14 @@ template<class F> void scanRds(F& mark, rds::Header* rds) {
   auto markSection = [&](folly::Range<const char*> r) {
     mark(r.begin(), r.size());
   };
-  mark.where("rds-normal");
+  mark.where(RootKind::RdsNormal);
   markSection(rds::normalSection());
-  mark.where("rds-local");
+  mark.where(RootKind::RdsLocal);
   markSection(rds::localSection());
-  mark.where("rds-persistent");
+  mark.where(RootKind::RdsPersistent);
   markSection(rds::persistentSection());
   // php stack TODO #6509338 exactly scan the php stack.
-  mark.where("php-stack");
+  mark.where(RootKind::PhpStack);
   auto stack_end = (TypedValue*)rds->vmRegs.stack.getStackHighAddress();
   auto sp = rds->vmRegs.stack.top();
   mark(sp, (stack_end - sp) * sizeof(*sp));
@@ -276,21 +277,21 @@ template<class F> void scanRoots(F& mark) {
   }
   // ExecutionContext
   if (!g_context.isNull()) {
-    mark.where("g_context");
+    mark.where(RootKind::ExecutionContext);
     g_context->scan(mark);
   }
   // ThreadInfo
-  mark.where("ThreadInfo");
+  mark.where(RootKind::ThreadInfo);
   if (!ThreadInfo::s_threadInfo.isNull()) {
     TI().scan(mark);
   }
   // C++ stack
-  mark.where("cpp-stack");
+  mark.where(RootKind::CppStack);
   CALLEE_SAVED_BARRIER(); // ensure stack contains callee-saved registers
   auto sp = stack_top_ptr();
   mark(sp, s_stackLimit + s_stackSize - uintptr_t(sp));
   // C++ threadlocal data, but don't scan MemoryManager
-  mark.where("cpp-tdata");
+  mark.where(RootKind::CppTls);
   auto tdata = getCppTdata(); // tdata = { ptr, size }
   if (tdata.second > 0) {
     auto tm = (char*)tdata.first;
@@ -302,27 +303,27 @@ template<class F> void scanRoots(F& mark) {
     mark(mm_end, tm_end - mm_end);
   }
   // ThreadLocal nodes (but skip MemoryManager)
-  mark.where("ThreadLocalManager");
+  mark.where(RootKind::ThreadLocalManager);
   ThreadLocalManager::GetManager().scan(mark);
   // Extension thread locals
-  mark.where("extensions");
+  mark.where(RootKind::Extensions);
   ExtMarker<F> xm(mark);
   ExtensionRegistry::scanExtensions(xm);
   // Root maps
-  mark.where("rootmaps");
+  mark.where(RootKind::RootMaps);
   MM().scanRootMaps(mark);
   // treat sweep lists as roots until we are ready to test what happens
   // when we start calling various sweep() functions early.
-  mark.where("sweeplists");
+  mark.where(RootKind::SweepLists);
   MM().scanSweepLists(mark);
   // these have rogue thread_local stuff
   if (auto asio = AsioSession::Get()) {
-    mark.where("AsioSession");
+    mark.where(RootKind::AsioSession);
     asio->scan(mark);
   }
-  mark.where("get_server_note");
+  mark.where(RootKind::GetServerNote);
   get_server_note()->scan(mark);
-  mark.where("ezc resources");
+  mark.where(RootKind::EzcResources);
   scan_ezc_resources(mark);
 }
 

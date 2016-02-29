@@ -29,6 +29,25 @@
 
 namespace HPHP {
 
+const char* root_kind_names[] = {
+  "NotARoot",
+  "RdsNormal",
+  "RdsLocal",
+  "RdsPersistent",
+  "PhpStack",
+  "ExecutionContext",
+  "ThreadInfo",
+  "CppStack",
+  "CppTls",
+  "ThreadLocalManager",
+  "Extensions",
+  "RootMaps",
+  "SweepLists",
+  "AsioSession",
+  "GetServerNote",
+  "EzcResources"
+};
+
 namespace {
 template<class F>
 struct PtrFilter: F {
@@ -170,10 +189,13 @@ void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
   from_node.succ = to_node.pred = e;
 }
 
-void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind kind, const char* seat) {
+void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
+             RootKind root_kind) {
   auto& to_node = g.nodes[to];
   auto e = g.ptrs.size();
-  g.ptrs.push_back(HeapGraph::Ptr{-1, to, -1, to_node.pred, kind, seat});
+  g.ptrs.push_back(
+    HeapGraph::Ptr{-1, to, -1, to_node.pred, ptr_kind, root_kind}
+  );
   to_node.pred = e;
   g.roots.push_back(e);
 }
@@ -190,7 +212,7 @@ struct ObjMarker {
       addPtr(g_, from_, blocks_.index(r), HeapGraph::Ambiguous);
     }
   }
-  void where(const char*) {}
+  void where(RootKind) {}
 
  private:
   void mark(const void* p, HeapGraph::PtrKind kind) {
@@ -207,30 +229,30 @@ struct ObjMarker {
 
 struct RootMarker {
   explicit RootMarker(HeapGraph& g, PtrMap& blocks)
-    : g_(g), blocks_(blocks)
+    : g_(g), blocks_(blocks), root_kind_(RootKind::NotARoot)
   {}
   void counted(const void* p) { mark(p, HeapGraph::Counted); }
   void implicit(const void* p) { mark(p, HeapGraph::Implicit); }
   void ambig(const void* p) {
     if (auto r = blocks_.region(p)) {
-      addRoot(g_, blocks_.index(r), HeapGraph::Ambiguous, seat_);
+      addRoot(g_, blocks_.index(r), HeapGraph::Ambiguous, root_kind_);
     }
   }
-  void where(const char* seat) {
-    seat_ = seat;
+  void where(RootKind k) {
+    root_kind_ = k;
   }
 
  private:
   void mark(const void* p, HeapGraph::PtrKind kind) {
     assert(blocks_.header(p));
     auto r = blocks_.region(p);
-    addRoot(g_, blocks_.index(r), kind, seat_);
+    addRoot(g_, blocks_.index(r), kind, root_kind_);
   }
 
  private:
   HeapGraph& g_;
   PtrMap& blocks_;
-  const char* seat_{nullptr};
+  RootKind root_kind_;
 };
 
 } // anon namespace

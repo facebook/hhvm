@@ -101,9 +101,9 @@ const char* ptrSym[] = {
 DEBUG_ONLY
 std::string describePtr(const HeapGraph& g, const HeapGraph::Ptr& ptr) {
   std::ostringstream out;
-  out << " " << ptrSym[(int)ptr.kind];
+  out << " " << ptrSym[(unsigned)ptr.ptr_kind];
   if (ptr.from != -1) out << describe(g, ptr.from);
-  else out << (ptr.seat ? ptr.seat : "?");
+  else out << root_kind_names[(unsigned)ptr.root_kind];
   return out.str();
 }
 
@@ -202,7 +202,7 @@ static void traceToRoot(const HeapGraph& g, int n, const std::string& ind) {
   g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {
     TRACE(1, "%s%s\n", indent.c_str(), describePtr(g, ptr).c_str());
     if (ptr.from == -1) return;
-    if (ptr.kind != HeapGraph::Counted) {
+    if (ptr.ptr_kind != HeapGraph::Counted) {
       TRACE(1, "%s   ## only tracing ref-counted references ##\n",
             indent.c_str());
     } else {
@@ -220,7 +220,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
     assert(count >= 0); // static things shouldn't be in the heap.
     unsigned num_counted{0}, num_implicit{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {
-      switch (ptr.kind) {
+      switch (ptr.ptr_kind) {
         case HeapGraph::Counted: num_counted++; break;
         case HeapGraph::Implicit: num_implicit++; break;
         case HeapGraph::Ambiguous: num_ambig++; break;

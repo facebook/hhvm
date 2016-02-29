@@ -4271,11 +4271,10 @@ OPTBLD_INLINE void iopThrow(IOP_ARGS) {
       !c1->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
     raise_error("Exceptions must implement the Throwable interface.");
   }
-
-  Object obj(c1->m_data.pobj);
-  vmStack().popC();
+  auto obj = Object::attach(c1->m_data.pobj);
+  vmStack().discard();
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(obj.get()));
-  throw obj;
+  throw_object_inl(std::move(obj));
 }
 
 OPTBLD_INLINE void iopAGetC(IOP_ARGS) {
@@ -7381,14 +7380,13 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
       SystemLib::throwBadMethodCallExceptionObject("Await on a non-WaitHandle");
     }
   }
-
+  if (LIKELY(wh->isFailed())) {
+    throw_object_inl(Object(wh->getException()));
+  }
   if (wh->isSucceeded()) {
     cellSet(wh->getResult(), *vmStack().topC());
     return nullptr;
-  } else if (UNLIKELY(wh->isFailed())) {
-    throw Object(wh->getException());
   }
-
   return suspendStack(pc);
 }
 

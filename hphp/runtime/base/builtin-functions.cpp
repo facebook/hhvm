@@ -616,9 +616,12 @@ create_object(const String& s, const Array& params, bool init /* = true */) {
   return Object::attach(g_context->createObject(s.get(), params, init));
 }
 
-ATTRIBUTE_NORETURN
 void throw_object(const Object& e) {
-  throw e;
+  throw_object_inl(e);
+}
+
+void throw_object(Object&& e) {
+  throw_object_inl(std::move(e));
 }
 
 /*

@@ -137,8 +137,18 @@ Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
 Object init_object(const String& s, const Array &params, ObjectData* o);
 
-ATTRIBUTE_NORETURN
-void throw_object(const Object& e);
+ATTRIBUTE_NORETURN void throw_object(const Object& e);
+ATTRIBUTE_NORETURN void throw_object(Object&& e);
+
+ATTRIBUTE_NORETURN ALWAYS_INLINE
+void throw_object_inl(const Object& e) {
+  throw e;
+}
+
+ATTRIBUTE_NORETURN ALWAYS_INLINE
+void throw_object_inl(Object&& e) {
+  throw e;
+}
 
 ATTRIBUTE_NORETURN inline
 void throw_object(const String& s, const Array& params, bool init = true) {

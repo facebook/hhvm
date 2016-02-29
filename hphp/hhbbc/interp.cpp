@@ -163,6 +163,10 @@ void in(ISS& env, const bc::NewArray& op) {
   push(env, op.arg1 == 0 ? aempty() : counted_aempty());
 }
 
+void in(ISS& env, const bc::NewDictArray& op) {
+  push(env, counted_aempty());
+}
+
 void in(ISS& env, const bc::NewMixedArray& op) {
   push(env, op.arg1 == 0 ? aempty() : counted_aempty());
 }

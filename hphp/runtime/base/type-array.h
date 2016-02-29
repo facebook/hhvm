@@ -71,6 +71,7 @@ public:
   }
 
   static Array Create(const Variant& key, const Variant& value);
+  static Array ConvertToDict(const Array& arr);
 
 public:
   Array() {}

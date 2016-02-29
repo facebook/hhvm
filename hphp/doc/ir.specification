@@ -1238,6 +1238,10 @@ To string conversions:
 
   Allocate a new array in mixed mode with the expected capacity S0.
 
+| NewDictArray, D(Arr), C(Int), PRc
+
+  Allocate a new array in dict mode with the expected capacity S0.
+
 | NewLikeArray, D(Arr), S(Arr) C(Int), PRc
 
   Allocate a new array in the same mode as S0 and with expected capacity S1,

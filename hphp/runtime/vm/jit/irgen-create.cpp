@@ -194,6 +194,10 @@ void emitNewMixedArray(IRGS& env, int32_t capacity) {
   }
 }
 
+void emitNewDictArray(IRGS& env, int32_t capacity) {
+  push(env, gen(env, NewDictArray, cns(env, capacity)));
+}
+
 void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);

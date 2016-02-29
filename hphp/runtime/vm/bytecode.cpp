@@ -3266,6 +3266,11 @@ OPTBLD_INLINE void iopNewMixedArray(IOP_ARGS) {
   }
 }
 
+OPTBLD_INLINE void iopNewDictArray(IOP_ARGS) {
+  auto capacity = decode_iva(pc);
+  vmStack().pushArrayNoRc(MixedArray::MakeReserveDict(capacity));
+}
+
 OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
   auto local = decode_la(pc);
   auto capacity = decode_iva(pc);

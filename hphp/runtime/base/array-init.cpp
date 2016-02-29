@@ -50,6 +50,35 @@ ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
   check_request_surprise_unlikely();
 }
 
+DictInit::DictInit(size_t n)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
+  m_data = MixedArray::MakeReserveDict(n);
+  assert(m_data->hasExactlyOneRef());
+}
+
+DictInit::DictInit(size_t n, CheckAllocation)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
+  if (n > std::numeric_limits<int>::max()) {
+    MM().forceOOM();
+    check_request_surprise_unlikely();
+  }
+  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+  m_data = MixedArray::MakeReserveDict(n);
+  assert(m_data->hasExactlyOneRef());
+  check_request_surprise_unlikely();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

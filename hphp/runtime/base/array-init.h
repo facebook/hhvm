@@ -297,6 +297,138 @@ private:
 #endif
 };
 
+struct DictInit {
+  /*
+   * For large array allocations, consider passing CheckAllocation, which will
+   * throw if the allocation would OOM the request.
+   */
+  explicit DictInit(size_t n);
+  DictInit(size_t n, CheckAllocation);
+
+  DictInit(DictInit&& other) noexcept
+    : m_data(other.m_data)
+#ifndef NDEBUG
+    , m_addCount(other.m_addCount)
+    , m_expectedCount(other.m_expectedCount)
+#endif
+  {
+    other.m_data = nullptr;
+#ifndef NDEBUG
+    other.m_expectedCount = 0;
+#endif
+  }
+
+  DictInit(const DictInit&) = delete;
+  DictInit& operator=(const DictInit&) = delete;
+
+  ~DictInit() {
+    // Use non-specialized release call so array instrumentation can track
+    // its destruction XXX rfc: keep this? what was it before?
+    assert(!m_data || m_data->hasExactlyOneRef());
+    if (m_data) m_data->release();
+  }
+
+  DictInit& append(const Variant& v) {
+    performOp([&]{ return MixedArray::Append(m_data, v, false); });
+    return *this;
+  }
+
+  DictInit& set(int64_t name, const Variant& v) {
+    performOp([&]{
+      return MixedArray::SetInt(m_data, name, v.asInitCellTmp(), false);
+    });
+    return *this;
+  }
+
+  // set(const char*) deprecated.  Use set(CStrRef) with a
+  // StaticString, if you have a literal, or String otherwise.
+  DictInit& set(const char*, const Variant& v) = delete;
+
+  DictInit& set(const String& name, const Variant& v) {
+    performOp([&]{
+      return MixedArray::SetStr(m_data, name.get(), v.asInitCellTmp(), false);
+    });
+    return *this;
+  }
+
+  DictInit& set(const Variant& name, const Variant& v) = delete;
+  DictInit& setValidKey(const Variant& name, const Variant& v) {
+    assert(name.isInteger() || name.isString());
+    performOp([&]{ return m_data->set(name, v, false); });
+    return *this;
+  }
+
+  template<class T>
+  DictInit& set(const T& name, const Variant& v) {
+    performOp([&]{ return m_data->set(name, v, false); });
+    return *this;
+  }
+
+  DictInit& add(int64_t name, const Variant& v) {
+    performOp([&]{
+      return MixedArray::AddInt(m_data, name, v.asInitCellTmp(), false);
+    });
+    return *this;
+  }
+
+  DictInit& add(const String& name, const Variant& v) {
+    assert(!name.isNull());
+    performOp([&]{
+      return MixedArray::AddStr(m_data, name.get(), v.asInitCellTmp(), false);
+    });
+    return *this;
+  }
+
+  DictInit& add(const Variant& name, const Variant& v) {
+    assert(name.isString() || name.isInteger());
+    performOp([&]{ return m_data->add(name, v, false); });
+    return *this;
+  }
+
+  template<typename T>
+  DictInit& add(const T &name, const Variant& v) {
+    performOp([&]{ return m_data->add(name, v, false); });
+    return *this;
+  }
+
+  Array toArray() {
+    assert(m_data->hasExactlyOneRef());
+    auto ptr = m_data;
+    m_data = nullptr;
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Array(ptr, Array::ArrayInitCtor::Tag);
+  }
+
+  Variant toVariant() {
+    assert(m_data->hasExactlyOneRef());
+    auto ptr = m_data;
+    m_data = nullptr;
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Variant(ptr, Variant::ArrayInitCtor{});
+  }
+
+private:
+  template<class Operation>
+  ALWAYS_INLINE void performOp(Operation oper) {
+    DEBUG_ONLY auto newp = oper();
+    // Array escalation must not happen during these reserved
+    // initializations.
+    assert(newp == m_data);
+    // You cannot add/set more times than you reserved with DictInit.
+    assert(++m_addCount <= m_expectedCount);
+  }
+
+private:
+  ArrayData* m_data;
+#ifndef NDEBUG
+  size_t m_addCount;
+  size_t m_expectedCount;
+#endif
+};
 //////////////////////////////////////////////////////////////////////
 
 /*

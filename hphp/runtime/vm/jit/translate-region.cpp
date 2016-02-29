@@ -264,8 +264,7 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
         irgen::prepareEntry(irgs);
         break;
       case Arch::ARM:
-        // Don't do this for ARM, because it can lead to interpOne on the
-        // first SrcKey in a translation, which isn't allowed.
+        irgen::prepareEntry(irgs);
         break;
       case Arch::PPC64:
         not_implemented();

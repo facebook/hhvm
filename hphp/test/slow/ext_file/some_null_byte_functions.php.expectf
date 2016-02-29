@@ -1,0 +1,18 @@
+
+Warning: readlink() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_file/some_null_byte_functions.php on line 5
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_file/some_null_byte_functions.php on line 6
+NULL
+
+Warning: rmdir() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_file/some_null_byte_functions.php on line 7
+bool(false)
+
+Warning: dir() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_file/some_null_byte_functions.php on line 8
+NULL
+
+Warning: opendir() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_file/some_null_byte_functions.php on line 9
+NULL
+
+Warning: tempnam() expects parameter 2 to be a valid path, string given in %s/test/slow/ext_file/some_null_byte_functions.php on line 10
+NULL

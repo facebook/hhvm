@@ -792,6 +792,8 @@ bool HHVM_FUNCTION(move_uploaded_file,
     return false;
   }
 
+  CHECK_PATH_FALSE(destination, 2);
+
   if (HHVM_FN(rename)(filename, destination)) {
     return true;
   }
@@ -1234,6 +1236,7 @@ Variant HHVM_FUNCTION(readlink_internal,
 
 Variant HHVM_FUNCTION(readlink,
                       const String& path) {
+  CHECK_PATH(path, 1);
   return HHVM_FN(readlink_internal)(path, true);
 }
 
@@ -1719,6 +1722,7 @@ bool HHVM_FUNCTION(fnmatch,
 Variant HHVM_FUNCTION(glob,
                       const String& pattern,
                       int flags /* = 0 */) {
+  CHECK_PATH(pattern, 1);
   glob_t globbuf;
   int cwd_skip = 0;
   memset(&globbuf, 0, sizeof(glob_t));
@@ -1807,6 +1811,7 @@ Variant HHVM_FUNCTION(tempnam,
                       const String& dir,
                       const String& prefix) {
   CHECK_PATH(dir, 1);
+  CHECK_PATH(prefix, 2);
   String tmpdir = dir, trailing_slash = "/";
   if (tmpdir.empty() || !HHVM_FN(is_dir)(tmpdir) ||
       !HHVM_FN(is_writable)(tmpdir)) {
@@ -1858,6 +1863,7 @@ bool HHVM_FUNCTION(mkdir,
 bool HHVM_FUNCTION(rmdir,
                    const String& dirname,
                    const Variant& context /* = null */) {
+  CHECK_PATH_FALSE(dirname, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   if (!w) return false;
   int options = 0;
@@ -1951,6 +1957,7 @@ bool StringAscending(const String& s1, const String& s2) {
 
 Variant HHVM_FUNCTION(dir,
                       const String& directory) {
+  CHECK_PATH(directory, 1);
   Variant dir = HHVM_FN(opendir)(directory);
   if (same(dir, false)) {
     return false;
@@ -1964,6 +1971,7 @@ Variant HHVM_FUNCTION(dir,
 Variant HHVM_FUNCTION(opendir,
                       const String& path,
                       const Variant& context /* = null */) {
+  CHECK_PATH(path, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
   if (!w) return false;
   auto p = w->opendir(path);

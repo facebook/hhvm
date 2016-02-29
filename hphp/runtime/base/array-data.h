@@ -58,7 +58,9 @@ struct ArrayData {
     kApcKind = 4,     // APCLocalArray
     kGlobalsKind = 5, // GlobalsArray
     kProxyKind = 6,   // ProxyArray
-    kNumKinds = 7     // insert new values before kNumKinds.
+    kDictKind = 7,    // MixedArray without implicit conversion of integer-like
+                      // string keys
+    kNumKinds = 8     // insert new values before kNumKinds.
   };
 
 protected:
@@ -120,6 +122,16 @@ public:
   }
 
   /*
+   * Should int-like string keys be implicitly converted to integers before they
+   * are inserted?
+   */
+  bool implicitConvertKeys() const {
+    return isDict();
+  }
+
+  bool convertKey(const StringData* key, int64_t& i) const;
+
+  /*
    * Return the capacity stored in the header. Not to be confused
    * with MixedArray::capacity
    */
@@ -165,6 +177,7 @@ public:
   bool isGlobalsArray() const { return kind() == kGlobalsKind; }
   bool isProxyArray() const { return kind() == kProxyKind; }
   bool isEmptyArray() const { return kind() == kEmptyKind; }
+  bool isDict() const { return kind() == kDictKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -362,6 +375,11 @@ public:
   ArrayData* prepend(const Variant& v, bool copy);
 
   /**
+   * Convert array to dictionary type
+   */
+  ArrayData* toDict();
+
+  /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
    */
   void renumber();
@@ -457,6 +475,7 @@ static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
 static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
+static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -541,6 +560,7 @@ struct ArrayFunctions {
   ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
+  ArrayData* (*toDict[NK])(ArrayData*);
 };
 
 extern const ArrayFunctions g_array_funcs;
@@ -549,6 +569,11 @@ ALWAYS_INLINE
 void decRefArr(ArrayData* arr) {
   arr->decRefAndRelease();
 }
+
+ATTRIBUTE_NORETURN void throwInvalidArrayKeyException(const TypedValue* key);
+ATTRIBUTE_NORETURN void throwOOBArrayKeyException(TypedValue key);
+ATTRIBUTE_NORETURN void throwOOBArrayKeyException(int64_t key);
+ATTRIBUTE_NORETURN void throwOOBArrayKeyException(const StringData* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

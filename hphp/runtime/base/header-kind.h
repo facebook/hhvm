@@ -23,7 +23,7 @@ namespace HPHP {
 
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
-  Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
+  Packed, Struct, Mixed, Empty, Apc, Globals, Proxy, Dict,
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
   Object, WaitHandle, ResumableObj, AwaitAllWH,
@@ -130,7 +130,7 @@ inline bool isObjectKind(HeaderKind k) {
 }
 
 inline bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Packed && k <= HeaderKind::Proxy;
+  return k >= HeaderKind::Packed && k <= HeaderKind::Dict;
 }
 
 enum class CollectionType : uint8_t { // Subset of possible HeaderKind values

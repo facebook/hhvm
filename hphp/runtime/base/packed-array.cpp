@@ -909,6 +909,11 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn,
   return ad;
 }
 
+ArrayData* PackedArray::ToDict(ArrayData* ad) {
+  auto mixed = ad->cowCheck() ? ToMixedCopy(ad) : ToMixed(ad);
+  return MixedArray::ToDictInPlace(mixed);
+}
+
 void PackedArray::OnSetEvalScalar(ArrayData* ad) {
   assert(checkInvariants(ad));
   auto ptr = packedData(ad);

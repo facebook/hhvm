@@ -325,6 +325,7 @@ Marker::operator()(const void* start, size_t len) {
       case HeaderKind::Packed:
       case HeaderKind::Struct:
       case HeaderKind::Mixed:
+      case HeaderKind::Dict:
       case HeaderKind::Empty:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
@@ -381,6 +382,7 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Proxy:
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
+      case HeaderKind::Dict:
       case HeaderKind::Struct:
       case HeaderKind::Empty:
       case HeaderKind::String:
@@ -450,6 +452,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
     case HeaderKind::Packed:
     case HeaderKind::Struct:
     case HeaderKind::Mixed:
+    case HeaderKind::Dict:
     case HeaderKind::Empty:
     case HeaderKind::Apc:
     case HeaderKind::Globals:
@@ -521,6 +524,7 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::Packed:
       case HeaderKind::Struct:
       case HeaderKind::Mixed:
+      case HeaderKind::Dict:
       case HeaderKind::Empty:
       case HeaderKind::Globals:
       case HeaderKind::Proxy:

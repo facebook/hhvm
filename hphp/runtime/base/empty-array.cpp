@@ -331,6 +331,10 @@ ArrayData* EmptyArray::Prepend(ArrayData*, const Variant& vin, bool) {
   return EmptyArray::MakePacked(cell).first;
 }
 
+ArrayData* EmptyArray::ToDict(ArrayData*) {
+  return MixedArray::MakeReserveDict(0);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {

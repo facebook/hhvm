@@ -125,6 +125,7 @@ retry:
                StructArray::asStructArray(ad));
 
     case ArrayData::kMixedKind:
+    case ArrayData::kDictKind:
       return c_AwaitAllWaitHandle::FromMixedArray(MixedArray::asMixed(ad));
 
     case ArrayData::kProxyKind:

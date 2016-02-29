@@ -124,6 +124,7 @@ struct EmptyArray {
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* ToDict(ArrayData*);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad) {

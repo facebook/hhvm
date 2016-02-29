@@ -63,21 +63,21 @@ ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
-  if (arr->empty()) return staticEmptyArray();
+  if (arr->empty() && !arr->isDict()) return staticEmptyArray();
   auto key = GetScalarArrayKey(arr);
   return GetScalarArray(arr, key);
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
                                      const ScalarArrayKey& key) {
-  if (arr->empty()) return staticEmptyArray();
+  if (arr->empty() && !arr->isDict()) return staticEmptyArray();
   assert(key == GetScalarArrayKey(arr));
 
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData* ad;
 
-    if (arr->isVectorData() && !arr->isPacked()) {
+    if (arr->isVectorData() && !arr->isPacked() && !arr->isDict()) {
       ad = PackedArray::ConvertStatic(arr);
     } else {
       ad = arr->copyStatic();
@@ -103,6 +103,16 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
   raise_fatal_error("Unimplemented ArrayData::ZAppend");
 }
 
+const StaticString s_failConvertToDict("Unsupported conversion to Dict array");
+
+static ArrayData* ToDictThrow(ArrayData*) {
+  SystemLib::throwExceptionObject(s_failConvertToDict);
+}
+
+static ArrayData* ToDictNoop(ArrayData* ad) {
+  return ad;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 #define DISPATCH(entry)                         \
@@ -112,7 +122,8 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
-    ProxyArray::entry                           \
+    ProxyArray::entry,                          \
+    MixedArray::entry /* Dict */                \
   },
 
 /*
@@ -287,6 +298,7 @@ const ArrayFunctions g_array_funcs = {
     APCLocalArray::LvalNew,
     GlobalsArray::LvalNew,
     ProxyArray::LvalNew,
+    MixedArray::LvalNew,
   },
 
   /*
@@ -613,6 +625,7 @@ const ArrayFunctions g_array_funcs = {
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ProxyArray::ZSetInt,
+    &MixedArray::ZSetInt,
   },
 
   {
@@ -623,6 +636,7 @@ const ArrayFunctions g_array_funcs = {
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ProxyArray::ZSetStr,
+    &MixedArray::ZSetStr,
   },
 
   {
@@ -633,6 +647,18 @@ const ArrayFunctions g_array_funcs = {
     &ZAppendThrow,
     &ZAppendThrow,
     &ProxyArray::ZAppend,
+    &ZAppendThrow,
+  },
+
+  {
+    PackedArray::ToDict,
+    StructArray::ToDict,
+    MixedArray::ToDict,
+    EmptyArray::ToDict,
+    ToDictThrow,
+    ToDictThrow,
+    ProxyArray::ToDict,
+    ToDictNoop,
   },
 };
 
@@ -853,7 +879,7 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,7> names = {{
+  std::array<const char*,8> names = {{
     "PackedKind",
     "StructKind",
     "MixedKind",
@@ -861,6 +887,7 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "ApcKind",
     "GlobalsKind",
     "ProxyKind",
+    "DictKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

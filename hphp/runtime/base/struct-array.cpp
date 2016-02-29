@@ -545,6 +545,12 @@ ArrayData* StructArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
   return MixedArray::Prepend(ToMixed(asStructArray(ad)), v, copy);
 }
 
+ArrayData* StructArray::ToDict(ArrayData* ad) {
+  auto a = asStructArray(ad);
+  auto mixed = ad->cowCheck() ? ToMixedCopy(a) : ToMixed(a);
+  return MixedArray::ToDictInPlace(mixed);
+}
+
 void StructArray::Renumber(ArrayData* ad) {
   // No integer keys so nothing to do.
 }

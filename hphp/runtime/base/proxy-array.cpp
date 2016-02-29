@@ -304,6 +304,12 @@ ArrayData* ProxyArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
   }
 }
 
+ArrayData* ProxyArray::ToDict(ArrayData* ad) {
+  auto r = innerArr(ad)->toDict();
+  reseatable(ad, r);
+  return ad;
+}
+
 void ProxyArray::Renumber(ArrayData* ad) {
   innerArr(ad)->renumber();
 }

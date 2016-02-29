@@ -100,6 +100,7 @@ struct StructArray : public ArrayData {
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* ToDict(ArrayData*);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);

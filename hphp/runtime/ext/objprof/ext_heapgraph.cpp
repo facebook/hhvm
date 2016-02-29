@@ -244,6 +244,7 @@ std::string getNodesConnectionName(
       // Known generalized cases that don't really need pointer kind
       case HeaderKind::Struct: // Not implemented yet
       case HeaderKind::Mixed:
+      case HeaderKind::Dict:
         return "ArrayKeyValue";
 
       // Obvious cases that do not need pointer type

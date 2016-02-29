@@ -135,12 +135,20 @@ public:
                         int64_t nextIntKey);
 
   /*
-   * Allocate a new, empty, request-local array in mixed mode, with
+   * Allocate a new, empty, request-local array in (mixed|dict) mode, with
    * enough space reserved for `capacity' members.
    *
    * The returned array is already incref'd.
    */
-  static ArrayData* MakeReserveMixed(uint32_t capacity);
+  static ArrayData* MakeReserveMixed(uint32_t size) {
+    return MakeReserveImpl(size, HeaderKind::Mixed);
+  }
+
+  static ArrayData* MakeReserveDict(uint32_t size) {
+    return MakeReserveImpl(size, HeaderKind::Dict);
+  }
+
+  static ArrayData* ConvertToDict(ArrayData* ad);
 
   /*
    * Allocate a new, empty, request-local array with the same mode as
@@ -257,6 +265,8 @@ public:
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* ToDict(ArrayData*);
+  static ArrayData* ToDictInPlace(ArrayData*);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
@@ -279,6 +289,7 @@ private:
   MixedArray* copyMixed() const;
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
+  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
 
 public:
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -377,9 +388,6 @@ private:
   static ArrayData* ArrayPlusEqGeneric(ArrayData*,
     MixedArray*, const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
-
-  // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
-  MixedArray* packedToMixed();
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);

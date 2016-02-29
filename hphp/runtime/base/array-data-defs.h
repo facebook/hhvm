@@ -21,6 +21,7 @@
 
 #include <algorithm>
 
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
@@ -40,6 +41,13 @@ inline StringData* getStringKey(const Cell* cell) {
   assert(isStringType(cell->m_type));
   return cell->m_data.pstr;
 }
+}
+
+inline bool ArrayData::convertKey(const StringData* key, int64_t& i) const {
+  if (key->isStrictlyInteger(i)) {
+    return implicitConvertKeys();
+  }
+  return false;
 }
 
 inline bool ArrayData::exists(const String& k) const {
@@ -338,6 +346,10 @@ inline ArrayData* ArrayData::prepend(const Variant& value, bool copy) {
   return g_array_funcs.prepend[kind()](this, value, copy);
 }
 
+inline ArrayData* ArrayData::toDict() {
+  return g_array_funcs.toDict[kind()](this);
+}
+
 inline void ArrayData::renumber() {
   return g_array_funcs.renumber[kind()](this);
 }
@@ -356,6 +368,94 @@ inline ArrayData* ArrayData::plusEq(const ArrayData* elms) {
 
 inline ArrayData* ArrayData::merge(const ArrayData* elms) {
   return g_array_funcs.merge[kind()](this, elms);
+}
+
+namespace {
+const char* describeKeyType(const TypedValue* tv) {
+  switch (tv->m_type) {
+  case KindOfUninit:
+  case KindOfNull:             return "null";
+  case KindOfBoolean:          return "bool";
+  case KindOfInt64:            return "int";
+  case KindOfDouble:           return "double";
+  case KindOfPersistentString:
+  case KindOfString:           return "string";
+  case KindOfPersistentArray:
+  case KindOfArray:            return "array";
+
+  case KindOfResource:
+    return tv->m_data.pres->data()->o_getClassName().c_str();
+
+  case KindOfObject:
+    return tv->m_data.pobj->getClassName().c_str();
+
+  case KindOfRef:
+    return describeKeyType(tv->m_data.pref->var()->asTypedValue());
+
+  case KindOfClass:
+    break;
+  }
+  not_reached();
+}
+
+std::string describeKeyValue(TypedValue tv) {
+  switch (tv.m_type) {
+  case KindOfPersistentString:
+  case KindOfString:
+    return folly::sformat("\"{}\"", tv.m_data.pstr->data());
+  case KindOfInt64:
+    return folly::to<std::string>(tv.m_data.num);
+  case KindOfRef:
+    return describeKeyValue(*tv.m_data.pref->var()->asTypedValue());
+  case KindOfUninit:
+  case KindOfNull:
+  case KindOfBoolean:
+  case KindOfDouble:
+  case KindOfPersistentArray:
+  case KindOfArray:
+  case KindOfResource:
+  case KindOfObject:
+  case KindOfClass:
+    return "<invalid key type>";
+  }
+  not_reached();
+}
+}
+
+inline void throwInvalidArrayKeyException(const TypedValue* key) {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    folly::sformat(
+      "Invalid array key: expected a key of type int or string, {} given",
+      describeKeyType(key)
+    )
+  );
+}
+
+inline void throwOOBArrayKeyException(TypedValue key) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat(
+      "Out of bounds array access: invalid index {}",
+      describeKeyValue(key)
+    )
+  );
+}
+
+inline void throwOOBArrayKeyException(int64_t key) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat(
+      "Out of bounds array access: invalid index {}",
+      folly::to<std::string>(key)
+    )
+  );
+}
+
+inline void throwOOBArrayKeyException(const StringData* key) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat(
+      "Out of bounds array access: invalid index \"{}\"",
+      key->data()
+    )
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

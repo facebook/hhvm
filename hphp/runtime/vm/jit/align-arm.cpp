@@ -48,7 +48,17 @@ void align(CodeBlock& cb, CGMeta* meta,
       break;
 
     case Alignment::SmashCall:
+      // Smashable call is 3 instructions plus inline 64-bit data, so it must
+      // be 8 byte aligned.
+      if (!cb.isFrontierAligned(8)) a.Nop();
+      break;
+
     case Alignment::SmashJcc:
+      // Smashable Jcc is 6 instructions plus inline 2 x 64-bit data, so it must
+      // be 8 byte aligned
+      if (!cb.isFrontierAligned(8)) a.Nop();
+      break;
+
     case Alignment::SmashJccAndJmp:
       // Other smashable control flow instructions are three instructions plus
       // inline 64-bit data, so it needs to be one instruction off from 8-byte

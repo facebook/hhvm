@@ -31,7 +31,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Array;
 struct VarNR;
 struct VariableSerializer;
 struct VariableUnserializer;
@@ -338,18 +337,20 @@ public:
   bool operator <= (const char* v) const = delete;
   bool operator >  (const char* v) const = delete;
   bool operator <  (const char* v) const = delete;
+
   bool operator == (const String& v) const;
   bool operator != (const String& v) const;
   bool operator >= (const String& v) const = delete;
   bool operator <= (const String& v) const = delete;
   bool operator >  (const String& v) const;
   bool operator <  (const String& v) const;
-  bool operator == (const Variant& v) const;
-  bool operator != (const Variant& v) const;
+
+  bool operator == (const Variant& v) const = delete;
+  bool operator != (const Variant& v) const = delete;
   bool operator >= (const Variant& v) const = delete;
   bool operator <= (const Variant& v) const = delete;
-  bool operator >  (const Variant& v) const;
-  bool operator <  (const Variant& v) const;
+  bool operator >  (const Variant& v) const = delete;
+  bool operator <  (const Variant& v) const = delete;
 
   /**
    * Type conversions
@@ -369,27 +370,30 @@ public:
   bool same (const char* v2) const = delete;
   bool same (const StringData *v2) const;
   bool same (const String& v2) const;
-  bool same (const Array& v2) const;
-  bool same (const Object& v2) const;
-  bool same (const Resource& v2) const;
+  bool same (const Array& v2) const = delete;
+  bool same (const Object& v2) const = delete;
+  bool same (const Resource& v2) const = delete;
+
   bool equal(const char* v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
-  bool equal(const Array& v2) const;
-  bool equal(const Object& v2) const;
-  bool equal(const Resource& v2) const;
+  bool equal(const Array& v2) const = delete;
+  bool equal(const Object& v2) const = delete;
+  bool equal(const Resource& v2) const = delete;
+
   bool less (const char* v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
-  bool less (const Array& v2) const;
-  bool less (const Object& v2) const;
-  bool less (const Resource& v2) const;
+  bool less (const Array& v2) const = delete;
+  bool less (const Object& v2) const = delete;
+  bool less (const Resource& v2) const = delete;
+
   bool more (const char* v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
-  bool more (const Array& v2) const;
-  bool more (const Object& v2) const;
-  bool more (const Resource& v2) const;
+  bool more (const Array& v2) const = delete;
+  bool more (const Object& v2) const = delete;
+  bool more (const Resource& v2) const = delete;
 
   int compare(const char* v2) const;
   int compare(const String& v2) const;
@@ -411,9 +415,10 @@ public:
     return rvalAtImpl(key ? key->toInt32() : 0);
   }
   String rvalAt(const String& key) const { return rvalAtImpl(key.toInt32());}
-  String rvalAt(const Array& key) const;
-  String rvalAt(const Object& key) const;
-  String rvalAt(const Variant& key) const;
+
+  String rvalAt(const Array& key) const = delete;
+  String rvalAt(const Object& key) const = delete;
+  String rvalAt(const Variant& key) const = delete;
 
   /**
    * Returns one character at specified position.

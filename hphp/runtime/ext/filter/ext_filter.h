@@ -25,7 +25,7 @@ namespace HPHP {
 
 Variant HHVM_FUNCTION(filter_list);
 Variant HHVM_FUNCTION(filter_id,
-                      const Variant& filtername);
+                      const String& filtername);
 Variant HHVM_FUNCTION(filter_var,
                       const Variant& variable,
                       int64_t filter = 516,

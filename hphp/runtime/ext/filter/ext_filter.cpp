@@ -16,9 +16,12 @@
 */
 
 #include "hphp/runtime/ext/filter/ext_filter.h"
+
 #include "hphp/runtime/ext/filter/logical_filters.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
+
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
@@ -414,12 +417,7 @@ Variant HHVM_FUNCTION(filter_list) {
 }
 
 Variant HHVM_FUNCTION(filter_id,
-                      const Variant& filtername) {
-  if (filtername.isArray()) {
-    raise_warning("Array to string conversion");
-    return init_null();
-  }
-
+                      const String& filtername) {
   size_t size = sizeof(filter_list) / sizeof(filter_list_entry);
   for (size_t i = 0; i < size; ++i) {
     if (filter_list[i].name == filtername) {

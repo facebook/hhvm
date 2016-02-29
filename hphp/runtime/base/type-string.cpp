@@ -223,18 +223,6 @@ int String::rfind(const String& s, int pos /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions: cannot inline these due to dependencies
 
-String String::rvalAt(const Array& key) const {
-  return rvalAtImpl(key.toInt32());
-}
-
-String String::rvalAt(const Object& key) const {
-  return rvalAtImpl(key.toInt32());
-}
-
-String String::rvalAt(const Variant& key) const {
-  return rvalAtImpl(key.toInt32());
-}
-
 char String::charAt(int pos) const {
   assert(pos >= 0 && pos <= size());
   const char *s = data();
@@ -377,35 +365,11 @@ bool String::same(const String& v2) const {
   return HPHP::same(get(), v2);
 }
 
-bool String::same(const Array& v2) const {
-  return HPHP::same(get(), v2);
-}
-
-bool String::same(const Object& v2) const {
-  return HPHP::same(get(), v2);
-}
-
-bool String::same(const Resource& v2) const {
-  return HPHP::same(get(), v2);
-}
-
 bool String::equal(const StringData *v2) const {
   return HPHP::equal(get(), v2);
 }
 
 bool String::equal(const String& v2) const {
-  return HPHP::equal(get(), v2);
-}
-
-bool String::equal(const Array& v2) const {
-  return HPHP::equal(get(), v2);
-}
-
-bool String::equal(const Object& v2) const {
-  return HPHP::equal(get(), v2);
-}
-
-bool String::equal(const Resource& v2) const {
   return HPHP::equal(get(), v2);
 }
 
@@ -417,35 +381,11 @@ bool String::less(const String& v2) const {
   return HPHP::less(get(), v2);
 }
 
-bool String::less(const Array& v2) const {
-  return HPHP::less(get(), v2);
-}
-
-bool String::less(const Object& v2) const {
-  return HPHP::less(get(), v2);
-}
-
-bool String::less(const Resource& v2) const {
-  return HPHP::less(get(), v2);
-}
-
 bool String::more(const StringData *v2) const {
   return HPHP::more(get(), v2);
 }
 
 bool String::more(const String& v2) const {
-  return HPHP::more(get(), v2);
-}
-
-bool String::more(const Array& v2) const {
-  return HPHP::more(get(), v2);
-}
-
-bool String::more(const Object& v2) const {
-  return HPHP::more(get(), v2);
-}
-
-bool String::more(const Resource& v2) const {
   return HPHP::more(get(), v2);
 }
 
@@ -481,22 +421,6 @@ bool String::operator>(const String& v) const {
 }
 
 bool String::operator<(const String& v) const {
-  return HPHP::less(get(), v);
-}
-
-bool String::operator==(const Variant& v) const {
-  return HPHP::equal(get(), v);
-}
-
-bool String::operator!=(const Variant& v) const {
-  return !HPHP::equal(get(), v);
-}
-
-bool String::operator>(const Variant& v) const {
-  return HPHP::more(get(), v);
-}
-
-bool String::operator<(const Variant& v) const {
   return HPHP::less(get(), v);
 }
 

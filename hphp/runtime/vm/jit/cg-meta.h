@@ -35,6 +35,13 @@ namespace HPHP { namespace jit {
  * collected during code generation.
  */
 struct CGMeta {
+  void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  bool empty() const;
+  void clear();
+
+  void setJmpTransID(TCA jmp, TransKind kind);
+
   std::vector<std::pair<TCA, Fixup>> fixups;
   std::vector<std::pair<CTCA, TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
@@ -46,23 +53,6 @@ struct CGMeta {
   GrowableVector<IncomingBranch> inProgressTailJumps;
   LiteralMap literals;
   Annotations annotations;
-
-  CodeBlock* mainCode{nullptr};
-  CodeBlock* coldCode{nullptr};
-  CodeBlock* frozenCode{nullptr};
-
-  void setBlocks(CodeBlock* main, CodeBlock* cold, CodeBlock* frozen) {
-    mainCode = main;
-    coldCode = cold;
-    frozenCode = frozen;
-  }
-
-  void setJmpTransID(TCA jmp, TransKind kind);
-
-  void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
-  void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
-  bool empty() const;
-  void clear();
 };
 
 }}

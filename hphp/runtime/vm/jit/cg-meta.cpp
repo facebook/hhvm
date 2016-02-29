@@ -38,8 +38,7 @@ void CGMeta::process(
   clear();
 }
 
-void
-CGMeta::process_only(
+void CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches) {
   for (auto const& pair : fixups) {
     assertx(mcg->code().isValidCodeAddress(pair.first));

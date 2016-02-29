@@ -39,11 +39,11 @@ namespace arm {
  * Number of instructions (each of which is four bytes) in the sequence, plus
  * the size of the smashable immediate.
  */
-constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
+constexpr size_t smashableMovqLen() { return 8 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 3 * 4 + 8; }
-constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
-constexpr size_t smashableJccLen()  { return 3 * 4 + 8; }
+constexpr size_t smashableCallLen() { return 8; }  // From return address
+constexpr size_t smashableJmpLen()  { return 8 + 8; }
+constexpr size_t smashableJccLen()  { return 24 + 16; }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);

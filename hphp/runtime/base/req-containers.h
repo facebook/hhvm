@@ -13,27 +13,29 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_MEMORY_HEAP_CONTAINERS_H_
-#define incl_HPHP_RUNTIME_BASE_MEMORY_HEAP_CONTAINERS_H_
+#ifndef incl_HPHP_RUNTIME_BASE_REQ_CONTAINERS_H_
+#define incl_HPHP_RUNTIME_BASE_REQ_CONTAINERS_H_
 
 #include <cstdlib>
 #include <deque>
 #include <functional>
+#include <limits>
+#include <list>
 #include <map>
 #include <memory>
 #include <queue>
+#include <set>
 #include <stack>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/container/flat_map.hpp>
-#include <limits>
-#include <list>
-#include <set>
-#include <utility>
 
-#include "hphp/runtime/base/memory-manager.h"
+#include <folly/Memory.h>
+
+#include "hphp/runtime/base/req-malloc.h"
 
 namespace HPHP { namespace req {
 

@@ -39,53 +39,6 @@ inline MemoryManager& MM() {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace req {
-
-template<class T, class... Args> T* make_raw(Args&&... args) {
-  auto const mem = req::malloc(sizeof(T));
-  try {
-    return new (mem) T(std::forward<Args>(args)...);
-  } catch (...) {
-    req::free(mem);
-    throw;
-  }
-}
-
-template<class T> void destroy_raw(T* t) {
-  t->~T();
-  req::free(t);
-}
-
-template<class T> T* make_raw_array(size_t count) {
-  T* ret = static_cast<T*>(req::malloc(count * sizeof(T)));
-  size_t i = 0;
-  try {
-    for (; i < count; ++i) {
-      new (&ret[i]) T();
-    }
-  } catch (...) {
-    size_t j = i;
-    while (j-- > 0) {
-      ret[j].~T();
-    }
-    req::free(ret);
-    throw;
-  }
-  return ret;
-}
-
-template<class T>
-void destroy_raw_array(T* t, size_t count) {
-  size_t i = count;
-  while (i-- > 0) {
-    t[i].~T();
-  }
-  req::free(t);
-}
-} // namespace req
-
-//////////////////////////////////////////////////////////////////////
-
 struct MemoryManager::MaskAlloc {
   explicit MaskAlloc(MemoryManager& mm) : m_mm(mm) {
     // capture all mallocs prior to construction

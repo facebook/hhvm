@@ -27,14 +27,16 @@
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/compilation-flags.h"
-#include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
+#include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
 
 // used for mmapping contiguous heap space
@@ -59,7 +61,7 @@ struct root_handle;
  * called MemoryManager.
  *
  * The object may be accessed with MM(), but higher-level apis are
- * also provided below.
+ * also provided.
  *
  * The MemoryManager serves the following funcitons in hhvm:
  *
@@ -74,126 +76,6 @@ struct root_handle;
  *     compiled with jemalloc.)
  */
 MemoryManager& MM();
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * req::malloc api for request-scoped memory
- *
- * This is the most generic entry point to the request local
- * allocator.  If you easily know the size of the allocation at free
- * time, it might be more efficient to use MM() apis directly.
- *
- * These functions behave like C's malloc/free, but get memory from
- * the current thread's MemoryManager instance.  At request-end, any
- * un-freed memory is explicitly freed (and in debug, garbage filled).
- * If any pointers to this memory survive beyond a request, they'll be
- * dangling pointers.
- *
- * These functions only guarantee 8-byte alignment for the returned
- * pointer.
- */
-
-namespace req {
-
-void* malloc(size_t nbytes);
-void* calloc(size_t count, size_t bytes);
-void* realloc(void* ptr, size_t nbytes);
-char* strndup(const char* str, size_t len);
-void  free(void* ptr);
-
-/*
- * request-heap (de)allocators for non-POD C++-style stuff. Runs constructors
- * and destructors.
- *
- * Unlike the normal operator delete, req::destroy_raw() requires ~T() must
- * be nothrow and that p is not null.
- */
-template<class T, class... Args> T* make_raw(Args&&...);
-template<class T> void destroy_raw(T* p);
-
-/*
- * Allocate an array of objects.  Similar to req::malloc, but with
- * support for constructors.
- *
- * Note that explicitly calling req::destroy_raw will run the destructors,
- * but if you let the allocator sweep it the destructors will not be
- * called.
- *
- * Unlike the normal operator delete, req::destroy_raw_array requires
- * ~T() must be nothrow.
- */
-template<class T> T* make_raw_array(size_t count);
-template<class T> void destroy_raw_array(T* t, size_t count);
-
-//////////////////////////////////////////////////////////////////////
-
-// STL-style allocator for the request-heap allocator.  (Unfortunately we
-// can't use allocator_traits yet.)
-//
-// You can also use req::Allocator as a model of folly's
-// SimpleAllocator where appropriate.
-//
-
-template <class T>
-struct Allocator {
-  typedef T              value_type;
-  typedef T*             pointer;
-  typedef const T*       const_pointer;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_type;
-
-  template <class U>
-  struct rebind {
-    typedef Allocator<U> other;
-  };
-
-  pointer address(reference value) {
-    return &value;
-  }
-  const_pointer address(const_reference value) const {
-    return &value;
-  }
-
-  Allocator() noexcept {}
-  Allocator(const Allocator&) noexcept {}
-  template<class U> Allocator(const Allocator<U>&) noexcept {}
-  ~Allocator() noexcept {}
-
-  size_type max_size() const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
-  }
-
-  pointer allocate(size_type num, const void* = 0) {
-    pointer ret = (pointer)req::malloc(num * sizeof(T));
-    return ret;
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  void deallocate(pointer p, size_type num) {
-    req::free((void*)p);
-  }
-
-  template<class U> bool operator==(const Allocator<U>&) const {
-    return true;
-  }
-
-  template<class U> bool operator!=(const Allocator<U>&) const {
-    return false;
-  }
-};
-
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -959,14 +841,7 @@ private:
   };
 
   template <typename T>
-  using RootMap =
-    std::unordered_map<
-      RootId,
-      req::ptr<T>,
-      std::hash<RootId>,
-      std::equal_to<RootId>,
-      req::Allocator<std::pair<const RootId,req::ptr<T>>>
-    >;
+  using RootMap = req::hash_map<RootId, req::ptr<T>>;
 
   /*
    * Request-local heap profiling context.

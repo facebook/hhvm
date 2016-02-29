@@ -288,6 +288,11 @@ class MacroAssembler : public Assembler {
     assert(!rd.IsZero());
     adr(rd, label);
   }
+  void Adrp(const Register& rd, Label* label) {
+    assert(allow_macro_instructions_);
+    assert(!rd.IsZero());
+    adrp(rd, label);
+  }
   void Asr(const Register& rd, const Register& rn, unsigned shift) {
     assert(allow_macro_instructions_);
     assert(!rd.IsZero());

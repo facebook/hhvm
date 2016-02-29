@@ -692,6 +692,12 @@ class Assembler {
   // Calculate the address of a PC offset.
   void adr(const Register& rd, int imm21);
 
+  // Calculate the page address of a label.
+  void adrp(const Register& rd, Label* label);
+
+  // Calculate the page address of a PC offset.
+  void adrp(const Register& rd, int imm21);
+
   // Data Processing instructions.
   // Add.
   void add(const Register& rd,
@@ -1095,6 +1101,12 @@ class Assembler {
   // Load literal to FP register.
   void ldr(const FPRegister& ft, double imm);
 
+  // Load exclusive register.
+  void ldxr(const Register& rt, const MemOperand& src);
+
+  // Store exclusive register.
+  void stxr(const Register& rs, const Register& rt, const MemOperand& dst);
+
   // Move instructions. The default shift of -1 indicates that the move
   // instruction will calculate an appropriate 16-bit immediate and left shift
   // that is equal to the 64-bit immediate argument. If an explicit left shift
@@ -1197,6 +1209,12 @@ class Assembler {
 
   // FP round to integer (nearest with ties to even).
   void frintn(const FPRegister& fd, const FPRegister& fn);
+
+  // FP round to integer (towards -Inf)
+  void frintm(const FPRegister& fd, const FPRegister& fn);
+
+  // FP round to integer (towards +Inf)
+  void frintp(const FPRegister& fd, const FPRegister& fn);
 
   // FP round to integer (towards zero).
   void frintz(const FPRegister& fd, const FPRegister& fn);
@@ -1311,6 +1329,11 @@ class Assembler {
   static Instr Rt2(CPURegister rt2) {
     assert(rt2.code() != kSPRegInternalCode);
     return rt2.code() << Rt2_offset;
+  }
+
+  static Instr Rs(CPURegister rs) {
+    assert(rs.code() != kSPRegInternalCode);
+    return rs.code() << Rs_offset;
   }
 
   // These encoding functions allow the stack pointer to be encoded, and

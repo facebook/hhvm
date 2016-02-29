@@ -45,7 +45,7 @@ inline StringData* getStringKey(const Cell* cell) {
 
 inline bool ArrayData::convertKey(const StringData* key, int64_t& i) const {
   if (key->isStrictlyInteger(i)) {
-    return implicitConvertKeys();
+    return useWeakKeys();
   }
   return false;
 }

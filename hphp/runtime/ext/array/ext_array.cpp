@@ -300,7 +300,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfString: {
       int64_t n = 0;
       StringData *sd = cell->m_data.pstr;
-      if (sd->isStrictlyInteger(n)) {
+      if (ad->convertKey(sd, n)) {
         return ad->exists(n);
       }
       return ad->exists(StrNR(sd));
@@ -2648,7 +2648,7 @@ Variant HHVM_FUNCTION(hphp_array_idx,
   if (!key.isNull()) {
     if (LIKELY(search.isArray())) {
       ArrayData *arr = search.getArrayData();
-      VarNR index = key.toKey();
+      VarNR index = key.toKey(arr->useWeakKeys());
       if (!index.isNull()) {
         const Variant& ret = arr->get(index, false);
         return (&ret != &null_variant) ? ret : def;

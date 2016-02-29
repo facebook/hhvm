@@ -470,42 +470,6 @@ Resource Variant::toResourceHelper() const {
   not_reached();
 }
 
-VarNR Variant::toKey() const {
-  if (isStringType(m_type)) {
-    int64_t n;
-    return m_data.pstr->isStrictlyInteger(n) ? VarNR(n) :
-                                               VarNR(m_data.pstr);
-  }
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return VarNR(staticEmptyString());
-
-    case KindOfBoolean:
-    case KindOfInt64:
-      return VarNR(m_data.num);
-
-    case KindOfDouble:
-    case KindOfResource:
-      return VarNR(toInt64());
-
-    case KindOfPersistentString:
-    case KindOfString:
-    case KindOfPersistentArray:
-    case KindOfArray:
-    case KindOfObject:
-      throw_bad_type_exception("Invalid type used as key");
-      return null_varNR;
-
-    case KindOfRef:
-      return m_data.pref->var()->toKey();
-
-    case KindOfClass:
-      break;
-  }
-  not_reached();
-}
-
 Variant& lvalBlackHole() {
   auto& bh = get_env_constants()->lvalProxy;
   bh = uninit_null();

@@ -167,8 +167,9 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
 
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
-  auto const result = !key->isStrictlyInteger(n) ? base->nvGet(key)
-                                                 : base->nvGet(n);
+  auto const result = !base->convertKey(key, n)
+    ? base->nvGet(key)
+    : base->nvGet(n);
   return result ? result : null_variant.asTypedValue();
 }
 
@@ -190,6 +191,9 @@ inline const TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
   if (UNLIKELY(result->m_type == KindOfUninit)) {
     result = init_null_variant.asTypedValue();
     if (warn) {
+      if (!base->useWeakKeys()) {
+        throwOOBArrayKeyException(key);
+      }
       auto scratch = initScratchKey(key);
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(&scratch).toString().data());
@@ -366,7 +370,10 @@ inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   auto* result = ElemDArrayPre<keyType>(baseArr, key);
   if (warn) {
     if (!defined) {
-      TypedValue scratchKey = initScratchKey(key);
+      if (!baseArr.useWeakKeys()) {
+        throwOOBArrayKeyException(key);
+      }
+      auto scratchKey = initScratchKey(key);
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(&scratchKey).toString().data());
     }
@@ -876,8 +883,9 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   Cell* value,
                                   bool copy) {
   int64_t n;
-  return key->isStrictlyInteger(n) ? a->set(n, cellAsCVarRef(*value), copy) :
-         a->set(StrNR(key), cellAsCVarRef(*value), copy);
+  return a->convertKey(key, n)
+    ? a->set(n, cellAsCVarRef(*value), copy)
+    : a->set(StrNR(key), cellAsCVarRef(*value), copy);
 }
 
 template<bool setResult>
@@ -885,14 +893,17 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   TypedValue key,
                                   Cell* value,
                                   bool copy) {
-  if (isNullType(key.m_type)) {
-    return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);
-  }
   if (isStringType(key.m_type)) {
     return SetElemArrayPre<setResult>(a, key.m_data.pstr, value, copy);
   }
   if (key.m_type == KindOfInt64) {
     return SetElemArrayPre<setResult>(a, key.m_data.num, value, copy);
+  }
+  if (!a->useWeakKeys()) {
+    throwInvalidArrayKeyException(&key);
+  }
+  if (isNullType(key.m_type)) {
+    return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);
   }
   if (!isArrayType(key.m_type) && key.m_type != KindOfObject) {
     return SetElemArrayPre<setResult>(a, tvAsCVarRef(&key).toInt64(),
@@ -1472,8 +1483,9 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key,
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
                                     bool copy) {
   int64_t n;
-  return !key->isStrictlyInteger(n) ? a->remove(StrNR(key), copy) :
-         a->remove(n, copy);
+  return !a->convertKey(key, n)
+    ? a->remove(StrNR(key), copy)
+    : a->remove(n, copy);
 }
 
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
@@ -1484,7 +1496,7 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
   if (key.m_type == KindOfInt64) {
     return UnsetElemArrayPre(a, key.m_data.num, copy);
   }
-  VarNR varKey = tvAsCVarRef(&key).toKey();
+  VarNR varKey = tvAsCVarRef(&key).toKey(a->useWeakKeys());
   if (varKey.isNull()) {
     return a;
   }

@@ -125,8 +125,8 @@ public:
    * Should int-like string keys be implicitly converted to integers before they
    * are inserted?
    */
-  bool implicitConvertKeys() const {
-    return isDict();
+  bool useWeakKeys() const {
+    return !isDict();
   }
 
   bool convertKey(const StringData* key, int64_t& i) const;

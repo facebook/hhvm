@@ -136,7 +136,7 @@ struct ArrayInit {
    * yourself.
    */
   ArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
-    VarNR k(name.toKey());
+    VarNR k(name.toKey(true /* convert */));
     if (UNLIKELY(k.isNull())) return *this;
     performOp([&]{ return m_data->set(k, v, false); });
     return *this;
@@ -176,7 +176,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else {
-      VarNR k(name.toKey());
+      VarNR k(name.toKey(true /* convert */));
       if (!k.isNull()) {
         performOp([&]{ return m_data->add(k, v, false); });
       }
@@ -189,7 +189,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else {
-      VarNR k(Variant(name).toKey());
+      VarNR k(Variant(name).toKey(true /* convert */));
       if (!k.isNull()) {
         performOp([&]{ return m_data->add(k, v, false); });
       }
@@ -223,7 +223,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
-      Variant key(name.toKey());
+      Variant key(name.toKey(true /* convert */));
       if (!key.isNull()) {
         performOp([&]{ return m_data->setRef(key, v, false); });
       }
@@ -238,7 +238,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
-      VarNR key(Variant(name).toKey());
+      VarNR key(Variant(name).toKey(true /* convert */));
       if (!key.isNull()) {
         performOp([&]{ return m_data->setRef(key, v, false); });
       }
@@ -340,8 +340,10 @@ struct DictInit {
     return *this;
   }
 
-  // set(const char*) deprecated.  Use set(CStrRef) with a
-  // StaticString, if you have a literal, or String otherwise.
+  /*
+   * set(const char*) deprecated.  Use set(CStrRef) with a
+   * StaticString, if you have a literal, or String otherwise.
+   */
   DictInit& set(const char*, const Variant& v) = delete;
 
   DictInit& set(const String& name, const Variant& v) {

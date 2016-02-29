@@ -6613,15 +6613,19 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
           if (length<byte_count-1) {
             /* When there are any characters after the first NUL */
             PHP_STRDUP(ImageInfo->CopyrightPhotographer, value_ptr);
-            PHP_STRDUP(ImageInfo->CopyrightEditor, value_ptr+length+1);
+            PHP_STRNDUP(
+              ImageInfo->CopyrightEditor,
+              value_ptr + length + 1,
+              byte_count - length - 1
+            );
             if (ImageInfo->Copyright) IM_FREE(ImageInfo->Copyright);
             php_vspprintf(&ImageInfo->Copyright, 0, "%s, %s",
-                          value_ptr, value_ptr+length+1);
+                          value_ptr, ImageInfo->CopyrightEditor);
             /* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
             /* but we are not supposed to change this                   */
             /* keep in mind that image_info does not store editor value */
           } else {
-            PHP_STRDUP(ImageInfo->Copyright, value_ptr);
+            PHP_STRNDUP(ImageInfo->Copyright, value_ptr, byte_count);
           }
         }
         break;
@@ -6737,10 +6741,10 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         break;
 
       case TAG_MAKE:
-        PHP_STRDUP(ImageInfo->make, value_ptr);
+        PHP_STRNDUP(ImageInfo->make, value_ptr, byte_count);
         break;
       case TAG_MODEL:
-        PHP_STRDUP(ImageInfo->model, value_ptr);
+        PHP_STRNDUP(ImageInfo->model, value_ptr, byte_count);
         break;
 
       case TAG_MAKER_NOTE:

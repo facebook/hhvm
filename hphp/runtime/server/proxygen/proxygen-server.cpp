@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/compatibility.h"
+#include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace HPHP {
 
@@ -152,6 +153,15 @@ ProxygenServer::ProxygenServer(
   m_httpConfig.transactionIdleTimeout = timeout;
   m_httpsConfig.connectionIdleTimeout = timeout;
   m_httpsConfig.transactionIdleTimeout = timeout;
+
+  if (RuntimeOption::ServerEnableH2C) {
+    m_httpConfig.allowedPlaintextUpgradeProtocols = {
+      proxygen::http2::kProtocolCleartextString };
+    // Set flow control (for uploads) to 1MB.  We could also make this
+    // configurable if needed
+    m_httpConfig.initialReceiveWindow = 1 << 20;
+    m_httpConfig.receiveSessionWindowSize = 1 << 20;
+  }
 
   if (!options.m_takeoverFilename.empty()) {
     m_takeover_agent.reset(new TakeoverAgent(options.m_takeoverFilename));

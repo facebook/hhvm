@@ -173,6 +173,7 @@ bool RuntimeOption::ServerKillOnSIGTERM = false;
 int RuntimeOption::ServerPreShutdownWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
+bool RuntimeOption::ServerEnableH2C = false;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;
 std::string RuntimeOption::ForceCompressionURL;
@@ -1281,6 +1282,7 @@ void RuntimeOption::Load(
     Config::Bind(ServerShutdownListenWait, ini, config,
                  "Server.ShutdownListenWait", 0);
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
+    Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");
     Config::Bind(GzipCompressionLevel, ini, config,
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,

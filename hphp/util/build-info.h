@@ -13,18 +13,39 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_SCHEMA_H_
-#define incl_HPHP_REPO_SCHEMA_H_
+
+#ifndef incl_HPHP_BUILD_INFO_H_
+#define incl_HPHP_BUILD_INFO_H_
+
+#include <folly/Range.h>
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+/*
+ * Version identifier for the hhbc repo schema.  Normally this is determined at
+ * build-time, but it can be overridden at run-time.
+ */
+folly::StringPiece repoSchemaId();
 
-// Version identifier for the hhbc repo.  Non-const, for runtime
-// overrides via HHVM_RUNTIME_REPO_SCHEMA.
-extern const char* kRepoSchemaId;
+/*
+ * Unique identifier for an hhvm binary, determined at build-time.  Normally
+ * this is a formatted version control hash, but it can fall back to system time
+ * in some cases.
+ */
+folly::StringPiece compilerId();
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Initializes the repo schema id and the compiler id from their special
+ * sections in the hhvm binary.
+ */
+void readBuildInfo();
+
+////////////////////////////////////////////////////////////////////////////////
+
+/* Overrides the repo schema id. */
+void overrideRepoSchemaId(folly::StringPiece);
 
 }
 

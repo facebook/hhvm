@@ -45,7 +45,7 @@ function(HHVM_SYSTEMLIB EXTNAME)
   foreach (SLIB ${ARGN})
     embed_systemlib_byname(${EXTNAME} ${SLIB})
   endforeach()
-  embed_systemlibs(${EXTNAME} "${EXTNAME}.so")
+  embed_sections(${EXTNAME} "${EXTNAME}.so")
 endfunction()
 
 function(HHVM_DEFINE EXTNAME)

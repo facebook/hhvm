@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/logger.h"
 
 #include <folly/Singleton.h>
@@ -81,6 +82,9 @@ void ProcessInit() {
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
   Option::WholeProgram = false;
+
+  // Set our repo schema and compiler IDs.
+  readBuildInfo();
 
   rds::requestInit();
   std::string hhas;

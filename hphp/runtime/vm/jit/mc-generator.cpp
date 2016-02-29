@@ -54,7 +54,7 @@
 #include "hphp/util/meta.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/service-data.h"
@@ -2131,7 +2131,7 @@ bool MCGenerator::dumpTCData() {
                 "acold.frontier   = %p\n"
                 "afrozen.base     = %p\n"
                 "afrozen.frontier = %p\n\n",
-                kRepoSchemaId,
+                repoSchemaId(),
                 m_code.hot().base(), m_code.hot().frontier(),
                 m_code.main().base(), m_code.main().frontier(),
                 m_code.prof().base(), m_code.prof().frontier(),

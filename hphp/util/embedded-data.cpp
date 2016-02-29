@@ -20,12 +20,15 @@
 
 #include <folly/ScopeGuard.h>
 
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <cstdio>
+#include <cstring>
 #include <fcntl.h>
-#include <string.h>
 #include <unistd.h>
+
+#include <fstream>
+#include <memory>
 
 #ifdef __APPLE__
 #include <mach-o/getsect.h>
@@ -121,6 +124,19 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   }
 #endif // __APPLE__
   return false;
+}
+
+std::string read_embedded_data(const embedded_data& desc) {
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+  return std::string((const char*)LockResource(desc.m_handle), desc.m_len);
+#else
+  std::ifstream ifs(desc.m_filename);
+  if (!ifs.good()) return "";
+  ifs.seekg(desc.m_start, std::ios::beg);
+  std::unique_ptr<char[]> data(new char[desc.m_len]);
+  ifs.read(data.get(), desc.m_len);
+  return std::string(data.get(), desc.m_len);
+#endif
 }
 
 }

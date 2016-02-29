@@ -17,7 +17,7 @@
 
 #include "hphp/tools/tc-print/tc-print.h"
 #include "hphp/tools/tc-print/offline-x86-code.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 #include "hphp/runtime/vm/repo.h"
 
 using std::string;

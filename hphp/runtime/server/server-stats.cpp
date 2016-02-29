@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/server/server-stats.h"
 
 #include <set>
@@ -36,6 +37,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/process.h"
@@ -567,7 +569,7 @@ void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
   w->writeEntry("id", (int64_t)Process::GetProcessId());
   w->writeEntry("build", RuntimeOption::BuildId);
 
-  w->writeEntry("compiler", kCompilerId);
+  w->writeEntry("compiler", compilerId().begin());
 
 #ifdef DEBUG
   w->writeEntry("debug", "yes");

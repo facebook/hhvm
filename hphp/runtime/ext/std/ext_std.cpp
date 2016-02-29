@@ -2,7 +2,7 @@
 
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/version.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -14,9 +14,7 @@ const StaticString
   s_HHVM_VERSION_string(HHVM_VERSION),
   s_HHVM_DEBUG("HHVM_DEBUG"),
   s_HHVM_COMPILER_ID("HHVM_COMPILER_ID"),
-  s_HHVM_COMPILER_ID_string(kCompilerId),
-  s_HHVM_REPO_SCHEMA("HHVM_REPO_SCHEMA"),
-  s_HHVM_REPO_SCHEMA_string(kRepoSchemaId);
+  s_HHVM_REPO_SCHEMA("HHVM_REPO_SCHEMA");
 
 void StandardExtension::initStandard() {
   // define('HHVM_VERSION_ID', XXYYZZ);
@@ -45,12 +43,12 @@ void StandardExtension::initStandard() {
 
   Native::registerConstant<KindOfPersistentString>(
     s_HHVM_COMPILER_ID.get(),
-    s_HHVM_COMPILER_ID_string.get()
+    makeStaticString(compilerId())
   );
 
   Native::registerConstant<KindOfPersistentString>(
     s_HHVM_REPO_SCHEMA.get(),
-    s_HHVM_REPO_SCHEMA_string.get()
+    makeStaticString(repoSchemaId())
   );
 }
 

@@ -39,7 +39,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/system/systemlib.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 
 #include "hphp/hhvm/process-init.h"
 
@@ -355,18 +355,18 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     cout << "HipHop Repo Compiler";
     cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
-    cout << "Compiler: " << kCompilerId << "\n";
-    cout << "Repo schema: " << kRepoSchemaId << "\n";
+    cout << "Compiler: " << compilerId() << "\n";
+    cout << "Repo schema: " << repoSchemaId() << "\n";
     return 1;
   }
 
   if (vm.count("compiler-id")) {
-    cout << kCompilerId << "\n";
+    cout << compilerId() << "\n";
     return 1;
   }
 
   if (vm.count("repo-schema")) {
-    cout << kRepoSchemaId << "\n";
+    cout << repoSchemaId() << "\n";
     return 1;
   }
 

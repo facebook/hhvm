@@ -24,9 +24,5 @@ const char* getHphpCompilerVersion() {
   return HHVM_VERSION;
 }
 
-const char* getHphpCompilerId() {
-  return kCompilerId;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

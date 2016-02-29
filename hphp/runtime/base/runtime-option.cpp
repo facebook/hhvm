@@ -29,6 +29,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
@@ -1783,7 +1784,7 @@ void RuntimeOption::Load(
                    "hphp.compiler_id",
                    IniSetting::SetAndGet<std::string>(
                      [](const std::string& value) { return false; },
-                     []() { return getHphpCompilerId(); }
+                     []() { return compilerId().begin(); }
                    ));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_version",

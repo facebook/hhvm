@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
@@ -85,7 +86,7 @@ static void bt_handler(int sig) {
   int debuggerCount = RuntimeOption::EnableDebugger ?
     Eval::Debugger::CountConnectedProxy() : 0;
 
-  st.log(strsignal(sig), fd, kCompilerId, debuggerCount);
+  st.log(strsignal(sig), fd, compilerId().begin(), debuggerCount);
 
   // flush so if php crashes us we still have this output so far
   ::fsync(fd);

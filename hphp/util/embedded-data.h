@@ -17,21 +17,24 @@
 #ifndef EMBEDDED_REPO_H
 #define EMBEDDED_REPO_H
 
+#include <cstdint>
 #include <string>
 
 namespace HPHP {
 
 struct embedded_data {
-  std::string   m_filename;
-  uint64_t      m_start;
-  uint64_t      m_len;
+  std::string m_filename;
+  uint64_t m_start;
+  uint64_t m_len;
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  void*         m_handle;
+  void* m_handle;
 #endif
 };
 
-bool get_embedded_data(const char *section, embedded_data* desc,
-                       const std::string &filename = "");
+bool get_embedded_data(const char* section, embedded_data* desc,
+                       const std::string& filename = "");
+
+std::string read_embedded_data(const embedded_data&);
 
 }
 

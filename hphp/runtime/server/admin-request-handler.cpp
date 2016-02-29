@@ -51,7 +51,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/timer.h"
 
@@ -398,11 +398,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "compiler-id") {
-      transport->sendString(kCompilerId, 200);
+      transport->sendString(compilerId().begin(), 200);
       break;
     }
     if (cmd == "repo-schema") {
-      transport->sendString(kRepoSchemaId, 200);
+      transport->sendString(repoSchemaId().begin(), 200);
       break;
     }
     if (cmd == "translate") {

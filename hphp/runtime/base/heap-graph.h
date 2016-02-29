@@ -44,6 +44,22 @@ enum class RootKind : uint8_t {
   EzcResources
 };
 
+// Graph representation of the heap. The heap consists of some objects
+// (Nodes), and directed pointers (Ptrs) from Node to Node. For each
+// node, we maintain two singly linked lists:
+//
+// 1. a list of pointers from this node to other nodes (out-ptrs)
+// 2. a list of pointers from other nodes to this node (in-ptrs).
+//
+// Each pointer is a member of both lists, except root pointers which
+// are only a member of a node's in-ptr list.
+//
+// Additionally, each Ptr records it's from and to nodes. This allows
+// traversing the heap graph in either direction (roots toward leaves,
+// or vice-versa). However, each list is singly linked; the order of
+// pointers in the least is meaningless and we don't need to support
+// deleting pointers (or nodes).
+
 struct HeapGraph {
   enum PtrKind : uint8_t {
     Counted, // exactly-marked, ref-counted, pointer
@@ -52,11 +68,12 @@ struct HeapGraph {
   };
   struct Node {
     const Header* h;
-    int succ, pred; // first out-ptr and in-ptr, respectively
+    int first_out;
+    int first_in; // first out-ptr and in-ptr, respectively
   };
   struct Ptr {
     int from, to; // node ids. if root, from == -1
-    int succ, pred; // from's next out-ptr, to's next in-ptr
+    int next_out, next_in; // from's next out-ptr, to's next in-ptr
     PtrKind ptr_kind;
     RootKind root_kind;
   };
@@ -65,19 +82,25 @@ struct HeapGraph {
   std::vector<int> roots; // ptr ids. ptr.from = -1, ptr.to = object
 
   template<class F> void eachSuccNode(int n, F f) const {
-    eachSuccPtr(n, [&](int p) { f(ptrs[p].to); });
+    eachOutPtr(n, [&](int p) { f(ptrs[p].to); });
   }
 
-  template<class F> void eachSuccPtr(int n, F f) const {
-    for (int p = nodes[n].succ; p != -1; p = ptrs[p].succ) f(p);
+  template<class F> void eachOutPtr(int n, F f) const {
+    for (int p = nodes[n].first_out; p != -1; p = ptrs[p].next_out) {
+      f(p);
+    }
   }
 
-  template<class F> void eachPredPtr(int n, F f) const {
-    for (int p = nodes[n].pred; p != -1; p = ptrs[p].pred) f(p);
+  template<class F> void eachInPtr(int n, F f) const {
+    for (int p = nodes[n].first_in; p != -1; p = ptrs[p].next_in) {
+      f(p);
+    }
   }
 
   template<class F> void eachPred(int n, F f) const {
-    for (int p = nodes[n].pred; p != -1; p = ptrs[p].pred) f(ptrs[p]);
+    for (int p = nodes[n].first_in; p != -1; p = ptrs[p].next_in) {
+      f(ptrs[p]);
+    }
   }
 
   template<class F> void eachRoot(F f) const {

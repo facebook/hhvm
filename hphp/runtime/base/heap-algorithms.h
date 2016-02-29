@@ -185,7 +185,7 @@ void dfs_ptrs(
       marks.set(n);
       pre(n, ptr);
       work.push_back({Action::Finish, n});
-      g.eachSuccPtr(n, [&](int p) {
+      g.eachOutPtr(n, [&](int p) {
         work.push_back({Action::Explore, p});
       });
     }

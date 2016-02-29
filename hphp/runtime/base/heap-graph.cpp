@@ -184,9 +184,9 @@ void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
   auto& to_node = g.nodes[to];
   auto e = g.ptrs.size();
   g.ptrs.push_back(
-    HeapGraph::Ptr{from, to, from_node.succ, to_node.pred, kind}
+    HeapGraph::Ptr{from, to, from_node.first_out, to_node.first_in, kind}
   );
-  from_node.succ = to_node.pred = e;
+  from_node.first_out = to_node.first_in = e;
 }
 
 void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
@@ -194,9 +194,9 @@ void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
   auto& to_node = g.nodes[to];
   auto e = g.ptrs.size();
   g.ptrs.push_back(
-    HeapGraph::Ptr{-1, to, -1, to_node.pred, ptr_kind, root_kind}
+    HeapGraph::Ptr{-1, to, -1, to_node.first_in, ptr_kind, root_kind}
   );
-  to_node.pred = e;
+  to_node.first_in = e;
   g.roots.push_back(e);
 }
 

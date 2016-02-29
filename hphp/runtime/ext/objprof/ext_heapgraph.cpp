@@ -497,7 +497,7 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
   if (!hgptr) return empty_array();
   if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
   Array result;
-  hgptr->hg.eachSuccPtr(index, [&](int ptr) {
+  hgptr->hg.eachOutPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
   return result;
@@ -511,7 +511,7 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
   if (!hgptr) return empty_array();
   if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
   Array result;
-  hgptr->hg.eachPredPtr(index, [&](int ptr) {
+  hgptr->hg.eachInPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
   return result;

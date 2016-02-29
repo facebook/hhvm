@@ -38,7 +38,7 @@ inline bool ffs64(I64 input, I64 &out) {
     "r"(input):
     "cc"
   );
-#elif defined(__AARCH64EL__)
+#elif defined(__aarch64__)
   asm volatile (
     "rbit  %2, %2\n\t"  // reverse bits
     "clz   %1, %2\n\t"  // count leading zeros
@@ -66,7 +66,7 @@ inline bool fls64(I64 input, I64 &out) {
     "r"(input):
     "cc"
   );
-#elif defined(__AARCH64EL__)
+#elif defined(__aarch64__)
   asm volatile (
     "clz   %1, %2\n\t"      // count leading zeros
     "neg   %1, %1\n\t"

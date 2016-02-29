@@ -41,6 +41,12 @@ inline uint64_t cpuCycles() {
   return tb;
 #elif _MSC_VER
   return (uint64_t)__rdtsc();
+#elif __aarch64__
+  // FIXME: This returns the virtual timer which is not exactly
+  // the core cycles but has a different frequency.
+  uint64_t tb;
+  asm volatile("mrs %0, cntvct_el0" : "=r" (tb));
+  return tb;
 #else
   not_implemented();
 #endif
@@ -51,6 +57,8 @@ inline void cpuRelax() {
   asm volatile("pause");
 #elif __powerpc64__
   asm volatile("or 31,31,31");
+#elif __aarch64__
+  asm volatile("wfe");
 #endif
 }
 

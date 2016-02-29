@@ -140,7 +140,12 @@ AliasClass pointee(
       }
       if (key->hasConstVal(TStr)) {
         int64_t n;
-        if (key->strVal()->isStrictlyInteger(n)) return AElemI { base, n };
+        auto const arrTy = base->type();
+        auto const dictTy = Type::Array(ArrayData::kDictKind);
+        if (!(arrTy <= dictTy) && key->strVal()->isStrictlyInteger(n)) {
+          if (arrTy.maybe(dictTy)) return AElemAny;
+          return AElemI { base, n };
+        }
         return AElemS { base, key->strVal() };
       }
       return AElemAny;

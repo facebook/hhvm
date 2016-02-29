@@ -4156,10 +4156,11 @@ void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {
+  auto const arrTy = inst->src(0)->type();
   auto const keyTy = inst->src(1)->type();
   auto& v = vmain();
 
-  auto const keyInfo = checkStrictlyInteger(keyTy);
+  auto const keyInfo = checkStrictlyInteger(arrTy, keyTy);
   auto const target =
     keyInfo.checkForInt ? CallSpec::direct(ak_exist_string) :
     keyInfo.type == KeyType::Int ? CallSpec::array(&g_array_funcs.existsInt)

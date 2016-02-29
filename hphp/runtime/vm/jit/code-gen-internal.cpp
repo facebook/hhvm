@@ -25,8 +25,9 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayKeyInfo checkStrictlyInteger(Type key) {
+ArrayKeyInfo checkStrictlyInteger(Type arr, Type key) {
   auto ret = ArrayKeyInfo{};
+  assertx(arr <= TArr);
 
   if (key <= TInt) {
     ret.type = KeyType::Int;
@@ -35,12 +36,21 @@ ArrayKeyInfo checkStrictlyInteger(Type key) {
   assertx(key <= TStr);
   ret.type = KeyType::Str;
 
+  auto const dictType = Type::Array(ArrayData::kDictKind);
+  if (arr <= dictType) {
+    return ret;
+  }
+
   if (key.hasConstVal()) {
     int64_t i;
     if (key.strVal()->isStrictlyInteger(i)) {
-      ret.converted    = true;
-      ret.type         = KeyType::Int;
-      ret.convertedInt = i;
+      if (arr.maybe(dictType)) {
+        ret.checkForInt = true;
+      } else {
+        ret.converted    = true;
+        ret.type         = KeyType::Int;
+        ret.convertedInt = i;
+      }
     }
   } else {
     ret.checkForInt = true;

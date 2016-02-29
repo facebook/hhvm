@@ -117,7 +117,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // set will decRef any old value that may have been overwritten
   // if appropriate
   int64_t intkey;
-  ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
+  ArrayData* retval = UNLIKELY(ad->convertKey(key, intkey)) ?
                   ad->set(intkey, tvAsCVarRef(&value), copy) :
                   ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
@@ -511,7 +511,7 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
 ALWAYS_INLINE
 static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
-  if (key->isStrictlyInteger(n)) {
+  if (arr->convertKey(key, n)) {
     return arr->exists(n);
   }
   return arr->exists(key);
@@ -559,7 +559,7 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ?
+  return UNLIKELY(a->convertKey(key, i)) ?
          getDefaultIfNullCell(a->nvGet(i), def) :
          getDefaultIfNullCell(a->nvGet(key), def);
 }

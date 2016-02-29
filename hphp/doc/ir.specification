@@ -2314,13 +2314,13 @@ fields of that struct for holding intermediate values.
 
 | ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-| ElemArrayD, D(PtrToElemGen), S(PtrToGen) S(Int,Str), MElem|Er
+| ElemArrayD<T>, D(PtrToElemGen), S(PtrToGen) S(Int,Str), MElem|Er
 
-| ElemArrayU, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
+| ElemArrayU<T>, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
 
   Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
   ElemArrayW is for Warn member instrs, ElemArrayD is for Define member instrs,
-  and ElemArrayU is for Unset.
+  and ElemArrayU is for Unset. T is the type of the base array.
 
   ElemArrayD takes a PtrToGen for its base operand, but it expects it to be a
   PtrToArr or PtrToBoxedArr.

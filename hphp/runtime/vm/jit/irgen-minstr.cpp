@@ -1026,7 +1026,13 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
   if (base && base->isA(TArr) && key->type().subtypeOfAny(TInt, TStr)) {
     env.irb->constrainValue(base, DataTypeSpecific);
     if (define || unset) {
-      return gen(env, unset ? ElemArrayU : ElemArrayD, basePtr, key);
+      return gen(
+        env,
+        unset ? ElemArrayU : ElemArrayD,
+        base->type(),
+        basePtr,
+        key
+      );
     }
     return gen(env, warn ? ElemArrayW : ElemArray, base, key);
   }

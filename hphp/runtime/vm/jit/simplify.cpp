@@ -2139,7 +2139,7 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   assertx(idx->hasConstVal(TStr));
   auto const value = [&] {
     int64_t val;
-    if (idx->strVal()->isStrictlyInteger(val)) {
+    if (arr->arrVal()->convertKey(idx->strVal(), val)) {
       return arr->arrVal()->nvGet(val);
     }
     return arr->arrVal()->nvGet(idx->strVal());

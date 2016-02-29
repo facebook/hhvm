@@ -44,7 +44,7 @@ struct ArrayKeyInfo {
   bool converted{false};
 };
 
-ArrayKeyInfo checkStrictlyInteger(Type key);
+ArrayKeyInfo checkStrictlyInteger(Type arr, Type key);
 
 ///////////////////////////////////////////////////////////////////////////////
 

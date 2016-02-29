@@ -281,9 +281,10 @@ void CodeGenerator::cgElemDX(IRInstruction* i)    { cgElemImpl(i); }
 void CodeGenerator::cgElemUX(IRInstruction* i)    { cgElemImpl(i); }
 
 void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
+  auto const arr     = inst->src(0);
   auto const key     = inst->src(1);
   bool const warn    = inst->op() == ElemArrayW;
-  auto const keyInfo = checkStrictlyInteger(key->type());
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
@@ -310,7 +311,7 @@ void CodeGenerator::cgElemArrayW(IRInstruction* i) { cgElemArrayImpl(i); }
 
 void CodeGenerator::cgElemArrayD(IRInstruction* inst) {
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key->type());
+  auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type);
 
   auto args = argGroup(inst).ssa(0);
@@ -331,7 +332,7 @@ void CodeGenerator::cgElemArrayD(IRInstruction* inst) {
 
 void CodeGenerator::cgElemArrayU(IRInstruction* inst) {
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key->type());
+  auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type);
 
   auto args = argGroup(inst).ssa(0);
@@ -351,8 +352,9 @@ void CodeGenerator::cgElemArrayU(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgArrayGet(IRInstruction* inst) {
+  auto const arr         = inst->src(0);
   auto const key         = inst->src(1);
-  auto const keyInfo     = checkStrictlyInteger(key->type());
+  auto const keyInfo     = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ARRAYGET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt);
@@ -453,8 +455,9 @@ void CodeGenerator::cgVGetElem(IRInstruction* inst) {
 
 void CodeGenerator::cgArraySetImpl(IRInstruction* inst) {
   bool const setRef  = inst->op() == ArraySetRef;
+  auto const arr     = inst->src(0);
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key->type());
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ARRAYSET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
@@ -499,8 +502,9 @@ void CodeGenerator::cgSetElem(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgArrayIsset(IRInstruction* inst) {
+  auto const arr     = inst->src(0);
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key->type());
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ARRAY_ISSET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt);
@@ -556,8 +560,9 @@ void CodeGenerator::cgEmptyElem(IRInstruction* i) { cgIssetEmptyElemImpl(i); }
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgArrayIdx(IRInstruction* inst) {
+  auto const arr     = inst->src(0);
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key->type());
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
 
   auto const target = [&] () -> CallSpec {
     if (keyInfo.checkForInt) {

@@ -428,11 +428,11 @@ TypedValue* elemImpl(TypedValue* base,
   m(elemSWD,   KeyType::Str,   WarnDefine)       \
   m(elemSWDR,  KeyType::Str,   WarnDefineReffy)
 
-#define X(nm, keyType, attrs)                             \
-inline TypedValue* nm(TypedValue* base,                   \
-                      key_type<keyType> key,              \
+#define X(nm, keyType, attrs)                              \
+inline TypedValue* nm(TypedValue* base,                    \
+                      key_type<keyType> key,               \
                       TypedValue& tvRef) {                 \
-  return elemImpl<keyType, WDRU(attrs)>(base, key, tvRef);  \
+  return elemImpl<keyType, WDRU(attrs)>(base, key, tvRef); \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
@@ -441,7 +441,7 @@ ELEM_HELPER_TABLE(X)
 
 inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) :
+  return UNLIKELY(a->convertKey(key, i)) ? a->nvGet(i) :
          a->nvGet(key);
 }
 
@@ -472,7 +472,13 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
 template<KeyType keyType, bool checkForInt, bool warn>
 inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   auto const ret = checkForInt ? checkedGet(ad, key) : ad->nvGet(key);
-  return ret ? ret : elemArrayNotFound<warn>(key);
+  if (!ret) {
+    if (warn && !ad->useWeakKeys()) {
+      throwOOBArrayKeyException(key);
+    }
+    return elemArrayNotFound<warn>(key);
+  }
+  return ret;
 }
 
 #define ELEM_ARRAY_D_HELPER_TABLE(m) \
@@ -531,6 +537,9 @@ template<KeyType keyType, bool checkForInt>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
   if (ret) return *ret;
+  if (!a->useWeakKeys()) {
+    throwOOBArrayKeyException(key);
+  }
   return arrayGetNotFound(key);
 }
 
@@ -617,7 +626,7 @@ inline ArrayData* checkedSet(ArrayData* a,
                              Cell value,
                              bool copy) {
   int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ? uncheckedSet(a, i, value, copy) :
+  return UNLIKELY(a->convertKey(key, i)) ? uncheckedSet(a, i, value, copy) :
          uncheckedSet(a, key, value, copy);
 }
 

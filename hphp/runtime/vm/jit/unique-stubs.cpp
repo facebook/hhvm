@@ -137,24 +137,32 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitFunctionEnterHelper(cb, data, us);
+/*
+ * Set up any registers we want live going into an LLVM catch block.
+ *
+ * Return the set of live registers.
+ */
+RegSet syncForLLVMCatch(Vout& v) {
+  if (arch() != Arch::X64) return RegSet{};
+  return x64::syncForLLVMCatch(v);
 }
 
-TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitFreeLocalsHelpers(cb, data, us);
+///////////////////////////////////////////////////////////////////////////////
+
+TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
+  return ARCH_SWITCH_CALL(emitFunctionEnterHelper, cb, us);
 }
 
-TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitCallToExit(cb, data, us);
+TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
+  return ARCH_SWITCH_CALL(emitFreeLocalsHelpers, cb, us);
 }
 
-TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitEndCatchHelper(cb, data, us);
+TCA emitCallToExit(CodeBlock& cb) {
+  return ARCH_SWITCH_CALL(emitCallToExit, cb);
+}
+
+TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
+  return ARCH_SWITCH_CALL(emitEndCatchHelper, cb, us);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1387,4 +1387,7 @@ namespace __SystemLib {
   function array_map(mixed $callback,
                      mixed $arr1,
                      ...$argv): mixed;
+
+  <<__Native>>
+  function dict(array $arr): dict;
 }

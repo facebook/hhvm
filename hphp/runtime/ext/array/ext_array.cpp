@@ -2735,6 +2735,11 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
   return arReturn(ar, Array::MultiSort(data, true));
 }
 
+// __SystemLib\\dict
+Array HHVM_FUNCTION(__SystemLib_dict, const Array& arr) {
+  return Array::ConvertToDict(arr);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayExtension final : Extension {
@@ -2866,6 +2871,7 @@ struct ArrayExtension final : Extension {
     HHVM_FE(i18n_loc_get_error_code);
     HHVM_FE(hphp_array_idx);
     HHVM_FE(array_multisort);
+    HHVM_FALIAS(__SystemLib\\dict, __SystemLib_dict);
 
     loadSystemlib();
   }

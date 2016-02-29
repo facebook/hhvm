@@ -4239,6 +4239,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         makeStaticString(call->getClassScope()->getScopeName());
       e.String(name);
       return true;
+    } else if (call->isCallToFunction("dict") &&
+               (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
+      emitFuncCall(e, call, "__SystemLib\\dict", params);
+      return true;
     }
 #define TYPE_CONVERT_INSTR(what, What)                             \
     else if (call->isCallToFunction(#what"val") &&                 \

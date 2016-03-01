@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -230,6 +231,7 @@ void HHVM_METHOD(SQLite3, open,
 
   String fname;
   if (strncmp(filename.data(), ":memory:", 8) != 0) {
+    FileUtil::checkPathAndError(filename, "SQLite3::__construct", 1);
     fname = File::TranslatePath(filename);
   } else {
     fname = filename; // in-memory db
@@ -330,6 +332,10 @@ bool HHVM_METHOD(SQLite3, loadextension,
                  const String& extension) {
   auto *data = Native::data<SQLite3>(this_);
   data->validate();
+
+  if (!FileUtil::checkPathAndWarn(extension, "SQLite3::loadExtension", 1)) {
+    return false;
+  }
 
   String translated = File::TranslatePath(extension);
   if (translated.empty()) {

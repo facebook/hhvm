@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -595,6 +596,10 @@ static bool HHVM_METHOD(XSLTProcessor, setProfiling,
                         const String& filename) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
+  if (!FileUtil::checkPathAndWarn(filename, "XSLTProcessor::setProfiling", 1)) {
+    return false;
+  }
+
   if (filename.length() > 0) {
     String translated = File::TranslatePath(filename);
     Stream::Wrapper* w = Stream::getWrapperFromURI(translated);
@@ -632,6 +637,10 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
                            const Object& doc,
                            const String& uri) {
   auto data = Native::data<XSLTProcessorData>(this_);
+
+  if (!FileUtil::checkPathAndWarn(uri, "XSLTProcessor::transformToUri", 2)) {
+    return false;
+  }
 
   if (doc.instanceof(s_DOMDocument)) {
     auto domdoc = Native::data<DOMNode>(doc);

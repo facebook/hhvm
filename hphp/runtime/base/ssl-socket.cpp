@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/ssl-socket.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/string-util.h"
@@ -122,7 +123,13 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
     String cafile = m_context[s_cafile].toString();
     String capath = m_context[s_capath].toString();
 
-    if (!cafile.empty() || !capath.empty()) {
+    if (!FileUtil::isValidPath(cafile)) {
+      raise_warning("cafile expected to be a path, string given");
+      return nullptr;
+    } else if (!FileUtil::isValidPath(capath)) {
+      raise_warning("capath expected to be a path, string given");
+      return nullptr;
+    } else if (!cafile.empty() || !capath.empty()) {
       const char* cafileptr = cafile.empty() ? nullptr : cafile.data();
       const char* capathptr = capath.empty() ? nullptr : capath.data();
       if (!SSL_CTX_load_verify_locations(ctx, cafileptr, capathptr)) {
@@ -157,7 +164,10 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
   SSL_CTX_set_cipher_list(ctx, cipherlist.data());
 
   String certfile = m_context[s_local_cert].toString();
-  if (!certfile.empty()) {
+  if (!FileUtil::isValidPath(certfile)) {
+    raise_warning("local_cert expected to be a path, string given");
+    return nullptr;
+  } else if (!certfile.empty()) {
     String resolved_path_buff = File::TranslatePath(certfile);
     if (!resolved_path_buff.empty()) {
       /* a certificate to use for authentication */

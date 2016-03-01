@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/bz2/bz2-file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/util/alloc.h"
 #include <folly/String.h>
 
@@ -61,6 +62,8 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
   if (filename.isString()) {
     if (filename.asCStrRef().empty()) {
       raise_warning("filename cannot be empty");
+      return false;
+    } else if (!FileUtil::isValidPath(filename.asCStrRef())) {
       return false;
     }
     bz = req::make<BZ2File>();

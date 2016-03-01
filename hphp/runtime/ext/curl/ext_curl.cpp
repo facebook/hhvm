@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -696,7 +697,7 @@ public:
             String val = var_val.toString();
             const char *postval = val.data();
 
-            if (*postval == '@') {
+            if (*postval == '@' && strlen(postval) == val.size()) {
               /* Given a string like:
                *   "@/foo/bar;type=herp/derp;filename=ponies\0"
                * - Temporarily convert to:

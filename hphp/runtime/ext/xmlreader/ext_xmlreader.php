@@ -6,7 +6,7 @@ class XMLReader {
   function __construct(): void {}
 
   <<__Native>>
-  function open(string $uri, ?string $encoding = null, int $options = 0): bool;
+  function open(string $uri, ?string $encoding = null, int $options = 0): mixed;
 
   <<__Native>>
   function XML(string $source,
@@ -77,7 +77,7 @@ class XMLReader {
   function setParserProperty(int $property, bool $value): bool;
 
   <<__Native>>
-  function setRelaxNGSchema(string $filename): bool;
+  function setRelaxNGSchema(string $filename): mixed;
 
   <<__Native>>
   function setRelaxNGSchemaSource(string $source): bool;

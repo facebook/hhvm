@@ -1,0 +1,22 @@
+
+Warning: cafile expected to be a path, string given in %s/test/slow/ssl-socket-null-byte.php on line 25
+
+Warning: failed to create an SSL handle in %s/test/slow/ssl-socket-null-byte.php on line 25
+
+Warning: Failed to enable crypto in %s/test/slow/ssl-socket-null-byte.php on line 25
+bool(false)
+
+Warning: capath expected to be a path, string given in %s/test/slow/ssl-socket-null-byte.php on line 25
+
+Warning: failed to create an SSL handle in %s/test/slow/ssl-socket-null-byte.php on line 25
+
+Warning: Failed to enable crypto in %s/test/slow/ssl-socket-null-byte.php on line 25
+bool(false)
+
+Warning: local_cert expected to be a path, string given in %s/test/slow/ssl-socket-null-byte.php on line 25
+
+Warning: failed to create an SSL handle in %s/test/slow/ssl-socket-null-byte.php on line 25
+
+Warning: Failed to enable crypto in %s/test/slow/ssl-socket-null-byte.php on line 25
+bool(false)
+

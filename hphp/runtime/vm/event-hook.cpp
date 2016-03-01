@@ -358,18 +358,22 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     Xenon::getInstance().log(Xenon::ExitSample);
   }
 
-  // Memory Threhsold
-  if (flags & MemThresholdFlag) {
-    DoMemoryThresholdCallback();
+  // Run callbacks only if it's safe to do so, i.e., not when
+  // there's a pending exception or we're unwinding from a C++ exception.
+  if (ThreadInfo::s_threadInfo->m_pendingException == nullptr
+      && (!unwind || phpException)) {
+
+    // Memory Threhsold
+    if (flags & MemThresholdFlag) {
+      DoMemoryThresholdCallback();
+    }
+
+    // Interval timer
+    if (flags & IntervalTimerFlag) {
+      IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
+    }
   }
 
-  // Run IntervalTimer callbacks only if it's safe to do so, i.e., not when
-  // there's a pending exception or we're unwinding from a C++ exception.
-  if (flags & IntervalTimerFlag
-      && ThreadInfo::s_threadInfo->m_pendingException == nullptr
-      && (!unwind || phpException)) {
-    IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
-  }
 
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip

@@ -484,6 +484,7 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
   size_t maxlen = addlen + 4;
   size_t pathlen = 0; // is the length of the result path
   size_t seglen;  // is the end of the current segment
+  auto pathend = addpath + addlen;
 
   /* Treat null as an empty path.
    */
@@ -555,6 +556,10 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
 
     addpath = next;
   }
+
+  // If there are null bytes in the path, treat it as the empty string
+  if (addpath != pathend) pathlen = 0;
+
   ret.setSize(pathlen);
   return ret;
 }

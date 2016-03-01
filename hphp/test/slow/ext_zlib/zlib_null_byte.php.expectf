@@ -1,0 +1,9 @@
+
+Warning: gzopen() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_zlib/zlib_null_byte.php on line 5
+NULL
+
+Warning: gzfile() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_zlib/zlib_null_byte.php on line 6
+NULL
+
+Warning: readgzfile() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_zlib/zlib_null_byte.php on line 7
+NULL

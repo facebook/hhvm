@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -1312,6 +1313,10 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
                              int64_t retries /* = 0 */) {
   String filename = mailbox;
   if (filename[0] != '{') {
+    if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+      return init_null();
+    }
+
     filename = File::TranslatePath(filename);
     if (filename.empty()) {
       return false;

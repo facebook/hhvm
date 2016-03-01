@@ -34,6 +34,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 
 namespace HPHP {
 
@@ -152,6 +153,10 @@ public:
 bool HHVM_FUNCTION(posix_access,
                    const String& file,
                    int mode /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(file, __FUNCTION__ + 2, 1)) {
+    return false;
+  }
+
   String path = File::TranslatePath(file);
   if (path.empty()) {
     return false;
@@ -468,6 +473,10 @@ bool HHVM_FUNCTION(posix_kill,
 bool HHVM_FUNCTION(posix_mkfifo,
                    const String& pathname,
                    int mode) {
+  if (!FileUtil::checkPathAndWarn(pathname, __FUNCTION__ + 2, 1)) {
+    return false;
+  }
+
   return mkfifo(pathname.data(), mode) >= 0;
 }
 
@@ -476,6 +485,10 @@ bool HHVM_FUNCTION(posix_mknod,
                    int mode,
                    int major /* = 0 */,
                    int minor /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(pathname, __FUNCTION__ + 2, 1)) {
+    return false;
+  }
+
   dev_t php_dev = 0;
   if ((mode & S_IFCHR) || (mode & S_IFBLK)) {
     if (major == 0 && minor == 0) {

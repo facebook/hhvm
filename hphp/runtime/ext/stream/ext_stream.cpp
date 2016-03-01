@@ -30,6 +30,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-await.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/stream-wrapper.h"
@@ -402,6 +403,10 @@ Array HHVM_FUNCTION(stream_get_transports) {
 Variant HHVM_FUNCTION(stream_resolve_include_path,
                       const String& filename,
                       const Variant& context /* = null_variant */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   struct stat s;
   String ret = resolveVmInclude(filename.get(), "", &s, true);
   if (ret.isNull()) {

@@ -1,0 +1,6 @@
+
+Warning: fb_lazy_lstat() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_fb/fb_null_byte.php on line 5
+bool(false)
+
+Warning: fb_lazy_realpath() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_fb/fb_null_byte.php on line 6
+bool(false)

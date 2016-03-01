@@ -22,6 +22,7 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -104,7 +105,7 @@ void XMLReader::close() {
   }
 }
 
-bool HHVM_METHOD(XMLReader, open,
+Variant HHVM_METHOD(XMLReader, open,
                  const String& uri,
                  const Variant& encoding /*= null_variant*/,
                  int64_t options /*= 0*/) {
@@ -120,6 +121,8 @@ bool HHVM_METHOD(XMLReader, open,
   if (uri.empty()) {
     raise_warning("Empty string supplied as input");
     return false;
+  } else if (!FileUtil::checkPathAndWarn(uri, "XMLReader::open", 1)) {
+    return init_null();
   }
 
   String valid_file = libxml_get_valid_file_path(uri.c_str());
@@ -525,8 +528,12 @@ bool XMLReader::set_relaxng_schema(String source, int type) {
   return false;
 }
 
-bool HHVM_METHOD(XMLReader, setRelaxNGSchema,
+Variant HHVM_METHOD(XMLReader, setRelaxNGSchema,
                  const String& filename) {
+  if (!FileUtil::checkPathAndWarn(filename, "XMLReader::setRelaxNGSchema", 1)) {
+    return init_null();
+  }
+
   auto* data = Native::data<XMLReader>(this_);
   return data->set_relaxng_schema(filename, XMLREADER_LOAD_FILE);
 }

@@ -107,6 +107,22 @@ void find(std::vector<std::string> &out,
           const std::set<std::string> *excludeDirs = nullptr,
           const std::set<std::string> *excludeFiles = nullptr);
 
+/**
+ * Determines if a given string is a valid path or not
+ * (ie: contains no null bytes)
+ */
+bool isValidPath(const String& path);
+
+/**
+ * Helper functions for use with FileUtil::isValidPath
+ */
+bool checkPathAndWarn(const String& path,
+                      const char* func_name,
+                      int param_pos);
+void checkPathAndError(const String& path,
+                       const char* func_name,
+                       int param_pos);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

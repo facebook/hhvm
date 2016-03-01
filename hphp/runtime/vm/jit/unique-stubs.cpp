@@ -545,7 +545,10 @@ TCA emitBindCallStub(CodeBlock& cb) {
     v << subqi{callLen, savedRIP, args[1], v.makeReg()};
 
     v << copy{rvmfp(), args[2]};
-    v << movb{v.cns(immutable), args[3]};
+    // Promote bool type argument size to long in order to avoid issues on
+    // platforms that optimization might not ignore the higher bits of the
+    // register (e.g: ppc64)
+    v << ldimml{immutable, args[3]};
 
     auto const handler = reinterpret_cast<void (*)()>(
       getMethodPtr(&MCGenerator::handleBindCall)

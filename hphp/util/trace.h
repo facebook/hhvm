@@ -99,6 +99,7 @@ namespace Trace {
       TM(debuginfo)     \
       TM(decreftype)    \
       TM(dispatchBB)    \
+      TM(ehframe)       \
       TM(emitter)       \
       TM(fixup)         \
       TM(fr)            \

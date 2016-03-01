@@ -344,7 +344,7 @@ private:
   uint64_t m_numTrans;
 
   // Handles to registered .eh_frame sections.
-  std::vector<EHFrameHandle> m_ehFrames;
+  std::vector<EHFrameDesc> m_ehFrames;
   // Landingpads for TC catch traces; used by the unwinder.
   CatchTraceMap m_catchTraceMap;
 

@@ -27,55 +27,55 @@ let payload_message_2 = "Hello child 1"
 
 (** Tail call; exits *)
 let send_fd_and_wait child_1_pid socket_fd fd_to_be_sent =
-  (** Before sending fd, read 1 message. *)
-  Unix.sleep 1;
   (** Before sending FD to child 1, read a message from it. *)
   let msg: string = Marshal_tools.from_fd_with_preamble
     fd_to_be_sent in
-  if (msg <> payload_message_1) then
-    (Printf.eprintf "Parent: error reading message. Got %s\n" msg;
-     exit 1);
+  if msg <> payload_message_1 then begin
+    Printf.eprintf "Parent: error reading message. Got %s\n" msg;
+    exit 1
+  end;
   let result = Libancillary.ancil_send_fd socket_fd fd_to_be_sent in
-  if (result = -1) then
-    (Printf.eprintf "Parent: Failed to send fd. Exiting\n";
+  if result = -1 then begin
+    Printf.eprintf "Parent: Failed to send fd. Exiting\n";
     let _ = Unix.wait () in
-    exit 1)
-  else
-    (let _, status = Unix.waitpid [] child_1_pid in
+    exit 1
+  end else
+    let _, status = Unix.waitpid [] child_1_pid in
     match status with
     | Unix.WEXITED 0 ->
-        print_endline "Success!";
+      print_endline "Success!";
       exit 0
-    | Unix.WEXITED i -> Printf.eprintf "Error: Child 1 exited with code %i" i;
+    | Unix.WEXITED i ->
+      Printf.eprintf "Error: Child 1 exited with code %i" i;
       exit 1
-    | _ -> Printf.eprintf "Error. Unexpected status";
-      exit 1)
+    | _ ->
+      Printf.eprintf "Error. Unexpected status";
+      exit 1
 
 (** Tail call; exits *)
 let child_1_process socket_fd =
-  Unix.sleep 2;
   (** Receive the fd from parent process which will be used to get messages
    * from child 2. *)
   let upward_fd_2 =
     try Libancillary.ancil_recv_fd socket_fd
     with
     | Libancillary.Receiving_Fd_Exception ->
-      (Printf.eprintf "Child 1: Failed to received fd. Exiting.\n";
-      exit 1)
+      Printf.eprintf "Child 1: Failed to received fd. Exiting.\n";
+      exit 1
     in
   let msg: string = Marshal_tools.from_fd_with_preamble upward_fd_2 in
   (** Reading should resume where parent left off, so should be message_2. *)
   if msg = payload_message_2 then
     exit 0
-  else
-    (Printf.eprintf "Child 1: Got message: %s\n" msg;
-    exit 1)
+  else begin
+    Printf.eprintf "Child 1: Got message: %s\n" msg;
+    exit 1
+  end
 
 (** Tail call; exits *)
 let child_2_process socket_fd =
   Marshal_tools.to_fd_with_preamble socket_fd payload_message_1;
   Marshal_tools.to_fd_with_preamble socket_fd payload_message_2;
-  Unix.sleep 4;
   exit 0
 
 (** After forking once, continue as the parent to fork the second child.
@@ -84,16 +84,16 @@ let continue_parent child_1_pid downward_fd_1 =
   let downward_fd_2, upward_fd_2 =
     Unix.socketpair Unix.PF_UNIX Unix.SOCK_STREAM 0 in
   let child_2_pid = Unix.fork() in
-  if (child_2_pid = -1) then
-    (Printf.eprintf "Parent: Error forking child 2. Exiting with code 1\n";
-    exit 1)
-  else if (child_2_pid = 0) then
+  if child_2_pid = -1 then begin
+    Printf.eprintf "Parent: Error forking child 2. Exiting with code 1\n";
+    exit 1
+  end else if child_2_pid = 0 then begin
     (** Child process doesn't use this. *)
-    (Unix.close downward_fd_2;
-    child_2_process upward_fd_2)
-  else
-    (Unix.close upward_fd_2;
-    send_fd_and_wait child_1_pid downward_fd_1 downward_fd_2)
+    Unix.close downward_fd_2;
+    child_2_process upward_fd_2
+  end else
+    Unix.close upward_fd_2;
+    send_fd_and_wait child_1_pid downward_fd_1 downward_fd_2
 
 let () =
   (** This socket lets parent send data to child 1. We will be using it to
@@ -102,14 +102,15 @@ let () =
     Unix.PF_UNIX Unix.SOCK_STREAM 0 in
   (*let upward_fd_1, downward_fd_1 = Unix.pipe () in*)
   let child_1_pid = Unix.fork() in
-  if (child_1_pid = -1) then
-    (Printf.eprintf "Owner: Error forking child 1. Exiting with code 1\n";
-    exit 1)
-  else if (child_1_pid = 0) then
-    ((** Child process doesn't use this. *)
+  if child_1_pid = -1 then begin
+    Printf.eprintf "Owner: Error forking child 1. Exiting with code 1\n";
+    exit 1
+  end else if child_1_pid = 0 then begin
+    (** Child process doesn't use this. *)
     Unix.close downward_fd_1;
-    child_1_process upward_fd_1)
-  else
-    ((** Parent process doesn't use this. *)
+    child_1_process upward_fd_1
+  end else begin
+    (** Parent process doesn't use this. *)
     Unix.close upward_fd_1;
-    continue_parent child_1_pid downward_fd_1)
+    continue_parent child_1_pid downward_fd_1
+  end

@@ -78,7 +78,9 @@ const StaticString
   s_1("1"),
   s_unserialize("unserialize"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
-  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
+  s___wakeup("__wakeup");
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1088,11 +1090,13 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       }
       uns->expectChar('}');
 
-      if (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
-          (cls && cls->instanceCtor() && cls->isCppSerializable())) {
+      if (cls &&
+          cls->lookupMethod(s___wakeup.get()) &&
+          (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
+           (cls->instanceCtor() && cls->isCppSerializable()))) {
         // Don't call wakeup when unserializing for the debugger, except for
         // natively implemented classes.
-        obj->invokeWakeup();
+        uns->addSleepingObject(obj);
       }
 
       check_request_surprise_unlikely();

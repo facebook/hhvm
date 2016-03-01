@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void VariableUnserializer::set(const char* buf, const char* end) {
@@ -34,6 +35,11 @@ void VariableUnserializer::set(const char* buf, const char* end) {
 Variant VariableUnserializer::unserialize() {
   Variant v;
   unserializeVariant(v, this);
+
+  for (auto& obj : m_sleepingObjects) {
+    obj->invokeWakeup();
+  }
+
   return v;
 }
 
@@ -101,4 +107,8 @@ void VariableUnserializer::putInOverwrittenList(const Variant& v) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void VariableUnserializer::addSleepingObject(const Object& o) {
+  m_sleepingObjects.emplace_back(o);
+}
+
 }

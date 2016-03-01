@@ -816,6 +816,7 @@ RegionDescPtr selectHotRegion(TransID transId,
 
   always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
 
+  if (region->empty()) return nullptr;
   return region;
 }
 

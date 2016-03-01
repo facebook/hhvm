@@ -108,7 +108,8 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
-  TransContext(TransID id, TransKind kind, SrcKey sk, FPInvOffset spOff);
+  TransContext(TransID id, TransKind kind, TransFlags flags,
+               SrcKey sk, FPInvOffset spOff);
 
   /*
    * The SrcKey for this translation.
@@ -122,6 +123,7 @@ struct TransContext {
    */
   TransID transID;  // May be kInvalidTransID if not for a real translation.
   TransKind kind{TransKind::Invalid};
+  TransFlags flags;
   FPInvOffset initSpOffset;
   const Func* func;
   Offset initBcOffset;

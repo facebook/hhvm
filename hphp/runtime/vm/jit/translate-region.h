@@ -24,40 +24,22 @@
 namespace HPHP { namespace jit {
 
 struct IRGS;
+struct IRUnit;
+struct TransContext;
 
 //////////////////////////////////////////////////////////////////////
 
-enum class TranslateResult {
-  Failure,
-  Retry,
-  Success
-};
-const char* show(TranslateResult);
-
 /*
- * Data used by translateRegion() to pass information between retries.
- */
-struct TranslateRetryContext {
-  // Instructions that must be interpreted.
-  ProfSrcKeySet toInterp;
-
-  // Regions to not inline
-  std::unordered_set<ProfSrcKey, ProfSrcKey::Hasher> inlineBlacklist;
-};
-
-/*
- * Populate and optimize an IRUnit for `region' inside `irgs'.
+ * Populate and optimize an IRUnit for `region'. Returns the new IRUnit on
+ * success, nullptr on failure.
  *
- * The caller is expected to continue calling irGenRegion() until either
- * Success or Failure is returned.  Otherwise, Retry is returned, and the
- * caller is responsible for threading the same RetryContext through to the
- * retried translations.
+ * `pconds' and `annotations' must be empty on entry, and if hhir generation is
+ * successful they will be populated appropriately.
  */
-TranslateResult irGenRegion(IRGS& irgs,
-                            const RegionDesc& region,
-                            TranslateRetryContext& retry,
-                            PostConditions& pconds,
-                            Annotations& annotations);
+std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
+                                    const TransContext& context,
+                                    PostConditions& pconds,
+                                    Annotations& annotations) noexcept;
 
 //////////////////////////////////////////////////////////////////////
 

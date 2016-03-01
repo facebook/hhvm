@@ -86,7 +86,6 @@ void CGMeta::clear() {
   alignments.clear();
   inProgressTailJumps.clear();
   literals.clear();
-  annotations.clear();
 }
 
 bool CGMeta::empty() const {
@@ -100,8 +99,7 @@ bool CGMeta::empty() const {
     bcMap.empty() &&
     alignments.empty() &&
     inProgressTailJumps.empty() &&
-    literals.empty() &&
-    annotations.empty();
+    literals.empty();
 }
 
 }}

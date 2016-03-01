@@ -55,16 +55,11 @@ struct ReturnTarget {
  * required to determine high-level compilation strategy.
  */
 struct IRGS {
-  explicit IRGS(TransContext ctx, TransFlags);
+  explicit IRGS(IRUnit& unit);
 
-  /*
-   * TODO: refactor this code eventually so IRGS doesn't own its IRUnit (or its
-   * IRBuilder).  The IRUnit should be the result of running the code in the ht
-   * module.
-   */
   TransContext context;
   TransFlags transFlags;
-  IRUnit unit;
+  IRUnit& unit;
   std::unique_ptr<IRBuilder> irb;
 
   /*

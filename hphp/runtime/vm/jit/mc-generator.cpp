@@ -1578,22 +1578,51 @@ static bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
   return true;
 }
 
-static TranslateResult mcGenUnit(const IRUnit& unit,
-                                 CodeCache::View code,
-                                 CGMeta& fixups,
-                                 ProfSrcKeySet& toInterp) {
+namespace {
+
+/*
+ * Analyze the given TranslArgs and return the region to translate, or nullptr
+ * if one could not be selected.
+ */
+RegionDescPtr prepareRegion(const TranslArgs& args) {
+  if (args.kind == TransKind::Optimize) {
+    assertx(RuntimeOption::EvalJitPGO);
+    if (args.region) return args.region;
+
+    assertx(isValidTransID(args.transId));
+    return selectHotRegion(args.transId, mcg);
+  }
+
+  // Attempt to create a region at this SrcKey
+  assertx(args.kind == TransKind::Profile || args.kind == TransKind::Live);
+  auto const sk = args.sk;
+  RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
+                           sk.resumed() };
+  FTRACE(2, "populating live context for region\n");
+  populateLiveContext(rContext);
+  return selectRegion(rContext, args.kind);
+}
+
+/*
+ * Attempt to emit code for the given IRUnit to `code'. Returns true on
+ * success, false if codegen failed.
+ */
+bool mcGenUnit(const IRUnit& unit, CodeCache::View code, CGMeta& fixups) {
   try {
     irlower::genCode(unit, code, fixups);
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
       mcg->code().disableHot();
-      // We can't return Retry here because the code block selection
-      // will still say hot.
-      return TranslateResult::Failure;
+      return false;
     } else {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
                          dbFull.name, dbFull.what());
     }
+  } catch (const FailedTraceGen& e) {
+    // Codegen failed for some other reason, most likely because xls wanted too
+    // many spill slots.
+    FTRACE(1, "codegen failed with {}\n", e.what());
+    return false;
   }
 
   auto const startSk = unit.context().srcKey();
@@ -1601,131 +1630,152 @@ static TranslateResult mcGenUnit(const IRUnit& unit,
     mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
   }
 
-  return TranslateResult::Success;
+  return true;
+}
+
+/*
+ * If TC reuse is enabled, attempt to relocate the newly-emitted translation to
+ * a hole reclaimed from dead code. Returns true if the translation was
+ * relocated and false otherwise.
+ */
+bool tryRelocateNewTranslation(SrcKey sk, TransLoc& loc,
+                               CodeCache::View code, CGMeta& fixups) {
+  if (!RuntimeOption::EvalEnableReusableTC) return false;
+
+  TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
+             cs = loc.coldStart(), ce = loc.coldEnd(),
+             fs = loc.frozenStart(), fe = loc.frozenEnd();
+  bool did_relocate = relocateNewTranslation(loc, code, fixups);
+
+  if (did_relocate) {
+    FTRACE_MOD(reusetc, 1,
+               "Relocated translation for func {} (id = {})  @ sk({}) "
+               "from M[{}, {}], C[{}, {}], F[{}, {}] to M[{}, {}] "
+               "C[{}, {}] F[{}, {}]\n",
+               sk.func()->fullName()->data(), sk.func()->getFuncId(),
+               sk.offset(), ms, me, cs, ce, fs, fe, loc.mainStart(),
+               loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
+               loc.frozenStart(), loc.frozenEnd());
+  } else {
+    FTRACE_MOD(reusetc, 1,
+               "Created translation for func {} (id = {}) "
+               " @ sk({}) at M[{}, {}], C[{}, {}], F[{}, {}]\n",
+               sk.func()->fullName()->data(), sk.func()->getFuncId(),
+               sk.offset(), ms, me, cs, ce, fs, fe);
+  }
+
+  assertx(did_relocate == (loc.mainStart() != ms));
+  return did_relocate;
+}
+
+/*
+ * If live code relocation is enabled, record metadata for the current
+ * translation.
+ */
+void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec,
+                              const TransLoc& loc, CGMeta& fixups) {
+  if (!RuntimeOption::EvalPerfRelocate) return;
+
+  recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
+                     loc.coldCodeStart(), loc.coldEnd(),
+                     sk, -1,
+                     srcRec.tailFallbackJumps(),
+                     fixups);
+}
+
+/*
+ * If the jit maturity counter is enabled, update it with the current amount of
+ * emitted code.
+ */
+void reportJitMaturity(const CodeCache& code) {
+  int32_t after = code.main().used() * 100 / CodeCache::AMaxUsage;
+  if (after > 100) after = 100;
+  if (s_jitMaturityCounter) {
+    int32_t before = s_jitMaturityCounter->getValue();
+    if (after > before) {
+      s_jitMaturityCounter->setValue(after);
+      constexpr int32_t kThreshold = 15;
+      if (StructuredLog::enabled() &&
+          before < kThreshold && kThreshold <= after) {
+        std::map<std::string, int64_t> cols;
+        cols["jit_mature_sec"] = time(nullptr) - HttpServer::StartTime;
+        StructuredLog::log("hhvm_warmup", cols);
+      }
+    }
+  }
+}
 }
 
 TCA MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t(Timer::translate);
-  auto sk = args.sk;
 
-  SKTRACE(1, sk, "translateWork\n");
+  auto const sk = args.sk;
   assertx(m_tx.getSrcDB().find(sk));
-
   SrcRec& srcRec = *m_tx.getSrcRec(sk);
-  auto kind = reachedTranslationLimit(sk, srcRec) ? TransKind::Interp
-                                                  : args.kind;
 
   setUseLLVM(
     RuntimeOption::EvalJitLLVM > 1 ||
-    (RuntimeOption::EvalJitLLVM && kind == TransKind::Optimize)
+    (RuntimeOption::EvalJitLLVM && args.kind == TransKind::Optimize)
   );
   SCOPE_EXIT { setUseLLVM(false); };
 
-  FPInvOffset initSpOffset =
-    args.region ? args.region->entry()->initialSpOffset()
-                : liveSpOff();
+  auto region = reachedTranslationLimit(sk, srcRec) ? nullptr
+                                                    : prepareRegion(args);
+  auto const initSpOffset = region ? region->entry()->initialSpOffset()
+                                   : liveSpOff();
 
+  std::unique_ptr<IRUnit> unit;
   PostConditions pconds;
-  RegionDescPtr region;
-  bool hasLoop = false;
+  Annotations annotations;
 
+  // First, lower the RegionDesc to an IRUnit.
+  if (region) {
+    auto const profTransID = RuntimeOption::EvalJitPGO
+      ? m_tx.profData()->curTransID()
+      : kInvalidTransID;
+    auto const transContext =
+      TransContext{profTransID, args.kind, args.flags, args.sk, initSpOffset};
+
+    unit = irGenRegion(*region, transContext, pconds, annotations);
+  }
+
+  // Next, lower the IRUnit to vasm and emit machine code from that.
   profileSetHotFuncAttr();
   auto code = m_code.view(args.sk.func()->attrs() & AttrHot, args.kind);
   auto const preAlignMain = code.main().frontier();
 
   if (args.align) {
-    // Align without registering fixups; we do so manually after translating
-    // the region because we may hit retries and need to roll back.
+    // Align without registering fixups. Codegen may fail and cause us to clear
+    // the partially-populated fixups, so we wait until after that to manually
+    // add the alignment fixup.
     align(code.main(), nullptr, Alignment::CacheLine, AlignContext::Dead);
   }
 
-  TransLocMaker maker{code};
   CGMeta fixups;
+  TransLocMaker maker{code};
+  maker.markStart();
 
-  if (kind != TransKind::Interp) {
-    if (kind == TransKind::Optimize) {
-      assertx(RuntimeOption::EvalJitPGO);
-      region = args.region;
-      if (region) {
-        assertx(!region->empty());
-      } else {
-        assertx(isValidTransID(args.transId));
-        region = selectHotRegion(args.transId, this);
-        assertx(region);
-        if (region && region->empty()) region = nullptr;
-      }
-    } else {
-      // Attempt to create a region at this SrcKey
-      assertx(kind == TransKind::Profile || kind == TransKind::Live);
-      RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
-                               sk.resumed() };
-      FTRACE(2, "populating live context for region\n");
-      populateLiveContext(rContext);
-      region = selectRegion(rContext, kind);
-    }
-
-    auto result = TranslateResult::Retry;
-    TranslateRetryContext retry;
-    initSpOffset = region ? region->entry()->initialSpOffset()
-                          : liveSpOff();
-    while (region && result == TranslateResult::Retry) {
-      auto const profTransID = RuntimeOption::EvalJitPGO
-        ? m_tx.profData()->curTransID()
-        : kInvalidTransID;
-      auto const transContext =
-        TransContext(profTransID, kind, sk, initSpOffset);
-
-      IRGS irgs { transContext, args.flags };
-      FTRACE(1, "{}{:-^40}{}\n",
-             color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
-             " HHIR during translation ",
-             color(ANSI_COLOR_END));
-
-      try {
-        result = irGenRegion(irgs, *region, retry, pconds, fixups.annotations);
-        FTRACE(2, "irGenRegion finished with result {}\n", show(result));
-        hasLoop = cfgHasLoop(irgs.unit);
-
-        maker.markStart();
-        if (result == TranslateResult::Success) {
-          result = mcGenUnit(irgs.unit, code, fixups, retry.toInterp);
-        }
-      } catch (const std::exception& e) {
-        FTRACE(1, "irGenRegion or mcGenUnit failed with '{}'\n", e.what());
-        result = TranslateResult::Failure;
-      }
-
-      if (result != TranslateResult::Success) {
-        // Translation failed or will be retried. Roll back the translation
-        // cache frontiers and discard any pending fixups.
-        maker.rollback();
-        fixups.clear();
-      } else {
-        m_numTrans++;
-        assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
-      }
-    }
-
-    if (!region || result != TranslateResult::Success) {
-      // Fall back to the interpreter, either because region selection or
-      // region translation failed.
-      kind = TransKind::Interp;
-      region.reset();
-    } else {
-      assert(kind == TransKind::Profile ||
-             kind == TransKind::Live ||
-             kind == TransKind::Optimize);
-    }
+  if (unit && !mcGenUnit(*unit, code, fixups)) {
+    // mcGenUnit() failed. Roll back, drop the unit and region, and clear
+    // fixups.
+    maker.rollback();
+    maker.markStart();
+    unit.reset();
+    region.reset();
+    fixups.clear();
   }
 
-  if (kind == TransKind::Interp) {
+  auto kind = args.kind;
+  if (unit) {
+    m_numTrans++;
+    assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
+  } else {
+    kind = TransKind::Interp;
     FTRACE(1, "emitting dispatchBB interp request for failed "
            "translation (spOff = {})\n", initSpOffset.offset);
-    maker.markStart();
     vwrap(code.main(), fixups,
           [&] (Vout& v) { emitInterpReq(v, sk, initSpOffset); },
           CodeKind::Helper);
-    // Fall through.
   }
 
   auto loc = maker.markEnd();
@@ -1737,43 +1787,20 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     );
   }
 
-  if (RuntimeOption::EvalEnableReusableTC) {
-    TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
-               cs = loc.coldStart(), ce = loc.coldEnd(),
-               fs = loc.frozenStart(), fe = loc.frozenEnd();
-    bool did_relocate = relocateNewTranslation(loc, code, fixups);
-
-    if (did_relocate) {
-      FTRACE_MOD(reusetc, 1,
-                 "Relocated translation for func {} (id = {})  @ sk({}) "
-                 "from M[{}, {}], C[{}, {}], F[{}, {}] to M[{}, {}] "
-                 "C[{}, {}] F[{}, {}]\n",
-                 sk.func()->fullName()->data(), sk.func()->getFuncId(),
-                 sk.offset(), ms, me, cs, ce, fs, fe, loc.mainStart(),
-                 loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
-                 loc.frozenStart(), loc.frozenEnd());
-    } else {
-      FTRACE_MOD(reusetc, 1,
-                 "Created translation for func {} (id = {}) "
-                 " @ sk({}) at M[{}, {}], C[{}, {}], F[{}, {}]\n",
-                 sk.func()->fullName()->data(), sk.func()->getFuncId(),
-                 sk.offset(), ms, me, cs, ce, fs, fe);
-    }
-
-    assertx(did_relocate == (loc.mainStart() != ms));
-    if (did_relocate) {
-      code.main().setFrontier(preAlignMain); // we may have shifted to align
-    }
+  if (tryRelocateNewTranslation(sk, loc, code, fixups)) {
+    code.main().setFrontier(preAlignMain);
   }
 
+  // Finally, record various metadata about the translation and add it to the
+  // SrcRec.
   if (RuntimeOption::EvalProfileBC) {
-    auto* unit = sk.unit();
+    auto const vmUnit = sk.unit();
     TransBCMapping prev{};
     for (auto& cur : fixups.bcMap) {
       if (!cur.aStart) continue;
       if (prev.aStart) {
-        if (prev.bcStart < unit->bclen()) {
-          recordBCInstr(uint32_t(unit->getOp(prev.bcStart)),
+        if (prev.bcStart < vmUnit->bclen()) {
+          recordBCInstr(uint32_t(vmUnit->getOp(prev.bcStart)),
                         prev.aStart, cur.aStart, false);
         }
       } else {
@@ -1783,6 +1810,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     }
   }
 
+  recordRelocationMetaData(sk, srcRec, loc, fixups);
   recordGdbTranslation(sk, sk.func(), code.main(), loc.mainStart(),
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
@@ -1793,19 +1821,13 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   }
 
   auto tr = maker.rec(sk, kind, region, fixups.bcMap,
-                      std::move(fixups.annotations), useLLVM(), hasLoop);
+                      std::move(annotations), useLLVM(),
+                      unit && cfgHasLoop(*unit));
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
 
-  if (RuntimeOption::EvalPerfRelocate) {
-    recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
-                       loc.coldCodeStart(), loc.coldEnd(),
-                       sk, -1,
-                       srcRec.tailFallbackJumps(),
-                       fixups);
-  }
   GrowableVector<IncomingBranch> inProgressTailBranches;
   fixups.process(&inProgressTailBranches);
 
@@ -1821,22 +1843,8 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     Trace::traceRelease("%s", getTCSpace().c_str());
   }
 
-  // Report jit maturity based on the amount of code emitted.
-  int32_t after = m_code.main().used() * 100 / CodeCache::AMaxUsage;
-  if (after > 100) after = 100;
-  if (s_jitMaturityCounter) {
-    int32_t before = s_jitMaturityCounter->getValue();
-    if (after > before) {
-      s_jitMaturityCounter->setValue(after);
-      constexpr int32_t kThreshold = 15;
-      if (StructuredLog::enabled() &&
-          before < kThreshold && kThreshold <= after) {
-        std::map<std::string, int64_t> cols;
-        cols["jit_mature_sec"] = time(0) - HttpServer::StartTime;
-        StructuredLog::log("hhvm_warmup", cols);
-      }
-    }
-  }
+  reportJitMaturity(m_code);
+
   return loc.mainStart();
 }
 

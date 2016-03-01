@@ -37,8 +37,8 @@
   TIMER_NAME(regionizeFunc)                     \
   TIMER_NAME(selectTracelet)                    \
   TIMER_NAME(translate)                         \
-  TIMER_NAME(translateRegion)                   \
-  TIMER_NAME(translateRegion_irGeneration)      \
+  TIMER_NAME(irGenRegion)                       \
+  TIMER_NAME(irGenRegionAttempt)                \
   TIMER_NAME(translateTracelet)                 \
   TIMER_NAME(translateTracelet_irGeneration)    \
   TIMER_NAME(vasm_layout)                       \

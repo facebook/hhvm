@@ -1107,15 +1107,6 @@ Translator::addDbgBLPC(PC pc) {
   return true;
 }
 
-const char* show(TranslateResult r) {
-  switch (r) {
-  case TranslateResult::Failure: return "Failure";
-  case TranslateResult::Retry:   return "Retry";
-  case TranslateResult::Success: return "Success";
-  }
-  not_reached();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 #define IMM_BLA(n)     ni.immVec

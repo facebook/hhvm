@@ -52,7 +52,6 @@ struct CGMeta {
   std::multimap<TCA,std::pair<Alignment,AlignContext>> alignments;
   GrowableVector<IncomingBranch> inProgressTailJumps;
   LiteralMap literals;
-  Annotations annotations;
 };
 
 }}

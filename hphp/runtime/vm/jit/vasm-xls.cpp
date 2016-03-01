@@ -1646,7 +1646,7 @@ void Vxls::assignSpill(Interval* ivl) {
   // Ran out of spill slots.
   ONTRACE(kRegAllocLevel, dumpVariables(variables, spill_info.num_spills));
   TRACE(1, "vxls-punt TooManySpills\n");
-  PUNT(LinearScan_TooManySpills);
+  TRACE_PUNT("LinearScan_TooManySpills");
 }
 
 /*
@@ -1676,7 +1676,7 @@ void Vxls::spill(Interval* ivl) {
       // This only can happen if we need more than the available registers
       // at a single position.  It can happen in phijmp or callargs.
       TRACE(1, "vxls-punt RegSpill\n");
-      PUNT(RegSpill); // cannot split before first_use
+      TRACE_PUNT("RegSpill"); // cannot split before first_use
     }
     pending.push(ivl->split(split_pos));
   }

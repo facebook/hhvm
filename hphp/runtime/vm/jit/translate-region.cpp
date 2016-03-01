@@ -48,6 +48,23 @@ namespace HPHP { namespace jit {
 
 namespace {
 
+enum class TranslateResult {
+  Failure,
+  Retry,
+  Success
+};
+
+/*
+ * Data used by irGenRegion() and friends to pass information between retries.
+ */
+struct TranslateRetryContext {
+  // Bytecode instructions that must be interpreted.
+  ProfSrcKeySet toInterp;
+
+  // Regions to not inline
+  std::unordered_set<ProfSrcKey, ProfSrcKey::Hasher> inlineBlacklist;
+};
+
 /*
  * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
@@ -560,7 +577,7 @@ TranslateResult irGenRegionImpl(IRGS& irgs,
                                 int32_t& budgetBCInstrs,
                                 double profFactor,
                                 Annotations& annotations) {
-  const Timer translateRegionTimer(Timer::translateRegion);
+  const Timer irGenTimer(Timer::irGenRegionAttempt);
   double prevProfFactor = irgs.profFactor;
   irgs.profFactor = profFactor;
   SCOPE_EXIT { irgs.profFactor = prevProfFactor; };
@@ -605,7 +622,6 @@ TranslateResult irGenRegionImpl(IRGS& irgs,
 
   RegionDesc::BlockIdSet processedBlocks;
 
-  Timer irGenTimer(Timer::translateRegion_irGeneration);
   auto& blocks = region.blocks();
 
   jit::queue<RegionDesc::BlockId> workQ;
@@ -853,7 +869,6 @@ TranslateResult irGenRegionImpl(IRGS& irgs,
     irgen::sealUnit(irgs);
   }
 
-  irGenTimer.stop();
   return TranslateResult::Success;
 }
 
@@ -861,57 +876,80 @@ TranslateResult irGenRegionImpl(IRGS& irgs,
 
 //////////////////////////////////////////////////////////////////////
 
-TranslateResult irGenRegion(IRGS& irgs,
-                            const RegionDesc& region,
-                            TranslateRetryContext& retry,
-                            PostConditions& pConds,
-                            Annotations& annotations) {
+std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
+                                    const TransContext& context,
+                                    PostConditions& pConds,
+                                    Annotations& annotations) noexcept {
+  Timer irGenTimer(Timer::irGenRegion);
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
-  SCOPE_ASSERT_DETAIL("IRUnit") { return show(irgs.unit); };
+  assertx(annotations.empty());
 
-  // Set up inlining context, but disable it for profiling mode.
-  InliningDecider inl(region.entry()->func());
-  if (irgs.context.kind == TransKind::Profile) inl.disable();
+  std::unique_ptr<IRUnit> unit;
+  TranslateRetryContext retry;
+  auto result = TranslateResult::Retry;
 
-  // Set the profCount of the IRUnit's entry block, which is created a priori.
-  if (irgs.context.kind == TransKind::Optimize) {
-    auto entryBID = region.entry()->id();
-    assertx(hasTransID(entryBID));
-    auto entryTID = getTransID(entryBID);
-    auto entryProfCount = mcg->tx().profData()->transCounter(entryTID);
-    irgs.unit.entry()->setProfCount(entryProfCount);
+  while (result == TranslateResult::Retry) {
+    unit = folly::make_unique<IRUnit>(context);
+    SCOPE_ASSERT_DETAIL("IRUnit") { return show(*unit); };
+    IRGS irgs{*unit};
+
+    // Set up inlining context, but disable it for profiling mode.
+    InliningDecider inl(region.entry()->func());
+    if (context.kind == TransKind::Profile) inl.disable();
+
+    // Set the profCount of the IRUnit's entry block, which is created a
+    // priori.
+    if (context.kind == TransKind::Optimize) {
+      auto entryBID = region.entry()->id();
+      assertx(hasTransID(entryBID));
+      auto entryTID = getTransID(entryBID);
+      auto entryProfCount = mcg->tx().profData()->transCounter(entryTID);
+      irgs.unit.entry()->setProfCount(entryProfCount);
+    }
+
+    int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
+    try {
+      result = irGenRegionImpl(irgs, region, retry, inl,
+                               budgetBCInstrs, 1, annotations);
+    } catch (const FailedTraceGen& e) {
+      FTRACE(2, "irGenRegion failed with {}\n", e.what());
+      result = TranslateResult::Failure;
+    }
+    assertx(budgetBCInstrs >= 0);
+    FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
+
+    if (result == TranslateResult::Success) {
+      // For profiling translations, grab the postconditions to be used for
+      // region selection whenever we decide to retranslate.
+      assertx(pConds.changed.empty() && pConds.refined.empty());
+      if (context.kind == TransKind::Profile &&
+          RuntimeOption::EvalJitPGOUsePostConditions) {
+        auto const lastSrcKey = region.lastSrcKey();
+        Block* mainExit = findMainExitBlock(irgs.unit, lastSrcKey);
+        FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
+               mainExit->id(), show(irgs.unit));
+        assertx(mainExit);
+        pConds = irgs.irb->postConds(mainExit);
+      }
+    } else {
+      // Clear annotations from the failed attempt.
+      annotations.clear();
+    }
   }
-  int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
-  auto result = irGenRegionImpl(irgs, region, retry, inl,
-                                budgetBCInstrs, 1, annotations);
-  assertx(budgetBCInstrs >= 0);
-  FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
-  if (result != TranslateResult::Success) return result;
 
-  // For profiling translations, grab the postconditions to be used
-  // for region selection whenever we decide to retranslate.
-  pConds.changed.clear();
-  pConds.refined.clear();
-  if (irgs.context.kind == TransKind::Profile &&
-      RuntimeOption::EvalJitPGOUsePostConditions) {
-    auto  lastSrcKey = region.lastSrcKey();
-    Block* mainExit = findMainExitBlock(irgs.unit, lastSrcKey);
-    FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
-           mainExit->id(), show(irgs.unit));
-    assertx(mainExit);
-    pConds = irgs.irb->postConds(mainExit);
-  }
+  irGenTimer.stop();
+  if (result != TranslateResult::Success) return nullptr;
 
   auto finishPass = [&](const char* msg, int level) {
-    printUnit(level, irgs.unit, msg, nullptr, irgs.irb->guards());
-    assertx(checkCfg(irgs.unit));
+    printUnit(level, *unit, msg, nullptr, nullptr, &annotations);
+    assertx(checkCfg(*unit));
   };
 
   finishPass(" after initial translation ", kIRLevel);
-  optimize(irgs.unit, irgs.context.kind);
+  optimize(*unit, context.kind);
   finishPass(" after optimizing ", kOptLevel);
 
-  return result;
+  return unit;
 }
 
 } }

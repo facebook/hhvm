@@ -56,6 +56,7 @@ TransContext prologue_context(TransID transID,
   return TransContext(
     transID,
     kind,
+    TransFlags{},
     SrcKey{func, entry, SrcKey::PrologueTag{}},
     FPInvOffset{func->numSlotsInFrame()}
   );
@@ -71,7 +72,8 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
                     CodeCache::View code, CGMeta& fixups) {
   auto context = prologue_context(transID, kind, func,
                                   func->getEntryForNumArgs(argc));
-  IRGS env{context, TransFlags{}};
+  IRUnit unit{context};
+  IRGS env{unit};
 
   auto& cb = code.main();
 
@@ -91,7 +93,8 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
                         CodeCache::View code) {
   auto context = prologue_context(kInvalidTransID, TransKind::Live,
                                   func, func->base());
-  IRGS env{context, TransFlags{}};
+  IRUnit unit{context};
+  IRGS env{unit};
 
   auto& main = code.main();
   auto& frozen = code.frozen();

@@ -68,7 +68,8 @@ struct Env {
     , blockFinished(false)
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
-    , irgs(TransContext{kInvalidTransID, kind, sk, ctx.spOffset}, TransFlags{0})
+    , unit(TransContext{kInvalidTransID, kind, TransFlags{}, sk, ctx.spOffset})
+    , irgs(unit)
     , arStates(1)
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)
@@ -85,6 +86,7 @@ struct Env {
   RegionDescPtr region;
   RegionDesc::Block* curBlock;
   bool blockFinished;
+  IRUnit unit;
   IRGS irgs;
   jit::vector<ActRecState> arStates;
   RefDeps refDeps;

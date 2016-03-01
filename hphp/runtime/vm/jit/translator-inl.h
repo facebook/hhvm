@@ -87,10 +87,11 @@ inline Lease& Translator::WriteLease() {
 // TransContext.
 
 inline TransContext::TransContext(
-  TransID id, TransKind kind, SrcKey sk, FPInvOffset spOff
+  TransID id, TransKind kind, TransFlags flags, SrcKey sk, FPInvOffset spOff
 )
   : transID(id)
   , kind(kind)
+  , flags(flags)
   , initSpOffset(spOff)
   , func(sk.valid() ? sk.func() : nullptr)
   , initBcOffset(sk.offset())

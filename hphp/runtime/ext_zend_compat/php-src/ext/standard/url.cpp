@@ -319,7 +319,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
   nohost:
 
   if ((p = (const char*) memchr(s, '?', (ue - s)))) {
-    pp = strchr(s, '#');
+    pp = (const char*)memchr(s, '#', (ue - s));
 
     if (pp && pp < p) {
       if (pp - s) {

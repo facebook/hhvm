@@ -6,6 +6,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -493,7 +494,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
       String val = var_val.toString();
       const char *postval = val.data();
 
-      if (*postval == '@') {
+      if (*postval == '@' && strlen(postval) == val.size()) {
         /* Given a string like:
          *   "@/foo/bar;type=herp/derp;filename=ponies\0"
          * - Temporarily convert to:

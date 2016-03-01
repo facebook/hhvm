@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/ext/zlib/zip-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
@@ -100,6 +101,10 @@ const int64_t k_FORCE_DEFLATE         = k_ZLIB_ENCODING_DEFLATE;
 
 Variant HHVM_FUNCTION(readgzfile, const String& filename,
                                   int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
   if (stream.isBoolean() && !stream.toBoolean()) {
     return false;
@@ -109,6 +114,10 @@ Variant HHVM_FUNCTION(readgzfile, const String& filename,
 
 Variant HHVM_FUNCTION(gzfile, const String& filename,
                               int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
   if (stream.isBoolean() && !stream.toBoolean()) {
     return false;
@@ -312,6 +321,10 @@ String HHVM_FUNCTION(zlib_get_coding_type) {
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
                               int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   auto file = req::make<ZipFile>();
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {

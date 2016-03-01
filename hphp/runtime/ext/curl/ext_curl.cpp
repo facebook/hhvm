@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/req-ptr.h"

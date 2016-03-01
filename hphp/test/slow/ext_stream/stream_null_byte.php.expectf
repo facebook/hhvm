@@ -1,0 +1,3 @@
+
+Warning: stream_resolve_include_path() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_stream/stream_null_byte.php on line 5
+NULL

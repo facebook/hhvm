@@ -48,7 +48,7 @@ class XMLReader {
   public string $xmlLang;
 
   public function __construct();
-  public function open(string $uri, ?string $encoding = null, int $options = 0): bool;
+  public function open(string $uri, ?string $encoding = null, int $options = 0): mixed;
   public function XML(string $source, ?string $encoding = null, int $options = 0): bool;
   public function close(): bool;
   public function read(): bool;
@@ -71,6 +71,6 @@ class XMLReader {
   public function lookupNamespace(string $prefix): mixed;
   public function setSchema(string $source): bool;
   public function setParserProperty(int $property, bool $value): bool;
-  public function setRelaxNGSchema(string $filename): bool;
+  public function setRelaxNGSchema(string $filename): mixed;
   public function setRelaxNGSchemaSource(string $source): bool;
 }

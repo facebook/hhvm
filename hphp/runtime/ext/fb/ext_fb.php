@@ -193,7 +193,7 @@ function fb_lazy_lstat(string $filename): mixed;
  * @return string - Real path of the file.
  */
 <<__Native>>
-function fb_lazy_realpath(string $filename): string;
+function fb_lazy_realpath(string $filename): mixed;
 
 /* This function invokes $function with the arguments specified in its
  * parameter list. It returns an array of two elements, the first being a

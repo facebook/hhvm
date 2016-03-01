@@ -28,6 +28,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/exception.h"
@@ -681,6 +682,36 @@ void FileUtil::find(std::vector<std::string> &out,
   }
 
   closedir(dir);
+}
+
+bool FileUtil::isValidPath(const String& path) {
+  return path.size() == strlen(path.data());
+}
+
+bool FileUtil::checkPathAndWarn(const String& path,
+                                const char* func_name,
+                                int param_pos) {
+  if (!FileUtil::isValidPath(path)) {
+    raise_warning(
+      "%s() expects parameter %d to be a valid path, string given",
+      func_name,
+      param_pos
+    );
+    return false;
+  }
+  return true;
+}
+
+void FileUtil::checkPathAndError(const String& path,
+                                 const char* func_name,
+                                 int param_pos) {
+  if (!FileUtil::isValidPath(path)) {
+    raise_error(
+      "%s() expects parameter %d to be a valid path, string given",
+      func_name,
+      param_pos
+    );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

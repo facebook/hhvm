@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
@@ -809,6 +810,10 @@ static bool HHVM_METHOD(DomDocument, _load, const String& source,
     raise_warning("Empty string supplied as input");
     return false;
   }
+  if (isFile && !FileUtil::isValidPath(source)) {
+    raise_warning("Invalid file source");
+    return false;
+  }
   auto domdoc = Native::data<DOMNode>(this_);
   auto newdoc = dom_document_parser(domdoc, isFile, source, options);
   if (!newdoc) {
@@ -834,6 +839,11 @@ static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
 
   htmlParserCtxtPtr ctxt;
   if (isFile) {
+    if (!FileUtil::isValidPath(source)) {
+      raise_warning("Invalid file source");
+      return false;
+    }
+
     ctxt = htmlCreateFileParserCtxt(source.data(), nullptr);
   } else {
     ctxt = htmlCreateMemoryParserCtxt(source.data(), source.size());

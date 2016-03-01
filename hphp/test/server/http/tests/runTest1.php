@@ -33,5 +33,6 @@ requestAll(array(
       'xyzzy' => 42, 'XyZZy' => 43, 'XYZZY' => 44, 'xxxxx' => 45
     )
   ),
-  "test_curl_multi_except.php"
+  "test_curl_multi_except.php",
+  "test_pagelet.php",
 ));

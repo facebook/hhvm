@@ -119,6 +119,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
       ' --mode=server' . $serverConfig . $logFileConfig .
       ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
       ' --instance-id=' . $test_run_id .
+      ' -vPageletServer.ThreadCount=5' .
       $portConfig . $srcRootConfig .
       $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
       $debugPortConfig . $repoConfig . $jitConfig .

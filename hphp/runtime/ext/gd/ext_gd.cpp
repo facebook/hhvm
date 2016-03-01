@@ -20,17 +20,17 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/runtime/ext/gd/libgd/gd.h"
@@ -4406,7 +4406,8 @@ const StaticString s_size("size");
 
 Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
     const String& jpeg_file_name, int64_t spool /* = 0 */) {
-  char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
+  char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0";
+  static_assert(sizeof(psheader) == 28, "psheader must be 28 bytes");
   unsigned int iptcdata_len = iptcdata.length();
   unsigned int marker, inx;
   unsigned char *spoolbuf = nullptr, *poi = nullptr;
@@ -4418,10 +4419,24 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
     raise_warning("failed to open file: %s", jpeg_file_name.c_str());
     return false;
   }
+
   if (spool < 2) {
-    Array stat = HHVM_FN(fstat)(Resource(file)).toArray();
-    int st_size = stat[s_size].toInt32();
-    size_t malloc_size = iptcdata_len + sizeof(psheader) + st_size + 1024 + 1;
+    auto stat = HHVM_FN(fstat)(Resource(file));
+    // TODO(t7561579) until we can properly handle non-file streams here, don't
+    // pretend we can and crash.
+    if (!stat.isArray()) {
+      raise_warning("unable to stat input");
+      return false;
+    }
+
+    auto& stat_arr = stat.toCArrRef();
+    auto st_size = stat_arr[s_size].toInt64();
+    if (st_size < 0) {
+      raise_warning("unsupported stream type");
+      return false;
+    }
+
+    auto malloc_size = iptcdata_len + sizeof(psheader) + st_size + 1024 + 1;
     poi = spoolbuf = (unsigned char *)IM_MALLOC(malloc_size);
     CHECK_ALLOC_R(poi, malloc_size, false);
     memset(poi, 0, malloc_size);
@@ -4474,11 +4489,11 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
         iptcdata_len++; /* make the length even */
       }
 
-      psheader[2] = (iptcdata_len+28)>>8;
-      psheader[3] = (iptcdata_len+28)&0xff;
+      psheader[2] = (iptcdata_len + sizeof(psheader)) >> 8;
+      psheader[3] = (iptcdata_len + sizeof(psheader)) & 0xff;
 
-      for (inx = 0; inx < 28; inx++) {
-        php_iptc_put1(file, spool, psheader[inx], poi?&poi:0);
+      for (inx = 0; inx < sizeof(psheader); inx++) {
+        php_iptc_put1(file, spool, psheader[inx], poi ? &poi : 0);
       }
 
       php_iptc_put1(file, spool, (unsigned char)(iptcdata_len>>8),

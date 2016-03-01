@@ -186,7 +186,8 @@ void throwUnexpectedEOB() {
 const StaticString
   s_unserialize("unserialize"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
-  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
+  s___wakeup("__wakeup");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -298,6 +299,11 @@ void VariableUnserializer::set(const char* buf, const char* end) {
 Variant VariableUnserializer::unserialize() {
   Variant v;
   unserializeVariant(v, this);
+
+  for (auto& obj : m_sleepingObjects) {
+    obj->invokeWakeup();
+  }
+
   return v;
 }
 
@@ -413,6 +419,10 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
 
 void VariableUnserializer::putInOverwrittenList(const Variant& v) {
   m_overwrittenList.append(v);
+}
+
+void VariableUnserializer::addSleepingObject(const Object& o) {
+  m_sleepingObjects.emplace_back(o);
 }
 
 bool VariableUnserializer::matchString(folly::StringPiece str) {
@@ -888,11 +898,13 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       }
       uns->expectChar('}');
 
-      if (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
-          (cls && cls->instanceCtor() && cls->isCppSerializable())) {
+      if (cls &&
+          cls->lookupMethod(s___wakeup.get()) &&
+          (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
+           (cls->instanceCtor() && cls->isCppSerializable()))) {
         // Don't call wakeup when unserializing for the debugger, except for
         // natively implemented classes.
-        obj->invokeWakeup();
+        uns->addSleepingObject(obj);
       }
 
       check_request_surprise_unlikely();

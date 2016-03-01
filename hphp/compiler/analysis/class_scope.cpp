@@ -51,7 +51,6 @@
 
 #include <folly/Conv.h>
 
-#include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <map>

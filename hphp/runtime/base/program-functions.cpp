@@ -1443,7 +1443,6 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
   if (vm.count("version")) {
-    readBuildInfo();
     cout << "HipHop VM";
     cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";

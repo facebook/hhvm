@@ -83,9 +83,6 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = true;
   Option::WholeProgram = false;
 
-  // Set our repo schema and compiler IDs.
-  readBuildInfo();
-
   rds::requestInit();
   std::string hhas;
   auto const slib = get_systemlib(&hhas);

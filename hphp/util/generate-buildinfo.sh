@@ -41,8 +41,6 @@ if [ -z "${COMPILER_ID}" ]; then
   COMPILER_ID=$(sh -c "$compiler")
 fi
 
-cd "${DIR}"
-
 ################################################################################
 
 # Compute a hash that can be used as a unique repo schema identifier.  The

@@ -173,8 +173,9 @@ def compute_additional_paths(options):
         options.fbcode_dir,
         options.code_dir
     )
-    options.test_dir = os.path.join(options.code_dir, 'test')
-    options.gen_file_dir = "%s/test" % options.install_dir
+    options.test_dir =\
+        os.path.join(options.fbcode_dir, 'hphp', 'hack', 'test', 'h2tp')
+    options.gen_file_dir = options.install_dir
     options.gen_file_path = os.path.join(
         options.gen_file_dir,
         options.gen_file_name

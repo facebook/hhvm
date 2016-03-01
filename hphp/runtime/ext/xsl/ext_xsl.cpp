@@ -369,7 +369,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   }
 
   obj = valuePop(ctxt);
-  if (obj->stringval == nullptr) {
+  if ((obj == nullptr) || (obj->stringval == nullptr)) {
     raise_warning("Handler name must be a string");
     xmlXPathFreeObject(obj);
     // Push an empty string to get an xslt result.

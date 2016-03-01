@@ -207,7 +207,7 @@ void NameValueTable::allocate(const size_t newCapac) {
   Elm* oldTab = m_table;
   const size_t oldMask = m_tabMask;
 
-  m_table = static_cast<Elm*>(req::calloc(sizeof(Elm), newCapac));
+  m_table = req::calloc_raw_array<Elm>(newCapac);
   m_tabMask = uint32_t(newCapac - 1);
 
   if (oldTab) {

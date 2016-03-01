@@ -77,6 +77,11 @@ template<class T> void destroy_raw(T* p);
 template<class T> T* make_raw_array(size_t count);
 template<class T> void destroy_raw_array(T* t, size_t count);
 
+/*
+ * Allocate an array of objects, memset to 0. Does *not* run any constructors.
+ */
+template<class T> T* calloc_raw_array(size_t count);
+
 //////////////////////////////////////////////////////////////////////
 
 // STL-style allocator for the request-heap allocator.  (Unfortunately we
@@ -187,6 +192,10 @@ void destroy_raw_array(T* t, size_t count) {
     t[i].~T();
   }
   req::free(t);
+}
+
+template<class T> T* calloc_raw_array(size_t count) {
+  return static_cast<T*>(req::calloc(count, sizeof(T)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

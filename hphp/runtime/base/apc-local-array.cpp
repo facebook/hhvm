@@ -68,9 +68,7 @@ const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
   } else {
     static_assert(KindOfUninit == 0, "must be 0 since we use req::calloc");
     unsigned cap = ad->m_arr->capacity();
-    ad->m_localCache = static_cast<TypedValue*>(
-      req::calloc(cap, sizeof(TypedValue))
-    );
+    ad->m_localCache = req::calloc_raw_array<TypedValue>(cap);
   }
   auto const tv = &ad->m_localCache[pos];
   tvAsVariant(tv) = sv->toLocal();

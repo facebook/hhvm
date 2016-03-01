@@ -2022,9 +2022,7 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
 Variant strtr_fast(const String& str, const Array& arr,
                    int minlen, int maxlen) {
   using PatternMask = uint64_t[256];
-  auto mask = static_cast<PatternMask*>(
-    req::calloc(maxlen, sizeof(PatternMask))
-  );
+  auto mask = req::calloc_raw_array<PatternMask>(maxlen);
   SCOPE_EXIT { req::free(mask); };
 
   int pattern_id = 0;

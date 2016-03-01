@@ -847,9 +847,9 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
 
 MySQLStmtVariables::MySQLStmtVariables(const Array& arr): m_arr(arr) {
   int count = m_arr.size();
-  m_vars   = (MYSQL_BIND*)req::calloc(count, sizeof(MYSQL_BIND));
-  m_null   = (my_bool*)req::calloc(count, sizeof(my_bool));
-  m_length = (unsigned long*)req::calloc(count, sizeof(unsigned long));
+  m_vars   = req::calloc_raw_array<MYSQL_BIND>(count);
+  m_null   = req::calloc_raw_array<my_bool>(count);
+  m_length = req::calloc_raw_array<unsigned long>(count);
 
   for (int i = 0; i < count; i++) {
     m_null[i] = false;
@@ -936,7 +936,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
     }
 
     if (b->buffer_length > 0) {
-      b->buffer = req::calloc(1, b->buffer_length);
+      b->buffer = req::calloc(b->buffer_length, 1);
     }
   }
   mysql_free_result(res);

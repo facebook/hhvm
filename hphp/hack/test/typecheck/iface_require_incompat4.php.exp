@@ -1,8 +1,16 @@
-File "iface_require_incompat4.php", line 13, characters 26-27:
-Incompatible trait/interface requirements (Typing[4110])
-File "iface_require_incompat4.php", line 10, characters 25-29:
+File "iface_require_incompat4.php", line 15, characters 11-12:
+This object is of type I3 (Typing[4110])
+File "iface_require_incompat4.php", line 15, characters 26-27:
+It is incompatible with this object of type I2
+because some declarations are incompatible.
+Read the following to see why:
+File "iface_require_incompat4.php", line 4, characters 10-11:
+Typing error
+File "iface_require_incompat4.php", line 12, characters 25-29:
 This is a float
-File "iface_require_incompat4.php", line 6, characters 25-27:
+File "iface_require_incompat4.php", line 4, characters 11-11:
+  via this generic T
+File "iface_require_incompat4.php", line 8, characters 25-27:
 It is incompatible with an int
-File "iface_require_incompat4.php", line 10, characters 25-29:
-Considering that this type argument is invariant with respect to Super
+File "iface_require_incompat4.php", line 4, characters 11-11:
+  via this generic T

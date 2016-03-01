@@ -9,3 +9,7 @@ interface I1 {
 trait T1 implements I1 {
   require extends Super<int>;
 }
+
+class Sub extends Super<int> {
+  use T1;
+}

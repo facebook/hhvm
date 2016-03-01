@@ -1286,7 +1286,7 @@ struct PropertyGetCmd : XDebugCommand {
   }
 
 private:
-  req::root<String> m_name;
+  String m_name;
   XDebugContext m_context = XDebugContext::LOCAL;
   int m_depth = 0; // desired stack depth
   int m_maxDepth = m_server.m_maxDepth; // max property depth
@@ -1371,9 +1371,9 @@ struct PropertySetCmd : XDebugCommand {
   }
 
 private:
-  req::root<String> m_symbol;
-  req::root<String> m_newValue;
-  req::root<Variant> m_type ; // datatype name
+  String m_symbol;
+  String m_newValue;
+  Variant m_type ; // datatype name
   int m_depth = 0; // desired stack depth
 };
 
@@ -1442,8 +1442,8 @@ struct SourceCmd : XDebugCommand {
   }
 
 private:
-  req::root<String> m_filename;
-  req::root<String> m_source;
+  String m_filename;
+  String m_source;
   int m_beginLine = 0;
   int m_endLine = -1;
 };

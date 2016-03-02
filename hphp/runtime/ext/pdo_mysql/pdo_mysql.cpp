@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/mysql/mysql_common.h"
+
 #include "hphp/runtime/ext/pdo_mysql/pdo_mysql.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -1134,12 +1136,12 @@ bool PDOMySqlStatement::getColumn(int colno, Variant &value) {
       return false;
     }
     len = m_out_length[colno];
-    value = String(ptr, len, CopyString);
+    value = mysql_makevalue( String(ptr, len, CopyString), m_fields[colno].type );
     return true;
   }
   ptr = m_current_data[colno];
   len = m_current_lengths[colno];
-  value = String(ptr, len, CopyString);
+  value = mysql_makevalue( String(ptr, len, CopyString), m_fields[colno].type );
   return true;
 }
 

@@ -1,0 +1,13 @@
+array(1) {
+  [0]=>
+  array(4) {
+    ["intField"]=>
+    string(3) "123"
+    ["floatField"]=>
+    string(7) "1234.57"
+    ["strField"]=>
+    string(9) "123214qwe"
+    ["calc"]=>
+    string(18) "10.037133193597562"
+  }
+}

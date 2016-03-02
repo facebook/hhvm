@@ -1,0 +1,13 @@
+array(1) {
+  [0]=>
+  array(4) {
+    ["intField"]=>
+    int(123)
+    ["floatField"]=>
+    float(1234.57)
+    ["strField"]=>
+    string(9) "123214qwe"
+    ["calc"]=>
+    float(10.037133193598)
+  }
+}

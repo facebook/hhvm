@@ -1,0 +1,20 @@
+<?php
+$drivers = PDO::getAvailableDrivers();
+
+if (!in_array('mysql', $drivers)) {
+  die("Skip. Driver not found");
+}
+
+$environmentVars = [
+  "MYSQL_TEST_HOST",
+  "MYSQL_TEST_PORT",
+  "MYSQL_TEST_USER",
+  "MYSQL_TEST_PASSWD",
+  "MYSQL_TEST_DB",
+];
+
+foreach ($environmentVars as $environmentVar) {
+ if (false === getenv($environmentVar)) {
+    die ("Skip. Environment variable $environmentVar is not set.");
+  }
+}

@@ -83,7 +83,9 @@ struct PDOPgSqlStatement : public PDOStatement {
       std::string strprintf(const char* format, T... args){
         int size = snprintf(nullptr, 0, format, args...);
         std::string str(size, '\0');
-        int actual_sz = snprintf(const_cast<char *>(str.c_str()), size + 1, format, args...);
+        int actual_sz = snprintf(
+          const_cast<char *>(str.c_str()), size + 1, format, args...
+        );
         if (actual_sz != size) {
           throw std::exception();
         }

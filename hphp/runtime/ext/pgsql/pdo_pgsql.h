@@ -25,7 +25,9 @@ namespace HPHP {
 struct PDOPgSql : public PDODriver {
   PDOPgSql();
   virtual req::ptr<PDOResource> createResourceImpl() override;
-  virtual req::ptr<PDOResource> createResource(const sp_PDOConnection& conn) override;
+  virtual req::ptr<PDOResource> createResource(
+    const sp_PDOConnection& conn
+  ) override;
 };
 
 long pdo_attr_lval(const Array& options, int opt, long defaultValue);
@@ -38,7 +40,9 @@ enum {
 };
 
 const StaticString
-  s_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT("PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT "),
+  s_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT(
+    "PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT"
+  ),
   s_PGSQL_ATTR_DISABLE_PREPARES("PGSQL_ATTR_DISABLE_PREPARES");
 }
 #endif

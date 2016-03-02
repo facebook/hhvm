@@ -23,7 +23,8 @@
 #undef PACKAGE_VERSION // pg_config defines it
 #include "pg_config.h" // needed for PG_VERSION
 
-#define HANDLE_ERROR(stmt, res) handleError(stmt, sqlstate(res), res.errorMessage())
+#define HANDLE_ERROR(stmt, res) \
+  handleError(stmt, sqlstate(res), res.errorMessage())
 
 void ReplaceStringInPlace(std::string& subject, const std::string& search,
     const std::string& replace) {
@@ -36,7 +37,8 @@ void ReplaceStringInPlace(std::string& subject, const std::string& search,
 
 /* For the convenience of drivers, this function will parse a data source
  * string, of the form "name=value; name2=value2" and populate variables
- * according to the data you pass in and array of pdo_data_src_parser structures */
+ * according to the data you pass in and array of pdo_data_src_parser structures
+ */
 struct pdo_data_src_parser {
   const char *optname;
   char *optval;
@@ -113,8 +115,8 @@ static int php_pdo_parse_data_source(const char *data_source,
 
 namespace HPHP {
 
-PDOPgSqlConnection::PDOPgSqlConnection() : m_server(nullptr), pgoid(InvalidOid) {
-}
+PDOPgSqlConnection::PDOPgSqlConnection() :
+  m_server(nullptr), pgoid(InvalidOid) {}
 
 PDOPgSqlConnection::~PDOPgSqlConnection(){
   if(m_server){
@@ -164,7 +166,11 @@ bool PDOPgSqlConnection::create(const Array &options){
   if(m_server->status() == CONNECTION_OK){
     return true;
   } else {
-    handleError(nullptr, PHP_PDO_PGSQL_CONNECTION_FAILURE_SQLSTATE, m_server->errorMessage());
+    handleError(
+      nullptr,
+      PHP_PDO_PGSQL_CONNECTION_FAILURE_SQLSTATE,
+      m_server->errorMessage()
+    );
     return false;
   }
 }
@@ -259,7 +265,8 @@ bool PDOPgSqlConnection::checkLiveness(){
 const char* PDOPgSqlConnection::sqlstate(PQ::Result& result){
   const char* sqlstate = result.errorField(PG_DIAG_SQLSTATE);
 
-  // Handle case where libpq doesn't return an SQLSTATE (eg. server connection lost)
+  // Handle case where libpq doesn't return an SQLSTATE
+  // (eg. server connection lost)
   if(sqlstate == nullptr){
     sqlstate = "XX000";
   }
@@ -267,19 +274,24 @@ const char* PDOPgSqlConnection::sqlstate(PQ::Result& result){
   return sqlstate;
 }
 
-bool PDOPgSqlConnection::quoter(const String& input, String &quoted, PDOParamType paramtype){
+bool PDOPgSqlConnection::quoter(
+    const String& input, String &quoted, PDOParamType paramtype
+  ){
   switch(paramtype){
     case PDO_PARAM_LOB:
       quoted = m_server->escapeByteA(input.data(), input.length());
       return true;
       break;
     default:
-      // http://www.postgresql.org/message-id/14249.1273943612@sss.pgh.pa.us + space for the two surrounding quotes
+      // http://www.postgresql.org/message-id/14249.1273943612@sss.pgh.pa.us +
+      // space for the two surrounding quotes
       std::unique_ptr<char[]> buffer(new char[input.length()*2+3]);
 
       buffer[0] = '\'';
       int error;
-      size_t written = m_server->escapeString(buffer.get()+1, input.c_str(), input.length()*2+1, &error);
+      size_t written = m_server->escapeString(
+          buffer.get()+1, input.c_str(), input.length()*2+1, &error
+      );
       if(error){
         return false;
       }
@@ -349,7 +361,10 @@ int PDOPgSqlConnection::getAttribute(int64_t attr, Variant &value){
           break;
 
         case CONNECTION_AUTH_OK:
-          value = String("Received authentication; waiting for backend start-up to finish.", CopyString);
+          value = String(
+            "Received authentication; waiting for backend start-up to finish.",
+            CopyString
+          );
           break;
 #ifdef CONNECTION_SSL_STARTUP
         case CONNECTION_SSL_STARTUP:
@@ -357,7 +372,9 @@ int PDOPgSqlConnection::getAttribute(int64_t attr, Variant &value){
           break;
 #endif
         case CONNECTION_SETENV:
-          value = String("Negotiating environment-driven parameter settings.", CopyString);
+          value = String(
+            "Negotiating environment-driven parameter settings.", CopyString
+          );
           break;
 
         case CONNECTION_BAD:
@@ -367,18 +384,25 @@ int PDOPgSqlConnection::getAttribute(int64_t attr, Variant &value){
       }
       break;
     case PDO_ATTR_SERVER_INFO: {
-                                 int spid = m_server->backendPID();
+        int spid = m_server->backendPID();
 
-                                 std::stringstream result;
-                                 result << "PID: " << spid << "; Client Encoding: " << m_server->parameterStatus("client_encoding");
-                                 result << "; Is Superusser: " << m_server->parameterStatus("is_superuser") << "; Session Authorization: ";
-                                 result << m_server->parameterStatus("session_authorization") << "; Date Style: " << m_server->parameterStatus("DateStyle");
+        std::stringstream result;
+        result << "PID: ";
+        result << spid;
+        result << "; Client Encoding: ";
+        result << m_server->parameterStatus("client_encoding");
+        result << "; Is Superusser: ";
+        result << m_server->parameterStatus("is_superuser");
+        result << "; Session Authorization: ";
+        result << m_server->parameterStatus("session_authorization");
+        result << "; Date Style: ";
+        result << m_server->parameterStatus("DateStyle");
 
-                                 value = String(result.str());
-                               }
-                               break;
+        value = String(result.str());
+      }
+      break;
     default:
-                               return 0;
+      return 0;
   }
 
   return 1;
@@ -386,15 +410,23 @@ int PDOPgSqlConnection::getAttribute(int64_t attr, Variant &value){
 
 bool PDOPgSqlConnection::fetchErr(PDOStatement *stmt, Array &info) {
   if (stmt == nullptr) {
-    info.append(m_lastExec == InvalidOid ? Variant(Variant::NullInit()) : Variant(m_lastExec));
-    info.append(err_msg.empty() ? Variant(Variant::NullInit()) : Variant(err_msg));
+    info.append(
+      m_lastExec == InvalidOid ?
+        Variant(Variant::NullInit()) :
+        Variant(m_lastExec)
+    );
+    info.append(
+      err_msg.empty() ? Variant(Variant::NullInit()) : Variant(err_msg)
+    );
     return true;
   } else {
     auto *s = static_cast<PDOPgSqlStatement *>(stmt);
     auto status = s->m_result.status();
     auto emsg = s->err_msg;
 
-    info.append(status == InvalidOid ? Variant(Variant::NullInit()) : Variant(status));
+    info.append(
+      status == InvalidOid ? Variant(Variant::NullInit()) : Variant(status)
+    );
     info.append(emsg.empty() ? Variant(Variant::NullInit()) : Variant(emsg));
     return true;
   }
@@ -414,7 +446,9 @@ bool PDOPgSqlConnection::support(SupportedMethod method){
   return true;
 }
 
-bool PDOPgSqlConnection::preparer(const String& sql, sp_PDOStatement *stmt, const Variant& options) {
+bool PDOPgSqlConnection::preparer(
+  const String& sql, sp_PDOStatement *stmt, const Variant& options
+  ) {
   auto rsrc = req::make<PDOPgSqlResource>(
       std::dynamic_pointer_cast<PDOPgSqlConnection>(shared_from_this()));
 
@@ -433,7 +467,9 @@ bool PDOPgSqlConnection::preparer(const String& sql, sp_PDOStatement *stmt, cons
   return false;
 }
 
-void PDOPgSqlConnection::handleError(PDOPgSqlStatement* stmt, const char* sqlState, const char* msg){
+void PDOPgSqlConnection::handleError(
+  PDOPgSqlStatement* stmt, const char* sqlState, const char* msg
+  ){
   PDOErrorType* err = &error_code;
   std::string* emsg = &err_msg;
   if(stmt != nullptr){

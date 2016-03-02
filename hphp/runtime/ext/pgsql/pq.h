@@ -232,7 +232,9 @@ struct Connection {
       return PQstatus(m_conn);
     }
 
-    PGTransactionStatusType transactionStatus() { return PQtransactionStatus(m_conn); }
+    PGTransactionStatusType transactionStatus() {
+      return PQtransactionStatus(m_conn);
+    }
 
     int protocolVersion() { return PQprotocolVersion(m_conn); }
 
@@ -249,7 +251,9 @@ struct Connection {
     }
     Result exec(const std::string &cmd) { return exec(cmd.c_str()); }
 
-    Result exec(const char *command, int nParams, const char * const *paramValues) {
+    Result exec(
+      const char *command, int nParams, const char * const *paramValues
+    ) {
       PGresult *res = PQexecParams(m_conn, command, nParams, nullptr,
           paramValues, nullptr, nullptr, 0);
       return Result(res);
@@ -259,17 +263,28 @@ struct Connection {
       return prepare(name, query, nParams, nullptr);
     }
 
-    Result prepare(const char *name, const char *query, int nParams, const Oid *paramTypes) {
+    Result prepare(
+      const char *name, const char *query, int nParams, const Oid *paramTypes
+    ) {
       PGresult *res = PQprepare(m_conn, name, query, nParams, paramTypes);
       return Result(res);
     }
 
-    Result execPrepared(const char *name, int nParams, const char * const *paramValues) {
+    Result execPrepared(
+      const char *name, int nParams, const char * const *paramValues
+    ) {
       return execPrepared(name, nParams, paramValues, nullptr, nullptr);
     }
 
-    Result execPrepared(const char *name, int nParams, const char * const *paramValues, const int *paramLengths, const int *paramFormats){
-      PGresult *res = PQexecPrepared(m_conn, name, nParams, paramValues, paramLengths, paramFormats, 0);
+    Result execPrepared(
+      const char *name,
+      int nParams,
+      const char * const *paramValues,
+      const int *paramLengths,
+      const int *paramFormats
+    ){
+      PGresult *res = PQexecPrepared(
+        m_conn, name, nParams, paramValues, paramLengths, paramFormats, 0);
       return Result(res);
 
     }
@@ -278,7 +293,8 @@ struct Connection {
       return (bool)PQsendQuery(m_conn, query);
     }
 
-    bool sendQuery(const char *command, int nParams, const char * const *paramValues) {
+    bool sendQuery(
+        const char *command, int nParams, const char * const *paramValues) {
       return (bool)PQsendQueryParams(m_conn, command, nParams, nullptr,
           paramValues, nullptr, nullptr, 0);
     }
@@ -287,8 +303,10 @@ struct Connection {
       return (bool)PQsendPrepare(m_conn, name, query, nParams, nullptr);
     }
 
-    bool sendQueryPrepared(const char *name, int nParams, const char * const *paramValues) {
-      return (bool)PQsendQueryPrepared(m_conn, name, nParams, paramValues, nullptr, nullptr, 0);
+    bool sendQueryPrepared(
+        const char *name, int nParams, const char * const *paramValues) {
+      return (bool)PQsendQueryPrepared(
+          m_conn, name, nParams, paramValues, nullptr, nullptr, 0);
     }
 
     Result result() {
@@ -304,10 +322,11 @@ struct Connection {
     }
 
     template<typename T>
-      PQnoticeProcessor setNoticeProcessor(void (*proc)(T*, const char *), T* arg) {
-        return PQsetNoticeProcessor(m_conn, (PQnoticeProcessor)proc,
-            static_cast<void *>(arg));
-      }
+    PQnoticeProcessor setNoticeProcessor(
+        void (*proc)(T*, const char *), T* arg) {
+      return PQsetNoticeProcessor(m_conn, (PQnoticeProcessor)proc,
+          static_cast<void *>(arg));
+    }
 
     int consumeInput() {
       return PQconsumeInput(m_conn);

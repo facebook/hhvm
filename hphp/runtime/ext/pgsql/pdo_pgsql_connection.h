@@ -42,7 +42,9 @@ struct PDOPgSqlConnection : public PDOConnection {
 
     virtual bool checkLiveness();
 
-    virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
+    virtual bool quoter(
+      const String& input, String &quoted, PDOParamType paramtype
+    );
 
     virtual bool support(SupportedMethod method);
 
@@ -55,7 +57,9 @@ struct PDOPgSqlConnection : public PDOConnection {
 
     String pgsqlLOBCreate();
 
-    bool preparer(const String& sql, sp_PDOStatement *stmt, const Variant& options) override;
+    bool preparer(
+      const String& sql, sp_PDOStatement *stmt, const Variant& options
+    ) override;
 
   private:
     PQ::Connection* m_server;
@@ -64,7 +68,9 @@ struct PDOPgSqlConnection : public PDOConnection {
     std::string err_msg;
     bool m_emulate_prepare;
     const char* sqlstate(PQ::Result& result);
-    void handleError(PDOPgSqlStatement* stmt, const char* sqlState, const char* msg);
+    void handleError(
+      PDOPgSqlStatement* stmt, const char* sqlState, const char* msg
+    );
     bool transactionCommand(const char* command);
     void testConnection();
 

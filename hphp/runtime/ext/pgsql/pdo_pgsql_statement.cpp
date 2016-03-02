@@ -20,14 +20,16 @@
 #include "pdo_pgsql.h"
 #include <iomanip>
 
-#define STMT_HANDLE_ERROR(res) (*m_conn).handleError(this, (*m_conn).sqlstate(res), res.errorMessage())
+#define STMT_HANDLE_ERROR(res) \
+  (*m_conn).handleError(this, (*m_conn).sqlstate(res), res.errorMessage())
 
 namespace HPHP {
 
 unsigned long PDOPgSqlStatement::m_stmtNameCounter = 0;
 unsigned long PDOPgSqlStatement::m_cursorNameCounter = 0;
-PDOPgSqlStatement::PDOPgSqlStatement(req::ptr<PDOPgSqlResource> conn, PQ::Connection* server)
-  : m_conn(conn->conn()), m_server(server),
+PDOPgSqlStatement::PDOPgSqlStatement(
+    req::ptr<PDOPgSqlResource> conn, PQ::Connection* server
+  ) : m_conn(conn->conn()), m_server(server),
   m_result(), m_isPrepared(false), m_current_row(0) {
     this->dbh = cast<PDOResource>(conn);
   }
@@ -46,7 +48,8 @@ void PDOPgSqlStatement::sweep(){
   }
 
   if(m_cursorName.size() > 0){
-    // Do we need a check here maybe to see if we've actually got a cursor or not?
+    // Do we need a check here maybe to see if we've actually got
+    // a cursor or not?
     std::stringstream ss;
     ss << "CLOSE " << m_cursorName;
     m_server->exec(ss.str());
@@ -58,7 +61,9 @@ void PDOPgSqlStatement::sweep(){
 bool PDOPgSqlStatement::create(const String& sql, const Array &options){
   supports_placeholders = PDO_PLACEHOLDER_NAMED;
 
-  bool scrollable = pdo_attr_lval(options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
+  bool scrollable = pdo_attr_lval(
+      options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY
+    ) == PDO_CURSOR_SCROLL;
 
   if(scrollable){
     m_cursorName = strprintf("pdo_crsr_%08x", ++m_cursorNameCounter);
@@ -71,7 +76,8 @@ bool PDOPgSqlStatement::create(const String& sql, const Array &options){
     supports_placeholders = PDO_PLACEHOLDER_NONE;
   }
 
-  if(supports_placeholders != PDO_PLACEHOLDER_NONE && m_server->protocolVersion() > 2){
+  if(supports_placeholders != PDO_PLACEHOLDER_NONE &&
+      m_server->protocolVersion() > 2){
     named_rewrite_template = "$%d";
     String nsql;
     int ret = pdo_parse_params(sp_PDOStatement(this), sql, nsql);
@@ -110,7 +116,8 @@ bool PDOPgSqlStatement::executer(){
     }
 
     std::stringstream q;
-    q << "DECLARE " << m_cursorName << " SCROLL CURSOR WITH HOLD FOR " << active_query_string.data();
+    q << "DECLARE " << m_cursorName;
+    q << " SCROLL CURSOR WITH HOLD FOR " << active_query_string.data();
 
     m_result = m_server->exec(q.str());
 
@@ -131,7 +138,12 @@ bool PDOPgSqlStatement::executer(){
   } else if(m_stmtName.size() > 0) {
     if(!m_isPrepared){
 stmt_retry:
-      m_result = m_server->prepare(m_stmtName.c_str(), m_resolvedQuery.c_str(), bound_params.size(), param_types.data());
+      m_result = m_server->prepare(
+        m_stmtName.c_str(),
+        m_resolvedQuery.c_str(),
+        bound_params.size(),
+        param_types.data()
+      );
 
       status = m_result.status();
       switch(status) {
@@ -141,7 +153,8 @@ stmt_retry:
           m_isPrepared = true;
           break;
         default:
-          // Read Zend implementation for this one. I am not sure if this applies to hhvm as well or not
+          // Read Zend implementation for this one. I am not sure if this
+          // applies to hhvm as well or not
           // but figure better leave it in here than not
           if(!strcmp(m_conn->sqlstate(m_result), "42P05")){
             std::stringstream q;
@@ -167,11 +180,19 @@ stmt_retry:
     }
 
     if(params.size() != bound_params.size()){
-      m_conn->handleError(this, "XX000", "Parameters not being bound correctly");
+      m_conn->handleError(
+        this, "XX000", "Parameters not being bound correctly"
+      );
       return false;
     }
 
-    m_result = m_server->execPrepared(m_stmtName.c_str(), bound_params.size(), params.data(), param_lengths.data(), param_formats.data());
+    m_result = m_server->execPrepared(
+      m_stmtName.c_str(),
+      bound_params.size(),
+      params.data(),
+      param_lengths.data(),
+      param_formats.data()
+    );
   } else {
     m_result = m_server->exec(active_query_string.data());
   }
@@ -261,7 +282,9 @@ bool PDOPgSqlStatement::fetcher(PDOFetchOrientation ori, long offset){
     if(!oriOk){
       return false;
     }
-    std::string q = strprintf("FETCH %s FROM %s", oriStr.c_str(), m_cursorName.c_str());
+    std::string q = strprintf(
+      "FETCH %s FROM %s", oriStr.c_str(), m_cursorName.c_str()
+    );
 
     m_result = m_server->exec(q);
     ExecStatusType status = m_result.status();
@@ -301,7 +324,9 @@ bool PDOPgSqlStatement::getColumnMeta(int64_t colno, Array &return_value){
 
   return_value.add(String("pgsql:oid"), (long)coltype);
 
-  std::string q = strprintf("SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", coltype);
+  std::string q = strprintf(
+    "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", coltype
+  );
 
   PQ::Result res = m_server->exec(q);
 
@@ -360,7 +385,9 @@ bool PDOPgSqlStatement::getColumn(int colno, Variant &value){
   }
 }
 
-bool PDOPgSqlStatement::paramHook(PDOBoundParam* param, PDOParamEvent event_type){
+bool PDOPgSqlStatement::paramHook(
+    PDOBoundParam* param, PDOParamEvent event_type
+  ){
   if(m_stmtName.size() > 0 && param->is_param){
     switch(event_type){
       case PDO_PARAM_EVT_FREE:
@@ -383,7 +410,9 @@ bool PDOPgSqlStatement::paramHook(PDOBoundParam* param, PDOParamEvent event_type
           } else {
             // resolve name
             if(bound_param_map.exists(param->name, true)){
-              param->paramno = atoi(bound_param_map[param->name].asCStrRef().data() + 1)-1;
+              param->paramno = atoi(
+                bound_param_map[param->name].asCStrRef().data() + 1
+              )-1;
             } else {
               m_conn->handleError(this, "HY093", param->name.data());
               return false;
@@ -426,12 +455,14 @@ bool PDOPgSqlStatement::paramHook(PDOBoundParam* param, PDOParamEvent event_type
             return false;
           }
 
-          if(PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || param->parameter.isNull()){
+          if(PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
+              param->parameter.isNull()){
             param_vals[param->paramno] = Variant(Variant::NullInit());
             param_ls[param->paramno] = 0;
           } else if(param->parameter.isBoolean()){
             // Sadly we need to convert this to a 'real' pgsql boolean literal, ie a string
-            param_vals[param->paramno] = param->parameter.asBooleanVal() ? Variant("t") : Variant("f");
+            param_vals[param->paramno] =
+              param->parameter.asBooleanVal() ? Variant("t") : Variant("f");
             param_ls[param->paramno] = 1;
             param_fs[param->paramno] = 0;
           } else {
@@ -454,9 +485,11 @@ bool PDOPgSqlStatement::paramHook(PDOBoundParam* param, PDOParamEvent event_type
     if(param->is_param){
       // Convert into a native pgsql boolean literal
       if(PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
-          ((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)){
+          ((param->param_type & PDO_PARAM_INPUT_OUTPUT) !=
+           PDO_PARAM_INPUT_OUTPUT)){
         param->param_type = PDO_PARAM_STR;
-        param->parameter = param->parameter.asBooleanVal() ? String("t") : String("f");
+        param->parameter =
+          param->parameter.asBooleanVal() ? String("t") : String("f");
       }
     }
   }

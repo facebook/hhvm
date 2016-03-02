@@ -53,7 +53,7 @@ struct SQLite3 {
 
 public:
   sqlite3 *m_raw_db;
-  req::vector<std::shared_ptr<UserDefinedFunc>> m_udfs;
+  req::vector<req::shared_ptr<UserDefinedFunc>> m_udfs;
   static Class *s_class;
   static const StaticString s_className;
 };
@@ -129,7 +129,7 @@ struct SQLite3Stmt {
 public:
   Object m_db;
   sqlite3_stmt *m_raw_stmt;
-  req::vector<std::shared_ptr<BoundParam>> m_bound_params;
+  req::vector<req::shared_ptr<BoundParam>> m_bound_params;
   static Class *s_class;
   static const StaticString s_className;
 };

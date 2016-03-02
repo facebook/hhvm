@@ -160,8 +160,8 @@ void ZendPack::pack(const Variant& val, int64_t size, int64_t *map,
 
 Variant ZendPack::pack(const String& fmt, const Array& argv) {
   /* Preprocess format into formatcodes and formatargs */
-  TinyVector<char, 64> formatcodes; // up to 64 codes on the stack
-  TinyVector<int, 64> formatargs;
+  req::TinyVector<char, 64> formatcodes; // up to 64 codes on the stack
+  req::TinyVector<int, 64> formatargs;
   int argc = argv.size();
 
   const char *format = fmt.c_str();

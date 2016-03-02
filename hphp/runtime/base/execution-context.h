@@ -635,7 +635,7 @@ public:
   req::vector<Unit*> m_createdFuncs;
   req::vector<Fault> m_faults;
   int m_lambdaCounter;
-  TinyVector<VMState, 32> m_nestedVMs;
+  req::TinyVector<VMState, 32> m_nestedVMs;
   int m_nesting;
   bool m_dbgNoBreak;
   bool m_unwindingCppException;

@@ -937,7 +937,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   bool updatePosAfterCompact = false;
   ElmKey mPos;
   bool hasStrongIters;
-  TinyVector<ElmKey,3> siKeys;
+  req::TinyVector<ElmKey,3> siKeys;
 
   // Prep work before beginning the compaction process
   if (LIKELY(!renumber)) {

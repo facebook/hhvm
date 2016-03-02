@@ -150,6 +150,7 @@ inline void ObjectData::instanceInit(Class* cls) {
 }
 
 inline Class* ObjectData::getVMClass() const {
+  assert(kindIsValid());
   return m_cls;
 }
 

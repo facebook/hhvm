@@ -933,20 +933,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   return ad;
 }
 
-namespace {
-struct ElmKey {
-  ElmKey() {}
-  ElmKey(int32_t hash, StringData* key)
-    : skey(key), hash(hash)
-  {}
-  union {
-    StringData* skey;
-    int64_t ikey;
-  };
-  int32_t hash;
-};
-}
-
 void MixedArray::compact(bool renumber /* = false */) {
   bool updatePosAfterCompact = false;
   ElmKey mPos;

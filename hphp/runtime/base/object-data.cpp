@@ -1014,6 +1014,16 @@ ObjectData::PropLookup<const TypedValue*> ObjectData::getProp(
 
 //////////////////////////////////////////////////////////////////////
 
+struct ObjectData::PropAccessInfo::Hash {
+  size_t operator()(PropAccessInfo const& info) const {
+    return folly::hash::hash_combine(
+      hash_int64(reinterpret_cast<intptr_t>(info.obj)),
+      info.key->hash(),
+      static_cast<uint32_t>(info.attr)
+    );
+  }
+};
+
 namespace {
 
 /*
@@ -1034,43 +1044,16 @@ namespace {
  * to a recursion error.
  */
 
-struct PropAccessInfo {
-  struct Hash;
-
-  bool operator==(const PropAccessInfo& o) const {
-    return obj == o.obj && attr == o.attr && key->same(o.key);
-  }
-
-  ObjectData* obj;
-  const StringData* key;      // note: not necessarily static
-  ObjectData::Attribute attr;
-};
-
-struct PropAccessInfo::Hash {
-  size_t operator()(PropAccessInfo const& info) const {
-    return folly::hash::hash_combine(
-      hash_int64(reinterpret_cast<intptr_t>(info.obj)),
-      info.key->hash(),
-      static_cast<uint32_t>(info.attr)
-    );
-  }
-};
-
-struct PropRecurInfo {
-  typedef req::hash_set<PropAccessInfo,PropAccessInfo::Hash> RecurSet;
-  const PropAccessInfo* activePropInfo;
-  RecurSet* activeSet;
-};
-
-__thread PropRecurInfo propRecurInfo;
+__thread ObjectData::PropRecurInfo propRecurInfo;
 
 template<class Invoker>
 bool magic_prop_impl(const StringData* key,
-                     const PropAccessInfo& info,
+                     const ObjectData::PropAccessInfo& info,
                      Invoker invoker) {
   if (UNLIKELY(propRecurInfo.activePropInfo != nullptr)) {
     if (!propRecurInfo.activeSet) {
-      propRecurInfo.activeSet = req::make_raw<PropRecurInfo::RecurSet>();
+      propRecurInfo.activeSet =
+        req::make_raw<ObjectData::PropRecurInfo::RecurSet>();
       propRecurInfo.activeSet->insert(*propRecurInfo.activePropInfo);
     }
     if (!propRecurInfo.activeSet->insert(info).second) {
@@ -1103,7 +1086,7 @@ bool magic_prop_impl(const StringData* key,
 struct MagicInvoker {
   TypedValue* retval;
   const StringData* magicFuncName;
-  const PropAccessInfo& info;
+  const ObjectData::PropAccessInfo& info;
 
   void operator()() const {
     auto const meth = info.obj->getVMClass()->lookupMethod(magicFuncName);

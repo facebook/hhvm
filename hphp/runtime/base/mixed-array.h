@@ -127,6 +127,18 @@ public:
     return sizeof(MixedArray);
   }
 
+  struct ElmKey {
+    ElmKey() {}
+    ElmKey(int32_t hash, StringData* key)
+        : skey(key), hash(hash)
+      {}
+    union {
+      StringData* skey;
+      int64_t ikey;
+    };
+    int32_t hash;
+  };
+
   /*
    * Initialize an empty small mixed array with given field. This should be
    * inlined.

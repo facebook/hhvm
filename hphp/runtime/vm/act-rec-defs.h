@@ -14,23 +14,36 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_BYTECODE_DEFS_H_
-#define incl_HPHP_VM_BYTECODE_DEFS_H_
+#ifndef incl_HPHP_ACT_REC_DEFS_H_
+#define incl_HPHP_ACT_REC_DEFS_H_
 
-#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/act-rec.h"
+
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
+
+#include "hphp/util/assertions.h"
+
+/*
+ * This is separate from act-rec-inl.h in order to keep the transitive header
+ * dependencies of act-rec.h as tight as possible.
+ *
+ * However, for performance reasons, we need to make sure certain functions get
+ * inlined.  Callers of these functions need to additionally include this file.
+ */
 
 namespace HPHP {
 
-bool isReturnHelper(void* address);
+///////////////////////////////////////////////////////////////////////////////
 
 inline void ActRec::setReturnVMExit() {
   assert(isReturnHelper(jit::mcg->ustubs().callToExit));
   m_sfp = nullptr;
-  m_savedRip =
-    reinterpret_cast<uintptr_t>(jit::mcg->ustubs().callToExit);
+  m_savedRip = reinterpret_cast<uintptr_t>(jit::mcg->ustubs().callToExit);
   m_soff = 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }
 

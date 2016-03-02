@@ -16,12 +16,13 @@
 #ifndef incl_HPHP_VM_EVENT_HOOK_H_
 #define incl_HPHP_VM_EVENT_HOOK_H_
 
-#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/vm/act-rec.h"
+
+#include "hphp/util/ringbuffer.h"
 
 #include <atomic>
 

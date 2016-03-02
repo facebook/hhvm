@@ -17,7 +17,10 @@
 #ifndef incl_HPHP_EXECUTION_CONTEXT_INL_H_
 #define incl_HPHP_EXECUTION_CONTEXT_INL_H_
 
+#include "hphp/runtime/vm/act-rec.h"
+
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void* ExecutionContext::operator new(size_t s) {
@@ -251,6 +254,7 @@ inline Variant ExecutionContext::invokeMethodV(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif

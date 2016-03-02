@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/bytecode-defs.h"
 
 #include <algorithm>
 #include <string>
@@ -92,6 +91,8 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/source-root-info.h"
 
+#include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -146,54 +147,6 @@ using jit::TCA;
 #define OPTBLD_FLT_INLINE   INLINE_FLATTEN
 #endif
 TRACE_SET_MOD(bcinterp);
-
-// Identifies the set of return helpers that we may set m_savedRip to in an
-// ActRec.
-bool isReturnHelper(void* address) {
-  auto tcAddr = reinterpret_cast<jit::TCA>(address);
-  auto& u = mcg->ustubs();
-  return tcAddr == u.retHelper ||
-         tcAddr == u.genRetHelper ||
-         tcAddr == u.asyncGenRetHelper ||
-         tcAddr == u.retInlHelper ||
-         tcAddr == u.callToExit;
-}
-
-bool isDebuggerReturnHelper(void* address) {
-  auto tcAddr = reinterpret_cast<jit::TCA>(address);
-  auto& u = mcg->ustubs();
-  return tcAddr == u.debuggerRetHelper ||
-         tcAddr == u.debuggerGenRetHelper ||
-         tcAddr == u.debuggerAsyncGenRetHelper;
-}
-
-ActRec* ActRec::sfp() const {
-  // Native frame? (used by enterTCHelper)
-  if (UNLIKELY(((uintptr_t)m_sfp - s_stackLimit) < s_stackSize)) {
-    return nullptr;
-  }
-
-  return m_sfp;
-}
-
-void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
-  assert(fp->func()->contains(pc));
-  assert(isReturnHelper(retAddr));
-  m_sfp = fp;
-  m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
-  m_soff = Offset(pc - fp->func()->getEntry());
-}
-
-void ActRec::setJitReturn(void* addr) {
-  FTRACE(1, "Replace m_savedRip in fp {}, {:#x} -> {}, func {}\n",
-         this, m_savedRip, addr, m_func->fullName()->data());
-  m_savedRip = reinterpret_cast<uintptr_t>(addr);
-}
-
-bool
-ActRec::skipFrame() const {
-  return m_func && m_func->isSkipFrame();
-}
 
 bool isVMFrame(const ActRec* ar) {
   assert(ar);

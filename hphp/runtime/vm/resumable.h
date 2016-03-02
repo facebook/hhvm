@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_VM_RESUMABLE_H_
 #define incl_HPHP_RUNTIME_VM_RESUMABLE_H_
 
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/native-data.h"

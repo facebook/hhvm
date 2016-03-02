@@ -24,17 +24,17 @@
 
 namespace PQ {
 
-class Connection;
+struct Connection;
 
-class Result {
+struct Result {
   public:
-    Result(){
+    Result() {
       m_res = nullptr;
     }
-    Result(const Result&) = delete;
+    explicit Result(const Result&) = delete;
     Result& operator=(const Result&) = delete;
 
-    Result(Result&& other) {
+    Result(Result&& other) noexcept {
       m_res = other.m_res;
       other.m_res = nullptr;
     }
@@ -61,7 +61,7 @@ class Result {
       }
     }
 
-    operator bool() const {
+    explicit operator bool() const {
       return (bool)m_res;
     }
 
@@ -144,10 +144,10 @@ class Result {
     PGresult *m_res;
 };
 
-class Connection {
+struct Connection {
   public:
     // Disable copying
-    Connection(const Connection&) = delete;
+    explicit Connection(const Connection&) = delete;
     Connection& operator=(const Connection&) = delete;
 
     explicit Connection(const char *conninfo) {
@@ -173,7 +173,7 @@ class Connection {
       }
     }
 
-    operator bool() const {
+    explicit operator bool() const {
       return (bool)m_conn;
     }
 

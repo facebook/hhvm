@@ -57,7 +57,7 @@ static struct PGSQLConnectionPoolContainer {
 
   public:
     PGSQLConnectionPoolContainer();
-    PGSQLConnectionPoolContainer(PGSQLConnectionPoolContainer const&);
+    explicit PGSQLConnectionPoolContainer(PGSQLConnectionPoolContainer const&);
     void operator=(PGSQLConnectionPoolContainer const&);
 
     ~PGSQLConnectionPoolContainer();
@@ -123,8 +123,8 @@ struct PGSQL : public SweepableResourceData {
   static req::ptr<PGSQL> Get(const Variant& conn_id);
 
   public:
-  PGSQL(String conninfo);
-  PGSQL(PGSQLConnectionPool& connectionPool);
+  explicit PGSQL(String conninfo);
+  explicit PGSQL(PGSQLConnectionPool& connectionPool);
   ~PGSQL();
 
   void ReleaseConnection();
@@ -636,7 +636,7 @@ struct CStringArray {
   std::vector<const char *> m_c_strs;
 
   public:
-  CStringArray(const Array& arr) {
+   explicit CStringArray(const Array& arr) {
     int size = arr.size();
 
     m_strings.reserve(size);
@@ -1195,7 +1195,8 @@ static bool HHVM_FUNCTION(pg_send_query, const Resource& connection, const Strin
       raise_notice("Could not empty PostgreSQL send buffer");
       break;
     }
-    usleep(5000);
+    // Sleep a little as Postgres hasn't received all of the async query
+    usleep(1000);
   }
 
   return true;
@@ -1250,7 +1251,8 @@ static bool HHVM_FUNCTION(pg_send_query_params, const Resource& connection, cons
       raise_notice("Could not empty PostgreSQL send buffer");
       break;
     }
-    usleep(5000);
+    // Sleep a little as Postgres hasn't received all of the async query
+    usleep(1000);
   }
 
   return true;

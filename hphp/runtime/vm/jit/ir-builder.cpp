@@ -119,7 +119,6 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   , m_curBlock(m_unit.entry())
   , m_constrainGuards(unit.context().kind != TransKind::Optimize)
 {
-  m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
@@ -198,7 +197,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
       m_state.finishBlock(oldBlock);
 
-      m_state.startBlock(m_curBlock);
+      m_state.startBlock(m_curBlock, false);
       where = m_curBlock->begin();
 
       FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
@@ -231,7 +230,7 @@ void IRBuilder::appendBlock(Block* block) {
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block);
+  m_state.startBlock(block, false);
   m_curBlock = block;
 }
 
@@ -988,7 +987,7 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
     BlockState { m_curBlock, m_curMarker, m_exnStack }
   );
   m_state.pauseBlock(m_curBlock);
-  m_state.startBlock(b);
+  m_state.startBlock(b, false);
   m_curBlock = b;
   m_curMarker = marker;
 

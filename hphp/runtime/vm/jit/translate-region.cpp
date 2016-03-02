@@ -795,7 +795,7 @@ TranslateResult irGenRegionImpl(IRGS& irgs,
           if (!callee->isCPPBuiltin()) {
             // Start a new IR block to hold the remainder of this block.
             auto const did_start =
-              irb.startBlock(returnBlock, false /* unprocessedPred */);
+              irb.startBlock(returnBlock, false /* hasUnprocPred */);
 
             // If the inlined region failed to contain any returns then the
             // rest of this block is dead- we could continue but there's no

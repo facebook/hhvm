@@ -549,7 +549,7 @@ SSATmp* clsMethodCtx(IRGS& env, const Func* callee, const Class* cls) {
   if (mustBeStatic) {
     return ldCls(env, cns(env, cls->name()));
   }
-  if (env.irb->thisAvailable()) {
+  if (env.irb->fs().thisAvailable()) {
     // might not be a static call and $this is available, so we know it's
     // definitely not static
     assertx(curClass(env));

@@ -533,7 +533,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
 
   if (!inl.canInlineAt(psk.srcKey, callee)) return nullptr;
 
-  auto const& fpiStack = irgs.irb->fpiStack();
+  auto const& fpiStack = irgs.irb->fs().fpiStack();
   // Make sure the FPushOp was in the region
   if (fpiStack.empty()) {
     return nullptr;
@@ -697,8 +697,8 @@ TranslateResult irGenRegionImpl(IRGS& irgs,
       }
       // HHIR may have figured the topFunc even though the RegionDesc
       // didn't know it.  When that happens, update topFunc.
-      if (!topFunc && !irb.fpiStack().empty()) {
-        auto& fpiInfo = irb.fpiStack().front();
+      if (!topFunc && !irb.fs().fpiStack().empty()) {
+        auto& fpiInfo = irb.fs().fpiStack().front();
         auto func = fpiInfo.func;
         if (func && func->isNameBindingImmutable(block->unit())) {
           topFunc = func;
@@ -929,7 +929,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
         FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
                mainExit->id(), show(irgs.unit));
         assertx(mainExit);
-        pConds = irgs.irb->postConds(mainExit);
+        pConds = irgs.irb->fs().postConds(mainExit);
       }
     } else {
       // Clear annotations from the failed attempt.

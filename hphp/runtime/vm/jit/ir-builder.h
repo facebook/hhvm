@@ -72,8 +72,14 @@ struct IRBuilder {
   IRBuilder(IRUnit&, BCMarker);
 
   /*
-   * Updates the marker used for instructions generated without one
-   * supplied.
+   * Accessors.
+   */
+  IRUnit& unit() const { return m_unit; }
+  FrameStateMgr& fs() { return m_state; }
+  BCMarker curMarker() const { return m_curMarker; }
+
+  /*
+   * Update the marker for instructions that were generated without one.
    */
   void setCurMarker(BCMarker);
 
@@ -101,38 +107,23 @@ struct IRBuilder {
   const ExnStackState& exceptionStackState() const { return m_exnStack; }
 
   /*
-   * The following functions are an abstraction layer we probably don't need.
-   * You can keep using them until we find time to remove them.
+   * Local and stack values and types.
+   *
+   * These simply constrain the local or stack slot, then delegate to fs().
    */
-  IRUnit& unit() const { return m_unit; }
-  FrameStateMgr& fs() { return m_state; }
-  BCMarker curMarker() const { return m_curMarker; }
-  const Func* curFunc() const { return m_state.func(); }
-  FPInvOffset spOffset() { return m_state.spOffset(); }
-  SSATmp* sp() const { return m_state.sp(); }
-  SSATmp* fp() const { return m_state.fp(); }
-  FPInvOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
-  bool thisAvailable() const { return m_state.thisAvailable(); }
-  void setThisAvailable() { m_state.setThisAvailable(); }
-  const jit::deque<FPIInfo>& fpiStack() const { return m_state.fpiStack(); }
-  Type localType(uint32_t id, TypeConstraint tc);
-  Type stackType(IRSPOffset, TypeConstraint tc);
-  Type predictedLocalType(uint32_t id) const;
-  Type predictedInnerType(uint32_t id) const;
-  Type predictedStackType(IRSPOffset) const;
-  Type predictedStackInnerType(IRSPOffset) const;
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   SSATmp* stackValue(IRSPOffset offset, TypeConstraint tc);
-  TypeSourceSet localTypeSources(uint32_t id) const {
-    return m_state.localTypeSources(id);
-  }
-  TypeSourceSet stackTypeSources(IRSPOffset offset) const {
-    return m_state.stackTypeSources(offset);
-  }
-  bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
-  const PostConditions& postConds(Block* b) const {
-    return m_state.postConds(b);
-  }
+  Type localType(uint32_t id, TypeConstraint tc);
+  Type stackType(IRSPOffset, TypeConstraint tc);
+
+  /*
+   * Helper for unboxing predicted types.
+   *
+   * @returns: ldRefReturn(fs().local(id).predictedType.unbox())
+   *           ldRefReturn(fs().stack(id).predictedType.unbox())
+   */
+  Type predictedInnerType(uint32_t id) const;
+  Type predictedStackInnerType(IRSPOffset) const;
 
   /*
    * Support for guard relaxation.

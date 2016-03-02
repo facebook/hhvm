@@ -45,7 +45,7 @@ void profiledGuard(IRGS& env,
       gen(env, CheckLoc, type, LocalId(id), failBlock, fp(env));
       return;
     case ProfGuard::CheckStk:
-      // Adjust 'id' to get an offset from the current m_irb->sp().
+      // Adjust 'id' to get an offset from the current m_irb->fs().sp().
       auto const adjOff = offsetFromIRSP(env, BCSPOffset{id});
       gen(env, CheckStk, type,
           RelOffsetData { BCSPOffset{id}, adjOff }, failBlock, sp(env));

@@ -56,7 +56,7 @@ std::string show(const IRGS& irgs) {
   const int32_t frameCells = irgen::resumed(irgs)
     ? 0
     : irgen::curFunc(irgs)->numSlotsInFrame();
-  auto const stackDepth = irgs.irb->syncedSpLevel().offset - frameCells;
+  auto const stackDepth = irgs.irb->fs().syncedSpLevel().offset - frameCells;
   assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
@@ -139,7 +139,7 @@ std::string show(const IRGS& irgs) {
                                     : irgs.irb->localType(i, DataTypeGeneric);
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
-    auto const predicted = irgs.irb->predictedLocalType(i);
+    auto const predicted = irgs.irb->fs().local(i).predictedType;
     if (predicted < localTy) str += folly::sformat(" (predict: {})", predicted);
 
     if (localTy <= TBoxedCell) {

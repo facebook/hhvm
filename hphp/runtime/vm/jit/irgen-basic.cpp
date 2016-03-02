@@ -290,7 +290,7 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
   }
   auto const ctx = gen(env, LdCtx, fp(env));
   if (subop == BareThisOp::NeverNull) {
-    env.irb->setThisAvailable();
+    env.irb->fs().setThisAvailable();
   } else {
     gen(env, CheckCtxThis, makeExitSlow(env), ctx);
   }

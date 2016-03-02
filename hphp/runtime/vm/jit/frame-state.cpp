@@ -747,7 +747,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
 
   if (base->inst()->is(LdStkAddr)) {
     auto const offset = base->inst()->extra<LdStkAddr>()->offset;
-    auto const prevTy = stackType(offset);
+    auto const prevTy = stack(offset).type;
     MInstrEffects effects(inst->op(), prevTy.ptr(Ptr::Stk));
 
     if (effects.baseTypeChanged || effects.baseValChanged) {
@@ -760,7 +760,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   } else if (base->inst()->is(LdLocAddr)) {
     if (isPM) return;
     auto const locId = base->inst()->extra<LdLocAddr>()->locId;
-    auto const baseType = localType(locId);
+    auto const baseType = local(locId).type;
 
     MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
     if (effects.baseTypeChanged || effects.baseValChanged) {
@@ -779,7 +779,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     // affected.
     if (base->type().maybe(TPtrToFrameGen) && !isPM) {
       for (size_t i = 0, n = cur().locals.size(); i < n; ++i) {
-        auto const oldType = localType(i);
+        auto const oldType = local(i).type;
         if (TGen <= oldType) {
           // Drop the value and don't bother with precise effects.
           setLocalType(i, oldType);
@@ -796,7 +796,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       auto end = cur().spOffset.offset - int32_t(cur().stack.size());
       for (auto i = begin; i > end; --i) {
         auto const irSP = IRSPOffset{i};
-        auto const oldType = stackType(irSP);
+        auto const oldType = stack(irSP).type;
         if (TStkElem <= oldType) {
           // Drop the value and don't bother with precise effects.
           setStackType(irSP, oldType);
@@ -884,8 +884,8 @@ void FrameStateMgr::collectPostConds(Block* block) {
       const auto bcSpRel = BCSPOffset{i};
       const auto fpRel   = bcSpOff - bcSpRel;
       const auto irSpRel = toIRSPOffset(bcSpRel, bcSpOff, irSpOff);
-      const auto type    = stackType(irSpRel);
-      const bool changed = stackMaybeChanged(irSpRel);
+      const auto type    = stack(irSpRel).type;
+      const bool changed = stack(irSpRel).maybeChanged;
       if (changed || type < TGen) {
         FTRACE(1, "Stack({}, {}): {} ({})\n", bcSpRel.offset, fpRel.offset,
                type, changed ? "changed" : "refined");
@@ -897,8 +897,8 @@ void FrameStateMgr::collectPostConds(Block* block) {
 
   if (fp() != nullptr) {
     for (unsigned i = 0; i < func()->numLocals(); i++) {
-      auto t = localType(i);
-      const bool changed = localMaybeChanged(i);
+      auto t = local(i).type;
+      const bool changed = local(i).maybeChanged;
       if (changed || t < TGen) {
         FTRACE(1, "Local {}: {} ({})\n", i, t.toString(),
                changed ? "changed" : "refined");
@@ -1122,54 +1122,17 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
   return it->second;
 }
 
-SSATmp* FrameStateMgr::localValue(uint32_t id) const {
+const LocalState& FrameStateMgr::local(uint32_t id) const {
   always_assert(id < cur().locals.size());
   auto const& local = cur().locals[id];
   assert(local.value == nullptr || local.value->type() == local.type);
-  return local.value;
+  return local;
 }
 
-TypeSourceSet FrameStateMgr::localTypeSources(uint32_t id) const {
-  always_assert(id < cur().locals.size());
-  return cur().locals[id].typeSrcs;
-}
-
-Type FrameStateMgr::localType(uint32_t id) const {
-  always_assert(id < cur().locals.size());
-  return cur().locals[id].type;
-}
-
-bool FrameStateMgr::localMaybeChanged(uint32_t id) const {
-  always_assert(id < cur().locals.size());
-  return cur().locals[id].maybeChanged;
-}
-
-Type FrameStateMgr::predictedLocalType(uint32_t id) const {
-  always_assert(id < cur().locals.size());
-  auto const ty = cur().locals[id].predictedType;
-  return ty;
-}
-
-Type FrameStateMgr::stackType(IRSPOffset offset) const {
-  return stackState(offset).type;
-}
-
-bool FrameStateMgr::stackMaybeChanged(IRSPOffset offset) const {
-  return stackState(offset).maybeChanged;
-}
-
-Type FrameStateMgr::predictedStackType(IRSPOffset offset) const {
-  return stackState(offset).predictedType;
-}
-
-SSATmp* FrameStateMgr::stackValue(IRSPOffset offset) const {
-  const auto& state = stackState(offset);
-  assert(state.value == nullptr || state.value->type() == state.type);
-  return state.value;
-}
-
-TypeSourceSet FrameStateMgr::stackTypeSources(IRSPOffset offset) const {
-  return stackState(offset).typeSrcs;
+const StackState& FrameStateMgr::stack(IRSPOffset offset) const {
+  auto const& stack = stackState(offset);
+  assert(stack.value == nullptr || stack.value->type() == stack.type);
+  return stack;
 }
 
 void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {

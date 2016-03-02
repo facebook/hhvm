@@ -141,19 +141,19 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     // to be recorded in side tables.
     if (inst->is(AssertLoc, CheckLoc, LdLoc)) {
       auto const locId = inst->extra<LocalId>()->locId;
-      m_constraints.typeSrcs[inst] = localTypeSources(locId);
+      m_constraints.typeSrcs[inst] = m_state.local(locId).typeSrcs;
       if (inst->is(AssertLoc, CheckLoc)) {
         m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
       }
     }
     if (inst->is(CheckStk)) {
       auto const offset = inst->extra<RelOffsetData>()->irSpOffset;
-      m_constraints.typeSrcs[inst] = stackTypeSources(offset);
+      m_constraints.typeSrcs[inst] = m_state.stack(offset).typeSrcs;
       m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
     }
     if (inst->is(AssertStk, LdStk)) {
       auto const offset = inst->extra<IRSPOffsetData>()->offset;
-      m_constraints.typeSrcs[inst] = stackTypeSources(offset);
+      m_constraints.typeSrcs[inst] = m_state.stack(offset).typeSrcs;
       if (inst->is(AssertStk)) {
         m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
       }
@@ -366,7 +366,7 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   // If the value has a single type-source instruction, pass it along to
   // preOptimizeAssertTypeOp, which may be able to use it to optimize away the
   // AssertStk.
-  auto const typeSrcInst = singleTypeSrcInst(stackTypeSources(offset));
+  auto const typeSrcInst = singleTypeSrcInst(m_state.stack(offset).typeSrcs);
 
   return preOptimizeAssertTypeOp(
     inst,
@@ -388,7 +388,7 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   // If the local has a single type-source instruction, pass it along
   // to preOptimizeAssertTypeOp, which may be able to use it to
   // optimize away the AssertLoc.
-  auto const typeSrcInst = singleTypeSrcInst(localTypeSources(locId));
+  auto const typeSrcInst = singleTypeSrcInst(m_state.local(locId).typeSrcs);
 
   return preOptimizeAssertTypeOp(
     inst,
@@ -642,7 +642,7 @@ void IRBuilder::exceptionStackBoundary() {
    * trace that the unwinder won't be able to see.
    */
   FTRACE(2, "exceptionStackBoundary()\n");
-  assertx(syncedSpLevel() == m_curMarker.spOff());
+  assertx(m_state.syncedSpLevel() == m_curMarker.spOff());
   m_exnStack.syncedSpLevel = m_state.syncedSpLevel();
   m_state.resetStackModified();
 }
@@ -789,7 +789,7 @@ bool IRBuilder::constrainLocal(uint32_t locId,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
   bool changed = false;
-  for (auto typeSrc : localTypeSources(locId)) {
+  for (auto typeSrc : m_state.local(locId).typeSrcs) {
     changed = constrainSlot(locId, typeSrc, tc, why + "Loc") || changed;
   }
   return changed;
@@ -798,7 +798,7 @@ bool IRBuilder::constrainLocal(uint32_t locId,
 bool IRBuilder::constrainStack(IRSPOffset offset, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
   auto changed = false;
-  for (auto typeSrc : stackTypeSources(offset)) {
+  for (auto typeSrc : m_state.stack(offset).typeSrcs) {
     changed = constrainSlot(offset.offset, typeSrc, tc, "Stk") || changed;
   }
   return changed;
@@ -873,43 +873,35 @@ bool IRBuilder::constrainSlot(int32_t idOrOffset,
 
 Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
   constrainLocal(id, tc, "localType");
-  return m_state.localType(id);
-}
-
-Type IRBuilder::predictedLocalType(uint32_t id) const {
-  return m_state.predictedLocalType(id);
+  return m_state.local(id).type;
 }
 
 Type IRBuilder::predictedInnerType(uint32_t id) const {
-  auto const ty = predictedLocalType(id);
+  auto const ty = m_state.local(id).predictedType;
   assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
-Type IRBuilder::predictedStackType(IRSPOffset offset) const {
-  return m_state.predictedStackType(offset);
-}
-
 Type IRBuilder::predictedStackInnerType(IRSPOffset offset) const {
-  auto const ty = predictedStackType(offset);
+  auto const ty =  m_state.stack(offset).predictedType;
   assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
 SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   constrainLocal(id, tc, "localValue");
-  return m_state.localValue(id);
+  return m_state.local(id).value;
 }
 
 SSATmp* IRBuilder::stackValue(IRSPOffset offset, TypeConstraint tc) {
-  auto const val = m_state.stackValue(offset);
+  auto const val = m_state.stack(offset).value;
   if (val) constrainValue(val, tc);
   return val;
 }
 
 Type IRBuilder::stackType(IRSPOffset offset, TypeConstraint tc) {
   constrainStack(offset, tc);
-  return m_state.stackType(offset);
+  return m_state.stack(offset).type;
 }
 
 void IRBuilder::setCurMarker(BCMarker newMarker) {
@@ -947,8 +939,8 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, hasUnprocessedPred);
-  always_assert(sp() != nullptr);
-  always_assert(fp() != nullptr);
+  always_assert(m_state.sp() != nullptr);
+  always_assert(m_state.fp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
          show(m_state));

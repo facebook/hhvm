@@ -182,11 +182,11 @@ void sealUnit(IRGS& env) {
 }
 
 Type predictedTypeFromLocal(const IRGS& env, uint32_t locId) {
-  return env.irb->predictedLocalType(locId);
+  return env.irb->fs().local(locId).predictedType;
 }
 
 Type predictedTypeFromStack(const IRGS& env, BCSPOffset offset) {
-  return env.irb->predictedStackType(offsetFromIRSP(env, offset));
+  return env.irb->fs().stack(offsetFromIRSP(env, offset)).predictedType;
 }
 
 // All accesses to the stack and locals in this function use DataTypeGeneric so
@@ -304,7 +304,7 @@ FPInvOffset logicalStackDepth(const IRGS& env) {
   // Negate the offsetFromIRSP because it is an offset from the actual StkPtr
   // (so negative values go deeper on the stack), but this function deals with
   // logical stack depths (where more positive values are deeper).
-  return env.irb->spOffset() - offsetFromIRSP(env, BCSPOffset{0});
+  return env.irb->fs().spOffset() - offsetFromIRSP(env, BCSPOffset{0});
 }
 
 Type publicTopType(const IRGS& env, BCSPOffset idx) {

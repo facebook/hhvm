@@ -59,7 +59,7 @@ bool beginInlining(IRGS& env,
                    Offset returnBcOffset,
                    Block* returnTarget,
                    bool multipleReturns) {
-  auto const& fpiStack = env.irb->fpiStack();
+  auto const& fpiStack = env.irb->fs().fpiStack();
 
   assertx(!fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");

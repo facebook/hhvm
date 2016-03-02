@@ -326,22 +326,11 @@ struct FrameStateMgr final {
   unsigned inlineDepth() const { return m_stack.size() - 1; }
 
   /*
-   * Access LocalState for local `id' in the most-inlined frame.
+   * Return the SlotState for local `id' or stack element at `off' in the
+   * most-inlined frame.
    */
-  SSATmp* localValue(uint32_t id) const;
-  Type localType(uint32_t id) const;
-  Type predictedLocalType(uint32_t id) const;
-  TypeSourceSet localTypeSources(uint32_t id) const;
-  bool localMaybeChanged(uint32_t id) const;
-
-  /*
-   * Access StackState for at the given offset in the most-inlined frame.
-   */
-  SSATmp* stackValue(IRSPOffset) const;
-  Type stackType(IRSPOffset) const;
-  Type predictedStackType(IRSPOffset) const;
-  TypeSourceSet stackTypeSources(IRSPOffset) const;
-  bool stackMaybeChanged(IRSPOffset) const;
+  const LocalState& local(uint32_t id) const;
+  const StackState& stack(IRSPOffset off) const;
 
   /*
    * Update the `predictedType' in the SlotState for the given local variable

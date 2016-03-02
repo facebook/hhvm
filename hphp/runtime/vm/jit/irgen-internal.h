@@ -41,8 +41,8 @@ TRACE_SET_MOD(hhir);
 //////////////////////////////////////////////////////////////////////
 // Convenient short-hand state accessors
 
-inline SSATmp* fp(const IRGS& env) { return env.irb->fp(); }
-inline SSATmp* sp(const IRGS& env) { return env.irb->sp(); }
+inline SSATmp* fp(const IRGS& env) { return env.irb->fs().fp(); }
+inline SSATmp* sp(const IRGS& env) { return env.irb->fs().sp(); }
 
 inline Offset bcOff(const IRGS& env) {
   return env.bcStateStack.back().offset();
@@ -79,7 +79,7 @@ inline Offset nextBcOff(const IRGS& env) {
 }
 
 inline FPInvOffset invSPOff(const IRGS& env) {
-  return env.irb->syncedSpLevel();
+  return env.irb->fs().syncedSpLevel();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
     SrcKey(curSrcKey(env), bcOff),
     stackOff,
     env.profTransID,
-    env.irb->fp()
+    env.irb->fs().fp()
   };
 }
 
@@ -271,12 +271,13 @@ inline SSATmp* assertType(SSATmp* tmp, Type type) {
 }
 
 inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset offsetFromInstr) {
-  auto const curSPTop = env.irb->syncedSpLevel();
-  auto const ret = toIRSPOffset(offsetFromInstr, curSPTop, env.irb->spOffset());
+  auto const curSPTop = env.irb->fs().syncedSpLevel();
+  auto const spOff = env.irb->fs().spOffset();
+  auto const ret = toIRSPOffset(offsetFromInstr, curSPTop, spOff);
   FTRACE(1,
     "offsetFromIRSP({}) --> spOff: {}, curTop: {}, ret: {}\n",
     offsetFromInstr.offset,
-    env.irb->spOffset().offset,
+    spOff.offset,
     curSPTop.offset,
     ret.offset
   );
@@ -284,12 +285,12 @@ inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset offsetFromInstr) {
 }
 
 inline BCSPOffset offsetFromBCSP(const IRGS& env, FPInvOffset offsetFromFP) {
-  auto const curSPTop = env.irb->syncedSpLevel();
+  auto const curSPTop = env.irb->fs().syncedSpLevel();
   return toBCSPOffset(offsetFromFP, curSPTop);
 }
 
 inline BCSPOffset offsetFromBCSP(const IRGS& env, IRSPOffset offsetFromIRSP) {
-  return offsetFromBCSP(env, env.irb->spOffset() - offsetFromIRSP);
+  return offsetFromBCSP(env, env.irb->fs().spOffset() - offsetFromIRSP);
 }
 
 inline SSATmp* pop(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
@@ -388,7 +389,7 @@ inline SSATmp* ldThis(IRGS& env) {
 }
 
 inline SSATmp* ldCtx(IRGS& env) {
-  if (env.irb->thisAvailable()) return ldThis(env);
+  if (env.irb->fs().thisAvailable()) return ldThis(env);
   return gen(env, LdCtx, fp(env));
 }
 
@@ -477,7 +478,8 @@ inline SSATmp* ldLoc(IRGS& env,
   env.irb->constrainLocal(locId, tc, opStr);
 
   if (curFunc(env)->isPseudoMain()) {
-    auto const type = relaxToGuardable(env.irb->predictedLocalType(locId));
+    auto const pred = env.irb->fs().local(locId).predictedType;
+    auto const type = relaxToGuardable(pred);
     assertx(!type.isSpecialized());
     assertx(type == type.dropConstVal());
 

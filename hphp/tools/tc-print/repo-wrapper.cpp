@@ -31,7 +31,10 @@ namespace HPHP { namespace jit {
 
 RepoWrapper::RepoWrapper(const char* repoSchema,
                          const std::string& configFile) {
-  overrideRepoSchemaId(repoSchema);
+  if (setenv("HHVM_RUNTIME_REPO_SCHEMA", repoSchema, 1 /* overwrite */)) {
+    fprintf(stderr, "Could not set repo schema");
+    exit(EXIT_FAILURE);
+  }
 
   printf("# Config file: %s\n", configFile.c_str());
   printf("# Repo schema: %s\n", repoSchemaId().begin());

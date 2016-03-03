@@ -23,7 +23,8 @@ namespace HPHP {
 
 /*
  * Version identifier for the hhbc repo schema.  Normally this is determined at
- * build-time, but it can be overridden at run-time.
+ * build-time, but it can be overridden at run-time via the
+ * HHVM_RUNTIME_REPO_SCHEMA environment variable.
  */
 folly::StringPiece repoSchemaId();
 
@@ -33,19 +34,6 @@ folly::StringPiece repoSchemaId();
  * in some cases.
  */
 folly::StringPiece compilerId();
-
-////////////////////////////////////////////////////////////////////////////////
-
-/*
- * Initializes the repo schema id and the compiler id from their special
- * sections in the hhvm binary.
- */
-void readBuildInfo();
-
-////////////////////////////////////////////////////////////////////////////////
-
-/* Overrides the repo schema id. */
-void overrideRepoSchemaId(folly::StringPiece);
 
 }
 

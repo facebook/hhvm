@@ -19,6 +19,8 @@
 #include "hphp/util/embedded-data.h"
 
 #include <folly/Range.h>
+#include <atomic>
+#include <mutex>
 #include <string>
 
 namespace HPHP {
@@ -26,24 +28,22 @@ namespace HPHP {
 
 namespace {
 
+std::atomic<bool> inited;
+std::mutex mtx;
 std::string repoSchema;
 std::string compiler;
 
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
-folly::StringPiece repoSchemaId() {
-  return repoSchema;
-}
-
-folly::StringPiece compilerId() {
-  return compiler;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
+/*
+ * Initializes the repo schema id and the compiler id from their special
+ * sections in the hhvm binary.
+ */
 void readBuildInfo() {
+  if (inited.load(std::memory_order_acquire)) return;
+  std::unique_lock<std::mutex> lock(mtx);
+  if (inited.load(std::memory_order_acquire)) return;
+
   auto const get = [&] (const char* section) -> std::string {
     auto constexpr bad = "(UNKNOWN)";
 
@@ -60,14 +60,29 @@ void readBuildInfo() {
     return data;
   };
 
-  repoSchema = get("repo_schema_id");
+  if (auto const env_schema = getenv("HHVM_RUNTIME_REPO_SCHEMA")) {
+    repoSchema = env_schema;
+  } else {
+    repoSchema = get("repo_schema_id");
+  }
+
   compiler = get("compiler_id");
+
+  inited.store(true, std::memory_order_release);
+}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void overrideRepoSchemaId(folly::StringPiece newId) {
-  repoSchema = newId.str();
+folly::StringPiece repoSchemaId() {
+  readBuildInfo();
+  return repoSchema;
+}
+
+folly::StringPiece compilerId() {
+  readBuildInfo();
+  return compiler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -33,8 +33,6 @@
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
-#include "hphp/util/build-info.h"
-
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/repo.h"
@@ -266,8 +264,6 @@ void compile_repo() {
 }
 
 int main(int argc, char** argv) try {
-  readBuildInfo();
-
   parse_options(argc, argv);
 
   if (fs::exists(output_repo)) {

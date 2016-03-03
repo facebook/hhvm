@@ -21,7 +21,6 @@
 #include "hphp/compiler/compiler.h"
 #include "hphp/hhbbc/hhbbc.h"
 
-#include "hphp/util/build-info.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
 #include "hphp/util/text-util.h"
@@ -30,7 +29,6 @@ int main(int argc, char** argv) {
   if (!argc) {
     return 0;
   }
-  HPHP::readBuildInfo();
   int len = strlen(argv[0]);
   if (len >= 4 && !strcmp(argv[0] + len - 4, "hphp")) {
     return HPHP::compiler_main(argc, argv);

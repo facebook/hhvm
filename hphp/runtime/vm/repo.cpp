@@ -48,10 +48,6 @@ void initialize_repo() {
   if (sqlite3_config(SQLITE_CONFIG_MEMSTATUS, 0) != SQLITE_OK) {
     TRACE(1, "Failed to disable SQLite memory statistics\n");
   }
-  if (auto const schemaOverride = getenv("HHVM_RUNTIME_REPO_SCHEMA")) {
-    TRACE(1, "Schema override: HHVM_RUNTIME_REPO_SCHEMA=%s\n", schemaOverride);
-    overrideRepoSchemaId(schemaOverride);
-  }
 }
 
 IMPLEMENT_THREAD_LOCAL(Repo, t_dh);

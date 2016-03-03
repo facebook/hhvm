@@ -584,7 +584,7 @@ public:
   }
 
   ALWAYS_INLINE
-  void pushStaticString(StringData* s) {
+  void pushStaticString(const StringData* s) {
     assert(s->isStatic()); // No need to call s->incRefCount().
     assert(m_top != m_elms);
     m_top--;

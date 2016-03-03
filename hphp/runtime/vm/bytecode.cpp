@@ -237,7 +237,7 @@ template<class T> T decode(PC& pc) {
   return v;
 }
 
-inline StringData* decode_litstr(PC& pc) {
+inline const StringData* decode_litstr(PC& pc) {
   auto id = decode<Id>(pc);
   return vmfp()->m_func->unit()->lookupLitstrId(id);
 }
@@ -3164,20 +3164,20 @@ OPTBLD_INLINE void iopFalse(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFile(IOP_ARGS) {
-  const StringData* s = vmfp()->m_func->unit()->filepath();
-  vmStack().pushStaticString(const_cast<StringData*>(s));
+  auto s = vmfp()->m_func->unit()->filepath();
+  vmStack().pushStaticString(s);
 }
 
 OPTBLD_INLINE void iopDir(IOP_ARGS) {
-  const StringData* s = vmfp()->m_func->unit()->dirpath();
-  vmStack().pushStaticString(const_cast<StringData*>(s));
+  auto s = vmfp()->m_func->unit()->dirpath();
+  vmStack().pushStaticString(s);
 }
 
 OPTBLD_INLINE void iopNameA(IOP_ARGS) {
   auto const cls  = vmStack().topA();
   auto const name = cls->name();
   vmStack().popA();
-  vmStack().pushStaticString(const_cast<StringData*>(name));
+  vmStack().pushStaticString(name);
 }
 
 OPTBLD_INLINE void iopInt(IOP_ARGS) {
@@ -3252,7 +3252,7 @@ OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   auto n = decode<uint32_t>(pc); // number of keys and elements
   assert(n > 0 && n <= StructArray::MaxMakeSize);
 
-  req::vector<StringData*> names;
+  req::vector<const StringData*> names;
   names.reserve(n);
 
   for (size_t i = 0; i < n; ++i) {
@@ -5660,7 +5660,7 @@ OPTBLD_INLINE void iopFPushObjMethodD(IOP_ARGS) {
   Class* cls = obj->getVMClass();
   // We handle decReffing obj in fPushObjMethodImpl
   vmStack().discard();
-  fPushObjMethodImpl(cls, name, obj, numArgs);
+  fPushObjMethodImpl(cls, const_cast<StringData*>(name), obj, numArgs);
 }
 
 template<bool forwarding>
@@ -5736,7 +5736,7 @@ OPTBLD_INLINE void iopFPushClsMethodD(IOP_ARGS) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
   ObjectData* obj = vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
-  pushClsMethodImpl<false>(cls, name, obj, numArgs);
+  pushClsMethodImpl<false>(cls, const_cast<StringData*>(name), obj, numArgs);
 }
 
 OPTBLD_INLINE void iopFPushClsMethodF(IOP_ARGS) {
@@ -6648,7 +6648,7 @@ OPTBLD_INLINE void iopInitThisLoc(IOP_ARGS) {
   }
 }
 
-static inline RefData* lookupStatic(StringData* name,
+static inline RefData* lookupStatic(const StringData* name,
                                     const ActRec* fp,
                                     bool& inited) {
   auto const func = fp->m_func;

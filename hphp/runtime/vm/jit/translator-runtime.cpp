@@ -59,7 +59,7 @@ const StaticString s_staticPrefix("86static_");
 
 // Defined here so it can be inlined below.
 RefData* lookupStaticFromClosure(ObjectData* closure,
-                                 StringData* name,
+                                 const StringData* name,
                                  bool& inited) {
   assertx(closure->instanceof(c_Closure::classof()));
   auto str = String::attach(

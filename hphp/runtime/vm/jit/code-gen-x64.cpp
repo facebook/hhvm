@@ -5122,7 +5122,7 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   StringData** table = mcg->allocData<StringData*>(sizeof(StringData*),
                                                       data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
-  MixedArray* (*f)(uint32_t, StringData**, const TypedValue*) =
+  MixedArray* (*f)(uint32_t, const StringData* const*, const TypedValue*) =
     &MixedArray::MakeStruct;
   cgCallHelper(
     vmain(),

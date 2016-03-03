@@ -175,7 +175,7 @@ public:
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */
-  static MixedArray* MakeStruct(uint32_t size, StringData** keys,
+  static MixedArray* MakeStruct(uint32_t size, const StringData* const* keys,
                                const TypedValue* values);
   static StructArray* MakeStructArray(uint32_t size, const TypedValue* values,
                                       Shape*);

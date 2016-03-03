@@ -230,7 +230,7 @@ newInstance(Class* cls) {
 
 // Returns a RefData* that is already incref'd.
 RefData* lookupStaticFromClosure(ObjectData* closure,
-                                 StringData* name,
+                                 const StringData* name,
                                  bool& inited);
 
 /*

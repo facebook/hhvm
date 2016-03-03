@@ -2518,8 +2518,6 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
             return ldcns<Vreg32, ldimml, xorl, int32_t>(ivl, dst, sf_live);
           case Vconst::Byte:
             return ldcns<Vreg8, ldimmb, xorb, uint8_t>(ivl, dst, sf_live);
-          case Vconst::ThreadLocal:
-            return load{Vptr{baseless(ivl->var->val.disp), Vptr::FS}, dst};
         }
         not_reached();
       }());

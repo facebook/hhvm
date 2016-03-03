@@ -36,16 +36,15 @@ namespace HPHP { namespace jit {
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
-bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
-  using namespace reg;
+bool checkSSA(const Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
+bool checkSSA(const Vunit& unit, jit::vector<Vlabel>& blocks) {
   using Bits = boost::dynamic_bitset<>;
 
   jit::vector<Bits> block_defs(unit.blocks.size()); // index by [Vlabel]
   Bits global_defs(unit.next_vr);
   Bits consts(unit.next_vr);
 
-  for (auto& c : unit.constToReg) {
+  for (auto const& c : unit.constToReg) {
     global_defs.set(c.second);
     consts.set(c.second);
   }
@@ -53,16 +52,16 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
     Bits local_defs;
     if (block_defs[b].empty()) {
       local_defs.resize(unit.next_vr);
-      for (auto& c : unit.constToReg) {
+      for (auto const& c : unit.constToReg) {
         local_defs.set(c.second);
       }
     } else {
       local_defs = block_defs[b];
     }
-    for (auto& inst : unit.blocks[b].code) {
+    for (auto const& inst : unit.blocks[b].code) {
       visitUses(unit, inst, [&](Vreg v) {
         assert_flog(v.isValid(), "invalid vreg used in B{}\n{}",
-                                 size_t(b), show(unit));
+                    size_t(b), show(unit));
         assert_flog(!v.isVirt() || local_defs[v],
                     "%{} used before def in B{}\n{}",
                     size_t(v), size_t(b), show(unit));
@@ -83,16 +82,20 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
         global_defs.set(v);
       });
     }
-    auto& block = unit.blocks[b];
-    auto lastOp = block.code.back().op;
+
+    auto const& block = unit.blocks[b];
+    auto const lastOp = block.code.back().op;
     if (lastOp == Vinstr::phijmp || lastOp == Vinstr::phijcc) {
       for (DEBUG_ONLY auto s : succs(block)) {
-        assert_flog(!unit.blocks[s].code.empty()
-          && unit.blocks[s].code.front().op == Vinstr::phidef,
+        assert_flog(
+          !unit.blocks[s].code.empty() &&
+            unit.blocks[s].code.front().op == Vinstr::phidef,
           "B{} ends in {} but successor B{} doesn't begin with phidef\n",
-          size_t(b), vinst_names[lastOp], size_t(s));
+          size_t(b), vinst_names[lastOp], size_t(s)
+        );
       }
     }
+
     for (auto s : succs(block)) {
       if (block_defs[s].empty()) {
         block_defs[s] = local_defs;
@@ -108,13 +111,13 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
  * Make sure syncpoint{}, nothrow{}, or unwind{} only appear immediately after
  * a call.
  */
-bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
-bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
-  for (auto b: blocks) {
+bool checkCalls(const Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
+bool checkCalls(const Vunit& unit, jit::vector<Vlabel>& blocks) {
+  for (auto const b : blocks) {
     bool unwind_valid = false;
     bool nothrow_valid = false;
     bool sync_valid = false;
-    for (auto& inst : unit.blocks[b].code) {
+    for (auto const& inst : unit.blocks[b].code) {
       switch (inst.op) {
         case Vinstr::call:
         case Vinstr::callm:
@@ -148,7 +151,6 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
 }
 
 struct FlagUseChecker {
-  VregSF& cur_sf;
   explicit FlagUseChecker(VregSF& sf) : cur_sf(sf) {}
   template<class T> void imm(const T&) {}
   template<class T> void def(T) {}
@@ -166,10 +168,10 @@ struct FlagUseChecker {
     assert(!r.isValid() || r.isSF() || r.isVirt());
     cur_sf = r;
   }
+  VregSF& cur_sf;
 };
 
 struct FlagDefChecker {
-  VregSF& cur_sf;
   explicit FlagDefChecker(VregSF& sf) : cur_sf(sf) {}
   template<class T> void imm(const T&) {}
   template<class T> void def(T) {}
@@ -186,6 +188,7 @@ struct FlagDefChecker {
     assertx(!cur_sf.isValid() || cur_sf == r);
     cur_sf = InvalidReg;
   }
+  VregSF& cur_sf;
 };
 
 const Abi sf_abi {

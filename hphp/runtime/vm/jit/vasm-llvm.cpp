@@ -642,9 +642,6 @@ struct LLVMEmitter {
             defineValue(pair.second, cnsDbl(pair.first.doubleVal));
           }
           break;
-        case Vconst::ThreadLocal:
-          always_assert(false);
-          break;
       }
     }
 

@@ -75,7 +75,7 @@ struct VcallArgs {
  * Also contains convenience constructors for various pointer and enum types.
  */
 struct Vconst {
-  enum Kind { Quad, Long, Byte, Double, ThreadLocal };
+  enum Kind { Quad, Long, Byte, Double };
 
   using ullong = unsigned long long;
   using ulong = unsigned long;
@@ -96,9 +96,6 @@ struct Vconst {
   explicit Vconst(long i)        : Vconst(ullong(i)) {}
   explicit Vconst(const void* p) : Vconst(uintptr_t(p)) {}
   explicit Vconst(double d)      : kind(Double), doubleVal(d) {}
-  explicit Vconst(Vptr tl)       : kind(ThreadLocal), disp(tl.disp) {
-    assertx(!tl.base.isValid() && !tl.index.isValid() && tl.seg == Vptr::FS);
-  }
 
   template<
     class E,
@@ -129,7 +126,6 @@ struct Vconst {
   union {
     uint64_t val;
     double doubleVal;
-    int64_t disp; // really, int32 offset from %fs
   };
 };
 

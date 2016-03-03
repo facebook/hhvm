@@ -170,12 +170,14 @@ ProxygenServer::ProxygenServer(
 
 int ProxygenServer::onTakeoverRequest(TakeoverAgent::RequestType type) {
   if (type == TakeoverAgent::RequestType::LISTEN_SOCKET) {
-    // TODO: don't pause here, wait for the TERMINATE message to take
-    // any action.  For now I'm copying broken LibEventServer
-    // behavior.
-    m_httpServerSocket->pauseAccepting();
+    // Subsequent calls to ProxygenServer::stop() won't do anything.
+    // The server continues accepting until RequestType::TERMINATE is
+    // seen.
+    setStatus(RunStatus::STOPPING);
   } else if (type == TakeoverAgent::RequestType::TERMINATE) {
     stopListening(true /*hard*/);
+    // No need to do m_takeover_agent->stop(), as the afdt server is
+    // going to be closed when this returns.
   }
   return 0;
 }
@@ -201,9 +203,8 @@ void ProxygenServer::start() {
   bool needListen = true;
   auto failedToListen = [](const std::exception& ex,
                            const folly::SocketAddress& addr) {
-    Logger::Error("%s", ex.what());
-    throw FailedToListenException(addr.getAddressStr(),
-                                  addr.getPort());
+    Logger::Error("failed to listen: %s", ex.what());
+    throw FailedToListenException(addr.getAddressStr(), addr.getPort());
   };
 
   try {
@@ -288,6 +289,7 @@ void ProxygenServer::start() {
 }
 
 void ProxygenServer::waitForEnd() {
+  if (getStatus() == RunStatus::STOPPED) return;
   Logger::Info("%p: Waiting for ProxygenServer port=%d", this, m_port);
   // m_worker.wait is always safe to call from any thread at any time.
   m_worker.wait();

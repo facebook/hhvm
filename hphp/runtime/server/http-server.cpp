@@ -182,17 +182,19 @@ void HttpServer::onServerShutdown() {
     Logger::Info("debugger server stopped");
   }
 
-  XboxServer::Stop();
-
   // When a new instance of HPHP has taken over our page server socket,
-  // stop our admin server and satellites so it can acquire those ports.
+  // stop our admin server and satellites so it can acquire those
+  // ports.
+  if (RuntimeOption::AdminServerPort) {
+    m_adminServer->stop();
+  }
   for (unsigned int i = 0; i < m_satellites.size(); i++) {
     std::string name = m_satellites[i]->getName();
     m_satellites[i]->stop();
     Logger::Info("satellite server %s stopped", name.c_str());
   }
+  XboxServer::Stop();
   if (RuntimeOption::AdminServerPort) {
-    m_adminServer->stop();
     m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");
   }
@@ -283,7 +285,8 @@ void HttpServer::runOrExitProcess() {
     createPid();
     Lock lock(this);
     BootTimer::done();
-    // continously running until /stop is received on admin server
+    // continously running until /stop is received on admin server, or
+    // takeover is requested.
     while (!m_stopped) {
       wait();
     }
@@ -295,10 +298,10 @@ void HttpServer::runOrExitProcess() {
       Logger::Info("page server killed");
       return;
     }
-    Logger::Info("stopping page server");
   }
 
   if (RuntimeOption::ServerPort) {
+    Logger::Info("stopping page server");
     m_pageServer->stop();
   }
   onServerShutdown();

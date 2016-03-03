@@ -1,0 +1,10 @@
+array(1) {
+  ["kind"]=>
+  int(1)
+}
+array(2) {
+  ["kind"]=>
+  int(1)
+  ["nullable"]=>
+  bool(true)
+}

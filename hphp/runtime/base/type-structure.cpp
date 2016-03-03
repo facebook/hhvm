@@ -611,6 +611,11 @@ Array resolveTS(const Array& arr,
         assert(typeCnsVal.exists(s_classname));
         clsName = typeCnsVal[s_classname].toCStrRef();
       }
+
+      if (arr.exists(s_nullable)) {
+        typeCnsVal.add(s_nullable, true_varNR);
+      }
+
       return typeCnsVal;
     }
     case TypeStructure::Kind::T_typevar: {

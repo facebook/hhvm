@@ -22,7 +22,6 @@ namespace HPHP {
 
 TEST(Config, HdfToIni) {
   EXPECT_EQ("hhvm.jit", Config::IniName("Eval.Jit"));
-  EXPECT_EQ("hhvm.jit_llvm", Config::IniName("Eval.JitLLVM"));
 
   EXPECT_EQ("hhvm.server.ssl_port", Config::IniName("Server.SSLPort"));
   EXPECT_EQ("max_file_uploads",

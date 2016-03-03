@@ -34,7 +34,6 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
-#include "hphp/runtime/vm/jit/vasm-llvm.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
@@ -81,148 +80,6 @@ size_t genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Print side-by-side code dumps comparing vasm output with LLVM.
- */
-void printLLVMComparison(const IRUnit& ir_unit,
-                         const Vunit& vasm_unit,
-                         const jit::vector<Varea>& areas,
-                         const CompareLLVMCodeGen* compare) {
-  auto const vasm_size = areas[0].code.frontier() - areas[0].start;
-  auto const percentage = compare->main_size * 100 / vasm_size;
-
-  // We accept a few different formats for the runtime option:
-  // - "all": print all tracelets
-  // - "<x": print when llvm code is < x% the size of vasm
-  // - ">x" or "x": print when llvm code is > x% the size of vasm
-  // - "=x": print when llvm code is = x% the size of vasm
-  folly::StringPiece mode(RuntimeOption::EvalJitLLVMCompare);
-  if (mode.empty()) return;
-  if (mode != "all") {
-    auto pred = '>';
-    switch (mode[0]) {
-      case '<':
-      case '=':
-      case '>':
-        pred = mode[0];
-        mode.pop_front();
-        break;
-
-      default:
-        break;
-    }
-    auto const threshold = folly::to<int>(mode);
-    if ((pred == '<' && percentage >= threshold) ||
-        (pred == '=' && percentage != threshold) ||
-        (pred == '>' && percentage <= threshold)) {
-      return;
-    }
-  }
-
-  Trace::ftraceRelease(
-    "{:-^121}\n{}\n{:-^121}\n{}\n{:-^121}\n{}\n",
-    folly::sformat(
-      " vasm: {} bytes | llvm: {} bytes | llvm is {}% of vasm",
-      vasm_size, compare->main_size, percentage
-    ),
-    show(ir_unit),
-    " vasm unit ",
-    show(vasm_unit),
-    " llvm IR ",
-    compare->llvm
-  );
-
-  auto const& llvmAreas = compare->disasm;
-  assert(llvmAreas.size() == areas.size());
-  Disasm disasm;
-
-  for (auto i = 0; i < kNumAreas; ++i) {
-    std::ostringstream vasmOut;
-    auto& area = areas[i];
-    disasm.disasm(vasmOut, area.start, area.code.frontier());
-    auto const vasmCode = vasmOut.str();
-
-    std::vector<folly::StringPiece> llvmLines, vasmLines;
-    folly::split('\n', llvmAreas[i], llvmLines);
-    folly::split('\n', vasmCode, vasmLines);
-
-    Trace::ftraceRelease("{:-^121}\n", folly::sformat(" area {} ", i));
-    for (auto llvmIt = llvmLines.begin(), vasmIt = vasmLines.begin();
-         llvmIt != llvmLines.end() || vasmIt != vasmLines.end(); ) {
-      folly::StringPiece llvmLine, vasmLine;
-      if (llvmIt != llvmLines.end()) {
-        llvmLine = *llvmIt;
-        ++llvmIt;
-      }
-      if (vasmIt != vasmLines.end()) {
-        vasmLine = *vasmIt;
-        ++vasmIt;
-      }
-      if (vasmLine.empty() && llvmLine.empty()) continue;
-
-      Trace::ftraceRelease("{:60.60} {:.60}\n", vasmLine, llvmLine);
-    }
-    Trace::ftraceRelease("\n");
-  }
-}
-
-void genLLVM(Vunit& vunit, Vtext& vtext, CGMeta& meta, CodeKind kind,
-             AsmInfo* ai, const IRUnit& unit) {
-  auto x64_unit = vunit;
-  auto vasm_size = std::numeric_limits<size_t>::max();
-
-  jit::vector<UndoMarker> undos = {UndoMarker(mcg->globalData())};
-  for (auto const& area : vtext.areas()) undos.emplace_back(area.code);
-
-  auto const resetCode = [&] {
-    for (auto& marker : undos) marker.undo();
-    meta.clear();
-  };
-  auto optimized = false;
-
-  // When EvalJitLLVMKeepSize is non-zero, we'll throw away the LLVM code and
-  // use vasm's output instead if the LLVM code is more than x% the size of the
-  // vasm code.  First we generate and throw away code with vasm, just to see
-  // how big it is.  The cost of this is trivial compared to the LLVM code
-  // generation.
-  if (RuntimeOption::EvalJitLLVMKeepSize) {
-    optimizeX64(x64_unit, abi(kind));
-    optimized = true;
-    emitX64(x64_unit, vtext, meta, nullptr);
-    vasm_size = vtext.main().code.frontier() - vtext.main().start;
-    resetCode();
-  }
-
-  try {
-    genCodeLLVM(vunit, vtext, meta);
-
-    auto const llvm_size = vtext.main().code.frontier() -
-                           vtext.main().start;
-    if (llvm_size * 100 / vasm_size > RuntimeOption::EvalJitLLVMKeepSize) {
-      throw FailedLLVMCodeGen("LLVM size {}, vasm size {}\n",
-                              llvm_size, vasm_size);
-    }
-  } catch (const FailedLLVMCodeGen& e) {
-    FTRACE_MOD(Trace::llvm, 1,
-               "LLVM codegen failed ({}); falling back to x64 backend\n",
-               e.what());
-    always_assert_flog(
-      RuntimeOption::EvalJitLLVM < 3,
-      "Mandatory LLVM codegen failed with reason `{}' on unit:\n{}",
-      e.what(), show(vunit)
-    );
-
-    mcg->setUseLLVM(false);
-    resetCode();
-    if (!optimized) optimizeX64(x64_unit, abi(kind));
-    emitX64(x64_unit, vtext, meta, ai);
-
-    if (auto compare = dynamic_cast<const CompareLLVMCodeGen*>(&e)) {
-      printLLVMComparison(unit, vunit, vtext.areas(), compare);
-    }
-  }
-}
 
 void genArch(Vunit& vunit, Vtext& vtext, CGMeta& meta,
              CodeKind kind, AsmInfo* ai) {
@@ -330,8 +187,7 @@ void genCodeImpl(const IRUnit& unit, CodeCache::View code,
 
   bool do_relocate = false;
 
-  if (!mcg->useLLVM() &&
-      !RuntimeOption::EvalEnableReusableTC &&
+  if (!RuntimeOption::EvalEnableReusableTC &&
       RuntimeOption::EvalJitRelocationSize &&
       cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
     // This is mainly to exercise the relocator, and ensure that its not broken
@@ -408,12 +264,7 @@ void genCodeImpl(const IRUnit& unit, CodeCache::View code,
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
 
-    if (mcg->useLLVM()) {
-      always_assert(arch() == Arch::X64);
-      genLLVM(vunit, vtext, meta, kind, ai, unit);
-    } else {
-      genArch(vunit, vtext, meta, kind, ai);
-    }
+    genArch(vunit, vtext, meta, kind, ai);
   }
 
   assertx(cold_in.frontier() == cold_start);

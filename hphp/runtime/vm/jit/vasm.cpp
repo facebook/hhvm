@@ -27,11 +27,6 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-rds::Link<uint64_t> g_bytecodesLLVM{rds::kInvalidHandle};
-rds::Link<uint64_t> g_bytecodesVasm{rds::kInvalidHandle};
-
-///////////////////////////////////////////////////////////////////////////////
-
 folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::callphp:     return {inst.callphp_.targets, 2};

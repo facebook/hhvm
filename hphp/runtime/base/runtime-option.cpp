@@ -451,24 +451,6 @@ static inline bool jitPseudomainDefault() {
   return !RuntimeOption::EvalSimulateARM;
 }
 
-/*
- * 0: never use LLVM
- * 1: use LLVM for TransOptimize translations
- * 2: use LLVM for all translations
- */
-static inline uint32_t jitLLVMDefault() {
-#ifdef HHVM_JIT_LLVM_BY_DEFAULT
-  return 2;
-#else
-  return 0;
-#endif
-}
-
-static inline bool jitLLVMSLPVectorizeDefault() {
-  return RuntimeOption::EvalJitLLVMOptLevel > 1 &&
-         RuntimeOption::EvalJitLLVMSizeLevel < 2;
-}
-
 static inline bool reuseTCDefault() {
   return hhvm_reuse_tc && !RuntimeOption::RepoAuthoritative;
 }

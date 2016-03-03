@@ -37,16 +37,6 @@ namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * LLVM catch traces expect vmfp to be in rdx.
- */
-inline RegSet syncForLLVMCatch(Vout& v) {
-  v << copy{rvmfp(), reg::rdx};
-  return RegSet{reg::rdx};
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us);
 TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us);
 TCA emitCallToExit(CodeBlock& cb);

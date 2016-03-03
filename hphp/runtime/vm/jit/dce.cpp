@@ -521,7 +521,6 @@ bool canDCE(IRInstruction* inst) {
   case BeginCatch:
   case EndCatch:
   case UnwindCheckSideExit:
-  case CountBytecode:
   case DbgTrashStk:
   case DbgTrashFrame:
   case DbgTrashMem:

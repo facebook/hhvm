@@ -342,7 +342,6 @@ TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
     v << jcci{CC_Z, sf2, done2, resumeCPPUnwind};
     v = done2;
 
-    // We need to do a syncForLLVMCatch(), but vmfp is already in rdx.
     v << jmpr{reg::rax};
   });
 }

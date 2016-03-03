@@ -61,7 +61,6 @@ struct TransRec {
   Offset                 bcStart;
   TransID                id;
   TransKind              kind;
-  bool                   isLLVM;
   bool                   hasLoop;
 
   TransRec() {}
@@ -79,7 +78,6 @@ struct TransRec {
              std::vector<TransBCMapping>(),
            Annotations&&               _annotations =
              Annotations(),
-           bool                        _isLLVM = false,
            bool                        _hasLoop = false);
 
   std::string print(uint64_t profCount) const;

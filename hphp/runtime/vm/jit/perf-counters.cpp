@@ -63,11 +63,6 @@ void getPerfCounters(Array& ret) {
 
     ret.set(String("jit_time_") + pair.first, pair.second.total);
   }
-
-  if (RuntimeOption::EvalJitLLVMCounters) {
-    ret.set(String("jit_instr_vasm"), *g_bytecodesVasm);
-    ret.set(String("jit_instr_llvm"), *g_bytecodesLLVM);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

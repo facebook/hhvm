@@ -67,7 +67,6 @@ struct Vunit;
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
-  O(countbytecode, Inone, U(base), D(sf))\
   O(debugtrap, Inone, Un, Dn)\
   O(fallthru, Inone, Un, Dn)\
   O(ldimmb, I(s), Un, D(d))\
@@ -438,11 +437,6 @@ struct retransopt {
 struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
-
-/*
- * Increment the bytecode counter at `base', which should be rvmtl().
- */
-struct countbytecode { Vreg base; VregSF sf; };
 
 /*
  * Cause any attached debugger to trap.

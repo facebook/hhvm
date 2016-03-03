@@ -1218,10 +1218,6 @@ void translateInstr(
   if (Stats::enableInstrCount()) {
     irgen::emitIncStat(irgs, Stats::opToTranslStat(ni.op()), 1);
   }
-  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
-      RuntimeOption::EvalJitLLVMCounters) {
-    irgen::gen(irgs, CountBytecode);
-  }
 
   if (isAlwaysNop(ni.op())) return;
   if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {

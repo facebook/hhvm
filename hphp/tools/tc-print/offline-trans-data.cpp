@@ -119,9 +119,6 @@ void OfflineTransData::loadTCData(string dumpDir) {
     }
 
     READ(" kind = %u %*s", &kind);
-    int isLLVM;
-    READ(" isLLVM = %d", &isLLVM);
-    tRec.isLLVM = isLLVM;
     int hasLoop;
     READ(" hasLoop = %d", &hasLoop);
     tRec.hasLoop = hasLoop;
@@ -327,7 +324,6 @@ void OfflineTransData::printTransRec(TransID transId,
 
   std::cout << folly::format(
     "  kind = {}\n"
-    "  isLLVM = {:d}\n"
     "  hasLoop = {:d}\n"
     "  aStart = {}\n"
     "  aLen = {:#x}\n"
@@ -336,7 +332,6 @@ void OfflineTransData::printTransRec(TransID transId,
     "  frozenStart = {}\n"
     "  frozenLen = {:#x}\n",
     show(tRec->kind),
-    tRec->isLLVM,
     tRec->hasLoop,
     tRec->aStart,
     tRec->aLen,

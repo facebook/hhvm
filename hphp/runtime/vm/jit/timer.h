@@ -49,10 +49,6 @@
   TIMER_NAME(vasm_lower)                        \
   TIMER_NAME(vasm_copy)                         \
   TIMER_NAME(vasm_optimize)                     \
-  TIMER_NAME(llvm)                              \
-  TIMER_NAME(llvm_irGeneration)                 \
-  TIMER_NAME(llvm_optimize)                     \
-  TIMER_NAME(llvm_codegen)                      \
 
 namespace HPHP { namespace jit {
 

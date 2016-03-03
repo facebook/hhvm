@@ -323,10 +323,6 @@ void liveRelocate(int time) {
     return;
   }
 
-  if (RuntimeOption::EvalJitLLVM) {
-    return;
-  }
-
   auto relocMap = mcg->debugInfo()->getRelocMap();
   if (!relocMap) return;
 

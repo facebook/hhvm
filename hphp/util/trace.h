@@ -137,8 +137,6 @@ namespace Trace {
       TM(jittime)       \
       TM(layout)        \
       TM(libxml)        \
-      TM(llvm)          \
-      TM(llvm_count)    \
       TM(mcg)           \
       TM(mcgstats)      \
       TM(minstr)        \

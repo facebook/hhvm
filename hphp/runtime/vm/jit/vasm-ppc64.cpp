@@ -1054,10 +1054,6 @@ void lowerForPPC64(Vout& v, popm& inst) {
   v << store{tmp, inst.d};
 }
 
-void lowerForPPC64(Vout& v, countbytecode& inst) {
-  v << incqm{inst.base[g_bytecodesVasm.handle()], inst.sf};
-}
-
 /////////////////////////////////////////////////////////////////////////////
 /*
  * PHP function ABI

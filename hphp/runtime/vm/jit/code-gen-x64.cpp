@@ -2189,9 +2189,6 @@ static CallSpec getDtorCallSpec(DataType type) {
 }
 
 static CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
-  // LLVM backend doesn't support CallSpec::Array
-  auto const llvm = mcg->useLLVM();
-
   static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
   static auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
   static auto const TApcArr = Type::Array(ArrayData::kApcKind);
@@ -2199,7 +2196,7 @@ static CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
   if (ty <= TPackedArr) return CallSpec::direct(PackedArray::Release);
   if (ty <= TMixedArr) return CallSpec::direct(MixedArray::Release);
   if (ty <= TApcArr) return CallSpec::direct(APCLocalArray::Release);
-  if (ty <= TArr && !llvm) return  CallSpec::array(&g_array_funcs.release);
+  if (ty <= TArr) return  CallSpec::array(&g_array_funcs.release);
 
   if (ty <= TObj && ty.clsSpec().cls()) {
     auto cls = ty.clsSpec().cls();
@@ -2309,8 +2306,7 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
   auto const rData = srcLoc(inst, 0).reg(0);
   auto const rType = srcLoc(inst, 0).reg(1);
   if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
-      profile && profile->optimizing() && !ty.isKnownDataType() &&
-      !mcg->useLLVM()) {
+      profile && profile->optimizing() && !ty.isKnownDataType()) {
     auto const data = profile->data(DecRefProfile::reduce);
     if (data.trydec == 0) {
       // This DecRef never saw a refcounted type during profiling, so call the
@@ -4485,9 +4481,8 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
 
   assertx(mcg->ustubs().interpOneCFHelpers.count(op));
 
-  // We pass the Offset in the third argument register.  This needs to be a
-  // 64-bit mov for now because LLVM exclusively uses i64 types.
-  v << ldimmq{pcOff, rarg(2)};
+  // We pass the Offset in the third argument register.
+  v << ldimml{pcOff, rarg(2)};
   v << jmpi{mcg->ustubs().interpOneCFHelpers.at(op),
             interp_one_cf_regs()};
 }
@@ -5260,11 +5255,6 @@ void CodeGenerator::cgRBTraceMsg(IRInstruction* inst) {
                  .immPtr(extra.msg->data())
                  .imm(extra.msg->size())
                  .imm(extra.type));
-}
-
-void CodeGenerator::cgCountBytecode(IRInstruction* inst) {
-  auto& v = vmain();
-  v << countbytecode{rvmtl(), v.makeReg()};
 }
 
 void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {

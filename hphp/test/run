@@ -340,8 +340,6 @@ function get_options($argv) {
     'log' => 'l',
     'failure-file:' => '',
     'arm' => '',
-    'llvm' => '',
-    'force-llvm' => '',
     'wholecfg' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
@@ -631,8 +629,6 @@ function mode_cmd($options) {
     case '':
     case 'jit':
       return "$jit_args";
-    case 'llvm':
-      return "$jit_args -vEval.JitLLVM=2";
     case 'pgo':
       return $jit_args.
         ' -vEval.JitPGO=1'.
@@ -662,9 +658,7 @@ function hhvm_cmd_impl() {
     '-vEval.EnableIntrinsicsExtension=true',
     mode_cmd($options),
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
-    isset($options['llvm']) ? '-vEval.JitLLVM=2' : '',
     isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
-    isset($options['require-llvm']) ? '-vEval.JitLLVM=3' : '',
     extra_args($options),
   );
 

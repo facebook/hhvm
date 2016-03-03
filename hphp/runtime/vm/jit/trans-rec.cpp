@@ -34,7 +34,6 @@ TransRec::TransRec(SrcKey                      _src,
                    RegionDescPtr               region,
                    std::vector<TransBCMapping> _bcMapping,
                    Annotations&&               _annotations,
-                   bool                        _isLLVM,
                    bool                        _hasLoop)
   : bcMapping(_bcMapping)
   , annotations(std::move(_annotations))
@@ -50,7 +49,6 @@ TransRec::TransRec(SrcKey                      _src,
   , bcStart(_src.offset())
   , id(0)
   , kind(_kind)
-  , isLLVM(_isLLVM)
   , hasLoop(_hasLoop)
 {
   if (funcName.empty()) funcName = "Pseudo-main";
@@ -176,7 +174,6 @@ TransRec::print(uint64_t profCount) const {
   folly::format(
     &ret,
     "  kind = {} ({})\n"
-    "  isLLVM = {:d}\n"
     "  hasLoop = {:d}\n"
     "  aStart = {}\n"
     "  aLen = {:#x}\n"
@@ -185,7 +182,7 @@ TransRec::print(uint64_t profCount) const {
     "  frozenStart = {}\n"
     "  frozenLen = {:#x}\n",
     static_cast<uint32_t>(kind), show(kind),
-    isLLVM, hasLoop,
+    hasLoop,
     aStart, aLen,
     acoldStart, acoldLen,
     afrozenStart, afrozenLen);

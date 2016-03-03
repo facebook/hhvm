@@ -732,10 +732,6 @@ void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower(Vunit& unit, countbytecode& inst, Vlabel b, size_t i) {
-  unit.blocks[b].code[i] = incqm{inst.base[g_bytecodesVasm.handle()], inst.sf};
-}
-
 void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   if (inst.saveframe) {
     unit.blocks[b].code[i] = push{rvmfp()};

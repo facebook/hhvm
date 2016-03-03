@@ -104,9 +104,6 @@ struct MCGenerator {
   FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
 
-  bool useLLVM() const { return m_useLLVM; }
-  void setUseLLVM(bool useLLVM) { m_useLLVM = useLLVM; }
-
   /*
    * Allocate a value in the global data section.
    */
@@ -357,10 +354,6 @@ private:
   FreeStubList m_freeStubs;
   // Map from integral literals to their location in the TC data section.
   LiteralMap m_literals;
-
-  // Used to tell the codegen backend when it should attempt to use LLVM, and
-  // to tell clients of the codegen backend when LLVM codegen succeeded.
-  bool m_useLLVM;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -40,16 +40,6 @@ struct Vtext;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * If Trace::moduleEnabled(Trace::llvm) || RuntimeOption::EvalJitLLVMCounters,
- * these two RDS values are used to count the number of bytecodes executed by
- * code emitted from their respective backends.
- */
-extern rds::Link<uint64_t> g_bytecodesLLVM;
-extern rds::Link<uint64_t> g_bytecodesVasm;
-
-///////////////////////////////////////////////////////////////////////////////
-
 #define DECLARE_VNUM(Vnum, check, prefix)                 \
 struct Vnum {                                             \
   Vnum() {}                                               \

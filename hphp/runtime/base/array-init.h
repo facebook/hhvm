@@ -166,7 +166,7 @@ struct ArrayInit {
           v.asInitCellTmp(), false);
       });
     } else if (!name.isNull()) {
-      performOp([&]{ return m_data->add(name.toKey(), v, false); });
+      performOp([&]{ return m_data->add(VarNR::MakeKey(name), v, false); });
     }
     return *this;
   }
@@ -212,7 +212,7 @@ struct ArrayInit {
         return MixedArray::SetRefStr(m_data, name.get(), v, false);
       });
     } else {
-      performOp([&]{ return m_data->setRef(name.toKey(), v, false); });
+      performOp([&]{ return m_data->setRef(VarNR::MakeKey(name), v, false); });
     }
     return *this;
   }

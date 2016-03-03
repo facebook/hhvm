@@ -361,7 +361,6 @@ public:
   int    toInt32  () const { return m_str ? m_str->toInt32  () : 0;}
   int64_t toInt64 () const { return m_str ? m_str->toInt64  () : 0;}
   double toDouble () const { return m_str ? m_str->toDouble () : 0;}
-  VarNR  toKey   () const;
   std::string toCppString() const { return std::string(c_str(), size()); }
 
   /**

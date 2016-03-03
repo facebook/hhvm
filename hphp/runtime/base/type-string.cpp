@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
@@ -339,19 +338,6 @@ String operator+(const String & lhs, const String & rhs) {
   if (lhs.empty()) return rhs;
   if (rhs.empty()) return lhs;
   return String::attach(StringData::Make(lhs.slice(), rhs.slice()));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// conversions
-
-VarNR String::toKey() const {
-  if (!m_str) return VarNR(staticEmptyString());
-  int64_t n = 0;
-  if (m_str->isStrictlyInteger(n)) {
-    return VarNR(n);
-  } else {
-    return VarNR(m_str.get());
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

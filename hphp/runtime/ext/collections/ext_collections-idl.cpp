@@ -1362,7 +1362,7 @@ Array HashCollection::t_toarray() {
         ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
       } else {
         assert(e->hasStrKey());
-        ai.set(String(StrNR(e->skey)).toKey(), tvAsCVarRef(&e->data));
+        ai.set(VarNR::MakeKey(String(StrNR(e->skey))), tvAsCVarRef(&e->data));
       }
     }
     Array arr = ai.toArray();

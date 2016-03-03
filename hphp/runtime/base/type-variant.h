@@ -1316,6 +1316,13 @@ private:
 // VarNR
 
 struct VarNR : private TypedValueAux {
+  static VarNR MakeKey(const String& s) {
+    if (s.empty()) return VarNR(staticEmptyString());
+    int64_t n;
+    if (s.get()->isStrictlyInteger(n)) return VarNR(n);
+    return VarNR(s);
+  }
+
   // Use to hold variant that do not need ref-counting
   explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
   explicit VarNR(int     v) { init(KindOfInt64  ); m_data.num = v;}

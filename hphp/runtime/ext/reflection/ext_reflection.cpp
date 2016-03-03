@@ -834,7 +834,7 @@ static Array get_function_user_attributes(const Func* func) {
 
   ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(String(StrNR(it->first)).toKey(), tvAsCVarRef(&it->second));
+    ai.set(VarNR::MakeKey(String(StrNR(it->first))), tvAsCVarRef(&it->second));
   }
   return ai.toArray();
 }

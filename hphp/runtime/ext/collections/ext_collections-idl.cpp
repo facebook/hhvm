@@ -2361,7 +2361,7 @@ BaseMap::php_takeWhile(const Variant& fn) {
         throw_collection_modified();
       }
     }
-    if (!b) continue;
+    if (!b) break;
     e = iter_elm(pos);
     if (e->hasIntKey()) {
       map->set(e->ikey, &e->data);
@@ -3808,7 +3808,7 @@ BaseSet::php_takeWhile(const Variant& fn) {
         throw_collection_modified();
       }
     }
-    if (!b) continue;
+    if (!b) break;
     e = &data()[i];
     if (e->hasIntKey()) {
       set->addRaw(e->data.m_data.num);

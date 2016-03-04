@@ -18,41 +18,50 @@
 #define incl_HPHP_REQ_ROOT_H_
 
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include <utility>
 
 namespace HPHP {
 struct IMarker;
 namespace req {
 
 /*
- * An explicitly-tracked root. subclasses of this can implement vscan()
- * and detach() methods so instances can be registered on construction,
- * scanned as needed, and de-registered on destruction.
+ * An explicitly-tracked root, registered on construction and de-registered
+ * on destruction. Subclasses of this implement vscan() and detach() methods
+ * so instances can be scanned as needed.
  * Warning: this extra tracking is expensive, and only necessary when
  * creating and destroying heap pointers in areas not already known
  * as roots (thread locals, stack, rds, ExecutionContext, etc).
  */
 struct root_handle {
   static constexpr size_t INVALID = -1LL;
-  root_handle() : m_id(addRootHandle()) {}
-
-  // root_handles must all be unique, so the copy-constructor just
-  // registers the new handle, and copy-assign is a nop.
-  root_handle(const root_handle&) : m_id(addRootHandle()) {}
-  root_handle& operator=(const root_handle&) {
-    return *this;
+  ALWAYS_INLINE bool enable() const {
+    return RuntimeOption::EvalEnableGC;
   }
+
+  root_handle()
+    : m_id(enable() ? addRootHandle() : INVALID)
+  {}
+
   // move construction takes over the old handle's id.
   root_handle(root_handle&& h) noexcept
-    : m_id(stealRootHandle(&h))
+    : m_id(h.m_id != INVALID ? stealRootHandle(&h) : INVALID)
   {}
-  // copy-assignment poaches the old handle's id if necessary.
+
+  // move-assignment poaches the old handle's id if necessary.
   root_handle& operator=(root_handle&& h) {
-    if (m_id == INVALID) m_id = stealRootHandle(&h);
+    if (m_id == INVALID && enable()) m_id = stealRootHandle(&h);
     return *this;
   }
+
+  // root_handles must all be unique; remove copy-construct and copy-assign
+  root_handle(const root_handle&) = delete;
+  root_handle& operator=(const root_handle&) = delete;
+
   virtual ~root_handle() {
     if (m_id != INVALID) delRootHandle();
   }
+
   void invalidate() {
     m_id = INVALID;
     detach();
@@ -71,15 +80,50 @@ private:
 // e.g. req::root<Array>, req::root<Variant>
 template<class T>
 struct root : T, root_handle {
-  root() = default;
-  /*implicit*/ root(const root<T>& other) = default;
-  template<class S> explicit root(S s)
-    : T(s)
+  root() : T(), root_handle() {}
+
+  // copy constructor
+  root(const root<T>& r)
+    : T(static_cast<const T&>(r)), root_handle()
   {}
-  template<class S> root<T>& operator=(const S& p) {
-    T::operator=(p);
+
+  // conversion constructor
+  template<class S> /* implicit */ root(const S& s)
+    : T(s), root_handle()
+  {}
+
+  // copy assign
+  root<T>& operator=(const root<T>& r) {
+    T::operator=(static_cast<const T&>(r));
     return *this;
   }
+
+  // converting assign from any type only deals with T
+  template<class S> root<T>& operator=(const S& s) {
+    T::operator=(s);
+    return *this;
+  }
+
+  // move ctors
+  root(root<T>&& r) noexcept
+    : T(std::move(r)), root_handle(std::move(r))
+  {}
+  /* implicit */ root(T&& t) noexcept
+    : T(std::move(t)), root_handle()
+  {}
+
+  // move assign
+  root<T>& operator=(root<T>&& r) {
+    T::operator=(std::move(static_cast<T&&>(r)));
+    root_handle::operator=(std::move(r));
+    return *this;
+  }
+  root<T>& operator=(T&& t) {
+    T::operator=(std::move(t));
+    return *this;
+  }
+
+  // implement root_handle
   void vscan(IMarker& mark) const override;
   void detach() override;
 };

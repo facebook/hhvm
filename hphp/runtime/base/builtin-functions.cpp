@@ -617,11 +617,11 @@ create_object(const String& s, const Array& params, bool init /* = true */) {
 }
 
 void throw_object(const Object& e) {
-  throw_object_inl(e);
+  throw req::root<Object>(e);
 }
 
 void throw_object(Object&& e) {
-  throw_object_inl(std::move(e));
+  throw req::root<Object>(std::move(e));
 }
 
 /*
@@ -1023,7 +1023,7 @@ void throw_exception(const Object& e) {
     raise_error("Exceptions must implement the Throwable interface.");
   }
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(e.get()));
-  throw_object(e);
+  throw req::root<Object>(e);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

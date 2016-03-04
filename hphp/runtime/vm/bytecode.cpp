@@ -4232,7 +4232,7 @@ OPTBLD_INLINE void iopThrow(IOP_ARGS) {
   auto obj = Object::attach(c1->m_data.pobj);
   vmStack().discard();
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(obj.get()));
-  throw_object_inl(std::move(obj));
+  throw req::root<Object>(std::move(obj));
 }
 
 OPTBLD_INLINE void iopAGetC(IOP_ARGS) {
@@ -7339,7 +7339,7 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
     }
   }
   if (LIKELY(wh->isFailed())) {
-    throw_object_inl(Object(wh->getException()));
+    throw req::root<Object>{wh->getException()};
   }
   if (wh->isSucceeded()) {
     cellSet(wh->getResult(), *vmStack().topC());

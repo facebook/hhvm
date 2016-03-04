@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/portability.h"
+#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +49,8 @@ String concat4(const String& s1, const String& s2, const String& s3,
 void NEVER_INLINE throw_invalid_property_name(const String& name);
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
+
+ATTRIBUTE_NORETURN
 void throw_exception(const Object& e);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,16 +142,6 @@ Object init_object(const String& s, const Array &params, ObjectData* o);
 
 ATTRIBUTE_NORETURN void throw_object(const Object& e);
 ATTRIBUTE_NORETURN void throw_object(Object&& e);
-
-ATTRIBUTE_NORETURN ALWAYS_INLINE
-void throw_object_inl(const Object& e) {
-  throw e;
-}
-
-ATTRIBUTE_NORETURN ALWAYS_INLINE
-void throw_object_inl(Object&& e) {
-  throw e;
-}
 
 ATTRIBUTE_NORETURN inline
 void throw_object(const String& s, const Array& params, bool init = true) {

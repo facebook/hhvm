@@ -32,7 +32,7 @@ size_t req::root_handle::addRootHandle() {
 }
 
 size_t req::root_handle::stealRootHandle(root_handle* s) {
-  if (s->m_id == INVALID) return INVALID;
+  assert(s->m_id != INVALID);
   auto& handles = MM().m_root_handles;
   auto id = s->m_id;
   handles[id] = this;

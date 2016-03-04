@@ -63,7 +63,7 @@ struct root_handle;
  * The object may be accessed with MM(), but higher-level apis are
  * also provided.
  *
- * The MemoryManager serves the following funcitons in hhvm:
+ * The MemoryManager serves the following functions in hhvm:
  *
  *   - Managing request-local memory.
  *

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-sort.h"
@@ -450,35 +451,29 @@ Variant HHVM_FUNCTION(array_map, const Variant& callback,
 
   // Handle the uncommon case where the caller passed a callback
   // and two or more containers
-  ArrayIter* iters =
-    (ArrayIter*)req::malloc(sizeof(ArrayIter) * (_argv.size() + 1));
-  size_t numIters = 0;
-  SCOPE_EXIT {
-    while (numIters--) iters[numIters].~ArrayIter();
-    req::free(iters);
-  };
+  req::vector<ArrayIter> iters;
+  iters.reserve(_argv.size() + 1);
   size_t maxLen = getContainerSize(cell_arr1);
-  (void) new (&iters[numIters]) ArrayIter(cell_arr1);
-  ++numIters;
-  for (ArrayIter it(_argv); it; ++it, ++numIters) {
+  iters.emplace_back(cell_arr1);
+  for (ArrayIter it(_argv); it; ++it) {
     const auto& c = *it.secondRefPlus().asCell();
     if (UNLIKELY(!isContainer(c))) {
       raise_warning("array_map(): Argument #%d should be an array or "
-                    "collection", (int)(numIters + 2));
-      (void) new (&iters[numIters]) ArrayIter(it.secondRefPlus().toArray());
+                    "collection", (int)(iters.size() + 2));
+      iters.emplace_back(it.secondRefPlus().toArray());
     } else {
-      (void) new (&iters[numIters]) ArrayIter(c);
+      iters.emplace_back(c);
       size_t len = getContainerSize(c);
       if (len > maxLen) maxLen = len;
     }
   }
   PackedArrayInit ret_ai(maxLen);
   for (size_t k = 0; k < maxLen; k++) {
-    PackedArrayInit params_ai(numIters);
-    for (size_t i = 0; i < numIters; ++i) {
-      if (iters[i]) {
-        params_ai.append(iters[i].secondRefPlus());
-        ++iters[i];
+    PackedArrayInit params_ai(iters.size());
+    for (auto& iter : iters) {
+      if (iter) {
+        params_ai.append(iter.secondRefPlus());
+        ++iter;
       } else {
         params_ai.append(init_null_variant);
       }
@@ -1848,8 +1843,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   assert(0 <= smallestPos);
   assert(smallestPos < count);
   // Allocate a TypedValue array and copy 'a' and the contents of 'argv'
-  TypedValue* containers =
-    (TypedValue*)req::malloc(count * sizeof(TypedValue));
+  TypedValue* containers = req::make_raw_array<TypedValue>(count);
   tvCopy(*a.asCell(), containers[0]);
   int pos = 1;
   for (ArrayIter argvIter(argv); argvIter; ++argvIter, ++pos) {

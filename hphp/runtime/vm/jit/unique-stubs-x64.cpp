@@ -140,14 +140,14 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
  * expects `tv' to be the address of a TypedValue with refcounted type `type'
  * (though it may be static, and we will do nothing in that case).
  *
- * The `saved' register should be a callee-saved GP register that the helper
- * can use to preserve `tv' across native calls.
+ * The `live' registers must be preserved across any native calls (and
+ * generally left untouched).
  */
 static TCA emitDecRefHelper(CodeBlock& cb, CGMeta& fixups, PhysReg tv,
                             PhysReg type, RegSet live) {
   return vwrap(cb, fixups, [&] (Vout& v) {
-    // We use the first argument register for the TV data because we may pass
-    // it to the release routine.  It's not live when we enter the helper.
+    // We use the first argument register for the TV data because we might pass
+    // it to the native release call.  It's not live when we enter the helper.
     auto const data = rarg(0);
     v << load{tv[TVOFF(m_data)], data};
 
@@ -160,7 +160,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, CGMeta& fixups, PhysReg tv,
       ifThen(v, CC_NE, sf, [&] (Vout& v) {
         // The refcount is greater than 1; decref it.
         v << declm{data[FAST_REFCOUNT_OFFSET], v.makeReg()};
-        v << ret{};
+        v << ret{live};
       });
 
       // Note that the stack is aligned since we called to this helper from an
@@ -179,7 +179,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, CGMeta& fixups, PhysReg tv,
     });
 
     // Either we did a decref, or the value was static.
-    v << ret{};
+    v << ret{live};
   });
 }
 

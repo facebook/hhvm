@@ -3489,7 +3489,7 @@ OPTBLD_INLINE void iopNot(IOP_ARGS) {
 }
 
 template<class Fn>
-OPTBLD_INLINE void implCellBinOp(PC& pc, Fn fn) {
+OPTBLD_INLINE void implCellBinOp(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const result = fn(*c2, *c1);
@@ -3499,7 +3499,7 @@ OPTBLD_INLINE void implCellBinOp(PC& pc, Fn fn) {
 }
 
 template<class Fn>
-OPTBLD_INLINE void implCellBinOpBool(PC& pc, Fn fn) {
+OPTBLD_INLINE void implCellBinOpBool(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   bool const result = fn(*c2, *c1);
@@ -3509,7 +3509,7 @@ OPTBLD_INLINE void implCellBinOpBool(PC& pc, Fn fn) {
 }
 
 template<class Fn>
-OPTBLD_INLINE void implCellBinOpInt64(PC& pc, Fn fn) {
+OPTBLD_INLINE void implCellBinOpInt64(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const result = fn(*c2, *c1);
@@ -3519,113 +3519,113 @@ OPTBLD_INLINE void implCellBinOpInt64(PC& pc, Fn fn) {
 }
 
 OPTBLD_INLINE void iopAdd(IOP_ARGS) {
-  implCellBinOp(pc, cellAdd);
+  implCellBinOp(cellAdd);
 }
 
 OPTBLD_INLINE void iopSub(IOP_ARGS) {
-  implCellBinOp(pc, cellSub);
+  implCellBinOp(cellSub);
 }
 
 OPTBLD_INLINE void iopMul(IOP_ARGS) {
-  implCellBinOp(pc, cellMul);
+  implCellBinOp(cellMul);
 }
 
 OPTBLD_INLINE void iopAddO(IOP_ARGS) {
-  implCellBinOp(pc, cellAddO);
+  implCellBinOp(cellAddO);
 }
 
 OPTBLD_INLINE void iopSubO(IOP_ARGS) {
-  implCellBinOp(pc, cellSubO);
+  implCellBinOp(cellSubO);
 }
 
 OPTBLD_INLINE void iopMulO(IOP_ARGS) {
-  implCellBinOp(pc, cellMulO);
+  implCellBinOp(cellMulO);
 }
 
 OPTBLD_INLINE void iopDiv(IOP_ARGS) {
-  implCellBinOp(pc, cellDiv);
+  implCellBinOp(cellDiv);
 }
 
 OPTBLD_INLINE void iopPow(IOP_ARGS) {
-  implCellBinOp(pc, cellPow);
+  implCellBinOp(cellPow);
 }
 
 OPTBLD_INLINE void iopMod(IOP_ARGS) {
-  implCellBinOp(pc, cellMod);
+  implCellBinOp(cellMod);
 }
 
 OPTBLD_INLINE void iopBitAnd(IOP_ARGS) {
-  implCellBinOp(pc, cellBitAnd);
+  implCellBinOp(cellBitAnd);
 }
 
 OPTBLD_INLINE void iopBitOr(IOP_ARGS) {
-  implCellBinOp(pc, cellBitOr);
+  implCellBinOp(cellBitOr);
 }
 
 OPTBLD_INLINE void iopBitXor(IOP_ARGS) {
-  implCellBinOp(pc, cellBitXor);
+  implCellBinOp(cellBitXor);
 }
 
 OPTBLD_INLINE void iopXor(IOP_ARGS) {
-  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) -> bool {
+  implCellBinOpBool([&] (Cell c1, Cell c2) -> bool {
     return cellToBool(c1) ^ cellToBool(c2);
   });
 }
 
 OPTBLD_INLINE void iopSame(IOP_ARGS) {
-  implCellBinOpBool(pc, cellSame);
+  implCellBinOpBool(cellSame);
 }
 
 OPTBLD_INLINE void iopNSame(IOP_ARGS) {
-  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
+  implCellBinOpBool([&] (Cell c1, Cell c2) {
     return !cellSame(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopEq(IOP_ARGS) {
-  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
+  implCellBinOpBool([&] (Cell c1, Cell c2) {
     return cellEqual(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopNeq(IOP_ARGS) {
-  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
+  implCellBinOpBool([&] (Cell c1, Cell c2) {
     return !cellEqual(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopLt(IOP_ARGS) {
-  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
+  implCellBinOpBool([&] (Cell c1, Cell c2) {
     return cellLess(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopLte(IOP_ARGS) {
-  implCellBinOpBool(pc, cellLessOrEqual);
+  implCellBinOpBool(cellLessOrEqual);
 }
 
 OPTBLD_INLINE void iopGt(IOP_ARGS) {
-  implCellBinOpBool(pc, [&] (Cell c1, Cell c2) {
+  implCellBinOpBool([&] (Cell c1, Cell c2) {
     return cellGreater(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopGte(IOP_ARGS) {
-  implCellBinOpBool(pc, cellGreaterOrEqual);
+  implCellBinOpBool(cellGreaterOrEqual);
 }
 
 OPTBLD_INLINE void iopCmp(IOP_ARGS) {
-  implCellBinOpInt64(pc, [&] (Cell c1, Cell c2) {
+  implCellBinOpInt64([&] (Cell c1, Cell c2) {
     return cellCompare(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopShl(IOP_ARGS) {
-  implCellBinOp(pc, cellShl);
+  implCellBinOp(cellShl);
 }
 
 OPTBLD_INLINE void iopShr(IOP_ARGS) {
-  implCellBinOp(pc, cellShr);
+  implCellBinOp(cellShr);
 }
 
 OPTBLD_INLINE void iopBitNot(IOP_ARGS) {
@@ -4394,7 +4394,7 @@ SpropState::~SpropState() {
   tvRefcountedDecRef(oldNameCell);
 }
 
-template<bool box> void getS(PC& pc) {
+template<bool box> void getS() {
   SpropState ss(vmStack());
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
@@ -4413,7 +4413,7 @@ template<bool box> void getS(PC& pc) {
 }
 
 OPTBLD_INLINE void iopCGetS(IOP_ARGS) {
-  getS<false>(pc);
+  getS<false>();
 }
 
 static inline MInstrState& initMState() {
@@ -4946,7 +4946,7 @@ OPTBLD_INLINE void iopVGetG(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopVGetS(IOP_ARGS) {
-  getS<true>(pc);
+  getS<true>();
 }
 
 OPTBLD_INLINE void iopIssetN(IOP_ARGS) {
@@ -5871,9 +5871,7 @@ OPTBLD_INLINE void iopFPushCufIter(IOP_ARGS) {
   setTypesFlag(ar);
 }
 
-OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
-  auto numArgs = decode_iva(pc);
-
+OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
   TypedValue func = vmStack().topTV()[safe];
 
   ObjectData* obj = nullptr;
@@ -5917,15 +5915,15 @@ OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
 }
 
 OPTBLD_INLINE void iopFPushCuf(IOP_ARGS) {
-  doFPushCuf(pc, false, false);
+  doFPushCuf(decode_iva(pc), false, false);
 }
 
 OPTBLD_INLINE void iopFPushCufF(IOP_ARGS) {
-  doFPushCuf(pc, true, false);
+  doFPushCuf(decode_iva(pc), true, false);
 }
 
 OPTBLD_INLINE void iopFPushCufSafe(IOP_ARGS) {
-  doFPushCuf(pc, false, true);
+  doFPushCuf(decode_iva(pc), false, true);
 }
 
 OPTBLD_INLINE void iopFPassC(IOP_ARGS) {
@@ -6238,7 +6236,7 @@ OPTBLD_INLINE void iopCufSafeReturn(IOP_ARGS) {
   vmStack().ndiscard(2);
 }
 
-inline bool initIterator(PC& pc, PC& origPc, Iter* it,
+inline bool initIterator(PC& pc, PC origPc, Iter* it,
                          Offset offset, Cell* c1) {
   bool hasElems = it->init(c1);
   if (!hasElems) {
@@ -6732,7 +6730,7 @@ OPTBLD_INLINE void iopVerifyParamType(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void implVerifyRetType(PC& pc) {
+OPTBLD_INLINE void implVerifyRetType() {
   if (LIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
     return;
   }
@@ -6746,11 +6744,11 @@ OPTBLD_INLINE void implVerifyRetType(PC& pc) {
 }
 
 OPTBLD_INLINE void iopVerifyRetTypeC(IOP_ARGS) {
-  implVerifyRetType(pc);
+  implVerifyRetType();
 }
 
 OPTBLD_INLINE void iopVerifyRetTypeV(IOP_ARGS) {
-  implVerifyRetType(pc);
+  implVerifyRetType();
 }
 
 OPTBLD_INLINE TCA iopNativeImpl(IOP_ARGS) {
@@ -7064,7 +7062,8 @@ OPTBLD_INLINE void iopContEnterDelegate(IOP_ARGS) {
   EventHook::FunctionResumeYield(vmfp());
 }
 
-OPTBLD_INLINE TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
+OPTBLD_INLINE
+TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
   auto fp = vmfp();
 
   assert(tvIsGenerator(gen->m_delegate));
@@ -7092,7 +7091,8 @@ OPTBLD_INLINE TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
+OPTBLD_INLINE
+TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
   auto fp = vmfp();
 
   // For the most part this should never happen, the emitter assigns our

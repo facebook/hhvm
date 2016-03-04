@@ -1608,6 +1608,16 @@ void emitIdx(IRGS& env) {
   auto const keyType  = key->type();
   auto const baseType = base->type();
 
+  if (keyType <= TNull || !baseType.maybe(TArr | TObj | TStr)) {
+    auto const def = popC(env, DataTypeGeneric);
+    popC(env, keyType <= TNull ? DataTypeSpecific : DataTypeGeneric);
+    popC(env, keyType <= TNull ? DataTypeGeneric : DataTypeSpecific);
+    push(env, def);
+    decRef(env, base);
+    decRef(env, key);
+    return;
+  }
+
   auto const simple_key =
     keyType <= TInt || keyType <= TStr;
 

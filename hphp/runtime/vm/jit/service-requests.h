@@ -295,21 +295,7 @@ static_assert(sizeof(ReqInfo) == 0x30,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // svcreq
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Service request assembly stub.
- *
- * Called by translated code before a service request to pack argument
- * registers into a ReqInfo and perform some other bookkeeping tasks.
- */
-extern "C" void handleSRHelper();
-
-///////////////////////////////////////////////////////////////////////////////
-
-}}
+}}}
 
 #include "hphp/runtime/vm/jit/service-requests-inl.h"
 

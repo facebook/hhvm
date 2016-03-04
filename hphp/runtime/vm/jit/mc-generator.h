@@ -214,15 +214,7 @@ public:
    * target or other address in the code, and returning the smashed-in value.
    * This address indicates where the caller should resume execution.
    */
-  TCA handleServiceRequest(svcreq::ReqInfo& info) noexcept
-#ifdef _MSC_VER
-    // For MSVC, we've had to hard-code the mangled name,
-    // because we can't explicitly set it like we can with
-    // GCC/Clang :(
-    ;
-#else
-    asm("MCGenerator_handleServiceRequest");
-#endif
+  TCA handleServiceRequest(svcreq::ReqInfo& info) noexcept;
 
   /*
    * Handle a bindcall request---i.e., look up (or create) the appropriate func

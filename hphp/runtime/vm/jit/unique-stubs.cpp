@@ -871,6 +871,47 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitHandleSRHelper(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [] (Vout& v) {
+    storeVMRegs(v);
+
+    // Pack the service request args into a svcreq::ReqInfo on the stack.
+    for (auto i = svcreq::kMaxArgs; i-- > 0; ) {
+      v << push{r_svcreq_arg(i)};
+    }
+    v << push{r_svcreq_stub()};
+    v << push{r_svcreq_req()};
+
+    // Call mcg->handleServiceRequest(rsp()).
+    auto const args = VregList { v.makeReg(), v.makeReg() };
+    loadMCG(v, args[0]);
+    v << copy{rsp(), args[1]};
+
+    auto const meth = &MCGenerator::handleServiceRequest;
+    auto const ret = v.makeReg();
+
+    v << vcall{
+      CallSpec::method(meth),
+      v.makeVcallArgs({args}),
+      v.makeTuple({ret}),
+      Fixup{},
+      DestType::SSA
+    };
+
+    // Pop the ReqInfo off the stack.
+    auto const reqinfo_sz = static_cast<int>(sizeof(svcreq::ReqInfo));
+    v << lea{rsp()[reqinfo_sz], rsp()};
+
+    // rvmtl() was preserved by the callee, but rvmsp() and rvmfp() might've
+    // changed if we interpreted anything.  Reload them.
+    loadVMRegs(v);
+
+    v << jmpr{ret};
+  });
+}
+
 TCA emitThrowSwitchMode(CodeBlock& cb) {
   alignJmpTarget(cb);
 
@@ -898,6 +939,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   };
 
 #define ADD(name, stub) name = add(#name, (stub), code, dbg)
+  ADD(handleSRHelper, emitHandleSRHelper(cold)); // required by emitInterpRet()
+
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot()));
   ADD(fcallHelperThunk,       emitFCallHelperThunk(cold));
   ADD(funcBodyHelperThunk,    emitFuncBodyHelperThunk(cold));

@@ -77,44 +77,4 @@ enterTCHelper$prologue:
   jmp r8
 
 enterTCHelper ENDP
-
-; This is the mangled name of MCGenerator::handleServiceRequest, as
-; we can't explicitly set the name of a member's mangle in MSVC.
-?handleServiceRequest@MCGenerator@jit@HPHP@@QEAAPEAEAEAUReqInfo@svcreq@23@@Z PROTO
-
-.DATA?
-EXTERN mcg : QWORD
-
-.CODE
-; handleSRHelper: Translated code will jump to this stub to perform all
-; service requests. It calls out to C++ to handle the request, then jumps
-; to the returned address (which may be the callToExit stub).
-handleSRHelper PROC
-  ; Sync vmsp & vmfp
-  mov [r12 + 10h], rbx
-  mov [r12 + 20h], rbp
-
-  ; Push a ServiceReqInfo struct onto the stack and call handleServiceRequest.
-  push r8
-  push rcx
-  push rdx
-  push rsi
-  push r10
-  push rdi
-
-  ; call mcg->handleServiceRequest(%rsp)
-  mov rcx, mcg
-  mov rdx, rsp
-  call ?handleServiceRequest@MCGenerator@jit@HPHP@@QEAAPEAEAEAUReqInfo@svcreq@23@@Z
-
-  ; Pop the ServiceReqInfo off the stack.
-  add rsp, 30h
-
-  ; rVmTl was preserved by the callee, but vmsp and vmfp might've changed if
-  ; we interpreted anything. Reload them.
-  mov rbx, [r12 + 10h]
-  mov rbp, [r12 + 20h]
-
-  jmp rax
-handleSRHelper ENDP
 END

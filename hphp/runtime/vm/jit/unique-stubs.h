@@ -389,6 +389,17 @@ struct UniqueStubs {
   TCA endCatchHelperPast;
 
   /*
+   * Service request helper.
+   *
+   * Packs service request arguments into a struct on the stack before calling
+   * the C++ service request handler.
+   *
+   * @reached:  jmp from TC
+   * @context:  func body
+   */
+  TCA handleSRHelper;
+
+  /*
    * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
    */
   TCA throwSwitchMode;

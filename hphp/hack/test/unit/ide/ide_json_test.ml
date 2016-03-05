@@ -77,7 +77,7 @@ let test_args_not_array () =
 
 let test_call_not_recognized () =
   expect_invalid_call
-    "{\"id\" : 4, \"type\" : \"call\", \"args\" : []}"
+    "{\"id\" : 4, \"type\" : \"call\", \"args\" : [\"no_such_command\"]}"
     4
     "Call not recognized"
 
@@ -116,6 +116,15 @@ let test_identify_function_call () =
   | Call (4, IdentifyFunctionCall ("<?hh", 21, 37)) -> true
   | _ -> false
 
+let test_status_call () =
+  let msg = "{\"type\" : \"call\", \
+              \"id\"   : 4, \
+              \"args\" : []}" in
+  match call_of_string msg with
+  | Call (4, StatusCall) -> true
+  | _ -> false
+
+
 let test_strip_json_arg () =
   let msg = "{\"type\" : \"call\", \
               \"id\"   : 4, \
@@ -146,6 +155,7 @@ let tests = [
   "test_server_busy_reponse", test_server_busy_reponse;
   "test_identify_function_call", test_identify_function_call;
   "test_strip_json_arg", test_strip_json_arg;
+  "test_status_call", test_status_call;
 ]
 
 let () =

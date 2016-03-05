@@ -124,6 +124,35 @@ let test_status_call () =
   | Call (4, StatusCall) -> true
   | _ -> false
 
+let test_find_function_refs_call () =
+  let msg = "{\"type\" : \"call\", \
+            \"id\"   : 4, \
+            \"args\" : [ \
+              \"--find-refs\", \
+              \"array_pull\" ]}" in
+  match call_of_string msg with
+  | Call (4, FindRefsCall (FindRefsService.Function "array_pull")) -> true
+  | _ -> false
+
+let test_find_method_refs_call () =
+  let msg = "{\"type\" : \"call\", \
+            \"id\"   : 4, \
+            \"args\" : [ \
+              \"--find-refs\", \
+              \"C::getID\" ]}" in
+  match call_of_string msg with
+  | Call (4, FindRefsCall (FindRefsService.Method ("C", "getID"))) -> true
+  | _ -> false
+
+let test_find_class_refs_call () =
+  let msg = "{\"type\" : \"call\", \
+            \"id\"   : 4, \
+            \"args\" : [ \
+              \"--find-class-refs\", \
+              \"C\" ]}" in
+  match call_of_string msg with
+  | Call (4, FindRefsCall (FindRefsService.Class "C")) -> true
+  | _ -> false
 
 let test_strip_json_arg () =
   let msg = "{\"type\" : \"call\", \
@@ -156,6 +185,9 @@ let tests = [
   "test_identify_function_call", test_identify_function_call;
   "test_strip_json_arg", test_strip_json_arg;
   "test_status_call", test_status_call;
+  "test_find_function_refs_call", test_find_function_refs_call;
+  "test_find_method_refs_call", test_find_method_refs_call;
+  "test_find_class_refs_call", test_find_class_refs_call;
 ]
 
 let () =

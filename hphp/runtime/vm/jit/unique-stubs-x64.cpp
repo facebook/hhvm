@@ -71,7 +71,7 @@ static void alignJmpTarget(CodeBlock& cb) {
 TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
   alignJmpTarget(cb);
 
-  auto const start = vwrap(cb, [&] (Vout& v) {
+  auto const start = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
     auto const ar = v.makeReg();
 
     v << copy{rvmfp(), ar};
@@ -93,10 +93,8 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
     v << copy2{ar, v.cns(EventHook::NormalFunc), rarg(0), rarg(1)};
 
     bool (*hook)(const ActRec*, int) = &EventHook::onFunctionCall;
-    v << call{TCA(hook)};
-  });
+    v << call{TCA(hook), arg_regs(0), &us.functionEnterHelperReturn};
 
-  us.functionEnterHelperReturn = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
     auto const sf = v.makeReg();
     v << testb{rret(), rret(), sf};
 
@@ -307,17 +305,16 @@ TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
   });
   svcreq::emit_persistent(cb, folly::none, REQ_POST_DEBUGGER_RET);
 
-  auto const resumeCPPUnwind = vwrap(cb, [] (Vout& v) {
+  auto const resumeCPPUnwind = vwrap(cb, [&] (Vout& v) {
     static_assert(sizeof(tl_regState) == 1,
                   "The following store must match the size of tl_regState.");
     auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
     v << storebi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
 
     v << load{rvmtl()[unwinderExnOff()], rarg(0)};
-    v << call{TCA(_Unwind_Resume), arg_regs(1)};
+    v << call{TCA(_Unwind_Resume), arg_regs(1), &us.endCatchHelperPast};
+    v << ud2{};
   });
-  us.endCatchHelperPast = cb.frontier();
-  vwrap(cb, [] (Vout& v) { v << ud2{}; });
 
   alignJmpTarget(cb);
 

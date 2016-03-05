@@ -480,6 +480,10 @@ void Vgen::emit(const call& i) {
     auto addr = mcg->allocLiteral((uint64_t)i.target, env.meta);
     a.call(rip[(intptr_t)addr]);
   }
+  if (i.watch) {
+    *i.watch = a.frontier();
+    env.meta.watchpoints.push_back(i.watch);
+  }
 }
 
 void Vgen::emit(const calls& i) {

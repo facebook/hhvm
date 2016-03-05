@@ -39,7 +39,8 @@ void CGMeta::process(
 }
 
 void CGMeta::process_only(
-  GrowableVector<IncomingBranch>* inProgressTailBranches) {
+  GrowableVector<IncomingBranch>* inProgressTailBranches
+) {
   for (auto const& pair : fixups) {
     assertx(mcg->code().isValidCodeAddress(pair.first));
     mcg->fixupMap().recordFixup(pair.first, pair.second);
@@ -76,30 +77,33 @@ void CGMeta::process_only(
 }
 
 void CGMeta::clear() {
+  watchpoints.clear();
   fixups.clear();
   catches.clear();
   jmpTransIDs.clear();
+  literals.clear();
+  alignments.clear();
   reusedStubs.clear();
   addressImmediates.clear();
   codePointers.clear();
-  bcMap.clear();
-  alignments.clear();
   inProgressTailJumps.clear();
-  literals.clear();
+  bcMap.clear();
 }
 
 bool CGMeta::empty() const {
   return
+    watchpoints.empty() &&
     fixups.empty() &&
     catches.empty() &&
     jmpTransIDs.empty() &&
+    literals.empty() &&
+    alignments.empty() &&
     reusedStubs.empty() &&
     addressImmediates.empty() &&
     codePointers.empty() &&
-    bcMap.empty() &&
-    alignments.empty() &&
     inProgressTailJumps.empty() &&
-    literals.empty();
+    bcMap.empty() &&
+    true;
 }
 
 }}

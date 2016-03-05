@@ -350,6 +350,12 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto watch : meta.watchpoints) {
+    if (auto const adjusted = rel.adjustedAddressBefore(*watch)) {
+      *watch = adjusted;
+    }
+  }
+
   for (auto& fixup : meta.fixups) {
     /*
      * Pending fixups always point after the call instruction,

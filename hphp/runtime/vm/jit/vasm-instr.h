@@ -517,9 +517,12 @@ struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
  *    callr: indirect call via register
  *    calls: direct call with smashable target
  *
- * (These follow the same suffix conventions described below.)
+ * (These follow the same suffix conventions described above.)
+ *
+ * If `watch' is set, *watch will be set to the address immediately following
+ * the call instruction---useful for various unwinder hijinks.
  */
-struct call  { CodeAddress target; RegSet args; };
+struct call  { CodeAddress target; RegSet args; TCA* watch; };
 struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
 struct calls { CodeAddress target; RegSet args; };

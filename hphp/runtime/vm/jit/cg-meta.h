@@ -33,6 +33,10 @@ namespace HPHP { namespace jit {
 /*
  * CGMeta contains a variety of different metadata information that is
  * collected during code generation.
+ *
+ * A major use case of this class is to expose metadata to the code relocator
+ * for adjustment before it is written to global data structures (e.g., in
+ * MCGenerator).
  */
 struct CGMeta {
   void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
@@ -42,16 +46,66 @@ struct CGMeta {
 
   void setJmpTransID(TCA jmp, TransKind kind);
 
-  std::vector<std::pair<TCA, Fixup>> fixups;
-  std::vector<std::pair<CTCA, TCA>> catches;
+  /*
+   * Code addresses of interest to the code generator.
+   *
+   * At emit-time, these should be set to point to TCAs of interest, and will
+   * be updated if those addresses change.  A watchpoint set immediately
+   * following an instruction is guaranteed to still follow it immediately,
+   * even if updated.
+   */
+  std::vector<TCA*> watchpoints;
+
+  /*
+   * Pending MCGenerator table entries.
+   */
+  std::vector<std::pair<TCA,Fixup>> fixups;
+  std::vector<std::pair<CTCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
-  std::vector<TCA> reusedStubs;
-  std::set<TCA> addressImmediates;
-  std::set<TCA*> codePointers;
-  std::vector<TransBCMapping> bcMap;
-  std::multimap<TCA,std::pair<Alignment,AlignContext>> alignments;
-  GrowableVector<IncomingBranch> inProgressTailJumps;
   LiteralMap literals;
+
+  /*
+   * All the alignment constraints on each code address.
+   */
+  std::multimap<TCA,std::pair<Alignment,AlignContext>> alignments;
+
+  /*
+   * Addresses of any allocated service request stubs.
+   */
+  std::vector<TCA> reusedStubs;
+
+  /*
+   * Address immediates in the generated code.
+   *
+   * Also contains the addresses of any mcprep{} smashable movq instructions
+   * that were emitted.
+   */
+  std::set<TCA> addressImmediates;
+
+  /*
+   * Code addresses of interest to other code.
+   *
+   * These are like `watchpoints', except that the pointers point into the TC
+   * data segment rather than, e.g., code generator data structures.  Used for
+   * REQ_BIND_ADDR service requests.
+   *
+   * These also omit the "stickiness" guarantee w.r.t. previous instructions.
+   */
+  std::set<TCA*> codePointers;
+
+  /*
+   * Smash targets of fallback{} and fallbackcc{} instructions (e.g.,
+   * REQ_RETRANSLATE service requests).
+   *
+   * These always correspond to the initial SrcKey of the current IR unit---
+   * see cgReqRetranslate().
+   */
+  GrowableVector<IncomingBranch> inProgressTailJumps;
+
+  /*
+   * Debug-only map from bytecode to machine code address.
+   */
+  std::vector<TransBCMapping> bcMap;
 };
 
 }}

@@ -131,9 +131,6 @@ extern "C" Extension* getModule() { \
 #define HHVM_GET_MODULE(name)
 #endif
 
-// Deprecated: Use HHVM_VERSION_BRANCH for source compat checks
-#define HHVM_API_VERSION 20150212L
-
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 #endif // incl_HPHP_EXTENSION_H_

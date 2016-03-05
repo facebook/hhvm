@@ -152,13 +152,23 @@ int
 
 on_def:
 
-enum TestEnum
+enum TestEnum : int {
+  A = 1;
+}
 
 =====
 
 on_class_:
 
-enum TestEnum
+enum TestEnum : int {
+  A = 1;
+}
+
+=====
+
+on_expr:
+
+1
 
 =====
 

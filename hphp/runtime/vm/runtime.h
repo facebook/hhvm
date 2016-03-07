@@ -60,12 +60,6 @@ frame_local(const ActRec* fp, int n) {
     uintptr_t((n+1) * sizeof(TypedValue)));
 }
 
-inline TypedValue*
-frame_local_inner(const ActRec* fp, int n) {
-  TypedValue* ret = frame_local(fp, n);
-  return ret->m_type == KindOfRef ? ret->m_data.pref->tv() : ret;
-}
-
 inline Resumable*
 frame_resumable(const ActRec* fp) {
   assert(fp->resumed());

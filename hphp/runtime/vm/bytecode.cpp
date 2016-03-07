@@ -4243,7 +4243,7 @@ OPTBLD_INLINE void iopAGetC(IOP_ARGS) {
 OPTBLD_INLINE void iopAGetL(IOP_ARGS) {
   auto local = decode_la(pc);
   vmStack().pushUninit();
-  TypedValue* fr = frame_local_inner(vmfp(), local);
+  TypedValue* fr = tvToCell(frame_local(vmfp(), local));
   lookupClsRef(fr, vmStack().top());
 }
 
@@ -4461,7 +4461,7 @@ OPTBLD_INLINE void iopBaseNC(IOP_ARGS) {
 OPTBLD_INLINE void iopBaseNL(IOP_ARGS) {
   auto const localId = decode_la(pc);
   auto const flags = decode_oa<MOpFlags>(pc);
-  baseNImpl(frame_local_inner(vmfp(), localId), flags);
+  baseNImpl(tvToCell(frame_local(vmfp(), localId)), flags);
 }
 
 OPTBLD_INLINE void iopFPassBaseNC(IOP_ARGS) {
@@ -4473,7 +4473,7 @@ OPTBLD_INLINE void iopFPassBaseNC(IOP_ARGS) {
 OPTBLD_INLINE void iopFPassBaseNL(IOP_ARGS) {
   auto const flags = decode_fpass_flags<Op::FPassBaseNL>(pc);
   auto const localId = decode_la(pc);
-  baseNImpl(frame_local_inner(vmfp(), localId), flags);
+  baseNImpl(tvToCell(frame_local(vmfp(), localId)), flags);
 }
 
 static inline void baseGImpl(TypedValue* key, MOpFlags flags) {
@@ -4489,7 +4489,7 @@ OPTBLD_INLINE void iopBaseGC(IOP_ARGS) {
 OPTBLD_INLINE void iopBaseGL(IOP_ARGS) {
   auto const localId = decode_la(pc);
   auto const flags = decode_oa<MOpFlags>(pc);
-  baseGImpl(frame_local_inner(vmfp(), localId), flags);
+  baseGImpl(tvToCell(frame_local(vmfp(), localId)), flags);
 }
 
 OPTBLD_INLINE void iopFPassBaseGC(IOP_ARGS) {
@@ -4501,7 +4501,7 @@ OPTBLD_INLINE void iopFPassBaseGC(IOP_ARGS) {
 OPTBLD_INLINE void iopFPassBaseGL(IOP_ARGS) {
   auto const flags = decode_fpass_flags<Op::FPassBaseGL>(pc);
   auto const localId = decode_la(pc);
-  baseGImpl(frame_local_inner(vmfp(), localId), flags);
+  baseGImpl(tvToCell(frame_local(vmfp(), localId)), flags);
 }
 
 static inline TypedValue* baseSImpl(int32_t clsIdx, TypedValue* key) {
@@ -4538,13 +4538,13 @@ OPTBLD_INLINE void iopBaseSL(IOP_ARGS) {
   auto const keyLoc = decode_la(pc);
   auto const clsIdx = decode_iva(pc);
   auto& mstate = initMState();
-  mstate.base = baseSImpl(clsIdx, frame_local_inner(vmfp(), keyLoc));
+  mstate.base = baseSImpl(clsIdx, tvToCell(frame_local(vmfp(), keyLoc)));
 }
 
 OPTBLD_INLINE void baseLImpl(int32_t localId, MOpFlags flags) {
   auto& mstate = initMState();
 
-  auto local = frame_local_inner(vmfp(), localId);
+  auto local = tvToCell(frame_local(vmfp(), localId));
   if (flags & MOpFlags::Warn && local->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE,
                  vmfp()->m_func->localVarName(localId)->data());
@@ -4663,7 +4663,7 @@ static inline TypedValue key_tv(MemberKey key) {
     case MW:
       return TypedValue{};
     case MEL: case MPL: {
-      auto local = frame_local_inner(vmfp(), key.iva);
+      auto local = tvToCell(frame_local(vmfp(), key.iva));
       if (local->m_type == KindOfUninit) {
         raise_undefined_local(vmfp(), key.iva);
         return make_tv<KindOfNull>();
@@ -4898,13 +4898,13 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
 }
 
 OPTBLD_INLINE void iopSetWithRefLML(IOP_ARGS) {
-  auto const key = *frame_local_inner(vmfp(), decode_iva(pc));
+  auto const key = *tvToCell(frame_local(vmfp(), decode_iva(pc)));
   auto const valLoc = decode_la(pc);
   setWithRefImpl(key, frame_local(vmfp(), valLoc));
 }
 
 OPTBLD_INLINE void iopSetWithRefRML(IOP_ARGS) {
-  auto const key = *frame_local_inner(vmfp(), decode_iva(pc));
+  auto const key = *tvToCell(frame_local(vmfp(), decode_iva(pc)));
   setWithRefImpl(key, vmStack().topTV());
   vmStack().popTV();
 }

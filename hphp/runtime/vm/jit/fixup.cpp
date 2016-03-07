@@ -160,8 +160,7 @@ void FixupMap::fixup(ExecutionContext* ec) const {
     // parent frame pointer in order make sure this pointer is valid. The
     // fixupWork function looks for a higher frame so there is no problem to
     // skip this one.
-    framePtr = framePtr->m_sfp;
-    fixupWork(ec, framePtr);
+    fixupWork(ec, framePtr->m_sfp);
   }
 }
 

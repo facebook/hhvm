@@ -724,6 +724,10 @@ static void HHVM_FUNCTION(_xdebug_check_trigger_vars) {
   }
 }
 
+bool HHVM_FUNCTION(hhvm_xdebug_remote_attached) {
+  return XDebugServer::isAttached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Module implementation
 
@@ -901,6 +905,7 @@ void XDebugExtension::moduleInit() {
   HHVM_FE(xdebug_time_index);
   HHVM_FE(xdebug_var_dump);
   HHVM_FE(_xdebug_check_trigger_vars);
+  HHVM_FE(hhvm_xdebug_remote_attached);
   loadSystemlib("xdebug");
 }
 

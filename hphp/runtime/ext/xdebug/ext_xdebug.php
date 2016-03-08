@@ -285,6 +285,14 @@ function xdebug_var_dump(mixed $var, ...$argv): void;
 <<__Native>>
 function _xdebug_check_trigger_vars(): void;
 
+/**
+ * Returns whether there is a remote debugger attached to the current request.
+ *
+ * @return bool - If a debugger is attached.
+ */
+<<__Native>>
+function hhvm_xdebug_remote_attached(): bool;
+
 namespace __SystemLib {
   /**
    * Native helper for xdebug_get_function_stack

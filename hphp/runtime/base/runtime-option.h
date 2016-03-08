@@ -480,7 +480,7 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 6)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \
-  F(bool, HHIRPartialInlineFrameOpts,  false)                           \
+  F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \
   F(std::string, InlineRegionMode,     "both")                          \
   F(bool, HHIRGenerateAsserts,         debug)                           \

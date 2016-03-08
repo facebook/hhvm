@@ -98,7 +98,8 @@ struct Vunit;
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
-  O(stubtophp, Inone, U(fp), Dn)\
+  O(stubtophp, Inone, Un, Dn)\
+  O(loadstubret, Inone, Un, D(d))\
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
   O(tailcallphp, Inone, U(target) U(fp) U(args), Dn)\
@@ -645,8 +646,20 @@ struct phplogue { Vreg fp; };
  *
  * This is only used by fcallArrayHelper, which needs to begin with a
  * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
+ *
+ * This does not modify the PHP ActRec, which can be loaded prior to this
+ * instruction using loadstubret.
  */
-struct stubtophp { Vreg fp; };
+struct stubtophp {};
+
+/*
+ * Load the return address for this stub in rvmfp(). This is only valid from a
+ * stublogue{} context.
+ *
+ * This is only used by fcallArrayHelper, which needs to begin with a
+ * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
+ */
+struct loadstubret { Vreg d; };
 
 /*
  * Load fp[m_sfp] into `d' and return to m_savedRip on `fp'.

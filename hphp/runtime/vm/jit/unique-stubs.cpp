@@ -636,7 +636,7 @@ TCA emitFCallArrayHelper(CodeBlock& cb, UniqueStubs& us) {
     v << movl{v.cns(0), rarg(2)};
   });
 
-  us.fcallUnpackHelper = vwrap2(cb, [] (Vout& v, Vout& vcold) {
+  us.fcallUnpackHelper = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
     // We reach fcallArrayHelper in the same context as a func prologue, so
     // this should really be a phplogue{}---but we don't need the return
     // address in the ActRec until later, and in the event the callee is
@@ -664,20 +664,19 @@ TCA emitFCallArrayHelper(CodeBlock& cb, UniqueStubs& us) {
     v << store{pc, rvmtl()[rds::kVmpcOff]};
     v << addq{bc, rarg(1), next, v.makeReg()};
 
-    bool (*helper)(PC, int32_t) = &doFCallArrayTC;
-    auto const res = v.makeReg();
-    v << vcall{
-      CallSpec::direct(helper),
-      v.makeVcallArgs({{next, rarg(2)}}),
-      v.makeTuple({res}),
-      Fixup{},
-      DestType::SSA
-    };
+    auto const retAddr = v.makeReg();
+    v << loadstubret{retAddr};
 
+    bool (*helper)(PC, int32_t, void*) = &doFCallArrayTC;
+    v << copyargs{
+      v.makeTuple({next, rarg(2), retAddr}),
+      v.makeTuple({rarg(0), rarg(1), rarg(2)})
+    };
+    v << call{TCA(helper), arg_regs(3), &us.fcallArrayReturn};
     v << load{rvmtl()[rds::kVmspOff], rvmsp()};
 
     auto const sf = v.makeReg();
-    v << testb{res, res, sf};
+    v << testb{rret(), rret(), sf};
 
     unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
       // If false was returned, we should skip the callee.  The interpreter
@@ -688,9 +687,9 @@ TCA emitFCallArrayHelper(CodeBlock& cb, UniqueStubs& us) {
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
 
     // If true was returned, we're calling the callee, so undo the stublogue{}
-    // and convert to a phplogue{}.
-    // stublogue{}, and simulate the work of a phplogue{}.
-    v << stubtophp{rvmfp()};
+    // and convert to a phplogue{}. The m_savedRip will be set during the call
+    // to doFCallArrayTC.
+    v << stubtophp{};
 
     auto const callee = v.makeReg();
     auto const body = v.makeReg();
@@ -704,6 +703,18 @@ TCA emitFCallArrayHelper(CodeBlock& cb, UniqueStubs& us) {
   });
 
   return ret;
+}
+
+TCA emitFCallArrayEndCatch(CodeBlock& cb, UniqueStubs& us) {
+  return vwrap(cb, [&] (Vout& v) {
+    // The CallArray that triggered the call to doFCallArrayTC has a catch trace
+    // which needs to be run. Switch to a phplogue context to enter the catch.
+    v << stubtophp{};
+    loadVMRegs(v);
+
+    always_assert(us.endCatchHelper);
+    v << jmpi{us.endCatchHelper};
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -966,6 +977,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(callToExit,       emitCallToExit(main));
   ADD(endCatchHelper,   emitEndCatchHelper(frozen, *this));
   ADD(throwSwitchMode,  emitThrowSwitchMode(frozen));
+
+  ADD(fcallArrayEndCatch, emitFCallArrayEndCatch(frozen, *this));
 #undef ADD
 
   add("freeLocalsHelpers", emitFreeLocalsHelpers(hot(), *this), code, dbg);

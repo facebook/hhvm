@@ -6134,7 +6134,8 @@ enum class CallArrOnInvalidContainer {
 };
 
 static bool doFCallArray(PC& pc, int numStackValues,
-                         CallArrOnInvalidContainer onInvalid) {
+                         CallArrOnInvalidContainer onInvalid,
+                         void* ret = nullptr) {
   assert(numStackValues >= 1);
   ActRec* ar = (ActRec*)(vmStack().top() + numStackValues);
   assert(ar->numArgs() == numStackValues);
@@ -6176,6 +6177,11 @@ static bool doFCallArray(PC& pc, int numStackValues,
           int(vmfp()->m_func->base()));
     ar->setReturn(vmfp(), pc, mcg->ustubs().retHelper);
 
+    // When called from the jit, populate the correct return address
+    if (ret) {
+      ar->setJitReturn(ret);
+    }
+
     auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
                                        /* ref param checks */ true, nullptr);
     if (UNLIKELY(!prepResult)) {
@@ -6193,7 +6199,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
   return true;
 }
 
-bool doFCallArrayTC(PC pc, int32_t numArgs) {
+bool doFCallArrayTC(PC pc, int32_t numArgs, void* retAddr) {
   assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
@@ -6202,7 +6208,7 @@ bool doFCallArrayTC(PC pc, int32_t numArgs) {
     numArgs = 1;
     onInvalid = CallArrOnInvalidContainer::CastToArray;
   }
-  auto const ret = doFCallArray(pc, numArgs, onInvalid);
+  auto const ret = doFCallArray(pc, numArgs, onInvalid, retAddr);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }

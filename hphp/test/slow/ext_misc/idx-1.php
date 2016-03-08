@@ -65,6 +65,10 @@ function main() {
   var_dump(idx($s, 5, 'abc'));
   var_dump(idx($s, '1'));
   var_dump(idx($s, '5'));
+  var_dump(idx($s, false));
+  var_dump(idx($s, true));
+  var_dump(idx($s, 1.0));
+  var_dump(idx($s, 5.0));
   var_dump(idx($s, 'wtf'));
   var_dump(idx($s, 8));
   var_dump(idx($s, null, 'abc'));

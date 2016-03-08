@@ -21,6 +21,10 @@ string(1) "e"
 string(3) "abc"
 string(1) "e"
 NULL
+string(1) "h"
+string(1) "e"
+string(1) "e"
+NULL
 NULL
 NULL
 string(3) "abc"

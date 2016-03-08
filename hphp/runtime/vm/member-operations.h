@@ -259,8 +259,8 @@ inline const TypedValue* ElemString(TypedValue& tvRef,
   auto offset = ElemStringPre(key);
 
   if (offset < 0 || offset >= base->m_data.pstr->size()) {
-    if (warn && RuntimeOption::EnableHipHopSyntax) {
-      raise_warning("Out of bounds");
+    if (warn) {
+      raise_notice("Uninitialized string offset: %" PRId64, offset);
     }
     tvRef = make_tv<KindOfPersistentString>(staticEmptyString());
   } else {

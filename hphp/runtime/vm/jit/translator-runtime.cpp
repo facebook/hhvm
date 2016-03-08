@@ -1290,9 +1290,8 @@ StringData* stringGetI(StringData* base, uint64_t x) {
   if (LIKELY(x < base->size())) {
     return base->getChar(x);
   }
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_warning("Out of bounds");
-  }
+  raise_notice("Uninitialized string offset: %" PRId64,
+               static_cast<int64_t>(x));
   return staticEmptyString();
 }
 

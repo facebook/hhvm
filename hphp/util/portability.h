@@ -63,24 +63,27 @@
 # define __thread __declspec(thread)
 #endif
 #define ATTRIBUTE_UNUSED
+#define ATTRIBUTE_USED
 
 #define ALWAYS_INLINE __forceinline
 #define EXTERNALLY_VISIBLE
 #define FLATTEN
 #define NEVER_INLINE __declspec(noinline)
 #define UNUSED
+
 #else
 #define ATTRIBUTE_NORETURN __attribute__((__noreturn__))
 #define ATTRIBUTE_PRINTF(a1, a2) \
   __attribute__((__format__ (__printf__, a1, a2)))
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))
-
+#define ATTRIBUTE_USED     __attribute__((__used__))
 #define ALWAYS_INLINE      inline __attribute__((__always_inline__))
 #define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
 #define FLATTEN            __attribute__((__flatten__))
 #define INLINE_FLATTEN     inline __attribute__((__always_inline__,__flatten__))
 #define NEVER_INLINE       __attribute__((__noinline__))
 #define UNUSED             __attribute__((__unused__))
+
 #endif
 
 #if defined(__GNUC__)

@@ -5,6 +5,8 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/extension.h"
 
+#include "hphp/util/type-scan.h"
+
 #include <curl/curl.h>
 
 namespace HPHP {
@@ -123,6 +125,7 @@ struct CurlResource : SweepableResourceData {
 
  private:
   CURL *m_cp;
+  TYPE_SCAN_IGNORE_FIELD(m_cp);
   ExceptionType m_exception;
 
   char m_error_str[CURL_ERROR_SIZE + 1];

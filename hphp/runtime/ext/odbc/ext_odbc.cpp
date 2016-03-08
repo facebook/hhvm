@@ -270,9 +270,11 @@ private:
 
   // buffer itself
   SQLPOINTER buffer_;
+  TYPE_SCAN_IGNORE_FIELD(buffer_);
 
   // current position inside buffer
   SQLPOINTER buffer_cursor_;
+  TYPE_SCAN_IGNORE_FIELD(buffer_cursor_);
 
   // number of rows returned by the ODBC call
   SQLULEN num_rows_fetched_;
@@ -294,6 +296,7 @@ private:
 
   // statement handler
   SQLHSTMT hdl_stmt_;
+  TYPE_SCAN_IGNORE_FIELD(hdl_stmt_);
 };
 
 ODBCCursor::ODBCCursor(SQLHDBC hdl_dbconn)
@@ -597,9 +600,11 @@ struct ODBCLink : SweepableResourceData {
 private:
   // env handler
   SQLHENV hdl_env_;
+  TYPE_SCAN_IGNORE_FIELD(hdl_env_);
 
   // connection handler
   SQLHDBC hdl_dbconn_;
+  TYPE_SCAN_IGNORE_FIELD(hdl_dbconn_);
 
   // finish current transaction (commit or rollback)
   bool end_transaction(const bool is_commit);

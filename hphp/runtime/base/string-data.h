@@ -69,7 +69,7 @@ enum CopyStringMode { CopyString };
  *   Flat   |   X    |     X    |    X
  *   Proxy  |        |          |    X
  */
-struct StringData {
+struct StringData final: type_scan::MarkCountable<StringData> {
   friend struct APCString;
   friend StringData* allocFlatSmallImpl(size_t len);
   friend StringData* allocFlatSlowImpl(size_t len);

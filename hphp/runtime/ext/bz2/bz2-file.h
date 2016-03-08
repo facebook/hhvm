@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/util/type-scan.h"
 #include <stdio.h>
 #include <bzlib.h>
 
@@ -49,6 +50,8 @@ struct BZ2File : File {
 
 private:
   BZFILE * m_bzFile;
+  // BZFILE is a typedef to void.
+  TYPE_SCAN_IGNORE_FIELD(m_bzFile);
   req::ptr<PlainFile> m_innerFile;
   bool closeImpl();
 };

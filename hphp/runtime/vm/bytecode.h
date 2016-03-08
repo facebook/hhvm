@@ -128,6 +128,7 @@ private:
 
 private:
   TypedValue m_extraArgs[];
+  TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_extraArgs);
 };
 
 /*

@@ -47,7 +47,8 @@ struct Shape;
  * transitions from struct to mixed cheaper. See MixedArray::checkInvariants
  * for details.
  */
-struct StructArray : public ArrayData {
+struct StructArray final : public ArrayData,
+                           type_scan::MarkCountable<StructArray> {
   static ArrayData* MakeUncounted(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);

@@ -61,7 +61,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-struct ObjectData {
+struct ObjectData: type_scan::MarkCountable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()

@@ -64,7 +64,7 @@ make(Args&&... args);
  *
  * In the JIT, SSATmps of type Res are ResourceHdr pointers.
  */
-struct ResourceHdr {
+struct ResourceHdr final : type_scan::MarkCountable<ResourceHdr> {
   static void resetMaxId();
 
   IMPLEMENT_COUNTABLE_METHODS
@@ -104,7 +104,7 @@ private:
 /**
  * Base class of all PHP resources.
  */
-struct ResourceData {
+struct ResourceData : type_scan::MarkCountable<ResourceData> {
   ResourceData();
 
   ResourceData(const ResourceData&) = delete;

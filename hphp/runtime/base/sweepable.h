@@ -18,6 +18,7 @@
 #define incl_HPHP_SWEEPABLE_H_
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,6 +81,8 @@ protected:
 
 private:
   Sweepable *m_next, *m_prev;
+  TYPE_SCAN_IGNORE_FIELD(m_next);
+  TYPE_SCAN_IGNORE_FIELD(m_prev);
 };
 
 /*

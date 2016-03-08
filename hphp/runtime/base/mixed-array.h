@@ -33,7 +33,8 @@ struct StructArray;
 
 //////////////////////////////////////////////////////////////////////
 
-struct MixedArray : private ArrayData {
+struct MixedArray final : private ArrayData,
+                          type_scan::MarkCountable<MixedArray> {
   // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
@@ -137,6 +138,8 @@ public:
       int64_t ikey;
     };
     int32_t hash;
+
+    TYPE_SCAN_CUSTOM() { if (hash < 0) scanner.enqueue(skey); }
   };
 
   /*

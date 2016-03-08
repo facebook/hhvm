@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/util/tls-pod-bag.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -619,6 +620,12 @@ struct CufIter {
   const Func* m_func;
   void* m_ctx;
   StringData* m_name;
+
+  TYPE_SCAN_CUSTOM_FIELD(m_ctx) {
+    if (m_ctx && intptr_t(m_ctx) % 2 == 0) {
+      scanner.enqueue(reinterpret_cast<const ObjectData*>(m_ctx));
+    }
+  }
 };
 
 struct alignas(16) Iter {

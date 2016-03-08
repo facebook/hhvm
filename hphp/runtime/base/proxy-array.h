@@ -39,7 +39,7 @@ struct RefData;
  *
  * TODO: rename to ZendArray
  */
-struct ProxyArray : ArrayData {
+struct ProxyArray final : ArrayData, type_scan::MarkCountable<ProxyArray> {
   static ProxyArray* Make(ArrayData*);
 
 public:

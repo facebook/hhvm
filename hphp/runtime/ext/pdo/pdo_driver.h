@@ -511,6 +511,7 @@ public:
   bool is_param;           /* parameter or column ? */
 
   void *driver_data;
+  TYPE_SCAN_CONSERVATIVE_FIELD(driver_data);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

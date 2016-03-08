@@ -649,6 +649,9 @@ public:
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::vector<vixl::Simulator*> m_activeSims;
+
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_stdoutData);
+  TYPE_SCAN_IGNORE_FIELD(dynPropTable);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,6 +26,8 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/header-kind.h"
 
+#include "hphp/util/type-scan.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -45,7 +47,7 @@ struct MixedArray;
  * Other arrays may also be empty in the sense that size() == 0, but
  * this one is dealt with commonly enough to deserve special handlers.
  */
-struct EmptyArray {
+struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
   static void Release(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t) {
     return nullptr;

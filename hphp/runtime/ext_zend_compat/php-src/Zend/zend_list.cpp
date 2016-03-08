@@ -100,6 +100,7 @@ namespace HPHP {
     }
 
     void* raw_ptr;
+    TYPE_SCAN_CONSERVATIVE_FIELD(raw_ptr);
     int id;
     int type;
     int refcount;

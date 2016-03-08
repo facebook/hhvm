@@ -44,6 +44,7 @@ struct ZendCustomElement : ResourceData {
 private:
   DtorFunc m_destructor;
   void* m_data;
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_data);
 };
 
 }

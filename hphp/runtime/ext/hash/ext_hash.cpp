@@ -186,6 +186,8 @@ struct HashContext : SweepableResourceData {
   void *context;
   int options;
   char *key;
+
+  TYPE_SCAN_IGNORE_FIELD(context);
 };
 
 IMPLEMENT_RESOURCE_ALLOCATION(HashContext)

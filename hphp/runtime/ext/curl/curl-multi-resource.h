@@ -3,6 +3,8 @@
 
 #include "hphp/runtime/ext/extension.h"
 
+#include "hphp/util/type-scan.h"
+
 #include <curl/curl.h>
 
 namespace HPHP {
@@ -33,6 +35,8 @@ struct CurlMultiResource : SweepableResourceData {
 
  private:
   CURLM *m_multi;
+  // CURLM is a typedef to void
+  TYPE_SCAN_IGNORE_FIELD(m_multi);
   Array m_easyh;
 };
 

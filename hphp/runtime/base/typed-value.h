@@ -23,6 +23,8 @@
 
 #include "hphp/runtime/base/datatype.h"
 
+#include "hphp/util/type-scan.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -104,6 +106,25 @@ struct TypedValue {
   AuxUnion m_aux;
 
   std::string pretty() const; // debug formatting. see trace.h
+
+  TYPE_SCAN_CUSTOM() {
+    switch (m_type) {
+      case KindOfObject: scanner.enqueue(m_data.pobj); break;
+      case KindOfResource: scanner.enqueue(m_data.pres); break;
+      case KindOfString: scanner.enqueue(m_data.pstr); break;
+      case KindOfArray: scanner.enqueue(m_data.parr); break;
+      case KindOfRef: scanner.enqueue(m_data.pref); break;
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfDouble:
+      case KindOfPersistentString:
+      case KindOfPersistentArray:
+      case KindOfClass:
+        break;
+    }
+  }
 };
 
 // Check that TypedValue's size is a power of 2 (16bytes currently)

@@ -25,6 +25,8 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/header-kind.h"
 
+#include "hphp/util/type-scan.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -43,7 +45,7 @@ struct MixedArray;
  * php arrays with zero-based contiguous integer keys, and values of mixed
  * types.  The TypedValue's are placed right after the array header.
  */
-struct PackedArray {
+struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr uint32_t MaxSize = 0xFFFFFFFFul;
   static constexpr uint32_t SmallSize = 3;
 

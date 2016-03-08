@@ -1421,25 +1421,24 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         }
       }
     } while (++ix < end);
+
     if (UNLIKELY(redoHoistable)) {
       // if this unit isnt mergeOnly, we're done
       if (!isMergeOnly()) return;
-      // as a special case, if all the classes are potentially
-      // hoistable, we dont list them twice, but instead
-      // iterate over them again
-      // At first glance, it may seem like we could leave
-      // the maybe-hoistable classes out of the second list
-      // and then always reset ix to 0; but that gets this
-      // case wrong if there's an autoloader for C, and C
-      // extends B:
+
+      // As a special case, if all the classes are potentially hoistable, we
+      // don't list them twice, but instead iterate over them again.
+      //
+      // At first glance, it may seem like we could leave the maybe-hoistable
+      // classes out of the second list and then always reset ix to 0; but that
+      // gets this case wrong if there's an autoloader for C, and C extends B:
       //
       // class A {}
       // class B implements I {}
       // class D extends C {}
       //
-      // because now A and D go on the maybe-hoistable list
-      // B goes on the never hoistable list, and we
-      // fatal trying to instantiate D before B
+      // because now A and D go on the maybe-hoistable list B goes on the never
+      // hoistable list, and we fatal trying to instantiate D before B
       Stats::inc(Stats::UnitMerge_redo_hoistable);
       if (end == (int)mi->m_mergeablesSize) {
         ix = mi->m_firstHoistablePreClass;

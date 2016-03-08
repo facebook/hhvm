@@ -267,7 +267,8 @@ struct BlockInfo {
  * TODO(#9876771): these should be cleaned up.
  */
 bool isDangerousActRecInst(IRInstruction& inst) {
-  return inst.is(VerifyParamCls, VerifyParamCallable, VerifyParamFail);
+  return inst.is(VerifyParamCls, VerifyParamCallable,
+                 VerifyParamFail, VerifyRetFail);
 }
 
 /*

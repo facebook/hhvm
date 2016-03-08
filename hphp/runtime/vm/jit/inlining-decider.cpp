@@ -562,9 +562,11 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     // callee.  It's up to the callee to constrain further if needed.
     auto type = irgen::publicTopType(irgs, BCSPOffset{i});
 
-    // If we don't have sufficient type information to inline the region
-    // return early
-    if (!(type <= TGen) && !(type <= TCls)) return nullptr;
+    // If we don't have sufficient type information to inline the region return
+    // early
+    if (!(type <= TCell) && !(type <= TBoxedCell) && !(type <= TCls)) {
+      return nullptr;
+    }
     argTypes.push_back(type);
   }
 

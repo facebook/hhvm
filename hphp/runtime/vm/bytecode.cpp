@@ -5053,7 +5053,7 @@ OPTBLD_FLT_INLINE void iopAssertRATL(IOP_ARGS) {
       vm->getContainingFileName()->data(),
       vm->getLine(),
       show(rat),
-      tv.pretty()
+      toStringElm(&tv)
     );
     return;
   }
@@ -5073,7 +5073,7 @@ OPTBLD_INLINE void iopAssertRATStk(IOP_ARGS) {
       vm->getContainingFileName()->data(),
       vm->getLine(),
       show(rat),
-      tv.pretty()
+      toStringElm(&tv)
     );
     return;
   }

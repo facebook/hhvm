@@ -59,6 +59,7 @@ const StaticString s_86ctor("86ctor");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
+const StaticString s_Closure("Closure");
 
 }
 
@@ -1988,12 +1989,11 @@ void in(ISS& env, const bc::CreateCl& op) {
   auto const clsPair = env.index.resolve_closure_class(env.ctx, op.str2);
 
   /*
-   * Every closure should have a unique allocation site, but we may
-   * see it multiple times in a given round of analyzing this
-   * function.  Each time we may have more information about the used
-   * variables; the types should only possibly grow.  If it's already
-   * there we need to merge the used vars in with what we saw last
-   * time.
+   * Every closure should have a unique allocation site, but we may see it
+   * multiple times in a given round of analyzing this function.  Each time we
+   * may have more information about the used variables; the types should only
+   * possibly grow.  If it's already there we need to merge the used vars in
+   * with what we saw last time.
    */
   if (nargs) {
     std::vector<Type> usedVars(nargs);
@@ -2007,7 +2007,13 @@ void in(ISS& env, const bc::CreateCl& op) {
     );
   }
 
-  return push(env, objExact(clsPair.first));
+  // Closure classes can be cloned and rescoped at runtime, so it's not safe to
+  // assert the exact type of closure objects. The best we can do is assert
+  // that it's a subclass of Closure.
+  auto const closure = env.index.resolve_class(env.ctx, s_Closure.get());
+  always_assert(closure.hasValue());
+
+  return push(env, subObj(*closure));
 }
 
 void in(ISS& env, const bc::CreateCont& op) {

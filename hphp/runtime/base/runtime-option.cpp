@@ -409,8 +409,12 @@ static inline std::string regionSelectorDefault() {
 }
 
 static inline bool pgoDefault() {
+#ifdef HHVM_NO_DEFAULT_PGO
+  return false;
+#else
   // TODO(3496304)
   return !RuntimeOption::EvalSimulateARM;
+#endif
 }
 
 static inline uint64_t pgoThresholdDefault() {
@@ -1100,6 +1104,8 @@ void RuntimeOption::Load(
       Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize",
                    64 << 20);
     } else {
+      // Avoid "Possible bad confg node" warning for unused keys.
+      config["Eval.JitAProfSize"].configGetUInt64();
       CodeCache::AProfSize = 0;
     }
     Config::Bind(CodeCache::AColdSize, ini, config, "Eval.JitAColdSize",

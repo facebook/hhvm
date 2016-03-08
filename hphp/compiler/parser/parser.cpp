@@ -1310,9 +1310,10 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 void Parser::onVariadicParam(Token &out, Token *params,
                              Token &type, Token &var,
                              bool ref, Token *attr, Token *modifier) {
-  if (!type.text().empty()) {
+  if (!type.text().empty() && !m_scanner.isHHSyntaxEnabled()) {
     PARSE_ERROR("Parameter $%s is variadic and has a type constraint (%s)"
-                "; variadic params with type constraints are not supported",
+                "; variadic params with type constraints are not supported"
+                " in non-Hack files",
                 var.text().c_str(), type.text().c_str());
   }
   if (ref) {
@@ -1332,7 +1333,10 @@ void Parser::onVariadicParam(Token &out, Token *params,
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
 
-  TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
+  TypeAnnotationPtr typeAnnotation = std::make_shared<TypeAnnotation>(
+    "array", type.typeAnnotation);
+  typeAnnotation->setTypeVar();
+
   expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
                               m_scanner.isHHSyntaxEnabled(), var->text(),
                               ref, (modifier) ? modifier->num() : 0,

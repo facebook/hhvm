@@ -188,3 +188,10 @@ bool(false)
 
 Notice: Object of class stdClass could not be converted to int in %s/test/slow/string/str_offset_isset_empty.php on line 11
 bool(false)
+
+int(4294967300)
+
+Notice: Uninitialized string offset: 4294967300 in %s/test/slow/string/str_offset_isset_empty.php on line 9
+string(0) ""
+bool(false)
+bool(false)

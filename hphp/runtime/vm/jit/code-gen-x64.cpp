@@ -3219,10 +3219,10 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   auto idxReg = srcLoc(inst, 1).reg();
   auto dstReg = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  auto const idxTrunc = v.makeReg();
-  v << movtql{idxReg, idxTrunc};
+  auto const strLen = v.makeReg();
   auto const sf = v.makeReg();
-  v << cmplm{idxTrunc, strReg[StringData::sizeOff()], sf};
+  v << loadzlq{strReg[StringData::sizeOff()], strLen};
+  v << cmpq{idxReg, strLen, sf};
   v << setcc{CC_NBE, sf, dstReg};
 }
 

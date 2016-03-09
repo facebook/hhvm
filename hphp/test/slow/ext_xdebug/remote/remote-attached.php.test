@@ -1,3 +1,3 @@
 <?php
 
-var_dump(hhvm_xdebug_remote_attached());
+var_dump(HH\xdebug_remote_attached());

@@ -837,6 +837,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStats();
   }
+  checkGC();
   storeTail(m_front, (char*)m_limit - (char*)m_front);
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);

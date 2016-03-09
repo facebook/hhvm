@@ -895,6 +895,7 @@ private:
 
   void checkEagerGC();
   void resetEagerGC();
+  void checkGC();
 
   template <typename T>
   typename std::enable_if<

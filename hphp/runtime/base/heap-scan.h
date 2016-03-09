@@ -131,7 +131,6 @@ template<class F> void ObjectData::scan(F& mark) const {
   auto props = propVec();
   if (getAttribute(IsCppBuiltin)) {
     // [ObjectData][C++ fields][props]
-    // TODO t6169228 virtual call for exact marking
     mark(this + 1, uintptr_t(props) - uintptr_t(this + 1));
   }
   for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {

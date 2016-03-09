@@ -158,8 +158,8 @@ void FixupMap::fixup(ExecutionContext* ec) const {
     DECLARE_FRAME_POINTER(framePtr);
     // In order to avoid tail call elimination optimization issues, grab the
     // parent frame pointer in order make sure this pointer is valid. The
-    // fixupWork function looks for a higher frame so there is no problem to
-    // skip this one.
+    // fixupWork() looks for a TC frame, and we never call fixup() directly
+    // from the TC, so skipping this frame isn't a problem.
     fixupWork(ec, framePtr->m_sfp);
   }
 }

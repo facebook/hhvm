@@ -553,7 +553,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
-  O(IterBreak,       TWO(ILA,BA),      NOV,             NOV,        CF_TF) \
+  O(IterBreak,       TWO(BA,ILA),      NOV,             NOV,        CF_TF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \
   O(Req,             NA,               ONE(CV),         ONE(CV),    CF) \

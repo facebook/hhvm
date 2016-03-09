@@ -338,14 +338,8 @@ Offset* instrJumpOffset(PC const origPC) {
   assert(!isSwitch(op));  // BLA doesn't work here
 
   if (op == OpIterBreak) {
-    auto const veclen = decode_raw<uint32_t>(pc);
-    assert(veclen > 0);
-    auto const target = const_cast<Offset*>(
-      reinterpret_cast<const Offset*>(
-        reinterpret_cast<const uint32_t*>(pc) + 2 * veclen
-      )
-    );
-    return target;
+    // offset is imm number 0
+    return const_cast<Offset*>(reinterpret_cast<const Offset*>(pc));
   }
 
   int mask = jumpMask[size_t(op)];
@@ -366,13 +360,8 @@ Offset* instrJumpOffset(PC const origPC) {
 }
 
 Offset instrJumpTarget(PC instrs, Offset pos) {
-  Offset* offset = instrJumpOffset(instrs + pos);
-
-  if (!offset) {
-    return InvalidAbsoluteOffset;
-  } else {
-    return *offset + pos;
-  }
+  auto offset = instrJumpOffset(instrs + pos);
+  return offset ? *offset + pos : InvalidAbsoluteOffset;
 }
 
 OffsetSet instrSuccOffsets(PC opc, const Unit* unit) {
@@ -1173,8 +1162,10 @@ ImmVector getImmVector(PC opcode) {
     if (t == BLA || t == SLA || t == ILA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
-        static_cast<const int32_t*>(vp));
-    } else if (t == VSA) {
+        static_cast<const int32_t*>(vp)
+      );
+    }
+    if (t == VSA) {
       const int32_t* vp = (int32_t*)getImmPtr(opcode, k);
       return ImmVector(reinterpret_cast<const uint8_t*>(vp + 1),
                        vp[0], vp[0]);

@@ -273,9 +273,7 @@ void emitMIterFree(IRGS& env, int32_t iterId) {
   gen(env, MIterFree, IterId(iterId), fp(env));
 }
 
-void emitIterBreak(IRGS& env,
-                   const ImmVector& iv,
-                   Offset relOffset) {
+void emitIterBreak(IRGS& env, Offset relOffset, const ImmVector& iv) {
   for (int iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
     IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
     Id       iterId   = iv.vec32()[iterIndex + 1];

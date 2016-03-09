@@ -3853,12 +3853,12 @@ OPTBLD_INLINE void iopJmpNZ(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIterBreak(IOP_ARGS) {
   PC savedPc = pc - encoded_op_size(Op::IterBreak);
+  auto offset = decode_ba(pc);
   auto veclen = decode<int32_t>(pc);
   assert(veclen > 0);
   Id* iterTypeList = (Id*)pc;
   Id* iterIdList   = (Id*)pc + 1;
   pc += 2 * veclen * sizeof(Id);
-  auto offset = peek_ba(pc);
   for (auto i = 0; i < 2 * veclen; i += 2) {
     Id iterType = iterTypeList[i];
     Id iterId   = iterIdList[i];

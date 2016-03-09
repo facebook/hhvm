@@ -1389,7 +1389,7 @@ void EmitterVisitor::emitIterFree(Emitter& e, IterVec& iters) {
 
 void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   if (!iters.empty()) {
-    e.IterBreak(iters, target);
+    e.IterBreak(target, iters);
     iters.clear();
   } else {
     e.Jmp(target);

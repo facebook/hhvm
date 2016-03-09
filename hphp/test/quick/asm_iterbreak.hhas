@@ -58,7 +58,7 @@ startInner:
   Print
   PopC
 
-  IterBreak <(MIter) 1, (Iter) 0> endOuter
+  IterBreak endOuter <(MIter) 1, (Iter) 0>
   MIterNextK 1 startInner $3 $4
 endInner:
   IterNextK 0 startOuter $1 $2

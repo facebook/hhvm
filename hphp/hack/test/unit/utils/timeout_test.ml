@@ -179,12 +179,20 @@ let test_timeout_after_input () =
   Daemon.to_channel oc ~flush:true payload;
   (** 0.9 seconds left in the timeout, but its rounded by alarms being integers
    * so give it slightly more time. *)
-  let _ = Unix.select [] [] [] 1.1 in
+  let _ = Unix.select [] [] [] 1.2 in
   let pid = handle.Daemon.pid in
   let result = match Unix.waitpid [Unix.WNOHANG] pid with
-    | 0, _ -> false
+    | 0, _ ->
+      Printf.printf "Child process did not exit.\n%!";
+      Unix.kill pid Sys.sigkill;
+      false
     | _, Unix.WEXITED 0 -> true
-    | _ -> false
+    | _, Unix.WEXITED i ->
+      Printf.printf "Child process exited with non-zero exit code\n%!.";
+      false
+    | _ ->
+      Printf.printf "Child process unexpected exit.\n%!.";
+      false
   in
   if not result then
     Unix.kill pid Sys.sigkill;

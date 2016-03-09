@@ -18,12 +18,14 @@
                        }
 *)
 
-module M = Map_ast
 open Ast
+
+module M = Map_ast
+module TNBody = Typing_naming_body
 
 let change_lambdas (k, _) = function
   | Lfun ({f_name = (p, _); _} as f)  ->
-    let ss = Naming.uselist_lambda f in
+    let ss = TNBody.uselist_lambda f in
     let uses = List.map (fun s -> ((p, s), false)) ss in
     k (Efun (f, uses))
   | e -> k e

@@ -231,7 +231,32 @@ static void initNuma() {
   numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
 }
 
+static bool purge_decay_hard() {
+  const char *purge;
+  if (mallctlRead("opt.purge", &purge, true) == 0) {
+    return (strcmp(purge, "decay") == 0);
+  }
+
+  // If "opt.purge" is absent, it's either because jemalloc is too old
+  // (pre-4.1.0), or because ratio-based purging is no longer present
+  // (likely post-4.x).
+  ssize_t decay_time;
+  return (mallctlRead("opt.decay_time", &decay_time, true) == 0);
+}
+
+static bool purge_decay() {
+  static bool initialized = false;
+  static bool decay;
+
+  if (!initialized) {
+    decay = purge_decay_hard();
+    initialized = true;
+  }
+  return decay;
+}
+
 static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
+  assert(!purge_decay());
   constexpr size_t max_miblen = 3;
   size_t miblen = max_miblen;
   size_t mib[max_miblen];
@@ -250,6 +275,8 @@ static void numa_purge_arena() {
   // Only purge if the thread's assigned arena is one of those created for use
   // by request threads.
   if (!threads_bind_local) return;
+  // Only purge if ratio-based purging is active.
+  if (purge_decay()) return;
   unsigned arena;
   mallctlRead("thread.arena", &arena);
   if (arena >= base_arena && arena < base_arena + numa_num_nodes) {
@@ -283,8 +310,10 @@ void enable_numa(bool local) {
         return;
       }
       arenas++;
-      // Tune dirty page purging for new arena.
-      set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
+      if (!purge_decay()) {
+        // Tune dirty page purging for new arena.
+        set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
+      }
     }
   }
 

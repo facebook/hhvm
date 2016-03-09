@@ -503,7 +503,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
 NEVER_INLINE void Marker::sweep() {
   Counter marked, ambig, freed;
   auto& mm = MM();
-  const bool use_quarantine = debug && RuntimeOption::EvalQuarantine;
+  const bool use_quarantine = RuntimeOption::EvalQuarantine;
   if (use_quarantine) mm.beginQuarantine();
   SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
@@ -575,12 +575,9 @@ NEVER_INLINE void Marker::sweep() {
         break;
     }
   });
-  if (freed.count > 1) {
-    TRACE(1, "sweep tot %lu(%lu) mk %lu(%lu) amb %lu(%lu) free %lu(%lu)\n",
-          total_.count, total_.bytes,
-          marked.count, marked.bytes,
-          ambig.count, ambig.bytes,
-          freed.count, freed.bytes);
+  if (freed.count > 1 && Trace::moduleEnabledRelease(Trace::gc, 1)) {
+    Trace::traceRelease("gc total %lu marked %lu ambig %lu free %lu\n",
+                        total_.bytes, marked.bytes, ambig.bytes, freed.bytes);
   }
 }
 

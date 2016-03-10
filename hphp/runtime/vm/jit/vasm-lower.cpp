@@ -230,9 +230,8 @@ void vlower(Vunit& unit) {
 
   auto& blocks = unit.blocks;
 
-  // The lowering operations for individual instructions may allocate scratch
-  // blocks, which may invalidate iterators on `blocks'.  Correctness of this
-  // pass relies on PostorderWalker /not/ using standard iterators on `blocks'.
+  // The vlower() implementations may allocate scratch blocks and modify
+  // instruction streams, so we cannot use standard iterators here.
   PostorderWalker{unit}.dfs([&] (Vlabel b) {
     assertx(!blocks[b].code.empty());
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {

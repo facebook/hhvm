@@ -1060,8 +1060,8 @@ struct Vinstr {
   VASM_OPCODES
 #undef O
 
-  template<typename Op>
-  struct matcher;
+  template<typename Op> struct matcher;
+  template<Opcode op> struct op_matcher;
 
   /*
    * Templated accessors for the union members.
@@ -1073,6 +1073,14 @@ struct Vinstr {
   template<typename Op>
   const typename matcher<Op>::type& get() const {
     return matcher<Op>::get(*this);
+  }
+  template<Opcode op>
+  typename op_matcher<op>::type& get() {
+    return op_matcher<op>::get(*this);
+  }
+  template<Opcode op>
+  const typename op_matcher<op>::type& get() const {
+    return op_matcher<op>::get(*this);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1107,17 +1115,28 @@ bool isBlockEnd(const Vinstr& inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define O(name, ...)                             \
-  template<> struct Vinstr::matcher<name> {      \
-    using type = jit::name;                      \
-    static type& get(Vinstr& inst) {             \
+#define O(name, ...)                              \
+  template<> struct Vinstr::matcher<name> {       \
+    using type = jit::name;                       \
+    static type& get(Vinstr& inst) {              \
       assertx(inst.op == name);                   \
-      return inst.name##_;                       \
-    }                                            \
-    static const type& get(const Vinstr& inst) { \
+      return inst.name##_;                        \
+    }                                             \
+    static const type& get(const Vinstr& inst) {  \
       assertx(inst.op == name);                   \
-      return inst.name##_;                       \
-    }                                            \
+      return inst.name##_;                        \
+    }                                             \
+  };                                              \
+  template<> struct Vinstr::op_matcher<Vinstr::name> {  \
+    using type = jit::name;                       \
+    static type& get(Vinstr& inst) {              \
+      assertx(inst.op == name);                   \
+      return inst.name##_;                        \
+    }                                             \
+    static const type& get(const Vinstr& inst) {  \
+      assertx(inst.op == name);                   \
+      return inst.name##_;                        \
+    }                                             \
   };
 VASM_OPCODES
 #undef O

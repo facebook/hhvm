@@ -186,6 +186,9 @@ private:
 
 /*
  * Visit reachable blocks in postorder, calling `fn' on each one.
+ *
+ * Guaranteed not to use standard iterators on u.blocks, because several passes
+ * (e.g., vlower) forbid it.
  */
 struct PostorderWalker {
   explicit PostorderWalker(const Vunit& u) : m_dfs{u} {}

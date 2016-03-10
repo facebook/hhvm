@@ -141,7 +141,11 @@ Object create_object(const String& s, const Array &params, bool init = true);
 Object init_object(const String& s, const Array &params, ObjectData* o);
 
 ATTRIBUTE_NORETURN void throw_object(const Object& e);
+#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8) || __GNUC_PATCHLEVEL__ >= 2)
+// gcc-4.8.1 has a bug that causes incorrect code if we
+// define this function.
 ATTRIBUTE_NORETURN void throw_object(Object&& e);
+#endif
 
 ATTRIBUTE_NORETURN inline
 void throw_object(const String& s, const Array& params, bool init = true) {

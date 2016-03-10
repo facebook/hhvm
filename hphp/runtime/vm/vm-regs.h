@@ -99,6 +99,10 @@ inline const unsigned char*& vmpc() {
   return vmRegs().pc;
 }
 
+inline Offset pcOff() {
+  return vmfp()->m_func->unit()->offsetOf(vmpc());
+}
+
 inline ActRec*& vmFirstAR() {
   // This is safe because firstAR is always updated directly.
   return vmRegsUnsafe().firstAR;

@@ -44,10 +44,12 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/system-profiler.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -958,8 +960,6 @@ void ExecutionContext::debuggerInfo(
                     IDebuggable::FormatTime(RID().getTimeout() * 1000));
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
 void ExecutionContext::setenv(const String& name, const String& value) {
   m_envs.set(name, value);
 }
@@ -982,6 +982,500 @@ String ExecutionContext::getenv(const String& name) const {
   return String();
 }
 
-//////////////////////////////////////////////////////////////////////
+Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
+                                      const StringData* cls,
+                                      const StringData* cns) {
+  Class* class_ = nullptr;
+  try {
+    class_ = Unit::loadClass(ne, cls);
+  } catch (Object& ex) {
+    // For compatibility with php, throwing through a constant lookup has
+    // different behavior inside a property initializer (86pinit/86sinit).
+    auto ar = getStackFrame();
+    if (ar && ar->func() && Func::isSpecial(ar->func()->name())) {
+      raise_warning("Uncaught %s", ex.toString().data());
+      raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
+    }
+    throw;
+  }
+  if (class_ == nullptr) {
+    raise_error(Strings::UNKNOWN_CLASS, cls->data());
+  }
+  Cell clsCns = class_->clsCnsGet(cns);
+  if (clsCns.m_type == KindOfUninit) {
+    raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
+  }
+  return clsCns;
+}
+
+// Look up the method specified by methodName from the class specified by cls
+// and enforce accessibility. Accessibility checks depend on the relationship
+// between the class that first declared the method (baseClass) and the context
+// class (ctx).
+//
+// If there are multiple accessible methods with the specified name declared in
+// cls and ancestors of cls, the method from the most derived class will be
+// returned, except if we are doing an ObjMethod call ("$obj->foo()") and there
+// is an accessible private method, in which case the accessible private method
+// will be returned.
+//
+// Accessibility rules:
+//
+//   | baseClass/ctx relationship | public | protected | private |
+//   +----------------------------+--------+-----------+---------+
+//   | anon/unrelated             | yes    | no        | no      |
+//   | baseClass == ctx           | yes    | yes       | yes     |
+//   | baseClass derived from ctx | yes    | yes       | no      |
+//   | ctx derived from baseClass | yes    | yes       | no      |
+//   +----------------------------+--------+-----------+---------+
+
+const StaticString s_construct("__construct");
+
+const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
+                                              const StringData* methodName,
+                                              const Class* ctx,
+                                              CallType callType,
+                                              bool raise /* = false */) {
+  const Func* method;
+  if (callType == CallType::CtorMethod) {
+    assert(methodName == nullptr);
+    method = cls->getCtor();
+  } else {
+    assert(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
+    assert(methodName != nullptr);
+    method = cls->lookupMethod(methodName);
+    while (!method) {
+      if (UNLIKELY(methodName->isame(s_construct.get()))) {
+        // We were looking up __construct and failed to find it. Fall back
+        // to old-style constructor: same as class name.
+        method = cls->getCtor();
+        if (!Func::isSpecial(method->name())) break;
+      }
+      // We didn't find any methods with the specified name in cls's method
+      // table, handle the failure as appropriate.
+      if (raise) {
+        raise_error("Call to undefined method %s::%s()",
+                    cls->name()->data(),
+                    methodName->data());
+      }
+      return nullptr;
+    }
+  }
+  assert(method);
+  bool accessible = true;
+  // If we found a protected or private method, we need to do some
+  // accessibility checks.
+  if ((method->attrs() & (AttrProtected|AttrPrivate)) &&
+      !g_context->debuggerSettings.bypassCheck) {
+    Class* baseClass = method->baseCls();
+    assert(baseClass);
+    // If ctx is the class that first declared this method, then we know we
+    // have the right method and we can stop here.
+    if (ctx == baseClass) {
+      return method;
+    }
+    // The invalid context cannot access protected or private methods,
+    // so we can fail fast here.
+    if (ctx == nullptr) {
+      if (raise) {
+        raise_error("Call to %s %s::%s() from invalid context",
+                    (method->attrs() & AttrPrivate) ? "private" : "protected",
+                    cls->name()->data(),
+                    method->name()->data());
+      }
+      return nullptr;
+    }
+    assert(ctx);
+    if (method->attrs() & AttrPrivate) {
+      // ctx is not the class that declared this private method, so this
+      // private method is not accessible. We need to keep going because
+      // ctx might define a private method with this name.
+      accessible = false;
+    } else {
+      // If ctx is derived from the class that first declared this protected
+      // method, then we know this method is accessible and thus (due to
+      // semantic checks) we know ctx cannot have a private method with the
+      // same name, so we're done.
+      if (ctx->classof(baseClass)) {
+        return method;
+      }
+      if (!baseClass->classof(ctx)) {
+        // ctx is not related to the class that first declared this protected
+        // method, so this method is not accessible. Because ctx is not the
+        // same or an ancestor of the class which first declared the method,
+        // we know that ctx not the same or an ancestor of cls, and therefore
+        // we don't need to check if ctx declares a private method with this
+        // name, so we can fail fast here.
+        if (raise) {
+          raise_error("Call to protected method %s::%s() from context '%s'",
+                      cls->name()->data(),
+                      method->name()->data(),
+                      ctx->name()->data());
+        }
+        return nullptr;
+      }
+      // We now know this protected method is accessible, but we need to
+      // keep going because ctx may define a private method with this name.
+      assert(accessible && baseClass->classof(ctx));
+    }
+  }
+  // If this is an ObjMethod call ("$obj->foo()") AND there is an ancestor
+  // of cls that declares a private method with this name AND ctx is an
+  // ancestor of cls, we need to check if ctx declares a private method with
+  // this name.
+  if (method->hasPrivateAncestor() && callType == CallType::ObjMethod &&
+      ctx && cls->classof(ctx)) {
+    const Func* ctxMethod = ctx->lookupMethod(methodName);
+    if (ctxMethod && ctxMethod->cls() == ctx &&
+        (ctxMethod->attrs() & AttrPrivate)) {
+      // For ObjMethod calls, a private method declared by ctx trumps
+      // any other method we may have found.
+      return ctxMethod;
+    }
+  }
+  // If we found an accessible method in cls's method table, return it.
+  if (accessible) {
+    return method;
+  }
+  // If we reach here it means we've found an inaccessible private method
+  // in cls's method table, handle the failure as appropriate.
+  if (raise) {
+    raise_error("Call to private method %s::%s() from %s'%s'",
+                method->baseCls()->name()->data(),
+                method->name()->data(),
+                ctx ? "context " : "invalid context",
+                ctx ? ctx->name()->data() : "");
+  }
+  return nullptr;
+}
+
+const StaticString s___call("__call");
+const StaticString s___callStatic("__callStatic");
+const StaticString s_call_user_func("call_user_func");
+const StaticString s_call_user_func_array("call_user_func_array");
+
+LookupResult ExecutionContext::lookupObjMethod(const Func*& f,
+                                                 const Class* cls,
+                                                 const StringData* methodName,
+                                                 const Class* ctx,
+                                                 bool raise /* = false */) {
+  f = lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, false);
+  if (!f) {
+    f = cls->lookupMethod(s___call.get());
+    if (!f) {
+      if (raise) {
+        // Throw a fatal error
+        lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, true);
+      }
+      return LookupResult::MethodNotFound;
+    }
+    return LookupResult::MagicCallFound;
+  }
+  if (f->attrs() & AttrStatic && !f->isClosureBody()) {
+    return LookupResult::MethodFoundNoThis;
+  }
+  return LookupResult::MethodFoundWithThis;
+}
+
+LookupResult
+ExecutionContext::lookupClsMethod(const Func*& f,
+                                    const Class* cls,
+                                    const StringData* methodName,
+                                    ObjectData* obj,
+                                    const Class* ctx,
+                                    bool raise /* = false */) {
+  f = lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, false);
+  if (!f) {
+    if (obj && obj->instanceof(cls)) {
+      f = obj->getVMClass()->lookupMethod(s___call.get());
+    }
+    if (!f) {
+      f = cls->lookupMethod(s___callStatic.get());
+      if (!f) {
+        if (raise) {
+          // Throw a fatal error
+          lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, true);
+        }
+        return LookupResult::MethodNotFound;
+      }
+      f->validate();
+      assert(f);
+      assert(f->attrs() & AttrStatic);
+      return LookupResult::MagicCallStaticFound;
+    }
+    assert(f);
+    assert(obj);
+    // __call cannot be static, this should be enforced by semantic
+    // checks defClass time or earlier
+    assert(!(f->attrs() & AttrStatic));
+    return LookupResult::MagicCallFound;
+  }
+  if (obj && !(f->attrs() & AttrStatic) && obj->instanceof(cls)) {
+    return LookupResult::MethodFoundWithThis;
+  }
+  return LookupResult::MethodFoundNoThis;
+}
+
+LookupResult ExecutionContext::lookupCtorMethod(const Func*& f,
+                                                const Class* cls,
+                                                bool raise /* = false */) {
+  f = cls->getCtor();
+  if (!(f->attrs() & AttrPublic)) {
+    Class* ctx = arGetContextClass(vmfp());
+    f = lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, raise);
+    if (!f) {
+      // If raise was true than lookupMethodCtx should have thrown,
+      // so we should only be able to get here if raise was false
+      assert(!raise);
+      return LookupResult::MethodNotFound;
+    }
+  }
+  return LookupResult::MethodFoundWithThis;
+}
+
+static Class* loadClass(StringData* clsName) {
+  Class* class_ = Unit::loadClass(clsName);
+  if (class_ == nullptr) {
+    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
+  }
+  return class_;
+}
+
+ObjectData* ExecutionContext::createObject(StringData* clsName,
+                                           const Variant& params,
+                                           bool init /* = true */) {
+  return createObject(loadClass(clsName), params, init);
+}
+
+ObjectData* ExecutionContext::createObject(const Class* class_,
+                                           const Variant& params,
+                                           bool init) {
+  auto o = Object::attach(newInstance(const_cast<Class*>(class_)));
+  if (init) {
+    initObject(class_, params, o.get());
+  }
+
+  return o.detach();
+}
+
+ObjectData* ExecutionContext::createObjectOnly(StringData* clsName) {
+  return createObject(clsName, init_null_variant, false);
+}
+
+ObjectData* ExecutionContext::initObject(StringData* clsName,
+                                         const Variant& params,
+                                         ObjectData* o) {
+  return initObject(loadClass(clsName), params, o);
+}
+
+ObjectData* ExecutionContext::initObject(const Class* class_,
+                                         const Variant& params,
+                                         ObjectData* o) {
+  auto ctor = class_->getCtor();
+  if (!(ctor->attrs() & AttrPublic)) {
+    std::string msg = "Access to non-public constructor of class ";
+    msg += class_->name()->data();
+    Reflection::ThrowReflectionExceptionObject(msg);
+  }
+  // call constructor
+  if (!isContainerOrNull(params)) {
+    throw_param_is_not_container();
+  }
+  TypedValue ret;
+  invokeFunc(&ret, ctor, params, o);
+  tvRefcountedDecRef(&ret);
+  return o;
+}
+
+ActRec* ExecutionContext::getStackFrame() {
+  VMRegAnchor _;
+  return vmfp();
+}
+
+ObjectData* ExecutionContext::getThis() {
+  VMRegAnchor _;
+  ActRec* fp = vmfp();
+  if (fp->skipFrame()) {
+    fp = getPrevVMState(fp);
+    if (!fp) return nullptr;
+  }
+  if (fp->hasThis()) {
+    return fp->getThis();
+  }
+  return nullptr;
+}
+
+Class* ExecutionContext::getContextClass() {
+  VMRegAnchor _;
+  ActRec* ar = vmfp();
+  assert(ar != nullptr);
+  if (ar->skipFrame()) {
+    ar = getPrevVMState(ar);
+    if (!ar) return nullptr;
+  }
+  return ar->m_func->cls();
+}
+
+Class* ExecutionContext::getParentContextClass() {
+  if (Class* ctx = getContextClass()) {
+    return ctx->parent();
+  }
+  return nullptr;
+}
+
+StringData* ExecutionContext::getContainingFileName() {
+  VMRegAnchor _;
+  ActRec* ar = vmfp();
+  if (ar == nullptr) return staticEmptyString();
+  if (ar->skipFrame()) {
+    ar = getPrevVMState(ar);
+    if (ar == nullptr) return staticEmptyString();
+  }
+  Unit* unit = ar->m_func->unit();
+  assert(unit->filepath()->isStatic());
+  // XXX: const StringData* -> Variant(bool) conversion problem makes this ugly
+  return const_cast<StringData*>(unit->filepath());
+}
+
+int ExecutionContext::getLine() {
+  VMRegAnchor _;
+  ActRec* ar = vmfp();
+  Unit* unit = ar ? ar->m_func->unit() : nullptr;
+  Offset pc = unit ? pcOff() : 0;
+  if (ar == nullptr) return -1;
+  if (ar->skipFrame()) {
+    ar = getPrevVMState(ar, &pc);
+  }
+  if (ar == nullptr || (unit = ar->m_func->unit()) == nullptr) return -1;
+  return unit->getLineNumber(pc);
+}
+
+Array ExecutionContext::getCallerInfo() {
+  VMRegAnchor _;
+  Array result = Array::Create();
+  ActRec* ar = vmfp();
+  if (ar->skipFrame()) {
+    ar = getPrevVMState(ar);
+  }
+  while (ar->m_func->name()->isame(s_call_user_func.get())
+         || ar->m_func->name()->isame(s_call_user_func_array.get())) {
+    ar = getPrevVMState(ar);
+    if (ar == nullptr) {
+      return result;
+    }
+  }
+
+  Offset pc = 0;
+  ar = getPrevVMState(ar, &pc);
+  while (ar != nullptr) {
+    if (!ar->m_func->name()->isame(s_call_user_func.get())
+        && !ar->m_func->name()->isame(s_call_user_func_array.get())) {
+      Unit* unit = ar->m_func->unit();
+      int lineNumber;
+      if ((lineNumber = unit->getLineNumber(pc)) != -1) {
+        result.set(s_file, unit->filepath()->data(), true);
+        result.set(s_line, lineNumber);
+        return result;
+      }
+    }
+    ar = getPrevVMState(ar, &pc);
+  }
+  return result;
+}
+
+int64_t ExecutionContext::getDebugBacktraceHash() {
+  VMRegAnchor _;
+  ActRec* ar = vmfp();
+  int64_t hash = 0x9e3779b9;
+  Unit* prev_unit = nullptr;
+
+  while (ar != nullptr) {
+    if (!ar->skipFrame()) {
+      Unit* unit = ar->m_func->unit();
+
+      // Only do a filehash if the file changed. It is very common
+      // to see sequences of calls within the same file
+      // File paths are already hashed, and the hash bits are random enough
+      // That allows us to do a faster combination of hashes using a known
+      // implementation (boost::hash_combine)
+      if (prev_unit != unit) {
+        prev_unit = unit;
+        auto filehash = unit->filepath()->hash();
+        hash ^= filehash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+      }
+
+      // Function names are already hashed, and the hash bits are random enough
+      // That allows us to do a faster combination of hashes using a known
+      // implementation (boost::hash_combine)
+      auto funchash = ar->m_func->fullName()->hash();
+      hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    }
+    ar = getPrevVMState(ar);
+  }
+
+  return hash;
+}
+
+ActRec* ExecutionContext::getFrameAtDepth(int frame) {
+  VMRegAnchor _;
+  auto fp = vmfp();
+  if (UNLIKELY(!fp)) return nullptr;
+  auto pc = fp->func()->unit()->offsetOf(vmpc());
+  for (; frame > 0; --frame) {
+    fp = getPrevVMState(fp, &pc);
+    if (UNLIKELY(!fp)) return nullptr;
+  }
+  if (fp->skipFrame()) {
+    fp = getPrevVMState(fp, &pc);
+  }
+  if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
+  auto const curOp = fp->func()->unit()->getOp(pc);
+  if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetV ||
+               curOp == Op::CreateCont || curOp == Op::Await)) {
+    return nullptr;
+  }
+  assert(!fp->magicDispatch());
+  return fp;
+}
+
+VarEnv* ExecutionContext::getOrCreateVarEnv(int frame) {
+  auto const fp = getFrameAtDepth(frame);
+  if (!fp || !(fp->func()->attrs() & AttrMayUseVV)) {
+    raise_error("Could not create variable environment");
+  }
+  if (!fp->hasVarEnv()) {
+    fp->setVarEnv(VarEnv::createLocal(fp));
+  }
+  return fp->getVarEnv();
+}
+
+void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
+  VMRegAnchor _;
+  ActRec *fp = vmfp();
+  if (!fp) return;
+  if (fp->skipFrame()) fp = getPrevVMState(fp);
+  fp->getVarEnv()->set(name, v);
+}
+
+void ExecutionContext::bindVar(StringData* name, TypedValue* v) {
+  VMRegAnchor _;
+  ActRec *fp = vmfp();
+  if (!fp) return;
+  if (fp->skipFrame()) fp = getPrevVMState(fp);
+  fp->getVarEnv()->bind(name, v);
+}
+
+Array ExecutionContext::getLocalDefinedVariables(int frame) {
+  VMRegAnchor _;
+  ActRec *fp = vmfp();
+  for (; frame > 0; --frame) {
+    if (!fp) break;
+    fp = getPrevVMState(fp);
+  }
+  if (!fp) {
+    return empty_array();
+  }
+  return getDefinedVariables(fp);
+}
 
 }

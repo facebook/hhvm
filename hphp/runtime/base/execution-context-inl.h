@@ -253,6 +253,25 @@ inline Variant ExecutionContext::invokeMethodV(
   return ret;
 }
 
+inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
+  ActRec* sfp = ar->sfp();
+  if (LIKELY(sfp != nullptr)) return sfp;
+  return LIKELY(!m_nestedVMs.empty()) ? m_nestedVMs.back().fp : nullptr;
+}
+
+inline Cell ExecutionContext::lookupClsCns(const StringData* cls,
+                                      const StringData* cns) {
+  return lookupClsCns(NamedEntity::get(cls), cls, cns);
+}
+
+inline VarEnv* ExecutionContext::hasVarEnv(int frame) {
+  auto const fp = getFrameAtDepth(frame);
+  if (fp && (fp->func()->attrs() & AttrMayUseVV)) {
+    if (fp->hasVarEnv()) return fp->getVarEnv();
+  }
+  return nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

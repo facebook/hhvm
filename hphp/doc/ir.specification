@@ -509,7 +509,13 @@ To string conversions:
 | OrdStr,                       D(Int), S(Str),                           NF
 
   Convert the first byte in a string to an unsigned integer.
+  Intended as an optimization for ord($str)
 
+| OrdStrIdx,                    D(Int), S(Str) S(Int),                    Er
+
+  Convert the character at position S1 in base string S0 to an unsigned
+  integer.  Raises a notice if the position is out of bounds.
+  Intended as an optimization for ord($str[$idx]).
 
 4. Boolean predicates
 
@@ -2337,8 +2343,7 @@ fields of that struct for holding intermediate values.
 | StringGet, D(StaticStr), S(Str) S(Int), PRc|Er
 
   Get string representing character at position S1 from base string S0.  Raises
-  a warning if the position is out of bounds, or a notice if the position is
-  not an integer.
+  a notice if the position is out of bounds.
 
 | MapGet, D(Cell), S(Obj) S(Int,Str), PRc|Er
 

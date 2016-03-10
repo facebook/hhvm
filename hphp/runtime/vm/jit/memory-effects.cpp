@@ -1474,7 +1474,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupCns:
   case LookupCnsE:
   case LookupCnsU:
-  case StringGet:      // raise_warning
+  case StringGet:      // raise_notice
+  case OrdStrIdx:      // raise_notice
   case ArrayAdd:       // decrefs source
   case AddElemIntKey:  // decrefs value
   case AddElemStrKey:  // decrefs value

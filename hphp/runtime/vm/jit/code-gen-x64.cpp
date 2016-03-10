@@ -1432,6 +1432,37 @@ void CodeGenerator::cgOrdStr(IRInstruction* inst) {
   v << loadzbq{sd[0], dstLoc(inst, 0).reg()};
 }
 
+void CodeGenerator::cgOrdStrIdx(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const strReg = srcLoc(inst, 0).reg();
+  auto const sd = v.makeReg();
+  auto const strLen = v.makeReg();
+  auto const srcOff = srcLoc(inst, 1).reg();
+  auto const sf = v.makeReg();
+
+  v << loadzlq{strReg[StringData::sizeOff()], strLen};
+  v << cmpq{srcOff, strLen, sf};
+  unlikelyCond(v, vcold(), CC_B, sf, dstLoc(inst, 0).reg(),
+               [&] (Vout& v) {
+                 cgCallHelper(
+                   v,
+                   CallSpec::direct(MInstrHelpers::stringGetI),
+                   kVoidDest,
+                   SyncOptions::Sync,
+                   argGroup(inst).ssa(0).ssa(1)
+                 );
+                 return v.cns(0);
+               },
+               [&] (Vout& v) {
+                 auto const dst = v.makeReg();
+                 // sd = StringData->m_data;
+                 v << load{strReg[StringData::dataOff()], sd};
+                 // dst = (unsigned char)sd[0];
+                 v << loadzbq{sd[srcOff], dst};
+                 return dst;
+               });
+}
+
 void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto srcReg = srcLoc(inst, 0).reg();

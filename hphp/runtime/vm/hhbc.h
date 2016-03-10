@@ -442,7 +442,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
-  O(Switch,          THREE(BLA,I64A,OA(SwitchKind)),                    \
+  O(Switch,          THREE(OA(SwitchKind),I64A,BLA),                    \
                                        ONE(CV),         NOV,        CF_TF) \
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \

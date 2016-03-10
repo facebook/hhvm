@@ -151,6 +151,10 @@ template<typename L>
 void foreachSwitchTarget(PC pc, L func) {
   auto const op = decode_op(pc);
   assert(isSwitch(op));
+  if (op == Op::Switch) {
+    (void)decode_oa<SwitchKind>(pc); // skip bounded kind
+    (void)decode_raw<int64_t>(pc); // skip base
+  }
   int32_t size = decode_raw<int32_t>(pc);
   for (int i = 0; i < size; ++i) {
     if (op == Op::SSwitch) decode_raw<Id>(pc);
@@ -159,7 +163,7 @@ void foreachSwitchTarget(PC pc, L func) {
 }
 
 template<typename L>
-void foreachSwitchString(PC pc, L func) {
+void foreachSSwitchString(PC pc, L func) {
   auto const UNUSED op = decode_op(pc);
   assert(op == Op::SSwitch);
   int32_t size = decode_raw<int32_t>(pc) - 1; // the last item is the default

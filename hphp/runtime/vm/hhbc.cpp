@@ -402,7 +402,11 @@ int numSuccs(PC const origPC) {
   auto const op = decode_op(pc);
   if ((instrFlags(op) & TF) != 0) {
     if (isSwitch(op)) {
-      return decode_raw<int32_t>(pc);
+      if (op == Op::Switch) {
+        decode_raw<SwitchKind>(pc); // skip bounded flag
+        decode_raw<int64_t>(pc); // skip base
+      }
+      return decode_raw<int32_t>(pc); // vector length
     }
     if (isUnconditionalJmp(op) || op == OpIterBreak) return 1;
     return 0;

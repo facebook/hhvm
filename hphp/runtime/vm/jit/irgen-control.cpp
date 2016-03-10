@@ -91,10 +91,8 @@ void emitJmpNZ(IRGS& env, Offset relOffset) {
 
 static const StaticString s_switchProfile("SwitchProfile");
 
-void emitSwitch(IRGS& env,
-                const ImmVector& iv,
-                int64_t base,
-                SwitchKind kind) {
+void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
+                const ImmVector& iv) {
   auto bounded = kind == SwitchKind::Bounded;
   int nTargets = bounded ? iv.size() - 2 : iv.size();
 

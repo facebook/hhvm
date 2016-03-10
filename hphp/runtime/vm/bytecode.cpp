@@ -3370,12 +3370,12 @@ static SwitchMatch doubleCheck(double d, int64_t& out) {
 
 OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
   auto const origPC = pc - encoded_op_size(Op::Switch);
+  auto const kind = decode_oa<SwitchKind>(pc);
+  auto base = decode<int64_t>(pc);
   auto veclen = decode<int32_t>(pc);
   assert(veclen > 0);
   Offset* jmptab = (Offset*)pc;
   pc += veclen * sizeof(*jmptab);
-  auto base = decode<int64_t>(pc);
-  auto const kind = decode_oa<SwitchKind>(pc);
 
   TypedValue* val = vmStack().topTV();
   if (kind == SwitchKind::Unbounded) {

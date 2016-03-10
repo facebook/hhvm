@@ -1464,7 +1464,7 @@ JmpNZ <rel offset>    [C]  ->  []
   Jump if not zero. Conditionally transfers control to the location specified
   by %1 if (bool)$1 != (bool)0.
 
-Switch <offset vector> <base> <bounded>    [C]  ->  []
+Switch <bounded> <base> <offset vector>    [C]  ->  []
 
   Switch over integer case values. If bounded == SwitchKind::Unbounded, the
   implementation will assume that $1 is an integer in the range [0,

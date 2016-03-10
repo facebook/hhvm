@@ -546,10 +546,6 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  // Task #8249076: Disable inlining when we need to load the context
-  // since it seems broken.
-  if (!info.ctx && !isFPushFunc(info.fpushOpc)) return nullptr;
-
   // We can't inline FPushClsMethod when the callee may have a $this pointer
   if (isFPushClsMethod(info.fpushOpc) && callee->mayHaveThis()) {
     return nullptr;

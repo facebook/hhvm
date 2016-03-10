@@ -86,19 +86,22 @@ bool beginInlining(IRGS& env,
   auto const& info = fpiStack.front();
   always_assert(!isFPushCuf(info.fpushOpc) && !info.interp);
 
+  // NB: the arguments were just popped from the VM stack above, so the VM
+  // stack-pointer is conceptually pointing to the callee's ActRec at this
+  // point.
+  IRSPOffset calleeAROff = offsetFromIRSP(env, BCSPOffset{0});
+
   auto ctx = [&] {
     if (info.ctx || isFPushFunc(info.fpushOpc)) {
       return info.ctx;
     }
-
-    constexpr int32_t adjust = offsetof(ActRec, m_r) - offsetof(ActRec, m_this);
-    IRSPOffset ctxOff{invSPOff(env) - info.returnSPOff - adjust};
+    constexpr int32_t adjust = offsetof(ActRec, m_this) / sizeof(Cell);
+    IRSPOffset ctxOff = calleeAROff + adjust;
     return gen(env, LdStk, TCtx, IRSPOffsetData{ctxOff}, sp(env));
   }();
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    IRSPOffset arOff = offsetFromIRSP(env, BCSPOffset{0});
-    auto arFunc = gen(env, LdARFuncPtr, IRSPOffsetData{arOff}, sp(env));
+    auto arFunc = gen(env, LdARFuncPtr, IRSPOffsetData{calleeAROff}, sp(env));
     gen(env, DbgAssertFunc, arFunc, cns(env, target));
   }
 
@@ -108,15 +111,14 @@ bool beginInlining(IRGS& env,
                      fpiFunc ? fpiFunc->fullName()->data() : "null",
                      target  ? target->fullName()->data()  : "null");
 
-  auto inlineStack = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, BeginInlining, IRSPOffsetData{inlineStack}, sp(env));
+  gen(env, BeginInlining, IRSPOffsetData{calleeAROff}, sp(env));
 
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
   data.ctx           = ctx;
   data.retSPOff      = prevSPOff;
-  data.spOffset      = offsetFromIRSP(env, BCSPOffset{0});
+  data.spOffset      = calleeAROff;
   data.numNonDefault = numParams;
 
   // Push state and update the marker before emitting any instructions so

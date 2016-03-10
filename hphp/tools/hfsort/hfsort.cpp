@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <cxxabi.h>
+#include <unordered_map>
 
 #include <folly/Format.h>
 #include "hphp/util/text-util.h"
@@ -66,10 +67,15 @@ void readSymbols(FILE *file) {
   }
 }
 
-FuncId getFuncId(char* perfLine) {
+uint64_t getAddr(char* perfLine) {
   uint64_t addr;
   int ret = sscanf(perfLine, "%" SCNx64, &addr);
-  if (ret != 1) return InvalidId;
+  if (ret != 1) return InvalidAddr;
+  return addr;
+}
+
+FuncId getFuncId(uint64_t addr) {
+  if (addr == InvalidAddr) return InvalidId;
   return cg.addrToFuncId(addr);
 }
 
@@ -83,15 +89,21 @@ void readPerfData(gzFile file, bool computeArcWeight) {
 
     // process one sample
     if (gzgets(file, line, BUFLEN) == Z_NULL) error("reading perf data");
-    FuncId idTop = getFuncId(line);
+    auto addrTop = getAddr(line);
+    FuncId idTop = getFuncId(addrTop);
     if (idTop == InvalidId) continue;
     cg.funcs[idTop].samples++;
     HFTRACE(2, "readPerfData: idTop: %u %s\n", idTop,
             cg.funcs[idTop].mangledNames[0].c_str());
     if (gzgets(file, line, BUFLEN) == Z_NULL) error("reading perf data");
-    FuncId idCaller = getFuncId(line);
+    auto addrCaller = getAddr(line);
+    FuncId idCaller = getFuncId(addrCaller);
     if (idCaller != InvalidId) {
-      if (computeArcWeight) cg.incArcWeight(idCaller, idTop);
+      auto arc = cg.getArc(idCaller, idTop);
+      if (computeArcWeight) {
+        arc->weight++;
+        arc->avgCallOffset += addrCaller - cg.funcs[idCaller].addr;
+      }
       HFTRACE(2, "readPerfData: idCaller: %u %s\n", idCaller,
               cg.funcs[idCaller].mangledNames[0].c_str());
     }
@@ -99,10 +111,11 @@ void readPerfData(gzFile file, bool computeArcWeight) {
 
   if (!computeArcWeight) return;
 
-  // Normalize incoming arc weights for each node.
+  // Normalize incoming arc weights and compute avgCallOffset for each node.
   for (auto& func : cg.funcs) {
     for (auto arc : func.inArcs) {
       arc->normalizedWeight = arc->weight / func.samples;
+      arc->avgCallOffset = arc->avgCallOffset / arc->weight;
     }
   }
 }
@@ -154,9 +167,24 @@ std::string getNameWithoutSuffix(std::string str) {
 void print(const std::vector<Cluster*>& clusters, bool useWildcards) {
   FILE* outfile = fopen("hotfuncs.txt", "wt");
   if (!outfile) error("opening output file hotfuncs.txt");
-  uint32_t totalSize = 0;
-  uint32_t curPage   = 0;
-  uint32_t hotfuncs  = 0;
+  uint32_t totalSize   = 0;
+  uint32_t curPage     = 0;
+  uint32_t hotfuncs    = 0;
+  double totalDistance = 0;
+  double totalCalls    = 0;
+  double totalCalls64B = 0;
+  double totalCalls4KB = 0;
+  double totalCalls2MB = 0;
+  std::unordered_map<FuncId,uint64_t> newAddr;
+  for (auto cluster : clusters) {
+    for (FuncId fid : cluster->funcs) {
+      if (cg.funcs[fid].samples > 0) {
+        newAddr[fid] = totalSize;
+        totalSize += cg.funcs[fid].size;
+      }
+    }
+  }
+  totalSize = 0;
   HFTRACE(1, "============== page 0 ==============\n");
   for (auto cluster : clusters) {
     HFTRACE(1,
@@ -178,7 +206,28 @@ void print(const std::vector<Cluster*>& clusters, bool useWildcards) {
 
           space = 1;
         }
-        HFTRACE(1, "start = %6u : %s\n", totalSize,
+        uint64_t dist = 0;
+        uint64_t calls = 0;
+        for (auto arc : cg.funcs[fid].outArcs) {
+          auto d = std::abs(newAddr[arc->dst] -
+                            (newAddr[fid] + arc->avgCallOffset));
+          auto w = arc->weight;
+          calls += w;
+          if (d < 64)      totalCalls64B += w;
+          if (d < 4096)    totalCalls4KB += w;
+          if (d < 2 << 20) totalCalls2MB += w;
+          HFTRACE(
+            2,
+            "arc: %u [@%u+%.1lf] -> %u [@%u]: weight = %.0lf, callDist = %u\n",
+            arc->src, newAddr[arc->src], arc->avgCallOffset,
+            arc->dst, newAddr[arc->dst], arc->weight, d);
+          dist += arc->weight * d;
+        }
+        totalCalls += calls;
+        totalDistance += dist;
+        HFTRACE(1, "start = %6u : avgCallDist = %u : %s\n",
+                totalSize,
+                calls ? dist / calls : 0,
                 cg.funcs[fid].toString().c_str());
         totalSize += cg.funcs[fid].size;
         uint32_t newPage = totalSize / kPageSize;
@@ -193,6 +242,18 @@ void print(const std::vector<Cluster*>& clusters, bool useWildcards) {
   printf("Output saved in hotfuncs.txt\n");
   printf("  Number of hot functions: %u\n  Number of clusters: %lu\n",
          hotfuncs, clusters.size());
+  printf("  Final average call distance = %.1lf (%.0lf / %.0lf)\n",
+         totalCalls ? totalDistance / totalCalls : 0,
+         totalDistance, totalCalls);
+  printf("  Total Calls = %.0lf\n", totalCalls);
+  if (totalCalls) {
+    printf("  Total Calls within 64B = %.0lf (%.2lf%%)\n",
+           totalCalls64B, 100 * totalCalls64B / totalCalls);
+    printf("  Total Calls within 4KB = %.0lf (%.2lf%%)\n",
+           totalCalls4KB, 100 * totalCalls4KB / totalCalls);
+    printf("  Total Calls within 2MB = %.0lf (%.2lf%%)\n",
+           totalCalls2MB, 100 * totalCalls2MB / totalCalls);
+  }
 }
 
 Algorithm checkAlgorithm(const char* algorithm) {

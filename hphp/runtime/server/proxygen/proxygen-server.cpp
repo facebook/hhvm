@@ -409,6 +409,11 @@ void ProxygenServer::timeoutExpired() noexcept {
 
 void ProxygenServer::doShutdown() {
   switch(m_shutdownState) {
+    case ShutdownState::SHUTDOWN_NONE:
+      // Transition from SHUTDOWN_NONE to DRAINING_READS needs to happen
+      // explicitly through `stopListening`, not here.
+      not_reached();
+      break;
     case ShutdownState::DRAINING_READS:
       // Even though connections may be open for reading, they will not be
       // executed in the VM
@@ -423,8 +428,6 @@ void ProxygenServer::doShutdown() {
     case ShutdownState::DRAINING_WRITES:
       forceStop();
       break;
-    default:
-      CHECK(false);
   }
 }
 
@@ -643,7 +646,7 @@ void ProxygenServer::onRequest(shared_ptr<ProxygenTransport> transport) {
 
   if (getStatus() == RunStatus::RUNNING ||
       (getStatus() == RunStatus::STOPPING &&
-       m_shutdownState == ShutdownState::DRAINING_READS)) {
+       m_shutdownState <= ShutdownState::DRAINING_READS)) {
     RequestPriority priority = getRequestPriority(transport->getUrl());
     VLOG(4) << this << ": enqueing request with path=" << transport->getUrl() <<
       " and priority=" << priority;

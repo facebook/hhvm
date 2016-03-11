@@ -139,7 +139,6 @@ struct ProxygenServer : Server,
   virtual void onRequestError(Transport* transport);
 
  protected:
-  // TODO: Share with LibEventServer?
   enum RequestPriority {
     PRIORITY_NORMAL = 0,
     PRIORITY_HIGH,
@@ -147,6 +146,9 @@ struct ProxygenServer : Server,
   };
   RequestPriority getRequestPriority(const char *uri);
 
+  // Ordering of shutdown states corresponds to the phases in time,
+  // and we rely on the ordering.  State transition graph is linear
+  // here.
   enum class ShutdownState {
     SHUTDOWN_NONE,
     DRAINING_READS,

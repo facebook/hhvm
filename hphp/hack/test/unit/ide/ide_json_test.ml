@@ -40,131 +40,124 @@ let test_no_call_id () =
 
 let test_call_id_not_int () =
   expect_parsing_error
-    "{\"id\" : \"aaa\"}"
+    {|{"id" : "aaa"}|}
     "id field must be an integer"
 
 let test_call_id_not_int2 () =
   expect_parsing_error
-    "{\"id\" : 12.3}"
+    {|{"id" : 12.3}|}
     "id field must be an integer"
 
 let test_no_type () =
   expect_parsing_error
-    "{\"id\" : 4}"
+    {|{"id" : 4}|}
     "Request object must have type field"
 
 let test_type_not_string () =
   expect_parsing_error
-    "{\"id\" : 4, \"type\" : 4}"
+    {|{"id" : 4, "type" : 4}|}
     "Type field must be string"
 
 let test_type_not_recognized () =
   expect_parsing_error
-    "{\"id\" : 4, \"type\" : \"aaaa\"}"
+    {|{"id" : 4, "type" : "aaaa"}|}
     "Message type not recognized"
 
 let test_no_args () =
   expect_invalid_call
-    "{\"id\" : 4, \"type\" : \"call\"}"
+    {|{"id" : 4, "type" : "call"}|}
     4
     "Request object must have an args field"
 
 let test_args_not_array () =
   expect_invalid_call
-    "{\"id\" : 4, \"type\" : \"call\", \"args\" : 4}"
+    {|{"id" : 4, "type" : "call", "args" : 4}|}
     4
     "Args field must be an array"
 
 let test_call_not_recognized () =
   expect_invalid_call
-    "{\"id\" : 4, \"type\" : \"call\", \"args\" : [\"no_such_command\"]}"
+    {|{"id" : 4, "type" : "call", "args" : ["no_such_command"]}|}
     4
     "Call not recognized"
 
-let test_autocomplete_call () =
-  let msg = "{\"id\" : 4, \"type\" : \"call\",  \
-             \"args\" : [\"--auto-complete\", \"<?hh\"]}" in
+let test_call_id = 4
+
+let build_call_msg args =
+  let args = String.concat ", " args in
+  {|{"id" : |} ^ string_of_int test_call_id ^
+    {|, "type" : "call", "args" : [|} ^ args ^ "]}"
+
+let expect_call msg call =
   match call_of_string msg with
-  | Call (4, AutoCompleteCall ("<?hh")) -> true
+  | Call (test_call_id, call) -> true
   | _ -> false
+
+let test_autocomplete_call () =
+  let msg = build_call_msg [
+    {|"--auto-complete"|};
+    {|"<?hh"|}
+  ] in
+  expect_call msg (AutoCompleteCall ("<?hh"))
 
 let test_autocomplete_response () =
   let id = 4 in
   let response = AutoCompleteResponse (JSON_Array []) in
   (json_string_of_response id response) =
-  "{\"type\":\"response\",\"id\":4,\"result\":[]}"
+  {|{"type":"response","id":4,"result":[]}|}
 
 let test_invalid_call_response () =
   let id = 4 in
   let msg = "error" in
   (json_string_of_invalid_call id msg) =
-  "{\"type\":\"response\",\"id\":4,\"error\":{\"code\":2,\"message\":\"error\"}}"
+  {|{"type":"response","id":4,"error":{"code":2,"message":"error"}}|}
 
 let test_server_busy_reponse () =
   let id = 4 in
   (json_string_of_server_busy id) =
-  "{\"type\":\"response\",\"id\":4,\"error\":{\"code\":1,\"message\":\"Server busy\"}}"
+  {|{"type":"response","id":4,"error":{"code":1,"message":"Server busy"}}|}
 
 let test_identify_function_call () =
-  let msg = "{\"type\" : \"call\", \
-              \"id\"   : 4, \
-              \"args\" : [ \
-                \"--identify-function\", \
-                \"21:37\", \
-                \"<?hh\" ]}" in
-  match call_of_string msg with
-  | Call (4, IdentifyFunctionCall ("<?hh", 21, 37)) -> true
-  | _ -> false
+  let msg = build_call_msg [
+    {|"--identify-function"|};
+    {|"21:37"|};
+    {|"<?hh"|}
+  ] in
+  expect_call msg (IdentifyFunctionCall ("<?hh", 21, 37))
 
 let test_status_call () =
-  let msg = "{\"type\" : \"call\", \
-              \"id\"   : 4, \
-              \"args\" : []}" in
-  match call_of_string msg with
-  | Call (4, StatusCall) -> true
-  | _ -> false
+  let msg = build_call_msg [] in
+  expect_call msg StatusCall
 
 let test_find_function_refs_call () =
-  let msg = "{\"type\" : \"call\", \
-            \"id\"   : 4, \
-            \"args\" : [ \
-              \"--find-refs\", \
-              \"array_pull\" ]}" in
-  match call_of_string msg with
-  | Call (4, FindRefsCall (FindRefsService.Function "array_pull")) -> true
-  | _ -> false
+  let msg = build_call_msg [
+    {|"--find-refs"|};
+    {|"array_pull"|};
+  ] in
+  expect_call msg (FindRefsCall (FindRefsService.Function "array_pull"))
 
 let test_find_method_refs_call () =
-  let msg = "{\"type\" : \"call\", \
-            \"id\"   : 4, \
-            \"args\" : [ \
-              \"--find-refs\", \
-              \"C::getID\" ]}" in
-  match call_of_string msg with
-  | Call (4, FindRefsCall (FindRefsService.Method ("C", "getID"))) -> true
-  | _ -> false
+  let msg = build_call_msg [
+    {|"--find-refs"|};
+    {|"C::getID"|}
+  ] in
+  expect_call msg (FindRefsCall (FindRefsService.Method ("C", "getID")))
 
 let test_find_class_refs_call () =
-  let msg = "{\"type\" : \"call\", \
-            \"id\"   : 4, \
-            \"args\" : [ \
-              \"--find-class-refs\", \
-              \"C\" ]}" in
-  match call_of_string msg with
-  | Call (4, FindRefsCall (FindRefsService.Class "C")) -> true
-  | _ -> false
+  let msg = build_call_msg [
+    {|"--find-class-refs"|};
+    {|"C"|}
+  ] in
+  expect_call msg (FindRefsCall (FindRefsService.Class "C"))
 
 let test_strip_json_arg () =
-  let msg = "{\"type\" : \"call\", \
-              \"id\"   : 4, \
-              \"args\" : [ \
-                \"--json\", \
-                \"--identify-function\", \
-                \"21:37\", \
-                \"<?hh\" ]}" in
-  match call_of_string msg with
-  | Call (4, IdentifyFunctionCall ("<?hh", 21, 37)) -> true
-  | _ -> false
+  let msg = build_call_msg [
+    {|"--json"|};
+    {|"--identify-function"|};
+    {|"21:37"|};
+    {|"<?hh"|}
+  ] in
+  expect_call msg (IdentifyFunctionCall ("<?hh", 21, 37))
 
 let tests = [
   "test_invalid_json", test_invalid_json;

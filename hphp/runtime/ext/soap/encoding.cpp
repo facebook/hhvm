@@ -3208,7 +3208,7 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns) {
   USE_SOAP_GLOBAL;
   xmlNsPtr xmlns;
 
-  if (ns == nullptr) {
+  if (ns == nullptr || ns[0] == '\0') {
     return nullptr;
   }
 

@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -175,6 +177,25 @@ bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {
     for (auto i = 0; i < srcs.size(); ++i) {
       v << copy{srcs[i], dsts[i]};
     }
+    return 1;
+  });
+}
+
+bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
+  if (arch() != Arch::X64) return false;
+  auto const def_op = env.def_insts[inst.s];
+
+  // Check if `inst.s' was defined by an instruction with Vreg32 operands, or
+  // movzbl{} in particular (which lowers to a movl{}).
+  if (width(def_op) != Width::Long &&
+      def_op != Vinstr::movzbl) {
+    return false;
+  }
+
+  // If so, the movzlq{} is redundant---instructions on 32-bit registers on x64
+  // always zero the upper bits.
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << copy{inst.s, inst.d};
     return 1;
   });
 }

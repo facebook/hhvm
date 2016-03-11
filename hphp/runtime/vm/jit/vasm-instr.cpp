@@ -74,5 +74,247 @@ bool isBlockEnd(const Vinstr& inst) {
   }
 }
 
+Width width(Vinstr::Opcode op) {
+  switch (op) {
+    // service requests
+    case Vinstr::bindjmp:
+    case Vinstr::bindjcc:
+    case Vinstr::bindjcc1st:
+    case Vinstr::bindaddr:
+    case Vinstr::fallback:
+    case Vinstr::fallbackcc:
+    case Vinstr::retransopt:
+    // vasm intrinsics
+    case Vinstr::copy:
+    case Vinstr::copy2:
+    case Vinstr::copyargs:
+    case Vinstr::debugtrap:
+    case Vinstr::fallthru:
+    case Vinstr::ldimmb:
+    case Vinstr::ldimmw:
+    case Vinstr::ldimml:
+    case Vinstr::ldimmq:
+    case Vinstr::ldimmqs:
+    case Vinstr::load:
+    case Vinstr::store:
+    case Vinstr::mcprep:
+    case Vinstr::phidef:
+    case Vinstr::phijcc:
+    case Vinstr::phijmp:
+    // native function abi
+    case Vinstr::vcall:
+    case Vinstr::vinvoke:
+    case Vinstr::call:
+    case Vinstr::callm:
+    case Vinstr::callr:
+    case Vinstr::calls:
+    case Vinstr::ret:
+    // stub function abi
+    case Vinstr::stublogue:
+    case Vinstr::stubret:
+    case Vinstr::callstub:
+    case Vinstr::callfaststub:
+    case Vinstr::tailcallstub:
+    // php function abi
+    case Vinstr::defvmsp:
+    case Vinstr::syncvmsp:
+    case Vinstr::phplogue:
+    case Vinstr::stubtophp:
+    case Vinstr::loadstubret:
+    case Vinstr::phpret:
+    case Vinstr::callphp:
+    case Vinstr::tailcallphp:
+    case Vinstr::callarray:
+    case Vinstr::vcallarray:
+    case Vinstr::contenter:
+    case Vinstr::leavetc:
+    // exception intrinsics
+    case Vinstr::landingpad:
+    case Vinstr::nothrow:
+    case Vinstr::syncpoint:
+    case Vinstr::unwind:
+    // arithmetic intrinsics
+    case Vinstr::absdbl:
+    case Vinstr::srem:
+    case Vinstr::divint:
+    // nop and trap
+    case Vinstr::nop:
+    case Vinstr::ud2:
+    // zero-extending/truncating copies
+    case Vinstr::movzbl:
+    case Vinstr::movzbq:
+    case Vinstr::movzlq:
+    case Vinstr::movtqb:
+    case Vinstr::movtql:
+    // branches
+    case Vinstr::jcc:
+    case Vinstr::jcci:
+    case Vinstr::jmp:
+    case Vinstr::jmpr:
+    case Vinstr::jmpm:
+    case Vinstr::jmpi:
+    // push/pop
+    case Vinstr::pop:
+    case Vinstr::popm:
+    case Vinstr::push:
+    case Vinstr::pushm:
+    // floating-point conversions
+    case Vinstr::cvttsd2siq:
+    case Vinstr::cvtsi2sd:
+    case Vinstr::cvtsi2sdm:
+    case Vinstr::unpcklpd:
+    // x64 instructions
+    case Vinstr::cqo:
+    case Vinstr::idiv:
+    case Vinstr::sarq:
+    case Vinstr::shlq:
+    // arm instructions
+    case Vinstr::brk:
+    case Vinstr::cbcc:
+    case Vinstr::hostcall:
+    case Vinstr::tbcc:
+    // ppc64 instructions
+    case Vinstr::extsb:
+    case Vinstr::extsw:
+    case Vinstr::fcmpo:
+    case Vinstr::fcmpu:
+    case Vinstr::xscvdpsxds:
+    case Vinstr::mfcr:
+    case Vinstr::mflr:
+    case Vinstr::mfvsrd:
+    case Vinstr::movlk:
+    case Vinstr::mtlr:
+    case Vinstr::mtvsrd:
+    case Vinstr::xscvsxddp:
+    case Vinstr::xxlxor:
+    case Vinstr::xxpermdi:
+      return Width::Any;
+
+    case Vinstr::andb:
+    case Vinstr::andbi:
+    case Vinstr::andbim:
+    case Vinstr::notb:
+    case Vinstr::orbim:
+    case Vinstr::subbi:
+    case Vinstr::xorb:
+    case Vinstr::xorbi:
+    case Vinstr::cmpb:
+    case Vinstr::cmpbi:
+    case Vinstr::cmpbim:
+    case Vinstr::testb:
+    case Vinstr::testbi:
+    case Vinstr::testbim:
+    case Vinstr::cmovb:
+    case Vinstr::setcc:
+    case Vinstr::movb:
+    case Vinstr::loadb:
+    case Vinstr::loadtqb:
+    case Vinstr::storeb:
+    case Vinstr::storebi:
+      return Width::Byte;
+
+    case Vinstr::incw:
+    case Vinstr::incwm:
+    case Vinstr::orwim:
+    case Vinstr::cmpwim:
+    case Vinstr::testwim:
+    case Vinstr::loadw:
+    case Vinstr::storew:
+    case Vinstr::storewi:
+      return Width::Word;
+
+    case Vinstr::addl:
+    case Vinstr::addli:
+    case Vinstr::addlm:
+    case Vinstr::addlim:
+    case Vinstr::andl:
+    case Vinstr::andli:
+    case Vinstr::decl:
+    case Vinstr::declm:
+    case Vinstr::incl:
+    case Vinstr::inclm:
+    case Vinstr::shlli:
+    case Vinstr::shrli:
+    case Vinstr::subl:
+    case Vinstr::subli:
+    case Vinstr::xorl:
+    case Vinstr::cmpl:
+    case Vinstr::cmpli:
+    case Vinstr::cmplm:
+    case Vinstr::cmplim:
+    case Vinstr::testl:
+    case Vinstr::testli:
+    case Vinstr::testlim:
+    case Vinstr::movl:
+    case Vinstr::loadl:
+    case Vinstr::loadzbl:
+    case Vinstr::storel:
+    case Vinstr::storeli:
+      return Width::Long;
+
+    case Vinstr::addq:
+    case Vinstr::addqi:
+    case Vinstr::addqim:
+    case Vinstr::andq:
+    case Vinstr::andqi:
+    case Vinstr::decq:
+    case Vinstr::decqm:
+    case Vinstr::incq:
+    case Vinstr::incqm:
+    case Vinstr::incqmlock:
+    case Vinstr::imul:
+    case Vinstr::neg:
+    case Vinstr::not:
+    case Vinstr::orq:
+    case Vinstr::orqi:
+    case Vinstr::orqim:
+    case Vinstr::sar:
+    case Vinstr::shl:
+    case Vinstr::sarqi:
+    case Vinstr::shlqi:
+    case Vinstr::shrqi:
+    case Vinstr::subq:
+    case Vinstr::subqi:
+    case Vinstr::xorq:
+    case Vinstr::xorqi:
+    case Vinstr::cmpq:
+    case Vinstr::cmpqi:
+    case Vinstr::cmpqm:
+    case Vinstr::cmpqim:
+    case Vinstr::testq:
+    case Vinstr::testqi:
+    case Vinstr::testqm:
+    case Vinstr::testqim:
+    case Vinstr::cloadq:
+    case Vinstr::cmovq:
+    case Vinstr::lea:
+    case Vinstr::leap:
+    case Vinstr::loadqp:
+    case Vinstr::loadzbq:
+    case Vinstr::loadzlq:
+    case Vinstr::storeqi:
+      return Width::Quad;
+
+    case Vinstr::loadups:
+    case Vinstr::storeups:
+      return Width::Octa;
+
+    case Vinstr::addsd:
+    case Vinstr::psllq:
+    case Vinstr::psrlq:
+    case Vinstr::subsd:
+    case Vinstr::cmpsd:
+    case Vinstr::ucomisd:
+    case Vinstr::loadsd:
+    case Vinstr::storesd:
+    case Vinstr::divsd:
+    case Vinstr::mulsd:
+    case Vinstr::roundsd:
+    case Vinstr::sqrtsd:
+      return Width::Dbl;
+  }
+  not_reached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

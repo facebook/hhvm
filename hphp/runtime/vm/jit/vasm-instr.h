@@ -45,14 +45,14 @@ struct Vunit;
 /*
  * Field actions:
  *
- *    I(f)          immediate
- *    Inone         no immediates
- *    U(s)          use s
- *    UA(s)         use s, but s lifetime extends across the instruction
- *    UH(s,h)       use s, try assigning same register as h
- *    D(d)          define d
- *    DH(d,h)       define d, try assigning same register as h
- *    Un,Dn         no uses, defs
+ *    I(f)      immediate
+ *    Inone     no immediates
+ *    U(s)      use s
+ *    UA(s)     use s, but s lifetime extends across the instruction
+ *    UH(s,h)   use s, try assigning same register as h
+ *    D(d)      define d
+ *    DH(d,h)   define d, try assigning same register as h
+ *    Un,Dn     no uses, defs
  */
 #define VASM_OPCODES\
   /* service requests */\
@@ -114,14 +114,12 @@ struct Vunit;
   O(unwind, Inone, Un, Dn)\
   /* arithmetic intrinsics */\
   O(absdbl, Inone, U(s), D(d))\
-  O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(divint, Inone, U(s0) U(s1), D(d))\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
   O(ud2, Inone, Un, Dn)\
-  /* x64 instructions */\
+  /* arithmetic instructions */\
   O(addl, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(addlm, Inone, U(s0) U(m), D(sf)) \
@@ -157,6 +155,8 @@ struct Vunit;
   O(orq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(orqim, I(s0), U(m), D(sf))\
+  O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shlli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shlqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
@@ -249,15 +249,16 @@ struct Vunit;
   O(popm, Inone, U(d), Dn)\
   O(push, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
-  /* other floating-point */\
+  /* floating-point conversions */\
   O(cvttsd2siq, Inone, U(s), D(d))\
   O(cvtsi2sd, Inone, U(s), D(d))\
   O(cvtsi2sdm, Inone, U(s), D(d))\
+  O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
+  /* other floating-point */\
   O(divsd, Inone, UA(s0) U(s1), D(d))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
   O(roundsd, I(dir), U(s), D(d))\
   O(sqrtsd, Inone, U(s), D(d))\
-  O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
   /* x64 instructions */\
   O(cqo, Inone, Un, Dn)\
   O(idiv, Inone, U(s), D(sf))\
@@ -774,12 +775,6 @@ struct unwind { Vlabel targets[2]; };
 struct absdbl { Vreg s, d; };
 
 /*
- * Arithmetic left and right shifts.
- */
-struct sar { Vreg64 s0, s1, d; VregSF sf; };
-struct shl { Vreg64 s0, s1, d; VregSF sf; };
-
-/*
  * Modulus of two integers.
  */
 struct srem { Vreg s0, s1, d; };
@@ -856,6 +851,8 @@ struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct orqim { Immed s0; Vptr m; VregSF sf; };
 // shift: s1 << s0 => d, sf
+struct sar { Vreg64 s0, s1, d; VregSF sf; };
+struct shl { Vreg64 s0, s1, d; VregSF sf; };
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; };
@@ -987,16 +984,20 @@ struct push { Vreg64 s; };
 struct pushm { Vptr s; };
 
 /*
- * Undocumented floating-point instructions.
+ * Integer-float conversions.
  */
 struct cvttsd2siq { VregDbl s; Vreg64 d; };
 struct cvtsi2sd { Vreg64 s; VregDbl d; };
 struct cvtsi2sdm { Vptr s; VregDbl d; };
+struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
+
+/*
+ * Undocumented floating-point instructions.
+ */
 struct divsd { VregDbl s0, s1, d; };
 struct mulsd  { VregDbl s0, s1, d; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct sqrtsd { VregDbl s, d; };
-struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1047,7 +1048,7 @@ struct Vinstr {
 
   Vinstr() : op(ud2) {}
 
-#define O(name, imms, uses, defs)                               \
+#define O(name, imms, uses, defs)               \
   /* implicit */ Vinstr(jit::name i) : op(name), name##_(i) {}
   VASM_OPCODES
 #undef O
@@ -1112,11 +1113,6 @@ struct Vinstr {
 
 extern const char* vinst_names[];
 
-/*
- * Whether `inst' is a block-terminating instruction.
- */
-bool isBlockEnd(const Vinstr& inst);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 #define O(name, ...)                              \
@@ -1144,6 +1140,26 @@ bool isBlockEnd(const Vinstr& inst);
   };
 VASM_OPCODES
 #undef O
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Whether `inst' is a block-terminating instruction.
+ */
+bool isBlockEnd(const Vinstr& inst);
+
+/*
+ * The register width specification of `op'.
+ *
+ * If `op' is an instruction whose non-flags register arguments are all a
+ * certain width, return that width; otherwise, return Width::Any.
+ *
+ * In particular, Width::Any is returned for intrinsics, architecture-specific
+ * instructions, zero-extending or truncating reg moves, branches, pushes/pops,
+ * and floating-point conversions.  All other instructions have operands of
+ * fixed and uniform width.
+ */
+Width width(Vinstr::Opcode op);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

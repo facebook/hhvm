@@ -15,17 +15,17 @@ open IdeJsonUtils
 let test_invalid_json () =
   let msg = "aaaa" in
   match call_of_string msg with
-  | ParsingError _ -> true
+  | Parsing_error _ -> true
   | _ -> false
 
 let expect_parsing_error input error =
   match call_of_string input with
-  | ParsingError error -> true
+  | Parsing_error error -> true
   | _ -> false
 
 let expect_invalid_call input id error =
   match call_of_string input with
-  | InvalidCall (id, error) -> true
+  | Invalid_call (id, error) -> true
   | _ -> false
 
 let test_non_object () =
@@ -98,11 +98,11 @@ let test_autocomplete_call () =
     {|"--auto-complete"|};
     {|"<?hh"|}
   ] in
-  expect_call msg (AutoCompleteCall ("<?hh"))
+  expect_call msg (Auto_complete_call ("<?hh"))
 
 let test_autocomplete_response () =
   let id = 4 in
-  let response = AutoCompleteResponse (JSON_Array []) in
+  let response = Auto_complete_response (JSON_Array []) in
   (json_string_of_response id response) =
   {|{"type":"response","id":4,"result":[]}|}
 
@@ -123,32 +123,32 @@ let test_identify_function_call () =
     {|"21:37"|};
     {|"<?hh"|}
   ] in
-  expect_call msg (IdentifyFunctionCall ("<?hh", 21, 37))
+  expect_call msg (Identify_function_call ("<?hh", 21, 37))
 
 let test_status_call () =
   let msg = build_call_msg [] in
-  expect_call msg StatusCall
+  expect_call msg Status_call
 
 let test_find_function_refs_call () =
   let msg = build_call_msg [
     {|"--find-refs"|};
     {|"array_pull"|};
   ] in
-  expect_call msg (FindRefsCall (FindRefsService.Function "array_pull"))
+  expect_call msg (Find_refs_call (FindRefsService.Function "array_pull"))
 
 let test_find_method_refs_call () =
   let msg = build_call_msg [
     {|"--find-refs"|};
     {|"C::getID"|}
   ] in
-  expect_call msg (FindRefsCall (FindRefsService.Method ("C", "getID")))
+  expect_call msg (Find_refs_call (FindRefsService.Method ("C", "getID")))
 
 let test_find_class_refs_call () =
   let msg = build_call_msg [
     {|"--find-class-refs"|};
     {|"C"|}
   ] in
-  expect_call msg (FindRefsCall (FindRefsService.Class "C"))
+  expect_call msg (Find_refs_call (FindRefsService.Class "C"))
 
 let test_strip_json_arg () =
   let msg = build_call_msg [
@@ -157,7 +157,7 @@ let test_strip_json_arg () =
     {|"21:37"|};
     {|"<?hh"|}
   ] in
-  expect_call msg (IdentifyFunctionCall ("<?hh", 21, 37))
+  expect_call msg (Identify_function_call ("<?hh", 21, 37))
 
 let tests = [
   "test_invalid_json", test_invalid_json;

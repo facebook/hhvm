@@ -95,8 +95,8 @@ std::string show(const IRGS& irgs) {
 
   header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
-  for (auto i = 0; spOffset > 0; ) {
-    assertx(i < irgen::curFunc(irgs)->maxStackCells());
+  assertx(spOffset <= irgen::curFunc(irgs)->maxStackCells());
+  for (auto i = 0; i < spOffset; ) {
     if (checkFpi()) {
       i += kNumActRecCells;
       continue;

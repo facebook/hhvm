@@ -1,0 +1,6 @@
+File "not_an_array.php", line 6, characters 15-16:
+Invalid argument (Typing[4110])
+File "not_an_array.php", line 3, characters 22-26:
+This is an array
+File "not_an_array.php", line 5, characters 14-17:
+It is incompatible with an object of type dict

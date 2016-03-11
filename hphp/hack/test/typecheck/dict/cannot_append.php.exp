@@ -1,0 +1,4 @@
+File "cannot_append.php", line 4, characters 3-6:
+an object of type dict does not allow array append (Typing[4006])
+File "cannot_append.php", line 3, characters 14-17:
+You might want to check this out

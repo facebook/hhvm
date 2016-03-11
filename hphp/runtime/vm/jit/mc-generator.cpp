@@ -450,39 +450,36 @@ bool MCGenerator::shouldTranslate(const Func* func, TransKind kind) const {
 
 
 static void populateLiveContext(RegionContext& ctx) {
-  typedef RegionDesc::Location L;
+  using L = RegionDesc::Location;
 
-  const ActRec*     const fp {vmfp()};
-  const TypedValue* const sp {vmsp()};
+  auto const fp = vmfp();
+  auto const sp = vmsp();
 
   always_assert(ctx.func == fp->m_func);
 
+  // Track local types.
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
       { L::Local{i}, typeFromTV(frame_local(fp, i)) }
     );
+    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
   }
 
+  // Track stack types and pre-live ActRecs.
   int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
-    [&](const ActRec* ar, Offset) {
-      // TODO(#2466980): when it's a Cls, we should pass the Class* in
-      // the Type.
+    [&] (const ActRec* ar, Offset) {
       auto const objOrCls =
         ar->hasThis()  ? Type::SubObj(ar->getThis()->getVMClass()) :
-        ar->hasClass() ? TCls
+        ar->hasClass() ? Type::SubCls(ar->getClass())
                        : TNullptr;
 
-      ctx.preLiveARs.push_back({
-        stackOff,
-        ar->m_func,
-        objOrCls
-      });
+      ctx.preLiveARs.push_back({ stackOff, ar->m_func, objOrCls });
       FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
       stackOff += kNumActRecCells;
     },
-    [&](const TypedValue* tv) {
+    [&] (const TypedValue* tv) {
       ctx.liveTypes.push_back(
         { L::Stack{ctx.spOffset - stackOff}, typeFromTV(tv) }
       );

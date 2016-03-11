@@ -217,7 +217,7 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       // this movzbq is only needed because callers aren't required to
       // zero-extend the type.
       auto zextType = v.makeReg();
-      v << movzbq{target.reg(), zextType};
+      v << movzbl{target.reg(), zextType};
       auto dtor_ptr = lookupDestructor(v, zextType);
       v << callm{dtor_ptr, args};
     } return;
@@ -236,7 +236,9 @@ Vptr lookupDestructor(Vout& v, Vreg type) {
     "segment, with addresses less than 2^31"
   );
   auto index = v.makeReg();
-  v << shrli{kShiftDataTypeToDestrIndex, type, index, v.makeReg()};
+  auto indexl = v.makeReg();
+  v << shrli{kShiftDataTypeToDestrIndex, type, indexl, v.makeReg()};
+  v << movzlq{indexl, index};
   return baseless(index * 8 + safe_cast<int>(table));
 }
 
@@ -283,7 +285,11 @@ void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
   if (size == 8) {
     v << cmpq{reg1, reg2, sf};
   } else if (size == 4) {
-    v << cmpl{reg1, reg2, sf};
+    auto const l1 = v.makeReg();
+    auto const l2 = v.makeReg();
+    v << movtql{reg1, l1};
+    v << movtql{reg2, l2};
+    v << cmpl{l1, l2, sf};
   } else {
     not_implemented();
   }

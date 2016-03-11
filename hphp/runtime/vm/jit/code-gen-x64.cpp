@@ -1689,8 +1689,12 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto classptr = v.makeReg();
   v << mcprep{func_class};
 
+  // Get the Class* part of the cache line.
+  auto tmp = v.makeReg();
+  v << movtql{func_class, tmp};
+  v << movzlq{tmp, classptr};
+
   // Check the inline cache.
-  v << movl{func_class, classptr};  // zeros the top 32 bits
   auto const sf = v.makeReg();
   v << cmpq{classptr, clsReg, sf};
   v << jcc{CC_NE, sf, {fast_path, slow_path}};
@@ -3024,7 +3028,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     if (dstType.isValid()) {
       auto const sf = v.makeReg();
       v << testq{dstReg, dstReg, sf};
-      v << cmovq{CC_Z, sf, rtype, nulltype, dstType};
+      v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
     }
     return;
   }
@@ -3039,7 +3043,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     if (dstType.isValid()) {
       auto const sf = v.makeReg();
       v << testb{tmp_type, tmp_type, sf};
-      v << cmovq{CC_Z, sf, tmp_type, nulltype, dstType};
+      v << cmovb{CC_Z, sf, tmp_type, nulltype, dstType};
     }
     return;
   }
@@ -3346,12 +3350,19 @@ void CodeGenerator::cgLdPackedArrayElemAddr(IRInstruction* inst) {
   static_assert(sizeof(TypedValue) == 16 && sizeof(ArrayData) == 16, "");
   /*
    * This computes `rArr + rIdx * sizeof(TypedValue) + sizeof(ArrayData)`. The
-   * logic of `scaaledIdx * 16` is split in the following two instructions, in
+   * logic of `scaledIdx * 16` is split in the following two instructions, in
    * order to save a byte in the shl instruction.
+   *
+   * TODO(#7728856): We should really move this into vasm-x64.cpp...
    */
-  auto scaledIdx = v.makeReg();
-  v << shlli{1, rIdx, scaledIdx, v.makeReg()};
-  v << lea{Vptr{rArr, scaledIdx, 8, 16}, dst};
+  auto idxl = v.makeReg();
+  auto scaled_idxl = v.makeReg();
+  auto scaled_idx = v.makeReg();
+  v << movtql{rIdx, idxl};
+  v << shlli{1, idxl, scaled_idxl, v.makeReg()};
+  v << movzlq{scaled_idxl, scaled_idx};
+  v << lea{rArr[scaled_idx * int(sizeof(TypedValue) / 2) +
+                int(sizeof(ArrayData))], dst};
 }
 
 void CodeGenerator::cgCheckRange(IRInstruction* inst) {
@@ -5297,7 +5308,7 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   auto& v = vmain();
   auto handle = v.makeReg();
   auto vec = v.makeReg();
-  v << loadl{clsReg[offset], handle};
+  v << loadzlq{clsReg[offset], handle};
   v << load{rds[handle], vec};
   v << load{vec[Class::PropInitVec::dataOff()], dstReg};
 }
@@ -5358,7 +5369,7 @@ void CodeGenerator::cgLdFuncNumParams(IRInstruction* inst) {
   auto tmp = v.makeReg();
   // See Func::finishedEmittingParams and Func::numParams.
   v << loadzlq{src, tmp};
-  v << shrli{1, tmp, dst, v.makeReg()};
+  v << shrqi{1, tmp, dst, v.makeReg()};
 }
 
 void CodeGenerator::cgInitPackedArray(IRInstruction* inst) {
@@ -5623,11 +5634,13 @@ void CodeGenerator::cgPackMagicArgs(IRInstruction* inst) {
   v << andli{ActRec::kNumArgsMask, naaf, num_args, v.makeReg()};
 
   auto const offset = v.makeReg();
+  auto const offsetq = v.makeReg();
   auto const values = v.makeReg();
 
   static_assert(sizeof(Cell) == 16, "");
   v << shlli{4, num_args, offset, v.makeReg()};
-  v << subq{offset, fp, values, v.makeReg()};
+  v << movzlq{offset, offsetq};
+  v << subq{offsetq, fp, values, v.makeReg()};
 
   cgCallHelper(
     v,

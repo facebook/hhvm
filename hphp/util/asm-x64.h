@@ -111,8 +111,12 @@ inline Reg8 rbyte(Reg64 r)     { return Reg8(int(r)); }
 inline Reg16 r16(Reg8 r)       { return Reg16(int(r)); }
 inline Reg32 r32(Reg8 r)       { return Reg32(int(r)); }
 inline Reg32 r32(Reg16 r)      { return Reg32(int(r)); }
-inline Reg32 r32(Reg64 r)      { return Reg32(int(r)); }
 inline Reg32 r32(Reg32 r)      { return r; }
+inline Reg32 r32(Reg64 r)      { return Reg32(int(r)); }
+inline Reg64 r64(Reg8 r)       { return Reg64(int(r)); }
+inline Reg64 r64(Reg16 r)      { return Reg64(int(r)); }
+inline Reg64 r64(Reg32 r)      { return Reg64(int(r)); }
+inline Reg64 r64(Reg64 r)      { return r; }
 
 //////////////////////////////////////////////////////////////////////
 

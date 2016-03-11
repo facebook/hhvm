@@ -254,16 +254,22 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb) {
       ifThen(v, CC_NL, sf, [&] (Vout& v) {
         auto const dest = v.makeReg();
 
+        auto const nargs = v.makeReg();
+        v << movzlq{nparams, nargs};
+
         // Too many gosh-darned arguments passed.  Go to the (nparams + 1)-th
         // prologue, which is always the "too many args" entry point.
-        emitLdLowPtr(v, func[nparams * ptrSize + (pTabOff + ptrSize)],
+        emitLdLowPtr(v, func[nargs * ptrSize + (pTabOff + ptrSize)],
                      dest, sizeof(LowPtr<uint8_t>));
         v << jmpr{dest};
       });
     });
 
+    auto const nargs = v.makeReg();
+    v << movzlq{argc, nargs};
+
     auto const dest = v.makeReg();
-    emitLdLowPtr(v, func[argc * ptrSize + pTabOff],
+    emitLdLowPtr(v, func[nargs * ptrSize + pTabOff],
                  dest, sizeof(LowPtr<uint8_t>));
     v << jmpr{dest};
   });

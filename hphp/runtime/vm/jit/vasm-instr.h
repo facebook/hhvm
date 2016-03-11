@@ -203,6 +203,7 @@ struct Vunit;
   O(testqim, I(s0), U(s1), D(sf))\
   /* conditional operations */\
   O(cloadq, I(cc), U(sf) U(f) U(t), D(d))\
+  O(cmovb, I(cc), U(sf) U(f) U(t), D(d))\
   O(cmovq, I(cc), U(sf) U(f) U(t), D(d))\
   O(setcc, I(cc), U(sf), D(d))\
   /* load effective address */\
@@ -213,6 +214,7 @@ struct Vunit;
   O(movl, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(movzbq, Inone, UH(s,d), DH(d,s))\
+  O(movzlq, Inone, UH(s,d), DH(d,s))\
   O(movtqb, Inone, UH(s,d), DH(d,s))\
   O(movtql, Inone, UH(s,d), DH(d,s))\
   /* loads/stores */\
@@ -912,6 +914,7 @@ struct testqim { Immed s0; Vptr s1; VregSF sf; };
 // t1 = load t; d = condition ? t1 : f
 struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
 // d = condition ? t : f
+struct cmovb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
 struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
 // d = condition ? 1 : 0
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
@@ -931,6 +934,7 @@ struct movl { Vreg32 s, d; };
 // zero-extended s to d
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct movzbq { Vreg8 s; Vreg64 d; };
+struct movzlq { Vreg32 s; Vreg64 d; };
 // truncated s to d
 struct movtqb { Vreg64 s; Vreg8 d; };
 struct movtql { Vreg64 s; Vreg32 d; };

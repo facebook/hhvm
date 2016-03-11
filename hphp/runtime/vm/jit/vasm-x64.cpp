@@ -129,7 +129,9 @@ struct Vgen {
   void emit(const addqim& i);
   void emit(addsd i) { commute(i); a.addsd(i.s0, i.d); }
   void emit(const cloadq& i);
-  void emit(const cmovq& i);
+  template<class cmov> void emit_cmov(const cmov& i);
+  void emit(const cmovb& i) { emit_cmov(i); }
+  void emit(const cmovq& i) { emit_cmov(i); }
   void emit(const cmpb& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbim& i) { a.cmpb(i.s0, i.s1); }
@@ -181,6 +183,7 @@ struct Vgen {
   void emit(const movl& i) { a.movl(i.s, i.d); }
   void emit(const movzbl& i) { a.movzbl(i.s, i.d); }
   void emit(const movzbq& i) { a.movzbl(i.s, Reg32(i.d)); }
+  void emit(const movzlq& i) { a.movl(i.s, Reg32(i.d)); }
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
   void emit(const nop& i) { a.nop(); }
@@ -600,14 +603,15 @@ void Vgen::emit(const cloadq& i) {
 
 // add s0 s1 d => mov s1->d; d += s0
 // cmov cc s d => if cc { mov s->d }
-void Vgen::emit(const cmovq& i) {
+template<class cmov>
+void Vgen::emit_cmov(const cmov& i) {
   if (i.f != i.d && i.t == i.d) {
     // negate the condition and swap t/f operands so we dont clobber i.t
-    return emit(cmovq{ccNegate(i.cc), i.sf, i.t, i.f, i.d});
+    return emit(cmov{ccNegate(i.cc), i.sf, i.t, i.f, i.d});
   } else {
     prep(i.f, i.d);
   }
-  a.cmov_reg64_reg64(i.cc, i.t, i.d);
+  a.cmov_reg64_reg64(i.cc, r64(i.t), r64(i.d));
 }
 
 void Vgen::emit(const cvtsi2sd& i) {
@@ -884,7 +888,6 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   optimizeExits(unit);
 
   lowerForX64(unit);
-
   simplify(unit);
 
   if (!unit.constToReg.empty()) {

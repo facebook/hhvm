@@ -235,10 +235,8 @@ struct FrameStateMgr final {
 
   /*
    * Update state by computing the effects of an instruction.
-   *
-   * Returns true iff the state for the instruction's taken edge is changed.
    */
-  bool update(const IRInstruction*);
+  void update(const IRInstruction*);
 
   /////////////////////////////////////////////////////////////////////////////
   // Per-block state.

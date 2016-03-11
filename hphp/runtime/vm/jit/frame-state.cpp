@@ -67,14 +67,10 @@ template<bool Stack>
 bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
   auto changed = false;
 
-  if (merge_util(dst.type, dst.type | src.type)) {
-    changed = true;
-  }
+  changed |= merge_util(dst.type, dst.type | src.type);
 
   // Get the least common ancestor across both states.
-  if (merge_util(dst.value, least_common_ancestor(dst.value, src.value))) {
-    changed = true;
-  }
+  changed |= merge_util(dst.value, least_common_ancestor(dst.value, src.value));
 
   // We may have changed either dst.value or dst.type in a way that could fail
   // to preserve SlotState invariants.  So check if we can't keep the value.
@@ -83,18 +79,16 @@ bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
     changed = true;
   }
 
-  if (merge_into(dst.typeSrcs, src.typeSrcs)) {
-    changed = true;
-  }
+  changed |= merge_into(dst.typeSrcs, src.typeSrcs);
 
   if (!dst.maybeChanged && src.maybeChanged) {
     dst.maybeChanged = true;
     changed = true;
   }
 
-  return
-    merge_util(dst.predictedType, dst.predictedType | src.predictedType) ||
-    changed;
+  changed |= merge_util(dst.predictedType,
+                       dst.predictedType | src.predictedType);
+  return changed;
 }
 
 bool merge_memory_stack_into(jit::vector<StackState>& dst,
@@ -106,7 +100,7 @@ bool merge_memory_stack_into(jit::vector<StackState>& dst,
   auto const result_size = std::min(dst.size(), src.size());
   dst.resize(result_size);
   for (auto i = uint32_t{0}; i < result_size; ++i) {
-    if (merge_into(dst[i], src[i])) changed = true;
+    changed |= merge_into(dst[i], src[i]);
   }
   return changed;
 }
@@ -140,17 +134,16 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     changed = true;
   }
 
-  if (dst.mbase.ptr != src.mbase.ptr) {
-    dst.mbase.ptr = nullptr;
-    changed = true;
-  }
-  if (merge_util(dst.mbase.ptrType, dst.mbase.ptrType | src.mbase.ptrType)) {
-    changed = true;
-  }
   if (dst.mbase.value != src.mbase.value) {
     dst.mbase.value = nullptr;
     changed = true;
   }
+  if (dst.mbase.ptr != src.mbase.ptr) {
+    dst.mbase.ptr = nullptr;
+    changed = true;
+  }
+  changed |= merge_util(dst.mbase.ptrType,
+                        dst.mbase.ptrType | src.mbase.ptrType);
 
   // The tracked FPI state must always be the same, notice that the size of the
   // FPI stacks may differ as the FPush associated with one of the merged blocks
@@ -191,30 +184,21 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   }
 
   // This is available iff it's available in both states
-  if (merge_util(dst.thisAvailable, dst.thisAvailable && src.thisAvailable)) {
-    changed = true;
-  }
+  changed |= merge_util(dst.thisAvailable,
+                        dst.thisAvailable && src.thisAvailable);
 
   // The frame may span a call if it could have done so in either state.
-  if (merge_util(dst.frameMaySpanCall,
-                 dst.frameMaySpanCall || src.frameMaySpanCall)) {
-    changed = true;
-  }
+  changed |= merge_util(dst.frameMaySpanCall,
+                        dst.frameMaySpanCall || src.frameMaySpanCall);
 
   for (auto i = uint32_t{0}; i < src.locals.size(); ++i) {
-    if (merge_into(dst.locals[i], src.locals[i])) {
-      changed = true;
-    }
+    changed |= merge_into(dst.locals[i], src.locals[i]);
   }
 
-  if (merge_memory_stack_into(dst.stack, src.stack)) {
-    changed = true;
-  }
+  changed |= merge_memory_stack_into(dst.stack, src.stack);
 
-  if (merge_util(dst.stackModified,
-                 dst.stackModified || src.stackModified)) {
-    changed = true;
-  }
+  changed |= merge_util(dst.stackModified,
+                        dst.stackModified || src.stackModified);
 
   // Eval stack depth should be the same at merge points.
   assertx(dst.syncedSpLevel == src.syncedSpLevel);
@@ -245,7 +229,7 @@ bool merge_into(jit::vector<FrameState>& dst, const jit::vector<FrameState>& src
   always_assert(src.size() == dst.size());
   auto changed = false;
   for (auto idx = uint32_t{0}; idx < dst.size(); ++idx) {
-    if (merge_into(dst[idx], src[idx])) changed = true;
+    changed |= merge_into(dst[idx], src[idx]);
   }
   return changed;
 }
@@ -334,11 +318,9 @@ FrameStateMgr::FrameStateMgr(BCMarker marker) {
   cur().stack.resize(marker.spOff().offset);
 }
 
-bool FrameStateMgr::update(const IRInstruction* inst) {
+void FrameStateMgr::update(const IRInstruction* inst) {
   ITRACE(3, "FrameStateMgr::update processing {}\n", *inst);
   Indent _i;
-
-  auto changed = false;
 
   if (auto const taken = inst->taken()) {
     /*
@@ -365,7 +347,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     // update the target block state at this point, so don't.  The
     // state doesn't have this problem during optimization passes,
     // because we'll always process the jump before the target block.
-    if (taken->empty()) changed |= save(taken);
+    if (taken->empty()) save(taken);
   }
 
   auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
@@ -735,8 +717,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
   }
-
-  return changed;
 }
 
 void FrameStateMgr::updateMInstr(const IRInstruction* inst) {

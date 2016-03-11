@@ -1,0 +1,4 @@
+File "indexish_immutable1.php", line 4, characters 3-6:
+an object of type Indexish does not allow array append (Typing[4006])
+File "indexish_immutable1.php", line 3, characters 15-22:
+You might want to check this out

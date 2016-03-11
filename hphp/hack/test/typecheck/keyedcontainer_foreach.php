@@ -28,7 +28,7 @@ function foo3(KeyedContainer<int, string> $p) {
   foreach ($p as $v) {
     f2($v);
   }
-  $p[10] = 'meh';
+//  $p[10] = 'meh';
   f2($p[10]);
 }
 

@@ -116,8 +116,9 @@ struct Debugger {
                                 CmdInterrupt &cmd);
 
 private:
-  static Debugger s_debugger;
   static bool s_clientStarted;
+
+  static Debugger& get();
 
   static void Interrupt(int type,
                         const char* program,

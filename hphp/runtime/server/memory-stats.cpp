@@ -133,7 +133,8 @@ namespace HPHP {
   }
 
   MemoryStats* MemoryStats::GetInstance() {
-    return &g_memoryStats;
+    static MemoryStats s_memoryStats;
+    return &s_memoryStats;
   }
 
   void MemoryStats::ResetStaticStringSize() {

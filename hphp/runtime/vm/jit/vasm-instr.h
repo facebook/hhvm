@@ -299,6 +299,7 @@ struct Vunit;
  *    w   16-bit
  *    l   32-bit
  *    q   64-bit
+ *    sd  double
  *    i   immediate
  *    m   Vptr
  *    p   RIPRelativeRef
@@ -787,15 +788,8 @@ struct divint { Vreg s0, s1, d; };
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Unless specifically noted otherwise, instructions with a Vreg8 or Vreg16
- * dest preserve the upper 56 or 48 bits. However, instructions with a Vreg32
- * dest zero the upper 32 bits.
- *
- * This reflects the behavior of using x86-64's byte and word-sized registers
- * such as AL, CL, etc and AX, CX, etc. Starting with x86-64, 32-bit
- * operations zero the upper bits of 64-bit registers.
- *
- * TODO(#10264244): Kill this.
+ * Unless specifically noted otherwise, instructions with Vreg{8,16,32} dsts
+ * can do whatever they please with the upper bits.
  */
 
 /*

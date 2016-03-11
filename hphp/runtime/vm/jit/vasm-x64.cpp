@@ -887,6 +887,8 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   optimizeJmps(unit);
   optimizeExits(unit);
 
+  assertx(checkWidths(unit));
+
   lowerForX64(unit);
   simplify(unit);
 

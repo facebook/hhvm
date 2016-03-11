@@ -86,7 +86,16 @@ DECLARE_VNUM(VcallArgsId, true, "V");
 /*
  * Assert invariants on a Vunit.
  */
-bool check(Vunit&);
+bool check(Vunit& unit);
+
+/*
+ * Assert that Vreg widths match between defs and uses.
+ *
+ * This should only be run before any zero-extending or truncating copies get
+ * reduced to regular copies---so, before simplify() or the various lowering
+ * passes.
+ */
+bool checkWidths(Vunit& unit);
 
 /*
  * Check that each block has exactly one terminal instruction at the end.

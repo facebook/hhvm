@@ -289,7 +289,6 @@ void ProxygenServer::start() {
 }
 
 void ProxygenServer::waitForEnd() {
-  if (getStatus() == RunStatus::STOPPED) return;
   Logger::Info("%p: Waiting for ProxygenServer port=%d", this, m_port);
   // m_worker.wait is always safe to call from any thread at any time.
   m_worker.wait();
@@ -616,8 +615,6 @@ bool ProxygenServer::enableSSL(int port) {
   } else {
     Logger::Error("Invalid certificate file or key file");
   }
-
-
 
   m_httpsConfig.sslContextConfigs.emplace_back(m_sslCtxConfig);
   m_https = true;

@@ -336,14 +336,16 @@ void HttpServer::stop(const char* stopReason) {
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
 
-  int totalWait =
-    RuntimeOption::ServerPreShutdownWait +
-    RuntimeOption::ServerShutdownListenWait +
-    RuntimeOption::ServerGracefulShutdownWait;
+  if (RuntimeOption::ServerKillOnTimeout) {
+    int totalWait =
+      RuntimeOption::ServerPreShutdownWait +
+      RuntimeOption::ServerShutdownListenWait +
+      RuntimeOption::ServerGracefulShutdownWait;
 
-  if (totalWait > 0) {
-    signal(SIGALRM, exit_on_timeout);
-    alarm(totalWait);
+    if (totalWait > 0) {
+      signal(SIGALRM, exit_on_timeout);
+      alarm(totalWait);
+    }
   }
 
   Lock lock(this);

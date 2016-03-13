@@ -248,7 +248,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64_t *lval,
     end_ptr_double = nullptr;
   } else {
     if (end_ptr_double == str+length) { /* floating point string */
-      if (!finite(local_dval)) {
+      if (!std::isfinite(local_dval)) {
         /* "inf","nan" and maybe other weird ones */
         return KindOfNull;
       }

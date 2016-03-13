@@ -946,9 +946,9 @@ int StringData::numericCompare(const StringData *v2) const {
   double dval1, dval2;
   DataType ret1, ret2;
   if ((ret1 = isNumericWithVal(lval1, dval1, 0, &oflow1)) == KindOfNull ||
-      (ret1 == KindOfDouble && !finite(dval1)) ||
+      (ret1 == KindOfDouble && !std::isfinite(dval1)) ||
       (ret2 = v2->isNumericWithVal(lval2, dval2, 0, &oflow2)) == KindOfNull ||
-      (ret2 == KindOfDouble && !finite(dval2))) {
+      (ret2 == KindOfDouble && !std::isfinite(dval2))) {
     return -2;
   }
   if (oflow1 && oflow1 == oflow2 && dval1 == dval2) {

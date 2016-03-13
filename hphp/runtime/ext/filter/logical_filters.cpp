@@ -355,7 +355,7 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
     return (double)lval;
   } else if (isDoubleType(dt)) {
     if ((!dval && p.size() > 1 && strpbrk(p.data(), "123456789")) ||
-         !finite(dval)) {
+         !std::isfinite(dval)) {
       goto error;
     }
     return dval;

@@ -186,7 +186,7 @@ Variant HHVM_FUNCTION(abs, const Variant& number) {
   }
 }
 
-bool HHVM_FUNCTION(is_finite, double val) { return finite(val);}
+bool HHVM_FUNCTION(is_finite, double val) { return std::isfinite(val);}
 bool HHVM_FUNCTION(is_infinite, double val) { return isinf(val);}
 bool HHVM_FUNCTION(is_nan, double val) { return isnan(val);}
 

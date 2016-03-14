@@ -14,7 +14,7 @@ if (ENABLE_LD_GOLD)
 endif()
 
 if (GOLD_FOUND AND ENABLE_LD_GOLD)
-  if(CMAKE_BUILD_TYPE MATCHES "Release")
+  if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
     SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--section-ordering-file,${SECTION_ORDERING_FILE},--icf=all,--gc-sections)
   else()
     SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--icf=all,--gc-sections)

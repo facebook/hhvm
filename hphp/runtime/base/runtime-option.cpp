@@ -511,6 +511,8 @@ bool RuntimeOption::RepoDebugInfo = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
 // perf-sensitive.
 bool RuntimeOption::RepoPreload;
+int64_t RuntimeOption::RepoLocalReadaheadRate = 0;
+bool RuntimeOption::RepoLocalReadaheadConcurrent = false;
 
 bool RuntimeOption::HHProfEnabled = false;
 bool RuntimeOption::HHProfActive = false;
@@ -991,6 +993,10 @@ void RuntimeOption::Load(
     Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", true);
     Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative", false);
     Config::Bind(RepoPreload, ini, config, "Repo.Preload", false);
+    Config::Bind(RepoLocalReadaheadRate, ini, config,
+                 "Repo.LocalReadaheadRate", 0);
+    Config::Bind(RepoLocalReadaheadConcurrent, ini, config,
+                 "Repo.LocalReadaheadConcurrent", false);
   }
 
   {

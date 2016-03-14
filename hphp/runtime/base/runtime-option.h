@@ -574,6 +574,8 @@ public:
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;
   static bool RepoPreload;
+  static int64_t RepoLocalReadaheadRate;
+  static bool RepoLocalReadaheadConcurrent;
 
   // pprof/hhprof options
   static bool HHProfEnabled;

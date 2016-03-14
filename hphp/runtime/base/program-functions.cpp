@@ -103,6 +103,7 @@
 #include <signal.h>
 #include <libxml/parser.h>
 
+#include <chrono>
 #include <exception>
 #include <fstream>
 #include <iterator>
@@ -886,6 +887,37 @@ static void set_execution_mode(folly::StringPiece mode) {
   }
 }
 
+/* Reads a file into the OS page cache, with rate limiting. */
+static bool readahead_rate(const char* path, int64_t mbPerSec) {
+  int ret = open(path, O_RDONLY);
+  if (ret < 0) return false;
+  const int fd = ret;
+  SCOPE_EXIT { close(fd); };
+
+  constexpr size_t kReadaheadBytes = 1 << 20;
+  std::unique_ptr<char[]> buf(new char[kReadaheadBytes]);
+  int64_t total = 0;
+  auto startTime = std::chrono::steady_clock::now();
+  do {
+    ret = read(fd, buf.get(), kReadaheadBytes);
+    if (ret > 0) {
+      total += ret;
+      // Unit math: bytes / (MB / seconds) = microseconds
+      auto endTime = startTime + std::chrono::microseconds(total / mbPerSec);
+      auto sleepT = endTime - std::chrono::steady_clock::now();
+      // Don't sleep too frequently.
+      if (sleepT >= std::chrono::seconds(1)) {
+        Logger::Info(folly::sformat(
+          "readahead sleeping {}ms after total {}b",
+          std::chrono::duration_cast<std::chrono::milliseconds>(sleepT).count(),
+          total));
+        /* sleep override */ std::this_thread::sleep_for(sleepT);
+      }
+    }
+  } while (ret > 0);
+  return ret == 0;
+}
+
 static int start_server(const std::string &username, int xhprof) {
   InitFiniNode::ServerPreInit();
   BootTimer::start();
@@ -928,6 +960,26 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (xhprof) {
     HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
+  }
+
+  std::unique_ptr<std::thread> readaheadThread;
+
+  if (RuntimeOption::RepoLocalReadaheadRate > 0 &&
+      !RuntimeOption::RepoLocalPath.empty()) {
+    readaheadThread = folly::make_unique<std::thread>([&] {
+        BootTimer::Block timer("Readahead Repo");
+        auto path = RuntimeOption::RepoLocalPath.c_str();
+        Logger::Info("readahead %s", path);
+        const auto mbPerSec = RuntimeOption::RepoLocalReadaheadRate;
+        if (!readahead_rate(path, mbPerSec)) {
+          Logger::Error("readahead failed: %s", strerror(errno));
+        }
+      });
+    if (!RuntimeOption::RepoLocalReadaheadConcurrent) {
+      // TODO(10152762): Run this concurrently with non-disk warmup.
+      readaheadThread->join();
+      readaheadThread.reset();
+    }
   }
 
   if (RuntimeOption::RepoPreload) {
@@ -979,6 +1031,11 @@ static int start_server(const std::string &username, int xhprof) {
     }
   }
   BootTimer::mark("warmup");
+
+  if (readaheadThread.get()) {
+    readaheadThread->join();
+    readaheadThread.reset();
+  }
 
   if (RuntimeOption::EvalEnableNuma) {
 #ifdef USE_JEMALLOC

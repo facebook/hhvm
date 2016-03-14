@@ -155,7 +155,8 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
       continue;
     }
     float freq;
-    if (sscanf(line, "cpu MHz : %f", &freq) == 1) {
+    if ((sscanf(line, "cpu MHz : %f", &freq) == 1) ||
+        (sscanf(line, "clock         : %f", &freq) == 1)) {
       if (processor != -1 && processor < ncpus) {
          freqs[processor] = nearbyint(freq);
          processor = -1;

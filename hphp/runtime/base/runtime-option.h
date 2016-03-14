@@ -155,6 +155,7 @@ struct RuntimeOption {
   static bool ServerKillOnTimeout;
   static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
+  static int ServerShutdownEOMWait;
   static std::vector<std::string> ServerNextProtocols;
   static bool ServerEnableH2C;
   static int GzipCompressionLevel;

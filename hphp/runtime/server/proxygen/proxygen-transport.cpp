@@ -115,12 +115,10 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ProxygenTransport::ProxygenTransport(
-  ProxygenServer *server,
-  folly::EventBase *eventBase)
-    : AsyncTimeout(eventBase),
-      m_server(server) {
-  m_eventBase = eventBase;
+ProxygenTransport::ProxygenTransport(ProxygenServer *server)
+  : m_server(server)
+{
+  m_server->addPendingTransport(*this);
 }
 
 ProxygenTransport::~ProxygenTransport() {
@@ -132,6 +130,7 @@ ProxygenTransport::~ProxygenTransport() {
     Lock lock(this);
     CHECK(m_pushHandlers.empty());
   }
+  // Destructor of IntrusiveListHook will automatically unlink()
 }
 
 bool ProxygenTransport::bufferRequest() const {
@@ -233,7 +232,6 @@ void ProxygenTransport::onHeadersComplete(
   }
 
   if (!bufferRequest()) {
-    m_enqueued = true;
     m_server->onRequest(shared_from_this());
   } // otherwise we wait for EOM
 }
@@ -269,7 +267,6 @@ void ProxygenTransport::onEOM() noexcept {
         m_currentBodyBuf->length();
     }
     m_clientComplete = true;
-    m_enqueued = true;
     m_server->onRequest(shared_from_this());
     return;
   } else {
@@ -459,6 +456,7 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
 
 void ProxygenTransport::onError(const HTTPException& err) noexcept {
   Logger::Error("HPHP transport error: %s", err.describe().c_str());
+  unlink();
   // For now, just send a naked RST.  It's closer to the LibEventServer behavior
   m_clientTxn->sendAbort();
   requestDoneLocking();
@@ -520,7 +518,6 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
         break;
       } // else fall through
     case ResponseMessage::Type::EOM:
-      cancelTimeout();
       txn->sendEOM();
       break;
     case ResponseMessage::Type::FINISH:
@@ -682,7 +679,8 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
                     id, false, data, size, eom));
 }
 
-void ProxygenTransport::timeoutExpired() noexcept {
+void ProxygenTransport::timeoutExpired() {
+  unlink();
   if (m_clientTxn) {
     m_clientTxn->sendAbort();
   }

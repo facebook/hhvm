@@ -25,7 +25,7 @@
 #include "hphp/util/synchronizable.h"
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <thrift/lib/cpp/async/TAsyncTransport.h>
-#include <folly/io/async/AsyncTimeout.h>
+#include <folly/IntrusiveList.h>
 #include <folly/IPAddress.h>
 
 namespace HPHP {
@@ -97,11 +97,9 @@ struct ProxygenTransport final
   : Transport
   , proxygen::HTTPTransactionHandler
   , std::enable_shared_from_this<ProxygenTransport>
-  , folly::AsyncTimeout
   , Synchronizable
 {
-  explicit ProxygenTransport(ProxygenServer *server,
-                             folly::EventBase *eventBase);
+  explicit ProxygenTransport(ProxygenServer *server);
   virtual ~ProxygenTransport();
 
   ///////////////////////////////////////////////////////////////////////////
@@ -267,15 +265,24 @@ struct ProxygenTransport final
 
   void messageAvailable(ResponseMessage&& message);
 
-  void timeoutExpired() noexcept override;
+  void timeoutExpired();
 
   void removePushTxn(uint64_t id) {
     Lock lock(this);
     m_pushHandlers.erase(id);
   }
 
+  void setEnqueued() {
+    m_enqueued = true;
+    unlink();
+  }
+
  private:
   bool bufferRequest() const;
+
+  void unlink() {
+    m_listHook.unlink();
+  }
 
   void sendErrorResponse(uint32_t code) noexcept;
 
@@ -291,7 +298,6 @@ struct ProxygenTransport final
   // Tracks HTTPTransaction's reference to this object
   std::shared_ptr<ProxygenTransport> m_transactionReference;
   ProxygenServer *m_server;
-  folly::EventBase *m_eventBase;
   proxygen::HTTPTransaction *m_clientTxn{nullptr}; // locked
   folly::SocketAddress m_clientAddress;
   std::string m_addressStr;
@@ -324,7 +330,19 @@ struct ProxygenTransport final
   uint16_t m_localPort{0};
   int64_t m_nextPushId{1};
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
+
+ public:
+  // List of ProxygenTransport not yet handed to the server will sit
+  // in a list, so that we can abort them if they take too long.
+  // Every ProxygenTransport is in the list initially, and gets
+  // unlinked when it is enqueued or aborted, or destructed if it is
+  // never handed to the server.  m_enqueued implies !is_linked(), but
+  // aborted ones can have !m_enqueued && !is_linked().
+  folly::IntrusiveListHook m_listHook;
 };
+
+using ProxygenTransportList =
+  folly::IntrusiveList<ProxygenTransport, &ProxygenTransport::m_listHook>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

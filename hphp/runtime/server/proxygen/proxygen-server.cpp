@@ -33,15 +33,10 @@
 
 namespace HPHP {
 
-using folly::EventBase;
-using folly::SocketAddress;
-using folly::AsyncTimeout;
 using apache::thrift::transport::TTransportException;
+using folly::SocketAddress;
 using folly::AsyncServerSocket;
 using wangle::Acceptor;
-using proxygen::SPDYCodec;
-using std::shared_ptr;
-using std::string;
 
 HPHPSessionAcceptor::HPHPSessionAcceptor(
     const proxygen::AcceptorConfiguration& config,
@@ -61,16 +56,15 @@ void HPHPSessionAcceptor::onIngressError(const proxygen::HTTPSession& session,
   // it could completely parse the headers.  Most of these are HTTP garbage
   // (400 Bad Request) or client timeouts (408).
   FakeTransport transport((error == proxygen::kErrorTimeout) ? 408 : 400);
-  transport.m_url = folly::to<string>("/onIngressError?error=",
-                                      proxygen::getErrorString(error));
+  transport.m_url = folly::to<std::string>("/onIngressError?error=",
+                                           proxygen::getErrorString(error));
   m_server->onRequestError(&transport);
 }
 
 proxygen::HTTPTransaction::Handler* HPHPSessionAcceptor::newHandler(
   proxygen::HTTPTransaction& txn,
   proxygen::HTTPMessage *msg) noexcept {
-  auto transport = std::make_shared<ProxygenTransport>(
-    m_server, m_server->getEventBase());
+  auto transport = std::make_shared<ProxygenTransport>(m_server);
   transport->setTransactionReference(transport);
   return transport.get();
 }
@@ -79,8 +73,7 @@ void HPHPSessionAcceptor::onConnectionsDrained() {
   m_server->onConnectionsDrained();
 }
 
-
-ProxygenJob::ProxygenJob(shared_ptr<ProxygenTransport> t) :
+ProxygenJob::ProxygenJob(std::shared_ptr<ProxygenTransport> t) :
     transport(t),
     reqStart(t->getRequestStart()) {
 }
@@ -283,7 +276,7 @@ void ProxygenServer::start() {
   startConsuming(m_worker.getEventBase(), &m_responseQueue);
 
   setStatus(RunStatus::RUNNING);
-  AsyncTimeout::attachEventBase(m_worker.getEventBase());
+  folly::AsyncTimeout::attachEventBase(m_worker.getEventBase());
   m_worker.start();
   m_dispatcher.start();
 }
@@ -342,6 +335,7 @@ void ProxygenServer::stop() {
       m_worker.getEventBase()->runAfterDelay([this] { stopListening(); },
                                              delayMilliSeconds);
     });
+  reportShutdownStatus();
 }
 
 void ProxygenServer::stopListening(bool hard) {
@@ -372,18 +366,44 @@ void ProxygenServer::stopListening(bool hard) {
   if (RuntimeOption::ServerShutdownListenWait > 0) {
     std::chrono::seconds s(RuntimeOption::ServerShutdownListenWait);
     VLOG(4) << this << ": scheduling shutdown listen timeout=" <<
-      s.count() << " port=" << m_port;
+      s.count() <<
+      " port=" << m_port;
     scheduleTimeout(s);
+    if (m_port == RuntimeOption::ServerPort &&
+        RuntimeOption::ServerShutdownEOMWait > 0) {
+      int delayMilliSeconds = RuntimeOption::ServerShutdownEOMWait * 1000;
+      m_worker.getEventBase()->runAfterDelay(
+        [this] { abortPendingTransports(); }, delayMilliSeconds);
+    }
   } else {
     doShutdown();
   }
 }
 
-void ProxygenServer::onConnectionsDrained() {
-  VLOG(2) << "All connections drained from ProxygenServer drainCount=" <<
-    m_drainCount;
+void ProxygenServer::abortPendingTransports() {
+  if (m_pendingTransports.empty()) return;
+  Logger::Info("aborting %lu incomplete requests", m_pendingTransports.size());
+  std::vector<ProxygenTransport*> pending;
+  // Avoid calling timeoutExpired() while iterating the list, as it will
+  // unlink the ProxygenTransport, leaving the list iterator in a corrupt
+  // state.
+  for (auto& p : m_pendingTransports) {
+    pending.push_back(&p);
+  }
+  m_pendingTransports.clear();
+  for (auto transport : pending) {
+    transport->timeoutExpired();
+  }
+  if (m_enqueuedCount == 0 &&
+      m_shutdownState == ShutdownState::DRAINING_READS) {
+    doShutdown();
+  }
+}
 
+void ProxygenServer::onConnectionsDrained() {
   ++m_drainCount;
+  Logger::Info("All connections drained from ProxygenServer drainCount=%d",
+               m_drainCount);
   if (!drained()) {
     // both servers have to finish
     Logger::Verbose("%p: waiting for other server port=%d", this, m_port);
@@ -448,8 +468,7 @@ void ProxygenServer::stopVM() {
 
 void ProxygenServer::vmStopped() {
   m_shutdownState = ShutdownState::DRAINING_WRITES;
-  if (!drained() && RuntimeOption::ServerGracefulShutdownWait > 0 &&
-      m_enqueuedCount > 0) {
+  if (!drained() && RuntimeOption::ServerGracefulShutdownWait > 0) {
     m_worker.getEventBase()->runInEventBaseThread([&] {
         std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);
         VLOG(4) << this << ": scheduling graceful timeout=" << s.count() <<
@@ -462,7 +481,8 @@ void ProxygenServer::vmStopped() {
 }
 
 void ProxygenServer::forceStop() {
-  Logger::Info("%p: forceStop ProxygenServer port=%d", this, m_port);
+  Logger::Info("%p: forceStop ProxygenServer port=%d, enqueued=%d, conns=%d",
+               this, m_port, m_enqueuedCount, getLibEventConnectionCount());
 
   m_httpServerSocket.reset();
   m_httpsServerSocket.reset();
@@ -488,6 +508,18 @@ void ProxygenServer::forceStop() {
   for (auto listener: m_listeners) {
     listener->serverStopped(this);
   }
+}
+
+void ProxygenServer::reportShutdownStatus() {
+  if (m_port != RuntimeOption::ServerPort) return;
+  if (getStatus() == RunStatus::STOPPED) return;
+  Logger::Info("Shutdown state=%d, a/q/e/p %d/%d/%d/%d",
+               (int)m_shutdownState,
+               getActiveWorker(),
+               getQueuedJobs(),
+               getLibEventConnectionCount(),
+               (int)m_pendingTransports.size());
+  m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
 }
 
 bool ProxygenServer::canAccept() {
@@ -547,14 +579,13 @@ bool ProxygenServer::dynamicCertHandler(const std::string &server_name,
     m_httpsAcceptor->addSSLContextConfig(sslCtxConfig);
     return true;
   } catch (const std::exception &ex) {
-    Logger::Error(folly::to<string>("Invalid certificate file or key file: ",
-                                    ex.what()));
+    Logger::Error("Invalid certificate file or key file: %s", ex.what());
     return false;
   }
 }
 
 bool ProxygenServer::sniNoMatchHandler(const char *server_name) {
-  string fqdn(server_name);
+  std::string fqdn(server_name);
   size_t pos = fqdn.find('.');
   std::string wildcard;
   if (pos != std::string::npos) {
@@ -600,8 +631,7 @@ bool ProxygenServer::enableSSL(int port) {
         std::end(RuntimeOption::ServerNextProtocols)
       });
     } catch (const std::exception &ex) {
-      Logger::Error(folly::to<string>("Invalid certificate file or key file: ",
-                                      ex.what()));
+      Logger::Error("Invalid certificate file or key file: %s", ex.what());
     }
     if (!RuntimeOption::SSLCertificateDir.empty()) {
       ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
@@ -621,7 +651,7 @@ bool ProxygenServer::enableSSL(int port) {
   return true;
 }
 
-void ProxygenServer::onRequest(shared_ptr<ProxygenTransport> transport) {
+void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
   // If we are in the process of crashing, we want to reject incoming work.
   // This will prompt the load balancers to choose another server. Using
   // shutdown rather than close has the advantage that it makes fewer changes
@@ -648,6 +678,7 @@ void ProxygenServer::onRequest(shared_ptr<ProxygenTransport> transport) {
     VLOG(4) << this << ": enqueing request with path=" << transport->getUrl() <<
       " and priority=" << priority;
     m_enqueuedCount++;
+    transport->setEnqueued();
     m_dispatcher.enqueue(std::make_shared<ProxygenJob>(transport), priority);
   } else {
     // VM is shutdown
@@ -659,19 +690,25 @@ void ProxygenServer::onRequest(shared_ptr<ProxygenTransport> transport) {
 
 void ProxygenServer::decrementEnqueuedCount() {
   m_enqueuedCount--;
-  if (m_enqueuedCount == 0 &&
-      m_shutdownState == ShutdownState::DRAINING_WRITES &&
-      isScheduled()) {
-    // If all requests that got enqueued are done, accelerate shutdown.
-    // All other connections must be reading new requests, which cannot be
-    // executed.
-    cancelTimeout();
-    timeoutExpired();
+  if (m_enqueuedCount == 0 && isScheduled()) {
+    if (m_shutdownState == ShutdownState::DRAINING_WRITES) {
+      // If all requests that got enqueued are done, accelerate
+      // shutdown.  All other connections must be reading new
+      // requests, which cannot be executed.
+      cancelTimeout();
+      doShutdown();
+    } else if (m_shutdownState == ShutdownState::DRAINING_READS) {
+      if (m_pendingTransports.empty()) {
+        cancelTimeout();
+        doShutdown();
+      }
+    }
   }
 }
+
 ProxygenServer::RequestPriority ProxygenServer::getRequestPriority(
   const char *uri) {
-  string command = URL::getCommand(URL::getServerObject(uri));
+  auto const command = URL::getCommand(URL::getServerObject(uri));
   if (RuntimeOption::ServerHighPriorityEndPoints.find(command) ==
       RuntimeOption::ServerHighPriorityEndPoints.end()) {
     return PRIORITY_NORMAL;

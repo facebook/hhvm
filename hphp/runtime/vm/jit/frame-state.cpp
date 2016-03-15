@@ -778,20 +778,21 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       }
     }
     if (base->type().maybe(TPtrToStkGen)) {
-      auto begin = cur().spOffset.offset;
-      auto end = cur().spOffset.offset - int32_t(cur().stack.size());
-      for (auto i = begin; i > end; --i) {
-        auto const irSP = IRSPOffset{i};
-        auto const oldType = stack(irSP).type;
+      for (auto i = 0; i < cur().stack.size(); ++i) {
+        // The FPInvOffset of the stack slot is just its 1-indexed slot.
+        auto const spRel = FPInvOffset{i + 1}.to<IRSPOffset>(cur().spOffset);
+
+        auto const oldType = stack(spRel).type;
         if (TStkElem <= oldType) {
           // Drop the value and don't bother with precise effects.
-          setStackType(irSP, oldType);
+          setStackType(spRel, oldType);
           continue;
         }
         if (oldType <= TBoxedCell) continue;
+
         MInstrEffects e(inst->op(), oldType);
         if (!e.baseValChanged && !e.baseTypeChanged) continue;
-        widenStackType(irSP, oldType | e.baseType);
+        widenStackType(spRel, oldType | e.baseType);
       }
     }
   }
@@ -1085,15 +1086,17 @@ bool FrameStateMgr::checkInvariants() const {
   return true;
 }
 
-StackState& FrameStateMgr::stackState(IRSPOffset offset) {
-  auto const idx = cur().spOffset.offset - offset.offset;
+StackState& FrameStateMgr::stackState(IRSPOffset spRel) {
+  auto const fpRel = spRel.to<FPInvOffset>(cur().spOffset);
+  auto const idx = fpRel.offset - 1;
+
   FTRACE(6, "stackState offset: {} (@ spOff {}) --> idx={}\n",
-    offset.offset, cur().spOffset.offset, idx);
+         spRel.offset, cur().spOffset.offset, idx);
   always_assert_flog(
     idx >= 0,
     "idx went negative: curSpOffset: {}, offset: {}\n",
     cur().spOffset.offset,
-    offset.offset
+    spRel.offset
   );
   if (idx >= cur().stack.size()) {
     cur().stack.resize(idx + 1);

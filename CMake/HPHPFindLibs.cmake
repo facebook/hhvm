@@ -540,6 +540,8 @@ macro(hphp_link target)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
   target_link_libraries(${target} wangle)
+  target_link_libraries(${target} brotli_enc)
+  target_link_libraries(${target} brotli_dec)
 
   if (ENABLE_MCROUTER)
     target_link_libraries(${target} mcrouter)

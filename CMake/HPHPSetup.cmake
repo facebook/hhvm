@@ -305,6 +305,7 @@ include_directories("${TP_DIR}/folly")
 include_directories("${TP_DIR}/folly/src")
 include_directories("${TP_DIR}/thrift/src")
 include_directories("${TP_DIR}/wangle/src")
+include_directories("${TP_DIR}/brotli/src")
 include_directories(${TP_DIR})
 
 include_directories(${HPHP_HOME}/hphp)

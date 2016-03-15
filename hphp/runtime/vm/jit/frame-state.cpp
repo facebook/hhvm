@@ -25,7 +25,9 @@
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stack-offsets-defs.h"
+#include "hphp/runtime/vm/jit/translator.h"
 
 TRACE_SET_MOD(hhir);
 
@@ -613,29 +615,35 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       }
     }
 
-    auto const spOffset = extra.spOffset;
+    // Offset of the bytecode stack top relative to the IR stack pointer.
+    auto const bcSPOff = extra.spOffset;
 
     // Clear tracked information for slots pushed and popped.
     for (auto i = uint32_t{0}; i < extra.cellsPopped; ++i) {
-      setStackValue(spOffset + i, nullptr);
+      setStackValue(bcSPOff + i, nullptr);
     }
     for (auto i = uint32_t{0}; i < extra.cellsPushed; ++i) {
-      setStackValue(spOffset + extra.cellsPopped - 1 - i, nullptr);
+      setStackValue(bcSPOff + extra.cellsPopped - 1 - i, nullptr);
     }
-    auto adjustedTop = spOffset + extra.cellsPopped - extra.cellsPushed;
+    auto adjustedTop = bcSPOff + extra.cellsPopped - extra.cellsPushed;
 
     switch (extra.opcode) {
-    case Op::CGetL2:
-      setStackType(adjustedTop + 1, inst->typeParam());
-      break;
-    case Op::CGetL3:
-      setStackType(adjustedTop + 2, inst->typeParam());
-      break;
-    default:
-      // We don't track cells pushed by interp one except the top of the stack,
-      // aside from above special cases.
-      if (inst->hasTypeParam()) setStackType(adjustedTop, inst->typeParam());
-      break;
+      case Op::CGetL2:
+        setStackType(adjustedTop + 1, inst->typeParam());
+        break;
+      case Op::CGetL3:
+        setStackType(adjustedTop + 2, inst->typeParam());
+        break;
+      default:
+        // We don't track cells pushed by interp one except the top of the
+        // stack, aside from the above special cases.
+        if (inst->hasTypeParam()) {
+          auto const instrInfo = getInstrInfo(extra.opcode);
+          if (instrInfo.out & InstrFlags::Stack1) {
+            setStackType(adjustedTop, inst->typeParam());
+          }
+        }
+        break;
     }
 
     cur().syncedSpLevel += extra.cellsPushed;

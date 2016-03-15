@@ -884,20 +884,20 @@ struct InterpOneData : IRExtraData {
     , smashesAllLocals(false)
   {}
 
-  // Delta from the StkPtr src to the top of the stack.
+  // Offset of the BC stack top relative to the current IR stack pointer.
   IRSPOffset spOffset;
 
-  // Offset of the instruction to interpret, in the Unit indicated by
-  // the current Marker.
+  // Offset of the instruction to interpret, in the Unit indicated by the
+  // current Marker.
   Offset bcOff;
 
-  // The number of stack cells consumed and produced by the
-  // instruction, respectively. Includes ActRecs.
+  // The number of eval stack cells consumed and produced by the instruction,
+  // respectively.  Includes ActRecs.
   int64_t cellsPopped;
   int64_t cellsPushed;
 
-  // Opcode, in case we need to fix the stack differently. Some byte-
-  // code instructions modify things below the top of the stack.
+  // Opcode, in case we need to fix the stack differently.  Some bytecode
+  // instructions modify things below the top of the stack.
   Op opcode;
 
   uint32_t nChangedLocals;

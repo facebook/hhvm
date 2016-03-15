@@ -59,7 +59,6 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stack-overflow.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -649,9 +648,9 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 void CodeGenerator::cgGenericIdx(IRInstruction* inst) {
   auto& v = vmain();
   auto const sp = srcLoc(inst, 3).reg();
-  auto const spOff = inst->extra<GenericIdx>()->offset.offset;
+  auto const spOff = inst->extra<GenericIdx>()->offset;
   auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(spOff)], sync_sp};
+  v << lea{sp[cellsToBytes(spOff.offset)], sync_sp};
   emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
                      rvmtl(), rvmfp(), sync_sp);
   cgCallNative (v, inst);
@@ -2015,10 +2014,10 @@ void CodeGenerator::cgStLocRange(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
-  auto const spOff = inst->extra<EagerSyncVMRegs>()->offset.offset;
+  auto const spOff = inst->extra<EagerSyncVMRegs>()->offset;
   auto& v = vmain();
   auto const sync_sp = v.makeReg();
-  v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff)], sync_sp};
+  v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff.offset)], sync_sp};
   emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
                      rvmtl(), srcLoc(inst, 0).reg(), sync_sp);
 }
@@ -5192,7 +5191,7 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {
-  auto const spOff = inst->extra<DbgTraceCall>()->offset.offset;
+  auto const spOff = inst->extra<DbgTraceCall>()->offset;
   cgCallHelper(
     vmain(),
     CallSpec::direct(traceCallback),
@@ -5200,7 +5199,7 @@ void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {
     SyncOptions::None,
     argGroup(inst)
       .ssa(0)
-      .addr(srcLoc(inst, 1).reg(), cellsToBytes(spOff))
+      .addr(srcLoc(inst, 1).reg(), cellsToBytes(spOff.offset))
       .imm(inst->marker().bcOff())
   );
 }

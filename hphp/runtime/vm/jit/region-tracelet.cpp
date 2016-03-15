@@ -115,7 +115,7 @@ const Unit* curUnit(const Env& env) {
 }
 
 FPInvOffset curSpOffset(const Env& env) {
-  return irgen::logicalStackDepth(env.irgs);
+  return env.irgs.irb->fs().syncedSpLevel();
 }
 
 bool irBlockReachable(Env& env, Block* block) {
@@ -363,12 +363,13 @@ void visitGuards(IRUnit& unit, F func) {
            * BCSPOffset is optional but should --always-- be set for CheckStk
            * instructions that appear within the guards for a translation.
            */
-          auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
+          auto const bcSPOff = inst.extra<RelOffsetData>()->bcSpOffset;
           assertx(inst.extra<RelOffsetData>()->hasBcSpOffset);
 
-          auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
+          auto const offsetFromFP =
+            bcSPOff.to<FPInvOffset>(inst.marker().spOff());
           func(&inst,
-               L::Stack{offsetFromFp},
+               L::Stack{offsetFromFP},
                inst.typeParam(),
                inst.is(HintStkInner));
           break;

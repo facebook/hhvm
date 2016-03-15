@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
-#include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 TRACE_SET_MOD(hhir);
@@ -281,7 +280,8 @@ bool check_invariants(const FrameState& state) {
   // ActRec).  Note that there are some "wasted" slots where locals/iterators
   // would be in the vector right now.
   always_assert_flog(
-    state.spOffset < 0 || state.stack.size() >= state.spOffset,
+    state.spOffset < FPInvOffset{0} ||
+    state.stack.size() >= state.spOffset.offset,
     "stack was smaller than possible"
   );
 
@@ -564,7 +564,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
      * the unwinder won't see what we expect.
      */
     always_assert_flog(
-      cur().spOffset + -inst->extra<EndCatch>()->offset.offset ==
+      inst->extra<EndCatch>()->offset.to<FPInvOffset>(cur().spOffset) ==
         inst->marker().spOff(),
       "EndCatch stack didn't seem right:\n"
       "                 spOff: {}\n"
@@ -700,11 +700,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     if (!func()->unit()->useStrictTypes()) {
       // In PHP 7 mode scalar types can sometimes coerce; we do this during the
       // VerifyRetFail call -- we never allow this in HH files.
-      auto const offset = toIRSPOffset(
-        BCSPOffset{0},
-        inst->marker().spOff(),
-        spOffset()
-      );
+      auto const offset = BCSPOffset{0}
+        .to<FPInvOffset>(inst->marker().spOff())
+        .to<IRSPOffset>(spOffset());
       setStackType(offset, TGen);
     }
     break;
@@ -862,20 +860,26 @@ void FrameStateMgr::collectPostConds(Block* block) {
   pConds.refined.clear();
 
   if (sp() != nullptr) {
-    const auto& lastInst = block->back();
-    const FPInvOffset bcSpOff = lastInst.marker().spOff();
-    const FPInvOffset irSpOff = spOffset();
-    const bool resumed = lastInst.marker().resumed();
-    const auto skipCells = FPInvOffset{resumed ? 0 : func()->numSlotsInFrame()};
-    const auto evalStkCells = bcSpOff - skipCells;
+    auto const& lastInst = block->back();
+    auto const bcSPOff = lastInst.marker().spOff();
+    auto const irSPOff = spOffset();
+    auto const resumed = lastInst.marker().resumed();
+    auto const skipCells = FPInvOffset{resumed ? 0 : func()->numSlotsInFrame()};
+    auto const evalStkCells = bcSPOff - skipCells;
+
     for (int32_t i = 0; i < evalStkCells; i++) {
-      const auto bcSpRel = BCSPOffset{i};
-      const auto fpRel   = bcSpOff - bcSpRel;
-      const auto irSpRel = toIRSPOffset(bcSpRel, bcSpOff, irSpOff);
-      const auto type    = stack(irSpRel).type;
-      const bool changed = stack(irSpRel).maybeChanged;
+      auto const bcSPRel = BCSPOffset{i};
+      auto const irSPRel = bcSPRel
+        .to<FPInvOffset>(bcSPOff)
+        .to<IRSPOffset>(irSPOff);
+
+      auto const type    = stack(irSPRel).type;
+      auto const changed = stack(irSPRel).maybeChanged;
+
       if (changed || type < TGen) {
-        FTRACE(1, "Stack({}, {}): {} ({})\n", bcSpRel.offset, fpRel.offset,
+        auto const fpRel = bcSPRel.to<FPInvOffset>(bcSPOff);
+
+        FTRACE(1, "Stack({}, {}): {} ({})\n", bcSPRel.offset, fpRel.offset,
                type, changed ? "changed" : "refined");
         auto& vec = changed ? pConds.changed : pConds.refined;
         vec.push_back({RegionDesc::Location::Stack{fpRel}, type});
@@ -1046,7 +1050,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
    * spValue.  We're not changing spValue while we inline, but we're changing
    * fpValue, so this needs to change.  We know where the new fpValue is
    * pointing (relative to the spValue, which we aren't changing).  So we just
-   * need to do a change of coordinates, which turns out to be an indentity map
+   * need to do a change of coordinates, which turns out to be an identity map
    * here:
    *
    *    fpValue = spValue + extra->spOffset (an IRSPOffset)

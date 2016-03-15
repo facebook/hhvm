@@ -225,11 +225,6 @@ void inlSingletonSLoc(IRGS&, const Func*, PC op);
  */
 
 /*
- * The logical stack depth (from an hhbc perspective) in the current situation.
- */
-FPInvOffset logicalStackDepth(const IRGS& env);
-
-/*
  * Access the type of the top of the stack, without making any change to the
  * IRGS.  This means that the type returned is /not/ necessarily constrained.
  */

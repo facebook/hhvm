@@ -265,13 +265,8 @@ void implRet(IRGS& env) {
 }
 
 IRSPOffset offsetToReturnSlot(IRGS& env) {
-  return offsetFromIRSP(
-    env,
-    BCSPOffset{
-      logicalStackDepth(env).offset +
-        AROFF(m_r) / int32_t{sizeof(Cell)}
-    }
-  );
+  auto const retOff = FPRelOffset { AROFF(m_r) / int32_t{sizeof(Cell)} };
+  return retOff.to<IRSPOffset>(env.irb->fs().spOffset());
 }
 
 void emitRetC(IRGS& env) {

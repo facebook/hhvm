@@ -926,34 +926,13 @@ void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(InlineReturn));
   auto const frameInst = inst.src(0)->inst();
   auto const spInst = frameInst->src(0)->inst();
+
+  auto const calleeAROff = frameInst->extra<DefInlineFP>()->spOffset;
+  auto const spOff = spInst->extra<DefSP>()->offset;
+
   InlineReturnNoFrameData data {
-    // +-------------------+
-    // |                   |
-    // | Outer Frame       |
-    // |                   |  <-- FP    --- ---
-    // +-------------------+             |   |
-    // |                   |             |   |  B: DefSP.offset
-    // | ...               |             |   |     (FPInvOffset, >= 0)
-    // +-------------------+             |   |
-    // |                   |  <-- SP     |  ---
-    // +-------------------+           C |   |
-    // |                   |             |   |
-    // | ...               |             |   |  A: DefInlineFP.spOffset
-    // +-------------------+             |   |     (IRSPRelOffset, <= 0)
-    // |                   |            ---  |
-    // | Callee Frame      |                 |
-    // |                   |                ---
-    // +-------------------+
-    //
-    // What we're trying to compute is C, a FPRelOffset (<0) from the
-    // Outer FP to the top cell in the Callee Frame. From the picture,
-    // we have |C| = |A| + |B| - 2. To get the negative result, A
-    // already has the correct sign, but we need to negate B and the
-    // minus 2 becomes +2, so: C = A - B + 2.
-    FPRelOffset {
-      frameInst->extra<DefInlineFP>()->spOffset.offset -
-        spInst->extra<DefSP>()->offset.offset + 2
-    }
+    // Offset of the callee's return value relative to the frame pointer.
+    calleeAROff.to<FPRelOffset>(spOff) + (AROFF(m_r) / sizeof(TypedValue))
   };
   unit.replace(&inst, InlineReturnNoFrame, data);
 }

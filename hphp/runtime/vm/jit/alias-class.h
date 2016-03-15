@@ -150,7 +150,7 @@ struct AStack {
   explicit AStack(SSATmp* base, int32_t offset, int32_t size);
   explicit AStack(int32_t o, int32_t s) : offset(o), size(s) {}
 
-  int32_t offset;
+  int32_t offset; // an FPRelOffset in everything but name
   int32_t size;
 };
 

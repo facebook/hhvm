@@ -300,13 +300,6 @@ void finishHHBC(IRGS& env) {
   env.firstBcInst = false;
 }
 
-FPInvOffset logicalStackDepth(const IRGS& env) {
-  // Negate the offsetFromIRSP because it is an offset from the actual StkPtr
-  // (so negative values go deeper on the stack), but this function deals with
-  // logical stack depths (where more positive values are deeper).
-  return env.irb->fs().spOffset() - offsetFromIRSP(env, BCSPOffset{0});
-}
-
 Type publicTopType(const IRGS& env, BCSPOffset idx) {
   // It's logically const, because we're using DataTypeGeneric.
   return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);

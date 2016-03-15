@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
-#include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -270,27 +269,30 @@ inline SSATmp* assertType(SSATmp* tmp, Type type) {
   return tmp;
 }
 
-inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset offsetFromInstr) {
-  auto const curSPTop = env.irb->fs().syncedSpLevel();
-  auto const spOff = env.irb->fs().spOffset();
-  auto const ret = toIRSPOffset(offsetFromInstr, curSPTop, spOff);
+inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset bcSPRel) {
+  auto const bcSPOff = env.irb->fs().syncedSpLevel();
+  auto const irSPOff = env.irb->fs().spOffset();
+  auto const ret = bcSPRel
+    .to<FPInvOffset>(bcSPOff)
+    .to<IRSPOffset>(irSPOff);
   FTRACE(1,
-    "offsetFromIRSP({}) --> spOff: {}, curTop: {}, ret: {}\n",
-    offsetFromInstr.offset,
-    spOff.offset,
-    curSPTop.offset,
+    "bcSPRel({}) --> irSPOff: {}, bcSPOff: {}, ret: {}\n",
+    bcSPRel.offset,
+    irSPOff.offset,
+    bcSPOff.offset,
     ret.offset
   );
   return ret;
 }
 
-inline BCSPOffset offsetFromBCSP(const IRGS& env, FPInvOffset offsetFromFP) {
-  auto const curSPTop = env.irb->fs().syncedSpLevel();
-  return toBCSPOffset(offsetFromFP, curSPTop);
+inline BCSPOffset offsetFromBCSP(const IRGS& env, FPInvOffset fpRel) {
+  auto const bcSPOff = env.irb->fs().syncedSpLevel();
+  return fpRel.to<BCSPOffset>(bcSPOff);
 }
 
-inline BCSPOffset offsetFromBCSP(const IRGS& env, IRSPOffset offsetFromIRSP) {
-  return offsetFromBCSP(env, env.irb->fs().spOffset() - offsetFromIRSP);
+inline BCSPOffset offsetFromBCSP(const IRGS& env, IRSPOffset irSPRel) {
+  auto const fpRel = irSPRel.to<FPInvOffset>(env.irb->fs().spOffset());
+  return offsetFromBCSP(env, fpRel);
 }
 
 inline SSATmp* pop(IRGS& env, TypeConstraint tc = DataTypeSpecific) {

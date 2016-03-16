@@ -723,16 +723,7 @@ void Vgen::emit(xorq i) {
 
 template<typename Lower>
 void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
-  auto& blocks = unit.blocks;
-  auto const& vinstr = blocks[b].code[i];
-
-  auto const scratch = unit.makeScratchBlock();
-  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, vinstr.origin);
-
-  lower(v);
-
-  vector_splice(blocks[b].code, i, 1, blocks[scratch].code);
+  vmodify(unit, b, i, [&] (Vout& v) { lower(v); return 1; });
 }
 
 template<typename Inst>

@@ -71,53 +71,36 @@ auto if_inst(const Env& env, Vlabel b, size_t i, F f)
 /*
  * Helper for vasm-simplification routines.
  *
- * This routine wraps a call to `simplify' with accounting logic for `env'.
- * `simplify' is passed a scratch Vinstr stream to fill with instructions.  It
- * should return the number of instructions to remove from the Vunit and
- * replace with the contents of its stream.  This instruction splicing occurs
- * at block `b', instruction `i' of the Vunit.
- *
- * If `simplify' both returns 0 and fails to populate the stream, nothing
- * happens, and false is returned; otherwise, return true.
- *
- * The `simplify' implementation should never modify instructions in the
- * stream, due to the required accounting for `env'.  Furthermore, once
- * simplify_impl() is run, all pointers and references to instructions in block
- * `b' should be considered invalidated.
+ * This just wraps vmodify() with some accounting logic for `env'.
  */
 template<typename Simplify>
 bool simplify_impl(Env& env, Vlabel b, size_t i, Simplify simplify) {
   auto& unit = env.unit;
-  auto& blocks = unit.blocks;
-  auto const& vinstr = blocks[b].code[i];
 
-  auto const scratch = unit.makeScratchBlock();
-  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, vinstr.origin);
+  return vmodify(unit, b, i, [&] (Vout& v) {
+    auto& blocks = unit.blocks;
+    auto const nremove = simplify(v);
 
-  auto const nremove = simplify(v);
-  if (nremove == 0 && v.empty()) return false;
+    // Update use counts for to-be-removed instructions.
+    for (auto j = i; j < i + nremove; ++j) {
+      visitUses(unit, blocks[b].code[j], [&] (Vreg r) {
+        --env.use_counts[r];
+      });
+    }
 
-  // Update use counts for to-be-removed instructions.
-  for (auto j = i; j < i + nremove; ++j) {
-    visitUses(unit, blocks[b].code[j], [&] (Vreg r) {
-      --env.use_counts[r];
-    });
-  }
+    // Update use counts and def instructions for to-be-added instructions.
+    for (auto const& inst : blocks[Vlabel(v)].code) {
+      visitUses(unit, inst, [&] (Vreg r) {
+        assertx(r < env.use_counts.size());
+        ++env.use_counts[r];
+      });
+      visitDefs(unit, inst, [&] (Vreg r) {
+        env.def_insts[r] = inst.op;
+      });
+    }
 
-  // Update use counts and def instructions for to-be-added instructions.
-  for (auto const& inst : blocks[scratch].code) {
-    visitUses(unit, inst, [&] (Vreg r) {
-      assertx(r < env.use_counts.size());
-      ++env.use_counts[r];
-    });
-    visitDefs(unit, inst, [&] (Vreg r) {
-      env.def_insts[r] = inst.op;
-    });
-  }
-
-  vector_splice(blocks[b].code, i, nremove, blocks[scratch].code);
-  return true;
+    return nremove;
+  });
 }
 
 /*

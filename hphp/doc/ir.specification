@@ -214,10 +214,21 @@ loaded, using a separate CheckRefInner instruction.
   is a subtype of BoxedCell. The type must be guarded on before it is known to
   be true (via LdRef).
 
+| HintStkInner<T,offset>, ND, S(StkPtr), NF
+
+  Hint that the inner type of the BoxedInitCell on the stack pointed to by S0
+  at offset (in cells) is T. The type must be guarded on before it is known to
+  be true (via LdRef).
+
 | CheckLoc<T,localId>, ND, S(FramePtr), B
 
   Check that type of the given localId on the frame S0 is T; if not, branch to
   block B.
+
+| CheckStk<T,offset>, ND, S(StkPtr), B
+
+  Check that the type of the cell on the stack pointed to by S0 at offset (in
+  cells) is T; if not, branch to block B.
 
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 
@@ -228,17 +239,6 @@ loaded, using a separate CheckRefInner instruction.
 
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the asserted local has type T.
-
-| HintStkInner<T,offset>, ND, S(StkPtr), NF
-
-  Hint that the inner type of the BoxedInitCell on the stack pointed to by S0
-  at offset (in cells) is T. The type must be guarded on before it is known to
-  be true (via LdRef).
-
-| CheckStk<T,offset>, ND, S(StkPtr), B
-
-  Check that the type of the cell on the stack pointed to by S0 at offset (in
-  cells) is T; if not, branch to block B.
 
 | AssertStk<T,offset>, ND, S(StkPtr), NF
 

@@ -74,6 +74,24 @@ void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
   gen(env, AssertLoc, type, LocalId(locId), fp(env));
 }
 
+void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
+  gen(env, AssertStk, type,
+      IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
+}
+
+void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
+  assertx(type <= TStkElem);
+  using T = RegionDesc::Location::Tag;
+  switch (loc.tag()) {
+  case T::Stack:
+    assertTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
+    break;
+  case T::Local:
+    assertTypeLocal(env, loc.localId(), type);
+    break;
+  }
+}
+
 void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
                     bool outerOnly) {
   assertx(type <= TCell || type <= TBoxedInitCell);
@@ -95,11 +113,6 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
     auto const val = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
     gen(env, CheckRefInner, env.irb->predictedInnerType(locId), exit, val);
   }
-}
-
-void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
-  gen(env, AssertStk, type,
-      IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
 }
 
 void checkTypeStack(IRGS& env,
@@ -136,6 +149,24 @@ void checkTypeStack(IRGS& env,
   profiledGuard(env, type, ProfGuard::CheckStk, idx.offset, exit);
 }
 
+void checkTypeLocation(IRGS& env,
+                       const RegionDesc::Location& loc,
+                       Type type,
+                       Offset dest,
+                       bool outerOnly) {
+  assertx(type <= TGen);
+  using T = RegionDesc::Location::Tag;
+  switch (loc.tag()) {
+  case T::Stack:
+    checkTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type, dest,
+                   outerOnly);
+    break;
+  case T::Local:
+    checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
+    break;
+  }
+}
+
 void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
   FTRACE(1, "predictTypeStack {}: {}\n", offset.offset, type);
   assert(type <= TGen);
@@ -167,37 +198,6 @@ void predictTypeLocation(
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
-  assertx(type <= TStkElem);
-  using T = RegionDesc::Location::Tag;
-  switch (loc.tag()) {
-  case T::Stack:
-    assertTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
-    break;
-  case T::Local:
-    assertTypeLocal(env, loc.localId(), type);
-    break;
-  }
-}
-
-void checkTypeLocation(IRGS& env,
-                       const RegionDesc::Location& loc,
-                       Type type,
-                       Offset dest,
-                       bool outerOnly) {
-  assertx(type <= TGen);
-  using T = RegionDesc::Location::Tag;
-  switch (loc.tag()) {
-  case T::Stack:
-    checkTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type, dest,
-                   outerOnly);
-    break;
-  case T::Local:
-    checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
-    break;
-  }
-}
 
 void makeExitPlaceholder(IRGS& env) {
   gen(env, ExitPlaceholder, makeGuardExit(env, TransFlags{}));

@@ -175,6 +175,15 @@ let test_type_at_pos_call () =
     "37"
   ] in expect_call msg (Type_at_pos_call ("<hh", 21, 37))
 
+let test_format_call () =
+  let msg = build_call_msg [
+    {|"--format"|};
+    {|"<?hh"|};
+    "5";
+    "6"
+  ] in
+  expect_call msg (Format_call ("<hh", 5, 6))
+
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;

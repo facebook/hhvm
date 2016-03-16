@@ -26,6 +26,12 @@ namespace HPHP {
 
 struct Func;
 
+enum class RequestKind {
+  Warmup,
+  Profile,
+  Standard
+};
+
 //////////////////////////////////////////////////////////////////////
 
 void profileInit();
@@ -43,9 +49,9 @@ int64_t requestCount();
  */
 void profileIncrementFuncCounter(const Func*);
 
-extern __thread bool profileOn;
+extern __thread RequestKind requestKind;
 inline bool isProfileRequest() {
-  return profileOn;
+  return requestKind == RequestKind::Profile;
 }
 
 extern __thread bool standardRequest;

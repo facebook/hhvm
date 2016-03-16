@@ -54,7 +54,8 @@ void profileInit() {
  * In server mode, we exclude warmup document requests from profiling, then
  * record samples for EvalJitProfileInterpRequests standard requests.
  */
-bool __thread profileOn = false;
+
+RequestKind __thread requestKind = RequestKind::Warmup;
 static bool warmingUp;
 static int64_t numRequests;
 bool __thread standardRequest = true;
@@ -161,17 +162,18 @@ static inline bool doneProfiling() {
      !RuntimeOption::EvalJitProfileRecord);
 }
 
-static inline bool profileThisRequest() {
-  if (warmingUp) return false;
-  if (doneProfiling()) return false;
-  if (RuntimeOption::ServerExecutionMode()) return true;
-  return RuntimeOption::EvalJitProfileRecord;
+static inline RequestKind getRequestKind() {
+  if (warmingUp) return RequestKind::Warmup;
+  if (doneProfiling()) return RequestKind::Standard;
+  if (RuntimeOption::ServerExecutionMode() ||
+      RuntimeOption::EvalJitProfileRecord) return RequestKind::Profile;
+  return RequestKind::Standard;
 }
 
 void profileRequestStart() {
-  profileOn = profileThisRequest();
+  requestKind = getRequestKind();
 
-  bool okToJit = !warmingUp && !profileOn;
+  bool okToJit = requestKind == RequestKind::Standard;
   if (okToJit) {
     jit::Lease::mayLock(true);
     if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {

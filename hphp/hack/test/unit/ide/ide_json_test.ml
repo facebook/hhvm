@@ -159,6 +159,14 @@ let test_strip_json_arg () =
   ] in
   expect_call msg (Identify_function_call ("<?hh", 21, 37))
 
+let test_find_lvar_refs_call () =
+  let msg = build_call_msg [
+    {|"--find-lvar-refs"|};
+    {|"<?hh"|};
+    "21";
+    "37"
+  ] in expect_call msg (Find_lvar_refs_call ("<hh", 21, 37))
+
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;
@@ -181,6 +189,7 @@ let tests = [
   "test_find_function_refs_call", test_find_function_refs_call;
   "test_find_method_refs_call", test_find_method_refs_call;
   "test_find_class_refs_call", test_find_class_refs_call;
+  "test_find_lvar_refs_call", test_find_lvar_refs_call;
 ]
 
 let () =

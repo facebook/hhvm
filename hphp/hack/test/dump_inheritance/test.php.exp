@@ -1,0 +1,57 @@
+Ancestors of \IFoo:
+
+Ancestors of \IBar:
+
+Ancestors of \IQux:
+File "test.php", line 7, characters 11-14: IQux
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 7, characters 11-14: IQux
+    inherited from File "test.php", line 5, characters 11-14: IBar
+
+Ancestors of \Foo:
+File "test.php", line 9, characters 7-9: Foo
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+
+Ancestors of \Bar:
+File "test.php", line 11, characters 7-9: Bar
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 11, characters 7-9: Bar
+    inherited from File "test.php", line 9, characters 7-9: Foo
+
+Ancestors of \Baz:
+File "test.php", line 13, characters 7-9: Baz
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 13, characters 7-9: Baz
+    inherited from File "test.php", line 9, characters 7-9: Foo
+File "test.php", line 13, characters 7-9: Baz
+    inherited from File "test.php", line 11, characters 7-9: Bar
+
+
+Children of \IFoo:
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 13, characters 7-9: Baz
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 11, characters 7-9: Bar
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 9, characters 7-9: Foo
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 7, characters 11-14: IQux
+
+Children of \IBar:
+File "test.php", line 5, characters 11-14: IBar
+    inherited by File "test.php", line 7, characters 11-14: IQux
+
+Children of \IQux:
+
+Children of \Foo:
+File "test.php", line 9, characters 7-9: Foo
+    inherited by File "test.php", line 13, characters 7-9: Baz
+File "test.php", line 9, characters 7-9: Foo
+    inherited by File "test.php", line 11, characters 7-9: Bar
+
+Children of \Bar:
+File "test.php", line 11, characters 7-9: Bar
+    inherited by File "test.php", line 13, characters 7-9: Baz
+
+Children of \Baz:
+

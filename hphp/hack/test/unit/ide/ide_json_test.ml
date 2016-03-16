@@ -167,6 +167,14 @@ let test_find_lvar_refs_call () =
     "37"
   ] in expect_call msg (Find_lvar_refs_call ("<hh", 21, 37))
 
+let test_type_at_pos_call () =
+  let msg = build_call_msg [
+    {|"--type-at-pos"|};
+    {|"<?hh"|};
+    "21";
+    "37"
+  ] in expect_call msg (Type_at_pos_call ("<hh", 21, 37))
+
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;
@@ -190,6 +198,7 @@ let tests = [
   "test_find_method_refs_call", test_find_method_refs_call;
   "test_find_class_refs_call", test_find_class_refs_call;
   "test_find_lvar_refs_call", test_find_lvar_refs_call;
+  "test_type_at_pos_call", test_type_at_pos_call;
 ]
 
 let () =

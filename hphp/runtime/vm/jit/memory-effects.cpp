@@ -285,10 +285,16 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
    * actually uses may_reenter with a non-AEmpty kills at the time of this
    * writing anyway.
    */
-  auto const killed_stack =
-    stack_below(inst.marker().fp(), -inst.marker().spOff().offset - 1);
-  auto const kills_union = x.kills.precise_union(killed_stack);
-  auto const new_kills = kills_union ? *kills_union : killed_stack;
+  auto const new_kills = [&] {
+    if (inst.marker().fp() == nullptr) return AEmpty;
+
+    auto const killed_stack = stack_below(
+      inst.marker().fp(),
+      -inst.marker().spOff().offset - 1
+    );
+    auto const kills_union = x.kills.precise_union(killed_stack);
+    return kills_union ? *kills_union : killed_stack;
+  }();
 
   return GeneralEffects {
     x.loads | AHeapAny
@@ -1614,9 +1620,10 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
          *
          * The mayRaiseError instructions should all be going through
          * may_reenter right now, which will kill the stack below the re-entry
-         * depth.
+         * depth---unless the marker for `inst' doesn't have an fp set.
          */
-        always_assert(AStackAny.maybe(x.kills));
+        always_assert(inst.marker().fp() == nullptr ||
+                      AStackAny.maybe(x.kills));
       }
     },
     [&] (PureLoad x)         { check(x.src); },

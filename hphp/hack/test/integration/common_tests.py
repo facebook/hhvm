@@ -285,22 +285,11 @@ assume_php = false""")
 
             ])
 
-    def test_ide_tools(self):
+    def test_find_refs(self):
         """
-        Test hh_client --search, --find-refs, --find-class-refs, --type-at-pos,
-        and --list-files
-
-        We *could* break this up into multiple tests, but starting the server
-        takes time and this test is slow enough already
+        Test hh_client --find-refs, --find-class-refs
         """
-
         self.write_load_config()
-
-        self.check_cmd_and_json_cmd([
-            'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
-            ], [
-            '[{{"name":"some_long_function_name","filename":"{root}foo_3.php","desc":"function","line":9,"char_start":18,"char_end":40,"scope":""}}]'
-            ], options=['--search', 'some_lo'])
 
         self.check_cmd_and_json_cmd([
             'File "{root}foo_3.php", line 11, characters 13-13: h',
@@ -323,11 +312,25 @@ assume_php = false""")
             '[{{"name":"Foo::__construct","filename":"{root}foo_3.php","line":10,"char_start":17,"char_end":19}}]'
             ], options=['--find-class-refs', 'Foo'])
 
+    def test_search(self):
+        """
+        Test hh_client --search
+        """
+
+        self.write_load_config()
+
         self.check_cmd_and_json_cmd([
-            'string'
+            'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
             ], [
-            '{{"type":"string","pos":{{"filename":"{root}foo_3.php","line":3,"char_start":23,"char_end":28}}}}'
-            ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
+            '[{{"name":"some_long_function_name","filename":"{root}foo_3.php","desc":"function","line":9,"char_start":18,"char_end":40,"scope":""}}]'
+            ], options=['--search', 'some_lo'])
+
+    def test_auto_complete(self):
+        """
+        Test hh_client --auto-complete
+        """
+
+        self.write_load_config()
 
         self.check_cmd_and_json_cmd([
             'some_long_function_name (function(): _)'
@@ -346,6 +349,20 @@ assume_php = false""")
             ],
             options=['--auto-complete'],
             stdin='<?hh function f() { some_AUTO332\n')
+
+    def test_misc_ide_tools(self):
+        """
+        Test hh_client --type-at-pos, --identify-function,
+        --auto-complete, and --list-files
+        """
+
+        self.write_load_config()
+
+        self.check_cmd_and_json_cmd([
+            'string'
+            ], [
+            '{{"type":"string","pos":{{"filename":"{root}foo_3.php","line":3,"char_start":23,"char_end":28}}}}'
+            ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
 
         self.check_cmd_and_json_cmd([
             'Foo::bar'

@@ -2113,7 +2113,7 @@ bool MCGenerator::dumpTCData() {
                 "acold.frontier   = %p\n"
                 "afrozen.base     = %p\n"
                 "afrozen.frontier = %p\n\n",
-                repoSchemaId(),
+                repoSchemaId().begin(),
                 m_code.hot().base(), m_code.hot().frontier(),
                 m_code.main().base(), m_code.main().frontier(),
                 m_code.prof().base(), m_code.prof().frontier(),

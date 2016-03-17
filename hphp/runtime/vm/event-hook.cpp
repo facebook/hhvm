@@ -43,6 +43,8 @@ const StaticString
   s_this_ptr("this_ptr"),
   s_enter("enter"),
   s_exit("exit"),
+  s_suspend("suspend"),
+  s_resume("resume"),
   s_exception("exception"),
   s_name("name"),
   s_return("return");
@@ -154,7 +156,11 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
   }
 }
 
-void runUserProfilerOnFunctionEnter(const ActRec* ar) {
+inline bool isResumeAware() {
+  return (g_context->m_setprofileFlags & EventHook::ProfileResumeAware) != 0;
+}
+
+void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileEnters) == 0) {
     return;
   }
@@ -163,7 +169,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
-  params.append(s_enter);
+  params.append((isResume && isResumeAware()) ? s_resume : s_enter);
   params.append(VarNR(ar->func()->fullName()));
 
   Array frameinfo;
@@ -175,7 +181,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
-                                   ObjectData* exception) {
+                                   ObjectData* exception, bool isSuspend) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileExits) == 0) {
     return;
   }
@@ -184,7 +190,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
-  params.append(s_exit);
+  params.append((isSuspend && isResumeAware()) ? s_suspend : s_exit);
   params.append(VarNR(ar->func()->fullName()));
 
   Array frameinfo;
@@ -330,11 +336,12 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
   return name;
 }
 
-void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
+void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
+                                ssize_t flags, bool isResume) {
   // User profiler
   if (flags & EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
-      runUserProfilerOnFunctionEnter(ar);
+      runUserProfilerOnFunctionEnter(ar, isResume);
     }
     auto profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr &&
@@ -352,7 +359,7 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
 
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                bool unwind, ObjectData* phpException,
-                               size_t flags) {
+                               size_t flags, bool isSuspend) {
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
@@ -401,9 +408,9 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
         // Avoid running PHP code when exception from destructor is pending.
         // TODO(#2329497) will not happen once CheckSurprise is used
       } else if (!unwind) {
-        runUserProfilerOnFunctionExit(ar, retval, nullptr);
+        runUserProfilerOnFunctionExit(ar, retval, nullptr, isSuspend);
       } else if (phpException) {
-        runUserProfilerOnFunctionExit(ar, retval, phpException);
+        runUserProfilerOnFunctionExit(ar, retval, phpException, isSuspend);
       } else {
         // Avoid running PHP code when unwinding C++ exception.
       }
@@ -437,7 +444,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
 
-  onFunctionEnter(ar, funcType, flags);
+  onFunctionEnter(ar, funcType, flags, false);
   return true;
 }
 
@@ -458,7 +465,7 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
     IntervalTimer::RunCallbacks(IntervalTimer::ResumeAwaitSample);
   }
 
-  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+  onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
 void EventHook::onFunctionResumeYield(const ActRec* ar) {
@@ -478,14 +485,14 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
 
-  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+  onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
 // Child is the AFWH we're going to block on, nullptr iff this is a suspending
 // generator.
 void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
   auto const flags = check_request_surprise();
-  onFunctionExit(suspending, nullptr, false, nullptr, flags);
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
 
   if ((flags & AsyncEventHookFlag) &&
       suspending->func()->isAsyncFunction()) {
@@ -515,7 +522,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
 
   try {
     auto const flags = check_request_surprise();
-    onFunctionExit(resumableAR, nullptr, false, nullptr, flags);
+    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
 
     if ((flags & AsyncEventHookFlag) &&
         resumableAR->func()->isAsyncFunction()) {
@@ -549,7 +556,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
 
   try {
     auto const flags = check_request_surprise();
-    onFunctionExit(ar, &retval, false, nullptr, flags);
+    onFunctionExit(ar, &retval, false, nullptr, flags, false);
 
     // Async profiler
     if ((flags & AsyncEventHookFlag) &&
@@ -580,7 +587,7 @@ void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
   // TODO(#2329497) can't check_request_surprise() yet, unwinder unable to
   // replace fault
   auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
-  onFunctionExit(ar, nullptr, true, phpException, flags);
+  onFunctionExit(ar, nullptr, true, phpException, flags, false);
 }
 
 } // namespace HPHP

@@ -51,7 +51,10 @@ function proffunc($event, $name, $info) {
 }
 
 function main($a) {
-  fb_setprofile('proffunc');
+  fb_setprofile(
+    'proffunc',
+    SETPROFILE_FLAGS_RESUME_AWARE | SETPROFILE_FLAGS_DEFAULT,
+  );
   $result = HH\Asio\join(genFoo($a));
   var_dump($result);
   fb_setprofile(null);

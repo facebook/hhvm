@@ -51,6 +51,7 @@ struct EventHook {
     ProfileDefault = 3,
     ProfileFramePointers = 4,
     ProfileConstructors = 8,
+    ProfileResumeAware = 16,
   };
 
 
@@ -120,10 +121,11 @@ private:
   static void onFunctionResumeYield(const ActRec* ar);
   static void onFunctionUnwind(ActRec* ar, ObjectData* phpException);
 
-  static void onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags);
+  static void onFunctionEnter(const ActRec* ar, int funcType,
+                              ssize_t flags, bool isResume);
   static void onFunctionExit(const ActRec* ar, const TypedValue* retval,
                              bool unwind, ObjectData* phpException,
-                             size_t flags);
+                             size_t flags, bool isSuspend);
 
   static bool RunInterceptHandler(ActRec* ar);
   static const char* GetFunctionNameForProfiler(const Func* func,

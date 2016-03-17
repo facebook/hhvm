@@ -15,7 +15,7 @@ int(43)
 ** exit var_dump
 ** enter HH\RescheduleWaitHandle::create
 ** exit HH\RescheduleWaitHandle::create
-** exit genBar
+** suspend genBar
 ** enter genBar
 ** enter error_log
 In genBar
@@ -25,17 +25,17 @@ int(44)
 ** exit var_dump
 ** enter HH\RescheduleWaitHandle::create
 ** exit HH\RescheduleWaitHandle::create
-** exit genBar
+** suspend genBar
 ** enter gen2
 ** enter error_log
 In gen2
 ** exit error_log
 ** enter HH\RescheduleWaitHandle::create
 ** exit HH\RescheduleWaitHandle::create
-** exit gen2
+** suspend gen2
 ** enter HH\GenArrayWaitHandle::create
 ** exit HH\GenArrayWaitHandle::create
-** exit genFoo
+** suspend genFoo
 ** enter HH\Asio\join
 ** enter HH\WaitHandle::join
 ** enter Exception::__init__
@@ -62,17 +62,17 @@ In gen2
 ** exit Exception::__init__
 ** enter Exception::__construct
 ** exit Exception::__construct
-** enter genBar
+** resume genBar
 ** enter error_log
 Finished in genBar
 ** exit error_log
 ** exit genBar
-** enter genBar
+** resume genBar
 ** enter error_log
 Finished in genBar
 ** exit error_log
 ** exit genBar
-** enter gen2
+** resume gen2
 ** enter gen1
 ** enter error_log
 In gen1
@@ -82,10 +82,10 @@ Finished in gen1
 ** exit error_log
 ** enter HH\RescheduleWaitHandle::create
 ** exit HH\RescheduleWaitHandle::create
-** exit gen1
+** suspend gen1
 ** enter HH\Asio\join
 ** enter HH\WaitHandle::join
-** enter gen1
+** resume gen1
 ** exit gen1
 ** exit HH\WaitHandle::join
 ** exit HH\Asio\join
@@ -93,7 +93,7 @@ Finished in gen1
 Finished in gen2
 ** exit error_log
 ** exit gen2
-** enter genFoo
+** resume genFoo
 ** enter var_dump
 int(45)
 ** exit var_dump

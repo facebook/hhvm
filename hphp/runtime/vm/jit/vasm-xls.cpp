@@ -2417,6 +2417,81 @@ void renameOperands(Vunit& unit, const VxlsContext& ctx,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Flags liveness optimization.
+
+template<typename Inst, typename F>
+void optimize(Vunit& unit, Inst& inst, Vlabel b, size_t i, F sf_live) {}
+
+template<typename xor_op, typename ldimm_op, typename F>
+void optimize_ldimm(Vunit& unit, ldimm_op& ldimm,
+                    Vlabel b, size_t i, F sf_live) {
+  if (!sf_live() && ldimm.s.q() == 0 && ldimm.d.isGP()) {
+    decltype(xor_op::d) d = ldimm.d;
+    unit.blocks[b].code[i] = xor_op{d, d, d, RegSF{0}};
+  }
+}
+
+template<typename F>
+void optimize(Vunit& unit, ldimmb& inst, Vlabel b, size_t i, F sf_live) {
+  optimize_ldimm<xorb>(unit, inst, b, i, sf_live);
+}
+template<typename F>
+void optimize(Vunit& unit, ldimml& inst, Vlabel b, size_t i, F sf_live) {
+  optimize_ldimm<xorl>(unit, inst, b, i, sf_live);
+}
+template<typename F>
+void optimize(Vunit& unit, ldimmq& inst, Vlabel b, size_t i, F sf_live) {
+  optimize_ldimm<xorq>(unit, inst, b, i, sf_live);
+}
+
+template <typename F>
+void optimize(Vunit& unit, lea& inst, Vlabel b, size_t i, F sf_live) {
+  if (!sf_live() && inst.d == rsp()) {
+    assertx(inst.s.base == inst.d && !inst.s.index.isValid());
+    unit.blocks[b].code[i] = addqi{inst.s.disp, inst.d, inst.d, RegSF{0}};
+  }
+}
+
+/*
+ * Perform optimizations on instructions in `unit' at which no flags registers
+ * are live.
+ */
+void optimizeSFLiveness(Vunit& unit, const VxlsContext& ctx,
+                        const jit::vector<Variable*>& variables) {
+  // Currently, all our optimizations are only relevant on x64.
+  if (arch() != Arch::X64) return;
+
+  // sf_var is the physical SF register, computed from the union of VregSF
+  // registers by computeLiveness() and buildIntervals().
+  auto const sf_var = variables[VregSF(RegSF{0})];
+  auto const sf_ivl = sf_var ? sf_var->ivl() : nullptr;
+
+  for (auto const b : ctx.blocks) {
+    auto& code = unit.blocks[b].code;
+
+    for (size_t i = 0; i < code.size(); ++i) {
+      auto& inst = code[i];
+
+      auto const sf_live = [&] {
+        return sf_ivl &&
+          !sf_ivl->ranges.empty() &&
+          sf_ivl->covers(inst.pos);
+      };
+
+      switch (inst.op) {
+#define O(name, ...)        \
+        case Vinstr::name:  \
+          optimize(unit, inst.name##_, b, i, sf_live); \
+          break;
+
+        VASM_OPCODES
+#undef O
+      }
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Copy insertion.
 
 /*
@@ -2477,20 +2552,6 @@ void insertCopiesAt(const VxlsContext& ctx,
 }
 
 /*
- * Get the appropriate Vinstr for a constant load of a particular constraint.
- */
-template<class VregT, class ldimm_op, class xor_op, class int_t>
-Vinstr ldcns(const Interval* ivl, PhysReg dst, bool sf_live) {
-  auto const use_xor = (ivl->var->val.val == 0 && dst.isGP() && !sf_live);
-  if (use_xor) {
-    VregT d = dst;
-    return xor_op{d, d, d, RegSF{0}};
-  } else {
-    return ldimm_op{int_t(ivl->var->val.val), dst};
-  }
-}
-
-/*
  * Insert constant loads or loads from spill space---with spill space starting
  * at `slots'---for `loads' into `code' before code[j], corresponding to XLS
  * logical position `pos'.
@@ -2498,13 +2559,8 @@ Vinstr ldcns(const Interval* ivl, PhysReg dst, bool sf_live) {
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
-                   const CopyPlan& plan, MemoryRef slots,
-                   unsigned pos, const Interval* sf_ivl) {
+                   const CopyPlan& plan, MemoryRef slots, unsigned pos) {
   jit::vector<Vinstr> loads;
-
-  auto const sf_live = sf_ivl &&
-                       !sf_ivl->ranges.empty() &&
-                       sf_ivl->covers(pos);
 
   for_each_load(plan, [&] (PhysReg dst, const Interval* ivl) {
     if (ivl->constant()) {
@@ -2513,11 +2569,11 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
         switch (ivl->var->val.kind) {
           case Vconst::Quad:
           case Vconst::Double:
-            return ldcns<Vreg64, ldimmq, xorq, uint64_t>(ivl, dst, sf_live);
+            return ldimmq{uint64_t(ivl->var->val.val), dst};
           case Vconst::Long:
-            return ldcns<Vreg32, ldimml, xorl, int32_t>(ivl, dst, sf_live);
+            return ldimml{int32_t(ivl->var->val.val), dst};
           case Vconst::Byte:
-            return ldcns<Vreg8, ldimmb, xorb, uint8_t>(ivl, dst, sf_live);
+            return ldimmb{uint8_t(ivl->var->val.val), dst};
         }
         not_reached();
       }());
@@ -2543,13 +2599,7 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
 void insertCopies(Vunit& unit, const VxlsContext& ctx,
                   const jit::vector<Variable*>& variables,
                   const ResolutionPlan& resolution) {
-  // sf_ivl is the physical SF register, computed from the union of VregSF
-  // registers by computeLiveness() and buildIntervals().  Its safe to lower
-  // ldimm{0,r} to xor{r,r,r} when SF is not live.
-  auto const sf_var = variables[VregSF(RegSF{0})];
-  auto const sf_ivl = sf_var ? sf_var->ivl() : nullptr;
-
-  // insert copies inside blocks
+  // Insert copies inside blocks.
   for (auto const b : ctx.blocks) {
     auto& block = unit.blocks[b];
     auto& code = block.code;
@@ -2568,14 +2618,14 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
       auto c = resolution.copies.find(pos - 1);
       if (c != resolution.copies.end()) {
         insertCopiesAt(ctx, code, j, c->second, pos - 1);
-        insertLoadsAt(code, j, c->second, slots, pos - 1, sf_ivl);
+        insertLoadsAt(code, j, c->second, slots, pos - 1);
       }
 
       // Insert copies and loads at instructions.
       c = resolution.copies.find(pos);
       if (c != resolution.copies.end()) {
         insertCopiesAt(ctx, code, j, c->second, pos);
-        insertLoadsAt(code, j, c->second, slots, pos, sf_ivl);
+        insertLoadsAt(code, j, c->second, slots, pos);
       }
       assertx(resolution.spills.count(pos) == 0);
 
@@ -2600,7 +2650,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         // We interleave copies and loads in `edge_copies', so here and below
         // we process them separately (and pass `true' to avoid asserting).
         insertCopiesAt(ctx, code, j, c->second, pos);
-        insertLoadsAt(code, j, c->second, slots, pos, sf_ivl);
+        insertLoadsAt(code, j, c->second, slots, pos);
       }
     } else {
       // copies will go at start of successor
@@ -2614,7 +2664,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
           auto const slots = ctx.sp[ctx.spill_offsets[s]];
 
           insertCopiesAt(ctx, code, j, c->second, pos);
-          insertLoadsAt(code, j, c->second, slots, pos, sf_ivl);
+          insertLoadsAt(code, j, c->second, slots, pos);
         }
       }
     }
@@ -3226,8 +3276,11 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
     printVariables("after inserting copies", unit, ctx, variables);
   );
 
-  // Perform some cleanup, then insert instructions for creating spill space.
+  // Perform optimizations based on flags liveness, then do some cleanup.
+  optimizeSFLiveness(unit, ctx, variables);
   peephole(unit, ctx);
+
+  // Insert instructions for creating spill space.
   allocateSpillSpace(unit, ctx, spill_info);
 
   printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);

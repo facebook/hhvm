@@ -181,6 +181,7 @@ UNSUPPORTED_FILES_CONVERTER = {
         "pipe_operator_not_leaking_dollardollar.php",
         "pipe_operator_with_assignment.php",
         "pipe_operator_containing_assignment.php",
+        "pipe_operator_dollardollar_null_check.php",
     ],
     "async is currently not supported. (Other[0])": [
         'dynamic_yield/DynamicYield1.php',

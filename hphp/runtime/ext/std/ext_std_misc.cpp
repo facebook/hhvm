@@ -136,11 +136,11 @@ void StandardExtension::threadInitMisc() {
           *s_misc_display_errors = value;
 
           if (value == s_1 || value == s_stdout) {
-            Logger::SetStandardOut(stdout);
+            Logger::SetStandardOut(Logger::DEFAULT, stdout);
             return true;
           }
           if (value == s_2 || value == s_stderr) {
-            Logger::SetStandardOut(stderr);
+            Logger::SetStandardOut(Logger::DEFAULT, stderr);
             return true;
           }
           return false;

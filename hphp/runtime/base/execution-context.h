@@ -390,7 +390,6 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  int64_t getDebugBacktraceHash();
   bool evalUnit(Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, const Unit* unit);
   Unit* compileEvalString(StringData* code,

@@ -308,5 +308,47 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   return bt;
 }
 
+int64_t createBacktraceHash() {
+  VMRegAnchor _;
+  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  ActRec* fp = vmfp();
+
+  // Settings constants before looping
+  int64_t hash = 0x9e3779b9;
+  Unit* prev_unit = nullptr;
+
+  // If there are no VM frames, we're done.
+  if (!fp || !rds::header()) return hash;
+
+  // Handle the subsequent VM frames.
+  Offset prevPc = 0;
+  for (; fp != nullptr; fp = getPrevActRec(fp, &prevPc, visitedWHs)) {
+
+    // Do not capture frame for HPHP only functions.
+    if (fp->func()->isNoInjection()) continue;
+
+    auto const curFunc = fp->func();
+    auto const curUnit = curFunc->unit();
+
+    // Only do a filehash if the file changed. It is very common
+    // to see sequences of calls within the same file
+    // File paths are already hashed, and the hash bits are random enough
+    // That allows us to do a faster combination of hashes using a known
+    // implementation (boost::hash_combine)
+    if (prev_unit != curUnit) {
+      prev_unit = curUnit;
+      auto filehash = curUnit->filepath()->hash();
+      hash ^= filehash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    }
+
+    // Function names are already hashed, and the hash bits are random enough
+    // That allows us to do a faster combination of hashes using a known
+    // implementation (boost::hash_combine)
+    auto funchash = curFunc->fullName()->hash();
+    hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+  }
+
+  return hash;
+}
 
 } // HPHP

@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_BACKTRACE_H_
 #define incl_HPHP_BACKTRACE_H_
 
+#include <stdint.h>
+
 namespace HPHP {
 
 struct Array;
@@ -125,6 +127,7 @@ private:
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
+int64_t createBacktraceHash();
 
 } // HPHP
 

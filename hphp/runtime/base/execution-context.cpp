@@ -1383,39 +1383,6 @@ Array ExecutionContext::getCallerInfo() {
   return result;
 }
 
-int64_t ExecutionContext::getDebugBacktraceHash() {
-  VMRegAnchor _;
-  ActRec* ar = vmfp();
-  int64_t hash = 0x9e3779b9;
-  Unit* prev_unit = nullptr;
-
-  while (ar != nullptr) {
-    if (!ar->skipFrame()) {
-      Unit* unit = ar->m_func->unit();
-
-      // Only do a filehash if the file changed. It is very common
-      // to see sequences of calls within the same file
-      // File paths are already hashed, and the hash bits are random enough
-      // That allows us to do a faster combination of hashes using a known
-      // implementation (boost::hash_combine)
-      if (prev_unit != unit) {
-        prev_unit = unit;
-        auto filehash = unit->filepath()->hash();
-        hash ^= filehash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-      }
-
-      // Function names are already hashed, and the hash bits are random enough
-      // That allows us to do a faster combination of hashes using a known
-      // implementation (boost::hash_combine)
-      auto funchash = ar->m_func->fullName()->hash();
-      hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-    }
-    ar = getPrevVMState(ar);
-  }
-
-  return hash;
-}
-
 ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   VMRegAnchor _;
   auto fp = vmfp();

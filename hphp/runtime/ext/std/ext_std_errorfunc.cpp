@@ -88,7 +88,7 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
 }
 
 int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash) {
-  return g_context->getDebugBacktraceHash();
+  return createBacktraceHash();
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,

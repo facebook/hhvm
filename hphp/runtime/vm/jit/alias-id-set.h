@@ -133,6 +133,13 @@ struct AliasIdSet {
   bool isAny() const           { return m_bits == Any; }
 
   /*
+   * Return the single value represented by the set.
+   *
+   * @requires: hasSingleValue()
+   */
+  uint32_t singleValue() const;
+
+  /*
    * Convert to bitset mode, possibly enlarging the set, and return *this.
    */
   AliasIdSet& toBitset() {

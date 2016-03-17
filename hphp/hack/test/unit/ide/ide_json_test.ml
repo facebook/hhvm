@@ -184,6 +184,15 @@ let test_format_call () =
   ] in
   expect_call msg (Format_call ("<hh", 5, 6))
 
+let test_get_method_name () =
+  let msg = build_call_msg [
+    {|"--get-method-name"|};
+    {|"<?hh"|};
+    "5";
+    "6"
+  ] in
+  expect_call msg (Get_method_name_call ("<hh", 5, 6))
+
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;
@@ -208,6 +217,7 @@ let tests = [
   "test_find_class_refs_call", test_find_class_refs_call;
   "test_find_lvar_refs_call", test_find_lvar_refs_call;
   "test_type_at_pos_call", test_type_at_pos_call;
+  "test_get_method_name", test_get_method_name;
 ]
 
 let () =

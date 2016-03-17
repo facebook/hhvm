@@ -1,6 +1,8 @@
 #include "hphp/runtime/ext/curl/curl-pool.h"
 
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/lock.h"
 
@@ -68,8 +70,8 @@ PooledCurlHandle* CurlHandlePool::fetch() {
   ts.tv_nsec += 1000000 * (m_waitTimeout % 1000);
   while (m_handleStack.empty()) {
     if (ETIMEDOUT == pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(), &ts)) {
-      raise_error("Timeout reached waiting for an "
-                  "available pooled curl connection!");
+      SystemLib::throwRuntimeExceptionObject(
+        "Timeout reached waiting for an available pooled curl connection!");
     }
   }
 

@@ -262,8 +262,6 @@ static CallMap s_callMap {
     {ClosureStaticLocInit,
                          closureStaticLocInit, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {GenericIdx,         genericIdx, DTV, SSync,
-                          {{TV, 0}, {TV, 1}, {TV, 2}}},
     {MapIdx,             mapIdx, DTV, SSync,
                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {ThrowInvalidOperation, throw_invalid_operation_exception,

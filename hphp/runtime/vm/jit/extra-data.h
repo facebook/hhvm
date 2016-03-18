@@ -1294,7 +1294,6 @@ X(ContStartedCheck,             IsAsyncData);
 X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
-X(GenericIdx,                   IRSPOffsetData);
 X(DecRef,                       DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(StRetVal,                     StRetValData);

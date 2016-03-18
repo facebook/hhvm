@@ -645,17 +645,6 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::cgGenericIdx(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sp = srcLoc(inst, 3).reg();
-  auto const spOff = inst->extra<GenericIdx>()->offset;
-  auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(spOff.offset)], sync_sp};
-  emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
-                     rvmtl(), rvmfp(), sync_sp);
-  cgCallNative (v, inst);
-}
-
 void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   using namespace NativeCalls;
   always_assert(CallMap::hasInfo(inst->op()));

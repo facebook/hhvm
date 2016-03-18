@@ -1134,6 +1134,36 @@ void emitFCall(IRGS& env, int32_t numParams) {
   );
 }
 
+void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
+                    SSATmp* const* const args) {
+  auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
+
+  env.irb->fs().setFPushOverride(Op::FPushFuncD);
+  fpushActRec(env, cns(env, callee), cns(env, TNullptr), numParams, nullptr);
+  assertx(!env.irb->fs().hasFPushOverride());
+
+  for (int32_t i = 0; i < numParams; i++) {
+    push(env, args[i]);
+  }
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+  gen(
+    env,
+    Call,
+    CallData {
+      offsetFromIRSP(env, BCSPOffset{0}),
+      static_cast<uint32_t>(numParams),
+      returnBcOffset,
+      callee,
+      false,
+      false,
+      false
+    },
+    sp(env),
+    fp(env)
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

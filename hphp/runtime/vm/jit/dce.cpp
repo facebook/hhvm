@@ -404,7 +404,6 @@ bool canDCE(IRInstruction* inst) {
   case ArrayAdd:
   case ArrayIdx:
   case GetMemoKey:
-  case GenericIdx:
   case LdSwitchObjIndex:
   case LdSSwitchDestSlow:
   case InterpOne:

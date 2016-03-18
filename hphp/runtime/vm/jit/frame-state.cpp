@@ -1192,10 +1192,12 @@ void FrameStateMgr::spillFrameStack(IRSPOffset offset, FPInvOffset retOffset,
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setStackValue(offset + i, nullptr);
   }
-  auto const opc = inst->marker().sk().op();
   auto const ctx = inst->op() == SpillFrame ? inst->src(2) : nullptr;
 
   const Func* func = getSpillFrameKnownCallee(inst);
+  auto const opc = m_fpushOverride ?
+    *m_fpushOverride : inst->marker().sk().op();
+  m_fpushOverride.clear();
 
   cur().syncedSpLevel += kNumActRecCells;
   cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, opc, func,

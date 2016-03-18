@@ -63,7 +63,6 @@ bool loadsCell(Opcode op) {
   case CGetElem:
   case VGetElem:
   case ArrayIdx:
-  case GenericIdx:
     switch (arch()) {
     case Arch::X64: return true;
     case Arch::ARM: return false;

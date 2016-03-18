@@ -282,6 +282,11 @@ struct FrameStateMgr final {
    */
   const PostConditions& postConds(Block* exitBlock) const;
 
+  /*
+   * set an override for the next fpi regions fpushOp
+   */
+  void setFPushOverride(Op op)          { m_fpushOverride = op; }
+  bool hasFPushOverride() const         { return m_fpushOverride.hasValue(); }
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -317,7 +322,6 @@ struct FrameStateMgr final {
   void setSyncedSpLevel(FPInvOffset o)  { cur().syncedSpLevel = o; }
   void incSyncedSpLevel(int32_t n = 1)  { cur().syncedSpLevel += n; }
   void decSyncedSpLevel(int32_t n = 1)  { cur().syncedSpLevel -= n; }
-
   /*
    * Current inlining depth (not including the toplevel frame).
    */
@@ -422,6 +426,12 @@ private:
    * Post-conditions for exit blocks.
    */
   jit::hash_map<Block*,PostConditions> m_exitPostConds;
+
+  /*
+   * Override for the current fpush* bytecode so we can convert bytecodes
+   * to php calls.
+   */
+  folly::Optional<Op> m_fpushOverride;
 };
 
 //////////////////////////////////////////////////////////////////////

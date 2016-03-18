@@ -1464,7 +1464,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src
-  case GenericIdx:
   case InitProps:
   case InitSProps:
   case OODeclExists:

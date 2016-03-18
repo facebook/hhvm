@@ -49,7 +49,7 @@ CurlResource::ToFree::~ToFree() {
 }
 
 CurlResource::CurlResource(const String& url,
-                           CurlHandlePool *pool /*=nullptr */)
+                           CurlHandlePoolPtr pool /*=nullptr */)
 : m_emptyPost(true), m_connPool(pool), m_pooledHandle(nullptr) {
   if (m_connPool) {
     m_pooledHandle = m_connPool->fetch();

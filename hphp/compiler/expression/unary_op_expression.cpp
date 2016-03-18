@@ -15,28 +15,30 @@
 */
 
 #include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/parser/hphp.tab.hpp"
+
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/option.h"
-#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/parser/hphp.tab.hpp"
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-conversions.h"
 
-using namespace HPHP;
+namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -111,6 +113,28 @@ ExpressionPtr UnaryOpExpression::clone() {
   return exp;
 }
 
+bool isDictScalar(ExpressionPtr exp) {
+  if (!exp) return true;
+  assertx(exp->is(Expression::KindOfExpressionList));
+
+  auto list = static_pointer_cast<ExpressionList>(exp);
+  assertx(list->getListKind() == ExpressionList::ListKindParam);
+
+  for (int i = 0; i < list->getCount(); ++i) {
+    auto& itemExp = (*list)[i];
+    if (!itemExp) continue;
+    assertx(itemExp->is(Expression::KindOfArrayPairExpression));
+
+    auto pair = static_pointer_cast<ArrayPairExpression>(itemExp);
+    auto name = pair->getName();
+
+    Variant val;
+    if (!name || !name->getScalarValue(val)) return false;
+    if (!val.isString() && !val.isInteger()) return false;
+  }
+  return true;
+}
+
 bool UnaryOpExpression::isScalar() const {
   switch (m_op) {
   case '!':
@@ -120,8 +144,9 @@ bool UnaryOpExpression::isScalar() const {
   case '@':
     return m_exp->isScalar();
   case T_ARRAY:
-  case T_DICT:
     return (!m_exp || m_exp->isScalar());
+  case T_DICT:
+    return isDictScalar(m_exp);
   default:
     break;
   }
@@ -467,4 +492,6 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
       assert(false);
     }
   }
+}
+
 }

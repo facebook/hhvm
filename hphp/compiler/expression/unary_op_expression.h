@@ -67,6 +67,14 @@ private:
   void setExistContext();
 };
 
+/*
+ * Check if the ExpressionList exp is a valid scalar initializer for a
+ * dictionary.
+ *
+ * If the list contains invalid keys it cannot statically initialize a dict.
+ */
+bool isDictScalar(ExpressionPtr exp);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

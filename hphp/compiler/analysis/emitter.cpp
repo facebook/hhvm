@@ -9024,7 +9024,8 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  if (el->isScalar()) {
+  auto const scalar = isDict ? isDictScalar(el) : el->isScalar();
+  if (scalar) {
     TypedValue tv;
     tvWriteUninit(&tv);
     initScalar(tv, el, kind);

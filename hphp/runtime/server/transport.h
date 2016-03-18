@@ -29,6 +29,10 @@
 #include "hphp/runtime/base/string-holder.h"
 #include "hphp/runtime/base/type-string.h"
 
+namespace brotli {
+  class BrotliCompressor;
+};
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -202,13 +206,11 @@ public:
   void setUseDefaultContentType(bool send) { m_sendContentType = send;}
 
   /**
-   * Can we gzip response?
+   * Can we compress response?
    */
-  void enableCompression() { m_compression = true;}
-  void disableCompression() { m_compression = false;}
-  bool isCompressionEnabled() const {
-    return m_compression && RuntimeOption::GzipCompressionLevel;
-  }
+  void enableCompression();
+  void disableCompression();
+  bool isCompressionEnabled() const;
 
   /**
    * Set cookie response header.
@@ -470,10 +472,26 @@ protected:
 
   std::vector<int> m_chunksSentSizes;
 
+  // Supported compression types.
+  enum CompressionType {
+    Brotli,
+    BrotliChunked,
+    Gzip,
+    Max,
+  };
+  static const char* ENCODING_TYPE_TO_NAME[CompressionType::Max + 1];
+  const char* compressionName(CompressionType type);
+
   std::string m_mimeType;
   bool m_sendContentType;
-  bool m_compression;
-  StreamCompressor *m_compressor;
+  // 0 - disabled, -1 - ini_set dictates the setting, enabled otherwise
+  int8_t m_compressionEnabled[CompressionType::Max];
+  // encodings accepted by the client, and enabled
+  bool m_acceptedEncodings[CompressionType::Max];
+  // encoding we decided to use
+  CompressionType m_encodingType;
+  std::unique_ptr<StreamCompressor> m_compressor;
+  std::unique_ptr<brotli::BrotliCompressor> m_brotliCompressor;
 
   bool m_isSSL;
 
@@ -497,6 +515,10 @@ protected:
 
   StringHolder prepareResponse(const void *data, int size, bool &compressed,
                                bool last);
+  StringHolder compressGzip(const void *data, int size, bool &compressed,
+                            bool last);
+  StringHolder compressBrotli(const void *data, int size, bool &compressed,
+                              bool last);
 
 private:
   void prepareHeaders(bool compressed, bool chunked,

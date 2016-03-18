@@ -185,6 +185,11 @@ int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownEOMWait = 0;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 bool RuntimeOption::ServerEnableH2C = false;
+int RuntimeOption::BrotliCompressionEnabled = 1;
+int RuntimeOption::BrotliChunkedCompressionEnabled = -1;
+int RuntimeOption::BrotliCompressionMode = 0;
+int RuntimeOption::BrotliCompressionQuality = 11;
+int RuntimeOption::BrotliCompressionLgWindowSize = 22;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;
 std::string RuntimeOption::ForceCompressionURL;
@@ -1306,6 +1311,16 @@ void RuntimeOption::Load(
                  "Server.ShutdownEOMWait", 0);
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
     Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");
+    Config::Bind(BrotliCompressionEnabled, ini, config,
+                 "Server.BrotliCompressionEnabled", 1);
+    Config::Bind(BrotliChunkedCompressionEnabled, ini, config,
+                 "Server.BrotliChunkedCompressionEnabled", -1);
+    Config::Bind(BrotliCompressionLgWindowSize, ini, config,
+                 "Server.BrotliCompressionLgWindowSize", 22);
+    Config::Bind(BrotliCompressionMode, ini, config,
+                 "Server.BrotliCompressionMode", 0);
+    Config::Bind(BrotliCompressionQuality, ini, config,
+                 "Server.BrotliCompressionQuality", 11);
     Config::Bind(GzipCompressionLevel, ini, config,
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,

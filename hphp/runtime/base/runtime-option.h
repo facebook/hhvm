@@ -164,6 +164,12 @@ struct RuntimeOption {
   static int ServerShutdownEOMWait;
   static std::vector<std::string> ServerNextProtocols;
   static bool ServerEnableH2C;
+  static int BrotliCompressionEnabled;
+  static int BrotliChunkedCompressionEnabled;
+  static int BrotliCompressionMode;
+  // Base 2 logarithm of the sliding window size. Range is 10-24.
+  static int BrotliCompressionLgWindowSize;
+  static int BrotliCompressionQuality;
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;
   static std::string ForceCompressionURL;

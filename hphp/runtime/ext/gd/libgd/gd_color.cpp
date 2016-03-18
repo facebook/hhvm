@@ -1,7 +1,6 @@
 #include "gd.h"
 #include "gdhelpers.h"
 #include "gd_intern.h"
-#include "php.h"
 
 /* bring the palette colors in im2 to be closer to im1
  *

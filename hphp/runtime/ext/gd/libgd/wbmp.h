@@ -12,10 +12,6 @@
 #ifndef __WBMP_H
 #define __WBMP_H	1
 
-extern "C" {
-#include "php_compat.h"
-}
-
 /* WBMP struct
 ** -----------
 ** A Wireless bitmap structure

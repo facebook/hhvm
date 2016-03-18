@@ -52,8 +52,6 @@ HHVM_DEFINE_EXTENSION("gd"
     libgd/gdfonts.h
     libgd/gdfontt.h
     libgd/jisx0208.h
-    libgd/php.h
-    libgd/php_compat.h
     libgd/wbmp.h
     libgd/webpimg.h
   SYSTEMLIB

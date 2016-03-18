@@ -5748,7 +5748,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
       length = php_strnlen((char*)value, length);
       // TODO
       // if (PG(magic_quotes_runtime)) {
-      //   info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+      //   info_value->s = php_addslashes(value, length, &length, 0);
       // } else {
       PHP_STRNDUP(info_value->s, (const char *)value, length);
       // }
@@ -5777,7 +5777,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
       /* do not recompute length here */
       // TODO
       // if (PG(magic_quotes_runtime)) {
-      //   info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+      //   info_value->s = php_addslashes(value, length, &length, 0);
       // } else {
       PHP_STRNDUP(info_value->s, (const char *)value, length);
       // }

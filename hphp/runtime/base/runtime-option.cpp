@@ -159,6 +159,7 @@ bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
+std::string RuntimeOption::ServerCleanupRequest;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
 bool RuntimeOption::ServerExitOnBindFail;
@@ -1279,6 +1280,7 @@ void RuntimeOption::Load(
     Config::Bind(ServerAddVaryEncoding, ini, config, "Server.AddVaryEncoding",
                  ServerAddVaryEncoding);
     Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");
+    Config::Bind(ServerCleanupRequest, ini, config, "Server.CleanupRequest");
     Config::Bind(ServerHighPriorityEndPoints, ini, config,
                  "Server.HighPriorityEndPoints");
     Config::Bind(ServerExitOnBindFail, ini, config, "Server.ExitOnBindFail",

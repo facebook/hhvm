@@ -62,15 +62,6 @@ public:
   void stopOnSignal(int sig);
 
 private:
-  bool m_stopped;
-  bool m_killed;
-  const char* m_stopReason;
-
-  ServerPtr m_pageServer;
-  ServerPtr m_adminServer;
-  std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
-  AsyncFunc<HttpServer> m_watchDog;
-
   bool startServer(bool pageServer);
   void onServerShutdown();
   void waitForServers();
@@ -83,6 +74,20 @@ private:
   // memory monitoring functions
   void dropCache();
   void checkMemory();
+
+  // Allow cleanups (e.g., flush cached values into a database) using
+  // PHP code when server stops.
+  void playShutdownRequest(const std::string& fileName);
+
+private:
+  bool m_stopped;
+  bool m_killed;
+  const char* m_stopReason;
+
+  ServerPtr m_pageServer;
+  ServerPtr m_adminServer;
+  std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
+  AsyncFunc<HttpServer> m_watchDog;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -138,6 +138,7 @@ struct RuntimeOption {
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static std::vector<std::string> ServerWarmupRequests;
+  static std::string ServerCleanupRequest;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;

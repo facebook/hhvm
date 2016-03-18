@@ -218,6 +218,25 @@ void HttpServer::serverStopped(HPHP::Server* server) {
   }
 }
 
+void HttpServer::playShutdownRequest(const std::string& fileName) {
+  if (fileName.empty()) return;
+  Logger::Info("playing request upon shutdown %s", fileName.c_str());
+  try {
+    ReplayTransport rt;
+    rt.replayInput(fileName.c_str());
+    HttpRequestHandler handler(0);
+    handler.run(&rt);
+    if (rt.getResponseCode() == 200) {
+      Logger::Info("successfully finished request: %s", rt.getUrl());
+    } else {
+      Logger::Error("request unsuccessful: %s", rt.getUrl());
+    }
+  } catch (...) {
+    Logger::Error("got exception when playing request: %s",
+                  fileName.c_str());
+  }
+}
+
 HttpServer::~HttpServer() {
   // XXX: why should we have to call stop here?  If we haven't already
   // stopped (and joined all the threads), watchDog could still be
@@ -308,6 +327,7 @@ void HttpServer::runOrExitProcess() {
 
   waitForServers();
   m_watchDog.waitForEnd();
+  playShutdownRequest(RuntimeOption::ServerCleanupRequest);
   hphp_process_exit();
   Logger::Info("all servers stopped");
 }

@@ -92,6 +92,11 @@ def boost_flat_map_at(flat_map, key):
 # TBB accessors.
 
 def tbb_atomic_get(atomic):
+    try:
+        return atomic['rep']['value']
+    except gdb.error:
+        # atomic_impl representation since version 4.1 Update 2
+        return atomic['my_storage']['my_value']
     return atomic['rep']['value']
 
 

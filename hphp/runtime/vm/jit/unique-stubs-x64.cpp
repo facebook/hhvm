@@ -45,16 +45,7 @@
 
 namespace HPHP { namespace jit {
 
-///////////////////////////////////////////////////////////////////////////////
-
 TRACE_SET_MOD(ustubs);
-
-extern "C" void enterTCHelper(Cell* vm_sp,
-                              ActRec* vm_fp,
-                              TCA start,
-                              ActRec* firstAR,
-                              void* targetCacheBase,
-                              ActRec* stashedAR);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -254,23 +245,29 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C" void enterTCExit();
+void assert_tc_saved_rip(void* sp) {
+  auto const saved_rip = *reinterpret_cast<uint8_t**>(sp);
+  auto const exittc = mcg->ustubs().enterTCExit;
 
-TCA emitCallToExit(CodeBlock& cb) {
+  DecodedInstruction di(saved_rip);
+  auto const jmp_target = [&] { return saved_rip + di.size() + di.offset(); };
+
+  // We should either be returning to enterTCExit, or to a jmp to enterTCExit.
+  always_assert(saved_rip == exittc || (di.isJmp() && jmp_target() == exittc));
+}
+
+TCA emitCallToExit(CodeBlock& cb, const UniqueStubs& us) {
   X64Assembler a { cb };
 
   // Emit a byte of padding. This is a kind of hacky way to avoid
   // hitting an assert in recordGdbStub when we call it with stub - 1
   // as the start address.
   a.emitNop(1);
+
   auto const start = a.frontier();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    Label ok;
-    a.emitImmReg(uintptr_t(enterTCExit), reg::rax);
-    a.cmpq(reg::rax, *rsp());
-    a.je8 (ok);
-    a.ud2();
-  asm_label(a, ok);
+    a.movq(rsp(), rarg(0));
+    a.call(TCA(assert_tc_saved_rip));
   }
 
   // Emulate a ret to enterTCExit without actually doing one to avoid
@@ -278,13 +275,13 @@ TCA emitCallToExit(CodeBlock& cb) {
   // got us into the TC was popped off the RSB by the ret that got us to this
   // stub.
   a.addq(8, rsp());
-  if (a.jmpDeltaFits(TCA(enterTCExit))) {
-    a.jmp(TCA(enterTCExit));
+  if (a.jmpDeltaFits(us.enterTCExit)) {
+    a.jmp(us.enterTCExit);
   } else {
     // can't do a near jmp and a rip-relative load/jmp would require threading
     // through extra state to allocate a literal. use an indirect jump through
     // a register
-    a.emitImmReg(uintptr_t(enterTCExit), reg::rax);
+    a.emitImmReg(us.enterTCExit, reg::rax);
     a.jmp(reg::rax);
   }
 
@@ -350,8 +347,8 @@ void enterTCImpl(TCA start, ActRec* stashedAR) {
   // register (aside from %rbp), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();
   auto& regs = vmRegsUnsafe();
-  jit::enterTCHelper(regs.stack.top(), regs.fp, start,
-                     vmFirstAR(), rds::tl_base, stashedAR);
+  mcg->ustubs().enterTCHelper(regs.stack.top(), regs.fp, start,
+                              vmFirstAR(), rds::tl_base, stashedAR);
   CALLEE_SAVED_BARRIER();
 }
 

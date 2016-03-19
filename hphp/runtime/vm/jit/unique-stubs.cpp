@@ -130,9 +130,9 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
   return x64::emitFreeLocalsHelpers(cb, us);
 }
 
-TCA emitCallToExit(CodeBlock& cb) {
+TCA emitCallToExit(CodeBlock& cb, const UniqueStubs& us) {
   if (arch() != Arch::X64) not_implemented();
-  return x64::emitCallToExit(cb);
+  return x64::emitCallToExit(cb, us);
 }
 
 TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
@@ -888,6 +888,70 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitEnterTCHelper(CodeBlock& cb, UniqueStubs& us) {
+  us.enterTCExit = vwrap(cb, [&] (Vout& v) {
+    // Eagerly save VM regs, realign the native stack, then perform a native
+    // return.
+    storeVMRegs(v);
+    v << lea{rsp()[8], rsp()};
+    v << stubret{RegSet(), true};
+  });
+
+  alignJmpTarget(cb);
+
+  auto const sp       = rarg(0);
+  auto const fp       = rarg(1);
+  auto const start    = rarg(2);
+  auto const firstAR  = rarg(3);
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  auto const tl       = reg::r10;
+  auto const calleeAR = reg::r11;
+#else
+  auto const tl       = rarg(4);
+  auto const calleeAR = rarg(5);
+#endif
+
+  return vwrap2(cb, [&] (Vout& v, Vout& vcold) {
+    // Native func prologue.
+    v << stublogue{true};
+
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+    // Windows hates argument registers.
+    v << load{rsp()[0x28], reg::r10};
+    v << load{rsp()[0x30], reg::r11};
+#endif
+
+    // Set up linkage with the top VM frame in this nesting.
+    v << store{rsp(), firstAR[AROFF(m_sfp)]};
+
+    // Set up the VM registers.
+    v << copy{fp, rvmfp()};
+    v << copy{sp, rvmsp()};
+    v << copy{tl, rvmtl()};
+
+    // Unalign the native stack.
+    v << lea{rsp()[-8], rsp()};
+
+    // Check if `calleeAR' was set.
+    auto const sf = v.makeReg();
+    v << testq{calleeAR, calleeAR, sf};
+
+    // We mark this block as unlikely in order to coax the emitter into
+    // ordering this block last.  This is an important optimization for x64;
+    // without it, both the jcc for the branch and the jmp for the resumetc{}
+    // will end up in the same 16-byte extent of code, which messes up the
+    // branch predictor.
+    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+      // No callee means we're resuming in the middle of a TC function.
+      v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
+    });
+
+    // We have a callee; set rvmfp() and call it.
+    v << copy{calleeAR, rvmfp()};
+    v << calltc{start, rvmfp(), us.enterTCExit, vm_regs_with_sp()};
+  });
+}
+
 TCA emitHandleSRHelper(CodeBlock& cb) {
   alignJmpTarget(cb);
 
@@ -955,6 +1019,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
     return hotBlock.available() > 512 ? hotBlock : main;
   };
 
+  enterTCHelper = decltype(enterTCHelper)(emitEnterTCHelper(main, *this));
+
 #define ADD(name, stub) name = add(#name, (stub), code, dbg)
   ADD(handleSRHelper, emitHandleSRHelper(cold)); // required by emitInterpRet()
 
@@ -980,7 +1046,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ADD(decRefGeneric,  emitDecRefGeneric(cold));
 
-  ADD(callToExit,       emitCallToExit(main));
+  ADD(callToExit,       emitCallToExit(main, *this));
   ADD(endCatchHelper,   emitEndCatchHelper(frozen, *this));
   ADD(throwSwitchMode,  emitThrowSwitchMode(frozen));
 

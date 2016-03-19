@@ -35,16 +35,7 @@
 
 namespace HPHP { namespace jit {
 
-///////////////////////////////////////////////////////////////////////////////
-
 TRACE_SET_MOD(ustubs);
-
-extern "C" void enterTCHelper(Cell* vm_sp,
-                              ActRec* vm_fp,
-                              TCA start,
-                              ActRec* firstAR,
-                              void* targetCacheBase,
-                              ActRec* stashedAR);
 
 ///////////////////////////////////////////////////////////////////////////////
 

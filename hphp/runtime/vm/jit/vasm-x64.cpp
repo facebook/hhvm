@@ -105,6 +105,9 @@ struct Vgen {
   void emit(const tailcallphp& i);
   void emit(const callarray& i);
   void emit(const contenter& i);
+
+  // vm entry abi
+  void emit(const calltc&);
   void emit(const leavetc&) { a.ret(); }
 
   // exceptions
@@ -542,6 +545,21 @@ void Vgen::emit(const callarray& i) {
   emit(call{i.target, i.args});
 }
 
+void Vgen::emit(const calltc& i) {
+  a.push(i.exittc);
+  a.push(i.fp[AROFF(m_savedRip)]);
+
+  Label stub;
+  a.call(stub);
+
+  asm_label(a, stub);
+  assertx(!i.args.contains(reg::rax));
+  a.pop(reg::rax);  // unused
+  a.jmp(i.target);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void Vgen::emit(const contenter& i) {
   Label Stub, End;
   Reg64 fp = i.fp, target = i.target;
@@ -749,6 +767,13 @@ void lower(Vunit& unit, loadstubret& inst, Vlabel b, size_t i) {
 
 void lower(Vunit& unit, stubtophp& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
+}
+
+void lower(Vunit& unit, resumetc& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << callr{inst.target, inst.args};
+    v << jmpi{inst.exittc};
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

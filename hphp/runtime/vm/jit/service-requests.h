@@ -260,7 +260,7 @@ constexpr int kMaxArgs = 4;
  *
  * This structure is created on the stack by handleSRHelper() from the SR
  * arguments passed in registers.  Any changes to its size or layout of must be
- * reflected in handleSRHelper() in translator-asm-helpers.S.
+ * reflected in the handleSRHelper unique stub.
  */
 struct ReqInfo {
   /*

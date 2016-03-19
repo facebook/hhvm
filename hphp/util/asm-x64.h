@@ -943,6 +943,8 @@ public:
   void decl(MemoryRef m) { instrM32(instr_dec, m); }
   void decw(MemoryRef m) { instrM16(instr_dec, m); }
 
+  void push(Immed64 i) { emitI(instr_push, i.q()); }
+
   void movups(RegXMM x, MemoryRef m)        { instrRM(instr_movups, x, m); }
   void movups(MemoryRef m, RegXMM x)        { instrMR(instr_movups, m, x); }
   void movdqu(RegXMM x, MemoryRef m)        { instrRM(instr_movdqu, x, m); }

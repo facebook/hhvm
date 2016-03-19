@@ -49,9 +49,12 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::jmpi:
     case Vinstr::phijmp:
     case Vinstr::phijcc:
+    // terminal calls
     case Vinstr::tailcallstub:
     case Vinstr::callphp:
     case Vinstr::tailcallphp:
+    case Vinstr::calltc:
+    case Vinstr::resumetc:
     // exception edges
     case Vinstr::unwind:
     case Vinstr::vinvoke:
@@ -127,6 +130,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::callarray:
     case Vinstr::vcallarray:
     case Vinstr::contenter:
+    // vm entry abi
+    case Vinstr::calltc:
+    case Vinstr::resumetc:
     case Vinstr::leavetc:
     // exception intrinsics
     case Vinstr::landingpad:

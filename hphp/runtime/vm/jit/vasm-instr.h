@@ -68,7 +68,7 @@ struct Vunit;
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(debugtrap, Inone, Un, Dn)\
-  O(fallthru, Inone, Un, Dn)\
+  O(fallthru, Inone, U(args), Dn)\
   O(ldimmb, I(s), Un, D(d))\
   O(ldimmw, I(s), Un, D(d))\
   O(ldimml, I(s), Un, D(d))\
@@ -106,6 +106,9 @@ struct Vunit;
   O(callarray, I(target), U(args), Dn)\
   O(vcallarray, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
+  /* vm entry intrinsics */\
+  O(calltc, Inone, U(target) U(fp) U(args), Dn)\
+  O(resumetc, Inone, U(target) U(args), Dn)\
   O(leavetc, Inone, U(args), Dn)\
   /* exception intrinsics */\
   O(landingpad, I(fromPHPCall), Un, Dn)\
@@ -466,7 +469,7 @@ struct debugtrap {};
  * Used for marking the end of a block that is intentionally going to fall
  * through.  Only for use with Vauto.
  */
-struct fallthru {};
+struct fallthru { RegSet args; };
 
 /*
  * Load an immedate value without mutating status flags.
@@ -516,7 +519,7 @@ struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
 /*
  * C++ function call using the native ABI.
  *
- * Comes in four flavors:
+ * Comes in five flavors:
  *    call:  direct call
  *    callm: indirect call via memory operand
  *    callr: indirect call via register
@@ -637,9 +640,10 @@ struct syncvmsp { Vreg s; };
  * the stack looks like this:
  *
  *    +-----------------------+
- *    |  addr of enterTCExit  |
+ *    |  <enterTCHelper+???>  |
  *    +-----------------------+   <- native stack pointer
  *
+ * i.e., the return address in enterTCHelper of the call that put us in the TC.
  * The native stack continues to point here as long as we are in the TC, modulo
  * register allocator spill space.
  */
@@ -730,6 +734,43 @@ struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
  * function.
  */
 struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
+
+///////////////////////////////////////////////////////////////////////////////
+// VM entry ABI.
+
+/*
+ * Call into the TC at a function prologue.
+ *
+ * This sets up for a phplogue{} and transfers control to `target'---which
+ * logically executes said phplogue{} before doing anything else.
+ *
+ * Before calltc{} is executed, the stack will always be set up like this:
+ *
+ *    +-----------------------+   <- 16-byte alignment
+ *    |   <8 bytes of junk>   |
+ *    +-----------------------+   <- native stack pointer
+ *
+ * i.e., the native stack pointer will be misaligned coming in (but must, of
+ * course, be aliged once phplogue{} finishes executing).  Using a native call
+ * in the implementation (and likewise, using native returns for leavetc{}) is
+ * recommended, in order to take advantage of return branch predictions.
+ *
+ * `fp' is the callee's ActRec, which will have already been set up
+ * appropriately.  `exittc' is the address to resume execution at after
+ * returning from the TC.
+ */
+struct calltc { Vreg64 target, fp; TCA exittc; RegSet args; };
+
+/*
+ * Resume execution in the middle of a TC function.
+ *
+ * This must set up the native stack in the same way as a phplogue{} would,
+ * before transferring control to `target'.  As with calltc{}, the native stack
+ * pointer is misaligned coming in, and using a native call is recommended.
+ *
+ * `exittc' is the address to resume execution at after returning from the TC.
+ */
+struct resumetc { Vreg64 target; TCA exittc; RegSet args; };
 
 /*
  * Pop the address of enterTCExit off the stack, and return to it.

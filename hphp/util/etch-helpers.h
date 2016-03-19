@@ -25,17 +25,6 @@
 #define ETCH_GET_ARG5     mov 0x28(%rsp), %r10
 #define ETCH_GET_ARG6     mov 0x30(%rsp), %r11
 #define ETCH_RET1         %rax
-/* VM Registers must match definition on abi-x64.h */
-#define ETCH_VMFP         %rbp
-#define ETCH_VMSP         %rbx
-#define ETCH_VMTL         %r12
-/* Service Request Registers must match svcreq_args list on abi-x64.cpp */
-#define ETCH_SVCREQ_REQ   %rdi
-#define ETCH_SVCREQ_STUB  %r10
-#define ETCH_SVCREQ_ARG1  %rsi
-#define ETCH_SVCREQ_ARG2  %rdx
-#define ETCH_SVCREQ_ARG3  %rcx
-#define ETCH_SVCREQ_ARG4  %r8
 
 #elif defined(__APPLE__)
 #define CFI(x)            .cfi_##x
@@ -59,17 +48,6 @@
 #define ETCH_GET_ARG5     /* not used */
 #define ETCH_GET_ARG6     /* not used */
 #define ETCH_RET1         %rax
-/* VM Registers must match definition on abi-x64.h */
-#define ETCH_VMFP         %rbp
-#define ETCH_VMSP         %rbx
-#define ETCH_VMTL         %r12
-/* Service Request Registers must match svcreq_args list on abi-x64.cpp */
-#define ETCH_SVCREQ_REQ   %rdi
-#define ETCH_SVCREQ_STUB  %r10
-#define ETCH_SVCREQ_ARG1  %rsi
-#define ETCH_SVCREQ_ARG2  %rdx
-#define ETCH_SVCREQ_ARG3  %rcx
-#define ETCH_SVCREQ_ARG4  %r8
 
 #else /* Other x86 (e.g. linux) */
 #define CFI(x)            .cfi_##x
@@ -93,17 +71,6 @@
 #define ETCH_GET_ARG5     /* not used */
 #define ETCH_GET_ARG6     /* not used */
 #define ETCH_RET1         %rax
-/* VM Registers must match definition on abi-x64.h */
-#define ETCH_VMFP         %rbp
-#define ETCH_VMSP         %rbx
-#define ETCH_VMTL         %r12
-/* Service Request Registers must match svcreq_args list on abi-x64.cpp */
-#define ETCH_SVCREQ_REQ   %rdi
-#define ETCH_SVCREQ_STUB  %r10
-#define ETCH_SVCREQ_ARG1  %rsi
-#define ETCH_SVCREQ_ARG2  %rdx
-#define ETCH_SVCREQ_ARG3  %rcx
-#define ETCH_SVCREQ_ARG4  %r8
 #endif
 
 #endif // incl_ETCH_HELPERS_H

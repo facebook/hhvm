@@ -180,6 +180,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::callr:
     case Vinstr::calls:
     case Vinstr::callstub:
+    case Vinstr::calltc:
     case Vinstr::cbcc:
     case Vinstr::contenter:
     case Vinstr::cqo:
@@ -219,6 +220,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::popm:
     case Vinstr::push:
     case Vinstr::pushm:
+    case Vinstr::resumetc:
     case Vinstr::ret:
     case Vinstr::retransopt:
     case Vinstr::store:

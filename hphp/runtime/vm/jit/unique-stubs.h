@@ -381,6 +381,18 @@ struct UniqueStubs {
   // Other stubs.
 
   /*
+   * Enter (or reenter) the TC.
+   *
+   * This is an assembly stub called from native code to transfer control
+   * (back) to jitted PHP code.
+   *
+   * enterTCExit is the address returned to when we leave the TC.
+   */
+  void (*enterTCHelper)(Cell* sp, ActRec* fp, TCA start,
+                        ActRec* firstAR, void* tl, ActRec* stashedAR);
+  TCA enterTCExit;
+
+  /*
    * Return from this VM nesting level to the previous one.
    *
    * This has the same effect as a leavetc{} instruction---it pops the address

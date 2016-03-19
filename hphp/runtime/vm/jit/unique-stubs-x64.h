@@ -39,7 +39,7 @@ namespace x64 {
 
 TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us);
 TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us);
-TCA emitCallToExit(CodeBlock& cb);
+TCA emitCallToExit(CodeBlock& cb, const UniqueStubs& us);
 TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us);
 
 void enterTCImpl(TCA start, ActRec* stashedAR);

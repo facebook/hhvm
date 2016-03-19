@@ -193,6 +193,13 @@ let test_get_method_name () =
   ] in
   expect_call msg (Get_method_name_call ("<hh", 5, 6))
 
+let test_outline_call () =
+  let msg = build_call_msg [
+    {|"--outline"|};
+    {|"<?hh"|};
+  ] in
+  expect_call msg (Outline_call "<hh")
+
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;
@@ -218,6 +225,7 @@ let tests = [
   "test_find_lvar_refs_call", test_find_lvar_refs_call;
   "test_type_at_pos_call", test_type_at_pos_call;
   "test_get_method_name", test_get_method_name;
+  "test_outline_call", test_outline_call;
 ]
 
 let () =

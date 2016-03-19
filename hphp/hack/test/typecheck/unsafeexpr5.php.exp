@@ -1,0 +1,6 @@
+File "unsafeexpr5.php", line 11, characters 8-9:
+Typing error (Typing[4110])
+File "unsafeexpr5.php", line 11, characters 8-9:
+This is a num (int/float) because this is used in an arithmetic operation
+File "unsafeexpr5.php", line 10, characters 12-17:
+It is incompatible with a string

@@ -27,6 +27,7 @@
 #include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
+#include "hphp/util/health-monitor-types.h"
 #include "hphp/util/lock.h"
 
 /**
@@ -132,7 +133,7 @@ using URLChecker = std::function<bool(const std::string&)>;
  * Base class of an HTTP server. Defining minimal interface an HTTP server
  * needs to implement.
  */
-struct Server {
+struct Server : IHostHealthObserver {
   enum class RunStatus {
     NOT_YET_STARTED = 0,
     RUNNING,
@@ -223,12 +224,16 @@ public:
   int getPort() const { return m_port;}
   int getThreadCount() const { return m_threadCount;}
 
-  RunStatus getStatus() const {
-    return m_status;
+  RunStatus getStatus() const { return m_status;}
+  void setStatus(RunStatus status) { m_status = status;}
+  /**
+   * IHostHealthObserver interface.  Note that m_status doesn't
+   * contain server health information.
+   */
+  virtual void notifyNewStatus(HealthLevel newLevel) override {
+    m_healthLevel = newLevel;
   }
-  void setStatus(RunStatus status) {
-    m_status = status;
-  }
+  virtual HealthLevel getHealthLevel() override { return m_healthLevel; }
 
   /**
    * Destructor.
@@ -295,7 +300,8 @@ protected:
   std::list<ServerEventListener*> m_listeners;
 
 private:
-  RunStatus m_status;
+  RunStatus m_status{RunStatus::NOT_YET_STARTED};
+  HealthLevel m_healthLevel{HealthLevel::Bold};
 };
 
 struct ServerOptions {

@@ -24,9 +24,6 @@
 namespace HPHP {
 
 struct ExternalClientShim : IHostHealthObserver {
-  ExternalClientShim():
-    m_status(HealthLevel::Bold) {
-  }
   virtual void notifyNewStatus(HealthLevel newStatus) final {
     m_status = newStatus;
 
@@ -35,17 +32,15 @@ struct ExternalClientShim : IHostHealthObserver {
 
     // push to ServerStats
     ServerStats::SetServerHealthLevel(m_status);
-
     // push to ApacheExtension
     ApacheExtension::UpdateHealthLevel(m_status);
-
   }
 
-  virtual HealthLevel getStatus() {
+  virtual HealthLevel getHealthLevel() final {
     return m_status;
   }
  private:
-  HealthLevel m_status;
+  HealthLevel m_status{HealthLevel::Bold};
 };
 
 }

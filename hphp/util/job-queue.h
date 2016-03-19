@@ -236,8 +236,8 @@ public:
     *expired = false;
     Lock lock(this);
     bool flushed = false;
-    bool ableToDeque = (m_healthStatus == nullptr ?
-        true : (m_healthStatus->getStatus() != HealthLevel::BackOff));
+    bool ableToDeque = m_healthStatus == nullptr ||
+      m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
 
     while (m_jobCount == 0 || !ableToDeque) {
       uint32_t kNumPriority = m_jobQueues.size();
@@ -264,7 +264,7 @@ public:
         }
       }
       if (!ableToDeque) {
-        ableToDeque = m_healthStatus->getStatus() != HealthLevel::BackOff;
+        ableToDeque = m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
       }
     }
     if (inc) incActiveWorker();
@@ -697,7 +697,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
     m_healthStatus = newStatus;
   }
 
-  HealthLevel getStatus() override {
+  HealthLevel getHealthLevel() override {
     return m_healthStatus;
   }
 

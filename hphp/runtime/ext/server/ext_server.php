@@ -232,6 +232,16 @@ namespace HH {
 function server_is_stopping(): bool;
 
 /**
+ * Return the health level of the server in the range of 0~100.
+ *
+ * @return int - 100 if the server is very healthy, and 0 if the
+ * server should not receive any more request.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_health_level(): int;
+
+/**
  * Returns the time that the http server has been running.
  *
  * @return int - number of seconds the server has been running.  -1 if

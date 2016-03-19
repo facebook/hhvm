@@ -57,6 +57,7 @@ static struct ServerExtension final : Extension {
     HHVM_FE(xbox_schedule_thread_reset);
     HHVM_FE(xbox_get_thread_time);
     HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
+    HHVM_FALIAS(HH\\server_health_level, server_health_level);
     HHVM_FALIAS(HH\\server_uptime, server_uptime);
 
     loadSystemlib();
@@ -251,6 +252,27 @@ bool HHVM_FUNCTION(server_is_stopping) {
   }
   // Return false if not running in server mode.
   return false;
+}
+
+int64_t HHVM_FUNCTION(server_health_level) {
+  constexpr int32_t kMaxHealth = 100;
+  if (HttpServer::Server) {
+    if (auto const server = HttpServer::Server->getPageServer()) {
+      // Smaller HealthLevel indicates better health condition, under
+      // which this function returns a bigger number.
+      static_assert(static_cast<int>(HealthLevel::Bold) == 0, "");
+      constexpr int32_t kMaxLevel =
+        static_cast<int32_t>(HealthLevel::NumLevels) - 1;
+      auto const level = server->getHealthLevel();
+      if (LIKELY(level == HealthLevel::Bold)) return kMaxHealth;
+      auto const result = kMaxHealth *
+        (kMaxLevel - static_cast<int32_t>(level)) / kMaxLevel;
+      return result;
+    }
+  }
+  // If server is not yet started, e.g., when not running in server
+  // mode, or before server starts, we assume everything is OK.
+  return kMaxHealth;
 }
 
 int64_t HHVM_FUNCTION(server_uptime) {

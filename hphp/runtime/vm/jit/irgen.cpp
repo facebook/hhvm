@@ -181,29 +181,47 @@ void sealUnit(IRGS& env) {
   mandatoryDCE(env.unit);
 }
 
-Type predictedTypeFromLocal(const IRGS& env, uint32_t locId) {
-  return env.irb->fs().local(locId).predictedType;
+///////////////////////////////////////////////////////////////////////////////
+
+Type publicTopType(const IRGS& env, BCSPOffset idx) {
+  // It's logically const, because we're using DataTypeGeneric.
+  return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
-Type predictedTypeFromStack(const IRGS& env, BCSPOffset offset) {
-  return env.irb->fs().stack(offsetFromIRSP(env, offset)).predictedType;
-}
+Type predictedType(const IRGS& env, const Location& loc) {
+  auto& fs = env.irb->fs();
 
-// All accesses to the stack and locals in this function use DataTypeGeneric so
-// this function should only be used for inspecting state; when the values are
-// actually used they must be constrained further.
-Type predictedTypeFromLocation(const IRGS& env, const Location& loc) {
   switch (loc.space) {
     case Location::Stack:
-      return predictedTypeFromStack(env, loc.bcRelOffset);
+      return fs.stack(offsetFromIRSP(env, loc.bcRelOffset)).predictedType;
+
     case Location::Local:
-      return predictedTypeFromLocal(env, loc.offset);
+      return fs.local(loc.offset).predictedType;
+
+    default:
+      // We don't have predictions for other locations.
+      return provenType(env, loc);
+  }
+  not_reached();
+}
+
+Type provenType(const IRGS& env, const Location& loc) {
+  switch (loc.space) {
+    case Location::Stack:
+      return env.irb->fs().stack(offsetFromIRSP(env, loc.bcRelOffset)).type;
+
+    case Location::Local:
+      return env.irb->fs().local(loc.offset).type;
+
     case Location::Litstr:
       return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
+
     case Location::Litint:
       return Type::cns(loc.offset);
+
     case Location::This:
-      // Don't specialize $this for cloned closures which may have been re-bound
+      // Don't specialize $this for cloned closures that may have been
+      // re-bound.
       if (curFunc(env)->hasForeignThis()) return TObj;
       if (auto const cls = curFunc(env)->cls()) {
         return Type::SubObj(cls);
@@ -217,38 +235,7 @@ Type predictedTypeFromLocation(const IRGS& env, const Location& loc) {
   not_reached();
 }
 
-Type provenTypeFromLocal(const IRGS& env, uint32_t locId) {
-  return env.irb->localType(locId, DataTypeGeneric);
-}
-
-Type provenTypeFromStack(const IRGS& env, BCSPOffset offset) {
-  return env.irb->stackType(offsetFromIRSP(env, offset), DataTypeGeneric);
-}
-
-Type provenTypeFromLocation(const IRGS& env, const Location& loc) {
-  switch (loc.space) {
-  case Location::Stack:
-    return provenTypeFromStack(env, loc.bcRelOffset);
-  case Location::Local:
-    return provenTypeFromLocal(env, loc.offset);
-  case Location::Litstr:
-    return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
-  case Location::Litint:
-    return Type::cns(loc.offset);
-  case Location::This:
-    // Don't specialize $this for cloned closures which may have been re-bound
-    if (curFunc(env)->hasForeignThis()) return TObj;
-    if (auto const cls = curFunc(env)->cls()) {
-      return Type::SubObj(cls);
-    }
-    return TObj;
-
-  case Location::Iter:
-  case Location::Invalid:
-    break;
-  }
-  not_reached();
-}
+///////////////////////////////////////////////////////////////////////////////
 
 void endBlock(IRGS& env, Offset next) {
   if (!fp(env)) {
@@ -298,11 +285,6 @@ void prepareForNextHHBC(IRGS& env,
 
 void finishHHBC(IRGS& env) {
   env.firstBcInst = false;
-}
-
-Type publicTopType(const IRGS& env, BCSPOffset idx) {
-  // It's logically const, because we're using DataTypeGeneric.
-  return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
 //////////////////////////////////////////////////////////////////////

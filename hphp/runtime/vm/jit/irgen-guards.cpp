@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/irgen-guards.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -35,32 +35,6 @@ uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
     }
   }
   return retval;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-}
-
-void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
-  gen(env, AssertLoc, type, LocalId(locId), fp(env));
-}
-
-void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
-  gen(env, AssertStk, type,
-      IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
-}
-
-void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
-  assertx(type <= TStkElem);
-  using T = RegionDesc::Location::Tag;
-  switch (loc.tag()) {
-  case T::Stack:
-    assertTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
-    break;
-  case T::Local:
-    assertTypeLocal(env, loc.localId(), type);
-    break;
-  }
 }
 
 void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
@@ -111,17 +85,41 @@ void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
   }
 }
 
-void checkTypeLocation(IRGS& env,
-                       const RegionDesc::Location& loc,
-                       Type type,
-                       Offset dest,
-                       bool outerOnly) {
-  assertx(type <= TGen);
+//////////////////////////////////////////////////////////////////////
+
+}
+
+void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
+  gen(env, AssertLoc, type, LocalId(locId), fp(env));
+}
+
+void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
+  gen(env, AssertStk, type,
+      IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
+}
+
+void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
+  assertx(type <= TStkElem);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
   case T::Stack:
-    checkTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type, dest,
-                   outerOnly);
+    assertTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
+    break;
+  case T::Local:
+    assertTypeLocal(env, loc.localId(), type);
+    break;
+  }
+}
+
+void checkType(IRGS& env, const RegionDesc::Location& loc,
+               Type type, Offset dest, bool outerOnly) {
+  using T = RegionDesc::Location::Tag;
+  assertx(type <= TGen);
+
+  switch (loc.tag()) {
+  case T::Stack:
+    checkTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()),
+                   type, dest, outerOnly);
     break;
   case T::Local:
     checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
@@ -129,32 +127,21 @@ void checkTypeLocation(IRGS& env,
   }
 }
 
-void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
-  FTRACE(1, "predictTypeStack {}: {}\n", offset.offset, type);
-  assert(type <= TGen);
-
-  auto const irSPOff = offsetFromIRSP(env, offset);
-  env.irb->fs().refineStackPredictedType(irSPOff, type);
-}
-
-void predictTypeLocal(IRGS& env, uint32_t locId, Type type) {
-  FTRACE(1, "predictTypeLocal: {}: {}\n", locId, type);
-  assert(type <= TGen);
-  env.irb->fs().refineLocalPredictedType(locId, type);
-}
-
-void predictTypeLocation(
-  IRGS& env,
-  const RegionDesc::Location& loc,
-  Type type
-) {
+void predictType(IRGS& env, const RegionDesc::Location& loc, Type type) {
   using T = RegionDesc::Location::Tag;
+
+  FTRACE(1, "predictType {}: {}\n", show(loc), type);
+  assertx(type <= TGen);
+
   switch (loc.tag()) {
   case T::Stack:
-    predictTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
+    env.irb->fs().refineStackPredictedType(
+      offsetFromIRSP(env, offsetFromBCSP(env, loc.offsetFromFP())),
+      type
+    );
     break;
   case T::Local:
-    predictTypeLocal(env, loc.localId(), type);
+    env.irb->fs().refineLocalPredictedType(loc.localId(), type);
     break;
   }
 }

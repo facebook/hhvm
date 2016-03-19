@@ -1235,7 +1235,7 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
 
   // base may be from inside a RefData inside a stack/local, so to determine
   // setRef we must check the actual value of the stack/local.
-  auto const rawBaseType = provenTypeFromLocation(env, baseLoc);
+  auto const rawBaseType = provenType(env, baseLoc);
   auto const setRef = rawBaseType <= TBoxedCell;
 
   if (setRef) {

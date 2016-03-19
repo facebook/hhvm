@@ -213,7 +213,7 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
   for (auto const& pred : typePredictions) {
     auto type = pred.type;
     auto loc  = pred.location;
-    irgen::predictTypeLocation(irgs, loc, type);
+    irgen::predictType(irgs, loc, type);
   }
 
   // Emit type guards/preconditions.
@@ -229,7 +229,7 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
       // Otherwise only check for BoxedInitCell.
       bool checkOuterTypeOnly =
         !isEntry || irgs.context.kind != TransKind::Profile;
-      irgen::checkTypeLocation(irgs, loc, type, bcOff, checkOuterTypeOnly);
+      irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
     }
   }
 

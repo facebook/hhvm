@@ -1547,6 +1547,10 @@ void implGenericIdx(IRGS& env) {
   emitDirectCall(env, func, 3, args);
 }
 
+/*
+ * Return the TypeConstraint that should be used to constrain baseType for an
+ * Idx bytecode.
+ */
 TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
                                  bool& useCollection, bool& useMap) {
   if (baseType < TObj && baseType.clsSpec()) {
@@ -1587,11 +1591,6 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-TypeConstraint idxBaseConstraint(Type baseType, Type keyType) {
-  bool collection, map;
-  return idxBaseConstraint(baseType, keyType, collection, map);
 }
 
 void emitArrayIdx(IRGS& env) {

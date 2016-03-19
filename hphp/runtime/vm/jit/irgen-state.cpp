@@ -120,7 +120,7 @@ std::string show(const IRGS& irgs) {
       elemStr = stkTy.toString();
     }
 
-    auto const predicted = irgen::predictedTypeFromStack(irgs, BCSPOffset{i});
+    auto const predicted = irgen::predictedType(irgs, Location(BCSPOffset{i}));
     if (predicted < stkTy) {
       elemStr += folly::sformat(" (predict: {})", predicted);
     }

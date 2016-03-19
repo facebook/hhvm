@@ -25,17 +25,17 @@
 
 namespace HPHP { namespace jit {
 
-// Location --
-//   A user-program-visible, and bytecode ISA addressable place for a PHP
-//   value.
+/*
+ * A bytecode-addressable location for a PHP value.
+ */
 struct Location {
   enum Space {
-    Invalid,  // Unknown location
-    Stack,    // Stack; offset == delta from top
-    Local,    // Stack frame's registers; offset == local register
-    Iter,     // Stack frame's iterators
-    Litstr,   // Literal string pseudo-location
-    Litint,   // Literal int pseudo-location
+    Invalid,  // unknown location
+    Stack,    // stack slot; offset == delta from top
+    Local,    // stack frame's locals; offset == local id
+    Iter,     // stack frame's iterators
+    Litstr,   // literal string pseudo-location
+    Litint,   // literal int pseudo-location
     This,     // $this in the current frame
   };
 

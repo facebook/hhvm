@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
-#include "hphp/runtime/vm/jit/irgen-guards.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 namespace HPHP { namespace jit { namespace irgen {

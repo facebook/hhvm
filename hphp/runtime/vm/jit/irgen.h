@@ -16,16 +16,45 @@
 #ifndef incl_HPHP_JIT_IRGEN_H_
 #define incl_HPHP_JIT_IRGEN_H_
 
-#include <cstdint>
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/member-key.h"
+#include "hphp/runtime/vm/srckey.h"
+
+#include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/ir-builder.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/irgen-state.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/ringbuffer.h"
-#include "hphp/runtime/vm/jit/irgen-state.h"
-#include "hphp/runtime/vm/hhbc.h"
 
-namespace HPHP { struct SrcKey; }
-namespace HPHP { namespace jit {
+#include <cstdint>
+#include <utility>
+#include <vector>
 
-//////////////////////////////////////////////////////////////////////
+namespace HPHP {
+
+struct ArrayData;
+struct Func;
+struct ImmVector;
+struct StringData;
+
+namespace jit {
+
+struct Block;
+struct IRGS;
+struct IRInstruction;
+struct NormalizedInstruction;
+struct SSATmp;
+
+namespace irgen {
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * The public interface to the HHIR frontend is exported here.  Don't include
@@ -46,9 +75,7 @@ namespace HPHP { namespace jit {
  * we can just export functions that do the above two tasks.
  */
 
-namespace irgen {
-
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * The main function for generating new IRInstructions.  Attempts to append an
@@ -75,26 +102,24 @@ SSATmp* cns(IRGS& env, Args&&... args) {
   return env.unit.cns(std::forward<Args>(args)...);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
- * Guards, checks and type assertions.  Guards and checks are the same thing,
- * except that guards must happen at the first bytecode offset in the region.
+ * Type checks and assertions.
  *
  * TODO(#5706706): the stack versions should not be exported, except that
  * RegionDesc::Location::Stack needs some fixes first.
  */
+void checkType(IRGS&, const RegionDesc::Location&, Type,
+               Offset dest, bool outerOnly);
 void assertTypeStack(IRGS&, BCSPOffset, Type);
-void checkTypeStack(IRGS&, BCSPOffset, Type, Offset dest, bool outerOnly);
-void checkTypeLocal(IRGS&, uint32_t locId, Type, Offset dest, bool outerOnly);
+void assertTypeLocal(IRGS&, uint32_t id, Type);
 void assertTypeLocation(IRGS&, const RegionDesc::Location&, Type);
-void checkTypeLocation(IRGS&, const RegionDesc::Location&, Type, Offset dest,
-                       bool outerOnly);
 
 /*
  * Type predictions.
  */
-void predictTypeLocation(IRGS&, const RegionDesc::Location&, Type);
-void predictTypeStack(IRGS&, int32_t offset, Type);
-void predictTypeLocal(IRGS&, uint32_t locId, Type);
+void predictType(IRGS&, const RegionDesc::Location&, Type);
 
 /*
  * Special type of guards for param-passing reffiness. These checks are needed
@@ -111,14 +136,15 @@ void checkRefs(IRGS&, int64_t entryArDelta, const std::vector<bool>& mask,
  */
 void prepareEntry(IRGS&);
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
- * Creates a no-op IR instruction that branches to an exit. These placeholder
- * instructions are later removed after any passes that want to use them for
- * their exits.
+ * Creates a no-op IR instruction that branches to an exit.
+ *
+ * These placeholder instructions are later removed after any passes that want
+ * to use them for their exits.
  */
 void makeExitPlaceholder(IRGS&);
-
-//////////////////////////////////////////////////////////////////////
 
 /*
  * Support for translation counters of various types, including reoptimization
@@ -138,7 +164,7 @@ void ringbufferEntry(IRGS&, Trace::RingBufferType, SrcKey, int level = 1);
 void ringbufferMsg(IRGS&, Trace::RingBufferType, const StringData*,
                    int level = 1);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * For handling PUNT-based interpOnes.  When we PUNT, an exception is thrown
@@ -147,7 +173,7 @@ void ringbufferMsg(IRGS&, Trace::RingBufferType, const StringData*,
  */
 void interpOne(IRGS&, const NormalizedInstruction&);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Before translating/processing each bytecode instruction, the driver
@@ -157,10 +183,8 @@ void interpOne(IRGS&, const NormalizedInstruction&);
  * The flag `lastBcInst' should be set if this is the last bytecode in
  * a region that's being translated.
  */
-void prepareForNextHHBC(IRGS&,
-                        const NormalizedInstruction*,
-                        SrcKey newSk,
-                        bool lastBcInst);
+void prepareForNextHHBC(IRGS&, const NormalizedInstruction*,
+                        SrcKey newSk, bool lastBcInst);
 
 /*
  * After translating each bytecode instruction, the driver of the
@@ -183,7 +207,7 @@ void endBlock(IRGS&, Offset next);
  */
 void sealUnit(IRGS&);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Called when we're starting to inline something.  Returns true iff
@@ -217,41 +241,27 @@ bool isInlining(const IRGS&);
 void inlSingletonSProp(IRGS&, const Func*, PC clsOp, PC propOp);
 void inlSingletonSLoc(IRGS&, const Func*, PC op);
 
-//////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////////////
 /*
- * Several state-inspecition functions are used during translation or tracelet
- * formation.
+ * State introspection.
+ *
+ * These functions should only be used for inspecting state.  None of them
+ * constrain types, so if the type information is actually used, it must be
+ * constrained appropriately.
  */
 
 /*
- * Access the type of the top of the stack, without making any change to the
- * IRGS.  This means that the type returned is /not/ necessarily constrained.
+ * Access the type of the top of the stack.
  */
 Type publicTopType(const IRGS& env, BCSPOffset);
 
 /*
- * Returns a predicted Type for the given location, used for tracelet analysis.
+ * Return the proven or predicted Type for the given location.
  */
-Type predictedTypeFromLocation(const IRGS&, const Location&);
-Type predictedTypeFromLocal(const IRGS&, uint32_t locId);
-Type predictedTypeFromStack(const IRGS&, BCSPOffset slot);
+Type provenType(const IRGS&, const Location&);
+Type predictedType(const IRGS&, const Location&);
 
-/*
- * Returns the proven Type for the given location.
- */
-Type provenTypeFromLocation(const IRGS&, const Location&);
-Type provenTypeFromLocal(const IRGS&, uint32_t locId);
-Type provenTypeFromStack(const IRGS&, BCSPOffset slot);
-
-/*
- * Returns the TypeConstraint that should be used to constrain baseType for an
- * Idx bytecode.
- */
-TypeConstraint idxBaseConstraint(Type baseType, Type keyType);
-
-//////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////////////
 /*
  * Forward-declare an irgen::emitFoo function for each bytecode Foo.
  *
@@ -307,12 +317,8 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType);
 #undef IMM_OA
 #undef IMM_KA
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-}}
+}}}
 
 #endif

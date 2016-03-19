@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/vm/jit/analysis.h"
 
-#include "hphp/runtime/vm/jit/irgen-guards.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 

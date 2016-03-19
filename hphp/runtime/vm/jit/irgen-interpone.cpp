@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
-#include "hphp/runtime/vm/jit/irgen-guards.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -356,11 +355,13 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
   interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {
     auto const out = getInstrInfo(inst.op()).out;
-    auto const checkIdx = BCSPOffset{(out & InstrFlags::StackIns2) ? 2
-                        : (out & InstrFlags::StackIns1) ? 1
-                        : 0};
-    checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset(),
-                   true /* outerOnly */);
+    auto const checkIdx = BCSPOffset{
+      (out & InstrFlags::StackIns2) ? 2 :
+      (out & InstrFlags::StackIns1) ? 1 : 0
+    }.to<FPInvOffset>(env.irb->fs().syncedSpLevel());
+
+    checkType(env, RegionDesc::Location::Stack { checkIdx }, *checkTypeType,
+              inst.nextSk().offset(), true /* outerOnly */);
   }
 }
 

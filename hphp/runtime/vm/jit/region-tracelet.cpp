@@ -139,7 +139,7 @@ bool irBlockReachable(Env& env, Block* block) {
  */
 bool consumeInput(Env& env, int i, const InputInfo& ii) {
   if (ii.dontGuard) return true;
-  auto const type = irgen::predictedTypeFromLocation(env.irgs, ii.loc);
+  auto const type = irgen::predictedType(env.irgs, ii.loc);
 
   if (env.profiling && type <= TBoxedCell &&
       (env.region->blocks().size() > 1 || !env.region->entry()->empty())) {
@@ -488,7 +488,7 @@ RegionDescPtr form_region(Env& env) {
       irgen::assertTypeLocation(env.irgs, lt.location, t);
       env.curBlock->addPreCondition({lt.location, t, DataTypeGeneric});
     } else {
-      irgen::checkTypeLocation(env.irgs, lt.location, t, env.ctx.bcOffset,
+      irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
                                true /* outerOnly */);
     }
   }

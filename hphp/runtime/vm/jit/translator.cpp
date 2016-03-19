@@ -653,26 +653,23 @@ size_t memberKeyImmIdx(Op op) {
 #undef O
 
 /*
- * getInputs --
- *   Returns locations for this instruction's inputs.
+ * Get location metadata for the inputs of `ni'.
  */
 InputInfoVec getInputs(NormalizedInstruction& ni) {
   InputInfoVec inputs;
-  auto UNUSED sk = ni.source;
   if (isAlwaysNop(ni.op())) return inputs;
 
-  assertx(inputs.empty());
   always_assert_flog(
     instrInfo.count(ni.op()),
     "Invalid opcode in getInputsImpl: {}\n",
     opcodeToName(ni.op())
   );
-  const InstrInfo& info = instrInfo[ni.op()];
-  Operands input = info.in;
-  BCSPOffset spOff{0};
-  if (input & FuncdRef) {
-    inputs.needsRefCheck = true;
-  }
+  UNUSED auto const sk = ni.source;
+
+  auto const& info = instrInfo[ni.op()];
+  auto const input = info.in;
+  auto spOff = BCSPOffset{0};
+
   if (input & Iter) {
     inputs.emplace_back(Location(Location::Iter, ni.imm[0].u_IVA));
   }
@@ -680,7 +677,9 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
     spOff += ni.imm[0].u_IVA; // arguments consumed
     spOff += kNumActRecCells; // ActRec is torn down as well
   }
+  if (input & FuncdRef) inputs.needsRefCheck = true;
   if (input & IgnoreInnerType) ni.ignoreInnerType = true;
+
   if (input & Stack1) {
     SKTRACE(1, sk, "getInputs: stack1 %d\n", spOff.offset);
     inputs.emplace_back(Location(spOff++));
@@ -717,6 +716,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
       inputs.emplace_back(Location(spOff++));
     }
   }
+
   if (input & Local) {
     // (Almost) all instructions that take a Local have its index at
     // their first immediate.
@@ -724,33 +724,35 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
     inputs.emplace_back(Location(Location::Local, loc));
   }
+  if (input & AllLocals) ni.ignoreInnerType = true;
+
   if (input & MKey) {
     auto mk = ni.imm[memberKeyImmIdx(ni.op())].u_KA;
     switch (mk.mcode) {
-      case MEL: case MPL:
+      case MEL:
+      case MPL:
         inputs.emplace_back(Location(Location::Local, mk.iva));
         break;
-      case MEC: case MPC:
+      case MEC:
+      case MPC:
         inputs.emplace_back(Location(BCSPOffset{int32_t(mk.iva)}));
         break;
-      case MW: case MEI: case MET: case MPT: case MQT:
+      case MW:
+      case MEI:
+      case MET:
+      case MPT:
+      case MQT:
         // The inputs vector is only used for deciding when to break the
         // tracelet, which can never happen for these cases.
         break;
     }
   }
-  if (input & AllLocals) {
-    ni.ignoreInnerType = true;
-  }
 
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", spOff.offset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());
 
-  if (inputs.size() &&
-      ((input & DontGuardAny) || dontGuardAnyInputs(ni.op()))) {
-    for (int i = inputs.size(); i--; ) {
-      inputs[i].dontGuard = true;
-    }
+  if ((input & DontGuardAny) || dontGuardAnyInputs(ni.op())) {
+    for (auto& info : inputs) info.dontGuard = true;
   }
   if (input & This) {
     inputs.emplace_back(Location(Location::This));

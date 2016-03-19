@@ -24,35 +24,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-enum class ProfGuard { CheckLoc, CheckStk };
-
-/*
- * Emit a type guard, possibly using profiling information. Depending on the
- * current translation mode and type to be guarded, this function may emit
- * additional profiling code or modify the guarded type using previously
- * collected profiling information. Str -> StaticStr is the only supported
- * refinement for now.
- */
-void profiledGuard(IRGS& env,
-                   Type type,
-                   ProfGuard kind,
-                   int32_t id, // locId or stackOff
-                   Block* checkExit) {
-  auto failBlock = env.irb->guardFailBlock();
-  if (failBlock == nullptr) failBlock = checkExit;
-  switch (kind) {
-    case ProfGuard::CheckLoc:
-      gen(env, CheckLoc, type, LocalId(id), failBlock, fp(env));
-      return;
-    case ProfGuard::CheckStk:
-      // Adjust 'id' to get an offset from the current m_irb->fs().sp().
-      auto const adjOff = offsetFromIRSP(env, BCSPOffset{id});
-      gen(env, CheckStk, type,
-          RelOffsetData { BCSPOffset{id}, adjOff }, failBlock, sp(env));
-      return;
-  }
-}
-
 uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   uint64_t retval = 0;
   assertx(i % 64 == 0);
@@ -92,61 +63,52 @@ void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
   }
 }
 
-void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
-                    bool outerOnly) {
-  assertx(type <= TCell || type <= TBoxedInitCell);
-
+void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
+                    Offset dest, bool outerOnly) {
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
   if (type <= TCell) {
-    profiledGuard(env, type, ProfGuard::CheckLoc, locId, exit);
+    gen(env, CheckLoc, type, LocalId(locId), exit, fp(env));
     return;
   }
+  assertx(type <= TBoxedInitCell);
 
-  profiledGuard(env, TBoxedInitCell, ProfGuard::CheckLoc, locId, exit);
+  gen(env, CheckLoc, TBoxedInitCell, LocalId(locId), exit, fp(env));
+  env.irb->constrainLocal(locId, DataTypeSpecific, "HintLocInner");
   gen(env, HintLocInner, type, LocalId { locId }, fp(env));
 
   if (!outerOnly && type.inner() < TInitCell) {
-    auto const exit = makeExit(env);
     auto const ldPMExit = makePseudoMainExit(env);
     auto const val = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
     gen(env, CheckRefInner, env.irb->predictedInnerType(locId), exit, val);
   }
 }
 
-void checkTypeStack(IRGS& env,
-                    BCSPOffset idx,
-                    Type type,
-                    Offset dest,
-                    bool outerOnly) {
-  assertx(type <= TCell || type <= TBoxedInitCell);
-
+void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
+                    Offset dest, bool outerOnly) {
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  if (type <= TBoxedInitCell) {
-    auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
-    profiledGuard(env, TBoxedInitCell, ProfGuard::CheckStk,
-                  idx.offset, exit);
-    env.irb->constrainStack(soff.irSpOffset, DataTypeSpecific);
-    gen(env, HintStkInner, type, soff, sp(env));
+  auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
 
-    // Check inner type eargerly only at the beginning of a region.
-    if (!outerOnly && type.inner() < TInitCell) {
-      auto stk = gen(env, LdStk, TBoxedInitCell,
-                     IRSPOffsetData{soff.irSpOffset}, sp(env));
-      gen(env, CheckRefInner,
-          env.irb->predictedStackInnerType(soff.irSpOffset),
-          exit, stk);
-    }
+  if (type <= TCell) {
+    gen(env, CheckStk, type, soff, exit, sp(env));
     return;
   }
+  assertx(type <= TBoxedInitCell);
 
-  FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx.offset, type.toString());
-  // Just like CheckType, CheckStk only cares about its input type if the
-  // simplifier does something with it.
-  profiledGuard(env, type, ProfGuard::CheckStk, idx.offset, exit);
+  gen(env, CheckStk, TBoxedInitCell, soff, exit, sp(env));
+  env.irb->constrainStack(soff.irSpOffset, DataTypeSpecific);
+  gen(env, HintStkInner, type, soff, sp(env));
+
+  if (!outerOnly && type.inner() < TInitCell) {
+    auto stk = gen(env, LdStk, TBoxedInitCell,
+                   IRSPOffsetData{soff.irSpOffset}, sp(env));
+    gen(env, CheckRefInner,
+        env.irb->predictedStackInnerType(soff.irSpOffset),
+        exit, stk);
+  }
 }
 
 void checkTypeLocation(IRGS& env,

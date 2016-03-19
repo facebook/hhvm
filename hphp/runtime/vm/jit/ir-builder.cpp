@@ -784,13 +784,12 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   return false;
 }
 
-bool IRBuilder::constrainLocal(uint32_t locId,
-                               TypeConstraint tc,
+bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
   bool changed = false;
   for (auto typeSrc : m_state.local(locId).typeSrcs) {
-    changed = constrainSlot(locId, typeSrc, tc, why + "Loc") || changed;
+    changed |= constrainSlot(locId, typeSrc, tc, why + "Loc");
   }
   return changed;
 }
@@ -799,7 +798,7 @@ bool IRBuilder::constrainStack(IRSPOffset offset, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
   auto changed = false;
   for (auto typeSrc : m_state.stack(offset).typeSrcs) {
-    changed = constrainSlot(offset.offset, typeSrc, tc, "Stk") || changed;
+    changed |= constrainSlot(offset.offset, typeSrc, tc, "Stk");
   }
   return changed;
 }

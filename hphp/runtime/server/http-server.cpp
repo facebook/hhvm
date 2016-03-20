@@ -344,7 +344,11 @@ void HttpServer::waitForServers() {
 
 static void exit_on_timeout(int sig) {
   signal(sig, SIG_DFL);
+#ifdef _WIN32
+  TerminateProcess(GetCurrentProcess(), (UINT)-1);
+#else
   kill(getpid(), SIGKILL);
+#endif
   // we really shouldn't get here, but who knows.
   // abort so we catch it as a crash.
   abort();

@@ -147,19 +147,6 @@ void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   always_assert(false);
 }
 
-#if defined(__powerpc64__)
-/*
- * Tail call elimination needs to be disabled in order to have a valid frame
- * pointer in fixupWork.
- *
- * PPC64 frame pointer points to the bottom of the frame, hence it changes
- * depending of the locals stored on the stack and it might be in a different
- * position than fixupWork, which would mean that the frame pointer grabbed
- * inside of fixup would not point to a valid frame anymore on fixupWork
- * context.
- */
-__attribute__((__optimize__("no-optimize-sibling-calls")))
-#endif
 void FixupMap::fixup(ExecutionContext* ec) const {
   if (RuntimeOption::EvalSimulateARM) {
     // Walking the C++ stack doesn't work in simulation mode. Fortunately, the
@@ -169,7 +156,11 @@ void FixupMap::fixup(ExecutionContext* ec) const {
     // Start looking for fixup entries at the current (C++) frame.  This
     // will walk the frames upward until we find a TC frame.
     DECLARE_FRAME_POINTER(framePtr);
-    fixupWork(ec, framePtr);
+    // In order to avoid tail call elimination optimization issues, grab the
+    // parent frame pointer in order make sure this pointer is valid. The
+    // fixupWork() looks for a TC frame, and we never call fixup() directly
+    // from the TC, so skipping this frame isn't a problem.
+    fixupWork(ec, framePtr->m_sfp);
   }
 }
 

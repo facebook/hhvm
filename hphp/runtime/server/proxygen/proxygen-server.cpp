@@ -296,17 +296,21 @@ void ProxygenServer::waitForEnd() {
 //    If it is the page server, it will continue accepting requests for
 //    ServerPreShutdownWait seconds
 // 2. Shutdown the listen sockets, this will
-//     3.a Close any idle connections
-//     3.b Send SPDY GOAWAY frames
-//     3.c Insert Connection: close on HTTP/1.1 keep-alive connections as the
+//     2.a Close any idle connections
+//     2.b Send SPDY GOAWAY frames
+//     2.c Insert Connection: close on HTTP/1.1 keep-alive connections as the
 //         response headers are sent
-//    Note: LibEventServer doesn't close the listen sockets if there is no
-//    ServerShutdownListenWait.
-// 3. After all connections close OR ServerShutdownListenWait seconds
-//    elapse, stop the VM.  Incomplete requests in the I/O thread will not be
-//    executed.  Stopping the VM is synchronous and all requests will run to
+// 3. If the server hasn't received the entire request body
+//    ServerShutdownEOM seconds after shutdown starts, the request
+//    will be aborted.  ServerShutdownEOM isn't required to be smaller
+//    than ServerShutdownListenWait, but it makes sense to make it be,
+//    in order to make shutdown faster.
+// 4. After all requests finish executing OR all connections close OR
+//    ServerShutdownListenWait seconds elapse, stop the VM.
+//    Incomplete requests in the I/O thread will not be executed.
+//    Stopping the VM is synchronous and all requests will run to
 //    completion, unless the alarm fires.
-// 4. Allow responses to drain for up to ServerGracefulShutdownWait seconds.
+// 5. Allow responses to drain for up to ServerGracefulShutdownWait seconds.
 //    Note if shutting the VM down took non-zero time it's possible that the
 //    alarm will fire first and kill this process.
 
@@ -652,14 +656,6 @@ bool ProxygenServer::enableSSL(int port) {
 }
 
 void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
-  // If we are in the process of crashing, we want to reject incoming work.
-  // This will prompt the load balancers to choose another server. Using
-  // shutdown rather than close has the advantage that it makes fewer changes
-  // to the process (eg, it doesn't close the FD so if the FD number were
-  // corrupted it would be mostly harmless).
-  //
-  // Note: the above comment came from LibEventServer, but ProxygenServer
-  // just invokes AsyncServerSocket::destroy, which just calls close.
   if (IsCrashing) {
     Logger::Error("Discarding request while crashing");
     if (m_shutdownState == ShutdownState::SHUTDOWN_NONE) {

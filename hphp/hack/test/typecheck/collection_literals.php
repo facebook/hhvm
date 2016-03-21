@@ -20,13 +20,3 @@ function f3() : Map<string,int> {
 function f4() : Map<int,string> {
   return Map { 1 => 'a' };
 }
-function f5() : StableMap<string,StableMap<string,int>> {
-  return StableMap {};
-}
-function f6() : StableMap<string,StableMap<string,int>> {
-  return StableMap { 'a' => StableMap { 'a' => 1 } };
-}
-function f7() : Map<int,StableMap<string,int>> {
-  return Map { 1 => StableMap { 'a' => 2 } };
-}
-

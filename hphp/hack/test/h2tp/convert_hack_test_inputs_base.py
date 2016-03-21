@@ -387,6 +387,12 @@ OTHER_UNPARSEABLE_FILES = [
     'concat_untyped_with_string.php',
     'covariance7.php',
     'covariance8.php',
+    # TODO: task 10395133
+    'dict/dict_literal.php',
+    'dict/dict_literal_empty.php',
+    'dict/dict_literal_wrong_brace.php',
+    'dict/dict_literal_mixed_brace.php',
+    'dict/dict_literal_mixed_brace2.php',
     'dynamic_new1.php',
     'dynamic_new3.php',
     'dynamic_new5.php',

@@ -45,6 +45,7 @@ let map program =
     | (Some "\\HH\\Pair", _) ->
         unsupported (p, "Invalid initialization of Pair")
     | (Some "\\HH\\Map", _) | (Some "\\HH\\ImmMap", _) ->
+        (** TODO: task 10395133. support dict *)
         List.iter ~f:begin function
           | AFkvalue _ -> ()
           | AFvalue (p, _) ->

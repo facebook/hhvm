@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-object.h"
 
+#include <type_traits>
+
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 // Class NativeData
@@ -110,22 +112,68 @@ void>::type nativeDataInfoCopy(ObjectData* dest, ObjectData* src) {}
 template<class T>
 void nativeDataInfoDestroy(ObjectData* obj) {
   data<T>(obj)->~T();
+};
+
+template<class T>
+typename std::enable_if<!std::is_trivially_destructible<T>::value,
+                        void(*)(ObjectData*)>::type
+getNativeDataInfoDestroy() {
+  return &nativeDataInfoDestroy<T>;
+}
+
+template<class T>
+typename std::enable_if<std::is_trivially_destructible<T>::value,
+                        void(*)(ObjectData*)>::type
+getNativeDataInfoDestroy() {
+  return nullptr;
 }
 
 // If the NDI class has a void sweep() method,
 // call it during sweep, otherwise call ~T()
+// unless its trivial, or the class defines a
+//
+//   static const bool sweep = false;
 FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasSweep, sweep);
+
+// class to test for presence of a sweep set to false
+template <typename T>
+struct doSweep {
+  template <typename C>
+  constexpr static typename std::enable_if<C::sweep == false, bool>::type
+  test(void*) { return false; }
+  template <typename>
+  constexpr static bool test(...) { return true; }
+  constexpr static bool value = test<T>(nullptr);
+};
+
+template<class T>
+void callSweep(ObjectData* obj) {
+  data<T>(obj)->sweep();
+};
 
 template<class T>
 typename std::enable_if<hasSweep<T,void ()>::value,
-void>::type nativeDataInfoSweep(ObjectData* obj) {
-  data<T>(obj)->sweep();
+                        void(*)(ObjectData*)>::type
+getNativeDataInfoSweep() {
+  return &callSweep<T>;
 }
 
 template<class T>
-typename std::enable_if<!hasSweep<T,void ()>::value,
-void>::type nativeDataInfoSweep(ObjectData* obj) {
-  data<T>(obj)->~T();
+typename std::enable_if<(!hasSweep<T,void ()>::value &&
+                         !std::is_trivially_destructible<T>::value &&
+                         doSweep<T>::value),
+                        void(*)(ObjectData*)>::type
+getNativeDataInfoSweep() {
+  return &nativeDataInfoDestroy<T>;
+}
+
+template<class T>
+typename std::enable_if<(!hasSweep<T,void ()>::value &&
+                         (std::is_trivially_destructible<T>::value ||
+                          !doSweep<T>::value)),
+                        void(*)(ObjectData*)>::type
+getNativeDataInfoSweep() {
+  return nullptr;
 }
 
 FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasSleep, sleep);
@@ -190,15 +238,16 @@ typename std::enable_if<
 >::type registerNativeDataInfo(const StringData* name,
                                int64_t flags = 0) {
   auto ndic = &nativeDataInfoCopy<T>;
-  auto ndisw = &nativeDataInfoSweep<T>;
+  auto ndisw = getNativeDataInfoSweep<T>();
   auto ndisl = &nativeDataInfoSleep<T>;
   auto ndiw = &nativeDataInfoWakeup<T>;
   auto ndis = &nativeDataInfoScan<T>;
 
-  registerNativeDataInfo(name, sizeof(T),
+  registerNativeDataInfo(
+    name, sizeof(T),
     &nativeDataInfoInit<T>,
     (flags & NDIFlags::NO_COPY) ? nullptr : ndic,
-    &nativeDataInfoDestroy<T>,
+    getNativeDataInfoDestroy<T>(),
     (flags & NDIFlags::NO_SWEEP) ? nullptr : ndisw,
     hasSleep<T, Variant() const>::value ? ndisl : nullptr,
     hasWakeup<T, void(const Variant&, ObjectData*)>::value ? ndiw : nullptr,

@@ -85,7 +85,7 @@ namespace __SystemLib {
 
   class InflateStreamFilter extends \php_user_filter {
     public function onCreate(): bool {
-      $this->impl = new \__SystemLib_ChunkedInflator();
+      $this->impl = new \__SystemLib\ChunkedInflator();
       return true;
     }
 

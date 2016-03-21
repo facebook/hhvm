@@ -11,7 +11,7 @@ function main() {
   $chunks = str_split($compressed, 512 /* bytes */);
 
   $output = '';
-  $inflator = new __SystemLib_ChunkedInflator();
+  $inflator = new __SystemLib\ChunkedInflator();
   $i = 0;
   foreach ($chunks as $chunk) {
     $this_chunk = $inflator->inflateChunk($chunk);

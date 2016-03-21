@@ -579,11 +579,12 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Chunk-based API
+namespace {
 
-const StaticString s___SystemLib_ChunkedInflator("__SystemLib_ChunkedInflator");
+const StaticString s_SystemLib_ChunkedInflator("__SystemLib\\ChunkedInflator");
 
-struct __SystemLib_ChunkedInflator {
-  __SystemLib_ChunkedInflator(): m_eof(false) {
+struct ChunkedInflator {
+  ChunkedInflator(): m_eof(false) {
     m_zstream.zalloc = (alloc_func) Z_NULL;
     m_zstream.zfree = (free_func) Z_NULL;
     int status = inflateInit2(&m_zstream, -MAX_WBITS);
@@ -592,7 +593,7 @@ struct __SystemLib_ChunkedInflator {
     }
   }
 
-  ~__SystemLib_ChunkedInflator() {
+  ~ChunkedInflator() {
     if (!eof()) {
       inflateEnd(&m_zstream);
     }
@@ -641,20 +642,22 @@ struct __SystemLib_ChunkedInflator {
 };
 
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
-  auto dest = Native::data<__SystemLib_ChunkedInflator>(src);
+  auto dest = Native::data<ChunkedInflator>(src);
 
-bool HHVM_METHOD(__SystemLib_ChunkedInflator, eof) {
+bool HHVM_METHOD(ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);
   assert(data);
   return data->eof();
 }
 
-String HHVM_METHOD(__SystemLib_ChunkedInflator,
+String HHVM_METHOD(ChunkedInflator,
                    inflateChunk,
                    const String& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
   assert(data);
   return data->inflateChunk(chunk);
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -711,11 +714,13 @@ struct ZlibExtension final : Extension {
     HHVM_FE(lz4_hccompress);
     HHVM_FE(lz4_uncompress);
 
-    HHVM_ME(__SystemLib_ChunkedInflator, eof);
-    HHVM_ME(__SystemLib_ChunkedInflator, inflateChunk);
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, eof,
+                  HHVM_MN(ChunkedInflator, eof));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, inflateChunk,
+                  HHVM_MN(ChunkedInflator, inflateChunk));
 
-    Native::registerNativeDataInfo<__SystemLib_ChunkedInflator>(
-      s___SystemLib_ChunkedInflator.get());
+    Native::registerNativeDataInfo<ChunkedInflator>(
+      s_SystemLib_ChunkedInflator.get());
 
     loadSystemlib();
 #ifdef HAVE_QUICKLZ

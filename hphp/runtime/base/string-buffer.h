@@ -44,6 +44,12 @@ struct StringBuffer {
   static constexpr uint32_t kDefaultOutputLimit = StringData::MaxSize;
 
   /*
+   * This class does not need to be swept when used as a NativeData from
+   * the StringBuffer HNI class.
+   */
+  static constexpr bool sweep = false;
+
+  /*
    * Construct a string buffer with some initial size, subsequent allocation
    * will geometrically grow the size when needed.
    */

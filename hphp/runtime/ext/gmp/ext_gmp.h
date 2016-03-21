@@ -91,9 +91,7 @@ const char* const cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER =
 // classes
 
 struct GMPData {
-                 GMPData()
-                 : m_isInit(false) {}
-  virtual       ~GMPData() { close(); }
+  ~GMPData() { close(); }
   GMPData&       operator=(const GMPData& source);
 
   void           close();
@@ -101,7 +99,7 @@ struct GMPData {
   mpz_t&         getGMPMpz() { return m_gmpMpz; }
 
 private:
-  bool           m_isInit;
+  bool           m_isInit{false};
   mpz_t          m_gmpMpz;
 };
 

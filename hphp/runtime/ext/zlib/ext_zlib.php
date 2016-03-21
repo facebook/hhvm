@@ -389,14 +389,15 @@ function lz4_uncompress(string $compressed): mixed;
 /**
  * Implementation detail for zlib.inflate stream filter.
  *
- * Not a public API - ideally this would be in namespace __SystemLib, but that
- * isn't currently supported.
+ * Not a public API
  */
-<<__NativeData("__SystemLib_ChunkedInflator")>>
-class __SystemLib_ChunkedInflator {
+namespace __SystemLib {
+<<__NativeData("__SystemLib\\ChunkedInflator")>>
+class ChunkedInflator {
   <<__Native>>
   function eof(): bool;
 
   <<__Native>>
   function inflateChunk(string $chunk): string;
+}
 }

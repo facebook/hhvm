@@ -58,7 +58,6 @@ struct ReflectionFuncHandle {
     m_func = other.m_func;
     return *this;
   }
-  ~ReflectionFuncHandle() {}
 
   static ReflectionFuncHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionFuncHandle>(obj);
@@ -90,7 +89,6 @@ struct ReflectionClassHandle {
     m_cls = that_.m_cls;
     return *this;
   }
-  ~ReflectionClassHandle() {}
   String init(const String& name) {
     auto const cls = Unit::loadClass(name.get());
     if (!cls) return empty_string();
@@ -176,7 +174,6 @@ struct ReflectionPropHandle {
     m_prop = other.m_prop;
     return *this;
   }
-  ~ReflectionPropHandle() {}
 
   static ReflectionPropHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionPropHandle>(obj);
@@ -211,7 +208,6 @@ struct ReflectionSPropHandle {
     m_sprop = other.m_sprop;
     return *this;
   }
-  ~ReflectionSPropHandle() {}
 
   static ReflectionSPropHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionSPropHandle>(obj);

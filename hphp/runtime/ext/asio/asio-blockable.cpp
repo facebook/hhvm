@@ -22,9 +22,6 @@
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,27 +63,6 @@ inline c_ConditionWaitHandle* getConditionWaitHandle(
 ) {
   assert(blockable->getKind() == Kind::ConditionWaitHandle);
   return getContainingObject<c_ConditionWaitHandle>(blockable);
-}
-
-inline c_GenArrayWaitHandle* getGenArrayWaitHandle(
-  const AsioBlockable* blockable
-) {
-  assert(blockable->getKind() == Kind::GenArrayWaitHandle);
-  return getContainingObject<c_GenArrayWaitHandle>(blockable);
-}
-
-inline c_GenMapWaitHandle* getGenMapWaitHandle(
-  const AsioBlockable* blockable
-) {
-  assert(blockable->getKind() == Kind::GenMapWaitHandle);
-  return getContainingObject<c_GenMapWaitHandle>(blockable);
-}
-
-inline c_GenVectorWaitHandle* getGenVectorWaitHandle(
-  const AsioBlockable* blockable
-) {
-  assert(blockable->getKind() == Kind::GenVectorWaitHandle);
-  return getContainingObject<c_GenVectorWaitHandle>(blockable);
 }
 
 inline void exitContextImpl(
@@ -151,12 +127,6 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
       return getAwaitAllWaitHandleNode(this)->getWaitHandle();
     case Kind::ConditionWaitHandle:
       return getConditionWaitHandle(this);
-    case Kind::GenArrayWaitHandle:
-      return getGenArrayWaitHandle(this);
-    case Kind::GenMapWaitHandle:
-      return getGenMapWaitHandle(this);
-    case Kind::GenVectorWaitHandle:
-      return getGenVectorWaitHandle(this);
   }
   not_reached();
 }
@@ -178,15 +148,6 @@ void AsioBlockableChain::unblock() {
       case Kind::ConditionWaitHandle:
         getConditionWaitHandle(cur)->onUnblocked();
         break;
-      case Kind::GenArrayWaitHandle:
-        getGenArrayWaitHandle(cur)->onUnblocked();
-        break;
-      case Kind::GenMapWaitHandle:
-        getGenMapWaitHandle(cur)->onUnblocked();
-        break;
-      case Kind::GenVectorWaitHandle:
-        getGenVectorWaitHandle(cur)->onUnblocked();
-        break;
     }
   }
 }
@@ -205,15 +166,6 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
         break;
       case Kind::ConditionWaitHandle:
         exitContextImpl(getConditionWaitHandle(cur), ctx_idx);
-        break;
-      case Kind::GenArrayWaitHandle:
-        exitContextImpl(getGenArrayWaitHandle(cur), ctx_idx);
-        break;
-      case Kind::GenMapWaitHandle:
-        exitContextImpl(getGenMapWaitHandle(cur), ctx_idx);
-        break;
-      case Kind::GenVectorWaitHandle:
-        exitContextImpl(getGenVectorWaitHandle(cur), ctx_idx);
         break;
     }
   }

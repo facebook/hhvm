@@ -33,9 +33,6 @@ struct AsioExtension final : Extension {
     initResumableWaitHandle();
     initAsyncGenerator();
     initAwaitAllWaitHandle();
-    initGenArrayWaitHandle();
-    initGenMapWaitHandle();
-    initGenVectorWaitHandle();
     initConditionWaitHandle();
     initSleepWaitHandle();
     initRescheduleWaitHandle();
@@ -54,9 +51,6 @@ private:
   void initResumableWaitHandle();
   void initAsyncGenerator();
   void initAwaitAllWaitHandle();
-  void initGenArrayWaitHandle();
-  void initGenMapWaitHandle();
-  void initGenVectorWaitHandle();
   void initConditionWaitHandle();
   void initSleepWaitHandle();
   void initRescheduleWaitHandle();

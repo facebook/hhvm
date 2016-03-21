@@ -33,11 +33,6 @@ struct AsioBlockable final {
     AsyncGeneratorWaitHandle,
     AwaitAllWaitHandleNode,
     ConditionWaitHandle,
-
-    // DEPRECATED
-    GenArrayWaitHandle,
-    GenMapWaitHandle,
-    GenVectorWaitHandle,
   };
 
   static constexpr ptrdiff_t bitsOff() {

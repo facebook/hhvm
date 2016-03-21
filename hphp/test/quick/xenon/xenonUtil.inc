@@ -23,34 +23,42 @@ function xenonDump($stacks): void {
 
 // get the Xenon data then verify that there are no unknown functions
 // and that all of the functions in this file are in the stack
-function verifyTestRun($stacks, $functionList, $requiredFunctions): void {
+function verifyTestRun($stacks, $required, $optional): void {
   echo "Verifying PHP Stack\n";
+  $required = array_fill_keys($required, true);
+  $required += array_fill_keys($optional, false);
   foreach ($stacks as $k => $v) {
-    if (is_numeric($k)) {
-      $frame = $v["phpStack"];
-      if ($frame) {
-        foreach ($frame as $f) {
-          $function = idx($f, "function", "");
-          $file = idx($f, "file", "");
-          $line = idx($f, "line", 0);
-          if (in_array($function, $functionList)) {
-            $foundFunction = idx($requiredFunctions, $function, "");
-            if ($foundFunction) {
-              unset($requiredFunctions[$function]);
-            }
-          } else if (strpos($function, "Exception") === false
-              && strpos($function, "create") === false) {
-            echo "Unknown function:  " . $function . " " . $file . " "
-              . $line . "\n";
-          } // else meaningless line, skip it
-        } // foreach
-      } // if ($frame)
-    } // if is_numeric
-  }
-  if ($requiredFunctions) {
-    echo "Functions missing from stacks:  ";
-    var_dump($requiredFunctions);
+    if (!is_numeric($k)) {
+      continue;
+    }
+
+    $frame = $v["phpStack"];
+    if (!$frame) {
+      continue;
+    }
+
+    foreach ($frame as $f) {
+      $function = idx($f, 'function', '');
+      if (array_key_exists($function, $required)) {
+        $required[$function] = false;
+      } else {
+        $file = idx($f, "file", "");
+        $line = idx($f, "line", 0);
+        echo sprintf(
+          "Unknown function:  %s %s %s\n",
+          $function,
+          idx($f, 'file', ''),
+          idx($f, 'line', 0),
+        );
+      }
+    }
   }
 
-  echo "Finished verfying stacks\n";
+  $required = array_filter($required);
+  if ($required) {
+    echo "Functions missing from stacks:  ";
+    var_dump(array_keys($required));
+  }
+
+  echo "Finished verifying stacks\n";
 }

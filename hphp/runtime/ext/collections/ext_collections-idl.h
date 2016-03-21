@@ -1358,7 +1358,6 @@ struct BaseMap : HashCollection {
   friend struct c_ImmMap;
   friend struct ArrayIter;
   friend struct c_AwaitAllWaitHandle;
-  friend struct c_GenMapWaitHandle;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field

@@ -52,6 +52,9 @@ DebugInfo::DebugInfo() {
   if (RuntimeOption::EvalPerfPidMap) {
     m_perfMap = fopen(m_perfMapName.c_str(), "w");
   }
+  if (RuntimeOption::EvalPerfJitDump) {
+    initPerfJitDump();
+  }
   m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
   if (RuntimeOption::EvalPerfDataMap) {
     m_dataMap = fopen(m_dataMapName.c_str(), "w");
@@ -70,7 +73,14 @@ DebugInfo::~DebugInfo() {
       unlink(m_perfMapName.c_str());
     }
   }
-
+  
+  if (m_perfJitDump) {
+    closePerfJitDump();
+    if (!RuntimeOption::EvalKeepPerfPidMap) {
+      unlink(m_perfJitDumpName.c_str());
+    }
+  }
+  
   if (m_dataMap) {
     fclose(m_dataMap);
     if (!RuntimeOption::EvalKeepPerfPidMap) {
@@ -180,6 +190,17 @@ void DebugInfo::recordPerfMap(TCRange range, const Func* func,
     range.size(),
     name.c_str());
   fflush(m_perfMap);
+}
+
+void DebugInfo::recordPerfJitTracelet(TCRange range, const Func* func,
+                                      bool exit, bool inPrologue) {
+  if (!m_perfJitDump) return;
+  if (RuntimeOption::EvalProfileBC) return;
+  
+  std::string name = lookupFunction(func, exit, inPrologue, true);
+  perfJitDumpTrace(range.begin(),
+                   range.size(),
+                   name.c_str()); 
 }
 
 void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {

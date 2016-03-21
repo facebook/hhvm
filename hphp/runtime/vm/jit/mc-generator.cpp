@@ -1982,6 +1982,10 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
       m_debugInfo.recordPerfMap(rangeFrom(cb, start, &cb == &m_code.cold()),
                                 srcFunc, exit, inPrologue);
     }
+    if(RuntimeOption::EvalPerfJitDump) {
+      m_debugInfo.recordPerfJitTracelet(rangeFrom(cb, start, &cb == &m_code.cold()),
+                                srcFunc, exit, inPrologue);
+    }
   }
 }
 

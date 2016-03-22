@@ -41,11 +41,24 @@ function(HHVM_COMPAT_EXTENSION EXTNAME)
   include_directories("${EZC_DIR}/php-src/TSRM")
 endfunction()
 
+function(embed_systemlibs TARGET DEST)
+  if (APPLE)
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
+  elseif(CYGWIN OR MSVC OR MINGW)
+    message(FATAL_ERROR "Shared extensions are not supported on Windows")
+  else()
+    add_custom_command(TARGET ${TARGET} POST_BUILD
+      COMMAND "objcopy"
+      ARGS ${${TARGET}_SLIBS} ${DEST}
+      COMMENT "Embedding php in ${TARGET}")
+  endif()
+endfunction(embed_systemlibs)
+
 function(HHVM_SYSTEMLIB EXTNAME)
   foreach (SLIB ${ARGN})
     embed_systemlib_byname(${EXTNAME} ${SLIB})
   endforeach()
-  embed_sections(${EXTNAME} "${EXTNAME}.so")
+  embed_systemlibs(${EXTNAME} "${EXTNAME}.so")
 endfunction()
 
 function(HHVM_DEFINE EXTNAME)

@@ -6,7 +6,7 @@ async function block() {
 
 async function foo() {
   await block();
-  return await GenArrayWaitHandle::create(
+  return await \HH\Asio\m(
     array_map(
       async $id ==> $id * $id,
       array(1,2,3,4),

@@ -199,63 +199,6 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   public static function setOnCreateCallback(mixed $callback): void;
 }
 
-/* A wait handle representing an array of asynchronous operations
- */
-final class GenArrayWaitHandle extends WaitableWaitHandle {
-
-  /* Create a wait handle that waits for a given array of dependencies
-   * @param array $dependencies - An Array of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given array of
-   * dependencies and return their results
-   */
-  <<__Native>>
-  public static function create(array $dependencies): WaitHandle;
-
-  /* Set callback for when a GenArrayWaitHandle is created
-   * @param mixed $callback - A Closure to be called on creation
-   */
-  <<__HipHopSpecific, __Native>>
-  public static function setOnCreateCallback(mixed $callback): void;
-}
-
-/* A wait handle representing a map of asynchronous operations
- */
-final class GenMapWaitHandle extends WaitableWaitHandle {
-
-  /* Create a wait handle that waits for a given map of dependencies
-   * @param mixed $dependencies - A map of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given map of
-   * dependencies and return their results
-   */
-  <<__Native>>
-  public static function create(Map $dependencies): WaitHandle;
-
-  /* Set callback for when a GenMapWaitHandle is created
-   * @param mixed $callback - A Closure to be called on creation
-   */
-  <<__HipHopSpecific, __Native>>
-  public static function setOnCreateCallback(mixed $callback): void;
-}
-
-/* A wait handle representing a vector of asynchronous operations
- */
-final class GenVectorWaitHandle extends WaitableWaitHandle {
-
-  /* Create a wait handle that waits for a given vector of dependencies
-   * @param mixed $dependencies - A Vector of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given vector of
-   * dependencies and return their results
-   */
-  <<__Native>>
-  public static function create(Vector $dependencies): WaitHandle;
-
-  /* Set callback for when a GenVectorWaitHandle is created
-   * @param mixed $callback - A Closure to be called on creation
-   */
-  <<__HipHopSpecific, __Native>>
-  public static function setOnCreateCallback(mixed $callback): void;
-}
-
 /* A wait handle representing a condition variable waiting for a notification
  */
 final class ConditionWaitHandle extends WaitableWaitHandle {

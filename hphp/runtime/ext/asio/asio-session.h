@@ -29,9 +29,6 @@ namespace HPHP {
 struct ActRec;
 struct c_WaitHandle;
 struct c_AwaitAllWaitHandle;
-struct c_GenArrayWaitHandle;
-struct c_GenMapWaitHandle;
-struct c_GenVectorWaitHandle;
 struct c_ConditionWaitHandle;
 struct c_ResumableWaitHandle;
 
@@ -132,21 +129,6 @@ struct AsioSession final {
   bool hasOnAwaitAllCreate() { return !!m_onAwaitAllCreate; }
   void onAwaitAllCreate(c_AwaitAllWaitHandle* wh, const Variant& dependencies);
 
-  // GenArrayWaitHandle callbacks:
-  void setOnGenArrayCreate(const Variant& callback);
-  bool hasOnGenArrayCreate() { return !!m_onGenArrayCreate; }
-  void onGenArrayCreate(c_GenArrayWaitHandle* wh, const Variant& dependencies);
-
-  // GenMapWaitHandle callbacks:
-  void setOnGenMapCreate(const Variant& callback);
-  bool hasOnGenMapCreate() { return !!m_onGenMapCreate; }
-  void onGenMapCreate(c_GenMapWaitHandle* wh, const Variant& dependencies);
-
-  // GenVectorWaitHandle callbacks:
-  void setOnGenVectorCreate(const Variant& callback);
-  bool hasOnGenVectorCreate() { return !!m_onGenVectorCreate; }
-  void onGenVectorCreate(c_GenVectorWaitHandle* wh, const Variant& deps);
-
   // ConditionWaitHandle callbacks:
   void setOnConditionCreate(const Variant& callback);
   bool hasOnConditionCreate() { return !!m_onConditionCreate; }
@@ -187,9 +169,6 @@ struct AsioSession final {
     mark(m_onResumableSuccess);
     mark(m_onResumableFail);
     mark(m_onAwaitAllCreate);
-    mark(m_onGenArrayCreate);
-    mark(m_onGenMapCreate);
-    mark(m_onGenVectorCreate);
     mark(m_onConditionCreate);
     mark(m_onExtThreadEventCreate);
     mark(m_onExtThreadEventSuccess);
@@ -216,9 +195,6 @@ private:
   Object m_onResumableSuccess;
   Object m_onResumableFail;
   Object m_onAwaitAllCreate;
-  Object m_onGenArrayCreate;
-  Object m_onGenMapCreate;
-  Object m_onGenVectorCreate;
   Object m_onConditionCreate;
   Object m_onExtThreadEventCreate;
   Object m_onExtThreadEventSuccess;

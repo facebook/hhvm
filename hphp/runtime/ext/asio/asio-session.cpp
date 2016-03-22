@@ -27,9 +27,6 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
@@ -222,50 +219,6 @@ void AsioSession::onAwaitAllCreate(
     m_onAwaitAllCreate,
     make_packed_array(waitHandle, dependencies),
     "AwaitAllWaitHandle::onCreate"
-  );
-}
-
-void AsioSession::setOnGenArrayCreate(const Variant& callback) {
-  m_onGenArrayCreate = checkCallback(callback, "GenArrayWaitHandle::onCreate");
-}
-
-void AsioSession::onGenArrayCreate(
-  c_GenArrayWaitHandle* waitHandle,
-  const Variant& dependencies
-) {
-  runCallback(
-    m_onGenArrayCreate,
-    make_packed_array(waitHandle, dependencies),
-    "GenArrayWaitHandle::onCreate"
-  );
-}
-
-void AsioSession::setOnGenMapCreate(const Variant& callback) {
-  m_onGenMapCreate = checkCallback(callback, "GenMapWaitHandle::onCreate");
-}
-
-void AsioSession::onGenMapCreate(
-  c_GenMapWaitHandle* waitHandle,
-  const Variant& dependencies
-) {
-  runCallback(m_onGenMapCreate,
-    make_packed_array(waitHandle, dependencies),
-    "GenMapWaitHandle::onCreate"
-  );
-}
-
-void AsioSession::setOnGenVectorCreate(const Variant& callback) {
-  m_onGenVectorCreate= checkCallback(callback, "GenVectorWaitHandle::onCreate");
-}
-
-void AsioSession::onGenVectorCreate(
-  c_GenVectorWaitHandle* waitHandle,
-  const Variant& dependencies
-) {
-  runCallback(
-    m_onGenVectorCreate,
-    make_packed_array(waitHandle, dependencies),
-    "GenVectorWaitHandle::onCreate"
   );
 }
 

@@ -26,9 +26,6 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -124,9 +121,6 @@ size_t asio_object_size(const ObjectData* od) {
     case c_WaitHandle::Kind::knd: \
       return sizeof(c_ ## knd ## WaitHandle);
     X(Static)
-    X(GenArray)
-    X(GenMap)
-    X(GenVector)
     X(Condition)
     X(Reschedule)
     X(Sleep)
@@ -200,9 +194,6 @@ void AsioExtension::finishClasses() {
   finish_class<c_WaitHandle>();
   finish_class<c_WaitableWaitHandle>();
   finish_class<c_AwaitAllWaitHandle>();
-  finish_class<c_GenArrayWaitHandle>();
-  finish_class<c_GenMapWaitHandle>();
-  finish_class<c_GenVectorWaitHandle>();
   finish_class<c_ResumableWaitHandle>();
   finish_class<c_AsyncFunctionWaitHandle>();
   finish_class<c_AsyncGeneratorWaitHandle>();

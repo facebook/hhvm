@@ -1,0 +1,3 @@
+
+Notice: Undefined variable: nonexistent in /data/users/deep/fbsource/fbcode/hphp/test/slow/ext_mysqli/test_mysqli_data_seek.php on line 7
+bool(false)

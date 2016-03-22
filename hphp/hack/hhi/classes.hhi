@@ -159,22 +159,6 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   ): void {}
 }
 
-final class GenArrayWaitHandle extends WaitableWaitHandle<array> {
-  // This is technically overloaded to allow an array of nullable
-  public static function create(array $dependencies): WaitHandle<array> {}
-  public static function setOnCreateCallback(?(function(GenArrayWaitHandle, array): void) $callback) {}
-}
-
-final class GenMapWaitHandle<Tk, Tv> extends WaitableWaitHandle<Map<Tk, Tv>> {
-  public static function create(Map<Tk, WaitHandle<Tv>> $dependencies): WaitHandle<Map<Tk, Tv>> {}
-  public static function setOnCreateCallback(?(function(GenMapWaitHandle<Tk, Tv>, Map<mixed, mixed>): void) $callback) {}
-}
-
-final class GenVectorWaitHandle<T> extends WaitableWaitHandle<Vector<T>> {
-  public static function create(Vector<WaitHandle<T>> $dependencies): WaitHandle<Vector<T>> {}
-  public static function setOnCreateCallback(?(function(GenVectorWaitHandle<T>, Vector<mixed>): void) $callback) {}
-}
-
 final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function create(WaitHandle<void> $child): ConditionWaitHandle<T> {}
   public static function setOnCreateCallback(?(function(ConditionWaitHandle<T>, WaitableWaitHandle<void>): void) $callback) {}

@@ -11,7 +11,7 @@ async function bar($id) {
 
 async function foo() {
   await block();
-  return await GenArrayWaitHandle::create(
+  return await \HH\Asio\m(
     array_map(
       async $id ==> {
         return await bar($id);

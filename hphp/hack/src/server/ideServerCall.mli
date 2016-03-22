@@ -16,11 +16,10 @@ type deferred_to_typechecker =
 type result =
   | Result of IdeJson.response_type
   | Deferred_to_typechecker of deferred_to_typechecker
+  | Server_busy
 
 val get_call_response:
   call_id ->
   call_type ->
-  TypecheckerOptions.t ->
-  FileInfo.t Relative_path.Map.t ->
-  Errors.t ->
+  IdeEnv.t ->
   result

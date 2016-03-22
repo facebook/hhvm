@@ -43,22 +43,21 @@ struct ExtendedLogger : Logger {
   static void Verbose(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(1,2);
 
+  // Convenience functions for stringifying.
+  static std::string StringOfStackTrace(const Array& stackTrace);
+
+private:
   // Log additional injected stacktrace.
   static void Log(LogLevelType level, const Array& stackTrace, bool escape = true,
                   bool escapeMore = false);
 
-  // Convenience functions for stringifying.
   static std::string StringOfFrame(const Array& frame, int i, bool escape = false);
-  static std::string StringOfStackTrace(const Array& stackTrace);
 
-protected:
   virtual void log(LogLevelType level, const char *type, const Exception &e,
                    const char *file = nullptr, int line = 0);
   virtual void log(LogLevelType level, const std::string &msg,
                    const StackTrace *stackTrace,
                    bool escape = true, bool escapeMore = false);
-
-private:
   static void PrintStackTrace(FILE *f, const Array& stackTrace,
                               bool escape = false, bool escapeMore = false);
 };

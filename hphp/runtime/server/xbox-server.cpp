@@ -34,7 +34,8 @@ namespace HPHP {
 
 using std::string;
 
-XboxTransport::XboxTransport(const String& message, const String& reqInitDoc /* = "" */)
+XboxTransport::XboxTransport(const String& message,
+                             const String& reqInitDoc /* = "" */)
     : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
   Timer::GetMonotonicTime(m_queueTime);
 
@@ -355,7 +356,8 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = "" */,
+Resource XboxServer::TaskStart(const String& msg,
+                               const String& reqInitDoc /* = "" */,
   ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
   {
     Lock l(s_dispatchMutex);

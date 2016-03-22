@@ -375,7 +375,6 @@ public:
   void setResponse(int code, const char *info = nullptr);
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
-  bool setHeaderCallback(const Variant& callback);
   void sendRaw(void *data, int size, int code = 200,
                bool compressed = false, bool chunked = false,
                const char *codeInfo = nullptr);
@@ -455,8 +454,6 @@ protected:
   // output
   bool m_chunkedEncoding;
   bool m_headerSent;
-  Cell m_headerCallback;
-  bool m_headerCallbackDone;  // used to prevent infinite loops
   int m_responseCode;
   std::string m_responseCodeInfo;
   HeaderMap m_responseHeaders;

@@ -340,13 +340,12 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
 }
 
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
-  Transport *transport = g_context->getTransport();
-
   if (!is_callable(callback)) {
     raise_warning("First argument is expected to be a valid callback");
     return init_null();
   }
 
+  auto transport = g_context->getTransport();
   if (!transport) {
     // fail if there is no transport
     return false;
@@ -355,7 +354,7 @@ Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
     // fail if headers have already been sent
     return false;
   }
-  return transport->setHeaderCallback(callback);
+  return g_context->setHeaderCallback(callback);
 }
 
 void HHVM_FUNCTION(header_remove, const Variant& name /* = null_string */) {

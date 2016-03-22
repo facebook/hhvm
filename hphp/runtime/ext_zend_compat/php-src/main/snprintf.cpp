@@ -989,10 +989,10 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
               goto fmt_error;
           }
 
-          if (zend_isnan(fp_num)) {
+          if (std::isnan(fp_num)) {
             s = "NAN";
             s_len = 3;
-          } else if (zend_isinf(fp_num)) {
+          } else if (std::isinf(fp_num)) {
             s = "INF";
             s_len = 3;
           } else {
@@ -1030,11 +1030,11 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
               goto fmt_error;
           }
 
-          if (zend_isnan(fp_num)) {
+          if (std::isnan(fp_num)) {
             s = "NAN";
             s_len = 3;
             break;
-          } else if (zend_isinf(fp_num)) {
+          } else if (std::isinf(fp_num)) {
             if (fp_num > 0) {
               s = "INF";
               s_len = 3;

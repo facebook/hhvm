@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/zend-printf.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -25,28 +25,6 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-strtod.h"
-
-#if defined(__APPLE__)
-#ifndef isnan
-#define isnan(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
-  : __inline_isnanl ((long double)(x)))
-#endif
-
-#ifndef isinf
-#define isinf(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
-  : __inline_isinfl ((long double)(x)))
-#endif
-#endif
-
-#ifdef __CYGWIN__
-#include <cmath>
-#define isinf std::isinf
-#define isnan std::isnan
-#endif
 
 namespace HPHP {
 
@@ -693,14 +671,14 @@ inline static void appenddouble(StringBuffer *buffer,
     precision = MAX_FLOAT_PRECISION;
   }
 
-  if (isnan(number)) {
+  if (std::isnan(number)) {
     is_negative = (number<0);
     appendstring(buffer, "NaN", 3, 0, padding,
                  alignment, 3, is_negative, 0, always_sign);
     return;
   }
 
-  if (isinf(number)) {
+  if (std::isinf(number)) {
     is_negative = (number<0);
     appendstring(buffer, "INF", 3, 0, padding,
                  alignment, 3, is_negative, 0, always_sign);
@@ -1407,10 +1385,10 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
               goto fmt_error;
           }
 
-          if (isnan(fp_num)) {
+          if (std::isnan(fp_num)) {
             s = const_cast<char*>("nan");
             s_len = 3;
-          } else if (isinf(fp_num)) {
+          } else if (std::isinf(fp_num)) {
             s = const_cast<char*>("inf");
             s_len = 3;
           } else {
@@ -1448,11 +1426,11 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
               goto fmt_error;
           }
 
-          if (isnan(fp_num)) {
+          if (std::isnan(fp_num)) {
              s = const_cast<char*>("NAN");
              s_len = 3;
              break;
-           } else if (isinf(fp_num)) {
+           } else if (std::isinf(fp_num)) {
              if (fp_num > 0) {
                s = const_cast<char*>("INF");
                s_len = 3;

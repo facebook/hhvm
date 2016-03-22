@@ -21,7 +21,8 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/overflow.h"
-#include <math.h>
+#include <cmath>
+
 #ifndef _MSC_VER
 #include <monetary.h>
 #endif
@@ -33,23 +34,6 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
-
-#ifdef __APPLE__
-#ifndef isnan
-#define isnan(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
-  : __inline_isnan ((long double)(x)))
-#endif
-
-#ifndef isinf
-#define isinf(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
-  : __inline_isinf ((long double)(x)))
-#endif
-#endif
-
 
 #define PHP_QPRINT_MAXL 75
 

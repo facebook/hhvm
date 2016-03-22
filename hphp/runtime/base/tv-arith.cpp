@@ -187,7 +187,7 @@ struct Div {
         FOLLY_MSVC_DISABLE_WARNING(4723)
         return make_dbl([](int64_t tVal) {
           auto v = tVal / 0.0;
-          assert(isnan(v) || isinf(v));
+          assert(std::isnan(v) || std::isinf(v));
           return v;
         }(t));
         FOLLY_POP_WARNING

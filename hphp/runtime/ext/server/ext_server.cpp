@@ -39,7 +39,6 @@ static struct ServerExtension final : Extension {
     HHVM_RC_INT_SAME(PAGELET_DONE);
 
     HHVM_FE(hphp_thread_type);
-    HHVM_FE(dangling_server_proxy_old_request);
     HHVM_FE(pagelet_server_is_enabled);
     HHVM_FE(pagelet_server_task_start);
     HHVM_FE(pagelet_server_task_status);
@@ -67,11 +66,6 @@ static struct ServerExtension final : Extension {
 int64_t HHVM_FUNCTION(hphp_thread_type) {
   Transport *transport = g_context->getTransport();
   return transport ? static_cast<int64_t>(transport->getThreadType()) : -1;
-}
-
-bool HHVM_FUNCTION(dangling_server_proxy_old_request) {
-  // We no longer use dangling server now.
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

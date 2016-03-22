@@ -155,7 +155,6 @@ struct RuntimeOption {
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ServerGracefulShutdownWait;
-  static int ServerDanglingWait;
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
   static bool ServerKillOnSIGTERM;

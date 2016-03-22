@@ -1060,7 +1060,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CheckStk:
     return may_load_store(
-      AStack { inst.src(0), inst.extra<CheckStk>()->irSpOffset.offset, 1 },
+      AStack { inst.src(0), inst.extra<CheckStk>()->offset.offset, 1 },
       AEmpty
     );
   case CufIterSpillFrame:

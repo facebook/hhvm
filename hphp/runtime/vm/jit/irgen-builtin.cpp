@@ -1128,11 +1128,9 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     ret[argIdx++] = realize_param(
       env, param, callee, targetTy,
       [&] (const Type& ty, Block* fail) -> SSATmp* {
-        auto irspOff = offsetFromIRSP(env, offset);
-        gen(env, CheckStk,
-            RelOffsetData { offset, irspOff },
-            ty, fail, sp(env));
-        env.irb->constrainStack(irspOff, DataTypeSpecific);
+        auto irSPRel = offsetFromIRSP(env, offset);
+        gen(env, CheckStk, IRSPOffsetData { irSPRel }, ty, fail, sp(env));
+        env.irb->constrainStack(irSPRel, DataTypeSpecific);
         return nullptr;
       },
       [&] (const Type& ty) -> SSATmp* {

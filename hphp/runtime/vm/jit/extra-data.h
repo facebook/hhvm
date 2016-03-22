@@ -311,54 +311,6 @@ struct IRSPOffsetData : IRExtraData {
   IRSPOffset offset;
 };
 
-/*
- * Special snowflake stack offset.
- *
- * This is sometimes used instead of IRSPOffsetData when we need to keep track
- * of the BCSPOffset for post-code-gen use, at which point it would be
- * difficult to derive (e.g., in visitGuards()).
- */
-struct RelOffsetData : IRExtraData {
-  explicit RelOffsetData(BCSPOffset bcSpOffset, IRSPOffset irSpOffset)
-    : hasBcSpOffset(true)
-    , bcSpOffset(bcSpOffset)
-    , irSpOffset(irSpOffset)
-  {}
-
-  explicit RelOffsetData(IRSPOffset irSpOffset)
-    : hasBcSpOffset(false)
-    , bcSpOffset(BCSPOffset{-1})
-    , irSpOffset(irSpOffset)
-  {}
-
-  bool equals(RelOffsetData o) const {
-    return bcSpOffset == o.bcSpOffset && irSpOffset == o.irSpOffset;
-  }
-  size_t hash() const {
-    return hash_int64_pair(
-      std::hash<int32_t>()(hasBcSpOffset ? bcSpOffset.offset : -1),
-      std::hash<int32_t>()(irSpOffset.offset)
-    );
-  }
-
-  std::string show() const {
-    return folly::to<std::string>(
-      "BCSPOff ", bcSpOffset.offset, ", ",
-      "IRSPOff ", irSpOffset.offset
-    );
-  }
-
-  /*
-   * Note: In certain situations we replace instructions that operate on locals
-   * with stack relative instructions for inlined calls. The bcSpOffset field
-   * is only used when visiting guards at the time of this writing, and inlined
-   * callee stack cells will never be in the guards for a translation.
-   */
-  bool hasBcSpOffset;
-  BCSPOffset bcSpOffset;
-  IRSPOffset irSpOffset;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -1198,10 +1150,10 @@ X(InitObjProps,                 ClassData);
 X(InstanceOfIfaceVtable,        ClassData);
 X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
-X(CheckStk,                     RelOffsetData);
-X(HintStkInner,                 RelOffsetData);
-X(CastStk,                      IRSPOffsetData);
+X(CheckStk,                     IRSPOffsetData);
+X(HintStkInner,                 IRSPOffsetData);
 X(StStk,                        IRSPOffsetData);
+X(CastStk,                      IRSPOffsetData);
 X(CoerceStk,                    CoerceStkData);
 X(CoerceMem,                    CoerceMemData);
 X(CoerceCellToInt,              FuncArgData);

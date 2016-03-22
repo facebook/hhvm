@@ -344,8 +344,9 @@ template<typename F>
 void visitGuards(IRUnit& unit, F func) {
   using L = RegionDesc::Location;
   auto blocks = rpoSortCfg(unit);
-  for (auto* block : blocks) {
-    for (auto& inst : *block) {
+
+  for (auto const block : blocks) {
+    for (auto const& inst : *block) {
       switch (inst.op()) {
         case EndGuards:
           return;
@@ -357,19 +358,15 @@ void visitGuards(IRUnit& unit, F func) {
                inst.is(HintLocInner));
           break;
         case HintStkInner:
-        case CheckStk:
-        {
-          /*
-           * BCSPOffset is optional but should --always-- be set for CheckStk
-           * instructions that appear within the guards for a translation.
-           */
-          auto const bcSPOff = inst.extra<RelOffsetData>()->bcSpOffset;
-          assertx(inst.extra<RelOffsetData>()->hasBcSpOffset);
+        case CheckStk: {
+          auto const irSPRel = inst.extra<IRSPOffsetData>()->offset;
 
-          auto const offsetFromFP =
-            bcSPOff.to<FPInvOffset>(inst.marker().spOff());
+          auto const defSP = inst.src(0)->inst();
+          assertx(defSP->is(DefSP));
+          auto const irSPOff = defSP->extra<DefSP>()->offset;
+
           func(&inst,
-               L::Stack{offsetFromFP},
+               L::Stack{irSPRel.to<FPInvOffset>(irSPOff)},
                inst.typeParam(),
                inst.is(HintStkInner));
           break;
@@ -400,8 +397,9 @@ void recordDependencies(Env& env) {
   auto hintMap = std::map<RegionDesc::Location,Type>{};
   auto catMap = std::map<RegionDesc::Location,DataTypeCategory>{};
   const auto& guards = env.irgs.irb->guards()->guards;
-  visitGuards(unit, [&](IRInstruction* guard, const RegionDesc::Location& loc,
-                        Type type, bool hint) {
+  visitGuards(unit, [&] (const IRInstruction* guard,
+                         const RegionDesc::Location& loc,
+                         Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
     if (type <= TCls) return;

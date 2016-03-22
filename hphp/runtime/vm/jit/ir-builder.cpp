@@ -146,15 +146,10 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
         m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
       }
     }
-    if (inst->is(CheckStk)) {
-      auto const offset = inst->extra<RelOffsetData>()->irSpOffset;
-      m_constraints.typeSrcs[inst] = m_state.stack(offset).typeSrcs;
-      m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
-    }
-    if (inst->is(AssertStk, LdStk)) {
+    if (inst->is(AssertStk, CheckStk, LdStk)) {
       auto const offset = inst->extra<IRSPOffsetData>()->offset;
       m_constraints.typeSrcs[inst] = m_state.stack(offset).typeSrcs;
-      if (inst->is(AssertStk)) {
+      if (inst->is(AssertStk, CheckStk)) {
         m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
       }
     }
@@ -272,7 +267,7 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
 }
 
 SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
-  auto const offset = inst->extra<CheckStk>()->irSpOffset;
+  auto const offset = inst->extra<CheckStk>()->offset;
 
   if (auto const prevValue = stackValue(offset, DataTypeGeneric)) {
     gen(CheckType, inst->typeParam(), inst->taken(), prevValue);

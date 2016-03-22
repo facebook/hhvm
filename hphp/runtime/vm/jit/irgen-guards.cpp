@@ -64,7 +64,7 @@ void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
+  auto const soff = IRSPOffsetData { offsetFromIRSP(env, idx) };
 
   if (type <= TCell) {
     gen(env, CheckStk, type, soff, exit, sp(env));
@@ -73,14 +73,14 @@ void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckStk, TBoxedInitCell, soff, exit, sp(env));
-  env.irb->constrainStack(soff.irSpOffset, DataTypeSpecific);
+  env.irb->constrainStack(soff.offset, DataTypeSpecific);
   gen(env, HintStkInner, type, soff, sp(env));
 
   if (!outerOnly && type.inner() < TInitCell) {
     auto stk = gen(env, LdStk, TBoxedInitCell,
-                   IRSPOffsetData{soff.irSpOffset}, sp(env));
+                   IRSPOffsetData{soff.offset}, sp(env));
     gen(env, CheckRefInner,
-        env.irb->predictedStackInnerType(soff.irSpOffset),
+        env.irb->predictedStackInnerType(soff.offset),
         exit, stk);
   }
 }

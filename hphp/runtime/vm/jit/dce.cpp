@@ -874,48 +874,35 @@ void optimizeActRecs(const BlockList& blocks,
 void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner));
   assertx(inst.src(0)->inst()->is(DefInlineFP));
+
+  auto const data = IRSPOffsetData { locToStkOff(inst) };
+  auto const mainSP = unit.mainSP();
+
   switch (inst.op()) {
-    case StLoc: {
-      IRSPOffsetData data {locToStkOff(inst)};
-      unit.replace(&inst, StStk, data, unit.mainSP(), inst.src(1));
+    case StLoc:
+      unit.replace(&inst, StStk, data, mainSP, inst.src(1));
       return;
-    }
-    case LdLoc: {
-      auto ty = inst.typeParam();
-      IRSPOffsetData data {locToStkOff(inst)};
-      unit.replace(&inst, LdStk, data, ty, unit.mainSP());
+    case LdLoc:
+      unit.replace(&inst, LdStk, data, inst.typeParam(), mainSP);
       return;
-    }
-    case LdLocAddr: {
-      IRSPOffsetData data {locToStkOff(inst)};
-      unit.replace(&inst, LdStkAddr, data, unit.mainSP());
+    case LdLocAddr:
+      unit.replace(&inst, LdStkAddr, data, mainSP);
       retypeDests(&inst, &unit);
       return;
-    }
-    case AssertLoc: {
-      auto ty = inst.typeParam();
-      IRSPOffsetData data {locToStkOff(inst)};
-      unit.replace(&inst, AssertStk, data, ty, unit.mainSP());
+    case AssertLoc:
+      unit.replace(&inst, AssertStk, data, inst.typeParam(), mainSP);
       return;
-    }
     case CheckLoc: {
-      auto ty = inst.typeParam();
-      // NOTE: RelOffsetData takes an optional BCSPOffset but it only gets
-      // read inside of region-tracelet when we walk guards-- if we're
-      // killing an inlined frame its locals won't be part of the guards
-      RelOffsetData data {locToStkOff(inst)};
       auto next = inst.next();
-      unit.replace(&inst, CheckStk, data, ty, inst.taken(), unit.mainSP());
+      unit.replace(&inst, CheckStk, data, inst.typeParam(),
+                   inst.taken(), mainSP);
       inst.setNext(next);
       return;
     }
-    case HintLocInner: {
-      auto ty = inst.typeParam();
-      // NOTE: same as above
-      RelOffsetData data {locToStkOff(inst)};
-      unit.replace(&inst, HintStkInner, data, ty, unit.mainSP());
+    case HintLocInner:
+      unit.replace(&inst, HintStkInner, data, inst.typeParam(), mainSP);
       return;
-    }
+
     default: break;
   }
   not_reached();

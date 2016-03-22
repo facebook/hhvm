@@ -53,7 +53,7 @@ struct Location {
     offset = off;
   }
 
-  explicit Location(BCSPOffset offset)
+  explicit Location(BCSPRelOffset offset)
     : space(Stack)
   {
     bcRelOffset = offset;
@@ -157,7 +157,7 @@ struct Location {
 public:
   Space space;
   union {
-    BCSPOffset bcRelOffset;
+    BCSPRelOffset bcRelOffset;
     int64_t offset;
   };
 };

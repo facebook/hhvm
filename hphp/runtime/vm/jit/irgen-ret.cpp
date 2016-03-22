@@ -113,7 +113,7 @@ void emitAsyncRetSlow(IRGS& env, SSATmp* retVal) {
   gen(env, FreeActRec, fp(env));
   decRef(env, resumableObj);
 
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
+  auto const spAdjust = bcSPOffset(env);
   gen(
     env,
     AsyncRetCtrl,
@@ -189,7 +189,7 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
 
   // Unblock parents and possibly take fast path to resume parent. SPOffset -1
   // is for retVal, which will be pushed on stack.
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{-1});
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   gen(env,
       AsyncRetFast,
       RetCtrlData { spAdjust, false },
@@ -221,7 +221,7 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   gen(
     env,
     RetCtrl,
-    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), true },
+    RetCtrlData { bcSPOffset(env), true },
     sp(env),
     fp(env)
   );
@@ -264,9 +264,9 @@ void implRet(IRGS& env) {
 
 }
 
-IRSPOffset offsetToReturnSlot(IRGS& env) {
+IRSPRelOffset offsetToReturnSlot(IRGS& env) {
   auto const retOff = FPRelOffset { AROFF(m_r) / int32_t{sizeof(Cell)} };
-  return retOff.to<IRSPOffset>(env.irb->fs().spOffset());
+  return retOff.to<IRSPRelOffset>(env.irb->fs().irSPOff());
 }
 
 void emitRetC(IRGS& env) {

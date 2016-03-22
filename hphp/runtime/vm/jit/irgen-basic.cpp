@@ -417,10 +417,10 @@ void emitNullUninit(IRGS& env) { push(env, cns(env, TUninit)); }
 
 void emitNop(IRGS&)                {}
 void emitBoxRNop(IRGS& env) {
-  assertTypeStack(env, BCSPOffset{0}, TBoxedCell);
+  assertTypeStack(env, BCSPRelOffset{0}, TBoxedCell);
 }
 void emitUnboxRNop(IRGS& env) {
-  assertTypeStack(env, BCSPOffset{0}, TCell);
+  assertTypeStack(env, BCSPRelOffset{0}, TCell);
 }
 void emitRGetCNop(IRGS&)           {}
 void emitFPassC(IRGS&, int32_t)    {}

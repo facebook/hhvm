@@ -59,12 +59,12 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
   }
 }
 
-void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
+void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
                     Offset dest, bool outerOnly) {
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  auto const soff = IRSPOffsetData { offsetFromIRSP(env, idx) };
+  auto const soff = IRSPRelOffsetData { offsetFromIRSP(env, idx) };
 
   if (type <= TCell) {
     gen(env, CheckStk, type, soff, exit, sp(env));
@@ -78,7 +78,7 @@ void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
 
   if (!outerOnly && type.inner() < TInitCell) {
     auto stk = gen(env, LdStk, TBoxedInitCell,
-                   IRSPOffsetData{soff.offset}, sp(env));
+                   IRSPRelOffsetData{soff.offset}, sp(env));
     gen(env, CheckRefInner,
         env.irb->predictedStackInnerType(soff.offset),
         exit, stk);
@@ -93,9 +93,9 @@ void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
   gen(env, AssertLoc, type, LocalId(locId), fp(env));
 }
 
-void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
+void assertTypeStack(IRGS& env, BCSPRelOffset idx, Type type) {
   gen(env, AssertStk, type,
-      IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
+      IRSPRelOffsetData { offsetFromIRSP(env, idx) }, sp(env));
 }
 
 void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
@@ -157,9 +157,9 @@ void checkRefs(IRGS& env,
                const std::vector<bool>& mask,
                const std::vector<bool>& vals,
                Offset dest) {
-  auto const actRecOff = entryArDelta + offsetFromIRSP(env, BCSPOffset{0});
+  auto const actRecOff = entryArDelta + bcSPOffset(env);
   auto const funcPtr = gen(env, LdARFuncPtr,
-                           IRSPOffsetData { actRecOff }, sp(env));
+                           IRSPRelOffsetData { actRecOff }, sp(env));
   SSATmp* nParams = nullptr;
 
   for (unsigned i = 0; i < mask.size(); i += 64) {

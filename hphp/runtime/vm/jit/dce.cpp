@@ -748,7 +748,7 @@ bool findWeakActRecUses(const BlockList& blocks,
  * Convert a localId in a callee frame into an SP relative offset in the caller
  * frame.
  */
-IRSPOffset locToStkOff(IRInstruction& inst) {
+IRSPRelOffset locToStkOff(IRInstruction& inst) {
   assertx(inst.is(LdLoc, StLoc, LdLocAddr, AssertLoc, CheckLoc, HintLocInner));
 
   auto locId = inst.extra<LocalId>()->locId;
@@ -875,7 +875,7 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner));
   assertx(inst.src(0)->inst()->is(DefInlineFP));
 
-  auto const data = IRSPOffsetData { locToStkOff(inst) };
+  auto const data = IRSPRelOffsetData { locToStkOff(inst) };
   auto const mainSP = unit.mainSP();
 
   switch (inst.op()) {

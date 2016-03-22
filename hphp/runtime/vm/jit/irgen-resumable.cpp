@@ -129,7 +129,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
   auto const stack = sp(env);
   auto const frame = fp(env);
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
+  auto const spAdjust = bcSPOffset(env);
   gen(env, AsyncRetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
 }
 
@@ -139,7 +139,7 @@ void yieldReturnControl(IRGS& env) {
 
   auto const stack    = sp(env);
   auto const frame    = fp(env);
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
+  auto const spAdjust = bcSPOffset(env);
   gen(env, RetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
 }
 
@@ -256,12 +256,12 @@ void emitFCallAwait(IRGS& env,
                     const StringData*) {
   auto const resumeOffset = nextBcOff(env);
   emitFCall(env, numParams);
-  assertTypeStack(env, BCSPOffset{0}, TCell);
+  assertTypeStack(env, BCSPRelOffset{0}, TCell);
   ifThen(
     env,
     [&] (Block* taken) {
       auto addr = gen(env, LdStkAddr,
-                      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+                      IRSPRelOffsetData { bcSPOffset(env) },
                       sp(env));
       auto aux = gen(env, LdTVAux, LdTVAuxData { 1 }, addr);
       gen(env, JmpNZero, taken, aux);
@@ -269,7 +269,7 @@ void emitFCallAwait(IRGS& env,
     [&] {
       hint(env, Block::Hint::Unlikely);
       IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-      assertTypeStack(env, BCSPOffset{0}, TObj);
+      assertTypeStack(env, BCSPRelOffset{0}, TObj);
       // If an event hook throws we need the current bytecode to be
       // after the FCallAwait, otherwise the unwinder will expect
       // to find a PreLive ActRec on the stack.
@@ -352,7 +352,7 @@ void emitContEnter(IRGS& env) {
   gen(
     env,
     ContEnter,
-    ContEnterData { offsetFromIRSP(env, BCSPOffset{0}), returnBcOffset },
+    ContEnterData { bcSPOffset(env), returnBcOffset },
     sp(env),
     fp(env),
     genFp,

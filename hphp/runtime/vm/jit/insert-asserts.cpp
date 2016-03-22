@@ -70,11 +70,11 @@ void insertRefCountAsserts(IRUnit& unit, IRInstruction& inst) {
 void insertStkAssert(IRUnit& unit,
                      IRInstruction* where,
                      SSATmp* sp,
-                     IRSPOffset off) {
+                     IRSPRelOffset off) {
   auto const addr = unit.gen(
     LdStkAddr,
     where->marker(),
-    IRSPOffsetData { off },
+    IRSPRelOffsetData { off },
     sp
   );
   if (!insertAfter(where, addr)) return;

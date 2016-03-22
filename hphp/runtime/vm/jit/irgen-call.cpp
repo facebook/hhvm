@@ -141,7 +141,7 @@ void fpushObjMethodUnknown(IRGS& env,
   gen(env,
       LdObjMethod,
       LdObjMethodData {
-        offsetFromIRSP(env, BCSPOffset{0}), methodName, shouldFatal
+        bcSPOffset(env), methodName, shouldFatal
       },
       objCls,
       sp(env));
@@ -484,8 +484,9 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  gen(env, LdArrFuncCtx, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-    arr, sp(env), thisAR);
+  gen(env, LdArrFuncCtx,
+      IRSPRelOffsetData { bcSPOffset(env) },
+      arr, sp(env), thisAR);
   decRef(env, arr);
 }
 
@@ -522,8 +523,9 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
 
   auto const opcode = callable->isA(TArr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
-  gen(env, opcode, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-    callable, sp(env), fp(env));
+  gen(env, opcode,
+      IRSPRelOffsetData { bcSPOffset(env) },
+      callable, sp(env), fp(env));
   decRef(env, callable);
 }
 
@@ -564,7 +566,7 @@ SSATmp* clsMethodCtx(IRGS& env, const Func* callee, const Class* cls) {
 void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
   bool forward = op == OpFPushCufF;
-  SSATmp* callable = topC(env, BCSPOffset{safe ? 1 : 0});
+  SSATmp* callable = topC(env, BCSPRelOffset{safe ? 1 : 0});
 
   const Class* cls = nullptr;
   StringData* invName = nullptr;
@@ -661,7 +663,10 @@ void fpushActRec(IRGS& env,
                  int32_t numArgs,
                  const StringData* invName) {
   ActRecInfo info;
-  info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
+  info.spOffset = offsetFromIRSP(
+    env,
+    BCSPRelOffset{-int32_t{kNumActRecCells}}
+  );
   info.invName = invName;
   info.numArgs = numArgs;
 
@@ -682,7 +687,10 @@ void emitFPushCufIter(IRGS& env, int32_t numParams, int32_t itId) {
     env,
     CufIterSpillFrame,
     FPushCufData {
-      offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}}),
+      offsetFromIRSP(
+        env,
+        BCSPRelOffset{-int32_t{kNumActRecCells}}
+      ),
       static_cast<uint32_t>(numParams),
       itId
     },
@@ -925,8 +933,8 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   env.irb->exceptionStackBoundary();
 
   gen(env, LookupClsMethod,
-    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-    clsVal, methVal, sp(env), fp(env));
+      IRSPRelOffsetData { bcSPOffset(env) },
+      clsVal, methVal, sp(env), fp(env));
   decRef(env, methVal);
 }
 
@@ -934,7 +942,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
   auto const exitBlock = makeExitSlow(env);
 
   auto classTmp = top(env);
-  auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
+  auto methodTmp = topC(env, BCSPRelOffset{1}, DataTypeGeneric);
   assertx(classTmp->isA(TCls));
   if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(TStr)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
@@ -1071,7 +1079,7 @@ void emitFPassCW(IRGS& env, int32_t argNum) {
 
 void emitFCallArray(IRGS& env) {
   auto const data = CallArrayData {
-    offsetFromIRSP(env, BCSPOffset{0}),
+    bcSPOffset(env),
     0,
     bcOff(env),
     nextBcOff(env),
@@ -1082,7 +1090,7 @@ void emitFCallArray(IRGS& env) {
 
 void emitFCallUnpack(IRGS& env, int32_t numParams) {
   auto const data = CallArrayData {
-    offsetFromIRSP(env, BCSPOffset{0}),
+    bcSPOffset(env),
     numParams,
     bcOff(env),
     nextBcOff(env),
@@ -1121,7 +1129,7 @@ void emitFCall(IRGS& env, int32_t numParams) {
     env,
     Call,
     CallData {
-      offsetFromIRSP(env, BCSPOffset{0}),
+      bcSPOffset(env),
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
@@ -1151,7 +1159,7 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
     env,
     Call,
     CallData {
-      offsetFromIRSP(env, BCSPOffset{0}),
+      bcSPOffset(env),
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,

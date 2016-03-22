@@ -147,7 +147,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
       }
     }
     if (inst->is(AssertStk, CheckStk, LdStk)) {
-      auto const offset = inst->extra<IRSPOffsetData>()->offset;
+      auto const offset = inst->extra<IRSPRelOffsetData>()->offset;
       m_constraints.typeSrcs[inst] = m_state.stack(offset).typeSrcs;
       if (inst->is(AssertStk, CheckStk)) {
         m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
@@ -637,8 +637,8 @@ void IRBuilder::exceptionStackBoundary() {
    * trace that the unwinder won't be able to see.
    */
   FTRACE(2, "exceptionStackBoundary()\n");
-  assertx(m_state.syncedSpLevel() == m_curMarker.spOff());
-  m_exnStack.syncedSpLevel = m_state.syncedSpLevel();
+  assertx(m_state.bcSPOff() == m_curMarker.spOff());
+  m_exnStack.syncedSpLevel = m_state.bcSPOff();
   m_state.resetStackModified();
 }
 
@@ -789,7 +789,7 @@ bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
   return changed;
 }
 
-bool IRBuilder::constrainStack(IRSPOffset offset, TypeConstraint tc) {
+bool IRBuilder::constrainStack(IRSPRelOffset offset, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
   auto changed = false;
   for (auto typeSrc : m_state.stack(offset).typeSrcs) {
@@ -876,7 +876,7 @@ Type IRBuilder::predictedInnerType(uint32_t id) const {
   return ldRefReturn(ty.unbox());
 }
 
-Type IRBuilder::predictedStackInnerType(IRSPOffset offset) const {
+Type IRBuilder::predictedStackInnerType(IRSPRelOffset offset) const {
   auto const ty =  m_state.stack(offset).predictedType;
   assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
@@ -887,13 +887,13 @@ SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   return m_state.local(id).value;
 }
 
-SSATmp* IRBuilder::stackValue(IRSPOffset offset, TypeConstraint tc) {
+SSATmp* IRBuilder::stackValue(IRSPRelOffset offset, TypeConstraint tc) {
   auto const val = m_state.stack(offset).value;
   if (val) constrainValue(val, tc);
   return val;
 }
 
-Type IRBuilder::stackType(IRSPOffset offset, TypeConstraint tc) {
+Type IRBuilder::stackType(IRSPRelOffset offset, TypeConstraint tc) {
   constrainStack(offset, tc);
   return m_state.stack(offset).type;
 }

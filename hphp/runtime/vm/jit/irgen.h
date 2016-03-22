@@ -112,7 +112,7 @@ SSATmp* cns(IRGS& env, Args&&... args) {
  */
 void checkType(IRGS&, const RegionDesc::Location&, Type,
                Offset dest, bool outerOnly);
-void assertTypeStack(IRGS&, BCSPOffset, Type);
+void assertTypeStack(IRGS&, BCSPRelOffset, Type);
 void assertTypeLocal(IRGS&, uint32_t id, Type);
 void assertTypeLocation(IRGS&, const RegionDesc::Location&, Type);
 
@@ -253,7 +253,7 @@ void inlSingletonSLoc(IRGS&, const Func*, PC op);
 /*
  * Access the type of the top of the stack.
  */
-Type publicTopType(const IRGS& env, BCSPOffset);
+Type publicTopType(const IRGS& env, BCSPRelOffset);
 
 /*
  * Return the proven or predicted Type for the given location.

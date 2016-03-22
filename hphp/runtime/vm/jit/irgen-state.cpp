@@ -56,7 +56,7 @@ std::string show(const IRGS& irgs) {
   const int32_t frameCells = irgen::resumed(irgs)
     ? 0
     : irgen::curFunc(irgs)->numSlotsInFrame();
-  auto const stackDepth = irgs.irb->fs().syncedSpLevel().offset - frameCells;
+  auto const stackDepth = irgs.irb->fs().bcSPOff().offset - frameCells;
   assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
@@ -103,11 +103,11 @@ std::string show(const IRGS& irgs) {
     }
 
     auto const stkTy = irgs.irb->stackType(
-      irgen::offsetFromIRSP(irgs, BCSPOffset{i}),
+      irgen::offsetFromIRSP(irgs, BCSPRelOffset{i}),
       DataTypeGeneric
     );
     auto const stkVal = irgs.irb->stackValue(
-      irgen::offsetFromIRSP(irgs, BCSPOffset{i}),
+      irgen::offsetFromIRSP(irgs, BCSPRelOffset{i}),
       DataTypeGeneric
     );
 
@@ -120,7 +120,8 @@ std::string show(const IRGS& irgs) {
       elemStr = stkTy.toString();
     }
 
-    auto const predicted = irgen::predictedType(irgs, Location(BCSPOffset{i}));
+    auto const predicted =
+      irgen::predictedType(irgs, Location(BCSPRelOffset{i}));
     if (predicted < stkTy) {
       elemStr += folly::sformat(" (predict: {})", predicted);
     }

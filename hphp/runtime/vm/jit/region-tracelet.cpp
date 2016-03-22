@@ -115,7 +115,7 @@ const Unit* curUnit(const Env& env) {
 }
 
 FPInvOffset curSpOffset(const Env& env) {
-  return env.irgs.irb->fs().syncedSpLevel();
+  return env.irgs.irb->fs().bcSPOff();
 }
 
 bool irBlockReachable(Env& env, Block* block) {
@@ -261,7 +261,7 @@ bool traceThroughJmp(Env& env) {
   // inputs while inlining.
   if (!isUnconditionalJmp(env.inst.op()) &&
       !(env.inlining && isConditionalJmp(env.inst.op()) &&
-        irgen::publicTopType(env.irgs, BCSPOffset{0}).hasConstVal())) {
+        irgen::publicTopType(env.irgs, BCSPRelOffset{0}).hasConstVal())) {
     return false;
   }
 
@@ -359,7 +359,7 @@ void visitGuards(IRUnit& unit, F func) {
           break;
         case HintStkInner:
         case CheckStk: {
-          auto const irSPRel = inst.extra<IRSPOffsetData>()->offset;
+          auto const irSPRel = inst.extra<IRSPRelOffsetData>()->offset;
 
           auto const defSP = inst.src(0)->inst();
           assertx(defSP->is(DefSP));

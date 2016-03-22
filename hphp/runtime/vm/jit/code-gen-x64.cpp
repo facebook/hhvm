@@ -210,7 +210,7 @@ void debug_trashsp(Vout& v) {
   }
 }
 
-void maybe_syncsp(Vout& v, BCMarker marker, Vreg irSP, IRSPOffset off) {
+void maybe_syncsp(Vout& v, BCMarker marker, Vreg irSP, IRSPRelOffset off) {
   if (!marker.resumed()) {
     debug_trashsp(v);
     return;

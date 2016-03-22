@@ -560,7 +560,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   for (int i = numArgs - 1; i >= 0; --i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
-    auto type = irgen::publicTopType(irgs, BCSPOffset{i});
+    auto type = irgen::publicTopType(irgs, BCSPRelOffset{i});
 
     // If we don't have sufficient type information to inline the region return
     // early

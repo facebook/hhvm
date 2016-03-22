@@ -82,9 +82,9 @@ bool type_converts_to_number(Type ty) {
 SSATmp* is_a_impl(IRGS& env, uint32_t numArgs, bool subclassOnly) {
   if (numArgs != 3) return nullptr;
 
-  auto const allowString = topC(env, BCSPOffset{0});
-  auto const classname   = topC(env, BCSPOffset{1});
-  auto const obj         = topC(env, BCSPOffset{2});
+  auto const allowString = topC(env, BCSPRelOffset{0});
+  auto const classname   = topC(env, BCSPRelOffset{1});
+  auto const obj         = topC(env, BCSPRelOffset{2});
 
   if (!obj->isA(TObj) ||
       !classname->hasConstVal(TStr) ||
@@ -131,8 +131,8 @@ SSATmp* opt_is_subclass_of(IRGS& env, uint32_t numArgs) {
 SSATmp* opt_method_exists(IRGS& env, uint32_t numArgs) {
   if (numArgs != 2) return nullptr;
 
-  auto const meth = topC(env, BCSPOffset{0});
-  auto const obj  = topC(env, BCSPOffset{1});
+  auto const meth = topC(env, BCSPRelOffset{0});
+  auto const obj  = topC(env, BCSPRelOffset{1});
 
   if (!obj->isA(TObj) || !meth->isA(TStr)) return nullptr;
 
@@ -143,8 +143,8 @@ SSATmp* opt_method_exists(IRGS& env, uint32_t numArgs) {
 SSATmp* opt_count(IRGS& env, uint32_t numArgs) {
   if (numArgs != 2) return nullptr;
 
-  auto const mode = topC(env, BCSPOffset{0});
-  auto const val = topC(env, BCSPOffset{1});
+  auto const mode = topC(env, BCSPRelOffset{0});
+  auto const val = topC(env, BCSPRelOffset{1});
 
   // Bail if we're trying to do a recursive count()
   if (!mode->hasConstVal(0)) return nullptr;
@@ -155,7 +155,7 @@ SSATmp* opt_count(IRGS& env, uint32_t numArgs) {
 SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
-  auto const arg = topC(env, BCSPOffset{0});
+  auto const arg = topC(env, BCSPRelOffset{0});
   auto const arg_type = arg->type();
   if (arg_type <= TStr) {
     return gen(env, OrdStr, arg);
@@ -201,7 +201,7 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
   // Only generate the optimized version if the argument passed in is a
   // static string with a constant literal value so we can get the string value
   // at JIT time.
-  auto const argType = topType(env, BCSPOffset{0});
+  auto const argType = topType(env, BCSPRelOffset{0});
   if (!(argType.hasConstVal(TStaticStr))) {
     return nullptr;
   }
@@ -214,8 +214,7 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
   // known static address or thread-local address of where the setting lives.
   // This might be worth doing specifically for the zend.assertions setting,
   // for which the emitter emits an ini_get around every call to assert().
-  auto const settingName = top(env,
-                               BCSPOffset{0})->strVal()->toCppString();
+  auto const settingName = top(env, BCSPRelOffset{0})->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
   if (!IniSetting::GetMode(settingName, mode)) {
     return nullptr;
@@ -253,13 +252,13 @@ SSATmp* opt_dirname(IRGS& env, uint32_t numArgs) {
   // Only generate the optimized version if the argument passed in is a
   // static string with a constant literal value so we can get the string value
   // at JIT time.
-  auto const argType = topType(env, BCSPOffset{0});
+  auto const argType = topType(env, BCSPRelOffset{0});
   if (!(argType.hasConstVal(TStaticStr))) {
     return nullptr;
   }
 
   // Return the directory portion of the path
-  auto path = top(env, BCSPOffset{0})->strVal();
+  auto path = top(env, BCSPRelOffset{0})->strVal();
   auto psize = path->size();
   // Make a mutable copy for dirname_helper to modify
   char *buf = strndup(path->data(), psize);
@@ -279,11 +278,11 @@ SSATmp* opt_in_array(IRGS& env, uint32_t numArgs) {
   // We will restrict this optimization to needles that are strings, and
   // haystacks that have only non-numeric string keys. This avoids a bunch of
   // complication around numeric-string array-index semantics.
-  if (!(topType(env, BCSPOffset{2}) <= TStr)) {
+  if (!(topType(env, BCSPRelOffset{2}) <= TStr)) {
     return nullptr;
   }
 
-  auto const haystackType = topType(env, BCSPOffset{1});
+  auto const haystackType = topType(env, BCSPRelOffset{1});
   if (!haystackType.hasConstVal(TStaticArr)) {
     // Haystack isn't statically known
     return nullptr;
@@ -315,7 +314,7 @@ SSATmp* opt_in_array(IRGS& env, uint32_t numArgs) {
     flipped.set(key.asCStrRef(), init_null_variant);
   }
 
-  auto const needle = topC(env, BCSPOffset{2});
+  auto const needle = topC(env, BCSPRelOffset{2});
   auto const array = flipped.toArray();
   return gen(
     env,
@@ -333,7 +332,7 @@ SSATmp* opt_get_class(IRGS& env, uint32_t numArgs) {
   if (numArgs == 0) return curName();
   if (numArgs != 1) return nullptr;
 
-  auto const val = topC(env, BCSPOffset{0});
+  auto const val = topC(env, BCSPRelOffset{0});
   auto const ty  = val->type();
   if (ty <= TNull) return curName();
   if (ty <= TObj) {
@@ -390,9 +389,9 @@ SSATmp* opt_strlen(IRGS& env, uint32_t numArgs) {
 }
 
 SSATmp* minmax(IRGS& env, const bool is_max) {
-  auto const val1 = topC(env, BCSPOffset{0});
+  auto const val1 = topC(env, BCSPRelOffset{0});
   auto const ty1 = val1->type();
-  auto const val2 = topC(env, BCSPOffset{1});
+  auto const val2 = topC(env, BCSPRelOffset{1});
   auto const ty2 = val2->type();
 
   // this optimization is only for 2 ints/doubles
@@ -702,8 +701,9 @@ struct CatchMaker {
     gen(env, BeginCatch);
     decRefForUnwind();
     prepareForCatch();
-    gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-      fp(env), sp(env));
+    gen(env, EndCatch,
+        IRSPRelOffsetData { bcSPOffset(env) },
+        fp(env), sp(env));
     return exit;
   }
 
@@ -725,7 +725,7 @@ struct CatchMaker {
         decRefForUnwind();
         prepareForCatch();
         gen(env, EndCatch,
-          IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+          IRSPRelOffsetData { bcSPOffset(env) },
           fp(env), sp(env));
       }
     );
@@ -776,7 +776,7 @@ private:
      * So before we leave, update the marker to placate EndCatch assertions,
      * which is trying to detect failure to do this properly.
      */
-    auto const spOff = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
+    auto const spOff = IRSPRelOffsetData { bcSPOffset(env) };
     gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
   }
@@ -816,13 +816,13 @@ private:
     // extendStack will end up with values that are of type StkElem
     // TODO(#6156498).
     for (auto i = 0; i < stackIdx; ++i) {
-      top(env, BCSPOffset{i}, DataTypeGeneric);
+      top(env, BCSPRelOffset{i}, DataTypeGeneric);
     }
 
     for (auto i = m_params.size(); i-- > 0;) {
       if (m_params[i].passByAddr) {
         --stackIdx;
-        auto const val = top(env, BCSPOffset{stackIdx}, DataTypeGeneric);
+        auto const val = top(env, BCSPRelOffset{stackIdx}, DataTypeGeneric);
         decRef(env, val);
       } else {
         decRef(env, m_params[i].value);
@@ -906,7 +906,7 @@ void coerce_stack(IRGS& env,
                   const Type& ty,
                   const Func* callee,
                   uint32_t paramIdx,
-                  BCSPOffset offset,
+                  BCSPRelOffset offset,
                   const CatchMaker& maker) {
   if (callee->isParamCoerceMode()) {
     always_assert(ty.isKnownDataType());
@@ -921,7 +921,7 @@ void coerce_stack(IRGS& env,
     gen(env,
         CastStk,
         ty,
-        IRSPOffsetData { offsetFromIRSP(env, offset) },
+        IRSPRelOffsetData { offsetFromIRSP(env, offset) },
         maker.makeUnusualCatch(),
         sp(env));
   }
@@ -1122,14 +1122,14 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     }
 
     usedStack = true;
-    auto const offset = BCSPOffset{safe_cast<int32_t>(
+    auto const offset = BCSPRelOffset{safe_cast<int32_t>(
         params.numByAddr - stackIdx - 1)};
 
     ret[argIdx++] = realize_param(
       env, param, callee, targetTy,
       [&] (const Type& ty, Block* fail) -> SSATmp* {
         auto irSPRel = offsetFromIRSP(env, offset);
-        gen(env, CheckStk, IRSPOffsetData { irSPRel }, ty, fail, sp(env));
+        gen(env, CheckStk, IRSPRelOffsetData { irSPRel }, ty, fail, sp(env));
         env.irb->constrainStack(irSPRel, DataTypeSpecific);
         return nullptr;
       },
@@ -1205,7 +1205,7 @@ SSATmp* builtinCall(IRGS& env,
     CallBuiltin,
     retType,
     CallBuiltinData {
-      offsetFromIRSP(env, BCSPOffset{0}),
+      bcSPOffset(env),
       callee,
       params.count ? -1 : numNonDefault,
       builtinFuncDestroysLocals(callee),
@@ -1486,7 +1486,7 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
-  auto const keyType = topC(env, BCSPOffset{1}, DataTypeGeneric)->type();
+  auto const keyType = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
 
   if (keyType <= TNull) {
     auto const def = popC(env, DataTypeGeneric);
@@ -1592,7 +1592,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
 }
 
 void emitArrayIdx(IRGS& env) {
-  auto const arrType = topC(env, BCSPOffset{2}, DataTypeGeneric)->type();
+  auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
   if (!(arrType <= TArr)) {
     // raise fatal
     interpOne(env, TCell, 3);
@@ -1603,8 +1603,8 @@ void emitArrayIdx(IRGS& env) {
 }
 
 void emitIdx(IRGS& env) {
-  auto const key      = topC(env, BCSPOffset{1}, DataTypeGeneric);
-  auto const base     = topC(env, BCSPOffset{2}, DataTypeGeneric);
+  auto const key      = topC(env, BCSPRelOffset{1}, DataTypeGeneric);
+  auto const base     = topC(env, BCSPRelOffset{2}, DataTypeGeneric);
   auto const keyType  = key->type();
   auto const baseType = base->type();
 

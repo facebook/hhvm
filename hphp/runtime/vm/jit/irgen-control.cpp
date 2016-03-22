@@ -222,7 +222,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   data.cases       = iv.size();
   data.targets     = &targets[0];
   data.invSPOff    = invSPOff(env);
-  data.irSPOff     = offsetFromIRSP(env, BCSPOffset{0});
+  data.irSPOff     = bcSPOffset(env);
 
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
@@ -270,7 +270,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   gen(
     env,
     JmpSSwitchDest,
-    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    IRSPRelOffsetData { bcSPOffset(env) },
     dest,
     sp(env),
     fp(env)

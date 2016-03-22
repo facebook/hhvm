@@ -668,7 +668,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
 
   auto const& info = instrInfo[ni.op()];
   auto const input = info.in;
-  auto spOff = BCSPOffset{0};
+  auto spOff = BCSPRelOffset{0};
 
   if (input & Iter) {
     inputs.emplace_back(Location(Location::Iter, ni.imm[0].u_IVA));
@@ -694,7 +694,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
     }
   }
   if (input & StackI) {
-    inputs.emplace_back(Location(BCSPOffset{ni.imm[0].u_IVA}));
+    inputs.emplace_back(Location(BCSPRelOffset{ni.imm[0].u_IVA}));
   }
   if (input & StackN) {
     int numArgs = (ni.op() == Op::NewPackedArray ||
@@ -735,7 +735,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
         break;
       case MEC:
       case MPC:
-        inputs.emplace_back(Location(BCSPOffset{int32_t(mk.iva)}));
+        inputs.emplace_back(Location(BCSPRelOffset{int32_t(mk.iva)}));
         break;
       case MW:
       case MEI:
@@ -1209,7 +1209,7 @@ void translateInstr(
       builtinFunc->byRef(num - i - 1) ? TGen : TCell;
     // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
     // is a little unsure of itself.
-    irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
+    irgen::assertTypeStack(irgs, BCSPRelOffset{i}, type);
   }
 
   FTRACE(1, "\nTranslating {}: {} with state:\n{}\n",

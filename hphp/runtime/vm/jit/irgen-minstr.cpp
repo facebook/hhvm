@@ -936,7 +936,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpFlags flags) {
 }
 
 void baseSImpl(IRGS& env, SSATmp* name, int32_t clsIdx) {
-  auto cls = topA(env, BCSPOffset{clsIdx});
+  auto cls = topA(env, BCSPRelOffset{clsIdx});
   auto spropPtr = ldClsPropAddr(env, cls, name, true);
   gen(env, StMBase, spropPtr);
 
@@ -1118,8 +1118,9 @@ Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
     },
     [&] {
       hint(env, Block::Hint::Unused);
-      gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-        fp(env), sp(env));
+      gen(env, EndCatch,
+          IRSPRelOffsetData { bcSPOffset(env) },
+          fp(env), sp(env));
     }
   );
 
@@ -1150,7 +1151,7 @@ Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
 }
 
 SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
-  auto const value = topC(env, BCSPOffset{0}, DataTypeGeneric);
+  auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
   auto base = env.irb->fs().memberBaseValue();
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
 
@@ -1227,7 +1228,7 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
     auto const id = ptrInst->extra<LocalId>()->locId;
     baseLoc = Location{Location::Local, id};
   } else if (ptrInst->is(LdStkAddr)) {
-    auto const irOff = ptrInst->extra<IRSPOffsetData>()->offset;
+    auto const irOff = ptrInst->extra<IRSPRelOffsetData>()->offset;
     baseLoc = Location{offsetFromBCSP(env, irOff)};
   } else {
     return nullptr;
@@ -1257,7 +1258,7 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
     gen(env, StLoc, LocalId(baseLoc.offset), fp(env), newArr);
   } else if (baseLoc.space == Location::Stack) {
     auto const offset = offsetFromIRSP(env, baseLoc.bcRelOffset);
-    gen(env, StStk, IRSPOffsetData{offset}, sp(env), newArr);
+    gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), newArr);
   } else {
     always_assert(false);
   }
@@ -1280,7 +1281,7 @@ SSATmp* setNewElemImpl(IRGS& env) {
 }
 
 SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
-  auto value = topC(env, BCSPOffset{0}, DataTypeGeneric);
+  auto value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
   auto const base = env.irb->fs().memberBaseValue();
   auto const simpleOp =
     base ? simpleCollectionOp(base->type(), key->type(), false)
@@ -1347,7 +1348,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
       return ldLocInnerWarn(env, mk.iva, makeExit(env),
                             makePseudoMainExit(env), DataTypeSpecific);
     case MEC: case MPC:
-      return topC(env, BCSPOffset{int32_t(mk.iva)});
+      return topC(env, BCSPRelOffset{int32_t(mk.iva)});
     case MEI:
       return cns(env, mk.int64);
     case MET: case MPT: case MQT:
@@ -1383,7 +1384,7 @@ void emitFPassBaseNL(IRGS& env, int32_t arg, int32_t locId) {
 
 void emitBaseGC(IRGS& env, int32_t idx, MOpFlags flags) {
   initTvRefs(env);
-  auto name = top(env, BCSPOffset{idx});
+  auto name = top(env, BCSPRelOffset{idx});
   baseGImpl(env, name, flags);
 }
 
@@ -1404,7 +1405,7 @@ void emitFPassBaseGL(IRGS& env, int32_t arg, int32_t locId) {
 
 void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx) {
   initTvRefs(env);
-  auto name = top(env, BCSPOffset{propIdx});
+  auto name = top(env, BCSPRelOffset{propIdx});
   baseSImpl(env, name, clsIdx);
 }
 
@@ -1439,7 +1440,7 @@ void emitFPassBaseL(IRGS& env, int32_t arg, int32_t locId) {
 void emitBaseC(IRGS& env, int32_t idx) {
   initTvRefs(env);
 
-  auto const bcOff = BCSPOffset{idx};
+  auto const bcOff = BCSPRelOffset{idx};
   auto const irOff = offsetFromIRSP(env, bcOff);
   gen(env, StMBase, ldStkAddr(env, bcOff));
 
@@ -1658,7 +1659,7 @@ void emitSetWithRefLML(IRGS& env, int32_t keyLoc, int32_t valLoc) {
 }
 
 void emitSetWithRefRML(IRGS& env, int32_t keyLoc) {
-  setWithRefImpl(env, keyLoc, top(env, BCSPOffset{0}, DataTypeGeneric));
+  setWithRefImpl(env, keyLoc, top(env, BCSPRelOffset{0}, DataTypeGeneric));
   popDecRef(env);
   mFinalImpl(env, 0, nullptr);
 }

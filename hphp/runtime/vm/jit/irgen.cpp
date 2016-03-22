@@ -35,10 +35,10 @@ Block* create_catch_block(IRGS& env) {
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
   auto const& exnState = env.irb->exceptionStackState();
-  env.irb->fs().setSyncedSpLevel(exnState.syncedSpLevel);
+  env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
 
   gen(env, BeginCatch);
-  gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+  gen(env, EndCatch, IRSPRelOffsetData { bcSPOffset(env) },
       fp(env), sp(env));
   return catchBlock;
 }
@@ -141,7 +141,7 @@ void prepareEntry(IRGS& env) {
    * C++ function that checks the state of everything.
    */
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const data = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
+    auto const data = IRSPRelOffsetData { bcSPOffset(env) };
     gen(env, DbgTraceCall, data, fp(env), sp(env));
   }
 
@@ -171,7 +171,7 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   auto const data = ReqBindJmpData {
     nextSk,
     invSPOff(env),
-    offsetFromIRSP(env, BCSPOffset{0}),
+    bcSPOffset(env),
     TransFlags{}
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));
@@ -183,7 +183,7 @@ void sealUnit(IRGS& env) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Type publicTopType(const IRGS& env, BCSPOffset idx) {
+Type publicTopType(const IRGS& env, BCSPRelOffset idx) {
   // It's logically const, because we're using DataTypeGeneric.
   return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }

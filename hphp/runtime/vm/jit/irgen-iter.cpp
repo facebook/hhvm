@@ -40,8 +40,7 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
   // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
 
   auto const exit  = makeExit(env);
-  auto const pred  = env.irb->predictedStackInnerType(
-    offsetFromIRSP(env, BCSPOffset{0}));
+  auto const pred  = env.irb->predictedStackInnerType(bcSPOffset(env));
   auto const src   = topV(env);
 
   if (!pred.subtypeOfAny(TArr, TObj)) {

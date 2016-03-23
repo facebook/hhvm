@@ -956,6 +956,11 @@ static int start_server(const std::string &username, int xhprof) {
   Capability::SetDumpable();
 #endif
 
+  if (RuntimeOption::ServerInternalWarmupThreads > 0) {
+    InitFiniNode::WarmupConcurrentStart(
+      RuntimeOption::ServerInternalWarmupThreads);
+  }
+
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
@@ -982,6 +987,11 @@ static int start_server(const std::string &username, int xhprof) {
       readaheadThread->join();
       readaheadThread.reset();
     }
+  }
+
+  if (RuntimeOption::ServerInternalWarmupThreads > 0) {
+    BootTimer::Block timer("concurrentWaitForEnd");
+    InitFiniNode::WarmupConcurrentWaitForEnd();
   }
 
   if (RuntimeOption::RepoPreload) {

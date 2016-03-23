@@ -21,7 +21,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 InitFiniNode *InitFiniNode::s_nodes[NumNodes];
-InitFiniNode::IFDispatcher* InitFiniNode::s_dispatcher;
+InitFiniNode::IFDispatcher* InitFiniNode::s_dispatcher[NumNodes];
 
 void InitFiniNode::iterate(InitFiniNode *node) {
   while (node) {
@@ -35,25 +35,42 @@ void InitFiniNode::IFWorker::doJob(std::shared_ptr<IFJob> job) {
   job->node.func();
 }
 
-void InitFiniNode::ProcessInitConcurrentStart(uint32_t maxWorkers) {
+void InitFiniNode::concurrentStart(uint32_t maxWorkers, When when) {
   if (maxWorkers == 0) {
-    iterate(When::ProcessInitConcurrent);
+    iterate(when);
     return;
   }
   std::vector<std::shared_ptr<IFJob> > jobs;
-  for (const auto* n = node(When::ProcessInitConcurrent); n; n = n->next) {
+  for (const auto* n = node(when); n; n = n->next) {
     jobs.push_back(std::make_shared<IFJob>(*n));
   }
-  s_dispatcher = new IFDispatcher(std::move(jobs), maxWorkers);
-  s_dispatcher->start();
+  dispatcher(when) = new IFDispatcher(std::move(jobs), maxWorkers);
+  dispatcher(when)->start();
+}
+
+void InitFiniNode::concurrentWaitForEnd(When when) {
+  auto& d = dispatcher(when);
+  if (d) {
+    d->waitForEnd();
+    delete d;
+    d = nullptr;
+  }
+}
+
+void InitFiniNode::ProcessInitConcurrentStart(uint32_t maxWorkers) {
+  concurrentStart(maxWorkers, When::ProcessInitConcurrent);
 }
 
 void InitFiniNode::ProcessInitConcurrentWaitForEnd() {
-  if (s_dispatcher) {
-    s_dispatcher->waitForEnd();
-    delete s_dispatcher;
-    s_dispatcher = nullptr;
-  }
+  concurrentWaitForEnd(When::ProcessInitConcurrent);
+}
+
+void InitFiniNode::WarmupConcurrentStart(uint32_t maxWorkers) {
+  concurrentStart(maxWorkers, When::WarmupConcurrent);
+}
+
+void InitFiniNode::WarmupConcurrentWaitForEnd() {
+  concurrentWaitForEnd(When::WarmupConcurrent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

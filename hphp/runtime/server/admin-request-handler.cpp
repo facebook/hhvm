@@ -515,7 +515,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         transport->sendString("No APC\n");
         break;
       }
-      s_apc_file_storage.adviseOut();
+      apc_advise_out();
       transport->sendString("Done\n");
       break;
     }

@@ -13,7 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/apc/snapshot.h"
+#include "hphp/runtime/ext/apc/snapshot-builder.h"
+#include "hphp/runtime/ext/apc/snapshot-loader.h"
 
 #include <sys/mman.h> // mmap
 #include <stdio.h>
@@ -29,7 +30,9 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/fb/ext_fb.h" // fb_unserialize
+#include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/timer.h"
 
 // ftello is 64-bit by default under OSX,
 // and ftello64 doesn't exist.
@@ -195,9 +198,22 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
     assert(disk == m_begin + m_size);
     s.prime(items);
   }
-  // TODO(9755912): Use 'madvise' to indicate we are done with Index now,
-  // or better+harder: avoid copying the keys and guard against freeing them.
   assert(m_cur == m_begin + header().diskOffset);
+  // Keys have been copied, so don't need that part any more.
+  madvise(const_cast<char*>(m_begin), header().diskOffset, MADV_DONTNEED);
+}
+
+void SnapshotLoader::adviseOut() {
+  Timer timer(Timer::WallTime, "advising out apc prime snapshot");
+  Logger::FInfo("Advising out {} bytes", m_size);
+  assert(m_begin);
+  if (madvise(const_cast<char*>(m_begin), m_size, MADV_DONTNEED) < 0) {
+    Logger::Error("Failed to madvise");
+  }
+  assert(m_fd >= 0);
+  if (fadvise_dontneed(m_fd, m_size) < 0) {
+    Logger::Error("Failed to fadvise");
+  }
 }
 
 }

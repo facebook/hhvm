@@ -91,6 +91,7 @@
 #include <folly/Range.h>
 #include <folly/Portability.h>
 #include <folly/Singleton.h>
+#include <folly/portability/Environment.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
@@ -119,7 +120,6 @@
 
 using namespace boost::program_options;
 using std::cout;
-extern char **environ;
 
 constexpr auto MAX_INPUT_NESTING_LEVEL = 64;
 

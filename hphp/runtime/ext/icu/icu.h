@@ -36,7 +36,7 @@ struct IntlError {
   void setError(UErrorCode code, const char *format = nullptr, ...);
   void clearError(bool clearGlobalError = true);
 
-  ATTRIBUTE_NORETURN
+  [[noreturn]]
   void throwException(const char *format, ...);
 
   UErrorCode getErrorCode() const { return m_errorCode; }

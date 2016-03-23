@@ -144,7 +144,7 @@ struct DataBlock {
     if (!canEmit(nBytes)) reportFull(nBytes);
   }
 
-  ATTRIBUTE_NORETURN
+  [[noreturn]]
   void reportFull(size_t nbytes) const;
 
   bool isValidAddress(const CodeAddress tca) const {

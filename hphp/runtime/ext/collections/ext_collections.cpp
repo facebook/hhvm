@@ -44,7 +44,7 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 
 template<bool oob>
-ALWAYS_INLINE ATTRIBUTE_NORETURN
+[[noreturn]] ALWAYS_INLINE
 void throwInt(int64_t key) {
   String msg(50, ReserveString);
   auto buf = msg.bufferSlice();

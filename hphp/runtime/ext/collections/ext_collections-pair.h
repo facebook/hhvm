@@ -144,7 +144,7 @@ struct c_Pair : ObjectData {
   Object getIterator();
   int getVersion() const { return 0; }
 
-  ATTRIBUTE_NORETURN static void throwBadKeyType();
+  [[noreturn]] static void throwBadKeyType();
 
   TypedValue* getElms() { return &elm0; }
   const TypedValue* getElms() const { return &elm0; }

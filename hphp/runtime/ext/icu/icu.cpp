@@ -58,7 +58,7 @@ void IntlError::clearError(bool clearGlobalError /*= true */) {
   }
 }
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void IntlError::throwException(const char *format, ...) {
   va_list args;
   va_start(args, format);

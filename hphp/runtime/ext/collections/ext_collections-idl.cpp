@@ -65,7 +65,7 @@ const Cell container_as_cell(const Variant& container) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 static void throwIntOOB(int64_t key, bool isVector = false);
 
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
@@ -84,7 +84,7 @@ void throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
 
-ATTRIBUTE_NORETURN static void throwStrOOB(StringData* key);
+[[noreturn]] static void throwStrOOB(StringData* key);
 
 void throwStrOOB(StringData* key) {
   constexpr size_t maxDisplaySize = 100;

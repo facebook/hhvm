@@ -222,7 +222,7 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 /*
  * Throw a VMSwitchMode exception.
  */
-ATTRIBUTE_NORETURN void throwSwitchMode();
+[[noreturn]] void throwSwitchMode();
 
 namespace MInstrHelpers {
 TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,9 +40,9 @@ IRGS::IRGS(IRUnit& unit)
   , irb(new IRBuilder(unit, initial_marker(context)))
   , bcStateStack { context.srcKey() }
 {
-  irgen::updateMarker(*this);
-  auto const frame = irgen::gen(*this, DefFP);
-  irgen::gen(*this, DefSP, FPInvOffsetData { context.initSpOffset }, frame);
+  updateMarker(*this);
+  auto const frame = gen(*this, DefFP);
+  gen(*this, DefSP, FPInvOffsetData { context.initSpOffset }, frame);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -53,9 +53,9 @@ std::string show(const IRGS& irgs) {
     out << folly::format("+{:-^102}+\n", str);
   };
 
-  const int32_t frameCells = irgen::resumed(irgs)
+  const int32_t frameCells = resumed(irgs)
     ? 0
-    : irgen::curFunc(irgs)->numSlotsInFrame();
+    : curFunc(irgs)->numSlotsInFrame();
   auto const stackDepth = irgs.irb->fs().bcSPOff().offset - frameCells;
   assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
@@ -67,14 +67,14 @@ std::string show(const IRGS& irgs) {
     --spOffset;
   };
 
-  auto fpi = irgen::curFunc(irgs)->findFPI(irgen::bcOff(irgs));
+  auto fpi = curFunc(irgs)->findFPI(bcOff(irgs));
   auto checkFpi = [&]() {
     if (fpi && spOffset + frameCells == fpi->m_fpOff) {
       auto fpushOff = fpi->m_fpushOff;
-      auto after = fpushOff + instrLen(irgen::curUnit(irgs)->at(fpushOff));
+      auto after = fpushOff + instrLen(curUnit(irgs)->at(fpushOff));
       std::ostringstream msg;
       msg << "ActRec from ";
-      irgen::curUnit(irgs)->prettyPrint(
+      curUnit(irgs)->prettyPrint(
         msg,
         Unit::PrintOpts().range(fpushOff, after)
                          .noLineNumbers()
@@ -86,7 +86,7 @@ std::string show(const IRGS& irgs) {
       msgStr.erase(msgStr.size() - 1);
       for (unsigned i = 0; i < kNumActRecCells; ++i) elem(msgStr);
       fpi = fpi->m_parentIndex != -1
-        ? &irgen::curFunc(irgs)->fpitab()[fpi->m_parentIndex]
+        ? &curFunc(irgs)->fpitab()[fpi->m_parentIndex]
         : nullptr;
       return true;
     }
@@ -95,7 +95,7 @@ std::string show(const IRGS& irgs) {
 
   header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
-  assertx(spOffset <= irgen::curFunc(irgs)->maxStackCells());
+  assertx(spOffset <= curFunc(irgs)->maxStackCells());
 
   for (auto i = 0; i < spOffset; ) {
     if (checkFpi()) {
@@ -104,11 +104,11 @@ std::string show(const IRGS& irgs) {
     }
 
     auto const stkTy = irgs.irb->stackType(
-      irgen::offsetFromIRSP(irgs, BCSPRelOffset{i}),
+      offsetFromIRSP(irgs, BCSPRelOffset{i}),
       DataTypeGeneric
     );
     auto const stkVal = irgs.irb->stackValue(
-      irgen::offsetFromIRSP(irgs, BCSPRelOffset{i}),
+      offsetFromIRSP(irgs, BCSPRelOffset{i}),
       DataTypeGeneric
     );
 
@@ -123,8 +123,7 @@ std::string show(const IRGS& irgs) {
 
     auto const irSPRel = BCSPRelOffset{i}
       .to<FPInvOffset>(irgs.irb->fs().bcSPOff());
-    auto const predicted =
-      irgen::predictedType(irgs, RegionDesc::Location::Stack { irSPRel });
+    auto const predicted = predictedType(irgs, Location::Stack { irSPRel });
 
     if (predicted < stkTy) {
       elemStr += folly::sformat(" (predict: {})", predicted);
@@ -136,8 +135,8 @@ std::string show(const IRGS& irgs) {
   out << "\n";
 
   header(folly::format(" {} local(s) ",
-                       irgen::curFunc(irgs)->numLocals()).str());
-  for (unsigned i = 0; i < irgen::curFunc(irgs)->numLocals(); ++i) {
+                       curFunc(irgs)->numLocals()).str());
+  for (unsigned i = 0; i < curFunc(irgs)->numLocals(); ++i) {
     auto const localValue = irgs.irb->localValue(i, DataTypeGeneric);
     auto const localTy = localValue ? localValue->type()
                                     : irgs.irb->localType(i, DataTypeGeneric);
@@ -162,4 +161,4 @@ std::string show(const IRGS& irgs) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}

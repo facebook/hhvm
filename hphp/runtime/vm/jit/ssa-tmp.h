@@ -24,7 +24,7 @@ namespace HPHP { namespace jit {
 
 struct IRInstruction;
 struct IRUnit;
-struct IRBuilder;
+namespace irgen { struct IRBuilder; }
 
 struct SSATmp {
   uint32_t          id() const { return m_id; }
@@ -77,7 +77,7 @@ struct SSATmp {
 
 private:
   friend struct IRUnit;
-  friend struct IRBuilder;
+  friend struct irgen::IRBuilder;
 
   // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.

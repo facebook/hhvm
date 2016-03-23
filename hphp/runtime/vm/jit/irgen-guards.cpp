@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -98,51 +100,48 @@ void assertTypeStack(IRGS& env, BCSPRelOffset idx, Type type) {
       IRSPRelOffsetData { offsetFromIRSP(env, idx) }, sp(env));
 }
 
-void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
+void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
   assertx(type <= TStkElem);
-  using T = RegionDesc::Location::Tag;
+
   switch (loc.tag()) {
-  case T::Stack:
-    assertTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
-    break;
-  case T::Local:
-    assertTypeLocal(env, loc.localId(), type);
-    break;
+    case LTag::Stack:
+      assertTypeStack(env, offsetFromBCSP(env, loc.stackIdx()), type);
+      break;
+    case LTag::Local:
+      assertTypeLocal(env, loc.localId(), type);
+      break;
   }
 }
 
-void checkType(IRGS& env, const RegionDesc::Location& loc,
+void checkType(IRGS& env, const Location& loc,
                Type type, Offset dest, bool outerOnly) {
-  using T = RegionDesc::Location::Tag;
   assertx(type <= TGen);
 
   switch (loc.tag()) {
-  case T::Stack:
-    checkTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()),
-                   type, dest, outerOnly);
-    break;
-  case T::Local:
-    checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
-    break;
+    case LTag::Stack:
+      checkTypeStack(env, offsetFromBCSP(env, loc.stackIdx()),
+                     type, dest, outerOnly);
+      break;
+    case LTag::Local:
+      checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
+      break;
   }
 }
 
-void predictType(IRGS& env, const RegionDesc::Location& loc, Type type) {
-  using T = RegionDesc::Location::Tag;
-
+void predictType(IRGS& env, const Location& loc, Type type) {
   FTRACE(1, "predictType {}: {}\n", show(loc), type);
   assertx(type <= TGen);
 
   switch (loc.tag()) {
-  case T::Stack:
-    env.irb->fs().refineStackPredictedType(
-      offsetFromIRSP(env, offsetFromBCSP(env, loc.offsetFromFP())),
-      type
-    );
-    break;
-  case T::Local:
-    env.irb->fs().refineLocalPredictedType(loc.localId(), type);
-    break;
+    case LTag::Stack:
+      env.irb->fs().refineStackPredictedType(
+        offsetFromIRSP(env, offsetFromBCSP(env, loc.stackIdx())),
+        type
+      );
+      break;
+    case LTag::Local:
+      env.irb->fs().refineLocalPredictedType(loc.localId(), type);
+      break;
   }
 }
 

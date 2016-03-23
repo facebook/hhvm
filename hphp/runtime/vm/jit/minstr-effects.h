@@ -21,8 +21,6 @@
 
 namespace HPHP { namespace jit {
 
-struct FrameStateMgr;
-
 //////////////////////////////////////////////////////////////////////
 
 int minstrBaseIdx(Opcode opc);

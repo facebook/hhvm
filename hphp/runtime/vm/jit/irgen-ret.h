@@ -17,10 +17,12 @@
 #define incl_HPHP_IRGEN_RET_H_
 
 namespace HPHP { namespace jit {
+
 struct IRSPRelOffset;
+
+namespace irgen {
+
 struct IRGS;
-}}
-namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 

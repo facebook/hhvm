@@ -16,12 +16,9 @@
 #ifndef incl_HPHP_JIT_IRGEN_INLINING_H_
 #define incl_HPHP_JIT_IRGEN_INLINING_H_
 
-namespace HPHP { namespace jit {
-struct IRGS;
-struct Type;
-}}
-
 namespace HPHP { namespace jit { namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

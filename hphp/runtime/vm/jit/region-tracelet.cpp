@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -87,7 +88,7 @@ struct Env {
   RegionDesc::Block* curBlock;
   bool blockFinished;
   IRUnit unit;
-  IRGS irgs;
+  irgen::IRGS irgs;
   jit::vector<ActRecState> arStates;
   RefDeps refDeps;
   uint32_t numJmps;
@@ -341,7 +342,6 @@ bool isThisSelfOrParent(Op op) {
  */
 template<typename F>
 void visitGuards(IRUnit& unit, F func) {
-  using L = RegionDesc::Location;
   auto blocks = rpoSortCfg(unit);
 
   for (auto const block : blocks) {
@@ -352,7 +352,7 @@ void visitGuards(IRUnit& unit, F func) {
         case HintLocInner:
         case CheckLoc:
           func(&inst,
-               L::Local{inst.extra<LocalId>()->locId},
+               Location::Local{inst.extra<LocalId>()->locId},
                inst.typeParam(),
                inst.is(HintLocInner));
           break;
@@ -365,7 +365,7 @@ void visitGuards(IRUnit& unit, F func) {
           auto const irSPOff = defSP->extra<DefSP>()->offset;
 
           func(&inst,
-               L::Stack{irSPRel.to<FPInvOffset>(irSPOff)},
+               Location::Stack{irSPRel.to<FPInvOffset>(irSPOff)},
                inst.typeParam(),
                inst.is(HintStkInner));
           break;
@@ -391,13 +391,13 @@ void recordDependencies(Env& env) {
   // Relax guards and record the ones that survived.
   auto& firstBlock = *env.region->blocks().front();
   auto& unit = env.irgs.unit;
-  auto guardMap = std::map<RegionDesc::Location,Type>{};
+  auto guardMap = std::map<Location,Type>{};
   ITRACE(2, "Visiting guards\n");
-  auto hintMap = std::map<RegionDesc::Location,Type>{};
-  auto catMap = std::map<RegionDesc::Location,DataTypeCategory>{};
+  auto hintMap = std::map<Location,Type>{};
+  auto catMap = std::map<Location,DataTypeCategory>{};
   const auto& guards = env.irgs.irb->guards()->guards;
   visitGuards(unit, [&] (const IRInstruction* guard,
-                         const RegionDesc::Location& loc,
+                         const Location& loc,
                          Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
@@ -438,8 +438,10 @@ void recordDependencies(Env& env) {
       // may have needed that (recorded already above).
       continue;
     }
-    auto const preCond = RegionDesc::GuardedLocation { kv.first, kv.second,
-                                                       catMap[kv.first] };
+    auto const preCond = RegionDesc::GuardedLocation {
+      kv.first, kv.second,
+      catMap[kv.first]
+    };
     ITRACE(1, "selectTracelet adding guard {}\n", show(preCond));
     firstBlock.addPreCondition(preCond);
   }

@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_JIT_IRGEN_H_
 #define incl_HPHP_JIT_IRGEN_H_
 
@@ -27,6 +28,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -107,16 +109,16 @@ SSATmp* cns(IRGS& env, Args&&... args) {
 /*
  * Type checks and assertions.
  */
-void checkType(IRGS&, const RegionDesc::Location&, Type,
+void checkType(IRGS&, const Location&, Type,
                Offset dest, bool outerOnly);
 void assertTypeStack(IRGS&, BCSPRelOffset, Type);
 void assertTypeLocal(IRGS&, uint32_t id, Type);
-void assertTypeLocation(IRGS&, const RegionDesc::Location&, Type);
+void assertTypeLocation(IRGS&, const Location&, Type);
 
 /*
  * Type predictions.
  */
-void predictType(IRGS&, const RegionDesc::Location&, Type);
+void predictType(IRGS&, const Location&, Type);
 
 /*
  * Special type of guards for param-passing reffiness. These checks are needed
@@ -255,8 +257,8 @@ Type publicTopType(const IRGS& env, BCSPRelOffset);
 /*
  * Return the proven or predicted Type for the given location.
  */
-Type provenType(const IRGS&, const RegionDesc::Location&);
-Type predictedType(const IRGS&, const RegionDesc::Location&);
+Type provenType(const IRGS&, const Location&);
+Type predictedType(const IRGS&, const Location&);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

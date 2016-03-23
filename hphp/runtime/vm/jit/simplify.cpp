@@ -76,7 +76,7 @@ SSATmp* simplifyWork(State&, const IRInstruction*);
 
 bool mightRelax(State& env, SSATmp* tmp) {
   if (!env.typesMightRelax) return false;
-  return jit::typeMightRelax(tmp);
+  return irgen::typeMightRelax(tmp);
 }
 
 template<class... Args>
@@ -1795,7 +1795,7 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
-  if (!typeMightRelax(inst->src(0)) &&
+  if (!irgen::typeMightRelax(inst->src(0)) &&
       ty < TObj &&
       ty.clsSpec().cls() &&
       ty.clsSpec().cls()->isCollectionClass()) {
@@ -2332,7 +2332,7 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
 SSATmp* simplifyIsCol(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
-  if (!typeMightRelax(inst->src(0)) &&
+  if (!irgen::typeMightRelax(inst->src(0)) &&
       ty < TObj &&
       ty.clsSpec().cls()) {
     return cns(env, ty.clsSpec().cls()->isCollectionClass());

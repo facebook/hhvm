@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -59,7 +60,7 @@ struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
-struct IRGS;
+namespace irgen { struct IRGS; }
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -356,13 +357,13 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst);
  * Location and metadata for an instruction's input.
  */
 struct InputInfo {
-  explicit InputInfo(const RegionDesc::Location& l) : loc(l) {}
+  explicit InputInfo(const Location& l) : loc(l) {}
 
   std::string pretty() const;
 
 public:
   // Location specifier for the input.
-  RegionDesc::Location loc;
+  Location loc;
 
   // If an input is unknowable, don't break the tracelet just to find its
   // type---but still generate a guard if that will tell us its type.
@@ -598,7 +599,7 @@ int locPhysicalOffset(int32_t localIndex);
  * functions.  Updates the bytecode marker, handles interp one flags, etc.
  */
 void translateInstr(
-  IRGS&,
+  irgen::IRGS&,
   const NormalizedInstruction&,
   bool checkOuterTypeOnly,
   bool firstInst

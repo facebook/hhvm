@@ -13,10 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 #include <cstdlib>
 
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
@@ -362,7 +364,7 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
       (out & InstrFlags::StackIns1) ? 1 : 0
     }.to<FPInvOffset>(env.irb->fs().bcSPOff());
 
-    checkType(env, RegionDesc::Location::Stack { checkIdx }, *checkTypeType,
+    checkType(env, Location::Stack { checkIdx }, *checkTypeType,
               inst.nextSk().offset(), true /* outerOnly */);
   }
 }

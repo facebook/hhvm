@@ -25,12 +25,11 @@ struct Func;
 
 namespace jit {
 
-struct IRGS;
 struct SSATmp;
 
-}}
+namespace irgen {
 
-namespace HPHP { namespace jit { namespace irgen {
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

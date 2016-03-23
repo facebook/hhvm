@@ -1226,16 +1226,16 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
   auto const ptrInst = basePtr->inst();
 
-  auto const baseLoc = [&]() -> folly::Optional<RegionDesc::Location> {
+  auto const baseLoc = [&]() -> folly::Optional<Location> {
     switch (ptrInst->op()) {
       case LdLocAddr: {
         auto const locID = ptrInst->extra<LocalId>()->locId;
-        return folly::make_optional<RegionDesc::Location>(RegionDesc::Location::Local { locID });
+        return folly::make_optional<Location>(Location::Local { locID });
       }
       case LdStkAddr: {
         auto const irSPRel = ptrInst->extra<IRSPRelOffsetData>()->offset;
         auto const fpRel = irSPRel.to<FPInvOffset>(env.irb->fs().irSPOff());
-        return folly::make_optional<RegionDesc::Location>(RegionDesc::Location::Stack { fpRel });
+        return folly::make_optional<Location>(Location::Stack { fpRel });
       }
       default:
         return folly::none;
@@ -1251,10 +1251,10 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
   if (setRef) {
     auto const box = [&] {
       switch (baseLoc->tag()) {
-        case RegionDesc::Location::Tag::Local:
+        case LTag::Local:
           return ldLoc(env, baseLoc->localId(), nullptr, DataTypeSpecific);
-        case RegionDesc::Location::Tag::Stack:
-          return top(env, offsetFromBCSP(env, baseLoc->offsetFromFP()));
+        case LTag::Stack:
+          return top(env, offsetFromBCSP(env, baseLoc->stackIdx()));
       }
       not_reached();
     }();
@@ -1269,14 +1269,14 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
 
   // Update the base's location with the new array.
   switch (baseLoc->tag()) {
-    case RegionDesc::Location::Tag::Local:
+    case LTag::Local:
       // We know it's not boxed (setRef above handles that), and the helper has
       // already decref'd the old array and incref'd newArr.
       gen(env, StLoc, LocalId { baseLoc->localId() }, fp(env), newArr);
       break;
-    case RegionDesc::Location::Tag::Stack:
+    case LTag::Stack:
       gen(env, StStk,
-          IRSPRelOffsetData { offsetFromIRSP(env, baseLoc->offsetFromFP()) },
+          IRSPRelOffsetData { offsetFromIRSP(env, baseLoc->stackIdx()) },
           sp(env), newArr);
       break;
   }

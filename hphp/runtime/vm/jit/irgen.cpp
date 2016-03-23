@@ -188,25 +188,25 @@ Type publicTopType(const IRGS& env, BCSPRelOffset idx) {
   return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
-Type predictedType(const IRGS& env, const RegionDesc::Location& loc) {
+Type predictedType(const IRGS& env, const Location& loc) {
   auto& fs = env.irb->fs();
 
   switch (loc.tag()) {
-    case RegionDesc::Location::Tag::Stack:
-      return fs.stack(offsetFromIRSP(env, loc.offsetFromFP())).predictedType;
-    case RegionDesc::Location::Tag::Local:
+    case LTag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.stackIdx())).predictedType;
+    case LTag::Local:
       return fs.local(loc.localId()).predictedType;
   }
   not_reached();
 }
 
-Type provenType(const IRGS& env, const RegionDesc::Location& loc) {
+Type provenType(const IRGS& env, const Location& loc) {
   auto& fs = env.irb->fs();
 
   switch (loc.tag()) {
-    case RegionDesc::Location::Tag::Stack:
-      return fs.stack(offsetFromIRSP(env, loc.offsetFromFP())).type;
-    case RegionDesc::Location::Tag::Local:
+    case LTag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.stackIdx())).type;
+    case LTag::Local:
       return fs.local(loc.localId()).type;
   }
   not_reached();

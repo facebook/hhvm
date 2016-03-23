@@ -14,26 +14,52 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
-#define incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
+#include "hphp/util/assertions.h"
 
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/types.h"
-
-#include <cstdint>
-
-namespace HPHP { namespace jit { namespace irgen {
-
-struct IRGS;
+namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
+inline uint32_t Location::localId() const {
+  assertx(m_tag == LTag::Local);
+  return m_local.locId;
+}
 
-void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs);
+inline FPInvOffset Location::stackIdx() const {
+  assertx(m_tag == LTag::Stack);
+  return m_stack.stackIdx;
+}
+
+inline bool Location::operator==(const Location& other) const {
+  if (m_tag != other.m_tag) return false;
+
+  switch (m_tag) {
+    case LTag::Local:
+      return localId() == other.localId();
+    case LTag::Stack:
+      return stackIdx() == other.stackIdx();
+  }
+  not_reached();
+  return false;
+}
+
+inline bool Location::operator!=(const Location& other) const {
+  return !(*this == other);
+}
+
+inline bool Location::operator<(const Location& other) const {
+  if (m_tag < other.m_tag) return true;
+  if (m_tag > other.m_tag) return false;
+  switch (m_tag) {
+    case LTag::Local:
+      return localId() < other.localId();
+    case LTag::Stack:
+      return stackIdx() < other.stackIdx();
+  }
+  not_reached();
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
-
-#endif // incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
+}}

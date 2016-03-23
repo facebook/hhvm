@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
@@ -64,7 +64,6 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 }
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -101,9 +100,9 @@ bool typeMightRelax(const SSATmp* tmp) {
   auto inst = tmp->inst();
   // Do the rest based on the opcode's dest type
   switch (inst->op()) {
-#   define O(name, dst, src, flags) case name: dst
+#define O(name, dst, src, flags) case name: dst
   IR_OPCODES
-#   undef O
+#undef O
   }
 
   return true;
@@ -130,7 +129,7 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
  * checked.
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
-  return shouldConstrainGuards() && jit::typeMightRelax(tmp);
+  return shouldConstrainGuards() && irgen::typeMightRelax(tmp);
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -1001,4 +1000,4 @@ void IRBuilder::popBlock() {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}

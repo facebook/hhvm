@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -30,7 +31,7 @@
 
 TRACE_SET_MOD(hhir);
 
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
@@ -874,7 +875,7 @@ void FrameStateMgr::collectPostConds(Block* block) {
         FTRACE(1, "Stack({}, {}): {} ({})\n", bcSPRel.offset, fpRel.offset,
                type, changed ? "changed" : "refined");
         auto& vec = changed ? pConds.changed : pConds.refined;
-        vec.push_back({RegionDesc::Location::Stack{fpRel}, type});
+        vec.push_back({ Location::Stack{fpRel}, type });
       }
     }
   }
@@ -887,7 +888,7 @@ void FrameStateMgr::collectPostConds(Block* block) {
         FTRACE(1, "Local {}: {} ({})\n", i, t.toString(),
                changed ? "changed" : "refined");
         auto& vec = changed ? pConds.changed : pConds.refined;
-        vec.push_back({ RegionDesc::Location::Local{i}, t });
+        vec.push_back({ Location::Local{i}, t });
       }
     }
   }
@@ -1453,4 +1454,4 @@ std::string show(const FrameStateMgr& state) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}

@@ -94,6 +94,7 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irlower.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -450,8 +451,6 @@ bool MCGenerator::shouldTranslate(const Func* func, TransKind kind) const {
 
 
 static void populateLiveContext(RegionContext& ctx) {
-  using L = RegionDesc::Location;
-
   auto const fp = vmfp();
   auto const sp = vmsp();
 
@@ -460,7 +459,7 @@ static void populateLiveContext(RegionContext& ctx) {
   // Track local types.
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
-      { L::Local{i}, typeFromTV(frame_local(fp, i)) }
+      { Location::Local{i}, typeFromTV(frame_local(fp, i)) }
     );
     FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
   }
@@ -481,7 +480,7 @@ static void populateLiveContext(RegionContext& ctx) {
     },
     [&] (const TypedValue* tv) {
       ctx.liveTypes.push_back(
-        { L::Stack{ctx.spOffset - stackOff}, typeFromTV(tv) }
+        { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv) }
       );
       stackOff++;
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));

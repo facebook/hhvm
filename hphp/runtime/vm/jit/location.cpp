@@ -13,32 +13,35 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_INTERPONE_H_
-#define incl_HPHP_JIT_IRGEN_INTERPONE_H_
 
-#include <folly/Optional.h>
+#include "hphp/runtime/vm/jit/location.h"
+
+#include "hphp/util/assertions.h"
+
+#include <folly/Format.h>
+#include <folly/Hash.h>
 
 namespace HPHP { namespace jit {
 
-struct InterpOneData;
-struct NormalizedInstruction;
-struct Type;
+///////////////////////////////////////////////////////////////////////////////
 
-namespace irgen {
+std::string show(Location loc) {
+  switch (loc.tag()) {
+    case LTag::Local:
+      return folly::format("Local{{{}}}", loc.localId()).str();
+    case LTag::Stack:
+      return folly::format("Stack{{{}}}", loc.stackIdx().offset).str();
+  }
+  not_reached();
+}
 
-struct IRGS;
+size_t Location::Hash::operator()(Location loc) const {
+  return folly::hash::hash_combine(
+    static_cast<uint32_t>(loc.m_tag),
+    loc.m_local.locId
+  );
+}
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-void interpOne(IRGS&, const NormalizedInstruction&);
-void interpOne(IRGS&, int popped);
-void interpOne(IRGS&, Type t, int popped);
-void interpOne(IRGS&, folly::Optional<Type>, int popped, int pushed,
-               InterpOneData&);
-
-//////////////////////////////////////////////////////////////////////
-
-}}}
-
-
-#endif
+}}

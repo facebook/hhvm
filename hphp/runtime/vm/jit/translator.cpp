@@ -679,22 +679,22 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
 
   if (flags & Stack1) {
     SKTRACE(1, sk, "getInputs: Stack1 %d\n", stackOff.offset);
-    inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
+    inputs.emplace_back(Location::Stack { stackOff-- });
 
     if (flags & DontGuardStack1) inputs.back().dontGuard = true;
 
     if (flags & Stack2) {
       SKTRACE(1, sk, "getInputs: Stack2 %d\n", stackOff.offset);
-      inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
+      inputs.emplace_back(Location::Stack { stackOff-- });
 
       if (flags & Stack3) {
         SKTRACE(1, sk, "getInputs: Stack3 %d\n", stackOff.offset);
-        inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
+        inputs.emplace_back(Location::Stack { stackOff-- });
       }
     }
   }
   if (flags & StackI) {
-    inputs.emplace_back(RegionDesc::Location::Stack {
+    inputs.emplace_back(Location::Stack {
       BCSPRelOffset{ni.imm[0].u_IVA}.to<FPInvOffset>(bcSPOff)
     });
   }
@@ -706,7 +706,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
 
     SKTRACE(1, sk, "getInputs: StackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
+      inputs.emplace_back(Location::Stack { stackOff-- });
       inputs.back().dontGuard = true;
       inputs.back().dontBreak = true;
     }
@@ -716,7 +716,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
 
     SKTRACE(1, sk, "getInputs: BStackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
+      inputs.emplace_back(Location::Stack { stackOff-- });
     }
   }
 
@@ -725,7 +725,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     // first immediate.
     auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
-    inputs.emplace_back(RegionDesc::Location::Local { uint32_t(loc) });
+    inputs.emplace_back(Location::Local { uint32_t(loc) });
   }
   if (flags & AllLocals) ni.ignoreInnerType = true;
 
@@ -734,11 +734,11 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     switch (mk.mcode) {
       case MEL:
       case MPL:
-        inputs.emplace_back(RegionDesc::Location::Local { uint32_t(mk.iva) });
+        inputs.emplace_back(Location::Local { uint32_t(mk.iva) });
         break;
       case MEC:
       case MPC:
-        inputs.emplace_back(RegionDesc::Location::Stack {
+        inputs.emplace_back(Location::Stack {
           BCSPRelOffset{int32_t(mk.iva)}.to<FPInvOffset>(bcSPOff)
         });
         break;
@@ -1136,7 +1136,7 @@ Translator::addDbgBLPC(PC pc) {
 #define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
 #define NA                   /*  */
 
-static void translateDispatch(IRGS& irgs,
+static void translateDispatch(irgen::IRGS& irgs,
                               const NormalizedInstruction& ni) {
 #define O(nm, imms, ...) case Op::nm: irgen::emit##nm(irgs imms); return;
   switch (ni.op()) { OPCODES }
@@ -1187,7 +1187,7 @@ Type flavorToType(FlavorDesc f) {
 }
 
 void translateInstr(
-  IRGS& irgs,
+  irgen::IRGS& irgs,
   const NormalizedInstruction& ni,
   bool checkOuterTypeOnly,
   bool firstInst

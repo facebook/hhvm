@@ -679,7 +679,7 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
                     id, false, data, size, eom));
 }
 
-void ProxygenTransport::timeoutExpired() {
+void ProxygenTransport::abort() {
   unlink();
   if (m_clientTxn) {
     m_clientTxn->sendAbort();

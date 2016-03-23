@@ -24,13 +24,12 @@
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
+#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/hash-map-typedefs.h"
@@ -357,28 +356,23 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst);
  * Location and metadata for an instruction's input.
  */
 struct InputInfo {
-  explicit InputInfo(const Location& l)
-    : loc(l)
-    , dontBreak(false)
-    , dontGuard(l.isLiteral())
-    , dontGuardInner(false)
-  {}
+  explicit InputInfo(const RegionDesc::Location& l) : loc(l) {}
 
   std::string pretty() const;
 
 public:
-  // Location tag for the input.
-  Location loc;
+  // Location specifier for the input.
+  RegionDesc::Location loc;
 
   // If an input is unknowable, don't break the tracelet just to find its
   // type---but still generate a guard if that will tell us its type.
-  bool dontBreak;
+  bool dontBreak{false};
 
   // Never break the tracelet nor generate a guard on account of this input.
-  bool dontGuard;
+  bool dontGuard{false};
 
   // Never guard the inner type if this input is KindOfRef.
-  bool dontGuardInner;
+  bool dontGuardInner{false};
 };
 
 /*
@@ -399,7 +393,7 @@ public:
  * Get input location info and flags for a NormalizedInstruction.  Some flags
  * on `ni' may be updated.
  */
-InputInfoVec getInputs(NormalizedInstruction&);
+InputInfoVec getInputs(NormalizedInstruction&, FPInvOffset bcSPOff);
 
 /*
  * Return the index of op's local immediate.

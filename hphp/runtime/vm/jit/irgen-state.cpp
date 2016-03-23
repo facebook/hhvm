@@ -96,6 +96,7 @@ std::string show(const IRGS& irgs) {
   header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
   assertx(spOffset <= irgen::curFunc(irgs)->maxStackCells());
+
   for (auto i = 0; i < spOffset; ) {
     if (checkFpi()) {
       i += kNumActRecCells;
@@ -120,12 +121,14 @@ std::string show(const IRGS& irgs) {
       elemStr = stkTy.toString();
     }
 
+    auto const irSPRel = BCSPRelOffset{i}
+      .to<FPInvOffset>(irgs.irb->fs().bcSPOff());
     auto const predicted =
-      irgen::predictedType(irgs, Location(BCSPRelOffset{i}));
+      irgen::predictedType(irgs, RegionDesc::Location::Stack { irSPRel });
+
     if (predicted < stkTy) {
       elemStr += folly::sformat(" (predict: {})", predicted);
     }
-
     elem(elemStr);
     ++i;
   }

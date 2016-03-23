@@ -198,9 +198,19 @@ struct FPInvOffset {
     offset++;
     return *this;
   }
+  FPInvOffset operator++(int) {
+    auto before = *this;
+    offset++;
+    return before;
+  }
   FPInvOffset& operator--() {
     offset--;
     return *this;
+  }
+  FPInvOffset operator--(int) {
+    auto before = *this;
+    offset--;
+    return before;
   }
 
   /*

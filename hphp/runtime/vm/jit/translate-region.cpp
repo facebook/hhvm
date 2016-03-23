@@ -293,12 +293,7 @@ void initNormalizedInstruction(
   // this is true.
   inst.interp = toInterp;
 
-  auto const inputInfos = getInputs(inst);
-
-  FTRACE(2, "populating inputs for {}\n", inst.toString());
-  for (auto const& ii : inputInfos) {
-    inst.inputs.push_back(ii.loc);
-  }
+  auto const inputInfos = getInputs(inst, irgs.irb->fs().bcSPOff());
 
   if (inputInfos.needsRefCheck) {
     inst.preppedByRef = byRefs.next();

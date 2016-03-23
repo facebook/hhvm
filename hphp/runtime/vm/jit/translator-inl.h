@@ -177,7 +177,7 @@ inline bool opcodeBreaksBB(const Op op) {
 // Input and output information.
 
 inline std::string InputInfo::pretty() const {
-  std::string p = loc.pretty();
+  std::string p = show(loc);
   if (dontBreak) p += ":dc";
   if (dontGuard) p += ":dg";
   if (dontGuardInner) p += ":dgi";

@@ -106,9 +106,6 @@ SSATmp* cns(IRGS& env, Args&&... args) {
 
 /*
  * Type checks and assertions.
- *
- * TODO(#5706706): the stack versions should not be exported, except that
- * RegionDesc::Location::Stack needs some fixes first.
  */
 void checkType(IRGS&, const RegionDesc::Location&, Type,
                Offset dest, bool outerOnly);
@@ -258,8 +255,8 @@ Type publicTopType(const IRGS& env, BCSPRelOffset);
 /*
  * Return the proven or predicted Type for the given location.
  */
-Type provenType(const IRGS&, const Location&);
-Type predictedType(const IRGS&, const Location&);
+Type provenType(const IRGS&, const RegionDesc::Location&);
+Type predictedType(const IRGS&, const RegionDesc::Location&);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

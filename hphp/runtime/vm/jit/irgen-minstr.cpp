@@ -14,9 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <type_traits>
-#include <sstream>
-
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/collections.h"
 
@@ -36,6 +33,11 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+
+#include <folly/Optional.h>
+
+#include <sstream>
+#include <type_traits>
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -1223,27 +1225,41 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
   auto const base = env.irb->fs().memberBaseValue();
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
   auto const ptrInst = basePtr->inst();
-  Location baseLoc;
-  if (ptrInst->is(LdLocAddr)) {
-    auto const id = ptrInst->extra<LocalId>()->locId;
-    baseLoc = Location{Location::Local, id};
-  } else if (ptrInst->is(LdStkAddr)) {
-    auto const irOff = ptrInst->extra<IRSPRelOffsetData>()->offset;
-    baseLoc = Location{offsetFromBCSP(env, irOff)};
-  } else {
-    return nullptr;
-  }
+
+  auto const baseLoc = [&]() -> folly::Optional<RegionDesc::Location> {
+    switch (ptrInst->op()) {
+      case LdLocAddr: {
+        auto const locID = ptrInst->extra<LocalId>()->locId;
+        return folly::make_optional<RegionDesc::Location>(RegionDesc::Location::Local { locID });
+      }
+      case LdStkAddr: {
+        auto const irSPRel = ptrInst->extra<IRSPRelOffsetData>()->offset;
+        auto const fpRel = irSPRel.to<FPInvOffset>(env.irb->fs().irSPOff());
+        return folly::make_optional<RegionDesc::Location>(RegionDesc::Location::Stack { fpRel });
+      }
+      default:
+        return folly::none;
+    }
+  }();
+  if (!baseLoc) return nullptr;
 
   // base may be from inside a RefData inside a stack/local, so to determine
   // setRef we must check the actual value of the stack/local.
-  auto const rawBaseType = provenType(env, baseLoc);
+  auto const rawBaseType = provenType(env, *baseLoc);
   auto const setRef = rawBaseType <= TBoxedCell;
 
   if (setRef) {
-    auto const box = baseLoc.space == Location::Local ?
-      ldLoc(env, baseLoc.offset, nullptr, DataTypeSpecific) :
-      top(env, baseLoc.bcRelOffset, DataTypeSpecific);
+    auto const box = [&] {
+      switch (baseLoc->tag()) {
+        case RegionDesc::Location::Tag::Local:
+          return ldLoc(env, baseLoc->localId(), nullptr, DataTypeSpecific);
+        case RegionDesc::Location::Tag::Stack:
+          return top(env, offsetFromBCSP(env, baseLoc->offsetFromFP()));
+      }
+      not_reached();
+    }();
     gen(env, ArraySetRef, base, key, value, box);
+
     // Unlike the non-ref case, we don't need to do anything to the stack/local
     // because any load of the box will be guarded.
     return value;
@@ -1251,18 +1267,19 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
 
   auto const newArr = gen(env, ArraySet, base, key, value);
 
-  // Update the base's location with the new array
-  if (baseLoc.space == Location::Local) {
-    // We know it's not boxed (setRef above handles that), and the helper has
-    // already decref'd the old array and incref'd newArr.
-    gen(env, StLoc, LocalId(baseLoc.offset), fp(env), newArr);
-  } else if (baseLoc.space == Location::Stack) {
-    auto const offset = offsetFromIRSP(env, baseLoc.bcRelOffset);
-    gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), newArr);
-  } else {
-    always_assert(false);
+  // Update the base's location with the new array.
+  switch (baseLoc->tag()) {
+    case RegionDesc::Location::Tag::Local:
+      // We know it's not boxed (setRef above handles that), and the helper has
+      // already decref'd the old array and incref'd newArr.
+      gen(env, StLoc, LocalId { baseLoc->localId() }, fp(env), newArr);
+      break;
+    case RegionDesc::Location::Tag::Stack:
+      gen(env, StStk,
+          IRSPRelOffsetData { offsetFromIRSP(env, baseLoc->offsetFromFP()) },
+          sp(env), newArr);
+      break;
   }
-
   return value;
 }
 

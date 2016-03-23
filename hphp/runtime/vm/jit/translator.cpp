@@ -655,7 +655,7 @@ size_t memberKeyImmIdx(Op op) {
 /*
  * Get location metadata for the inputs of `ni'.
  */
-InputInfoVec getInputs(NormalizedInstruction& ni) {
+InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   InputInfoVec inputs;
   if (isAlwaysNop(ni.op())) return inputs;
 
@@ -667,75 +667,80 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
   UNUSED auto const sk = ni.source;
 
   auto const& info = instrInfo[ni.op()];
-  auto const input = info.in;
-  auto spOff = BCSPRelOffset{0};
+  auto const flags = info.in;
+  auto stackOff = bcSPOff;
 
-  if (input & Iter) {
-    inputs.emplace_back(Location(Location::Iter, ni.imm[0].u_IVA));
+  if (flags & FStack) {
+    stackOff -= ni.imm[0].u_IVA; // arguments consumed
+    stackOff -= kNumActRecCells; // ActRec is torn down as well
   }
-  if (input & FStack) {
-    spOff += ni.imm[0].u_IVA; // arguments consumed
-    spOff += kNumActRecCells; // ActRec is torn down as well
-  }
-  if (input & FuncdRef) inputs.needsRefCheck = true;
-  if (input & IgnoreInnerType) ni.ignoreInnerType = true;
+  if (flags & FuncdRef) inputs.needsRefCheck = true;
+  if (flags & IgnoreInnerType) ni.ignoreInnerType = true;
 
-  if (input & Stack1) {
-    SKTRACE(1, sk, "getInputs: stack1 %d\n", spOff.offset);
-    inputs.emplace_back(Location(spOff++));
-    if (input & DontGuardStack1) inputs.back().dontGuard = true;
-    if (input & Stack2) {
-      SKTRACE(1, sk, "getInputs: stack2 %d\n", spOff.offset);
-      inputs.emplace_back(Location(spOff++));
-      if (input & Stack3) {
-        SKTRACE(1, sk, "getInputs: stack3 %d\n", spOff.offset);
-        inputs.emplace_back(Location(spOff++));
+  if (flags & Stack1) {
+    SKTRACE(1, sk, "getInputs: Stack1 %d\n", stackOff.offset);
+    inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
+
+    if (flags & DontGuardStack1) inputs.back().dontGuard = true;
+
+    if (flags & Stack2) {
+      SKTRACE(1, sk, "getInputs: Stack2 %d\n", stackOff.offset);
+      inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
+
+      if (flags & Stack3) {
+        SKTRACE(1, sk, "getInputs: Stack3 %d\n", stackOff.offset);
+        inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
       }
     }
   }
-  if (input & StackI) {
-    inputs.emplace_back(Location(BCSPRelOffset{ni.imm[0].u_IVA}));
+  if (flags & StackI) {
+    inputs.emplace_back(RegionDesc::Location::Stack {
+      BCSPRelOffset{ni.imm[0].u_IVA}.to<FPInvOffset>(bcSPOff)
+    });
   }
-  if (input & StackN) {
+  if (flags & StackN) {
     int numArgs = (ni.op() == Op::NewPackedArray ||
                    ni.op() == Op::ConcatN)
       ? ni.imm[0].u_IVA
       : ni.immVec.numStackValues();
 
-    SKTRACE(1, sk, "getInputs: stackN %d %d\n", spOff.offset, numArgs);
+    SKTRACE(1, sk, "getInputs: StackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.emplace_back(Location(spOff++));
+      inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
       inputs.back().dontGuard = true;
       inputs.back().dontBreak = true;
     }
   }
-  if (input & BStackN) {
+  if (flags & BStackN) {
     int numArgs = ni.imm[0].u_IVA;
-    SKTRACE(1, sk, "getInputs: BStackN %d %d\n", spOff.offset, numArgs);
+
+    SKTRACE(1, sk, "getInputs: BStackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.emplace_back(Location(spOff++));
+      inputs.emplace_back(RegionDesc::Location::Stack { stackOff-- });
     }
   }
 
-  if (input & Local) {
-    // (Almost) all instructions that take a Local have its index at
-    // their first immediate.
+  if (flags & Local) {
+    // (Almost) all instructions that take a Local have its index at their
+    // first immediate.
     auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
-    inputs.emplace_back(Location(Location::Local, loc));
+    inputs.emplace_back(RegionDesc::Location::Local { uint32_t(loc) });
   }
-  if (input & AllLocals) ni.ignoreInnerType = true;
+  if (flags & AllLocals) ni.ignoreInnerType = true;
 
-  if (input & MKey) {
+  if (flags & MKey) {
     auto mk = ni.imm[memberKeyImmIdx(ni.op())].u_KA;
     switch (mk.mcode) {
       case MEL:
       case MPL:
-        inputs.emplace_back(Location(Location::Local, mk.iva));
+        inputs.emplace_back(RegionDesc::Location::Local { uint32_t(mk.iva) });
         break;
       case MEC:
       case MPC:
-        inputs.emplace_back(Location(BCSPRelOffset{int32_t(mk.iva)}));
+        inputs.emplace_back(RegionDesc::Location::Stack {
+          BCSPRelOffset{int32_t(mk.iva)}.to<FPInvOffset>(bcSPOff)
+        });
         break;
       case MW:
       case MEI:
@@ -748,14 +753,11 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
     }
   }
 
-  SKTRACE(1, sk, "stack args: virtual sfo now %d\n", spOff.offset);
+  SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackOff.offset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());
 
-  if ((input & DontGuardAny) || dontGuardAnyInputs(ni.op())) {
+  if ((flags & DontGuardAny) || dontGuardAnyInputs(ni.op())) {
     for (auto& info : inputs) info.dontGuard = true;
-  }
-  if (input & This) {
-    inputs.emplace_back(Location(Location::This));
   }
   return inputs;
 }
@@ -1207,8 +1209,6 @@ void translateInstr(
     auto const type =
       !builtinFunc ? flavorToType(instrInputFlavor(pc, i)) :
       builtinFunc->byRef(num - i - 1) ? TGen : TCell;
-    // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
-    // is a little unsure of itself.
     irgen::assertTypeStack(irgs, BCSPRelOffset{i}, type);
   }
 

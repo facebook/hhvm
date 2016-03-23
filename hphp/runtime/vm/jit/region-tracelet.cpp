@@ -137,9 +137,9 @@ bool irBlockReachable(Env& env, Block* block) {
  * Check if the current predicted type for the location in ii is specific
  * enough for what the current opcode wants. If not, return false.
  */
-bool consumeInput(Env& env, int i, const InputInfo& ii) {
-  if (ii.dontGuard) return true;
-  auto const type = irgen::predictedType(env.irgs, ii.loc);
+bool consumeInput(Env& env, const InputInfo& input) {
+  if (input.dontGuard) return true;
+  auto const type = irgen::predictedType(env.irgs, input.loc);
 
   if (env.profiling && type <= TBoxedCell &&
       (env.region->blocks().size() > 1 || !env.region->entry()->empty())) {
@@ -148,21 +148,23 @@ bool consumeInput(Env& env, int i, const InputInfo& ii) {
     return false;
   }
 
-  if (!ii.dontBreak && !type.isKnownDataType()) {
+  if (!input.dontBreak && !type.isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
     FTRACE(1, "selectTracelet: {} tried to consume {}\n",
-           env.inst.toString(), env.inst.inputs[i].pretty());
+           env.inst.toString(), show(input.loc));
     return false;
   }
 
-  if (!(type <= TBoxedCell) || env.inst.ignoreInnerType || ii.dontGuardInner) {
+  if (!(type <= TBoxedCell) ||
+      env.inst.ignoreInnerType ||
+      input.dontGuardInner) {
     return true;
   }
 
   if (!type.inner().isKnownDataType()) {
     // Trying to consume a boxed value without a guess for the inner type.
     FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
-           env.inst.toString(), env.inst.inputs[i].pretty());
+           env.inst.toString(), show(input.loc));
     return false;
   }
 
@@ -207,20 +209,17 @@ bool prepareInstruction(Env& env) {
   env.inst.funcd = env.arStates.back().knownFunc();
   irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk, false);
 
-  auto const inputInfos = getInputs(env.inst);
-
-  for (auto const& ii : inputInfos) env.inst.inputs.push_back(ii.loc);
+  auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
 
   // This reads valueClass from the inputs so it used to need to
   // happen after readMetaData.  But now readMetaData is gone ...
   annotate(&env.inst);
 
   // Check all the inputs for unknown values.
-  assertx(inputInfos.size() == env.inst.inputs.size());
-  for (unsigned i = 0; i < inputInfos.size(); ++i) {
-    if (!consumeInput(env, i, inputInfos[i])) {
+  for (auto const& input : inputInfos) {
+    if (!consumeInput(env, input)) {
       FTRACE(2, "Stopping tracelet consuming {} input {}\n",
-        opcodeToName(env.inst.op()), i);
+             opcodeToName(env.inst.op()), show(input.loc));
       return false;
     }
   }

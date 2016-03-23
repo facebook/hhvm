@@ -188,49 +188,26 @@ Type publicTopType(const IRGS& env, BCSPRelOffset idx) {
   return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
-Type predictedType(const IRGS& env, const Location& loc) {
+Type predictedType(const IRGS& env, const RegionDesc::Location& loc) {
   auto& fs = env.irb->fs();
 
-  switch (loc.space) {
-    case Location::Stack:
-      return fs.stack(offsetFromIRSP(env, loc.bcRelOffset)).predictedType;
-
-    case Location::Local:
-      return fs.local(loc.offset).predictedType;
-
-    default:
-      // We don't have predictions for other locations.
-      return provenType(env, loc);
+  switch (loc.tag()) {
+    case RegionDesc::Location::Tag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.offsetFromFP())).predictedType;
+    case RegionDesc::Location::Tag::Local:
+      return fs.local(loc.localId()).predictedType;
   }
   not_reached();
 }
 
-Type provenType(const IRGS& env, const Location& loc) {
-  switch (loc.space) {
-    case Location::Stack:
-      return env.irb->fs().stack(offsetFromIRSP(env, loc.bcRelOffset)).type;
+Type provenType(const IRGS& env, const RegionDesc::Location& loc) {
+  auto& fs = env.irb->fs();
 
-    case Location::Local:
-      return env.irb->fs().local(loc.offset).type;
-
-    case Location::Litstr:
-      return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
-
-    case Location::Litint:
-      return Type::cns(loc.offset);
-
-    case Location::This:
-      // Don't specialize $this for cloned closures that may have been
-      // re-bound.
-      if (curFunc(env)->hasForeignThis()) return TObj;
-      if (auto const cls = curFunc(env)->cls()) {
-        return Type::SubObj(cls);
-      }
-      return TObj;
-
-    case Location::Iter:
-    case Location::Invalid:
-      break;
+  switch (loc.tag()) {
+    case RegionDesc::Location::Tag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.offsetFromFP())).type;
+    case RegionDesc::Location::Tag::Local:
+      return fs.local(loc.localId()).type;
   }
   not_reached();
 }

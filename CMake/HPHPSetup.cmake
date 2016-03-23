@@ -126,6 +126,12 @@ include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
+# Ubuntu 15.10 and 14.04 have been failing to include a dependency on jemalloc
+# as a these linked flags force the dependency to be recorded
+if (JEMALLOC_ENABLED AND LINUX)
+  LIST(APPEND HHVM_LINK_LIBRARIES -Wl,--no-as-needed ${JEMALLOC_LIB} -Wl,--as-needed)
+endif()
+
 if (HHVM_VERSION_OVERRIDE)
   parse_version("HHVM_VERSION_" ${HHVM_VERSION_OVERRIDE})
   add_definitions("-DHHVM_VERSION_OVERRIDE")

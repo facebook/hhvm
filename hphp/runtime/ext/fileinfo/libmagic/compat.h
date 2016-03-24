@@ -35,7 +35,7 @@
 #define php_stream HPHP::File
 
 inline char *estrndup(const char *s, unsigned int length) {
-  char* ret = (char*) emalloc(length + 1);
+  char* ret = (char*)HPHP::req::malloc_noptrs(length + 1);
   memcpy(ret, s, length);
   ret[length] = '\0';
   return ret;

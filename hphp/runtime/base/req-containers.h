@@ -105,7 +105,7 @@ template<class T, class... Args>
 shared_ptr<T> make_shared(Args&&... args) {
   return static_cast<shared_ptr<T>>(
     std::allocate_shared<T>(
-      Allocator<T>(),
+      ConservativeAllocator<T>(),
       std::forward<Args>(args)...
     )
   );
@@ -139,10 +139,10 @@ template <typename Key,
           typename T,
           typename Compare = std::less<Key>>
 struct map final : std::map<Key, T, Compare,
-                            Allocator<std::pair<const Key,T>>
+                            ConservativeAllocator<std::pair<const Key,T>>
                             > {
   using Base = std::map<Key, T, Compare,
-                        Allocator<std::pair<const Key, T>>>;
+                        ConservativeAllocator<std::pair<const Key, T>>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(Key, T) {
@@ -154,10 +154,10 @@ template <typename Key,
           typename T,
           typename Compare = std::less<Key>>
 struct multimap final : std::multimap<Key, T, Compare,
-                                      Allocator<std::pair<const Key,T>>
-                                      > {
+                                      ConservativeAllocator<
+                                        std::pair<const Key,T>>> {
   using Base = std::multimap<Key, T, Compare,
-                             Allocator<std::pair<const Key, T>>>;
+                             ConservativeAllocator<std::pair<const Key, T>>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(Key, T) {
@@ -166,8 +166,8 @@ struct multimap final : std::multimap<Key, T, Compare,
 };
 
 template <typename T, typename Compare = std::less<T>>
-struct set final : std::set<T, Compare, Allocator<T>> {
-  using Base = std::set<T, Compare, Allocator<T>>;
+struct set final : std::set<T, Compare, ConservativeAllocator<T>> {
+  using Base = std::set<T, Compare, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -176,8 +176,8 @@ struct set final : std::set<T, Compare, Allocator<T>> {
 };
 
 template <typename T, typename Compare = std::less<T>>
-struct multiset final : std::multiset<T, Compare, Allocator<T>> {
-  using Base = std::multiset<T, Compare, Allocator<T>>;
+struct multiset final : std::multiset<T, Compare, ConservativeAllocator<T>> {
+  using Base = std::multiset<T, Compare, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -186,8 +186,8 @@ struct multiset final : std::multiset<T, Compare, Allocator<T>> {
 };
 
 template <typename T>
-struct deque final : std::deque<T, Allocator<T>> {
-  using Base = std::deque<T, Allocator<T>>;
+struct deque final : std::deque<T, ConservativeAllocator<T>> {
+  using Base = std::deque<T, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -196,8 +196,8 @@ struct deque final : std::deque<T, Allocator<T>> {
 };
 
 template <typename T>
-struct vector final : std::vector<T, Allocator<T>> {
-  using Base = std::vector<T, Allocator<T>>;
+struct vector final : std::vector<T, ConservativeAllocator<T>> {
+  using Base = std::vector<T, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -206,8 +206,8 @@ struct vector final : std::vector<T, Allocator<T>> {
 };
 
 template <typename T>
-struct list final : std::list<T, Allocator<T>> {
-  using Base = std::list<T, Allocator<T>>;
+struct list final : std::list<T, ConservativeAllocator<T>> {
+  using Base = std::list<T, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -216,8 +216,8 @@ struct list final : std::list<T, Allocator<T>> {
 };
 
 template <typename T>
-struct forward_list final : std::forward_list<T, Allocator<T>> {
-  using Base = std::forward_list<T, Allocator<T>>;
+struct forward_list final : std::forward_list<T, ConservativeAllocator<T>> {
+  using Base = std::forward_list<T, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -241,10 +241,11 @@ using priority_queue = std::priority_queue<T, Container, Compare>;
 
 template<typename K, typename V, typename Pred = std::less<K>>
 struct flat_map final : boost::container::flat_map<
-  K, V, Pred, Allocator<std::pair<K,V>>
+  K, V, Pred, ConservativeAllocator<std::pair<K,V>>
 > {
   using Base =
-    boost::container::flat_map<K, V, Pred, Allocator<std::pair<K,V>>>;
+    boost::container::flat_map<K, V, Pred,
+                               ConservativeAllocator<std::pair<K,V>>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K, V) {
@@ -254,10 +255,10 @@ struct flat_map final : boost::container::flat_map<
 
 template<typename K, typename V, typename Pred = std::less<K>>
 struct flat_multimap final : boost::container::flat_multimap<
-  K, V, Pred, Allocator<std::pair<K,V>>
+  K, V, Pred, ConservativeAllocator<std::pair<K,V>>
 > {
   using Base = boost::container::flat_multimap<
-    K, V, Pred, Allocator<std::pair<K,V>>
+    K, V, Pred, ConservativeAllocator<std::pair<K,V>>
   >;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
@@ -276,8 +277,8 @@ using flat_multimap = req::multimap<Key,T,Compare>;
 
 template<typename K, typename Compare = std::less<K>>
 struct flat_set final : boost::container::flat_set<K, Compare,
-                                                   Allocator<K>> {
-  using Base = boost::container::flat_set<K, Compare, Allocator<K>>;
+                                                   ConservativeAllocator<K>> {
+  using Base = boost::container::flat_set<K, Compare, ConservativeAllocator<K>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K) {
@@ -287,10 +288,10 @@ struct flat_set final : boost::container::flat_set<K, Compare,
 
 template<typename K, typename Compare = std::less<K>>
 struct flat_multiset final : boost::container::flat_multiset<
-  K, Compare, Allocator<K>
+  K, Compare, ConservativeAllocator<K>
 > {
   using Base =
-    boost::container::flat_multiset<K, Compare, Allocator<K>>;
+    boost::container::flat_multiset<K, Compare, ConservativeAllocator<K>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K) {
@@ -304,17 +305,17 @@ template <class T,
           class W = std::equal_to<T>>
 struct hash_map final : std::unordered_map<
   T, U, V, W,
-  Allocator<std::pair<const T,U>>
+  ConservativeAllocator<std::pair<const T,U>>
 > {
   hash_map()
     : std::unordered_map<
         T, U, V, W,
-        Allocator<std::pair<const T,U>>
+      ConservativeAllocator<std::pair<const T,U>>
       >(0)
   {}
 
   using Base = std::unordered_map<
-    T, U, V, W, Allocator<std::pair<const T, U>>
+    T, U, V, W, ConservativeAllocator<std::pair<const T, U>>
   >;
 
   TYPE_SCAN_IGNORE_BASES(Base);
@@ -329,17 +330,17 @@ template <class T,
           class W = std::equal_to<T>>
 struct hash_multimap final : std::unordered_multimap<
   T, U, V, W,
-  Allocator<std::pair<const T,U>>
+  ConservativeAllocator<std::pair<const T,U>>
 > {
   hash_multimap()
     : std::unordered_multimap<
         T, U, V, W,
-        Allocator<std::pair<const T,U>>
+      ConservativeAllocator<std::pair<const T,U>>
       >(0)
   {}
 
   using Base = std::unordered_multimap<
-    T, U, V, W, Allocator<std::pair<const T, U>>
+    T, U, V, W, ConservativeAllocator<std::pair<const T, U>>
   >;
 
   TYPE_SCAN_IGNORE_BASES(Base);
@@ -351,12 +352,12 @@ struct hash_multimap final : std::unordered_multimap<
 template <class T,
           class V = std::hash<T>,
           class W = std::equal_to<T>>
-struct hash_set : std::unordered_set<T,V,W,Allocator<T> > {
+struct hash_set final : std::unordered_set<T,V,W,ConservativeAllocator<T> > {
   hash_set()
-    : std::unordered_set<T,V,W,Allocator<T>>(0)
+      : std::unordered_set<T,V,W,ConservativeAllocator<T>>(0)
   {}
 
-  using Base = std::unordered_set<T,V,W,Allocator<T>>;
+  using Base = std::unordered_set<T,V,W,ConservativeAllocator<T>>;
 
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -365,8 +366,8 @@ struct hash_set : std::unordered_set<T,V,W,Allocator<T> > {
 };
 
 template <typename T>
-struct FixedVector final : HPHP::FixedVector<T, Allocator<T>> {
-  using Base = HPHP::FixedVector<T, Allocator<T>>;
+struct FixedVector final : HPHP::FixedVector<T, ConservativeAllocator<T>> {
+  using Base = HPHP::FixedVector<T, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -381,7 +382,12 @@ template <typename T, typename Element = T> struct TinyVectorReqAllocator {
   };
 
   void* allocate(std::size_t size) const {
-    return req::malloc(size);
+    return req::malloc(
+      size,
+      type_scan::getIndexForMalloc<
+        T, type_scan::Action::Conservative<Element>
+      >()
+    );
   }
   void deallocate(void* ptr) const { req::free(ptr); }
   std::size_t usable_size(void* ptr, std::size_t size) const {

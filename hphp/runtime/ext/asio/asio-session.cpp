@@ -72,7 +72,7 @@ namespace {
 }
 
 void AsioSession::Init() {
-  s_current.set(new AsioSession());
+  s_current.set(req::make_raw<AsioSession>());
 }
 
 AsioSession::AsioSession()
@@ -85,7 +85,7 @@ void AsioSession::enterContext(ActRec* savedFP) {
       "Unable to enter asio context: too many contexts open");
   }
 
-  m_contexts.push_back(new AsioContext(savedFP));
+  m_contexts.push_back(req::make_raw<AsioContext>(savedFP));
 
   assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
   assert(isInContext());
@@ -95,7 +95,7 @@ void AsioSession::exitContext() {
   assert(isInContext());
 
   m_contexts.back()->exit(m_contexts.size());
-  delete m_contexts.back();
+  req::destroy_raw(m_contexts.back());
   m_contexts.pop_back();
 }
 

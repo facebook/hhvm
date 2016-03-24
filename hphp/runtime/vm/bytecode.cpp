@@ -493,7 +493,13 @@ ExtraArgs::~ExtraArgs() {}
 
 void* ExtraArgs::allocMem(unsigned nargs) {
   assert(nargs > 0);
-  return req::malloc(sizeof(TypedValue) * nargs + sizeof(ExtraArgs));
+  return req::malloc(
+    sizeof(TypedValue) * nargs + sizeof(ExtraArgs),
+    type_scan::getIndexForMalloc<
+      ExtraArgs,
+      type_scan::Action::WithSuffix<TypedValue>
+    >()
+  );
 }
 
 ExtraArgs* ExtraArgs::allocateCopy(TypedValue* args, unsigned nargs) {

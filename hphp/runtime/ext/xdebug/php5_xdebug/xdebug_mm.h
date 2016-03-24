@@ -23,9 +23,4 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 
-#define xdmalloc    HPHP::req::malloc
-#define xdcalloc    HPHP::req::calloc
-#define xdrealloc   HPHP::req::realloc
-#define xdfree      HPHP::req::free
-
 #endif

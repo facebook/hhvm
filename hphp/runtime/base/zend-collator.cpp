@@ -84,8 +84,14 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) {
     if (length < (int)sizeof(buf)) {
       numbuf = buf;
     } else {
-      numbuf = (char *) req::malloc(length + 1);
+      numbuf = (char *) req::malloc_noptrs(length + 1);
     }
+
+    SCOPE_EXIT {
+      if (numbuf != buf) {
+        req::free(numbuf);
+      }
+    };
 
     bufpos = numbuf;
 
@@ -95,10 +101,6 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) {
 
     *bufpos = '\0';
     value = zend_strtod(numbuf, nullptr);
-
-    if (numbuf != buf) {
-      req::free(numbuf);
-    }
 
     if (endptr != nullptr) {
       *endptr = (UChar *)u;

@@ -150,7 +150,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
   if (value == 0.0) {
     *decpt = 1 - fmode; /* 1 for 'e', 0 for 'f' */
     *sign = 0;
-    if ((rve = s = (char *)req::malloc(ndigit?siz:2)) == nullptr) {
+    if ((rve = s = (char *)req::malloc_noptrs(ndigit?siz:2)) == nullptr) {
       return(nullptr);
     }
     *rve++ = '0';
@@ -171,7 +171,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
     if (pad && fmode) {
       siz += *decpt;
     }
-    if ((s = (char *)req::malloc(siz+1)) == nullptr) {
+    if ((s = (char *)req::malloc_noptrs(siz+1)) == nullptr) {
       zend_freedtoa(p);
       return(nullptr);
     }

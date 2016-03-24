@@ -23,6 +23,36 @@ function test_fun(bool $a, int $b): array<int> {
     echo "\" { { } }";
   }
 
+  $xhp1 =
+    <div>
+      test
+      <div>nested</div>
+    </div>;
+
+  $xhp2 =
+    <div>
+      test nested braces
+      {Vector {
+        <div />,
+      }}
+    </div>;
+
+  $xhp3 =
+    <div class={"nested string attribute"}>
+      <div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+    </div>;
+
+  $heredoc2 = <<<TEST
+    this only has a newline
+TEST
+;
+
+  $nowdoc = <<<'TEST'
+    this is a nowdoc
+TEST;
+
   switch ($b) {
     case 1:
       echo "1";

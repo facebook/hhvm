@@ -299,11 +299,11 @@ void HttpServer::runOrExitProcess() {
   InitFiniNode::ServerInit();
 
   {
-    BootTimer::mark("servers started");
+    BootStats::mark("servers started");
     Logger::Info("all servers started");
     createPid();
     Lock lock(this);
-    BootTimer::done();
+    BootStats::done();
     // continously running until /stop is received on admin server, or
     // takeover is requested.
     while (!m_stopped) {

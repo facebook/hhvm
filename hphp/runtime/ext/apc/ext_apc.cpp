@@ -575,7 +575,7 @@ void apc_load(int thread) {
       !apcExtension::Enable) {
     return;
   }
-  BootTimer::Block timer("loading APC data");
+  BootStats::Block timer("loading APC data");
   if (apc_store().primeFromSnapshot(apcExtension::PrimeLibrary.c_str())) {
     return;
   }
@@ -607,7 +607,7 @@ void apc_load(int thread) {
 
   apc_store().primeDone();
   if (!upgradeDest.empty()) {
-    BootTimer::Block block("SnapshotBuilder::writeToFile");
+    BootStats::Block block("SnapshotBuilder::writeToFile");
     s_snapshotBuilder.writeToFile(upgradeDest);
   }
 

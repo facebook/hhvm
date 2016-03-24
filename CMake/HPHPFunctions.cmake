@@ -127,6 +127,14 @@ function(append_systemlib TARGET SOURCE SECTNAME)
 endfunction(append_systemlib)
 
 function(embed_sections TARGET DEST)
+  add_custom_command(TARGET ${TARGET} PRE_BUILD
+    # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
+    #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
+    COMMAND "${HPHP_HOME}/hphp/util/generate-buildinfo.sh"
+    WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
+    COMMENT "Generating Repo Schema ID and Compiler ID"
+    VERBATIM)
+
   if (APPLE)
     set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
     set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
@@ -148,14 +156,6 @@ function(embed_sections TARGET DEST)
     endforeach()
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/embed.rc "${RESOURCE_FILE}")
   else()
-    add_custom_command(TARGET ${TARGET} PRE_BUILD
-      # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
-      #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
-      COMMAND "${HPHP_HOME}/hphp/util/generate-buildinfo.sh"
-      WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
-      COMMENT "Generating Repo Schema ID and Compiler ID"
-      VERBATIM)
-
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"
       ARGS "--add-section" "compiler_id=${HPHP_HOME}/hphp/util/generated-compiler-id.txt"

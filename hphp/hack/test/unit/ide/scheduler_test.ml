@@ -15,7 +15,7 @@ type test_env = {
   callbacks_trace : (string * float) list;
 }
 
-module TestScheduler = IdeScheduler.Make(struct type t = test_env end)
+module TestScheduler = Scheduler.Make(struct type t = test_env end)
 
 let empty_test_env () = {
   callbacks_trace = [];

@@ -82,6 +82,18 @@ private:
     return (recurse) ? key | RECURSE_MASK : key;
   }
 
+  const EnumValues* cachePersistentEnumValues(
+    const Class* klass,
+    bool recurse,
+    Array&& names,
+    Array&& values);
+
+  const EnumValues* cacheRequestEnumValues(
+    const Class* klass,
+    bool recurse,
+    Array&& names,
+    Array&& values);
+
   const EnumValues* getEnumValuesIfDefined(intptr_t key) const;
   const EnumValues* getEnumValues(const Class* klass, bool recurse);
   const EnumValues* loadEnumValues(const Class* klass, bool recurse);
@@ -89,10 +101,17 @@ private:
 
   // Map that contains associations between Enum classes and their array
   // values and array names.
-  typedef tbb::concurrent_hash_map<
-              intptr_t, const EnumValues*, clsCompare> EnumValuesMap;
+  using EnumValuesMap = tbb::concurrent_hash_map<
+    intptr_t,
+    const EnumValues*,
+    clsCompare>;
+
+  using ReqEnumValuesMap = req::hash_map<
+    intptr_t,
+    const EnumValues*>;
 
   EnumValuesMap m_enumValuesMap;
+  rds::Link<ReqEnumValuesMap*> m_nonScalarEnumValuesMap{rds::kInvalidHandle};
 };
 
 //////////////////////////////////////////////////////////////////////

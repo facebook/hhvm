@@ -551,7 +551,7 @@ Variant HHVM_FUNCTION(proc_open,
                       const String& cmd,
                       const Array& descriptorspec,
                       VRefParam pipesParam,
-                      const String& cwd /* = null_string */,
+                      const Variant& cwd /* = null_string */,
                       const Variant& env /* = null_variant */,
                       const Variant& other_options /* = null_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
@@ -566,8 +566,8 @@ Variant HHVM_FUNCTION(proc_open,
   std::vector<DescriptorItem> items;
 
   std::string scwd = "";
-  if (!cwd.empty()) {
-    scwd = cwd.c_str();
+  if (!cwd.toString().empty()) {
+    scwd = cwd.toString().c_str();
   } else if (!g_context->getCwd().empty()) {
     scwd = g_context->getCwd().c_str();
   }

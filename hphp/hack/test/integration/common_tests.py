@@ -429,6 +429,22 @@ function test(C $c) {
 }
 ''')
 
+        self.check_cmd_and_json_cmd([
+            'function test1(int $x) {{',
+            '  $x = $x * x + 3;',
+            '  return f($x);',
+            '}}'
+            ], [
+            '{{"error_message":"","result":"function test1(int $x) {{\\n''  $x'
+            ' = $x * x + 3;\\n  return f($x);\\n}}\\n","internal_error":false}}'
+            ],
+            options=['--format', '7', '63'],
+            stdin='''<?hh
+
+function test1(int $x) { $x = $x*x + 3; return f($x); }
+function test2(int $x) { $x = $x*x + 3; return f($x); }
+''')
+
     def test_abnormal_typechecker_exit_message(self):
         """
         Tests that the monitor outputs a useful message when its typechecker

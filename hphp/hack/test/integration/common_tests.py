@@ -355,7 +355,7 @@ assume_php = false""")
     def test_misc_ide_tools(self):
         """
         Test hh_client --type-at-pos, --identify-function,
-        --auto-complete, and --list-files
+        --auto-complete, --list-files, and --find-lvar-refs
         """
 
         self.write_load_config()
@@ -384,6 +384,31 @@ assume_php = false""")
             ], [
             '{root}foo_1.php',  # see comment for identify-function
             ], options=['--list-files'])
+
+        self.check_cmd_and_json_cmd([
+            'line 3, characters 15-16',
+            'line 4, characters 3-4',
+            'line 5, characters 5-6',
+            'line 5, characters 11-12',
+            'line 6, characters 10-11',
+            '5 total results',
+            ], [
+            '{{"positions":[{{"filename":"","line":3,"char_start":15,'
+            '"char_end":16}},{{"filename":"","line":4,"char_start":3,'
+            '"char_end":4}},{{"filename":"","line":5,"char_start":5,'
+            '"char_end":6}},{{"filename":"","line":5,"char_start":11,'
+            '"char_end":12}},{{"filename":"","line":6,"char_start":10,'
+            '"char_end":11}}],"internal_error":false}}'
+            ],
+            options=['--find-lvar-refs', '4:4'],
+            stdin='''<?hh
+
+function test($x) {
+  $x = 3;
+  g($x) + $x;
+  return $x;
+}
+''')
 
     def test_abnormal_typechecker_exit_message(self):
         """

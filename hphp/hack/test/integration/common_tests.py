@@ -355,7 +355,7 @@ assume_php = false""")
     def test_misc_ide_tools(self):
         """
         Test hh_client --type-at-pos, --identify-function,
-        --auto-complete, --list-files, and --find-lvar-refs
+        --auto-complete, --list-files, --find-lvar-refs, and --get-method-name
         """
 
         self.write_load_config()
@@ -407,6 +407,25 @@ function test($x) {
   $x = 3;
   g($x) + $x;
   return $x;
+}
+''')
+
+        self.check_cmd_and_json_cmd([
+            'Name: \\C::foo, type: method, position: line 8, characters 7-9'
+            ], [
+            '{{"name":"\\\\C::foo","result_type":"method",'
+            '"pos":{{"filename":"","line":8,"char_start":7,"char_end":9}},'
+            '"internal_error":false}}'
+            ],
+            options=['--get-method-name', '8:7'],
+            stdin='''<?hh
+
+class C {
+  public function foo() {}
+}
+
+function test(C $c) {
+  $c->foo();
 }
 ''')
 

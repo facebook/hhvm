@@ -140,7 +140,6 @@ TypedValue arrayIdxIc(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
-TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
 TypedValue mapIdx(ObjectData*, StringData*, TypedValue);
 
 TypedValue getMemoKeyHelper(TypedValue tv);

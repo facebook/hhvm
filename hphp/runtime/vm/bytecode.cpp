@@ -3789,13 +3789,47 @@ OPTBLD_INLINE void iopGetMemoKey(IOP_ARGS) {
   vmStack().replaceTV(*res);
 }
 
+namespace {
+const StaticString s_idx("hh\\idx");
+
+TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
+  static auto func = Unit::loadFunc(s_idx.get());
+  assertx(func != nullptr);
+  TypedValue args[] = {
+    obj,
+    key,
+    def
+  };
+  TypedValue ret;
+  g_context->invokeFuncFew(&ret, func, nullptr, nullptr, 3, &args[0]);
+  return ret;
+}
+}
+
 OPTBLD_INLINE void iopIdx(IOP_ARGS) {
   TypedValue* def = vmStack().topTV();
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
 
-  TypedValue result = jit::genericIdx(*arr, *key, *def);
-  vmStack().popTV();
+  TypedValue result;
+  if (isArrayType(arr->m_type)) {
+    new (&result) Variant(HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
+                                                  tvAsCVarRef(key),
+                                                  tvAsCVarRef(def)));
+    vmStack().popTV();
+  } else if (isNullType(key->m_type)) {
+    tvRefcountedDecRef(arr);
+    *arr = *def;
+    vmStack().ndiscard(2);
+    return;
+  } else if (!isStringType(arr->m_type) &&
+             arr->m_type != KindOfObject) {
+    result = *def;
+    vmStack().discard();
+  } else {
+    result = genericIdx(*arr, *key, *def);
+    vmStack().popTV();
+  }
   vmStack().popTV();
   tvRefcountedDecRef(arr);
   *arr = result;

@@ -31,12 +31,13 @@ static NativeDataInfoMap s_nativedatainfo;
 
 size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
   auto cls = obj->getVMClass();
-  if (cls == Generator::getClass() || cls == AsyncGenerator::getClass()) {
-    return (cls == Generator::getClass())
-      ? Native::data<Generator>(obj)->resumable()->size()
-      - sizeof(ObjectData)
-      : Native::data<AsyncGenerator>(obj)->resumable()->size()
-      - sizeof(ObjectData);
+  if (cls == Generator::getClass()) {
+    return Native::data<Generator>(obj)->resumable()->size() -
+           sizeof(ObjectData);
+  }
+  if (cls == AsyncGenerator::getClass()) {
+    return Native::data<AsyncGenerator>(obj)->resumable()->size() -
+           sizeof(ObjectData);
   }
   return ndsize(ndi->sz);
 }

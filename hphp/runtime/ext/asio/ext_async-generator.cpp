@@ -76,11 +76,10 @@ AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
     // Resumed execution.
     m_waitHandle->await(child);
     return nullptr;
-  } else {
-    // Eager executon.
-    m_waitHandle = c_AsyncGeneratorWaitHandle::Create(this, child);
-    return m_waitHandle;
   }
+  // Eager executon.
+  m_waitHandle = c_AsyncGeneratorWaitHandle::Create(this, child);
+  return m_waitHandle;
 }
 
 c_StaticWaitHandle*

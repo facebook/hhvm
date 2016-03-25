@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/replay-transport.h"
@@ -33,6 +34,7 @@
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/boot_timer.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -324,6 +326,14 @@ void HttpServer::runOrExitProcess() {
     m_pageServer->stop();
   }
   onServerShutdown();
+
+  // In theory, the kernel should do just as well even if we don't
+  // explicitly advise files out.  But we do it anyway.  If there is a
+  // new server process starting on the same host, it will see more
+  // free memory and have more confidence to proceed.
+  advise_out(RuntimeOption::RepoLocalPath);
+  advise_out(RuntimeOption::FileCache);
+  apc_advise_out();
 
   waitForServers();
   m_watchDog.waitForEnd();

@@ -61,6 +61,7 @@ private:
   StorageState m_state{StorageState::Invalid};
   std::vector<char*> m_chunks;
   std::vector<std::string> m_fileNames;
+  std::vector<int> m_fds;
   std::string m_prefix;
 
   // This lock is needed when manipulating chunks.

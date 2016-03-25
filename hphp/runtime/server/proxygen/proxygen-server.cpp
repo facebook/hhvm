@@ -28,7 +28,9 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/process.h"
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace HPHP {
@@ -457,6 +459,7 @@ void ProxygenServer::stopVM() {
   // we can't call m_dispatcher.stop() from the event loop, because it blocks
   // all I/O.  Spawn a thread to call it and callback when it's done.
   std::thread vmStopper([this] {
+      purge_all();
       Logger::Info("%p: Stopping dispatcher port=%d", this, m_port);
       m_dispatcher.stop();
       Logger::Info("%p: Dispatcher stopped port=%d.  conns=%d", this, m_port,
@@ -515,12 +518,13 @@ void ProxygenServer::forceStop() {
 void ProxygenServer::reportShutdownStatus() {
   if (m_port != RuntimeOption::ServerPort) return;
   if (getStatus() == RunStatus::STOPPED) return;
-  Logger::Info("Shutdown state=%d, a/q/e/p %d/%d/%d/%d",
-               (int)m_shutdownState,
-               getActiveWorker(),
-               getQueuedJobs(),
-               getLibEventConnectionCount(),
-               (int)m_pendingTransports.size());
+  Logger::FInfo("Shutdown state={}, a/q/e/p {}/{}/{}/{}, RSS={}Mb",
+                static_cast<int>(m_shutdownState),
+                getActiveWorker(),
+                getQueuedJobs(),
+                getLibEventConnectionCount(),
+                m_pendingTransports.size(),
+                Process::GetProcessRSS(Process::GetProcessId()));
   m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
 }
 

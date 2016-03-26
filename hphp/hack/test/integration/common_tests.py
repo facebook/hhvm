@@ -14,87 +14,46 @@ import tempfile
 import time
 
 from hh_paths import hh_server, hh_client
-from utils import write_files
 
-class CommonSaveStateTests(object):
+class CommonTestDriver(object):
+
+    # This needs to be overridden in child classes. The files in this
+    # directory will be used to set up the initial environment for each
+    # test.
+    template_repo = None
 
     @classmethod
     def setUpClass(cls):
         cls.maxDiff = 2000
-        # we create the state in a different dir from the one we run our tests
-        # on, to verify that the saved state does not depend on any absolute
-        # paths
-        init_dir = tempfile.mkdtemp()
-        cls.repo_dir = tempfile.mkdtemp()
-        cls.config_path = os.path.join(cls.repo_dir, '.hhconfig')
-        cls.tmp_dir = tempfile.mkdtemp()
+        cls.base_tmp_dir = tempfile.mkdtemp()
+        # we don't create repo_dir using mkdtemp() because we want to create
+        # it with copytree(). copytree() will fail if the directory already
+        # exists.
+        cls.repo_dir = os.path.join(cls.base_tmp_dir, 'repo')
+        # Where the hhi files, socket, etc get extracted
         cls.hh_tmp_dir = tempfile.mkdtemp()
-        cls.saved_state_name = 'foo'
+        cls.bin_dir = tempfile.mkdtemp()
         hh_server_dir = os.path.dirname(hh_server)
         cls.test_env = dict(os.environ, **{
             'HH_TEST_MODE': '1',
             'HH_TMPDIR': cls.hh_tmp_dir,
             'PATH': '%s:%s:/bin:/usr/bin:/usr/local/bin' %
-                (hh_server_dir, cls.tmp_dir),
+                (hh_server_dir, cls.bin_dir),
             'OCAMLRUNPARAM': 'b',
             'HH_LOCALCONF_PATH': cls.repo_dir,
             })
 
-        with open(os.path.join(init_dir, '.hhconfig'), 'w') as f:
-            f.write(r"""
-# some comment
-assume_php = false""")
-
-        cls.files = {}
-
-        cls.files['foo_1.php'] = """
-        <?hh
-        function f() {
-            return g() + 1;
-        }
-        """
-
-        cls.files['foo_2.php'] = """
-        <?hh
-        function g(): int {
-            return 0;
-        }
-        """
-
-        cls.files['foo_3.php'] = """
-        <?hh
-        function h(): string {
-            return "a";
-        }
-
-        class Foo {}
-
-        function some_long_function_name() {
-            new Foo();
-            h();
-        }
-        """
-
-        write_files(cls.files, init_dir)
-
-        cls.save_command(init_dir)
-
-        shutil.rmtree(init_dir)
-
-    @classmethod
-    def save_command(cls):
-        raise NotImplementedError()
-
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.tmp_dir)
+        shutil.rmtree(cls.base_tmp_dir)
+        shutil.rmtree(cls.bin_dir)
         shutil.rmtree(cls.hh_tmp_dir)
 
-    @classmethod
-    def saved_state_path(cls):
-        return os.path.join(cls.tmp_dir, cls.saved_state_name)
-
     def write_load_config(self, *changed_files):
+        """
+        Writes out a script that will print the list of changed files,
+        and adds the path to that script to .hhconfig
+        """
         raise NotImplementedError()
 
     def start_hh_server(self):
@@ -113,9 +72,7 @@ assume_php = false""")
             return f.read()
 
     def setUp(self):
-        if os.path.isdir(self.repo_dir) is False:
-            os.mkdir(self.repo_dir)
-        write_files(self.files, self.repo_dir)
+        shutil.copytree(self.template_repo, self.repo_dir)
 
     def tearDown(self):
         (_, _, exit_code) = self.proc_call([
@@ -165,6 +122,10 @@ assume_php = false""")
         # idempotent)
         self.check_cmd(expected_json, stdin, options + ['--json'])
         self.check_cmd(expected_output, stdin, options)
+
+class CommonTests(object):
+
+    template_repo = 'hphp/hack/test/integration/data/simple_repo'
 
     # hh should should work with 0 retries.
     def test_responsiveness(self):
@@ -598,7 +559,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             new Qux();
             h();
         }
-        """)
+""")
 
     def test_refactor_functions(self):
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
@@ -650,4 +611,4 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         function fff() {
             return g() + 1;
         }
-        """)
+""")

@@ -499,8 +499,12 @@ void printTrans(TransID transId) {
                          tRec->bcMapping, tcaPerfEvents);
 
   printf("----------\nx64: cold\n----------\n");
-  transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
-                         tRec->bcMapping, tcaPerfEvents);
+  // Sometimes acoldStart is the same as afrozenStart.  Avoid printing the code
+  // twice in such cases.
+  if (tRec->acoldStart != tRec->afrozenStart) {
+    transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
+                           tRec->bcMapping, tcaPerfEvents);
+  }
 
   printf("----------\nx64: frozen\n----------\n");
   transCode->printDisasm(tRec->afrozenStart, tRec->afrozenLen,

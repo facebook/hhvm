@@ -316,7 +316,7 @@ class CommonTests(object):
     def test_misc_ide_tools(self):
         """
         Test hh_client --type-at-pos, --identify-function,
-        --auto-complete, --list-files, --find-lvar-refs, and --get-method-name
+        --list-files, --find-lvar-refs, and --get-method-name
         """
 
         self.write_load_config()

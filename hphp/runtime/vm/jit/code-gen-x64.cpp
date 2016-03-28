@@ -751,7 +751,8 @@ static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
 
 void
 CodeGenerator::cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,
-                            SyncOptions sync, const ArgGroup& args) {
+                            SyncOptions sync, const ArgGroup& args,
+                            bool indResult) {
   auto const inst = args.inst();
   jit::vector<Vreg> vargs, vSimdArgs, vStkArgs;
   for (size_t i = 0; i < args.numGpArgs(); ++i) {
@@ -814,11 +815,12 @@ CodeGenerator::cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,
   auto dstId = v.makeTuple(std::move(dstRegs));
   if (do_catch) {
     v << vinvoke{call, argsId, dstId, {targets[0], targets[1]},
-                 syncFixup, dstInfo.type};
+                 syncFixup, dstInfo.type, indResult};
     m_state.catch_calls[inst->taken()] = CatchCall::CPP;
     v = targets[0];
   } else {
-    v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow};
+    v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow,
+               indResult};
   }
 }
 
@@ -2957,7 +2959,8 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }();
 
   cgCallHelper(v, CallSpec::direct(callee->nativeFuncPtr()),
-               dest, SyncOptions::Sync, callArgs);
+               dest, SyncOptions::Sync, callArgs,
+               !returnByValue && isBuiltinByRef(funcReturnType));
 
   // For primitive return types (int, bool, double), and returnByValue,
   // the return value is already in dstReg/dstType

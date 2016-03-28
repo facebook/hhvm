@@ -495,9 +495,9 @@ struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
  * needed for lowering to different target architectures.
  */
 struct vcall { CallSpec call; VcallArgsId args; Vtuple d;
-               Fixup fixup; DestType destType; bool nothrow; };
+               Fixup fixup; DestType destType; bool nothrow; bool indResult; };
 struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
-                 Fixup fixup; DestType destType; };
+                 Fixup fixup; DestType destType; bool indResult; };
 
 /*
  * C++ function call using the native ABI.
@@ -688,7 +688,7 @@ struct callarray { TCA target; RegSet args; };
  * Has exception edges and additional integer args (used by the `target' stub).
  */
 struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
-                    Vlabel targets[2]; };
+                    Vlabel targets[2]; bool indResult; };
 
 /*
  * Enter a continuation (with exception edges).

@@ -37,6 +37,7 @@ RegSet vm_regs_no_sp() { return ARCH_SWITCH_CALL(vm_regs_no_sp); }
 
 PhysReg rret(size_t i) { return ARCH_SWITCH_CALL(rret, i); }
 PhysReg rret_simd(size_t i) { return ARCH_SWITCH_CALL(rret_simd, i); }
+PhysReg rret_indirect() { return ARCH_SWITCH_CALL(rret_indirect); }
 
 PhysReg rarg(size_t i) { return ARCH_SWITCH_CALL(rarg, i); }
 PhysReg rarg_simd(size_t i) { return ARCH_SWITCH_CALL(rarg_simd, i); }

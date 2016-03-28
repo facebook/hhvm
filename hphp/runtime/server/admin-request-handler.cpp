@@ -173,6 +173,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/stop:            stop the web server\n"
         "    instance-id   optional, if specified, instance ID has to match\n"
         "/free-mem:        ask allocator to release unused memory to system\n"
+        "/prepare-to-stop: ask the server to prepare for stopping\n"
         "/flush-logs:      trigger batching log-writers to flush all content\n"
         "/translate:       translate hex encoded stacktrace in 'stack' param\n"
         "    stack         required, stack trace to translate\n"
@@ -372,6 +373,30 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       } else {
         transport->sendString(errStr.c_str(), 500);
       }
+      break;
+    }
+    if (cmd == "prepare-to-stop") {
+      transport->sendString("OK\n");
+      Logger::Info("Got admin port prepare-to-stop request from %s",
+                   transport->getRemoteHost());
+      MemInfo info, newInfo;
+      Process::GetMemoryInfo(info);
+      HttpServer::PrepareToStop();
+
+      // We may consider purge_all() here, too.  But since requests
+      // are still coming in, it may not be very useful, and has some
+      // performance penalties.
+
+      // TODO: evaluate the effect of sync() and uncomment if
+      // desirable.  It is blocking and can take some time, so do it
+      // in a separate thread.
+      // std::thread t{sync};
+      // t.detach();
+
+      Process::GetMemoryInfo(newInfo);
+      Logger::FInfo("free/cached/buffer {}/{}/{} -> {}/{}/{}",
+                    info.freeMb, info.cachedMb, info.buffersMb,
+                    newInfo.freeMb, newInfo.cachedMb, newInfo.buffersMb);
       break;
     }
     if (cmd == "flush-logs") {

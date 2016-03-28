@@ -59,11 +59,11 @@ private:
 };
 
 struct MemInfo {
-  int64_t m_freeMb{-1};
-  int64_t m_cachedMb{-1};
-  int64_t m_buffersMb{-1};
+  int64_t freeMb{-1};
+  int64_t cachedMb{-1};
+  int64_t buffersMb{-1};
   bool valid() const {
-    return m_freeMb >= 0 && m_cachedMb >= 0 && m_buffersMb >= 0;
+    return freeMb >= 0 && cachedMb >= 0 && buffersMb >= 0;
   }
 };
 

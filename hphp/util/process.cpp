@@ -588,9 +588,9 @@ bool Process::GetMemoryInfo(MemInfo& info) {
 
     char buf[128];
     while (fgets(buf, sizeof(buf), f)) {
-      info.m_freeMb = std::max(info.m_freeMb, parseLine("MemFree", buf));
-      info.m_buffersMb = std::max(info.m_buffersMb, parseLine("Buffers", buf));
-      info.m_cachedMb = std::max(info.m_cachedMb, parseLine("Cached", buf));
+      info.freeMb = std::max(info.freeMb, parseLine("MemFree", buf));
+      info.buffersMb = std::max(info.buffersMb, parseLine("Buffers", buf));
+      info.cachedMb = std::max(info.cachedMb, parseLine("Cached", buf));
       if (info.valid()) return true;
     }
   }

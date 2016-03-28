@@ -57,6 +57,7 @@ using std::string;
 std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
 time_t HttpServer::OldServerStopTime;
+unsigned HttpServer::LoadFactor = 100; // desired load level in [0, 100]
 
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
 
@@ -328,13 +329,7 @@ void HttpServer::runOrExitProcess() {
   }
   onServerShutdown();
 
-  // In theory, the kernel should do just as well even if we don't
-  // explicitly advise files out.  But we do it anyway.  If there is a
-  // new server process starting on the same host, it will see more
-  // free memory and have more confidence to proceed.
-  advise_out(RuntimeOption::RepoLocalPath);
-  advise_out(RuntimeOption::FileCache);
-  apc_advise_out();
+  EvictFileCache();
 
   waitForServers();
   m_watchDog.waitForEnd();
@@ -418,6 +413,21 @@ void HttpServer::stopOnSignal(int sig) {
   }
 
   waitForServers();
+}
+
+void HttpServer::EvictFileCache() {
+  // In theory, the kernel should do just as well even if we don't
+  // explicitly advise files out.  But we can do it anyway when we
+  // need more free memory, e.g., when a new instance of the server is
+  // about to start.
+  advise_out(RuntimeOption::RepoLocalPath);
+  advise_out(RuntimeOption::FileCache);
+  apc_advise_out();
+}
+
+void HttpServer::PrepareToStop() {
+  EvictFileCache();
+  LoadFactor = LoadFactor * 3 / 4;
 }
 
 void HttpServer::createPid() {
@@ -528,8 +538,8 @@ static inline int64_t availableMemory(const MemInfo& mem, int64_t rss,
   // causing big memory pressure.  We consider it safe to take
   // `pageFreeFactor` percent of cached pages (excluding those used by
   // the current process, estimated to be equal to the current RSS)
-  auto const otherCacheMb = std::max((int64_t)0,  mem.m_cachedMb - rss);
-  auto const availableMb = mem.m_freeMb + otherCacheMb * factor / 100;
+  auto const otherCacheMb = std::max((int64_t)0,  mem.cachedMb - rss);
+  auto const availableMb = mem.freeMb + otherCacheMb * factor / 100;
   return availableMb;
 }
 
@@ -539,7 +549,7 @@ bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
   if (!mem.valid()) return false;
   // Don't proceed if free memory is too limited, no matter how big
   // the cache is.
-  if (mem.m_freeMb < rssNeeded / 16) return false;
+  if (mem.freeMb < rssNeeded / 16) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
   return (rssMb + availableMb >= rssNeeded);
 }
@@ -547,7 +557,7 @@ bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
 bool HttpServer::CanStep(const MemInfo& mem, int64_t rssMb,
                          int64_t rssNeeded, int cacheFreeFactor) {
   if (!mem.valid()) return false;
-  if (mem.m_freeMb < rssNeeded / 16) return false;
+  if (mem.freeMb < rssNeeded / 16) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
 
   // Estimation of the memory needed till the next check point.  Since
@@ -582,7 +592,7 @@ void HttpServer::CheckMemAndWait(bool final) {
     }
     Logger::FInfo("Memory pressure check: free/cached/buffers {}/{}/{} "
                   "currentRss {}Mb, required {}Mb.",
-                  memInfo.m_freeMb, memInfo.m_cachedMb, memInfo.m_buffersMb,
+                  memInfo.freeMb, memInfo.cachedMb, memInfo.buffersMb,
                   rssMb, rssNeeded);
 
     if (CanContinue(memInfo, rssMb, rssNeeded, factor)) return;

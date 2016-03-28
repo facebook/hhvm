@@ -30,7 +30,10 @@ struct HttpServer : Synchronizable, TakeoverListener,
                     Server::ServerEventListener {
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
+
+private:
   static time_t OldServerStopTime;
+  static unsigned LoadFactor;
 
 public:
   explicit HttpServer();
@@ -64,6 +67,9 @@ public:
 
   void stopOnSignal(int sig);
 
+  static unsigned GetLoadFactor() { return LoadFactor; }
+  static void ResetLoadFactor() { LoadFactor = 100; }
+
   /*
    * Try to stop the previous server instance.  Return true if the
    * old server acknowledges.  This function doesn't wait until the
@@ -93,6 +99,9 @@ public:
                       int64_t rssNeeded, int cacheFreeFactor);
   static bool CanContinue(const MemInfo& mem, int64_t rss,
                           int64_t rssNeeded, int cacheFreeFactor);
+
+  static void EvictFileCache();
+  static void PrepareToStop();
 
 private:
   bool startServer(bool pageServer);

@@ -37,8 +37,12 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/code-gen-internal.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/code-gen-tls.h"
+#include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -141,13 +145,121 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
   return start;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Helper for the freeLocalsHelpers which does the actual work of decrementing
+ * a value's refcount or releasing it.
+ *
+ * This helper is reached via call from the various freeLocalHelpers.  It
+ * expects `tv' to be the address of a TypedValue with refcounted type `type'
+ * (though it may be static, and we will do nothing in that case).
+ *
+ * The `saved' register should be a callee-saved GP register that the helper
+ * can use to preserve `tv' across native calls.
+ */
+static TCA emitDecRefHelper(CodeBlock& cb, PhysReg tv, PhysReg type,
+                            RegSet live) {
+  return vwrap(cb, [&] (Vout& v) {
+    v << stublogue{};
+
+    // We use the first argument register for the TV data because we may pass
+    // it to the release routine.  It's not live when we enter the helper.
+    auto const data = rarg(0);
+    v << load{tv[TVOFF(m_data)], data};
+
+    auto const sf = v.makeReg();
+    v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+
+    ifThen(v, CC_NL, sf, [&] (Vout& v) {
+      // The refcount is positive, so the value is refcounted.  We need to
+      // either decref or release.
+      ifThen(v, CC_NE, sf, [&] (Vout& v) {
+        // The refcount is greater than 1; decref it.
+        v << declm{data[FAST_REFCOUNT_OFFSET], v.makeReg()};
+        v << stubret{};
+      });
+
+      // Note that the stack is aligned since we called to this helper from an
+      // stack-unaligned stub.
+      PhysRegSaver prs{v, live};
+
+      // The refcount is exactly 1; release the value.
+      // Avoid 'this' pointer overwriting by reserving it as an argument.
+      v << callm{lookupDestructor(v, type), arg_regs(1)};
+
+      // Between where %rsp is now and the saved RIP of the call into the
+      // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
+      // saved RIP of the call from the stub to this helper.
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed() + 1)};
+      // fallthru
+    });
+
+    // Either we did a decref, or the value was static.
+    v << stubret{};
+  });
+}
+
 TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
-  auto const release = vwrap(cb, [&](Vout& v) {
-    v << ud2{};
+  // The address of the first local is passed in the second argument register.
+  // We use the third and fourth as scratch registers.
+  auto const local = rarg(1);
+  auto const last = rarg(2);
+  auto const type = rarg(3);
+
+  // This stub is very hot; keep it cache-aligned.
+  align(cb, Alignment::CacheLine, AlignContext::Dead);
+  auto const release = emitDecRefHelper(cb, local, type, local | last);
+
+  auto const decref_local = [&] (Vout& v) {
+    auto const sf = v.makeReg();
+
+    // We can't use emitLoadTVType() here because it does a byte load, and we
+    // need to sign-extend since we use `type' as a 32-bit array index to the
+    // destructor table.
+    v << loadzbl{local[TVOFF(m_type)], type};
+    emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
+
+    ifThen(v, CC_G, sf, [&] (Vout& v) {
+      v << call{release, arg_regs(3)};
+    });
+  };
+
+  auto const next_local = [&] (Vout& v) {
+    v << addqi{static_cast<int>(sizeof(TypedValue)),
+               local, local, v.makeReg()};
+  };
+
+  alignJmpTarget(cb);
+
+  us.freeManyLocalsHelper = vwrap(cb, [&] (Vout& v) {
+    v << stublogue{true};
+    // We always unroll the final `kNumFreeLocalsHelpers' decrefs, so only loop
+    // until we hit that point.
+    v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
+
+    doWhile(v, CC_NZ, {},
+      [&] (const VregList& in, const VregList& out) {
+        auto const sf = v.makeReg();
+
+        decref_local(v);
+        next_local(v);
+        v << cmpq{local, last, sf};
+        return sf;
+      }
+    );
+    v << stubret{RegSet(), true};
   });
-  us.freeManyLocalsHelper = vwrap(cb, [&](Vout& v) {
-    v << ud2{};
-  });
+
+  for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
+    us.freeLocalsHelpers[i] = vwrap(cb, [&] (Vout& v) {
+      v << stublogue{true};
+      decref_local(v);
+      if (i != 0) next_local(v);
+      v << stubret{RegSet(), true};
+    });
+  }
+
   return release;
 }
 
@@ -172,10 +284,52 @@ TCA emitCallToExit(CodeBlock& cb) {
 }
 
 TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
-  auto const start = vwrap(cb, [&] (Vout& v) {
-    v << ret{};
+  auto const udrspo = rvmtl()[unwinderDebuggerReturnSPOff()];
+
+  auto const debuggerReturn = vwrap(cb, [&] (Vout& v) {
+    v << load{udrspo, rvmsp()};
+    v << storeqi{0, udrspo};
   });
-  return start;
+  svcreq::emit_persistent(cb, folly::none, REQ_POST_DEBUGGER_RET);
+
+  auto const resumeCPPUnwind = vwrap(cb, [] (Vout& v) {
+    static_assert(sizeof(tl_regState) == 1,
+                  "The following store must match the size of tl_regState.");
+    auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
+    v << storebi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
+
+    v << load{rvmtl()[unwinderExnOff()], rarg(0)};
+    v << call{TCA(_Unwind_Resume), arg_regs(1)};
+  });
+  us.endCatchHelperPast = cb.frontier();
+  vwrap(cb, [] (Vout& v) { v << ud2{}; });
+
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [&] (Vout& v) {
+    auto const done1 = v.makeBlock();
+    auto const sf1 = v.makeReg();
+
+    v << cmpqim{0, udrspo, sf1};
+    v << jcci{CC_NE, sf1, done1, debuggerReturn};
+    v = done1;
+
+    // Normal end catch situation: call back to tc_unwind_resume, which returns
+    // the catch trace (or null) in x0, and the new vmfp in x1.
+    v << copy{rvmfp(), rarg(0)};
+    v << call{TCA(tc_unwind_resume)};
+    v << copy{rarg(1), rvmfp()};
+
+    auto const done2 = v.makeBlock();
+    auto const sf2 = v.makeReg();
+
+    v << testq{rarg(0), rarg(0), sf2};
+    v << jcci{CC_Z, sf2, done2, resumeCPPUnwind};
+    v = done2;
+
+    // We need to do a syncForLLVMCatch(), but vmfp is already in rdx.
+    v << jmpr{rarg(0)};
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

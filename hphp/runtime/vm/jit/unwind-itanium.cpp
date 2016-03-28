@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-helpers.h"
@@ -97,9 +98,18 @@ TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
   if (auto catchTraceOpt = mcg->getCatchTrace(rip)) {
     if (auto catchTrace = *catchTraceOpt) return catchTrace;
 
-    // FIXME: This assumes that smashable calls and regular calls look the
-    // same, which is probably not true on non-x64 platforms.
-    auto const target = smashableCallTarget(smashableCallFromRet(rip));
+    TCA target;
+    switch(arch()) {
+    case Arch::X64:
+      target = smashableCallTarget(smashableCallFromRet(rip));
+      break;
+    case Arch::ARM:
+      // FIXME: Handle both 'call' (target = extract(rip - 4)) and 'calls'?
+      target = smashableCallTarget(smashableCallFromRet(rip));
+      break;
+    default:
+      not_implemented();
+    }
 
     always_assert_flog(
       false, "Translated call to {} threw '{}' without catch block; "
@@ -332,21 +342,36 @@ EHFrameHandle register_unwind_region(unsigned char* start, size_t size) {
 
   EHFrameWriter ehfw;
 
-  ehfw.begin_cie(dw_reg::RIP,
-                 reinterpret_cast<const void*>(tc_unwind_personality));
+  switch(arch()) {
+  case Arch::X64:
+    ehfw.begin_cie(dw_reg::RIP,
+                   reinterpret_cast<const void*>(tc_unwind_personality));
 
-  // The part of the ActRec that mirrors the native frame record is the first
-  // sixteen bytes.  In particular, the "top" of the record is 16 bytes after
-  // rvmfp(), and the saved fp and return addr are as usual.
-  ehfw.def_cfa(dw_reg::RBP, 16);
-  ehfw.offset_extended_sf(dw_reg::RIP, 1);
-  ehfw.offset_extended_sf(dw_reg::RBP, 2);
+    // The part of the ActRec that mirrors the native frame record is the first
+    // sixteen bytes.  In particular, the "top" of the record is 16 bytes after
+    // rvmfp(), and the saved fp and return addr are as usual.
+    ehfw.def_cfa(dw_reg::RBP, 16);
+    ehfw.offset_extended_sf(dw_reg::RIP, 1);
+    ehfw.offset_extended_sf(dw_reg::RBP, 2);
 
-  // This is an artifact of a time when we did not spill registers onto the
-  // native stack.  Now that we do, this CFI is a lie.  Fortunately, our TC
-  // personality routine skips all the way back to native frames before
-  // resuming the unwinder, so its brokenness goes unnoticed.
-  ehfw.same_value(dw_reg::RSP);
+    // This is an artifact of a time when we did not spill registers onto the
+    // native stack.  Now that we do, this CFI is a lie.  Fortunately, our TC
+    // personality routine skips all the way back to native frames before
+    // resuming the unwinder, so its brokenness goes unnoticed.
+    ehfw.same_value(dw_reg::RSP);
+    break;
+  case Arch::ARM:
+    // Same as X64 with the corresponding ARM registers
+    ehfw.begin_cie(dw_reg::X30,
+                   reinterpret_cast<const void*>(tc_unwind_personality));
+    ehfw.def_cfa(dw_reg::X29, 16);
+    ehfw.offset_extended_sf(dw_reg::X30, 1);
+    ehfw.offset_extended_sf(dw_reg::X29, 2);
+    ehfw.same_value(dw_reg::SP);
+    break;
+  default:
+    not_implemented();
+  }
   ehfw.end_cie();
 
   // Add a single FDE for the whole TC.

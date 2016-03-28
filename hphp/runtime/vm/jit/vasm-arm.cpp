@@ -92,19 +92,34 @@ vixl::MemOperand M(vixl::MacroAssembler* a, Vptr p) {
                p.scale == 4 ? 2 :
                p.scale == 8 ? 3 : 0;
   if (p.base.isValid()) {
+    // TLS addresses are baseless. If base is valid, p.seg must be Vptr::DS
+    assertx(p.seg == Vptr::DS);
+
     if (!p.index.isValid()) return X(p.base)[p.disp];
     a->Lsl(rAsm2, X(p.index), shift);
     if (!p.disp) return X(p.base)[rAsm2];
     a->Add(rAsm2, X(p.base), rAsm2 /* Don't set flags */);
     return rAsm2[p.disp];
   }
+  // Read TPIDR_EL0, if it is a TLS address
+  switch(p.seg) {
+  case Vptr::DS:
+    a->Mov(rAsm2, vixl::xzr);
+    break;
+  case Vptr::FS:
+  case Vptr::GS:
+    a->Mrs(rAsm2, TPIDR_EL0);
+    break;
+  default:
+    always_assert(false);
+  }
   // no base, but index,scale,disp can be valid
   if (p.index.isValid()) {
-    a->Lsl(rAsm2, X(p.index), shift);
+    a->Add(rAsm2, rAsm2, Operand(X(p.index), LSL, shift));
     return rAsm2[p.disp];
   }
   // no base, no index.
-  a->Mov(rAsm2, p.disp);
+  a->Add(rAsm2, rAsm2, p.disp);
   return rAsm2[0];
 }
 
@@ -1067,16 +1082,6 @@ void lower(cmpbim& i, Vout& v) {
   auto scratch = v.makeReg();
   v << loadzbl{i.s1, scratch};
   v << cmpli{i.s0, scratch, i.sf};
-}
-
-void lower(testbim& i, Vout& v) {
-  auto scratch = v.makeReg();
-  v << loadzbl{i.s1, scratch};
-  v << testli{i.s0, scratch, i.sf};
-}
-
-void lower(call& i, Vout& v) {
-  v << callr{v.cns(i.target), i.args};
 }
 
 void lowerForARM(Vunit& unit) {

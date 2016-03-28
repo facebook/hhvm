@@ -21,6 +21,7 @@
 #include <type_traits>
 
 #include <folly/Portability.h>
+#include <folly/portability/Asm.h>
 
 #include "hphp/util/assertions.h"
 

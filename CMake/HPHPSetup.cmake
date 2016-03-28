@@ -166,6 +166,14 @@ else()
   add_definitions(-DFOLLY_HAVE_WEAK_SYMBOLS=0)
 endif()
 
+include(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(memrchr FOLLY_HAVE_MEMRCHR)
+if (FOLLY_HAVE_MEMRCHR)
+  add_definitions("-DFOLLY_HAVE_MEMRCHR=1")
+else()
+  add_definitions("-DFOLLY_HAVE_MEMRCHR=0")
+endif()
+
 add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
 
 if (LINUX)

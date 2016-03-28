@@ -40,6 +40,10 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/compatibility.h"
 
+#ifdef FACEBOOK
+#include <folly/experimental/symbolizer/Symbolizer.h>
+#endif
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -92,6 +96,14 @@ std::string getNativeFunctionName(void* codeAddr) {
   free(symbol);
 
   SymCleanup(process);
+#elif defined(FACEBOOK)
+
+  folly::symbolizer::Symbolizer symbolizer;
+  folly::symbolizer::SymbolizedFrame frame;
+  if (symbolizer.symbolize(uintptr_t(codeAddr), frame)) {
+    functionName = frame.demangledName().toStdString();
+  }
+
 #else
   void* buf[1] = {codeAddr};
   char** symbols = backtrace_symbols(buf, 1);

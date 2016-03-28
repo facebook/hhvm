@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
 
+#include <folly/portability/String.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

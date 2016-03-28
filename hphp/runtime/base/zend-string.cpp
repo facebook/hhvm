@@ -35,6 +35,8 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
+#include <folly/portability/String.h>
+
 #define PHP_QPRINT_MAXL 75
 
 namespace HPHP {
@@ -2713,17 +2715,6 @@ String string_convert_hebrew_string(const String& inStr,
   brokenStr.setSize(str_len);
   return brokenStr;
 }
-
-#if defined(__APPLE__)
-
-  void *memrchr(const void *s, int c, size_t n) {
-    for (const char *p = (const char *)s + n - 1; p >= s; p--) {
-      if (*p == c) return (void *)p;
-    }
-    return nullptr;
-  }
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

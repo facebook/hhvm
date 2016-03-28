@@ -209,8 +209,6 @@ void lower(Vunit& unit, syncvmsp& inst, Vlabel b, size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void vlower(Vunit& unit, Vlabel b, size_t i) {
-  Timer _t(Timer::vasm_lower);
-
   auto& inst = unit.blocks[b].code[i];
 
   switch (inst.op) {
@@ -225,6 +223,8 @@ void vlower(Vunit& unit, Vlabel b, size_t i) {
 }
 
 void vlower(Vunit& unit) {
+  Timer timer(Timer::vasm_lower);
+
   // This pass relies on having no critical edges in the unit.
   splitCriticalEdges(unit);
 

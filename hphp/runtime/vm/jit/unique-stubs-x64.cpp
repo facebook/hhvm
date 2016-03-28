@@ -59,10 +59,10 @@ static void alignJmpTarget(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
+TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignJmpTarget(cb);
 
-  auto const start = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
+  auto const start = vwrap2(cb, data, [&] (Vout& v, Vout& vcold) {
     auto const ar = v.makeReg();
 
     v << copy{rvmfp(), ar};
@@ -132,9 +132,9 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
  * The `live' registers must be preserved across any native calls (and
  * generally left untouched).
  */
-static TCA emitDecRefHelper(CodeBlock& cb, CGMeta& fixups, PhysReg tv,
-                            PhysReg type, RegSet live) {
-  return vwrap(cb, fixups, [&] (Vout& v) {
+static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                            PhysReg tv, PhysReg type, RegSet live) {
+  return vwrap(cb, data, fixups, [&] (Vout& v) {
     // We use the first argument register for the TV data because we might pass
     // it to the native release call.  It's not live when we enter the helper.
     auto const data = rarg(0);
@@ -172,7 +172,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, CGMeta& fixups, PhysReg tv,
   });
 }
 
-TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
+TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   // The address of the first local is passed in the second argument register.
   // We use the third and fourth as scratch registers.
   auto const local = rarg(1);
@@ -182,7 +182,8 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
 
   // This stub is very hot; keep it cache-aligned.
   align(cb, &fixups, Alignment::CacheLine, AlignContext::Dead);
-  auto const release = emitDecRefHelper(cb, fixups, local, type, local | last);
+  auto const release =
+    emitDecRefHelper(cb, data, fixups, local, type, local | last);
 
   auto const decref_local = [&] (Vout& v) {
     auto const sf = v.makeReg();
@@ -204,7 +205,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
 
   alignJmpTarget(cb);
 
-  us.freeManyLocalsHelper = vwrap(cb, fixups, [&] (Vout& v) {
+  us.freeManyLocalsHelper = vwrap(cb, data, fixups, [&] (Vout& v) {
     // We always unroll the final `kNumFreeLocalsHelpers' decrefs, so only loop
     // until we hit that point.
     v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
@@ -222,14 +223,14 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
   });
 
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
-    us.freeLocalsHelpers[i] = vwrap(cb, [&] (Vout& v) {
+    us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
       decref_local(v);
       if (i != 0) next_local(v);
     });
   }
 
   // All the stub entrypoints share the same ret.
-  vwrap(cb, fixups, [] (Vout& v) { v << ret{}; });
+  vwrap(cb, data, fixups, [] (Vout& v) { v << ret{}; });
 
   // This stub is hot, so make sure to keep it small.
   // Alas, we have more work to do in this under Windows,
@@ -256,7 +257,7 @@ void assert_tc_saved_rip(void* sp) {
   always_assert(saved_rip == exittc || (di.isJmp() && jmp_target() == exittc));
 }
 
-TCA emitCallToExit(CodeBlock& cb, const UniqueStubs& us) {
+TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
   X64Assembler a { cb };
 
   // Emit a byte of padding. This is a kind of hacky way to avoid
@@ -293,16 +294,16 @@ TCA emitCallToExit(CodeBlock& cb, const UniqueStubs& us) {
   return start;
 }
 
-TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
+TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   auto const udrspo = rvmtl()[unwinderDebuggerReturnSPOff()];
 
-  auto const debuggerReturn = vwrap(cb, [&] (Vout& v) {
+  auto const debuggerReturn = vwrap(cb, data, [&] (Vout& v) {
     v << load{udrspo, rvmsp()};
     v << storeqi{0, udrspo};
   });
-  svcreq::emit_persistent(cb, folly::none, REQ_POST_DEBUGGER_RET);
+  svcreq::emit_persistent(cb, data, folly::none, REQ_POST_DEBUGGER_RET);
 
-  auto const resumeCPPUnwind = vwrap(cb, [&] (Vout& v) {
+  auto const resumeCPPUnwind = vwrap(cb, data, [&] (Vout& v) {
     static_assert(sizeof(tl_regState) == 1,
                   "The following store must match the size of tl_regState.");
     auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
@@ -315,7 +316,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
 
   alignJmpTarget(cb);
 
-  return vwrap(cb, [&] (Vout& v) {
+  return vwrap(cb, data, [&] (Vout& v) {
     auto const done1 = v.makeBlock();
     auto const sf1 = v.makeReg();
 

@@ -37,11 +37,12 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, CGMeta& fixups) {
+void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
+                     CGMeta& fixups) {
   TCA realCode = sr->getTopTranslation();
   if (!realCode) return;  // No translations, nothing to do.
 
-  auto const dbgGuard = vwrap(cb, fixups, [&] (Vout& v) {
+  auto const dbgGuard = vwrap(cb, data, fixups, [&] (Vout& v) {
     if (!sk.resumed()) {
       auto const off = sr->nonResumedSPOff();
       v << lea{rvmfp()[-cellsToBytes(off.offset)], rvmsp()};

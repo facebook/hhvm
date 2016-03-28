@@ -109,6 +109,13 @@ template<class Vemit>
 void vasm_emit(const Vunit& u, Vtext& text, CGMeta& fixups,
                AsmInfo* asm_info);
 
+/*
+ * Allocate memory to hold the given value and return a pointer to it. If a
+ * previous translation allocated the same literal, a pointer to that may be
+ * returned instead.
+ */
+const uint64_t* alloc_literal(Venv& env, uint64_t val);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

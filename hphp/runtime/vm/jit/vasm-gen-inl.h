@@ -64,16 +64,22 @@ inline Vreg Vout::cns(T v) {
   return m_unit.makeConst(Vconst{v});
 }
 
+template<class T, class... Args>
+T* Vout::allocData(Args&&... args) {
+  return m_unit.allocData<T>(std::forward<Args>(args)...);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
 
 template<class GenFunc>
-TCA vwrap_impl(CodeBlock& cb, CGMeta* meta, GenFunc gen, CodeKind kind) {
+TCA vwrap_impl(CodeBlock& cb, DataBlock& data, CGMeta* meta,
+               GenFunc gen, CodeKind kind) {
   CGMeta dummy_meta;
 
   auto const start = cb.frontier();
-  Vauto vauto { cb, meta ? *meta : dummy_meta, kind };
+  Vauto vauto { cb, data, meta ? *meta : dummy_meta, kind };
   gen(vauto.main(), vauto.cold());
 
   assertx(dummy_meta.empty());

@@ -89,11 +89,13 @@ bool effectful(Vinstr& inst) {
     case Vinstr::ldimmqs:
     case Vinstr::lea:
     case Vinstr::leap:
+    case Vinstr::lead:
     case Vinstr::load:
     case Vinstr::loadups:
     case Vinstr::loadb:
     case Vinstr::loadl:
     case Vinstr::loadqp:
+    case Vinstr::loadqd:
     case Vinstr::loadsd:
     case Vinstr::loadw:
     case Vinstr::loadtqb:

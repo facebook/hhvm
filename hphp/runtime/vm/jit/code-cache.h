@@ -39,8 +39,8 @@ namespace HPHP { namespace jit {
  * translated code.
  *
  * CodeCache only allows direct access to const references to its
- * CodeBlocks. Any user that wants to emit code must call the view() function,
- * which returns a struct of mutable CodeBlock references, appropriately
+ * (Code|Data)Blocks. Any user that wants to emit code or data must call the
+ * view() function, which returns a struct of mutable references, appropriately
  * selected based on hotness and whether profiling is active.
  */
 struct CodeCache {
@@ -99,7 +99,6 @@ struct CodeCache {
   const CodeBlock& prof()   const { return m_prof; }
 
   const DataBlock& data() const { return m_data; }
-        DataBlock& data()       { return m_data; }
 
   /*
    * Return a View of this CodeCache, selecting blocks approriately depending

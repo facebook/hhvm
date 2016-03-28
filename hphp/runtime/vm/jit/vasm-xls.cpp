@@ -57,7 +57,7 @@ namespace HPHP { namespace jit {
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t s_counter;
+std::atomic<size_t> s_counter;
 
 DEBUG_ONLY constexpr auto kHintLevel = 5;
 
@@ -338,6 +338,8 @@ public:
   PhysReg sp;
   // Temp register used only for breaking cycles.
   PhysReg tmp;
+  // Debug-only run identifier.
+  size_t counter;
 
   // Sorted blocks.
   jit::vector<Vlabel> blocks;
@@ -3166,7 +3168,7 @@ DEBUG_ONLY void printVariables(const char* caption,
                                const Vunit& unit, const VxlsContext& ctx,
                                const jit::vector<Variable*>& variables) {
   std::ostringstream str;
-  str << "Intervals " << caption << " " << s_counter << "\n";
+  str << "Intervals " << caption << " " << ctx.counter << "\n";
   for (auto var : variables) {
     if (!var) continue;
     if (var->fixed()) {
@@ -3244,7 +3246,7 @@ DEBUG_ONLY void dumpStats(const Vunit& unit,
 }
 
 void allocateRegisters(Vunit& unit, const Abi& abi) {
-  s_counter++;
+  auto const counter = s_counter.fetch_add(1, std::memory_order_relaxed);
 
   splitCriticalEdges(unit);
   assertx(check(unit));
@@ -3255,6 +3257,7 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   ctx.block_ranges = computePositions(unit, ctx.blocks);
   ctx.spill_offsets = analyzeSP(unit, ctx.blocks, ctx.sp);
   ctx.livein = computeLiveness(unit, ctx.abi, ctx.blocks);
+  ctx.counter = counter;
 
   // Build lifetime intervals and analyze hints.
   auto variables = buildIntervals(unit, ctx);

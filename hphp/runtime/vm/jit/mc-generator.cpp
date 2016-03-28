@@ -534,6 +534,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   TCA req;
   if (!RuntimeOption::EvalEnableReusableTC) {
     req = svcreq::emit_persistent(code.cold(),
+                                  code.data(),
                                   srcRecSPOff,
                                   REQ_RETRANSLATE,
                                   sk.offset(),
@@ -547,6 +548,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
     // Ensure that the anchor translation is a known size so that it can be
     // reclaimed when the function is freed
     req = svcreq::emit_ephemeral(code.cold(),
+                                 code.data(),
                                  (TCA)newStart,
                                  srcRecSPOff,
                                  REQ_RETRANSLATE,
@@ -1073,8 +1075,10 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
 
   CGMeta fixups;
 
+  auto code = m_code.view();
   auto const stub = svcreq::emit_bindjmp_stub(
-    m_code.view().frozen(),
+    code.frozen(),
+    code.data(),
     fixups,
     liveSpOff(),
     jccAddr,
@@ -1517,27 +1521,6 @@ void MCGenerator::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-// Get the address of the literal val in the global data section.
-// If it's not there, add it to the map in m_fixups, which will
-// be committed to literals when m_fixups.process() is called.
-const uint64_t*
-MCGenerator::allocLiteral(uint64_t val, CGMeta& fixups) {
-  auto it = m_literals.find(val);
-  if (it != m_literals.end()) {
-    assertx(*it->second == val);
-    return it->second;
-  }
-  auto& pending = fixups.literals;
-  it = pending.find(val);
-  if (it != pending.end()) {
-    assertx(*it->second == val);
-    return it->second;
-  }
-  auto addr = allocData<uint64_t>(sizeof(uint64_t), 1);
-  *addr = val;
-  return pending[val] = addr;
-}
-
 static bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
   if (srcRec.translations().size() != RuntimeOption::EvalJitMaxTranslations) {
     return false;
@@ -1762,7 +1745,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     kind = TransKind::Interp;
     FTRACE(1, "emitting dispatchBB interp request for failed "
            "translation (spOff = {})\n", initSpOffset.offset);
-    vwrap(code.main(), fixups,
+    vwrap(code.main(), code.data(), fixups,
           [&] (Vout& v) { emitInterpReq(v, sk, initSpOffset); },
           CodeKind::Helper);
   }
@@ -1990,10 +1973,9 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
   struct timespec tsBegin, tsEnd;
   {
     BlockingLeaseHolder writer(Translator::WriteLease());
-    auto& main = m_code.view().main();
-    if (!writer) {
-      return false;
-    }
+    auto code = m_code.view();
+    auto& main = code.main();
+    auto& data = code.data();
 
     HPHP::Timer::GetMonotonicTime(tsBegin);
     // Doc says even find _could_ invalidate iterator, in pactice it should
@@ -2009,7 +1991,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
       if (sr->unitMd5() == unit->md5() &&
           !sr->hasDebuggerGuard() &&
           m_tx.isSrcKeyInBL(sk)) {
-        addDbgGuardImpl(sk, sr, main, fixups);
+        addDbgGuardImpl(sk, sr, main, data, fixups);
       }
     }
     fixups.process(nullptr);
@@ -2047,7 +2029,8 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
 
   CGMeta fixups;
   if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
-    addDbgGuardImpl(sk, sr, m_code.view().main(), fixups);
+    auto code = m_code.view();
+    addDbgGuardImpl(sk, sr, code.main(), code.data(), fixups);
   }
   fixups.process(nullptr);
   return true;

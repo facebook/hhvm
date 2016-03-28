@@ -738,6 +738,13 @@ static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
       vargs.push_back(tmp);
       break;
     }
+
+    case ArgDesc::Kind::DataPtr: {
+      auto tmp = v.makeReg();
+      v << lead{reinterpret_cast<void*>(arg.imm().q()), tmp};
+      vargs.push_back(tmp);
+      break;
+    }
   }
 }
 
@@ -1785,16 +1792,9 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   auto& v = vmain();
 
   // Emit service request to smash address of SrcKey into 'addr'.
-  auto const addrPtr = mcg->allocData<TCA>(sizeof(TCA), 1);
+  auto const addrPtr = v.allocData<TCA>();
   v << bindaddr{addrPtr, extra->sk, extra->spOff};
-
-  // Load the maybe bound address.
-  auto const addr = reinterpret_cast<intptr_t>(addrPtr);
-  // the tc/global data is intentionally layed out to guarantee
-  // rip-relative addressing will work.
-  // Also, a rip-relative load, is 1 byte smaller than the corresponding
-  // baseless load.
-  v << loadqp{rip[addr], dstReg};
+  v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dstReg};
 }
 
 void CodeGenerator::cgProfileSwitchDest(IRInstruction* inst) {
@@ -1829,12 +1829,12 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
 
   maybe_syncsp(v, marker, srcLoc(inst, 1).reg(), extra->irSPOff);
 
-  auto const table = mcg->allocData<TCA>(sizeof(TCA), extra->cases);
+  auto const table = v.allocData<TCA>(extra->cases);
   auto const t = v.makeReg();
   for (int i = 0; i < extra->cases; i++) {
     v << bindaddr{&table[i], extra->targets[i], invSPOff};
   }
-  v << leap{rip[(intptr_t)table], t};
+  v << lead{table, t};
   v << jmpm{t[indexReg * 8], cross_trace_args(marker)};
 }
 
@@ -1842,16 +1842,23 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   auto const extra = inst->extra<LdSSwitchDestFast>();
   auto const spOff = extra->spOff;
 
-  auto table = mcg->allocData<SSwitchMap>(64);
-  new (table) SSwitchMap(extra->numCases);
   auto& v = vmain();
+  auto const table = v.allocData<SSwitchMap>();
+  // XXX(t10347945): This causes our data section to own a pointer to heap
+  // memory, and we're putting bindaddrs in said heap memory.
+  new (table) SSwitchMap(extra->numCases);
 
   for (int64_t i = 0; i < extra->numCases; ++i) {
     table->add(extra->cases[i].str, nullptr);
     auto const addr = table->find(extra->cases[i].str);
-    v << bindaddr{addr, extra->cases[i].dest, spOff};
+    // The addresses we're passing to bindaddr{} here live in SSwitchMap's heap
+    // buffer (see comment above). They don't need to be relocated like normal
+    // VdataPtrs, so bind them here.
+    VdataPtr<TCA> dataPtr{nullptr};
+    dataPtr.bind(addr);
+    v << bindaddr{dataPtr, extra->cases[i].dest, spOff};
   }
-  auto const def = mcg->allocData<TCA>(sizeof(TCA), 1);
+  auto const def = v.allocData<TCA>();
   v << bindaddr{def, extra->defaultSk, spOff};
   cgCallHelper(v,
                CallSpec::direct(sswitchHelperFast),
@@ -1859,8 +1866,8 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
                SyncOptions::None,
                argGroup(inst)
                  .ssa(0)
-                 .immPtr(table)
-                 .immPtr(def));
+                 .dataPtr(table)
+                 .dataPtr(def));
 }
 
 static TCA sswitchHelperSlow(TypedValue typedVal,
@@ -1878,10 +1885,9 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
   auto const extra = inst->extra<LdSSwitchDestSlow>();
   auto const spOff = extra->spOff;
 
-  auto strtab = mcg->allocData<const StringData*>(
-    sizeof(const StringData*), extra->numCases);
-  auto jmptab = mcg->allocData<TCA>(sizeof(TCA), extra->numCases + 1);
   auto& v = vmain();
+  auto strtab = v.allocData<const StringData*>(extra->numCases);
+  auto jmptab = v.allocData<TCA>(extra->numCases + 1);
 
   for (int i = 0; i < extra->numCases; ++i) {
     strtab[i] = extra->cases[i].str;
@@ -1894,9 +1900,9 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
                SyncOptions::Sync,
                argGroup(inst)
                  .typedValue(0)
-                 .immPtr(strtab)
+                 .dataPtr(strtab)
                  .imm(extra->numCases)
-                 .immPtr(jmptab));
+                 .dataPtr(jmptab));
 }
 
 /*
@@ -2735,7 +2741,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
           builtinFuncPtr);
     // We sometimes call this while curFunc() isn't really the builtin, so
     // make sure to record the sync point as if we are inside the builtin.
-    if (mcg->fixupMap().eagerRecord(callee)) {
+    if (FixupMap::eagerRecord(callee)) {
       emitEagerSyncPoint(v, callee->getEntry(), rds, rvmfp(), sync_sp);
     }
     // Call the native implementation. This will free the locals for us in the
@@ -5144,8 +5150,7 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
     }
   }
 
-  StringData** table = mcg->allocData<StringData*>(sizeof(StringData*),
-                                                      data->numKeys);
+  auto table = vmain().allocData<const StringData*>(data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
   MixedArray* (*f)(uint32_t, const StringData* const*, const TypedValue*) =
     &MixedArray::MakeStruct;
@@ -5156,7 +5161,7 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
     SyncOptions::None,
     argGroup(inst)
       .imm(data->numKeys)
-      .imm(uintptr_t(table))
+      .dataPtr(table)
       .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
   );
 }

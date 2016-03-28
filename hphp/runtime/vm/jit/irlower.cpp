@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
 
 #include "hphp/util/data-block.h"
@@ -79,6 +80,71 @@ size_t genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
   return hhir_count;
 }
 
+struct BlockInfo {
+  uintptr_t base;
+  size_t size;
+};
+using DataBlockMap = jit::flat_map<uintptr_t, BlockInfo>;
+
+struct DataPtrVisitor {
+  explicit DataPtrVisitor(const DataBlockMap& blocks) : m_blocks(blocks) {}
+
+  template<typename T> void imm(T) {}
+  template<typename T> void imm(VdataPtr<T>& ptr) {
+    if (ptr.bound()) return;
+
+    auto const unboundPtr = (uintptr_t)ptr.getRaw();
+    auto it = m_blocks.upper_bound(unboundPtr);
+    assertx(it != m_blocks.begin());
+    it--;
+    auto const boundPtr = it->second.base + (unboundPtr - it->first);
+    assertx(boundPtr < it->second.base + it->second.size);
+    ptr.bind((T*)boundPtr);
+  }
+
+  template<typename T> void use(T) {}
+  template<typename T> void use(VdataPtr<T>& ptr) = delete;
+  template<typename R, typename H> void useHint(R r, H) { use(r); }
+
+  template<typename T> void across(T) {}
+  template<typename T> void across(VdataPtr<T>&) = delete;
+
+  template<typename T> void def(T) {}
+  template<typename T> void def(VdataPtr<T>&) = delete;
+  template<typename R, typename H> void defHint(R r, H) { def(r); }
+
+private:
+  const DataBlockMap& m_blocks;
+};
+
+
+void bindDataPtrs(Vunit& vunit, DataBlock& data) {
+  if (vunit.dataBlocks.empty()) return;
+
+  Timer timer(Timer::vasm_bind_ptrs);
+  FTRACE(1, "{:-^80}\n", "binding VdataPtrs");
+
+  DataBlockMap blocks;
+  for (auto& dataBlock : vunit.dataBlocks) {
+    auto oldPtr = dataBlock.data.get();
+    auto newPtr = data.allocRaw(dataBlock.size, dataBlock.align);
+    std::memcpy(newPtr, oldPtr, dataBlock.size);
+    FTRACE(2, "  allocated {} bytes at {:#x}, moving from {:#x}\n",
+           dataBlock.size, (uintptr_t)newPtr, (uintptr_t)oldPtr);
+    blocks.emplace((uintptr_t)oldPtr,
+                   BlockInfo{(uintptr_t)newPtr, dataBlock.size});
+  }
+
+  DataPtrVisitor ptrVisitor{blocks};
+
+  PostorderWalker{vunit}.dfs([&](Vlabel b) {
+    auto& block = vunit.blocks[b];
+    for (auto& inst : block.code) {
+      visitOperands(inst, ptrVisitor);
+    }
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void genArch(Vunit& vunit, Vtext& vtext, CGMeta& meta,
@@ -86,6 +152,7 @@ void genArch(Vunit& vunit, Vtext& vtext, CGMeta& meta,
   switch (arch()) {
     case Arch::X64:
       optimizeX64(vunit, abi(kind));
+      bindDataPtrs(vunit, vtext.data());
       emitX64(vunit, vtext, meta, ai);
       return;
 
@@ -241,7 +308,7 @@ void genCodeImpl(const IRUnit& unit, CodeCache::View code,
     assignRegs(unit, vunit, env, blocks);
 
     vunit.entry = env.labels[unit.entry()];
-    Vtext vtext { main, cold, *frozen };
+    Vtext vtext { main, cold, *frozen, code.data() };
 
     for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :

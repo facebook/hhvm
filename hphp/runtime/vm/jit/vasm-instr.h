@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-data.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -212,6 +213,7 @@ struct Vunit;
   /* load effective address */\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
+  O(lead, I(s), Un, D(d))\
   /* copies */\
   O(movb, Inone, UH(s,d), DH(d,s))\
   O(movl, Inone, UH(s,d), DH(d,s))\
@@ -225,6 +227,7 @@ struct Vunit;
   O(loadw, Inone, U(s), D(d))\
   O(loadl, Inone, U(s), D(d))\
   O(loadqp, I(s), Un, D(d))\
+  O(loadqd, I(s), Un, D(d))\
   O(loadups, Inone, U(s), D(d))\
   O(loadsd, Inone, U(s), D(d))\
   O(loadzbl, Inone, U(s), D(d))\
@@ -306,6 +309,7 @@ struct Vunit;
  *    i   immediate
  *    m   Vptr
  *    p   RIPRelativeRef
+ *    d   VdataPtr
  *    s   smashable
  */
 
@@ -375,13 +379,13 @@ struct bindjcc1st {
 };
 
 struct bindaddr {
-  explicit bindaddr(TCA* addr, SrcKey target, FPInvOffset spOff)
+  explicit bindaddr(VdataPtr<TCA> addr, SrcKey target, FPInvOffset spOff)
     : addr(addr)
     , target(target)
     , spOff(spOff)
   {}
 
-  TCA* addr;
+  VdataPtr<TCA> addr;
   SrcKey target;
   FPInvOffset spOff;
 };
@@ -956,6 +960,7 @@ struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
  */
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
+struct lead { VdataPtr<void> s; Vreg64 d; };
 
 /*
  * Copies.
@@ -979,6 +984,7 @@ struct loadb { Vptr s; Vreg8 d; };
 struct loadw { Vptr s; Vreg16 d; };
 struct loadl { Vptr s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
+struct loadqd { VdataPtr<uint64_t> s; Vreg64 d; };
 struct loadups { Vptr s; Vreg128 d; };
 struct loadsd { Vptr s; VregDbl d; };
 // zero-extended s to d

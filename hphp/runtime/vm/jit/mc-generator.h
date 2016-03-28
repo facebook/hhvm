@@ -94,7 +94,6 @@ struct MCGenerator {
    * Accessors.
    */
   CodeCache& code() { return m_code; }
-  DataBlock& globalData() { return m_code.data(); }
   const UniqueStubs& ustubs() const { return m_ustubs; }
   Translator& tx() { return m_tx; }
   TCATransIDMap& jmpToTransIDMap() { return m_jmpToTransID; }
@@ -103,19 +102,6 @@ struct MCGenerator {
   Debug::DebugInfo* debugInfo() { return &m_debugInfo; }
   FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
-
-  /*
-   * Allocate a value in the global data section.
-   */
-  template<typename T, typename... Args>
-  T* allocData(Args&&... args) {
-    return m_code.data().alloc<T>(std::forward<Args>(args)...);
-  }
-
-  /*
-   * Allocate a literal value in the global data section.
-   */
-  const uint64_t* allocLiteral(uint64_t val, CGMeta& fixups);
 
   /*
    * Look up a TCA-to-landingpad mapping.

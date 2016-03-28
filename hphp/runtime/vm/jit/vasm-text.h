@@ -56,14 +56,17 @@ struct Varea {
  * Vtext is a lightweight container for Vareas.
  */
 struct Vtext {
-  explicit Vtext(CodeBlock& main)
+  explicit Vtext(CodeBlock& main, DataBlock& data)
     : m_areas{main}
+    , m_data(data)
   {}
-  Vtext(CodeBlock& main, CodeBlock& cold)
+  Vtext(CodeBlock& main, CodeBlock& cold, DataBlock& data)
     : m_areas{main, cold}
+    , m_data(data)
   {}
-  Vtext(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen)
+  Vtext(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen, DataBlock& data)
     : m_areas{main, cold, frozen}
+    , m_data(data)
   {
     // Main and frozen aren't allowed to alias each other unless cold is /also/
     // the same code region.
@@ -80,6 +83,8 @@ struct Vtext {
   Varea& cold() { return area(AreaIndex::Cold); }
   Varea& frozen() { return area(AreaIndex::Frozen); }
 
+  DataBlock& data() { return m_data; }
+
   /*
    * The vector of areas.
    */
@@ -87,6 +92,7 @@ struct Vtext {
 
 private:
   jit::vector<Varea> m_areas; // indexed by AreaIndex
+  DataBlock& m_data;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -41,12 +41,16 @@ template<class T> uint64_t test_const(T val) {
     .sf = x64::abi().sf
   };
   static uint8_t code[1000];
+  // None of these tests should use any data.
+  static uint8_t data_buffer[0];
 
   CodeBlock main;
   main.init(code, sizeof(code), "test");
+  DataBlock data;
+  data.init(data_buffer, sizeof(data), "data");
 
   Vasm vasm;
-  Vtext text { main };
+  Vtext text { main, data };
 
   auto& unit = vasm.unit();
   auto& v = vasm.main();
@@ -57,6 +61,8 @@ template<class T> uint64_t test_const(T val) {
 
   optimizeX64(vasm.unit(), test_abi);
   CGMeta fixups;
+  LeaseHolder writer{Translator::WriteLease()};
+  EXPECT_TRUE(writer);
   emitX64(unit, text, fixups, nullptr);
   // The above code might use fixups.literals but shouldn't use anything else.
   fixups.literals.clear();

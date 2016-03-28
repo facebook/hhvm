@@ -198,26 +198,10 @@ struct TransLocMaker {
       std::vector<TransBCMapping> bcmap   = std::vector<TransBCMapping>(),
       Annotations&&               annot   = Annotations(),
       bool                        hasLoop = false) const {
-    auto& cold = cache.cold();
-    auto& frozen = cache.frozen();
-    TCA coldStart = cold.frontier();
-    TCA frozenStart = frozen.frontier();
-    size_t coldSize = 0;
-    size_t frozenSize = 0;
-
-    if (&cache.cold() == &cold) {
-      coldStart = loc.coldCodeStart();
-      coldSize  = loc.coldCodeSize();
-    }
-    if (&cache.frozen() == &frozen) {
-      frozenStart = loc.frozenCodeStart();
-      frozenSize  = loc.frozenCodeSize();
-    }
-
     return TransRec(sk, kind,
                     loc.mainStart(), loc.mainSize(),
-                    coldStart, coldSize,
-                    frozenStart, frozenSize,
+                    loc.coldCodeStart(), loc.coldCodeSize(),
+                    loc.frozenCodeStart(), loc.frozenCodeSize(),
                     std::move(region), std::move(bcmap),
                     std::move(annot), hasLoop);
   }

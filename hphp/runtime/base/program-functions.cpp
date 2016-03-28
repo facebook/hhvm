@@ -919,8 +919,10 @@ static bool readahead_rate(const char* path, int64_t mbPerSec) {
 }
 
 static int start_server(const std::string &username, int xhprof) {
-  InitFiniNode::ServerPreInit();
+  HttpServer::CheckMemAndWait();
+
   BootStats::start();
+  InitFiniNode::ServerPreInit();
 
   // Before we start the webserver, make sure the entire
   // binary is paged into memory.
@@ -956,11 +958,13 @@ static int start_server(const std::string &username, int xhprof) {
   Capability::SetDumpable();
 #endif
 
+  HttpServer::CheckMemAndWait();
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
     InitFiniNode::WarmupConcurrentStart(
       RuntimeOption::ServerInternalWarmupThreads);
   }
 
+  HttpServer::CheckMemAndWait();
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
@@ -973,6 +977,7 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (RuntimeOption::RepoLocalReadaheadRate > 0 &&
       !RuntimeOption::RepoLocalPath.empty()) {
+    HttpServer::CheckMemAndWait();
     readaheadThread = folly::make_unique<std::thread>([&] {
         BootStats::Block timer("Readahead Repo");
         auto path = RuntimeOption::RepoLocalPath.c_str();
@@ -995,6 +1000,7 @@ static int start_server(const std::string &username, int xhprof) {
   }
 
   if (RuntimeOption::RepoPreload) {
+    HttpServer::CheckMemAndWait();
     BootStats::Block timer("Preloading Repo");
     profileWarmupStart();
     preloadRepo();
@@ -1009,6 +1015,7 @@ static int start_server(const std::string &username, int xhprof) {
     SCOPE_EXIT { profileWarmupEnd(); };
     std::map<std::string, int> seen;
     for (auto& file : RuntimeOption::ServerWarmupRequests) {
+      HttpServer::CheckMemAndWait();
       // Take only the last part
       folly::StringPiece f(file);
       auto pos = f.rfind('/');
@@ -1049,6 +1056,8 @@ static int start_server(const std::string &username, int xhprof) {
     readaheadThread.reset();
   }
 
+  if (RuntimeOption::StopOldServer) HttpServer::StopOldServer();
+
   if (RuntimeOption::EvalEnableNuma) {
 #ifdef USE_JEMALLOC
     unsigned narenas;
@@ -1065,6 +1074,7 @@ static int start_server(const std::string &username, int xhprof) {
     BootStats::mark("enable_numa");
   }
 
+  HttpServer::CheckMemAndWait(true); // Final wait
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();
   return 0;

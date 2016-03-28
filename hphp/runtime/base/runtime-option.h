@@ -163,6 +163,18 @@ struct RuntimeOption {
   static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
   static int ServerShutdownEOMWait;
+  // If `StopOldServer` is set, we try to stop the old server running
+  // on the local host earlier when we initialize, and we do not start
+  // serving requests until we are confident that the system can give
+  // the new server `ServerRSSNeededMb` resident memory, or till
+  // `OldServerWait` seconds passes after an effort to stop the old
+  // server is made.
+  static bool StopOldServer;
+  static int64_t ServerRSSNeededMb;
+  static int OldServerWait;
+  // The percentage of page caches that can be considered as free (0 -
+  // 100).  This is experimental.
+  static int CacheFreeFactor;
   static std::vector<std::string> ServerNextProtocols;
   static bool ServerEnableH2C;
   static int BrotliCompressionEnabled;

@@ -208,6 +208,8 @@ void ProxygenServer::start() {
                    m_accept_sock);
       m_httpServerSocket->useExistingSocket(m_accept_sock);
     } else {
+      // make it possible to quickly reuse the port
+      m_httpServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
       m_httpServerSocket->bind(m_httpConfig.bindAddress);
     }
   } catch (const std::system_error& ex) {
@@ -243,6 +245,7 @@ void ProxygenServer::start() {
                      m_accept_sock_ssl);
         m_httpsServerSocket->useExistingSocket(m_accept_sock_ssl);
       } else {
+        m_httpsServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
         m_httpsServerSocket->bind(m_httpsConfig.bindAddress);
       }
     } catch (const TTransportException& ex) {

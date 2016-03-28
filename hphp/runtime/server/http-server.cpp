@@ -56,6 +56,7 @@ using std::string;
 
 std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
+time_t HttpServer::OldServerStopTime;
 
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
 
@@ -484,6 +485,116 @@ void HttpServer::watchDog() {
   }
 }
 
+bool HttpServer::StopOldServer() {
+  if (RuntimeOption::AdminServerPort <= 0) return false;
+  if (OldServerStopTime > 0) return true; // already stopped before
+
+  Logger::Info("shutting down old HPHP server by /stop command");
+
+  std::string host = RuntimeOption::ServerIP;
+  if (host.empty()) host = "localhost";
+  auto url = folly::format("http://{}:{}/stop", host,
+                           RuntimeOption::AdminServerPort).str();
+  auto passwords = RuntimeOption::AdminPasswords;
+  if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {
+    passwords.insert(RuntimeOption::AdminPassword);
+  }
+  auto passwordIter = passwords.begin();
+  HttpClient http;
+  do {
+    std::string auth_url;
+    if (passwordIter != passwords.end()) {
+      auth_url = folly::format("{}?auth={}", url, *passwordIter).str();
+      ++passwordIter;
+    } else {                            // no password specified
+      auth_url = url;
+    }
+    StringBuffer response;
+    if (http.get(auth_url.c_str(), response) == 200) {
+      Logger::Info("sent stop via admin port");
+      OldServerStopTime = time(nullptr);
+      return true;
+    }
+  } while (passwordIter != passwords.end());
+  OldServerStopTime = time(nullptr);
+  return false;
+}
+
+// Return the estimated amount of memory that can be safely taken into
+// the current process RSS.
+static inline int64_t availableMemory(const MemInfo& mem, int64_t rss,
+                                      int factor) {
+  // Estimation of page cache that are readily evictable without
+  // causing big memory pressure.  We consider it safe to take
+  // `pageFreeFactor` percent of cached pages (excluding those used by
+  // the current process, estimated to be equal to the current RSS)
+  auto const otherCacheMb = std::max((int64_t)0,  mem.m_cachedMb - rss);
+  auto const availableMb = mem.m_freeMb + otherCacheMb * factor / 100;
+  return availableMb;
+}
+
+bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
+                             int64_t rssNeeded, int cacheFreeFactor) {
+  assert(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
+  if (!mem.valid()) return false;
+  // Don't proceed if free memory is too limited, no matter how big
+  // the cache is.
+  if (mem.m_freeMb < rssNeeded / 16) return false;
+  auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
+  return (rssMb + availableMb >= rssNeeded);
+}
+
+bool HttpServer::CanStep(const MemInfo& mem, int64_t rssMb,
+                         int64_t rssNeeded, int cacheFreeFactor) {
+  if (!mem.valid()) return false;
+  if (mem.m_freeMb < rssNeeded / 16) return false;
+  auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
+
+  // Estimation of the memory needed till the next check point.  Since
+  // the current check point is not the last one, we try to be more
+  // optimistic, by assuming that memory requirement won't grow
+  // drastically between successive check points, and that it won't
+  // grow over our estimate.
+  auto const neededToStep = std::min(rssNeeded / 4, rssNeeded - rssMb);
+  return (availableMb >= neededToStep);
+}
+
+void HttpServer::CheckMemAndWait(bool final) {
+  if (!RuntimeOption::StopOldServer) return;
+  if (RuntimeOption::OldServerWait <= 0) return;
+
+  auto const pid = Process::GetProcessId();
+  auto const rssNeeded = RuntimeOption::ServerRSSNeededMb;
+  auto const factor = RuntimeOption::CacheFreeFactor;
+  do {
+    // Don't wait too long
+    if (OldServerStopTime > 0 &&
+        time(nullptr) - OldServerStopTime >= RuntimeOption::OldServerWait) {
+      return;
+    }
+
+    auto const rssMb = Process::GetProcessRSS(pid);
+    MemInfo memInfo;
+    if (!Process::GetMemoryInfo(memInfo)) {
+      Logger::Error("Failed to obtain memory information");
+      HttpServer::StopOldServer();
+      return;
+    }
+    Logger::FInfo("Memory pressure check: free/cached/buffers {}/{}/{} "
+                  "currentRss {}Mb, required {}Mb.",
+                  memInfo.m_freeMb, memInfo.m_cachedMb, memInfo.m_buffersMb,
+                  rssMb, rssNeeded);
+
+    if (CanContinue(memInfo, rssMb, rssNeeded, factor)) return;
+    if (!final && CanStep(memInfo, rssMb, rssNeeded, factor)) return;
+
+    // OK, we don't have enough memory, let's do something.
+    HttpServer::StopOldServer();  // nop if already called before
+    sleep(1);
+  } while (true);        // Guaranteed to exit, at least upon timeout.
+  not_reached();
+}
+
 void HttpServer::dropCache() {
   FILE *f = fopen("/proc/sys/vm/drop_caches", "w");
   if (f) {
@@ -545,9 +656,7 @@ bool HttpServer::startServer(bool pageServer) {
     } catch (FailedToListenException &e) {
       if (RuntimeOption::ServerExitOnBindFail) return false;
 
-      if (i == 0) {
-        Logger::Info("shutting down old HPHP server by /stop command");
-      }
+      StopOldServer();
 
       if (errno == EACCES) {
         if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
@@ -558,35 +667,6 @@ bool HttpServer::startServer(bool pageServer) {
         }
         return false;
       }
-
-      HttpClient http;
-      std::string url = "http://";
-      std::string serverIp = (RuntimeOption::ServerIP.empty()) ? "localhost" :
-        RuntimeOption::ServerIP;
-      url += serverIp;
-      url += ":";
-      url += folly::to<std::string>(RuntimeOption::AdminServerPort);
-      url += "/stop";
-      std::string auth;
-
-      auto passwords = RuntimeOption::AdminPasswords;
-      if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {
-        passwords.insert(RuntimeOption::AdminPassword);
-      }
-      auto passwordIter = passwords.begin();
-      int statusCode = 401;
-      do {
-        std::string auth_url;
-        if (passwordIter != passwords.end()) {
-          auth_url = url + "?auth=";
-          auth_url += *passwordIter;
-          passwordIter++;
-        } else {
-          auth_url = url;
-        }
-        StringBuffer response;
-        statusCode = http.get(auth_url.c_str(), response);
-      } while (statusCode == 401 && passwordIter != passwords.end());
 
       if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
         if (i == 0) {

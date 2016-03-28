@@ -369,8 +369,6 @@ private:
   void checkMetadata() const;
 
 private:
-  static BlockId s_nextId;
-
   BlockId         m_id;
   const Func*     m_func;
   const bool      m_resumed;

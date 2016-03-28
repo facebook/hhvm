@@ -1070,6 +1070,10 @@ void RuntimeOption::Load(
     Config::Bind(Eval ## name, ini, config, "Eval."#name, defaultVal);
     EVALFLAGS()
 #undef F
+    if (RuntimeOption::EvalJitConcurrently) {
+      // TODO(t10247359): Remove this.
+      RuntimeOption::EvalJitPGO = false;
+    }
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);
     }

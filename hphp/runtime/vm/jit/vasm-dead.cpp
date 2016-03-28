@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -270,6 +271,7 @@ bool effectful(Vinstr& inst) {
 // or not a useful block executes, and useless branches can be forwarded to
 // the nearest useful post-dominator.
 void removeDeadCode(Vunit& unit) {
+  Timer timer(Timer::vasm_dce);
   auto blocks = sortBlocks(unit);
   jit::vector<LiveSet> livein(unit.blocks.size());
   LiveSet live(unit.next_vr);

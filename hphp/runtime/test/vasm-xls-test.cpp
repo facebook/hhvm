@@ -49,10 +49,10 @@ template<class T> uint64_t test_const(T val) {
   DataBlock data;
   data.init(data_buffer, sizeof(data), "data");
 
-  Vasm vasm;
+  Vunit unit;
+  Vasm vasm{unit};
   Vtext text { main, data };
 
-  auto& unit = vasm.unit();
   auto& v = vasm.main();
   unit.entry = v;
 
@@ -62,7 +62,7 @@ template<class T> uint64_t test_const(T val) {
   optimizeX64(vasm.unit(), test_abi);
   CGMeta fixups;
   LeaseHolder writer{Translator::WriteLease()};
-  EXPECT_TRUE(writer);
+  EXPECT_TRUE(writer.canWrite());
   emitX64(unit, text, fixups, nullptr);
   // The above code might use fixups.literals but shouldn't use anything else.
   fixups.literals.clear();

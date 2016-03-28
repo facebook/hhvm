@@ -1009,6 +1009,8 @@ TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
+  BlockingLeaseHolder writer{Translator::WriteLease()};
+
   auto view = code.view();
   auto& main = view.main();
   auto& cold = view.cold();

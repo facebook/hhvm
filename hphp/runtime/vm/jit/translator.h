@@ -137,12 +137,12 @@ struct TransContext {
  * These include a variety of flags that help decide what to translate, or what
  * to do after we're done, so it's distinct from the TransContext above.
  */
-struct TranslArgs {
-  TranslArgs(SrcKey sk, bool align) : sk{sk}, align{align} {}
+struct TransArgs {
+  TransArgs(SrcKey sk, bool align) : sk{sk}, align{align} {}
 
   SrcKey sk;
   bool align;
-  bool setFuncBody{false};
+  bool allowPartial{false};
   TransFlags flags{0};
   TransID transId{kInvalidTransID};
   TransKind kind{TransKind::Invalid};

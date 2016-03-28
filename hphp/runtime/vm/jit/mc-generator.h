@@ -22,13 +22,15 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/data-block.h"
@@ -77,6 +79,76 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * The state of a partially-complete translation.
+ *
+ * It is used to transfer context between MCGenerator::translate() and
+ * MCGenerator::finishTranslation() when the initial phase of translation can
+ * be done without the write lease.
+ */
+struct TransEnv {
+  explicit TransEnv(const TransArgs& args) : args(args) {}
+
+  TransEnv(TransEnv&&) = default;
+  TransEnv& operator=(TransEnv&&) = default;
+
+  /*
+   * Context for the translation process.
+   */
+  TransArgs args;
+  FPInvOffset initSpOffset;
+
+  /*
+   * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
+   * successful (hhir -> vasm lowering never fails).
+   */
+  std::unique_ptr<IRUnit> unit;
+  std::unique_ptr<Vunit> vunit;
+
+  /*
+   * Metadata collected during bytecode -> hhir lowering.
+   */
+  PostConditions pconds;
+  Annotations annotations;
+};
+
+/*
+ * The result of the getTranslation() family of functions in MCGenerator,
+ * representing a translation that may or may not be complete.
+ */
+struct TransResult {
+  /* implicit */ TransResult(TCA tca)        : m_tca(tca) {}
+  /* implicit */ TransResult(TransEnv&& env) : m_env(std::move(env)) {}
+
+  TransResult(TransResult&&) = default;
+  TransResult& operator=(TransResult&&) = default;
+
+  /*
+   * Is the translation finished?
+   *
+   * If this function returns true, the TCA of the finished translation (or
+   * nullptr if it failed) can be retrieved using tca(). If it returns false,
+   * the state required to finish translation can be retrieved with env().
+   */
+  bool finished() const {
+    return !m_env.hasValue();
+  }
+
+  TCA tca() const {
+    assertx(finished());
+    return m_tca;
+  }
+
+  TransEnv& env() {
+    assertx(!finished());
+    return *m_env;
+  }
+
+private:
+  TCA m_tca;
+  folly::Optional<TransEnv> m_env;
+};
 
 /*
  * MCGenerator handles the machine-level details of code generation (e.g.,
@@ -269,12 +341,13 @@ private:
 
   void syncWork();
 
-  TCA getTranslation(const TranslArgs& args);
-  TCA createTranslation(const TranslArgs& args);
-  bool createRetranslateStub(SrcKey sk);
-  TCA retranslate(const TranslArgs& args);
-  TCA translate(const TranslArgs& args);
-  TCA translateWork(const TranslArgs& args);
+  TCA findTranslation(const TransArgs& args) const;
+  TransResult getTranslation(const TransArgs& args);
+  TransResult createTranslation(const TransArgs& args);
+  bool createSrcRec(SrcKey sk);
+  TransResult retranslate(const TransArgs& args);
+  TransResult translate(TransArgs args);
+  TCA finishTranslation(TransEnv env);
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);

@@ -915,24 +915,20 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   if (!unit.constToReg.empty()) {
     foldImms<x64::ImmFolder>(unit);
   }
-  {
-    Timer timer(Timer::vasm_copy);
-    optimizeCopies(unit, abi);
-  }
+
+  optimizeCopies(unit, abi);
+
   if (unit.needsRegAlloc()) {
-    Timer timer(Timer::vasm_xls);
     removeDeadCode(unit);
     allocateRegisters(unit, abi);
   }
   if (unit.blocks.size() > 1) {
-    Timer timer(Timer::vasm_jumps);
     optimizeJmps(unit);
   }
 }
 
 void emitX64(const Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
-  Timer timer(Timer::vasm_gen);
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }
 

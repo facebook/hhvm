@@ -459,7 +459,7 @@ void handlePrimeCacheInit(Entry* mce,
   // determine which thread should free the SmashLoc---after getting the
   // lease, we need to re-check if someone else smashed it first.
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer) return;
+  if (!writer.canWrite()) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);

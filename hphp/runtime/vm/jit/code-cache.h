@@ -149,7 +149,7 @@ struct CodeCache::View {
   const CodeBlock& frozen() const { return m_frozen; }
   const DataBlock& data()   const { return m_data; }
 
- private:
+private:
   CodeBlock& m_main;
   CodeBlock& m_cold;
   CodeBlock& m_frozen;

@@ -117,7 +117,7 @@ private:
  * A Vasm manages Vout streams for a Vunit.
  */
 struct Vasm {
-  Vasm() { m_outs.reserve(kNumAreas); }
+  explicit Vasm(Vunit& unit) : m_unit(unit) { m_outs.reserve(kNumAreas); }
 
   /*
    * Obtain the managed Vunit.
@@ -135,7 +135,7 @@ private:
   Vout& out(AreaIndex i);
 
 private:
-  Vunit m_unit;
+  Vunit& m_unit;
   jit::vector<Vout> m_outs; // one for each AreaIndex
 };
 

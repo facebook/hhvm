@@ -111,6 +111,7 @@
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
@@ -269,7 +270,7 @@ void MCGenerator::invalidateFuncProfSrcKeys(const Func* func) {
   }
 }
 
-TCA MCGenerator::retranslate(const TranslArgs& args) {
+TransResult MCGenerator::retranslate(const TransArgs& args) {
   auto sr = m_tx.getSrcDB().find(args.sk);
   always_assert(sr);
   bool locked = sr->tryLock();
@@ -282,14 +283,17 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
     SKTRACE(1, args.sk, "retranslate abort due to debugger\n");
     return nullptr;
   }
-  LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate(args.sk.func(), args.kind)) return nullptr;
+
+  LeaseHolder writer(Translator::WriteLease(), args.sk.func());
+  if (!writer.canTranslate() ||
+      !shouldTranslate(args.sk.func(), args.kind)) {
+    return nullptr;
+  }
   if (!locked) {
-    // Even though we knew above that we were going to skip
-    // doing another translation, we wait until we get the
-    // write lease, to avoid spinning through the tracelet
-    // guards again and again while another thread is writing
-    // to it.
+    // Even though we knew above that we were going to skip doing another
+    // translation, we wait until we get the write lease, to avoid spinning
+    // through the tracelet guards again and again while another thread is
+    // writing to it.
     return sr->getTopTranslation();
   }
   if (sr->translations().size() > RuntimeOption::EvalJitMaxTranslations) {
@@ -301,7 +305,7 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
 
   auto newArgs = args;
   newArgs.kind = profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
-  auto start = translate(newArgs);
+  auto result = translate(newArgs);
 
   // In PGO mode, we free all the profiling data once the TC is full.
   if (RuntimeOption::EvalJitPGO &&
@@ -309,12 +313,12 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
     m_tx.profData()->free();
   }
 
-  return start;
+  return result;
 }
 
 TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer) return nullptr;
+  if (!writer.canWrite()) return nullptr;
   if (isDebuggerAttachedProcess()) return nullptr;
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
@@ -331,8 +335,6 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   if (m_tx.profData()->optimized(funcId)) return nullptr;
   m_tx.profData()->setOptimized(funcId);
 
-  bool setFuncBody = func->getDVFunclets().size() == 0;
-
   func->setFuncBody(ustubs().funcBodyHelperThunk);
 
   // Invalidate SrcDB's entries for all func's SrcKeys.
@@ -348,15 +350,17 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   for (auto region : regions) {
     always_assert(!region->empty());
     auto regionSk = region->start();
-    auto translArgs = TranslArgs{regionSk, align};
-    translArgs.region = region;
-    translArgs.kind = TransKind::Optimize;
+    auto transArgs = TransArgs{regionSk, align};
+    transArgs.region = region;
+    transArgs.kind = TransKind::Optimize;
 
-    if (setFuncBody && regionSk.offset() == func->base()) {
-      translArgs.setFuncBody = true;
-      setFuncBody = false;
+    auto const regionStart = translate(transArgs).tca();
+    if (regionStart != nullptr &&
+        regionSk.offset() == func->base() &&
+        func->getDVFunclets().size() == 0 &&
+        func->getFuncBody() == ustubs().funcBodyHelperThunk) {
+      func->setFuncBody(regionStart);
     }
-    auto regionStart = translate(translArgs);
     if (start == nullptr && regionSk == sk) {
       start = regionStart;
     }
@@ -378,32 +382,35 @@ static bool liveFrameIsPseudoMain() {
 }
 
 /*
- * Find or create a translation for sk. Returns TCA of "best" current
- * translation. May return NULL if it is currently impossible to create
- * a translation.
+ * Return an existing translation for `args', or nullptr if one can't be found.
  */
-TCA
-MCGenerator::getTranslation(const TranslArgs& args) {
+TCA MCGenerator::findTranslation(const TransArgs& args) const {
   auto sk = args.sk;
   sk.func()->validate();
-  SKTRACE(2, sk,
-          "getTranslation: curUnit %s funcId %x offset %d\n",
-          sk.unit()->filepath()->data(),
-          sk.funcID(),
-          sk.offset());
-  SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
   if (liveFrameIsPseudoMain() && !RuntimeOption::EvalJitPseudomain) {
     SKTRACE(2, sk, "punting on pseudoMain\n");
     return nullptr;
   }
-  if (const SrcRec* sr = m_tx.getSrcDB().find(sk)) {
-    TCA tca = sr->getTopTranslation();
-    if (tca) {
+
+  if (auto const sr = m_tx.getSrcDB().find(sk)) {
+    if (auto const tca = sr->getTopTranslation()) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);
       return tca;
     }
   }
+
+  return nullptr;
+}
+
+/*
+ * Find or create a translation for `args'. Returns TCA of "best" current
+ * translation. May return nullptr if it is currently impossible to create a
+ * translation.
+ */
+TransResult MCGenerator::getTranslation(const TransArgs& args) {
+  if (auto const tca = findTranslation(args)) return tca;
+
   return createTranslation(args);
 }
 
@@ -488,46 +495,58 @@ static void populateLiveContext(RegionContext& ctx) {
   );
 }
 
-TCA
-MCGenerator::createTranslation(const TranslArgs& args) {
+TransResult MCGenerator::createTranslation(const TransArgs& args) {
   if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
   /*
-   * Try to become the writer. We delay this until we *know* we will have
-   * a need to create new translations, instead of just trying to win the
-   * lottery at the dawn of time. Hopefully lots of requests won't require
-   * any new translation.
+   * Try to become the writer. We delay this until we *know* we will have a
+   * need to create new translations, instead of just trying to win the lottery
+   * at the dawn of time. Hopefully lots of requests won't require any new
+   * translation.
    */
   auto sk = args.sk;
-  LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate(args.sk.func(), args.kind)) return nullptr;
-
-  if (auto sr = m_tx.getSrcDB().find(sk)) {
-    TCA tca = sr->getTopTranslation();
-    if (tca) {
-      // Handle extremely unlikely race; someone may have just already
-      // added the first instance of this SrcRec while we did a
-      // non-blocking wait on the write lease.
-      return tca;
-    }
-
-    // Since we are holding the write lease, we know that sk is properly
-    // initialized, except that it has no translations (due to
-    // replaceOldTranslations)
-    return retranslate(args);
+  LeaseHolder writer(Translator::WriteLease(), sk.func());
+  if (!writer.canTranslate() ||
+      !shouldTranslate(args.sk.func(), args.kind)) {
+    return nullptr;
   }
 
   if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {
     return nullptr;
   }
-  auto const srcRecSPOff = [&] () -> folly::Optional<FPInvOffset> {
-    if (sk.resumed()) return folly::none;
-    return liveSpOff();
-  }();
+
+  if (!createSrcRec(sk)) return nullptr;
+
+  auto sr = m_tx.getSrcDB().find(sk);
+  always_assert(sr);
+
+  if (auto const tca = sr->getTopTranslation()) {
+    // Handle extremely unlikely race; someone may have just added the first
+    // translation for this SrcRec while we did a non-blocking wait on the
+    // write lease in createSrcRec().
+    return tca;
+  }
+
+  return retranslate(args);
+}
+
+bool MCGenerator::createSrcRec(SrcKey sk) {
+  if (m_tx.getSrcDB().find(sk)) return true;
+
+  LeaseHolder writer{Translator::WriteLease()};
+  if (!writer.canWrite()) return false;
+
+  if (m_tx.getSrcDB().find(sk)) {
+    // Someone created it between our check above and getting the write lease.
+    return true;
+  }
+
+  auto const srcRecSPOff = sk.resumed() ? folly::none
+                                        : folly::make_optional(liveSpOff());
 
   // We put retranslate requests at the end of our slab to more frequently
   // allow conditional jump fall-throughs
-  auto code = m_code.view();
+  auto code       = m_code.view();
   TCA astart      = code.main().frontier();
   TCA coldStart   = code.cold().frontier();
   TCA frozenStart = code.frozen().frontier();
@@ -581,7 +600,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
            m_tx.getTransRec(coldStart)->kind == TransKind::Anchor);
   }
 
-  return retranslate(args);
+  return true;
 }
 
 TCA
@@ -592,8 +611,71 @@ MCGenerator::lookupTranslation(SrcKey sk) const {
   return nullptr;
 }
 
-TCA
-MCGenerator::translate(const TranslArgs& args) {
+namespace {
+/*
+ * Returns true iff we already have Eval.JitMaxTranslations translations
+ * recorded in srcRec.
+ */
+bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
+  if (srcRec.translations().size() != RuntimeOption::EvalJitMaxTranslations) {
+    return false;
+  }
+  INC_TPC(max_trans);
+
+  if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
+    const auto& tns = srcRec.translations();
+    TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
+          tns.size(), sk.unit()->filepath()->data(),
+          sk.offset());
+    SKTRACE(2, sk, "{\n");
+    TCA topTrans = srcRec.getTopTranslation();
+    for (size_t i = 0; i < tns.size(); ++i) {
+      auto const rec = mcg->tx().getTransRec(tns[i].mainStart());
+      assertx(rec);
+      SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
+      if (tns[i].mainStart() == topTrans) {
+        SKTRACE(2, sk, "%zd: *Top*\n", i);
+      }
+      if (rec->kind == TransKind::Anchor) {
+        SKTRACE(2, sk, "%zd: Anchor\n", i);
+      } else {
+        SKTRACE(2, sk, "%zd: guards {\n", i);
+        for (unsigned j = 0; j < rec->guards.size(); ++j) {
+          FTRACE(2, "{}\n", rec->guards[j]);
+        }
+        SKTRACE(2, sk, "%zd } guards\n", i);
+      }
+    }
+    SKTRACE(2, sk, "} /* Too many translations */\n");
+  }
+  return true;
+}
+
+/*
+ * Analyze the given TransArgs and return the region to translate, or nullptr
+ * if one could not be selected.
+ */
+RegionDescPtr prepareRegion(const TransArgs& args) {
+  if (args.kind == TransKind::Optimize) {
+    assertx(RuntimeOption::EvalJitPGO);
+    if (args.region) return args.region;
+
+    assertx(isValidTransID(args.transId));
+    return selectHotRegion(args.transId, mcg);
+  }
+
+  // Attempt to create a region at this SrcKey
+  assertx(args.kind == TransKind::Profile || args.kind == TransKind::Live);
+  auto const sk = args.sk;
+  RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
+                           sk.resumed() };
+  FTRACE(2, "populating live context for region\n");
+  populateLiveContext(rContext);
+  return selectRegion(rContext, args.kind);
+}
+}
+
+TransResult MCGenerator::translate(TransArgs args) {
   INC_TPC(translate);
 
   assert(args.kind != TransKind::Invalid);
@@ -602,14 +684,41 @@ MCGenerator::translate(const TranslArgs& args) {
 
   if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
-  auto start = translateWork(args);
+  Timer timer(Timer::mcg_translate);
 
-  if (args.setFuncBody) {
-    const_cast<Func*>(args.sk.func())->setFuncBody(start);
+  assertx(m_tx.getSrcDB().find(args.sk));
+  auto& srcRec = *m_tx.getSrcRec(args.sk);
+
+  args.region = reachedTranslationLimit(args.sk, srcRec) ? nullptr
+                                                         : prepareRegion(args);
+  TransEnv env{args};
+  env.initSpOffset = args.region ? args.region->entry()->initialSpOffset()
+                                 : liveSpOff();
+
+  // Lower the RegionDesc to an IRUnit, then lower that to a Vunit.
+  if (args.region) {
+    auto const profTransID = RuntimeOption::EvalJitPGO
+      ? m_tx.profData()->curTransID()
+      : kInvalidTransID;
+    auto const transContext =
+      TransContext{profTransID, args.kind, args.flags, args.sk,
+                   env.initSpOffset};
+
+    env.unit = irGenRegion(*args.region, transContext,
+                           env.pconds, env.annotations);
+    if (env.unit) {
+      env.vunit = irlower::lowerUnit(*env.unit);
+    }
   }
-  SKTRACE(1, args.sk, "translate moved head from %p to %p\n",
-          getTopTranslation(args.sk), start);
-  return start;
+
+  // If our caller requested partial translation and we don't already have the
+  // write lease, we're done here. Otherwise, finish the translation now.
+  if (args.allowPartial && !Translator::WriteLease().amOwner()) {
+    return std::move(env);
+  }
+
+  timer.stop();
+  return finishTranslation(std::move(env));
 }
 
 TCA MCGenerator::getFuncBody(Func* func) {
@@ -620,16 +729,15 @@ TCA MCGenerator::getFuncBody(Func* func) {
 
   if (dvs.size()) {
     LeaseHolder writer(Translator::WriteLease());
-    if (!writer) return nullptr;
+    if (!writer.canWrite()) return nullptr;
     tca = func->getFuncBody();
     if (tca != ustubs().funcBodyHelperThunk) return tca;
     tca = genFuncBodyDispatch(func, dvs, m_code.view());
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base(), false);
-    auto args = TranslArgs{sk, false};
-    args.setFuncBody = true;
-    tca = mcg->getTranslation(args);
+    tca = mcg->getTranslation(TransArgs{sk, false}).tca();
+    if (tca) func->setFuncBody(tca);
   }
 
   return tca;
@@ -789,7 +897,7 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer) return nullptr;
+  if (!writer.canWrite()) return nullptr;
 
   // If we're regenerating a prologue, and we want to check shouldTranslate()
   // but ignore the code size limits.  We still want to respect the global
@@ -872,10 +980,10 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
       auto funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);
-        auto args = TranslArgs{funcletSK, false};
+        auto args = TransArgs{funcletSK, false};
         args.transId = funcletTransId;
         args.kind = TransKind::Optimize;
-        auto dvStart = translate(args);
+        auto dvStart = translate(args).tca();
         if (dvStart && !triggerSkStart && funcletSK == triggerSk) {
           triggerSkStart = dvStart;
         }
@@ -961,19 +1069,18 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
 TCA
 MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
                      TransFlags trflags, bool& smashed) {
-  auto args = TranslArgs{destSk, false};
+  auto args = TransArgs{destSk, false};
   args.flags = trflags;
-  auto tDest = getTranslation(args);
+  auto tDest = getTranslation(args).tca();
   if (!tDest) return nullptr;
 
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer) return tDest;
+  if (!writer.canWrite()) return tDest;
 
   SrcRec* sr = m_tx.getSrcRec(destSk);
-  // The top translation may have changed while we waited for the
-  // write lease, so read it again.  If it was replaced with a new
-  // translation, then bind to the new one.  If it was invalidated,
-  // then don't bind the jump.
+  // The top translation may have changed while we waited for the write lease,
+  // so read it again.  If it was replaced with a new translation, then bind to
+  // the new one.  If it was invalidated, then don't bind the jump.
   tDest = sr->getTopTranslation();
   if (tDest == nullptr) return nullptr;
 
@@ -1035,12 +1142,32 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
 TCA
 MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
                           bool taken, bool& smashed) {
-  LeaseHolder writer(Translator::WriteLease());
-  if (!writer) return nullptr;
-
   auto const skWillExplore = taken ? skTaken : skNotTaken;
   auto const skWillDefer = taken ? skNotTaken : skTaken;
   auto const dest = skWillExplore;
+  TransArgs args{dest, true};
+  args.allowPartial = true;
+
+  auto const jmpAddr = jccAddr + smashableJccLen();
+  auto fallThru = [&] {
+    auto& cb = m_code.blockFor(jccAddr);
+
+    // It's not clear where the IncomingBranch should go to if cb is frozen.
+    assertx(&cb != &m_code.frozen());
+    auto const afterAddr = jmpAddr + smashableJmpLen();
+    return afterAddr == cb.frontier() && !m_tx.getSrcDB().find(dest);
+  };
+
+  LeaseHolder writer{Translator::WriteLease(), dest.func()};
+  if (writer.canWrite()) {
+    args.align = !fallThru();
+  } else if (!writer.canTranslate()) {
+    return nullptr;
+  }
+
+  auto result = getTranslation(args);
+  if (result.finished() && result.tca() == nullptr) return nullptr;
+
   auto cc = smashableJccCond(jccAddr);
 
   TRACE(3, "bindJccFirst: explored %d, will defer %d; "
@@ -1051,20 +1178,15 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
   // We want the branch to point to whichever side has not been explored yet.
   if (taken) cc = ccNegate(cc);
 
-  auto& cb = m_code.blockFor(jccAddr);
-
-  // It's not clear where the IncomingBranch should go to if cb is frozen.
-  assertx(&cb != &m_code.frozen());
-
-  auto const jmpAddr = jccAddr + smashableJccLen();
-  auto const afterAddr = jmpAddr + smashableJmpLen();
+  if (!writer.canWrite()) writer.acquireBlocking();
 
   // Can we just directly fall through?
-  bool const fallThru = afterAddr == cb.frontier() &&
-                        !m_tx.getSrcDB().find(dest);
+  auto const tDest = [&] {
+    if (result.finished()) return result.tca();
 
-  auto const tDest = getTranslation(TranslArgs{dest, !fallThru});
-  if (!tDest) return nullptr;
+    result.env().args.align = !fallThru();
+    return finishTranslation(std::move(result.env()));
+  }();
 
   auto const jmpTarget = smashableJmpTarget(jmpAddr);
   if (jmpTarget != smashableJccTarget(jccAddr)) {
@@ -1130,36 +1252,17 @@ private:
 
 }
 
-#ifdef DEBUG
-
-struct DepthGuard {
-  static __thread int m_depth;
-  DepthGuard()  { m_depth++; TRACE(2, "DepthGuard: %d {\n", m_depth); }
-  ~DepthGuard() { TRACE(2, "DepthGuard: %d }\n", m_depth); m_depth--; }
-
-  bool depthOne() const { return m_depth == 1; }
-};
-__thread int DepthGuard::m_depth;
-
-#else
-
-struct DepthGuard { bool depthOne() const { return false; } };
-
-#endif
-
 void
 MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
   if (debug) {
     fflush(stdout);
     fflush(stderr);
   }
-  DepthGuard d;
 
   assertx(m_code.isValidCodeAddress(start));
   assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
-  Translator::WriteLease().gremlinUnlock();
   assertx(!Translator::WriteLease().amOwner());
 
   INC_TPC(enter_tc);
@@ -1172,15 +1275,6 @@ MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
   enterTCImpl(start, stashedAR);
   tl_regState = VMRegState::CLEAN;
   assertx(isValidVMStackAddress(vmsp()));
-
-  if (debug) {
-    // Debugging code: cede the write lease half the time.
-    if (RuntimeOption::EvalJitStressLease) {
-      if (d.depthOne() && (rand() % 2) == 0) {
-        Translator::WriteLease().gremlinLock();
-      }
-    }
-  }
 
   vmfp() = nullptr;
 }
@@ -1225,9 +1319,9 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
       INC_TPC(retranslate);
       sk = SrcKey{liveFunc(), info.args[0].offset, liveResumed()};
       auto trflags = info.args[1].trflags;
-      auto args = TranslArgs{sk, true};
+      auto args = TransArgs{sk, true};
       args.flags = trflags;
-      start = retranslate(args);
+      start = retranslate(args).tca();
       SKTRACE(2, sk, "retranslated @%p\n", start);
       break;
     }
@@ -1279,7 +1373,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
         }
       }
       sk = SrcKey{caller->func(), vmpc(), caller->resumed()};
-      start = getTranslation(TranslArgs{sk, true});
+      start = getTranslation(TransArgs{sk, true}).tca();
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
             caller->m_func->fullName()->data());
@@ -1294,7 +1388,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
              vmpc(), fp->func()->fullName()->data());
       sk = SrcKey{fp->func(), vmpc(), fp->resumed()};
-      start = getTranslation(TranslArgs{sk, true});
+      start = getTranslation(TransArgs{sk, true}).tca();
       break;
     }
   }
@@ -1335,7 +1429,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
 
   if (start && !RuntimeOption::EvalFailJitPrologs) {
     LeaseHolder writer(Translator::WriteLease());
-    if (writer) {
+    if (writer.canWrite()) {
       // Someone else may have changed the func prologue while we waited for
       // the write lease, so read it again.
       start = getFuncPrologue(func, nArgs);
@@ -1416,7 +1510,7 @@ TCA MCGenerator::handleResume(bool interpFirst) {
     start = nullptr;
     INC_TPC(interp_bb_force);
   } else {
-    start = getTranslation(TranslArgs(sk, true));
+    start = getTranslation(TransArgs(sk, true)).tca();
   }
 
   vmJitCalledFrame() = vmfp();
@@ -1434,7 +1528,7 @@ TCA MCGenerator::handleResume(bool interpFirst) {
 
     assertx(vmpc());
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
-    start = getTranslation(TranslArgs{sk, true});
+    start = getTranslation(TransArgs{sk, true}).tca();
   }
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
@@ -1485,7 +1579,7 @@ MCGenerator::freeRequestStub(TCA stub) {
    * If we can't acquire the write lock, the caller
    * (FreeRequestStubTrigger) retries
    */
-  if (!writer) return false;
+  if (!writer.canWrite()) return false;
   assertx(m_code.frozen().contains(stub));
   m_debugInfo.recordRelocMap(stub, 0, "FreeStub");
   m_freeStubs.push(stub);
@@ -1521,73 +1615,15 @@ void MCGenerator::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-static bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
-  if (srcRec.translations().size() != RuntimeOption::EvalJitMaxTranslations) {
-    return false;
-  }
-  INC_TPC(max_trans);
-
-  if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
-    const auto& tns = srcRec.translations();
-    TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
-          tns.size(), sk.unit()->filepath()->data(),
-          sk.offset());
-    SKTRACE(2, sk, "{\n");
-    TCA topTrans = srcRec.getTopTranslation();
-    for (size_t i = 0; i < tns.size(); ++i) {
-      auto const rec = mcg->tx().getTransRec(tns[i].mainStart());
-      assertx(rec);
-      SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
-      if (tns[i].mainStart() == topTrans) {
-        SKTRACE(2, sk, "%zd: *Top*\n", i);
-      }
-      if (rec->kind == TransKind::Anchor) {
-        SKTRACE(2, sk, "%zd: Anchor\n", i);
-      } else {
-        SKTRACE(2, sk, "%zd: guards {\n", i);
-        for (unsigned j = 0; j < rec->guards.size(); ++j) {
-          FTRACE(2, "{}\n", rec->guards[j]);
-        }
-        SKTRACE(2, sk, "%zd } guards\n", i);
-      }
-    }
-    SKTRACE(2, sk, "} /* Too many translations */\n");
-  }
-  return true;
-}
-
 namespace {
-
-/*
- * Analyze the given TranslArgs and return the region to translate, or nullptr
- * if one could not be selected.
- */
-RegionDescPtr prepareRegion(const TranslArgs& args) {
-  if (args.kind == TransKind::Optimize) {
-    assertx(RuntimeOption::EvalJitPGO);
-    if (args.region) return args.region;
-
-    assertx(isValidTransID(args.transId));
-    return selectHotRegion(args.transId, mcg);
-  }
-
-  // Attempt to create a region at this SrcKey
-  assertx(args.kind == TransKind::Profile || args.kind == TransKind::Live);
-  auto const sk = args.sk;
-  RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
-                           sk.resumed() };
-  FTRACE(2, "populating live context for region\n");
-  populateLiveContext(rContext);
-  return selectRegion(rContext, args.kind);
-}
-
 /*
  * Attempt to emit code for the given IRUnit to `code'. Returns true on
  * success, false if codegen failed.
  */
-bool mcGenUnit(const IRUnit& unit, CodeCache::View code, CGMeta& fixups) {
+bool mcGenUnit(Vunit& vunit, const IRUnit& unit,
+               CodeCache::View code, CGMeta& fixups) {
   try {
-    irlower::genCode(unit, code, fixups);
+    emitVunit(vunit, unit, code, fixups);
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
       mcg->code().disableHot();
@@ -1596,11 +1632,6 @@ bool mcGenUnit(const IRUnit& unit, CodeCache::View code, CGMeta& fixups) {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
                          dbFull.name, dbFull.what());
     }
-  } catch (const FailedTraceGen& e) {
-    // Codegen failed for some other reason, most likely because xls wanted too
-    // many spill slots.
-    FTRACE(1, "codegen failed with {}\n", e.what());
-    return false;
   }
 
   auto const startSk = unit.context().srcKey();
@@ -1684,36 +1715,21 @@ void reportJitMaturity(const CodeCache& code) {
 }
 }
 
-TCA MCGenerator::translateWork(const TranslArgs& args) {
-  Timer _t(Timer::translate);
+TCA MCGenerator::finishTranslation(TransEnv env) {
+  Timer timer(Timer::mcg_finishTranslation);
 
+  auto& args = env.args;
   auto const sk = args.sk;
-  assertx(m_tx.getSrcDB().find(sk));
-  SrcRec& srcRec = *m_tx.getSrcRec(sk);
 
-  auto region = reachedTranslationLimit(sk, srcRec) ? nullptr
-                                                    : prepareRegion(args);
-  auto const initSpOffset = region ? region->entry()->initialSpOffset()
-                                   : liveSpOff();
-
-  std::unique_ptr<IRUnit> unit;
-  PostConditions pconds;
-  Annotations annotations;
-
-  // First, lower the RegionDesc to an IRUnit.
-  if (region) {
-    auto const profTransID = RuntimeOption::EvalJitPGO
-      ? m_tx.profData()->curTransID()
-      : kInvalidTransID;
-    auto const transContext =
-      TransContext{profTransID, args.kind, args.flags, args.sk, initSpOffset};
-
-    unit = irGenRegion(*region, transContext, pconds, annotations);
-  }
-
-  // Next, lower the IRUnit to vasm and emit machine code from that.
   profileSetHotFuncAttr();
-  auto code = m_code.view(args.sk.func()->attrs() & AttrHot, args.kind);
+
+  // Grab the write lease before touching the TC. We use a blocking aqcuisition
+  // because either a) we already have the lease and this will return right
+  // away, or b) a caller above our pay grade decided to do the first part of
+  // the translation process without the write lease, and wants us to make sure
+  // we emit code here rather than throwing away the work already done.
+  BlockingLeaseHolder write{Translator::WriteLease()};
+  auto code = m_code.view(sk.func()->attrs() & AttrHot, args.kind);
   auto const preAlignMain = code.main().frontier();
 
   if (args.align) {
@@ -1727,26 +1743,26 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   TransLocMaker maker{code};
   maker.markStart();
 
-  if (unit && !mcGenUnit(*unit, code, fixups)) {
+  if (env.vunit && !mcGenUnit(*env.vunit, *env.unit, code, fixups)) {
     // mcGenUnit() failed. Roll back, drop the unit and region, and clear
     // fixups.
     maker.rollback();
     maker.markStart();
-    unit.reset();
-    region.reset();
+    env.unit.reset();
+    env.vunit.reset();
+    args.region.reset();
     fixups.clear();
   }
 
-  auto kind = args.kind;
-  if (unit) {
+  if (env.vunit) {
     m_numTrans++;
     assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
   } else {
-    kind = TransKind::Interp;
+    args.kind = TransKind::Interp;
     FTRACE(1, "emitting dispatchBB interp request for failed "
-           "translation (spOff = {})\n", initSpOffset.offset);
+           "translation (spOff = {})\n", env.initSpOffset.offset);
     vwrap(code.main(), code.data(), fixups,
-          [&] (Vout& v) { emitInterpReq(v, sk, initSpOffset); },
+          [&] (Vout& v) { emitInterpReq(v, sk, env.initSpOffset); },
           CodeKind::Helper);
   }
 
@@ -1782,18 +1798,20 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     }
   }
 
+  auto& srcRec = *m_tx.getSrcRec(args.sk);
   recordRelocationMetaData(sk, srcRec, loc, fixups);
   recordGdbTranslation(sk, sk.func(), code.main(), loc.mainStart(),
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
                        false, false);
-  if (RuntimeOption::EvalJitPGO && kind == TransKind::Profile) {
-    always_assert(region);
-    m_tx.profData()->addTransProfile(region, pconds);
+  if (RuntimeOption::EvalJitPGO && args.kind == TransKind::Profile) {
+    always_assert(args.region);
+    m_tx.profData()->addTransProfile(args.region, env.pconds);
   }
 
-  auto tr = maker.rec(sk, kind, region, fixups.bcMap,
-                      std::move(annotations), unit && cfgHasLoop(*unit));
+  auto tr = maker.rec(sk, args.kind, args.region, fixups.bcMap,
+                      std::move(env.annotations),
+                      env.unit && cfgHasLoop(*env.unit));
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
@@ -1906,8 +1924,8 @@ void MCGenerator::requestExit() {
   always_assert(!Translator::WriteLease().amOwner());
   TRACE_MOD(txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
             " kept, %15" PRId64 " grabbed\n",
-            Process::GetThreadIdForTrace(), Translator::WriteLease().m_hintKept,
-            Translator::WriteLease().m_hintGrabbed);
+            Process::GetThreadIdForTrace(), Translator::WriteLease().hintKept(),
+            Translator::WriteLease().hintGrabbed());
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();
@@ -2023,9 +2041,6 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
     }
   }
   BlockingLeaseHolder writer(Translator::WriteLease());
-  if (!writer) {
-    return false;
-  }
 
   CGMeta fixups;
   if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
@@ -2073,7 +2088,6 @@ bool MCGenerator::dumpTC(bool ignoreLease /* = false */) {
   folly::Optional<BlockingLeaseHolder> writer;
   if (!ignoreLease) {
     writer.emplace(Translator::WriteLease());
-    if (!*writer) return false;
   }
   return dumpTCData() && dumpTCCode("/tmp/tc_dump");
 }

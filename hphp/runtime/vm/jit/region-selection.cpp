@@ -521,7 +521,7 @@ std::string RegionDesc::toString() const {
  * invalid TransIDs.  To maintain this property, we have to start one past
  * the sentinel kInvalidTransID, which is -1.
  */
-RegionDesc::BlockId RegionDesc::Block::s_nextId = -2;
+static std::atomic<RegionDesc::BlockId> s_nextId{-2};
 
 TransID getTransID(RegionDesc::BlockId blockId) {
   assertx(hasTransID(blockId));
@@ -537,7 +537,7 @@ RegionDesc::Block::Block(const Func* func,
                          Offset      start,
                          int         length,
                          FPInvOffset initSpOff)
-  : m_id(s_nextId--)
+  : m_id(s_nextId.fetch_sub(1, std::memory_order_relaxed))
   , m_func(func)
   , m_resumed(resumed)
   , m_start(start)

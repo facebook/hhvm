@@ -431,6 +431,7 @@ struct RuntimeOption {
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
+  F(bool, JitConcurrently,             false)                           \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \
@@ -484,7 +485,6 @@ struct RuntimeOption {
   F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
-  F(bool, JitStressLease,              false)                           \
   F(bool, JitKeepDbgFiles,             false)                           \
   /* despite the unfortunate name, this enables function renaming and
    * interception in the interpreter as well as the jit, and also

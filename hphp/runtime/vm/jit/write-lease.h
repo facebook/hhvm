@@ -16,21 +16,25 @@
 #ifndef incl_HPHP_WRITELEASE_H_
 #define incl_HPHP_WRITELEASE_H_
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include <pthread.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+
+struct Func;
+
+namespace jit {
 
 /*
- * The write Lease guards write access to the translation caches,
- * srcDB, and TransDB. The term "lease" is meant to indicate that
- * the right of ownership is conferred for a long, variable time:
- * often the entire length of a request. If a request is not
- * actively translating, it will perform a "hinted drop" of the lease:
- * the lease is unlocked but all calls to acquire(false) from other
- * threads will fail for a short period of time.
+ * The write Lease guards write access to the translation caches, srcDB, and
+ * TransDB. The term "lease" is meant to indicate that the right of ownership
+ * is conferred for a long, variable time: often the entire length of a
+ * request. If a request is not actively translating, it will perform a "hinted
+ * drop" of the lease: the lease is unlocked but all calls to acquire(false)
+ * from other threads will fail for a short period of time.
  */
 
 struct LeaseHolderBase;
@@ -38,73 +42,110 @@ struct Lease {
   friend struct LeaseHolderBase;
 
   static const int64_t kStandardHintExpireInterval = 1500; // in microseconds
-  pthread_t       m_owner;
-  pthread_mutex_t m_lock;
-  // m_held: since there's no portable, universally invalid pthread_t,
-  // explicitly represent the held <-> unheld state machine.
-  volatile bool   m_held;
-  int64_t           m_hintExpire;
-  int64_t           m_hintKept;
-  int64_t           m_hintGrabbed;
 
-  Lease() : m_held(false), m_hintExpire(0), m_hintKept(0), m_hintGrabbed(0) {
-    pthread_mutex_init(&m_lock, nullptr);
-  }
-  ~Lease() {
-    if (m_held && m_owner == pthread_self()) {
-      // Can happen, e.g., in exception scenarios.
-      pthread_mutex_unlock(&m_lock);
-    }
-    pthread_mutex_destroy(&m_lock);
-  }
-  bool amOwner() const;
+  Lease();
+  ~Lease();
 
   /*
-   * A malevolent entity sometimes takes the write lease out from under us
-   * for debugging purposes.
+   * Returns true iff the Lease is locked and the current thread is the owner.
    */
-  void gremlinLock();
-  void gremlinUnlock() {
-    if (debug) { gremlinUnlockImpl(); }
-  }
+  bool amOwner() const;
+
+  int64_t hintKept()    const { return m_hintKept; }
+  int64_t hintGrabbed() const { return m_hintGrabbed; }
 
   static bool mayLock(bool f);
+
 private:
   // acquire: also returns true if we are already the writer.
   bool acquire(bool blocking = false);
   void drop(int64_t hintExpireDelay = 0);
   void gremlinUnlockImpl();
+
+  // Since there's no portable, universally invalid pthread_t, explicitly
+  // represent the held <-> unheld state machine with m_held.
+  pthread_t         m_owner;
+  std::atomic<bool> m_held{false};
+  pthread_mutex_t   m_lock;
+
+  // Timestamp for when a hinted lease drop (see block comment above) will
+  // expire.
+  int64_t m_hintExpire{0};
+
+  // Statistics about how many times the write lease is picked back up by the
+  // thread that did a hinted drop.
+  int64_t m_hintKept{0};
+  int64_t m_hintGrabbed{0};
 };
 
 enum class LeaseAcquire {
   ACQUIRE,
-  NO_ACQUIRE,
   BLOCKING
 };
 
 struct LeaseHolderBase {
-  protected:
-    LeaseHolderBase(Lease& l, LeaseAcquire acquire);
+  ~LeaseHolderBase();
 
-  public:
-    ~LeaseHolderBase();
-    explicit operator bool() const { return m_haveLock; }
-    bool acquire();
+  void acquireBlocking();
 
-  private:
-    Lease& m_lease;
-    bool m_haveLock;
-    bool m_acquired;
+  /*
+   * Returns true iff the thread owning this LeaseHolder may proceed with the
+   * unsynchronized first phase of translation.
+   */
+  bool canTranslate() const {
+    switch (m_state) {
+      case LockLevel::None:
+        return false;
+      case LockLevel::Translate:
+      case LockLevel::Write:
+        return true;
+    }
+    not_reached();
+  }
+
+  /*
+   * Returns true iff the thread owning this LeaseHolder may write to the
+   * translation cache.
+   */
+  bool canWrite() const {
+    switch (m_state) {
+      case LockLevel::None:
+      case LockLevel::Translate:
+        return false;
+      case LockLevel::Write:
+        return true;
+    }
+    not_reached();
+  }
+
+ protected:
+  LeaseHolderBase(Lease& l, LeaseAcquire acquire, const Func* f = nullptr);
+
+ private:
+  enum class LockLevel {
+    None,
+    Translate,
+    Write,
+  };
+
+  Lease& m_lease;
+  LockLevel m_state{LockLevel::None};
+  bool m_acquired{false};
+  const Func* m_func;
+  bool m_acquiredFunc{false};
 };
+
 struct LeaseHolder : public LeaseHolderBase {
-  explicit LeaseHolder(Lease& l, LeaseAcquire acquire)
-    : LeaseHolderBase(l, acquire) {}
   explicit LeaseHolder(Lease& l)
     : LeaseHolderBase(l,
                       RuntimeOption::EvalJitRequireWriteLease ?
                       LeaseAcquire::BLOCKING : LeaseAcquire::ACQUIRE)
-    {}
+  {}
+  explicit LeaseHolder(Lease& l, const Func* func)
+    : LeaseHolderBase(l, LeaseAcquire::ACQUIRE, func)
+  {}
 };
+
 struct BlockingLeaseHolder : public LeaseHolderBase {
   explicit BlockingLeaseHolder(Lease& l)
     : LeaseHolderBase(l, LeaseAcquire::BLOCKING) {}

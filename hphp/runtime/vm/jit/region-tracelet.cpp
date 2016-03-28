@@ -634,7 +634,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
 
   if (region->empty() || region->blocks().front()->length() == 0) {
     FTRACE(1, "selectTracelet giving up after {} tries\n", tries);
-    return RegionDescPtr { nullptr };
+    return nullptr;
   }
 
   if (region->blocks().back()->length() == 0) {

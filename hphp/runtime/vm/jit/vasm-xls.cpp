@@ -3246,6 +3246,7 @@ DEBUG_ONLY void dumpStats(const Vunit& unit,
 }
 
 void allocateRegisters(Vunit& unit, const Abi& abi) {
+  Timer timer(Timer::vasm_xls);
   auto const counter = s_counter.fetch_add(1, std::memory_order_relaxed);
 
   splitCriticalEdges(unit);

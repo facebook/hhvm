@@ -344,6 +344,15 @@ struct FrameStateMgr final {
    */
   const LocalState& local(uint32_t id) const;
   const StackState& stack(IRSPRelOffset off) const;
+  const StackState& stack(FPInvOffset off) const;
+
+  /*
+   * Generic accessors for LocationState members.
+   */
+  SSATmp* valueOf(Location l) const;
+  Type typeOf(Location l) const;
+  Type predictedTypeOf(Location l) const;
+  const TypeSourceSet& typeSrcsOf(Location l) const;
 
   /*
    * Update the predicted type for `l'.

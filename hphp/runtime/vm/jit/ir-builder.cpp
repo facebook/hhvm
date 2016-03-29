@@ -43,7 +43,7 @@ namespace {
 TRACE_SET_MOD(hhir);
 using Trace::Indent;
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 template<typename M>
 const typename M::mapped_type& get_required(const M& m,
@@ -61,11 +61,11 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
   return nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /* For each possible dest type, determine if its type might relax. */
 #define ND             always_assert(false);
@@ -108,7 +108,7 @@ bool typeMightRelax(const SSATmp* tmp) {
   return true;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
@@ -116,18 +116,16 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   , m_curMarker(initMarker)
   , m_state(initMarker)
   , m_curBlock(m_unit.entry())
-  , m_constrainGuards(unit.context().kind != TransKind::Optimize)
 {
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
 }
 
-/*
- * Returns whether or not the given value might have its type relaxed by guard
- * relaxation. If tmp is null, only conditions that apply to all values are
- * checked.
- */
+bool IRBuilder::shouldConstrainGuards() const {
+  return m_unit.context().kind != TransKind::Optimize;
+}
+
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   return shouldConstrainGuards() && irgen::typeMightRelax(tmp);
 }
@@ -219,28 +217,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (inst->isTerminal()) m_state.finishBlock(m_curBlock);
 }
 
-void IRBuilder::appendBlock(Block* block) {
-  m_state.finishBlock(m_curBlock);
-
-  FTRACE(2, "appending B{}\n", block->id());
-  // Load up the state for the new block.
-  m_state.startBlock(block, false);
-  m_curBlock = block;
-}
-
-void IRBuilder::setGuardFailBlock(Block* block) {
-  m_guardFailBlock = block;
-}
-
-void IRBuilder::resetGuardFailBlock() {
-  m_guardFailBlock = nullptr;
-}
-
-Block* IRBuilder::guardFailBlock() const {
-  return m_guardFailBlock;
-}
-
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
   auto const typeParam = inst->typeParam();
@@ -545,7 +522,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   return nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Perform preoptimization and simplification on the input instruction.  If the
@@ -641,11 +618,9 @@ void IRBuilder::exceptionStackBoundary() {
   m_state.resetStackModified();
 }
 
-/*
- * Returns true iff a guard to constrain was found, and tc was more specific
- * than the guard's existing constraint. Note that this doesn't necessarily
- * mean that the guard was constrained: tc.weak might be true.
- */
+///////////////////////////////////////////////////////////////////////////////
+// Guard relaxation.
+
 bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
@@ -660,97 +635,61 @@ bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
   return changed;
 }
 
-/**
- * Trace back to the guard that provided the type of val, if
- * any. Constrain it so its type will not be relaxed beyond the given
- * DataTypeCategory. Returns true iff one or more guard instructions
- * were constrained.
- */
 bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
 
   if (!val) {
-    ITRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
+    ITRACE(1, "attempted to constrain nullptr SSATmp*; bailing\n", tc);
     return false;
   }
+  auto inst = val->inst();
 
-  ITRACE(1, "constrainValue({}, {})\n", *val->inst(), tc);
+  ITRACE(1, "constraining {} to {}\n", *inst, tc);
   Indent _i;
 
-  auto inst = val->inst();
   if (inst->is(LdLoc, LdStk)) {
     // If the value's type source is non-null and not a FramePtr, it's a real
     // value that was killed by a Call. The value won't be live but it's ok to
     // use it to track down the guard.
 
     always_assert_flog(m_constraints.typeSrcs.count(inst),
-                       "No typeSrcs found for {}", *inst);
-
-    auto const typeSrcs = get_required(m_constraints.typeSrcs, inst);
+                       "no typeSrcs found for {}", *inst);
 
     bool changed = false;
+    auto const typeSrcs = get_required(m_constraints.typeSrcs, inst);
+
     for (auto typeSrc : typeSrcs) {
       if (typeSrc.isGuard()) {
         if (inst->is(LdLoc)) {
-          changed = constrainSlot(inst->extra<LdLoc>()->locId, typeSrc,
-            tc, "constrainValueLoc") || changed;
+          ITRACE(1, "constraining guard for local[{}]\n",
+                 inst->extra<LdLoc>()->locId);
         } else {
           assertx(inst->is(LdStk));
-          changed = constrainSlot(inst->extra<LdStk>()->offset.offset, typeSrc,
-            tc, "constrainValueStk") || changed;
+          ITRACE(1, "constraining guard for stack[{}]\n",
+                 inst->extra<LdStk>()->offset.offset);
         }
-      } else {
-        // Keep chasing down the source of val.
-        assertx(typeSrc.isValue());
-        changed = constrainValue(typeSrc.value, tc) || changed;
       }
+      changed |= constrainTypeSrc(typeSrc, tc);
     }
     return changed;
   }
 
   if (inst->is(AssertType)) {
-    // Sometimes code in irgen asks for a value with DataTypeSpecific
-    // but can tolerate a less specific value. If that happens, there's nothing
-    // to constrain.
+    // Sometimes code in irgen asks for a value with DataTypeSpecific but can
+    // tolerate a less specific value.  If that happens, there's nothing to
+    // constrain.
     if (!typeFitsConstraint(val->type(), tc)) return false;
 
-    // If the immutable typeParam fits the constraint, we're done.
-    auto const typeParam = inst->typeParam();
-    if (typeFitsConstraint(typeParam, tc)) return false;
-
-    auto const newTc = relaxConstraint(tc, typeParam, inst->src(0)->type());
-    ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
-           *inst, tc, newTc);
-    return constrainValue(inst->src(0), newTc);
+    return constrainAssert(inst, tc, inst->src(0)->type());
   }
 
   if (inst->is(CheckType)) {
-    // Sometimes code in irgen asks for a value with DataTypeSpecific
-    // but can tolerate a less specific value. If that happens, there's nothing
-    // to constrain.
+    // Sometimes code in irgen asks for a value with DataTypeSpecific but can
+    // tolerate a less specific value.  If that happens, there's nothing to
+    // constrain.
     if (!typeFitsConstraint(val->type(), tc)) return false;
 
-    bool changed = false;
-    auto const typeParam = inst->typeParam();
-    auto const srcType = inst->src(0)->type();
-
-    // Constrain the guard on the CheckType, but first relax the constraint
-    // based on what's known about srcType.
-    auto const guardTc = relaxConstraint(tc, srcType, typeParam);
-    changed = constrainGuard(inst, guardTc) || changed;
-
-    // Relax typeParam with its current constraint. This is used below to
-    // recursively relax the constraint on the source, if needed.
-    auto constraint = applyConstraint(m_constraints.guards[inst], guardTc);
-    auto const knownType = relaxType(typeParam, constraint.category);
-
-    if (!typeFitsConstraint(knownType, tc)) {
-      auto const newTc = relaxConstraint(tc, knownType, srcType);
-      ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
-             *inst, tc, newTc);
-      changed = constrainValue(inst->src(0), newTc) || changed;
-    }
-    return changed;
+    return constrainCheck(inst, tc, inst->src(0)->type());
   }
 
   if (inst->isPassthrough()) {
@@ -767,45 +706,45 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     for (auto& pred : inst->block()->preds()) {
       assertx(pred.inst()->is(Jmp));
       auto src = pred.inst()->src(dst);
-      changed = constrainValue(src, tc) || changed;
+      changed |= constrainValue(src, tc);
     }
     return changed;
   }
 
-  // Any instructions not special cased above produce a new value, so
-  // there's no guard for us to constrain.
+  // Any instructions not special cased above produce a new value, so there's
+  // no guard for us to constrain.
   ITRACE(2, "value is new in this trace, bailing\n");
   return false;
 }
 
-bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
-                               const std::string& why) {
+bool IRBuilder::constrainLocation(Location l, TypeConstraint tc,
+                                  const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
+
+  ITRACE(1, "constraining {} to {} (for {})\n", show(l), tc, why);
+  Indent _i;
+
   bool changed = false;
-  for (auto typeSrc : m_state.local(locId).typeSrcs) {
-    changed |= constrainSlot(locId, typeSrc, tc, why + "Loc");
+  for (auto typeSrc : m_state.typeSrcsOf(l)) {
+    changed |= constrainTypeSrc(typeSrc, tc);
   }
   return changed;
+}
+
+bool IRBuilder::constrainLocal(uint32_t locID, TypeConstraint tc,
+                               const std::string& why) {
+  return constrainLocation(Location::Local { locID }, tc, why);
 }
 
 bool IRBuilder::constrainStack(IRSPRelOffset offset, TypeConstraint tc) {
-  if (!shouldConstrainGuards() || tc.empty()) return false;
-  auto changed = false;
-  for (auto typeSrc : m_state.stack(offset).typeSrcs) {
-    changed |= constrainSlot(offset.offset, typeSrc, tc, "Stk");
-  }
-  return changed;
+  auto const fpRel = offset.to<FPInvOffset>(m_state.irSPOff());
+  return constrainLocation(Location::Stack { fpRel }, tc, "");
 }
 
-// Constrains a local or stack slot.
-bool IRBuilder::constrainSlot(int32_t idOrOffset,
-                              TypeSource typeSrc,
-                              TypeConstraint tc,
-                              const std::string& why) {
+bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
 
-  ITRACE(1, "constrainSlot({}, {}, {}, {})\n",
-         idOrOffset, show(typeSrc), tc, why);
+  ITRACE(1, "constraining type source {} to {}\n", show(typeSrc), tc);
   Indent _i;
 
   if (typeSrc.isValue()) return constrainValue(typeSrc.value, tc);
@@ -815,7 +754,7 @@ bool IRBuilder::constrainSlot(int32_t idOrOffset,
 
   always_assert(guard->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
 
-  // If the dest of the Assert/Check doesn't fit tc there's no point in
+  // If the dest of the Assert/Check doesn't fit `tc', there's no point in
   // continuing.
   auto prevType = get_required(m_constraints.prevTypes, guard);
   if (!typeFitsConstraint(prevType & guard->typeParam(), tc)) {
@@ -823,46 +762,70 @@ bool IRBuilder::constrainSlot(int32_t idOrOffset,
   }
 
   if (guard->is(AssertLoc, AssertStk)) {
-    // If the immutable typeParam fits the constraint, we're done.
-    auto const typeParam = guard->typeParam();
-    if (typeFitsConstraint(typeParam, tc)) return false;
+    return constrainAssert(guard, tc, prevType);
+  }
+  return constrainCheck(guard, tc, prevType);
+}
 
-    auto const newTc = relaxConstraint(tc, typeParam, prevType);
-    ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
-           *guard, tc, newTc);
-    bool changed = false;
-    auto typeSrcs = get_required(m_constraints.typeSrcs, guard);
-    for (auto typeSrc : typeSrcs) {
-      changed = constrainSlot(idOrOffset, typeSrc, newTc, why) || changed;
-    }
-    return changed;
+/*
+ * Constrain the sources of an Assert instruction.
+ *
+ * We also have to constrain the sources for Check instructions, and we share
+ * this codepath for that purpose.  However, for Checks, we first pre-relax the
+ * instruction's typeParam, which we pass as `knownType'.  (Otherwise, the
+ * typeParam will be used as the `knownType'.)
+ */
+bool IRBuilder::constrainAssert(const IRInstruction* inst,
+                                TypeConstraint tc, Type srcType,
+                                folly::Optional<Type> knownType) {
+  if (!knownType) knownType = inst->typeParam();
+
+  // If the known type fits the constraint, we're done.
+  if (typeFitsConstraint(*knownType, tc)) return false;
+
+  auto const newTC = relaxConstraint(tc, *knownType, srcType);
+  ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
+         *inst, tc, newTC);
+
+  if (inst->is(AssertType, CheckType)) {
+    return constrainValue(inst->src(0), newTC);
   }
 
-  // guard is a CheckLoc or CheckStk.
   auto changed = false;
-  auto const typeParam = guard->typeParam();
+  auto const& typeSrcs = get_required(m_constraints.typeSrcs, inst);
 
-  // Constrain the guard on the Check instruction, but first relax the
-  // constraint based on what's known about prevType.
-  auto const guardTc = relaxConstraint(tc, prevType, typeParam);
-  changed = constrainGuard(guard, guardTc) || changed;
-
-  // Relax typeParam with its current constraint.  This is used below to
-  // recursively relax the constraint on the source, if needed.
-  auto constraint = applyConstraint(m_constraints.guards[guard], guardTc);
-  auto const knownType = relaxType(typeParam, constraint.category);
-
-  if (!typeFitsConstraint(knownType, tc)) {
-    auto const newTc = relaxConstraint(tc, knownType, prevType);
-    ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
-           *guard, tc, newTc);
-    auto typeSrcs = get_required(m_constraints.typeSrcs, guard);
-    for (auto typeSrc : typeSrcs) {
-      changed = constrainSlot(idOrOffset, typeSrc, newTc, why) || changed;
-    }
+  for (auto typeSrc : typeSrcs) {
+    changed |= constrainTypeSrc(typeSrc, newTC);
   }
   return changed;
 }
+
+/*
+ * Constrain the typeParam and sources of a Check instruction.
+ */
+bool IRBuilder::constrainCheck(const IRInstruction* inst,
+                               TypeConstraint tc, Type srcType) {
+  assertx(inst->is(CheckType, CheckLoc, CheckStk));
+
+  auto changed = false;
+  auto const typeParam = inst->typeParam();
+
+  // Constrain the guard on the Check instruction, but first relax the
+  // constraint based on what's known about `srcType'.
+  auto const guardTC = relaxConstraint(tc, srcType, typeParam);
+  changed |= constrainGuard(inst, guardTC);
+
+  // Relax typeParam with its current constraint.  This is used below to
+  // recursively relax the constraint on the source, if needed.
+  auto constraint = applyConstraint(m_constraints.guards[inst], guardTC);
+  auto const knownType = relaxType(typeParam, constraint.category);
+
+  changed |= constrainAssert(inst, tc, srcType, knownType);
+
+  return changed;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
   constrainLocal(id, tc, "localType");
@@ -905,6 +868,9 @@ void IRBuilder::setCurMarker(BCMarker newMarker) {
   assertx(newMarker.valid());
   m_curMarker = newMarker;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Bytecode-level control flow.
 
 bool IRBuilder::canStartBlock(Block* block) const {
   return m_state.hasStateFor(block);
@@ -963,6 +929,27 @@ void IRBuilder::setBlock(SrcKey sk, Block* block) {
   m_skToBlockMap[sk] = block;
 }
 
+void IRBuilder::appendBlock(Block* block) {
+  m_state.finishBlock(m_curBlock);
+
+  FTRACE(2, "appending B{}\n", block->id());
+  // Load up the state for the new block.
+  m_state.startBlock(block, false);
+  m_curBlock = block;
+}
+
+Block* IRBuilder::guardFailBlock() const {
+  return m_guardFailBlock;
+}
+
+void IRBuilder::setGuardFailBlock(Block* block) {
+  m_guardFailBlock = block;
+}
+
+void IRBuilder::resetGuardFailBlock() {
+  m_guardFailBlock = nullptr;
+}
+
 void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_curMarker.show(), b, marker.show());
@@ -998,6 +985,6 @@ void IRBuilder::popBlock() {
   m_savedBlocks.pop_back();
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

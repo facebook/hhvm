@@ -150,10 +150,9 @@ bool typeFitsConstraint(Type t, TypeConstraint tc);
 /*
  * relaxConstraint returns the least specific TypeConstraint 'tc' that doesn't
  * prevent the intersection of knownType and relaxType(toRelax, tc.category)
- * from satisfying origTc. It is used in IRBuilder::constrainValue and
- * IRBuilder::constrainStack to determine how to constrain the typeParam and
- * src values of CheckType/CheckStk instructions, and the src values of
- * AssertType/AssertStk instructions.
+ * from satisfying origTc. It is used in IRBuilder::constrain*() functions to
+ * determine how to constrain the typeParam and src values of Check
+ * instructions, and the src values of Assert instructions.
  *
  * AssertType example:
  * t24:Obj<C> = AssertType<{Obj<C>|InitNull}> t4:Obj

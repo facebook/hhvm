@@ -1140,11 +1140,34 @@ const LocalState& FrameStateMgr::local(uint32_t id) const {
   return const_cast<FrameStateMgr&>(*this).localState(id);
 }
 
+/*
+ * We consider it logically const to extend with default-constructed stack
+ * values.
+ */
 const StackState& FrameStateMgr::stack(IRSPRelOffset offset) const {
-  // We consider it logically const to extend with default-constructed stack
-  // values.
   return const_cast<FrameStateMgr&>(*this).stackState(offset);
 }
+const StackState& FrameStateMgr::stack(FPInvOffset offset) const {
+  return const_cast<FrameStateMgr&>(*this).stackState(offset);
+}
+
+#define IMPL_MEMBER_OF(type_t, name)                        \
+  type_t FrameStateMgr::name##Of(Location l) const {        \
+    return [&]() -> type_t {                                \
+      switch (l.tag()) {                                    \
+        case LTag::Local: return local(l.localId()).name;   \
+        case LTag::Stack: return stack(l.stackIdx()).name;  \
+      }                                                     \
+      not_reached();                                        \
+    }();                                                    \
+  }
+
+IMPL_MEMBER_OF(SSATmp*, value)
+IMPL_MEMBER_OF(Type, type)
+IMPL_MEMBER_OF(Type, predictedType)
+IMPL_MEMBER_OF(const TypeSourceSet&, typeSrcs)
+
+#undef IMPL_MEMBER_AT
 
 ///////////////////////////////////////////////////////////////////////////////
 

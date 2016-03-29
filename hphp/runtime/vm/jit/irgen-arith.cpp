@@ -945,7 +945,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
    * boxed locals.
    */
   bool const isAdd = (*subOpc == Op::Add || *subOpc == Op::AddO);
-  if (isAdd && (env.irb->localType(id, DataTypeSpecific) <= TArr) &&
+  if (isAdd && (env.irb->local(id, DataTypeSpecific).type <= TArr) &&
       topC(env)->isA(TArr)) {
     /*
      * ArrayAdd decrefs its sources and returns a new array with

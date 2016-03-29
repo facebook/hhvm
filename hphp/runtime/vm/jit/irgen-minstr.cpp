@@ -1443,7 +1443,7 @@ void emitBaseL(IRGS& env, int32_t locId, MOpFlags flags) {
     gen(env, RaiseUninitLoc, cns(env, curFunc(env)->localVarName(locId)));
   }
 
-  auto innerTy = base->isA(TBoxedCell) ? env.irb->predictedInnerType(locId)
+  auto innerTy = base->isA(TBoxedCell) ? env.irb->predictedLocalInnerType(locId)
                                        : TTop;
   simpleBaseImpl(env, base, innerTy);
 }

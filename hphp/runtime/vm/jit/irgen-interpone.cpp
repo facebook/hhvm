@@ -94,7 +94,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     static_assert(std::is_unsigned<decltype(locId)>::value,
                   "locId should be unsigned");
     assertx(locId < curFunc(env)->numLocals());
-    return env.irb->localType(locId, DataTypeSpecific);
+    return env.irb->local(locId, DataTypeSpecific).type;
   };
 
   auto boxed = [&] (Type t) -> Type {
@@ -233,7 +233,7 @@ interpOutputLocals(IRGS& env,
     case OpSetOpL:
     case OpIncDecL: {
       assertx(pushedType.hasValue());
-      auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
+      auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
       assertx(locType < TGen || curFunc(env)->isPseudoMain());
 
       auto stackType = pushedType.value();
@@ -250,7 +250,7 @@ interpOutputLocals(IRGS& env,
       break;
 
     case OpSetL: {
-      auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
+      auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
       auto stackType = topType(env, BCSPRelOffset{0});
       // SetL preserves reffiness of a local.
       setImmLocType(0, handleBoxiness(locType, stackType));
@@ -313,7 +313,7 @@ interpOutputLocals(IRGS& env,
     case OpVerifyParamType: {
       auto paramId = inst.imm[0].u_LA;
       auto const& tc = func->params()[paramId].typeConstraint;
-      auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
+      auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
       if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
           (locType <= TObj || locType.maybe(TBoxedCell))) {
         setImmLocType(0, handleBoxiness(locType, TCell));

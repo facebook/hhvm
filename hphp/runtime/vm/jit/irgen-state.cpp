@@ -103,14 +103,9 @@ std::string show(const IRGS& irgs) {
       continue;
     }
 
-    auto const stkTy = irgs.irb->stackType(
-      offsetFromIRSP(irgs, BCSPRelOffset{i}),
-      DataTypeGeneric
-    );
-    auto const stkVal = irgs.irb->stackValue(
-      offsetFromIRSP(irgs, BCSPRelOffset{i}),
-      DataTypeGeneric
-    );
+    auto const spRel = offsetFromIRSP(irgs, BCSPRelOffset{i});
+    auto const stkTy  = irgs.irb->stack(spRel, DataTypeGeneric).type;
+    auto const stkVal = irgs.irb->stack(spRel, DataTypeGeneric).value;
 
     std::string elemStr;
     if (stkTy == TStkElem) {
@@ -137,16 +132,16 @@ std::string show(const IRGS& irgs) {
   header(folly::format(" {} local(s) ",
                        curFunc(irgs)->numLocals()).str());
   for (unsigned i = 0; i < curFunc(irgs)->numLocals(); ++i) {
-    auto const localValue = irgs.irb->localValue(i, DataTypeGeneric);
+    auto const localValue = irgs.irb->local(i, DataTypeGeneric).value;
     auto const localTy = localValue ? localValue->type()
-                                    : irgs.irb->localType(i, DataTypeGeneric);
+                                    : irgs.irb->local(i, DataTypeGeneric).type;
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
     auto const predicted = irgs.irb->fs().local(i).predictedType;
     if (predicted < localTy) str += folly::sformat(" (predict: {})", predicted);
 
     if (localTy <= TBoxedCell) {
-      auto const pred = irgs.irb->predictedInnerType(i);
+      auto const pred = irgs.irb->predictedLocalInnerType(i);
       if (pred != TBottom) {
         str += folly::sformat(" (predict inner: {})", pred.toString());
       }

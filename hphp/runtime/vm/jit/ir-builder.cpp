@@ -134,20 +134,31 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   FTRACE(1, "  append {}\n", inst->toString());
 
   if (shouldConstrainGuards()) {
+    auto const l = [&]() -> folly::Optional<Location> {
+      switch (inst->op()) {
+        case AssertLoc:
+        case CheckLoc:
+        case LdLoc:
+          return loc(inst->extra<LocalId>()->locId);
+
+        case AssertStk:
+        case CheckStk:
+        case LdStk:
+          return stk(inst->extra<IRSPRelOffsetData>()->offset);
+
+        default:
+          return folly::none;
+      }
+      not_reached();
+    }();
+
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc)) {
-      auto const locId = inst->extra<LocalId>()->locId;
-      m_constraints.typeSrcs[inst] = m_state.local(locId).typeSrcs;
-      if (inst->is(AssertLoc, CheckLoc)) {
-        m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
-      }
-    }
-    if (inst->is(AssertStk, CheckStk, LdStk)) {
-      auto const offset = inst->extra<IRSPRelOffsetData>()->offset;
-      m_constraints.typeSrcs[inst] = m_state.stack(offset).typeSrcs;
-      if (inst->is(AssertStk, CheckStk)) {
-        m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
+    if (l) {
+      m_constraints.typeSrcs[inst] = m_state.typeSrcsOf(*l);
+      if (!inst->is(LdLoc, LdStk)) {
+        constrainLocation(*l, DataTypeGeneric, "appendInstruction");
+        m_constraints.prevTypes[inst] = m_state.typeOf(*l);
       }
     }
 
@@ -219,14 +230,21 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
+SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
+  if (auto const prevValue = valueOf(l, DataTypeGeneric)) {
+    gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  auto const oldType = typeOf(l, DataTypeGeneric);
   auto const typeParam = inst->typeParam();
 
   if (!oldType.maybe(typeParam)) {
-    /* This check will always fail. It's probably due to an incorrect
-     * prediction. Generate a Jmp and return the src. The fact that the type
-     * will be slightly off is ok because all the code after the Jmp is
-     * unreachable. */
+    // This check will always fail.  It's probably due to an incorrect
+    // prediction.  Generate a Jmp and return the src.  The fact that the type
+    // will be slightly off is ok because all the code after the Jmp is
+    // unreachable.
     gen(Jmp, inst->taken());
     return fwdGuardSource(inst);
   }
@@ -234,48 +252,26 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
   auto const newType = oldType & inst->typeParam();
 
   if (oldType <= newType) {
-    /* The type of the src is the same or more refined than type, so the guard
-     * is unnecessary. */
+    // The type of the src is the same or more refined than type, so the guard
+    // is unnecessary.
     return fwdGuardSource(inst);
   }
 
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
-  auto const offset = inst->extra<CheckStk>()->offset;
-
-  if (auto const prevValue = stackValue(offset, DataTypeGeneric)) {
-    gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  return preOptimizeCheckTypeOp(
-    inst,
-    stackType(offset, DataTypeGeneric)
-  );
+SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
+  return preOptimizeCheckLocation(inst, loc(inst->extra<CheckLoc>()->locId));
 }
 
-SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
-  auto const locId = inst->extra<CheckLoc>()->locId;
-
-  if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
-    gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  return preOptimizeCheckTypeOp(
-    inst,
-    localType(locId, DataTypeGeneric)
-  );
+SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
+  return preOptimizeCheckLocation(inst, stk(inst->extra<CheckStk>()->offset));
 }
 
 SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
   auto const locId = inst->extra<HintLocInner>()->locId;
-  if (!(localType(locId, DataTypeGeneric) <= TBoxedCell) ||
-      predictedInnerType(locId).box() <= inst->typeParam()) {
+  if (!(local(locId, DataTypeGeneric).type <= TBoxedCell) ||
+      predictedLocalInnerType(locId).box() <= inst->typeParam()) {
     inst->convertToNop();
     return nullptr;
   }
@@ -309,64 +305,48 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeAssertLocation(IRInstruction* inst,
+                                             Location l) {
+  if (auto const prevValue = valueOf(l, DataTypeGeneric)) {
+    gen(AssertType, inst->typeParam(), prevValue);
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  // If the location has a single type-source instruction, pass it along to
+  // preOptimizeAssertTypeOp(), which may be able to use it to optimize away
+  // the Assert*.
+  auto const typeSrcInst = [&]() -> const IRInstruction* {
+    auto const& typeSrcs = m_state.typeSrcsOf(l);
+
+    if (typeSrcs.size() == 1) {
+      auto typeSrc = *typeSrcs.begin();
+      return typeSrc.isValue() ? typeSrc.value->inst() :
+             typeSrc.isGuard() ? typeSrc.guard :
+                                 nullptr;
+    }
+    return nullptr;
+  }();
+
+  return preOptimizeAssertTypeOp(
+    inst,
+    typeOf(l, DataTypeGeneric),
+    valueOf(l, DataTypeGeneric),
+    typeSrcInst
+  );
+}
+
 SSATmp* IRBuilder::preOptimizeAssertType(IRInstruction* inst) {
   auto const src = inst->src(0);
   return preOptimizeAssertTypeOp(inst, src->type(), src, src->inst());
 }
 
-static const IRInstruction* singleTypeSrcInst(const TypeSourceSet& typeSrcs) {
-  if (typeSrcs.size() == 1) {
-    auto typeSrc = *typeSrcs.begin();
-    return typeSrc.isValue() ? typeSrc.value->inst() :
-           typeSrc.isGuard() ? typeSrc.guard :
-                               nullptr;
-  }
-  return nullptr;
-}
-
-// TODO(#5868904): almost the same as AssertLoc now; combine
-SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
-  auto const offset = inst->extra<AssertStk>()->offset;
-
-  if (auto const prevValue = stackValue(offset, DataTypeGeneric)) {
-    gen(AssertType, inst->typeParam(), prevValue);
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  // If the value has a single type-source instruction, pass it along to
-  // preOptimizeAssertTypeOp, which may be able to use it to optimize away the
-  // AssertStk.
-  auto const typeSrcInst = singleTypeSrcInst(m_state.stack(offset).typeSrcs);
-
-  return preOptimizeAssertTypeOp(
-    inst,
-    stackType(offset, DataTypeGeneric),
-    stackValue(offset, DataTypeGeneric),
-    typeSrcInst
-  );
-}
-
 SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
-  auto const locId = inst->extra<AssertLoc>()->locId;
+  return preOptimizeAssertLocation(inst, loc(inst->extra<AssertLoc>()->locId));
+}
 
-  if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
-    gen(AssertType, inst->typeParam(), prevValue);
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  // If the local has a single type-source instruction, pass it along
-  // to preOptimizeAssertTypeOp, which may be able to use it to
-  // optimize away the AssertLoc.
-  auto const typeSrcInst = singleTypeSrcInst(m_state.local(locId).typeSrcs);
-
-  return preOptimizeAssertTypeOp(
-    inst,
-    localType(locId, DataTypeGeneric),
-    localValue(locId, DataTypeGeneric),
-    typeSrcInst
-  );
+SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
+  return preOptimizeAssertLocation(inst, stk(inst->extra<AssertStk>()->offset));
 }
 
 SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
@@ -408,41 +388,46 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
-  auto const locId = inst->extra<LdLoc>()->locId;
-  if (auto tmp = localValue(locId, DataTypeGeneric)) return tmp;
+SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
+  if (auto tmp = valueOf(l, DataTypeGeneric)) return tmp;
 
-  auto const type = localType(locId, DataTypeGeneric);
+  auto const type = typeOf(l, DataTypeGeneric);
 
   // The types may not be compatible in the presence of unreachable code.
-  // Unreachable code elimination will take care of it later.
+  // Don't try to optimize the code in this case, and just let dead code
+  // elimination take care of it later.
   if (!type.maybe(inst->typeParam())) {
     inst->setTypeParam(TBottom);
     return nullptr;
   }
+
   // If FrameStateMgr's type isn't as good as the type param, we're missing
   // information in the IR.
   assertx(inst->typeParam() >= type);
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
+
   if (inst->typeParam().hasConstVal() ||
       inst->typeParam().subtypeOfAny(TUninit, TInitNull)) {
     return m_unit.cns(inst->typeParam());
   }
-
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
+  return preOptimizeLdLocation(inst, loc(inst->extra<LdLoc>()->locId));
+}
+
+SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
+  return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
+}
+
 SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
-  auto const curType = stackType(
-    inst->extra<CastStk>()->offset,
-    DataTypeGeneric
-  );
-  auto const curVal = stackValue(
-    inst->extra<CastStk>()->offset,
-    DataTypeGeneric
-  );
+  auto const off = inst->extra<CastStk>()->offset;
+  auto const curType = stack(off, DataTypeGeneric).type;
+  auto const curVal = stack(off, DataTypeGeneric).value;
+
   if (typeMightRelax(curVal)) return nullptr;
   if (inst->typeParam() == TNullableObj && curType <= TNull) {
     // If we're casting Null to NullableObj, we still need to call
@@ -458,38 +443,16 @@ SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
-  auto const curType = stackType(
-    inst->extra<CoerceStk>()->offset,
-    DataTypeGeneric
-  );
-  auto const curVal = stackValue(
-    inst->extra<CoerceStk>()->offset,
-    DataTypeGeneric
-  );
+  auto const off = inst->extra<CoerceStk>()->offset;
+  auto const curType = stack(off, DataTypeGeneric).type;
+  auto const curVal = stack(off, DataTypeGeneric).value;
+
   if (typeMightRelax(curVal)) return nullptr;
+
   if (curType <= inst->typeParam()) {
     inst->convertToNop();
     return nullptr;
   }
-  return nullptr;
-}
-
-SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
-  auto const offset = inst->extra<LdStk>()->offset;
-  if (auto tmp = stackValue(offset, DataTypeGeneric)) return tmp;
-  // The types may not be compatible in the presence of unreachable code.
-  // Don't try to optimize the code in this case, and just let
-  // unreachable code elimination take care of it later.
-  auto const type = stackType(offset, DataTypeGeneric);
-  if (!type.maybe(inst->typeParam())) return nullptr;
-  inst->setTypeParam(std::min(type, inst->typeParam()));
-
-  if (typeMightRelax()) return nullptr;
-  if (inst->typeParam().hasConstVal() ||
-      inst->typeParam().subtypeOfAny(TUninit, TInitNull)) {
-    return m_unit.cns(inst->typeParam());
-  }
-
   return nullptr;
 }
 
@@ -616,6 +579,15 @@ void IRBuilder::exceptionStackBoundary() {
   assertx(m_state.bcSPOff() == m_curMarker.spOff());
   m_exnStack.syncedSpLevel = m_state.bcSPOff();
   m_state.resetStackModified();
+}
+
+void IRBuilder::setCurMarker(BCMarker newMarker) {
+  if (newMarker == m_curMarker) return;
+  FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
+         m_curMarker.valid() ? m_curMarker.show() : "<invalid>",
+         newMarker.show());
+  assertx(newMarker.valid());
+  m_curMarker = newMarker;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -827,46 +799,47 @@ bool IRBuilder::constrainCheck(const IRInstruction* inst,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
-  constrainLocal(id, tc, "localType");
-  return m_state.local(id).type;
+const LocalState& IRBuilder::local(uint32_t id, TypeConstraint tc) {
+  constrainLocal(id, tc, "");
+  return m_state.local(id);
 }
 
-Type IRBuilder::predictedInnerType(uint32_t id) const {
+const StackState& IRBuilder::stack(IRSPRelOffset offset, TypeConstraint tc) {
+  constrainStack(offset, tc);
+  return m_state.stack(offset);
+}
+
+SSATmp* IRBuilder::valueOf(Location l, TypeConstraint tc) {
+  constrainLocation(l, tc, "");
+  return m_state.valueOf(l);
+}
+
+Type IRBuilder::typeOf(Location l, TypeConstraint tc) {
+  constrainLocation(l, tc, "");
+  return m_state.typeOf(l);
+}
+
+Type IRBuilder::predictedLocalInnerType(uint32_t id) const {
   auto const ty = m_state.local(id).predictedType;
   assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
 Type IRBuilder::predictedStackInnerType(IRSPRelOffset offset) const {
-  auto const ty =  m_state.stack(offset).predictedType;
+  auto const ty = m_state.stack(offset).predictedType;
   assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
-SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
-  constrainLocal(id, tc, "localValue");
-  return m_state.local(id).value;
+/*
+ * Wrap a local or stack ID into a Location.
+ */
+Location IRBuilder::loc(uint32_t id) const {
+  return Location::Local { id };
 }
-
-SSATmp* IRBuilder::stackValue(IRSPRelOffset offset, TypeConstraint tc) {
-  auto const val = m_state.stack(offset).value;
-  if (val) constrainValue(val, tc);
-  return val;
-}
-
-Type IRBuilder::stackType(IRSPRelOffset offset, TypeConstraint tc) {
-  constrainStack(offset, tc);
-  return m_state.stack(offset).type;
-}
-
-void IRBuilder::setCurMarker(BCMarker newMarker) {
-  if (newMarker == m_curMarker) return;
-  FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         m_curMarker.valid() ? m_curMarker.show() : "<invalid>",
-         newMarker.show());
-  assertx(newMarker.valid());
-  m_curMarker = newMarker;
+Location IRBuilder::stk(IRSPRelOffset off) const {
+  auto const fpRel = off.to<FPInvOffset>(m_state.irSPOff());
+  return Location::Stack { fpRel };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

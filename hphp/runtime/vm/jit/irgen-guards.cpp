@@ -57,7 +57,7 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
   if (!outerOnly && type.inner() < TInitCell) {
     auto const ldPMExit = makePseudoMainExit(env);
     auto const val = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
-    gen(env, CheckRefInner, env.irb->predictedInnerType(locId), exit, val);
+    gen(env, CheckRefInner, env.irb->predictedLocalInnerType(locId), exit, val);
   }
 }
 

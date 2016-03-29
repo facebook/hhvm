@@ -103,14 +103,14 @@ struct IRBuilder {
   const ExnStackState& exceptionStackState() const { return m_exnStack; }
 
   /*
-   * Local and stack values and types.
+   * Tracked state for bytecode locations.
    *
-   * These simply constrain the local or stack slot, then delegate to fs().
+   * These simply constrain the location, then delegate to fs().
    */
-  SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  SSATmp* stackValue(IRSPRelOffset offset, TypeConstraint tc);
-  Type localType(uint32_t id, TypeConstraint tc);
-  Type stackType(IRSPRelOffset, TypeConstraint tc);
+  const LocalState& local(uint32_t id, TypeConstraint tc);
+  const StackState& stack(IRSPRelOffset offset, TypeConstraint tc);
+  SSATmp* valueOf(Location l, TypeConstraint tc);
+  Type     typeOf(Location l, TypeConstraint tc);
 
   /*
    * Helper for unboxing predicted types.
@@ -118,7 +118,7 @@ struct IRBuilder {
    * @returns: ldRefReturn(fs().local(id).predictedType.unbox())
    *           ldRefReturn(fs().stack(id).predictedType.unbox())
    */
-  Type predictedInnerType(uint32_t id) const;
+  Type predictedLocalInnerType(uint32_t id) const;
   Type predictedStackInnerType(IRSPRelOffset) const;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -260,28 +260,33 @@ private:
   }
 
   /*
+   * Location wrapper helpers.
+   */
+  Location loc(uint32_t) const;
+  Location stk(IRSPRelOffset) const;
+
+  /*
    * preOptimize() and helpers.
    */
-  SSATmp* preOptimizeCheckTypeOp(IRInstruction*, Type);
-  SSATmp* preOptimizeCheckType(IRInstruction*);
-  SSATmp* preOptimizeCheckStk(IRInstruction*);
+  SSATmp* preOptimizeCheckLocation(IRInstruction*, Location);
   SSATmp* preOptimizeCheckLoc(IRInstruction*);
+  SSATmp* preOptimizeCheckStk(IRInstruction*);
   SSATmp* preOptimizeHintLocInner(IRInstruction*);
   SSATmp* preOptimizeAssertTypeOp(IRInstruction* inst,
                                   Type oldType,
                                   SSATmp* oldVal,
                                   const IRInstruction* typeSrc);
   SSATmp* preOptimizeAssertType(IRInstruction*);
-  SSATmp* preOptimizeAssertStk(IRInstruction*);
+  SSATmp* preOptimizeAssertLocation(IRInstruction*, Location);
   SSATmp* preOptimizeAssertLoc(IRInstruction*);
+  SSATmp* preOptimizeAssertStk(IRInstruction*);
   SSATmp* preOptimizeCheckCtxThis(IRInstruction*);
   SSATmp* preOptimizeLdCtx(IRInstruction*);
-  SSATmp* preOptimizeLdLocPseudoMain(IRInstruction*);
+  SSATmp* preOptimizeLdLocation(IRInstruction*, Location);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
-  SSATmp* preOptimizeStLoc(IRInstruction*);
+  SSATmp* preOptimizeLdStk(IRInstruction*);
   SSATmp* preOptimizeCastStk(IRInstruction*);
   SSATmp* preOptimizeCoerceStk(IRInstruction*);
-  SSATmp* preOptimizeLdStk(IRInstruction*);
   SSATmp* preOptimizeLdMBase(IRInstruction*);
   SSATmp* preOptimize(IRInstruction*);
 

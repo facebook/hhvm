@@ -74,7 +74,7 @@ void freeLocalsAndThis(IRGS& env) {
     if (localCount > 0 && count > kTooPolyRet) return false;
     auto numRefCounted = int{0};
     for (auto i = uint32_t{0}; i < localCount; ++i) {
-      if (env.irb->localType(i, DataTypeGeneric).maybe(TCounted)) {
+      if (env.irb->local(i, DataTypeGeneric).type.maybe(TCounted)) {
         ++numRefCounted;
       }
     }

@@ -52,6 +52,9 @@ DebugInfo::DebugInfo() {
   if (RuntimeOption::EvalPerfPidMap) {
     m_perfMap = fopen(m_perfMapName.c_str(), "w");
   }
+  if (RuntimeOption::EvalPerfJitDump) {
+    initPerfJitDump();
+  }
   m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
   if (RuntimeOption::EvalPerfDataMap) {
     m_dataMap = fopen(m_dataMapName.c_str(), "w");
@@ -70,7 +73,14 @@ DebugInfo::~DebugInfo() {
       unlink(m_perfMapName.c_str());
     }
   }
-
+  
+  if (m_perfJitDump) {
+    closePerfJitDump();
+    if (!RuntimeOption::EvalKeepPerfPidMap) {
+      unlink(m_perfJitDumpName.c_str());
+    }
+  }
+  
   if (m_dataMap) {
     fclose(m_dataMap);
     if (!RuntimeOption::EvalKeepPerfPidMap) {
@@ -170,7 +180,7 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
   }
 }
 
-void DebugInfo::recordPerfMap(TCRange range, const Func* func,
+void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, const Func* func,
                               bool exit, bool inPrologue) {
   if (!m_perfMap) return;
   if (RuntimeOption::EvalProfileBC) return;
@@ -180,6 +190,11 @@ void DebugInfo::recordPerfMap(TCRange range, const Func* func,
     range.size(),
     name.c_str());
   fflush(m_perfMap);
+
+  //Dump the object code into the specified file
+  if (m_perfJitDump) {
+    perfJitDumpTrace(range.begin(), range.size(), name.c_str());    
+  }
 }
 
 void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {

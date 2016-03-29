@@ -37,14 +37,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  template<bool decRef, class TWaitHandle>
+  template<class TWaitHandle>
   void exitContextQueue(context_idx_t ctx_idx,
                         req::deque<TWaitHandle*>& queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop_front();
       wait_handle->exitContext(ctx_idx);
-      if (decRef) decRefObj(wait_handle);
+      decRefObj(wait_handle);
     }
   }
 
@@ -92,10 +92,10 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   exitContextVector(ctx_idx, m_fastRunnableQueue);
 
   for (auto& it : m_priorityQueueDefault) {
-    exitContextQueue<true>(ctx_idx, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
   for (auto& it : m_priorityQueueNoPendingIO) {
-    exitContextQueue<true>(ctx_idx, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
 
   exitContextVector(ctx_idx, m_sleepEvents);

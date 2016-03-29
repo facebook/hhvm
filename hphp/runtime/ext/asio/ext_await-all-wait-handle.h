@@ -50,7 +50,11 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     , m_cap(cap)
     , m_unfinished(cap - 1)
   {}
-  ~c_AwaitAllWaitHandle() {}
+  ~c_AwaitAllWaitHandle() {
+    for (int32_t i = 0; i < m_cap; i++) {
+      decRefObj(m_children[i].m_child);
+    }
+  }
 
  public:
   class Node final {

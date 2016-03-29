@@ -257,14 +257,14 @@ struct Resource;
 struct Object;
 struct Variant;
 
-ATTRIBUTE_NORETURN extern void throw_null_pointer_exception();
-ATTRIBUTE_NORETURN void throw_invalid_object_type(ResourceData* p);
-ATTRIBUTE_NORETURN void throw_invalid_object_type(ObjectData* p);
-ATTRIBUTE_NORETURN void throw_invalid_object_type(const Variant& p);
-ATTRIBUTE_NORETURN void throw_invalid_object_type(const Resource& p);
-ATTRIBUTE_NORETURN void throw_invalid_object_type(const Object& p);
+[[noreturn]] extern void throw_null_pointer_exception();
+[[noreturn]] void throw_invalid_object_type(ResourceData* p);
+[[noreturn]] void throw_invalid_object_type(ObjectData* p);
+[[noreturn]] void throw_invalid_object_type(const Variant& p);
+[[noreturn]] void throw_invalid_object_type(const Resource& p);
+[[noreturn]] void throw_invalid_object_type(const Object& p);
 template <typename T>
-ATTRIBUTE_NORETURN void throw_invalid_object_type(const req::ptr<T>& p);
+[[noreturn]] void throw_invalid_object_type(const req::ptr<T>& p);
 template <typename T>
 void throw_invalid_object_type(const req::ptr<T>& p) {
   throw_invalid_object_type(p.get());

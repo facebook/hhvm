@@ -31,7 +31,6 @@ static const MInstrAttr Define = MIA_define;
 static const MInstrAttr None = MIA_none;
 static const MInstrAttr WarnDefine = MInstrAttr(Warn | Define);
 static const MInstrAttr DefineReffy = MInstrAttr(Define | Reffy);
-static const MInstrAttr WarnDefineReffy = MInstrAttr(Warn | Define | Reffy);
 #define WDU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \
                    (attrs & Unset) != 0
 #define WDRU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \

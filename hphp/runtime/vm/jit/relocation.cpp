@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 
 #include "hphp/tools/hfsort/jitsort.h"
@@ -77,7 +78,7 @@ struct CodeSmasher {
   std::vector<std::pair<TCA,TCA>> entries;
   void operator()() {
     LeaseHolder writer(Translator::WriteLease());
-    if (!writer) {
+    if (!writer.canWrite()) {
       Treadmill::enqueue(std::move(*this));
       return;
     }
@@ -327,7 +328,7 @@ void liveRelocate(int time) {
   if (!relocMap) return;
 
   BlockingLeaseHolder writer(Translator::WriteLease());
-  assert(writer);
+  assert(writer.canWrite());
   if (!okToRelocate) return;
 
   SCOPE_EXIT { fseek(relocMap, 0, SEEK_END); };
@@ -634,6 +635,81 @@ void readRelocations(
       callback(std::move(tri), data);
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void relocateTranslation(
+  const IRUnit& unit,
+  CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
+  CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
+  CodeBlock& frozen, CodeAddress frozen_start,
+  AsmInfo* ai, CGMeta& meta
+) {
+  auto const& bc_map = meta.bcMap;
+  if (!bc_map.empty()) {
+    TRACE(1, "bcmaps before relocation\n");
+    for (UNUSED auto const& map : bc_map) {
+      TRACE(1, "%s %-6d %p %p %p\n",
+            map.md5.toString().c_str(),
+            map.bcStart,
+            map.aStart,
+            map.acoldStart,
+            map.afrozenStart);
+    }
+  }
+  if (ai) printUnit(kRelocationLevel, unit, " before relocation ", ai);
+
+  RelocationInfo rel;
+  size_t asm_count{0};
+
+  asm_count += x64::relocate(rel, main_in,
+                             main.base(), main.frontier(),
+                             meta, nullptr);
+  asm_count += x64::relocate(rel, cold_in,
+                             cold.base(), cold.frontier(),
+                             meta, nullptr);
+
+  TRACE(1, "asm %ld\n", asm_count);
+
+  if (&frozen != &cold) {
+    rel.recordRange(frozen_start, frozen.frontier(),
+                    frozen_start, frozen.frontier());
+  }
+  x64::adjustForRelocation(rel);
+  x64::adjustMetaDataForRelocation(rel, ai, meta);
+  x64::adjustCodeForRelocation(rel, meta);
+
+  if (ai) {
+    static int64_t mainDeltaTotal = 0, coldDeltaTotal = 0;
+    int64_t mainDelta = (main_in.frontier() - main_start) -
+                        (main.frontier() - main.base());
+    int64_t coldDelta = (cold_in.frontier() - cold_start) -
+                        (cold.frontier() - cold.base());
+
+    mainDeltaTotal += mainDelta;
+    coldDeltaTotal += coldDelta;
+
+    if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, 1)) {
+      HPHP::Trace::traceRelease("main delta after relocation: "
+                                "%" PRId64 " (%" PRId64 ")\n",
+                                mainDelta, mainDeltaTotal);
+      HPHP::Trace::traceRelease("cold delta after relocation: "
+                                "%" PRId64 " (%" PRId64 ")\n",
+                                coldDelta, coldDeltaTotal);
+    }
+  }
+
+#ifndef NDEBUG
+  auto& ip = meta.inProgressTailJumps;
+  for (size_t i = 0; i < ip.size(); ++i) {
+    const auto& ib = ip[i];
+    assertx(!main.contains(ib.toSmash()));
+    assertx(!cold.contains(ib.toSmash()));
+  }
+  memset(main.base(), 0xcc, main.frontier() - main.base());
+  memset(cold.base(), 0xcc, cold.frontier() - cold.base());
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////

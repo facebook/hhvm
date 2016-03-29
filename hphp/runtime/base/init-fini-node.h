@@ -48,6 +48,7 @@ struct InitFiniNode {
       ProcessExit,           // after Init and InitConcurrent
       ServerPreInit,
       ServerInit,
+      WarmupConcurrent,      // concurrent with OS file cache warmup, optional
       ServerExit,
       GlobalsInit,
 
@@ -76,6 +77,8 @@ struct InitFiniNode {
   static void ProcessFini()    { iterate(When::ProcessExit);    }
   static void ServerPreInit()  { iterate(When::ServerPreInit);  }
   static void ServerInit()     { iterate(When::ServerInit);     }
+  static void WarmupConcurrentStart(uint32_t maxWorkers);
+  static void WarmupConcurrentWaitForEnd(); // No-op if not started.
   static void ServerFini()     { iterate(When::ServerExit);     }
   static void GlobalsInit()    { iterate(When::GlobalsInit);    }
 
@@ -92,15 +95,22 @@ struct InitFiniNode {
     assert(idx < NumNodes);
     return s_nodes[idx];
   }
+  static IFDispatcher*& dispatcher(When when) {
+    auto idx = static_cast<unsigned>(when);
+    assert(idx < NumNodes);
+    return s_dispatcher[idx];
+  }
   void (*func)();
   InitFiniNode* next;
   const char* name;
 
   static void iterate(When when) { iterate(node(when)); }
   static void iterate(InitFiniNode* node);
+  static void concurrentStart(uint32_t maxWorkers, When when);
+  static void concurrentWaitForEnd(When when);
 
   static InitFiniNode* s_nodes[NumNodes];
-  static IFDispatcher* s_dispatcher;
+  static IFDispatcher* s_dispatcher[NumNodes];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

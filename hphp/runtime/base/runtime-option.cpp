@@ -160,6 +160,7 @@ bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 std::string RuntimeOption::ServerCleanupRequest;
+int RuntimeOption::ServerInternalWarmupThreads = 0;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
 bool RuntimeOption::ServerExitOnBindFail;
@@ -184,6 +185,10 @@ bool RuntimeOption::ServerKillOnTimeout = true;
 int RuntimeOption::ServerPreShutdownWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownEOMWait = 0;
+bool RuntimeOption::StopOldServer = false;
+int RuntimeOption::OldServerWait = 30;
+int RuntimeOption::CacheFreeFactor = 50;
+int64_t RuntimeOption::ServerRSSNeededMb = 4096;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 bool RuntimeOption::ServerEnableH2C = false;
 int RuntimeOption::BrotliCompressionEnabled = 1;
@@ -480,7 +485,7 @@ static inline bool hugePagesSoundNice() {
 }
 
 static inline int nsjrDefault() {
-  return RuntimeOption::ServerExecutionMode() ? 5 : 0;
+  return RuntimeOption::ServerExecutionMode() ? 20 : 0;
 }
 
 uint64_t ahotDefault() {
@@ -1065,6 +1070,10 @@ void RuntimeOption::Load(
     Config::Bind(Eval ## name, ini, config, "Eval."#name, defaultVal);
     EVALFLAGS()
 #undef F
+    if (RuntimeOption::EvalJitConcurrently) {
+      // TODO(t10247359): Remove this.
+      RuntimeOption::EvalJitPGO = false;
+    }
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);
     }
@@ -1281,6 +1290,8 @@ void RuntimeOption::Load(
                  ServerAddVaryEncoding);
     Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");
     Config::Bind(ServerCleanupRequest, ini, config, "Server.CleanupRequest");
+    Config::Bind(ServerInternalWarmupThreads, ini, config,
+                 "Server.InternalWarmupThreads", 0);  // 0 = skip
     Config::Bind(ServerHighPriorityEndPoints, ini, config,
                  "Server.HighPriorityEndPoints");
     Config::Bind(ServerExitOnBindFail, ini, config, "Server.ExitOnBindFail",
@@ -1311,6 +1322,13 @@ void RuntimeOption::Load(
                  "Server.ShutdownListenWait", 0);
     Config::Bind(ServerShutdownEOMWait, ini, config,
                  "Server.ShutdownEOMWait", 0);
+    Config::Bind(StopOldServer, ini, config, "Server.StopOld", false);
+    Config::Bind(OldServerWait, ini, config, "Server.StopOldWait", 30);
+    Config::Bind(ServerRSSNeededMb, ini, config, "Server.RSSNeededMb", 4096);
+    Config::Bind(CacheFreeFactor, ini, config, "Server.CacheFreeFactor", 50);
+    if (CacheFreeFactor > 100) CacheFreeFactor = 100;
+    if (CacheFreeFactor < 0) CacheFreeFactor = 0;
+
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
     Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");
     Config::Bind(BrotliCompressionEnabled, ini, config,

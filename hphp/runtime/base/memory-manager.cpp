@@ -588,15 +588,16 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-inline void* MemoryManager::malloc(size_t nbytes) {
+inline void* MemoryManager::malloc(size_t nbytes, type_scan::Index tyindex) {
   auto const nbytes_padded = nbytes + sizeof(SmallNode);
   if (LIKELY(nbytes_padded) <= kMaxSmallSize) {
     auto const ptr = static_cast<SmallNode*>(mallocSmallSize(nbytes_padded));
     ptr->padbytes = nbytes_padded;
     ptr->hdr.kind = HeaderKind::SmallMalloc;
+    ptr->typeIndex() = tyindex;
     return ptr + 1;
   }
-  return mallocBig(nbytes);
+  return mallocBig(nbytes, tyindex);
 }
 
 union MallocNode {
@@ -616,12 +617,15 @@ inline void MemoryManager::free(void* ptr) {
   m_heap.freeBig(ptr);
 }
 
-inline void* MemoryManager::realloc(void* ptr, size_t nbytes) {
-  FTRACE(3, "MemoryManager::realloc: {} to {}\n", ptr, nbytes);
+inline void* MemoryManager::realloc(void* ptr,
+                                    size_t nbytes,
+                                    type_scan::Index tyindex) {
+  FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
+         ptr, nbytes, tyindex);
   assert(nbytes > 0);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->small.padbytes <= kMaxSmallSize)) {
-    void* newmem = req::malloc(nbytes);
+    void* newmem = req::malloc(nbytes, tyindex);
     auto const copySize = std::min(
       n->small.padbytes - sizeof(SmallNode),
       nbytes
@@ -938,9 +942,9 @@ inline void MemoryManager::updateBigStats() {
 }
 
 NEVER_INLINE
-void* MemoryManager::mallocBig(size_t nbytes) {
+void* MemoryManager::mallocBig(size_t nbytes, type_scan::Index tyindex) {
   assert(nbytes > 0);
-  auto block = m_heap.allocBig(nbytes, HeaderKind::BigMalloc);
+  auto block = m_heap.allocBig(nbytes, HeaderKind::BigMalloc, tyindex);
   updateBigStats();
   return block.ptr;
 }
@@ -954,7 +958,7 @@ template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::mallocBigSize(size_t bytes) {
   if (debug) checkEagerGC();
 
-  auto block = m_heap.allocBig(bytes, HeaderKind::BigObj);
+  auto block = m_heap.allocBig(bytes, HeaderKind::BigObj, 0);
   auto szOut = block.size;
 #ifdef USE_JEMALLOC
   // NB: We don't report the SweepNode size in the stats.
@@ -973,41 +977,43 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes) {
 }
 
 NEVER_INLINE
-void* MemoryManager::callocBig(size_t totalbytes) {
+void* MemoryManager::callocBig(size_t totalbytes, type_scan::Index tyindex) {
   if (debug) checkEagerGC();
   assert(totalbytes > 0);
-  auto block = m_heap.callocBig(totalbytes);
+  auto block = m_heap.callocBig(totalbytes, tyindex);
   updateBigStats();
   return block.ptr;
 }
 
 // req::malloc api entry points, with support for malloc/free corner cases.
 namespace req {
-void* malloc(size_t nbytes) {
+void* malloc(size_t nbytes, type_scan::Index tyindex) {
   auto const size = std::max(nbytes, size_t(1));
-  return MM().malloc(size);
+  return MM().malloc(size, tyindex);
 }
 
-void* calloc(size_t count, size_t nbytes) {
+void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
   if (totalBytes <= kMaxSmallSize) {
-    return memset(req::malloc(totalBytes), 0, totalBytes);
+    return memset(req::malloc(totalBytes, tyindex), 0, totalBytes);
   }
-  return MM().callocBig(totalBytes);
+  return MM().callocBig(totalBytes, tyindex);
 }
 
-void* realloc(void* ptr, size_t nbytes) {
-  if (!ptr) return req::malloc(nbytes);
+void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
+  if (!ptr) return req::malloc(nbytes, tyindex);
   if (!nbytes) {
     req::free(ptr);
     return nullptr;
   }
-  return MM().realloc(ptr, nbytes);
+  return MM().realloc(ptr, nbytes, tyindex);
 }
 
 char* strndup(const char* str, size_t len) {
   size_t n = std::min(len, strlen(str));
-  char* ret = reinterpret_cast<char*>(req::malloc(n + 1));
+  char* ret = reinterpret_cast<char*>(
+    req::malloc(n + 1, type_scan::kIndexUnknownNoPtrs)
+  );
   memcpy(ret, str, n);
   ret[n] = 0;
   return ret;
@@ -1175,14 +1181,18 @@ MemBlock BigHeap::allocSlab(size_t size) {
   return {slab, size};
 }
 
-void BigHeap::enlist(BigNode* n, HeaderKind kind, size_t size) {
+void BigHeap::enlist(BigNode* n, HeaderKind kind,
+                     size_t size, type_scan::Index tyindex) {
   n->nbytes = size;
   n->hdr.kind = kind;
   n->index() = m_bigs.size();
+  n->typeIndex() = tyindex;
   m_bigs.push_back(n);
 }
 
-MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind) {
+MemBlock BigHeap::allocBig(size_t bytes,
+                           HeaderKind kind,
+                           type_scan::Index tyindex) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<BigNode*>(mallocx(bytes + sizeof(BigNode), 0));
   auto cap = sallocx(n, 0);
@@ -1190,14 +1200,14 @@ MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind) {
   auto cap = bytes + sizeof(BigNode);
   auto n = static_cast<BigNode*>(safe_malloc(cap));
 #endif
-  enlist(n, kind, cap);
+  enlist(n, kind, cap, tyindex);
   return {n + 1, cap - sizeof(BigNode)};
 }
 
-MemBlock BigHeap::callocBig(size_t nbytes) {
+MemBlock BigHeap::callocBig(size_t nbytes, type_scan::Index tyindex) {
   auto cap = nbytes + sizeof(BigNode);
   auto const n = static_cast<BigNode*>(safe_calloc(cap, 1));
-  enlist(n, HeaderKind::BigMalloc, cap);
+  enlist(n, HeaderKind::BigMalloc, cap, tyindex);
   return {n + 1, nbytes};
 }
 
@@ -1317,19 +1327,21 @@ MemBlock ContiguousHeap::allocSlab(size_t size) {
   return {slab, cap};
 }
 
-MemBlock ContiguousHeap::allocBig(size_t bytes, HeaderKind kind) {
+MemBlock ContiguousHeap::allocBig(size_t bytes,
+                                  HeaderKind kind,
+                                  type_scan::Index tyindex) {
   size_t cap;
   auto n = static_cast<BigNode*>(heapAlloc(bytes + sizeof(BigNode), cap));
-  enlist(n, kind, cap);
+  enlist(n, kind, cap, tyindex);
   return {n + 1, cap - sizeof(BigNode)};
 }
 
-MemBlock ContiguousHeap::callocBig(size_t nbytes) {
+MemBlock ContiguousHeap::callocBig(size_t nbytes, type_scan::Index tyindex) {
   size_t cap;
   auto const n = static_cast<BigNode*>(
         heapAlloc(nbytes + sizeof(BigNode), cap));
   memset(n, 0, cap);
-  enlist(n, HeaderKind::BigMalloc, cap);
+  enlist(n, HeaderKind::BigMalloc, cap, tyindex);
   return {n + 1, cap - sizeof(BigNode)};
 }
 

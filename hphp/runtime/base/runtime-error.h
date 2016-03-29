@@ -71,10 +71,10 @@ enum class ErrorMode {
   UPGRADEABLE_ERROR = WARNING | USER_WARNING | NOTICE | USER_NOTICE
 };
 
-ATTRIBUTE_NORETURN void raise_error(const std::string&);
-ATTRIBUTE_NORETURN void raise_error(ATTRIBUTE_PRINTF_STRING const char*, ...)
+[[noreturn]] void raise_error(const std::string&);
+[[noreturn]] void raise_error(ATTRIBUTE_PRINTF_STRING const char*, ...)
   ATTRIBUTE_PRINTF(1, 2);
-ATTRIBUTE_NORETURN void raise_error_without_first_frame(const std::string&);
+[[noreturn]] void raise_error_without_first_frame(const std::string&);
 void raise_recoverable_error(const std::string &msg);
 void raise_recoverable_error(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
   ATTRIBUTE_PRINTF(1, 2);

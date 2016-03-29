@@ -19,16 +19,18 @@
 #include <folly/Optional.h>
 
 namespace HPHP {
+
 struct RepoAuthType;
 struct StringData;
-}
-namespace HPHP { namespace jit {
-struct SSATmp;
-struct IRGS;
-struct Type;
-}}
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace jit {
+
+struct SSATmp;
+struct Type;
+
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

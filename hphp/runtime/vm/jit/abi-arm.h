@@ -48,6 +48,9 @@ inline PhysReg rsp()   { return vixl::sp; }
 inline RegSet vm_regs_no_sp()   { return rvmfp() | rvmtl(); }
 inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
 
+inline PhysReg rret_data() { return vixl::x0; }
+inline PhysReg rret_type() { return vixl::x1; }
+
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
 

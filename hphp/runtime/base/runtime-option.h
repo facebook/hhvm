@@ -139,6 +139,7 @@ struct RuntimeOption {
   static bool ServerAddVaryEncoding;
   static std::vector<std::string> ServerWarmupRequests;
   static std::string ServerCleanupRequest;
+  static int ServerInternalWarmupThreads;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;
@@ -155,7 +156,6 @@ struct RuntimeOption {
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ServerGracefulShutdownWait;
-  static int ServerDanglingWait;
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
   static bool ServerKillOnSIGTERM;
@@ -163,6 +163,18 @@ struct RuntimeOption {
   static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
   static int ServerShutdownEOMWait;
+  // If `StopOldServer` is set, we try to stop the old server running
+  // on the local host earlier when we initialize, and we do not start
+  // serving requests until we are confident that the system can give
+  // the new server `ServerRSSNeededMb` resident memory, or till
+  // `OldServerWait` seconds passes after an effort to stop the old
+  // server is made.
+  static bool StopOldServer;
+  static int64_t ServerRSSNeededMb;
+  static int OldServerWait;
+  // The percentage of page caches that can be considered as free (0 -
+  // 100).  This is experimental.
+  static int CacheFreeFactor;
   static std::vector<std::string> ServerNextProtocols;
   static bool ServerEnableH2C;
   static int BrotliCompressionEnabled;
@@ -419,6 +431,7 @@ struct RuntimeOption {
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
+  F(bool, JitConcurrently,             false)                           \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \
@@ -453,7 +466,6 @@ struct RuntimeOption {
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
-  F(bool, PerfJitDump,                 false)                           \
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
   F(int32_t, PerfRelocate,             0)                               \
@@ -473,7 +485,6 @@ struct RuntimeOption {
   F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
-  F(bool, JitStressLease,              false)                           \
   F(bool, JitKeepDbgFiles,             false)                           \
   /* despite the unfortunate name, this enables function renaming and
    * interception in the interpreter as well as the jit, and also

@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,18 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_ASYNC_GENERATOR_H_
-#error "This should only be included by ext_async-generator.h"
-#endif
+#include "hphp/runtime/vm/jit/location.h"
 
-namespace HPHP {
+#include "hphp/util/assertions.h"
+
+#include <folly/Format.h>
+#include <folly/Hash.h>
+
+namespace HPHP { namespace jit {
+
 ///////////////////////////////////////////////////////////////////////////////
 
-inline AsyncGenerator* AsyncGenerator::fromObject(ObjectData *obj) {
-  assert (obj->getVMClass() == c_AsyncGenerator::classof());
-  return reinterpret_cast<AsyncGenerator*>(
-    reinterpret_cast<char*>(obj) - objectOff());
+std::string show(Location loc) {
+  switch (loc.tag()) {
+    case LTag::Local:
+      return folly::format("Local{{{}}}", loc.localId()).str();
+    case LTag::Stack:
+      return folly::format("Stack{{{}}}", loc.stackIdx().offset).str();
+  }
+  not_reached();
+}
+
+size_t Location::Hash::operator()(Location loc) const {
+  return folly::hash::hash_combine(
+    static_cast<uint32_t>(loc.m_tag),
+    loc.m_local.locId
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+
+}}

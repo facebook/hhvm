@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/region-selection.h"
+
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -28,13 +31,11 @@ TRACE_SET_MOD(pgo);
  * Remove from pConds the elements that correspond to stack positions
  * that have been popped given the current SP offset from FP.
  */
-static void discardPoppedTypes(
-  TypedLocations& pConds,
-  FPInvOffset curSpOffset
-) {
+static void discardPoppedTypes(TypedLocations& pConds,
+                               FPInvOffset curSpOffset) {
   for (auto it = pConds.begin(); it != pConds.end(); ) {
-    if (it->location.tag() == RegionDesc::Location::Tag::Stack &&
-        it->location.offsetFromFP() > curSpOffset) {
+    if (it->location.tag() == LTag::Stack &&
+        it->location.stackIdx() > curSpOffset) {
       it = pConds.erase(it);
     } else {
       it++;

@@ -1130,7 +1130,7 @@ Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
   assert(memchr(charListData, '\0', charListSz) != nullptr);
 
   // in order to use strcspn, remove all null byte(s) from char_list
-  auto charListWithoutNull = (char*) req::malloc(charListSz);
+  auto charListWithoutNull = (char*) req::malloc_noptrs(charListSz);
   SCOPE_EXIT { req::free(charListWithoutNull); };
 
   auto copy_ptr = charListWithoutNull;

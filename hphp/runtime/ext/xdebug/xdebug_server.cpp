@@ -764,7 +764,7 @@ bool XDebugServer::readInput() {
       m_bufferSize = (m_bufferSize == 0) ?
         INPUT_BUFFER_INIT_SIZE : m_bufferSize * INPUT_BUFFER_EXPANSION;
       bytes_left = m_bufferSize - bytes_read;
-      m_buffer = (char*) req::realloc(m_buffer, m_bufferSize);
+      m_buffer = (char*) req::realloc_noptrs(m_buffer, m_bufferSize);
     }
 
     // Read into the buffer

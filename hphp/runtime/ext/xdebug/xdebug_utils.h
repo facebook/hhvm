@@ -52,7 +52,7 @@ struct XDebugUtils {
   static String pathToUrl(const String& fileurl) {
     auto url = pathToUrl(const_cast<char*>(fileurl.data()));
     String url_str = String(url, CopyString);
-    xdfree(url); // xdfree needed since allocated with xdmalloc
+    HPHP::req::free(url);
     return url_str;
   }
 

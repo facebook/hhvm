@@ -33,6 +33,8 @@ namespace HPHP { namespace jit {
 struct NormalizedInstruction;
 struct SSATmp;
 
+namespace irgen {
+
 //////////////////////////////////////////////////////////////////////
 
 struct ReturnTarget {
@@ -133,6 +135,6 @@ std::string show(const IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}
 
 #endif

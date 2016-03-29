@@ -113,6 +113,9 @@ Array HHVM_FUNCTION(apc_sma_info,
 
 void apc_load(int thread);
 
+// Evict any file-backed APC values from OS page cache.
+void apc_advise_out();
+
 // needed by generated apc archive .cpp files
 void apc_load_impl(struct cache_info *info,
                    const char **int_keys, long long *int_values,

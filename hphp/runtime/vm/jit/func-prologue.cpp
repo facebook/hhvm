@@ -20,21 +20,22 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
-#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
-#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
@@ -73,7 +74,7 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   auto context = prologue_context(transID, kind, func,
                                   func->getEntryForNumArgs(argc));
   IRUnit unit{context};
-  IRGS env{unit};
+  irgen::IRGS env{unit};
 
   auto& cb = code.main();
 
@@ -84,7 +85,8 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
 
-  irlower::genCode(env.unit, code, fixups, CodeKind::CrossTrace);
+  auto vunit = irlower::lowerUnit(env.unit, CodeKind::CrossTrace);
+  emitVunit(*vunit, env.unit, code, fixups);
 
   return start;
 }
@@ -94,7 +96,7 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   auto context = prologue_context(kInvalidTransID, TransKind::Live,
                                   func, func->base());
   IRUnit unit{context};
-  IRGS env{unit};
+  irgen::IRGS env{unit};
 
   auto& main = code.main();
   auto& frozen = code.frozen();
@@ -105,7 +107,8 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   irgen::sealUnit(env);
 
   CGMeta fixups;
-  irlower::genCode(env.unit, code, fixups, CodeKind::CrossTrace);
+  auto vunit = irlower::lowerUnit(env.unit, CodeKind::CrossTrace);
+  emitVunit(*vunit, env.unit, code, fixups);
 
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;

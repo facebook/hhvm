@@ -517,7 +517,7 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   return cls->nameStr();
 }
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   Object inst{s_ReflectionExceptionClass};
   TypedValue ret;

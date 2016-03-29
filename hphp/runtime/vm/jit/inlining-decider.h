@@ -30,8 +30,8 @@ struct SrcKey;
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct IRGS;
 struct RegionDesc;
+namespace irgen { struct IRGS; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -169,7 +169,7 @@ private:
  */
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
-                                 const IRGS& irgs,
+                                 const irgen::IRGS& irgs,
                                  InliningDecider& inl,
                                  int32_t maxBCInstrs);
 

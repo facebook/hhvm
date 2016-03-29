@@ -20,6 +20,36 @@ function test_fun(bool $a, int $b): array<int> {
     echo "\" { { } }";
   }
 
+  $xhp1 =
+    <div>
+      test
+      <div>nested</div>
+    </div>;
+
+  $xhp2 =
+    <div>
+      test nested braces
+      {Vector {
+        <div />,
+      }}
+    </div>;
+
+  $xhp3 =
+    <div class={"nested string attribute"}>
+      <div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+    </div>;
+
+  $heredoc2 = <<<TEST
+    this only has a newline
+TEST
+;
+
+  $nowdoc = <<<'TEST'
+    this is a nowdoc
+TEST;
+
   switch ($b) {
     case 1:
       echo "1";
@@ -186,6 +216,36 @@ function test_fun(bool $a, int $b): array<int> {
     echo "\" { { } }";
   }
 
+  $xhp1 =
+    <div>
+      test
+      <div>nested</div>
+    </div>;
+
+  $xhp2 =
+    <div>
+      test nested braces
+      {Vector {
+        <div />,
+      }}
+    </div>;
+
+  $xhp3 =
+    <div class={"nested string attribute"}>
+      <div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+    </div>;
+
+  $heredoc2 = <<<TEST
+    this only has a newline
+TEST
+;
+
+  $nowdoc = <<<'TEST'
+    this is a nowdoc
+TEST;
+
   switch ($b) {
     case 1:
       echo "1";
@@ -246,6 +306,36 @@ function test_fun(bool $a, int $b): array<int> {
   } else {
     echo "\" { { } }";
   }
+
+  $xhp1 =
+    <div>
+      test
+      <div>nested</div>
+    </div>;
+
+  $xhp2 =
+    <div>
+      test nested braces
+      {Vector {
+        <div />,
+      }}
+    </div>;
+
+  $xhp3 =
+    <div class={"nested string attribute"}>
+      <div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+    </div>;
+
+  $heredoc2 = <<<TEST
+    this only has a newline
+TEST
+;
+
+  $nowdoc = <<<'TEST'
+    this is a nowdoc
+TEST;
 
   switch ($b) {
     case 1:
@@ -513,6 +603,256 @@ echo
 on_expr:
 
 "\" { { } }"
+
+=====
+
+on_stmt:
+
+$xhp1 =
+    <div>
+      test
+      <div>nested</div>
+    </div>
+
+=====
+
+on_expr:
+
+$xhp1 =
+    <div>
+      test
+      <div>nested</div>
+    </div>
+
+=====
+
+on_expr:
+
+$xhp1
+
+=====
+
+on_expr:
+
+div>
+      test
+      <div>nested</div>
+    </div>
+
+=====
+
+on_expr:
+
+
+      test
+      <
+
+=====
+
+on_expr:
+
+div>nested</div>
+
+=====
+
+on_expr:
+
+nested
+
+=====
+
+on_stmt:
+
+$xhp2 =
+    <div>
+      test nested braces
+      {Vector {
+        <div />,
+      }}
+    </div>
+
+=====
+
+on_expr:
+
+$xhp2 =
+    <div>
+      test nested braces
+      {Vector {
+        <div />,
+      }}
+    </div>
+
+=====
+
+on_expr:
+
+$xhp2
+
+=====
+
+on_expr:
+
+div>
+      test nested braces
+      {Vector {
+        <div />,
+      }}
+    </div>
+
+=====
+
+on_expr:
+
+
+      test nested braces
+      {Vector {
+        <div />,
+      }
+
+=====
+
+on_expr:
+
+Vector {
+        <div />,
+      }
+
+=====
+
+on_expr:
+
+div />
+
+=====
+
+on_stmt:
+
+$xhp3 =
+    <div class={"nested string attribute"}>
+      <div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+    </div>
+
+=====
+
+on_expr:
+
+$xhp3 =
+    <div class={"nested string attribute"}>
+      <div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+    </div>
+
+=====
+
+on_expr:
+
+$xhp3
+
+=====
+
+on_expr:
+
+div class={"nested string attribute"}>
+      <div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+    </div>
+
+=====
+
+on_expr:
+
+"nested string attribute"
+
+=====
+
+on_expr:
+
+div class={cx('test')}>
+        {'}'}{'{'}
+      </div>
+
+=====
+
+on_expr:
+
+cx('test')
+
+=====
+
+on_expr:
+
+cx
+
+=====
+
+on_expr:
+
+'test'
+
+=====
+
+on_expr:
+
+'}'
+
+=====
+
+on_expr:
+
+'{'
+
+=====
+
+on_stmt:
+
+$heredoc2 = <<<TEST
+
+=====
+
+on_expr:
+
+$heredoc2 = <<<TEST
+
+=====
+
+on_expr:
+
+$heredoc2
+
+=====
+
+on_expr:
+
+TEST
+
+=====
+
+on_stmt:
+
+$nowdoc = <<<'TEST'
+
+=====
+
+on_expr:
+
+$nowdoc = <<<'TEST'
+
+=====
+
+on_expr:
+
+$nowdoc
+
+=====
+
+on_expr:
+
+'TEST'
 
 =====
 

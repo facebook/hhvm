@@ -22,12 +22,18 @@
 #include "hphp/util/async-func.h"
 
 namespace HPHP {
+struct MemInfo;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct HttpServer : Synchronizable, TakeoverListener,
                     Server::ServerEventListener {
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
+
+private:
+  static time_t OldServerStopTime;
+  static unsigned LoadFactor;
 
 public:
   explicit HttpServer();
@@ -60,6 +66,42 @@ public:
   std::pair<int, int> getSatelliteRequestCount() const;
 
   void stopOnSignal(int sig);
+
+  static unsigned GetLoadFactor() { return LoadFactor; }
+  static void ResetLoadFactor() { LoadFactor = 100; }
+
+  /*
+   * Try to stop the previous server instance.  Return true if the
+   * old server acknowledges.  This function doesn't wait until the
+   * previous server dies.  Nothing bad happens if the old server
+   * isn't there, or is already in the process of stopping.
+   *
+   * Currently it is implemented through the admin port command.  So
+   * it will not work if admin server is not present, or if the new
+   * server and old server disagree on port and password for admin
+   * server.
+   */
+  static bool StopOldServer();
+  /*
+   * When running with RuntimeOption::StopOldServer, given a target
+   * memory needed (RuntimeOption::ServerRSSNeededMb), check memory
+   * status, stop the old server when necessary, and wait for at most
+   * RuntimeOption::OldServerWait seconds after trying to stop the old
+   * server, before proceeding regardless of available memory. `final`
+   * indicates whether this is the final wait (and thus must wait till
+   * all the required memory is available).
+   */
+  static void CheckMemAndWait(bool final = false);
+
+  // Helpers to decide whether it is safe to proceed till next check
+  // point, or continue indefinitely.
+  static bool CanStep(const MemInfo& mem, int64_t rss,
+                      int64_t rssNeeded, int cacheFreeFactor);
+  static bool CanContinue(const MemInfo& mem, int64_t rss,
+                          int64_t rssNeeded, int cacheFreeFactor);
+
+  static void EvictFileCache();
+  static void PrepareToStop();
 
 private:
   bool startServer(bool pageServer);

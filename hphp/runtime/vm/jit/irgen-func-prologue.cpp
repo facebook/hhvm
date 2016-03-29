@@ -304,7 +304,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     ReqBindJmpData {
       SrcKey { func, func->getEntryForNumArgs(argc), false },
       FPInvOffset { func->numSlotsInFrame() },
-      offsetFromIRSP(env, BCSPOffset{0}),
+      bcSPOffset(env),
       TransFlags{}
     },
     sp(env),
@@ -393,7 +393,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
           ReqBindJmpData {
             SrcKey { func, dv.second, false },
             FPInvOffset { func->numSlotsInFrame() },
-            offsetFromIRSP(env, BCSPOffset{0}),
+            bcSPOffset(env),
             TransFlags{}
           },
           sp(env),
@@ -409,7 +409,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
     ReqBindJmpData {
       SrcKey { func, func->base(), false },
       FPInvOffset { func->numSlotsInFrame() },
-      offsetFromIRSP(env, BCSPOffset{0}),
+      bcSPOffset(env),
       TransFlags{}
     },
     sp(env),

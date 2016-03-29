@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/ext/apc/snapshot-loader.h"
 #include "hphp/runtime/server/server-stats.h"
 
 namespace HPHP {
@@ -217,12 +218,16 @@ struct ConcurrentTableSharedStore {
   bool clear();
 
   /*
-   * The API for priming APC.  Not yet documented.
+   * The API for priming APC.  Poorly documented.
    */
   void prime(const std::vector<KeyValuePair>& vars);
   bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
   bool constructPrime(const Variant& v, KeyValuePair& item);
   void primeDone();
+  // Returns false on failure (in particular, for the old file format).
+  bool primeFromSnapshot(const char* filename);
+  // Evict any file-backed APC values from OS page cache.
+  void adviseOut();
 
   /*
    * Debugging.  Dump information about the table to an output stream.
@@ -358,6 +363,8 @@ private:
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
   std::atomic<uint64_t> m_purgeCounter{0};
+
+  std::unique_ptr<SnapshotLoader> m_snapshotLoader;
 };
 
 //////////////////////////////////////////////////////////////////////

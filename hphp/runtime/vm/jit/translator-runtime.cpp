@@ -572,22 +572,6 @@ TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
   return arrayIdxI(a, key, def);
 }
 
-const StaticString s_idx("hh\\idx");
-
-TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
-  EagerVMRegAnchor _;
-  static auto func = Unit::loadFunc(s_idx.get());
-  assertx(func != nullptr);
-  TypedValue args[] = {
-    obj,
-    key,
-    def
-  };
-  TypedValue ret;
-  g_context->invokeFuncFew(&ret, func, nullptr, nullptr, 3, &args[0]);
-  return ret;
-}
-
 TypedValue mapIdx(ObjectData* mapOD, StringData* key, TypedValue def) {
   assert(collections::isType(mapOD->getVMClass(), CollectionType::Map) ||
          collections::isType(mapOD->getVMClass(), CollectionType::ImmMap));

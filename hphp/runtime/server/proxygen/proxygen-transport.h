@@ -247,8 +247,8 @@ struct ProxygenTransport final
   }
 
   /**
-   * After this callback is received, there will be no more normal ingress
-   * callbacks received (onEgress*(), onError(), and onTimeout() may still
+   * After this callback is received, there will be no more normal
+   * ingress callbacks received (onEgress*() and onError() may still
    * be invoked). The Handler should consider ingress complete after
    * receiving this message. This Transaction is still valid, and work
    * may still occur on it until detachTransaction is called.
@@ -265,7 +265,13 @@ struct ProxygenTransport final
 
   void messageAvailable(ResponseMessage&& message);
 
-  void timeoutExpired();
+  /**
+   * The transaction is aborted when there are errors, or during
+   * shutdown when the server has stopped enqueuing requests, or
+   * when the post request takes too long before we see EOM during
+   * server shutdown.
+   */
+  void abort();
 
   void removePushTxn(uint64_t id) {
     Lock lock(this);

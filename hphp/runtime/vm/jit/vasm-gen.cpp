@@ -82,16 +82,19 @@ Vauto::~Vauto() {
       // Prevent spurious printir traces.
       Trace::Bump bumper{Trace::printir, 10};
 
+      auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:
-          optimizeX64(unit(), abi(m_kind));
+          optimizeX64(unit(), abi);
           emitX64(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::ARM:
-          finishARM(unit(), m_text, m_fixups, abi(m_kind), nullptr);
+          optimizeARM(unit(), abi);
+          emitARM(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::PPC64:
-          finishPPC64(unit(), m_text, m_fixups, abi(m_kind), nullptr);
+          optimizePPC64(unit(), abi);
+          emitPPC64(unit(), m_text, m_fixups, nullptr);
           break;
       }
       return;

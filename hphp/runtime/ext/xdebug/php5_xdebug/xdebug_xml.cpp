@@ -18,9 +18,9 @@
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
 
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -100,9 +100,9 @@ void xdebug_xml_return_node_impl(StringBuffer& out, xdebug_xml_node* node) {
 
 void xdebug_xml_text_node_dtor(xdebug_xml_text_node* node) {
   if (node->free_value && node->text) {
-    xdfree(node->text);
+    HPHP::req::free(node->text);
   }
-  xdfree(node);
+  HPHP::req::free(node);
 }
 
 
@@ -111,12 +111,12 @@ void xdebug_xml_attribute_dtor(xdebug_xml_attribute* attr) {
     xdebug_xml_attribute_dtor(attr->next);
   }
   if (attr->free_name) {
-    xdfree(attr->name);
+    HPHP::req::free(attr->name);
   }
   if (attr->free_value) {
-    xdfree(attr->value);
+    HPHP::req::free(attr->value);
   }
-  xdfree(attr);
+  HPHP::req::free(attr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ String xdebug_xml_return_node(xdebug_xml_node* node) {
 }
 
 xdebug_xml_node* xdebug_xml_node_init(char* tag, int free_tag /* = 0 */) {
-  auto xml = (xdebug_xml_node*)xdmalloc(sizeof(xdebug_xml_node));
+  auto xml = HPHP::req::make_raw<xdebug_xml_node>();
 
   xml->tag = tag;
   xml->text = nullptr;
@@ -164,7 +164,7 @@ void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char* attribute,
                                   size_t attribute_len, char* value,
                                   size_t value_len, int free_name,
                                   int free_value) {
-  auto attr = (xdebug_xml_attribute*)xdmalloc(sizeof(xdebug_xml_attribute));
+  auto attr = HPHP::req::make_raw<xdebug_xml_attribute>();
   xdebug_xml_attribute** ptr;
 
   /* Init structure */
@@ -209,7 +209,7 @@ void xdebug_xml_add_text_encode(xdebug_xml_node* xml, char* text) {
 
 void xdebug_xml_add_text_ex(xdebug_xml_node* xml, char* text, int length,
                             int free_text, int encode) {
-  auto node = (xdebug_xml_text_node*)xdmalloc(sizeof(xdebug_xml_text_node));
+  auto node = HPHP::req::make_raw<xdebug_xml_text_node>();
   node->free_value = free_text;
   node->encode = encode;
 
@@ -251,12 +251,12 @@ void xdebug_xml_node_dtor(xdebug_xml_node* xml) {
     xdebug_xml_attribute_dtor(xml->attribute);
   }
   if (xml->free_tag) {
-    xdfree(xml->tag);
+    HPHP::req::free(xml->tag);
   }
   if (xml->text) {
     xdebug_xml_text_node_dtor(xml->text);
   }
-  xdfree(xml);
+  HPHP::req::free(xml);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

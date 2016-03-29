@@ -92,10 +92,6 @@ PGORegionMode pgoRegionMode(const Func& func) {
 
 //////////////////////////////////////////////////////////////////////
 
-size_t RegionDesc::Location::Hash::operator()(RegionDesc::Location loc) const {
-  return folly::hash::hash_combine(uint32_t(loc.m_tag), loc.m_local.locId);
-}
-
 /*
  * Checks whether two RefPredVecs contain the same elements, which may
  * appear in different orders.
@@ -525,7 +521,7 @@ std::string RegionDesc::toString() const {
  * invalid TransIDs.  To maintain this property, we have to start one past
  * the sentinel kInvalidTransID, which is -1.
  */
-RegionDesc::BlockId RegionDesc::Block::s_nextId = -2;
+static std::atomic<RegionDesc::BlockId> s_nextId{-2};
 
 TransID getTransID(RegionDesc::BlockId blockId) {
   assertx(hasTransID(blockId));
@@ -541,7 +537,7 @@ RegionDesc::Block::Block(const Func* func,
                          Offset      start,
                          int         length,
                          FPInvOffset initSpOff)
-  : m_id(s_nextId--)
+  : m_id(s_nextId.fetch_sub(1, std::memory_order_relaxed))
   , m_func(func)
   , m_resumed(resumed)
   , m_start(start)
@@ -683,8 +679,7 @@ void RegionDesc::Block::checkInstruction(Op op) const {
  *
  * 2. Each local id referred to in the type prediction list is valid.
  *
- * 3. (Unchecked) each stack offset in the type prediction list is
- *    valid.
+ * 3. (Unchecked) each stack offset in the type prediction list is valid.
 */
 void RegionDesc::Block::checkMetadata() const {
   auto rangeCheck = [&](const char* type, Offset o) {
@@ -699,10 +694,11 @@ void RegionDesc::Block::checkMetadata() const {
     for (auto& typedLoc : vec) {
       auto& loc = typedLoc.location;
       switch (loc.tag()) {
-      case Location::Tag::Local: assertx(loc.localId() < m_func->numLocals());
-                                 break;
-      case Location::Tag::Stack: // Unchecked
-                                 break;
+        case LTag::Local:
+          assertx(loc.localId() < m_func->numLocals());
+          break;
+        case LTag::Stack:
+          break;
       }
     }
   };
@@ -713,10 +709,11 @@ void RegionDesc::Block::checkMetadata() const {
               typeFitsConstraint(guardedLoc.type, guardedLoc.category));
       auto& loc = guardedLoc.location;
       switch (loc.tag()) {
-      case Location::Tag::Local: assertx(loc.localId() < m_func->numLocals());
-                                 break;
-      case Location::Tag::Stack: // Unchecked
-                                 break;
+        case LTag::Local:
+          assertx(loc.localId() < m_func->numLocals());
+          break;
+        case LTag::Stack:
+          break;
       }
     }
   };
@@ -1076,16 +1073,6 @@ bool check(const RegionDesc& region, std::string& error) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-std::string show(RegionDesc::Location l) {
-  switch (l.tag()) {
-  case RegionDesc::Location::Tag::Local:
-    return folly::format("Local{{{}}}", l.localId()).str();
-  case RegionDesc::Location::Tag::Stack:
-    return folly::format("Stack{{{}}}", l.offsetFromFP().offset).str();
-  }
-  not_reached();
-}
 
 std::string show(RegionDesc::TypedLocation ta) {
   return folly::format(

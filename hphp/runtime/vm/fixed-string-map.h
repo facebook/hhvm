@@ -32,8 +32,8 @@ namespace HPHP {
 
 template<class V, bool case_sensitive, class ExtraType = int32_t>
 struct FixedStringMap {
-  explicit FixedStringMap(int num) : m_table(0) { init(num); }
-  FixedStringMap() : m_mask(0), m_table(0) {}
+  explicit FixedStringMap(int num) : m_table(nullptr) { init(num); }
+  FixedStringMap() : m_mask(0), m_table(nullptr) {}
   ~FixedStringMap() { clear(); }
 
   FixedStringMap(const FixedStringMap&) = delete;

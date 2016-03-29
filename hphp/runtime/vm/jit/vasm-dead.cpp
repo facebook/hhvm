@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -71,6 +72,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cvttsd2siq:
     case Vinstr::decl:
     case Vinstr::decq:
+    case Vinstr::defvmret:
     case Vinstr::defvmsp:
     case Vinstr::divint:
     case Vinstr::divsd:
@@ -89,11 +91,13 @@ bool effectful(Vinstr& inst) {
     case Vinstr::ldimmqs:
     case Vinstr::lea:
     case Vinstr::leap:
+    case Vinstr::lead:
     case Vinstr::load:
     case Vinstr::loadups:
     case Vinstr::loadb:
     case Vinstr::loadl:
     case Vinstr::loadqp:
+    case Vinstr::loadqd:
     case Vinstr::loadsd:
     case Vinstr::loadw:
     case Vinstr::loadtqb:
@@ -238,6 +242,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::stubtophp:
     case Vinstr::loadstubret:
     case Vinstr::syncpoint:
+    case Vinstr::syncvmret:
     case Vinstr::syncvmsp:
     case Vinstr::tailcallphp:
     case Vinstr::tailcallstub:
@@ -268,6 +273,7 @@ bool effectful(Vinstr& inst) {
 // or not a useful block executes, and useless branches can be forwarded to
 // the nearest useful post-dominator.
 void removeDeadCode(Vunit& unit) {
+  Timer timer(Timer::vasm_dce);
   auto blocks = sortBlocks(unit);
   jit::vector<LiveSet> livein(unit.blocks.size());
   LiveSet live(unit.next_vr);

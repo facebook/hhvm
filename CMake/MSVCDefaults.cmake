@@ -16,16 +16,25 @@ if (EXISTS "${HPHP_HOME}/deps/")
 
   # Disable a few extensions that we can't currently build because we can't
   # compile the library they depend on.
+  set(ENABLE_ASYNC_MYSQL OFF CACHE BOOL "")
+  set(ENABLE_MCROUTER OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_MEMCACHE OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_MEMCACHED OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_MYSQL OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_MYSQLI OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_PDO_MYSQL OFF CACHE BOOL "")
+  set(MYSQL_UNIX_SOCK_ADDR "/dev/null" CACHE PATH "")
 
-  # We need to link against the static library version of boost targetting the static
+  # We need to link against the static library version of boost targeting the static
   # runtime, so set the vars required by default.
+  set(BOOST_INCLUDEDIR "${incRoot}" CACHE PATH "")
+  set(BOOST_LIBRARYDIR "${libRoot}/lib64-msvc-14.0" CACHE PATH "")
   set(Boost_USE_STATIC_LIBS ON CACHE BOOL "")
   set(Boost_USE_STATIC_RUNTIME ON CACHE BOOL "")
+
+  # GPerf is needed for proxygen, so a precompiled version of it is included
+  # in the deps package.
+  set(GPERF_EXECUTABLE "${depRoot}/bin/gperf.exe" CACHE STRING "")
 
   # And now the actual libs. Please keep them alphabetical, and keep the lib
   # values with any system libs first, then the debug version, and finally the

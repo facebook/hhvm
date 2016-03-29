@@ -29,6 +29,7 @@
 #include <signal.h>
 
 #include <folly/String.h>
+#include <folly/portability/Environment.h>
 
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"
@@ -53,8 +54,6 @@
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
 #endif
-
-extern char **environ;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

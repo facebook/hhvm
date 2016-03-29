@@ -5,6 +5,8 @@ HHVM_DEFINE_EXTENSION("apc" REQUIRED
   HEADERS
     ext_apc.h
     snapshot.h
+    snapshot-builder.h
+    snapshot-loader.h
   SYSTEMLIB
     ext_apc.php
 )

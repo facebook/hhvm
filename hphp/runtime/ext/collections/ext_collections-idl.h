@@ -74,7 +74,7 @@ using ExtCollectionObjectData = ExtObjectDataFlags<
   ObjectData::NoDestructor |
   ObjectData::HasClone>;
 
-ATTRIBUTE_NORETURN void throwOOB(int64_t key);
+[[noreturn]] void throwOOB(int64_t key);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseVector: encapsulates functionality that is common to both
@@ -449,7 +449,7 @@ struct BaseVector : ExtCollectionObjectData {
    */
   void mutateImpl();
 
-  ATTRIBUTE_NORETURN static void throwBadKeyType();
+  [[noreturn]] static void throwBadKeyType();
 
   // Fields
 #ifndef USE_LOWPTR
@@ -558,7 +558,7 @@ struct c_Vector : BaseVector {
   Object t_immutable();
   String t___tostring();
 
-  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
+  [[noreturn]] static void throwOOB(int64_t key);
 
   void sort(int sort_flags, bool ascending);
   bool usort(const Variant& cmp_function);
@@ -806,8 +806,8 @@ struct HashCollection : ExtCollectionObjectData {
     }
   }
 
-  ATTRIBUTE_NORETURN void throwTooLarge();
-  ATTRIBUTE_NORETURN void throwReserveTooLarge();
+  [[noreturn]] void throwTooLarge();
+  [[noreturn]] void throwReserveTooLarge();
   int32_t* warnUnbalanced(size_t n, int32_t* ei) const;
 
   /**
@@ -1236,8 +1236,8 @@ struct HashCollection : ExtCollectionObjectData {
  */
 struct BaseMap : HashCollection {
  protected:
-  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
-  ATTRIBUTE_NORETURN static void throwOOB(StringData* key);
+  [[noreturn]] static void throwOOB(int64_t key);
+  [[noreturn]] static void throwOOB(StringData* key);
 
  public:
   TypedValue* at(int64_t key) const;
@@ -1347,7 +1347,7 @@ struct BaseMap : HashCollection {
   ~BaseMap();
 
  public:
-  ATTRIBUTE_NORETURN static void throwBadKeyType();
+  [[noreturn]] static void throwBadKeyType();
 
  private:
   friend void collections::deepCopy(TypedValue*);
@@ -1659,9 +1659,9 @@ struct BaseSet : HashCollection {
   static Clone(ObjectData* obj);
 
   // Static methods
-  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
-  ATTRIBUTE_NORETURN static void throwOOB(StringData* key);
-  ATTRIBUTE_NORETURN static void throwNoMutableIndexAccess();
+  [[noreturn]] static void throwOOB(int64_t key);
+  [[noreturn]] static void throwOOB(StringData* key);
+  [[noreturn]] static void throwNoMutableIndexAccess();
 
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
@@ -1805,7 +1805,7 @@ struct BaseSet : HashCollection {
  private:
   // Helpers
 
-  ATTRIBUTE_NORETURN static void throwBadValueType();
+  [[noreturn]] static void throwBadValueType();
 
  private:
 

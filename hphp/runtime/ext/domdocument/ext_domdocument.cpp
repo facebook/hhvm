@@ -500,7 +500,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       if (ret > 0) {
         retval = String((char *)xmlOutputBufferGetContent(buf), ret, CopyString);
       } else {
-        retval.setNull();
+        retval = empty_string();
       }
     }
   }

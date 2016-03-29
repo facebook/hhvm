@@ -686,9 +686,9 @@ class SplFileObject extends SplFileInfo
     do {
       $line = fgets($this->rsrc, $this->maxLineLen);
     } while($this->getFlags() & (self::SKIP_EMPTY | self::DROP_NEW_LINE) &&
-            $line !== false && rtrim($line) === "");
+            $line !== false && rtrim($line, "\r\n") === "");
     if ($line !== false && $this->flags & self::DROP_NEW_LINE) {
-      $line = rtrim($line);
+      $line = rtrim($line, "\r\n");
     }
 
     return $line;

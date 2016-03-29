@@ -94,11 +94,18 @@ void freeLocalsAndThis(IRGS& env) {
 }
 
 void normalReturn(IRGS& env, SSATmp* retval) {
-  gen(env, StRetVal,
-      StRetValData { !curFunc(env)->isAsyncFunction() || resumed(env) },
-      fp(env), retval);
-  auto const data = RetCtrlData { offsetToReturnSlot(env), false };
-  gen(env, RetCtrl, data, sp(env), fp(env));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    gen(env, DbgTrashRetVal, fp(env));
+  }
+  // If we're on the eager side of an async function, we have to zero-out the
+  // TV aux of the return value, because it might be used as a flag if we were
+  // called with FCallAwait.
+  auto const aux = curFunc(env)->isAsyncFunction() && !resumed(env)
+    ? folly::make_optional(AuxUnion{0})
+    : folly::none;
+
+  auto const data = RetCtrlData { offsetToReturnSlot(env), false, aux };
+  gen(env, RetCtrl, data, sp(env), fp(env), retval);
 }
 
 void emitAsyncRetSlow(IRGS& env, SSATmp* retVal) {
@@ -108,19 +115,23 @@ void emitAsyncRetSlow(IRGS& env, SSATmp* retVal) {
   gen(env, StAsyncArResult, fp(env), retVal);
   gen(env, ABCUnblock, parentChain);
 
+  // We don't really pass a return value via the stack, but enterTCHelper is
+  // going to want to store the rret() regs to the top of the stack, so we need
+  // the stack depth to be one deeper here.  The resumeAsyncFunc() entry point
+  // in ExecutionContext doesn't care what we put here, but also won't try to
+  // decref it, so we use a null.  (This push doesn't actually get the value
+  // into memory---we're going to put it in the return value for AsyncRetCtrl
+  // and let enterTCHelper store it to memory.)
+  auto const ret = cns(env, TInitNull);
+  push(env, ret);
+
   // Must load this before FreeActRec, which adjusts fp(env).
   auto const resumableObj = gen(env, LdResumableArObj, fp(env));
   gen(env, FreeActRec, fp(env));
   decRef(env, resumableObj);
 
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(
-    env,
-    AsyncRetCtrl,
-    RetCtrlData { spAdjust, false },
-    sp(env),
-    fp(env)
-  );
+  gen(env, AsyncRetCtrl, RetCtrlData { bcSPOffset(env), false },
+      sp(env), fp(env), ret);
 }
 
 void asyncRetSurpriseCheck(IRGS& env, SSATmp* retVal) {
@@ -169,13 +180,9 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
         gen(env, JmpNZero, taken, test);
       },
       [&] {
-        if (RuntimeOption::EvalHHIRGenerateAsserts) {
-          gen(env, StTVAux, fp(env), cns(env, 0xbad));
-        }
         return gen(env, CreateSSWH, retVal);
       },
       [&] {
-        gen(env, StTVAux, fp(env), cns(env, 0));
         return retVal;
       });
     normalReturn(env, wrapped);
@@ -187,16 +194,10 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
   // when debugging the fast return path.
   asyncRetSurpriseCheck(env, retVal);
 
-  // Unblock parents and possibly take fast path to resume parent. SPOffset -1
-  // is for retVal, which will be pushed on stack.
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{-1});
-  gen(env,
-      AsyncRetFast,
-      RetCtrlData { spAdjust, false },
-      sp(env),
-      fp(env),
-      retVal
-  );
+  // Unblock parents and possibly take fast path to resume parent.
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+  gen(env, AsyncRetFast, RetCtrlData { spAdjust, false },
+      sp(env), fp(env), retVal);
 }
 
 void generatorReturn(IRGS& env, SSATmp* retval) {
@@ -215,15 +216,27 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
       GeneratorState { BaseGenerator::State::Done },
       fp(env));
 
-  // Push return value of next()/send()/raise().
-  push(env, cns(env, TInitNull));
+  // Push the return value of next()/send()/raise().  Generators pass return
+  // values both through the eval stack and through the return registers, so we
+  // need to get it in both places.
+  //
+  // The reason we do this for now is that generator code in the TC may return
+  // to normal TC exits (enterTCHelper), so it should support returning in
+  // registers, and also it can (normally) return to a ContEnter translation,
+  // which isn't yet prepared for getting the yielded value out of the
+  // registers instead of the eval stack.
+  //
+  // So for now we just put it in both places.
+  auto const retVal = cns(env, TInitNull);
+  push(env, retVal);
 
   gen(
     env,
     RetCtrl,
-    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), true },
+    RetCtrlData { bcSPOffset(env), true },
     sp(env),
-    fp(env)
+    fp(env),
+    retVal
   );
 }
 
@@ -264,9 +277,9 @@ void implRet(IRGS& env) {
 
 }
 
-IRSPOffset offsetToReturnSlot(IRGS& env) {
+IRSPRelOffset offsetToReturnSlot(IRGS& env) {
   auto const retOff = FPRelOffset { AROFF(m_r) / int32_t{sizeof(Cell)} };
-  return retOff.to<IRSPOffset>(env.irb->fs().spOffset());
+  return retOff.to<IRSPRelOffset>(env.irb->fs().irSPOff());
 }
 
 void emitRetC(IRGS& env) {

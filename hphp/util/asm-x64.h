@@ -256,7 +256,7 @@ struct DispRIP {
     return DispRIP(disp - x);
   }
 
-  intptr_t disp; // TODO #4613274: should be int32_t
+  intptr_t disp;
 };
 
 // *(reg + x)

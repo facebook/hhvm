@@ -17,38 +17,41 @@
 #ifndef incl_HPHP_JIT_VASM_EMIT_H_
 #define incl_HPHP_JIT_VASM_EMIT_H_
 
+#include "hphp/runtime/vm/jit/code-cache.h"
+
 namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
 
 struct Abi;
 struct AsmInfo;
 struct CGMeta;
+struct IRUnit;
 struct Vtext;
 struct Vunit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Optimize, lower for x64, register allocator, and perform more optimizations
- * on `unit'.
+ * Optimize, lower for the specified architecture, register allocate, and
+ * perform more optimizations on the given unit.
  */
-void optimizeX64(Vunit& unit, const Abi&);
+void optimizeX64(Vunit&, const Abi&);
+void optimizeARM(Vunit&, const Abi&);
+void optimizePPC64(Vunit&, const Abi&);
 
 /*
- * Emit code for the given unit using the given code areas. The unit should
- * have already been through optimizeX64().
+ * Emit code for the given unit using the given code areas. The unit must have
+ * already been through the corresponding optimizeArch() function.
  */
 void emitX64(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emitARM(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emitPPC64(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
 
 /*
- * Optimize, register allocate, and emit ARM code for the given unit.
+ * Emit code for the given Vunit, which must already be register-allocated, to
+ * the given CodeBlocks.
  */
-void finishARM(Vunit&, Vtext&, CGMeta&, const Abi&, AsmInfo*);
-
-/*
- * Optimize, register allocate, and emit PPC64 code for the given unit.
- */
-void finishPPC64(Vunit&, Vtext&, CGMeta&, const Abi&, AsmInfo*);
+void emitVunit(Vunit& vunit, const IRUnit& unit,
+               CodeCache::View code, CGMeta& fixups);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

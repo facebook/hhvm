@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
 namespace HPHP { namespace jit {
@@ -93,14 +94,11 @@ struct IRLS {
 };
 
 /*
- * Generate machine code.
- *
- * Lower HHIR to vasm, optionally lower vasm to LLIR, run optimization passes,
- * emit code into main/cold/frozen sections, allocate RDS and global data, and
- * add fixup metadata.
+ * Lower the given HHIR unit to a Vunit, then optimize, regalloc, and return
+ * the Vunit. Returns nullptr on failure.
  */
-void genCode(const IRUnit& unit, CodeCache::View code, CGMeta& fixups,
-             CodeKind kind = CodeKind::Trace);
+std::unique_ptr<Vunit> lowerUnit(const IRUnit&, CodeKind = CodeKind::Trace)
+  noexcept;
 
 ///////////////////////////////////////////////////////////////////////////////
 

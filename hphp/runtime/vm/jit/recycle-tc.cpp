@@ -194,7 +194,6 @@ void recordJump(TCA toSmash, SrcRec* sr) {
 
 void reclaimTranslation(TransLoc loc) {
   BlockingLeaseHolder writer(Translator::WriteLease());
-  if (!writer) return;
 
   ITRACE(1, "Reclaiming translation M[{}, {}] C[{}, {}] F[{}, {}]\n",
          loc.mainStart(), loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
@@ -251,7 +250,6 @@ void reclaimTranslation(TransLoc loc) {
 
 void reclaimFunction(const Func* func) {
   BlockingLeaseHolder writer(Translator::WriteLease());
-  if (!writer) return;
 
   auto it = s_funcTCData.find(func);
   if (it == s_funcTCData.end()) return;
@@ -289,7 +287,6 @@ void reclaimFunction(const Func* func) {
   // should be unreachable.
   Treadmill::enqueue([fname, fid, movedData] {
     BlockingLeaseHolder writer(Translator::WriteLease());
-    if (!writer) return;
 
     ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
     Trace::Indent _i;

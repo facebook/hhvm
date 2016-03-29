@@ -132,21 +132,7 @@ enum MInstrAttr {
   MIA_define       = 0x02,
   MIA_reffy        = 0x04,
   MIA_unset        = 0x08,
-  MIA_new          = 0x10,
-  MIA_final_get    = 0x20,
   MIA_base         = MIA_warn | MIA_define,
-  MIA_intermediate = MIA_warn | MIA_define | MIA_reffy | MIA_unset,
-  MIA_intermediate_prop = MIA_warn | MIA_define | MIA_unset,
-  MIA_final        = MIA_new | MIA_final_get,
-
-  // Some warnings may conditionally be built for Zend compatibility,
-  // but are off by default.
-  MIA_more_warn =
-#ifdef HHVM_MORE_WARNINGS
-    MIA_warn
-#else
-    MIA_none
-#endif
 };
 
 std::string show(MInstrAttr);
@@ -333,6 +319,20 @@ inline MInstrAttr mOpFlagsToAttr(MOpFlags f) {
     case MOpFlags::Unset:       return MIA_unset;
     case MOpFlags::DefineReffy: return MInstrAttr(MIA_reffy | MIA_define);
     case MOpFlags::WarnDefine:  return MInstrAttr(MIA_warn | MIA_define);
+  }
+  always_assert(false);
+}
+
+inline MOpFlags dropReffy(MOpFlags f) {
+  switch (f) {
+    case MOpFlags::None:
+    case MOpFlags::Warn:
+    case MOpFlags::Define:
+    case MOpFlags::Unset:
+    case MOpFlags::WarnDefine:
+      return f;
+    case MOpFlags::DefineReffy:
+      return MOpFlags::Define;
   }
   always_assert(false);
 }

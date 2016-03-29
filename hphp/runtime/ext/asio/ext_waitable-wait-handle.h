@@ -72,7 +72,7 @@ struct c_WaitableWaitHandle : c_WaitHandle {
   void detectCycle(c_WaitableWaitHandle* child) const;
 
  private:
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void throwCycleException(c_WaitableWaitHandle* child) const;
 };
 

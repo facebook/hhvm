@@ -173,11 +173,13 @@ struct Vgen {
   void emit(const jmpi& i);
   void emit(const lea& i);
   void emit(const leap& i) { a.lea(i.s, i.d); }
+  void emit(const lead& i) { a.lea(rip[(intptr_t)i.s.get()], i.d); }
   void emit(const loadups& i) { a.movups(i.s, i.d); }
   void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
   void emit(const loadb& i) { a.loadb(i.s, i.d); }
   void emit(const loadl& i) { a.loadl(i.s, i.d); }
   void emit(const loadqp& i) { a.loadq(i.s, i.d); }
+  void emit(const loadqd& i) { a.loadq(rip[(intptr_t)i.s.get()], i.d); }
   void emit(const loadsd& i) { a.movsd(i.s, i.d); }
   void emit(const loadzbl& i) { a.loadzbl(i.s, i.d); }
   void emit(const loadzbq& i) { a.loadzbl(i.s, Reg32(i.d)); }
@@ -389,7 +391,7 @@ void Vgen::emit_simd_imm(int64_t val, Vreg d) {
   if (val == 0) {
     a.pxor(d, d); // does not modify flags
   } else {
-    auto addr = mcg->allocLiteral(val, env.meta);
+    auto addr = alloc_literal(env, val);
     a.movsd(rip[(intptr_t)addr], d);
   }
 }
@@ -483,7 +485,7 @@ void Vgen::emit(const call& i) {
     // assumes the data section is near the current code section.  Since
     // this sequence is directly in-line, rip-relative like this is
     // more compact than loading a 64-bit immediate.
-    auto addr = mcg->allocLiteral((uint64_t)i.target, env.meta);
+    auto addr = alloc_literal(env, (uint64_t)i.target);
     a.call(rip[(intptr_t)addr]);
   }
   if (i.watch) {
@@ -670,7 +672,7 @@ void Vgen::emit(const jmpi& i) {
     a.jmp(i.target);
   } else {
     // can't do a near jmp - use rip-relative addressing
-    auto addr = mcg->allocLiteral((uint64_t)i.target, env.meta);
+    auto addr = alloc_literal(env, (uint64_t)i.target);
     a.jmp(rip[(intptr_t)addr]);
   }
 }
@@ -857,6 +859,8 @@ void lower_vcallarray(Vunit& unit, Vlabel b) {
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
 void lowerForX64(Vunit& unit) {
+  Timer timer(Timer::vasm_lower);
+
   // This pass relies on having no critical edges in the unit.
   splitCriticalEdges(unit);
 
@@ -911,24 +915,20 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   if (!unit.constToReg.empty()) {
     foldImms<x64::ImmFolder>(unit);
   }
-  {
-    Timer timer(Timer::vasm_copy);
-    optimizeCopies(unit, abi);
-  }
+
+  optimizeCopies(unit, abi);
+
   if (unit.needsRegAlloc()) {
-    Timer timer(Timer::vasm_xls);
     removeDeadCode(unit);
     allocateRegisters(unit, abi);
   }
   if (unit.blocks.size() > 1) {
-    Timer timer(Timer::vasm_jumps);
     optimizeJmps(unit);
   }
 }
 
 void emitX64(const Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
-  Timer timer(Timer::vasm_gen);
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }
 

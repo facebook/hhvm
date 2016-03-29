@@ -50,7 +50,7 @@ void NEVER_INLINE throw_invalid_property_name(const String& name);
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void throw_exception(const Object& e);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,15 +122,15 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 bool is_constructor_name(const char* func);
 void throw_instance_method_fatal(const char *name);
 
-ATTRIBUTE_NORETURN void throw_invalid_operation_exception(StringData*);
-ATTRIBUTE_NORETURN void throw_arithmetic_error(StringData*);
-ATTRIBUTE_NORETURN void throw_division_by_zero_error(StringData*);
-ATTRIBUTE_NORETURN void throw_iterator_not_valid();
-ATTRIBUTE_NORETURN void throw_collection_modified();
-ATTRIBUTE_NORETURN void throw_collection_property_exception();
-ATTRIBUTE_NORETURN void throw_collection_compare_exception();
-ATTRIBUTE_NORETURN void throw_param_is_not_container();
-ATTRIBUTE_NORETURN
+[[noreturn]] void throw_invalid_operation_exception(StringData*);
+[[noreturn]] void throw_arithmetic_error(StringData*);
+[[noreturn]] void throw_division_by_zero_error(StringData*);
+[[noreturn]] void throw_iterator_not_valid();
+[[noreturn]] void throw_collection_modified();
+[[noreturn]] void throw_collection_property_exception();
+[[noreturn]] void throw_collection_compare_exception();
+[[noreturn]] void throw_param_is_not_container();
+[[noreturn]]
 void throw_cannot_modify_immutable_object(const char* className);
 void check_collection_compare(const ObjectData* obj);
 void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2);
@@ -140,14 +140,14 @@ Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
 Object init_object(const String& s, const Array &params, ObjectData* o);
 
-ATTRIBUTE_NORETURN void throw_object(const Object& e);
+[[noreturn]] void throw_object(const Object& e);
 #if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8) || __GNUC_PATCHLEVEL__ >= 2)
 // gcc-4.8.1 has a bug that causes incorrect code if we
 // define this function.
-ATTRIBUTE_NORETURN void throw_object(Object&& e);
+[[noreturn]] void throw_object(Object&& e);
 #endif
 
-ATTRIBUTE_NORETURN inline
+[[noreturn]] inline
 void throw_object(const String& s, const Array& params, bool init = true) {
   throw_object(create_object(s, params, init));
 }

@@ -229,7 +229,7 @@ void emitNewPackedArray(IRGS& env, int32_t numArgs) {
       env,
       InitPackedArrayLoop,
       InitPackedArrayLoopData {
-        offsetFromIRSP(env, BCSPOffset{0}),
+        bcSPOffset(env),
         static_cast<uint32_t>(numArgs)
       },
       array,
@@ -257,7 +257,7 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   auto const ids = immVec.vec32();
 
   NewStructData extra;
-  extra.offset  = offsetFromIRSP(env, BCSPOffset{0});
+  extra.offset  = bcSPOffset(env);
   extra.numKeys = numArgs;
   extra.keys    = new (env.unit.arena()) StringData*[numArgs];
   for (auto i = size_t{0}; i < numArgs; ++i) {
@@ -271,7 +271,7 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
 void emitAddElemC(IRGS& env) {
   // This is just to peek at the type; it'll be consumed for real down below and
   // we don't want to constrain it if we're just going to InterpOne.
-  auto const kt = topC(env, BCSPOffset{1}, DataTypeGeneric)->type();
+  auto const kt = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
   Opcode op;
   if (kt <= TInt) {
     op = AddElemIntKey;
@@ -293,7 +293,7 @@ void emitAddElemC(IRGS& env) {
 }
 
 void emitAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{1})->isA(TArr)) {
+  if (!topC(env, BCSPRelOffset{1})->isA(TArr)) {
     return interpOne(env, TArr, 2);
   }
 
@@ -313,10 +313,10 @@ void emitColFromArray(IRGS& env, int type) {
 }
 
 void emitMapAddElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{2})->isA(TObj)) {
+  if (!topC(env, BCSPRelOffset{2})->isA(TObj)) {
     return interpOne(env, TObj, 3);
   }
-  if (!topC(env, BCSPOffset{1}, DataTypeGeneric)->type().
+  if (!topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type().
       subtypeOfAny(TInt, TStr)) {
     interpOne(env, TObj, 3);
     return;
@@ -330,7 +330,7 @@ void emitMapAddElemC(IRGS& env) {
 }
 
 void emitColAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{1})->isA(TObj)) {
+  if (!topC(env, BCSPRelOffset{1})->isA(TObj)) {
     return interpOne(env, TObj, 2);
   }
 

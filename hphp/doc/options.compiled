@@ -171,7 +171,6 @@ flood error logs.
     GracefulShutdownWait = 0   # in seconds
     HarshShutdown = true
     EvilShutdown = true
-    DanglingWait = 0
 
     # SSL options
     EnableSSL = false
@@ -185,10 +184,6 @@ Graceful shutdown will try admin /stop command and it waits for number of
 seconds specified by GracefulShutdownWait. Harsh shutdown looks for pid file
 and try to kill that process. Evil shutdown kills anything listening on the
 server port it's trying to grab.
-
-- DanglingWait
-
-How long to wait for dangling server to respond.
 
     # HTTP settings
     GzipCompressionLevel = 3
@@ -413,7 +408,7 @@ to block access to certain files (ex. .htaccess.)
 
   Satellites {
     * {
-      Type = RPCServer | InternalPageServer | DanglingPageServer
+      Type = RPCServer | InternalPageServer
 
       Port = 0  # disabled
       ThreadCount = 5
@@ -434,9 +429,9 @@ to block access to certain files (ex. .htaccess.)
     }
   }
 
-- RPCServer, DanglingPageServer
+- RPCServer
 
-Please refer to their documentations for more details.
+Please refer to its documentation for more details.
 
 - Internal Page Server
 

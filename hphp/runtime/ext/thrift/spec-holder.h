@@ -32,7 +32,7 @@ enum TError {
   ERR_BAD_VERSION = 4
 };
 
-ATTRIBUTE_NORETURN void thrift_error(const String& what, TError why);
+[[noreturn]] void thrift_error(const String& what, TError why);
 
 Array get_tspec(const Class* cls);
 

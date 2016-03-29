@@ -35,10 +35,10 @@ Block* create_catch_block(IRGS& env) {
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
   auto const& exnState = env.irb->exceptionStackState();
-  env.irb->fs().setSyncedSpLevel(exnState.syncedSpLevel);
+  env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
 
   gen(env, BeginCatch);
-  gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+  gen(env, EndCatch, IRSPRelOffsetData { bcSPOffset(env) },
       fp(env), sp(env));
   return catchBlock;
 }
@@ -141,7 +141,7 @@ void prepareEntry(IRGS& env) {
    * C++ function that checks the state of everything.
    */
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const data = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
+    auto const data = IRSPRelOffsetData { bcSPOffset(env) };
     gen(env, DbgTraceCall, data, fp(env), sp(env));
   }
 
@@ -171,7 +171,7 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   auto const data = ReqBindJmpData {
     nextSk,
     invSPOff(env),
-    offsetFromIRSP(env, BCSPOffset{0}),
+    bcSPOffset(env),
     TransFlags{}
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));
@@ -183,7 +183,7 @@ void sealUnit(IRGS& env) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Type publicTopType(const IRGS& env, BCSPOffset idx) {
+Type publicTopType(const IRGS& env, BCSPRelOffset idx) {
   // It's logically const, because we're using DataTypeGeneric.
   return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
@@ -191,46 +191,23 @@ Type publicTopType(const IRGS& env, BCSPOffset idx) {
 Type predictedType(const IRGS& env, const Location& loc) {
   auto& fs = env.irb->fs();
 
-  switch (loc.space) {
-    case Location::Stack:
-      return fs.stack(offsetFromIRSP(env, loc.bcRelOffset)).predictedType;
-
-    case Location::Local:
-      return fs.local(loc.offset).predictedType;
-
-    default:
-      // We don't have predictions for other locations.
-      return provenType(env, loc);
+  switch (loc.tag()) {
+    case LTag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.stackIdx())).predictedType;
+    case LTag::Local:
+      return fs.local(loc.localId()).predictedType;
   }
   not_reached();
 }
 
 Type provenType(const IRGS& env, const Location& loc) {
-  switch (loc.space) {
-    case Location::Stack:
-      return env.irb->fs().stack(offsetFromIRSP(env, loc.bcRelOffset)).type;
+  auto& fs = env.irb->fs();
 
-    case Location::Local:
-      return env.irb->fs().local(loc.offset).type;
-
-    case Location::Litstr:
-      return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
-
-    case Location::Litint:
-      return Type::cns(loc.offset);
-
-    case Location::This:
-      // Don't specialize $this for cloned closures that may have been
-      // re-bound.
-      if (curFunc(env)->hasForeignThis()) return TObj;
-      if (auto const cls = curFunc(env)->cls()) {
-        return Type::SubObj(cls);
-      }
-      return TObj;
-
-    case Location::Iter:
-    case Location::Invalid:
-      break;
+  switch (loc.tag()) {
+    case LTag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.stackIdx())).type;
+    case LTag::Local:
+      return fs.local(loc.localId()).type;
   }
   not_reached();
 }

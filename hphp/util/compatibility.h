@@ -17,6 +17,7 @@
 #define incl_HPHP_COMPATIBILITY_H_
 
 #include <cstdint>
+#include <string>
 #include <time.h>
 #include <unistd.h>
 
@@ -52,10 +53,10 @@ int64_t gettime_diff_us(const timespec &start, const timespec &end);
  * Drop the cached pages associated with the file from the file system
  * cache, if supported on our build target.
  *
- * Returns: -1 on error, setting errno according to posix_fadvise
- * values.
+ * Returns: -1 on error.
  */
 int fadvise_dontneed(int fd, off_t len);
+int advise_out(const std::string& fileName);
 
 #if defined(__CYGWIN__) || defined(_MSC_VER)
 

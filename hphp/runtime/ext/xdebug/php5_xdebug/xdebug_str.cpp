@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -33,7 +33,7 @@ char* xdebug_sprintf(const char* fmt, ...) {
   auto const orig_locale = setlocale(LC_ALL, nullptr);
   setlocale(LC_ALL, "C");
   SCOPE_EXIT { setlocale(LC_ALL, orig_locale); };
-  auto new_str = (char*)xdmalloc(size);
+  auto new_str = (char*)HPHP::req::malloc_noptrs(size);
   for (;;) {
     va_start(args, fmt);
     auto const n = vsnprintf(new_str, size, fmt, args);
@@ -47,7 +47,7 @@ char* xdebug_sprintf(const char* fmt, ...) {
     } else {
       size = n + 1;
     }
-    new_str = (char*)xdrealloc(new_str, size);
+    new_str = (char*)HPHP::req::realloc_noptrs(new_str, size);
   }
   return new_str;
 }
@@ -58,7 +58,7 @@ char* xdstrdup(const char* str) {
   }
 
   auto const size = strlen(str) + 1;
-  auto const dup = (char*)xdmalloc(size);
+  auto const dup = (char*)HPHP::req::malloc_noptrs(size);
   memcpy(dup, str, size);
   return dup;
 }

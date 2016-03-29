@@ -72,7 +72,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
   *use_copy = 1;
 }
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void zend_error_noreturn(int type, const char *format, ...) {
   va_list ap;
   va_start(ap, format);

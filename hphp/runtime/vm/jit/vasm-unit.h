@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-data.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
@@ -172,6 +173,24 @@ struct Vunit {
   Vreg makeConst(Vconst);
   template<typename T> Vreg makeConst(T v) { return makeConst(Vconst{v}); }
 
+  /*
+   * Allocate a block of data to hold n objects of type T. Any instructions
+   * with VdataPtr members that point inside the buffer returned by allocData()
+   * will automatically be fixed up during a relocation pass immediately before
+   * final code emission.
+   */
+  template<typename T>
+  T* allocData(size_t n = 1) {
+    auto const size = sizeof(T) * n;
+    dataBlocks.emplace_back();
+
+    auto& block = dataBlocks.back();
+    block.data.reset(new uint8_t[size]);
+    block.size = size;
+    block.align = alignof(T);
+    return (T*)block.data.get();
+  }
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -191,6 +210,7 @@ struct Vunit {
   jit::hash_map<size_t,Vconst> regToConst;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
+  jit::vector<VdataBlock> dataBlocks;
   bool padding{false};
   TransKind transKind{TransKind::Invalid};
 };

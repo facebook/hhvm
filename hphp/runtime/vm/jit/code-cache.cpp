@@ -16,8 +16,10 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 
-#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/translator.h"
+
+#include "hphp/runtime/base/program-functions.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
@@ -214,6 +216,8 @@ void CodeCache::unprotect() {
 }
 
 CodeCache::View CodeCache::view(bool hot, TransKind kind) {
+  assertx(Translator::WriteLease().amOwner());
+
   // Profile takes precedence over hot.
   if (kind == TransKind::Profile || kind == TransKind::Proflogue) {
     return View{m_prof, m_frozen, m_frozen, m_data};

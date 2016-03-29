@@ -4,6 +4,8 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/lock.h"
 
+#include <folly/portability/Time.h>
+
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // PooledCurlHandle

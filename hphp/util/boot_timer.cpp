@@ -18,6 +18,7 @@
 #include <cassert>
 
 #include "hphp/util/logger.h"
+#include "hphp/util/process.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -26,70 +27,77 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TimeUsage TimeUsage::sinceEpoch() {
-  return TimeUsage(
-    std::chrono::duration_cast<Unit>(
+ResourceUsage ResourceUsage::sinceEpoch() {
+  return ResourceUsage(
+    std::chrono::duration_cast<TimeUnit>(
       std::chrono::steady_clock::now().time_since_epoch()),
-    std::chrono::duration_cast<Unit>(
+    std::chrono::duration_cast<TimeUnit>(
       std::chrono::microseconds(
-        HPHP::Timer::GetRusageMicros(Timer::TotalCPU, Timer::Self))));
+        HPHP::Timer::GetRusageMicros(Timer::TotalCPU, Timer::Self))),
+    Process::GetProcessRSS((pid_t)Process::GetProcessId()));
 }
 
-std::string TimeUsage::toString() const {
+std::string ResourceUsage::toString() const {
   return folly::sformat(
-    "{}ms wall, {}ms cpu",
+    "{}ms wall, {}ms cpu, {} MB RSS",
     std::chrono::duration_cast<std::chrono::milliseconds>(wall()).count(),
-    std::chrono::duration_cast<std::chrono::milliseconds>(cpu()).count());
+    std::chrono::duration_cast<std::chrono::milliseconds>(cpu()).count(),
+    rssMb());
 }
 
-void TimeUsage::operator=(const TimeUsage& rhs) {
+void ResourceUsage::operator=(const ResourceUsage& rhs) {
   m_wall = rhs.m_wall;
   m_cpu = rhs.m_cpu;
+  m_rssMb = rhs.m_rssMb;
 }
 
-TimeUsage TimeUsage::operator-(const TimeUsage& rhs) const {
-  return TimeUsage(m_wall - rhs.m_wall, m_cpu - rhs.m_cpu);
+ResourceUsage ResourceUsage::operator-(const ResourceUsage& rhs) const {
+  return ResourceUsage(m_wall - rhs.m_wall,
+                       m_cpu - rhs.m_cpu,
+                       m_rssMb - rhs.m_rssMb);
 }
 
-TimeUsage TimeUsage::operator+(const TimeUsage& rhs) const {
-  return TimeUsage(m_wall + rhs.m_wall, m_cpu + rhs.m_cpu);
+ResourceUsage ResourceUsage::operator+(const ResourceUsage& rhs) const {
+  return ResourceUsage(m_wall + rhs.m_wall,
+                       m_cpu + rhs.m_cpu,
+                       m_rssMb + rhs.m_rssMb);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct BootTimer::Impl {
-  Impl() : m_last(TimeUsage::sinceEpoch()) {
+struct BootStats::Impl {
+  Impl() : m_last(ResourceUsage::sinceEpoch()) {
   }
 
-  void add(const std::string& info, TimeUsage value);
+  void add(const std::string& info, ResourceUsage value);
   void dumpMarks();
-  TimeUsage computeDeltaFromLast();
+  ResourceUsage computeDeltaFromLast();
 
-  friend struct BootTimer;
+  friend struct BootStats;
 
 private:
   // Must hold when updating m_last
   std::mutex m_last_guard_;
-  TimeUsage m_last;
+  ResourceUsage m_last;
   std::mutex m_marks_guard_;
-  std::map<std::string, TimeUsage> m_marks;
+  std::map<std::string, ResourceUsage> m_marks;
 };
 
-void BootTimer::Impl::add(const std::string& info, TimeUsage value) {
+void BootStats::Impl::add(const std::string& info, ResourceUsage value) {
   std::lock_guard<std::mutex> lock(m_marks_guard_);
   m_marks[info] = m_marks[info] + value;
 }
 
-void BootTimer::Impl::dumpMarks() {
+void BootStats::Impl::dumpMarks() {
   for (const auto& it : m_marks) {
     Logger::Info(
-      folly::sformat("BootTimer: {} = {}", it.first, it.second.toString()));
+      folly::sformat("BootStats: {} = {}", it.first, it.second.toString()));
   }
 }
 
-TimeUsage BootTimer::Impl::computeDeltaFromLast() {
+ResourceUsage BootStats::Impl::computeDeltaFromLast() {
   std::lock_guard<std::mutex> lock(m_last_guard_);
-  auto now = TimeUsage::sinceEpoch();
+  auto now = ResourceUsage::sinceEpoch();
   auto ret = now - m_last;
   m_last = now;
   return ret;
@@ -97,41 +105,41 @@ TimeUsage BootTimer::Impl::computeDeltaFromLast() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BootTimer::Block::Block(const std::string& name)
-    : m_name(name), m_start(TimeUsage::sinceEpoch()) {
-  Logger::Info(folly::sformat("BootTimer: {}...", name));
+BootStats::Block::Block(const std::string& name)
+    : m_name(name), m_start(ResourceUsage::sinceEpoch()) {
+  Logger::Info(folly::sformat("BootStats: {}...", name));
 }
 
-BootTimer::Block::~Block() {
-  auto total = TimeUsage::sinceEpoch() - m_start;
+BootStats::Block::~Block() {
+  auto total = ResourceUsage::sinceEpoch() - m_start;
   Logger::Info(
     folly::sformat(
-      "BootTimer: {} block done, took {}", m_name, total.toString()));
-  BootTimer::add(m_name, total);
+      "BootStats: {} block done, took {}", m_name, total.toString()));
+  BootStats::add(m_name, total);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool BootTimer::s_started;
-TimeUsage BootTimer::s_start;
-std::unique_ptr<BootTimer::Impl> BootTimer::s_instance;
+bool BootStats::s_started;
+ResourceUsage BootStats::s_start;
+std::unique_ptr<BootStats::Impl> BootStats::s_instance;
 
-void BootTimer::start() {
-  BootTimer::s_started = true;
-  BootTimer::s_start = TimeUsage::sinceEpoch();
-  BootTimer::s_instance = folly::make_unique<BootTimer::Impl>();
+void BootStats::start() {
+  BootStats::s_started = true;
+  BootStats::s_start = ResourceUsage::sinceEpoch();
+  BootStats::s_instance = folly::make_unique<BootStats::Impl>();
 }
 
-void BootTimer::done() {
+void BootStats::done() {
   if (!s_started) return;
   s_started = false;
 
-  auto total = TimeUsage::sinceEpoch() - s_start;
+  auto total = ResourceUsage::sinceEpoch() - s_start;
   Logger::Info(
-    folly::sformat("BootTimer: all done, took {} total", total.toString()));
+    folly::sformat("BootStats: all done, took {} total", total.toString()));
 
-  BootTimer::s_instance->add("TOTAL", total);
-  BootTimer::s_instance->dumpMarks();
+  BootStats::s_instance->add("TOTAL", total);
+  BootStats::s_instance->dumpMarks();
 
   if (StructuredLog::enabled()) {
     std::lock_guard<std::mutex> lock(s_instance->m_marks_guard_);
@@ -141,20 +149,25 @@ void BootTimer::done() {
       cols[sample.first + " CPU"] = sample.second.cpu().count();
     }
     StructuredLog::log("hhvm_boot_timer", cols);
+    cols.clear();
+    for (auto sample : s_instance->m_marks) {
+      cols[sample.first] = sample.second.rssMb() << 20; // To bytes.
+    }
+    StructuredLog::log("hhvm_boot_memory", cols);
   }
 }
 
-void BootTimer::mark(const std::string& info) {
+void BootStats::mark(const std::string& info) {
   if (!s_started) return;
-  auto elapsed = BootTimer::s_instance->computeDeltaFromLast();
+  auto elapsed = BootStats::s_instance->computeDeltaFromLast();
   Logger::Info(
-    folly::sformat("BootTimer: {} done, took {}", info, elapsed.toString()));
-  BootTimer::s_instance->add(info, elapsed);
+    folly::sformat("BootStats: {} done, took {}", info, elapsed.toString()));
+  BootStats::s_instance->add(info, elapsed);
 }
 
-void BootTimer::add(const std::string& info, const TimeUsage value) {
+void BootStats::add(const std::string& info, const ResourceUsage value) {
   if (!s_started) return;
-  BootTimer::s_instance->add(info, value);
+  BootStats::s_instance->add(info, value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

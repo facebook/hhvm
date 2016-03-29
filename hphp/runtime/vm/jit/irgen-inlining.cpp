@@ -88,19 +88,20 @@ bool beginInlining(IRGS& env,
   // NB: the arguments were just popped from the VM stack above, so the VM
   // stack-pointer is conceptually pointing to the callee's ActRec at this
   // point.
-  IRSPOffset calleeAROff = offsetFromIRSP(env, BCSPOffset{0});
+  IRSPRelOffset calleeAROff = bcSPOffset(env);
 
   auto ctx = [&] {
     if (info.ctx || isFPushFunc(info.fpushOpc)) {
       return info.ctx;
     }
     constexpr int32_t adjust = offsetof(ActRec, m_this) / sizeof(Cell);
-    IRSPOffset ctxOff = calleeAROff + adjust;
-    return gen(env, LdStk, TCtx, IRSPOffsetData{ctxOff}, sp(env));
+    IRSPRelOffset ctxOff = calleeAROff + adjust;
+    return gen(env, LdStk, TCtx, IRSPRelOffsetData{ctxOff}, sp(env));
   }();
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto arFunc = gen(env, LdARFuncPtr, IRSPOffsetData{calleeAROff}, sp(env));
+    auto arFunc = gen(env, LdARFuncPtr,
+                      IRSPRelOffsetData{calleeAROff}, sp(env));
     gen(env, DbgAssertFunc, arFunc, cns(env, target));
   }
 
@@ -110,7 +111,7 @@ bool beginInlining(IRGS& env,
                      fpiFunc ? fpiFunc->fullName()->data() : "null",
                      target  ? target->fullName()->data()  : "null");
 
-  gen(env, BeginInlining, IRSPOffsetData{calleeAROff}, sp(env));
+  gen(env, BeginInlining, IRSPRelOffsetData{calleeAROff}, sp(env));
 
   DefInlineFPData data;
   data.target        = target;

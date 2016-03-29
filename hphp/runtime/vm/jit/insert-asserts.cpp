@@ -34,24 +34,20 @@ namespace {
  * If `definer' ends its block, it must have a fallthrough block, and `inst'
  * will be inserted at the beginning of that block, as long as the block has no
  * other predecessors.
- *
- * Returns: true if it inserted the intruction.
  */
-bool insertAfter(IRInstruction* definer, IRInstruction* inst) {
+void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assertx(!definer->isTerminal());
   if (definer->isControlFlow()) {
     assertx(definer->next());
     if (definer->next()->numPreds() == 1) {
       definer->next()->prepend(inst);
-      return true;
     }
-    return false;
+    return;
   }
 
   auto const block = definer->block();
   auto const pos = block->iteratorTo(definer);
   block->insert(std::next(pos), inst);
-  return true;
 }
 
 /*
@@ -67,40 +63,12 @@ void insertRefCountAsserts(IRUnit& unit, IRInstruction& inst) {
   }
 }
 
-void insertStkAssert(IRUnit& unit,
-                     IRInstruction* where,
-                     SSATmp* sp,
-                     IRSPOffset off) {
-  auto const addr = unit.gen(
-    LdStkAddr,
-    where->marker(),
-    IRSPOffsetData { off },
-    sp
-  );
-  if (!insertAfter(where, addr)) return;
-  auto const check = unit.gen(DbgAssertPtr, where->marker(), addr->dst());
-  insertAfter(addr, check);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void visit(IRUnit& unit, Block* block) {
   for (auto it = block->begin(); it != block->end();) {
-    auto& inst = *it;
-    ++it;
-
-    switch (inst.op()) {
-    case Call:
-      {
-        auto const extra = inst.extra<Call>();
-        insertStkAssert(unit, &inst, inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1);
-      }
-      break;
-    default:
-      insertRefCountAsserts(unit, inst);
-      break;
-    }
+    auto& inst = *it++;
+    insertRefCountAsserts(unit, inst);
   }
 }
 

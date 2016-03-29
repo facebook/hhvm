@@ -290,7 +290,7 @@ typedef enum {
 #define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval **return_value_ptr, zval *this_ptr, int return_value_used TSRMLS_DC
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, return_value_ptr, this_ptr, return_value_used TSRMLS_CC
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void zend_error_noreturn(int type, const char *format, ...);
 
 /*

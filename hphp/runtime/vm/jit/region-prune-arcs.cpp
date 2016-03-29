@@ -98,11 +98,8 @@ bool preconds_may_pass(const RegionDesc::Block& block,
 
   auto const& preConds = block.typePreConditions();
   for (auto const& preCond : preConds) {
-    using L = RegionDesc::Location::Tag;
     switch (preCond.location.tag()) {
-    case L::Stack: break;
-    case L::Local:
-      {
+      case LTag::Local: {
         auto const loc = preCond.location.localId();
         assertx(loc < state.locals.size());
         if (!state.locals[loc].maybe(preCond.type)) {
@@ -110,8 +107,10 @@ bool preconds_may_pass(const RegionDesc::Block& block,
                  block.id(), show(preCond), loc, state.locals[loc]);
           return false;
         }
+        break;
       }
-      break;
+      case LTag::Stack:
+        break;
     }
   }
   return true;
@@ -122,30 +121,28 @@ bool preconds_may_pass(const RegionDesc::Block& block,
 // with the current type.
 void apply_transfer_function(State& dst, const PostConditions& postConds) {
   for (auto& p : postConds.refined) {
-    using L = RegionDesc::Location::Tag;
     switch (p.location.tag()) {
-      case L::Stack:
-        break;
-      case L::Local: {
+      case LTag::Local: {
         const auto locId = p.location.localId();
         assert(locId < dst.locals.size());
         dst.locals[locId] = dst.locals[locId] & p.type;
         break;
       }
+      case LTag::Stack:
+        break;
     }
   }
 
   for (auto& p : postConds.changed) {
-    using L = RegionDesc::Location::Tag;
     switch (p.location.tag()) {
-      case L::Stack:
-        break;
-      case L::Local: {
+      case LTag::Local: {
         const auto locId = p.location.localId();
         assert(locId < dst.locals.size());
         dst.locals[locId] = p.type;
         break;
       }
+      case LTag::Stack:
+        break;
     }
   }
 }

@@ -44,9 +44,6 @@
 #ifdef ATTRIBUTE_UNUSED
 # undef ATTRIBUTE_UNUSED
 #endif
-#ifdef ATTRIBUTE_NORETURN
-# undef ATTRIBUTE_NORETURN
-#endif
 #ifdef ATTRIBUTE_PRINTF
 # undef ATTRIBUTE_PRINTF
 #endif
@@ -57,7 +54,6 @@
 #define ATTRIBUTE_PRINTF_STRING FOLLY_PRINTF_FORMAT
 
 #ifdef _MSC_VER
-#define ATTRIBUTE_NORETURN __declspec(noreturn)
 #define ATTRIBUTE_PRINTF(a1, a2)
 #ifndef __thread
 # define __thread __declspec(thread)
@@ -72,7 +68,6 @@
 #define UNUSED
 
 #else
-#define ATTRIBUTE_NORETURN __attribute__((__noreturn__))
 #define ATTRIBUTE_PRINTF(a1, a2) \
   __attribute__((__format__ (__printf__, a1, a2)))
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))

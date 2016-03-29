@@ -1096,7 +1096,7 @@ xdebug_xml_node* xdebug_get_value_xml_node(
         char* tmp_name = prepare_variable_name(name);
         short_name = xdstrdup(tmp_name);
         full_name = xdstrdup(tmp_name);
-        xdfree(tmp_name);
+        HPHP::req::free(tmp_name);
         break;
       }
       case XDebugVarType::Static:

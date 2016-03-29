@@ -570,10 +570,10 @@ void decRefArr(ArrayData* arr) {
   arr->decRefAndRelease();
 }
 
-ATTRIBUTE_NORETURN void throwInvalidArrayKeyException(const TypedValue* key);
-ATTRIBUTE_NORETURN void throwOOBArrayKeyException(TypedValue key);
-ATTRIBUTE_NORETURN void throwOOBArrayKeyException(int64_t key);
-ATTRIBUTE_NORETURN void throwOOBArrayKeyException(const StringData* key);
+[[noreturn]] void throwInvalidArrayKeyException(const TypedValue* key);
+[[noreturn]] void throwOOBArrayKeyException(TypedValue key);
+[[noreturn]] void throwOOBArrayKeyException(int64_t key);
+[[noreturn]] void throwOOBArrayKeyException(const StringData* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

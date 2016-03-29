@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
@@ -97,11 +98,15 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   suspendHookE(env, fp(env), asyncAR, waitHandle);
   discard(env, 1);
 
-  // store the return value and return control to the caller.
-  gen(env, StRetVal, StRetValData { true }, fp(env), waitHandle);
-  gen(env, StTVAux, fp(env), cns(env, 1));
-  auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
-  gen(env, RetCtrl, ret_data, sp(env), fp(env));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    gen(env, DbgTrashRetVal, fp(env));
+  }
+  auto const ret_data = RetCtrlData {
+    offsetToReturnSlot(env),
+    false, // suspendingResumed
+    AuxUnion{1}
+  };
+  gen(env, RetCtrl, ret_data, sp(env), fp(env), waitHandle);
 }
 
 void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
@@ -127,20 +132,21 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
 
-  auto const stack = sp(env);
-  auto const frame = fp(env);
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, AsyncRetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
+  // We put a fake return value on the stack for the same reason that returning
+  // from a resumed function does.  See the comments in asyncFunctionReturn.
+  auto const retVal = cns(env, TInitNull);
+  push(env, retVal);
+
+  gen(env, AsyncRetCtrl, RetCtrlData { bcSPOffset(env), true },
+      sp(env), fp(env), retVal);
 }
 
 void yieldReturnControl(IRGS& env) {
-  // Push return value of next()/send()/raise().
-  push(env, cns(env, TInitNull));
+  auto const retVal = cns(env, TInitNull);
+  push(env, retVal);
 
-  auto const stack    = sp(env);
-  auto const frame    = fp(env);
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, RetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
+  gen(env, RetCtrl, RetCtrlData { bcSPOffset(env), true },
+      sp(env), fp(env), retVal);
 }
 
 void yieldImpl(IRGS& env, Offset resumeOffset) {
@@ -255,21 +261,20 @@ void emitFCallAwait(IRGS& env,
                     const StringData*,
                     const StringData*) {
   auto const resumeOffset = nextBcOff(env);
-  emitFCall(env, numParams);
-  assertTypeStack(env, BCSPOffset{0}, TCell);
+
+  auto const ret = implFCall(env, numParams);
+  assertTypeStack(env, BCSPRelOffset{0}, TCell);
   ifThen(
     env,
     [&] (Block* taken) {
-      auto addr = gen(env, LdStkAddr,
-                      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-                      sp(env));
-      auto aux = gen(env, LdTVAux, LdTVAuxData { 1 }, addr);
+      auto const aux = gen(env, LdTVAux, LdTVAuxData { 1 }, ret);
       gen(env, JmpNZero, taken, aux);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
       IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-      assertTypeStack(env, BCSPOffset{0}, TObj);
+      assertTypeStack(env, BCSPRelOffset{0}, TObj);
+
       // If an event hook throws we need the current bytecode to be
       // after the FCallAwait, otherwise the unwinder will expect
       // to find a PreLive ActRec on the stack.
@@ -321,11 +326,13 @@ void emitCreateCont(IRGS& env) {
         cont);
   suspendHookE(env, fp(env), contAR, cont);
 
-  // Grab caller info from ActRec, free ActRec, store the return value
-  // and return control to the caller.
-  gen(env, StRetVal, StRetValData { true }, fp(env), cont);
+  // Grab caller info from the ActRec, free the ActRec, and return control to
+  // the caller.
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    gen(env, DbgTrashRetVal, fp(env));
+  }
   auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
-  gen(env, RetCtrl, ret_data, sp(env), fp(env));
+  gen(env, RetCtrl, ret_data, sp(env), fp(env), cont);
 }
 
 void emitContEnter(IRGS& env) {
@@ -352,7 +359,7 @@ void emitContEnter(IRGS& env) {
   gen(
     env,
     ContEnter,
-    ContEnterData { offsetFromIRSP(env, BCSPOffset{0}), returnBcOffset },
+    ContEnterData { bcSPOffset(env), returnBcOffset },
     sp(env),
     fp(env),
     genFp,

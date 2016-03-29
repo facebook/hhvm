@@ -35,7 +35,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/ext/apc/snapshot.h"
+#include "hphp/runtime/ext/apc/snapshot-builder.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -575,14 +575,8 @@ void apc_load(int thread) {
       !apcExtension::Enable) {
     return;
   }
-  BootTimer::Block timer("loading APC data");
-  SnapshotLoader loader;
-  if (loader.tryInitializeFromFile(apcExtension::PrimeLibrary.c_str())) {
-    // TODO(9755815): APCFileStorage is redundant when using snapshot;
-    // disable it at module loading time in this case.
-    Logger::Info("Loading from snapshot file");
-    loader.load(apc_store());
-    apc_store().primeDone();
+  BootStats::Block timer("loading APC data");
+  if (apc_store().primeFromSnapshot(apcExtension::PrimeLibrary.c_str())) {
     return;
   }
   Logger::Info("Fall back to shared object format");
@@ -613,7 +607,7 @@ void apc_load(int thread) {
 
   apc_store().primeDone();
   if (!upgradeDest.empty()) {
-    BootTimer::Block block("SnapshotBuilder::writeToFile");
+    BootStats::Block block("SnapshotBuilder::writeToFile");
     s_snapshotBuilder.writeToFile(upgradeDest);
   }
 
@@ -643,6 +637,10 @@ void apc_load(int thread) {
   // We've copied all the data out, so close it out.
   dlclose(handle);
 #endif
+}
+
+void apc_advise_out() {
+  apc_store().adviseOut();
 }
 
 size_t get_const_map_size() {

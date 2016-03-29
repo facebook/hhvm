@@ -128,8 +128,8 @@ Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
 }
 
 void binaryBitOp(IRGS& env, Op op) {
-  auto const type2 = topC(env, BCSPOffset{0})->type();
-  auto const type1 = topC(env, BCSPOffset{1})->type();
+  auto const type2 = topC(env, BCSPRelOffset{0})->type();
+  auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     PUNT(BunaryBitOp-Unsupported);
     return;
@@ -141,8 +141,8 @@ void binaryBitOp(IRGS& env, Op op) {
 }
 
 void binaryArith(IRGS& env, Op op) {
-  auto const type2 = topC(env, BCSPOffset{0})->type();
-  auto const type1 = topC(env, BCSPOffset{1})->type();
+  auto const type2 = topC(env, BCSPRelOffset{0})->type();
+  auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     // either an int or a dbl, but can't tell
     PUNT(BinaryArith-Unsupported);
@@ -815,8 +815,8 @@ void implCmp(IRGS& env, Op op) {
 }
 
 void implAdd(IRGS& env, Op op) {
-  if (topC(env, BCSPOffset{0})->type() <= TArr &&
-      topC(env, BCSPOffset{1})->type() <= TArr) {
+  if (topC(env, BCSPRelOffset{0})->type() <= TArr &&
+      topC(env, BCSPRelOffset{1})->type() <= TArr) {
     auto const tr = popC(env);
     auto const tl = popC(env);
     // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
@@ -1152,8 +1152,8 @@ void emitNot(IRGS& env) {
 }
 
 void emitDiv(IRGS& env) {
-  auto const divisorType  = topC(env, BCSPOffset{0})->type();
-  auto const dividendType = topC(env, BCSPOffset{1})->type();
+  auto const divisorType  = topC(env, BCSPRelOffset{0})->type();
+  auto const dividendType = topC(env, BCSPRelOffset{1})->type();
 
   auto isNumeric = [&] (Type type) {
     return type.subtypeOfAny(TInt, TDbl, TBool);

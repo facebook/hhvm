@@ -37,10 +37,6 @@ struct DebugInfo {
   void recordStub(TCRange range, const std::string&);
   void recordPerfMap(TCRange range, const Func* func, bool exit,
                      bool inPrologue);
-  void recordPerfJitTracelet(TCRange range,
-                             const Func* func,
-                             bool exit,
-                             bool inPrologue);
   void recordBCInstr(TCRange range, uint32_t op);
 
   static void recordDataMap(void* from, void* to, const std::string& desc);
@@ -54,15 +50,9 @@ struct DebugInfo {
     pidMapOverlayStart = from;
     pidMapOverlayEnd = to;
   }
-
  private:
   void generatePidMapOverlay();
-  void initPerfJitDump();
-  void closePerfJitDump();
-  int perfJitDumpTrace(const void* startAddr, 
-                       const unsigned int size, 
-                       const char* symName); 
-  
+
   /* maintain separate dwarf info for a and acold, so that we
    * don't emit dwarf info for the two in the same ELF file.
    * gdb tends to get confused when it sees dwarf info for
@@ -76,20 +66,7 @@ struct DebugInfo {
    */
   FILE* m_perfMap{nullptr};
   std::string m_perfMapName;
-  
-  /*
-   * jitdump file will store the generated code in /tmp/jit-<pid>.dump 
-   * perf record will create perf.data 
-   * perf inject will read jitdump file and generate a corresponding 
-   * jitted-<pid>-<id>.so ELF file every trace compiled, it will then insert
-   * a PERF_RECORD_MMAP2 mmap event for every ELF file created into perf.data
-   * perf report will be able to read these ELF files and provide information
-   * on the samples collected on generated code. 
-   */ 
-  FILE* m_perfJitDump{nullptr}; 
-  std::string m_perfJitDumpName;  
-  void* m_perfMmapMarker{nullptr}; 
-  
+
   /*
    * Similar to perfMap, but for data addresses. Perf doesn't use
    * it directly, but we can write tools based on perf script that

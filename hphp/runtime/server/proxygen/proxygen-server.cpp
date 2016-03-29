@@ -28,7 +28,9 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/process.h"
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace HPHP {
@@ -206,6 +208,8 @@ void ProxygenServer::start() {
                    m_accept_sock);
       m_httpServerSocket->useExistingSocket(m_accept_sock);
     } else {
+      // make it possible to quickly reuse the port
+      m_httpServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
       m_httpServerSocket->bind(m_httpConfig.bindAddress);
     }
   } catch (const std::system_error& ex) {
@@ -241,6 +245,7 @@ void ProxygenServer::start() {
                      m_accept_sock_ssl);
         m_httpsServerSocket->useExistingSocket(m_accept_sock_ssl);
       } else {
+        m_httpsServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
         m_httpsServerSocket->bind(m_httpsConfig.bindAddress);
       }
     } catch (const TTransportException& ex) {
@@ -338,8 +343,8 @@ void ProxygenServer::stop() {
       }
       m_worker.getEventBase()->runAfterDelay([this] { stopListening(); },
                                              delayMilliSeconds);
+      reportShutdownStatus();
     });
-  reportShutdownStatus();
 }
 
 void ProxygenServer::stopListening(bool hard) {
@@ -373,8 +378,7 @@ void ProxygenServer::stopListening(bool hard) {
       s.count() <<
       " port=" << m_port;
     scheduleTimeout(s);
-    if (m_port == RuntimeOption::ServerPort &&
-        RuntimeOption::ServerShutdownEOMWait > 0) {
+    if (RuntimeOption::ServerShutdownEOMWait > 0) {
       int delayMilliSeconds = RuntimeOption::ServerShutdownEOMWait * 1000;
       m_worker.getEventBase()->runAfterDelay(
         [this] { abortPendingTransports(); }, delayMilliSeconds);
@@ -385,19 +389,18 @@ void ProxygenServer::stopListening(bool hard) {
 }
 
 void ProxygenServer::abortPendingTransports() {
-  if (m_pendingTransports.empty()) return;
-  Logger::Info("aborting %lu incomplete requests", m_pendingTransports.size());
-  std::vector<ProxygenTransport*> pending;
-  // Avoid calling timeoutExpired() while iterating the list, as it will
-  // unlink the ProxygenTransport, leaving the list iterator in a corrupt
-  // state.
-  for (auto& p : m_pendingTransports) {
-    pending.push_back(&p);
+  if (!m_pendingTransports.empty()) {
+    Logger::Warning("aborting %lu incomplete requests",
+                    m_pendingTransports.size());
+    // Avoid iterating the list, as abort() will unlink(), leaving the
+    // list iterator in a corrupt state.
+    do {
+      auto& transport = m_pendingTransports.front();
+      transport.abort();                // will unlink()
+    } while (!m_pendingTransports.empty());
   }
-  m_pendingTransports.clear();
-  for (auto transport : pending) {
-    transport->timeoutExpired();
-  }
+  // Accelerate shutdown if all requests that were enqueued are done,
+  // since no more is coming in.
   if (m_enqueuedCount == 0 &&
       m_shutdownState == ShutdownState::DRAINING_READS) {
     doShutdown();
@@ -459,6 +462,7 @@ void ProxygenServer::stopVM() {
   // we can't call m_dispatcher.stop() from the event loop, because it blocks
   // all I/O.  Spawn a thread to call it and callback when it's done.
   std::thread vmStopper([this] {
+      purge_all();
       Logger::Info("%p: Stopping dispatcher port=%d", this, m_port);
       m_dispatcher.stop();
       Logger::Info("%p: Dispatcher stopped port=%d.  conns=%d", this, m_port,
@@ -517,12 +521,13 @@ void ProxygenServer::forceStop() {
 void ProxygenServer::reportShutdownStatus() {
   if (m_port != RuntimeOption::ServerPort) return;
   if (getStatus() == RunStatus::STOPPED) return;
-  Logger::Info("Shutdown state=%d, a/q/e/p %d/%d/%d/%d",
-               (int)m_shutdownState,
-               getActiveWorker(),
-               getQueuedJobs(),
-               getLibEventConnectionCount(),
-               (int)m_pendingTransports.size());
+  Logger::FInfo("Shutdown state={}, a/q/e/p {}/{}/{}/{}, RSS={}Mb",
+                static_cast<int>(m_shutdownState),
+                getActiveWorker(),
+                getQueuedJobs(),
+                getLibEventConnectionCount(),
+                m_pendingTransports.size(),
+                Process::GetProcessRSS(Process::GetProcessId()));
   m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
 }
 
@@ -663,7 +668,7 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     }
     m_httpServerSocket.reset();
     m_httpsServerSocket.reset();
-    transport->timeoutExpired();
+    transport->abort();
     return;
   }
 
@@ -678,7 +683,7 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     m_dispatcher.enqueue(std::make_shared<ProxygenJob>(transport), priority);
   } else {
     // VM is shutdown
-    transport->timeoutExpired();
+    transport->abort();
     Logger::Error("%p: throwing away one new request while shutting down",
                   this);
   }
@@ -687,17 +692,13 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
 void ProxygenServer::decrementEnqueuedCount() {
   m_enqueuedCount--;
   if (m_enqueuedCount == 0 && isScheduled()) {
-    if (m_shutdownState == ShutdownState::DRAINING_WRITES) {
-      // If all requests that got enqueued are done, accelerate
-      // shutdown.  All other connections must be reading new
-      // requests, which cannot be executed.
+    // If all requests that got enqueued are done, and no more request
+    // is coming in, accelerate shutdown.
+    if ((m_shutdownState == ShutdownState::DRAINING_READS &&
+         m_pendingTransports.empty()) ||
+        m_shutdownState == ShutdownState::DRAINING_WRITES) {
       cancelTimeout();
       doShutdown();
-    } else if (m_shutdownState == ShutdownState::DRAINING_READS) {
-      if (m_pendingTransports.empty()) {
-        cancelTimeout();
-        doShutdown();
-      }
     }
   }
 }

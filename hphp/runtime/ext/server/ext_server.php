@@ -9,18 +9,6 @@
 function hphp_thread_type(): int;
 
 /**
- * When I'm running a newer version of the server software and I'm getting an
- *   HTTP request that's from old version of a web page, proxy it to a local
- *   instance that is still running or dangling just for handling old version of
- *   requests. Please read server documentation for more details.
- *
- * @return bool - TRUE if successful, FALSE otherwise.
- *
- */
-<<__HipHopSpecific, __Native>>
-function dangling_server_proxy_old_request(): bool;
-
-/**
  * Whether pagelet server is enabled or not. Please read server documentation
  *   for what a pagelet server is.
  *

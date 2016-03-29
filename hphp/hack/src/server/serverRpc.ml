@@ -19,7 +19,7 @@ type _ t =
   | COVERAGE_LEVELS : ServerUtils.file_input -> ServerColorFile.result t
   | AUTOCOMPLETE : string -> AutocompleteService.result t
   | IDENTIFY_FUNCTION : string * int * int ->
-      IdentifySymbolService.find_symbol_result option t
+      (string IdentifySymbolService.find_symbol_result) option t
   | OUTLINE : string -> (Pos.absolute * string * string) list t
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
@@ -36,6 +36,8 @@ type _ t =
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | KILL : unit t
+  | FIND_LVAR_REFS : string * int * int -> ServerFindLocals.result t
+  | FORMAT : string * int * int -> string Format_hack.return t
 
 let handle : type a. genv -> env -> a t -> a =
   fun genv env -> function
@@ -47,14 +49,14 @@ let handle : type a. genv -> env -> a t -> a =
     | INFER_TYPE (fn, line, char) ->
         ServerInferType.go env (fn, line, char)
     | AUTOCOMPLETE content ->
-        ServerAutoComplete.auto_complete env.files_info content
+        ServerAutoComplete.auto_complete env.tcopt env.files_info content
     | IDENTIFY_FUNCTION (content, line, char) ->
-        ServerIdentifyFunction.go content line char
+        ServerIdentifyFunction.go_absolute content line char
     | OUTLINE content ->
         FileOutline.outline content
     | METHOD_JUMP (class_, find_children) ->
-      MethodJumps.get_inheritance class_ ~find_children env.files_info
-        genv.workers
+      MethodJumps.get_inheritance env.tcopt class_ ~find_children
+        env.files_info genv.workers
     | FIND_REFS find_refs_action ->
         if ServerArgs.ai_mode genv.options = None then
           ServerFindRefs.go find_refs_action genv env
@@ -77,3 +79,7 @@ let handle : type a. genv -> env -> a t -> a =
     | DELETE_CHECKPOINT x -> ServerCheckpoint.delete_checkpoint x
     | STATS -> Stats.get_stats ()
     | KILL -> ()
+    | FIND_LVAR_REFS (content, line, char) ->
+        ServerFindLocals.go content line char
+    | FORMAT (content, from, to_) ->
+        ServerFormat.go content from to_

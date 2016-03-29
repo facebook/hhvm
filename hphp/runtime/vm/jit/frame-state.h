@@ -37,6 +37,8 @@ struct BlocksWithIds;
 struct IRInstruction;
 struct SSATmp;
 
+namespace irgen {
+
 //////////////////////////////////////////////////////////////////////
 
 struct FPIInfo {
@@ -122,7 +124,12 @@ struct FrameState {
    * Tracking of in-memory state of the evaluation stack.
    */
   SSATmp* spValue{nullptr};
-  FPInvOffset spOffset;   // delta from vmfp to spvalue
+  FPInvOffset irSPOff;  // delta from vmfp to `spValue'
+
+  /*
+   * Depth of the in-memory eval stack.
+   */
+  FPInvOffset bcSPOff{0};
 
   /*
    * Here we keep track of the raw pointer value of the member base register,
@@ -160,11 +167,6 @@ struct FrameState {
    * since the definition of the current frame pointer.
    */
   bool frameMaySpanCall{false};
-
-  /*
-   * syncedSpLevel indicates the depth of the in-memory eval stack.
-   */
-  FPInvOffset syncedSpLevel{0};
 
   /*
    * stackModified is reset to false by exceptionStackBoundary() and set to
@@ -298,14 +300,14 @@ struct FrameStateMgr final {
   const Func* func()              const { return cur().curFunc; }
   SSATmp*     fp()                const { return cur().fpValue; }
   SSATmp*     sp()                const { return cur().spValue; }
-  FPInvOffset spOffset()          const { return cur().spOffset; }
+  FPInvOffset irSPOff()           const { return cur().irSPOff; }
+  FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
   SSATmp*     memberBasePtr()     const { return cur().mbase.ptr; }
   Type        memberBasePtrType() const { return cur().mbase.ptrType; }
   SSATmp*     memberBaseValue()   const { return cur().mbase.value; }
   bool        needRatchet()       const { return cur().needRatchet; }
   bool        thisAvailable()     const { return cur().thisAvailable; }
   bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
-  FPInvOffset syncedSpLevel()     const { return cur().syncedSpLevel; }
   bool        stackModified()     const { return cur().stackModified; }
   const jit::deque<FPIInfo>& fpiStack() const { return cur().fpiStack; }
 
@@ -319,9 +321,9 @@ struct FrameStateMgr final {
   void setNeedRatchet(bool b)           { cur().needRatchet = b; }
   void setThisAvailable()               { cur().thisAvailable = true; }
   void resetStackModified()             { cur().stackModified = false; }
-  void setSyncedSpLevel(FPInvOffset o)  { cur().syncedSpLevel = o; }
-  void incSyncedSpLevel(int32_t n = 1)  { cur().syncedSpLevel += n; }
-  void decSyncedSpLevel(int32_t n = 1)  { cur().syncedSpLevel -= n; }
+  void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
+  void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
+  void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
   /*
    * Current inlining depth (not including the toplevel frame).
    */
@@ -332,14 +334,14 @@ struct FrameStateMgr final {
    * most-inlined frame.
    */
   const LocalState& local(uint32_t id) const;
-  const StackState& stack(IRSPOffset off) const;
+  const StackState& stack(IRSPRelOffset off) const;
 
   /*
    * Update the `predictedType' in the SlotState for the given local variable
    * or stack value.
    */
   void refineLocalPredictedType(uint32_t id, Type type);
-  void refineStackPredictedType(IRSPOffset, Type);
+  void refineStackPredictedType(IRSPRelOffset, Type);
 
 private:
   struct BlockState {
@@ -354,8 +356,8 @@ private:
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
   void clearForUnprocessedPred();
-  StackState& stackState(IRSPOffset offset);
-  const StackState& stackState(IRSPOffset offset) const;
+  StackState& stackState(IRSPRelOffset offset);
+  const StackState& stackState(IRSPRelOffset offset) const;
   void collectPostConds(Block* exitBlock);
   void updateMInstr(const IRInstruction*);
   void refinePredictedTmpType(SSATmp*, Type);
@@ -401,14 +403,14 @@ private: // local tracking helpers
   void clearLocals();
 
 private: // stack tracking helpers
-  void setStackValue(IRSPOffset, SSATmp*);
-  void setStackType(IRSPOffset, Type);
-  void widenStackType(IRSPOffset, Type);
+  void setStackValue(IRSPRelOffset, SSATmp*);
+  void setStackType(IRSPRelOffset, Type);
+  void widenStackType(IRSPRelOffset, Type);
   void refineStackValues(SSATmp* oldval, SSATmp* newVal);
-  void refineStackType(IRSPOffset, Type, TypeSource typeSrc);
+  void refineStackType(IRSPRelOffset, Type, TypeSource typeSrc);
   void clearStackForCall();
-  void setBoxedStkPrediction(IRSPOffset, Type type);
-  void spillFrameStack(IRSPOffset, FPInvOffset, const IRInstruction*);
+  void setBoxedStkPrediction(IRSPRelOffset, Type type);
+  void spillFrameStack(IRSPRelOffset, FPInvOffset, const IRInstruction*);
 
 private:
   /*
@@ -443,6 +445,6 @@ std::string show(const FrameStateMgr&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}
 
 #endif

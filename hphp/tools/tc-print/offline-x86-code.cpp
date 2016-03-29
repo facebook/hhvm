@@ -109,9 +109,14 @@ TCA OfflineX86Code::getTransJmpTargets(const TransRec *transRec,
                                     transRec->aStart, transRec->aLen,
                                     jmpTargets);
 
-  collectJmpTargets(tcRegions[TCRCold].file,
-                    tcRegions[TCRCold].baseAddr,
-                    transRec->acoldStart, transRec->acoldLen, jmpTargets);
+  // Sometimes acoldStart is the same as afrozenStart.  In these cases, don't
+  // look up the address range in the "cold" file, since it the range isn't
+  // there.
+  if (transRec->acoldStart != transRec->afrozenStart) {
+    collectJmpTargets(tcRegions[TCRCold].file,
+                      tcRegions[TCRCold].baseAddr,
+                      transRec->acoldStart, transRec->acoldLen, jmpTargets);
+  }
 
   collectJmpTargets(tcRegions[TCRFrozen].file,
                     tcRegions[TCRFrozen].baseAddr,

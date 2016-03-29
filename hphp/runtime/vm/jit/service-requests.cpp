@@ -53,6 +53,7 @@ namespace detail {
  * Emit a service request stub of type `sr' at `start' in `cb'.
  */
 void emit_svcreq(CodeBlock& cb,
+                 DataBlock& data,
                  TCA start,
                  bool persist,
                  folly::Optional<FPInvOffset> spOff,
@@ -69,7 +70,7 @@ void emit_svcreq(CodeBlock& cb,
     CGMeta fixups;
     SCOPE_EXIT { assert(fixups.empty()); };
 
-    Vauto vasm{stub, fixups};
+    Vauto vasm{stub, data, fixups};
     auto& v = vasm.main();
 
     // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do
@@ -142,10 +143,12 @@ void emit_svcreq(CodeBlock& cb,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emit_bindjmp_stub(CodeBlock& cb, CGMeta& fixups, FPInvOffset spOff,
+TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                      FPInvOffset spOff,
                       TCA jmp, SrcKey target, TransFlags trflags) {
   return emit_ephemeral(
     cb,
+    data,
     mcg->getFreeStub(cb, &fixups),
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_JMP,
@@ -155,13 +158,14 @@ TCA emit_bindjmp_stub(CodeBlock& cb, CGMeta& fixups, FPInvOffset spOff,
   );
 }
 
-TCA emit_bindjcc1st_stub(CodeBlock& cb, CGMeta& fixups,
+TCA emit_bindjcc1st_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                          FPInvOffset spOff, TCA jcc, SrcKey taken, SrcKey next,
                          ConditionCode cc) {
   always_assert_flog(taken.resumed() == next.resumed(),
                      "bind_jcc_1st was confused about resumables");
   return emit_ephemeral(
     cb,
+    data,
     mcg->getFreeStub(cb, &fixups),
     taken.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_JCC_FIRST,
@@ -172,10 +176,12 @@ TCA emit_bindjcc1st_stub(CodeBlock& cb, CGMeta& fixups,
   );
 }
 
-TCA emit_bindaddr_stub(CodeBlock& cb, CGMeta& fixups, FPInvOffset spOff,
+TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                       FPInvOffset spOff,
                        TCA* addr, SrcKey target, TransFlags trflags) {
   return emit_ephemeral(
     cb,
+    data,
     mcg->getFreeStub(cb, &fixups),
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_ADDR,
@@ -185,10 +191,11 @@ TCA emit_bindaddr_stub(CodeBlock& cb, CGMeta& fixups, FPInvOffset spOff,
   );
 }
 
-TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
                           SrcKey target, TransFlags trflags) {
   return emit_persistent(
     cb,
+    data,
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE,
     target.offset(),
@@ -196,10 +203,11 @@ TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
   );
 }
 
-TCA emit_retranslate_opt_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
                               SrcKey target, TransID transID) {
   return emit_persistent(
     cb,
+    data,
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE_OPT,
     target.toAtomicInt(),

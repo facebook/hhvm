@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/apc/snapshot.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
@@ -214,8 +215,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
     }
     if (UNLIKELY(tmp.first ==
                  intptr_t(apcExtension::FileStorageFlagKey.c_str()))) {
-      s_apc_file_storage.adviseOut();
-
+      adviseOut();
       tmp.second = time(nullptr) + apcExtension::FileStorageAdviseOutPeriod;
       m_expQueue.push(tmp);
       continue;
@@ -648,14 +648,14 @@ void ConcurrentTableSharedStore::primeDone() {
       APCFileStorage::StorageState::Invalid) {
     s_apc_file_storage.seal();
     s_apc_file_storage.hashCheck();
-    // Schedule the adviseOut instead of doing it immediately, so that the
-    // initial accesses to the primed keys are not too bad. Still, for
-    // the keys in file, a deserialization from memory is required on first
-    // access.
-    ExpirationPair p(intptr_t(apcExtension::FileStorageFlagKey.c_str()),
-                     time(nullptr) + apcExtension::FileStorageAdviseOutPeriod);
-    m_expQueue.push(p);
   }
+  // Schedule the adviseOut instead of doing it immediately, so that the
+  // initial accesses to the primed keys are not too bad. Still, for
+  // the keys in file, a deserialization from memory is required on first
+  // access.
+  ExpirationPair p(intptr_t(apcExtension::FileStorageFlagKey.c_str()),
+                   time(nullptr) + apcExtension::FileStorageAdviseOutPeriod);
+  m_expQueue.push(p);
 
   for (auto iter = apcExtension::CompletionKeys.begin();
        iter != apcExtension::CompletionKeys.end(); ++iter) {
@@ -670,6 +670,30 @@ void ConcurrentTableSharedStore::primeDone() {
     acc->second.set(pair.handle, 0);
     acc->second.dataSize = pair.size;
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
+  }
+}
+
+bool ConcurrentTableSharedStore::primeFromSnapshot(const char* filename) {
+  m_snapshotLoader = folly::make_unique<SnapshotLoader>();
+  if (!m_snapshotLoader->tryInitializeFromFile(filename)) {
+    m_snapshotLoader.reset();
+    return false;
+  }
+  // TODO(9755815): APCFileStorage is redundant when using snapshot;
+  // disable it at module loading time in this case.
+  Logger::Info("Loading from snapshot file %s", filename);
+  m_snapshotLoader->load(*this);
+  primeDone();
+  return true;
+}
+
+void ConcurrentTableSharedStore::adviseOut() {
+  if (s_apc_file_storage.getState() !=
+      APCFileStorage::StorageState::Invalid) {
+    s_apc_file_storage.adviseOut();
+  }
+  if (m_snapshotLoader.get()) {
+    m_snapshotLoader->adviseOut();
   }
 }
 

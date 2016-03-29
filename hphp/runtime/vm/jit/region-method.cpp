@@ -1,4 +1,4 @@
-/*
+  /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -13,10 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/arena.h"
+
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/verifier/cfg.h"
+
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/location.h"
+
+#include "hphp/runtime/vm/verifier/cfg.h"
+
+#include "hphp/util/arena.h"
 
 namespace HPHP { namespace jit {
 
@@ -159,18 +164,16 @@ RegionDescPtr selectMethod(const RegionContext& context) {
    */
   assertx(!ret->empty());
   for (auto& lt : context.liveTypes) {
-    typedef RegionDesc::Location::Tag LTag;
-
     switch (lt.location.tag()) {
-    case LTag::Stack:
-      break;
-    case LTag::Local:
-      if (lt.location.localId() < context.func->numParams()) {
-        // Only predict objectness, not the specific class type.
-        auto const type = lt.type < TObj ? TObj : lt.type;
-        ret->entry()->addPreCondition({lt.location, type, DataTypeSpecific});
-      }
-      break;
+      case LTag::Local:
+        if (lt.location.localId() < context.func->numParams()) {
+          // Only predict objectness, not the specific class type.
+          auto const type = lt.type < TObj ? TObj : lt.type;
+          ret->entry()->addPreCondition({lt.location, type, DataTypeSpecific});
+        }
+        break;
+      case LTag::Stack:
+        break;
     }
   }
 

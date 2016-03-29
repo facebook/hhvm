@@ -106,6 +106,7 @@ ExecutionContext::ExecutionContext()
 
   VariableSerializer::serializationSizeLimit =
     RuntimeOption::SerializationSizeLimit;
+  tvWriteUninit(&m_headerCallback);
 }
 
 // See header for why this is required.
@@ -1455,6 +1456,15 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
     return empty_array();
   }
   return getDefinedVariables(fp);
+}
+
+bool ExecutionContext::setHeaderCallback(const Variant& callback) {
+  if (cellAsVariant(g_context->m_headerCallback).toBoolean()) {
+    // return false if a callback has already been set.
+    return false;
+  }
+  cellAsVariant(g_context->m_headerCallback) = callback;
+  return true;
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {

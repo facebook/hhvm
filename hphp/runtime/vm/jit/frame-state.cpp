@@ -302,7 +302,7 @@ bool check_invariants(const FrameState& state) {
  * This maintains the invariant `predicted <= proven'.
  */
 Type updatePrediction(Type predicted, Type proven) {
-  if (predicted == TBottom) return proven;
+  always_assert(predicted != TBottom);
   return predicted < proven ? predicted : proven;
 }
 
@@ -1183,12 +1183,7 @@ void FrameStateMgr::setValueImpl(Location l,
 
   state.predictedType = [&] {
     if (predicted) {
-      // We need to maintain the invariant predictedType <= type.  Note that
-      // operator& can be conservative (it could just return one of the two
-      // types in situations relating to specialized types we can't represent),
-      // so it's necessary to double check.
-      auto const isect = state.type & *predicted;
-      return isect <= state.type ? isect : state.type;
+      return refinePrediction(state.type, *predicted, state.type);
     } else {
       return state.type;
     }
@@ -1363,7 +1358,7 @@ void FrameStateMgr::refinePredictedType(Location l, Type type) {
 
 template<LTag tag>
 static void setBoxedPredictionImpl(LocationState<tag>& state, Type type) {
-  state.predictedType = state.type & type;
+  state.predictedType = refinePrediction(state.type, type, state.type);
 }
 
 /*

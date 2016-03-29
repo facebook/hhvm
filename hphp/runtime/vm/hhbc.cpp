@@ -1201,8 +1201,6 @@ std::string show(MInstrAttr mia) {
   X(define);
   X(reffy);
   X(unset);
-  X(new);
-  X(final_get);
 #undef X
 
   return ret;

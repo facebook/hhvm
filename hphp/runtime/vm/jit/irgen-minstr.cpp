@@ -253,7 +253,7 @@ SSATmp* ptrToUninit(IRGS& env) {
   return cns(env, Type::cns(&null_variant, TPtrToOtherUninit));
 }
 
-bool mightCallMagicPropMethod(MInstrAttr mia, PropInfo propInfo) {
+bool mightCallMagicPropMethod(MOpFlags flags, PropInfo propInfo) {
   if (!typeFromRAT(propInfo.repoAuthType).maybe(TUninit)) {
     return false;
   }
@@ -266,10 +266,8 @@ bool mightCallMagicPropMethod(MInstrAttr mia, PropInfo propInfo) {
     // contexts.
     AttrNoOverrideMagicGet |
     // But magic setters are only possible in define contexts.
-    ((mia & MIA_define) ? AttrNoOverrideMagicSet : AttrNone);
-  bool const no_override_magic =
-    (cls->attrs() & relevant_attrs) == relevant_attrs;
-  return !no_override_magic;
+    ((flags & MOpFlags::Define) ? AttrNoOverrideMagicSet : AttrNone);
+  return (cls->attrs() & relevant_attrs) != relevant_attrs;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -366,12 +364,12 @@ SSATmp* emitPropSpecialized(
   Type baseType,
   SSATmp* key,
   bool nullsafe,
-  const MInstrAttr mia,
+  MOpFlags flags,
   PropInfo propInfo
 ) {
-  assertx(!(mia & MIA_warn) || !(mia & MIA_unset));
-  const bool doWarn   = mia & MIA_warn;
-  const bool doDefine = mia & MIA_define || mia & MIA_unset;
+  assertx(!(flags & MOpFlags::Warn) || !(flags & MOpFlags::Unset));
+  auto const doWarn   = flags & MOpFlags::Warn;
+  auto const doDefine = (flags & MOpFlags::Define) || (flags & MOpFlags::Unset);
 
   auto const initNull = ptrToInitNull(env);
 
@@ -740,14 +738,14 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MIA_none, propInfo) &&
-      !mightCallMagicPropMethod(MIA_define, propInfo)) {
+      !mightCallMagicPropMethod(MOpFlags::None, propInfo) &&
+      !mightCallMagicPropMethod(MOpFlags::Define, propInfo)) {
 
     // Special case for when the property is known to be an int.
     if (base->isA(TObj) &&
         propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
       base = emitPropSpecialized(env, base, base->type(), key, false,
-                                 MIA_define, propInfo);
+                                 MOpFlags::Define, propInfo);
       auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
       assertx(result != nullptr);
@@ -967,16 +965,17 @@ void simpleBaseImpl(IRGS& env, SSATmp* base, Type innerTy) {
   env.irb->constrainValue(base, DataTypeSpecific);
 }
 
-SSATmp* propGenericImpl(IRGS& env, MInstrAttr mia, SSATmp* base, SSATmp* key,
+SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
                         bool nullsafe) {
-  auto const miaData = MInstrAttrData{mia};
-  auto const define = bool(mia & MIA_define);
+  auto const define = flags & MOpFlags::Define;
 
   if (define && nullsafe) {
-    gen(env, RaiseError,
-        cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
+    auto const msg = makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR);
+    gen(env, RaiseError, cns(env, msg));
     return ptrToInitNull(env);
   }
+
+  auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
 
   auto const tvRef = propTvRefPtr(env, base, key);
   return nullsafe
@@ -1002,16 +1001,17 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
 
   specializeObjBase(env, base);
 
-  auto const mia = MInstrAttr(mOpFlagsToAttr(flags) & MIA_intermediate_prop);
+  flags = dropReffy(flags);
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
   if (propInfo.offset == -1 || (flags & MOpFlags::Unset) ||
-      mightCallMagicPropMethod(mia, propInfo)) {
-    return propGenericImpl(env, mia, base, key, nullsafe);
+      mightCallMagicPropMethod(flags, propInfo)) {
+    return propGenericImpl(env, flags, base, key, nullsafe);
   }
 
-  return emitPropSpecialized(env, base, base->type(), key,
-                             nullsafe, mia, propInfo);
+  return emitPropSpecialized(
+    env, base, base->type(), key, nullsafe, flags, propInfo
+  );
 }
 
 SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
@@ -1074,13 +1074,11 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   specializeObjBase(env, base);
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
-  auto const mia = mOpFlagsToAttr(flags);
 
   if (propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MIA_none, propInfo)) {
+      !mightCallMagicPropMethod(MOpFlags::None, propInfo)) {
     auto propAddr = emitPropSpecialized(
-      env, base, base->type(), key,
-      nullsafe, mia, propInfo
+      env, base, base->type(), key, nullsafe, flags, propInfo
     );
 
     if (!RuntimeOption::RepoAuthoritative) {
@@ -1100,8 +1098,9 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
     return result;
   }
 
-  // No warning takes precedence over nullsafe
-  if (!nullsafe || !(mia & MIA_warn)) {
+  // No warning takes precedence over nullsafe.
+  if (!nullsafe || !(flags & MOpFlags::Warn)) {
+    auto const mia = mOpFlagsToAttr(flags);
     return gen(env, CGetProp, MInstrAttrData{mia}, base, key);
   }
   return gen(env, CGetPropQ, base, key);
@@ -1165,14 +1164,13 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
 
   specializeObjBase(env, base);
 
-  auto const mia = MIA_define;
+  auto const flags = MOpFlags::Define;
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
 
-  if (propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MIA_define, propInfo)) {
+  if (propInfo.offset != -1 && !mightCallMagicPropMethod(flags, propInfo)) {
     auto propPtr =
-      emitPropSpecialized(env, base, base->type(), key, false, mia, propInfo);
+      emitPropSpecialized(env, base, base->type(), key, false, flags, propInfo);
     auto propTy = propPtr->type().deref();
 
     if (propTy.maybe(TBoxedCell)) {

@@ -313,12 +313,13 @@ static_assert(kNumSmallSizes <= sizeof(kSmallSize2Index),
  * debugging.  There's also 0x7a for junk-filling some cases of
  * ex-TypedValue memory (evaluation stack).
  */
-constexpr char kSmallFreeFill   = 0x6a;
-constexpr char kTVTrashFill     = 0x7a; // used by interpreter
-constexpr char kTVTrashFill2    = 0x7b; // used by req::ptr dtors
-constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
-constexpr char kTVTrashJITFrame = 0x7d; // used by the JIT for stack frames
-constexpr char kTVTrashJITHeap  = 0x7e; // used by the JIT for heap
+constexpr char kSmallFreeFill    = 0x6a;
+constexpr char kTVTrashFill      = 0x7a; // used by interpreter
+constexpr char kTVTrashFill2     = 0x7b; // used by req::ptr dtors
+constexpr char kTVTrashJITStk    = 0x7c; // used by the JIT for stack slots
+constexpr char kTVTrashJITFrame  = 0x7d; // used by the JIT for stack frames
+constexpr char kTVTrashJITHeap   = 0x7e; // used by the JIT for heap
+constexpr char kTVTrashJITRetVal = 0x7f; // used by the JIT for ActRec::m_r
 constexpr uintptr_t kSmallFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 

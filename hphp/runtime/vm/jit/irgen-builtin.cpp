@@ -1368,8 +1368,9 @@ void emitNativeImpl(IRGS& env) {
 
   auto genericNativeImpl = [&]() {
     gen(env, NativeImpl, fp(env), sp(env));
+    auto const retVal = gen(env, LdRetVal, fp(env));
     auto const data = RetCtrlData { offsetToReturnSlot(env), false };
-    gen(env, RetCtrl, data, sp(env), fp(env));
+    gen(env, RetCtrl, data, sp(env), fp(env), retVal);
   };
 
   auto callee = curFunc(env);

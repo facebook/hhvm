@@ -486,10 +486,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
    * opcode also suspends resumables, which we model as having any possible
    * effects.
-   *
-   * Note that marking AFrameAny as dead isn't quite right, because that
-   * ought to mean that the preceding StRetVal is dead; but memory effects
-   * ignores StRetVal so the AFrameAny is fine.
    */
   case RetCtrl:
     if (inst.extra<RetCtrl>()->suspendingResumed) {
@@ -1210,7 +1206,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
   case LdTVAux:
-  case StTVAux:
   case LdARInvName:
   case StARInvName:
   case MethodExists:
@@ -1232,7 +1227,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StClosureArg:
   case StContArKey:
   case StContArValue:
-  case StRetVal:
+  case LdRetVal:
   case ConvStrToInt:
   case ConvResToInt:
   case OrdStr:
@@ -1561,6 +1556,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty, AEmpty, AEmpty,
       pointee(inst.src(0))
     };
+  case DbgTrashRetVal:
+    return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
 

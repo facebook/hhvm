@@ -32,6 +32,7 @@
 #include "hphp/util/ringbuffer.h"
 
 #include <folly/Conv.h>
+#include <folly/Optional.h>
 
 #include <algorithm>
 #include <string>
@@ -441,16 +442,6 @@ struct LdTVAuxData : IRExtraData {
   int32_t valid;
 };
 
-struct StRetValData : IRExtraData {
-  explicit StRetValData(bool w) : wide(w) {}
-
-  std::string show() const {
-    return wide ? "wide" : "narrow";
-  }
-
-  bool wide;
-};
-
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& target,
                           FPInvOffset invSPOff,
@@ -683,9 +674,11 @@ struct CallData : IRExtraData {
 };
 
 struct RetCtrlData : IRExtraData {
-  explicit RetCtrlData(IRSPRelOffset spOffset, bool suspendingResumed)
+  explicit RetCtrlData(IRSPRelOffset spOffset, bool suspendingResumed,
+                       folly::Optional<AuxUnion> aux = folly::none)
     : spOffset(spOffset)
     , suspendingResumed(suspendingResumed)
+    , aux(aux)
   {}
 
   std::string show() const {
@@ -702,6 +695,9 @@ struct RetCtrlData : IRExtraData {
   // Indicates that the current resumable frame is being suspended without
   // decrefing locals.  Used by refcount optimizer.
   bool suspendingResumed;
+
+  // Optional TV aux value to attach to the function's return value.
+  folly::Optional<AuxUnion> aux;
 };
 
 /*
@@ -1248,7 +1244,6 @@ X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(DecRef,                       DecRefData);
 X(LdTVAux,                      LdTVAuxData);
-X(StRetVal,                     StRetValData);
 
 #undef X
 

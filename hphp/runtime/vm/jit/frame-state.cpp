@@ -379,11 +379,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       setStackType(
         extra->spOffset + kNumActRecCells + extra->numParams - 1,
         TGen);
-      // What we're considering sync'd to memory is popping an actrec, popping
-      // args, and pushing a return value.
+      // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().spOff());
       cur().bcSPOff -= extra->numParams + kNumActRecCells;
-      cur().bcSPOff += 1;
 
       if (!cur().fpiStack.empty()) {
         cur().fpiStack.pop_front();
@@ -407,10 +405,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       }
       clearStackForCall();
       setStackType(extra->spOffset + numCells - 1, TGen);
-      // A CallArray pops the ActRec, actual args, an array arg, and
-      // pushes a return value.
+      // A CallArray pops the ActRec, actual args, and an array arg.
       assertx(cur().bcSPOff == inst->marker().spOff());
-      cur().bcSPOff -= numCells - 1;
+      cur().bcSPOff -= numCells;
 
       if (!cur().fpiStack.empty()) {
         cur().fpiStack.pop_front();

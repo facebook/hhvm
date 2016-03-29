@@ -1085,7 +1085,8 @@ void emitFCallArray(IRGS& env) {
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
   };
-  gen(env, CallArray, data, sp(env), fp(env));
+  auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
+  push(env, retVal);
 }
 
 void emitFCallUnpack(IRGS& env, int32_t numParams) {
@@ -1096,7 +1097,8 @@ void emitFCallUnpack(IRGS& env, int32_t numParams) {
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
   };
-  gen(env, CallArray, data, sp(env), fp(env));
+  auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
+  push(env, retVal);
 }
 
 void emitFCallD(IRGS& env,
@@ -1106,7 +1108,7 @@ void emitFCallD(IRGS& env,
   emitFCall(env, numParams);
 }
 
-void emitFCall(IRGS& env, int32_t numParams) {
+SSATmp* implFCall(IRGS& env, int32_t numParams) {
   auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
   auto const callee = env.currentNormalizedInstruction->funcd;
 
@@ -1125,7 +1127,7 @@ void emitFCall(IRGS& env, int32_t numParams) {
 
   auto op = curFunc(env)->unit()->getOp(bcOff(env));
 
-  gen(
+  auto const retVal = gen(
     env,
     Call,
     CallData {
@@ -1140,6 +1142,12 @@ void emitFCall(IRGS& env, int32_t numParams) {
     sp(env),
     fp(env)
   );
+  push(env, retVal);
+  return retVal;
+}
+
+void emitFCall(IRGS& env, int32_t numParams) {
+  implFCall(env, numParams);
 }
 
 void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
@@ -1155,7 +1163,8 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
   }
   updateMarker(env);
   env.irb->exceptionStackBoundary();
-  gen(
+
+  auto const retVal = gen(
     env,
     Call,
     CallData {
@@ -1170,6 +1179,7 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
     sp(env),
     fp(env)
   );
+  push(env, retVal);
 }
 
 //////////////////////////////////////////////////////////////////////

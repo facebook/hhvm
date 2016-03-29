@@ -87,14 +87,31 @@ void assertNativeStackAligned(Vout& v) {
   }
 }
 
+/*
+ * Load and store the VM registers from/to RDS.
+ */
 void loadVMRegs(Vout& v) {
   v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
   v << load{rvmtl()[rds::kVmspOff], rvmsp()};
 }
-
 void storeVMRegs(Vout& v) {
   v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
   v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
+}
+
+/*
+ * Load and store the PHP return registers from/to the top of the VM stack.
+ *
+ * Note that we don't do loadb{}/storeb{} for the type register, because we
+ * sometimes need to preserve the m_aux field across returns.
+ */
+void loadReturnRegs(Vout& v) {
+  v << load{rvmsp()[TVOFF(m_data)], rret_data()};
+  v << load{rvmsp()[TVOFF(m_type)], rret_type()};
+}
+void storeReturnRegs(Vout& v) {
+  v << store{rret_data(), rvmsp()[TVOFF(m_data)]};
+  v << store{rret_type(), rvmsp()[TVOFF(m_type)]};
 }
 
 void loadMCG(Vout& v, Vreg d) {
@@ -295,10 +312,11 @@ TCA emitFCallHelperThunk(CodeBlock& cb, DataBlock& data) {
     unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
       // A nullptr dest means the callee was intercepted and should be skipped.
       // Make a copy of the current rvmfp(), which belongs to the callee,
-      // before syncing VM regs.
+      // before syncing VM regs and return regs.
       auto const callee_fp = v.makeReg();
       v << copy{rvmfp(), callee_fp};
       loadVMRegs(v);
+      loadReturnRegs(v);
 
       // Do a PHP return to the caller---i.e., relative to the callee's frame.
       // Note that if intercept skips the callee, it tears down its frame but
@@ -371,7 +389,10 @@ TCA emitInterpRet(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
   auto const start = vwrap(cb, data, [] (Vout& v) {
+    // Sync return regs before calling native assert function.
+    storeReturnRegs(v);
     assertNativeStackAligned(v);
+
     v << lea{rvmsp()[-AROFF(m_r)], r_svcreq_arg(0)};
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
@@ -385,6 +406,9 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data) {
 
   auto const start = vwrap(cb, data, [] (Vout& v) {
     assertNativeStackAligned(v);
+    // Note that we don't need to sync the return registers to memory.
+    // Generators pass return values through both the eval stack and the
+    // registers, so the memory location already contains the same value.
     loadGenFrame<async>(v, r_svcreq_arg(0));
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
@@ -396,6 +420,8 @@ TCA emitDebuggerInterpRet(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
+    // Sync return regs before calling native assert function.
+    storeReturnRegs(v);
     assertNativeStackAligned(v);
 
     auto const ar = v.makeReg();
@@ -438,7 +464,7 @@ constexpr ptrdiff_t bl_rel(ptrdiff_t off) {
 void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
   auto const resultOff = ar_rel(AFWH::resultOff());
   v << store{data, rvmfp()[resultOff + TVOFF(m_data)]};
-  v << storeb{type, rvmfp()[resultOff + TVOFF(m_type)]};
+  v << store{type, rvmfp()[resultOff + TVOFF(m_type)]};
 }
 
 /*
@@ -525,13 +551,13 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data) {
      * Handle the return value, unblock any additional parents, release the
      * WaitHandle, and transfer control to the parent.
      */
-    // Incref the return value.  In addition to pushing the it onto the stack,
-    // we are also storing it in the AFWH object.
+    // Incref the return value.  In addition to pushing it onto the stack, we
+    // are also storing it in the AFWH object.
     emitIncRefWork(v, data, type);
 
     // Write the return value to the stack and the AFWH object.
-    v << storeb{type, rvmsp()[TVOFF(m_type)]};
     v << store{data, rvmsp()[TVOFF(m_data)]};
+    v << storeb{type, rvmsp()[TVOFF(m_type)]};
     storeAFWHResult(v, data, type);
 
     // Load the next parent in the chain, and unblock the whole chain.
@@ -588,11 +614,6 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data) {
     // Decref the WaitHandle.  We only do it once here (unlike in the fast
     // path) because the scheduler drops the other reference.
     emitDecRefWorkObj(v, wh);
-
-    // Adjust stack: on slow path, retVal is not pushed on stack yet.
-    auto const sync_sp = v.makeReg();
-    v << lea{rvmsp()[cellsToBytes(1)], sync_sp};
-    v << syncvmsp{sync_sp};
 
     v << leavetc{php_return_regs()};
   });
@@ -687,7 +708,8 @@ TCA emitFCallArrayHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
       // If false was returned, we should skip the callee.  The interpreter
       // will have popped the pre-live ActRec already, so we can just return to
-      // the caller.
+      // the caller after syncing the return regs.
+      loadReturnRegs(v);
       v << stubret{};
     });
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
@@ -753,8 +775,14 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
   });
 
   rh.reenterTC = vwrap(cb, data, [] (Vout& v) {
+    // Save the return of handleResume(), then sync regs.
+    auto const target = v.makeReg();
+    v << copy{rret(), target};
+
     loadVMRegs(v);
-    v << jmpr{rret()};
+    loadReturnRegs(v);  // spurious load if we're not returning
+
+    v << jmpr{target};
   });
 
   return rh;
@@ -890,10 +918,22 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
 TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   us.enterTCExit = vwrap(cb, data, [&] (Vout& v) {
-    // Eagerly save VM regs, realign the native stack, then perform a native
-    // return.
+    // Eagerly save VM regs and realign the native stack.
     storeVMRegs(v);
     v << lea{rsp()[8], rsp()};
+
+    // Store the return value on the top of the eval stack.  Whenever we get to
+    // enterTCExit, we're semantically executing some PHP construct that sends
+    // a return value out of a function (either a RetC, or a Yield, or an Await
+    // that's suspending, etc), and moreover, we must be executing the return
+    // that leaves this level of VM reentry (i.e. the only way we get here is
+    // by coming from the callToExit stub).
+    //
+    // Either way, we have a live PHP return value in the return registers,
+    // which we need to put on the top of the evaluation stack.
+    storeReturnRegs(v);
+
+    // Perform a native return.
     v << stubret{RegSet(), true};
   });
 
@@ -986,8 +1026,10 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
     v << lea{rsp()[reqinfo_sz], rsp()};
 
     // rvmtl() was preserved by the callee, but rvmsp() and rvmfp() might've
-    // changed if we interpreted anything.  Reload them.
+    // changed if we interpreted anything.  Reload them.  Also load the return
+    // regs; if we're not returning, it's a spurious load.
     loadVMRegs(v);
+    loadReturnRegs(v);
 
     v << jmpr{ret};
   });

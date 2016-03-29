@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -179,8 +180,12 @@ void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src) {
 
 /*
  * Emit code to load `src' into `loc', the registers representing `dst'.
+ *
+ * If `aux' is true, we also need to load the m_aux field of the TypedValue
+ * into the type reg.  This should only happen when loading a return value.
  */
-void loadTV(Vout& v, const SSATmp* dst, Vloc loc, Vptr src) {
+void loadTV(Vout& v, const SSATmp* dst, Vloc loc,
+            Vptr src, bool aux = false) {
   auto const type = dst->type();
 
   if (loc.isFullSIMD()) {
@@ -192,7 +197,11 @@ void loadTV(Vout& v, const SSATmp* dst, Vloc loc, Vptr src) {
 
   if (type.needsReg()) {
     assertx(loc.hasReg(1));
-    v << loadb{src + TVOFF(m_type), loc.reg(1)};
+    if (aux) {
+      v << load{src + TVOFF(m_type), loc.reg(1)};
+    } else {
+      v << loadb{src + TVOFF(m_type), loc.reg(1)};
+    }
   }
 
   if (type <= TBool) {
@@ -222,6 +231,35 @@ void maybe_syncsp(Vout& v, BCMarker marker, Vreg irSP, IRSPRelOffset off) {
 
 RegSet cross_trace_args(BCMarker marker) {
   return marker.resumed() ? cross_trace_regs_resumed() : cross_trace_regs();
+}
+
+void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
+                         folly::Optional<AuxUnion> aux) {
+  auto const type = [&] {
+    auto const mask = [&] { return uint64_t{(*aux).u_raw} << 32; };
+
+    if (!retLoc.hasReg(1)) {
+      auto const dt = retVal->type().toDataType();
+      return aux ? v.cns(dt | mask()) : v.cns(dt);
+    }
+    auto const type = retLoc.reg(1);
+
+    if (!aux) {
+      auto const ret = v.makeReg();
+      v << copy{type, ret};
+      return ret;
+    }
+
+    auto const extended = v.makeReg();
+    auto const result = v.makeReg();
+
+    v << movzbq{type, extended};
+    v << orq{extended, v.cns(mask()), result, v.makeReg()};
+    return result;
+  }();
+  auto const data = zeroExtendIfBool(v, retVal, retLoc.reg(0));
+
+  v << syncvmret{data, type};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1731,13 +1769,9 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
   v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
 }
 
-void CodeGenerator::cgStRetVal(IRInstruction* inst) {
-  auto const rFp = srcLoc(inst, 0).reg();
-  storeTV(vmain(), rFp[AROFF(m_r)], srcLoc(inst, 1), inst->src(1));
-  if (RuntimeOption::EvalHHIRGenerateAsserts &&
-      inst->extra<StRetValData>()->wide) {
-    vmain() << storeli{0xbadbaad, rFp[AROFF(m_r.m_aux.u_fcallAwaitFlag)]};
-  }
+void CodeGenerator::cgLdRetVal(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  loadTV(vmain(), inst->dst(), dstLoc(inst, 0), fp[AROFF(m_r)], true);
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
@@ -1746,8 +1780,6 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   }
   checkFrame(fp, sp, /*fullCheck*/ false, 0);
   assertx(sp <= (Cell*)fp || fp->resumed());
-  // check return value if stack not empty
-  if (sp < (Cell*)fp) assertTv(sp);
 }
 
 static Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
@@ -1778,12 +1810,17 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{prev_fp, sync_sp, ripReg}}), v.makeTuple({})};
   }
 
+  prepare_return_regs(v, inst->src(2), srcLoc(inst, 2),
+                      inst->extra<RetCtrl>()->aux);
   v << phpret{fp, rvmfp(), php_return_regs()};
 }
 
 void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
+  auto& v = vmain();
   adjustSPForReturn(m_state, inst);
-  vmain() << leavetc{php_return_regs()};
+  prepare_return_regs(v, inst->src(2), srcLoc(inst, 2),
+                      inst->extra<AsyncRetCtrl>()->aux);
+  v << leavetc{php_return_regs()};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
@@ -2691,6 +2728,9 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
                   {done, m_state.labels[inst->taken()]}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;
+
+  auto const dst = dstLoc(inst, 0);
+  v << defvmret{dst.reg(0), dst.reg(1)};
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
@@ -2758,6 +2798,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     // register so the trace we are returning to has it where it expects.
     // TODO(#1273094): we should probably modify the actual builtins to return
     // values via registers using the C ABI and do a reg-to-reg move.
+    loadTV(v, inst->dst(), dstLoc(inst, 0), rvmfp()[AROFF(m_r)], true);
     v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
     emitRB(v, Trace::RBTypeFuncExit, callee->fullName()->data());
     return;
@@ -2777,6 +2818,9 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   v << callphp{addr, php_call_regs(), {{next, catchBlock}}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
+
+  auto const dst = dstLoc(inst, 0);
+  v << defvmret{dst.reg(0), dst.reg(1)};
 }
 
 void CodeGenerator::cgCastHelper(IRInstruction *inst,
@@ -3081,6 +3125,10 @@ void CodeGenerator::cgDbgTrashFrame(IRInstruction* inst) {
 
 void CodeGenerator::cgDbgTrashMem(IRInstruction* inst) {
   emitTrashTV(srcLoc(inst, 0).reg(), 0, kTVTrashJITHeap);
+}
+
+void CodeGenerator::cgDbgTrashRetVal(IRInstruction* inst) {
+  emitTrashTV(srcLoc(inst, 0).reg(), AROFF(m_r), kTVTrashJITRetVal);
 }
 
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
@@ -4837,24 +4885,18 @@ void emitPackTVRegs(Vout& v, Vloc loc, const SSATmp* src,
 }
 
 void CodeGenerator::cgAsyncRetFast(IRInstruction* inst) {
-  auto const retValLoc = srcLoc(inst, 2);
-  auto const retValSrc = inst->src(2);
+  auto const ret = inst->src(2);
+  auto const retLoc = srcLoc(inst, 2);
   auto& v = vmain();
 
-  // Here we sync stack assuming the return value will be pushed onto stack by
-  // the stub, i.e. the fast path case.  If slow path is taken, SP will be
-  // adjusted accordingly.
   adjustSPForReturn(m_state, inst);
 
-  // The asyncRetCtrl stub takes 2 arguments: data and type of the return value.
-  emitPackTVRegs(v, retValLoc, retValSrc, rarg(0), rarg(1));
+  // The asyncRetCtrl stub takes the return TV as its arguments.
+  emitPackTVRegs(v, retLoc, ret, rarg(0), rarg(1));
+  auto args = vm_regs_with_sp() | rarg(1);
+  if (!ret->isA(TNull)) args |= rarg(0);
 
-  RegSet asyncStubRegs(vm_regs_with_sp() | rarg(1));
-  if (!(retValSrc->isA(TNull))) {
-      asyncStubRegs |= rarg(0);
-  }
-  auto const stub = mcg->ustubs().asyncRetCtrl;
-  v << jmpi{stub, asyncStubRegs};
+  v << jmpi{mcg->ustubs().asyncRetCtrl, args};
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
@@ -5578,30 +5620,26 @@ void CodeGenerator::cgStARNumArgsAndFlags(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdTVAux(IRInstruction* inst) {
-  auto const extra = inst->extra<LdTVAux>();
-  auto tv = srcLoc(inst, 0).reg();
-  auto dst = dstLoc(inst, 0).reg();
-  auto &v = vmain();
-  v << loadzlq{tv[TVOFF(m_aux)], dst};
+  auto const tv = srcLoc(inst, 0);
+  assertx(tv.hasReg(1));
+  auto const type = tv.reg(1);
+  auto const dst = dstLoc(inst, 0).reg();
+
+  auto& v = vmain();
+  v << shrqi{32, type, dst, v.makeReg()};
+
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto mask = -extra->valid - 1;
+    auto const extra = inst->extra<LdTVAux>();
+    auto const mask = -extra->valid - 1;
+
     if (mask) {
       auto const sf = v.makeReg();
       v << testqi{mask, dst, sf};
       ifThen(v, CC_NZ, sf, [](Vout& v) {
-          v << ud2{};
-        });
+        v << ud2{};
+      });
     }
   }
-}
-
-void CodeGenerator::cgStTVAux(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  auto const val = srcLoc(inst, 1).reg();
-  auto &v = vmain();
-  auto const tmp = v.makeReg();
-  v << movtql{val, tmp};
-  v << storel{tmp, fp[AROFF(m_r.m_aux.u_fcallAwaitFlag)]};
 }
 
 void CodeGenerator::cgLdARInvName(IRInstruction* inst) {

@@ -198,6 +198,7 @@ bool canDCE(IRInstruction* inst) {
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
+  case LdRetVal:
   case Mov:
   case CountArray:
   case CountArrayFast:
@@ -354,7 +355,6 @@ bool canDCE(IRInstruction* inst) {
   case CallBuiltin:
   case RetCtrl:
   case AsyncRetCtrl:
-  case StRetVal:
   case ReleaseVVAndSkip:
   case GenericRetDecRefs:
   case StMem:
@@ -524,6 +524,7 @@ bool canDCE(IRInstruction* inst) {
   case DbgTrashStk:
   case DbgTrashFrame:
   case DbgTrashMem:
+  case DbgTrashRetVal:
   case EnterFrame:
   case CheckStackOverflow:
   case InitExtraArgs:
@@ -532,7 +533,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckARMagicFlag:
   case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
-  case StTVAux:
   case StARInvName:
   case ExitPlaceholder:
   case ThrowOutOfBounds:

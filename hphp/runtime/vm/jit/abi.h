@@ -65,6 +65,48 @@ PhysReg rsp();
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Calling convention registers.
+
+/*
+ * PHP return value registers.
+ */
+PhysReg rret_data();
+PhysReg rret_type();
+
+/*
+ * Native return value registers.
+ */
+PhysReg rret(size_t i = 0);
+PhysReg rret_simd(size_t i);
+
+/*
+ * Native argument registers.
+ */
+PhysReg rarg(size_t i);
+PhysReg rarg_simd(size_t i);
+
+/*
+ * Number of available argument registers.
+ */
+size_t num_arg_regs();
+size_t num_arg_regs_simd();
+
+/*
+ * RegSet for a call with `n' arguments.
+ */
+RegSet arg_regs(size_t n);
+RegSet arg_regs_simd(size_t n);
+
+/*
+ * Service request argument registers.
+ */
+PhysReg r_svcreq_req();
+PhysReg r_svcreq_stub();
+PhysReg r_svcreq_sf();
+PhysReg r_svcreq_arg(size_t i);
+
+
+///////////////////////////////////////////////////////////////////////////////
 // JIT and TC boundary ABI registers.
 //
 // These registers should not be used for scratch purposes between tracelets,
@@ -101,7 +143,9 @@ inline RegSet php_call_regs() { return cross_trace_regs(); }
  *
  * TODO(#2288359): We don't want this to include rvmsp() eventually.
  */
-inline RegSet php_return_regs() { return vm_regs_with_sp(); }
+inline RegSet php_return_regs() {
+  return vm_regs_with_sp() | rret_data() | rret_type();
+}
 
 /*
  * Registers that are live on entry to fcallArrayHelper.
@@ -109,42 +153,6 @@ inline RegSet php_return_regs() { return vm_regs_with_sp(); }
  * TODO(#2288359): We don't want this to include rvmsp() eventually.
  */
 inline RegSet fcall_array_regs() { return vm_regs_with_sp(); }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Calling convention registers.
-
-/*
- * Native return value registers.
- */
-PhysReg rret(size_t i = 0);
-PhysReg rret_simd(size_t i);
-
-/*
- * Native argument registers.
- */
-PhysReg rarg(size_t i);
-PhysReg rarg_simd(size_t i);
-
-/*
- * Number of available argument registers.
- */
-size_t num_arg_regs();
-size_t num_arg_regs_simd();
-
-/*
- * RegSet for a call with `n' arguments.
- */
-RegSet arg_regs(size_t n);
-RegSet arg_regs_simd(size_t n);
-
-/*
- * Service request argument registers.
- */
-PhysReg r_svcreq_req();
-PhysReg r_svcreq_stub();
-PhysReg r_svcreq_sf();
-PhysReg r_svcreq_arg(size_t i);
 
 ///////////////////////////////////////////////////////////////////////////////
 

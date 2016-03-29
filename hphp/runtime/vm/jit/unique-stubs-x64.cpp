@@ -103,9 +103,13 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       // is exactly 16 bytes.
       v << lea{rsp()[16], rsp()};
 
-      // Sync vmsp and return to the caller.  This unbalances the return stack
-      // buffer, but if we're intercepting, we probably don't care.
+      // Sync vmsp and the return regs.
       v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+      v << load{rvmsp()[TVOFF(m_data)], rret_data()};
+      v << load{rvmsp()[TVOFF(m_type)], rret_type()};
+
+      // Return to the caller.  This unbalances the return stack buffer, but if
+      // we're intercepting, we probably don't care.
       v << jmpr{saved_rip};
     });
 
@@ -267,8 +271,16 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
 
   auto const start = a.frontier();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    always_assert(rarg(0) != rret(0) &&
+                  rarg(0) != rret(1));
     a.movq(rsp(), rarg(0));
+
+    // We need to spill the return registers around the assert call.
+    a.push(rret(0));
+    a.push(rret(1));
     a.call(TCA(assert_tc_saved_rip));
+    a.pop(rret(1));
+    a.pop(rret(0));
   }
 
   // Emulate a ret to enterTCExit without actually doing one to avoid
@@ -344,6 +356,13 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void enterTCImpl(TCA start, ActRec* stashedAR) {
+  static_assert(rvmfp() == reg::rbp &&
+                rvmsp() == reg::rbx &&
+                rvmtl() == reg::r12 &&
+                rret_data() == reg::rax &&
+                rret_type() == reg::rdx,
+                "enterTCHelper needs to be modified to use the correct ABI");
+
   // We have to force C++ to spill anything that might be in a callee-saved
   // register (aside from %rbp), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();

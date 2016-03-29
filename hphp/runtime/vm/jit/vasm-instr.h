@@ -98,6 +98,8 @@ struct Vunit;
   /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
+  O(defvmret, Inone, Un, D(data) D(type))\
+  O(syncvmret, Inone, U(data) U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
   O(stubtophp, Inone, Un, Dn)\
   O(loadstubret, Inone, Un, D(d))\
@@ -626,6 +628,21 @@ struct defvmsp { Vreg d; };
  * bindjmp{} or fallbackcc{}.
  */
 struct syncvmsp { Vreg s; };
+
+/*
+ * Copy the PHP return value from the return registers into `data' and `type'.
+ *
+ * Used right after an instruction that makes a PHP call (like the
+ * suggestively-named callphp{}) to receive the values as Vregs.
+ */
+struct defvmret { Vreg data; Vreg type; };
+
+/*
+ * Copy a PHP return value into the return registers (rreg(0) and rreg(1)).
+ *
+ * This should be used right before we execute a phpret{}.
+ */
+struct syncvmret { Vreg data; Vreg type; };
 
 /*
  * PHP function prologue.

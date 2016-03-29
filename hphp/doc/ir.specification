@@ -1367,7 +1367,7 @@ To string conversions:
   callee frame. Everything below InlineFrameStart is dead.
 
 | CallArray<spOffset,numParams,callOff,after,destroyLocals>,
-|                       ND,
+|                       D(Gen),
 |                       S(StkPtr) S(FramePtr),
 |                       Er
 
@@ -1383,7 +1383,7 @@ To string conversions:
   Stores bcOffset into the frame at spOffset from S0 as the return bytecode
   address and the frame S1 as the return frame.
 
-| Call<offset,numParams,returnOff,funcd,destroyLocals>, ND,
+| Call<offset,numParams,returnOff,funcd,destroyLocals>, D(Gen),
 |                                                       S(StkPtr) S(FramePtr),
 |                                                       Er
 
@@ -1420,25 +1420,37 @@ To string conversions:
     Object              {Obj|InitNull}    destination
     Variant             {Gen-UninitNull}  destination
 
-| RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr), T
+| RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(Gen), T
 
-  Ensure that S0 + `spOff' (in cells) is stored in rvmsp, S1's saved frame
-  pointer is stored in rvmfp, and return to the saved return address in
-  S1.  `suspendingResumed' indicates when this instruction is suspending a
-  resumable rather than performing a normal function return.
+  Ensure that S0 + `spOff' (in cells) is stored in rvmsp and that S1's saved
+  frame pointer is stored in rvmfp, then return to the saved return address in
+  S1.  The return value is S2, which is passed via the rret_*() registers to
+  the caller.  The `suspendingResumed' flag indicates when this instruction is
+  suspending a resumable rather than performing a normal function return.
 
-| AsyncRetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr), T
+| AsyncRetCtrl<spOff,suspendingResumed>, ND,
+|                                        S(StkPtr) S(FramePtr) S(InitNull),
+|                                        T
 
-  Ensure that S0 + `spOff` (in cells) is stored in rVmSp, S1 is stored in
-  rVmFp.  `suspendingResumed' indicates when this instruction is suspending a
-  resumable rather than performing an async function return.  Returns by
-  leaving the TC to enterTCHelper.
+  Ensure that S0 + `spOff` (in cells) is stored in rvmsp and that S1 is stored
+  in rvmfp.  The `suspendingResumed' flag indicates when this instruction is
+  suspending a resumable rather than performing an async function return.
+  Returns by leaving the TC to enterTCHelper.
 
-| StRetVal<wide>, ND, S(FramePtr) S(Gen), CRc
+  The return value is S2, which is passed via the rret_*() registers, and must
+  be null---it is only used for enterTCHelper and ignored by everything else;
+  resumed functions store their real return value into the Resumable object.
 
-  Writes the value in S1 to the return value slot on the activation record
-  pointed to by S0.
-  If wide is true, can clobber the aux field of the return value slot.
+| LdRetVal, D(Gen), S(FramePtr), NF
+
+  Load the return value from the already-returned-from ActRec pointed to by S0
+  into the dest.  This is used by NativeImpl.  TODO(#7150575): We want to make
+  NativeImpl return a TypedValue in the C++ ABI registers.
+
+| DbgTrashRetVal, ND, S(FramePtr), NF
+
+  Writes trash to the return value slot on the activation record pointed to by
+  S0.
 
 | ReleaseVVAndSkip, ND, S(FramePtr), B
 
@@ -2614,14 +2626,10 @@ fields of that struct for holding intermediate values.
   pointed to by the frame pointer S0 as the first argument, and the pointer to
   the first parameter in the frame as the second argument.
 
-| LdTVAux<ValidBits>, D(Int), S(PtrToStkGen), NF
+| LdTVAux<ValidBits>, D(Int), S(Gen), NF
 
-  Load the value of m_aux from the Cell pointed to by S0. ValidBits is a mask
-  specifying which bits are allowed to be set. The runtime may ignore it.
-
-| StTVAux, ND, S(FramePtr) S(Int), CRc
-
-  Store S1 to m_aux field of the m_ret field of the frame pointed to by S0.
+  Load the value of m_aux from the TypedValue S0.  ValidBits is a mask
+  specifying which bits are allowed to be set.  The runtime may ignore it.
 
 /* Local Variables: */
 /* fill-column: 79 */

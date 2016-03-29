@@ -72,6 +72,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cvttsd2siq:
     case Vinstr::decl:
     case Vinstr::decq:
+    case Vinstr::defvmret:
     case Vinstr::defvmsp:
     case Vinstr::divint:
     case Vinstr::divsd:
@@ -241,6 +242,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::stubtophp:
     case Vinstr::loadstubret:
     case Vinstr::syncpoint:
+    case Vinstr::syncvmret:
     case Vinstr::syncvmsp:
     case Vinstr::tailcallphp:
     case Vinstr::tailcallstub:

@@ -64,7 +64,7 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
 
   ObjectData* m_generator; // has AsyncGenerator nativedata.
 
-  // valid if STATE_SCHEDULED || STATE_BLOCKED
+  // valid if STATE_READY || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
   AsioBlockable m_blockable;
 };

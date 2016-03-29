@@ -47,9 +47,9 @@ struct c_ResumableWaitHandle : c_WaitableWaitHandle {
   void resume();
   void exitContext(context_idx_t ctx_idx);
 
-  static const int8_t STATE_BLOCKED   = 2;
-  static const int8_t STATE_SCHEDULED = 3;
-  static const int8_t STATE_RUNNING   = 4;
+  static const int8_t STATE_BLOCKED   = 2; // waiting on dependencies.
+  static const int8_t STATE_READY     = 3; // ready to run
+  static const int8_t STATE_RUNNING   = 4; // currently running
 };
 
 inline c_ResumableWaitHandle* c_WaitHandle::asResumable() {

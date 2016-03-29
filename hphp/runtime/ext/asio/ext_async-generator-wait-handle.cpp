@@ -72,12 +72,12 @@ c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
 
 void c_AsyncGeneratorWaitHandle::resume() {
   // may happen if scheduled in multiple contexts
-  if (getState() != STATE_SCHEDULED) {
+  if (getState() != STATE_READY) {
     decRefObj(this);
     return;
   }
 
-  assert(getState() == STATE_SCHEDULED);
+  assert(getState() == STATE_READY);
   assert(m_child->isFinished());
   setState(STATE_RUNNING);
 
@@ -106,7 +106,7 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncGeneratorWaitHandle::onUnblocked() {
-  setState(STATE_SCHEDULED);
+  setState(STATE_READY);
   if (isInContext()) {
     getContext()->schedule(this);
   } else {
@@ -167,7 +167,7 @@ c_WaitableWaitHandle* c_AsyncGeneratorWaitHandle::getChild() {
     assert(m_child);
     return m_child;
   } else {
-    assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
+    assert(getState() == STATE_READY || getState() == STATE_RUNNING);
     return nullptr;
   }
 }
@@ -196,7 +196,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
       decRefObj(this);
       break;
 
-    case STATE_SCHEDULED:
+    case STATE_READY:
       // Recursively move all wait handles blocked by us.
       getParentChain().exitContext(ctx_idx);
 

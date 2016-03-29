@@ -111,7 +111,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   }
 
   bool isFastResumable() const {
-    assert(getState() == STATE_SCHEDULED);
+    assert(getState() == STATE_READY);
     return (resumable()->resumeAddr() &&
             m_children[0].getChild()->isSucceeded());
   }
@@ -121,7 +121,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   void initialize(c_WaitableWaitHandle* child);
   void prepareChild(c_WaitableWaitHandle* child);
 
-  // valid if STATE_SCHEDULED || STATE_BLOCKED
+  // valid if STATE_READY || STATE_BLOCKED
   Node m_children[1];
 };
 

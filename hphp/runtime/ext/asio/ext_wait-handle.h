@@ -174,8 +174,8 @@ struct c_WaitHandle : ObjectData {
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().
-  static const int8_t STATE_SUCCEEDED = 0;
-  static const int8_t STATE_FAILED    = 1;
+  static const int8_t STATE_SUCCEEDED = 0; // completed with result
+  static const int8_t STATE_FAILED    = 1; // completed with exception
 
  private: // layout, ignoring ObjectData fields.
   // 0                           8             9             10 12

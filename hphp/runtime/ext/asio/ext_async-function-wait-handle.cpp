@@ -106,13 +106,13 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 
 void c_AsyncFunctionWaitHandle::resume() {
   // may happen if scheduled in multiple contexts
-  if (getState() != STATE_SCHEDULED) {
+  if (getState() != STATE_READY) {
     decRefObj(this);
     return;
   }
 
   auto const child = m_children[0].getChild();
-  assert(getState() == STATE_SCHEDULED);
+  assert(getState() == STATE_READY);
   assert(child->isFinished());
   setState(STATE_RUNNING);
 
@@ -137,7 +137,7 @@ void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncFunctionWaitHandle::onUnblocked() {
-  setState(STATE_SCHEDULED);
+  setState(STATE_READY);
   if (isInContext()) {
     if (isFastResumable()) {
       getContext()->scheduleFast(this);
@@ -214,7 +214,7 @@ void c_AsyncFunctionWaitHandle::failCpp() {
 String c_AsyncFunctionWaitHandle::getName() {
   switch (getState()) {
     case STATE_BLOCKED:
-    case STATE_SCHEDULED:
+    case STATE_READY:
     case STATE_RUNNING: {
       auto func = actRec()->func();
       if (!actRec()->getThisOrClass() ||
@@ -263,7 +263,7 @@ c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
     return m_children[0].getChild();
   } else {
-    assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
+    assert(getState() == STATE_READY || getState() == STATE_RUNNING);
     return nullptr;
   }
 }
@@ -292,7 +292,7 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
       decRefObj(this);
       break;
 
-    case STATE_SCHEDULED:
+    case STATE_READY:
       // Recursively move all wait handles blocked by us.
       getParentChain().exitContext(ctx_idx);
 

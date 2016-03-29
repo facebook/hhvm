@@ -104,7 +104,7 @@ namespace {
     }
 
     void enter(c_ResumableWaitHandle* node) {
-      if (node->getState() == c_ResumableWaitHandle::STATE_SCHEDULED) {
+      if (node->getState() == c_ResumableWaitHandle::STATE_READY) {
         node->getContext()->schedule(node);
         node->incRefCount();
       }

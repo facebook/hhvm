@@ -58,7 +58,7 @@ inline void cpuRelax() {
 #elif __powerpc64__
   asm volatile("or 31,31,31");
 #elif __aarch64__
-  asm volatile("wfe");
+  asm volatile("yield");
 #endif
 }
 

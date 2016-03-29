@@ -32,6 +32,7 @@ inline Arch arch() {
 #elif defined(__aarch64__)
   return Arch::ARM;
 #else
+  if (RuntimeOption::EvalSimulateARM) return Arch::ARM;
   return Arch::X64;
 #endif
 }

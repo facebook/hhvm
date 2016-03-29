@@ -131,18 +131,7 @@ void checkType(IRGS& env, const Location& loc,
 void predictType(IRGS& env, const Location& loc, Type type) {
   FTRACE(1, "predictType {}: {}\n", show(loc), type);
   assertx(type <= TGen);
-
-  switch (loc.tag()) {
-    case LTag::Stack:
-      env.irb->fs().refineStackPredictedType(
-        offsetFromIRSP(env, offsetFromBCSP(env, loc.stackIdx())),
-        type
-      );
-      break;
-    case LTag::Local:
-      env.irb->fs().refineLocalPredictedType(loc.localId(), type);
-      break;
-  }
+  env.irb->fs().refinePredictedType(loc, type);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -313,12 +313,22 @@ class CommonTests(object):
             options=['--auto-complete'],
             stdin='<?hh function f() { some_AUTO332\n')
 
+    def test_list_files(self):
+        """
+        Test hh_client --list-files
+        """
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        self.write_load_config('foo_2.php')
+        self.check_cmd_and_json_cmd([
+            '{root}foo_1.php',
+            ], [
+            '{root}foo_1.php',  # see comment for identify-function
+            ], options=['--list-files'])
+
     def test_misc_ide_tools(self):
         """
-        Test hh_client --type-at-pos, --identify-function,
-        --list-files, --find-lvar-refs, and --get-method-name
+        Test hh_client --type-at-pos and --identify-function
         """
-
         self.write_load_config()
 
         self.check_cmd_and_json_cmd([
@@ -339,12 +349,12 @@ class CommonTests(object):
             options=['--identify-function', '1:51'],
             stdin='<?hh class Foo { private function bar() { $this->bar() }}')
 
+    def test_find_lvar_refs(self):
+        """
+        Test --find-lvar-refs
+        """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
-        self.check_cmd_and_json_cmd([
-            '{root}foo_1.php',
-            ], [
-            '{root}foo_1.php',  # see comment for identify-function
-            ], options=['--list-files'])
+        self.write_load_config('foo_2.php')
 
         self.check_cmd_and_json_cmd([
             'line 3, characters 15-16',
@@ -371,6 +381,13 @@ function test($x) {
 }
 ''')
 
+    def test_get_method_name(self):
+        """
+        Test --get-method-name
+        """
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        self.write_load_config('foo_2.php')
+
         self.check_cmd_and_json_cmd([
             'Name: \\C::foo, type: method, position: line 8, characters 7-9'
             ], [
@@ -390,6 +407,11 @@ function test(C $c) {
 }
 ''')
 
+    def test_format(self):
+        """
+        Test --format
+        """
+        self.write_load_config()
         self.check_cmd_and_json_cmd([
             'function test1(int $x) {{',
             '  $x = $x * x + 3;',

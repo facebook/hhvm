@@ -1,1 +1,4 @@
-Fatal error: Timeout reached waiting for an available pooled curl connection! %s
+
+Fatal error: Uncaught exception 'RuntimeException' with message 'Timeout reached waiting for an available pooled curl connection!' in %s/hphp/test/slow/ext_curl/get_pooled_curl_timeout_works.php:4
+Stack trace:
+#0 {main}

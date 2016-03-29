@@ -34,7 +34,6 @@ enum PageletStatusType {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t HHVM_FUNCTION(hphp_thread_type);
-bool HHVM_FUNCTION(dangling_server_proxy_old_request);
 bool HHVM_FUNCTION(pagelet_server_is_enabled);
 Resource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,

@@ -2056,7 +2056,7 @@ function find_open_port() {
   error("Couldn't find an open port");
 }
 
-function start_server_impl($options, $config, $port) {
+function start_server_proc($options, $config, $port) {
   $threads = $options['threads'];
   $command = hhvm_cmd_impl(
     $options,
@@ -2101,16 +2101,26 @@ function start_server_impl($options, $config, $port) {
   return $status;
 }
 
-function start_server($options, $config) {
-  for ($i = 0; $i < 5; ++$i) {
-    $port = find_open_port();
-    $status = start_server_impl($options, $config, $port);
+/*
+ * For each config file in $configs, start up a server on a randomly-determined
+ * port. Return value is an array mapping pids and config files to arrays of
+ * information about the server.
+ */
+function start_servers($options, $configs) {
+  $starting = array();
+  foreach ($configs as $config) {
+    $starting[] = start_server_proc($options, $config, find_open_port());
+  }
 
-    // Wait for the server to start responding. If someone else bound to $port
-    // between the call to find_open_port and the call to proc_open, then we
-    // might start talking to them thinking it's our server.
-    for ($j = 0; $j < 40; ++$j) {
-      $new_status = proc_get_status($status['proc']);
+  $start_time = microtime(true);
+  $servers = array('pids' => array(), 'configs' => array());
+
+  // Wait for all servers to come up.
+  while (count($starting) > 0) {
+    $still_starting = array();
+
+    foreach ($starting as $server) {
+      $new_status = proc_get_status($server['proc']);
 
       if (!$new_status['running']) {
         if ($new_status['exitcode'] === 0) {
@@ -2121,34 +2131,29 @@ function start_server($options, $config) {
         if (getenv('HHVM_TEST_SERVER_LOG')) {
           echo "\n\nLost connection race on port $port. Trying another.\n\n";
         }
-        continue 2;
+        $still_starting[] =
+          start_server_proc($options, $server['config'], find_open_port());
+      } else if (!port_is_listening($server['port'])) {
+        $still_starting[] = $server;
+      } else {
+        $servers['pids'][$server['pid']] =& $server;
+        $servers['configs'][$server['config']] =& $server;
+        unset($server);
       }
-
-      if (port_is_listening($port)) {
-        return $status;
-      }
-
-      usleep(250000);
     }
-    error("Server took too long to come up");
+
+    $starting = $still_starting;
+    $max_time = 10;
+    if (microtime(true) - $start_time > $max_time) {
+      error("Servers took more than $max_time seconds to come up");
+    }
+
+    // Take a short nap and try again.
+    usleep(100000);
   }
 
-  error("Couldn't start server");
-}
-
-/*
- * For each config file in $configs, start up a server on a randomly-determined
- * port. Return value is an array mapping pids and config files to arrays of
- * information about the server.
- */
-function start_servers($options, $configs) {
-  $servers = array('pids' => array(), 'configs' => array());
-  foreach ($configs as $config) {
-    $server = start_server($options, $config);
-    $servers['pids'][$server['pid']] =& $server;
-    $servers['configs'][$server['config']] =& $server;
-    unset($server);
-  }
+  $elapsed = microtime(true) - $start_time;
+  printf("Started %d servers in %.1f seconds\n\n", count($configs), $elapsed);
   return $servers;
 }
 
@@ -2271,7 +2276,7 @@ function main($argv) {
       $configs[$config] = $config;
     }
 
-    $max_configs = 10;
+    $max_configs = 20;
     if (count($configs) > $max_configs) {
       error("More than $max_configs unique config files will be needed to run ".
             "the tests you specified. They may not be a good fit for server ".
@@ -2408,7 +2413,7 @@ function main($argv) {
       }
       Status::serverRestarted();
       $server =& $servers['pids'][$pid];
-      $server = start_server_impl($options, $server['config'], $server['port']);
+      $server = start_server_proc($options, $server['config'], $server['port']);
 
       // Unset the old $pid entry and insert the new one.
       unset($servers['pids'][$pid]);

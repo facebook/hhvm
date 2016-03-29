@@ -17,11 +17,12 @@
 #define incl_HPHP_JIT_IRGEN_BUILTIN_H_
 
 namespace HPHP { namespace jit {
-struct SSATmp;
-struct IRGS;
-}}
 
-namespace HPHP { namespace jit { namespace irgen {
+struct SSATmp;
+
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

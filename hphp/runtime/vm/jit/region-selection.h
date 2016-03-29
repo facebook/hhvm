@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_JIT_REGION_SELECTION_H_
 #define incl_HPHP_JIT_REGION_SELECTION_H_
 
@@ -28,9 +29,11 @@
 #include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
+
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -65,7 +68,6 @@ enum class PGORegionMode {
 struct RegionDesc {
   struct Block;
   struct Arc;
-  struct Location;
   struct TypedLocation;
   struct GuardedLocation;
   struct ReffinessPred;
@@ -169,80 +171,6 @@ using RegionSet = hphp_hash_set<
   smart_pointer_hash<RegionDescPtr>
 >;
 
-/*
- * Specification of an HHBC-visible location that can have a type
- * hint.  This is currently either local variables or stack slots.
- *
- * Local variables are addressed by local id, and stack slots are
- * addressed by offset from the top of the stack at the HHBC opcode
- * being annoted.  So Stack{0} is the top of the stack, Stack{1} is
- * one slot under the top, etc.
- */
-struct RegionDesc::Location {
-  enum class Tag : uint32_t {
-    Local,
-    Stack,
-  };
-  struct Local { uint32_t locId;  };
-  struct Stack {
-    FPInvOffset offsetFromFP;
-  };
-
-  /* implicit */ Location(Local l) : m_tag{Tag::Local}, m_local(l) {}
-  /* implicit */ Location(Stack s) : m_tag{Tag::Stack}, m_stack(s) {}
-
-  Tag tag() const { return m_tag; };
-
-  uint32_t localId() const {
-    assertx(m_tag == Tag::Local);
-    return m_local.locId;
-  }
-
-  FPInvOffset offsetFromFP() const {
-    assertx(m_tag == Tag::Stack);
-    return m_stack.offsetFromFP;
-  }
-
-  bool operator==(const Location& other) const {
-    if (m_tag != other.m_tag) return false;
-
-    switch (m_tag) {
-    case Tag::Local:
-      return localId() == other.localId();
-    case Tag::Stack:
-      return offsetFromFP() == other.offsetFromFP();
-    }
-    not_reached();
-    return false;
-  }
-
-  bool operator!=(const Location& other) const {
-    return !(*this == other);
-  }
-
-  bool operator<(const Location& other) const {
-    if (m_tag < other.m_tag) return true;
-    if (m_tag > other.m_tag) return false;
-    switch (m_tag) {
-    case Tag::Local:
-      return localId() < other.localId();
-    case Tag::Stack:
-      return offsetFromFP() < other.offsetFromFP();
-    }
-    not_reached();
-    return false;
-  }
-
-  struct Hash { size_t operator()(Location loc) const; };
-
-private:
-  Tag m_tag;
-  union {
-    Local m_local;
-    Stack m_stack;
-  };
-};
-
 struct RegionDesc::Arc {
   BlockId src;
   BlockId dst;
@@ -270,8 +198,8 @@ inline bool operator==(const RegionDesc::TypedLocation& a,
  * Includes the type and the DataTypeCategory.
  */
 struct RegionDesc::GuardedLocation {
-  Location         location;
-  Type             type;
+  Location location;
+  Type type;
   DataTypeCategory category;
 };
 
@@ -441,8 +369,6 @@ private:
   void checkMetadata() const;
 
 private:
-  static BlockId s_nextId;
-
   BlockId         m_id;
   const Func*     m_func;
   const bool      m_resumed;
@@ -490,7 +416,7 @@ struct RegionContext {
  * Live information about the type of a local or stack slot.
  */
 struct RegionContext::LiveType {
-  RegionDesc::Location location;
+  Location location;
   Type type;
 };
 
@@ -638,7 +564,6 @@ bool check(const RegionDesc& region, std::string& error);
 /*
  * Debug stringification for various things.
  */
-std::string show(RegionDesc::Location);
 std::string show(RegionDesc::TypedLocation);
 std::string show(const RegionDesc::GuardedLocation&);
 std::string show(const RegionDesc::Block::GuardedLocVec&);

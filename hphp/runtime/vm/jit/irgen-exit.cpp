@@ -50,7 +50,7 @@ bool branchesToItself(SrcKey sk) {
  */
 void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   auto const curBCOff = bcOff(env);
-  auto const irSP = offsetFromIRSP(env, BCSPOffset{0});
+  auto const irSP = bcSPOffset(env);
   auto const invSP = invSPOff(env);
   if (env.firstBcInst && target.offset() == curBCOff) {
     gen(
@@ -133,7 +133,7 @@ Block* makeExitOpt(IRGS& env, TransID transId) {
   auto const data = ReqRetranslateOptData {
     transId,
     SrcKey { curSrcKey(env), targetBcOff },
-    offsetFromIRSP(env, BCSPOffset{0})
+    bcSPOffset(env)
   };
   gen(env, ReqRetranslateOpt, data, sp(env), fp(env));
   return exit;

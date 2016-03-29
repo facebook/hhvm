@@ -23,7 +23,7 @@ namespace HPHP {
 
 std::string TypedValue::pretty() const {
   char buf[20];
-  sprintf(buf, "0x%lx", long(m_data.num));
+  snprintf(buf, sizeof(buf), "0x%lx", long(m_data.num));
   return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));
 }
 

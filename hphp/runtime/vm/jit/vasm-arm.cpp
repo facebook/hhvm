@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
@@ -461,8 +461,9 @@ void lowerForARM(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void finishARM(Vunit& unit, Vtext& text, CGMeta& fixups,
-               const Abi& abi, AsmInfo* asmInfo) {
+void optimizeARM(Vunit& unit, const Abi& abi) {
+  Timer timer(Timer::vasm_optimize);
+
   optimizeExits(unit);
   simplify(unit);
   if (!unit.constToReg.empty()) {
@@ -471,16 +472,15 @@ void finishARM(Vunit& unit, Vtext& text, CGMeta& fixups,
   vlower(unit);
   lowerForARM(unit);
   if (unit.needsRegAlloc()) {
-    Timer _t(Timer::vasm_xls);
     removeDeadCode(unit);
     allocateRegisters(unit, abi);
   }
   if (unit.blocks.size() > 1) {
-    Timer _t(Timer::vasm_jumps);
     optimizeJmps(unit);
   }
+}
 
-  Timer _t(Timer::vasm_gen);
+void emitARM(const Vunit& unit, Vtext& text, CGMeta& fixups, AsmInfo* asmInfo) {
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }
 

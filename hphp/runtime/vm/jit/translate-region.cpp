@@ -28,8 +28,9 @@
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
@@ -68,7 +69,8 @@ struct TranslateRetryContext {
 /*
  * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
-BlockIdToIRBlockMap createBlockMap(IRGS& irgs, const RegionDesc& region) {
+BlockIdToIRBlockMap createBlockMap(irgen::IRGS& irgs,
+                                   const RegionDesc& region) {
   auto ret = BlockIdToIRBlockMap{};
 
   auto& irb = *irgs.irb;
@@ -99,7 +101,7 @@ BlockIdToIRBlockMap createBlockMap(IRGS& irgs, const RegionDesc& region) {
  * Set IRBuilder's Block associated to blockId's block according to
  * the mapping in blockIdToIRBlock.
  */
-void setIRBlock(IRGS& irgs,
+void setIRBlock(irgen::IRGS& irgs,
                 RegionDesc::BlockId blockId,
                 const RegionDesc& region,
                 const BlockIdToIRBlockMap& blockIdToIRBlock) {
@@ -120,7 +122,7 @@ void setIRBlock(IRGS& irgs,
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
  * the region.  It also sets the guard-failure block, if any.
  */
-void setSuccIRBlocks(IRGS& irgs,
+void setSuccIRBlocks(irgen::IRGS& irgs,
                      const RegionDesc& region,
                      RegionDesc::BlockId srcBlockId,
                      const BlockIdToIRBlockMap& blockIdToIRBlock) {
@@ -167,7 +169,7 @@ bool blockHasUnprocessedPred(
  * in some hhas-based builtins), if they even go there (they aren't required
  * to).
  */
-void emitEntryAssertions(IRGS& irgs, const Func* func, SrcKey sk) {
+void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
   if (sk.offset() != func->base()) return;
   for (auto& pinfo : func->params()) {
     if (pinfo.hasDefaultValue()) return;
@@ -186,7 +188,7 @@ void emitEntryAssertions(IRGS& irgs, const Func* func, SrcKey sk) {
   }
   auto const numLocs = func->numLocals();
   for (auto loc = func->numParams(); loc < numLocs; ++loc) {
-    auto const location = RegionDesc::Location::Local { loc };
+    auto const location = Location::Local { loc };
     irgen::assertTypeLocation(irgs, location, TUninit);
   }
 }
@@ -194,10 +196,10 @@ void emitEntryAssertions(IRGS& irgs, const Func* func, SrcKey sk) {
 /*
  * Emit type and reffiness prediction guards.
  */
-void emitPredictionsAndPreConditions(IRGS& irgs,
-                          const RegionDesc& region,
-                          const RegionDesc::BlockPtr block,
-                          bool isEntry) {
+void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
+                                     const RegionDesc& region,
+                                     const RegionDesc::BlockPtr block,
+                                     bool isEntry) {
   auto const sk = block->start();
   auto const bcOff = sk.offset();
   auto& typePredictions = block->typePredictions();
@@ -222,7 +224,7 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
     auto loc  = preCond.location;
     if (type <= TCls) {
       // Do not generate guards for class; instead assert the type.
-      assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
+      assertx(loc.tag() == LTag::Stack);
       irgen::assertTypeLocation(irgs, loc, type);
     } else {
       // Check inner type eagerly if it is the first block during profiling.
@@ -275,13 +277,13 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
 void initNormalizedInstruction(
   NormalizedInstruction& inst,
   MapWalker<RegionDesc::Block::ParamByRefMap>& byRefs,
-  IRGS& irgs,
+  irgen::IRGS& irgs,
   const RegionDesc& region,
   RegionDesc::BlockId blockId,
   const Func* topFunc,
   bool lastInstr,
-  bool toInterp) {
-
+  bool toInterp
+) {
   inst.funcd = topFunc;
 
   if (lastInstr) {
@@ -293,12 +295,7 @@ void initNormalizedInstruction(
   // this is true.
   inst.interp = toInterp;
 
-  auto const inputInfos = getInputs(inst);
-
-  FTRACE(2, "populating inputs for {}\n", inst.toString());
-  for (auto const& ii : inputInfos) {
-    inst.inputs.push_back(ii.loc);
-  }
+  auto const inputInfos = getInputs(inst, irgs.irb->fs().bcSPOff());
 
   if (inputInfos.needsRefCheck) {
     inst.preppedByRef = byRefs.next();
@@ -334,7 +331,7 @@ bool shouldTrySingletonInline(const RegionDesc& region,
  * function with a singleton pattern, and if so, inline it.  Returns true if
  * this succeeds, else false.
  */
-bool tryTranslateSingletonInline(IRGS& irgs,
+bool tryTranslateSingletonInline(irgen::IRGS& irgs,
                                  const NormalizedInstruction& ninst,
                                  const Func* funcd) {
   using Atom = BCPattern::Atom;
@@ -471,7 +468,7 @@ bool tryTranslateSingletonInline(IRGS& irgs,
  */
 folly::Optional<RegionDesc::BlockId> nextReachableBlock(
   jit::queue<RegionDesc::BlockId>& workQ,
-  const IRBuilder& irb,
+  const irgen::IRBuilder& irb,
   const BlockIdToIRBlockMap& blockIdToIRBlock
 ) {
   auto const size = workQ.size();
@@ -523,7 +520,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        const Func* callee,
                                        TranslateRetryContext& retry,
                                        InliningDecider& inl,
-                                       const IRGS& irgs,
+                                       const irgen::IRGS& irgs,
                                        int32_t maxBCInstrs,
                                        bool& needsMerge) {
   if (psk.srcKey.op() != Op::FCall &&
@@ -566,7 +563,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   return calleeRegion;
 }
 
-TranslateResult irGenRegionImpl(IRGS& irgs,
+TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
                                 TranslateRetryContext& retry,
                                 InliningDecider& inl,
@@ -887,7 +884,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   while (result == TranslateResult::Retry) {
     unit = folly::make_unique<IRUnit>(context);
     SCOPE_ASSERT_DETAIL("IRUnit") { return show(*unit); };
-    IRGS irgs{*unit};
+    irgen::IRGS irgs{*unit};
 
     // Set up inlining context, but disable it for profiling mode.
     InliningDecider inl(region.entry()->func());

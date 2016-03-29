@@ -140,6 +140,12 @@ public:
   bool isObject() const { return m_map.isObject();}
   Variant& toVariant() { return m_map; }
   void set(const String& key, const Variant& v);
+  template<class F> void scan(F& mark) const {
+    mark(m_map);
+  }
+  TypedValue detach() noexcept {
+    return m_map.detach();
+  }
 private:
   Variant m_map;
 };

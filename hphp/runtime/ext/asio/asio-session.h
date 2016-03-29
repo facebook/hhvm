@@ -36,9 +36,6 @@ struct AsioSession final {
   static void Init();
   static AsioSession* Get() { return s_current.get(); }
 
-  void* operator new(size_t size) { return req::malloc(size); }
-  void operator delete(void* ptr) { req::free(ptr); }
-
   // context
   void enterContext(ActRec* savedFP);
   void exitContext();
@@ -179,6 +176,7 @@ struct AsioSession final {
 
 private:
   AsioSession();
+  friend AsioSession* req::make_raw<AsioSession>();
 
 private:
   static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);

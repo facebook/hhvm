@@ -70,6 +70,7 @@ let parse_check_args cmd =
   let logname = ref false in
   let refactor_mode = ref "" in
   let refactor_before = ref "" in
+  let format_from = ref 0 in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -220,6 +221,20 @@ let parse_check_args cmd =
     "--stats",
       Arg.Unit (set_mode MODE_STATS),
       " display some server statistics";
+    (* Server versions of methods that were exclusive to Javascript
+     * (see hh_ide.ml) so we can test how the editors are doing without it *)
+    "--find-lvar-refs",
+      Arg.String (fun x -> set_mode (MODE_FIND_LVAR_REFS x) ()),
+      (* (mode) finds references of local variable at [line:character] *)
+      (* position in file on stdin *) "";
+    "--get-method-name",
+      Arg.String (fun x -> set_mode (MODE_GET_METHOD_NAME x) ()),
+      (* (mode) same as --identify-function, but returns more information *) "";
+    "--format",
+      Arg.Tuple ([
+        Arg.Int (fun x -> format_from := x);
+        Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)) ())
+      ]), "";
 
     (* flags *)
     "--json", Arg.Set output_json,

@@ -561,6 +561,42 @@ int64_t Process::GetProcessRSS(pid_t pid) {
   return 0;
 }
 
+bool Process::GetMemoryInfo(MemInfo& info) {
+#ifdef _WIN32
+#error "Process::GetMemoryInfo() doesn't support Windows (yet)."
+  return false;
+#endif
+
+  info = MemInfo{};
+  FILE* f = fopen("/proc/meminfo", "r");
+  if (f) {
+    SCOPE_EXIT{ fclose(f); };
+
+    // Return size in MB
+    auto const parseLine = [] (const char* item, const char* line) -> int64_t {
+      int64_t amount = -1;
+      char mult = 'b';
+      char format[64];
+      snprintf(format, sizeof(format), "%s: %%%s %%c", item, PRId64);
+      sscanf(line, format, &amount, &mult);
+      if (amount <= 0) return -1;
+      if (mult == 'k' || mult == 'K') return amount >> 10;
+      if (mult == 'm' || mult == 'M') return amount;
+      if (mult == 'g' || mult == 'G') return amount << 10;
+      return amount >> 20;
+    };
+
+    char buf[128];
+    while (fgets(buf, sizeof(buf), f)) {
+      info.freeMb = std::max(info.freeMb, parseLine("MemFree", buf));
+      info.buffersMb = std::max(info.buffersMb, parseLine("Buffers", buf));
+      info.cachedMb = std::max(info.cachedMb, parseLine("Cached", buf));
+      if (info.valid()) return true;
+    }
+  }
+  return false;
+}
+
 int Process::GetCPUCount() {
   return sysconf(_SC_NPROCESSORS_ONLN);
 }

@@ -775,7 +775,7 @@ static int* create_offset_array(const pcre_cache_entry* pce,
                                 int& size_offsets) {
   /* Allocate memory for the offsets array */
   size_offsets = pce->num_subpats * 3;
-  return (int *)req::malloc(size_offsets * sizeof(int));
+  return (int *)req::malloc_noptrs(size_offsets * sizeof(int));
 }
 
 static inline void add_offset_pair(Array& result,
@@ -1879,7 +1879,7 @@ static void php_reg_eprint(int err, regex_t* re) {
   /* get the length of the message */
   buf_len = regerror(REG_ITOA | err, re, nullptr, 0);
   if (buf_len) {
-    buf = (char *)req::malloc(buf_len);
+    buf = (char *)req::malloc_noptrs(buf_len);
     if (!buf) return; /* fail silently */
     /* finally, get the error message */
     regerror(REG_ITOA | err, re, buf, buf_len);
@@ -1889,7 +1889,7 @@ static void php_reg_eprint(int err, regex_t* re) {
 #endif
   len = regerror(err, re, nullptr, 0);
   if (len) {
-    message = (char *)req::malloc(buf_len + len + 2);
+    message = (char *)req::malloc_noptrs(buf_len + len + 2);
     if (!message) {
       return; /* fail silently */
     }

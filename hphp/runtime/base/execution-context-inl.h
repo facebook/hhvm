@@ -24,7 +24,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void* ExecutionContext::operator new(size_t s) {
-  return req::malloc(s);
+  // Can't use req::make_raw here because we want raw memory, not a constructed
+  // object. This gets called generically from ThreadLocal, so we can't just
+  // change the call-sites.
+  return req::malloc(s, type_scan::getIndexForMalloc<ExecutionContext>());
 }
 
 inline void* ExecutionContext::operator new(size_t s, void* p) {

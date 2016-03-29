@@ -5,5 +5,6 @@ hhi.tar.gz:
 		--mtime='1970-01-01 00:00Z' \
 		--owner=root --group=root \
 		--numeric-owner \
+		--mode="u=rwX,go=rX" \
 		-T - --no-recursion \
 		-c | gzip -n > ../bin/hhi.tar.gz

@@ -28,7 +28,7 @@ StaticContentCache StaticContentCache::TheCache;
 std::shared_ptr<FileCache> StaticContentCache::TheFileCache;
 
 void StaticContentCache::load() {
-  BootTimer::Block timer("loading static content");
+  BootStats::Block timer("loading static content");
 
   if (!RuntimeOption::FileCache.empty()) {
     TheFileCache = std::make_shared<FileCache>();

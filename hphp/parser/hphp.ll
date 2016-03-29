@@ -953,14 +953,18 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>("#"|"//")[^\r\n]*{NEWLINE}? {
         const char* asptag = nullptr;
+        const auto searchTwoChars = [](const char* str, size_t len, char d) {
+                for (auto t = str; t + 1 < str + len; t++) {
+                        if (t[0] == d && t[1] == '>') {
+                                return t;
+                        }
+                }
+                return (const char*)nullptr;
+        };
         if (_scanner->aspTags()) {
-                asptag = static_cast<const char*>(
-                  memmem(yytext, yyleng, "%>", 2)
-                );
+                asptag = searchTwoChars(yytext, yyleng, '%');
         }
-        auto phptag = static_cast<const char*>(
-          memmem(yytext, yyleng, "?>", 2)
-        );
+        auto phptag = searchTwoChars(yytext, yyleng, '?');
         if (asptag && (!phptag || (asptag < phptag))) {
                 if (_scanner->isHHFile()) {
                         _scanner->error("HH mode: %%> not allowed");

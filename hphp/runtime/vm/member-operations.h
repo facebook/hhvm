@@ -156,9 +156,9 @@ void objOffsetSet(
 void objOffsetAppend(ObjectData* base, TypedValue* val, bool validate = true);
 void objOffsetUnset(ObjectData* base, TypedValue offset);
 
-ATTRIBUTE_NORETURN void throw_cannot_use_newelem_for_lval_read();
+[[noreturn]] void throw_cannot_use_newelem_for_lval_read();
 
-ATTRIBUTE_NORETURN void unknownBaseType(const TypedValue*);
+[[noreturn]] void unknownBaseType(const TypedValue*);
 
 inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
   auto const result = base->nvGet(key);

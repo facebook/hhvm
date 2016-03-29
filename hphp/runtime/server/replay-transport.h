@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
@@ -57,7 +58,7 @@ struct ReplayTransport final : Transport {
 
 private:
   Hdf m_hdf;
-  IniSetting::Map m_ini;
+  req::root<IniSetting::Map> m_ini;
   std::string m_postData;
   HeaderMap m_requestHeaders;
   HeaderMap m_responseHeaders;

@@ -30,7 +30,7 @@ const StaticString
 
 static Class* c_MCRouterException = nullptr;
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
                                mc_res_t reply = mc_res_unknown,
@@ -53,7 +53,7 @@ static void mcr_throwException(const std::string& message,
 
 static Class* c_MCRouterOptionException = nullptr;
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 static void mcr_throwOptionException(
   const std::vector<mc::McrouterOptionError>& errors) {
   if (!c_MCRouterOptionException) {

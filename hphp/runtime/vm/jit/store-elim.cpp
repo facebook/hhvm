@@ -368,7 +368,7 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
       dbgInst = env.global.unit.gen(
         DbgTrashStk,
         inst.marker(),
-        IRSPOffsetData { inst.extra<StStk>()->offset },
+        IRSPRelOffsetData { inst.extra<StStk>()->offset },
         inst.src(0)
       );
       break;
@@ -376,7 +376,7 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
       dbgInst = env.global.unit.gen(
         DbgTrashFrame,
         inst.marker(),
-        IRSPOffsetData { inst.extra<SpillFrame>()->spOffset },
+        IRSPRelOffsetData { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
       break;

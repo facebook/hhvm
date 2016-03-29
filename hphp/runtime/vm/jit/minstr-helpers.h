@@ -412,21 +412,18 @@ TypedValue* elemImpl(TypedValue* base,
   m(elemCU,    KeyType::Any,   Unset)            \
   m(elemCW,    KeyType::Any,   Warn)             \
   m(elemCWD,   KeyType::Any,   WarnDefine)       \
-  m(elemCWDR,  KeyType::Any,   WarnDefineReffy)  \
   m(elemI,     KeyType::Int,   None)             \
   m(elemID,    KeyType::Int,   Define)           \
   m(elemIDR,   KeyType::Int,   DefineReffy)      \
   m(elemIU,    KeyType::Int,   Unset)            \
   m(elemIW,    KeyType::Int,   Warn)             \
   m(elemIWD,   KeyType::Int,   WarnDefine)       \
-  m(elemIWDR,  KeyType::Int,   WarnDefineReffy)  \
   m(elemS,     KeyType::Str,   None)             \
   m(elemSD,    KeyType::Str,   Define)           \
   m(elemSDR,   KeyType::Str,   DefineReffy)      \
   m(elemSU,    KeyType::Str,   Unset)            \
   m(elemSW,    KeyType::Str,   Warn)             \
   m(elemSWD,   KeyType::Str,   WarnDefine)       \
-  m(elemSWDR,  KeyType::Str,   WarnDefineReffy)
 
 #define X(nm, keyType, attrs)                              \
 inline TypedValue* nm(TypedValue* base,                    \

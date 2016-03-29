@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -59,12 +61,12 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
   }
 }
 
-void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
+void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
                     Offset dest, bool outerOnly) {
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
+  auto const soff = IRSPRelOffsetData { offsetFromIRSP(env, idx) };
 
   if (type <= TCell) {
     gen(env, CheckStk, type, soff, exit, sp(env));
@@ -73,14 +75,14 @@ void checkTypeStack(IRGS& env, BCSPOffset idx, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckStk, TBoxedInitCell, soff, exit, sp(env));
-  env.irb->constrainStack(soff.irSpOffset, DataTypeSpecific);
+  env.irb->constrainStack(soff.offset, DataTypeSpecific);
   gen(env, HintStkInner, type, soff, sp(env));
 
   if (!outerOnly && type.inner() < TInitCell) {
     auto stk = gen(env, LdStk, TBoxedInitCell,
-                   IRSPOffsetData{soff.irSpOffset}, sp(env));
+                   IRSPRelOffsetData{soff.offset}, sp(env));
     gen(env, CheckRefInner,
-        env.irb->predictedStackInnerType(soff.irSpOffset),
+        env.irb->predictedStackInnerType(soff.offset),
         exit, stk);
   }
 }
@@ -93,56 +95,53 @@ void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
   gen(env, AssertLoc, type, LocalId(locId), fp(env));
 }
 
-void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
+void assertTypeStack(IRGS& env, BCSPRelOffset idx, Type type) {
   gen(env, AssertStk, type,
-      IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
+      IRSPRelOffsetData { offsetFromIRSP(env, idx) }, sp(env));
 }
 
-void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
+void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
   assertx(type <= TStkElem);
-  using T = RegionDesc::Location::Tag;
+
   switch (loc.tag()) {
-  case T::Stack:
-    assertTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
-    break;
-  case T::Local:
-    assertTypeLocal(env, loc.localId(), type);
-    break;
+    case LTag::Stack:
+      assertTypeStack(env, offsetFromBCSP(env, loc.stackIdx()), type);
+      break;
+    case LTag::Local:
+      assertTypeLocal(env, loc.localId(), type);
+      break;
   }
 }
 
-void checkType(IRGS& env, const RegionDesc::Location& loc,
+void checkType(IRGS& env, const Location& loc,
                Type type, Offset dest, bool outerOnly) {
-  using T = RegionDesc::Location::Tag;
   assertx(type <= TGen);
 
   switch (loc.tag()) {
-  case T::Stack:
-    checkTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()),
-                   type, dest, outerOnly);
-    break;
-  case T::Local:
-    checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
-    break;
+    case LTag::Stack:
+      checkTypeStack(env, offsetFromBCSP(env, loc.stackIdx()),
+                     type, dest, outerOnly);
+      break;
+    case LTag::Local:
+      checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
+      break;
   }
 }
 
-void predictType(IRGS& env, const RegionDesc::Location& loc, Type type) {
-  using T = RegionDesc::Location::Tag;
-
+void predictType(IRGS& env, const Location& loc, Type type) {
   FTRACE(1, "predictType {}: {}\n", show(loc), type);
   assertx(type <= TGen);
 
   switch (loc.tag()) {
-  case T::Stack:
-    env.irb->fs().refineStackPredictedType(
-      offsetFromIRSP(env, offsetFromBCSP(env, loc.offsetFromFP())),
-      type
-    );
-    break;
-  case T::Local:
-    env.irb->fs().refineLocalPredictedType(loc.localId(), type);
-    break;
+    case LTag::Stack:
+      env.irb->fs().refineStackPredictedType(
+        offsetFromIRSP(env, offsetFromBCSP(env, loc.stackIdx())),
+        type
+      );
+      break;
+    case LTag::Local:
+      env.irb->fs().refineLocalPredictedType(loc.localId(), type);
+      break;
   }
 }
 
@@ -157,9 +156,9 @@ void checkRefs(IRGS& env,
                const std::vector<bool>& mask,
                const std::vector<bool>& vals,
                Offset dest) {
-  auto const actRecOff = entryArDelta + offsetFromIRSP(env, BCSPOffset{0});
+  auto const actRecOff = entryArDelta + bcSPOffset(env);
   auto const funcPtr = gen(env, LdARFuncPtr,
-                           IRSPOffsetData { actRecOff }, sp(env));
+                           IRSPRelOffsetData { actRecOff }, sp(env));
   SSATmp* nParams = nullptr;
 
   for (unsigned i = 0; i < mask.size(); i += 64) {

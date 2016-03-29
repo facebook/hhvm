@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -87,7 +88,7 @@ struct Env {
   RegionDesc::Block* curBlock;
   bool blockFinished;
   IRUnit unit;
-  IRGS irgs;
+  irgen::IRGS irgs;
   jit::vector<ActRecState> arStates;
   RefDeps refDeps;
   uint32_t numJmps;
@@ -115,7 +116,7 @@ const Unit* curUnit(const Env& env) {
 }
 
 FPInvOffset curSpOffset(const Env& env) {
-  return env.irgs.irb->fs().syncedSpLevel();
+  return env.irgs.irb->fs().bcSPOff();
 }
 
 bool irBlockReachable(Env& env, Block* block) {
@@ -137,9 +138,9 @@ bool irBlockReachable(Env& env, Block* block) {
  * Check if the current predicted type for the location in ii is specific
  * enough for what the current opcode wants. If not, return false.
  */
-bool consumeInput(Env& env, int i, const InputInfo& ii) {
-  if (ii.dontGuard) return true;
-  auto const type = irgen::predictedType(env.irgs, ii.loc);
+bool consumeInput(Env& env, const InputInfo& input) {
+  if (input.dontGuard) return true;
+  auto const type = irgen::predictedType(env.irgs, input.loc);
 
   if (env.profiling && type <= TBoxedCell &&
       (env.region->blocks().size() > 1 || !env.region->entry()->empty())) {
@@ -148,21 +149,23 @@ bool consumeInput(Env& env, int i, const InputInfo& ii) {
     return false;
   }
 
-  if (!ii.dontBreak && !type.isKnownDataType()) {
+  if (!input.dontBreak && !type.isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
     FTRACE(1, "selectTracelet: {} tried to consume {}\n",
-           env.inst.toString(), env.inst.inputs[i].pretty());
+           env.inst.toString(), show(input.loc));
     return false;
   }
 
-  if (!(type <= TBoxedCell) || env.inst.ignoreInnerType || ii.dontGuardInner) {
+  if (!(type <= TBoxedCell) ||
+      env.inst.ignoreInnerType ||
+      input.dontGuardInner) {
     return true;
   }
 
   if (!type.inner().isKnownDataType()) {
     // Trying to consume a boxed value without a guess for the inner type.
     FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
-           env.inst.toString(), env.inst.inputs[i].pretty());
+           env.inst.toString(), show(input.loc));
     return false;
   }
 
@@ -207,20 +210,17 @@ bool prepareInstruction(Env& env) {
   env.inst.funcd = env.arStates.back().knownFunc();
   irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk, false);
 
-  auto const inputInfos = getInputs(env.inst);
-
-  for (auto const& ii : inputInfos) env.inst.inputs.push_back(ii.loc);
+  auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
 
   // This reads valueClass from the inputs so it used to need to
   // happen after readMetaData.  But now readMetaData is gone ...
   annotate(&env.inst);
 
   // Check all the inputs for unknown values.
-  assertx(inputInfos.size() == env.inst.inputs.size());
-  for (unsigned i = 0; i < inputInfos.size(); ++i) {
-    if (!consumeInput(env, i, inputInfos[i])) {
+  for (auto const& input : inputInfos) {
+    if (!consumeInput(env, input)) {
       FTRACE(2, "Stopping tracelet consuming {} input {}\n",
-        opcodeToName(env.inst.op()), i);
+             opcodeToName(env.inst.op()), show(input.loc));
       return false;
     }
   }
@@ -261,7 +261,7 @@ bool traceThroughJmp(Env& env) {
   // inputs while inlining.
   if (!isUnconditionalJmp(env.inst.op()) &&
       !(env.inlining && isConditionalJmp(env.inst.op()) &&
-        irgen::publicTopType(env.irgs, BCSPOffset{0}).hasConstVal())) {
+        irgen::publicTopType(env.irgs, BCSPRelOffset{0}).hasConstVal())) {
     return false;
   }
 
@@ -342,34 +342,30 @@ bool isThisSelfOrParent(Op op) {
  */
 template<typename F>
 void visitGuards(IRUnit& unit, F func) {
-  using L = RegionDesc::Location;
   auto blocks = rpoSortCfg(unit);
-  for (auto* block : blocks) {
-    for (auto& inst : *block) {
+
+  for (auto const block : blocks) {
+    for (auto const& inst : *block) {
       switch (inst.op()) {
         case EndGuards:
           return;
         case HintLocInner:
         case CheckLoc:
           func(&inst,
-               L::Local{inst.extra<LocalId>()->locId},
+               Location::Local{inst.extra<LocalId>()->locId},
                inst.typeParam(),
                inst.is(HintLocInner));
           break;
         case HintStkInner:
-        case CheckStk:
-        {
-          /*
-           * BCSPOffset is optional but should --always-- be set for CheckStk
-           * instructions that appear within the guards for a translation.
-           */
-          auto const bcSPOff = inst.extra<RelOffsetData>()->bcSpOffset;
-          assertx(inst.extra<RelOffsetData>()->hasBcSpOffset);
+        case CheckStk: {
+          auto const irSPRel = inst.extra<IRSPRelOffsetData>()->offset;
 
-          auto const offsetFromFP =
-            bcSPOff.to<FPInvOffset>(inst.marker().spOff());
+          auto const defSP = inst.src(0)->inst();
+          assertx(defSP->is(DefSP));
+          auto const irSPOff = defSP->extra<DefSP>()->offset;
+
           func(&inst,
-               L::Stack{offsetFromFP},
+               Location::Stack{irSPRel.to<FPInvOffset>(irSPOff)},
                inst.typeParam(),
                inst.is(HintStkInner));
           break;
@@ -395,13 +391,14 @@ void recordDependencies(Env& env) {
   // Relax guards and record the ones that survived.
   auto& firstBlock = *env.region->blocks().front();
   auto& unit = env.irgs.unit;
-  auto guardMap = std::map<RegionDesc::Location,Type>{};
+  auto guardMap = std::map<Location,Type>{};
   ITRACE(2, "Visiting guards\n");
-  auto hintMap = std::map<RegionDesc::Location,Type>{};
-  auto catMap = std::map<RegionDesc::Location,DataTypeCategory>{};
+  auto hintMap = std::map<Location,Type>{};
+  auto catMap = std::map<Location,DataTypeCategory>{};
   const auto& guards = env.irgs.irb->guards()->guards;
-  visitGuards(unit, [&](IRInstruction* guard, const RegionDesc::Location& loc,
-                        Type type, bool hint) {
+  visitGuards(unit, [&] (const IRInstruction* guard,
+                         const Location& loc,
+                         Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
     if (type <= TCls) return;
@@ -441,8 +438,10 @@ void recordDependencies(Env& env) {
       // may have needed that (recorded already above).
       continue;
     }
-    auto const preCond = RegionDesc::GuardedLocation { kv.first, kv.second,
-                                                       catMap[kv.first] };
+    auto const preCond = RegionDesc::GuardedLocation {
+      kv.first, kv.second,
+      catMap[kv.first]
+    };
     ITRACE(1, "selectTracelet adding guard {}\n", show(preCond));
     firstBlock.addPreCondition(preCond);
   }
@@ -635,7 +634,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
 
   if (region->empty() || region->blocks().front()->length() == 0) {
     FTRACE(1, "selectTracelet giving up after {} tries\n", tries);
-    return RegionDescPtr { nullptr };
+    return nullptr;
   }
 
   if (region->blocks().back()->length() == 0) {

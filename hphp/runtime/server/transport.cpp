@@ -56,7 +56,6 @@ Transport::Transport()
     m_nsleepTimeS(0), m_nsleepTimeN(0), m_url(nullptr),
     m_postData(nullptr), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
-    m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
     m_flushTimeUs(0), m_sendEnded(false), m_sendContentType(true),
@@ -69,7 +68,6 @@ Transport::Transport()
   memset(m_acceptedEncodings, 0, sizeof(m_acceptedEncodings));
   enableCompression();
   m_chunksSentSizes.clear();
-  tvWriteUninit(&m_headerCallback);
 }
 
 Transport::~Transport() {
@@ -982,15 +980,6 @@ bool Transport::isCompressionEnabled() const {
          m_compressionEnabled[CompressionType::Gzip];
 }
 
-bool Transport::setHeaderCallback(const Variant& callback) {
-  if (cellAsVariant(m_headerCallback).toBoolean()) {
-    // return false if a callback has already been set.
-    return false;
-  }
-  cellAsVariant(m_headerCallback) = callback;
-  return true;
-}
-
 void Transport::sendRaw(void *data, int size, int code /* = 200 */,
                         bool compressed /* = false */,
                         bool chunked /* = false */,
@@ -1032,15 +1021,17 @@ void Transport::sendRawInternal(const void *data, int size,
 
   bool chunked = m_chunkedEncoding;
 
-  if (!m_headerCallbackDone && !cellIsNull(&m_headerCallback)) {
+  if (!g_context->m_headerCallbackDone &&
+      !cellIsNull(&g_context->m_headerCallback)) {
     // We could use m_headerSent here, however it seems we can still
     // end up in an infinite loop when:
     // m_headerCallback calls flush()
     // flush() triggers php's recursion guard
     // the recursion guard calls back into m_headerCallback
-    m_headerCallbackDone = true;
+    g_context->m_headerCallbackDone = true;
     try {
-      vm_call_user_func(cellAsVariant(m_headerCallback), init_null_variant);
+      vm_call_user_func(cellAsVariant(g_context->m_headerCallback),
+                        init_null_variant);
     } catch (...) {
       LogException("HeaderCallback");
     }

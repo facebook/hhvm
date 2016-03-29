@@ -21,29 +21,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-math.h"
-#include <math.h>
-
-#if defined(__APPLE__)
-#ifndef isnan
-#define isnan(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
-  : __inline_isnanl ((long double)(x)))
-#endif
-
-#ifndef isinf
-#define isinf(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
-  : __inline_isinfl ((long double)(x)))
-#endif
-#endif
-
-#ifdef __CYGWIN__
 #include <cmath>
-#define isinf std::isinf
-#define isnan std::isnan
-#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

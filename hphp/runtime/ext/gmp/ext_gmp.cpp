@@ -32,13 +32,10 @@ static String mpzToString(mpz_t gmpData, const int64_t base) {
     ++charLength;
   }
 
-  char *charStr = (char*)req::malloc(charLength);
-  mpz_get_str(charStr, base, gmpData);
-
-  String returnValue(charStr);
-  req::free(charStr);
-
-  return returnValue;
+  String str{size_t(charLength), ReserveString};
+  auto buf = str.mutableData();
+  mpz_get_str(buf, base, gmpData);
+  return str.setSize(strlen(buf));
 }
 
 

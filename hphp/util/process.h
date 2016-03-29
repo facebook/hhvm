@@ -19,7 +19,6 @@
 
 #include <string>
 #include <vector>
-#include <cstdio>
 
 #include <sys/types.h>
 #ifdef _MSC_VER
@@ -57,6 +56,15 @@ struct CPipe {
 
 private:
   int m_fds[2];
+};
+
+struct MemInfo {
+  int64_t freeMb{-1};
+  int64_t cachedMb{-1};
+  int64_t buffersMb{-1};
+  bool valid() const {
+    return freeMb >= 0 && cachedMb >= 0 && buffersMb >= 0;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,6 +122,13 @@ struct Process {
    * Get memory usage in MB by a process.
    */
   static int64_t GetProcessRSS(pid_t pid);
+
+  /**
+   * Get system-wide memory usage information.  Returns false upon
+   * failure.  Note that previous value of `info` is reset, even upon
+   * failure.
+   */
+  static bool GetMemoryInfo(MemInfo& info);
 
   /**
    * Current thread's identifier.

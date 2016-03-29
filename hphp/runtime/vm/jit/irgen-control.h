@@ -19,12 +19,13 @@
 #include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP { namespace jit {
-struct IRGS;
+
 struct Block;
 struct SSATmp;
-}}
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

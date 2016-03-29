@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 namespace req {
@@ -68,5 +69,6 @@ template struct root<String>;
 template struct root<Array>;
 template struct root<Object>;
 template struct root<Variant>;
+template struct root<IniSettingMap>;
 
 }}

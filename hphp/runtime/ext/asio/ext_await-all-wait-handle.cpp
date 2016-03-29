@@ -45,25 +45,25 @@ req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
 namespace {
   StaticString s_awaitAll("<await-all>");
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void failArray() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be an array");
   }
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void failMap() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be a Map");
   }
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void failVector() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be a Vector");
   }
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void failWaitHandle() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be a collection of WaitHandle instances");
@@ -343,11 +343,11 @@ void c_AwaitAllWaitHandle::markAsFinished() {
 void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {
   for (uint32_t idx = 0; idx < m_cap; idx++) {
     auto const child = m_children[idx].m_child;
-    decRefObj(child);
     if (!child->isFinished()) {
       // Remove the current AAWH from the parent chain of all children.
       child->getParentChain().removeFromChain(&m_children[idx].m_blockable);
     }
+    decRefObj(child);
   }
 
   auto parentChain = getParentChain();

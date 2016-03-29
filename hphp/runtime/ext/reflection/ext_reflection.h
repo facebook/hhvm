@@ -43,7 +43,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 
 struct Reflection {
   static HPHP::Class* s_ReflectionExceptionClass;
-  ATTRIBUTE_NORETURN
+  [[noreturn]]
   static void ThrowReflectionExceptionObject(const Variant& message);
 };
 

@@ -37,10 +37,10 @@ namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us);
-TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us);
-TCA emitCallToExit(CodeBlock& cb, const UniqueStubs& us);
-TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us);
+TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us);
+TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us);
+TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us);
+TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us);
 
 void enterTCImpl(TCA start, ActRec* stashedAR);
 

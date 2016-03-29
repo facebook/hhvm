@@ -26,7 +26,7 @@ struct SrcRec;
 struct CGMeta;
 
 void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec, CodeBlock& cb,
-                     CGMeta& fixup);
+                     DataBlock& data, CGMeta& fixup);
 
 }}
 

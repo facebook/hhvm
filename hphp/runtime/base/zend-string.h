@@ -269,13 +269,6 @@ String string_convert_hebrew_string(const String& str, int max_chars_per_line,
 void string_charmask(const char *input, int len, char *mask);
 
 ///////////////////////////////////////////////////////////////////////////////
-// mac doesn't have memrchr
-
-#if defined(__APPLE__)
- void *memrchr(const void *s, int c, size_t n);
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_ZEND_STRING_H_

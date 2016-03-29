@@ -303,15 +303,14 @@ static String HHVM_FUNCTION(get_current_user) {
   if (pwbuflen < 1) {
     return empty_string();
   }
-  char *pwbuf = (char*)req::malloc(pwbuflen);
+  char *pwbuf = (char*)req::malloc_noptrs(pwbuflen);
+  SCOPE_EXIT { req::free(pwbuf); };
   struct passwd pw;
   struct passwd *retpwptr = NULL;
   if (getpwuid_r(getuid(), &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
-    req::free(pwbuf);
     return empty_string();
   }
   String ret(pw.pw_name, CopyString);
-  req::free(pwbuf);
   return ret;
 #endif
 }
@@ -582,7 +581,7 @@ static int parse_opts(const char * opts, int opts_len, opt_struct **result) {
     }
   }
 
-  opt_struct *paras = (opt_struct *)req::malloc(sizeof(opt_struct) * count);
+  opt_struct *paras = req::make_raw_array<opt_struct>(count);
   memset(paras, 0, sizeof(opt_struct) * count);
   *result = paras;
   while ((*opts >= 48 && *opts <= 57) ||  /* 0 - 9 */
@@ -614,8 +613,8 @@ static Array HHVM_FUNCTION(getopt, const String& options,
 
     /* the first <len> slots are filled by the one short ops
      * we now extend our array and jump to the new added structs */
-    opts = (opt_struct *)req::realloc(
-      opts, sizeof(opt_struct) * (len + count + 1));
+    opts =
+      (opt_struct *)req::realloc(opts, sizeof(opt_struct) * (len + count + 1));
     orig_opts = opts;
     opts += len;
 

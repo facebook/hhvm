@@ -203,7 +203,8 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
   // Preallocate sort keys buffer
   size_t sortKeysOffset = 0;
   size_t sortKeysLength = DEF_SORT_KEYS_BUF_SIZE;
-  char*  sortKeys = (char*)req::malloc(sortKeysLength);
+  char*  sortKeys = (char*)req::malloc_noptrs(sortKeysLength);
+
   if (!sortKeys) {
     throw Exception("Out of memory");
   }
@@ -212,12 +213,12 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
   // Preallocate index buffer
   size_t sortIndexPos = 0;
   size_t sortIndexLength = DEF_SORT_KEYS_INDX_BUF_SIZE;
-  auto   sortIndex = (collator_sort_key_index_t*)req::malloc(
-                  sortIndexLength * sizeof(collator_sort_key_index_t));
+  auto   sortIndex =
+    req::make_raw_array<collator_sort_key_index_t>(sortIndexLength);
   if (!sortIndex) {
     throw Exception("Out of memory");
   }
-  SCOPE_EXIT{ req::free(sortIndex); };
+  SCOPE_EXIT{ req::destroy_raw_array(sortIndex, sortIndexLength); };
 
   // Translate input hash to sortable index
   auto pos_limit = hash->iter_end();
@@ -247,7 +248,7 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
       int32_t inc = (sortkey_len > DEF_SORT_KEYS_BUF_INCREMENT)
                   ?  sortkey_len : DEF_SORT_KEYS_BUF_INCREMENT;
       sortKeysLength += inc;
-      sortKeys = (char*)req::realloc(sortKeys, sortKeysLength);
+      sortKeys = (char*)req::realloc_noptrs(sortKeys, sortKeysLength);
       if (!sortKeys) {
         throw Exception("Out of memory");
       }
@@ -262,8 +263,10 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
     // Check for index buffer overflow
     if ((sortIndexPos + 1) > sortIndexLength) {
       sortIndexLength += DEF_SORT_KEYS_INDX_BUF_INCREMENT;
-      sortIndex = (collator_sort_key_index_t*)req::realloc(sortIndex,
-                      sortIndexLength * sizeof(collator_sort_key_index_t));
+      sortIndex = (collator_sort_key_index_t*)req::realloc(
+        sortIndex,
+        sortIndexLength * sizeof(collator_sort_key_index_t)
+      );
       if (!sortIndex) {
         throw Exception("Out of memory");
       }

@@ -24,47 +24,33 @@
 namespace HPHP { namespace jit {
 TRACE_SET_MOD(txlease);
 
-static __thread bool threadCanAcquire = true;
+namespace {
+__thread bool threadCanAcquire = true;
+
+using FuncMap = tbb::concurrent_hash_map<const Func*, pthread_t>;
+FuncMap s_funcOwners;
+}
+
+Lease::Lease() {
+  pthread_mutex_init(&m_lock, nullptr);
+}
+
+Lease::~Lease() {
+  if (amOwner()) {
+    // Can happen, e.g., in exception scenarios.
+    pthread_mutex_unlock(&m_lock);
+  }
+  pthread_mutex_destroy(&m_lock);
+}
 
 bool Lease::amOwner() const {
-  return m_held && m_owner == pthread_self();
+  return m_held.load(std::memory_order_acquire) &&
+    pthread_equal(m_owner, pthread_self());
 }
 
 bool Lease::mayLock(bool f) {
   std::swap(threadCanAcquire, f);
   return f;
-}
-
-/*
- * Multi-threaded scenarios for lease interleaving are hard to tease out.
- * The "gremlin" is a pseudo-thread that sometimes steals our lease while
- * we're running in the TC.
- *
- * The gremlin's pthread id is the bitwise negation of our own. Yes,
- * hypothetical wacky pthread implementations can break this. It's
- * DEBUG-only, folks.
- */
-static inline pthread_t gremlinize_threadid(pthread_t tid) {
-  return (pthread_t)(~((int64_t)tid));
-}
-
-void Lease::gremlinLock() {
-  if (amOwner()) {
-    TRACE(2, "Lease: gremlinLock dropping lease\n");
-    drop();
-  }
-  pthread_mutex_lock(&m_lock);
-  TRACE(2, "Lease: gremlin grabbed lock\n ");
-  m_held = true;
-  m_owner = gremlinize_threadid(pthread_self());
-}
-
-void Lease::gremlinUnlockImpl() {
-  if (m_held && m_owner == gremlinize_threadid(pthread_self())) {
-    TRACE(2, "Lease: gremlin dropping lock\n ");
-    pthread_mutex_unlock(&m_lock);
-    m_held = false;
-  }
 }
 
 // acquire: also returns true if we are already the writer.
@@ -77,15 +63,15 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   }
   int64_t expire = m_hintExpire;
   int64_t expireDiff = expire - Timer::GetCurrentTimeMicros();
-  if (!blocking && (m_held ||
+  if (!blocking && (m_held.load(std::memory_order_acquire) ||
                     (expireDiff > 0 && m_owner != pthread_self()))) {
     return false;
   }
 
   checkRank(RankWriteLease);
-  if (0 == (blocking ?
-            pthread_mutex_lock(&m_lock) :
-            pthread_mutex_trylock(&m_lock))) {
+  auto const locked = blocking ? pthread_mutex_lock(&m_lock)
+                               : pthread_mutex_trylock(&m_lock);
+  if (locked == 0) {
     TRACE(4, "thr%" PRIx64 ": acquired lease, called by %p,%p\n",
           Process::GetThreadIdForTrace(), __builtin_return_address(0),
           __builtin_return_address(1));
@@ -104,13 +90,11 @@ bool Lease::acquire(bool blocking /* = false */ ) {
 
     m_owner = pthread_self();
     m_hintExpire = 0;
-    m_held = true;
+    m_held.store(true, std::memory_order_release);
     return true;
   }
-  if (blocking) {
-    TRACE(3, "thr%" PRIx64 ": failed to acquired lease in blocking mode\n",
-          Process::GetThreadIdForTrace());
-  }
+
+  always_assert(!blocking && "Failed to acquire write lease in blocking mode");
   return false;
 }
 
@@ -124,33 +108,62 @@ void Lease::drop(int64_t hintExpireDelay) {
   }
   m_hintExpire = hintExpireDelay > 0 ?
     Timer::GetCurrentTimeMicros() + hintExpireDelay : 0;
-  m_held = false;
+  m_held.store(false, std::memory_order_release);
   pthread_mutex_unlock(&m_lock);
 }
 
-LeaseHolderBase::LeaseHolderBase(Lease& l, LeaseAcquire acquire)
-    : m_lease(l), m_haveLock(false), m_acquired(false) {
-  if (!m_lease.amOwner() && (acquire == LeaseAcquire::ACQUIRE ||
-                             acquire == LeaseAcquire::BLOCKING)) {
-    bool blocking = (acquire == LeaseAcquire::BLOCKING);
+LeaseHolderBase::LeaseHolderBase(Lease& l,
+                                 LeaseAcquire acquire,
+                                 const Func* func)
+  : m_lease(l)
+  , m_func{RuntimeOption::EvalJitConcurrently ? func : nullptr}
+{
+  if (m_func) {
+    FuncMap::const_accessor acc;
+    auto const self = pthread_self();
+    if (s_funcOwners.insert(acc, std::make_pair(m_func, self))) {
+      m_acquiredFunc = true;
+    } else if (!pthread_equal(acc->second, self)) {
+      return;
+    }
+  }
+
+  if (!m_lease.amOwner()) {
+    if (m_func) {
+      m_state = LockLevel::Translate;
+      return;
+    }
+
+    auto const blocking = acquire == LeaseAcquire::BLOCKING;
     m_acquired = m_lease.acquire(blocking);
   }
-  m_haveLock = m_lease.amOwner();
+
+  if (m_lease.amOwner()) {
+    m_state = LockLevel::Write;
+  }
 }
 
 LeaseHolderBase::~LeaseHolderBase() {
   if (m_acquired && m_lease.amOwner()) {
     m_lease.drop(Lease::kStandardHintExpireInterval);
   }
+
+  if (m_acquiredFunc) {
+    auto const removed = s_funcOwners.erase(m_func);
+    always_assert(removed);
+  }
 }
 
-bool LeaseHolderBase::acquire() {
-  assertx(!m_acquired);
-  assertx(m_haveLock == m_lease.amOwner());
-  if (m_haveLock) {
-    return true;
+void LeaseHolderBase::acquireBlocking() {
+  assertx(!canWrite());
+
+  if (m_lease.amOwner()) {
+    m_state = LockLevel::Write;
+    return;
   }
-  return m_haveLock = m_acquired = m_lease.acquire();
+
+  m_acquired = m_lease.acquire(true);
+  m_state = LockLevel::Write;
 }
 
 }}

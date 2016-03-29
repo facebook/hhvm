@@ -17,10 +17,12 @@
 #define incl_HPHP_IRGEN_RET_H_
 
 namespace HPHP { namespace jit {
-struct IRSPOffset;
+
+struct IRSPRelOffset;
+
+namespace irgen {
+
 struct IRGS;
-}}
-namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -28,7 +30,7 @@ namespace HPHP { namespace jit { namespace irgen {
  * Helper to return the offset from the IR stack pointer to the frame's return
  * value slot.  This is used during return sequences from non-resumables.
  */
-IRSPOffset offsetToReturnSlot(IRGS&);
+IRSPRelOffset offsetToReturnSlot(IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 

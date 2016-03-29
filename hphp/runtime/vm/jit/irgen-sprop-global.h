@@ -17,16 +17,18 @@
 #define incl_HPHP_JIT_IRGEN_SPROP_GLOBAL_H_
 
 namespace HPHP {
+
 struct Class;
 struct StringData;
-}
-namespace HPHP { namespace jit {
-struct IRGS;
+
+namespace jit {
+
 struct SSATmp;
 struct Block;
-}}
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

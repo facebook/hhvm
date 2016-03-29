@@ -16,14 +16,17 @@
 #ifndef incl_HPHP_JIT_IRGEN_CREATE_H_
 #define incl_HPHP_JIT_IRGEN_CREATE_H_
 
-namespace HPHP { struct Class; }
-namespace HPHP { namespace jit {
-struct IRGS;
-struct Block;
-struct SSATmp;
-}}
+namespace HPHP {
 
-namespace HPHP { namespace jit { namespace irgen {
+struct Class;
+
+namespace jit {
+
+struct SSATmp;
+
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

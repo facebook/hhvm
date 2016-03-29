@@ -25,6 +25,7 @@
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
@@ -377,6 +378,7 @@ void optimize(Env& env) {
  * will just be an lea off of the rvmfp() physical register).
  */
 void optimizeCopies(Vunit& unit, const Abi& abi) {
+  Timer timer(Timer::vasm_copy);
   VpassTracer tracer{&unit, Trace::vasm_copy, "vasm-copy"};
   Env env { unit, abi };
   analyze_physical(env);

@@ -140,7 +140,6 @@ TypedValue arrayIdxIc(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
-TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
 TypedValue mapIdx(ObjectData*, StringData*, TypedValue);
 
 TypedValue getMemoKeyHelper(TypedValue tv);
@@ -222,7 +221,7 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 /*
  * Throw a VMSwitchMode exception.
  */
-ATTRIBUTE_NORETURN void throwSwitchMode();
+[[noreturn]] void throwSwitchMode();
 
 namespace MInstrHelpers {
 TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);

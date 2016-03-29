@@ -93,6 +93,11 @@ struct FormatVisitor {
   void imm(TCA* addr) {
     str << sep() << folly::format("{}", addr);
   }
+  template<typename T>
+  void imm(VdataPtr<T> ptr) {
+    str << folly::format("{}{}{}",
+                         sep(), ptr.getRaw(), ptr.bound() ? "" : "(unbound)");
+  }
   void imm(const CallSpec& call) {
     switch (call.kind()) {
     default:

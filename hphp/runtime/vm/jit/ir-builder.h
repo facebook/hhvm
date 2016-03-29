@@ -34,7 +34,7 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -112,9 +112,9 @@ struct IRBuilder {
    * These simply constrain the local or stack slot, then delegate to fs().
    */
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  SSATmp* stackValue(IRSPOffset offset, TypeConstraint tc);
+  SSATmp* stackValue(IRSPRelOffset offset, TypeConstraint tc);
   Type localType(uint32_t id, TypeConstraint tc);
-  Type stackType(IRSPOffset, TypeConstraint tc);
+  Type stackType(IRSPRelOffset, TypeConstraint tc);
 
   /*
    * Helper for unboxing predicted types.
@@ -123,7 +123,7 @@ struct IRBuilder {
    *           ldRefReturn(fs().stack(id).predictedType.unbox())
    */
   Type predictedInnerType(uint32_t id) const;
-  Type predictedStackInnerType(IRSPOffset) const;
+  Type predictedStackInnerType(IRSPRelOffset) const;
 
   /*
    * Support for guard relaxation.
@@ -138,7 +138,7 @@ struct IRBuilder {
   bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
   bool constrainValue(SSATmp* const val, TypeConstraint tc);
   bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
-  bool constrainStack(IRSPOffset offset, TypeConstraint tc);
+  bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
   bool typeMightRelax(SSATmp* val = nullptr) const;
   const GuardConstraints* guards() const { return &m_constraints; }
 
@@ -345,6 +345,6 @@ bool typeMightRelax(const SSATmp* tmp);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}
 
 #endif

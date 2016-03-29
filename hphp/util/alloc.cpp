@@ -71,6 +71,67 @@ void flush_thread_caches() {
 #endif
 }
 
+bool purge_all(std::string* errStr) {
+#ifdef USE_JEMALLOC
+  if (mallctl) {
+    assert(mallctlnametomib && mallctlbymib);
+    // Purge all dirty unused pages.
+    int err = mallctlWrite<uint64_t>("epoch", 1, true);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctl(\"epoch\", ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+
+    unsigned narenas;
+    err = mallctlRead("arenas.narenas", &narenas, true);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
+             << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+
+    size_t mib[3];
+    size_t miblen = 3;
+    err = mallctlnametomib("arena.0.purge", mib, &miblen);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err
+             << " in mallctlnametomib(\"arenas.narenas\", ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+    mib[1] = narenas;
+
+    err = mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctlbymib([\"arena." << narenas
+             << ".purge\"], ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+  }
+#endif
+#ifdef USE_TCMALLOC
+  if (MallocExtensionInstance) {
+    MallocExtensionInstance()->ReleaseFreeMemory();
+  }
+#endif
+  return true;
+}
+
 __thread uintptr_t s_stackLimit;
 __thread size_t s_stackSize;
 const size_t s_pageSize =  sysconf(_SC_PAGESIZE);

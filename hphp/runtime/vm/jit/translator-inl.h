@@ -23,6 +23,7 @@ namespace HPHP { namespace jit {
 // Translator accessors.
 
 inline ProfData* Translator::profData() const {
+  assertx(m_profData == nullptr || !RuntimeOption::EvalJitConcurrently);
   return m_profData.get();
 }
 
@@ -177,7 +178,7 @@ inline bool opcodeBreaksBB(const Op op) {
 // Input and output information.
 
 inline std::string InputInfo::pretty() const {
-  std::string p = loc.pretty();
+  std::string p = show(loc);
   if (dontBreak) p += ":dc";
   if (dontGuard) p += ":dg";
   if (dontGuardInner) p += ":dgi";

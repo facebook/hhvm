@@ -18,15 +18,16 @@
 #include <sys/mman.h>
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 
+#include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/server/server-stats.h"
 
 #if !defined(HAVE_POSIX_FALLOCATE) && \
   (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L || defined(__CYGWIN__))
@@ -134,6 +135,11 @@ void APCFileStorage::adviseOut() {
       Logger::Error("Failed to madvise chunk %d", i);
     }
   }
+  for (auto i = 0u; i < m_fds.size(); i++) {
+    if (fadvise_dontneed(m_fds[i], m_chunkSize) < 0) {
+      Logger::Error("Failed to fadvise chunk file %d, fd = %d", i, m_fds[i]);
+    }
+  }
 }
 
 bool APCFileStorage::hashCheck() {
@@ -180,9 +186,15 @@ bool APCFileStorage::hashCheck() {
 
 void APCFileStorage::cleanup() {
   std::lock_guard<std::mutex> lock(m_lock);
-  for (unsigned int i = 0 ; i < m_fileNames.size(); i++) {
-    unlink(m_fileNames[i].c_str());
+  for (auto& fileName : m_fileNames) {
+    unlink(fileName.c_str());
   }
+  m_fileNames.clear();
+  for (auto fd : m_fds) {
+    fadvise_dontneed(fd, m_chunkSize);
+    close(fd);
+  }
+  m_fds.clear();
   m_chunks.clear();
 }
 
@@ -252,12 +264,12 @@ bool APCFileStorage::addFile() {
   }
 
   m_chunks.push_back(addr);
+  m_fds.push_back(fd);
   // memory_order_release guarantees that the new chunk is already present in
   // m_chunks when we reset m_current.  It is OK if other threads still try to
   // use the previous chunk before this point.
   m_current.store(static_cast<int64_t>(m_chunks.size() - 1) << 32,
                   std::memory_order_release);
-  close(fd);
   return true;
 }
 

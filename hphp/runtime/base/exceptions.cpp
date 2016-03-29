@@ -147,7 +147,7 @@ void throw_not_supported(const char* feature, const char* reason) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void raise_fatal_error(const char* msg,
                        const Array& bt /* = null_array */,
                        bool recoverable /* = false */,

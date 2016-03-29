@@ -102,36 +102,24 @@ struct DataBlock {
   }
 
   /*
-   * alloc --
+   * allocRaw
+   * alloc
    *
-   *   Simple bump allocator.
-   *
-   * allocAt --
-   *
-   *   Some clients need to allocate with an externally maintained frontier.
-   *   allocAt supports this.
+   * Simple bump allocator, supporting power-of-two alignment. alloc<T>() is a
+   * simple typed wrapper around allocRaw().
    */
-  void* allocAt(size_t &frontierOff, size_t sz, size_t align = 16) {
-    align = folly::nextPowTwo(align);
-    uint8_t* frontier = m_base + frontierOff;
-    assert(m_base && frontier);
-    int slop = uintptr_t(frontier) & (align - 1);
-    if (slop) {
-      int leftInBlock = (align - slop);
-      frontier += leftInBlock;
-      frontierOff += leftInBlock;
-    }
-    assert((uintptr_t(frontier) & (align - 1)) == 0);
-    frontierOff += sz;
-    assert(frontierOff <= m_size);
-    return frontier;
+  void* allocRaw(size_t sz, size_t align = 16) {
+    // Round frontier up to a multiple of align
+    align = folly::nextPowTwo(align) - 1;
+    m_frontier = (uint8_t*)(((uintptr_t)m_frontier + align) & ~align);
+    auto data = m_frontier;
+    m_frontier += sz;
+    assertx(m_frontier < m_base + m_size);
+    return data;
   }
 
   template<typename T> T* alloc(size_t align = 16, int n = 1) {
-    size_t frontierOff = m_frontier - m_base;
-    T* retval = (T*)allocAt(frontierOff, sizeof(T) * n, align);
-    m_frontier = m_base + frontierOff;
-    return retval;
+    return (T*)allocRaw(sizeof(T) * n, align);
   }
 
   bool canEmit(size_t nBytes) {
@@ -144,7 +132,7 @@ struct DataBlock {
     if (!canEmit(nBytes)) reportFull(nBytes);
   }
 
-  ATTRIBUTE_NORETURN
+  [[noreturn]]
   void reportFull(size_t nbytes) const;
 
   bool isValidAddress(const CodeAddress tca) const {

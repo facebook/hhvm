@@ -197,6 +197,12 @@ void flush_thread_caches();
 void flush_thread_stack();
 
 /**
+ * Free all unused memory back to system. On error, returns false and, if
+ * not null, sets an error message in *errStr.
+ */
+bool purge_all(std::string* errStr = nullptr);
+
+/**
  * Like scoped_ptr, but calls free() on destruct
  */
 struct ScopedMem {

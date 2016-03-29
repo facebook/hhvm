@@ -499,6 +499,8 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
   return true;
 }
 
+thread_local size_t t_poor_collections;
+
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
 NEVER_INLINE void Marker::sweep() {
@@ -575,8 +577,13 @@ NEVER_INLINE void Marker::sweep() {
     }
   });
   if (freed.count > 1 && Trace::moduleEnabledRelease(Trace::gc, 1)) {
-    Trace::traceRelease("gc total %lu marked %lu ambig %lu free %lu\n",
-                        total_.bytes, marked.bytes, ambig.bytes, freed.bytes);
+    Trace::traceRelease(
+      "gc total kb %lu marked %lu ambig %lu free %.1f after %lu poor\n",
+                        total_.bytes/1024, marked.bytes/1024, ambig.bytes/1024,
+                        freed.bytes/1024.0, t_poor_collections);
+    t_poor_collections = 0;
+  } else if (freed.count == 0) {
+    t_poor_collections++;
   }
 }
 

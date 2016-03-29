@@ -202,6 +202,15 @@ void lower(Vunit& unit, syncvmsp& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, rvmsp()};
 }
 
+void lower(Vunit& unit, defvmret& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy2{rret_data(), rret_type(),
+                                 inst.data,   inst.type};
+}
+void lower(Vunit& unit, syncvmret& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy2{inst.data,   inst.type,
+                                 rret_data(), rret_type()};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -209,8 +218,6 @@ void lower(Vunit& unit, syncvmsp& inst, Vlabel b, size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void vlower(Vunit& unit, Vlabel b, size_t i) {
-  Timer _t(Timer::vasm_lower);
-
   auto& inst = unit.blocks[b].code[i];
 
   switch (inst.op) {
@@ -225,6 +232,8 @@ void vlower(Vunit& unit, Vlabel b, size_t i) {
 }
 
 void vlower(Vunit& unit) {
+  Timer timer(Timer::vasm_lower);
+
   // This pass relies on having no critical edges in the unit.
   splitCriticalEdges(unit);
 

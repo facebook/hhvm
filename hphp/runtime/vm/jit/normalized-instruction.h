@@ -43,7 +43,6 @@ struct NormalizedInstruction {
                      // known Func* that /this/ instruction is pushing)
   const Unit* m_unit;
 
-  std::vector<Location> inputs;
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate

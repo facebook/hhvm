@@ -9,15 +9,12 @@ import unittest
 
 from hh_paths import hh_client
 
-class TestFreshInit(common_tests.CommonSaveStateTests, unittest.TestCase):
-
-    @classmethod
-    def save_command(cls, init_dir):
-        pass
+class FreshInitTestDriver(common_tests.CommonTestDriver):
 
     def write_load_config(self, *changed_files):
-        with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
-            f.write("assume_php = false\n")
+        # Fresh init tests don't care about which files changed, so we can
+        # just use the default .hhconfig in the template repo
+        pass
 
     def check_cmd(self, expected_output, stdin=None, options=(), retries=3):
         time.sleep(2)  # wait for Hack to catch up with file system changes
@@ -42,3 +39,7 @@ class TestFreshInit(common_tests.CommonSaveStateTests, unittest.TestCase):
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
         return err
+
+class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver,
+        unittest.TestCase):
+    pass

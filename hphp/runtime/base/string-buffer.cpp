@@ -239,12 +239,12 @@ void StringBuffer::printf(const char *format, ...) {
     va_list v;
     va_copy(v, ap);
 
-    char *buf = (char*)req::malloc(len);
+    char *buf = (char*)req::malloc_noptrs(len);
+    SCOPE_EXIT { req::free(buf); };
     if (vsnprintf(buf, len, format, v) < len) {
       append(buf);
       printed = true;
     }
-    req::free(buf);
 
     va_end(v);
   }

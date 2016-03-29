@@ -1757,10 +1757,10 @@ static void add_bignum_as_string(Array &arr,
     return;
   }
   int num_bytes = BN_num_bytes(bn);
-  unsigned char *out = (unsigned char *)req::malloc(num_bytes);
-  BN_bn2bin(bn, out);
-  arr.set(key, String((const char *)out, num_bytes, CopyString));
-  req::free(out);
+  String str{size_t(num_bytes), ReserveString};
+  BN_bn2bin(bn, (unsigned char*)str.mutableData());
+  str.setSize(num_bytes);
+  arr.set(key, std::move(str));
 }
 
 Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {

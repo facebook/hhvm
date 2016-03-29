@@ -673,7 +673,7 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
   if (RuntimeOption::PHP7_ScalarTypes && tv->m_type == KindOfDouble) {
     if (tv->m_data.dbl < std::numeric_limits<int64_t>::min()) return false;
     if (tv->m_data.dbl > std::numeric_limits<int64_t>::max()) return false;
-    if (isnan(tv->m_data.dbl)) return false;
+    if (std::isnan(tv->m_data.dbl)) return false;
   }
   tvCastToInt64InPlace(tv);
   return true;

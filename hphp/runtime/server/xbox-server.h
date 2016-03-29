@@ -160,6 +160,7 @@ private:
   std::string m_host;
   std::string m_reqInitDoc;
 
+  // points to an event with an attached waithandle from a different request
   ServerTaskEvent<XboxServer, XboxTransport> *m_event;
 };
 

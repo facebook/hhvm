@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
 #define incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
 
+#include "hphp/util/type-scan.h"
+
 /*
  * req::malloc api for request-scoped memory
  *
@@ -43,11 +45,25 @@ namespace HPHP { namespace req {
  * interfaces below, such as make_raw<T>.
  */
 
-void* malloc(size_t nbytes);
+void* malloc(size_t nbytes,
+             type_scan::Index tyindex = type_scan::kIndexUnknown);
 
-void* calloc(size_t count, size_t bytes);
+// Unknown type-index, but assert there's no pointers within.
+inline void* malloc_noptrs(size_t nbytes) {
+  return malloc(nbytes, type_scan::kIndexUnknownNoPtrs);
+}
 
-void* realloc(void* ptr, size_t nbytes);
+void* calloc(size_t count, size_t bytes,
+             type_scan::Index tyindex = type_scan::kIndexUnknown);
+
+void* realloc(void* ptr,
+              size_t nbytes,
+              type_scan::Index tyindex = type_scan::kIndexUnknown);
+
+// Unknown type-index, but assert there's no pointers within.
+inline void* realloc_noptrs(void* ptr, size_t nbytes) {
+  return realloc(ptr, nbytes, type_scan::kIndexUnknownNoPtrs);
+}
 
 char* strndup(const char* str, size_t len);
 
@@ -91,7 +107,8 @@ template<class T> T* calloc_raw_array(size_t count);
 // SimpleAllocator where appropriate.
 //
 
-template <class T> struct Allocator {
+template <class T, typename Action = type_scan::Action::Auto>
+struct Allocator {
   typedef T              value_type;
   typedef T*             pointer;
   typedef const T*       const_pointer;
@@ -102,7 +119,7 @@ template <class T> struct Allocator {
 
   template <class U>
   struct rebind {
-    typedef Allocator<U> other;
+    typedef Allocator<U, Action> other;
   };
 
   pointer address(reference value) {
@@ -114,7 +131,7 @@ template <class T> struct Allocator {
 
   Allocator() noexcept {}
   Allocator(const Allocator&) noexcept {}
-  template<class U> Allocator(const Allocator<U>&) noexcept {}
+  template<class U, typename A> Allocator(const Allocator<U,A>&) noexcept {}
   ~Allocator() noexcept {}
 
   Allocator& operator=(const Allocator&) noexcept { return *this; }
@@ -124,7 +141,10 @@ template <class T> struct Allocator {
   }
 
   pointer allocate(size_type num, const void* = 0) {
-    pointer ret = (pointer)req::malloc(num * sizeof(T));
+    pointer ret = (pointer)req::malloc(
+      num * sizeof(T),
+      type_scan::getIndexForMalloc<T, Action>()
+    );
     return ret;
   }
 
@@ -141,19 +161,29 @@ template <class T> struct Allocator {
     req::free((void*)p);
   }
 
-  template<class U> bool operator==(const Allocator<U>&) const {
+  template<class U, typename A> bool operator==(const Allocator<U,A>&) const {
     return true;
   }
 
-  template<class U> bool operator!=(const Allocator<U>&) const {
+  template<class U, typename A> bool operator!=(const Allocator<U,A>&) const {
     return false;
   }
 };
 
+// Variant of Allocator which indicates to the GC type-scanning machinery T
+// should be conservative scanned. Meant to be used for container internal
+// allocations where we don't want to attempt to exactly scan the internal
+// contents. Such containers often using type-punning and other tricks, which
+// means an exact scan will fail to find valid pointers (where as conservative
+// scan will). Where-ever possible, we'll use the container's public interface
+// to scan the values it holds in an exact manner.
+template<typename T>
+using ConservativeAllocator = Allocator<T, type_scan::Action::Conservative<T>>;
+
 /////////////////////////////////////////////////////////////////////
 
 template<class T, class... Args> T* make_raw(Args&&... args) {
-  auto const mem = req::malloc(sizeof(T));
+  auto const mem = req::malloc(sizeof(T), type_scan::getIndexForMalloc<T>());
   try {
     return new (mem) T(std::forward<Args>(args)...);
   } catch (...) {
@@ -168,7 +198,9 @@ template<class T> void destroy_raw(T* t) {
 }
 
 template<class T> T* make_raw_array(size_t count) {
-  T* ret = static_cast<T*>(req::malloc(count * sizeof(T)));
+  T* ret = static_cast<T*>(
+    req::malloc(count * sizeof(T), type_scan::getIndexForMalloc<T>())
+  );
   size_t i = 0;
   try {
     for (; i < count; ++i) {
@@ -195,7 +227,9 @@ void destroy_raw_array(T* t, size_t count) {
 }
 
 template<class T> T* calloc_raw_array(size_t count) {
-  return static_cast<T*>(req::calloc(count, sizeof(T)));
+  return static_cast<T*>(
+    req::calloc(count, sizeof(T), type_scan::getIndexForMalloc<T>())
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

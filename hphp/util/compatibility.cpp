@@ -140,6 +140,15 @@ int fadvise_dontneed(int fd, off_t len) {
 #endif
 }
 
+int advise_out(const std::string& fileName) {
+  if (fileName.empty()) return -1;
+  int fd = open(fileName.c_str(), O_RDONLY);
+  if (fd == -1) return -1;
+  int result = fadvise_dontneed(fd, 0);
+  close(fd);
+  return result;
+}
+
 #if defined(__CYGWIN__) || defined(_MSC_VER)
 #include <windows.h>
 

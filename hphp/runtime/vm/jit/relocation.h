@@ -31,6 +31,7 @@ struct CodeCache;
 namespace jit {
 
 struct AsmInfo;
+struct IRUnit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -109,6 +110,20 @@ void readRelocations(
   void* data);
 void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot,
               CGMeta& fixups);
+
+/*
+ * Relocate a new translation to the current frontiers of main and cold. Code
+ * in frozen is not moved.
+ *
+ * TODO(t10543562): This can probably be merged with relocateNewTranslation.
+ */
+void relocateTranslation(
+  const IRUnit& unit,
+  CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
+  CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
+  CodeBlock& frozen, CodeAddress frozen_start,
+  AsmInfo* ai, CGMeta& meta
+);
 
 /*
  * Relocate a new translation into a free region in the TC and update the

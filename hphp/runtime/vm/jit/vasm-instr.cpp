@@ -121,6 +121,8 @@ Width width(Vinstr::Opcode op) {
     // php function abi
     case Vinstr::defvmsp:
     case Vinstr::syncvmsp:
+    case Vinstr::defvmret:
+    case Vinstr::syncvmret:
     case Vinstr::phplogue:
     case Vinstr::stubtophp:
     case Vinstr::loadstubret:
@@ -295,7 +297,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cmovq:
     case Vinstr::lea:
     case Vinstr::leap:
+    case Vinstr::lead:
     case Vinstr::loadqp:
+    case Vinstr::loadqd:
     case Vinstr::loadzbq:
     case Vinstr::loadzlq:
     case Vinstr::storeqi:

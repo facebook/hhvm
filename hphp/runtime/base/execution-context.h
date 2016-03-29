@@ -506,6 +506,8 @@ public:
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
+  bool setHeaderCallback(const Variant& callback);
+
 private:
   template<class FStackCheck, class FInitArgs, class FEnterVM>
   void invokeFuncImpl(TypedValue* retptr, const Func* f,
@@ -517,7 +519,7 @@ private:
 
 public:
   template<class F> void scan(F& mark) {
-    //mark(m_transport);
+    //mark(m_transport); Transport &subclasses must not contain heap ptrs.
     mark(m_cwd);
     //mark(m_sb); // points into m_buffers
     //mark(m_out); // points into m_buffers
@@ -568,6 +570,7 @@ public:
     mark(m_memThresholdCallback);
     mark(m_executingSetprofileCallback);
     //mark(m_activeSims);
+    mark(m_headerCallback);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -648,6 +651,9 @@ public:
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::vector<vixl::Simulator*> m_activeSims;
+public:
+  Cell m_headerCallback;
+  bool m_headerCallbackDone{false}; // used to prevent infinite loops
 
   TYPE_SCAN_CONSERVATIVE_FIELD(m_stdoutData);
   TYPE_SCAN_IGNORE_FIELD(dynPropTable);

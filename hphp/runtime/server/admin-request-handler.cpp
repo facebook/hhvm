@@ -172,6 +172,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       string usage =
         "/stop:            stop the web server\n"
         "    instance-id   optional, if specified, instance ID has to match\n"
+        "/free-mem:        ask allocator to release unused memory to system\n"
+        "/prepare-to-stop: ask the server to prepare for stopping\n"
         "/flush-logs:      trigger batching log-writers to flush all content\n"
         "/translate:       translate hex encoded stacktrace in 'stack' param\n"
         "    stack         required, stack trace to translate\n"
@@ -273,7 +275,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
           usage.append(
-              "/free-mem:        ask tcmalloc to release memory to system\n"
               "/tcmalloc-stats:  get internal tcmalloc stats\n"
               "/tcmalloc-set-tc: set max mem tcmalloc thread-cache can use\n"
           );
@@ -359,6 +360,43 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       Logger::Info("Got admin port stop request from %s",
                    transport->getRemoteHost());
       HttpServer::Server->stop();
+      break;
+    }
+    if (cmd == "free-mem") {
+      pid_t pid = Process::GetProcessId();
+      const auto before = Process::GetProcessRSS(pid);
+      std::string errStr;
+      if (purge_all(&errStr)) {
+        const auto after = Process::GetProcessRSS(pid);
+        transport->sendString(
+          folly::sformat("Purged {} -> {} MB RSS", before, after).c_str());
+      } else {
+        transport->sendString(errStr.c_str(), 500);
+      }
+      break;
+    }
+    if (cmd == "prepare-to-stop") {
+      transport->sendString("OK\n");
+      Logger::Info("Got admin port prepare-to-stop request from %s",
+                   transport->getRemoteHost());
+      MemInfo info, newInfo;
+      Process::GetMemoryInfo(info);
+      HttpServer::PrepareToStop();
+
+      // We may consider purge_all() here, too.  But since requests
+      // are still coming in, it may not be very useful, and has some
+      // performance penalties.
+
+      // TODO: evaluate the effect of sync() and uncomment if
+      // desirable.  It is blocking and can take some time, so do it
+      // in a separate thread.
+      // std::thread t{sync};
+      // t.detach();
+
+      Process::GetMemoryInfo(newInfo);
+      Logger::FInfo("free/cached/buffer {}/{}/{} -> {}/{}/{}",
+                    info.freeMb, info.cachedMb, info.buffersMb,
+                    newInfo.freeMb, newInfo.cachedMb, newInfo.buffersMb);
       break;
     }
     if (cmd == "flush-logs") {
@@ -515,7 +553,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         transport->sendString("No APC\n");
         break;
       }
-      s_apc_file_storage.adviseOut();
+      apc_advise_out();
       transport->sendString("Done\n");
       break;
     }
@@ -527,11 +565,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
 #ifdef USE_TCMALLOC
     if (MallocExtensionInstance) {
-      if (cmd == "free-mem") {
-        MallocExtensionInstance()->ReleaseFreeMemory();
-        transport->sendString("OK\n");
-        break;
-      }
       if (cmd == "tcmalloc-stats") {
         std::ostringstream stats;
         size_t user_allocated, heap_size, slack_bytes;
@@ -591,49 +624,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #ifdef USE_JEMALLOC
     if (mallctl) {
       assert(mallctlnametomib && mallctlbymib);
-      if (cmd == "free-mem") {
-        // Purge all dirty unused pages.
-        int err = mallctlWrite<uint64_t>("epoch", 1, true);
-        if (err) {
-          std::ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"epoch\", ...)" << endl;
-          transport->sendString(estr.str());
-          break;
-        }
-
-        unsigned narenas;
-        err = mallctlRead("arenas.narenas", &narenas, true);
-        if (err) {
-          std::ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
-               << endl;
-          transport->sendString(estr.str());
-          break;
-        }
-
-        size_t mib[3];
-        size_t miblen = 3;
-        err = mallctlnametomib("arena.0.purge", mib, &miblen);
-        if (err) {
-          std::ostringstream estr;
-          estr << "Error " << err
-               << " in mallctlnametomib(\"arenas.narenas\", ...)" << endl;
-          transport->sendString(estr.str());
-          break;
-        }
-        mib[1] = narenas;
-
-        err = mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
-        if (err) {
-          std::ostringstream estr;
-          estr << "Error " << err << " in mallctlbymib([\"arena." << narenas
-            << ".purge\"], ...)" << endl;
-          transport->sendString(estr.str());
-          break;
-        }
-        transport->sendString("OK\n");
-        break;
-      }
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
         uint32_t error = 0;

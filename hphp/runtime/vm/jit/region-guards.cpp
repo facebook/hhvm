@@ -24,6 +24,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -71,9 +72,9 @@ RegionDesc::BlockIdVec findRetransChainRoots(const RegionDesc& region) {
   return roots;
 }
 
-BlockDataVec createBlockData(const RegionDesc&   region,
+BlockDataVec createBlockData(const RegionDesc& region,
                              RegionDesc::BlockId rootId,
-                             const ProfData&     profData) {
+                             const ProfData& profData) {
   BlockDataVec data;
   auto bid = rootId;
   while (true) {
@@ -98,9 +99,11 @@ BlockDataVec createBlockData(const RegionDesc&   region,
   return data;
 }
 
-using LocationTypeWeights = jit::hash_map<RegionDesc::Location,
-                                          jit::hash_map<Type,int64_t>,
-                                          RegionDesc::Location::Hash>;
+using LocationTypeWeights = jit::hash_map<
+  Location,
+  jit::hash_map<Type,int64_t>,
+  Location::Hash
+>;
 
 LocationTypeWeights findLocationTypes(const BlockDataVec& blockData) {
   LocationTypeWeights map;

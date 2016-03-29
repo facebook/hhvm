@@ -149,6 +149,7 @@ private:
   std::set<std::string> m_rfc1867UploadedFiles;
   std::string m_files; // serialized to use as $_FILES
 
+  // points to an event with an attached waithandle from a different request
   PageletServerTaskEvent *m_event;
 };
 

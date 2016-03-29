@@ -182,8 +182,8 @@ bool emit(Venv& env, const bindjcc1st& i) {
 
 bool emit(Venv& env, const bindaddr& i) {
   env.stubs.push_back({nullptr, nullptr, i});
-  env.meta.setJmpTransID(TCA(i.addr), env.unit.transKind);
-  env.meta.codePointers.insert(i.addr);
+  env.meta.setJmpTransID(TCA(i.addr.get()), env.unit.transKind);
+  env.meta.codePointers.insert(i.addr.get());
   return true;
 }
 
@@ -203,7 +203,8 @@ bool emit(Venv& env, const fallbackcc& i) {
 }
 
 bool emit(Venv& env, const retransopt& i) {
-  svcreq::emit_retranslate_opt_stub(*env.cb, i.spOff, i.target, i.transID);
+  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(),
+                                    i.spOff, i.target, i.transID);
   return true;
 }
 
@@ -218,29 +219,33 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
     case Vinstr::bindjmp:
       { auto const& i = p.svcreq.bindjmp_;
         assertx(p.jmp && !p.jcc);
-        stub = svcreq::emit_bindjmp_stub(frozen, env.meta, i.spOff, p.jmp,
+        stub = svcreq::emit_bindjmp_stub(frozen, env.text.data(),
+                                         env.meta, i.spOff, p.jmp,
                                          i.target, i.trflags);
       } break;
 
     case Vinstr::bindjcc:
       { auto const& i = p.svcreq.bindjcc_;
         assertx(!p.jmp && p.jcc);
-        stub = svcreq::emit_bindjmp_stub(frozen, env.meta, i.spOff, p.jcc,
+        stub = svcreq::emit_bindjmp_stub(frozen, env.text.data(),
+                                         env.meta, i.spOff, p.jcc,
                                          i.target, i.trflags);
       } break;
 
     case Vinstr::bindaddr:
       { auto const& i = p.svcreq.bindaddr_;
         assertx(!p.jmp && !p.jcc);
-        stub = svcreq::emit_bindaddr_stub(frozen, env.meta, i.spOff, i.addr,
+        stub = svcreq::emit_bindaddr_stub(frozen, env.text.data(),
+                                          env.meta, i.spOff, i.addr.get(),
                                           i.target, TransFlags{});
-        *i.addr = stub;
+        *i.addr.get() = stub;
       } break;
 
     case Vinstr::bindjcc1st:
       { auto const& i = p.svcreq.bindjcc1st_;
         assertx(p.jmp && p.jcc);
-        stub = svcreq::emit_bindjcc1st_stub(frozen, env.meta, i.spOff, p.jcc,
+        stub = svcreq::emit_bindjcc1st_stub(frozen, env.text.data(),
+                                            env.meta, i.spOff, p.jcc,
                                             i.targets[1], i.targets[0], i.cc);
       } break;
 
@@ -250,7 +255,8 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
 
         auto const srcrec = mcg->tx().getSrcRec(i.target);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.target, i.trflags)
+          ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
+                                          i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;
 
@@ -260,7 +266,8 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
 
         auto const srcrec = mcg->tx().getSrcRec(i.target);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.target, i.trflags)
+          ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
+                                          i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;
 
@@ -281,4 +288,26 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}
+
+const uint64_t* alloc_literal(Venv& env, uint64_t val) {
+  assertx(Translator::WriteLease().amOwner());
+  auto it = mcg->literals().find(val);
+  if (it != mcg->literals().end()) {
+    assertx(*it->second == val);
+    return it->second;
+  }
+
+  auto& pending = env.meta.literals;
+  it = pending.find(val);
+  if (it != pending.end()) {
+    assertx(*it->second == val);
+    return it->second;
+  }
+
+  auto addr = env.text.data().alloc<uint64_t>(alignof(uint64_t));
+  *addr = val;
+  return pending[val] = addr;
+}
+
+}}

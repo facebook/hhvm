@@ -6,8 +6,10 @@ import common_tests
 import json
 import os
 import shlex
+import shutil
 import stat
 import subprocess
+import tempfile
 import time
 import unittest
 
@@ -16,7 +18,28 @@ from hh_paths import hh_server, hh_client
 def write_echo_json(f, obj):
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
 
-class TestSaveMiniState(common_tests.CommonSaveStateTests, unittest.TestCase):
+class MiniStateTestDriver(common_tests.CommonTestDriver):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # we create the state in a different dir from the one we run our tests
+        # on, to verify that the saved state does not depend on any absolute
+        # paths
+        init_dir = os.path.join(cls.base_tmp_dir, 'init')
+        shutil.copytree(cls.template_repo, init_dir)
+        cls.saved_state_dir = tempfile.mkdtemp()
+        cls.save_command(init_dir)
+        shutil.rmtree(init_dir)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.saved_state_dir)
+
+    @classmethod
+    def saved_state_path(cls):
+        return os.path.join(cls.saved_state_dir, 'foo')
+
     @classmethod
     def save_command(cls, init_dir):
         stdout, stderr, retcode = cls.proc_call([
@@ -90,6 +113,17 @@ load_mini_script = %s
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
         return err
+
+class MiniStateCommonTests(common_tests.CommonTests, MiniStateTestDriver,
+        unittest.TestCase):
+    pass
+
+class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
+    """
+    Tests in this class are specific to saved state; would not make sense
+    for them to run on a fresh init
+    """
+    template_repo = 'hphp/hack/test/integration/data/simple_repo'
 
     def test_no_state_found(self):
         error_msg = 'No such rev'
@@ -173,7 +207,7 @@ load_mini_script = %s
 watchman_init_timeout = 1
 """)
 
-        with open(os.path.join(self.tmp_dir, 'watchman'), 'w') as f:
+        with open(os.path.join(self.bin_dir, 'watchman'), 'w') as f:
             f.write(r"""sleep 2""")
             os.fchmod(f.fileno(), stat.S_IRWXU)
 

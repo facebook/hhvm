@@ -20,12 +20,12 @@ let test_invalid_json () =
 
 let expect_parsing_error input error =
   match call_of_string input with
-  | Parsing_error error -> true
+  | Parsing_error x when x = error -> true
   | _ -> false
 
 let expect_invalid_call input id error =
   match call_of_string input with
-  | Invalid_call (id, error) -> true
+  | Invalid_call (x, y) when x = id && y = error -> true
   | _ -> false
 
 let test_non_object () =
@@ -56,7 +56,7 @@ let test_no_type () =
 let test_type_not_string () =
   expect_parsing_error
     {|{"id" : 4, "type" : 4}|}
-    "Type field must be string"
+    "Type field must be a string"
 
 let test_type_not_recognized () =
   expect_parsing_error
@@ -90,7 +90,7 @@ let build_call_msg args =
 
 let expect_call msg call =
   match call_of_string msg with
-  | Call (test_call_id, call) -> true
+  | Call (x, y) when x = test_call_id && y = call -> true
   | _ -> false
 
 let test_autocomplete_call () =
@@ -165,7 +165,7 @@ let test_find_lvar_refs_call () =
     {|"<?hh"|};
     "21";
     "37"
-  ] in expect_call msg (Find_lvar_refs_call ("<hh", 21, 37))
+  ] in expect_call msg (Find_lvar_refs_call ("<?hh", 21, 37))
 
 let test_type_at_pos_call () =
   let msg = build_call_msg [
@@ -173,7 +173,7 @@ let test_type_at_pos_call () =
     {|"<?hh"|};
     "21";
     "37"
-  ] in expect_call msg (Type_at_pos_call ("<hh", 21, 37))
+  ] in expect_call msg (Type_at_pos_call ("<?hh", 21, 37))
 
 let test_format_call () =
   let msg = build_call_msg [
@@ -191,14 +191,14 @@ let test_get_method_name () =
     "5";
     "6"
   ] in
-  expect_call msg (Get_method_name_call ("<hh", 5, 6))
+  expect_call msg (Get_method_name_call ("<?hh", 5, 6))
 
 let test_outline_call () =
   let msg = build_call_msg [
     {|"--outline"|};
     {|"<?hh"|};
   ] in
-  expect_call msg (Outline_call "<hh")
+  expect_call msg (Outline_call "<?hh")
 
 let tests = [
   "test_invalid_json", test_invalid_json;

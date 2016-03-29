@@ -101,6 +101,7 @@ struct Vout {
   Vtuple makeTuple(VregList&& regs) const;
   VcallArgsId makeVcallArgs(VcallArgs&& args) const;
   template<class T> Vreg cns(T v);
+  template<class T, class... Args> T* allocData(Args&&... args);
 
 private:
   Vunit& m_unit;
@@ -116,7 +117,7 @@ private:
  * A Vasm manages Vout streams for a Vunit.
  */
 struct Vasm {
-  Vasm() { m_outs.reserve(kNumAreas); }
+  explicit Vasm(Vunit& unit) : m_unit(unit) { m_outs.reserve(kNumAreas); }
 
   /*
    * Obtain the managed Vunit.
@@ -134,7 +135,7 @@ private:
   Vout& out(AreaIndex i);
 
 private:
-  Vunit m_unit;
+  Vunit& m_unit;
   jit::vector<Vout> m_outs; // one for each AreaIndex
 };
 
@@ -147,9 +148,9 @@ private:
  * it will finalize and emit any code it contains.
  */
 struct Vauto {
-  explicit Vauto(CodeBlock& code, CGMeta& fixups,
-                 CodeKind kind = CodeKind::Helper)
-    : m_text{code, code}
+  explicit Vauto(CodeBlock& code, DataBlock& data,
+                 CGMeta& fixups, CodeKind kind = CodeKind::Helper)
+    : m_text{code, code, data}
     , m_fixups(fixups)
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
     , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
@@ -175,25 +176,27 @@ private:
 
 namespace detail {
   template<class GenFunc>
-  TCA vwrap_impl(CodeBlock& cb, CGMeta* meta, GenFunc gen, CodeKind kind);
+  TCA vwrap_impl(CodeBlock& cb, DataBlock& data, CGMeta* meta,
+                 GenFunc gen, CodeKind kind);
 }
 
 /*
  * Convenience wrappers around Vauto for cross-trace or helper code.
  */
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, CGMeta& meta, GenFunc gen,
+TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
           CodeKind kind = CodeKind::CrossTrace) {
-  return detail::vwrap_impl(cb, &meta, [&] (Vout& v, Vout&) { gen(v); }, kind);
+  return detail::vwrap_impl(cb, data, &meta,
+                            [&] (Vout& v, Vout&) { gen(v); }, kind);
 }
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, GenFunc gen) {
-  return detail::vwrap_impl(cb, nullptr, [&] (Vout& v, Vout&) { gen(v); },
+TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen) {
+  return detail::vwrap_impl(cb, data, nullptr, [&] (Vout& v, Vout&) { gen(v); },
                             CodeKind::CrossTrace);
 }
 template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, GenFunc gen) {
-  return detail::vwrap_impl(cb, nullptr, gen, CodeKind::CrossTrace);
+TCA vwrap2(CodeBlock& cb, DataBlock& data, GenFunc gen) {
+  return detail::vwrap_impl(cb, data, nullptr, gen, CodeKind::CrossTrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

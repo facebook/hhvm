@@ -1425,47 +1425,38 @@ void lowerForPPC64(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 } // anonymous namespace
 
-void finishPPC64(Vunit& unit, Vtext& text, CGMeta& fixups,
-                 const Abi& abi, AsmInfo* asmInfo) {
-  // The Timer instances calculate the time while they are alive, hence the
-  // additional scope in order to limit them.
-  {
-    Timer timer(Timer::vasm_optimize);
+void optimizePPC64(Vunit& unit, const Abi& abi) {
+  Timer timer(Timer::vasm_optimize);
 
-    removeTrivialNops(unit);
-    optimizePhis(unit);
-    fuseBranches(unit);
-    optimizeJmps(unit);
-    optimizeExits(unit);
+  removeTrivialNops(unit);
+  optimizePhis(unit);
+  fuseBranches(unit);
+  optimizeJmps(unit);
+  optimizeExits(unit);
 
-    lowerForPPC64(unit);
+  lowerForPPC64(unit);
 
-    simplify(unit);
+  simplify(unit);
 
 #if 0 // TODO(gut): not needed?
-    if (!unit.constToReg.empty()) {
-      foldImms<x64::ImmFolder>(unit);
-    }
+  if (!unit.constToReg.empty()) {
+    foldImms<x64::ImmFolder>(unit);
+  }
 #endif
-    {
-      Timer timer(Timer::vasm_copy);
-      optimizeCopies(unit, abi);
-    }
-    if (unit.needsRegAlloc()) {
-      Timer timer(Timer::vasm_xls);
-      removeDeadCode(unit);
-      allocateRegisters(unit, abi);
-    }
-    if (unit.blocks.size() > 1) {
-      Timer timer(Timer::vasm_jumps);
-      optimizeJmps(unit);
-    }
-  }
+  optimizeCopies(unit, abi);
 
-  {
-    Timer timer(Timer::vasm_gen);
-    vasm_emit<Vgen>(unit, text, fixups, asmInfo);
+  if (unit.needsRegAlloc()) {
+    removeDeadCode(unit);
+    allocateRegisters(unit, abi);
   }
+  if (unit.blocks.size() > 1) {
+    optimizeJmps(unit);
+  }
+}
+
+void emitPPC64(const Vunit& unit, Vtext& text, CGMeta& fixups,
+               AsmInfo* asmInfo) {
+  vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

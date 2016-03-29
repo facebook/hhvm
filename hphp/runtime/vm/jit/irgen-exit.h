@@ -28,13 +28,13 @@
 // peekSpillValues.
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-namespace HPHP { struct StringData; }
 namespace HPHP { namespace jit {
-struct IRGS;
-struct Block;
-}}
 
-namespace HPHP { namespace jit { namespace irgen {
+struct Block;
+
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

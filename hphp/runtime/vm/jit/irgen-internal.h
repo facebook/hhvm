@@ -78,7 +78,7 @@ inline Offset nextBcOff(const IRGS& env) {
 }
 
 inline FPInvOffset invSPOff(const IRGS& env) {
-  return env.irb->fs().syncedSpLevel();
+  return env.irb->fs().bcSPOff();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -269,37 +269,38 @@ inline SSATmp* assertType(SSATmp* tmp, Type type) {
   return tmp;
 }
 
-inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset bcSPRel) {
-  auto const bcSPOff = env.irb->fs().syncedSpLevel();
-  auto const irSPOff = env.irb->fs().spOffset();
-  auto const ret = bcSPRel
-    .to<FPInvOffset>(bcSPOff)
-    .to<IRSPOffset>(irSPOff);
-  FTRACE(1,
-    "bcSPRel({}) --> irSPOff: {}, bcSPOff: {}, ret: {}\n",
-    bcSPRel.offset,
-    irSPOff.offset,
-    bcSPOff.offset,
-    ret.offset
-  );
-  return ret;
+inline IRSPRelOffset offsetFromIRSP(const IRGS& env, FPInvOffset fpRel) {
+  auto const irSPOff = env.irb->fs().irSPOff();
+  return fpRel.to<IRSPRelOffset>(irSPOff);
 }
 
-inline BCSPOffset offsetFromBCSP(const IRGS& env, FPInvOffset fpRel) {
-  auto const bcSPOff = env.irb->fs().syncedSpLevel();
-  return fpRel.to<BCSPOffset>(bcSPOff);
+inline IRSPRelOffset offsetFromIRSP(const IRGS& env, BCSPRelOffset bcSPRel) {
+  auto const fpRel = bcSPRel.to<FPInvOffset>(env.irb->fs().bcSPOff());
+  return offsetFromIRSP(env, fpRel);
 }
 
-inline BCSPOffset offsetFromBCSP(const IRGS& env, IRSPOffset irSPRel) {
-  auto const fpRel = irSPRel.to<FPInvOffset>(env.irb->fs().spOffset());
+inline BCSPRelOffset offsetFromBCSP(const IRGS& env, FPInvOffset fpRel) {
+  auto const bcSPOff = env.irb->fs().bcSPOff();
+  return fpRel.to<BCSPRelOffset>(bcSPOff);
+}
+
+inline BCSPRelOffset offsetFromBCSP(const IRGS& env, IRSPRelOffset irSPRel) {
+  auto const fpRel = irSPRel.to<FPInvOffset>(env.irb->fs().irSPOff());
   return offsetFromBCSP(env, fpRel);
 }
 
+/*
+ * Offset of the bytecode stack pointer relative to the IR stack pointer.
+ */
+inline IRSPRelOffset bcSPOffset(const IRGS& env) {
+  return offsetFromIRSP(env, BCSPRelOffset { 0 });
+}
+
 inline SSATmp* pop(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
-  auto const offset = offsetFromIRSP(env, BCSPOffset{0});
+  auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   auto const knownType = env.irb->stackType(offset, tc);
-  auto value = gen(env, LdStk, knownType, IRSPOffsetData{offset}, sp(env));
-  env.irb->fs().decSyncedSpLevel();
+  auto value = gen(env, LdStk, knownType, IRSPRelOffsetData{offset}, sp(env));
+  env.irb->fs().decBCSPDepth();
   FTRACE(2, "popping {}\n", *value->inst());
   return value;
 }
@@ -314,7 +315,7 @@ inline SSATmp* popR(IRGS& env) { return assertType(pop(env), TGen); }
 inline SSATmp* popF(IRGS& env) { return assertType(pop(env), TGen); }
 
 inline void discard(IRGS& env, uint32_t n) {
-  env.irb->fs().decSyncedSpLevel(n);
+  env.irb->fs().decBCSPDepth(n);
 }
 
 inline void decRef(IRGS& env, SSATmp* tmp, int locId=-1) {
@@ -329,9 +330,9 @@ inline void popDecRef(IRGS& env,
 
 inline SSATmp* push(IRGS& env, SSATmp* tmp) {
   FTRACE(2, "pushing {}\n", *tmp->inst());
-  env.irb->fs().incSyncedSpLevel();
-  auto const offset = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, StStk, IRSPOffsetData{offset}, sp(env), tmp);
+  env.irb->fs().incBCSPDepth();
+  auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
+  gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), tmp);
   return tmp;
 }
 
@@ -344,41 +345,41 @@ inline SSATmp* pushIncRef(IRGS& env,
 }
 
 inline Type topType(IRGS& env,
-                    BCSPOffset idx,
+                    BCSPRelOffset idx,
                     TypeConstraint constraint = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
   return env.irb->stackType(offsetFromIRSP(env, idx), constraint);
 }
 
 inline SSATmp* top(IRGS& env,
-                   BCSPOffset index = BCSPOffset{0},
+                   BCSPRelOffset index = BCSPRelOffset{0},
                    TypeConstraint tc = DataTypeSpecific) {
   auto const offset = offsetFromIRSP(env, index);
   auto const knownType = env.irb->stackType(offset, tc);
-  return gen(env, LdStk, IRSPOffsetData{offset}, knownType, sp(env));
+  return gen(env, LdStk, IRSPRelOffsetData{offset}, knownType, sp(env));
 }
 
 inline SSATmp* topC(IRGS& env,
-                    BCSPOffset i = BCSPOffset{0},
+                    BCSPRelOffset i = BCSPRelOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return assertType(top(env, i, tc), TCell);
 }
 
 inline SSATmp* topF(IRGS& env,
-                    BCSPOffset i = BCSPOffset{0},
+                    BCSPRelOffset i = BCSPRelOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return assertType(top(env, i, tc), TGen);
 }
 
-inline SSATmp* topV(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
+inline SSATmp* topV(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
   return assertType(top(env, i), TBoxedCell);
 }
 
-inline SSATmp* topR(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
+inline SSATmp* topR(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
   return assertType(top(env, i), TGen);
 }
 
-inline SSATmp* topA(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
+inline SSATmp* topA(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
   return assertType(top(env, i), TCls);
 }
 
@@ -692,13 +693,13 @@ inline SSATmp* ldLocAddr(IRGS& env, uint32_t locId) {
   return gen(env, LdLocAddr, LocalId(locId), fp(env));
 }
 
-inline SSATmp* ldStkAddr(IRGS& env, BCSPOffset relOffset) {
+inline SSATmp* ldStkAddr(IRGS& env, BCSPRelOffset relOffset) {
   auto const offset = offsetFromIRSP(env, relOffset);
   env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
     env,
     LdStkAddr,
-    IRSPOffsetData { offset },
+    IRSPRelOffsetData { offset },
     sp(env)
   );
 }

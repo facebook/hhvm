@@ -361,7 +361,7 @@ void PageletServer::Restart() {
       monitor->subscribe(s_dispatcher);
     }
     s_dispatcher->start();
-    BootTimer::mark("pagelet server started");
+    BootStats::mark("pagelet server started");
   }
 }
 

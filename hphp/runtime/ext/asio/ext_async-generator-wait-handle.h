@@ -38,9 +38,7 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   WAITHANDLE_CLASSOF(AsyncGeneratorWaitHandle);
   WAITHANDLE_DTOR(AsyncGeneratorWaitHandle);
 
-  explicit c_AsyncGeneratorWaitHandle(Class* cls =
-      c_AsyncGeneratorWaitHandle::classof())
-    : c_ResumableWaitHandle(cls) {}
+  c_AsyncGeneratorWaitHandle(AsyncGenerator* gen, c_WaitableWaitHandle* child);
   ~c_AsyncGeneratorWaitHandle();
 
  public:
@@ -62,10 +60,9 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
 
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncGenerator, state); }
-  void initialize(AsyncGenerator* gen, c_WaitableWaitHandle* child);
   void prepareChild(c_WaitableWaitHandle* child);
 
-  AsyncGenerator* m_generator;
+  ObjectData* m_generator; // has AsyncGenerator nativedata.
 
   // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;

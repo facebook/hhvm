@@ -84,9 +84,9 @@ inline size_t getSize(const ObjectData* od) {
   );
 }
 
-ATTRIBUTE_NORETURN void throwOOB(int64_t key);
-ATTRIBUTE_NORETURN void throwUndef(int64_t key);
-ATTRIBUTE_NORETURN void throwUndef(const StringData* key);
+[[noreturn]] void throwOOB(int64_t key);
+[[noreturn]] void throwUndef(int64_t key);
+[[noreturn]] void throwUndef(const StringData* key);
 
 /////////////////////////////////////////////////////////////////////////////
 

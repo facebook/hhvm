@@ -191,13 +191,27 @@ class CommonTests(object):
 
     def test_deleted_file(self):
         """
-        Delete a file that still has dangling references after restoring from
+        Delete a file that still has dangling references before restoring from
         a saved state.
         """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
 
         self.write_load_config('foo_2.php')
 
+        self.check_cmd([
+            '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
+            '{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])',
+            ])
+
+    def test_file_delete_after_load(self):
+        """
+        Delete a file that still has dangling references after restoring from
+        a saved state.
+        """
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
         self.check_cmd([
             '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
             '{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])',

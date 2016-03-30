@@ -342,7 +342,6 @@ void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {
       // Remove the current AAWH from the parent chain of all children.
       child->getParentChain().removeFromChain(&m_children[idx].m_blockable);
     }
-    decRefObj(child);
   }
 
   auto parentChain = getParentChain();

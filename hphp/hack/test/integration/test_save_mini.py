@@ -114,7 +114,21 @@ load_mini_script = %s
             output.splitlines())
         return err
 
+class LazyDeclTestDriver(MiniStateTestDriver):
+    def write_local_conf(self):
+        with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+            f.write(r"""
+# some comment
+use_mini_state = true
+use_watchman = true
+lazy_decl = true
+""")
+
 class MiniStateCommonTests(common_tests.CommonTests, MiniStateTestDriver,
+        unittest.TestCase):
+    pass
+
+class LazyDeclCommonTests(common_tests.CommonTests, LazyDeclTestDriver,
         unittest.TestCase):
     pass
 

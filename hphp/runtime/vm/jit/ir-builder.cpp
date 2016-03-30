@@ -401,9 +401,11 @@ SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
     return nullptr;
   }
 
-  // If FrameStateMgr's type isn't as good as the type param, we're missing
-  // information in the IR.
-  assertx(inst->typeParam() >= type);
+  if (l.tag() == LTag::Local) {
+    // If FrameStateMgr's type for a local isn't as good as the type param,
+    // we're missing information in the IR.
+    assertx(inst->typeParam() >= type);
+  }
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;

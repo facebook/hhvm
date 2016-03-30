@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import common_tests
+
 import json
 import os
 import shlex
@@ -12,6 +12,9 @@ import subprocess
 import tempfile
 import time
 import unittest
+
+import common_tests
+import hierarchy_tests
 
 from hh_paths import hh_server, hh_client
 
@@ -130,6 +133,14 @@ class MiniStateCommonTests(common_tests.CommonTests, MiniStateTestDriver,
 
 class LazyDeclCommonTests(common_tests.CommonTests, LazyDeclTestDriver,
         unittest.TestCase):
+    pass
+
+class MiniStateHierarchyTests(hierarchy_tests.HierarchyTests,
+        MiniStateTestDriver, unittest.TestCase):
+    pass
+
+class LazyDeclHierarchyTests(hierarchy_tests.HierarchyTests,
+        LazyDeclTestDriver, unittest.TestCase):
     pass
 
 class MiniStateTests(MiniStateTestDriver, unittest.TestCase):

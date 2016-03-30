@@ -28,7 +28,7 @@ ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 
 static size_t numGPRegArgs() {
-#ifdef __AARCH64EL__
+#ifdef __aarch64__
   return 8; // r0-r7
 #elif defined(__powerpc64__)
   return 31;

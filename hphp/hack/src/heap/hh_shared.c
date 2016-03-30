@@ -849,7 +849,7 @@ value hh_mem(value key) {
     // actually is ready to be used before returning.
     while (hashtbl[slot].addr == (char*)1) {
 #ifdef __aarch64__
-      asm volatile("wfe" : : : "memory");
+      asm volatile("yield" : : : "memory");
 #else
       asm volatile("pause" : : : "memory");
 #endif

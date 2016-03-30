@@ -1,8 +1,7 @@
 <?php
 $image = imagecreate(1,1);// 1px image
 
-
-$tempdir = sys_get_temp_dir(). '/php-gdtest';
+$tempdir = sys_get_temp_dir(). '/php-gdtest' . rand();
 if (!file_exists($tempdir) && !is_dir($tempdir)) {
 	mkdir ($tempdir, 0777, true);
 }
@@ -19,6 +18,6 @@ foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
 ?>
 <?php error_reporting(0); ?>
 <?php
-$tempdir = sys_get_temp_dir(). '/php-gdtest';
+
 foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
 rmdir($tempdir);

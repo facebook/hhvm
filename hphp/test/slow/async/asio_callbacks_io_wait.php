@@ -9,5 +9,5 @@ WaitHandle::setOnIOWaitExitCallback(function() {
 });
 
 echo "going to sleep\n";
-HH\Asio\join(SleepWaitHandle::create(1000000));
+HH\Asio\join(SleepWaitHandle::create(2000000));
 echo "sleep finished\n";

@@ -122,7 +122,7 @@ void emit(const Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
 }
 
 void emitVunit(Vunit& vunit, const IRUnit& unit,
-               CodeCache::View code, CGMeta& meta) {
+               CodeCache::View code, CGMeta& meta, Annotations* annotations) {
   Timer _t(Timer::vasm_emit);
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
   assertx(Translator::WriteLease().amOwner());
@@ -187,7 +187,10 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
     main_in.skip(main.frontier() - main_in.frontier());
   }
 
-  if (ai) printUnit(kCodeGenLevel, unit, " after code gen ", ai);
+  if (ai) {
+    printUnit(kCodeGenLevel, unit, " after code gen ",
+              ai, nullptr, annotations);
+  }
 }
 
 }}

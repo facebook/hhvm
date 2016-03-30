@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
@@ -242,7 +243,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       if (format.equal(s_collection)) {
         auto const pvec(req::make<c_Vector>(size));
         for (uint32_t s = 0; s < size; ++s) {
-          pvec->t_add(binary_deserialize(type, transport, elemspec));
+          pvec->add(binary_deserialize(type, transport, elemspec));
         }
         return Variant(std::move(pvec));
       } else {

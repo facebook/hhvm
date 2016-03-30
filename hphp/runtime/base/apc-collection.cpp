@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/data-walker.h"
 
 namespace HPHP {
@@ -53,7 +54,7 @@ Object createFromSerialized(CollectionType colType, APCHandle* handle) {
   switch (colType) {
   case CollectionType::ImmVector:
   case CollectionType::Vector:
-    static_cast<BaseVector*>(col.get())->t___construct(arr);
+    static_cast<BaseVector*>(col.get())->init(arr);
     break;
   case CollectionType::ImmSet:
   case CollectionType::Set:

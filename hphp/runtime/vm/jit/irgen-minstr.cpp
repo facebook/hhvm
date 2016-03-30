@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 #include <folly/Optional.h>
 

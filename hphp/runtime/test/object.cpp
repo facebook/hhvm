@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP {

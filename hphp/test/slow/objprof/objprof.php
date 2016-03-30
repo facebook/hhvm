@@ -142,8 +142,8 @@ $myClass = Vector {
   1, // 16
 };
 $objs = objprof_get_data();
-echo get_bytes('HH\\Vector', $objs) == $ObjSize + 32 + 19 + 16 && // Vec+35=99
-     get_bytesd('HH\\Vector', $objs) == $ObjSize + 67 - 3 // Static strings
+echo get_bytes('HH\\Vector', $objs) == $ObjSize + 32 + 3 && // Vec+35
+     get_bytesd('HH\\Vector', $objs) == $ObjSize + 32 // Static strings
   ? "(GOOD) Bytes (Vector) works\n"
   : "(BAD) Bytes (Vector) failed: ".var_export($objs, true)."\n";
 $objs = null;

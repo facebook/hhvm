@@ -5,8 +5,590 @@
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/native-data.h"
 
-namespace HPHP { namespace collections {
+namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
+
+struct Header;
+
+namespace collections {
+void deepCopy(TypedValue*);
+struct VectorIterator;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//// class BaseVector: encapsulates functionality that is common to both
+//// c_Vector and c_ImmVector. It doesn't map to any PHP-land class.
+
+struct BaseVector : ObjectData {
+ protected:
+  // Make sure this one is inlined all the way
+  explicit BaseVector(Class* cls, HeaderKind kind)
+    : ObjectData(cls, collections::objectFlags, kind)
+    , m_size(0)
+    , m_versionAndCap(0)
+    , m_arr(staticEmptyArray())
+  {}
+  explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
+    : ObjectData(cls, collections::objectFlags, kind)
+    , m_size(arr->size())
+    , m_versionAndCap(arr->cap())
+    , m_arr(arr)
+  {
+    assertx(arr == staticEmptyArray() || arr->isPacked());
+  }
+  explicit BaseVector(Class* cls, HeaderKind, uint32_t cap);
+  ~BaseVector();
+
+ public:
+  Variant firstValue() const {
+    if (!m_size) return init_null_variant;
+    return tvAsCVarRef(&data()[0]);
+  }
+
+  Variant lastValue() const {
+    if (!m_size) return init_null_variant;
+    return tvAsCVarRef(&data()[m_size-1]);
+  }
+
+  template<class TVector, bool useKey>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_map(const Variant& callback) const;
+
+  template<class TVector, bool useKey>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_filter(const Variant& callback) const;
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_take(const Variant& n);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_takeWhile(const Variant& fn);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_skip(const Variant& n);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_skipWhile(const Variant& fn);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_slice(const Variant& start, const Variant& len);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_concat(const Variant& iterable);
+
+  ArrayData* arrayData() {
+    auto* ret = getArrayFromPackedData(data());
+    assert(ret == staticEmptyArray() || ret->isPacked());
+    return ret;
+  }
+  const ArrayData* arrayData() const {
+    auto* ret = getArrayFromPackedData(data());
+    assert(ret == staticEmptyArray() || ret->isPacked());
+    return ret;
+  }
+  void setSize(uint32_t sz) {
+    assert(sz <= m_capacity);
+    if (sz == m_size) return;
+    assert(!arrayData()->cowCheck());
+    m_size = sz;
+    arrayData()->m_size = sz;
+  }
+  void incSize() {
+    assert(m_size + 1 <= m_capacity);
+    assert(!arrayData()->cowCheck());
+    ++m_size;
+    arrayData()->m_size = m_size;
+  }
+  void decSize() {
+    assert(m_size > 0);
+    assert(!arrayData()->cowCheck());
+    --m_size;
+    arrayData()->m_size = m_size;
+  }
+  TypedValue* appendForUnserialize(int64_t k) {
+    assert(k == m_size);
+    incSize();
+    return &data()[k];
+  }
+
+  static Array ToArray(const ObjectData* obj) {
+    check_collection_cast_to_array();
+    return const_cast<BaseVector*>(
+      static_cast<const BaseVector*>(obj)
+    )->toArray();
+  }
+
+  static bool ToBool(const ObjectData* obj) {
+    return static_cast<const BaseVector*>(obj)->toBoolImpl();
+  }
+
+  template <bool throwOnMiss>
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
+    assertx(key->m_type != KindOfRef);
+    auto vec = static_cast<BaseVector*>(obj);
+    if (key->m_type == KindOfInt64) {
+      return throwOnMiss ? vec->at(key->m_data.num)
+                         : vec->get(key->m_data.num);
+    }
+    throwBadKeyType();
+    return nullptr;
+  }
+  static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
+
+  template<typename T> typename
+    std::enable_if<std::is_integral<T>::value, TypedValue*>::type
+  at(T key) {
+    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
+      throwOOB(key);
+      return nullptr;
+    }
+    return &data()[key];
+  }
+  TypedValue* at(const TypedValue* key) {
+    assertx(key->m_type != KindOfRef);
+    if (LIKELY(key->m_type == KindOfInt64)) {
+      return at(key->m_data.num);
+    }
+    throwBadKeyType();
+  }
+
+  template<typename T> typename
+    std::enable_if<std::is_integral<T>::value, TypedValue*>::type
+  get(T key) {
+    if ((uint64_t)key >= (uint64_t)m_size) {
+      return nullptr;
+    }
+    return &data()[key];
+  }
+  TypedValue* get(const TypedValue* key) {
+    assert(key->m_type != KindOfRef);
+    if (LIKELY(key->m_type == KindOfInt64)) {
+      return get(key->m_data.num);
+    }
+    throwBadKeyType();
+  }
+
+  bool contains(int64_t key) const {
+    return ((uint64_t)key < (uint64_t)m_size);
+  }
+
+  void init(const Variant& it) {
+    assert(m_size == 0);
+    addAllImpl(it);
+  }
+
+  void keys(BaseVector* bvec);
+  int64_t linearSearch(const Variant& search_value);
+  void zip(BaseVector* bvec, const Variant& iterable);
+  void addFront(const TypedValue* val);
+  Variant popFront();
+
+  int getVersion() const { return m_version; }
+  int64_t size() const { return m_size; }
+  bool toBoolImpl() const { return (m_size != 0); }
+  void reserve(int64_t sz);
+  Array toArray() {
+    if (!m_size) return empty_array();
+    return Array(const_cast<ArrayData*>(arrayData()));
+  }
+
+  static constexpr size_t sizeOffset() { return offsetof(BaseVector, m_size); }
+  static constexpr size_t arrOffset() { return offsetof(BaseVector, m_arr); }
+  static constexpr size_t immCopyOffset() {
+    return offsetof(BaseVector, m_immCopy);
+  }
+
+  void add(const TypedValue* val) { addImpl<false>(val); }
+  void add(const Variant& val) { add(val.asCell()); }
+
+  void set(int64_t key, const TypedValue* val) {
+    mutate();
+    setRaw(key, val);
+  }
+  void set(int64_t key, const Variant& val) {
+    set(key, val.asCell());
+  }
+  void set(const TypedValue* key, const TypedValue* val) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type != KindOfInt64) {
+      throwBadKeyType();
+    }
+    set(key->m_data.num, val);
+  }
+  void set(const Variant& key, const Variant& val) {
+    set(key.asCell(), val.asCell());
+  }
+
+  template<class TVector>
+  static typename
+    std::enable_if<std::is_base_of<BaseVector, TVector>::value, Object>::type
+  fromKeysOf(const TypedValue& container);
+
+  /**
+   * canMutateBuffer() indicates whether it is currently safe to directly
+   * modify this Vector's buffer. canMutateBuffer() is vacuously true for
+   * buffers with zero capacity (i.e. the staticEmptyArray() case) because
+   * you can't meaningfully mutate zero-capacity buffer without first doing
+   * a grow. This may seem weird, but its actually much smoother in practice
+   * than the alternative of returning false for such cases.
+   */
+  bool canMutateBuffer() const {
+    assert(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
+    return m_capacity == 0 || !arrayData()->cowCheck();
+  }
+
+  /**
+   * mutate() must be called before any doing anything that mutates this
+   * Vector's buffer, unless it can be proven that canMutateBuffer() is
+   * true. mutate() takes care of updating m_immCopy and making a copy
+   * this Vector's buffer if needed.
+   */
+  void mutate() {
+    if (arrayData()->cowCheck()) {
+      // mutateImpl() does two things for us. First it drops the the
+      // immutable collection held by m_immCopy (if m_immCopy is not
+      // null). Second, it takes care of copying the buffer if needed.
+      mutateImpl();
+    }
+  }
+
+  void mutateAndBump() { mutate(); ++m_version; }
+
+  Object getImmutableCopy();
+  void dropImmCopy() {
+    assert(m_immCopy.isNull() ||
+           (data() == ((BaseVector*)m_immCopy.get())->data() &&
+            arrayData()->cowCheck()));
+    m_immCopy.reset();
+  }
+
+  [[noreturn]] static void throwBadKeyType();
+
+  static constexpr uint64_t MaxCapacity() {
+    // same as mixed-array for now
+    return MixedArray::MaxSize;
+  }
+
+  static bool instanceof(const ObjectData*);
+
+ protected:
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, TVector*>::type
+  static Clone(ObjectData* obj);
+
+  Cell* data() const { return packedData(m_arr); }
+  void grow();
+  void reserveImpl(uint32_t newCap);
+
+  void addAllImpl(const Variant& t);
+
+  template <bool raw>
+  ALWAYS_INLINE
+  void addImpl(const TypedValue* val) {
+    assert(val->m_type != KindOfRef);
+    if (m_capacity <= m_size) {
+      grow();
+    }
+    if (!raw) {
+      mutateAndBump();
+    }
+    assert(canMutateBuffer());
+    cellDup(*val, data()[m_size]);
+    incSize();
+  }
+
+  // addRaw() adds a new element to this Vector but doesn't check for an
+  // immutable buffer and doesn't increment m_version, so it's only safe
+  // to use in some cases. If you're not sure, use add() instead.
+  void addRaw(const TypedValue* val) { addImpl<true>(val); }
+  void addRaw(const Variant& val) { addRaw(val.asCell()); }
+
+  // setRaw() assigns a value to the specified key in this Vector but
+  // doesn't increment m_version, so it's only safe to use in some cases.
+  // If you're not sure, use set() instead.
+  void setRaw(int64_t key, const TypedValue* val) {
+    assert(val->m_type != KindOfRef);
+    assert(canMutateBuffer());
+    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
+      throwOOB(key);
+      return;
+    }
+    TypedValue* tv = &data()[key];
+    DataType oldType = tv->m_type;
+    uint64_t oldDatum = tv->m_data.num;
+    cellDup(*val, *tv);
+    if (isRefcountedType(oldType)) {
+      tvDecRefHelper(oldType, oldDatum);
+    }
+  }
+  void setRaw(int64_t key, const Variant& val) {
+    setRaw(key, val.asCell());
+  }
+  void setRaw(const TypedValue* key, const TypedValue* val) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type != KindOfInt64) {
+      throwBadKeyType();
+    }
+    setRaw(key->m_data.num, val);
+  }
+  void setRaw(const Variant& key, const Variant& val) {
+    setRaw(key.asCell(), val.asCell());
+  }
+
+  /**
+   * Copy the buffer and reset the immutable copy.
+   */
+  void mutateImpl();
+
+  Object getIterator();
+  Variant php_at(const Variant& key) {
+    return tvAsCVarRef(at(key.asCell()));
+  }
+  Variant php_get(const Variant& key) {
+    if (auto tv = get(key.asCell())) {
+      return tvAsCVarRef(tv);
+    }
+    return init_null_variant;
+  }
+
+  template<class TVector> typename
+    std::enable_if<std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_keys() {
+    auto vec = req::make<TVector>();
+    keys(vec.get());
+    return Object{std::move(vec)};
+  }
+
+  template<class TVector> typename
+    std::enable_if<std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_zip(const Variant& it) {
+    auto vec = req::make<TVector>();
+    zip(vec.get(), it);
+    return Object{std::move(vec)};
+  }
+
+ protected:
+  template<class F> friend void scanHeader(const Header*, F& mark);
+  template<class F> void scan(F& mark) const {
+    if (!m_size) return;
+    assertx(m_arr->isPacked());
+    PackedArray::scan(m_arr, mark);
+  }
+
+  // Fields
+#ifndef USE_LOWPTR
+  // Keep `m_size' aligned at the same offset for all collection classes.
+  UNUSED uint32_t dummy;
+#endif
+  uint32_t m_size;
+
+  union {
+    struct {
+      uint32_t m_capacity;
+      int32_t m_version;
+    };
+    int64_t m_versionAndCap;
+  };
+
+
+  // The ArrayData's element area can be computed from m_arr via the
+  // packedData() helper function. When capacity is non-zero, m_arr points
+  // to a PackedArray.
+  ArrayData* m_arr;
+
+  // m_immCopy is a smart pointer to an ImmVector that is an up-to-date
+  // shallow copy of this Vector (or m_immCopy is null). We maintain the
+  // invariant that a Vector and its m_immCopy share the same ArrayData
+  // buffer. Neither the Vector or the ImmVector "owns" the ArrayData
+  // buffer; instead we rely on the ArrayData's ref counting to deal
+  // with freeing the buffer at the right time.
+  Object m_immCopy;
+
+ private:
+  static void compileTimeAssertions() {
+    // For performance, all native collection classes have their m_size field
+    // at the same offset.
+    static_assert(
+      offsetof(BaseVector, m_size) == collections::FAST_SIZE_OFFSET, "");
+  }
+
+  // Friends
+
+  friend struct collections::VectorIterator;
+  friend struct collections::CollectionsExtension;
+  friend struct BaseMap;
+  friend struct BaseSet;
+  friend struct c_Pair;
+  friend struct c_AwaitAllWaitHandle;
+
+  friend void collections::deepCopy(TypedValue*);
+
+  friend void collectionReserve(ObjectData* obj, int64_t sz);
+  friend void collectionInitAppend(ObjectData* obj, TypedValue* val);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// c_Vector
+
+struct c_Vector : BaseVector {
+  DECLARE_COLLECTIONS_CLASS(Vector);
+
+  explicit c_Vector(Class* cls = c_Vector::classof())
+    : BaseVector(cls, HeaderKind::Vector) { }
+  explicit c_Vector(Class* cls, ArrayData* arr)
+    : BaseVector(cls, HeaderKind::Vector, arr) { }
+  explicit c_Vector(Class* cls, uint32_t cap)
+    : BaseVector(cls, HeaderKind::Vector, cap) { }
+  explicit c_Vector(uint32_t cap, Class* cls = c_Vector::classof())
+    : c_Vector(cls, cap) { }
+
+  void addAll(const Variant& it) {
+    addAllImpl(it);
+  }
+
+  static c_Vector* Clone(ObjectData* obj);
+
+  void addAllKeysOf(const Variant& val);
+  void clear();
+  Variant pop();
+  void resize(int64_t sz, const Cell* val);
+  void removeKey(int64_t k);
+  void reverse();
+  void shuffle();
+  void splice(int64_t startPos, int64_t endPos);
+  void splice(int64_t startPos) {
+    splice(startPos, m_size - 1);
+  }
+  void sort(int sort_flags, bool ascending);
+  bool usort(const Variant& cmp_function);
+
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        const TypedValue* val);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
+  static Object fromArray(const Class*, const Variant&);
+
+ protected:
+  int64_t checkRequestedSize(const Variant& sz) {
+    int64_t intSz = sz.isInteger() ? sz.toInt64() : -1;
+    if (intSz < 0) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Parameter sz must be a non-negative integer");
+    }
+    if (intSz > BaseVector::MaxCapacity()) {
+      auto msg = folly::format(
+        "Parameter sz must be at most {}; {} passed",
+        BaseVector::MaxCapacity(),
+        intSz
+      ).str();
+      SystemLib::throwInvalidArgumentExceptionObject(msg);
+    }
+    return intSz;
+  }
+
+  Object php_add(const Variant& value) {
+    add(value.asCell());
+    return Object{this};
+  }
+  Object php_addAll(const Variant& it) {
+    addAll(it);
+    return Object{this};
+  }
+  Object php_addAllKeysOf(const Variant& it) {
+    addAllKeysOf(it);
+    return Object{this};
+  }
+  Object php_clear() {
+    clear();
+    return Object{this};
+  }
+  Object php_removeKey(const Variant& key) {
+    if (UNLIKELY(!key.isInteger())) {
+      throwBadKeyType();
+    }
+    removeKey(key.toInt64());
+    return Object{this};
+  }
+  void php_reserve(const Variant& sz) {
+    return reserve(checkRequestedSize(sz));
+  }
+  void php_resize(const Variant& sz, const Variant& value) {
+    return resize(checkRequestedSize(sz), value.asCell());
+  }
+  Object php_set(const Variant& key, const Variant& value) {
+    set(key, value);
+    return Object{this};
+  }
+  Object php_setAll(const Variant& it) {
+    if (it.isNull()) return Object{this};
+    size_t sz;
+    ArrayIter iter = getArrayIterHelper(it, sz);
+    for (; iter; ++iter) {
+      set(iter.first(), iter.second());
+    }
+    return Object{this};
+  }
+  void php_splice(const Variant& offset,
+                  const Variant& len = null_variant,
+                  const Variant& replacement = null_variant);
+
+private:
+  template <typename AccessorT>
+  SortFlavor preSort(const AccessorT& acc);
+
+  // Friends
+  friend struct collections::CollectionsExtension;
+  friend void collections::append(ObjectData* obj, TypedValue* val);
+  friend void triggerCow(c_Vector* vec);
+
+  friend struct ArrayIter;
+  friend struct BaseMap;
+  friend struct c_Pair;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// c_ImmVector
+
+struct c_ImmVector : BaseVector {
+  DECLARE_COLLECTIONS_CLASS(ImmVector)
+
+  explicit c_ImmVector(Class* cls = c_ImmVector::classof())
+    : BaseVector(cls, HeaderKind::ImmVector) { }
+  explicit c_ImmVector(Class* cls, ArrayData* arr)
+    : BaseVector(cls, HeaderKind::ImmVector, arr) { }
+  explicit c_ImmVector(Class* cls, uint32_t cap)
+    : BaseVector(cls, HeaderKind::ImmVector, cap) { }
+  explicit c_ImmVector(uint32_t cap, Class* cls = c_ImmVector::classof())
+    : c_ImmVector(cls, cap) { }
+
+  static c_ImmVector* Clone(ObjectData* obj);
+};
+
+inline bool BaseVector::instanceof(const ObjectData* obj) {
+  return c_Vector::instanceof(obj) ||
+         c_ImmVector::instanceof(obj);
+}
+
+namespace collections {
+/////////////////////////////////////////////////////////////////////////////
+// VectorIterator
 
 extern const StaticString
   s_VectorIterator;

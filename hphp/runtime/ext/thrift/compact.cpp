@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/ext/thrift/transport.h"
@@ -901,7 +902,7 @@ struct CompactReader {
       if (format.equal(s_collection)) {
         auto const pvec(req::make<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
-          pvec->t_add(readField(valueSpec, valueType));
+          pvec->add(readField(valueSpec, valueType));
         }
         readCollectionEnd();
         return Variant(std::move(pvec));

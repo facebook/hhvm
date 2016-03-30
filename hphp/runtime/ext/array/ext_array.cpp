@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/zend-sort.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -778,9 +779,9 @@ Variant HHVM_FUNCTION(array_push,
         case CollectionType::Vector: {
           c_Vector* vec = static_cast<c_Vector*>(obj);
           vec->reserve(vec->size() + args.size() + 1);
-          vec->t_add(var);
+          vec->add(var);
           for (ArrayIter iter(args); iter; ++iter) {
-            vec->t_add(iter.second());
+            vec->add(iter.second());
           }
           return vec->size();
         }

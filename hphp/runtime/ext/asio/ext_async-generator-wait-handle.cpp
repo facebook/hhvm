@@ -67,12 +67,6 @@ c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
 }
 
 void c_AsyncGeneratorWaitHandle::resume() {
-  // may happen if scheduled in multiple contexts
-  if (getState() != STATE_READY) {
-    decRefObj(this);
-    return;
-  }
-
   assert(getState() == STATE_READY);
   assert(m_child->isFinished());
   setState(STATE_RUNNING);

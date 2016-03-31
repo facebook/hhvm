@@ -105,12 +105,6 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
-  // may happen if scheduled in multiple contexts
-  if (getState() != STATE_READY) {
-    decRefObj(this);
-    return;
-  }
-
   auto const child = m_children[0].getChild();
   assert(getState() == STATE_READY);
   assert(child->isFinished());

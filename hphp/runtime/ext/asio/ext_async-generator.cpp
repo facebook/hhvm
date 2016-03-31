@@ -98,6 +98,7 @@ AsyncGenerator::yield(Offset resumeOffset,
   if (m_waitHandle) {
     // Resumed execution.
     m_waitHandle->ret(*tvAssertCell(&keyValueTupleTV));
+    decRefObj(m_waitHandle);
     m_waitHandle = nullptr;
     return nullptr;
   }
@@ -115,6 +116,7 @@ AsyncGenerator::ret() {
   if (m_waitHandle) {
     // Resumed execution.
     m_waitHandle->ret(nullTV);
+    decRefObj(m_waitHandle);
     m_waitHandle = nullptr;
     return nullptr;
   }
@@ -129,6 +131,7 @@ AsyncGenerator::fail(ObjectData* exception) {
   if (m_waitHandle) {
     // Resumed execution.
     m_waitHandle->fail(exception);
+    decRefObj(m_waitHandle);
     m_waitHandle = nullptr;
     return nullptr;
   }
@@ -142,6 +145,7 @@ void AsyncGenerator::failCpp() {
   if (m_waitHandle) {
     // Resumed execution.
     m_waitHandle->failCpp();
+    decRefObj(m_waitHandle);
     m_waitHandle = nullptr;
   }
 }

@@ -2816,7 +2816,9 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
-    frame_afwh(vmfp())->ret(retval);
+    auto wh = frame_afwh(vmfp());
+    wh->ret(retval);
+    decRefObj(wh);
   } else if (vmfp()->func()->isAsyncGenerator()) {
     // Mark the async generator as finished.
     assert(isNullType(retval.m_type));

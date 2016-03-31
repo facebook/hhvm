@@ -277,6 +277,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // Handle exception thrown by async function.
       decRefLocals();
       waitHandle->fail(phpException);
+      decRefObj(waitHandle);
       phpException = nullptr;
     } else if (waitHandle->isRunning()) {
       // Let the C++ exception propagate. If the current frame represents async
@@ -285,6 +286,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // decides to throw C++ exception.
       decRefLocals();
       waitHandle->failCpp();
+      decRefObj(waitHandle);
     }
   } else if (func->isAsyncGenerator()) {
     auto const gen = frame_async_generator(fp);

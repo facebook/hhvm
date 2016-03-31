@@ -121,7 +121,6 @@ void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
   cellCopy(result, m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
-  decRefObj(this);
 }
 
 void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
@@ -135,7 +134,6 @@ void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
   cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
-  decRefObj(this);
 }
 
 void c_AsyncGeneratorWaitHandle::failCpp() {
@@ -145,7 +143,6 @@ void c_AsyncGeneratorWaitHandle::failCpp() {
   tvWriteObject(exception, &m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
-  decRefObj(this);
 }
 
 String c_AsyncGeneratorWaitHandle::getName() {

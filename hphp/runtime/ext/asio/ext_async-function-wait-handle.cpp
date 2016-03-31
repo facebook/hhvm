@@ -162,7 +162,6 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
   parentChain.unblock();
-  decRefObj(this);
 }
 
 /**
@@ -189,7 +188,6 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   setState(STATE_FAILED);
   cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
-  decRefObj(this);
 }
 
 /**
@@ -202,7 +200,6 @@ void c_AsyncFunctionWaitHandle::failCpp() {
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
   parentChain.unblock();
-  decRefObj(this);
 }
 
 String c_AsyncFunctionWaitHandle::getName() {

@@ -85,6 +85,16 @@ class CommonTestDriver(object):
         shutil.rmtree(self.repo_dir)
 
     @classmethod
+    def proc_create(cls, args, env):
+        return subprocess.Popen(
+                args,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=dict(cls.test_env, **env),
+                universal_newlines=True)
+
+    @classmethod
     def proc_call(cls, args, env=None, stdin=None):
         """
         Invoke a subprocess, return stdout, send stderr to our stderr (for
@@ -92,13 +102,7 @@ class CommonTestDriver(object):
         """
         env = {} if env is None else env
         print(" ".join(args), file=sys.stderr)
-        proc = subprocess.Popen(
-                args,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=dict(cls.test_env, **env),
-                universal_newlines=True)
+        proc = cls.proc_create(args, env)
         (stdout_data, stderr_data) = proc.communicate(stdin)
         sys.stderr.write(stderr_data)
         sys.stderr.flush()
@@ -122,6 +126,37 @@ class CommonTestDriver(object):
         # idempotent)
         self.check_cmd(expected_json, stdin, options + ['--json'])
         self.check_cmd(expected_output, stdin, options)
+
+    def subscribe_debug(self):
+        proc = self.proc_create([
+            hh_client,
+            'debug',
+            self.repo_dir
+            ], env={})
+        return DebugSubscription(proc)
+
+class DebugSubscription(object):
+    """
+    Wraps `hh_client debug`.
+    """
+
+    def __init__(self, proc):
+        self.proc = proc
+        hello = self.read_msg()
+        assert(hello['data'] == 'hello')
+
+    def read_msg(self):
+        line = self.proc.stdout.readline()
+        return json.loads(line)
+
+    def get_incremental_logs(self):
+        msgs = {}
+        while True:
+            msg = self.read_msg()
+            if msg['type'] == 'info' and msg['data'] == 'incremental_done':
+                break
+            msgs[msg['name']] = msg
+        return msgs
 
 class CommonTests(object):
 
@@ -210,8 +245,14 @@ class CommonTests(object):
         """
         self.write_load_config()
         self.check_cmd(['No errors!'])
+        debug_sub = self.subscribe_debug()
 
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        msgs = debug_sub.get_incremental_logs()
+        self.assertEqual(msgs['to_redecl_phase1']['files'], ['foo_2.php'])
+        self.assertEqual(msgs['to_redecl_phase2']['files'], ['foo_2.php'])
+        self.assertEqual(set(msgs['to_recheck']['files']),
+                set(['foo_1.php', 'foo_2.php']))
         self.check_cmd([
             '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
             '{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])',

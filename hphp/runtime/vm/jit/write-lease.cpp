@@ -145,7 +145,7 @@ LeaseHolderBase::LeaseHolderBase(Lease& l,
 
 LeaseHolderBase::~LeaseHolderBase() {
   if (m_acquired && m_lease.amOwner()) {
-    m_lease.drop(Lease::kStandardHintExpireInterval);
+    m_lease.drop(RuntimeOption::EvalJitWriteLeaseExpiration);
   }
 
   if (m_acquiredFunc) {

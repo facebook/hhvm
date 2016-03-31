@@ -45,8 +45,10 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   static constexpr ptrdiff_t blockableOff() {
     return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
   }
-  static c_AsyncGeneratorWaitHandle* Create(AsyncGenerator* gen,
-                                            c_WaitableWaitHandle* child);
+
+  static req::ptr<c_AsyncGeneratorWaitHandle>
+  Create(AsyncGenerator* gen, c_WaitableWaitHandle* child);
+
   void resume();
   void onUnblocked();
   void await(c_WaitableWaitHandle* child);

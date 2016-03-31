@@ -129,16 +129,16 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   while (!wait_handle->isFinished()) {
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.back();
+      auto resumable = m_runnableQueue.back();
       m_runnableQueue.pop_back();
-      current->resume();
+      resumable->resume();
       continue;
     }
 
     if (!m_fastRunnableQueue.empty()) {
-      auto current = m_fastRunnableQueue.back();
+      auto async_function = m_fastRunnableQueue.back();
       m_fastRunnableQueue.pop_back();
-      current->resume();
+      async_function->resume();
       continue;
     }
 

@@ -78,7 +78,8 @@ AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
     return nullptr;
   }
   // Eager executon.
-  m_waitHandle = c_AsyncGeneratorWaitHandle::Create(this, child);
+  auto wh = c_AsyncGeneratorWaitHandle::Create(this, child);
+  m_waitHandle = wh.detach();
   return m_waitHandle;
 }
 
@@ -99,10 +100,9 @@ AsyncGenerator::yield(Offset resumeOffset,
     m_waitHandle->ret(*tvAssertCell(&keyValueTupleTV));
     m_waitHandle = nullptr;
     return nullptr;
-  } else {
-    // Eager execution.
-    return c_StaticWaitHandle::CreateSucceeded(keyValueTupleTV);
   }
+  // Eager execution.
+  return c_StaticWaitHandle::CreateSucceeded(keyValueTupleTV);
 }
 
 c_StaticWaitHandle*
@@ -117,9 +117,8 @@ AsyncGenerator::ret() {
     m_waitHandle->ret(nullTV);
     m_waitHandle = nullptr;
     return nullptr;
-  } else {
-    return c_StaticWaitHandle::CreateSucceeded(nullTV);
   }
+  return c_StaticWaitHandle::CreateSucceeded(nullTV);
 }
 
 c_StaticWaitHandle*
@@ -132,9 +131,8 @@ AsyncGenerator::fail(ObjectData* exception) {
     m_waitHandle->fail(exception);
     m_waitHandle = nullptr;
     return nullptr;
-  } else {
-    return c_StaticWaitHandle::CreateFailed(exception);
   }
+  return c_StaticWaitHandle::CreateFailed(exception);
 }
 
 void AsyncGenerator::failCpp() {

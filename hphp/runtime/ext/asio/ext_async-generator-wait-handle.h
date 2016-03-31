@@ -64,7 +64,7 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   void setState(uint8_t state) { setKindState(Kind::AsyncGenerator, state); }
   void prepareChild(c_WaitableWaitHandle* child);
 
-  ObjectData* m_generator; // has AsyncGenerator nativedata.
+  Object m_generator; // has AsyncGenerator nativedata.
 
   // valid if STATE_READY || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;

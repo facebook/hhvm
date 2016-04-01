@@ -1078,12 +1078,18 @@ void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
       auto h = k.toInt64();
       tv = map->findForUnserialize(h);
       // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
+      if (UNLIKELY(!tv)) {
+        tv = k.asTypedValue();
+        goto do_unserialize;
+      }
     } else if (k.isString()) {
       auto key = k.getStringData();
       tv = map->findForUnserialize(key);
       // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
+      if (UNLIKELY(!tv)) {
+        tv = k.asTypedValue();
+        goto do_unserialize;
+      }
     } else {
       throwInvalidKey();
     }

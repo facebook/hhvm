@@ -998,6 +998,14 @@ struct IndexData : IRExtraData {
   std::string show() const { return folly::format("{}", index).str(); }
 };
 
+struct MOpFlagsData : IRExtraData {
+  explicit MOpFlagsData(MOpFlags flags) : flags{flags} {}
+
+  std::string show() const { return subopToName(flags); }
+
+  MOpFlags flags;
+};
+
 struct MInstrAttrData : IRExtraData {
   explicit MInstrAttrData(MInstrAttr mia) : mia(mia) {}
 
@@ -1211,9 +1219,9 @@ X(LdRDSAddr,                    RDSHandleData);
 X(BaseG,                        MInstrAttrData);
 X(PropX,                        MInstrAttrData);
 X(PropDX,                       MInstrAttrData);
-X(ElemX,                        MInstrAttrData);
-X(ElemDX,                       MInstrAttrData);
-X(ElemUX,                       MInstrAttrData);
+X(ElemX,                        MOpFlagsData);
+X(ElemDX,                       MOpFlagsData);
+X(ElemUX,                       MOpFlagsData);
 X(CGetProp,                     MInstrAttrData);
 X(CGetElem,                     MInstrAttrData);
 X(SetOpProp,                    SetOpData);

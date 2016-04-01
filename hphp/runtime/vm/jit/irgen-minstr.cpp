@@ -1053,9 +1053,9 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
     }
   }
 
-  auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
+  auto const flagsData = MOpFlagsData{flags};
   auto const op = define ? ElemDX : unset ? ElemUX : ElemX;
-  return gen(env, op, miaData, basePtr, key, tvRefPtr(env));
+  return gen(env, op, flagsData, basePtr, key, tvRefPtr(env));
 }
 
 /*

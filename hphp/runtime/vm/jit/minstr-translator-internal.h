@@ -24,17 +24,16 @@
 
 namespace HPHP { namespace jit { namespace {
 
-static const MInstrAttr Warn = MIA_warn;
-static const MInstrAttr Unset = MIA_unset;
-static const MInstrAttr Reffy = MIA_reffy;
-static const MInstrAttr Define = MIA_define;
-static const MInstrAttr None = MIA_none;
-static const MInstrAttr WarnDefine = MInstrAttr(Warn | Define);
-static const MInstrAttr DefineReffy = MInstrAttr(Define | Reffy);
+constexpr MInstrAttr Warn = MIA_warn;
+constexpr MInstrAttr Unset = MIA_unset;
+constexpr MInstrAttr Reffy = MIA_reffy;
+constexpr MInstrAttr Define = MIA_define;
+constexpr MInstrAttr None = MIA_none;
+constexpr MInstrAttr WarnDefine = MInstrAttr(Warn | Define);
+constexpr MInstrAttr DefineReffy = MInstrAttr(Define | Reffy);
+
 #define WDU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \
                    (attrs & Unset) != 0
-#define WDRU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \
-                    (attrs & Reffy) != 0, (attrs & Unset) != 0
 
 /* The following bunch of macros and functions are used to build up tables of
  * helper function pointers and determine which helper should be called based
@@ -44,6 +43,7 @@ template<typename T> constexpr unsigned bitWidth() {
   return std::is_same<T, bool>::value ? 1
     : std::is_same<T, KeyType>::value ? 2
     : std::is_same<T, MInstrAttr>::value ? 4
+    : std::is_same<T, MOpFlags>::value ? 4
     : sizeof(T) * CHAR_BIT;
 }
 

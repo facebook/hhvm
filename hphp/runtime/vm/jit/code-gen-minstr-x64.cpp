@@ -261,9 +261,10 @@ void CodeGenerator::cgIssetProp(IRInstruction* i) { cgIssetEmptyPropImpl(i); }
 void CodeGenerator::cgEmptyProp(IRInstruction* i) { cgIssetEmptyPropImpl(i); }
 
 void CodeGenerator::cgElemImpl(IRInstruction* inst) {
-  auto const mia = inst->extra<MInstrAttrData>()->mia;
-  auto const key = inst->src(1);
-  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mia);
+  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  auto const key   = inst->src(1);
+
+  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), flags);
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),

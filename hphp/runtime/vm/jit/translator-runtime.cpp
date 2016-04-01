@@ -1293,7 +1293,7 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
 
 void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   TypedValue localTvRef;
-  auto elem = HPHP::ElemD<false, true>(localTvRef, base, key);
+  auto elem = HPHP::ElemD<MOpFlags::DefineReffy>(localTvRef, base, key);
 
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
@@ -1308,7 +1308,7 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
 void setWithRefElemC(TypedValue* base, TypedValue keyTV, TypedValue val) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(&keyTV);
-  auto elem = HPHP::ElemD<false, false>(localTvRef, base, *keyC);
+  auto elem = HPHP::ElemD<MOpFlags::Define>(localTvRef, base, *keyC);
   // Intentionally leak the old value pointed to by elem, including from magic
   // methods.
   tvDup(val, *elem);

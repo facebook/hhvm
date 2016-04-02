@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import os
+
 class HierarchyTests(object):
 
     template_repo = 'hphp/hack/test/integration/data/hierarchy'

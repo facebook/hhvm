@@ -30,82 +30,71 @@ namespace HPHP { namespace jit { namespace MInstrHelpers {
 
 template <MOpFlags flags>
 TypedValue* baseGImpl(TypedValue key) {
-  TypedValue* base;
-  StringData* name = prepareKey(key);
+  auto const name = prepareKey(key);
   SCOPE_EXIT { decRefStr(name); };
-  VarEnv* varEnv = g_context->m_globalVarEnv;
+
+  auto const varEnv = g_context->m_globalVarEnv;
   assertx(varEnv != nullptr);
-  base = varEnv->lookup(name);
+
+  auto base = varEnv->lookup(name);
   if (base == nullptr) {
     if (flags & MOpFlags::Warn) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
     if (flags & MOpFlags::Define) {
-      TypedValue tv;
-      tvWriteNull(&tv);
+      auto tv = make_tv<KindOfNull>();
       varEnv->set(name, &tv);
       base = varEnv->lookup(name);
     } else {
       return const_cast<TypedValue*>(init_null_variant.asTypedValue());
     }
   }
-  if (base->m_type == KindOfRef) {
-    base = base->m_data.pref->tv();
-  }
-  return base;
+  return tvToCell(base);
 }
 
-inline TypedValue* baseG(TypedValue key) {
-  return baseGImpl<MOpFlags::None>(key);
-}
+#define BASE_G_HELPER_TABLE(m)                  \
+  /* name    flags                 */           \
+  m(baseG,   MOpFlags::None)                    \
+  m(baseGW,  MOpFlags::Warn)                    \
+  m(baseGD,  MOpFlags::Define)                  \
+  m(baseGWD, MOpFlags::WarnDefine)              \
 
-inline TypedValue* baseGW(TypedValue key) {
-  return baseGImpl<MOpFlags::Warn>(key);
+#define X(nm, flags)                            \
+inline TypedValue* nm(TypedValue key) {         \
+  return baseGImpl<flags>(key);                 \
 }
-
-inline TypedValue* baseGD(TypedValue key) {
-  return baseGImpl<MOpFlags::Define>(key);
-}
-
-inline TypedValue* baseGWD(TypedValue key) {
-  return baseGImpl<MOpFlags::WarnDefine>(key);
-}
+BASE_G_HELPER_TABLE(X)
+#undef X
 
 //////////////////////////////////////////////////////////////////////
 
-template <MInstrAttr attrs, KeyType kt, bool isObj>
-TypedValue* propImpl(Class* ctx, TypedValue* base,
-                     key_type<kt> key, TypedValue& tvRef) {
-  return Prop<WDU(attrs), isObj, kt>(tvRef, ctx, base, key);
-}
+#define PROP_HELPER_TABLE(m)                                \
+  /* name      flags                 keyType       isObj */ \
+  m(propC,     MOpFlags::None,       KeyType::Any, false)   \
+  m(propCS,    MOpFlags::None,       KeyType::Str, false)   \
+  m(propCD,    MOpFlags::Define,     KeyType::Any, false)   \
+  m(propCDS,   MOpFlags::Define,     KeyType::Str, false)   \
+  m(propCDO,   MOpFlags::Define,     KeyType::Any, true)    \
+  m(propCDOS,  MOpFlags::Define,     KeyType::Str, true)    \
+  m(propCO,    MOpFlags::None,       KeyType::Any, true)    \
+  m(propCOS,   MOpFlags::None,       KeyType::Str, true)    \
+  m(propCU,    MOpFlags::Unset,      KeyType::Any, false)   \
+  m(propCUS,   MOpFlags::Unset,      KeyType::Str, false)   \
+  m(propCUO,   MOpFlags::Unset,      KeyType::Any, true)    \
+  m(propCUOS,  MOpFlags::Unset,      KeyType::Str, true)    \
+  m(propCW,    MOpFlags::Warn,       KeyType::Any, false)   \
+  m(propCWS,   MOpFlags::Warn,       KeyType::Str, false)   \
+  m(propCWD,   MOpFlags::WarnDefine, KeyType::Any, false)   \
+  m(propCWDS,  MOpFlags::WarnDefine, KeyType::Str, false)   \
+  m(propCWDO,  MOpFlags::WarnDefine, KeyType::Any, true)    \
+  m(propCWDOS, MOpFlags::WarnDefine, KeyType::Str, true)    \
+  m(propCWO,   MOpFlags::Warn,       KeyType::Any, true)    \
+  m(propCWOS,  MOpFlags::Warn,       KeyType::Str, true)    \
 
-#define PROP_HELPER_TABLE(m)                      \
-  /* name      attrs       keyType       isObj */ \
-  m(propC,     None,       KeyType::Any, false)   \
-  m(propCS,    None,       KeyType::Str, false)   \
-  m(propCD,    Define,     KeyType::Any, false)   \
-  m(propCDS,   Define,     KeyType::Str, false)   \
-  m(propCDO,   Define,     KeyType::Any, true)    \
-  m(propCDOS,  Define,     KeyType::Str, true)    \
-  m(propCO,    None,       KeyType::Any, true)    \
-  m(propCOS,   None,       KeyType::Str, true)    \
-  m(propCU,    Unset,      KeyType::Any, false)   \
-  m(propCUS,   Unset,      KeyType::Str, false)   \
-  m(propCUO,   Unset,      KeyType::Any, true)    \
-  m(propCUOS,  Unset,      KeyType::Str, true)    \
-  m(propCW,    Warn,       KeyType::Any, false)   \
-  m(propCWS,   Warn,       KeyType::Str, false)   \
-  m(propCWD,   WarnDefine, KeyType::Any, false)   \
-  m(propCWDS,  WarnDefine, KeyType::Str, false)   \
-  m(propCWDO,  WarnDefine, KeyType::Any, true)    \
-  m(propCWDOS, WarnDefine, KeyType::Str, true)    \
-  m(propCWO,   Warn,       KeyType::Any, true)    \
-  m(propCWOS,  Warn,       KeyType::Str, true)    \
-
-#define X(nm, attrs, kt, isObj)                                       \
+#define X(nm, flags, kt, isObj)                                       \
 inline TypedValue* nm(Class* ctx, TypedValue* base, key_type<kt> key, \
                       TypedValue& tvRef) {                            \
-  return propImpl<attrs, kt, isObj>(ctx, base, key, tvRef);           \
+  return Prop<flags, isObj, kt>(tvRef, ctx, base, key);               \
 }
 PROP_HELPER_TABLE(X)
 #undef X
@@ -147,12 +136,8 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
 template <KeyType keyType, bool isObj, bool warn>
 TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Prop<warn, false, false, isObj, keyType>(
-    localTvRef,
-    ctx,
-    base,
-    key
-  );
+  auto constexpr flags = warn ? MOpFlags::Warn : MOpFlags::None;
+  auto result = Prop<flags, isObj, keyType>(localTvRef, ctx, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -213,7 +198,7 @@ inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
 template <KeyType keyType, bool isObj>
 RefData* vGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Prop<false, true, false, isObj, keyType>(
+  auto result = Prop<MOpFlags::Define, isObj, keyType>(
     localTvRef, ctx, base, key
   );
 
@@ -240,7 +225,7 @@ template <bool isObj>
 void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
                   RefData* val) {
   TypedValue localTvRef;
-  auto prop = Prop<false, true, false, isObj>(localTvRef, ctx, base, key);
+  auto prop = Prop<MOpFlags::Define, isObj>(localTvRef, ctx, base, key);
 
   if (UNLIKELY(prop == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy

@@ -1697,19 +1697,19 @@ bool IssetEmptyElem(TypedValue* base, key_type<keyType> key) {
   return IssetEmptyElemSlow<useEmpty, keyType>(base, key);
 }
 
-template <bool warn>
+template <MOpFlags flags>
 inline TypedValue* propPreNull(TypedValue& tvRef) {
   tvWriteNull(&tvRef);
-  if (warn) {
+  if (flags & MOpFlags::Warn) {
     raise_notice("Cannot access property on non-object");
   }
   return &tvRef;
 }
 
-template <bool warn, bool define>
+template <MOpFlags flags>
 TypedValue* propPreStdclass(TypedValue& tvRef, TypedValue* base) {
-  if (!define) {
-    return propPreNull<warn>(tvRef);
+  if (!(flags & MOpFlags::Define)) {
+    return propPreNull<flags>(tvRef);
   }
 
   // TODO(#1124706): We don't want to do this anymore.
@@ -1727,35 +1727,35 @@ TypedValue* propPreStdclass(TypedValue& tvRef, TypedValue* base) {
   return base;
 }
 
-template <bool warn, bool define>
+template <MOpFlags flags>
 TypedValue* propPre(TypedValue& tvRef, TypedValue* base) {
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return propPreStdclass<warn, define>(tvRef, base);
+      return propPreStdclass<flags>(tvRef, base);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return propPreNull<warn>(tvRef);
+        return propPreNull<flags>(tvRef);
       }
-      return propPreStdclass<warn, define>(tvRef, base);
+      return propPreStdclass<flags>(tvRef, base);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return propPreNull<warn>(tvRef);
+      return propPreNull<flags>(tvRef);
 
     case KindOfPersistentString:
     case KindOfString:
       if (base->m_data.pstr->size() != 0) {
-        return propPreNull<warn>(tvRef);
+        return propPreNull<flags>(tvRef);
       }
-      return propPreStdclass<warn, define>(tvRef, base);
+      return propPreStdclass<flags>(tvRef, base);
 
     case KindOfPersistentArray:
     case KindOfArray:
-      return propPreNull<warn>(tvRef);
+      return propPreNull<flags>(tvRef);
 
     case KindOfObject:
       return base;
@@ -1803,18 +1803,22 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
  * Returns a pointer to a number of possible places, but does not unbox it.
  * (The returned pointer is never pointing into a RefData.)
  */
-template <bool warn, bool define, bool unset, bool baseIsObj = false,
-          KeyType keyType = KeyType::Any>
+template <MOpFlags flags, bool isObj = false, KeyType keyType = KeyType::Any>
 inline TypedValue* Prop(TypedValue& tvRef,
                         Class* ctx,
                         TypedValue* base,
                         key_type<keyType> key) {
-  assert(!warn || !unset);
+  auto constexpr warn   = flags & MOpFlags::Warn;
+  auto constexpr define = flags & MOpFlags::Define;
+  auto constexpr unset  = flags & MOpFlags::Unset;
+
+  assertx(!warn || !unset);
+
   ObjectData* instance;
-  if (baseIsObj) {
+  if (isObj) {
     instance = reinterpret_cast<ObjectData*>(base);
   } else {
-    auto result = propPre<warn, define>(tvRef, base);
+    auto result = propPre<flags>(tvRef, base);
     if (result->m_type == KindOfNull) {
       return result;
     }

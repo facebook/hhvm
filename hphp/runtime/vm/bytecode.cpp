@@ -3231,16 +3231,17 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
   auto result = [&]{
     switch (flags) {
       case MOpFlags::None:
-        return Prop<false, false, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::None>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Warn:
-        return Prop<true, false, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::Warn>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Define:
+        return Prop<MOpFlags::Define>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::DefineReffy:
-        return Prop<false, true, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::DefineReffy>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Unset:
-        return Prop<false, false, true>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::Unset>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::WarnDefine:
-        return Prop<true, true, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::WarnDefine>(mstate.tvRef, ctx, mstate.base, key);
     }
     always_assert(false);
   }();

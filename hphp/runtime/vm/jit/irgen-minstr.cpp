@@ -932,7 +932,9 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
 
 void baseGImpl(IRGS& env, SSATmp* name, MOpFlags flags) {
   if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
-  auto gblPtr = gen(env, BaseG, MInstrAttrData{mOpFlagsToAttr(flags)}, name);
+
+  auto const flagsData = MOpFlagsData{dropUnset(dropReffy(flags))};
+  auto gblPtr = gen(env, BaseG, flagsData, name);
   gen(env, StMBase, gblPtr);
 }
 
@@ -976,12 +978,12 @@ SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
     return ptrToInitNull(env);
   }
 
-  auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
+  auto const flagsData = MOpFlagsData{dropReffy(flags)};
 
   auto const tvRef = propTvRefPtr(env, base, key);
   return nullsafe
     ? gen(env, PropQ, base, key, tvRef)
-    : gen(env, define ? PropDX : PropX, miaData, base, key, tvRef);
+    : gen(env, define ? PropDX : PropX, flagsData, base, key, tvRef);
 }
 
 SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
@@ -1002,7 +1004,6 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
 
   specializeObjBase(env, base);
 
-  flags = dropReffy(flags);
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
   if (propInfo.offset == -1 || (flags & MOpFlags::Unset) ||

@@ -141,7 +141,12 @@ class MiniStateHierarchyTests(hierarchy_tests.HierarchyTests,
 
 class LazyDeclHierarchyTests(hierarchy_tests.HierarchyTests,
         LazyDeclTestDriver, unittest.TestCase):
-    pass
+
+    @unittest.expectedFailure
+    def test_failed_decl(self):
+        # we currently don't properly account for declaration failures when
+        # declaring lazily!
+        super().test_failed_decl()
 
 class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
     """

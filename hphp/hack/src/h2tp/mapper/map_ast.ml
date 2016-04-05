@@ -408,7 +408,6 @@ let mk_mapper = fun m_in ->
                f_params = v_f_params;
                f_body = v_f_body;
                f_user_attributes = v_f_user_attributes;
-               f_mtime = v_f_mtime;
                f_fun_kind = v_f_fun_kind;
                f_namespace = v_f_namespace
              } =
@@ -421,7 +420,6 @@ let mk_mapper = fun m_in ->
       let v_f_body = map_block v_f_body in
       let v_f_user_attributes =
         map_smap map_user_attribute v_f_user_attributes in
-      let v_f_mtime = map_of_float v_f_mtime in
       let v_f_fun_kind = map_fun_kind v_f_fun_kind in
       let v_f_namespace = map_namespace_env v_f_namespace
       in
@@ -434,7 +432,6 @@ let mk_mapper = fun m_in ->
           f_params = v_f_params;
           f_body = v_f_body;
           f_user_attributes = v_f_user_attributes;
-          f_mtime = v_f_mtime;
           f_fun_kind = v_f_fun_kind;
           f_namespace = v_f_namespace;
         }

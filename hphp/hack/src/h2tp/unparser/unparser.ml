@@ -534,36 +534,31 @@ let rec u_program v = u_of_list_spc u_def v
     end
 
   and u_fun_with_use {
-      f_mode;
-      f_tparams;
-      f_ret;
-      f_ret_by_ref;
-      f_name = (pos, _) as f_name;
-      f_params;
-      f_body;
-      f_user_attributes;
-      f_mtime;
-      f_fun_kind;
-      f_namespace
-    } useStr =
-      u_in_mode f_mode begin fun () ->
-        invariant (is_empty_ns f_namespace)
-          (pos, "Namespaces are expected to not be elaborated");
-        u_todo_conds [
-          (f_mtime <> 0., "f_mtime", fun () -> StrEmpty) ;
-        ] begin fun () ->
-            u_fun_common {
-              fc_tparams = f_tparams;
-              fc_ret = f_ret;
-              fc_ret_by_ref = f_ret_by_ref;
-              fc_name = f_name;
-              fc_params = f_params;
-              fc_body = f_body;
-              fc_user_attributes = f_user_attributes;
-              fc_fun_kind = f_fun_kind;
-            } useStr (u_id) false
-        end
-      end
+    f_mode;
+    f_tparams;
+    f_ret;
+    f_ret_by_ref;
+    f_name = (pos, _) as f_name;
+    f_params;
+    f_body;
+    f_user_attributes;
+    f_fun_kind;
+    f_namespace
+  } useStr =
+    u_in_mode f_mode begin fun () ->
+      invariant (is_empty_ns f_namespace)
+        (pos, "Namespaces are expected to not be elaborated");
+      u_fun_common {
+        fc_tparams = f_tparams;
+        fc_ret = f_ret;
+        fc_ret_by_ref = f_ret_by_ref;
+        fc_name = f_name;
+        fc_params = f_params;
+        fc_body = f_body;
+        fc_user_attributes = f_user_attributes;
+        fc_fun_kind = f_fun_kind;
+      } useStr (u_id) false
+    end
   and
     u_fun_ fun_ = u_fun_with_use fun_ StrEmpty
   and u_fun_kind =

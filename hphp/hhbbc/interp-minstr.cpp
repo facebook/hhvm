@@ -541,16 +541,17 @@ Base miBaseSProp(ISS& env, Type cls, Type tprop) {
 //////////////////////////////////////////////////////////////////////
 // intermediate ops
 
-void miProp(ISS& env, bool isNullsafe, MInstrAttr mia, Type key) {
+void miProp(ISS& env, bool isNullsafe, MOpFlags flags, Type key) {
   auto const name     = mStringKey(key);
-  bool const isDefine = mia & MIA_define;
-  bool const isUnset  = mia & MIA_unset;
+  auto const isDefine = flags & MOpFlags::Define;
+  auto const isUnset  = flags & MOpFlags::Unset;
 
   /*
-   * MIA_unset Props doesn't promote "emptyish" things to stdClass, or affect
-   * arrays, however it can define a property on an object base.  This means we
-   * don't need any couldBeInFoo logic, but if the base could actually be
-   * $this, and a declared property could be Uninit, we need to merge InitNull.
+   * MOpFlags::Unset Props doesn't promote "emptyish" things to stdClass, or
+   * affect arrays, however it can define a property on an object base.  This
+   * means we don't need any couldBeInFoo logic, but if the base could actually
+   * be $this, and a declared property could be Uninit, we need to merge
+   * InitNull.
    *
    * We're trying to handle this case correctly as far as the type inference
    * here is concerned, but the runtime doesn't actually behave this way right
@@ -606,7 +607,7 @@ void miProp(ISS& env, bool isNullsafe, MInstrAttr mia, Type key) {
 
   /*
    * Otherwise, intermediate props with define can promote a null, false, or ""
-   * to stdClass.  Those cases, and others, if it's not MIA_define, will set
+   * to stdClass.  Those cases, and others, if it's MOpFlags::Define, will set
    * the base to a null value in tvScratch.  The base may also legitimately be
    * an object and our next base is in an object property.
    *
@@ -623,12 +624,12 @@ void miProp(ISS& env, bool isNullsafe, MInstrAttr mia, Type key) {
   moveBase(env, Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name });
 }
 
-void miElem(ISS& env, MInstrAttr attr, Type key) {
-  bool const isDefine = attr & MIA_define;
-  bool const isUnset  = attr & MIA_unset;
+void miElem(ISS& env, MOpFlags flags, Type key) {
+  auto const isDefine = flags & MOpFlags::Define;
+  auto const isUnset  = flags & MOpFlags::Unset;
 
   /*
-   * Elem dims with MIA_unset can change a base from a static array into a
+   * Elem dims with MOpFlags::Unset can change a base from a static array into a
    * reference counted array.  It never promotes emptyish types, however.
    *
    * We only need to handle this for self props, because we don't track
@@ -1301,9 +1302,9 @@ void in(ISS& env, const bc::FPassBaseL& op) {
 void in(ISS& env, const bc::Dim& op) {
   auto const key = key_type(env, op.mkey);
   if (mcodeIsProp(op.mkey.mcode)) {
-    miProp(env, op.mkey.mcode == MQT, mOpFlagsToAttr(op.subop1), key);
+    miProp(env, op.mkey.mcode == MQT, op.subop1, key);
   } else if (mcodeIsElem(op.mkey.mcode)) {
-    miElem(env, mOpFlagsToAttr(op.subop1), key);
+    miElem(env, op.subop1, key);
   } else {
     miNewElem(env);
   }

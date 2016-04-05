@@ -11,7 +11,7 @@
  *
  * The point of this unit test is to detect regressions if/when we fix
  * either of those issues, though.  The associated code is in miProp()
- * for MIA_unset.
+ * for MOpFlags::Unset.
  */
 class A {
   private $x = array(1,2,3);

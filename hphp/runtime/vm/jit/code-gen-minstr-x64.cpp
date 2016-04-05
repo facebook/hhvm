@@ -91,11 +91,11 @@ void CodeGenerator::cgPropQ(IRInstruction* inst) {
 
 void CodeGenerator::cgCGetProp(IRInstruction* inst) {
   using namespace MInstrHelpers;
-  auto const mia     = inst->extra<MInstrAttrData>()->mia;
+  auto const flags   = inst->extra<MOpFlagsData>()->flags;
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB(CGETPROP_HELPER_TABLE, keyType, base->isA(TObj), mia);
+  BUILD_OPTAB(CGETPROP_HELPER_TABLE, keyType, base->isA(TObj), flags);
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
@@ -425,9 +425,9 @@ void CodeGenerator::cgMapIsset(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCGetElem(IRInstruction* inst) {
-  auto const mia = inst->extra<MInstrAttrData>()->mia;
-  auto const key = inst->src(1);
-  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), mia);
+  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  auto const key   = inst->src(1);
+  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), flags);
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),

@@ -1188,23 +1188,5 @@ int instrFpToArDelta(const Func* func, PC opcode) {
   return fpi->m_fpOff;
 }
 
-std::string show(MInstrAttr mia) {
-  if (mia == MIA_none) return "none";
-
-  std::string ret;
-  auto sep = "";
-#define X(n) if (mia & MIA_##n) {               \
-    folly::toAppend(sep, #n, &ret);             \
-    sep = "|";                                  \
-  }
-  X(warn);
-  X(define);
-  X(reffy);
-  X(unset);
-#undef X
-
-  return ret;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

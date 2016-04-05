@@ -780,8 +780,7 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Map:
       return gen(env, MapGet, base, key);
     case SimpleOp::None:
-      return gen(env, CGetElem, MInstrAttrData{mOpFlagsToAttr(flags)},
-                 base, key);
+      return gen(env, CGetElem, MOpFlagsData{flags}, base, key);
   }
   always_assert(false);
 }
@@ -1102,8 +1101,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
 
   // No warning takes precedence over nullsafe.
   if (!nullsafe || !(flags & MOpFlags::Warn)) {
-    auto const mia = mOpFlagsToAttr(flags);
-    return gen(env, CGetProp, MInstrAttrData{mia}, base, key);
+    return gen(env, CGetProp, MOpFlagsData{flags}, base, key);
   }
   return gen(env, CGetPropQ, base, key);
 }

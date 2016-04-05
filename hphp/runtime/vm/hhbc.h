@@ -126,17 +126,6 @@ enum InstrFlags {
   CF_FF = (CF | FF)
 };
 
-enum MInstrAttr {
-  MIA_none         = 0x00,
-  MIA_warn         = 0x01,
-  MIA_define       = 0x02,
-  MIA_reffy        = 0x04,
-  MIA_unset        = 0x08,
-  MIA_base         = MIA_warn | MIA_define,
-};
-
-std::string show(MInstrAttr);
-
 #define INCDEC_OPS    \
   INCDEC_OP(PreInc)   \
   INCDEC_OP(PostInc)  \
@@ -309,18 +298,6 @@ enum class MOpFlags : uint8_t {
 
 inline constexpr bool operator&(MOpFlags a, MOpFlags b) {
   return uint8_t(a) & uint8_t(b);
-}
-
-inline MInstrAttr mOpFlagsToAttr(MOpFlags f) {
-  switch (f) {
-    case MOpFlags::None:        return MIA_none;
-    case MOpFlags::Warn:        return MIA_warn;
-    case MOpFlags::Define:      return MIA_define;
-    case MOpFlags::Unset:       return MIA_unset;
-    case MOpFlags::DefineReffy: return MInstrAttr(MIA_reffy | MIA_define);
-    case MOpFlags::WarnDefine:  return MInstrAttr(MIA_warn | MIA_define);
-  }
-  always_assert(false);
 }
 
 inline MOpFlags dropReffy(MOpFlags f) {

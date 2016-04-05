@@ -1006,14 +1006,6 @@ struct MOpFlagsData : IRExtraData {
   MOpFlags flags;
 };
 
-struct MInstrAttrData : IRExtraData {
-  explicit MInstrAttrData(MInstrAttr mia) : mia(mia) {}
-
-  std::string show() const { return HPHP::show(mia); }
-
-  MInstrAttr mia;
-};
-
 struct SetOpData : IRExtraData {
   explicit SetOpData(SetOpOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
@@ -1222,8 +1214,8 @@ X(PropDX,                       MOpFlagsData);
 X(ElemX,                        MOpFlagsData);
 X(ElemDX,                       MOpFlagsData);
 X(ElemUX,                       MOpFlagsData);
-X(CGetProp,                     MInstrAttrData);
-X(CGetElem,                     MInstrAttrData);
+X(CGetProp,                     MOpFlagsData);
+X(CGetElem,                     MOpFlagsData);
 X(SetOpProp,                    SetOpData);
 X(IncDecProp,                   IncDecData);
 X(SetOpElem,                    SetOpData);

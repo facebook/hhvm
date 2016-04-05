@@ -133,28 +133,27 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
   return *result;
 }
 
-template <KeyType keyType, bool isObj, bool warn>
+template <KeyType keyType, bool isObj, MOpFlags flags>
 TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto constexpr flags = warn ? MOpFlags::Warn : MOpFlags::None;
   auto result = Prop<flags, isObj, keyType>(localTvRef, ctx, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
-#define CGETPROP_HELPER_TABLE(m)                      \
-  /* name             keyType       isObj   attrs */  \
-  m(cGetPropCQuiet,  KeyType::Any, false,  None)      \
-  m(cGetPropCOQuiet, KeyType::Any,  true,  None)      \
-  m(cGetPropSQuiet,  KeyType::Str, false,  None)      \
-  m(cGetPropSOQuiet, KeyType::Str,  true,  None)      \
-  m(cGetPropC,       KeyType::Any, false,  Warn)      \
-  m(cGetPropCO,      KeyType::Any,  true,  Warn)      \
-  m(cGetPropS,       KeyType::Str, false,  Warn)      \
-  m(cGetPropSO,      KeyType::Str,  true,  Warn)
+#define CGETPROP_HELPER_TABLE(m)                                \
+  /* name            keyType       isObj   flags */             \
+  m(cGetPropCQuiet,  KeyType::Any, false,  MOpFlags::None)      \
+  m(cGetPropCOQuiet, KeyType::Any,  true,  MOpFlags::None)      \
+  m(cGetPropSQuiet,  KeyType::Str, false,  MOpFlags::None)      \
+  m(cGetPropSOQuiet, KeyType::Str,  true,  MOpFlags::None)      \
+  m(cGetPropC,       KeyType::Any, false,  MOpFlags::Warn)      \
+  m(cGetPropCO,      KeyType::Any,  true,  MOpFlags::Warn)      \
+  m(cGetPropS,       KeyType::Str, false,  MOpFlags::Warn)      \
+  m(cGetPropSO,      KeyType::Str,  true,  MOpFlags::Warn)      \
 
-#define X(nm, kt, isObj, attrs)                                        \
+#define X(nm, kt, isObj, flags)                                        \
 inline TypedValue nm(Class* ctx, TypedValue* base, key_type<kt> key) { \
-  return cGetPropImpl<kt, isObj, (attrs) & MIA_warn>(ctx, base, key);  \
+  return cGetPropImpl<kt, isObj, flags>(ctx, base, key);               \
 }
 CGETPROP_HELPER_TABLE(X)
 #undef X

@@ -111,6 +111,33 @@ bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const retransopt& i);
 
+template<class Vemit>
+void check_nop_interval(Venv& env, const Vinstr& inst,
+                        int& nop_counter, int nop_interval) {
+  if (LIKELY(nop_counter < 0)) return;
+
+  switch (inst.op) {
+    // These instructions are for exception handling or state syncing and do
+    // not represent any actual work, so they're excluded from the nop counter.
+    case Vinstr::landingpad:
+    case Vinstr::nothrow:
+    case Vinstr::syncpoint:
+    case Vinstr::unwind:
+      break;
+
+    default:
+      if (--nop_counter == 0) {
+        // We use a special emit_nop() function rather than emit(nop{}) because
+        // many performance counters exclude nops from their count of retired
+        // instructions. It's up the to arch-specific backends to emit some
+        // real work with no visible side-effects.
+        Vemit(env).emit_nop();
+        nop_counter = nop_interval;
+      }
+      break;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -133,6 +160,12 @@ void vasm_emit(const Vunit& unit, Vtext& text, CGMeta& fixups,
     auto area = unit.blocks[b].area_idx;
     return text.area(area).start;
   };
+
+  // We don't want to put nops in Vunits representing stubs, and those Vunits
+  // don't have transKind set.
+  auto const nop_interval = unit.transKind != TransKind::Invalid
+    ? RuntimeOption::EvalJitNopInterval : 0;
+  auto nop_counter = nop_interval;
 
   for (int i = 0, n = labels.size(); i < n; ++i) {
     assertx(checkBlockEnd(unit, labels[i]));
@@ -160,6 +193,8 @@ void vasm_emit(const Vunit& unit, Vtext& text, CGMeta& fixups,
 
     for (auto& inst : block.code) {
       irmu.register_inst(inst);
+
+      check_nop_interval<Vemit>(env, inst, nop_counter, nop_interval);
 
       switch (inst.op) {
 #define O(name, imms, uses, defs)               \

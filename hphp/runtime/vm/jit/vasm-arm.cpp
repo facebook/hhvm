@@ -169,6 +169,8 @@ struct Vgen {
   void emit(const xorq& i) { a->Eor(X(i.d), X(i.s1), X(i.s0) /* flags? */); }
   void emit(const xorqi& i) { a->Eor(X(i.d), X(i.s1), i.s0.l() /* flags? */); }
 
+  void emit_nop() { not_implemented(); }
+
 private:
   CodeBlock& frozen() { return text.frozen().code; }
 

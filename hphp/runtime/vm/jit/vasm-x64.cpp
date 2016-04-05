@@ -250,6 +250,11 @@ struct Vgen {
   void emit(xorq i);
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
 
+  void emit_nop() {
+    emit(lea{rax[8], rax});
+    emit(lea{rax[-8], rax});
+  }
+
 private:
   // helpers
   void prep(Reg8 s, Reg8 d) { if (s != d) a.movb(s, d); }

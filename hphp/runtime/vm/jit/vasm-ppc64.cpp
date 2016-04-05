@@ -400,6 +400,8 @@ struct Vgen {
   void emit(const tailcallstub& i);
   void emit(const callarray& i);
 
+  void emit_nop() { not_implemented(); }
+
 private:
   CodeBlock& frozen() { return text.frozen().code; }
 

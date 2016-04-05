@@ -343,6 +343,33 @@ class CommonTests(object):
             '[{{"name":"some_long_function_name","filename":"{root}foo_3.php","desc":"function","line":9,"char_start":18,"char_end":40,"scope":""}}]'
             ], options=['--search', 'some_lo'])
 
+    def test_search_case_insensitive1(self):
+        """
+        Test that global search is not case sensitive
+        """
+        self.maxDiff = None
+        self.write_load_config()
+
+        self.check_cmd([
+            'File "{root}foo_4.php", line 4, characters 10-24: '
+            'aaaaaaaaaaa_fun, function',
+            'File "{root}foo_4.php", line 3, characters 7-23: '
+            'Aaaaaaaaaaa_class, class',
+        ], options=['--search', 'Aaaaaaaaaaa'])
+
+    def test_search_case_insensitive2(self):
+        """
+        Test that global search is not case sensitive
+        """
+        self.write_load_config()
+
+        self.check_cmd([
+            'File "{root}foo_4.php", line 4, characters 10-24: '
+            'aaaaaaaaaaa_fun, function',
+            'File "{root}foo_4.php", line 3, characters 7-23: '
+            'Aaaaaaaaaaa_class, class',
+        ], options=['--search', 'aaaaaaaaaaa'])
+
     def test_auto_complete(self):
         """
         Test hh_client --auto-complete

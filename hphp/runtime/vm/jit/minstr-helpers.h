@@ -28,84 +28,73 @@ namespace HPHP { namespace jit { namespace MInstrHelpers {
 
 //////////////////////////////////////////////////////////////////////
 
-template <bool warn, bool define>
+template <MOpFlags flags>
 TypedValue* baseGImpl(TypedValue key) {
-  TypedValue* base;
-  StringData* name = prepareKey(key);
+  auto const name = prepareKey(key);
   SCOPE_EXIT { decRefStr(name); };
-  VarEnv* varEnv = g_context->m_globalVarEnv;
+
+  auto const varEnv = g_context->m_globalVarEnv;
   assertx(varEnv != nullptr);
-  base = varEnv->lookup(name);
+
+  auto base = varEnv->lookup(name);
   if (base == nullptr) {
-    if (warn) {
+    if (flags & MOpFlags::Warn) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
-    if (define) {
-      TypedValue tv;
-      tvWriteNull(&tv);
+    if (flags & MOpFlags::Define) {
+      auto tv = make_tv<KindOfNull>();
       varEnv->set(name, &tv);
       base = varEnv->lookup(name);
     } else {
       return const_cast<TypedValue*>(init_null_variant.asTypedValue());
     }
   }
-  if (base->m_type == KindOfRef) {
-    base = base->m_data.pref->tv();
-  }
-  return base;
+  return tvToCell(base);
 }
 
-inline TypedValue* baseG(TypedValue key) {
-  return baseGImpl<false, false>(key);
-}
+#define BASE_G_HELPER_TABLE(m)                  \
+  /* name    flags                 */           \
+  m(baseG,   MOpFlags::None)                    \
+  m(baseGW,  MOpFlags::Warn)                    \
+  m(baseGD,  MOpFlags::Define)                  \
+  m(baseGWD, MOpFlags::WarnDefine)              \
 
-inline TypedValue* baseGW(TypedValue key) {
-  return baseGImpl<true, false>(key);
+#define X(nm, flags)                            \
+inline TypedValue* nm(TypedValue key) {         \
+  return baseGImpl<flags>(key);                 \
 }
-
-inline TypedValue* baseGD(TypedValue key) {
-  return baseGImpl<false, true>(key);
-}
-
-inline TypedValue* baseGWD(TypedValue key) {
-  return baseGImpl<true, true>(key);
-}
+BASE_G_HELPER_TABLE(X)
+#undef X
 
 //////////////////////////////////////////////////////////////////////
 
-template <MInstrAttr attrs, KeyType kt, bool isObj>
-TypedValue* propImpl(Class* ctx, TypedValue* base,
-                     key_type<kt> key, TypedValue& tvRef) {
-  return Prop<WDU(attrs), isObj, kt>(tvRef, ctx, base, key);
-}
+#define PROP_HELPER_TABLE(m)                                \
+  /* name      flags                 keyType       isObj */ \
+  m(propC,     MOpFlags::None,       KeyType::Any, false)   \
+  m(propCS,    MOpFlags::None,       KeyType::Str, false)   \
+  m(propCD,    MOpFlags::Define,     KeyType::Any, false)   \
+  m(propCDS,   MOpFlags::Define,     KeyType::Str, false)   \
+  m(propCDO,   MOpFlags::Define,     KeyType::Any, true)    \
+  m(propCDOS,  MOpFlags::Define,     KeyType::Str, true)    \
+  m(propCO,    MOpFlags::None,       KeyType::Any, true)    \
+  m(propCOS,   MOpFlags::None,       KeyType::Str, true)    \
+  m(propCU,    MOpFlags::Unset,      KeyType::Any, false)   \
+  m(propCUS,   MOpFlags::Unset,      KeyType::Str, false)   \
+  m(propCUO,   MOpFlags::Unset,      KeyType::Any, true)    \
+  m(propCUOS,  MOpFlags::Unset,      KeyType::Str, true)    \
+  m(propCW,    MOpFlags::Warn,       KeyType::Any, false)   \
+  m(propCWS,   MOpFlags::Warn,       KeyType::Str, false)   \
+  m(propCWD,   MOpFlags::WarnDefine, KeyType::Any, false)   \
+  m(propCWDS,  MOpFlags::WarnDefine, KeyType::Str, false)   \
+  m(propCWDO,  MOpFlags::WarnDefine, KeyType::Any, true)    \
+  m(propCWDOS, MOpFlags::WarnDefine, KeyType::Str, true)    \
+  m(propCWO,   MOpFlags::Warn,       KeyType::Any, true)    \
+  m(propCWOS,  MOpFlags::Warn,       KeyType::Str, true)    \
 
-#define PROP_HELPER_TABLE(m)                      \
-  /* name      attrs       keyType       isObj */ \
-  m(propC,     None,       KeyType::Any, false)   \
-  m(propCS,    None,       KeyType::Str, false)   \
-  m(propCD,    Define,     KeyType::Any, false)   \
-  m(propCDS,   Define,     KeyType::Str, false)   \
-  m(propCDO,   Define,     KeyType::Any, true)    \
-  m(propCDOS,  Define,     KeyType::Str, true)    \
-  m(propCO,    None,       KeyType::Any, true)    \
-  m(propCOS,   None,       KeyType::Str, true)    \
-  m(propCU,    Unset,      KeyType::Any, false)   \
-  m(propCUS,   Unset,      KeyType::Str, false)   \
-  m(propCUO,   Unset,      KeyType::Any, true)    \
-  m(propCUOS,  Unset,      KeyType::Str, true)    \
-  m(propCW,    Warn,       KeyType::Any, false)   \
-  m(propCWS,   Warn,       KeyType::Str, false)   \
-  m(propCWD,   WarnDefine, KeyType::Any, false)   \
-  m(propCWDS,  WarnDefine, KeyType::Str, false)   \
-  m(propCWDO,  WarnDefine, KeyType::Any, true)    \
-  m(propCWDOS, WarnDefine, KeyType::Str, true)    \
-  m(propCWO,   Warn,       KeyType::Any, true)    \
-  m(propCWOS,  Warn,       KeyType::Str, true)    \
-
-#define X(nm, attrs, kt, isObj)                                       \
+#define X(nm, flags, kt, isObj)                                       \
 inline TypedValue* nm(Class* ctx, TypedValue* base, key_type<kt> key, \
                       TypedValue& tvRef) {                            \
-  return propImpl<attrs, kt, isObj>(ctx, base, key, tvRef);           \
+  return Prop<flags, isObj, kt>(tvRef, ctx, base, key);               \
 }
 PROP_HELPER_TABLE(X)
 #undef X
@@ -147,12 +136,8 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
 template <KeyType keyType, bool isObj, bool warn>
 TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Prop<warn, false, false, isObj, keyType>(
-    localTvRef,
-    ctx,
-    base,
-    key
-  );
+  auto constexpr flags = warn ? MOpFlags::Warn : MOpFlags::None;
+  auto result = Prop<flags, isObj, keyType>(localTvRef, ctx, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -213,7 +198,7 @@ inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
 template <KeyType keyType, bool isObj>
 RefData* vGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Prop<false, true, false, isObj, keyType>(
+  auto result = Prop<MOpFlags::Define, isObj, keyType>(
     localTvRef, ctx, base, key
   );
 
@@ -240,7 +225,7 @@ template <bool isObj>
 void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
                   RefData* val) {
   TypedValue localTvRef;
-  auto prop = Prop<false, true, false, isObj>(localTvRef, ctx, base, key);
+  auto prop = Prop<MOpFlags::Define, isObj>(localTvRef, ctx, base, key);
 
   if (UNLIKELY(prop == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
@@ -389,47 +374,47 @@ ISSET_EMPTY_PROP_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, bool warn, bool define, bool reffy, bool unset>
+template <KeyType keyType, MOpFlags flags>
 TypedValue* elemImpl(TypedValue* base,
                      key_type<keyType> key,
                      TypedValue& tvRef) {
-  if (unset) {
+  if (flags & MOpFlags::Unset) {
     return ElemU<keyType>(tvRef, base, key);
   }
-  if (define) {
-    return ElemD<warn, reffy, keyType>(tvRef, base, key);
+  if (flags & MOpFlags::Define) {
+    return ElemD<flags, keyType>(tvRef, base, key);
   }
   // We won't really modify the TypedValue in the non-D case, so
   // this const_cast is safe.
-  return const_cast<TypedValue*>(Elem<warn, keyType>(tvRef, base, key));
+  return const_cast<TypedValue*>(Elem<flags, keyType>(tvRef, base, key));
 }
 
-#define ELEM_HELPER_TABLE(m)                     \
-  /* name      keyType         attrs  */         \
-  m(elemC,     KeyType::Any,   None)             \
-  m(elemCD,    KeyType::Any,   Define)           \
-  m(elemCDR,   KeyType::Any,   DefineReffy)      \
-  m(elemCU,    KeyType::Any,   Unset)            \
-  m(elemCW,    KeyType::Any,   Warn)             \
-  m(elemCWD,   KeyType::Any,   WarnDefine)       \
-  m(elemI,     KeyType::Int,   None)             \
-  m(elemID,    KeyType::Int,   Define)           \
-  m(elemIDR,   KeyType::Int,   DefineReffy)      \
-  m(elemIU,    KeyType::Int,   Unset)            \
-  m(elemIW,    KeyType::Int,   Warn)             \
-  m(elemIWD,   KeyType::Int,   WarnDefine)       \
-  m(elemS,     KeyType::Str,   None)             \
-  m(elemSD,    KeyType::Str,   Define)           \
-  m(elemSDR,   KeyType::Str,   DefineReffy)      \
-  m(elemSU,    KeyType::Str,   Unset)            \
-  m(elemSW,    KeyType::Str,   Warn)             \
-  m(elemSWD,   KeyType::Str,   WarnDefine)       \
+#define ELEM_HELPER_TABLE(m)                          \
+  /* name      keyType         attrs  */              \
+  m(elemC,     KeyType::Any,   MOpFlags::None)        \
+  m(elemCD,    KeyType::Any,   MOpFlags::Define)      \
+  m(elemCDR,   KeyType::Any,   MOpFlags::DefineReffy) \
+  m(elemCU,    KeyType::Any,   MOpFlags::Unset)       \
+  m(elemCW,    KeyType::Any,   MOpFlags::Warn)        \
+  m(elemCWD,   KeyType::Any,   MOpFlags::WarnDefine)  \
+  m(elemI,     KeyType::Int,   MOpFlags::None)        \
+  m(elemID,    KeyType::Int,   MOpFlags::Define)      \
+  m(elemIDR,   KeyType::Int,   MOpFlags::DefineReffy) \
+  m(elemIU,    KeyType::Int,   MOpFlags::Unset)       \
+  m(elemIW,    KeyType::Int,   MOpFlags::Warn)        \
+  m(elemIWD,   KeyType::Int,   MOpFlags::WarnDefine)  \
+  m(elemS,     KeyType::Str,   MOpFlags::None)        \
+  m(elemSD,    KeyType::Str,   MOpFlags::Define)      \
+  m(elemSDR,   KeyType::Str,   MOpFlags::DefineReffy) \
+  m(elemSU,    KeyType::Str,   MOpFlags::Unset)       \
+  m(elemSW,    KeyType::Str,   MOpFlags::Warn)        \
+  m(elemSWD,   KeyType::Str,   MOpFlags::WarnDefine)  \
 
-#define X(nm, keyType, attrs)                              \
+#define X(nm, keyType, flags)                              \
 inline TypedValue* nm(TypedValue* base,                    \
                       key_type<keyType> key,               \
                       TypedValue& tvRef) {                 \
-  return elemImpl<keyType, WDRU(attrs)>(base, key, tvRef); \
+  return elemImpl<keyType, flags>(base, key, tvRef);       \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
@@ -448,32 +433,32 @@ inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<bool warn>
+template<MOpFlags flags>
 NEVER_INLINE
 const TypedValue* elemArrayNotFound(int64_t k) {
-  if (warn) {
+  if (flags & MOpFlags::Warn) {
     raise_notice("Undefined index: %" PRId64, k);
   }
   return null_variant.asTypedValue();
 }
 
-template<bool warn>
+template<MOpFlags flags>
 NEVER_INLINE
 const TypedValue* elemArrayNotFound(const StringData* k) {
-  if (warn) {
+  if (flags & MOpFlags::Warn) {
     raise_notice("Undefined index: %s", k->data());
   }
   return null_variant.asTypedValue();
 }
 
-template<KeyType keyType, bool checkForInt, bool warn>
+template<KeyType keyType, bool checkForInt, MOpFlags flags>
 inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   auto const ret = checkForInt ? checkedGet(ad, key) : ad->nvGet(key);
   if (!ret) {
-    if (warn && !ad->useWeakKeys()) {
+    if ((flags & MOpFlags::Warn) && !ad->useWeakKeys()) {
       throwOOBArrayKeyException(key);
     }
-    return elemArrayNotFound<warn>(key);
+    return elemArrayNotFound<flags>(key);
   }
   return ret;
 }
@@ -487,9 +472,7 @@ inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
 inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
   auto cbase = tvToCell(base);                                         \
   assertx(isArrayType(cbase->m_type));                                 \
-  auto constexpr warn  = false;                                        \
-  auto constexpr reffy = false;                                        \
-  return ElemDArray<warn, reffy, keyType>(cbase, key);                 \
+  return ElemDArray<MOpFlags::None, keyType>(cbase, key);              \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X
@@ -508,18 +491,18 @@ inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
 ELEM_ARRAY_U_HELPER_TABLE(X)
 #undef X
 
-#define ELEM_ARRAY_HELPER_TABLE(m)                      \
-  /* name               keyType  checkForInt   warn */  \
-  m(elemArrayS,    KeyType::Str,       false,  false)   \
-  m(elemArraySi,   KeyType::Str,        true,  false)   \
-  m(elemArrayI,    KeyType::Int,       false,  false)   \
-  m(elemArraySW,   KeyType::Str,       false,  true)    \
-  m(elemArraySiW,  KeyType::Str,        true,  true)    \
-  m(elemArrayIW,   KeyType::Int,       false,  true)    \
+#define ELEM_ARRAY_HELPER_TABLE(m)                              \
+  /* name               keyType  checkForInt   warn */          \
+  m(elemArrayS,    KeyType::Str,       false,  MOpFlags::None)  \
+  m(elemArraySi,   KeyType::Str,        true,  MOpFlags::None)  \
+  m(elemArrayI,    KeyType::Int,       false,  MOpFlags::None)  \
+  m(elemArraySW,   KeyType::Str,       false,  MOpFlags::Warn)  \
+  m(elemArraySiW,  KeyType::Str,        true,  MOpFlags::Warn)  \
+  m(elemArrayIW,   KeyType::Int,       false,  MOpFlags::Warn)  \
 
-#define X(nm, keyType, checkForInt, warn)               \
+#define X(nm, keyType, checkForInt, flags)                          \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
-  return elemArrayImpl<keyType, checkForInt, warn>(ad, key);\
+  return elemArrayImpl<keyType, checkForInt, flags>(ad, key);       \
 }
 ELEM_ARRAY_HELPER_TABLE(X)
 #undef X
@@ -555,25 +538,25 @@ ARRAYGET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, bool warn>
+template <KeyType keyType, MOpFlags flags>
 TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Elem<warn, keyType>(localTvRef, base, key);
+  auto result = Elem<flags, keyType>(localTvRef, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
-#define CGETELEM_HELPER_TABLE(m)               \
-  /* name            key          attrs  */    \
-  m(cGetElemCQuiet, KeyType::Any, None)        \
-  m(cGetElemIQuiet, KeyType::Int, None)        \
-  m(cGetElemSQuiet, KeyType::Str, None)        \
-  m(cGetElemC,      KeyType::Any, Warn)        \
-  m(cGetElemI,      KeyType::Int, Warn)        \
-  m(cGetElemS,      KeyType::Str, Warn)
+#define CGETELEM_HELPER_TABLE(m)                  \
+  /* name            key          attrs  */       \
+  m(cGetElemCQuiet, KeyType::Any, MOpFlags::None) \
+  m(cGetElemIQuiet, KeyType::Int, MOpFlags::None) \
+  m(cGetElemSQuiet, KeyType::Str, MOpFlags::None) \
+  m(cGetElemC,      KeyType::Any, MOpFlags::Warn) \
+  m(cGetElemI,      KeyType::Int, MOpFlags::Warn) \
+  m(cGetElemS,      KeyType::Str, MOpFlags::Warn) \
 
-#define X(nm, kt, attrs)                                                \
+#define X(nm, kt, flags)                                                \
 inline TypedValue nm(TypedValue* base, key_type<kt> key) {              \
-  return cGetElemImpl<kt, (attrs) & MIA_warn>(base, key);               \
+  return cGetElemImpl<kt, flags>(base, key);                            \
 }
 CGETELEM_HELPER_TABLE(X)
 #undef X
@@ -583,8 +566,7 @@ CGETELEM_HELPER_TABLE(X)
 template <KeyType keyType>
 RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = HPHP::ElemD<false, true, keyType>(localTvRef, base, key);
-
+  auto result = ElemD<MOpFlags::DefineReffy, keyType>(localTvRef, base, key);
   return vGetRefShuffle(localTvRef, result);
 }
 
@@ -594,9 +576,9 @@ RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key) {
   m(vGetElemI,    KeyType::Int)                 \
   m(vGetElemS,    KeyType::Str)
 
-#define X(nm, kt)                                                       \
-  inline RefData* nm(TypedValue* base, key_type<kt> key) {              \
-    return vGetElemImpl<kt>(base, key);                                 \
+#define X(nm, kt)                                                     \
+inline RefData* nm(TypedValue* base, key_type<kt> key) {              \
+  return vGetElemImpl<kt>(base, key);                                 \
 }
 VGETELEM_HELPER_TABLE(X)
 #undef X

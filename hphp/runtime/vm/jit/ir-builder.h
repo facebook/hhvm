@@ -17,10 +17,6 @@
 #ifndef incl_HPHP_VM_IRBUILDER_H_
 #define incl_HPHP_VM_IRBUILDER_H_
 
-#include <functional>
-
-#include <folly/ScopeGuard.h>
-
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -34,9 +30,14 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include <folly/Optional.h>
+#include <folly/ScopeGuard.h>
+
+#include <functional>
+
 namespace HPHP { namespace jit { namespace irgen {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 struct ExnStackState {
   FPInvOffset syncedSpLevel{0};
@@ -62,11 +63,6 @@ struct ExnStackState {
  *      After the preOptimize pass, IRBuilder calls out to
  *      Simplifier to perform state-independent optimizations, like
  *      copy propagation and strength reduction.  (See simplify.h.)
- *
- *
- * After all the instructions are linked into the trace, this module can also
- * be used to perform a second round of the above two optimizations via the
- * reoptimize() entry point.
  */
 struct IRBuilder {
   IRBuilder(IRUnit&, BCMarker);
@@ -107,14 +103,14 @@ struct IRBuilder {
   const ExnStackState& exceptionStackState() const { return m_exnStack; }
 
   /*
-   * Local and stack values and types.
+   * Tracked state for bytecode locations.
    *
-   * These simply constrain the local or stack slot, then delegate to fs().
+   * These simply constrain the location, then delegate to fs().
    */
-  SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  SSATmp* stackValue(IRSPRelOffset offset, TypeConstraint tc);
-  Type localType(uint32_t id, TypeConstraint tc);
-  Type stackType(IRSPRelOffset, TypeConstraint tc);
+  const LocalState& local(uint32_t id, TypeConstraint tc);
+  const StackState& stack(IRSPRelOffset offset, TypeConstraint tc);
+  SSATmp* valueOf(Location l, TypeConstraint tc);
+  Type     typeOf(Location l, TypeConstraint tc);
 
   /*
    * Helper for unboxing predicted types.
@@ -122,44 +118,75 @@ struct IRBuilder {
    * @returns: ldRefReturn(fs().local(id).predictedType.unbox())
    *           ldRefReturn(fs().stack(id).predictedType.unbox())
    */
-  Type predictedInnerType(uint32_t id) const;
+  Type predictedLocalInnerType(uint32_t id) const;
   Type predictedStackInnerType(IRSPRelOffset) const;
 
+  /////////////////////////////////////////////////////////////////////////////
   /*
-   * Support for guard relaxation.
+   * Guard relaxation.
    *
-   * Whenever the semantics of an hhir operation depends on the type of one of
-   * its input values, that value's type must be constrained using one of these
-   * methods. This happens automatically for most values, when obtained through
-   * irgen-internal functions like popC (and friends).
+   * Whenever the semantics of an HHIR instruction depends on the type of one
+   * of its input values, that value's type must be constrained using one of
+   * these functions. This happens automatically for most values, when obtained
+   * through irgen-internal functions like popC (and friends).
    */
-  void setConstrainGuards(bool constrain) { m_constrainGuards = constrain; }
-  bool shouldConstrainGuards()      const { return m_constrainGuards; }
-  bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
-  bool constrainValue(SSATmp* const val, TypeConstraint tc);
-  bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
-  bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
-  bool typeMightRelax(SSATmp* val = nullptr) const;
+
+  /*
+   * All the guards in the managed IRUnit.
+   */
   const GuardConstraints* guards() const { return &m_constraints; }
 
-public:
   /*
-   * API for managing state when building IR with bytecode-level control flow.
+   * Return true iff `tc' is more specific than the existing constraint for the
+   * guard `inst'.
+   *
+   * This does not necessarily constrain the guard, if `tc.weak' is true.
    */
+  bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
 
   /*
-   * Start the given block.  Returns whether or not it succeeded.  A failure
-   * may occur in case the block turned out to be unreachable.
+   * Trace back to the guard that provided the type of `val', if any, then
+   * constrain it so that its type will not be relaxed beyond `tc'.
+   *
+   * Like constrainGuard(), this returns true iff `tc' is more specific than
+   * the existing constraint, and does not constrain the guard if `tc.weak' is
+   * true.
    */
-  bool startBlock(Block* block, bool hasUnprocPred);
+  bool constrainValue(SSATmp* const val, TypeConstraint tc);
 
   /*
-   * Returns whether or not `block' will succeed if passed to
-   * startBlock, which implies that we have state saved for `block',
-   * and therefore it's currently reachable from the unit's entry
-   * block.
+   * Constrain the type sources of the given bytecode location.
+   */
+  bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
+  bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
+
+  /*
+   * Whether `val' might have its type relaxed by guard relaxation.
+   *
+   * If `val' is nullptr, only conditions that apply to all values are checked.
+   */
+  bool typeMightRelax(SSATmp* val = nullptr) const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Bytecode-level control flow helpers.
+
+  /*
+   * The block that we're currently emitting code to.
+   */
+  Block* curBlock() { return m_curBlock; }
+
+  /*
+   * Return whether we have state saved for `block'---which indicates that it's
+   * currently reachable from the unit's entry block.
    */
   bool canStartBlock(Block* block) const;
+
+  /*
+   * Start `block', returning success.
+   *
+   * We fail if `canStartBlock(block)' is false.
+   */
+  bool startBlock(Block* block, bool hasUnprocessedPred);
 
   /*
    * Create a new block corresponding to bytecode control flow.
@@ -167,50 +194,31 @@ public:
   Block* makeBlock(SrcKey sk, uint64_t profCount);
 
   /*
-   * Clear the map from bytecode offsets to Blocks.
+   * Check or set the block corresponding to `sk'.
+   */
+  bool hasBlock(SrcKey sk) const;
+  void setBlock(SrcKey sk, Block* block);
+
+  /*
+   * Clear the SrcKey-to-block map.
    */
   void resetOffsetMapping();
 
   /*
-   * Checks whether or not there's a block associated with the given
-   * SrcKey offset.
-   */
-  bool hasBlock(SrcKey sk) const;
-
-  /*
-   * Set the block associated with the given offset in the SrcKey->block map.
-   */
-  void setBlock(SrcKey sk, Block* block);
-
-  /*
-   * Get the block that we're currently emitting code to.
-   */
-  Block* curBlock() { return m_curBlock; }
-
-  /*
-   * Append a new block to the unit.
+   * Append `block' to the unit.
    */
   void appendBlock(Block* block);
 
   /*
-   * Set the block to branch to in case a guard fails.
-   */
-  void setGuardFailBlock(Block* block);
-
-  /*
-   * Resets the guard failure block to nullptr.
-   */
-  void resetGuardFailBlock();
-
-  /*
-   * Returns the block to branch to in case of a guard failure.  This
-   * returns nullptr if no such block has been set, and therefore
-   * guard failures should end the region and perform a service
-   * request.
+   * Get, set, or null out the block to branch to in case of a guard failure.
+   *
+   * A nullptr guard fail block indicates that guard failures should end the
+   * region and perform a service request.
    */
   Block* guardFailBlock() const;
+  void setGuardFailBlock(Block* block);
+  void resetGuardFailBlock();
 
-public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),
    * emit instructions as usual with gen(...), then call popBlock(). This is
@@ -227,7 +235,7 @@ public:
   void popBlock();
 
   /*
-   * Conditionally-append a new instruction to the current Block, depending on
+   * Conditionally append a new instruction to the current Block, depending on
    * what some optimizations have to say about it.
    */
   enum class CloneFlag { Yes, No };
@@ -235,17 +243,10 @@ public:
                        CloneFlag doClone,
                        Block* srcBlock);
 
-private:
-  struct BlockState {
-    Block* block;
-    BCMarker marker;
-    ExnStackState exnStack;
-    std::function<Block* ()> catchCreator;
-  };
+  /////////////////////////////////////////////////////////////////////////////
+  // Internal API.
 
 private:
-  // Helper for cond() and such.  We should move them out of IRBuilder so they
-  // can just use irgen::gen.
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {
     return makeInstruction(
@@ -258,36 +259,61 @@ private:
     );
   }
 
-private:
-  SSATmp* preOptimizeCheckTypeOp(IRInstruction*, Type);
-  SSATmp* preOptimizeCheckType(IRInstruction*);
-  SSATmp* preOptimizeCheckStk(IRInstruction*);
+  /*
+   * Location wrapper helpers.
+   */
+  Location loc(uint32_t) const;
+  Location stk(IRSPRelOffset) const;
+
+  /*
+   * preOptimize() and helpers.
+   */
+  SSATmp* preOptimizeCheckLocation(IRInstruction*, Location);
   SSATmp* preOptimizeCheckLoc(IRInstruction*);
+  SSATmp* preOptimizeCheckStk(IRInstruction*);
   SSATmp* preOptimizeHintLocInner(IRInstruction*);
   SSATmp* preOptimizeAssertTypeOp(IRInstruction* inst,
                                   Type oldType,
                                   SSATmp* oldVal,
                                   const IRInstruction* typeSrc);
   SSATmp* preOptimizeAssertType(IRInstruction*);
-  SSATmp* preOptimizeAssertStk(IRInstruction*);
+  SSATmp* preOptimizeAssertLocation(IRInstruction*, Location);
   SSATmp* preOptimizeAssertLoc(IRInstruction*);
+  SSATmp* preOptimizeAssertStk(IRInstruction*);
   SSATmp* preOptimizeCheckCtxThis(IRInstruction*);
   SSATmp* preOptimizeLdCtx(IRInstruction*);
-  SSATmp* preOptimizeLdLocPseudoMain(IRInstruction*);
+  SSATmp* preOptimizeLdLocation(IRInstruction*, Location);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
-  SSATmp* preOptimizeStLoc(IRInstruction*);
+  SSATmp* preOptimizeLdStk(IRInstruction*);
   SSATmp* preOptimizeCastStk(IRInstruction*);
   SSATmp* preOptimizeCoerceStk(IRInstruction*);
-  SSATmp* preOptimizeLdStk(IRInstruction*);
   SSATmp* preOptimizeLdMBase(IRInstruction*);
   SSATmp* preOptimize(IRInstruction*);
 
-private:
   void appendInstruction(IRInstruction* inst);
-  bool constrainSlot(int32_t idOrOffset,
-                     TypeSource typeSrc,
-                     TypeConstraint tc,
-                     const std::string& why);
+
+  /*
+   * Type constraint helpers.
+   */
+  bool constrainLocation(Location l, TypeConstraint tc,
+                         const std::string& why);
+  bool constrainCheck(const IRInstruction* inst,
+                      TypeConstraint tc, Type srcType);
+  bool constrainAssert(const IRInstruction* inst,
+                       TypeConstraint tc, Type srcType,
+                       folly::Optional<Type> knownType = folly::none);
+  bool constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc);
+  bool shouldConstrainGuards() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+
+private:
+  struct BlockState {
+    Block* block;
+    BCMarker marker;
+    ExnStackState exnStack;
+    std::function<Block* ()> catchCreator;
+  };
 
 private:
   IRUnit& m_unit;
@@ -305,7 +331,6 @@ private:
   ExnStackState m_exnStack;
 
   bool m_enableSimplification{false};
-  bool m_constrainGuards;
 
   GuardConstraints m_constraints;
 
@@ -318,7 +343,7 @@ private:
   Block* m_guardFailBlock{nullptr};
 };
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * RAII helper for emitting code to exit traces. See IRBuilder::pushBlock
@@ -339,11 +364,11 @@ struct BlockPusher {
   IRBuilder& m_irb;
 };
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 bool typeMightRelax(const SSATmp* tmp);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}
 

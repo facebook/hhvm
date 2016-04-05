@@ -57,7 +57,7 @@ struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
   int64_t m_priority;
 
  public:
-  static const int8_t STATE_SCHEDULED = 2;
+  static const int8_t STATE_SCHEDULED = 2; // waiting in priority queue
 };
 
 Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,

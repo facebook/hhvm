@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -946,8 +947,8 @@ Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
   ret->reserve(row_blocks.size());
 
   for (auto& row_block : row_blocks) {
-    ret->t_add(AsyncMysqlRowBlock::newInstance(&row_block,
-                                               data->m_field_index));
+    ret->add(AsyncMysqlRowBlock::newInstance(&row_block,
+                                             data->m_field_index));
   }
   return Object{std::move(ret)};
 }
@@ -989,15 +990,15 @@ Object AsyncMysqlQueryResult::buildRows(bool as_maps, bool typed_values) {
             buildTypedValue(
                 m_query_result->getRowFields(), row, i, typed_values));
       }
-      ret->t_add(Variant(std::move(row_map)));
+      ret->add(Variant(std::move(row_map)));
     } else {
       auto row_vector = req::make<c_Vector>();
       row_vector->reserve(row.size());
       for (int i = 0; i < row.size(); ++i) {
-        row_vector->t_add(buildTypedValue(
+        row_vector->add(buildTypedValue(
             m_query_result->getRowFields(), row, i, typed_values));
       }
-      ret->t_add(Variant(std::move(row_vector)));
+      ret->add(Variant(std::move(row_vector)));
     }
   }
   return Object(std::move(ret));
@@ -1107,7 +1108,7 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   for (int i = 0; i < query_results.size(); ++i) {
     auto ret = AsyncMysqlQueryResult::newInstance(
         m_multi_op, m_clientStats, std::move(query_results[i]));
-    results->t_add(std::move(ret));
+    results->add(std::move(ret));
   }
   query_results.clear();
 

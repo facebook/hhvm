@@ -337,6 +337,20 @@ inline MOpFlags dropReffy(MOpFlags f) {
   always_assert(false);
 }
 
+inline MOpFlags dropUnset(MOpFlags f) {
+  switch (f) {
+    case MOpFlags::None:
+    case MOpFlags::Warn:
+    case MOpFlags::Define:
+    case MOpFlags::WarnDefine:
+    case MOpFlags::DefineReffy:
+      return f;
+    case MOpFlags::Unset:
+      return MOpFlags::None;
+  }
+  always_assert(false);
+}
+
 #define QUERY_M_OPS                               \
   OP(CGet)                                        \
   OP(CGetQuiet)                                   \

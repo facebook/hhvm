@@ -28,6 +28,8 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+
 #include <algorithm>
 
 namespace HPHP {
@@ -53,6 +55,7 @@ struct Header {
     GlobalsArray globals_;
     ObjectData obj_;
     c_Pair pair_;
+    BaseVector vector_;
     ResourceHdr res_;
     RefData ref_;
     SmallNode small_;

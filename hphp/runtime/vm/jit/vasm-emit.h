@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_VASM_EMIT_H_
 
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
 
@@ -51,7 +52,8 @@ void emitPPC64(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
  * the given CodeBlocks.
  */
 void emitVunit(Vunit& vunit, const IRUnit& unit,
-               CodeCache::View code, CGMeta& fixups);
+               CodeCache::View code, CGMeta& fixups,
+               Annotations* annotations = nullptr);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

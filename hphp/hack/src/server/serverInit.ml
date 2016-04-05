@@ -99,7 +99,7 @@ let load_state root cmd (_ic, oc) =
         "%s %s %s"
         (Filename.quote (Path.to_string cmd))
         (Filename.quote (Path.to_string root))
-        (Filename.quote Build_id.build_id_ohai) in
+        (Filename.quote Build_id.build_revision) in
     Hh_logger.log "Running load_mini script: %s\n%!" cmd;
     let ic = Unix.open_process_in cmd in
     let json = read_json_line ic in
@@ -329,9 +329,9 @@ let print_hash_stats () =
     used_slots slots load_factor;
   ()
 
-let get_build_targets () =
+let get_build_targets env =
   let targets =
-    List.map (BuildMain.get_live_targets ()) (Relative_path.(concat Root)) in
+    List.map (BuildMain.get_live_targets env) (Relative_path.(concat Root)) in
   Relative_path.set_of_list targets
 
 (* entry point *)
@@ -363,7 +363,9 @@ let init ?load_mini_script genv =
   let fast = Relative_path.Set.fold env.failed_parsing
     ~f:Relative_path.Map.remove ~init:fast in
   let env, t =
-    if genv.local_config.SLC.lazy_decl then env, t
+    if genv.local_config.SLC.lazy_decl
+      && Option.is_none (ServerArgs.ai_mode genv.options)
+    then env, t
     else type_decl genv env fast t in
 
   let state = state_future >>= fun f ->
@@ -379,7 +381,7 @@ let init ?load_mini_script genv =
      * recheck them. While we could query hg / git for the untracked files,
      * it's much slower. *)
     let dirty_files =
-      Relative_path.Set.union dirty_files (get_build_targets ()) in
+      Relative_path.Set.union dirty_files (get_build_targets env) in
     Ok (dirty_files, changed_while_parsing, old_fast)
   in
   HackEventLogger.vcs_changed_files_end t;
@@ -409,6 +411,14 @@ let init ?load_mini_script genv =
       end;
       type_check genv env fast t
   in
+
+  let errorl, failed = Decl.errors_and_failures () in
+  Decl.reset_errors ();
+  let env = { env with
+    failed_decl =
+      List.fold_left failed ~init:env.failed_decl ~f:Relative_path.Set.add;
+    errorl = List.rev_append errorl env.errorl;
+  } in
 
   let env, _t = ai_check genv env.files_info env t in
 

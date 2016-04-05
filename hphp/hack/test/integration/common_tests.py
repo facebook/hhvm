@@ -85,6 +85,16 @@ class CommonTestDriver(object):
         shutil.rmtree(self.repo_dir)
 
     @classmethod
+    def proc_create(cls, args, env):
+        return subprocess.Popen(
+                args,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=dict(cls.test_env, **env),
+                universal_newlines=True)
+
+    @classmethod
     def proc_call(cls, args, env=None, stdin=None):
         """
         Invoke a subprocess, return stdout, send stderr to our stderr (for
@@ -92,13 +102,7 @@ class CommonTestDriver(object):
         """
         env = {} if env is None else env
         print(" ".join(args), file=sys.stderr)
-        proc = subprocess.Popen(
-                args,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=dict(cls.test_env, **env),
-                universal_newlines=True)
+        proc = cls.proc_create(args, env)
         (stdout_data, stderr_data) = proc.communicate(stdin)
         sys.stderr.write(stderr_data)
         sys.stderr.flush()
@@ -122,6 +126,37 @@ class CommonTestDriver(object):
         # idempotent)
         self.check_cmd(expected_json, stdin, options + ['--json'])
         self.check_cmd(expected_output, stdin, options)
+
+    def subscribe_debug(self):
+        proc = self.proc_create([
+            hh_client,
+            'debug',
+            self.repo_dir
+            ], env={})
+        return DebugSubscription(proc)
+
+class DebugSubscription(object):
+    """
+    Wraps `hh_client debug`.
+    """
+
+    def __init__(self, proc):
+        self.proc = proc
+        hello = self.read_msg()
+        assert(hello['data'] == 'hello')
+
+    def read_msg(self):
+        line = self.proc.stdout.readline()
+        return json.loads(line)
+
+    def get_incremental_logs(self):
+        msgs = {}
+        while True:
+            msg = self.read_msg()
+            if msg['type'] == 'info' and msg['data'] == 'incremental_done':
+                break
+            msgs[msg['name']] = msg
+        return msgs
 
 class CommonTests(object):
 
@@ -191,13 +226,33 @@ class CommonTests(object):
 
     def test_deleted_file(self):
         """
-        Delete a file that still has dangling references after restoring from
+        Delete a file that still has dangling references before restoring from
         a saved state.
         """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
 
         self.write_load_config('foo_2.php')
 
+        self.check_cmd([
+            '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
+            '{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])',
+            ])
+
+    def test_file_delete_after_load(self):
+        """
+        Delete a file that still has dangling references after restoring from
+        a saved state.
+        """
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        debug_sub = self.subscribe_debug()
+
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        msgs = debug_sub.get_incremental_logs()
+        self.assertEqual(msgs['to_redecl_phase1']['files'], ['foo_2.php'])
+        self.assertEqual(msgs['to_redecl_phase2']['files'], ['foo_2.php'])
+        self.assertEqual(set(msgs['to_recheck']['files']),
+                set(['foo_1.php', 'foo_2.php']))
         self.check_cmd([
             '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
             '{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])',
@@ -313,12 +368,22 @@ class CommonTests(object):
             options=['--auto-complete'],
             stdin='<?hh function f() { some_AUTO332\n')
 
+    def test_list_files(self):
+        """
+        Test hh_client --list-files
+        """
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        self.write_load_config('foo_2.php')
+        self.check_cmd_and_json_cmd([
+            '{root}foo_1.php',
+            ], [
+            '{root}foo_1.php',  # see comment for identify-function
+            ], options=['--list-files'])
+
     def test_misc_ide_tools(self):
         """
-        Test hh_client --type-at-pos, --identify-function,
-        --list-files, --find-lvar-refs, and --get-method-name
+        Test hh_client --type-at-pos and --identify-function
         """
-
         self.write_load_config()
 
         self.check_cmd_and_json_cmd([
@@ -339,12 +404,12 @@ class CommonTests(object):
             options=['--identify-function', '1:51'],
             stdin='<?hh class Foo { private function bar() { $this->bar() }}')
 
+    def test_find_lvar_refs(self):
+        """
+        Test --find-lvar-refs
+        """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
-        self.check_cmd_and_json_cmd([
-            '{root}foo_1.php',
-            ], [
-            '{root}foo_1.php',  # see comment for identify-function
-            ], options=['--list-files'])
+        self.write_load_config('foo_2.php')
 
         self.check_cmd_and_json_cmd([
             'line 3, characters 15-16',
@@ -371,6 +436,13 @@ function test($x) {
 }
 ''')
 
+    def test_get_method_name(self):
+        """
+        Test --get-method-name
+        """
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        self.write_load_config('foo_2.php')
+
         self.check_cmd_and_json_cmd([
             'Name: \\C::foo, type: method, position: line 8, characters 7-9'
             ], [
@@ -390,6 +462,11 @@ function test(C $c) {
 }
 ''')
 
+    def test_format(self):
+        """
+        Test --format
+        """
+        self.write_load_config()
         self.check_cmd_and_json_cmd([
             'function test1(int $x) {{',
             '  $x = $x * x + 3;',

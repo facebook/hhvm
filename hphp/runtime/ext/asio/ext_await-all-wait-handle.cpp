@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
@@ -77,6 +78,7 @@ namespace {
     auto const waitHandle = c_WaitHandle::fromCell(src);
     if (UNLIKELY(!waitHandle)) failWaitHandle();
     if (waitHandle->isFinished()) return;
+    assert(isa<c_WaitableWaitHandle>(waitHandle));
     auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);
     ctx_idx = std::min(ctx_idx, child->getContextIdx());
     ++cnt;
@@ -327,12 +329,6 @@ void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {
 }
 
 void c_AwaitAllWaitHandle::markAsFinished() {
-  for (int i = 0; i < m_cap; i++) {
-    auto const child = m_children[i].m_child;
-    assert(child->isFinished());
-    decRefObj(child);
-  }
-
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   tvWriteNull(&m_resultOrException);
@@ -347,7 +343,6 @@ void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {
       // Remove the current AAWH from the parent chain of all children.
       child->getParentChain().removeFromChain(&m_children[idx].m_blockable);
     }
-    decRefObj(child);
   }
 
   auto parentChain = getParentChain();

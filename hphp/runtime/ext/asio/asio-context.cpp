@@ -37,14 +37,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  template<bool decRef, class TWaitHandle>
+  template<class TWaitHandle>
   void exitContextQueue(context_idx_t ctx_idx,
                         req::deque<TWaitHandle*>& queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop_front();
       wait_handle->exitContext(ctx_idx);
-      if (decRef) decRefObj(wait_handle);
+      decRefObj(wait_handle);
     }
   }
 
@@ -92,10 +92,10 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   exitContextVector(ctx_idx, m_fastRunnableQueue);
 
   for (auto& it : m_priorityQueueDefault) {
-    exitContextQueue<true>(ctx_idx, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
   for (auto& it : m_priorityQueueNoPendingIO) {
-    exitContextQueue<true>(ctx_idx, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
 
   exitContextVector(ctx_idx, m_sleepEvents);
@@ -129,16 +129,26 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   while (!wait_handle->isFinished()) {
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.back();
+      auto wh = m_runnableQueue.back();
       m_runnableQueue.pop_back();
-      current->resume();
+      if (wh->getState() != c_ResumableWaitHandle::STATE_READY) {
+        // may happen if wh was scheduled in multiple contexts
+        decRefObj(wh);
+      } else {
+        wh->resume();
+      }
       continue;
     }
 
     if (!m_fastRunnableQueue.empty()) {
-      auto current = m_fastRunnableQueue.back();
+      auto wh = m_fastRunnableQueue.back();
       m_fastRunnableQueue.pop_back();
-      current->resume();
+      if (wh->getState() != c_ResumableWaitHandle::STATE_READY) {
+        // may happen if wh was scheduled in multiple contexts
+        decRefObj(wh);
+      } else {
+        wh->resume();
+      }
       continue;
     }
 
@@ -214,8 +224,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // What? The wait handle did not finish? We know it is part of the current
     // context and since there is nothing else to run, it cannot be in RUNNING
-    // or SCHEDULED state. So it must be BLOCKED on something. Apparently, the
-    // same logic can be used recursively on the something, so there is an
+    // or READY/SCHEDULED state. So it must be BLOCKED on something. Apparently,
+    // the same logic can be used recursively on the something, so there is an
     // infinite chain of blocked wait handles. But our memory is not infinite.
     // What could it possibly mean? I think we are in a deep sh^H^Hcycle.
     // But we can't, the cycles are detected and avoided at blockOn() time.

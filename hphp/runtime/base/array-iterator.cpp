@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"

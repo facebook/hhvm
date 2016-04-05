@@ -18,6 +18,8 @@
 #define incl_HPHP_JIT_FRAME_STATE_H_
 
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type-source.h"
 
@@ -39,7 +41,7 @@ struct SSATmp;
 
 namespace irgen {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 struct FPIInfo {
   SSATmp* returnSP;
@@ -51,62 +53,67 @@ struct FPIInfo {
   bool spansCall;
 };
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * SlotState stores information about either a local variable or a stack slot
- * in the current function, for FrameState.  LocalState and StackState are the
- * concrete versions of this struct, which differ only by the default type they
- * use.
+ * Information about a Location in the current function; used by FrameState.
  */
-template<bool Stack>
-struct SlotState {
+template<LTag tag>
+struct LocationState {
+  static_assert(tag == LTag::Stack ||
+                tag == LTag::Local ||
+                false,
+                "invalid LTag for LocationState");
+
   static constexpr Type default_type() {
-    return Stack ? TStkElem : TGen;
+    return tag == LTag::Stack ? TStkElem :
+        /* tag == LTag::Local */ TGen;
   }
 
   /*
-   * The current value of the or stack slot.
+   * The current value at the location.
    */
   SSATmp* value{nullptr};
 
   /*
-   * The current type of the local or stack slot.  We may have a
-   * tracked type even if we don't have an available value.  This
-   * happens across PHP-level calls, for example, or at some joint
-   * points where we couldn't find the same available value for all
-   * incoming edges.  However, whenever we have a value, the type of
-   * the SSATmp must match this `type' field.
+   * The current type of the value at the location.
+   *
+   * We may have a tracked type even if we don't have an available value.  This
+   * happens across PHP-level calls, for example, or at some joint points where
+   * we couldn't find the same available value for all incoming edges.
+   * However, whenever we have a value, the type of the SSATmp must match this
+   * `type' field.
    */
   Type type{default_type()};
 
   /*
-   * Prediction for the type of a local or stack slot, if it's boxed or if
-   * we're in a pseudomain.  Otherwise it will be the same as `type'.
+   * Prediction for the type at the location, if it's boxed or if we're in a
+   * pseudomain.  Otherwise it will be the same as `type'.
    *
-   * Invariants:
-   *   always a subtype of `type'
+   * @requires: predictedType <= type
    */
   Type predictedType{default_type()};
 
   /*
-   * The sources of the currently known type. They may be values. If the value
-   * is unavailable, we won't hold onto it in the value field, but we'll keep
-   * it around in typeSrcs for guard relaxation.
+   * The sources of the currently known type, which may be values.
+   *
+   * If the value is unavailable, we won't hold onto it in the value field, but
+   * we'll keep it around in typeSrcs for guard relaxation.
    */
   TypeSourceSet typeSrcs{};
 
   /*
-   * Whether or not the local or stack element may have changed since
-   * the entry of the unit.  This is only used for post-conditions.
+   * Whether or not the location may have changed since the entry of the unit.
+   *
+   * This is only used for post-conditions.
    */
   bool maybeChanged{false};
 };
 
-using LocalState = SlotState<false>;
-using StackState = SlotState<true>;
+using LocalState = LocationState<LTag::Local>;
+using StackState = LocationState<LTag::Stack>;
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * State related to a particular frame.  These state structures are stored in a
@@ -205,7 +212,7 @@ struct FrameState {
   jit::hash_map<SSATmp*, Type> predictedTypes;
 };
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * FrameStateMgr tracks state about the VM stack frame in the function currently
@@ -249,7 +256,7 @@ struct FrameStateMgr final {
   bool hasStateFor(Block*) const;
 
   /*
-   * Starts tracking state for a block and reloads any previously saved state.
+   * Start tracking state for a block and reloads any previously saved state.
    *
    * `hasUnprocessedPred' is set to indicate that the given block has a
    * predecessor in the region that might not yet be linked into the IR CFG.
@@ -275,20 +282,21 @@ struct FrameStateMgr final {
   void pauseBlock(Block*);
 
   /*
-   * Resumes processing a block that was stopped by pauseBlock.
+   * Resume processing a block that was stopped by pauseBlock.
    */
   void unpauseBlock(Block*);
 
   /*
-   * Returns the post-conditions associated with `exitBlock'
+   * Return the post-conditions associated with `exitBlock'.
    */
   const PostConditions& postConds(Block* exitBlock) const;
 
   /*
-   * set an override for the next fpi regions fpushOp
+   * Set an override for the next FPI region's fpushOp.
    */
-  void setFPushOverride(Op op)          { m_fpushOverride = op; }
-  bool hasFPushOverride() const         { return m_fpushOverride.hasValue(); }
+  void setFPushOverride(Op op)  { m_fpushOverride = op; }
+  bool hasFPushOverride() const { return m_fpushOverride.hasValue(); }
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -324,43 +332,34 @@ struct FrameStateMgr final {
   void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
   void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
   void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
+
   /*
    * Current inlining depth (not including the toplevel frame).
    */
   unsigned inlineDepth() const { return m_stack.size() - 1; }
 
   /*
-   * Return the SlotState for local `id' or stack element at `off' in the
+   * Return the LocationState for local `id' or stack element at `off' in the
    * most-inlined frame.
    */
   const LocalState& local(uint32_t id) const;
   const StackState& stack(IRSPRelOffset off) const;
+  const StackState& stack(FPInvOffset off) const;
 
   /*
-   * Update the `predictedType' in the SlotState for the given local variable
-   * or stack value.
+   * Generic accessors for LocationState members.
    */
-  void refineLocalPredictedType(uint32_t id, Type type);
-  void refineStackPredictedType(IRSPRelOffset, Type);
+  SSATmp* valueOf(Location l) const;
+  Type typeOf(Location l) const;
+  Type predictedTypeOf(Location l) const;
+  const TypeSourceSet& typeSrcsOf(Location l) const;
 
-private:
-  struct BlockState {
-    jit::vector<FrameState> in;
-    folly::Optional<jit::vector<FrameState>> paused;
-  };
+  /*
+   * Update the predicted type for `l'.
+   */
+  void refinePredictedType(Location l, Type type);
 
-private:
-  bool checkInvariants() const;
-  bool save(Block*);
-  jit::vector<LocalState>& locals(unsigned inlineIdx);
-  void trackDefInlineFP(const IRInstruction* inst);
-  void trackInlineReturn();
-  void clearForUnprocessedPred();
-  StackState& stackState(IRSPRelOffset offset);
-  const StackState& stackState(IRSPRelOffset offset) const;
-  void collectPostConds(Block* exitBlock);
-  void updateMInstr(const IRInstruction*);
-  void refinePredictedTmpType(SSATmp*, Type);
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
   FrameState& cur() {
@@ -371,46 +370,76 @@ private:
     return const_cast<FrameStateMgr*>(this)->cur();
   }
 
-  template<bool Stack>
-  void syncPrediction(SlotState<Stack>&);
+  /*
+   * LocationState access helpers.
+   */
+  Location loc(uint32_t) const;
+  Location stk(IRSPRelOffset) const;
+  LocalState& localState(uint32_t);
+  LocalState& localState(Location l); // @requires: l.tag() == LTag::Local
+  StackState& stackState(IRSPRelOffset);
+  StackState& stackState(FPInvOffset);
+  StackState& stackState(Location l); // @requires: l.tag() == LTag::Stack
 
   /*
-   * refine(Local|Stack)Type() are used when the value of a slot hasn't changed
-   * but we have more information about its type, from a guard or type assert.
-   *
-   * set(Local|Stack)Type() are used to change the type of a slot when we have
-   * a brand new type because the value might have changed. These operations
-   * clear the typeSrcs of the slot, so new type may not be derived from the
-   * old type in any way.
-   *
-   * widen(Local|Stack)Type() are used to change the type of a slot, as a
-   * result of an operation that might change the value. These operations
-   * preserve the typeSrcs of the slot, so the new type may be derived from the
-   * old type.
+   * Helpers for update().
    */
-private: // local tracking helpers
-  void setLocalValue(uint32_t id, SSATmp* value);
-  void refineLocalValues(SSATmp* oldVal, SSATmp* newVal);
-  void dropLocalRefsInnerTypes();
-  void killLocalsForCall(bool);
-  void refineLocalType(uint32_t id, Type type, TypeSource typeSrc);
+  bool checkInvariants() const;
+  void updateMInstr(const IRInstruction*);
+  void trackDefInlineFP(const IRInstruction* inst);
+  void trackInlineReturn();
+
+  /*
+   * Per-block state helpers.
+   */
+  bool save(Block*);
+  void clearForUnprocessedPred();
+  void collectPostConds(Block* exitBlock);
+
+  /*
+   * LocationState update helpers.
+   */
+  void setValue(Location l, SSATmp* value);
+  void setType(Location l, Type type);
+  void widenType(Location l, Type type);
+  void refineType(Location l, Type type, TypeSource typeSrc);
+  void setBoxedPrediction(Location l, Type type);
+  void refinePredictedTmpType(SSATmp*, Type);
+
+  template<LTag tag>
+  void refineValue(LocationState<tag>& state, SSATmp* oldVal, SSATmp* newVal);
+
+  template<LTag tag>
+  void setValueImpl(Location l, LocationState<tag>& state, SSATmp* value,
+                    folly::Optional<Type> predicted = folly::none);
+  template<LTag tag>
+  void refinePredictedTypeImpl(LocationState<tag>& state, Type type);
+
+  template<LTag tag> void syncPrediction(LocationState<tag>&);
+
+  /*
+   * Local state update helpers.
+   */
   void setLocalPredictedType(uint32_t id, Type type);
-  void setLocalType(uint32_t id, Type type);
-  void widenLocalType(uint32_t id, Type type);
-  void setBoxedLocalPrediction(uint32_t id, Type type);
   void updateLocalRefPredictions(SSATmp*, SSATmp*);
-  void setLocalTypeSource(uint32_t id, TypeSource typeSrc);
+  void killLocalsForCall(bool);
+  void dropLocalRefsInnerTypes();
   void clearLocals();
 
-private: // stack tracking helpers
-  void setStackValue(IRSPRelOffset, SSATmp*);
-  void setStackType(IRSPRelOffset, Type);
-  void widenStackType(IRSPRelOffset, Type);
-  void refineStackValues(SSATmp* oldval, SSATmp* newVal);
-  void refineStackType(IRSPRelOffset, Type, TypeSource typeSrc);
-  void clearStackForCall();
-  void setBoxedStkPrediction(IRSPRelOffset, Type type);
+  /*
+   * Stack state update helpers.
+   */
   void spillFrameStack(IRSPRelOffset, FPInvOffset, const IRInstruction*);
+  void clearStackForCall();
+
+private:
+  struct BlockState {
+    jit::vector<FrameState> in;
+    folly::Optional<jit::vector<FrameState>> paused;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
 
 private:
   /*
@@ -436,14 +465,14 @@ private:
   folly::Optional<Op> m_fpushOverride;
 };
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Debug stringification.
  */
 std::string show(const FrameStateMgr&);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}
 

@@ -1369,6 +1369,15 @@ def walk(filename, dest_subdir):
     if '/ext/json/tests/unsupported_type_error.php' in full_dest_filename:
         exp = exp.replace('resource(5)', 'resource(%d)')
         open(full_dest_filename + '.expectf', 'w').write(exp)
+    if ('/ext/gd/tests/imagegd_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagegd2_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagegif_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagepng_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagewbmp_nullbyte_injection.php' in full_dest_filename):
+        test = test.replace("'/php-gdtest';\nif",
+                            "'/php-gdtest'.rand();\nif")
+        test = test.replace("$tempdir = sys_get_temp_dir(). '/php-gdtest';\n",
+                            "\n")
     if ('/ext/xmlreader/tests/007.php' in full_dest_filename or
        '/ext/xmlreader/tests/008.php' in full_dest_filename or
        '/ext/xmlreader/tests/012.php' in full_dest_filename or

@@ -132,7 +132,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   auto const valType = [&]() -> Type {
     if (val->type() <= TCell) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
-    auto const pred = env.irb->predictedInnerType(id);
+    auto const pred = env.irb->predictedLocalInnerType(id);
     gen(env, CheckRefInner, pred, makeExit(env), val);
     val = gen(env, LdRef, pred, val);
     return pred;

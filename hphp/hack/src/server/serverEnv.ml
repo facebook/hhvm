@@ -27,6 +27,7 @@ type genv = {
     notifier         : unit -> SSet.t;
     (* If daemons are spawned as part of the init process, wait for them here *)
     wait_until_ready : unit -> unit;
+    mutable debug_channels   : (Timeout.in_channel * out_channel) option;
     ide_process      : IdeProcessPipe.to_ide option;
   }
 
@@ -43,7 +44,6 @@ type env = {
     files_info     : FileInfo.t Relative_path.Map.t;
     tcopt          : TypecheckerOptions.t;
     errorl         : Errors.t;
-    (* the strings in those sets represent filenames *)
     failed_parsing : Relative_path.Set.t;
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;

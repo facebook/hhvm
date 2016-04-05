@@ -1604,10 +1604,10 @@ namespace {
  * Attempt to emit code for the given IRUnit to `code'. Returns true on
  * success, false if codegen failed.
  */
-bool mcGenUnit(Vunit& vunit, const IRUnit& unit,
-               CodeCache::View code, CGMeta& fixups) {
+bool mcGenUnit(TransEnv& env, CodeCache::View code, CGMeta& fixups) {
+  auto const& unit = *env.unit;
   try {
-    emitVunit(vunit, unit, code, fixups);
+    emitVunit(*env.vunit, unit, code, fixups, &env.annotations);
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
       mcg->code().disableHot();
@@ -1727,7 +1727,7 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   TransLocMaker maker{code};
   maker.markStart();
 
-  if (env.vunit && !mcGenUnit(*env.vunit, *env.unit, code, fixups)) {
+  if (env.vunit && !mcGenUnit(env, code, fixups)) {
     // mcGenUnit() failed. Roll back, drop the unit and region, and clear
     // fixups.
     maker.rollback();

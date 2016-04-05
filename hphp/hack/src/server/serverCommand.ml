@@ -10,9 +10,12 @@
 
 open Utils
 
+module TLazyHeap = Typing_lazy_heap
+
 type 'a command =
   | Rpc of 'a ServerRpc.t
   | Stream of streamed
+  | Debug
 
 and streamed =
   | SHOW of string
@@ -34,6 +37,10 @@ let rpc : type a. Timeout.in_channel * out_channel -> a ServerRpc.t -> a
 
 let stream_request oc cmd =
   Marshal.to_channel oc (Stream cmd) [];
+  flush oc
+
+let connect_debug oc =
+  Marshal.to_channel oc Debug [];
   flush oc
 
 (****************************************************************************)
@@ -72,11 +79,11 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           let () = output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
-      let class_ = Typing_heap.Classes.get class_name in
+      let class_ = TLazyHeap.get_class env.ServerEnv.tcopt class_name in
       (match class_ with
       | None -> output_string oc "Missing from typing env\n"
       | Some c ->
-          let class_str = Typing_print.class_ c in
+          let class_str = Typing_print.class_ env.ServerEnv.tcopt c in
           output_string oc (class_str^"\n")
       );
       output_string oc "\nfunction:\n";
@@ -89,7 +96,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           let () = output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
-      let fun_ = Typing_heap.Funs.get fun_name in
+      let fun_ = TLazyHeap.get_fun env.ServerEnv.tcopt fun_name in
       (match fun_ with
       | None ->
           output_string oc "Missing from typing env\n"
@@ -101,7 +108,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       (match NamingGlobal.GEnv.gconst_pos qual_name with
       | Some p -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
       | None -> output_string oc "Missing from naming env\n");
-      let gconst_ty = Typing_heap.GConsts.get qual_name in
+      let gconst_ty = TLazyHeap.get_gconst env.ServerEnv.tcopt qual_name in
       (match gconst_ty with
       | None -> output_string oc "Missing from typing env\n"
       | Some gc ->
@@ -112,7 +119,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       (match NamingGlobal.GEnv.typedef_pos qual_name with
       | Some p -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
       | None -> output_string oc "Missing from naming env\n");
-      let tdef = Typing_heap.Typedefs.get qual_name in
+      let tdef = TLazyHeap.get_typedef env.ServerEnv.tcopt qual_name in
       (match tdef with
       | None ->
           output_string oc "Missing from typing env\n"
@@ -171,3 +178,6 @@ let handle genv env (ic, oc) =
       send_response_to_client (ic, oc) response;
       if cmd = ServerRpc.KILL then ServerUtils.die_nicely ()
   | Stream cmd -> stream_response genv env (ic, oc) ~cmd
+  | Debug ->
+    genv.ServerEnv.debug_channels <- Some (ic, oc);
+    ServerDebug.say_hello genv

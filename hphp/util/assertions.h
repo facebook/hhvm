@@ -34,11 +34,13 @@
 
 #define IMPLIES(a, b) (!(a) || (b))
 
-#if defined(__INTEL_COMPILER) || defined(_MSC_VER)
+#if defined(__INTEL_COMPILER)
 #define not_reached()                                                \
   do {                                                               \
     assert(false);                                                   \
   } while (true)
+#elif defined(_MSC_VER)
+#define not_reached() __assume(0)
 #else
 #define not_reached() /* gcc-4.5 supports __builtin_unreachable() */  \
   do {                                                                \

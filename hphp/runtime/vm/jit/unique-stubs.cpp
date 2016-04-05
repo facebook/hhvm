@@ -464,7 +464,8 @@ constexpr ptrdiff_t bl_rel(ptrdiff_t off) {
 void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
   auto const resultOff = ar_rel(AFWH::resultOff());
   v << store{data, rvmfp()[resultOff + TVOFF(m_data)]};
-  v << store{type, rvmfp()[resultOff + TVOFF(m_type)]};
+  // This store must preserve the kind bits in the WaitHandle for correctness.
+  v << storeb{type, rvmfp()[resultOff + TVOFF(m_type)]};
 }
 
 /*

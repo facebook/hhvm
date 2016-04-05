@@ -366,22 +366,27 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
   return Variant(std::move(parser));
 }
 
+static bool name_contains_class(const String& name) {
+  if (name) {
+    int pos = name.find("::");
+    return pos != 0 && pos != String::npos && pos + 2 < name.size();
+  }
+  return false;
+}
+
 static Variant xml_call_handler(const req::ptr<XmlParser>& parser,
                                 const Variant& handler,
                                 const Array& args) {
   if (parser && handler.toBoolean()) {
     Variant retval;
-    if (handler.isString()) {
+    if (handler.isString() && !name_contains_class(handler.toString())) {
       if (!parser->object.isObject()) {
         retval = invoke(handler.toString().c_str(), args, -1);
       } else {
         retval = parser->object.toObject()->
           o_invoke(handler.toString(), args);
       }
-    } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
-               (handler.toCArrRef()[0].isString() ||
-                handler.toCArrRef()[0].isObject()) &&
-               handler.toCArrRef()[1].isString()) {
+    } else if (is_callable(handler)) {
       vm_call_user_func(handler, args);
     } else {
       raise_warning("Handler is invalid");
@@ -723,9 +728,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 
 static void xml_set_handler(Variant * handler, const Variant& data) {
   if (data.isNull() || same(data, false) || data.isString() ||
-      (data.isArray() && data.getArrayData()->size() == 2 &&
-       (data.toCArrRef()[0].isString() || data.toCArrRef()[0].isObject()) &&
-       data.toCArrRef()[1].isString())) {
+        is_callable(data)) {
     *handler = data;
   } else {
     raise_warning("Handler is invalid");

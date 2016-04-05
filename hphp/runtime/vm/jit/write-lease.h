@@ -41,8 +41,6 @@ struct LeaseHolderBase;
 struct Lease {
   friend struct LeaseHolderBase;
 
-  static const int64_t kStandardHintExpireInterval = 1500; // in microseconds
-
   Lease();
   ~Lease();
 

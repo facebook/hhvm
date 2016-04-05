@@ -26,12 +26,14 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-strtod.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
+
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo.h"
-
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
@@ -1076,12 +1078,18 @@ void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
       auto h = k.toInt64();
       tv = map->findForUnserialize(h);
       // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
+      if (UNLIKELY(!tv)) {
+        tv = k.asTypedValue();
+        goto do_unserialize;
+      }
     } else if (k.isString()) {
       auto key = k.getStringData();
       tv = map->findForUnserialize(key);
       // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
+      if (UNLIKELY(!tv)) {
+        tv = k.asTypedValue();
+        goto do_unserialize;
+      }
     } else {
       throwInvalidKey();
     }

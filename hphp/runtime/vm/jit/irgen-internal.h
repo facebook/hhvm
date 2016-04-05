@@ -298,7 +298,7 @@ inline IRSPRelOffset bcSPOffset(const IRGS& env) {
 
 inline SSATmp* pop(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
-  auto const knownType = env.irb->stackType(offset, tc);
+  auto const knownType = env.irb->stack(offset, tc).type;
   auto value = gen(env, LdStk, knownType, IRSPRelOffsetData{offset}, sp(env));
   env.irb->fs().decBCSPDepth();
   FTRACE(2, "popping {}\n", *value->inst());
@@ -348,14 +348,14 @@ inline Type topType(IRGS& env,
                     BCSPRelOffset idx,
                     TypeConstraint constraint = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
-  return env.irb->stackType(offsetFromIRSP(env, idx), constraint);
+  return env.irb->stack(offsetFromIRSP(env, idx), constraint).type;
 }
 
 inline SSATmp* top(IRGS& env,
                    BCSPRelOffset index = BCSPRelOffset{0},
                    TypeConstraint tc = DataTypeSpecific) {
   auto const offset = offsetFromIRSP(env, index);
-  auto const knownType = env.irb->stackType(offset, tc);
+  auto const knownType = env.irb->stack(offset, tc).type;
   return gen(env, LdStk, IRSPRelOffsetData{offset}, knownType, sp(env));
 }
 
@@ -520,7 +520,7 @@ inline SSATmp* ldLocInner(IRGS& env,
   // Handle the Boxed case manually outside of unbox() so we can use the
   // local's predicted type.
   if (loc->type() <= TBoxedCell) {
-    auto const predTy = env.irb->predictedInnerType(locId);
+    auto const predTy = env.irb->predictedLocalInnerType(locId);
     gen(env, CheckRefInner, predTy, ldrefExit, loc);
     return gen(env, LdRef, predTy, loc);
   };
@@ -617,7 +617,7 @@ inline SSATmp* stLocImpl(IRGS& env,
   auto boxed_case = [&] (SSATmp* box) {
     // It's important that the IncRef happens after the guard on the inner type
     // of the ref, since it may side-exit.
-    auto const predTy = env.irb->predictedInnerType(id);
+    auto const predTy = env.irb->predictedLocalInnerType(id);
 
     // We may not have a ldrefExit, but if so we better not be loading the inner
     // ref.

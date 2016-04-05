@@ -19,9 +19,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 namespace HPHP {
 

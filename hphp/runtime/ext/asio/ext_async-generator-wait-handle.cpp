@@ -37,16 +37,12 @@ namespace {
 }
 
 c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
-  if (LIKELY(isFinished())) {
-    return;
-  }
-
+  if (LIKELY(isFinished())) return;
   assert(!isRunning());
-  decRefObj(m_generator);
   decRefObj(m_child);
 }
 
-c_AsyncGeneratorWaitHandle*
+req::ptr<c_AsyncGeneratorWaitHandle>
 c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
                                    c_WaitableWaitHandle* child) {
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
@@ -57,27 +53,21 @@ c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
       AsioBlockable::Kind::AsyncGeneratorWaitHandle
   );
   wh->incRefCount(); // on behalf of child->parent ptr in AsioBlockableChain
-  return wh.detach();
+  return wh;
 }
 
 c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child)
-  : c_ResumableWaitHandle(classof()) {
+  : c_ResumableWaitHandle(classof())
+  , m_generator(gen->toObject())
+{
   setState(STATE_BLOCKED);
   setContextIdx(child->getContextIdx());
-  m_generator = gen->toObject();
-  m_generator->incRefCount();
   m_child = child; // no incref, to avoid leaking parent<-->child cycle
 }
 
 void c_AsyncGeneratorWaitHandle::resume() {
-  // may happen if scheduled in multiple contexts
-  if (getState() != STATE_SCHEDULED) {
-    decRefObj(this);
-    return;
-  }
-
-  assert(getState() == STATE_SCHEDULED);
+  assert(getState() == STATE_READY);
   assert(m_child->isFinished());
   setState(STATE_RUNNING);
 
@@ -106,7 +96,7 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncGeneratorWaitHandle::onUnblocked() {
-  setState(STATE_SCHEDULED);
+  setState(STATE_READY);
   if (isInContext()) {
     getContext()->schedule(this);
   } else {
@@ -130,8 +120,7 @@ void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
   parentChain.unblock();
-  decRefObj(m_generator);
-  decRefObj(this);
+  m_generator.reset();
 }
 
 void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
@@ -144,8 +133,7 @@ void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
   setState(STATE_FAILED);
   cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
-  decRefObj(m_generator);
-  decRefObj(this);
+  m_generator.reset();
 }
 
 void c_AsyncGeneratorWaitHandle::failCpp() {
@@ -154,8 +142,7 @@ void c_AsyncGeneratorWaitHandle::failCpp() {
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
   parentChain.unblock();
-  decRefObj(m_generator);
-  decRefObj(this);
+  m_generator.reset();
 }
 
 String c_AsyncGeneratorWaitHandle::getName() {
@@ -167,7 +154,7 @@ c_WaitableWaitHandle* c_AsyncGeneratorWaitHandle::getChild() {
     assert(m_child);
     return m_child;
   } else {
-    assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
+    assert(getState() == STATE_READY || getState() == STATE_RUNNING);
     return nullptr;
   }
 }
@@ -196,7 +183,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
       decRefObj(this);
       break;
 
-    case STATE_SCHEDULED:
+    case STATE_READY:
       // Recursively move all wait handles blocked by us.
       getParentChain().exitContext(ctx_idx);
 

@@ -32,12 +32,11 @@ TRACE_SET_MOD(hhir);
 
 void CodeGenerator::cgBaseG(IRInstruction* inst) {
   using namespace MInstrHelpers;
-  using F = TypedValue* (*)(TypedValue);
-  static const F opFuncs[] = { baseG, baseGW, baseGD, baseGWD };
-  auto const mia = inst->extra<BaseG>()->mia;
+  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  BUILD_OPTAB(BASE_G_HELPER_TABLE, flags);
   cgCallHelper(
     vmain(),
-    CallSpec::direct(opFuncs[mia & MIA_base]),
+    CallSpec::direct(opFunc),
     callDest(inst),
     SyncOptions::Sync,
     argGroup(inst)
@@ -47,11 +46,11 @@ void CodeGenerator::cgBaseG(IRInstruction* inst) {
 
 void CodeGenerator::cgPropImpl(IRInstruction* inst) {
   using namespace MInstrHelpers;
-  auto const mia  = inst->extra<MInstrAttrData>()->mia;
-  auto const base = inst->src(0);
-  auto const key  = inst->src(1);
+  auto const flags   = inst->extra<MOpFlagsData>()->flags;
+  auto const base    = inst->src(0);
+  auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB(PROP_HELPER_TABLE, mia, keyType, base->isA(TObj));
+  BUILD_OPTAB(PROP_HELPER_TABLE, flags, keyType, base->isA(TObj));
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
@@ -261,9 +260,10 @@ void CodeGenerator::cgIssetProp(IRInstruction* i) { cgIssetEmptyPropImpl(i); }
 void CodeGenerator::cgEmptyProp(IRInstruction* i) { cgIssetEmptyPropImpl(i); }
 
 void CodeGenerator::cgElemImpl(IRInstruction* inst) {
-  auto const mia = inst->extra<MInstrAttrData>()->mia;
-  auto const key = inst->src(1);
-  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mia);
+  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  auto const key   = inst->src(1);
+
+  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), flags);
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),

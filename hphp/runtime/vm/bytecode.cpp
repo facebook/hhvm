@@ -2816,7 +2816,9 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
-    frame_afwh(vmfp())->ret(retval);
+    auto wh = frame_afwh(vmfp());
+    wh->ret(retval);
+    decRefObj(wh);
   } else if (vmfp()->func()->isAsyncGenerator()) {
     // Mark the async generator as finished.
     assert(isNullType(retval.m_type));
@@ -3229,16 +3231,17 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
   auto result = [&]{
     switch (flags) {
       case MOpFlags::None:
-        return Prop<false, false, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::None>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Warn:
-        return Prop<true, false, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::Warn>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Define:
+        return Prop<MOpFlags::Define>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::DefineReffy:
-        return Prop<false, true, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::DefineReffy>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Unset:
-        return Prop<false, false, true>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::Unset>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::WarnDefine:
-        return Prop<true, true, false>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpFlags::WarnDefine>(mstate.tvRef, ctx, mstate.base, key);
     }
     always_assert(false);
   }();
@@ -3278,19 +3281,21 @@ static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
       case MOpFlags::None:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<false>(mstate.tvRef, mstate.base, key));
+          Elem<MOpFlags::None>(mstate.tvRef, mstate.base, key)
+        );
       case MOpFlags::Warn:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<true>(mstate.tvRef, mstate.base, key));
+          Elem<MOpFlags::Warn>(mstate.tvRef, mstate.base, key)
+        );
       case MOpFlags::Define:
-        return ElemD<false,false>(mstate.tvRef, mstate.base, key);
+        return ElemD<MOpFlags::Define>(mstate.tvRef, mstate.base, key);
       case MOpFlags::DefineReffy:
-        return ElemD<false,true>(mstate.tvRef, mstate.base, key);
+        return ElemD<MOpFlags::DefineReffy>(mstate.tvRef, mstate.base, key);
       case MOpFlags::Unset:
         return ElemU(mstate.tvRef, mstate.base, key);
       case MOpFlags::WarnDefine:
-        return ElemD<true,false>(mstate.tvRef, mstate.base, key);
+        return ElemD<MOpFlags::WarnDefine>(mstate.tvRef, mstate.base, key);
     }
     always_assert(false);
   }();
@@ -3332,9 +3337,9 @@ static OPTBLD_INLINE void dimDispatch(MOpFlags flags, MemberKey mk) {
     if (flags == MOpFlags::Warn) raise_error("Cannot use [] for reading");
 
     auto& mstate = vmMInstrState();
-    auto result =
-      flags & MOpFlags::DefineReffy ? NewElem<true>(mstate.tvRef, mstate.base)
-                                    : NewElem<false>(mstate.tvRef, mstate.base);
+    auto result = flags == MOpFlags::DefineReffy
+      ? NewElem<true>(mstate.tvRef, mstate.base)
+      : NewElem<false>(mstate.tvRef, mstate.base);
     mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
   }
 }
@@ -3531,7 +3536,7 @@ OPTBLD_INLINE void iopUnsetM(IOP_ARGS) {
 
 static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   auto& mstate = vmMInstrState();
-  mstate.base = ElemD<false,true>(mstate.tvRef, mstate.base, key);
+  mstate.base = ElemD<MOpFlags::DefineReffy>(mstate.tvRef, mstate.base, key);
   tvAsVariant(mstate.base).setWithRef(tvAsVariant(value));
 
   mFinal(mstate, 0, folly::none);

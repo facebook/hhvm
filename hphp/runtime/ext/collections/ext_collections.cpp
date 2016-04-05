@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/memory-manager.h"
 
@@ -7,8 +8,6 @@ namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_HH_Vector("HH\\Vector"),
-  s_HH_ImmVector("HH\\ImmVector"),
   s_HH_Map("HH\\Map"),
   s_HH_ImmMap("HH\\ImmMap"),
   s_HH_Set("HH\\Set"),

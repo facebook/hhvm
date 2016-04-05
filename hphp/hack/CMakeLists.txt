@@ -22,6 +22,8 @@ if (OCAMLC_FOUND)
     list(APPEND extra_include_paths ${CMAKE_CURRENT_SOURCE_DIR}/../..)
   ENDIF()
 
+  list(APPEND extra_include_paths ${CMAKE_CURRENT_SOURCE_DIR}/src/heap)
+
   foreach(lib ${LIBELF_INCLUDE_DIRS})
     list(APPEND extra_include_paths ${lib})
   endforeach()

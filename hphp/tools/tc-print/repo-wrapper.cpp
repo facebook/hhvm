@@ -42,6 +42,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   register_process_init();
   initialize_repo();
   hphp_thread_init();
+  g_context.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   if (!configFile.empty()) {

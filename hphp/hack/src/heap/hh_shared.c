@@ -103,8 +103,9 @@
 #include <sys/syscall.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 #endif
+
+#include "hh_shared_common.h"
 
 // The following 'typedef' won't be required anymore
 // when dropping support for OCaml < 4.03
@@ -115,16 +116,6 @@ typedef unsigned __int64 uint64_t;
 #ifndef NO_LZ4
 #include <lz4.h>
 #include <lz4hc.h>
-#endif
-
-#ifdef _WIN32
-static int win32_getpagesize(void)
-{
-  SYSTEM_INFO siSysInfo;
-  GetSystemInfo(&siSysInfo);
-  return siSysInfo.dwPageSize;
-}
-#define getpagesize win32_getpagesize
 #endif
 
 /*****************************************************************************/
@@ -145,7 +136,7 @@ static size_t heap_size;
 #define HASHTBL_POW     18
 #else
 #define DEP_POW         26
-#define HASHTBL_POW     25
+#define HASHTBL_POW     26
 #endif
 
 /* Convention: .*_B = Size in bytes. */
@@ -162,15 +153,6 @@ static size_t heap_size;
 #define Get_size(x)     (((size_t*)(x))[-1])
 #define Get_buf_size(x) (((size_t*)(x))[-1] + sizeof(size_t))
 #define Get_buf(x)      (x - sizeof(size_t))
-
-/* Too lazy to use getconf */
-#define CACHE_LINE_SIZE (1 << 6)
-#define CACHE_MASK      (~(CACHE_LINE_SIZE - 1))
-#define ALIGNED(x)      ((x + CACHE_LINE_SIZE - 1) & CACHE_MASK)
-
-/* Fix the location of our shared memory so we can save and restore the
- * hashtable easily */
-#define SHARED_MEM_INIT 0x500000000000ll
 
 /* As a sanity check when loading from a file */
 static uint64_t MAGIC_CONSTANT = 0xfacefacefaceb000ll;
@@ -261,7 +243,7 @@ CAMLprim value hh_hashtable_mutex_trylock(void) {
   // TODO
 #else
   res = pthread_mutex_trylock(hashtable_mutex);
-  if ((res != 0 ) && (res != EBUSY)) {
+  if ((res != 0) && (res != EBUSY)) {
     caml_failwith("Error trying to acquire the lock");
   }
 #endif
@@ -275,7 +257,7 @@ CAMLprim value hh_hashtable_mutex_unlock(void) {
 #else
   int res = pthread_mutex_unlock(hashtable_mutex);
   if (res != 0) {
-    caml_failwith("Error releasing the lock");\
+    caml_failwith("Error releasing the lock");
   }
 #endif
   CAMLreturn(Val_unit);
@@ -329,21 +311,13 @@ static void init_shared_globals(char* mem) {
 
 #ifdef _WIN32
   if (!VirtualAlloc(mem,
-                    global_size_b + page_size +
+                    page_size + global_size_b +
                       2 * DEP_SIZE_B + HASHTBL_SIZE_B,
                     MEM_COMMIT, PAGE_READWRITE)) {
     win32_maperr(GetLastError());
     uerror("VirtualAlloc2", Nothing);
   }
 #endif
-
-  /* Global storage initialization:
-   * We store this at the start of the shared memory section as it never
-   * needs to get saved (always reset after each typechecking run) */
-  global_storage = (value*)mem;
-  // Initial size is zero
-  global_storage[0] = 0;
-  mem += global_size_b;
 
   /* BEGINNING OF THE SMALL OBJECTS PAGE
    * We keep all the small objects in this page.
@@ -376,6 +350,12 @@ static void init_shared_globals(char* mem) {
   // Just checking that the page is large enough.
   assert(page_size > 3*CACHE_LINE_SIZE + (int)sizeof(int));
   /* END OF THE SMALL OBJECTS PAGE */
+
+  /* Global storage initialization */
+  global_storage = (value*)mem;
+  // Initial size is zero
+  global_storage[0] = 0;
+  mem += global_size_b;
 
   /* Dependencies */
   deptbl = (uint64_t*)mem;
@@ -451,11 +431,8 @@ CAMLprim value hh_shared_init(
   shared_mem = MapViewOfFileEx(
     handle,
     FILE_MAP_ALL_ACCESS,
-    0, 0,
-    0,
-    (char *)SHARED_MEM_INIT);
-  if (shared_mem != (char *)SHARED_MEM_INIT) {
-    shared_mem = NULL;
+    0, 0, 0);
+  if (shared_mem == NULL) {
     win32_maperr(GetLastError());
     uerror("MapViewOfFileEx", Nothing);
   }
@@ -465,12 +442,10 @@ CAMLprim value hh_shared_init(
   /* MAP_NORESERVE is because we want a lot more virtual memory than what
    * we are actually going to use.
    */
-  int flags = MAP_SHARED | MAP_ANON | MAP_NORESERVE | MAP_FIXED;
+  int flags = MAP_SHARED | MAP_ANON | MAP_NORESERVE;
   int prot  = PROT_READ  | PROT_WRITE;
 
-  shared_mem =
-    (char*)mmap((void*)SHARED_MEM_INIT,  shared_mem_size, prot,
-                flags, 0, 0);
+  shared_mem = (char*)mmap(NULL, shared_mem_size, prot, flags, 0, 0);
   if(shared_mem == MAP_FAILED) {
     printf("Error initializing: %s\n", strerror(errno));
     exit(2);
@@ -784,41 +759,6 @@ void hh_collect(value aggressive_val) {
 }
 
 /*****************************************************************************/
-/* Allocates in the shared heap.
- * The chunks are cache aligned.
- * The word before the chunk address contains the size of the chunk in bytes.
- * The function returns a pointer to the data (the size can be accessed by
- * looking at the address: chunk - sizeof(size_t)).
- */
-/*****************************************************************************/
-
-static char* hh_alloc(size_t size) {
-  size_t slot_size  = ALIGNED(size + sizeof(size_t));
-  char* chunk       = __sync_fetch_and_add(heap, (char*)slot_size);
-#ifdef _WIN32
-  if (!VirtualAlloc(chunk, slot_size, MEM_COMMIT, PAGE_READWRITE)) {
-    win32_maperr(GetLastError());
-    uerror("VirtualAlloc1", Nothing);
-  }
-#endif
-  *((size_t*)chunk) = size;
-  return (chunk + sizeof(size_t));
-}
-
-/*****************************************************************************/
-/* Allocates an ocaml value in the shared heap.
- * The values can only be ocaml strings. It returns the address of the
- * allocated chunk.
- */
-/*****************************************************************************/
-static char* hh_store_ocaml(value data) {
-  size_t data_size = caml_string_length(data);
-  char* addr = hh_alloc(data_size);
-  memcpy(addr, String_val(data), data_size);
-  return addr;
-}
-
-/*****************************************************************************/
 /* Given an OCaml string, returns the 8 first bytes in an unsigned long.
  * The key is generated using MD5, but we only use the first 8 bytes because
  * it allows us to use atomic operations.
@@ -837,7 +777,7 @@ static void write_at(unsigned int slot, value data) {
   // Try to write in a value to indicate that the data is being written.
   if(hashtbl[slot].addr == NULL &&
      __sync_bool_compare_and_swap(&(hashtbl[slot].addr), NULL, (char*)1)) {
-    hashtbl[slot].addr = hh_store_ocaml(data);
+    hashtbl[slot].addr = hh_store_ocaml(heap, data);
   }
 }
 

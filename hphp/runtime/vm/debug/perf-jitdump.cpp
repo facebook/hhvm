@@ -144,14 +144,19 @@ void DebugInfo::initPerfJitDump() {
     if (use_arch_timestamp) {
       fprintf(stderr, "system arch timestamp not supported\n"); 
     } else {
-      fprintf(stderr, "kernel does not support (monotonic) %d clk_id\n", perf_clk_id);
+      fprintf(stderr, "kernel does not support (monotonic) %d clk_id\n",
+              perf_clk_id);
     }
     fprintf(stderr, "Cannot create %s \n", m_perfJitDumpName.c_str());
     return;  
   }
  
   int fd = open(m_perfJitDumpName.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
-  m_perfMmapMarker = mmap(NULL, sysconf(_SC_PAGESIZE), PROT_READ|PROT_EXEC, MAP_PRIVATE, fd, 0); 
+  m_perfMmapMarker = mmap(nullptr, 
+                          sysconf(_SC_PAGESIZE), 
+                          PROT_READ|PROT_EXEC, 
+                          MAP_PRIVATE, 
+                          fd, 0); 
   
   if (m_perfMmapMarker == MAP_FAILED) {
     fprintf(stderr, "Failed to create mmap marker file for perf\n");
@@ -161,7 +166,8 @@ void DebugInfo::initPerfJitDump() {
 
   m_perfJitDump = fdopen(fd, "w+");
   if (!m_perfJitDump) {
-    fprintf(stderr, "Failed to create the file %s for perf\n", m_perfJitDumpName.c_str());
+    fprintf(stderr, "Failed to create the file %s for perf\n",
+                     m_perfJitDumpName.c_str() );
     return; 
   }
   /*
@@ -214,7 +220,7 @@ void DebugInfo::closePerfJitDump() {
   fflush(m_perfJitDump);
   fclose(m_perfJitDump);
 
-  m_perfJitDump = NULL;
+  m_perfJitDump = nullptr;
   if (!m_perfMmapMarker) {
     munmap(m_perfMmapMarker, sysconf(_SC_PAGESIZE));
   }

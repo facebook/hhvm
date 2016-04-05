@@ -101,9 +101,12 @@ struct jr_code_move {
 
 struct debug_entry {
   uint64_t addr;
-  int lineno;      /* source line number starting at 1 */
-  int discrim;      /* column discriminator, 0 is default */
-  const char name[0]; /* null terminated filename, \xff\0 if same as previous entry */
+  /* source line number starting at 1 */
+  int lineno;
+  /* column discriminator, 0 is default */
+  int discrim;
+  /* null terminated filename, \xff\0 if same as previous entry */
+  const char name[0];
 };
 
 struct jr_code_debug_info {

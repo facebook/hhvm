@@ -287,8 +287,7 @@ enum class SwitchKind : uint8_t {
   FLAG(Warn,       (1 << 0))                       \
   FLAG(Define,     (1 << 1))                       \
   FLAG(Unset,      (1 << 2))                       \
-  FLAG(DefineReffy,(Define | (1 << 3)))            \
-  FLAG(WarnDefine, (Warn | Define))
+  FLAG(DefineReffy,(Define | (1 << 3)))
 
 enum class MOpFlags : uint8_t {
 #define FLAG(name, val) name = val,
@@ -306,7 +305,6 @@ inline MOpFlags dropReffy(MOpFlags f) {
     case MOpFlags::Warn:
     case MOpFlags::Define:
     case MOpFlags::Unset:
-    case MOpFlags::WarnDefine:
       return f;
     case MOpFlags::DefineReffy:
       return MOpFlags::Define;
@@ -319,7 +317,6 @@ inline MOpFlags dropUnset(MOpFlags f) {
     case MOpFlags::None:
     case MOpFlags::Warn:
     case MOpFlags::Define:
-    case MOpFlags::WarnDefine:
     case MOpFlags::DefineReffy:
       return f;
     case MOpFlags::Unset:

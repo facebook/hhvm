@@ -162,7 +162,7 @@ namespace StackSym {
    * times.
    */
   static const char C = 0x01; // Cell symbolic flavor
-  static const char V = 0x02; // Var symbolic flavor
+  static const char V = 0x02; // Ref symbolic flavor
   static const char A = 0x03; // Classref symbolic flavor
   static const char R = 0x04; // Return value symbolic flavor
   static const char F = 0x05; // Function argument symbolic flavor
@@ -178,7 +178,7 @@ namespace StackSym {
   static const char P = 0x50; // Property marker
   static const char S = 0x60; // Static property marker
   static const char M = 0x70; // Non elem/prop/W part of M-vector
-  static const char K = (char)0x80u; // Marker for information about a class base
+  static const char K = (char)0x80u; // Class base marker
   static const char Q = (char)0x90u; // NullSafe Property marker
 
   static const char CN = C | N;
@@ -5099,6 +5099,11 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   return 0;
 }
 
+static MOpFlags makeBaseFlags(MOpFlags f) {
+  auto constexpr mask = uint8_t(MOpFlags::Warn) | uint8_t(MOpFlags::Define);
+  return MOpFlags(uint8_t(f) & mask);
+}
+
 size_t EmitterVisitor::emitMOp(
   int iFirst,
   int& iLast,
@@ -5109,9 +5114,8 @@ size_t EmitterVisitor::emitMOp(
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
 
-  auto const baseFlags =
-    opts.fpass ? MOpFlags::None
-               : MOpFlags(uint8_t(opts.flags) & uint8_t(MOpFlags::WarnDefine));
+  auto const baseFlags = opts.fpass ? MOpFlags::None
+                                    : makeBaseFlags(opts.flags);
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
@@ -10157,7 +10161,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     Option::HardReturnTypeHints =
       (RuntimeOption::EvalCheckReturnTypeHints >= 3);
     Option::EnableZendCompat = RuntimeOption::EnableZendCompat;
-    Option::JitEnableRenameFunction = RuntimeOption::EvalJitEnableRenameFunction;
+    Option::JitEnableRenameFunction =
+      RuntimeOption::EvalJitEnableRenameFunction;
     for (auto& i : RuntimeOption::DynamicInvokeFunctions) {
       Option::DynamicInvokeFunctions.insert(i);
     }

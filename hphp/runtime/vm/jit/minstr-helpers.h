@@ -57,7 +57,6 @@ TypedValue* baseGImpl(TypedValue key) {
   m(baseG,   MOpFlags::None)                    \
   m(baseGW,  MOpFlags::Warn)                    \
   m(baseGD,  MOpFlags::Define)                  \
-  m(baseGWD, MOpFlags::WarnDefine)              \
 
 #define X(nm, flags)                            \
 inline TypedValue* nm(TypedValue key) {         \
@@ -84,10 +83,6 @@ BASE_G_HELPER_TABLE(X)
   m(propCUOS,  MOpFlags::Unset,      KeyType::Str, true)    \
   m(propCW,    MOpFlags::Warn,       KeyType::Any, false)   \
   m(propCWS,   MOpFlags::Warn,       KeyType::Str, false)   \
-  m(propCWD,   MOpFlags::WarnDefine, KeyType::Any, false)   \
-  m(propCWDS,  MOpFlags::WarnDefine, KeyType::Str, false)   \
-  m(propCWDO,  MOpFlags::WarnDefine, KeyType::Any, true)    \
-  m(propCWDOS, MOpFlags::WarnDefine, KeyType::Str, true)    \
   m(propCWO,   MOpFlags::Warn,       KeyType::Any, true)    \
   m(propCWOS,  MOpFlags::Warn,       KeyType::Str, true)    \
 
@@ -395,19 +390,16 @@ TypedValue* elemImpl(TypedValue* base,
   m(elemCDR,   KeyType::Any,   MOpFlags::DefineReffy) \
   m(elemCU,    KeyType::Any,   MOpFlags::Unset)       \
   m(elemCW,    KeyType::Any,   MOpFlags::Warn)        \
-  m(elemCWD,   KeyType::Any,   MOpFlags::WarnDefine)  \
   m(elemI,     KeyType::Int,   MOpFlags::None)        \
   m(elemID,    KeyType::Int,   MOpFlags::Define)      \
   m(elemIDR,   KeyType::Int,   MOpFlags::DefineReffy) \
   m(elemIU,    KeyType::Int,   MOpFlags::Unset)       \
   m(elemIW,    KeyType::Int,   MOpFlags::Warn)        \
-  m(elemIWD,   KeyType::Int,   MOpFlags::WarnDefine)  \
   m(elemS,     KeyType::Str,   MOpFlags::None)        \
   m(elemSD,    KeyType::Str,   MOpFlags::Define)      \
   m(elemSDR,   KeyType::Str,   MOpFlags::DefineReffy) \
   m(elemSU,    KeyType::Str,   MOpFlags::Unset)       \
   m(elemSW,    KeyType::Str,   MOpFlags::Warn)        \
-  m(elemSWD,   KeyType::Str,   MOpFlags::WarnDefine)  \
 
 #define X(nm, keyType, flags)                              \
 inline TypedValue* nm(TypedValue* base,                    \

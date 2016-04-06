@@ -3240,8 +3240,6 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
         return Prop<MOpFlags::DefineReffy>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Unset:
         return Prop<MOpFlags::Unset>(mstate.tvRef, ctx, mstate.base, key);
-      case MOpFlags::WarnDefine:
-        return Prop<MOpFlags::WarnDefine>(mstate.tvRef, ctx, mstate.base, key);
     }
     always_assert(false);
   }();
@@ -3266,7 +3264,6 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
 
     case MOpFlags::Define:
     case MOpFlags::Unset:
-    case MOpFlags::WarnDefine:
       always_assert(false);
   }
 
@@ -3294,8 +3291,6 @@ static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
         return ElemD<MOpFlags::DefineReffy>(mstate.tvRef, mstate.base, key);
       case MOpFlags::Unset:
         return ElemU(mstate.tvRef, mstate.base, key);
-      case MOpFlags::WarnDefine:
-        return ElemD<MOpFlags::WarnDefine>(mstate.tvRef, mstate.base, key);
     }
     always_assert(false);
   }();

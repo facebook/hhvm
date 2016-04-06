@@ -946,9 +946,7 @@ static int start_server(const std::string &username, int xhprof) {
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
     if (Logger::UseCronolog) {
-      for (const auto& el : RuntimeOption::ErrorLogs) {
-        Cronolog::changeOwner(username, el.second.symLink);
-      }
+      Cronolog::changeOwner(username, RuntimeOption::LogFileSymLink);
     }
     Capability::ChangeUnixUser(username);
     LightProcess::ChangeUser(username);
@@ -1132,46 +1130,45 @@ int execute_program(int argc, char **argv) {
   return ret_code;
 }
 
-static bool open_server_log_files() {
-  bool openedLog = false;
-  for (const auto& el : RuntimeOption::ErrorLogs) {
-    bool ok = true;
-    const auto& name    = el.first;
-    const auto& errlog = el.second;
-    if (!errlog.logFile.empty()) {
-      if (errlog.isPipeOutput()) {
-        auto output = popen(errlog.logFile.substr(1).c_str(), "w");
-        ok = (output != nullptr);
-        Logger::SetOutput(name, output, true);
-      } else if (Logger::UseCronolog && errlog.hasTemplate()) {
-        auto cronoLog = Logger::CronoOutput(name);
-        always_assert(cronoLog);
-        cronoLog->m_template = errlog.logFile;
-        cronoLog->setPeriodicity();
-        cronoLog->m_linkName = errlog.symLink;
+/* -1 - cannot open file
+ * 0  - no need to open file
+ * 1 - fopen
+ * 2 - popen
+ */
+static int open_server_log_file() {
+  if (!RuntimeOption::LogFile.empty()) {
+    if (Logger::UseCronolog) {
+      if (strchr(RuntimeOption::LogFile.c_str(), '%')) {
+        Logger::cronOutput.m_template = RuntimeOption::LogFile;
+        Logger::cronOutput.setPeriodicity();
+        Logger::cronOutput.m_linkName = RuntimeOption::LogFileSymLink;
+        return 0;
       } else {
-        auto output = fopen(errlog.logFile.c_str(), "a");
-        ok = (output != nullptr);
-        Logger::SetOutput(name, output, false);
+        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "a");
+        if (Logger::Output) return 1;
       }
-      if (!ok) Logger::Error("Can't open log file: %s", errlog.logFile.c_str());
-      openedLog |= ok;
+    } else {
+      if (Logger::IsPipeOutput) {
+        Logger::Output = popen(RuntimeOption::LogFile.substr(1).c_str(), "w");
+        if (Logger::Output) return 2;
+      } else {
+        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "a");
+        if (Logger::Output) return 1;
+      }
     }
+    Logger::Error("Cannot open log file: %s", RuntimeOption::LogFile.c_str());
+    return -1;
   }
-  return openedLog;
+  return 0;
 }
 
-static void close_server_log_files() {
-  for (const auto& el : RuntimeOption::ErrorLogs) {
-    const auto& logNameAndPipe = Logger::GetOutput(el.first);
-    const auto& errlog = el.second;
-    if (logNameAndPipe.second) {
-      pclose(logNameAndPipe.first);
-    } else if (Logger::UseCronolog && errlog.hasTemplate()) {
-      always_assert(!logNameAndPipe.first);
-    } else {
-      fclose(logNameAndPipe.first);
-    }
+static void close_server_log_file(int kind) {
+  if (kind == 1) {
+    fclose(Logger::Output);
+  } else if (kind == 2) {
+    pclose(Logger::Output);
+  } else {
+    always_assert(!Logger::Output);
   }
 }
 
@@ -1616,14 +1613,15 @@ static int execute_program_impl(int argc, char** argv) {
   MM().resetRuntimeOptions();
 
   if (po.mode == "daemon") {
-    if (!open_server_log_files()) {
+    if (RuntimeOption::LogFile.empty()) {
       Logger::Error("Log file not specified under daemon mode.\n\n");
     }
+    int ret = open_server_log_file();
     Process::Daemonize();
-    close_server_log_files();
+    close_server_log_file(ret);
   }
 
-  open_server_log_files();
+  open_server_log_file();
   if (RuntimeOption::ServerExecutionMode()) {
     for (auto const& m : messages) {
       Logger::Info(m);
@@ -1658,13 +1656,7 @@ static int execute_program_impl(int argc, char** argv) {
     Logger::LogLevel = Logger::LogInfo;
     Logger::UseCronolog = false;
     Logger::UseLogFile = true;
-    // we're linting, reset whatever logger settings and write once to stdout
-    Logger::ClearThreadLog();
-    for (auto& el : RuntimeOption::ErrorLogs) {
-      const auto& name = el.first;
-      Logger::SetTheLogger(name, nullptr);
-    }
-    Logger::SetTheLogger(Logger::DEFAULT, new Logger());
+    Logger::SetNewOutput(nullptr);
 
     if (po.isTempFile) {
       tempFile = po.lint;

@@ -35,7 +35,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct AccessLogFileData;
-struct ErrorLogFileData;
 struct VirtualHost;
 struct IpBlockMap;
 struct SatelliteServerInfo;
@@ -77,13 +76,8 @@ struct RuntimeOption {
   static std::string InstanceId;
   static std::string PidFile;
 
-#ifdef FACEBOOK
-  static bool UseThriftLogger;
-#endif
-  static std::map<std::string, ErrorLogFileData> ErrorLogs;
   static std::string LogFile;
   static std::string LogFileSymLink;
-
   static int LogHeaderMangle;
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;

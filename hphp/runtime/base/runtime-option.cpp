@@ -95,16 +95,8 @@ bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::AutoprimeGenerators = true;
 
-#ifdef FACEBOOK
-bool RuntimeOption::UseThriftLogger = false;
-#endif
-std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
-  {Logger::DEFAULT, ErrorLogFileData()},
-};
-// these hold the DEFAULT logger
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
-
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysLogUnhandledExceptions =
   RuntimeOption::EnableHipHopSyntax;
@@ -799,57 +791,43 @@ void RuntimeOption::Load(
       }
     ));
 
-    Config::Bind(Logger::UseLogFile, ini, config, "Log.UseLogFile", true);
-    Config::Bind(LogFile, ini, config, "Log.File");
-    Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
 #ifdef FACEBOOK
-    Config::Bind(UseThriftLogger, ini, config, "Log.UseThriftLogger");
-    if (UseThriftLogger) {
+    if (Config::GetBool(ini, config, "Log.UseThriftLogger", false)) {
       fprintf(stderr,
               "WARNING: Log.UseThriftLogger overrides other logger options.\n"
               "WARNING: Log.UseThriftLogger ignores logger's thread-hook.\n");
       Logger::UseLogFile = true;
-      // replace default logger with thrift-logger
-      RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-          ErrorLogFileData(LogFile, LogFileSymLink);
-      Logger::SetTheLogger(Logger::DEFAULT, new ThriftLogger());
-      // mirror thrift log in plain text
-      if (Config::GetBool(ini, config, "Log.TextMirror.Enable", false)) {
-        auto logFile = Config::GetString(ini, config, "Log.TextMirror.File",
-                                         "", false);
-        auto symLink = Config::GetString(ini, config, "Log.TextMirror.SymLink",
-                                         "", false);
-        RuntimeOption::ErrorLogs["TextMirror"] =
-            ErrorLogFileData(logFile, symLink);
-        if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
-          Logger::SetTheLogger("TextMirror", new ExtendedLogger());
-          ExtendedLogger::EnabledByDefault = true;
-        } else {
-          Logger::SetTheLogger("TextMirror", new Logger());
-        }
-      }
+      Config::Bind(LogFile, ini, config, "Log.File");
+      if (LogFile[0] == '|') Logger::IsPipeOutput = true;
+      Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
+      Logger::SetTheLogger(new ThriftLogger());
 #else
     if (false) {
 #endif
     } else {
-      if (Logger::UseLogFile && RuntimeOption::ServerExecutionMode()) {
-        RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-            ErrorLogFileData(LogFile, LogFileSymLink);
-      }
+      Config::Bind(Logger::LogHeader, ini, config, "Log.Header");
       if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
-        Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
+        Logger::SetTheLogger(new ExtendedLogger());
         ExtendedLogger::EnabledByDefault = true;
+      }
+      Config::Bind(Logger::LogNativeStackTrace, ini, config,
+                   "Log.NativeStackTrace", true);
+      Config::Bind(Logger::UseSyslog, ini, config, "Log.UseSyslog", false);
+      Config::Bind(Logger::UseLogFile, ini, config, "Log.UseLogFile", true);
+      Config::Bind(Logger::UseRequestLog, ini, config, "Log.UseRequestLog",
+                   false);
+      Config::Bind(Logger::AlwaysEscapeLog, ini, config, "Log.AlwaysEscapeLog",
+                   true);
+      if (Logger::UseLogFile) {
+        Config::Bind(LogFile, ini, config, "Log.File");
+        if (!RuntimeOption::ServerExecutionMode()) {
+          LogFile.clear();
+        }
+        if (LogFile[0] == '|') Logger::IsPipeOutput = true;
+        Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
       }
     }
 
-    Config::Bind(Logger::LogHeader, ini, config, "Log.Header");
-    Config::Bind(Logger::LogNativeStackTrace, ini, config,
-                 "Log.NativeStackTrace", true);
-    Config::Bind(Logger::UseSyslog, ini, config, "Log.UseSyslog", false);
-    Config::Bind(Logger::UseRequestLog, ini, config, "Log.UseRequestLog",
-                 false);
-    Config::Bind(Logger::AlwaysEscapeLog, ini, config, "Log.AlwaysEscapeLog",
-                 true);
     Config::Bind(Logger::UseCronolog, ini, config, "Log.UseCronolog", false);
     Config::Bind(Logger::MaxMessagesPerRequest, ini,
                  config, "Log.MaxMessagesPerRequest", -1);

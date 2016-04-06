@@ -31,18 +31,6 @@ namespace HPHP {
 struct StackTrace;
 struct Exception;
 
-struct ErrorLogFileData {
-  ErrorLogFileData() {}
-  ErrorLogFileData(const std::string& file, const std::string& symlink)
-    : logFile(file)
-    , symLink(symlink)
-  {}
-  std::string logFile;
-  std::string symLink;
-  bool isPipeOutput() const { return !logFile.empty() && logFile[0] == '|'; }
-  bool hasTemplate() const { return logFile.find('%') != std::string::npos; }
-};
-
 struct Logger {
   enum LogLevelType {
     LogNone,
@@ -52,18 +40,18 @@ struct Logger {
     LogVerbose
   };
 
-  Logger()
-    : m_isPipeOutput(false)
-    , m_output(nullptr)
-    , m_standardOut(stderr)
-  { ResetPid(); }
+  Logger(): m_standardOut(stderr) { ResetPid(); }
 
   static bool AlwaysEscapeLog;
   static bool UseSyslog;
   static bool UseLogFile;
   static bool UseRequestLog;
+  static bool IsPipeOutput;
   static bool UseCronolog;
+  static FILE *Output;
+  static Cronolog cronOutput;
   static LogLevelType LogLevel;
+  static LogFileFlusher flusher;
   static bool LogHeader;
   static bool LogNativeStackTrace;
   static std::string ExtraHeader;
@@ -96,28 +84,29 @@ struct Logger {
 
   static bool SetThreadLog(const char *file, bool threadOnly);
   static void ClearThreadLog();
+  static void SetNewOutput(FILE *output);
   static void UnlimitThreadMessages();
 
   typedef void (*PFUNC_LOG)(const char *header, const char *msg,
                             const char *ending, void *data);
   static void SetThreadHook(PFUNC_LOG func, void *data);
 
-  static constexpr const char *DEFAULT = "Default";
-  static void SetTheLogger(const std::string &name, Logger* newLogger);
+  static void SetTheLogger(Logger* logger) {
+    if (logger != nullptr) {
+      delete s_logger;
+      s_logger = logger;
+    }
+  }
 
   static char *EscapeString(const std::string &msg);
 
-  static void SetStandardOut(const std::string &name, FILE* file);
-  static Cronolog *CronoOutput(const std::string &name);
-  static void SetOutput(const std::string &name, FILE *output, bool isPipe);
-  static std::pair<FILE*, bool> GetOutput(const std::string &name);
+  static FILE *GetStandardOut();
+  static void SetStandardOut(FILE*);
 
   virtual ~Logger() { }
   static void ResetPid();
 
   static void FlushAll();
-
-  virtual FILE* fileForStackTrace() { return output(); }
 
 protected:
   struct ThreadData {
@@ -156,22 +145,15 @@ protected:
   // mainly intended for subclass of loggers that batch
   virtual void flush() {}
 
-  // deduce where to write log
-  virtual FILE* output();
-
   /**
    * What needs to be print for each line of logging. Currently it's
    * [machine:thread:datetime].
    */
   static std::string GetHeader();
   static pid_t s_pid;
-protected:
-  bool m_isPipeOutput;
-  FILE *m_output;
+private:
+  static Logger *s_logger;
   FILE* m_standardOut;
-  Cronolog m_cronOutput;
-  LogFileFlusher m_flusher;
-  static std::map<std::string, Logger*> s_loggers;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

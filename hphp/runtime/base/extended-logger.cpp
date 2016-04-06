@@ -101,14 +101,10 @@ void ExtendedLogger::Log(LogLevelType level, const Array& stackTrace,
   if (stackTrace.isNull()) return;
 
   if (UseLogFile) {
-    FILE* tf = threadData->log;
-    for (const auto& l : s_loggers) {
-      const auto& logger = l.second;
-      if (auto* f = (logger ? logger->fileForStackTrace() : nullptr)) {
-          PrintStackTrace(f, stackTrace, escape, escapeMore);
-          if (tf == f) tf = nullptr; // only print to thread local log once
-      }
-    }
+    FILE *f = Output ? Output : GetStandardOut();
+    PrintStackTrace(f, stackTrace, escape, escapeMore);
+
+    FILE *tf = threadData->log;
     if (tf) {
       PrintStackTrace(tf, stackTrace, escape, escapeMore);
     }

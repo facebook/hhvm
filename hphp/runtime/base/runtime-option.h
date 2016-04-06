@@ -75,6 +75,7 @@ struct RuntimeOption {
   static const char *ExecutionMode;
   static std::string BuildId;
   static std::string InstanceId;
+  static std::string DeploymentId; // ID for set of instances deployed at once
   static std::string PidFile;
 
 #ifdef FACEBOOK

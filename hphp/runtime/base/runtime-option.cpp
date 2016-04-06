@@ -74,6 +74,7 @@ namespace HPHP {
 const char *RuntimeOption::ExecutionMode = "";
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
+std::string RuntimeOption::DeploymentId;
 std::string RuntimeOption::PidFile = "www.pid";
 
 bool RuntimeOption::EnableHipHopSyntax = false;
@@ -764,6 +765,7 @@ void RuntimeOption::Load(
   }
 
   Config::Bind(PidFile, ini, config, "PidFile", "www.pid");
+  Config::Bind(DeploymentId, ini, config, "DeploymentId");
 
   Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions");
 

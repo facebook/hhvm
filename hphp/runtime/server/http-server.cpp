@@ -259,6 +259,14 @@ void HttpServer::runOrExitProcess() {
     _Exit(1);
   };
 
+  if (!RuntimeOption::InstanceId.empty()) {
+    std::string msg = "Starting instance " + RuntimeOption::InstanceId;
+    if (!RuntimeOption::DeploymentId.empty()) {
+      msg += " from deployment " + RuntimeOption::DeploymentId;
+    }
+    Logger::Info(msg);
+  }
+
   m_watchDog.start();
 
   if (RuntimeOption::ServerPort) {

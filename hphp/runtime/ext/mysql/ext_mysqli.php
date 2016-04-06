@@ -2335,7 +2335,7 @@ function mysqli_thread_safe(): bool;
  * @return mysqli_result - Returns an unbuffered result object or FALSE
  *   if an error occurred.
  */
-function mysqli_use_result(mysqli $link): mysqli_result {
+function mysqli_use_result(mysqli $link): ?mixed {
   return $link->use_result();
 }
 

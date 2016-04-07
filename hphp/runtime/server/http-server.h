@@ -60,7 +60,7 @@ public:
 
   void serverStopped(HPHP::Server* server) override;
 
-  HPHP::Server *getPageServer() { return m_pageServer.get(); }
+  HPHP::Server* getPageServer() { return m_pageServer.get(); }
   void getSatelliteStats(std::vector<std::pair<std::string, int>> *stats);
   // Get total ongoing/queued request count for all satellite servers.
   std::pair<int, int> getSatelliteRequestCount() const;
@@ -71,17 +71,21 @@ public:
   static void ResetLoadFactor() { LoadFactor = 100; }
 
   /*
-   * Try to stop the previous server instance.  Return true if the
-   * old server acknowledges.  This function doesn't wait until the
-   * previous server dies.  Nothing bad happens if the old server
-   * isn't there, or is already in the process of stopping.
+   * Tell the old server instance to (prepare to) stop.  Return true
+   * if the old server acknowledges, or a previous such attempt to
+   * stop it was made.  This function doesn't wait until the previous
+   * server exits.  Nothing bad happens if the old server isn't there,
+   * or is already in the process of stopping.  These functions are
+   * designed to work when RuntimeOption::StopOldServer is set.
    *
-   * Currently it is implemented through the admin port command.  So
-   * it will not work if admin server is not present, or if the new
-   * server and old server disagree on port and password for admin
+   * Currently they are implemented through commands on admin port.
+   * So they will not work if admin server is not present, or if the
+   * new server and old server disagree on port and password for admin
    * server.
    */
+  static bool ReduceOldServerLoad();
   static bool StopOldServer();
+
   /*
    * When running with RuntimeOption::StopOldServer, given a target
    * memory needed (RuntimeOption::ServerRSSNeededMb), check memory

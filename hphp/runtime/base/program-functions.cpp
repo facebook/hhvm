@@ -919,9 +919,9 @@ static bool readahead_rate(const char* path, int64_t mbPerSec) {
 }
 
 static int start_server(const std::string &username, int xhprof) {
-  HttpServer::CheckMemAndWait();
-
   BootStats::start();
+  HttpServer::ReduceOldServerLoad();
+  HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
 
   // Before we start the webserver, make sure the entire
@@ -958,8 +958,8 @@ static int start_server(const std::string &username, int xhprof) {
   Capability::SetDumpable();
 #endif
 
-  HttpServer::CheckMemAndWait();
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
+    HttpServer::CheckMemAndWait();
     InitFiniNode::WarmupConcurrentStart(
       RuntimeOption::ServerInternalWarmupThreads);
   }

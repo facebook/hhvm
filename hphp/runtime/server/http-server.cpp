@@ -48,8 +48,6 @@
 
 namespace HPHP {
 
-using std::string;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -503,39 +501,55 @@ void HttpServer::watchDog() {
   }
 }
 
-bool HttpServer::StopOldServer() {
+static bool sendAdminCommand(const char* cmd) {
   if (RuntimeOption::AdminServerPort <= 0) return false;
-  if (OldServerStopTime > 0) return true; // already stopped before
-
-  Logger::Info("shutting down old HPHP server by /stop command");
-
   std::string host = RuntimeOption::ServerIP;
   if (host.empty()) host = "localhost";
-  auto url = folly::format("http://{}:{}/stop", host,
-                           RuntimeOption::AdminServerPort).str();
   auto passwords = RuntimeOption::AdminPasswords;
   if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {
     passwords.insert(RuntimeOption::AdminPassword);
   }
   auto passwordIter = passwords.begin();
-  HttpClient http;
   do {
-    std::string auth_url;
+    std::string url;
     if (passwordIter != passwords.end()) {
-      auth_url = folly::format("{}?auth={}", url, *passwordIter).str();
+      url = folly::sformat("http://{}:{}/{}?auth={}", host,
+                           RuntimeOption::AdminServerPort,
+                           cmd, *passwordIter);
       ++passwordIter;
-    } else {                            // no password specified
-      auth_url = url;
+    } else {
+      url = folly::sformat("http://{}:{}/{}", host,
+                           RuntimeOption::AdminServerPort, cmd);
     }
-    StringBuffer response;
-    if (http.get(auth_url.c_str(), response) == 200) {
-      Logger::Info("sent stop via admin port");
-      OldServerStopTime = time(nullptr);
-      return true;
+    if (CURL* curl = curl_easy_init()) {
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+      curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3);
+      auto code = curl_easy_perform(curl);
+      curl_easy_cleanup(curl);
+      if (code == CURLE_OK) {
+        Logger::Info("sent %s via admin port", cmd);
+        return true;
+      }
     }
   } while (passwordIter != passwords.end());
-  OldServerStopTime = time(nullptr);
   return false;
+}
+
+bool HttpServer::ReduceOldServerLoad() {
+  if (!RuntimeOption::StopOldServer) return false;
+  if (OldServerStopTime > 0) return true;
+  Logger::Info("trying to reduce load of the old HPHP server");
+  return sendAdminCommand("prepare-to-stop");
+}
+
+bool HttpServer::StopOldServer() {
+  if (!RuntimeOption::StopOldServer) return false;
+  if (OldServerStopTime > 0) return true;
+  SCOPE_EXIT { OldServerStopTime = time(nullptr); };
+  Logger::Info("trying to shut down old HPHP server by /stop command");
+  return sendAdminCommand("stop");
 }
 
 // Return the estimated amount of memory that can be safely taken into

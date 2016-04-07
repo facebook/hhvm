@@ -402,6 +402,7 @@ OTHER_UNPARSEABLE_FILES = [
     'enum_6.php',
     'fc_enum_case_10.php',
     'fc_enum_case_4.php',
+    'global_const_needs_hint.php',
     'hh_fixme3.php',
     'hh_fixme7.php',
     'instanceof_newtype.php',

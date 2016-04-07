@@ -8,8 +8,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-const INF = 0;
-const NAN = 0;
+const INF = 0.0;
+const NAN = 0.0;
 function connection_aborted();
 function connection_status();
 function connection_timeout();

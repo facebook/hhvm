@@ -43,45 +43,34 @@ struct AsioBlockable final {
     return reinterpret_cast<AsioBlockable*>(m_bits & kParentMask);
   }
 
-  uint32_t getExtraData() const {
-    // Currently only AAWH use this for its child idx.
-    assert(getKind() == Kind::AwaitAllWaitHandleNode);
-    return static_cast<uint32_t>(m_bits >> kBitsPtr);
-  }
-
   Kind getKind() const {
-    return static_cast<Kind>(m_bits & 7);
+    return static_cast<Kind>(m_bits & kKindMask);
   }
 
   c_WaitableWaitHandle* getWaitHandle() const;
 
-  void setNextParent(AsioBlockable* parent, Kind kind, uint32_t extraInfo) {
+  void setNextParent(AsioBlockable* parent, Kind kind) {
     assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
-    assert(!(static_cast<intptr_t>(kind) & ~7UL));
-    assert(extraInfo <= kExtraInfoMax);
-    m_bits = reinterpret_cast<intptr_t>(parent) |
-             static_cast<intptr_t>(kind) |
-             (static_cast<uint64_t>(extraInfo) << kBitsPtr);
+    assert(!(static_cast<intptr_t>(kind) & kParentMask));
+    m_bits = reinterpret_cast<intptr_t>(parent) | static_cast<intptr_t>(kind);
   }
 
-  // Only update the next parent w/o changing kind & extraInfo
+  // Only update the next parent w/o changing kind.
   void updateNextParent(AsioBlockable* parent) {
     assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
     m_bits = (m_bits & ~kParentMask) | reinterpret_cast<intptr_t>(parent);
   }
 
-  static constexpr int kBitsPtr          = 48;
-  static constexpr uint64_t kExtraInfoMax = (1UL << (64 - kBitsPtr)) - 1;
-  static constexpr uint64_t kPointerMask  = (1UL << kBitsPtr) - 1;
-  static constexpr uint64_t kParentMask   = kPointerMask & (~7UL);
+  static constexpr uint64_t kKindMask   = 7UL;
+  static constexpr uint64_t kParentMask = ~kKindMask;
 
 private:
-  // m_bits stores kind (lowest 3 bits), next parent (in the middle) and extra
-  // info in highest 16 bits (currently only AAWH uses it for child index).
-  // +--------- Layout for m_bits (64 bits) ------------+
-  // | 63........48 | 47.....................3 | 2....0 |
-  // | [Extra info] | [Pointer to next parent] | [Kind] |
-  // +--------------------------------------------------+
+  // m_bits stores kind in the lowest 3 bits and next parent in the
+  // upper 61 bits.
+  // +--- Layout for m_bits (64 bits) ---+
+  // | 63.....................3 | 2....0 |
+  // | [Pointer to next parent] | [Kind] |
+  // +-----------------------------------+
   uintptr_t m_bits;
 };
 
@@ -94,9 +83,8 @@ struct AsioBlockableChain final {
     m_firstParent = nullptr;
   }
 
-  void addParent(AsioBlockable& parent, AsioBlockable::Kind kind,
-                 const uint32_t extraInfo = 0) {
-    parent.setNextParent(m_firstParent, kind, extraInfo);
+  void addParent(AsioBlockable& parent, AsioBlockable::Kind kind) {
+    parent.setNextParent(m_firstParent, kind);
     m_firstParent = &parent;
   }
 

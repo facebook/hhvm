@@ -64,7 +64,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     }
 
     uint32_t getChildIdx() {
-      return m_blockable.getExtraData();
+      return m_index;
     }
 
     inline c_AwaitAllWaitHandle* getWaitHandle() {
@@ -83,6 +83,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 
     AsioBlockable m_blockable;
     c_WaitableWaitHandle* m_child;
+    uint32_t m_index;
   };
 
   static constexpr ptrdiff_t childrenOff() {
@@ -121,7 +122,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                           const Variant& dependencies);
  private:
-  static constexpr uint32_t kMaxNodes = AsioBlockable::kExtraInfoMax + 1;
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
   Node m_children[0]; // allocated off the end

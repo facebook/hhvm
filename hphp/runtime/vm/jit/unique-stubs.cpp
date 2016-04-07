@@ -519,7 +519,11 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data) {
       "AFWH kind must be 0."
     );
     auto const isAFWH = v.makeReg();
-    v << testbim{0x7, parentBl[AsioBlockable::bitsOff()], isAFWH};
+    v << testbim{
+      int8_t(AsioBlockable::kKindMask),
+      parentBl[AsioBlockable::bitsOff()],
+      isAFWH
+    };
     ifThen(v, CC_NZ, isAFWH, slow_path);
 
     // Check parentBl->getBWH()->getKindState() == {Async, BLOCKED}.
@@ -565,7 +569,12 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data) {
     auto const nextParent = v.makeReg();
     auto const tmp = v.makeReg();
     v << load{parentBl[AsioBlockable::bitsOff()], tmp};
-    v << andqi{~0x7, tmp, nextParent, v.makeReg()};
+    v << andqi{
+      int32_t(AsioBlockable::kParentMask),
+      tmp,
+      nextParent,
+      v.makeReg()
+    };
     unblockParents(v, vcold, nextParent);
 
     // Set up PHP frame linkage for our parent by copying our ActRec's sfp.

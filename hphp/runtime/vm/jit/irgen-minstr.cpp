@@ -1509,6 +1509,13 @@ void emitQueryM(IRGS& env, int32_t nDiscard, QueryMOp query, MemberKey mk) {
 
   auto basePtr = gen(env, LdMBase, TPtrToGen);
   auto base = env.irb->fs().memberBaseValue();
+
+  // If we don't have the base available, we might still be able to get a value
+  // with a good type from its pointer.
+  if (base == nullptr && (basePtr->type().subtypeOfAny(TPtrToArr, TPtrToObj))) {
+    base = gen(env, LdMem, basePtr->type().deref(), basePtr);
+  }
+
   auto objBase = base && base->isA(TObj) ? base : basePtr;
   auto key = memberKey(env, mk);
   auto simpleOp = SimpleOp::None;

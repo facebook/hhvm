@@ -388,9 +388,8 @@ struct BaseVector : ObjectData {
  protected:
   template<class F> friend void scanHeader(const Header*, F& mark);
   template<class F> void scan(F& mark) const {
-    if (!m_size) return;
-    assertx(m_arr->isPacked());
-    PackedArray::scan(m_arr, mark);
+    mark(m_arr);
+    mark(m_immCopy);
   }
 
   // Fields

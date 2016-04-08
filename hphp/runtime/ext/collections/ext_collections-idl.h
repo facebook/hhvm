@@ -111,6 +111,11 @@ struct HashCollection : ExtCollectionObjectData {
 
   using Elm = MixedArray::Elm;
 
+  template<typename F> void scan(F& mark) const {
+    mark(m_arr);
+    mark(m_immCopy);
+  }
+
  protected:
   union {
     struct {
@@ -653,14 +658,6 @@ struct HashCollection : ExtCollectionObjectData {
   void ksort(int sort_flags, bool ascending);
   bool uasort(const Variant& cmp_function);
   bool uksort(const Variant& cmp_function);
-
-  template<typename F>
-  void scan(F& mark) const {
-    for (size_t i = 0; i < size(); ++i) {
-      iter_elm(nthElmPos(i))->scan(mark);
-    }
-    mark(m_immCopy);
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

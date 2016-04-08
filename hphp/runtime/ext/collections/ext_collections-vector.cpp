@@ -714,13 +714,13 @@ void c_Vector::php_splice(const Variant& offset,
   int64_t end;
   if (!len.isNull()) {
     end = len.toInt64();
-    if (end < 0) {
+    if (LIKELY(end > 0)) {
+      end += start;
+      if (end > sz) end = sz;
+    } else {
+      if (!end) return;
       end += sz;
-    } else if (end > sz) {
-      end = sz;
-    }
-    if (end < start) {
-      return;
+      if (end < start) return;
     }
   } else {
     end = sz;

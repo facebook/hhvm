@@ -576,28 +576,13 @@ VGETELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-inline ArrayData* uncheckedSet(ArrayData* a,
-                               StringData* key,
-                               Cell value,
-                               bool copy) {
-  return g_array_funcs.setStr[a->kind()](a, key, value, copy);
-}
-
-inline ArrayData* uncheckedSet(ArrayData* a,
-                               int64_t key,
-                               Cell value,
-                               bool copy) {
-  return g_array_funcs.setInt[a->kind()](a, key, value, copy);
-}
-
-
 inline ArrayData* checkedSet(ArrayData* a,
                              StringData* key,
                              Cell value,
                              bool copy) {
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ? uncheckedSet(a, i, value, copy) :
-         uncheckedSet(a, key, value, copy);
+  return UNLIKELY(a->convertKey(key, i)) ? a->set(i, value, copy) :
+         a->set(key, value, copy);
 }
 
 inline ArrayData* checkedSet(ArrayData*, int64_t, Cell, bool) {
@@ -614,7 +599,7 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   assertx(cellIsPlausible(value));
   const bool copy = a->cowCheck();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
-                               : uncheckedSet(a, key, value, copy);
+                               : a->set(key, value, copy);
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
 }
 

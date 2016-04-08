@@ -252,6 +252,8 @@ public:
    */
   ArrayData *set(int64_t k, const Variant& v, bool copy);
   ArrayData *set(StringData* k, const Variant& v, bool copy);
+  ArrayData *set(int64_t k, Cell v, bool copy);
+  ArrayData *set(StringData* k, Cell v, bool copy);
 
   ArrayData *setRef(int64_t k, Variant& v, bool copy);
   ArrayData *setRef(StringData* k, Variant& v, bool copy);

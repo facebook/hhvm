@@ -187,6 +187,14 @@ inline ArrayData* ArrayData::set(StringData* k, const Variant& v, bool copy) {
   return g_array_funcs.setStr[kind()](this, k, *v.asCell(), copy);
 }
 
+inline ArrayData* ArrayData::set(int64_t k, Cell v, bool copy) {
+  return g_array_funcs.setInt[kind()](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::set(StringData* k, Cell v, bool copy) {
+  return g_array_funcs.setStr[kind()](this, k, v, copy);
+}
+
 inline ArrayData* ArrayData::zSet(int64_t k, RefData* v) {
   return g_array_funcs.zSetInt[kind()](this, k, v);
 }

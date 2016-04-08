@@ -32,7 +32,7 @@ class Memcached {
    */
   public function add(mixed $key,
                       mixed $value,
-                      mixed $expiration = 0): bool {
+                      int $expiration = 0): bool {
     return $this->addByKey('', $key, $value, $expiration);
   }
 
@@ -243,7 +243,7 @@ class Memcached {
    *   Memcached::RES_NOTFOUND if the key does not exist.
    */
   public function delete(mixed $key,
-                         mixed $time = 0): bool {
+                         int $time = 0): bool {
     return $this->deleteByKey('', $key, $time);
   }
 
@@ -408,7 +408,7 @@ class Memcached {
    */
   public function getMulti(mixed $keys,
                            mixed &$cas_tokens = null,
-                           mixed $flags = 0): mixed {
+                           int $flags = 0): mixed {
     return $this->getMultiByKey('', $keys, $cas_tokens, $flags);
   }
 
@@ -604,7 +604,7 @@ class Memcached {
    */
   public function replace(mixed $key,
                           mixed $value,
-                          mixed $expiration = 0): bool {
+                          int $expiration = 0): bool {
     return $this->replaceByKey('', $key, $value, $expiration);
   }
 
@@ -636,7 +636,7 @@ class Memcached {
    */
   public function set(mixed $key,
                       mixed $value,
-                      mixed $expiration = 0): bool {
+                      int $expiration = 0): bool {
     return $this->setByKey('', $key, $value, $expiration);
   }
 
@@ -824,7 +824,7 @@ class MemcachedSessionModule implements SessionHandlerInterface {
   public function write($sessionId, $data) {
     return $this->memcached->set($sessionId,
                                  $data,
-                                 ini_get('session.gc_maxlifetime'));
+                                 (int)ini_get('session.gc_maxlifetime'));
   }
 
   private static function parseSavePath($savePath) {

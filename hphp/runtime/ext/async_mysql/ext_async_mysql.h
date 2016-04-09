@@ -102,6 +102,7 @@ struct AsyncMysqlConnection {
   void setConnectOperation(std::shared_ptr<am::ConnectOperation> op);
   void setClientStats(db::ClientPerfStats perfStats);
   void verifyValidConnection();
+  bool isValidConnection();
   static Class* getClass();
   static Object newInstance(
       std::unique_ptr<am::Connection> conn,

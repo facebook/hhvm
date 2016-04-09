@@ -420,6 +420,12 @@ void AsyncMysqlConnection::verifyValidConnection() {
   }
 }
 
+bool AsyncMysqlConnection::isValidConnection() {
+  // When a query timeout happens, the connection is invalid and SQuangLe
+  // layer closes it for precaution.
+  return m_conn && m_conn->ok() && !m_closed;
+}
+
 Object AsyncMysqlConnection::query(
   ObjectData* this_,
   am::Query query,
@@ -595,9 +601,15 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
   }
 }
 
+bool HHVM_METHOD(AsyncMysqlConnection, isValid) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  return data->isValidConnection();
+}
+
 String HHVM_METHOD(AsyncMysqlConnection, escapeString, const String& input) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
+  data->verifyValidConnection();
   String ret = data->m_conn->escapeString(input.data());
   return ret;
 }
@@ -606,8 +618,10 @@ String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   String ret = "";
-  if (data->m_conn && !data->m_closed) {
+  if (data->isValidConnection()) {
     ret = data->m_conn->serverInfo();
+  } else {
+    LOG(ERROR) << "Accessing closed connection";
   }
   return ret;
 }
@@ -615,29 +629,27 @@ String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
 bool HHVM_METHOD(AsyncMysqlConnection, sslSessionReused) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
-  bool ret = false;
-  if (data->m_conn && !data->m_closed) {
-    ret = data->m_conn->sslSessionReused();
-  }
-  return ret;
+  // Will throw PHP catchable Exception in case the connection isn't valid.
+  data->verifyValidConnection();
+  return data->m_conn->sslSessionReused();
 }
 
 bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
-  bool ret = false;
-  if (data->m_conn && !data->m_closed) {
-    ret = data->m_conn->isSSL();
-  }
-  return ret;
+  // Will throw PHP catchable Exception in case the connection isn't valid.
+  data->verifyValidConnection();
+  return data->m_conn->isSSL();
 }
 
 int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   int count = 0;
-  if (data->m_conn && !data->m_closed) {
+  if (data->isValidConnection()) {
     count = data->m_conn->warningCount();
+  } else {
+    LOG(ERROR) << "Accessing closed connection";
   }
   return count;
 }
@@ -1513,6 +1525,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnection, escapeString);
     HHVM_ME(AsyncMysqlConnection, close);
     HHVM_ME(AsyncMysqlConnection, releaseConnection);
+    HHVM_ME(AsyncMysqlConnection, isValid);
     HHVM_ME(AsyncMysqlConnection, serverInfo);
     HHVM_ME(AsyncMysqlConnection, sslSessionReused);
     HHVM_ME(AsyncMysqlConnection, isSSL);

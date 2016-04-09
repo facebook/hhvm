@@ -379,6 +379,18 @@ final class AsyncMysqlConnection {
   function releaseConnection(): mixed;
 
   /**
+   * Checks if the data inside `AsyncMysqlConnection` object is valid. For
+   * example, during a timeout in a query, the MySQL connection gets closed.
+   *
+   * @return - `true` if MySQL resource is valid and can be accessed;
+   *           `false` otherwise.
+   */
+  <<__HipHopSpecific, __Native>>
+  function isValid(): bool;
+
+
+
+  /**
    * The MySQL server version associated with the current connection.
    *
    * @return - The server version as a `string`.

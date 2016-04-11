@@ -136,23 +136,23 @@ double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
 //////////////////////////////////////////////////////////////////////////////
 // MySSLContextProvider
 MySSLContextProvider::MySSLContextProvider(
-    std::unique_ptr<am::SSLOptionsProviderBase> provider)
-    : m_provider(std::move(provider)) {}
+    std::shared_ptr<am::SSLOptionsProviderBase> provider)
+    : m_provider(provider) {}
 
 Object MySSLContextProvider::newInstance(
-    std::unique_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
   Object obj{getClass()};
-  Native::data<MySSLContextProvider>(obj)
-      ->setSSLProvider(std::move(ssl_provider));
+  Native::data<MySSLContextProvider>(obj)->setSSLProvider(
+      std::move(ssl_provider));
   return obj;
 }
 
-std::unique_ptr<am::SSLOptionsProviderBase>
-MySSLContextProvider::stealSSLProvider() {
-  return std::move(m_provider);
+std::shared_ptr<am::SSLOptionsProviderBase>
+MySSLContextProvider::getSSLProvider() {
+  return m_provider;
 }
 void MySSLContextProvider::setSSLProvider(
-    std::unique_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
   m_provider = std::move(ssl_provider);
 }
 
@@ -191,7 +191,7 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient,
   if (!sslContextProvider.isNull()) {
     auto* mysslContextProvider =
         Native::data<MySSLContextProvider>(sslContextProvider.toObject());
-    op->setSSLOptionsProviderBase(mysslContextProvider->stealSSLProvider());
+    op->setSSLOptionsProvider(mysslContextProvider->getSSLProvider());
   }
 
   if (timeout_micros < 0) {

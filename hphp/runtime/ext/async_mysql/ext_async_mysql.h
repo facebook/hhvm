@@ -131,20 +131,20 @@ struct AsyncMysqlConnection {
 struct MySSLContextProvider {
   MySSLContextProvider() {}
   explicit MySSLContextProvider(
-      std::unique_ptr<am::SSLOptionsProviderBase> provider);
+      std::shared_ptr<am::SSLOptionsProviderBase> provider);
 
   MySSLContextProvider& operator=(const MySSLContextProvider& that_) = delete;
 
   static Object newInstance(
-      std::unique_ptr<am::SSLOptionsProviderBase> ssl_provider);
+      std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider);
   static Class* getClass();
-  std::unique_ptr<am::SSLOptionsProviderBase> stealSSLProvider();
-  void setSSLProvider(std::unique_ptr<am::SSLOptionsProviderBase> ssl_provider);
+  std::shared_ptr<am::SSLOptionsProviderBase> getSSLProvider();
+  void setSSLProvider(std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider);
 
   static Class* s_class;
   static const StaticString s_className;
 
-  std::unique_ptr<am::SSLOptionsProviderBase> m_provider;
+  std::shared_ptr<am::SSLOptionsProviderBase> m_provider;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

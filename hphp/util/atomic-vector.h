@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_ATOMIC_VECTOR_H
 #define incl_HPHP_ATOMIC_VECTOR_H
 
+#include <algorithm>
 #include <atomic>
 
 #include <folly/String.h>
@@ -105,7 +106,7 @@ void AtomicVector<Value>::ensureSize(size_t size) {
 
   auto next = m_next.load(std::memory_order_acquire);
   if (!next) {
-    next = new AtomicVector(m_size * 2, m_default);
+    next = new AtomicVector(std::max(m_size * 2, size_t{1}), m_default);
     AtomicVector* expected = nullptr;
     FTRACE(2, "Attempting to use {}...", next);
     if (!m_next.compare_exchange_strong(expected, next,

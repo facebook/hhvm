@@ -393,6 +393,7 @@ OTHER_UNPARSEABLE_FILES = [
     'dict/dict_literal_wrong_brace.php',
     'dict/dict_literal_mixed_brace.php',
     'dict/dict_literal_mixed_brace2.php',
+    'dict/construct_dict_from_array.php',
     'dynamic_new1.php',
     'dynamic_new3.php',
     'dynamic_new5.php',

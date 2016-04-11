@@ -1,8 +1,0 @@
-File "key_must_be_arraykey.php", line 5, characters 14-17:
-Some type constraint(s) here are violated (Typing[4110])
-File "builtins.hhi", line 118, characters 28-29:
-'Tk' is a constrained type
-File "builtins.hhi", line 118, characters 34-41:
-This is an array key (int/string)
-File "key_must_be_arraykey.php", line 5, characters 19-19:
-It is incompatible with an object of type I

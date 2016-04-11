@@ -304,6 +304,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
 // information about heap objects, indexed by valid object starts.
 struct PtrMap {
   using Region = std::pair<const Header*, std::size_t>;
+  static constexpr auto Mask = 0xffffffffffffULL; // 48 bit address space
 
   void insert(const Header* h) {
     assert(!sorted_);
@@ -313,6 +314,7 @@ struct PtrMap {
   const Region* region(const void* p) const {
     assert(sorted_);
     // Find the first region which begins beyond p.
+    p = reinterpret_cast<void*>(uintptr_t(p) & Mask);
     auto it = std::upper_bound(regions_.begin(), regions_.end(), p,
       [](const void* p, const Region& region) {
         return p < region.first;

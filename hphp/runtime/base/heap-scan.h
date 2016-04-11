@@ -117,12 +117,11 @@ template<class F> void ObjectData::scan(F& mark) const {
     mark(frame, uintptr_t(this) - uintptr_t(frame));
     auto node = reinterpret_cast<const ResumableNode*>(frame) - 1;
     mark(this + 1, uintptr_t(node) + r->size() - uintptr_t(this + 1));
-  } else if (m_hdr.kind == HeaderKind::WaitHandle) {
-    // scan C++ properties after [ObjectData] header
+  } else if (m_hdr.kind == HeaderKind::WaitHandle ||
+             m_hdr.kind == HeaderKind::AwaitAllWH) {
+    // scan C++ properties after [ObjectData] header. should pick up
+    // unioned and bit-packed fields
     mark(this + 1, asio_object_size(this) - sizeof(*this));
-  } else if (m_hdr.kind == HeaderKind::AwaitAllWH) {
-    auto wh = static_cast<const c_AwaitAllWaitHandle*>(this);
-    wh->scanChildren(mark);
   }
 
   if (getAttribute(HasNativeData)) {

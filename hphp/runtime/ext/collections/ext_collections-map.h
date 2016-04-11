@@ -147,7 +147,6 @@ struct BaseMap : HashCollection {
     return init_null_variant;
   }
 
-
   template<bool throwOnError>
   TypedValue* atImpl(int64_t key) const {
     auto p = find(key);

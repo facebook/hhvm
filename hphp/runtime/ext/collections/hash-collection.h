@@ -531,6 +531,20 @@ struct HashCollection : ObjectData {
     }
   }
 
+  void updateIntLikeStrKeys() {
+    int64_t ignore;
+    if (intLikeStrKeys()) return;
+    const Elm* e = data();
+    const Elm* eLimit = elmLimit();
+    for (; e != eLimit; ++e) {
+      if (!isTombstone(e) && e->hasStrKey() &&
+          e->skey->isStrictlyInteger(ignore)) {
+        setIntLikeStrKeys(true);
+        return;
+      }
+    }
+  }
+
   // The skipTombstonesNoBoundsCheck helper functions assume that either
   // the specified location is not a tombstone OR that there is at least
   // one non-tombstone after the specified position.
@@ -624,6 +638,17 @@ struct HashCollection : ObjectData {
   static bool instanceof(const ObjectData*);
 
  protected:
+  // Replace the m_arr field with a new MixedArray
+  // WARNING: does not update intLikeStrKeys
+  void replaceArray(ArrayData* adata) {
+    auto* oldAd = m_arr;
+    m_arr = MixedArray::asMixed(adata);
+    adata->incRefCount();
+    m_size = adata->size();
+    decRefArr(oldAd);
+    ++m_version;
+  }
+
   template<class F> friend void scanHeader(const Header*, F& mark);
   template<typename F>
   void scan(F& mark) const {
@@ -650,6 +675,10 @@ struct HashCollection : ObjectData {
   // that no int-like strings keys are present. If this method returns true
   // that means there _might_ be int-like string keys, but there might not be.
   bool intLikeStrKeys() const { return (bool)(m_version & 0x80000000UL); }
+  // So that BaseMap can call intLikeStrKeys on a HashCollection
+  static bool intLikeStrKeys(const HashCollection* hc) {
+    return hc->intLikeStrKeys();
+  }
   // Beware: calling this method can invalidate iterators, so use with
   // caution
   void setIntLikeStrKeys(bool b) {

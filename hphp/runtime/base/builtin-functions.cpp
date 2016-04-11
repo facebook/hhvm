@@ -554,6 +554,11 @@ void throw_collection_property_exception() {
     "Cannot access a property on a collection");
 }
 
+void throw_invalid_collection_parameter() {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Parameter must be an array or an instance of Traversable");
+}
+
 void throw_invalid_operation_exception(StringData* str) {
   SystemLib::throwInvalidOperationExceptionObject(Variant{str});
 }

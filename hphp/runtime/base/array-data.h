@@ -426,6 +426,33 @@ public:
 
   static const char* kindToString(ArrayKind kind);
 
+  // helpers for IterateV and IterateKV
+  template <typename Fn, class... Args>
+  ALWAYS_INLINE
+  static typename std::enable_if<
+    std::is_same<typename std::result_of<Fn(Args...)>::type,
+                 void>::value, bool>::type
+  call_helper(Fn f, Args&&... args) {
+    f(std::forward<Args>(args)...);
+    return false;
+  }
+
+  template <typename Fn, class... Args>
+  ALWAYS_INLINE
+  static typename std::enable_if<
+    std::is_same<typename std::result_of<Fn(Args...)>::type,
+                 bool>::value, bool>::type
+  call_helper(Fn f, Args&&... args) {
+    return f(std::forward<Args>(args)...);
+  }
+
+  template <typename B, class... Args>
+  ALWAYS_INLINE
+  static typename std::enable_if<std::is_same<B, bool>::value, bool>::type
+  call_helper(B f, Args&&... args) {
+    return f;
+  }
+
 private:
   friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {

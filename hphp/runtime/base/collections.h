@@ -139,7 +139,7 @@ TypedValue* atRw(ObjectData* obj, const TypedValue* key);
  * `empty` needs to exist and not be falsy
  */
 bool contains(ObjectData* obj, const Variant& offset);
-bool isset(ObjectData* obj, const TypedValue* key);
+bool (isset)(ObjectData* obj, const TypedValue* key);
 bool empty(ObjectData* obj, const TypedValue* key);
 
 /* Remove element {key} from Collection {obj} */

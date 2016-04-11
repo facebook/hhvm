@@ -146,6 +146,10 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* MakeUncounted(ArrayData* array);
   static ArrayData* MakeUncountedHelper(ArrayData* array);
 
+  // Fast iteration
+  template <class F> static void IterateV(ArrayData* arr, F fn);
+  template <class F> static void IterateKV(ArrayData* arr, F fn);
+
 private:
   static ArrayData* Grow(ArrayData*);
   static ArrayData* GrowHelper(ArrayData*);

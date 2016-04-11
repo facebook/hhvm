@@ -315,24 +315,41 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
 // Used by addAll for Vector only
 void BaseVector::addAllImpl(const Variant& t) {
   if (t.isNull()) return;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(t, sz);
-  if (sz) { reserve(m_size + sz); }
 
-  if (LIKELY(!iter.hasIteratorObj())) {
-    if (iter) {
+  auto ok = IterateV(
+    *t.asTypedValue(),
+    [this](ArrayData* adata) {
+      if (adata->empty()) return true;
+      if (!m_size) {
+        if (adata->isPacked()) {
+          auto* oldAd = arrayData();
+          m_arr = adata;
+          adata->incRefCount();
+          m_capacity = arrayData()->cap();
+          m_size = arrayData()->m_size;
+          decRefArr(oldAd);
+          ++m_version;
+          return true;
+        }
+      }
+      reserve(m_size + adata->size());
       mutateAndBump();
-      assert(canMutateBuffer());
-      do {
-        addRaw(iter.secondRefPlus());
-        ++iter;
-      } while (iter);
-    }
-  } else {
-    for (; iter; ++iter) {
-      auto v = iter.second();
-      add(v.asCell());
-    }
+      return false;
+    },
+    [this](const TypedValue* item) {
+      addRaw(tvAsCVarRef(item));
+    },
+    [this](ObjectData* coll) {
+      if (coll->collectionType() == CollectionType::Pair) {
+        mutateAndBump();
+      }
+    },
+    [this](const TypedValue* item) {
+      add(tvToCell(item));
+    });
+
+  if (UNLIKELY(!ok)) {
+    throw_invalid_collection_parameter();
   }
 }
 

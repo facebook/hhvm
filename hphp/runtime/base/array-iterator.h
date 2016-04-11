@@ -21,6 +21,9 @@
 #include <cstdint>
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -650,6 +653,192 @@ private:
     CufIter cufiter;
   } m_u;
 };
+
+//////////////////////////////////////////////////////////////////////
+// Template based iteration, bypassing ArrayIter where possible
+
+/*
+ * Iterate the values of the iterable 'it'.
+ *
+ * If it is a collection, preCollFn will be called first, with the ObjectData
+ * as a parameter. If it returns true, no further iteration will be performed.
+ * This allows for certain optimizations - see eg BaseSet::addAll. Otherwise...
+ *
+ * If its an array or a collection, the ArrayData is passed to preArrFn, which
+ * can do any necessary setup, and as with preCollFn can return true to bypass
+ * any further work. Otherwise...
+ *
+ * The array is iterated efficiently (without ArrayIter for MixedArray and
+ * PackedArray), and ArrFn is called for each element. Otherwise...
+ *
+ * If its an iterable object, the object is iterated using ArrayIter, and
+ * objFn is called on each element. Otherwise...
+ *
+ * If none of the above apply, the function returns false.
+ *
+ * During iteration, if objFn or arrFn returns true, iteration stops.
+ *
+ * There are also two supported shortcuts:
+ * If ObjFn is a bool, and 'it' is not an array, and not a collection,
+ * IterateV will do nothing, and return the value of objFn.
+ *
+ * If PreCollFn is a bool, and 'it' is not an array, IterateV will do nothing,
+ * and return the value of preCollFn.
+ *
+ * There are overloads that take 4 and 3 arguments respectively, that pass
+ * false for the trailing arguments as a convenience.
+ */
+template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
+bool IterateV(const TypedValue& it,
+              PreArrFn preArrFn,
+              ArrFn arrFn,
+              PreCollFn preCollFn,
+              ObjFn objFn) {
+  assert(it.m_type != KindOfRef);
+  ArrayData* adata;
+  if (LIKELY(isArrayType(it.m_type))) {
+    adata = it.m_data.parr;
+   do_array:
+    if (ArrayData::call_helper(preArrFn, adata)) return true;
+    if (adata->empty()) return true;
+    if (adata->isPacked()) {
+      PackedArray::IterateV(adata, arrFn);
+    } else if (adata->isMixed()) {
+      MixedArray::IterateV(MixedArray::asMixed(adata), arrFn);
+    } else {
+      for (ArrayIter iter(adata); iter; ++iter) {
+        if (ArrayData::call_helper(arrFn, iter.secondRef().asTypedValue())) {
+          break;
+        }
+      }
+    }
+    return true;
+  }
+  if (std::is_same<PreCollFn, bool>::value) {
+    return ArrayData::call_helper(preCollFn, nullptr);
+  }
+  if (it.m_type != KindOfObject) return false;
+  auto odata = it.m_data.pobj;
+  if (odata->isCollection()) {
+    if (ArrayData::call_helper(preCollFn, odata)) return true;
+    adata = collections::asArray(odata);
+    if (adata) goto do_array;
+    assert(odata->collectionType() == CollectionType::Pair);
+    auto tv = make_tv<KindOfInt64>(0);
+    if (!ArrayData::call_helper(arrFn, collections::at(odata, &tv))) {
+      tv.m_data.num = 1;
+      ArrayData::call_helper(arrFn, collections::at(odata, &tv));
+    }
+    return true;
+  }
+  if (std::is_same<ObjFn, bool>::value) {
+    return ArrayData::call_helper(objFn, nullptr);
+  }
+  bool isIterable;
+  Object iterable = odata->iterableObject(isIterable);
+  if (!isIterable) return false;
+  for (ArrayIter iter(iterable.detach(), ArrayIter::noInc); iter; ++iter) {
+    if (ArrayData::call_helper(objFn, iter.second().asTypedValue())) break;
+  }
+  return true;
+}
+
+template <typename PreArrFn, typename ArrFn, typename PreCollFn>
+bool IterateV(const TypedValue& it,
+              PreArrFn preArrFn,
+              ArrFn arrFn,
+              PreCollFn preCollFn) {
+  return IterateV(it, preArrFn, arrFn, preCollFn, false);
+}
+
+template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
+bool IterateV(const TypedValue& it,
+              PreArrFn preArrFn,
+              ArrFn arrFn) {
+  return IterateV(it, preArrFn, arrFn, false);
+}
+
+/*
+ * Iterate the keys and values of the iterable 'it'.
+ *
+ * The behavior is identical to that of IterateV, except the ArrFn and ObjFn
+ * callbacks are called with both a key and a value.
+ */
+template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
+bool IterateKV(const TypedValue& it,
+               PreArrFn preArrFn,
+               ArrFn arrFn,
+               PreCollFn preCollFn,
+               ObjFn objFn) {
+  assert(it.m_type != KindOfRef);
+  ArrayData* adata;
+  if (LIKELY(isArrayType(it.m_type))) {
+    adata = it.m_data.parr;
+   do_array:
+    if (preArrFn(adata)) return true;
+    if (adata->empty()) return true;
+    if (adata->isMixed()) {
+      MixedArray::IterateKV(MixedArray::asMixed(adata), arrFn);
+    } else if (adata->isPacked()) {
+      PackedArray::IterateKV(adata, arrFn);
+    } else {
+      for (ArrayIter iter(adata); iter; ++iter) {
+        if (ArrayData::call_helper(arrFn,
+                                   iter.first().asTypedValue(),
+                                   iter.secondRef().asTypedValue())) {
+          break;
+        }
+      }
+    }
+    return true;
+  }
+  if (std::is_same<PreCollFn, bool>::value) {
+    return ArrayData::call_helper(preCollFn, nullptr);
+  }
+  if (it.m_type != KindOfObject) return false;
+  auto odata = it.m_data.pobj;
+  if (odata->isCollection()) {
+    if (ArrayData::call_helper(preCollFn, odata)) return true;
+    adata = collections::asArray(odata);
+    if (adata) goto do_array;
+    assert(odata->collectionType() == CollectionType::Pair);
+    auto tv = make_tv<KindOfInt64>(0);
+    if (!ArrayData::call_helper(arrFn, &tv, collections::at(odata, &tv))) {
+      tv.m_data.num = 1;
+      ArrayData::call_helper(arrFn, &tv, collections::at(odata, &tv));
+    }
+    return true;
+  }
+  if (std::is_same<ObjFn, bool>::value) {
+    return ArrayData::call_helper(objFn, nullptr, nullptr);
+  }
+  bool isIterable;
+  Object iterable = odata->iterableObject(isIterable);
+  if (!isIterable) return false;
+  for (ArrayIter iter(iterable.detach(), ArrayIter::noInc); iter; ++iter) {
+    if (ArrayData::call_helper(objFn,
+                               iter.first().asTypedValue(),
+                               iter.second().asTypedValue())) {
+      break;
+    }
+  }
+  return true;
+}
+
+template <typename PreArrFn, typename ArrFn, typename PreCollFn>
+bool IterateKV(const TypedValue& it,
+               PreArrFn preArrFn,
+               ArrFn arrFn,
+               PreCollFn preCollFn) {
+  return IterateKV(it, preArrFn, arrFn, preCollFn, false);
+}
+
+template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
+bool IterateKV(const TypedValue& it,
+               PreArrFn preArrFn,
+               ArrFn arrFn) {
+  return IterateKV(it, preArrFn, arrFn, false);
+}
 
 //////////////////////////////////////////////////////////////////////
 

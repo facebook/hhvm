@@ -63,31 +63,56 @@ void BaseMap::addAllImpl(const Variant& iterable) {
   if (iterable.isNull()) return;
   VMRegGuard _;
 
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (LIKELY(!iter.hasIteratorObj())) {
-    if (!sz) return;
-    if (!m_size) {
-      reserve(sz);
+  decltype(cap()) oldCap = 0;
+  bool ok = IterateKV(
+    *iterable.asTypedValue(),
+    [&](ArrayData* adata) {
+      auto sz = adata->size();
+      if (!sz) return true;
+      if (!m_size) {
+        if (adata->isMixed()) {
+          replaceArray(adata);
+          updateIntLikeStrKeys();
+          return true;
+        }
+      } else {
+        oldCap = cap(); // assume minimal collisions
+      }
+      reserve(m_size + sz);
       mutateAndBump();
-      do {
-        setRaw(iter.first(), iter.secondRefPlus());
-        ++iter;
-      } while (iter);
-      return;
-    }
-  }
+      return false;
+    },
+    [this](const TypedValue* key, const TypedValue* value) {
+      setRaw(tvAsCVarRef(key), tvAsCVarRef(value));
+    },
+    [this](ObjectData* coll) {
+      switch (coll->collectionType()) {
+        case CollectionType::Map:
+        case CollectionType::Set:
+        {
+          if (m_size) break;
+          auto hc = static_cast<HashCollection*>(coll);
+          replaceArray(hc->arrayData());
+          setIntLikeStrKeys(BaseMap::intLikeStrKeys(hc));
+          return true;
+        }
+        case CollectionType::Pair:
+          mutateAndBump();
+          break;
+        default:
+          break;
+      }
+      return false;
+    },
+    [this](const TypedValue* key, const TypedValue* value) {
+      set(tvAsCVarRef(key), tvAsCVarRef(value));
+    });
 
-  decltype(cap()) oldCap;
-  if (sz) {
-    oldCap = cap();
-    reserve(m_size + sz); // assume minimal collisions
-  }
-  for (; iter; ++iter) {
-    set(iter.first(), iter.second());
+  if (UNLIKELY(!ok)) {
+    throw_invalid_collection_parameter();
   }
   // ... and shrink back if that was incorrect
-  if (sz) shrinkIfCapacityTooHigh(oldCap);
+  if (oldCap) shrinkIfCapacityTooHigh(oldCap);
 }
 
 void BaseMap::addAllPairs(const Variant& iterable) {

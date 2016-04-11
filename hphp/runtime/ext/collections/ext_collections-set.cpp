@@ -28,50 +28,82 @@ bool invokeAndCastToBool(const CallCtx& ctx, int argc,
 void BaseSet::addAllKeysOf(const Cell container) {
   assert(isContainer(container));
 
-  auto sz = getContainerSize(container);
-  ArrayIter iter(container);
-  if (!sz || !iter) { return; }
+  decltype(cap()) oldCap = 0;
+  bool ok = IterateKV(
+    container,
+    [&](ArrayData* adata) {
+      auto sz = adata->size();
+      if (!sz) return true;
+      if (m_size) {
+        oldCap = cap(); // assume minimal collisions
+      }
+      reserve(m_size + sz);
+      mutateAndBump();
+      return false;
+    },
+    [this](const TypedValue* key, const TypedValue* value) {
+      addRaw(tvAsCVarRef(key));
+    },
+    [this](ObjectData* coll) {
+      if (!m_size && coll->collectionType() == CollectionType::Set) {
+        auto hc = static_cast<HashCollection*>(coll);
+        replaceArray(hc->arrayData());
+        setIntLikeStrKeys(BaseSet::intLikeStrKeys(hc));
+        return true;
+      }
+      if (coll->collectionType() == CollectionType::Pair) {
+        mutateAndBump();
+      }
+      return false;
+    });
 
-  mutateAndBump();
-  // In theory we could be deferring the version bump above because all the
-  // elements of iter could already be present in the set.
-  auto oldCap = cap();
-  reserve(m_size + sz); // presume minimum collisions ...
-  for (; iter; ++iter) { addRaw(iter.first()); }
-  shrinkIfCapacityTooHigh(oldCap); // ... and shrink back if that was incorrect
+  if (UNLIKELY(!ok)) {
+    throw_invalid_collection_parameter();
+  }
+  // ... and shrink back if that was incorrect
+  if (oldCap) shrinkIfCapacityTooHigh(oldCap);
 }
 
 void BaseSet::addAll(const Variant& t) {
   if (t.isNull()) { return; } // nothing to do
 
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(t, sz);
-  if (!iter) { return; }
+  decltype(cap()) oldCap = 0;
+  bool ok = IterateV(
+    *t.asTypedValue(),
+    [&](ArrayData* adata) {
+      auto sz = adata->size();
+      if (!sz) return true;
+      if (m_size) {
+        oldCap = cap(); // assume minimal collisions
+      }
+      reserve(m_size + sz);
+      mutateAndBump();
+      return false;
+    },
+    [this](const TypedValue* value) {
+      addRaw(tvAsCVarRef(value));
+    },
+    [this](ObjectData* coll) {
+      if (!m_size && coll->collectionType() == CollectionType::Set) {
+        auto hc = static_cast<HashCollection*>(coll);
+        replaceArray(hc->arrayData());
+        setIntLikeStrKeys(BaseSet::intLikeStrKeys(hc));
+        return true;
+      }
+      if (coll->collectionType() == CollectionType::Pair) {
+        mutateAndBump();
+      }
+      return false;
+    },
+    [this](const TypedValue* value) {
+      add(tvAsCVarRef(value));
+    });
 
-  mutateAndBump();
-  assert(canMutateBuffer());
-  // In theory we could be deferring the version bump above for the
-  // container case because all the elements of iter could already be
-  // present in the set: there's no destructor invocations because Sets are
-  // int/string only. We can save m_size and version bump after the
-  // insertion loop only if the size has increased. However, as presently
-  // constituted, such an ->addAll() call is a time bomb and a no-op,
-  if (LIKELY(!iter.hasIteratorObj())) {
-    auto oldCap = cap();
-    reserve(m_size + sz); // presume minimum collisions ...
-    do {
-      addRaw(iter.secondRefPlus());
-      ++iter;
-    } while (iter);
-    // ... and shrink back if that was incorrect
-    shrinkIfCapacityTooHigh(oldCap);
-  } else {
-    assert(sz == 0); // iter is an Iterable with unknown number of elements
-    do {
-      add(iter.second());
-      ++iter;
-    } while (iter);
+  if (UNLIKELY(!ok)) {
+    throw_invalid_collection_parameter();
   }
+  // ... and shrink back if that was incorrect
+  if (oldCap) shrinkIfCapacityTooHigh(oldCap);
 }
 
 template<bool raw>

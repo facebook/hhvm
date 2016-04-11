@@ -122,6 +122,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 bool is_constructor_name(const char* func);
 void throw_instance_method_fatal(const char *name);
 
+[[noreturn]] void throw_invalid_collection_parameter();
 [[noreturn]] void throw_invalid_operation_exception(StringData*);
 [[noreturn]] void throw_arithmetic_error(StringData*);
 [[noreturn]] void throw_division_by_zero_error(StringData*);

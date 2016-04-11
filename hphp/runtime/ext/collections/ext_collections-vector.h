@@ -98,14 +98,12 @@ struct BaseVector : ObjectData {
   php_concat(const Variant& iterable);
 
   ArrayData* arrayData() {
-    auto* ret = getArrayFromPackedData(data());
-    assert(ret == staticEmptyArray() || ret->isPacked());
-    return ret;
+    assert(m_arr == staticEmptyArray() || m_arr->isPacked());
+    return m_arr;
   }
   const ArrayData* arrayData() const {
-    auto* ret = getArrayFromPackedData(data());
-    assert(ret == staticEmptyArray() || ret->isPacked());
-    return ret;
+    assert(m_arr == staticEmptyArray() || m_arr->isPacked());
+    return m_arr;
   }
   void setSize(uint32_t sz) {
     assert(sz <= m_capacity);

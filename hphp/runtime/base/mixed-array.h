@@ -371,6 +371,30 @@ public:
   // Safe downcast helpers
   static MixedArray* asMixed(ArrayData* ad);
   static const MixedArray* asMixed(const ArrayData* ad);
+  // Fast iteration
+  template <class F> static void IterateV(MixedArray* arr, F fn) {
+    auto elm = arr->data();
+    arr->incRefCount();
+    SCOPE_EXIT { decRefArr(arr); };
+    for (auto i = arr->m_used; i--; elm++) {
+      if (LIKELY(!elm->isTombstone())) {
+        if (ArrayData::call_helper(fn, &elm->data)) break;
+      }
+    }
+  }
+  template <class F> static void IterateKV(MixedArray* arr, F fn) {
+    auto elm = arr->data();
+    arr->incRefCount();
+    SCOPE_EXIT { decRefArr(arr); };
+    for (auto i = arr->m_used; i--; elm++) {
+      if (LIKELY(!elm->isTombstone())) {
+        TypedValue key;
+        key.m_data.num = elm->ikey;
+        key.m_type = elm->hasIntKey() ? KindOfInt64 : KindOfString;
+        if (ArrayData::call_helper(fn, &key, &elm->data)) break;
+      }
+    }
+  }
 
 private:
   static void getElmKey(const Elm& e, TypedValue* out);

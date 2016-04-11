@@ -32,7 +32,9 @@
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-sort.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -788,9 +790,9 @@ Variant HHVM_FUNCTION(array_push,
         case CollectionType::Set: {
           c_Set* set = static_cast<c_Set*>(obj);
           set->reserve(set->size() + args.size() + 1);
-          set->t_add(var);
+          set->add(var);
           for (ArrayIter iter(args); iter; ++iter) {
-            set->t_add(iter.second());
+            set->add(iter.second());
           }
           return set->size();
         }

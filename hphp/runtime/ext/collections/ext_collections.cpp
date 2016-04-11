@@ -1,34 +1,43 @@
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/memory-manager.h"
 
-namespace HPHP { namespace collections {
+namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_HH_Map("HH\\Map"),
-  s_HH_ImmMap("HH\\ImmMap"),
-  s_HH_Set("HH\\Set"),
-  s_HH_ImmSet("HH\\ImmSet");
-
-void instanceDtor(ObjectData* obj, const Class* cls) {
-  assert(obj->getAttribute(ObjectData::IsCollection));
-  assert(cls->isCollectionClass());
-  assert(cls->numDeclProperties() == 0);
-  assert(cls->attrs() & AttrFinal);
-
-  switch (obj->headerKind()) {
-#define X(knd) case HeaderKind::knd: \
-                 (static_cast<c_##knd*>(obj))->~c_##knd(); \
-                 MM().objFree(obj, sizeof(c_##knd)); \
-                 break;
-COLLECTIONS_ALL_TYPES(X)
-#undef X
-    default: always_assert(false);
-  }
+void triggerCow(c_Vector* vec) {
+  vec->mutateImpl();
 }
+
+ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
+  if (v.isArray()) {
+    ArrayData* ad = v.getArrayData();
+    sz = ad->size();
+    return ArrayIter(ad);
+  }
+  if (v.isObject()) {
+    ObjectData* obj = v.getObjectData();
+    if (obj->isCollection()) {
+      sz = collections::getSize(obj);
+      return ArrayIter(obj);
+    }
+    bool isIterable;
+    Object iterable = obj->iterableObject(isIterable);
+    if (isIterable) {
+      sz = 0;
+      return ArrayIter(iterable.detach(), ArrayIter::noInc);
+    }
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Parameter must be an array or an instance of Traversable");
+}
+
+namespace collections {
+/////////////////////////////////////////////////////////////////////////////
 
 size_t heapSize(HeaderKind kind) {
   switch (kind) {

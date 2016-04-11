@@ -20,12 +20,14 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class AwaitAllWaitHandle
+
+struct BaseMap;
+struct BaseVector;
 
 /**
  * A wait handle that waits for a list of wait handles. The wait handle succeeds

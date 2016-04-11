@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
 
 namespace HPHP {
 

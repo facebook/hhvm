@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/native-calls.h"
 
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -31,7 +32,7 @@
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections.h"
 
 #include "hphp/util/abi-cxx.h"
 
@@ -417,7 +418,7 @@ static CallMap s_callMap {
                  {{SSA, 0}, {TV, 1}, {TV, 2}}},
     {SetWithRefNewElem, MInstrHelpers::setWithRefNewElem, DNone, SSync,
                  {{SSA, 0}, {TV, 1}}},
-    {ThrowOutOfBounds, throwOOB, DNone, SSync, {{SSA, 0}}},
+    {ThrowOutOfBounds, collections::throwOOB, DNone, SSync, {{SSA, 0}}},
 
     /* instanceof checks */
     {InstanceOf, &Class::classof, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},

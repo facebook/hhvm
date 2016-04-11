@@ -1,7 +1,11 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -53,16 +57,6 @@ bool invokeAndCastToBool(const CallCtx& ctx, int argc,
   Variant ret;
   g_context->invokeFuncFew(ret.asTypedValue(), ctx, argc, argv);
   return ret.toBoolean();
-}
-
-ALWAYS_INLINE static
-const Cell container_as_cell(const Variant& container) {
-  const auto& cellContainer = *container.asCell();
-  if (UNLIKELY(!isContainer(cellContainer))) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Parameter must be a container (array or collection)");
-  }
-  return cellContainer;
 }
 
 /////////////////////////////////////////////////////////////////////////////

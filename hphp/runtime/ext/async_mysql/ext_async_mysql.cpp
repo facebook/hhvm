@@ -23,7 +23,7 @@
 #include <squangle/mysql_client/AsyncHelpers.h>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
@@ -997,7 +997,7 @@ Object AsyncMysqlQueryResult::buildRows(bool as_maps, bool typed_values) {
     if (as_maps) {
       auto row_map = req::make<c_Map>();
       for (int i = 0; i < row.size(); ++i) {
-        row_map->t_set(
+        row_map->set(
             m_field_index->getFieldString(i),
             buildTypedValue(
                 m_query_result->getRowFields(), row, i, typed_values));

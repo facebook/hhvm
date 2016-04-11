@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/collections/hash-collection.h"
 
 #include <algorithm>
 
@@ -56,6 +57,7 @@ struct Header {
     ObjectData obj_;
     c_Pair pair_;
     BaseVector vector_;
+    HashCollection hashcoll_;
     ResourceHdr res_;
     RefData ref_;
     SmallNode small_;

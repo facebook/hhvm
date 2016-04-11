@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/data-walker.h"
 
@@ -58,11 +59,11 @@ Object createFromSerialized(CollectionType colType, APCHandle* handle) {
     break;
   case CollectionType::ImmSet:
   case CollectionType::Set:
-    static_cast<BaseSet*>(col.get())->t___construct(arr);
+    static_cast<BaseSet*>(col.get())->init(arr);
     break;
   case CollectionType::ImmMap:
   case CollectionType::Map:
-    static_cast<BaseMap*>(col.get())->t___construct(arr);
+    static_cast<BaseMap*>(col.get())->init(arr);
     break;
   case CollectionType::Pair:
     not_reached();

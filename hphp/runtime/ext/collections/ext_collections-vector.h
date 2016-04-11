@@ -2,15 +2,22 @@
 #define incl_HPHP_EXT_COLLECTIONS_VECTOR_H
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 struct Header;
+struct BaseMap;
+struct BaseSet;
+struct c_Pair;
+struct c_AwaitAllWaitHandle;
 
 namespace collections {
+void append(ObjectData*, TypedValue*);
 void deepCopy(TypedValue*);
 struct VectorIterator;
 }
@@ -156,7 +163,7 @@ struct BaseVector : ObjectData {
     std::enable_if<std::is_integral<T>::value, TypedValue*>::type
   at(T key) {
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
-      throwOOB(key);
+      collections::throwOOB(key);
       return nullptr;
     }
     return &data()[key];
@@ -328,7 +335,7 @@ struct BaseVector : ObjectData {
     assert(val->m_type != KindOfRef);
     assert(canMutateBuffer());
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
-      throwOOB(key);
+      collections::throwOOB(key);
       return;
     }
     TypedValue* tv = &data()[key];

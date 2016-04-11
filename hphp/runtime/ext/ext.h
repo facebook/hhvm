@@ -21,13 +21,4 @@
 #ifndef incl_EXT_LIST_EXT_H_
 #define incl_EXT_LIST_EXT_H_
 
-// Super temporary
-#ifndef USE_CMAKE
-#define ENABLE_EXTENSION_COLLECTIONS
-#endif
-
-#ifdef ENABLE_EXTENSION_COLLECTIONS
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#endif
-
 #endif // incl_EXT_LIST_EXT_H_

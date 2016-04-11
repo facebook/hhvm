@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 /*
  *                       Heapgraph Extension

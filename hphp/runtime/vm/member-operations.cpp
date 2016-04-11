@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/member-operations.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP {
 

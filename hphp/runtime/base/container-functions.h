@@ -17,7 +17,8 @@
 #define incl_HPHP_CONTAINER_FUNCTIONS_H_
 
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/ext/collections/ext_collections.h"
 
 namespace HPHP {
 
@@ -73,6 +74,16 @@ inline bool isPackedContainer(const Cell c) {
   }
 
   return isVectorCollection(c.m_data.pobj->collectionType());
+}
+
+ALWAYS_INLINE
+const Cell container_as_cell(const Variant& container) {
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a container (array or collection)");
+  }
+  return cellContainer;
 }
 
 //////////////////////////////////////////////////////////////////////

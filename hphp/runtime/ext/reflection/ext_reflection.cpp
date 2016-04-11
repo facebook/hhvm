@@ -30,7 +30,7 @@
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/extension-registry.h"
@@ -1397,7 +1397,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
   }
 
   assert(st->size() <= numConsts);
-  return st->t_toarray();
+  return st->toArray();
 }
 
 
@@ -1422,7 +1422,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
   }
 
   assert(st->size() <= numConsts);
-  return st->t_toarray();
+  return st->toArray();
 }
 
 static Array HHVM_METHOD(ReflectionClass, getAttributes) {

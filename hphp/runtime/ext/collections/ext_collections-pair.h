@@ -2,7 +2,6 @@
 #define incl_HPHP_EXT_COLLECTIONS_PAIR_H
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
@@ -10,6 +9,9 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 struct Header;
+struct BaseVector;
+struct BaseMap;
+struct c_Vector;
 
 namespace collections {
 void deepCopy(TypedValue*);
@@ -17,9 +19,16 @@ struct PairIterator;
 }
 
 struct c_Pair : ObjectData {
-  DECLARE_COLLECTIONS_CLASS(Pair);
+  DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
 
   enum class NoInit {};
+  static ObjectData* instanceCtor(Class* cls) { \
+    assert(cls); \
+    assert(cls->isCollectionClass()); \
+    assert(cls->classof(c_Pair::classof())); \
+    assert(cls->attrs() & AttrFinal); \
+    return new (MM().objMalloc(sizeof(c_Pair))) c_Pair(NoInit{}, cls); \
+  }
 
   explicit c_Pair(Class* cls = c_Pair::classof())
     : ObjectData(cls, collections::objectFlags, HeaderKind::Pair)

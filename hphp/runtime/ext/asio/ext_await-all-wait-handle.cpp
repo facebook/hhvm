@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-session.h"

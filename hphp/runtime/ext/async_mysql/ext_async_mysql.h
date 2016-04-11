@@ -28,7 +28,6 @@
 #include <squangle/logger/DBEventCounter.h>
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/extension.h"
 
 #include <folly/Format.h>
@@ -37,6 +36,9 @@ using folly::StringPiece;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct c_Vector;
+
 namespace am = facebook::common::mysql_client;
 namespace db = facebook::db;
 

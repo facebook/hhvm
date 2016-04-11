@@ -53,8 +53,6 @@ private:
 
   static std::string StringOfFrame(const Array& frame, int i, bool escape = false);
 
-  virtual void log(LogLevelType level, const char *type, const Exception &e,
-                   const char *file = nullptr, int line = 0);
   virtual void log(LogLevelType level, const std::string &msg,
                    const StackTrace *stackTrace,
                    bool escape = true, bool escapeMore = false);

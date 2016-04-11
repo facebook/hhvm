@@ -85,22 +85,10 @@ void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
 
 void Logger::Log(LogLevelType level, const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
-  for (auto& l : s_loggers) {
-    auto& logger = l.second;
-    if (logger) logger->log(level, type, e, file, line);
-  }
-}
-
-void Logger::log(LogLevelType level, const char *type, const Exception &e,
-                 const char *file /* = NULL */, int line /* = 0 */) {
   if (!IsEnabled()) return;
-
-  std::string msg = type;
-  msg += e.getMessage();
+  auto msg = type + e.getMessage();
   if (file && file[0]) {
-    std::ostringstream os;
-    os << " in " << file << " on line " << line;
-    msg += os.str();
+    msg += folly::sformat(" in {} on line {}", file, line);
   }
   Log(level, msg, nullptr);
 }
@@ -120,7 +108,6 @@ void Logger::ResetRequestCount() {
 void Logger::Log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
                  bool escape /* = false */, bool escapeMore /* = false */) {
-
   for (auto& l : s_loggers) {
     auto& logger = l.second;
     if (logger) logger->log(level, msg, stackTrace, escape, escapeMore);
@@ -327,7 +314,7 @@ void Logger::SetOutput(const std::string &name, FILE *output, bool isPipe) {
   auto it = s_loggers.find(name);
   if (it != s_loggers.end()) {
     auto& logger = it->second;
-    if (logger->m_output) {
+    if (logger->m_output && logger->m_output != output) {
       if (logger->m_isPipeOutput) {
         pclose(logger->m_output);
       } else {

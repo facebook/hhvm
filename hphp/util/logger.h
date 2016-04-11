@@ -148,8 +148,6 @@ protected:
   /**
    * For subclasses to override, e.g., to support injected stack trace.
    */
-  virtual void log(LogLevelType level, const char *type, const Exception &e,
-                   const char *file = nullptr, int line = 0);
   virtual void log(LogLevelType level, const std::string &msg,
                    const StackTrace *stackTrace,
                    bool escape = false, bool escapeMore = false);

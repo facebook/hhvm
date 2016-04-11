@@ -67,13 +67,6 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ExtendedLogger::log(LogLevelType level, const char *type,
-                         const Exception &e, const char *file /* = NULL */,
-                         int line /* = 0 */) {
-  if (!IsEnabled()) return;
-  Logger::log(level, type, e, file, line);
-}
-
 void ExtendedLogger::log(LogLevelType level, const std::string &msg,
                          const StackTrace *stackTrace,
                          bool escape /* = true */,

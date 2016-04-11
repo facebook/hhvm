@@ -323,7 +323,7 @@ private:
     if (ad != nullptr) {
       if (ad->isPacked()) {
         m_nextHelperIdx = IterNextIndex::ArrayPacked;
-      } else if (!ad->isMixed()) {
+      } else if (!ad->isMixedLayout()) {
         m_nextHelperIdx = IterNextIndex::Array;
       }
     }

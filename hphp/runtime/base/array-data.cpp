@@ -110,6 +110,7 @@ static ArrayData* ToDictThrow(ArrayData*) {
 }
 
 static ArrayData* ToDictNoop(ArrayData* ad) {
+  ad->incRefCount();
   return ad;
 }
 

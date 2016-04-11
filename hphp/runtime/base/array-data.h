@@ -179,6 +179,8 @@ public:
   bool isEmptyArray() const { return kind() == kEmptyKind; }
   bool isDict() const { return kind() == kDictKind; }
 
+  bool isMixedLayout() const { return isMixed() || isDict(); }
+
   /*
    * Returns whether or not this array contains "vector-like" data.
    * I.e. iteration order produces int keys 0 to m_size-1 in sequence.

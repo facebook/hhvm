@@ -238,8 +238,18 @@ Object APCObject::createObject() const {
   auto const apcProp = persistentProps();
 
   if (m_fast_init) {
-    for (unsigned i = 0; i < numProps; ++i) {
-      new (objProp + i) Variant(apcProp[i]->toLocal());
+    unsigned i = 0;
+    try {
+      while (i < numProps) {
+        new (objProp + i) Variant(apcProp[i]->toLocal());
+        ++i;
+      }
+    } catch (...) {
+      while (i < numProps) {
+        new (objProp + i) Variant();
+        ++i;
+      }
+      throw;
     }
   } else {
     for (unsigned i = 0; i < numProps; ++i) {

@@ -70,7 +70,7 @@ namespace {
     // the time currently remaining in the request (see
     // AsioSession::getLatestWakeTime).
     if (UNLIKELY(checkSurpriseFlags())) {
-      auto const flags = check_request_surprise();
+      auto const flags = handle_request_surprise();
       if (flags & XenonSignalFlag) {
         Xenon::getInstance().log(Xenon::IOWaitSample);
       }

@@ -424,7 +424,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 }
 
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
-  auto const flags = check_request_surprise();
+  auto const flags = handle_request_surprise();
   if (flags & InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
@@ -449,7 +449,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionResumeAwait(const ActRec* ar) {
-  auto const flags = check_request_surprise();
+  auto const flags = handle_request_surprise();
 
   // Xenon
   if (flags & XenonSignalFlag) {
@@ -469,7 +469,7 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
 }
 
 void EventHook::onFunctionResumeYield(const ActRec* ar) {
-  auto const flags = check_request_surprise();
+  auto const flags = handle_request_surprise();
 
   // Xenon
   if (flags & XenonSignalFlag) {
@@ -491,7 +491,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
 // Child is the AFWH we're going to block on, nullptr iff this is a suspending
 // generator.
 void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
-  auto const flags = check_request_surprise();
+  auto const flags = handle_request_surprise();
   onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
 
   if ((flags & AsyncEventHookFlag) &&
@@ -521,7 +521,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
   suspending->setVarEnv(nullptr);
 
   try {
-    auto const flags = check_request_surprise();
+    auto const flags = handle_request_surprise();
     onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
 
     if ((flags & AsyncEventHookFlag) &&
@@ -555,7 +555,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
   ar->setVarEnv(nullptr);
 
   try {
-    auto const flags = check_request_surprise();
+    auto const flags = handle_request_surprise();
     onFunctionExit(ar, &retval, false, nullptr, flags, false);
 
     // Async profiler
@@ -584,7 +584,7 @@ void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
   ar->setLocalsDecRefd();
   ar->setVarEnv(nullptr);
 
-  // TODO(#2329497) can't check_request_surprise() yet, unwinder unable to
+  // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault
   auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
   onFunctionExit(ar, nullptr, true, phpException, flags, false);

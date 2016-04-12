@@ -22,6 +22,7 @@
 
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/request-injection-data.h"
+#include "hphp/runtime/base/surprise-flags.h"
 
 namespace HPHP {
 
@@ -145,8 +146,11 @@ inline void check_recursion_throw() {
   throw Exception("Maximum stack size reached");
 }
 
-size_t check_request_surprise();
-void check_request_surprise_unlikely();
+size_t handle_request_surprise();
+
+inline void check_request_surprise_unlikely() {
+  if (UNLIKELY(checkSurpriseFlags())) handle_request_surprise();
+}
 
 //////////////////////////////////////////////////////////////////////
 

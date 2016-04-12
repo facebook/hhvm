@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -62,9 +63,11 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/hh-utils.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/repo.h"
@@ -76,6 +79,7 @@
 
 #include "hphp/runtime/server/source-root-info.h"
 
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/system/systemlib.h"
@@ -527,8 +531,7 @@ void Unit::loadFunc(const Func *func) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FrameRestore {
- public:
+struct FrameRestore {
   explicit FrameRestore(const PreClass* preClass) {
     ActRec* fp = vmfp();
     PC pc = vmpc();
@@ -699,7 +702,21 @@ Class* Unit::defClass(const PreClass* preClass,
   }
 }
 
+namespace {
+bool isPHP7ReservedType(const StringData* alias) {
+  return
+    !strcmp("int",    alias->data()) ||
+    !strcmp("bool",   alias->data()) ||
+    !strcmp("float",  alias->data()) ||
+    !strcmp("string", alias->data());
+}
+}
+
 bool Unit::aliasClass(Class* original, const StringData* alias) {
+  if (RuntimeOption::PHP7_ScalarTypes && isPHP7ReservedType(alias)) {
+    raise_error("Fatal error: Cannot use '%s' as class name as it is reserved",
+                alias->data());
+  }
   auto const aliasNe = NamedEntity::get(alias);
   aliasNe->m_cachedClass.bind();
 
@@ -828,7 +845,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
        * optimizing for.
        */
       rds::s_constants() =
-        Array::attach(MixedArray::MakeReserve(1));
+        Array::attach(PackedArray::MakeReserve(PackedArray::SmallSize));
     }
     auto const existed = !!rds::s_constants()->nvGet(cnsName);
     if (!existed) {
@@ -1349,7 +1366,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
       do {
         Func* func = *it;
         assert(func->top());
-        getDataRef<Func*>(tcbase, func->funcHandle()) = func;
+        getDataRef<LowPtr<Func>>(tcbase, func->funcHandle()) = func;
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
@@ -1390,12 +1407,13 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
               rds::isPersistentHandle(parent->classHandle())) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
           }
-          if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->classHandle()))) {
+          if (UNLIKELY(!getDataRef<LowPtr<Class>>(tcbase,
+                                                  parent->classHandle()))) {
             redoHoistable = true;
             continue;
           }
         }
-        getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
+        getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
         if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
@@ -1403,25 +1421,24 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         }
       }
     } while (++ix < end);
+
     if (UNLIKELY(redoHoistable)) {
       // if this unit isnt mergeOnly, we're done
       if (!isMergeOnly()) return;
-      // as a special case, if all the classes are potentially
-      // hoistable, we dont list them twice, but instead
-      // iterate over them again
-      // At first glance, it may seem like we could leave
-      // the maybe-hoistable classes out of the second list
-      // and then always reset ix to 0; but that gets this
-      // case wrong if there's an autoloader for C, and C
-      // extends B:
+
+      // As a special case, if all the classes are potentially hoistable, we
+      // don't list them twice, but instead iterate over them again.
+      //
+      // At first glance, it may seem like we could leave the maybe-hoistable
+      // classes out of the second list and then always reset ix to 0; but that
+      // gets this case wrong if there's an autoloader for C, and C extends B:
       //
       // class A {}
       // class B implements I {}
       // class D extends C {}
       //
-      // because now A and D go on the maybe-hoistable list
-      // B goes on the never hoistable list, and we
-      // fatal trying to instantiate D before B
+      // because now A and D go on the maybe-hoistable list B goes on the never
+      // hoistable list, and we fatal trying to instantiate D before B
       Stats::inc(Stats::UnitMerge_redo_hoistable);
       if (end == (int)mi->m_mergeablesSize) {
         ix = mi->m_firstHoistablePreClass;
@@ -1473,7 +1490,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
             raise_error("unknown class %s", other->name()->data());
           }
           assert(avail == Class::Avail::True);
-          getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
+          getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
@@ -1612,7 +1629,6 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
   } while (true);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Info arrays.
 
@@ -1620,18 +1636,15 @@ namespace {
 
 Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   Array a = Array::Create();
-  if (NamedEntity::table()) {
-    for (AllCachedClasses ac; !ac.empty();) {
-      Class* c = ac.popFront();
-      if ((c->attrs() & attrs) ? !inverse : inverse) {
-        if (c->isBuiltin()) {
-          a.prepend(VarNR(c->name()));
-        } else {
-          a.append(VarNR(c->name()));
-        }
+  NamedEntity::foreach_cached_class([&](Class* c) {
+    if ((c->attrs() & attrs) ? !inverse : inverse) {
+      if (c->isBuiltin()) {
+        a.prepend(VarNR(c->name()));
+      } else {
+        a.append(VarNR(c->name()));
       }
     }
-  }
+  });
   return a;
 }
 
@@ -1640,16 +1653,10 @@ Array getFunctions() {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
   Array a = Array::Create();
-  if (NamedEntity::table()) {
-    for (auto it = NamedEntity::table()->begin();
-         it != NamedEntity::table()->end(); ++it) {
-      Func* func_ = it->second.getCachedFunc();
-      if (!func_ || (system ^ func_->isBuiltin()) || func_->isGenerated()) {
-        continue;
-      }
-      a.append(VarNR(HHVM_FN(strtolower)(func_->nameStr())));
-    }
-  }
+  NamedEntity::foreach_cached_func([&](Func* func) {
+    if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
+    a.append(VarNR(HHVM_FN(strtolower)(func->nameStr())));
+  });
   return a;
 }
 
@@ -1726,9 +1733,9 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
 
     out << std::string(opts.indentSize, ' ')
         << std::setw(4) << (it - m_bc) << ": "
-        << instrToString((Op*)it, this)
+        << instrToString(it, this)
         << std::endl;
-    it += instrLen((Op*)it);
+    it += instrLen(it);
   }
 }
 
@@ -1749,21 +1756,20 @@ std::string Unit::toString() const {
 // Other methods.
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
-  auto entry = reinterpret_cast<const Op*>(getMain()->getEntry());
+  auto entry = getMain()->getEntry();
   auto pc = entry;
   // String <id>; Fatal;
   // ^^^^^^
-  if (*pc != Op::String) {
+  if (decode_op(pc) != Op::String) {
     return false;
   }
-  pc++;
   // String <id>; Fatal;
   //        ^^^^
   Id id = *(Id*)pc;
   pc += sizeof(Id);
   // String <id>; Fatal;
   //              ^^^^^
-  if (*pc != Op::Fatal) {
+  if (decode_op(pc) != Op::Fatal) {
     return false;
   }
   msg = lookupLitstrId(id);
@@ -1778,51 +1784,13 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
 
   auto pc = getMain()->getEntry();
 
-  // two opcodes + String's ID
-  pc += sizeof(Id) + 2;
+  // String <id>
+  decode_op(pc);
+  pc += sizeof(Id);
 
+  // Fatal <kind>
+  decode_op(pc);
   auto kind_char = *pc;
   return kind_char == static_cast<uint8_t>(FatalOp::Parse);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-void AllCachedClasses::skip() {
-  Class* cls;
-  while (!empty()) {
-    cls = m_next->second.clsList();
-    if (cls && cls->getCached() &&
-        (cls->parent() != SystemLib::s_ClosureClass)) break;
-    ++m_next;
-  }
-}
-
-AllCachedClasses::AllCachedClasses()
-    : m_next(NamedEntity::table()->begin())
-    , m_end(NamedEntity::table()->end())
-{
-  skip();
-}
-
-bool AllCachedClasses::empty() const {
-  return m_next == m_end;
-}
-
-Class* AllCachedClasses::front() {
-  assert(!empty());
-  Class* c = m_next->second.clsList();
-  assert(c);
-  c = c->getCached();
-  assert(c);
-  return c;
-}
-
-Class* AllCachedClasses::popFront() {
-  Class* c = front();
-  ++m_next;
-  skip();
-  return c;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

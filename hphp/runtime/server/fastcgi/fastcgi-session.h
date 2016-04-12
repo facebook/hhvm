@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -177,13 +177,13 @@ private:
  */
 struct FastCGISession
   : public  wangle::ManagedConnection
-  , private folly::AsyncSocket::ReadCallback
-  , private folly::AsyncSocket::WriteCallback
+  , private folly::AsyncTransportWrapper::ReadCallback
+  , private folly::AsyncTransportWrapper::WriteCallback
 {
   FastCGISession(
     folly::EventBase* evBase,
     JobQueueDispatcher<FastCGIWorker>& dispatcher,
-    folly::AsyncSocket::UniquePtr sock,
+    folly::AsyncTransportWrapper::UniquePtr sock,
     const folly::SocketAddress& localAddr,
     const folly::SocketAddress& peerAddr);
 
@@ -347,7 +347,7 @@ private:
 
   folly::SocketAddress m_localAddr;     // app server address
   folly::SocketAddress m_peerAddr;      // webserver address
-  folly::AsyncSocket::UniquePtr m_sock; // async socket
+  folly::AsyncTransportWrapper::UniquePtr m_sock; // async socket
 
   //////////////////////////////////////////////////////////////////////////////
   // State data- flags, buffers, and event counters

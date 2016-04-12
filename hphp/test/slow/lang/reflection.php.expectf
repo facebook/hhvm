@@ -25,9 +25,9 @@ int(2)
 --- getParameters("f") ---
 array(4) {
   [0]=>
-  object(ReflectionParameter)#2 (2) {
+  object(ReflectionParameter)#2 (3) {
     ["info"]=>
-    array(8) {
+    array(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -36,9 +36,13 @@ array(4) {
       string(0) ""
       ["type_hint"]=>
       string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
       ["function"]=>
       string(1) "f"
       ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
       array(0) {
@@ -48,11 +52,20 @@ array(4) {
     }
     ["name"]=>
     string(1) "a"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
   }
   [1]=>
-  object(ReflectionParameter)#3 (2) {
+  object(ReflectionParameter)#3 (3) {
     ["info"]=>
-    array(9) {
+    array(11) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -61,9 +74,13 @@ array(4) {
       string(0) ""
       ["type_hint"]=>
       string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
       ["function"]=>
       string(1) "f"
       ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
       bool(true)
       ["ref"]=>
       bool(true)
@@ -75,11 +92,20 @@ array(4) {
     }
     ["name"]=>
     string(1) "b"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
   }
   [2]=>
-  object(ReflectionParameter)#4 (2) {
+  object(ReflectionParameter)#4 (3) {
     ["info"]=>
-    array(10) {
+    array(12) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -88,9 +114,13 @@ array(4) {
       string(0) ""
       ["type_hint"]=>
       string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
       ["function"]=>
       string(1) "f"
       ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
       NULL
@@ -104,11 +134,20 @@ array(4) {
     }
     ["name"]=>
     string(1) "c"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
   }
   [3]=>
-  object(ReflectionParameter)#5 (2) {
+  object(ReflectionParameter)#5 (3) {
     ["info"]=>
-    array(10) {
+    array(12) {
       ["index"]=>
       int(3)
       ["name"]=>
@@ -117,9 +156,13 @@ array(4) {
       string(0) ""
       ["type_hint"]=>
       string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
       ["function"]=>
       string(1) "f"
       ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
       array(3) {
@@ -140,6 +183,15 @@ array(4) {
     }
     ["name"]=>
     string(1) "d"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
   }
 }
 

@@ -59,7 +59,8 @@ not_array:
     loop_x_kt:FPushCufIter 1 0
               FPassL 0 $v
               FCall 1
-              SetWithRefRM <L:$res EL:$k>
+              BaseL $res DefineReffy
+              SetWithRefRML $k
               WIterNextK 1 loop_x_kt $v $k
    }
 }
@@ -89,7 +90,8 @@ one_array:
     loop_x:   FPushCufIter 1 0
               FPassL 0 $v
               FCall 1
-              SetWithRefRM <L:$res EL:$k>
+              BaseL $res DefineReffy
+              SetWithRefRML $k
               WIterNextK 1 loop_x $v $k
   }
 }

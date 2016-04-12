@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,7 @@ struct StringData;
  * runtime Units.
  */
 struct UnitEmitter {
-  friend class UnitRepoProxy;
+  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
@@ -89,6 +89,7 @@ struct UnitEmitter {
    */
   const unsigned char* bc() const;
   Offset bcPos() const;
+  Offset offsetOf(const unsigned char* pc) const;
 
   /*
    * Set the bytecode pointer by allocating a copy of `bc' with size `bclen'.
@@ -316,10 +317,10 @@ struct UnitEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.
   //
-  // These methods emit values to bc() at bcPos() and then updates bcPos(),
-  // realloc-ing the bytecode region if necessary.
+  // These methods emit values to bc() at bcPos() (or pos, if given) and then
+  // update bcPos(), realloc-ing the bytecode region if necessary.
 
-  void emitOp(Op op, int64_t pos = -1);
+  void emitOp(Op op);
   void emitByte(unsigned char n, int64_t pos = -1);
 
   void emitInt32(int n, int64_t pos = -1);
@@ -360,6 +361,7 @@ public:
 
   bool m_mergeOnly{false};
   bool m_isHHFile{false};
+  bool m_useStrictTypes{false};
   bool m_returnSeen{false};
   int m_preloadPriority{0};
   TypedValue m_mainReturn;
@@ -442,8 +444,8 @@ private:
  * Proxy for converting in-repo unit representations into UnitEmitters.
  */
 struct UnitRepoProxy : public RepoProxy {
-  friend class Unit;
-  friend class UnitEmitter;
+  friend struct Unit;
+  friend struct UnitEmitter;
 
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-
-open Utils
 
 let lock_fds = ref SMap.empty
 
@@ -80,7 +78,9 @@ let _operations lock_file op : bool =
 (**
  * Grabs the file lock and returns true if it the lock was grabbed
  *)
-let grab lock_file : bool = _operations lock_file Unix.F_TLOCK
+let grab lock_file : bool =
+  let _ = Sys_utils.mkdir_no_fail (Filename.dirname lock_file) in
+  _operations lock_file Unix.F_TLOCK
 
 (**
  * Releases a file lock.

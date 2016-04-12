@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,12 +23,19 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-inline void c_AwaitAllWaitHandle::forEachChild(T fn) {
-  uint32_t const last = m_cur;
-  for (uint32_t idx = 0; idx <= last; ++idx) {
-    auto const child = m_children[idx];
+void c_AwaitAllWaitHandle::forEachChild(T fn) {
+  for (uint32_t idx = 0; idx < m_cap; ++idx) {
+    auto const child = m_children[idx].m_child;
     if (child->isFinished()) continue;
     fn(child);
+  }
+}
+
+template<class F>
+void c_AwaitAllWaitHandle::scanChildren(F& mark) const {
+  if (isFinished()) return;
+  for (uint32_t i = 0; i < m_cap; ++i) {
+    mark(m_children[i].m_child);
   }
 }
 

@@ -3,10 +3,10 @@
 <<__Native>>
 function stream_get_filters(): array;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function stream_filter_register(string $filtername, string $classname): bool;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function stream_filter_append(
   resource $stream,
   string $filtername,
@@ -14,7 +14,7 @@ function stream_filter_append(
   ?mixed $params = null
 ): mixed;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function stream_filter_prepend(
   resource $stream,
   string $filtername,
@@ -22,7 +22,7 @@ function stream_filter_prepend(
   ?mixed $params = null
 ): mixed;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function stream_filter_remove(
   resource $stream_filter
 ): bool;
@@ -36,11 +36,11 @@ function stream_filter_remove(
  * We use a __SystemLib\StreamFilterBucket object throughout.
  */
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function stream_bucket_make_writeable(resource $brigade): ?object;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function stream_bucket_append(resource $brigade, object $bucket): void;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function stream_bucket_prepend(resource $brigade, object $bucket): void;

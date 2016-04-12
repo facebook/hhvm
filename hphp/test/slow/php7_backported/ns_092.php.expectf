@@ -1,0 +1,16 @@
+==== MIXED ====
+Foo\Bar\A::__construct
+Foo\Bar\B::__construct
+int(2)
+===== CONSTANTS ====
+int(100)
+int(1)
+int(2)
+bool(false)
+===== FUNCTIONS ====
+Fiz\Biz\Buz\buz
+Foo\Bar\fiz
+Foo\Bar\biz
+Foo\Bar\buz
+
+Fatal error: %s

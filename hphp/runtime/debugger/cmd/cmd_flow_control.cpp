@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP { namespace Eval {
@@ -158,7 +159,7 @@ void CmdFlowControl::setupStepOuts() {
     PC returnPC = returnUnit->at(returnOffset);
     TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
           fp->m_func->fullName()->data(), returnOffset,
-          opcodeToName(*reinterpret_cast<const Op*>(returnPC)));
+          opcodeToName(peek_op(returnPC)));
     // Don't step out to generated or builtin functions, keep looking.
     if (fp->m_func->line1() == 0) continue;
     if (fp->m_func->isBuiltin()) continue;
@@ -166,20 +167,19 @@ void CmdFlowControl::setupStepOuts() {
       TRACE(2, "CmdFlowControl::setupStepOuts: VM entry\n");
       // We only execute this for opcodes which invoke more PHP, and that does
       // not include switches. Thus, we'll have at most two destinations.
-      assert(!isSwitch(*reinterpret_cast<const Op*>(returnPC)) &&
-        (numSuccs(reinterpret_cast<const Op*>(returnPC)) <= 2));
+      auto const retOp = peek_op(returnPC);
+      assert(!isSwitch(retOp) && numSuccs(returnPC) <= 2);
       // Set an internal breakpoint after the instruction if it can fall thru.
-      if (instrAllowsFallThru(*reinterpret_cast<const Op*>(returnPC))) {
-        Offset nextOffset = returnOffset + instrLen((Op*)returnPC);
+      if (instrAllowsFallThru(retOp)) {
+        Offset nextOffset = returnOffset + instrLen(returnPC);
         TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
               fp->m_func->fullName()->data(), nextOffset);
         m_stepOut1 = StepDestination(returnUnit, nextOffset);
       }
       // Set an internal breakpoint at the target of a control flow instruction.
       // A good example of a control flow op that invokes PHP is IterNext.
-      if (instrIsControlFlow(*reinterpret_cast<const Op*>(returnPC))) {
-        Offset target =
-          instrJumpTarget(reinterpret_cast<const Op*>(returnPC), 0);
+      if (instrIsControlFlow(retOp)) {
+        Offset target = instrJumpTarget(returnPC, 0);
         if (target != InvalidAbsoluteOffset) {
           Offset targetOffset = returnOffset + target;
           TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",

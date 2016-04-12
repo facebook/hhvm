@@ -1,0 +1,4 @@
+File "%snot-nullable.php", line 19, characters 10-19:
+You are using the ?-> operator but this object cannot be null.  (Typing[4117])
+File "%snot-nullable.php", line 11, characters 21-23:
+This is what makes me believe it cannot be null

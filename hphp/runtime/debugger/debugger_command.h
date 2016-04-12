@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,7 +128,7 @@ public:
 
   // Returns a non empty error message if the receipt of this command
   // did not complete successfully.
-  const String& getWireError() const {
+  const std::string& getWireError() const {
     return m_wireError;
   }
 
@@ -144,7 +144,7 @@ protected:
   std::string m_body;
 
   // Used to save temporary error happened on the wire.
-  String m_wireError;
+  std::string m_wireError;
 
   // Server side breaking out of message loop.
   bool m_exitInterrupt{false};

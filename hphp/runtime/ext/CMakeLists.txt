@@ -43,6 +43,12 @@ set(EXTENSION_IDL_SOURCES ${IDL_SOURCES} CACHE INTERNAL "" FORCE)
 set(EXTENSION_IDL_DEFINES ${IDL_DEFINES} CACHE INTERNAL "" FORCE)
 set(EXTENSION_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
 
+add_precompiled_header(
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_ext.h"
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_ext.cpp"
+  CXX_SOURCES
+)
+
 ADD_LIBRARY(hphp_runtime_ext STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_runtime_ext" "${CMAKE_CURRENT_SOURCE_DIR}"

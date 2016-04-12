@@ -1,3 +1,4 @@
+option(App \classname<[<static>::T][this::T][\P::T], >)
 App \classname<[<static>::T][this::T][\C::T]App \IBase<>, >
 App \classname<App \IChild<>, >
 No errors

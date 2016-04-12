@@ -255,6 +255,18 @@ function mb_encode_numericentity(string $str,
                                  bool $is_hex = false): mixed;
 
 /**
+ * Get aliases of a known encoding type.
+ *
+ * @param string $encoding - The encoding type being checked, for aliases.
+ *
+ * @return mixed - Returns a numerically indexed array of encoding aliases on
+ *   success, or FALSE on failure.
+ *
+ */
+<<__Native>>
+function mb_encoding_aliases(string $str): mixed;
+
+/**
  * A regular expression match for a multibyte string
  *
  * @param string $pattern - The regular expression pattern.

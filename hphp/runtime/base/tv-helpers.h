@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,14 +41,37 @@ struct Variant;
  * of the pointer types, the compiler cannot use type aliasing assumptions to
  * miscompile.
  *
+ * If we're in debug mode, switch on the type and call the appropriate function
+ * directly. This is slightly slower, but gives us the benefit of extra
+ * assertions.
+ *
  * This assumes isRefcountedType() is true.
  */
-#define TV_GENERIC_DISPATCH(exp, func)                                  \
-  HPHP::CountableManip::func(                                           \
-    *reinterpret_cast<HPHP::RefCount*>(                                 \
-      (exp).m_data.num + HPHP::FAST_REFCOUNT_OFFSET                     \
-    )                                                                   \
-  )
+#define TV_GENERIC_DISPATCH_FAST(exp, func)                     \
+  reinterpret_cast<HPHP::HeaderWord<uint16_t,HPHP::Counted::Maybe>*>(\
+      (exp).m_data.num + HPHP::HeaderOffset                     \
+  )->func()
+
+#define TV_GENERIC_DISPATCH_SLOW(exp, func) \
+  [](HPHP::TypedValue tv) {                                     \
+    switch (tv.m_type) {                                        \
+      case HPHP::KindOfPersistentString:                        \
+      case HPHP::KindOfString: return tv.m_data.pstr->func();   \
+      case HPHP::KindOfPersistentArray:                         \
+      case HPHP::KindOfArray: return tv.m_data.parr->func();    \
+      case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
+      case HPHP::KindOfResource: return tv.m_data.pres->func(); \
+      case HPHP::KindOfRef: return tv.m_data.pref->func();      \
+      default:                                                  \
+        assert_flog(false, "Bad KindOf: {}", (size_t)tv.m_type);\
+    }                                                           \
+  }(exp)
+
+#ifdef DEBUG
+#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_SLOW(exp, func)
+#else
+#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_FAST(exp, func)
+#endif
 
 /*
  * Assertions on Cells and TypedValues.  Should usually only happen
@@ -61,7 +85,7 @@ bool refIsPlausible(Ref);
  * In a debug build, write garbage into a memory slot for a TypedValue
  * that should not be used anymore.
  */
-inline void tvDebugTrash(TypedValue* tv) {
+ALWAYS_INLINE void tvDebugTrash(TypedValue* tv) {
   if (debug) memset(tv, kTVTrashFill, sizeof *tv);
 }
 
@@ -69,7 +93,7 @@ inline void tvDebugTrash(TypedValue* tv) {
  * Returns: true if the supplied TypedValue is KindOfDouble or
  * KindOfInt64.  I.e. if it is a TypedNum.
  */
-inline bool isTypedNum(const TypedValue& tv) {
+ALWAYS_INLINE bool isTypedNum(const TypedValue& tv) {
   return tv.m_type == KindOfInt64 || tv.m_type == KindOfDouble;
 }
 
@@ -78,16 +102,15 @@ inline bool isTypedNum(const TypedValue& tv) {
  * a non-reference counted type, or is a KindOfString that points to a
  * static string.
  */
-inline bool isUncounted(const TypedValue& tv) {
+ALWAYS_INLINE bool isUncounted(const TypedValue& tv) {
   auto const uncounted = !isRefcountedType(tv.m_type) ||
     (tv.m_type == KindOfString && tv.m_data.pstr->isStatic());
   if (uncounted) assert(cellIsPlausible(tv));
   return uncounted;
 }
 
-// Assumes 'data' is live
-// Assumes 'isRefcountedType(type)'
-void tvDecRefHelper(DataType type, uint64_t datum) noexcept;
+typedef void(*RawDestructor)(void*);
+extern RawDestructor g_destructors[kDestrTableSize];
 
 /*
  * Returns true if decreffing the specified TypedValue will free heap-allocated
@@ -100,57 +123,76 @@ bool tvDecRefWillRelease(TypedValue* tv);
  * helper to be called. Note that there are cases where this function returns
  * true but tvDecRefWillRelease() will return false.
  */
-inline bool tvDecRefWillCallHelper(TypedValue* tv) {
+ALWAYS_INLINE bool tvDecRefWillCallHelper(TypedValue* tv) {
   return isRefcountedType(tv->m_type) &&
-    !TV_GENERIC_DISPATCH(*tv, hasMultipleRefs);
+         TV_GENERIC_DISPATCH(*tv, decWillRelease);
 }
 
-inline void tvDecRefStr(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefStr(TypedValue* tv) {
   assert(tv->m_type == KindOfString);
   decRefStr(tv->m_data.pstr);
 }
 
-inline void tvDecRefArr(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefArr(TypedValue* tv) {
   assert(tv->m_type == KindOfArray);
   decRefArr(tv->m_data.parr);
 }
 
-inline void tvDecRefObj(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefObj(TypedValue* tv) {
   assert(tv->m_type == KindOfObject);
   decRefObj(tv->m_data.pobj);
 }
 
-inline void tvDecRefRes(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefRes(TypedValue* tv) {
   assert(tv->m_type == KindOfResource);
   decRefRes(tv->m_data.pres);
 }
 
 // Assumes 'r' is live and points to a RefData
-inline void tvDecRefRefInternal(RefData* r) {
-  assert(tvIsPlausible(*r->tv()));
-  assert(r->tv()->m_type != KindOfRef);
-  assert(r->getRealCount() > 0);
+ALWAYS_INLINE void tvDecRefRefInternal(RefData* r) {
+  assert(cellIsPlausible(*r->tv()));
   decRefRef(r);
 }
 
 // Assumes 'tv' is live
-inline void tvDecRefRef(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefRef(TypedValue* tv) {
   assert(tv->m_type == KindOfRef);
   tvDecRefRefInternal(tv->m_data.pref);
 }
 
+// Assumes 'data' is live
+// Assumes 'isRefcountedType(type)'
+ALWAYS_INLINE void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
+  assert(type == KindOfString || type == KindOfArray ||
+         type == KindOfObject || type == KindOfResource ||
+         type == KindOfRef);
+  TypedValue tmp;
+  tmp.m_type = type;
+  tmp.m_data.num = datum;
+  if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
+    g_destructors[typeToDestrIdx(type)]((void*)datum);
+  }
+}
+
 // Assumes 'tv' is live
-inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
+ALWAYS_INLINE void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
   if (isRefcountedType(type)) {
     tvDecRefHelper(type, datum);
   }
 }
 
-inline void tvRefcountedDecRef(TypedValue v) {
+// Assumes 'tv' is live and unlikely to be a refcounted type
+ALWAYS_INLINE void tvUnlikelyRefcountedDecRef(TypedValue tv) {
+  if (UNLIKELY(isRefcountedType(tv.m_type))) {
+    tvDecRefHelper(tv.m_type, tv.m_data.num);
+  }
+}
+
+ALWAYS_INLINE void tvRefcountedDecRef(TypedValue v) {
   return tvRefcountedDecRefHelper(v.m_type, v.m_data.num);
 }
 
-inline void tvRefcountedDecRefNZ(TypedValue tv) {
+ALWAYS_INLINE void tvRefcountedDecRefNZ(TypedValue tv) {
   if (isRefcountedType(tv.m_type)) {
     TV_GENERIC_DISPATCH(tv, decRefCount);
   }
@@ -158,7 +200,7 @@ inline void tvRefcountedDecRefNZ(TypedValue tv) {
 
 // Assumes 'tv' is live
 // Assumes 'isRefcountedType(tv->m_type)'
-inline void tvDecRef(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRef(TypedValue* tv) {
   tvDecRefHelper(tv->m_type, tv->m_data.num);
 }
 
@@ -166,6 +208,9 @@ inline void tvDecRef(TypedValue* tv) {
 ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
   if (isRefcountedType(tv->m_type)) {
     tvDecRef(tv);
+    // If we're in debug mode, turn the entry into null so that the GC doesn't
+    // assert if it tries to follow it.
+    if (debug) tv->m_type = KindOfNull;
   }
 }
 
@@ -176,7 +221,7 @@ ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-inline TypedValue* tvBox(TypedValue* tv) {
+ALWAYS_INLINE TypedValue* tvBox(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(tv->m_type != KindOfRef);
   tv->m_data.pref = RefData::Make(*tv);
@@ -186,7 +231,7 @@ inline TypedValue* tvBox(TypedValue* tv) {
 
 // Assumes 'tv' is live
 // Assumes 'isRefcountedType(tv->m_type)'
-inline void tvIncRef(const TypedValue* tv) {
+ALWAYS_INLINE void tvIncRef(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(isRefcountedType(tv->m_type));
   TV_GENERIC_DISPATCH(*tv, incRefCount);
@@ -202,7 +247,7 @@ ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {
 // Assumes 'tv' is live
 // Assumes 'isRefcountedType(tv->m_type)'
 // Assumes 'tv' is not shared (ie KindOfRef or KindOfObject)
-inline void tvIncRefNotShared(TypedValue* tv) {
+ALWAYS_INLINE void tvIncRefNotShared(TypedValue* tv) {
   assert(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
   tv->m_type == KindOfObject ?
     tv->m_data.pobj->incRefCount() :
@@ -211,7 +256,7 @@ inline void tvIncRefNotShared(TypedValue* tv) {
 
 // Assumes 'tv' is live
 // Assumes 'tv.m_type == KindOfRef'
-inline void tvUnbox(TypedValue* tv) {
+ALWAYS_INLINE void tvUnbox(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(tv->m_type == KindOfRef);
   RefData* r = tv->m_data.pref;
@@ -230,7 +275,7 @@ inline void tvUnbox(TypedValue* tv) {
  * Copies the m_data and m_type fields, but not m_aux.  (For that you
  * need TypedValue::operator=.)
  */
-inline void tvCopy(const TypedValue& fr, TypedValue& to) {
+ALWAYS_INLINE void tvCopy(const TypedValue& fr, TypedValue& to) {
   assert(tvIsPlausible(fr));
   to.m_data.num = fr.m_data.num;
   to.m_type = fr.m_type;
@@ -240,11 +285,11 @@ inline void tvCopy(const TypedValue& fr, TypedValue& to) {
  * Equivalent of tvCopy for Cells and Vars.  These functions have the
  * same effects as tvCopy, but have some added assertions.
  */
-inline void cellCopy(const Cell fr, Cell& to) {
+ALWAYS_INLINE void cellCopy(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
 }
-inline void refCopy(const Ref fr, Ref& to) {
+ALWAYS_INLINE void refCopy(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   tvCopy(fr, to);
 }
@@ -254,7 +299,7 @@ inline void refCopy(const Ref fr, Ref& to) {
  * m_type fields, and increments reference count. Does not perform a
  * decRef on to.
  */
-inline void tvDup(const TypedValue& fr, TypedValue& to) {
+ALWAYS_INLINE void tvDup(const TypedValue& fr, TypedValue& to) {
   tvCopy(fr, to);
   tvRefcountedIncRef(&to);
 }
@@ -264,18 +309,18 @@ inline void tvDup(const TypedValue& fr, TypedValue& to) {
  * m_type fields, and increments the reference count. Does not perform
  * a decRef on the value that was overwritten.
  */
-inline void cellDup(const Cell fr, Cell& to) {
+ALWAYS_INLINE void cellDup(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
   tvRefcountedIncRef(&to);
 }
 
 /*
- * Duplicate a Ref from one location to another. Copies the m_data and
- * m_type fields and increments the reference count. Does not perform
- * as decRef on the value that was overwritten.
+ * Duplicate a Ref from one location to another. Copies the m_data and m_type
+ * fields and increments the reference count. Does not perform a decRef on the
+ * value that was overwritten.
  */
-inline void refDup(const Ref fr, Ref& to) {
+ALWAYS_INLINE void refDup(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   to.m_type = KindOfRef;
   to.m_data.pref = fr.m_data.pref;
@@ -284,18 +329,18 @@ inline void refDup(const Ref fr, Ref& to) {
 
 // Assumes 'tv' is dead
 // NOTE: this helper does not modify tv->m_aux
-inline void tvWriteNull(TypedValue* tv) {
+ALWAYS_INLINE void tvWriteNull(TypedValue* tv) {
   tv->m_type = KindOfNull;
 }
 
 // Assumes 'tv' is dead
 // NOTE: this helper does not modify tv->m_aux
-inline void tvWriteUninit(TypedValue* tv) {
+ALWAYS_INLINE void tvWriteUninit(TypedValue* tv) {
   tv->m_type = KindOfUninit;
 }
 
 // Assumes 'tv' is dead
-inline void tvWriteObject(ObjectData* pobj, TypedValue* tv) {
+ALWAYS_INLINE void tvWriteObject(ObjectData* pobj, TypedValue* tv) {
   tv->m_type = KindOfObject;
   tv->m_data.pobj = pobj;
   tv->m_data.pobj->incRefCount();
@@ -303,27 +348,27 @@ inline void tvWriteObject(ObjectData* pobj, TypedValue* tv) {
 
 // Like tvWriteObject, but does not increment ref-count. Used for transferring
 // object ownership.
-inline void tvMoveObject(ObjectData* pobj, TypedValue* tv) {
+ALWAYS_INLINE void tvMoveObject(ObjectData* pobj, TypedValue* tv) {
   tv->m_type = KindOfObject;
   tv->m_data.pobj = pobj;
 }
 
 // conditionally unbox tv
-inline Cell* tvToCell(TypedValue* tv) {
+ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
 
 // conditionally unbox tv, preserve constness.
-inline const Cell* tvToCell(const TypedValue* tv) {
+ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
 
 // assert that tv is cell
-inline Cell* tvAssertCell(TypedValue* tv) {
+ALWAYS_INLINE Cell* tvAssertCell(TypedValue* tv) {
   assert(cellIsPlausible(*tv));
   return tv;
 }
-inline const Cell* tvAssertCell(const TypedValue* tv) {
+ALWAYS_INLINE const Cell* tvAssertCell(const TypedValue* tv) {
   assert(cellIsPlausible(*tv));
   return tv;
 }
@@ -337,7 +382,7 @@ inline const Cell* tvAssertCell(const TypedValue* tv) {
  *
  * `to' must contain a live php value; use cellDup when it doesn't.
  */
-inline void tvSet(const Cell fr, TypedValue& inTo) {
+ALWAYS_INLINE void tvSet(const Cell fr, TypedValue& inTo) {
   assert(cellIsPlausible(fr));
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
@@ -347,7 +392,7 @@ inline void tvSet(const Cell fr, TypedValue& inTo) {
 }
 
 // like tvSet, but RHS is bool
-inline void tvSetBool(bool val, TypedValue& inTo) {
+ALWAYS_INLINE void tvSetBool(bool val, TypedValue& inTo) {
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
   auto const oldDatum = to->m_data.num;
@@ -357,7 +402,7 @@ inline void tvSetBool(bool val, TypedValue& inTo) {
 }
 
 // like tvSet, but RHS is int
-inline void tvSetInt(int64_t val, TypedValue& inTo) {
+ALWAYS_INLINE void tvSetInt(int64_t val, TypedValue& inTo) {
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
   auto const oldDatum = to->m_data.num;
@@ -367,7 +412,7 @@ inline void tvSetInt(int64_t val, TypedValue& inTo) {
 }
 
 // like tvSet, but RHS is double
-inline void tvSetDouble(double val, TypedValue& inTo) {
+ALWAYS_INLINE void tvSetDouble(double val, TypedValue& inTo) {
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
   auto const oldDatum = to->m_data.num;
@@ -385,7 +430,7 @@ inline void tvSetDouble(double val, TypedValue& inTo) {
  *
  * `to' must contain a live php value; use cellCopy when it doesn't.
  */
-inline void tvMove(const Cell fr, TypedValue& inTo) {
+ALWAYS_INLINE void tvMove(const Cell fr, TypedValue& inTo) {
   assert(cellIsPlausible(fr));
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
@@ -399,7 +444,7 @@ inline void tvMove(const Cell fr, TypedValue& inTo) {
  *
  * `to' must contain a live php value; use tvWriteNull when it doesn't.
  */
-inline void cellSetNull(Cell& to) {
+ALWAYS_INLINE void cellSetNull(Cell& to) {
   auto const oldType = to.m_type;
   auto const oldDatum = to.m_data.num;
   tvWriteNull(&to);
@@ -413,7 +458,7 @@ inline void cellSetNull(Cell& to) {
  *
  * `to' must contain a live php value; use tvWriteNull when it doesn't.
  */
-inline void tvSetNull(TypedValue& to) {
+ALWAYS_INLINE void tvSetNull(TypedValue& to) {
   cellSetNull(*tvToCell(&to));
 }
 
@@ -428,7 +473,7 @@ inline void tvSetNull(TypedValue& to) {
  *
  * Post: `to' is a Cell.
  */
-inline void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
+ALWAYS_INLINE void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
   assert(cellIsPlausible(fr));
   auto const oldType = to.m_type;
   auto const oldDatum = to.m_data.num;
@@ -443,7 +488,7 @@ inline void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
  * This function has the same effects as tvSetIgnoreRef, with stronger
  * assertions on `to'.
  */
-inline void cellSet(const Cell fr, Cell& to) {
+ALWAYS_INLINE void cellSet(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   assert(cellIsPlausible(to));
   tvSetIgnoreRef(fr, to);
@@ -460,7 +505,7 @@ inline void cellSet(const Cell fr, Cell& to) {
  *
  * Post: `to' is a Cell.
  */
-inline void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
+ALWAYS_INLINE void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
   assert(cellIsPlausible(fr));
   auto const oldType = to.m_type;
   auto const oldDatum = to.m_data.num;
@@ -475,7 +520,7 @@ inline void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
  * This function has the same effects as tvMoveIgnoreRef, with stronger
  * assertions on `to'.
  */
-inline void cellMove(const Cell fr, Cell& to) {
+ALWAYS_INLINE void cellMove(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   assert(cellIsPlausible(to));
   tvMoveIgnoreRef(fr, to);
@@ -483,7 +528,7 @@ inline void cellMove(const Cell fr, Cell& to) {
 
 // Assumes 'to' and 'fr' are live
 // Assumes that 'fr->m_type == KindOfRef'
-inline void tvBind(const TypedValue* fr, TypedValue* to) {
+ALWAYS_INLINE void tvBind(const TypedValue* fr, TypedValue* to) {
   assert(fr->m_type == KindOfRef);
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
@@ -492,7 +537,7 @@ inline void tvBind(const TypedValue* fr, TypedValue* to) {
 }
 
 // Assumes 'to' and 'fr' are live
-inline void tvBindRef(RefData* fr, TypedValue* to) {
+ALWAYS_INLINE void tvBindRef(RefData* fr, TypedValue* to) {
   auto const oldType  = to->m_type;
   auto const oldDatum = to->m_data.num;
   fr->incRefCount();
@@ -524,7 +569,7 @@ void tvDupWithRef(const TypedValue& frIn, TypedValue& dst) {
 }
 
 // Assumes 'to' is live
-inline void tvUnset(TypedValue* to) {
+ALWAYS_INLINE void tvUnset(TypedValue* to) {
   auto const oldType = to->m_type;
   auto const oldDatum = to->m_data.num;
   tvWriteUninit(to);
@@ -535,7 +580,7 @@ inline void tvUnset(TypedValue* to) {
  * Returns true if this tv is not a ref-counted type, or if it is a
  * ref-counted type and the object pointed to is static.
  */
-inline bool tvIsStatic(const TypedValue* tv) {
+ALWAYS_INLINE bool tvIsStatic(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   return !isRefcountedType(tv->m_type) || TV_GENERIC_DISPATCH(*tv, isStatic);
 }
@@ -547,48 +592,48 @@ inline bool tvIsStatic(const TypedValue* tv) {
  */
 
 // Assumes 'tv' is live
-inline Variant& tvAsVariant(TypedValue* tv) {
+ALWAYS_INLINE Variant& tvAsVariant(TypedValue* tv) {
   assert(tv != nullptr);
   assert(tvIsPlausible(*tv));
   return *(Variant*)(tv);
 }
 
-inline Variant& tvAsUninitializedVariant(TypedValue* tv) {
+ALWAYS_INLINE Variant& tvAsUninitializedVariant(TypedValue* tv) {
   // A special case, for use when constructing a variant and we don't
   // assume initialization.
   return *(Variant*)(tv);
 }
 
 // Assumes 'tv' is live
-inline const Variant& tvAsCVarRef(const TypedValue* tv) {
+ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue* tv) {
   return *(const Variant*)(tv);
 }
 
 // Assumes 'tv' is live
-inline Variant& cellAsVariant(Cell& cell) {
+ALWAYS_INLINE Variant& cellAsVariant(Cell& cell) {
   assert(cellIsPlausible(cell));
   return *(Variant*)(&cell);
 }
 
 // Assumes 'tv' is live
-inline const Variant& cellAsCVarRef(const Cell& cell) {
+ALWAYS_INLINE const Variant& cellAsCVarRef(const Cell& cell) {
   assert(cellIsPlausible(cell));
   return *(const Variant*)(&cell);
 }
 
 // Assumes 'tv' is live
-inline Variant& refAsVariant(Ref& ref) {
+ALWAYS_INLINE Variant& refAsVariant(Ref& ref) {
   assert(refIsPlausible(ref));
   return *(Variant*)(&ref);
 }
 
 // Assumes 'tv' is live
-inline const Variant& refAsCVarRef(const Ref& ref) {
+ALWAYS_INLINE const Variant& refAsCVarRef(const Ref& ref) {
   assert(refIsPlausible(ref));
   return *(const Variant*)(&ref);
 }
 
-inline bool tvIsStronglyBound(const TypedValue* tv) {
+ALWAYS_INLINE bool tvIsStronglyBound(const TypedValue* tv) {
   return (tv->m_type == KindOfRef && tv->m_data.pref->isReferenced());
 }
 
@@ -610,14 +655,14 @@ void tvDupFlattenImpl(const TypedValue* fr, TypedValue* to, Fun shouldFlatten) {
 }
 
 // Assumes 'fr' is live and 'to' is dead, and does not mutate to->m_aux
-inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to) {
+ALWAYS_INLINE void tvDupFlattenVars(const TypedValue* fr, TypedValue* to) {
   tvDupFlattenImpl(fr, to, [&](RefData* ref) {
     return !ref->isReferenced();
   });
 }
 
 // Assumes 'fr' is live and 'to' is dead, and does not mutate to->m_aux
-inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
+ALWAYS_INLINE void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
                              const ArrayData* container) {
   assert(container);
   tvDupFlattenImpl(fr, to, [&](RefData* ref) {
@@ -625,17 +670,34 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
   });
 }
 
-inline bool cellIsNull(const Cell* tv) {
+ALWAYS_INLINE bool cellIsNull(const Cell* tv) {
   assert(cellIsPlausible(*tv));
   return isNullType(tv->m_type);
 }
 
-inline bool tvIsString(const TypedValue* tv) {
+ALWAYS_INLINE bool tvIsString(const TypedValue* tv) {
   return (tv->m_type & KindOfStringBit) != 0;
 }
 
-inline void tvUnboxIfNeeded(TypedValue* tv) {
+ALWAYS_INLINE void tvUnboxIfNeeded(TypedValue* tv) {
   if (tv->m_type == KindOfRef) tvUnbox(tv);
+}
+
+// Used when adding an array element.
+ALWAYS_INLINE void initVal(TypedValue& tv, Cell v) {
+  cellDup(v, tv);
+  if (UNLIKELY(tv.m_type == KindOfUninit)) {
+    tv.m_type = KindOfNull;
+  }
+}
+
+// Used when changing an array element.
+ALWAYS_INLINE void setVal(TypedValue& tv, Cell src) {
+  auto const dst = tvToCell(&tv);
+  if (UNLIKELY(src.m_type == KindOfUninit)) {
+    src.m_type = KindOfNull;
+  }
+  cellSet(src, *dst);
 }
 
 /*
@@ -654,6 +716,16 @@ double tvCastToDouble(TypedValue* tv);
 StringData* tvCastToString(const TypedValue* tv);
 bool tvCanBeCoercedToNumber(TypedValue* tv);
 
+/*
+ * If the current function (func, a builtin) was called in a strict context then
+ * verify that tv is the correct type for argNum or attempt to convert it to
+ * the correct type, fataling on failure.
+ *
+ * If PHP7_ScalarType is false or EnableHipHopSyntax is true, this call does
+ * nothing.
+ */
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
+
 #define X(kind) \
 void tvCastTo##kind##InPlace(TypedValue* tv); \
 bool tvCoerceParamTo##kind##InPlace(TypedValue* tv); \
@@ -670,10 +742,7 @@ X(NullableObject)
 X(Resource)
 #undef X
 
-typedef void(*RawDestructor)(void*);
-extern RawDestructor g_destructors[kDestrTableSize];
-
-inline void tvCastInPlace(TypedValue *tv, DataType DType) {
+ALWAYS_INLINE void tvCastInPlace(TypedValue *tv, DataType DType) {
 #define X(kind) \
   if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
   X(Boolean)
@@ -687,7 +756,7 @@ inline void tvCastInPlace(TypedValue *tv, DataType DType) {
   not_reached();
 }
 
-inline bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
+ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
 #define X(kind) \
   if (DType == KindOf##kind) return tvCoerceParamTo##kind##InPlace(tv);
   X(Boolean)
@@ -705,14 +774,22 @@ inline bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
  * TVCoercionException is thrown to indicate that a parameter could not be
  * coerced when calling an HNI builtin function.
  */
-struct TVCoercionException : public std::runtime_error {
+struct TVCoercionException : std::runtime_error {
   TVCoercionException(const Func* func, int arg_num,
                       DataType actual, DataType expected);
-
   TypedValue tv() const { return m_tv; }
 private:
-  TypedValue m_tv;
+  req::root<TypedValue> m_tv;
 };
+
+// for debugging & instrumentation only! otherwise, stick to the
+// predicates defined in countable.h
+ALWAYS_INLINE RefCount tvGetCount(const TypedValue* tv) {
+  assert(isRefcountedType(tv->m_type));
+  return reinterpret_cast<const HeaderWord<>*>(
+    reinterpret_cast<const char*>(tv->m_data.parr) + HeaderOffset
+  )->count;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

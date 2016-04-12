@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/pipe.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/temp-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -41,7 +42,6 @@
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/static-content-cache.h"
-#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -65,9 +65,9 @@
 #define REGISTER_CONSTANT(name, value)                                         \
   Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
 
-#define REGISTER_STRING_CONSTANT(name, value)                                  \
-  Native::registerConstant<KindOfStaticString>(makeStaticString(#name),        \
-                                               value.get())                    \
+#define REGISTER_STRING_CONSTANT(name, value)       \
+  Native::registerConstant<KindOfPersistentString>( \
+      makeStaticString(#name), value.get())
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   auto f = dyn_cast_or_null<File>(handle);              \
@@ -180,7 +180,7 @@ static int statSyscall(
     const String& path,
     struct stat* buf,
     bool useFileCache = false) {
-  bool isRelative = path.charAt(0) != '/';
+  bool isRelative = !FileUtil::isAbsolutePath(path.slice());
   int pathIndex = 0;
   Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
   if (!w) return -1;
@@ -411,7 +411,7 @@ Variant HHVM_FUNCTION(fgetss,
 
 Variant fscanfImpl(const Resource& handle,
                    const String& format,
-                   const std::vector<Variant*>& args) {
+                   const req::vector<Variant*>& args) {
   CHECK_HANDLE(handle, f);
   String line = f->readLine();
   if (line.length() == 0) {
@@ -429,8 +429,8 @@ TypedValue* HHVM_FN(fscanf)(ActRec* ar) {
   if (ar->numArgs() < 2) {
     return arReturn(ar, false);
   }
-
-  std::vector<Variant*> args;
+  req::vector<Variant*> args;
+  args.reserve(ar->numArgs() - 2);
   for (int i = 2; i < ar->numArgs(); ++i) {
     args.push_back(getArg<KindOfRef>(ar, i));
   }
@@ -537,12 +537,14 @@ Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,
                       const String& delimiter /* = "," */,
-                      const String& enclosure /* = "\"" */) {
+                      const String& enclosure /* = "\"" */,
+                      const String& escape /* = "\\" */) {
   FCSV_CHECK_ARG(delimiter);
   FCSV_CHECK_ARG(enclosure);
+  FCSV_CHECK_ARG(escape);
 
   CHECK_HANDLE_RET_NULL(handle, f);
-  return f->writeCSV(fields, delimiter_char, enclosure_char);
+  return f->writeCSV(fields, delimiter_char, enclosure_char, escape_char);
 }
 
 Variant HHVM_FUNCTION(fgetcsv,
@@ -652,10 +654,11 @@ Variant HHVM_FUNCTION(file_put_contents,
       break;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = data.toArray();
       for (ArrayIter iter(arr); iter; ++iter) {
-        String value = iter.second();
+        auto const value = iter.second().toString();
         if (!value.empty()) {
           numbytes += value.size();
           int written = file->writeImpl(value.data(), value.size());
@@ -679,7 +682,7 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
     case KindOfRef: {
       String value = data.toString();
@@ -788,6 +791,8 @@ bool HHVM_FUNCTION(move_uploaded_file,
   if (!transport || !transport->isUploadedFile(filename)) {
     return false;
   }
+
+  CHECK_PATH_FALSE(destination, 2);
 
   if (HHVM_FN(rename)(filename, destination)) {
     return true;
@@ -907,6 +912,9 @@ Variant HHVM_FUNCTION(fileinode,
 Variant HHVM_FUNCTION(filesize,
                       const String& filename) {
   CHECK_PATH(filename, 1);
+  if (filename.empty()) {
+    return false;
+  }
   if (StaticContentCache::TheFileCache) {
     int64_t size =
       StaticContentCache::TheFileCache->fileSize(filename.data(),
@@ -1093,11 +1101,13 @@ static VFileType lookupVirtualFile(const String& filename) {
 
   String cwd;
   std::string root;
-  bool isRelative = (filename.charAt(0) != '/');
+  bool isRelative = !FileUtil::isAbsolutePath(filename.slice());
   if (isRelative) {
     cwd = g_context->getCwd();
     root = RuntimeOption::SourceRoot;
-    if (cwd.empty() || cwd[cwd.size() - 1] != '/') root.pop_back();
+    if (cwd.empty() || FileUtil::isDirSeparator(cwd[cwd.size() - 1])) {
+      root.pop_back();
+    }
   }
 
   if (!isRelative || !root.compare(cwd.data())) {
@@ -1226,13 +1236,21 @@ Variant HHVM_FUNCTION(readlink_internal,
 
 Variant HHVM_FUNCTION(readlink,
                       const String& path) {
+  CHECK_PATH(path, 1);
   return HHVM_FN(readlink_internal)(path, true);
 }
 
 Variant HHVM_FUNCTION(realpath,
                       const String& path) {
   CHECK_PATH(path, 1);
-  String translated = File::TranslatePath(path);
+
+  String translated;
+  if (path.empty()) {
+    translated = File::TranslatePath(g_context->getCwd());
+  } else {
+    translated = File::TranslatePath(path);
+  }
+
   if (translated.empty()) {
     return false;
   }
@@ -1519,6 +1537,10 @@ bool HHVM_FUNCTION(touch,
                    int64_t atime /* = 0 */) {
   CHECK_PATH_FALSE(filename, 1);
 
+  if (filename.empty()) {
+    return false;
+  }
+
   // If filename points to a user file, invoke UserStreamWrapper::touch(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
@@ -1655,7 +1677,7 @@ String HHVM_FUNCTION(basename,
   const char *comp, *cend;
   comp = cend = c;
   for (int cnt = path.size(); cnt > 0; --cnt, ++c) {
-    if (*c == '/') {
+    if (FileUtil::isDirSeparator(*c)) {
       if (state == 1) {
         state = 0;
         cend = c;
@@ -1700,6 +1722,7 @@ bool HHVM_FUNCTION(fnmatch,
 Variant HHVM_FUNCTION(glob,
                       const String& pattern,
                       int flags /* = 0 */) {
+  CHECK_PATH(pattern, 1);
   glob_t globbuf;
   int cwd_skip = 0;
   memset(&globbuf, 0, sizeof(glob_t));
@@ -1788,6 +1811,7 @@ Variant HHVM_FUNCTION(tempnam,
                       const String& dir,
                       const String& prefix) {
   CHECK_PATH(dir, 1);
+  CHECK_PATH(prefix, 2);
   String tmpdir = dir, trailing_slash = "/";
   if (tmpdir.empty() || !HHVM_FN(is_dir)(tmpdir) ||
       !HHVM_FN(is_writable)(tmpdir)) {
@@ -1813,11 +1837,11 @@ Variant HHVM_FUNCTION(tempnam,
 }
 
 Variant HHVM_FUNCTION(tmpfile) {
-  FILE *f = tmpfile();
-  if (f) {
-    return Variant(req::make<PlainFile>(f));
+  auto file = req::make<TempFile>(true);
+  if (!file->valid()) {
+    return false;
   }
-  return false;
+  return Variant(file);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1839,6 +1863,7 @@ bool HHVM_FUNCTION(mkdir,
 bool HHVM_FUNCTION(rmdir,
                    const String& dirname,
                    const Variant& context /* = null */) {
+  CHECK_PATH_FALSE(dirname, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   if (!w) return false;
   int options = 0;
@@ -1932,6 +1957,7 @@ bool StringAscending(const String& s1, const String& s2) {
 
 Variant HHVM_FUNCTION(dir,
                       const String& directory) {
+  CHECK_PATH(directory, 1);
   Variant dir = HHVM_FN(opendir)(directory);
   if (same(dir, false)) {
     return false;
@@ -1945,6 +1971,7 @@ Variant HHVM_FUNCTION(dir,
 Variant HHVM_FUNCTION(opendir,
                       const String& path,
                       const Variant& context /* = null */) {
+  CHECK_PATH(path, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
   if (!w) return false;
   auto p = w->opendir(path);
@@ -2078,6 +2105,14 @@ void StandardExtension::initFile() {
   Native::registerConstant(s_STDIN.get(),  BuiltinFiles::GetSTDIN);
   Native::registerConstant(s_STDOUT.get(), BuiltinFiles::GetSTDOUT);
   Native::registerConstant(s_STDERR.get(), BuiltinFiles::GetSTDERR);
+
+  HHVM_RC_INT(INI_SCANNER_NORMAL, k_INI_SCANNER_NORMAL);
+  HHVM_RC_INT(INI_SCANNER_RAW,    k_INI_SCANNER_RAW);
+
+  HHVM_RC_INT(PATHINFO_BASENAME,  PHP_PATHINFO_BASENAME);
+  HHVM_RC_INT(PATHINFO_DIRNAME,   PHP_PATHINFO_DIRNAME);
+  HHVM_RC_INT(PATHINFO_EXTENSION, PHP_PATHINFO_EXTENSION);
+  HHVM_RC_INT(PATHINFO_FILENAME,  PHP_PATHINFO_FILENAME);
 
   HHVM_FE(fopen);
   HHVM_FE(popen);

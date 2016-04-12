@@ -1,0 +1,4 @@
+4: enum MyEnum: int {
+5:   FirstVal = 0;
+6:   SndVal = 1;
+7:   ThirdVal = 2;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,9 @@
 
 #ifndef incl_HPHP_JIT_ALIGNMENT_H_
 #define incl_HPHP_JIT_ALIGNMENT_H_
+
+#include <cstdint>
+#include <string>
 
 namespace HPHP { namespace jit {
 
@@ -60,6 +63,23 @@ enum class Alignment : uint32_t {
   SmashJmp,
   SmashJcc,
   SmashJccAndJmp,
+};
+
+constexpr auto kNumAlignments =
+  static_cast<size_t>(Alignment::SmashJccAndJmp) + 1;
+
+/*
+ * Under most architectures, the Alignments can be expressed by stipulating
+ * that the code region given by
+ *
+ *    [frontier + offset, nbytes)
+ *
+ * fits into the nearest `align'-aligned and -sized line.
+ */
+struct AlignInfo {
+  size_t align;
+  size_t nbytes;
+  size_t offset;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

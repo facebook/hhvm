@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -175,6 +175,17 @@ inline void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   m_srcs[i] = newSrc;
 }
 
+inline void IRInstruction::setSrcs(uint32_t numSrcs, SSATmp** newSrcs) {
+  m_numSrcs = numSrcs;
+  m_srcs = newSrcs;
+}
+
+inline void IRInstruction::deleteSrc(uint32_t i) {
+  always_assert(i < numSrcs());
+  std::copy(m_srcs + i + 1, m_srcs + m_numSrcs, m_srcs + i);
+  --m_numSrcs;
+}
+
 inline void IRInstruction::setDst(SSATmp* newDst) {
   assertx(hasDst());
   m_dest = newDst;
@@ -185,6 +196,13 @@ inline void IRInstruction::setDsts(uint32_t numDsts, SSATmp** newDsts) {
   assertx(naryDst());
   m_numDsts = numDsts;
   m_dsts = newDsts;
+}
+
+inline void IRInstruction::deleteDst(uint32_t i) {
+  always_assert(i < numDsts());
+  assertx(naryDst());
+  std::copy(m_dsts + i + 1, m_dsts + m_numDsts, m_dsts + i);
+  --m_numDsts;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

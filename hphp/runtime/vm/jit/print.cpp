@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,21 +21,30 @@
 #include <algorithm>
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-util.h"
+
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
+
+#include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/cfg.h"
+
+#include "hphp/vixl/a64/disasm-a64.h"
 
 namespace HPHP { namespace jit {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 namespace {
+
+///////////////////////////////////////////////////////////////////////////////
 
 // Helper for pretty-printing punctuation.
 std::string punc(const char* str) {
@@ -70,7 +79,7 @@ void printLabel(std::ostream& os, const Block* block) {
     os << "<Catch>";
   } else {
     switch (block->hint()) {
-      case Block::Hint::Unused:        os << "<Unused>"; break;
+      case Block::Hint::Unused:      os << "<Unused>"; break;
       case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
       case Block::Hint::Likely:      os << "<Likely>"; break;
       default:
@@ -79,13 +88,40 @@ void printLabel(std::ostream& os, const Block* block) {
   }
   os << color(ANSI_COLOR_END);
 }
-} // namespace
 
-//////////////////////////////////////////////////////////////////////
+// Simple tuple-like class used to order instructions for printing.
+struct InstAreaRange {
+  // order by instruction index, area then instruction range.
+  bool operator<(const InstAreaRange& other) const {
+    return (m_instIdx < other.m_instIdx ||
+            (m_instIdx == other.m_instIdx &&
+             (m_area < other.m_area ||
+              (m_area == other.m_area &&
+               (m_instRange.begin() < other.m_instRange.begin() ||
+                (m_instRange.begin() == other.m_instRange.begin() &&
+                 (m_instRange.end() < other.m_instRange.end())))))));
+  }
 
-/*
- * IRInstruction
- */
+  InstAreaRange(size_t instIdx,
+                AreaIndex area,
+                TcaRange instRange)
+      : m_instIdx(instIdx),
+        m_area(area),
+        m_instRange(instRange)
+    { }
+
+  size_t m_instIdx{0};
+  AreaIndex m_area{AreaIndex::Main};
+  TcaRange m_instRange;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// IRInstruction.
+
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* constraints) {
   os << color(ANSI_COLOR_CYAN)
@@ -180,7 +216,8 @@ void print(const IRInstruction* inst) {
   std::cerr << std::endl;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// SSATmp.
 
 void print(std::ostream& os, const SSATmp* tmp) {
   if (tmp->inst()->is(DefConst)) {
@@ -202,16 +239,123 @@ void print(const SSATmp* tmp) {
   std::cerr << std::endl;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Block.
 
-/*
- * Block
- */
 static constexpr auto kIndent = 4;
 
 void disasmRange(std::ostream& os, TCA begin, TCA end) {
-  mcg->backEnd().disasmRange(os, kIndent, dumpIREnabled(kExtraLevel),
-                             begin, end);
+  assertx(begin <= end);
+  bool const dumpIR = dumpIREnabled(kExtraLevel);
+
+  switch (arch()) {
+    case Arch::X64: {
+      Disasm disasm(Disasm::Options().indent(kIndent + 4)
+                    .printEncoding(dumpIR)
+                    .color(color(ANSI_COLOR_BROWN)));
+      disasm.disasm(os, begin, end);
+      return;
+    }
+
+    case Arch::ARM: {
+      vixl::Decoder dec;
+      vixl::PrintDisassembler disasm(os, kIndent + 4, dumpIR,
+                                     color(ANSI_COLOR_BROWN));
+      dec.AppendVisitor(&disasm);
+      for (; begin < end; begin += vixl::kInstructionSize) {
+        dec.Decode(vixl::Instruction::Cast(begin));
+      }
+      return;
+    }
+
+    case Arch::PPC64:
+      not_implemented();
+  }
+  not_reached();
+}
+
+template <typename T>
+std::vector<TcaRange> makeSortedRanges(const T& itrPair) {
+  std::vector<TcaRange> ranges;
+  for (auto itr = itrPair.first; itr != itrPair.second; ++itr) {
+    ranges.push_back(itr->second);
+  }
+  std::sort(ranges.begin(),
+            ranges.end(),
+            [](const TcaRange& a, const TcaRange& b) {
+              return a.begin() < b.begin();
+            });
+  return ranges;
+}
+
+void printIRInstruction(std::ostream& os,
+                        const IRInstruction& inst,
+                        const GuardConstraints* guards,
+                        BCMarker& curMarker,
+                        const char*& markerEndl) {
+  if (inst.marker() != curMarker) {
+    std::ostringstream mStr;
+    auto const& newMarker = inst.marker();
+    if (!newMarker.hasFunc()) {
+      os << color(ANSI_COLOR_BLUE)
+         << std::string(kIndent, ' ')
+         << "--- invalid marker"
+         << color(ANSI_COLOR_END)
+         << '\n';
+    } else {
+      auto func = newMarker.func();
+      if (!curMarker.hasFunc() || func != curMarker.func()) {
+        func->prettyPrint(mStr, Func::PrintOpts().noFpi());
+      }
+      mStr << std::string(kIndent, ' ')
+           << newMarker.show()
+           << '\n';
+
+      auto bcOffset = newMarker.bcOff();
+      func->unit()->prettyPrint(
+        mStr, Unit::PrintOpts()
+        .range(bcOffset, bcOffset+1)
+        .noLineNumbers()
+        .noFuncs()
+        .indent(0));
+      std::vector<std::string> vec;
+      folly::split('\n', mStr.str(), vec);
+      os << markerEndl;
+      markerEndl = "\n";
+      for (auto& s : vec) {
+        if (s.empty()) continue;
+        os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
+      }
+    }
+
+    curMarker = newMarker;
+  }
+
+  if (inst.op() == DefLabel) {
+    // print phi pseudo-instructions
+    for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+      os << std::string(kIndent +
+                        folly::format("({}) ", inst.id()).str().size(),
+                        ' ');
+      auto dst = inst.dst(i);
+      jit::print(os, dst);
+      os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
+         << color(ANSI_COLOR_END);
+      bool first = true;
+      inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
+          if (!first) os << punc(", ");
+          first = false;
+          printSrc(os, jmp, i);
+          os << punc("@");
+          printLabel(os, jmp->block());
+        });
+      os << '\n';
+    }
+  }
+
+  os << std::string(kIndent, ' ');
+  jit::print(os, &inst, guards);
+  os << '\n';
 }
 
 void print(std::ostream& os, const Block* block, AreaIndex area,
@@ -220,12 +364,17 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
   BCMarker dummy;
   BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
-  TcaRange blockRange = asmInfo ? asmInfo->blockRangesForArea(area)[block]
-                                : TcaRange { nullptr, nullptr };
-
   os << '\n' << std::string(kIndent - 3, ' ');
   printLabel(os, block);
-  os << punc(":");
+  os << punc(":") << " [profCount=" << block->profCount() << "]";
+
+  switch (block->hint()) {
+    case Block::Hint::Unused:   os << "<Unused>";   break;
+    case Block::Hint::Unlikely: os << "<Unlikely>"; break;
+    case Block::Hint::Likely:   os << "<Likely>";   break;
+    default: break;
+  }
+
   auto& preds = block->preds();
   if (!preds.empty()) {
     os << " (preds";
@@ -242,108 +391,96 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
   }
 
   const char* markerEndl = "";
-  for (auto it = block->begin(); it != block->end();) {
-    auto& inst = *it; ++it;
-
-    if (inst.marker() != curMarker) {
-      std::ostringstream mStr;
-      auto const& newMarker = inst.marker();
-      if (!newMarker.hasFunc()) {
-        os << color(ANSI_COLOR_BLUE)
-           << std::string(kIndent, ' ')
-           << "--- invalid marker"
-           << color(ANSI_COLOR_END)
-           << '\n';
-      } else {
-        auto func = newMarker.func();
-        if (!curMarker.hasFunc() || func != curMarker.func()) {
-          func->prettyPrint(mStr, Func::PrintOpts().noFpi());
-        }
-        mStr << std::string(kIndent, ' ')
-             << newMarker.show()
-             << '\n';
-
-        auto bcOffset = newMarker.bcOff();
-        func->unit()->prettyPrint(
-          mStr, Unit::PrintOpts()
-          .range(bcOffset, bcOffset+1)
-          .noLineNumbers()
-          .noFuncs()
-          .indent(0));
-        std::vector<std::string> vec;
-        folly::split('\n', mStr.str(), vec);
-        os << markerEndl;
-        markerEndl = "\n";
-        for (auto& s : vec) {
-          if (s.empty()) continue;
-          os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
-        }
-      }
-
-      curMarker = newMarker;
-    }
-
-    if (inst.op() == DefLabel) {
-      // print phi pseudo-instructions
-      for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
-        os << std::string(kIndent +
-                          folly::format("({}) ", inst.id()).str().size(),
-                          ' ');
-        auto dst = inst.dst(i);
-        jit::print(os, dst);
-        os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
-           << color(ANSI_COLOR_END);
-        bool first = true;
-        inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
-            if (!first) os << punc(", ");
-            first = false;
-            printSrc(os, jmp, i);
-            os << punc("@");
-            printLabel(os, jmp->block());
-          });
-        os << '\n';
-      }
-    }
-
-    os << std::string(kIndent, ' ');
-    jit::print(os, &inst, guards);
-    os << '\n';
-
-    if (asmInfo) {
-      // There can be asm ranges in areas other than the one this blocks claims
-      // to be in so we have to iterate all the areas to be sure to get
-      // everything.
-      for (auto i = 0; i < kNumAreas; ++i) {
-        AreaIndex currentArea = static_cast<AreaIndex>(i);
-        TcaRange instRange = asmInfo->instRangesForArea(currentArea)[inst];
-        if (!instRange.empty()) {
-          os << std::string(kIndent + 4, ' ') << areaAsString(currentArea);
-          os << ":\n";
-          disasmRange(os, instRange.begin(), instRange.end());
-          os << '\n';
-          if (currentArea == area) {
-            // FIXME: this used to be an assertion
-            auto things_are_ok =
-              instRange.end() >= blockRange.start() &&
-              instRange.end() <= blockRange.end();
-            if (things_are_ok) {
-              blockRange = TcaRange(instRange.end(), blockRange.end());
-            } else {
-              // Don't crash; do something broken instead.
-              os << "<note: print range is probably incorrect right now>\n";
-            }
-          }
-        }
-      }
-    }
-  }
 
   if (asmInfo) {
-    // Print code associated with the block that isn't tied to any instruction.
-    if (!blockRange.empty()) {
-      os << std::string(kIndent, ' ') << punc("A:") << "\n";
-      disasmRange(os, blockRange.start(), blockRange.end());
-      os << '\n';
+    std::vector<const IRInstruction*> instrs;
+    std::vector<InstAreaRange> instRanges;
+    TcaRange lastRange[kNumAreas];
+    size_t instIdx = 0;
+
+    // Collect all the instruction ranges for the current block and sort
+    // them.  Entries will be sorted by instruction index, area then machine
+    // code pc.  This reflects the order in which code will be printed.
+    // IR instructions with no associated assembly will still get entries
+    // in the instRanges vector so they will be printed too (they just get
+    // an empty machine code range).
+    for (auto it = block->begin(); it != block->end(); ++it, ++instIdx) {
+      const auto& inst = *it;
+      const size_t lastInstRangesSize = instRanges.size();
+      instrs.push_back(&inst);  // Map back to IRInstruction from index.
+
+      for (auto i = 0; i < kNumAreas; ++i) {
+        const auto instArea = static_cast<AreaIndex>(i);
+        auto rngs = asmInfo->instRangesForArea(instArea)[inst];
+        for (auto itr = rngs.first; itr != rngs.second; ++itr) {
+          instRanges.push_back(InstAreaRange(instIdx,
+                                             instArea,
+                                             itr->second));
+          lastRange[(int)instArea] = itr->second;
+        }
+      }
+
+      // Add an entry for IRInstructions that have no associated machine
+      // code.  Use the end address of the last instruction range to assign
+      // an empty range to this element.
+      if (instRanges.size() == lastInstRangesSize) {
+        instRanges.push_back(
+          InstAreaRange(instIdx,
+                        AreaIndex::Main,
+                        TcaRange(lastRange[(int)AreaIndex::Main].end(),
+                                 lastRange[(int)AreaIndex::Main].end())));
+      }
+    }
+
+    std::sort(instRanges.begin(), instRanges.end());
+
+    const IRInstruction* lastInst = nullptr;
+    AreaIndex lastArea = AreaIndex::Main;
+    bool printArea = false;
+    for (auto itr = instRanges.begin(); itr != instRanges.end(); ++itr) {
+      auto currInstIdx = itr->m_instIdx;
+      auto currInst = instrs[currInstIdx];
+      auto currArea = itr->m_area;
+      auto instRange = itr->m_instRange;
+      if (lastInst != currInst) {
+        if (lastInst && !lastRange[(int)currArea].empty()) os << "\n";
+        printIRInstruction(os, *currInst, guards, curMarker, markerEndl);
+        printArea = true;
+        lastInst = currInst;
+        lastRange[(int)currArea] = TcaRange{nullptr,nullptr};
+      }
+      if (printArea || currArea != lastArea) {
+        if (!instRange.empty()) {
+          if (!printArea) os << "\n";
+          os << std::string(kIndent + 4, ' ') << areaAsString(currArea);
+          os << ":\n";
+        }
+        lastArea = currArea;
+        printArea = false;
+        lastRange[(int)currArea] = TcaRange{nullptr,nullptr};
+      }
+
+      const auto lastEnd = lastRange[(int)currArea].end();
+
+      if (lastEnd && lastEnd != instRange.begin()) {
+        // There may be gaps between instruction ranges that have been
+        // added by the relocator, e.g. adding nops.  This check will
+        // determine if the gap belongs to another instruction or not.
+        // If it doesn't belong to any other instruction then print it.
+        if (!asmInfo->instRangeExists(currArea,
+                                      TcaRange(lastEnd, instRange.begin()))) {
+          disasmRange(os, lastEnd, instRange.begin());
+        } else {
+          os << "\n";
+        }
+      }
+      disasmRange(os, instRange.begin(), instRange.end());
+      lastRange[(int)currArea] = instRange;
+    }
+    os << "\n";
+  } else {
+    for (auto it = block->begin(); it != block->end(); ++it) {
+      printIRInstruction(os, *it, guards, curMarker, markerEndl);
     }
   }
 
@@ -369,7 +506,8 @@ std::string Block::toString() const {
   return out.str();
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Unit.
 
 void printOpcodeStats(std::ostream& os, const BlockList& blocks) {
   uint32_t counts[kNumOpcodes];
@@ -388,9 +526,6 @@ void printOpcodeStats(std::ostream& os, const BlockList& blocks) {
   os << '\n';
 }
 
-/*
- * Unit
- */
 void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
            const GuardConstraints* guards) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
@@ -500,8 +635,9 @@ std::string banner(const char* caption) {
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
-void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
-               const GuardConstraints* guards) {
+void printUnit(int level, const IRUnit& unit, const char* caption,
+               AsmInfo* ai,
+               const GuardConstraints* guards, Annotations* annotations) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     str << banner(caption);
@@ -510,10 +646,12 @@ void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
     if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level)) {
       HPHP::Trace::traceRelease("%s\n", str.str().c_str());
     }
-    if (RuntimeOption::EvalDumpIR >= level) {
-      mcg->annotations().emplace_back(caption, std::move(str.str()));
+    if (annotations && RuntimeOption::EvalDumpIR >= level) {
+      annotations->emplace_back(caption, str.str());
     }
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}

@@ -25,8 +25,6 @@
 #include "gd.h"
 #include "gdhelpers.h"
 
-#include "php.h"
-
 #define MAX_XBM_LINE_SIZE 255
 
 /* {{{ gdImagePtr gdImageCreateFromXbm */
@@ -163,10 +161,10 @@ void gdCtxPrintf(gdIOCtx * out, const char *format, ...)
 	va_list args;
 
 	va_start(args, format);
-	len = vspprintf(&buf, 0, format, args);
+	len = HPHP::vspprintf(&buf, 0, format, args);
 	va_end(args);
 	out->putBuf(out, buf, len);
-	efree(buf);
+	gdFree(buf);
 }
 /* }}} */
 
@@ -180,11 +178,11 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 	name = file_name;
 	if ((f = strrchr(name, '/')) != NULL) name = f+1;
 	if ((f = strrchr(name, '\\')) != NULL) name = f+1;
-	name = estrdup(name);
+	name = gdEstrdup(name);
 	if ((f = strrchr(name, '.')) != NULL && !strcasecmp(f, ".XBM")) *f = '\0';
 	if ((l = strlen(name)) == 0) {
-		efree(name);
-		name = estrdup("image");
+		gdFree(name);
+		name = gdEstrdup("image");
 	} else {
 		for (i=0; i<l; i++) {
 			/* only in C-locale isalnum() would work */
@@ -198,7 +196,7 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 	gdCtxPrintf(out, "#define %s_height %d\n", name, gdImageSY(image));
 	gdCtxPrintf(out, "static unsigned char %s_bits[] = {\n  ", name);
 
-	efree(name);
+	gdFree(name);
 
 	b = 1;
 	p = 0;

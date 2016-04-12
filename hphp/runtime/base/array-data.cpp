@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,21 +63,21 @@ ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
-  if (arr->empty()) return staticEmptyArray();
+  if (arr->empty() && !arr->isDict()) return staticEmptyArray();
   auto key = GetScalarArrayKey(arr);
   return GetScalarArray(arr, key);
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
                                      const ScalarArrayKey& key) {
-  if (arr->empty()) return staticEmptyArray();
+  if (arr->empty() && !arr->isDict()) return staticEmptyArray();
   assert(key == GetScalarArrayKey(arr));
 
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData* ad;
 
-    if (arr->isVectorData() && !arr->isPacked()) {
+    if (arr->isVectorData() && !arr->isPacked() && !arr->isDict()) {
       ad = PackedArray::ConvertStatic(arr);
     } else {
       ad = arr->copyStatic();
@@ -92,15 +92,26 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
 //////////////////////////////////////////////////////////////////////
 
 static ArrayData* ZSetIntThrow(ArrayData* ad, int64_t k, RefData* v) {
-  throw FatalErrorException("Unimplemented ArrayData::ZSetInt");
+  raise_fatal_error("Unimplemented ArrayData::ZSetInt");
 }
 
 static ArrayData* ZSetStrThrow(ArrayData* ad, StringData* k, RefData* v) {
-  throw FatalErrorException("Unimplemented ArrayData::ZSetStr");
+  raise_fatal_error("Unimplemented ArrayData::ZSetStr");
 }
 
 static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
-  throw FatalErrorException("Unimplemented ArrayData::ZAppend");
+  raise_fatal_error("Unimplemented ArrayData::ZAppend");
+}
+
+const StaticString s_failConvertToDict("Unsupported conversion to Dict array");
+
+static ArrayData* ToDictThrow(ArrayData*) {
+  SystemLib::throwExceptionObject(s_failConvertToDict);
+}
+
+static ArrayData* ToDictNoop(ArrayData* ad) {
+  ad->incRefCount();
+  return ad;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -112,7 +123,8 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
-    ProxyArray::entry                           \
+    ProxyArray::entry,                          \
+    MixedArray::entry /* Dict */                \
   },
 
 /*
@@ -146,7 +158,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
  *   incref'd.
  */
 
-extern const ArrayFunctions g_array_funcs_unmodified = {
+const ArrayFunctions g_array_funcs = {
   /*
    * void Release(ArrayData*)
    *
@@ -287,6 +299,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     APCLocalArray::LvalNew,
     GlobalsArray::LvalNew,
     ProxyArray::LvalNew,
+    MixedArray::LvalNew,
   },
 
   /*
@@ -533,7 +546,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *    Performs array addition, logically mutating the first array.
    *    It may return a new array if the array needed to grow, or if
-   *    it needed to COW because hasMultipleRefs was true.
+   *    it needed to COW because cowCheck() was true.
    */
   DISPATCH(PlusEq)
 
@@ -550,7 +563,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *   Remove the last element from the array and assign it to `value'.  This
    *   function may return a new array if it decided to COW due to
-   *   hasMultipleRefs().
+   *   cowCheck().
    */
   DISPATCH(Pop)
 
@@ -559,7 +572,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *   Remove the first element from the array and assign it to `value'.  This
    *   function may return a new array if it decided to COW due to
-   *   hasMultipleRefs().
+   *   cowCheck().
    */
   DISPATCH(Dequeue)
 
@@ -613,6 +626,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ProxyArray::ZSetInt,
+    &MixedArray::ZSetInt,
   },
 
   {
@@ -623,6 +637,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ProxyArray::ZSetStr,
+    &MixedArray::ZSetStr,
   },
 
   {
@@ -633,20 +648,28 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     &ZAppendThrow,
     &ZAppendThrow,
     &ProxyArray::ZAppend,
+    &ZAppendThrow,
+  },
+
+  {
+    PackedArray::ToDict,
+    StructArray::ToDict,
+    MixedArray::ToDict,
+    EmptyArray::ToDict,
+    ToDictThrow,
+    ToDictThrow,
+    ProxyArray::ToDict,
+    ToDictNoop,
   },
 };
-
-// We create a copy so that we can install instrumentation shim-functions
-// instrument g_array_funcs at runtime.
-ArrayFunctions g_array_funcs = g_array_funcs_unmodified;
 
 #undef DISPATCH
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// In general, arrays can contain int-valued-strings, even though
-// plain array access converts them to integers.  non-int-string
-// assersions should go upstream of the ArrayData api.
+// In general, arrays can contain int-valued-strings, even though plain array
+// access converts them to integers.  non-int-string assertions should go
+// upstream of the ArrayData api.
 
 bool ArrayData::IsValidKey(const String& k) {
   return IsValidKey(k.get());
@@ -715,8 +738,8 @@ int ArrayData::compare(const ArrayData *v2) const {
     if (!v2->exists(key)) return 1;
     auto value1 = iter.second();
     auto value2 = v2->get(key);
-    if (HPHP::more(value1, value2)) return 1;
-    if (HPHP::less(value1, value2)) return -1;
+    auto cmp = HPHP::compare(value1, value2);
+    if (cmp != 0) return cmp;
   }
 
   return 0;
@@ -837,11 +860,17 @@ const Variant& ArrayData::getNotFound(const StringData* k) {
 }
 
 const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
+  if (error && !useWeakKeys()) {
+    throwOOBArrayKeyException(k);
+  }
   return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 
 const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
+  if (error && !useWeakKeys()) {
+    throwOOBArrayKeyException(k);
+  }
   return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
@@ -857,7 +886,7 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,7> names = {{
+  std::array<const char*,8> names = {{
     "PackedKind",
     "StructKind",
     "MixedKind",
@@ -865,6 +894,7 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "ApcKind",
     "GlobalsKind",
     "ProxyKind",
+    "DictKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

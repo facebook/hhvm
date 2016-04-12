@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,12 +29,11 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/virtual-host.h"
-
-#include "hphp/system/constants.h"
 
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/util/logger.h"
@@ -92,7 +91,7 @@ String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
     }
 
     // disallow access with an absolute path
-    if (canonicalized.charAt(0) == '/') {
+    if (FileUtil::isAbsolutePath(canonicalized.slice())) {
       return empty_string();
     }
 
@@ -107,11 +106,17 @@ String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
 }
 
 String File::TranslatePath(const String& filename) {
-  if (filename.charAt(0) != '/') {
+  if (filename.empty()) {
+    // Special case: an empty string should continue to be an empty string.
+    // Otherwise it would be canonicalized to CWD, which is inconsistent with
+    // PHP and most filesystem utilities.
+    return filename;
+  } else if (!FileUtil::isAbsolutePath(filename.slice())) {
     String cwd = g_context->getCwd();
     return TranslatePathKeepRelative(cwd + "/" + filename);
+  } else {
+    return TranslatePathKeepRelative(filename);
   }
-  return TranslatePathKeepRelative(filename);
 }
 
 String File::TranslatePathWithFileCache(const String& filename) {
@@ -654,7 +659,15 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
   int64_t avail = bufferedLen();
   if (m_data->m_buffer == nullptr) {
     m_data->m_buffer = (char *)malloc(CHUNK_SIZE * 3);
+    m_data->m_bufferSize = CHUNK_SIZE * 3;
+  } else if (m_data->m_bufferSize < CHUNK_SIZE * 3) {
+    auto newbuf = malloc(CHUNK_SIZE * 3);
+    memcpy(newbuf, m_data->m_buffer, m_data->m_bufferSize);
+    free(m_data->m_buffer);
+    m_data->m_buffer = (char*) newbuf;
+    m_data->m_bufferSize = CHUNK_SIZE * 3;
   }
+
   if (avail < maxlen && !eof()) {
     assert(m_data->m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
     m_data->m_writepos +=
@@ -751,10 +764,10 @@ const String& File::o_getResourceName() const {
 // csv functions
 
 int64_t File::writeCSV(const Array& fields, char delimiter_char /* = ',' */,
-                     char enclosure_char /* = '"' */) {
+                     char enclosure_char /* = '"' */,
+                     char escape_char /* = '\' */) {
   int line = 0;
   int count = fields.size();
-  const char escape_char = '\\';
   StringBuffer csvline(1024);
 
   for (ArrayIter iter(fields); iter; ++iter) {

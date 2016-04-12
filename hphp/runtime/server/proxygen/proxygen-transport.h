@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,12 +25,12 @@
 #include "hphp/util/synchronizable.h"
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <thrift/lib/cpp/async/TAsyncTransport.h>
-#include <thrift/lib/cpp/async/TAsyncTimeout.h>
+#include <folly/IntrusiveList.h>
 #include <folly/IPAddress.h>
 
 namespace HPHP {
-class ProxygenServer;
-class ProxygenTransport;
+struct ProxygenServer;
+struct ProxygenTransport;
 
 ////////////////////////////////////////////////////////////////////////////////
 /** Message passed from dispatch thread to I/O thread
@@ -38,8 +38,7 @@ class ProxygenTransport;
  * These messages hold a reference to the transport so it doesn't get deleted
  * out from under them in transit.
  */
-class ResponseMessage {
-  public:
+struct ResponseMessage {
   enum class Type {
     HEADERS,
     BODY,
@@ -59,7 +58,7 @@ class ResponseMessage {
       m_eom(eom) {
     if (size > 0 && (m_type == Type::BODY || m_type == Type::HEADERS)) {
         // sad panda copy.  TODO (t4362832): change sendImpl to take IOBuf
-        m_chunk = std::move(folly::IOBuf::copyBuffer(data, size));
+        m_chunk = folly::IOBuf::copyBuffer(data, size);
       }
     };
 
@@ -83,7 +82,7 @@ class ResponseMessage {
   bool m_eom{false};
 };
 
-class PushTxnHandler;
+struct PushTxnHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -94,14 +93,13 @@ class PushTxnHandler;
  * Note that one transport object is created for each request.  The transport
  * accessed by the I/O thread and dispatch thread, but it should be OK, right?
  */
-class ProxygenTransport : public Transport,
-  public proxygen::HTTPTransactionHandler,
-  public std::enable_shared_from_this<ProxygenTransport>,
-  public apache::thrift::async::TAsyncTimeout,
-  public Synchronizable {
-public:
-  explicit ProxygenTransport(ProxygenServer *server,
-                             folly::EventBase *eventBase);
+struct ProxygenTransport final
+  : Transport
+  , proxygen::HTTPTransactionHandler
+  , std::enable_shared_from_this<ProxygenTransport>
+  , Synchronizable
+{
+  explicit ProxygenTransport(ProxygenServer *server);
   virtual ~ProxygenTransport();
 
   ///////////////////////////////////////////////////////////////////////////
@@ -124,9 +122,9 @@ public:
   /**
    * POST request's data.
    */
-  const void *getPostData(int &size) override;
+  const void *getPostData(size_t &size) override;
   bool hasMorePostData() override;
-  const void *getMorePostData(int &size) override;
+  const void *getMorePostData(size_t &size) override;
 
   // TODO: is get getFiles required?
 
@@ -144,7 +142,7 @@ public:
   /**
    * Get http request size.
    */
-  int getRequestSize() const override;
+  size_t getRequestSize() const override;
 
   /**
    * Get request header(s).
@@ -249,8 +247,8 @@ public:
   }
 
   /**
-   * After this callback is received, there will be no more normal ingress
-   * callbacks received (onEgress*(), onError(), and onTimeout() may still
+   * After this callback is received, there will be no more normal
+   * ingress callbacks received (onEgress*() and onError() may still
    * be invoked). The Handler should consider ingress complete after
    * receiving this message. This Transaction is still valid, and work
    * may still occur on it until detachTransaction is called.
@@ -267,15 +265,30 @@ public:
 
   void messageAvailable(ResponseMessage&& message);
 
-  void timeoutExpired() noexcept override;
+  /**
+   * The transaction is aborted when there are errors, or during
+   * shutdown when the server has stopped enqueuing requests, or
+   * when the post request takes too long before we see EOM during
+   * server shutdown.
+   */
+  void abort();
 
   void removePushTxn(uint64_t id) {
     Lock lock(this);
     m_pushHandlers.erase(id);
   }
 
+  void setEnqueued() {
+    m_enqueued = true;
+    unlink();
+  }
+
  private:
   bool bufferRequest() const;
+
+  void unlink() {
+    m_listHook.unlink();
+  }
 
   void sendErrorResponse(uint32_t code) noexcept;
 
@@ -291,7 +304,6 @@ public:
   // Tracks HTTPTransaction's reference to this object
   std::shared_ptr<ProxygenTransport> m_transactionReference;
   ProxygenServer *m_server;
-  folly::EventBase *m_eventBase;
   proxygen::HTTPTransaction *m_clientTxn{nullptr}; // locked
   folly::SocketAddress m_clientAddress;
   std::string m_addressStr;
@@ -324,7 +336,19 @@ public:
   uint16_t m_localPort{0};
   int64_t m_nextPushId{1};
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
+
+ public:
+  // List of ProxygenTransport not yet handed to the server will sit
+  // in a list, so that we can abort them if they take too long.
+  // Every ProxygenTransport is in the list initially, and gets
+  // unlinked when it is enqueued or aborted, or destructed if it is
+  // never handed to the server.  m_enqueued implies !is_linked(), but
+  // aborted ones can have !m_enqueued && !is_linked().
+  folly::IntrusiveListHook m_listHook;
 };
+
+using ProxygenTransportList =
+  folly::IntrusiveList<ProxygenTransport, &ProxygenTransport::m_listHook>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

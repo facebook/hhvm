@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
@@ -322,6 +321,16 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
     });
   retypeDests(label, &unit);
   return label->dst(label->numDsts() - 1);
+}
+
+SSATmp* deletePhiDest(IRInstruction* label, unsigned i) {
+  assertx(label->is(DefLabel));
+  auto dest = label->dst(i);
+  label->block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp* src) {
+    jmp->deleteSrc(i);
+  });
+  label->deleteDst(i);
+  return dest;
 }
 
 //////////////////////////////////////////////////////////////////////

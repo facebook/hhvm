@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,6 +79,99 @@ using Iter = boost::variant< UnknownIter
                            >;
 
 /*
+ * Tag indicating what sort of thing contains the current member base.
+ *
+ * The base is always the unboxed version of the type, and its
+ * location could be inside of a Ref.  So, for example, a base with
+ * BaseLoc::Frame could be located inside of a Ref that is pointed
+ * to by the Frame.  (We may want to distinguish these two cases at
+ * some point if we start trying to track real information about
+ * Refs, but not yet.)
+ */
+enum class BaseLoc {
+  /*
+   * Base is in a number of possible places after an Elem op.  It
+   * cannot possibly be in an object property (although it certainly
+   * may alias one).  See miElem for details.  Not all post-elem ops
+   * use this location (see LocalArrChain).
+   *
+   * If it is definitely in an array, the locTy in the Base will be
+   * a subtype of TArr.
+   */
+  PostElem,
+
+  /*
+   * Base is in possible locations after a Prop op.  This means it
+   * possibly lives in a property on an object, but possibly not
+   * (e.g. it could be a null in tvScratch).  See miProp for
+   * details.
+   *
+   * If it is definitely known to be a property in an object, the
+   * locTy in the Base will be a subtype of TObj.
+   */
+  PostProp,
+
+  /*
+   * Known to be a static property on an object.  This is only
+   * possible as an initial base.
+   */
+  StaticObjProp,
+
+  /*
+   * The base is inside of a local that contains a specialized array
+   * type, and the arrayChain is non-empty.
+   *
+   * When the location is set to this, the chain will continue as
+   * long as we keep staying inside specialized array types.  If it
+   * moves to something like a ?Arr type, we must leave the chain
+   * when the base moves.
+   */
+  LocalArrChain,
+
+  /*
+   * Known to be contained in the current frame as a local, as the
+   * frame $this, by the evaluation stack, or inside $GLOBALS.  Only
+   * possible as initial bases.
+   */
+  Frame,
+  FrameThis,
+  EvalStack,
+  Global,
+
+  /*
+   * If we've execute an operation that's known to fatal, we use
+   * this BaseLoc.
+   */
+  Fataled,
+};
+
+/*
+ * Information about the current member base's type and location.
+ */
+struct Base {
+  Type type;
+  BaseLoc loc;
+
+  /*
+   * We also need to track effects of intermediate dims on the type
+   * of the base.  So we have a type, name, and possibly associated
+   * local for the base's container.
+   *
+   * For StaticObjProp, locName this is the name of the property if
+   * known, or nullptr, and locTy is the type of the class
+   * containing the static property.
+   *
+   * Similarly, if loc is PostProp, locName is the name of the
+   * property if it was known, and locTy gives as much information
+   * about the object type it is in.  (If we actually *know* it is
+   * in an object, locTy will be a subtype of TObj.)
+   */
+  Type locTy;
+  SString locName;
+  borrowed_ptr<php::Local> local;
+};
+
+/*
  * A program state at a position in a php::Block.
  *
  * The `initialized' flag indicates whether the state knows anything.  All
@@ -113,6 +206,20 @@ struct State {
   std::vector<Iter> iters;
   std::vector<Type> stack;
   std::vector<ActRec> fpiStack;
+
+  /*
+   * The current member base. Updated as we move through bytecodes representing
+   * the operation.
+   */
+  Base base;
+
+  /*
+   * Chains of member operations on array elements will all affect the type of
+   * something further back in the member instruction.  Currently this is just
+   * used for locals.  This vector tracks the base,key type pair that was used
+   * at each stage.  See irgen-minstr.cpp:resolveArrayChain().
+   */
+  std::vector<std::pair<Type,Type>> arrayChain;
 };
 
 /*

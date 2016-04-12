@@ -8,4 +8,13 @@
  *
  *)
 
-val start: unit -> unit
+(* The in/out channels don't actually take type unit -- we write directly
+ * to the underlying file descriptor -- but we have to declare some type for
+ * these phantom types because OCaml doesn't allow polymorphic values that
+ * are not functions. *)
+val entry: (ServerArgs.options, unit, unit) Daemon.entry
+
+val run_once: ServerArgs.options -> 'a
+
+val daemon_main:
+  ServerArgs.options -> ('a Daemon.in_channel * 'b Daemon.out_channel) -> unit

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ namespace HPHP {
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   assert(ad->isApcArray());
-  assert(ad->getCount() != 0);
+  assert(ad->checkCount());
   DEBUG_ONLY auto const shared = static_cast<const APCLocalArray*>(ad);
   if (auto ptr = shared->m_localCache) {
     auto const cap = shared->m_arr->capacity();
@@ -68,9 +68,7 @@ const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
   } else {
     static_assert(KindOfUninit == 0, "must be 0 since we use req::calloc");
     unsigned cap = ad->m_arr->capacity();
-    ad->m_localCache = static_cast<TypedValue*>(
-      req::calloc(cap, sizeof(TypedValue))
-    );
+    ad->m_localCache = req::calloc_raw_array<TypedValue>(cap);
   }
   auto const tv = &ad->m_localCache[pos];
   tvAsVariant(tv) = sv->toLocal();
@@ -220,7 +218,7 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
 }
 
 ArrayData* APCLocalArray::CopyWithStrongIterators(const ArrayData*) {
-  throw FatalErrorException(
+  raise_fatal_error(
     "Unimplemented ArrayData::copyWithStrongIterators");
 }
 

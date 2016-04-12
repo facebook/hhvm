@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,10 +30,12 @@
 #include <type_traits>
 
 #include "hphp/util/alloc.h"
-#include "hphp/util/hdf.h"
 #include "hphp/util/async-job.h"
 #include "hphp/util/boot_timer.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/logger.h"
 
+#include "hphp/runtime/ext/apc/snapshot-builder.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -77,33 +79,6 @@ void initialize_apc() {
 
 //////////////////////////////////////////////////////////////////////
 
-#define DEFINE_CONSTANT(name, value)                                           \
-  static const int64_t k_##name = value;                                       \
-  static const StaticString s_##name(#name)                                    \
-
-#define REGISTER_CONSTANT(name)                                                \
-  Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
-
-DEFINE_CONSTANT(APC_ITER_TYPE, 0x1);
-DEFINE_CONSTANT(APC_ITER_KEY, 0x2);
-DEFINE_CONSTANT(APC_ITER_FILENAME, 0x4);
-DEFINE_CONSTANT(APC_ITER_DEVICE, 0x8);
-DEFINE_CONSTANT(APC_ITER_INODE, 0x10);
-DEFINE_CONSTANT(APC_ITER_VALUE, 0x20);
-DEFINE_CONSTANT(APC_ITER_MD5, 0x40);
-DEFINE_CONSTANT(APC_ITER_NUM_HITS, 0x80);
-DEFINE_CONSTANT(APC_ITER_MTIME, 0x100);
-DEFINE_CONSTANT(APC_ITER_CTIME, 0x200);
-DEFINE_CONSTANT(APC_ITER_DTIME, 0x400);
-DEFINE_CONSTANT(APC_ITER_ATIME, 0x800);
-DEFINE_CONSTANT(APC_ITER_REFCOUNT, 0x1000);
-DEFINE_CONSTANT(APC_ITER_MEM_SIZE, 0x2000);
-DEFINE_CONSTANT(APC_ITER_TTL, 0x4000);
-DEFINE_CONSTANT(APC_ITER_NONE, 0x0);
-DEFINE_CONSTANT(APC_ITER_ALL, 0xFFFFFFFFFF);
-DEFINE_CONSTANT(APC_LIST_ACTIVE, 1);
-DEFINE_CONSTANT(APC_LIST_DELETED, 2);
-
 const StaticString
   s_delete("delete");
 
@@ -112,14 +87,25 @@ extern void const_load();
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 
+static void* keep_alive;
+
 void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
+  if (!keep_alive && ini.isString()) {
+    // this is a hack to preserve some dynamic entry points
+    switch (ini.toString().size()) {
+      case 0: keep_alive = (void*)const_load; break;
+      case 2: keep_alive = (void*)const_load_impl_compressed; break;
+      case 4: keep_alive = (void*)apc_load_impl_compressed; break;
+    }
+  }
+
   Config::Bind(Enable, ini, config, "Server.APC.EnableApc", true);
   Config::Bind(EnableConstLoad, ini, config, "Server.APC.EnableConstLoad",
                false);
   Config::Bind(ForceConstLoadToAPC, ini, config,
                "Server.APC.ForceConstLoadToAPC", true);
   Config::Bind(PrimeLibrary, ini, config, "Server.APC.PrimeLibrary");
-  Config::Bind(LoadThread, ini, config, "Server.APC.LoadThread", 2);
+  Config::Bind(LoadThread, ini, config, "Server.APC.LoadThread", 15);
   Config::Bind(CompletionKeys, ini, config, "Server.APC.CompletionKeys");
   std::string tblType = Config::GetString(ini, config, "Server.APC.TableType",
                                           "concurrent");
@@ -137,14 +123,15 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
 
+  // Loads .so PrimeLibrary, writes snapshot output to this file, then exits.
+  Config::Bind(PrimeLibraryUpgradeDest, ini, config,
+               "Server.APC.PrimeLibraryUpgradeDest");
+
   // FileStorage
   Config::Bind(UseFileStorage, ini, config, "Server.APC.FileStorage.Enable");
   FileStorageChunkSize = Config::GetInt64(ini, config,
                                           "Server.APC.FileStorage.ChunkSize",
                                           1LL << 29);
-  // TODO(markdrayton): remove FileStorageMaxSize once FileStorage.MaxSize has
-  // been removed from config.hdf (see D2360365)
-  Config::GetInt64(ini, config, "Server.APC.FileStorage.MaxSize", 1LL << 32);
   Config::Bind(FileStoragePrefix, ini, config, "Server.APC.FileStorage.Prefix",
                "/tmp/apc_store");
   Config::Bind(FileStorageFlagKey, ini, config,
@@ -174,28 +161,36 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
 void apcExtension::moduleInit() {
   if (UseFileStorage) {
+    // We use 32 bits to represent offset into a chunk, so don't make it too
+    // large.
+    constexpr int64_t MaxChunkSize = 1LL << 31;
+    if (FileStorageChunkSize > MaxChunkSize) {
+      Logger::Warning("Server.APC.FileStorage.ChunkSize too large, "
+                      "resetting to %" PRId64, MaxChunkSize);
+      FileStorageChunkSize = MaxChunkSize;
+    }
     s_apc_file_storage.enable(FileStoragePrefix, FileStorageChunkSize);
   }
 
-  REGISTER_CONSTANT(APC_ITER_TYPE);
-  REGISTER_CONSTANT(APC_ITER_KEY);
-  REGISTER_CONSTANT(APC_ITER_FILENAME);
-  REGISTER_CONSTANT(APC_ITER_DEVICE);
-  REGISTER_CONSTANT(APC_ITER_INODE);
-  REGISTER_CONSTANT(APC_ITER_VALUE);
-  REGISTER_CONSTANT(APC_ITER_MD5);
-  REGISTER_CONSTANT(APC_ITER_NUM_HITS);
-  REGISTER_CONSTANT(APC_ITER_MTIME);
-  REGISTER_CONSTANT(APC_ITER_CTIME);
-  REGISTER_CONSTANT(APC_ITER_DTIME);
-  REGISTER_CONSTANT(APC_ITER_ATIME);
-  REGISTER_CONSTANT(APC_ITER_REFCOUNT);
-  REGISTER_CONSTANT(APC_ITER_MEM_SIZE);
-  REGISTER_CONSTANT(APC_ITER_TTL);
-  REGISTER_CONSTANT(APC_ITER_NONE);
-  REGISTER_CONSTANT(APC_ITER_ALL);
-  REGISTER_CONSTANT(APC_LIST_ACTIVE);
-  REGISTER_CONSTANT(APC_LIST_DELETED);
+  HHVM_RC_INT(APC_ITER_TYPE, 0x1);
+  HHVM_RC_INT(APC_ITER_KEY, 0x2);
+  HHVM_RC_INT(APC_ITER_FILENAME, 0x4);
+  HHVM_RC_INT(APC_ITER_DEVICE, 0x8);
+  HHVM_RC_INT(APC_ITER_INODE, 0x10);
+  HHVM_RC_INT(APC_ITER_VALUE, 0x20);
+  HHVM_RC_INT(APC_ITER_MD5, 0x40);
+  HHVM_RC_INT(APC_ITER_NUM_HITS, 0x80);
+  HHVM_RC_INT(APC_ITER_MTIME, 0x100);
+  HHVM_RC_INT(APC_ITER_CTIME, 0x200);
+  HHVM_RC_INT(APC_ITER_DTIME, 0x400);
+  HHVM_RC_INT(APC_ITER_ATIME, 0x800);
+  HHVM_RC_INT(APC_ITER_REFCOUNT, 0x1000);
+  HHVM_RC_INT(APC_ITER_MEM_SIZE, 0x2000);
+  HHVM_RC_INT(APC_ITER_TTL, 0x4000);
+  HHVM_RC_INT(APC_ITER_NONE, 0x0);
+  HHVM_RC_INT(APC_ITER_ALL, 0xFFFFFFFFFF);
+  HHVM_RC_INT(APC_LIST_ACTIVE, 1);
+  HHVM_RC_INT(APC_LIST_DELETED, 2);
 
   HHVM_FE(apc_add);
   HHVM_FE(apc_store);
@@ -223,7 +218,7 @@ bool apcExtension::Enable = true;
 bool apcExtension::EnableConstLoad = false;
 bool apcExtension::ForceConstLoadToAPC = true;
 std::string apcExtension::PrimeLibrary;
-int apcExtension::LoadThread = 1;
+int apcExtension::LoadThread = 15;
 std::set<std::string> apcExtension::CompletionKeys;
 apcExtension::TableTypes apcExtension::TableType =
   TableTypes::ConcurrentTable;
@@ -236,6 +231,7 @@ int apcExtension::PurgeFrequency = 4096;
 int apcExtension::PurgeRate = -1;
 bool apcExtension::AllowObj = false;
 int apcExtension::TTLLimit = -1;
+std::string apcExtension::PrimeLibraryUpgradeDest;
 bool apcExtension::UseFileStorage = false;
 int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
 std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";
@@ -256,7 +252,7 @@ Variant HHVM_FUNCTION(apc_store,
                       int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return Variant(false);
 
-  if (key_or_array.is(KindOfArray)) {
+  if (key_or_array.isArray()) {
     Array valuesArr = key_or_array.toArray();
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
@@ -299,7 +295,7 @@ Variant HHVM_FUNCTION(apc_add,
                       int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
-  if (key_or_array.is(KindOfArray)) {
+  if (key_or_array.isArray()) {
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
@@ -334,7 +330,7 @@ Variant HHVM_FUNCTION(apc_fetch,
 
   Variant v;
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     bool tmp = false;
     Array keys = key.toArray();
     ArrayInit init(keys.size(), ArrayInit::Map{});
@@ -367,7 +363,7 @@ Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key) {
   if (!apcExtension::Enable) return false;
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     Array keys = key.toArray();
     PackedArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
@@ -444,7 +440,7 @@ Variant HHVM_FUNCTION(apc_exists,
                       const Variant& key) {
   if (!apcExtension::Enable) return false;
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     Array keys = key.toArray();
     PackedArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
@@ -496,7 +492,7 @@ Variant HHVM_FUNCTION(apc_cache_info,
   std::map<const StringData*, int64_t> stats;
   APCStats::getAPCStats().collectStats(stats);
   for (auto it = stats.begin(); it != stats.end(); it++) {
-    info.add(Variant(it->first, Variant::StaticStrInit{}), it->second);
+    info.add(Variant(it->first, Variant::PersistentStrInit{}), it->second);
   }
   if (!limited) {
     auto const entries = apc_store().getEntriesInfo();
@@ -538,81 +534,62 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
 #ifdef _MSC_VER
   throw Exception("apc_load_func is not currently supported under MSVC!");
 #else
-  Lock lock(dl_mutex);
-  dlerror(); // clear errors
   PFUNC_APC_LOAD p = (PFUNC_APC_LOAD)dlsym(handle, name);
-  const char *error = dlerror();
-  if (error || p == nullptr) {
-    throw Exception("Unable to find %s in %s: %s", name,
-                    apcExtension::PrimeLibrary.c_str(),
-                    error ? error : "(unknown error)");
+  if (p == nullptr) {
+    throw Exception("Unable to find %s in %s", name,
+                    apcExtension::PrimeLibrary.c_str());
   }
   return p;
 #endif
 }
 
-class ApcLoadJob {
-public:
+struct ApcLoadJob {
   ApcLoadJob(void *handle, int index) : m_handle(handle), m_index(index) {}
   void *m_handle; int m_index;
 };
 
-class ApcLoadWorker {
-public:
-  void onThreadEnter() {}
+struct ApcLoadWorker {
+  void onThreadEnter() {
+    g_context.getCheck();
+  }
   void doJob(std::shared_ptr<ApcLoadJob> job) {
     char func_name[128];
     MemoryManager::SuppressOOM so(MM());
     snprintf(func_name, sizeof(func_name), "_apc_load_%d", job->m_index);
     apc_load_func(job->m_handle, func_name)();
   }
-  void onThreadExit() {}
+  void onThreadExit() {
+    hphp_memory_cleanup();
+  }
 };
 
 static size_t s_const_map_size = 0;
 
-EXTERNALLY_VISIBLE
+static SnapshotBuilder s_snapshotBuilder;
+
 void apc_load(int thread) {
 #ifndef _MSC_VER
   static void *handle = nullptr;
   if (handle ||
       apcExtension::PrimeLibrary.empty() ||
       !apcExtension::Enable) {
-    static uint64_t keep_entry_points_around_under_lto;
-    if (++keep_entry_points_around_under_lto ==
-        std::numeric_limits<uint64_t>::max()) {
-      // this had better never happen...
-
-      // Fill out a cache_info to prevent g++ from optimizing out
-      // the calls to const_load_impl*
-      cache_info info;
-      info.a_name = "dummy";
-      info.use_const = true;
-
-      const_load_impl(&info, (const char**)const_load,
-                      nullptr, nullptr, nullptr, nullptr,
-                      nullptr, nullptr, nullptr);
-      const_load_impl_compressed(&info,
-                                 nullptr, nullptr, nullptr,
-                                 nullptr, nullptr, nullptr,
-                                 nullptr, nullptr, nullptr, nullptr,
-                                 nullptr, nullptr, nullptr, nullptr);
-      apc_load_impl(&info, nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr);
-      apc_load_impl_compressed(&info,
-                               nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr, nullptr);
-    }
     return;
   }
-
-  BootTimer::Block timer("loading APC data");
+  BootStats::Block timer("loading APC data");
+  if (apc_store().primeFromSnapshot(apcExtension::PrimeLibrary.c_str())) {
+    return;
+  }
+  Logger::Info("Fall back to shared object format");
   handle = dlopen(apcExtension::PrimeLibrary.c_str(), RTLD_LAZY);
   if (!handle) {
     throw Exception("Unable to open apc prime library %s: %s",
                     apcExtension::PrimeLibrary.c_str(), dlerror());
+  }
+
+  auto upgradeDest = apcExtension::PrimeLibraryUpgradeDest;
+  if (!upgradeDest.empty()) {
+    thread = 1; // SnapshotBuilder is not (yet) thread-safe.
+    // TODO(9755792): Ensure APCFileStorage is enabled.
   }
 
   if (thread <= 1) {
@@ -625,34 +602,33 @@ void apc_load(int thread) {
     for (int i = 0; i < count; i++) {
       jobs.push_back(std::make_shared<ApcLoadJob>(handle, i));
     }
-    JobDispatcher<ApcLoadJob, ApcLoadWorker>(jobs, thread).run();
+    JobDispatcher<ApcLoadJob, ApcLoadWorker>(std::move(jobs), thread).run();
   }
 
   apc_store().primeDone();
+  if (!upgradeDest.empty()) {
+    BootStats::Block block("SnapshotBuilder::writeToFile");
+    s_snapshotBuilder.writeToFile(upgradeDest);
+  }
 
   if (apcExtension::EnableConstLoad) {
 #ifdef USE_JEMALLOC
     size_t allocated_before = 0;
     size_t allocated_after = 0;
-    size_t sz = sizeof(size_t);
     if (mallctl) {
-      uint64_t epoch = 1;
-      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
-      mallctl("stats.allocated", &allocated_before, &sz, nullptr, 0);
+      mallctlWrite<uint64_t>("epoch", 1);
+      mallctlRead("stats.allocated", &allocated_before);
       // Ignore the first result because it may be inaccurate due to internal
       // allocation.
-      epoch = 1;
-      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
-      mallctl("stats.allocated", &allocated_before, &sz, nullptr, 0);
+      mallctlWrite<uint64_t>("epoch", 1);
+      mallctlRead("stats.allocated", &allocated_before);
     }
 #endif
     apc_load_func(handle, "_hphp_const_load_all")();
 #ifdef USE_JEMALLOC
     if (mallctl) {
-      uint64_t epoch = 1;
-      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
-      sz = sizeof(size_t);
-      mallctl("stats.allocated", &allocated_after, &sz, nullptr, 0);
+      mallctlWrite<uint64_t>("epoch", 1);
+      mallctlRead("stats.allocated", &allocated_after);
       s_const_map_size = allocated_after - allocated_before;
     }
 #endif
@@ -663,6 +639,10 @@ void apc_load(int thread) {
 #endif
 }
 
+void apc_advise_out() {
+  apc_store().adviseOut();
+}
+
 size_t get_const_map_size() {
   return s_const_map_size;
 }
@@ -671,236 +651,7 @@ size_t get_const_map_size() {
 extern void const_load_set(const String& key, const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
-// Constant and APC priming with uncompressed data
-// Note (qixin): this is going to be deprecated by the compressed version.
-
-static int count_items(const char **p, int step) {
-  int count = 0;
-  for (const char **k = p; *k; k += step) {
-    count++;
-  }
-  return count;
-}
-
-EXTERNALLY_VISIBLE
-void const_load_impl(struct cache_info *info,
-                     const char **int_keys, long long *int_values,
-                     const char **char_keys, char *char_values,
-                     const char **strings, const char **objects,
-                     const char **thrifts, const char **others) {
-  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
-  {
-    int count = count_items(int_keys, 2);
-    if (count) {
-      const char **k = int_keys;
-      long long* v = int_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        String key(*k, (int)(int64_t)*(k+1), CopyString);
-        int64_t value = *v++;
-        const_load_set(key, value);
-      }
-    }
-  }
-  {
-    int count = count_items(char_keys, 2);
-    if (count) {
-      const char **k = char_keys;
-      char *v = char_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        String key(*k, (int)(int64_t)*(k+1), CopyString);
-        Variant value;
-        switch (*v++) {
-        case 0: value = false; break;
-        case 1: value = true; break;
-        case 2: value = init_null(); break;
-        default:
-          throw Exception("bad apc archive, unknown char type");
-        }
-        const_load_set(key, value);
-      }
-    }
-  }
-  {
-    int count = count_items(strings, 4);
-    if (count) {
-      const char **p = strings;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        const_load_set(key, value);
-      }
-    }
-  }
-  // unserialize_from_string object is extremely slow here;
-  // currently turned off: no objects in haste_maps.
-  if (false) {
-    int count = count_items(objects, 4);
-    if (count) {
-      const char **p = objects;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        const_load_set(key, unserialize_from_string(value));
-      }
-    }
-  }
-  {
-    int count = count_items(thrifts, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = thrifts;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant success;
-        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
-        if (same(success, false)) {
-          throw Exception("bad apc archive, fb_unserialize failed");
-        }
-        const_load_set(key, v);
-      }
-    }
-  }
-  {//Would we use others[]?
-    int count = count_items(others, 4);
-    if (count) {
-      const char **p = others;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant v = unserialize_from_string(value);
-        if (same(v, false)) {
-          throw Exception("bad apc archive, unserialize_from_string failed");
-        }
-        const_load_set(key, v);
-      }
-    }
-  }
-}
-
-EXTERNALLY_VISIBLE
-void apc_load_impl(struct cache_info *info,
-                   const char **int_keys, long long *int_values,
-                   const char **char_keys, char *char_values,
-                   const char **strings, const char **objects,
-                   const char **thrifts, const char **others) {
-  if (!apcExtension::ForceConstLoadToAPC) {
-    if (apcExtension::EnableConstLoad && info && info->use_const) return;
-  }
-  auto& s = apc_store();
-  {
-    int count = count_items(int_keys, 2);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **k = int_keys;
-      long long*v = int_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        auto& item = vars[i];
-        item.key = *k;
-        item.len = (int)(int64_t)*(k+1);
-        s.constructPrime(*v++, item);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(char_keys, 2);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **k = char_keys;
-      char *v = char_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        auto& item = vars[i];
-        item.key = *k;
-        item.len = (int)(int64_t)*(k+1);
-        switch (*v++) {
-        case 0: s.constructPrime(false, item); break;
-        case 1: s.constructPrime(true , item); break;
-        case 2: s.constructPrime(uninit_null() , item); break;
-        default:
-          throw Exception("bad apc archive, unknown char type");
-        }
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(strings, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = strings;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-        // Strings would be copied into APC anyway.
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        s.constructPrime(value, item, false);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(objects, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = objects;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        s.constructPrime(value, item, true);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(thrifts, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = thrifts;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant success;
-        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
-        if (same(success, false)) {
-          throw Exception("bad apc archive, fb_unserialize failed");
-        }
-        s.constructPrime(v, item);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(others, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = others;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant v = unserialize_from_string(value);
-        if (same(v, false)) {
-          // we can't possibly get here if it was a boolean "false" that's
-          // supposed to be serialized as a char
-          throw Exception("bad apc archive, unserialize_from_string failed");
-        }
-        s.constructPrime(v, item);
-      }
-      s.prime(vars);
-    }
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Constant and APC priming with compressed data
+// Constant and APC priming (always with compressed data).
 
 EXTERNALLY_VISIBLE
 void const_load_impl_compressed
@@ -1053,6 +804,8 @@ void apc_load_impl_compressed
     if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
   auto& s = apc_store();
+  SnapshotBuilder* snap = apcExtension::PrimeLibraryUpgradeDest.empty() ?
+    nullptr : &s_snapshotBuilder;
   {
     int count = int_lens[0];
     int len = int_lens[1];
@@ -1066,8 +819,8 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = k;
-        item.len = int_lens[i + 2];
         s.constructPrime(*v++, item);
+        if (UNLIKELY(snap != nullptr)) snap->addInt(v[-1], item);
         k += int_lens[i + 2] + 1; // skip \0
       }
       s.prime(vars);
@@ -1087,11 +840,19 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = k;
-        item.len = char_lens[i + 2];
         switch (*v++) {
-        case 0: s.constructPrime(false, item); break;
-        case 1: s.constructPrime(true , item); break;
-        case 2: s.constructPrime(uninit_null() , item); break;
+          case 0:
+            s.constructPrime(false, item);
+            if (UNLIKELY(snap != nullptr)) snap->addFalse(item);
+            break;
+          case 1:
+            s.constructPrime(true, item);
+            if (UNLIKELY(snap != nullptr)) snap->addTrue(item);
+            break;
+          case 2:
+            s.constructPrime(uninit_null(), item);
+            if (UNLIKELY(snap != nullptr)) snap->addNull(item);
+            break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }
@@ -1113,12 +874,12 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
-        item.len = string_lens[i + i + 2];
         p += string_lens[i + i + 2] + 1; // skip \0
         // Strings would be copied into APC anyway.
         String value(p, string_lens[i + i + 3], CopyString);
         // todo: t2539893: check if value is already a static string
         s.constructPrime(value, item, false);
+        if (UNLIKELY(snap != nullptr)) snap->addString(value, item);
         p += string_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1137,10 +898,10 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
-        item.len = object_lens[i + i + 2];
         p += object_lens[i + i + 2] + 1; // skip \0
         String value(p, object_lens[i + i + 3], CopyString);
         s.constructPrime(value, item, true);
+        if (UNLIKELY(snap != nullptr)) snap->addObject(value, item);
         p += object_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1159,7 +920,6 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
-        item.len = thrift_lens[i + i + 2];
         p += thrift_lens[i + i + 2] + 1; // skip \0
         String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
@@ -1168,6 +928,7 @@ void apc_load_impl_compressed
           throw Exception("bad apc archive, fb_unserialize failed");
         }
         s.constructPrime(v, item);
+        if (UNLIKELY(snap != nullptr)) snap->addThrift(value, item);
         p += thrift_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1186,7 +947,6 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
-        item.len = other_lens[i + i + 2];
         p += other_lens[i + i + 2] + 1; // skip \0
         String value(p, other_lens[i + i + 3], CopyString);
         Variant v = unserialize_from_string(value);
@@ -1196,6 +956,7 @@ void apc_load_impl_compressed
           throw Exception("bad apc archive, unserialize_from_string failed");
         }
         s.constructPrime(v, item);
+        if (UNLIKELY(snap != nullptr)) snap->addOther(value, item);
         p += other_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(vars);
@@ -1318,7 +1079,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
           rfc1867ApcData->update_freq) {
         Variant v;
         if (apc_store().get(rfc1867ApcData->tracking_key, v)) {
-          if (v.is(KindOfArray)) {
+          if (v.isArray()) {
             ArrayInit track(6, ArrayInit::Map{});
             track.set(s_total, rfc1867ApcData->content_length);
             track.set(s_current, rfc1867ApcData->bytes_processed);

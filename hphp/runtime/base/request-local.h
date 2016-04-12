@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,7 @@ namespace HPHP {
  *
  * Use DECLARE_STATIC_REQUEST_LOCAL to declare a *static* class field as
  * request local:
- *   class SomeClass {
+ *   struct SomeClass {
  *     DECLARE_STATIC_REQUEST_LOCAL(SomeFieldType, f);
  *   }
  *
@@ -63,14 +63,17 @@ struct RequestLocal {
     }
     if (!m_node.m_p->getInited()) {
       m_node.m_p->setInited(true);
+      // This registration makes sure obj->requestShutdown() will be called. Do
+      // it before calling requestInit() so that obj is reachable to the GC no
+      // matter what the callback does.
+      auto index = g_context->registerRequestEventHandler(m_node.m_p);
       try {
         m_node.m_p->requestInit();
       } catch (...) {
         m_node.m_p->setInited(false);
+        g_context->unregisterRequestEventHandler(m_node.m_p, index);
         throw;
       }
-      // this registration makes sure m_p->requestShutdown() will be called
-      g_context->registerRequestEventHandler(m_node.m_p);
     }
     return m_node.m_p;
   }
@@ -123,8 +126,7 @@ void RequestLocal<T>::create() {
 #else // defined(USE_GCC_FAST_TLS)
 
 template<typename T>
-class RequestLocal {
-public:
+struct RequestLocal {
   explicit RequestLocal(ThreadLocal<T> & tl) : m_tlsObjects(tl) {}
 
   bool getInited() const {
@@ -138,15 +140,17 @@ public:
     T *obj = m_tlsObjects.get();
     if (!obj->getInited()) {
       obj->setInited(true);
+      // This registration makes sure obj->requestShutdown() will be called. Do
+      // it before calling requestInit() so that obj is reachable to the GC no
+      // matter what the callback does.
+      auto index = g_context->registerRequestEventHandler(obj);
       try {
         obj->requestInit();
       } catch (...) {
         obj->setInited(false);
+        g_context->unregisterRequestEventHandler(obj, index);
         throw;
       }
-
-      // this registration makes sure obj->requestShutdown() will be called
-      g_context->registerRequestEventHandler(obj);
     }
     return obj;
   }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,8 +36,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ServerStats {
-public:
+struct ServerStats {
 
   enum class ThreadMode {
     Idling,
@@ -96,7 +95,7 @@ private:
   static std::vector<ServerStats*> s_loggers;
   static DECLARE_THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
 
-  typedef hphp_shared_string_map<int64_t> CounterMap;
+  using CounterMap = hphp_shared_string_map<int64_t>;
 
   struct PageStats {
     std::string m_url; // which page
@@ -104,7 +103,7 @@ private:
     int m_hit;         // page hits
     CounterMap m_values; // name value pairs
   };
-  typedef hphp_shared_string_map<PageStats> PageStatsMap;
+  using PageStatsMap = hphp_shared_string_map<PageStats>;
   struct TimeSlot {
     int64_t m_time;
     PageStatsMap m_pages;
@@ -159,18 +158,16 @@ private:
                          int64_t usWallTime = -1);
   Array getThreadIOStatuses();
 
-  class IOStatus {
-  public:
+  struct IOStatus {
     IOStatus() : count(0), wall_time(0) {}
 
     int64_t count;
     int64_t wall_time; // micro-seconds
   };
   // keys: "url==>name" and "name==>address"
-  typedef hphp_string_map<IOStatus> IOStatusMap;
+  using IOStatusMap = hphp_string_map<IOStatus>;
 
-  class ThreadStatus {
-  public:
+  struct ThreadStatus {
     ThreadStatus();
 
     pthread_t m_threadId;
@@ -211,8 +208,7 @@ private:
 /**
  * Taking server stats at different time point of execution.
  */
-class ServerStatsHelper {
-public:
+struct ServerStatsHelper {
   enum {
     TRACK_MEMORY = 0x00000001,
     TRACK_HWINST = 0x00000002,
@@ -236,8 +232,7 @@ private:
 /**
  * Recording I/O status in a scoped manner.
  */
-class IOStatusHelper {
-public:
+struct IOStatusHelper {
   explicit IOStatusHelper(const char *name, const char *address = nullptr,
                           int port = 0);
   ~IOStatusHelper();

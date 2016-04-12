@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -77,7 +77,7 @@ let error_kind error_code =
 
 let error_code_to_string error_code =
   let error_kind = error_kind error_code in
-  let error_number = string_of_int error_code in
+  let error_number = Printf.sprintf "%04d" error_code in
   error_kind^"["^error_number^"]"
 
 (*****************************************************************************)
@@ -96,7 +96,7 @@ module Parsing = struct
   let unexpected_eof                        = 1003 (* DONT MODIFY!!!! *)
   let unterminated_comment                  = 1004 (* DONT MODIFY!!!! *)
   let unterminated_xhp_comment              = 1005 (* DONT MODIFY!!!! *)
-
+  let call_time_pass_by_reference           = 1006 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -168,6 +168,8 @@ module Naming                               = struct
   let too_many_type_arguments               = 2065 (* DONT MODIFY!!!! *)
   let classname_param                       = 2066 (* DONT MODIFY!!!! *)
   let invalid_instanceof                    = 2067 (* DONT MODIFY!!!! *)
+  let name_is_reserved                      = 2068 (* DONT MODIFY!!!! *)
+  let dollardollar_unused                   = 2069 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -272,7 +274,7 @@ module Typing                               = struct
   let non_object_member                     = 4062 (* DONT MODIFY!!!! *)
   let null_container                        = 4063 (* DONT MODIFY!!!! *)
   let null_member                           = 4064 (* DONT MODIFY!!!! *)
-  let nullable_parameter                    = 4065 (* DONT MODIFY!!!! *)
+  (*let nullable_parameter                    = 4065 *)
   let option_return_only_typehint           = 4066 (* DONT MODIFY!!!! *)
   let object_string                         = 4067 (* DONT MODIFY!!!! *)
   let option_mixed                          = 4068 (* DONT MODIFY!!!! *)
@@ -330,8 +332,8 @@ module Typing                               = struct
   (* DEPRECATED unset_in_strict             = 4122 *)
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
   let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
-  let dynamic_class                         = 4125 (* DONT MODIFY!!!! *)
-  let attribute_arity                       = 4126 (* DONT MODIFY!!!! *)
+  (*let dynamic_class                       = 4125 *)
+  let attribute_too_many_arguments          = 4126 (* DONT MODIFY!!!! *)
   let attribute_param_type                  = 4127 (* DONT MODIFY!!!! *)
   let deprecated_use                        = 4128 (* DONT MODIFY!!!! *)
   let abstract_const_usage                  = 4129 (* DONT MODIFY!!!! *)
@@ -356,9 +358,18 @@ module Typing                               = struct
   let invalid_classname                     = 4148 (* DONT MODIFY!!!! *)
   let invalid_memoized_param                = 4149 (* DONT MODIFY!!!! *)
   let illegal_type_structure                = 4150 (* DONT MODIFY!!!! *)
-  (* RESERVED not_nullable_compare_null_trivial     = 4151 *)
+  let not_nullable_compare_null_trivial     = 4151 (* DONT MODIFY!!!! *)
+  let class_property_only_static_literal    = 4152 (* DONT MODIFY!!!! *)
+  let attribute_too_few_arguments           = 4153 (* DONT MODIFY!!!! *)
+  let reference_expr                        = 4154 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
+
+let internal_error pos msg =
+  add 0 pos ("Internal error: "^msg)
+
+let unimplemented_feature pos msg =
+  add 0 pos ("Feature not implemented: " ^ msg)
 
 (*****************************************************************************)
 (* Parsing errors. *)
@@ -380,6 +391,9 @@ let unterminated_xhp_comment pos =
 let parsing_error (p, msg) =
   add Parsing.parsing_error p msg
 
+let call_time_pass_by_reference pos =
+  let msg = "Call-time pass-by-reference is not allowed" in
+  add Parsing.call_time_pass_by_reference pos msg
 (*****************************************************************************)
 (* Naming errors *)
 (*****************************************************************************)
@@ -416,6 +430,17 @@ let name_already_bound name pos1 pos2 =
     pos2, "Previous definition is here"
 ]
 
+let name_is_reserved name pos =
+  let name = Utils.strip_all_ns name in
+  add Naming.name_is_reserved pos (
+  name^" cannot be used as it is reserved."
+ )
+
+let dollardollar_unused pos =
+  add Naming.dollardollar_unused pos ("This expression does not contain a "^
+    "usage of the special pipe variable. Did you forget to use the ($$) "^
+    "variable?")
+
 let method_name_already_bound pos name =
   add Naming.method_name_already_bound pos (
   "Method name already bound: "^name
@@ -437,9 +462,9 @@ let error_name_already_bound name name_prev p p_prev =
     "do this by deleting the \"hhi\" directory you copied into your "^
     "project when first starting with Hack." in
   let errs =
-    if (Relative_path.prefix p.Pos.pos_file) = Relative_path.Hhi
+    if (Relative_path.prefix (Pos.filename p)) = Relative_path.Hhi
     then errs @ [p_prev, hhi_msg]
-    else if (Relative_path.prefix p_prev.Pos.pos_file) = Relative_path.Hhi
+    else if (Relative_path.prefix (Pos.filename p_prev)) = Relative_path.Hhi
     then errs @ [p, hhi_msg]
     else errs in
   add_list Naming.error_name_already_bound errs
@@ -652,16 +677,17 @@ let gen_array_rec_arity pos =
   add Naming.gen_array_rec_arity pos
     "gen_array_rec() expects exactly 1 argument"
 
-let dynamic_class pos =
-  add Typing.dynamic_class pos
-    "Don't use dynamic classes"
-
-let uninstantiable_class usage_pos decl_pos name =
+let uninstantiable_class usage_pos decl_pos name reason_msgl =
   let name = strip_ns name in
-  add_list Typing.uninstantiable_class [
+  let msgl = [
     usage_pos, (name^" is uninstantiable");
     decl_pos, "Declaration is here"
-  ]
+  ] in
+  let msgl = match reason_msgl with
+    | (reason_pos, reason_str) :: tail ->
+      (reason_pos, reason_str^" which must be instantiable") :: tail @ msgl
+    | _ -> msgl in
+  add_list Typing.uninstantiable_class msgl
 
 let abstract_const_usage usage_pos decl_pos name =
   let name = strip_ns name in
@@ -1160,10 +1186,6 @@ let too_many_type_arguments p =
   add Naming.too_many_type_arguments p
     ("Too many type arguments for this type")
 
-let nullable_parameter pos =
-  add Typing.nullable_parameter pos
-    "Please add a ?, this argument can be null"
-
 let return_in_void pos1 pos2 =
   add_list Typing.return_in_void [
   pos1,
@@ -1325,9 +1347,8 @@ let const_mutation pos1 pos2 ty =
      then [(pos2, "This is " ^ ty)]
      else [])
 
-let expected_class pos =
-  add Typing.expected_class pos
-    "Was expecting a class"
+let expected_class ?(suffix="") pos =
+  add Typing.expected_class pos ("Was expecting a class"^suffix)
 
 let snot_found_hint = function
   | `no_hint ->
@@ -1678,7 +1699,7 @@ let invalid_memoized_param pos ty_reason_msg =
     ty_reason_msg @ [pos,
       "Parameters to memoized function must be null, bool, int, float, string, \
       an object deriving IMemoizeParam, or a Container thereof. See also \
-      http://docs.hhvm.com/manual/en/hack.attributes.memoize.php"])
+      http://docs.hhvm.com/hack/attributes/special#__memoize"])
 
 let nullsafe_not_needed p nonnull_witness =
   add_list Typing.nullsafe_not_needed (
@@ -1698,6 +1719,11 @@ let trivial_strict_eq p b left right left_trail right_trail =
   add_list Typing.trivial_strict_eq
     ((p, msg) :: left @ left_trail @ right @ right_trail)
 
+let trivial_strict_not_nullable_compare_null p result type_reason =
+  let msg = "This expression is always "^result in
+  add_list Typing.not_nullable_compare_null_trivial
+    ((p, msg) :: type_reason)
+
 let void_usage p void_witness =
   let msg = "You are using the return value of a void function" in
   add_list Typing.void_usage ((p, msg) :: void_witness)
@@ -1706,10 +1732,16 @@ let noreturn_usage p noreturn_witness =
   let msg = "You are using the return value of a noreturn function" in
   add_list Typing.noreturn_usage ((p, msg) :: noreturn_witness)
 
-let attribute_arity pos x n =
+let attribute_too_few_arguments pos x n =
   let n = string_of_int n in
-  add Typing.attribute_arity pos (
-    "The attribute "^x^" expects "^n^" parameters"
+  add Typing.attribute_too_few_arguments pos (
+    "The attribute "^x^" expects at least "^n^" arguments"
+  )
+
+let attribute_too_many_arguments pos x n =
+  let n = string_of_int n in
+  add Typing.attribute_too_many_arguments pos (
+    "The attribute "^x^" expects at most "^n^" arguments"
   )
 
 let attribute_param_type pos x =
@@ -1793,6 +1825,15 @@ let illegal_typeconst_direct_access pos =
     ^"Use type_structure(ValidClassname::class, 'TypeConstName') instead" in
   add Typing.illegal_type_structure pos msg
 
+let class_property_only_static_literal pos =
+  let msg =
+    "Initialization of class property must be a static literal expression." in
+  add Typing.class_property_only_static_literal pos msg
+
+let reference_expr pos =
+  let msg = "Cannot take a value by reference in strict mode." in
+  add Typing.reference_expr pos msg
+
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)
 (*****************************************************************************)
@@ -1805,19 +1846,19 @@ let to_absolute (code, msg_l) =
 (* Printing *)
 (*****************************************************************************)
 
-let to_json ((error_code, msgl) : Pos.absolute error_) = Hh_json.(
+let to_json ((error_code, msgl) : Pos.absolute error_) =
   let elts = List.map msgl begin fun (p, w) ->
     let line, scol, ecol = Pos.info_pos p in
-    JAssoc [ "descr", JString w;
-             "path",  JString p.Pos.pos_file;
-             "line",  JInt line;
-             "start", JInt scol;
-             "end",   JInt ecol;
-             "code",  JInt error_code
-           ]
+    Hh_json.JSON_Object [
+        "descr", Hh_json.JSON_String w;
+        "path",  Hh_json.JSON_String (Pos.filename p);
+        "line",  Hh_json.int_ line;
+        "start", Hh_json.int_ scol;
+        "end",   Hh_json.int_ ecol;
+        "code",  Hh_json.int_ error_code
+    ]
   end in
-  JAssoc [ "message", JList elts ]
-)
+  Hh_json.JSON_Object [ "message", Hh_json.JSON_Array elts ]
 
 let to_string ((error_code, msgl) : Pos.absolute error_) : string =
   let buf = Buffer.create 50 in

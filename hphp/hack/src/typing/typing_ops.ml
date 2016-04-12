@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -13,7 +13,7 @@ open Typing_defs
 module Reason  = Typing_reason
 module TUtils  = Typing_utils
 module Env     = Typing_env
-module Inst    = Typing_instantiate
+module Inst    = Decl_instantiate
 module Unify   = Typing_unify
 module TDef    = Typing_tdef
 module SubType = Typing_subtype

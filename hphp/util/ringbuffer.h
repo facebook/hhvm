@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,7 +85,8 @@ extern RingBufferEntry* g_ring_ptr;
 extern std::atomic<int> g_ringIdx;
 
 const char* ringbufferName(RingBufferType t);
-void vtraceRingbuffer(const char* fmt, va_list ap) ATTRIBUTE_PRINTF(1,0);
+void vtraceRingbuffer(ATTRIBUTE_PRINTF_STRING const char* fmt, va_list ap)
+  ATTRIBUTE_PRINTF(1,0);
 void ringbufferMsg(const char* msg, size_t msgLen,
                    RingBufferType t = RBTypeMsg);
 void ringbufferEntry(RingBufferType t, uint64_t sk, uint64_t data);

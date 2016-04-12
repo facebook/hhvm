@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Utils
 
 type config = {
   global_size: int;
@@ -31,6 +30,8 @@ let init config =
     ~global_size:config.global_size
     ~heap_size:config.heap_size
 
+external reset: unit -> unit = "hh_shared_reset"
+
 (*****************************************************************************)
 (* The shared memory garbage collector. It must be called every time we
  * free data (cf hh_shared.c for the underlying C implementation).
@@ -39,14 +40,14 @@ let init config =
 external hh_collect: bool -> unit = "hh_collect"
 
 (*****************************************************************************)
-(* Serializes the shared memory and writes it to a file *)
+(* Serializes the dependency table and writes it to a file *)
 (*****************************************************************************)
-external save: string -> unit = "hh_save"
+external save_dep_table: string -> unit = "hh_save_dep_table"
 
 (*****************************************************************************)
-(* Loads the shared memory by reading from a file *)
+(* Loads the dependency table by reading from a file *)
 (*****************************************************************************)
-external load: string -> unit = "hh_load"
+external load_dep_table: string -> unit = "hh_load_dep_table"
 
 (*****************************************************************************)
 (* The size of the dynamically allocated shared memory section *)
@@ -79,6 +80,18 @@ external dep_slots : unit -> int = "hh_dep_slots"
 (*****************************************************************************)
 external hh_init_done: unit -> unit = "hh_call_after_init"
 
+external hashtable_mutex_lock: unit -> unit = "hh_hashtable_mutex_lock"
+external hashtable_mutex_trylock: unit -> bool = "hh_hashtable_mutex_trylock"
+external hashtable_mutex_unlock: unit -> unit = "hh_hashtable_mutex_unlock"
+
+let try_lock_hashtable ~do_ =
+  if hashtable_mutex_trylock () then begin
+    Some (Utils.with_context
+      ~enter:(fun () -> ())
+      ~do_:do_
+      ~exit:hashtable_mutex_unlock)
+  end else None
+
 let init_done () =
   hh_init_done ();
   EventLogger.sharedmem_init_done (heap_size ())
@@ -105,11 +118,12 @@ let collect (effort : [ `gentle | `aggressive ]) =
   hh_collect (effort = `aggressive);
   let new_size = heap_size () in
   let time_taken = Unix.gettimeofday () -. start_t in
-  if old_size <> new_size then
+  if old_size <> new_size then begin
     Hh_logger.log
       "Sharedmem GC: %d bytes before; %d bytes after; in %f seconds"
       old_size new_size time_taken;
-  EventLogger.sharedmem_gc old_size new_size time_taken
+    EventLogger.sharedmem_gc_ran effort old_size new_size time_taken
+  end
 
 (*****************************************************************************)
 (* Module returning the MD5 of the key. It's because the code in C land
@@ -166,7 +180,7 @@ end) : Key with type userkey = UserKeyType.t = struct
 
   let to_old x = old_prefix^x
 
-  let to_new x = 
+  let to_new x =
     let module S = String in
     S.sub x (S.length old_prefix) (S.length x - S.length old_prefix)
 
@@ -207,7 +221,68 @@ module Raw (Key: Key) (Value: sig type t end) = struct
   external hh_get         : Key.md5 -> Value.t         = "hh_get"
   external hh_remove      : Key.md5 -> unit            = "hh_remove"
   external hh_move        : Key.md5 -> Key.md5 -> unit = "hh_move"
-      
+end
+
+let local_writes = ref false
+
+let enable_local_writes () =
+  assert (not !local_writes);
+  local_writes := true
+
+module RawWithLocalWritesOption:
+  functor (Key : Key) -> functor(Value: sig type t end) -> sig
+
+  val hh_add         : Key.md5 -> Value.t -> unit
+  val hh_mem         : Key.md5 -> bool
+  val hh_get         : Key.md5 -> Value.t
+  val hh_remove      : Key.md5 -> unit
+  val hh_move        : Key.md5 -> Key.md5 -> unit
+
+end = functor (Key : Key) -> functor (Value: sig type t end) -> struct
+
+  module Raw = Raw (Key) (Value)
+
+  (* We store option type instead of the type itself to be able to locally
+   * cache removals too *)
+  let (local_writes_storage : (Key.md5, Value.t option) Hashtbl.t)
+    = Hashtbl.create 7
+
+  let hh_mem key =
+    if not !local_writes then Raw.hh_mem key
+    else
+      try
+        begin match Hashtbl.find local_writes_storage key with
+          | None -> false
+          | Some _ -> true
+        end
+      with Not_found -> Raw.hh_mem key
+
+  let hh_add key value =
+    if not !local_writes then Raw.hh_add key value
+    else if not (hh_mem key) then
+      Hashtbl.replace local_writes_storage key (Some value)
+
+  let hh_get key =
+    if not !local_writes then Raw.hh_get key
+    else
+      try
+        begin match Hashtbl.find local_writes_storage key with
+          | None -> raise Not_found
+          | Some x -> x
+        end
+      with Not_found -> Raw.hh_get key
+
+  let hh_remove key =
+    if not !local_writes then Raw.hh_remove key
+    else Hashtbl.replace local_writes_storage key None
+
+  let hh_move key1 key2 =
+    if not !local_writes then Raw.hh_move key1 key2
+    else begin
+      let value = hh_get key1 in
+      hh_remove key2;
+      hh_add key2 value
+    end
 end
 
 (*****************************************************************************)
@@ -223,7 +298,7 @@ end
 (*****************************************************************************)
 
 module New : functor (Key : Key) -> functor(Value: Value.Type) -> sig
-  
+
   (* Adds a binding to the table, the table is left unchanged if the
    * key was already bound.
    *)
@@ -244,7 +319,7 @@ module New : functor (Key : Key) -> functor(Value: Value.Type) -> sig
 end = functor (Key : Key) -> functor (Value : Value.Type) -> struct
 
   module Data = Serial(Value)
-  module Raw = Raw (Key) (Data)
+  module Raw = RawWithLocalWritesOption (Key) (Data)
 
   let add key value = Raw.hh_add (Key.md5 key) (Data.make value)
   let mem key = Raw.hh_mem (Key.md5 key)
@@ -255,15 +330,15 @@ end = functor (Key : Key) -> functor (Value : Value.Type) -> struct
     then Some (Data.get (Raw.hh_get key))
     else None
 
-  let find_unsafe key = 
-    match get key with 
+  let find_unsafe key =
+    match get key with
     | None -> raise Not_found
     | Some x -> x
 
   let remove key =
     let key = Key.md5 key in
     if Raw.hh_mem key
-    then begin 
+    then begin
       Raw.hh_remove key;
       assert (not (Raw.hh_mem key));
     end
@@ -292,7 +367,7 @@ module Old : functor (Key : Key) -> functor (Value : Value.Type) -> sig
 end = functor (Key : Key) -> functor (Value: Value.Type) -> struct
 
   module Data = Serial(Value)
-  module Raw = Raw (Key) (Data)
+  module Raw = RawWithLocalWritesOption (Key) (Data)
 
   let get key =
     let key = Key.md5_old key in
@@ -318,14 +393,14 @@ end = functor (Key : Key) -> functor (Value: Value.Type) -> struct
 end
 
 (*****************************************************************************)
-(* The signature of what we are actually going to expose to the user *)
+(* The signatures of what we are actually going to expose to the user *)
 (*****************************************************************************)
 
-module type S = sig
+module type NoCache = sig
   type key
   type t
   module KeySet : Set.S with type elt = key
-  module KeyMap : MapSig with type key = key
+  module KeyMap : MyMap.S with type key = key
 
   val add              : key -> t -> unit
   val get              : key -> t option
@@ -340,6 +415,11 @@ module type S = sig
   val revive_batch     : KeySet.t -> unit
 end
 
+module type WithCache = sig
+  include NoCache
+  val write_through : key -> t -> unit
+end
+
 (*****************************************************************************)
 (* The interface that all keys need to implement *)
 (*****************************************************************************)
@@ -352,7 +432,7 @@ end
 
 (*****************************************************************************)
 (* A functor returning an implementation of the S module without caching. *)
-(*****************************************************************************)        
+(*****************************************************************************)
 
 module NoCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
 
@@ -360,7 +440,7 @@ module NoCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
   module New = New (Key) (Value)
   module Old = Old (Key) (Value)
   module KeySet = Set.Make (UserKeyType)
-  module KeyMap = MyMap (UserKeyType)
+  module KeyMap = MyMap.Make (UserKeyType)
 
   type key = UserKeyType.t
   type t = Value.t
@@ -409,7 +489,7 @@ module NoCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
         New.remove key
     end xs
 
-  let get_batch xs = 
+  let get_batch xs =
     KeySet.fold begin fun str_key acc ->
       let key = Key.make Value.prefix str_key in
       match New.get key with
@@ -434,7 +514,7 @@ end
 module type ConfigType = sig
 
 (* The type of object we want to keep in cache *)
-  type value         
+  type value
 
 (* The capacity of the cache *)
   val capacity : int
@@ -445,7 +525,7 @@ end
 (* All the caches are functors returning a module of the following signature
  *)
 (*****************************************************************************)
-      
+
 module type CacheType = sig
   type key
   type value
@@ -459,7 +539,7 @@ end
 (*****************************************************************************)
 (* Cache keeping the objects the most frequently used. *)
 (*****************************************************************************)
-      
+
 module FreqCache (Key : Key) (Config:ConfigType) :
   CacheType with type key := Key.t and type value := Config.value = struct
 
@@ -470,10 +550,10 @@ module FreqCache (Key : Key) (Config:ConfigType) :
       = Hashtbl.create (2 * Config.capacity)
   let size = ref 0
 
-  let clear() = 
+  let clear() =
     Hashtbl.clear cache;
     size := 0
- 
+
 (* The collection function is called when we reach twice original capacity
  * in size. When the collection is triggered, we only keep the most recent
  * object.
@@ -502,7 +582,7 @@ module FreqCache (Key : Key) (Config:ConfigType) :
 
   let add x y =
     collect();
-    try 
+    try
       let freq, y' = Hashtbl.find cache x in
       incr freq;
       if y' == y
@@ -546,7 +626,7 @@ module OrderedCache (Key : Key) (Config:ConfigType):
     size := 0;
     Queue.clear queue;
     ()
-      
+
   let add x y =
     if !size < Config.capacity
     then begin
@@ -565,7 +645,7 @@ module OrderedCache (Key : Key) (Config:ConfigType):
   let get x = try Some (find x) with Not_found -> None
 
   let remove x =
-    try 
+    try
       if Hashtbl.mem cache x
       then decr size;
       Hashtbl.remove cache x;
@@ -588,7 +668,7 @@ let invalidate_caches () =
  * We need to avoid constantly deserializing types, because it costs us too
  * much time. The caches keep a deserialized version of the types.
  *)
-(*****************************************************************************)        
+(*****************************************************************************)
 module WithCache (UserKeyType : UserKeyType) (Value:Value.Type) = struct
 
   type key = UserKeyType.t
@@ -609,17 +689,23 @@ module WithCache (UserKeyType : UserKeyType) (Value:Value.Type) = struct
   module New = New (Key) (Value)
   module Old = Old (Key) (Value)
   module KeySet = Set.Make (UserKeyType)
-  module KeyMap = MyMap (UserKeyType)
+  module KeyMap = MyMap.Make (UserKeyType)
 
   module Direct = NoCache (UserKeyType) (Value)
 
-  let add x y = 
+  let add x y =
     let x = Key.make Value.prefix x in
     L1.add x y;
     L2.add x y;
     New.add x y
 
-  let get x = 
+  let write_through x y =
+    (* Note that we do not need to do any cache invalidation here because
+     * New.add is a no-op if the key already exists. *)
+    let x = Key.make Value.prefix x in
+    New.add x y
+
+  let get x =
     let x = Key.make Value.prefix x in
     match L1.get x with
     | None ->
@@ -650,12 +736,12 @@ module WithCache (UserKeyType : UserKeyType) (Value:Value.Type) = struct
     | None -> raise Not_found
     | Some x -> x
 
-  let mem x = 
+  let mem x =
     match get x with
     | None -> false
     | Some _ -> true
-    
-  let remove x = 
+
+  let remove x =
     let x = Key.make Value.prefix x in
     L1.remove x;
     L2.remove x;

@@ -1,0 +1,6 @@
+string(13) "Y::__destruct"
+string(13) "X::__destruct"
+Destructor raised a fatal error: Maximum execution time of 1 seconds exceeded
+
+
+Fatal error: Maximum execution time of 1 seconds exceeded in %s/test/slow/error_handler/destructor_fatal.php on line 31

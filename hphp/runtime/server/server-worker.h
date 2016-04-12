@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,15 +20,15 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/service-data.h"
 
 namespace HPHP {
 
-class Transport;
+struct Transport;
 
-class ServerJob {
-public:
+struct ServerJob {
   explicit ServerJob();
   virtual ~ServerJob() {}
 
@@ -89,7 +89,9 @@ protected:
     bool error = true;
     std::string errorMsg;
 
-    assertx(MM().empty());
+    // rpc threads keep things live between requests, but other
+    // requests should not have allocated anything yet.
+    assertx(vmStack().isAllocated() || MM().empty());
 
     SCOPE_EXIT { m_handler->teardownRequest(transport); };
 

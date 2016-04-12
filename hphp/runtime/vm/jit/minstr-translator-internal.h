@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,19 +24,6 @@
 
 namespace HPHP { namespace jit { namespace {
 
-static const MInstrAttr Warn = MIA_warn;
-static const MInstrAttr Unset = MIA_unset;
-static const MInstrAttr Reffy = MIA_reffy;
-static const MInstrAttr Define = MIA_define;
-static const MInstrAttr None = MIA_none;
-static const MInstrAttr WarnDefine = MInstrAttr(Warn | Define);
-static const MInstrAttr DefineReffy = MInstrAttr(Define | Reffy);
-static const MInstrAttr WarnDefineReffy = MInstrAttr(Warn | Define | Reffy);
-#define WDU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \
-                   (attrs & Unset) != 0
-#define WDRU(attrs) (attrs & Warn) != 0, (attrs & Define) != 0, \
-                    (attrs & Reffy) != 0, (attrs & Unset) != 0
-
 /* The following bunch of macros and functions are used to build up tables of
  * helper function pointers and determine which helper should be called based
  * on a variable number of bool and enum arguments. */
@@ -44,7 +31,7 @@ static const MInstrAttr WarnDefineReffy = MInstrAttr(Warn | Define | Reffy);
 template<typename T> constexpr unsigned bitWidth() {
   return std::is_same<T, bool>::value ? 1
     : std::is_same<T, KeyType>::value ? 2
-    : std::is_same<T, MInstrAttr>::value ? 4
+    : std::is_same<T, MOpFlags>::value ? 4
     : sizeof(T) * CHAR_BIT;
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -39,8 +40,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ImapStream : public SweepableResourceData {
-public:
+struct ImapStream : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ImapStream);
 
   ImapStream(MAILSTREAM *stream, int64_t flag)
@@ -1312,6 +1312,10 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
                              int64_t retries /* = 0 */) {
   String filename = mailbox;
   if (filename[0] != '{') {
+    if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+      return init_null();
+    }
+
     filename = File::TranslatePath(filename);
     if (filename.empty()) {
       return false;
@@ -1570,13 +1574,7 @@ static Variant HHVM_FUNCTION(imap_utf8, const String& mime_encoded_text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_IMAP_CLOSETIMEOUT("IMAP_CLOSETIMEOUT");
-const StaticString s_IMAP_OPENTIMEOUT("IMAP_OPENTIMEOUT");
-const StaticString s_IMAP_READTIMEOUT("IMAP_READTIMEOUT");
-const StaticString s_IMAP_WRITETIMEOUT("IMAP_WRITETIMEOUT");
-
-static class imapExtension final : public Extension {
-public:
+static struct imapExtension final : Extension {
   imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {
@@ -1622,19 +1620,93 @@ public:
     mail_parameters(NIL, SET_WRITETIMEOUT, timeout);
     mail_parameters(NIL, SET_CLOSETIMEOUT, timeout);
 
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_CLOSETIMEOUT.get(), 4
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_OPENTIMEOUT.get(), 1
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_READTIMEOUT.get(), 2
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_WRITETIMEOUT.get(), 3
-    );
+    // FIXME: Use a consistent constant/enum
+    // rather than repeating hard-coded values
+    HHVM_RC_INT(IMAP_OPENTIMEOUT, 1);
+    HHVM_RC_INT(IMAP_READTIMEOUT, 2);
+    HHVM_RC_INT(IMAP_WRITETIMEOUT, 3);
+    HHVM_RC_INT(IMAP_CLOSETIMEOUT, 4);
 
+    HHVM_RC_INT_SAME(NIL);
+
+    HHVM_RC_INT_SAME(OP_DEBUG);
+    HHVM_RC_INT_SAME(OP_READONLY);
+    HHVM_RC_INT_SAME(OP_ANONYMOUS);
+    HHVM_RC_INT_SAME(OP_SHORTCACHE);
+    HHVM_RC_INT_SAME(OP_SILENT);
+    HHVM_RC_INT_SAME(OP_PROTOTYPE);
+    HHVM_RC_INT_SAME(OP_HALFOPEN);
+    HHVM_RC_INT_SAME(OP_EXPUNGE);
+    HHVM_RC_INT_SAME(OP_SECURE);
+
+    HHVM_RC_INT_SAME(LATT_NOINFERIORS);
+    HHVM_RC_INT_SAME(LATT_NOSELECT);
+    HHVM_RC_INT_SAME(LATT_MARKED);
+    HHVM_RC_INT_SAME(LATT_UNMARKED);
+#ifdef LATT_REFERRAL
+    HHVM_RC_INT_SAME(LATT_REFERRAL);
+#endif
+#ifdef LATT_HASCHILDREN
+    HHVM_RC_INT_SAME(LATT_HASCHILDREN);
+#endif
+#ifdef LATT_HASNOCHILDREN
+    HHVM_RC_INT_SAME(LATT_HASNOCHILDREN);
+#endif
+
+    HHVM_RC_INT_SAME(SE_UID);
+    HHVM_RC_INT_SAME(SE_FREE);
+    HHVM_RC_INT_SAME(SE_NOPREFETCH);
+
+    HHVM_RC_INT_SAME(SO_FREE);
+    HHVM_RC_INT_SAME(SO_NOSERVER);
+
+    HHVM_RC_INT_SAME(SA_MESSAGES);
+    HHVM_RC_INT_SAME(SA_RECENT);
+    HHVM_RC_INT_SAME(SA_UNSEEN);
+    HHVM_RC_INT_SAME(SA_UIDNEXT);
+    HHVM_RC_INT_SAME(SA_UIDVALIDITY);
+    HHVM_RC_INT(SA_ALL, SA_MESSAGES | SA_RECENT | SA_UNSEEN |
+                        SA_UIDNEXT | SA_UIDVALIDITY);
+
+    HHVM_RC_INT(CL_EXPUNGE, PHP_EXPUNGE);
+
+    HHVM_RC_INT_SAME(FT_UID);
+    HHVM_RC_INT_SAME(FT_PEEK);
+    HHVM_RC_INT_SAME(FT_NOT);
+    HHVM_RC_INT_SAME(FT_INTERNAL);
+    HHVM_RC_INT_SAME(FT_PREFETCHTEXT);
+
+    HHVM_RC_INT_SAME(ST_UID);
+    HHVM_RC_INT_SAME(ST_SILENT);
+    HHVM_RC_INT_SAME(ST_SET);
+
+    HHVM_RC_INT_SAME(CP_UID);
+    HHVM_RC_INT_SAME(CP_MOVE);
+
+    HHVM_RC_INT_SAME(SORTDATE);
+    HHVM_RC_INT_SAME(SORTARRIVAL);
+    HHVM_RC_INT_SAME(SORTFROM);
+    HHVM_RC_INT_SAME(SORTSUBJECT);
+    HHVM_RC_INT_SAME(SORTTO);
+    HHVM_RC_INT_SAME(SORTCC);
+    HHVM_RC_INT_SAME(SORTSIZE);
+
+    HHVM_RC_INT_SAME(TYPETEXT);
+    HHVM_RC_INT_SAME(TYPEMULTIPART);
+    HHVM_RC_INT_SAME(TYPEMESSAGE);
+    HHVM_RC_INT_SAME(TYPEAPPLICATION);
+    HHVM_RC_INT_SAME(TYPEAUDIO);
+    HHVM_RC_INT_SAME(TYPEIMAGE);
+    HHVM_RC_INT_SAME(TYPEVIDEO);
+    HHVM_RC_INT_SAME(TYPEMODEL);
+    HHVM_RC_INT_SAME(TYPEOTHER);
+
+    HHVM_RC_INT_SAME(ENC7BIT);
+    HHVM_RC_INT_SAME(ENC8BIT);
+    HHVM_RC_INT_SAME(ENCBINARY);
+    HHVM_RC_INT_SAME(ENCBASE64);
+    HHVM_RC_INT_SAME(ENCQUOTEDPRINTABLE);
+    HHVM_RC_INT_SAME(ENCOTHER);
 
     HHVM_FE(imap_8bit);
     HHVM_FE(imap_alerts);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -102,7 +102,6 @@ struct AliasAnalysis {
   ALocBits all_elemIs;
   ALocBits all_frame;
   ALocBits all_stack;
-  ALocBits all_mistate;
   ALocBits all_ref;
   ALocBits all_iterPos;
   ALocBits all_iterBase;
@@ -128,7 +127,9 @@ struct AliasAnalysis {
    * contained in `acls'.  This function may conservatively return a smaller
    * set of bits: every bit that is set in the returned ALocBits is contained
    * in `acls', but there may be locations contained in `acls' that don't have
-   * a bit set in the returned vector.
+   * a bit set in the returned vector. As a consequence of this, any caller of
+   * expand() must produce correct (but potentially suboptimal) results if
+   * expand is hardcoded to always return an empty bitset.
    *
    * This should generally be used with AliasClasses that are exhaustive,
    * must-style information.  That is, AliasClasses that should be interpreted

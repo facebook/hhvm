@@ -1,0 +1,2 @@
+File "pipe_operator_not_leaking_dollardollar.php", line 13, characters 14-15:
+Undefined variable: $$ (Naming[2050])

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -105,7 +105,7 @@ int64_t Timer::GetCurrentTimeMicros() {
   return to_usec(tv);
 }
 
-int64_t Timer::GetRusageMicros(Type t, int who) {
+int64_t Timer::GetRusageMicros(Type t, Who who) {
   assert(t != WallTime);
 
   struct rusage ru;
@@ -113,7 +113,7 @@ int64_t Timer::GetRusageMicros(Type t, int who) {
   auto DEBUG_ONLY ret = getrusage(who, &ru);
   assert(ret == 0);
 
-  switch (who) {
+  switch (t) {
     case SystemCPU: return to_usec(ru.ru_stime);
     case UserCPU:   return to_usec(ru.ru_utime);
     case TotalCPU:  return to_usec(ru.ru_stime) + to_usec(ru.ru_utime);
@@ -126,7 +126,7 @@ int64_t Timer::measure() const {
     return GetCurrentTimeMicros();
   }
 
-  return GetRusageMicros(m_type, RUSAGE_SELF);
+  return GetRusageMicros(m_type, Timer::Self);
 }
 
 const char *Timer::getName() const {

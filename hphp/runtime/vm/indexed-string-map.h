@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -138,7 +138,8 @@ private:
  * up, and then pass it to IndexedStringMap::create.
  */
 template<class T, bool CaseSensitive, class Index, Index InvalidIndex>
-class IndexedStringMap<T,CaseSensitive,Index,InvalidIndex>::Builder {
+struct IndexedStringMap<T,CaseSensitive,Index,InvalidIndex>::Builder {
+private:
   using EqObject = typename std::conditional<
     CaseSensitive,
     string_data_same,
@@ -187,7 +188,9 @@ public:
       abort();
     }
 
-    m_map[name] = m_list.size();
+    if (!m_map.emplace(name, m_list.size()).second) {
+      abort();
+    }
     m_list.push_back(t);
   }
 
@@ -239,7 +242,7 @@ public:
   }
 
 private:
-  friend class IndexedStringMap;
+  friend struct IndexedStringMap;
   std::vector<T> m_list;
   Map m_map;
 };

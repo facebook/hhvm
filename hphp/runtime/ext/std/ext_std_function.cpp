@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -54,9 +54,8 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
 }
 
 bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
-                   VRefParam name /* = null */) {
-  return is_callable(v, syntax, name.isReferenced() ?
-                     name.wrapped().asTypedValue()->m_data.pref : nullptr);
+                   OutputArg name /* = null */) {
+  return is_callable(v, syntax, name.get());
 }
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
@@ -171,8 +170,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   );
   if (variadic && numArgs > numParams) {
     auto arr = local - numParams;
-    if (arr->m_type == KindOfArray &&
-        arr->m_data.parr->isPacked()) {
+    if (isArrayType(arr->m_type) && arr->m_data.parr->isPacked()) {
       numArgs = numParams + arr->m_data.parr->size();
     } else {
       numArgs = numParams;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include <iterator>
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ void BCPattern::matchAnchored(const Expr& pattern,
       return;
     }
 
-    auto op = *(Op*)inst;
+    auto const op = peek_op(inst);
 
     // Skip pattern-globally ignored opcodes.
     if (m_ignores.count(op)) {
@@ -103,7 +104,7 @@ void BCPattern::matchAnchored(const Expr& pattern,
 
     if ((pos->op() == Op::JmpZ || pos->op() == Op::JmpNZ)) {
       // Match the taken block, if there is one.
-      auto off = instrJumpOffset((Op*)inst);
+      auto off = instrJumpOffset(inst);
       assert(off);
 
       auto res = result;

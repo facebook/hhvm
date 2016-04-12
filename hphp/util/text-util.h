@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,19 +54,19 @@ std::string getIdentifier(const std::string &fileName);
 /**
  * Duplicate a buffer of given size, null-terminate the result.
  */
-const void *buffer_duplicate(const void *src, int size);
+const void *buffer_duplicate(const void *src, size_t size);
 
 /**
  * Append buf2 to buf2, null-terminate the result.
  */
-const void *buffer_append(const void *buf1, int size1,
-                          const void *buf2, int size2);
+const void *buffer_append(const void *buf1, size_t size1,
+                          const void *buf2, size_t size2);
 
 /**
  * printf into a std::string.
  */
 void string_printf(std::string &msg,
-                   const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
 /**
  * Escaping strings for code generation.

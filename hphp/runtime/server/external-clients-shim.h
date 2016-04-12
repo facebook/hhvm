@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,9 +24,6 @@
 namespace HPHP {
 
 struct ExternalClientShim : IHostHealthObserver {
-  ExternalClientShim():
-    m_status(HealthLevel::Bold) {
-  }
   virtual void notifyNewStatus(HealthLevel newStatus) final {
     m_status = newStatus;
 
@@ -35,17 +32,15 @@ struct ExternalClientShim : IHostHealthObserver {
 
     // push to ServerStats
     ServerStats::SetServerHealthLevel(m_status);
-
     // push to ApacheExtension
     ApacheExtension::UpdateHealthLevel(m_status);
-
   }
 
-  virtual HealthLevel getStatus() {
+  virtual HealthLevel getHealthLevel() final {
     return m_status;
   }
  private:
-  HealthLevel m_status;
+  HealthLevel m_status{HealthLevel::Bold};
 };
 
 }

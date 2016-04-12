@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +125,7 @@ ExtOpcode getExtOpcode(TCA addr,
         (bcMap[i].afrozenStart <= addr && bcMap[i+1].afrozenStart > addr)) {
       auto* unit = g_repo->getUnit(bcMap[i].md5);
       always_assert(unit);
-      return (ExtOpcode)unit->getOpcode(bcMap[i].bcStart);
+      return (ExtOpcode)unit->getOp(bcMap[i].bcStart);
     }
   }
 

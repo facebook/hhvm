@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,18 +27,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ActRec;
-class c_WaitableWaitHandle;
-class c_ResumableWaitHandle;
-class c_RescheduleWaitHandle;
-class c_SleepWaitHandle;
-class c_ExternalThreadEventWaitHandle;
+struct c_WaitableWaitHandle;
+struct c_ResumableWaitHandle;
+struct c_RescheduleWaitHandle;
+struct c_SleepWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
+struct c_AsyncFunctionWaitHandle;
 
 typedef uint8_t context_idx_t;
 
 struct AsioContext final {
-  void* operator new(size_t size) { return req::malloc(size); }
-  void operator delete(void* ptr) { req::free(ptr); }
-
   explicit AsioContext(ActRec* savedFP) : m_savedFP(savedFP) {}
   void exit(context_idx_t ctx_idx);
 
@@ -46,6 +44,10 @@ struct AsioContext final {
 
   void schedule(c_ResumableWaitHandle* wait_handle) {
     m_runnableQueue.push_back(wait_handle);
+  }
+  void scheduleFast(c_AsyncFunctionWaitHandle* wait_handle) {
+    // assert(wait_handle->isFastResumable());
+    m_fastRunnableQueue.push_back(wait_handle);
   }
   void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
                 int64_t priority);
@@ -72,6 +74,7 @@ struct AsioContext final {
     // m_savedFP is a pointer to a frame on the stack that represents
     // a WaitHandle::join() call; it's guaranteed to be on the stack
     mark(m_runnableQueue);
+    mark(m_fastRunnableQueue);
     for (auto& p : m_priorityQueueDefault) {
       for (auto wh : p.second) mark(wh);
     }
@@ -94,6 +97,9 @@ private:
 
   // stack of ResumableWaitHandles ready for immediate execution
   req::vector<c_ResumableWaitHandle*> m_runnableQueue;
+
+  // stack of AsyncFunctionWaitHandles ready for immediate execution
+  req::vector<c_AsyncFunctionWaitHandle*> m_fastRunnableQueue;
 
   // queue of RescheduleWaitHandles scheduled in default mode
   reschedule_priority_queue_t m_priorityQueueDefault;

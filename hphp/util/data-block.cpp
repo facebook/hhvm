@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@ void* DataBlock::allocInner(size_t len) {
 
   if (!len) return nullptr;
 
-  auto freeList = m_freeLists.lower_bound((Size) len);
+  auto freeList = m_freeLists.lower_bound(len);
   if (freeList == m_freeLists.end()) {
     return nullptr;
   }
@@ -48,7 +48,7 @@ void* DataBlock::allocInner(size_t len) {
 
   if (freeList->second.empty()) m_freeLists.erase(freeList);
 
-  return (void*)(off + m_base);
+  return m_base + off;
 }
 
 void DataBlock::free(void* addr, size_t len) {
@@ -108,6 +108,16 @@ void DataBlock::free(void* addr, size_t len) {
   }
   m_freeLists[len].emplace(off);
   m_freeRanges[off + len] = -(int64_t)len;
+}
+
+void DataBlock::reportFull(size_t nBytes) const {
+  throw DataBlockFull(m_name, folly::format(
+    "Attempted to emit {} byte(s) into a {} byte DataBlock with {} bytes "
+    "available. This almost certainly means the TC is full. If this is "
+    "the case, increasing Eval.JitASize, Eval.JitAColdSize, "
+    "Eval.JitAFrozenSize and Eval.JitGlobalDataSize in the configuration "
+    "file when running this script or application should fix this problem.",
+    nBytes, m_size, m_size - (m_frontier - m_base)).str());
 }
 
 }

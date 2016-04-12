@@ -1,0 +1,19 @@
+--Parameter--
+
+bool(true)
+bool(true)
+string(6) "HH\int"
+bool(false)
+
+--Return--
+
+bool(true)
+bool(true)
+string(8) "?HH\bool"
+bool(true)
+
+--Call Constructor Directly--
+
+bool(false)
+
+Fatal error: ReflectionType::__construct(): Internal error: Failed to retrieve the reflection object in %sReflectionType-basic.php on line %d

@@ -1,6 +1,11 @@
 <?hh
 
-function block() { return RescheduleWaitHandle::create(1,1); };
+function block() {
+  return RescheduleWaitHandle::create(
+    RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
+    1,
+  );
+};
 
 async function ret1() {
   await block();

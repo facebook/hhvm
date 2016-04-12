@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,8 +20,6 @@
 #include <set>
 #include <string>
 
-#include "hphp/util/string-bag.h"
-
 #include "hphp/compiler/hphp.h"
 
 #include "hphp/runtime/base/class-info.h"
@@ -36,8 +34,7 @@ DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(VariableTable);
 DECLARE_BOOST_TYPES(ConstantTable);
 
-class BuiltinSymbols {
-public:
+struct BuiltinSymbols {
   static bool Loaded;
   static AnalysisResultPtr s_systemAr;
 
@@ -63,7 +60,6 @@ public:
   static const char *const GlobalNames[];
   static int NumGlobalNames();
 private:
-  static StringBag s_strings;
   static const char *SystemClasses[];
 
   static hphp_string_set s_superGlobals;

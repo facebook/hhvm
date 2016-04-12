@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,8 @@
 #include "hphp/compiler/hphp.h"
 #include "hphp/compiler/json.h"
 
+#include "hphp/compiler/statement/class_statement.h"
+
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/md5.h"
 
@@ -47,10 +49,8 @@ DECLARE_BOOST_TYPES(StatementList);
  * AnalysisResult objects to grab statements, functions and classes from
  * FileScope objects to form execution paths.
  */
-class FileScope : public BlockScope,
-                  public FunctionContainer,
-                  public JSON::DocTarget::ISerializable {
-public:
+struct FileScope : BlockScope, FunctionContainer,
+                   JSON::DocTarget::ISerializable {
   enum Attribute {
     ContainsDynamicVariable  = 0x0001,
     ContainsLDynamicVariable = 0x0002,
@@ -122,6 +122,8 @@ public:
   const StringToFunctionScopePtrVecMap *getRedecFunctions() {
     return m_redeclaredFunctions;
   }
+  void addAnonClass(ClassStatementPtr stmt);
+  const std::vector<ClassStatementPtr>& getAnonClasses() const;
 
   /**
    * For separate compilation
@@ -161,6 +163,9 @@ public:
   void setHHFile();
   bool isHHFile() const { return m_isHHFile; }
 
+  void setUseStrictTypes();
+  bool useStrictTypes() const { return m_useStrictTypes; }
+
   void setPreloadPriority(int p) { m_preloadPriority = p; }
   int preloadPriority() const { return m_preloadPriority; }
 
@@ -186,6 +191,7 @@ private:
   MD5 m_md5;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
+  unsigned m_useStrictTypes : 1;
   int m_preloadPriority;
 
   std::vector<int> m_attributes;
@@ -193,6 +199,7 @@ private:
   StatementListPtr m_tree;
   StringToFunctionScopePtrVecMap *m_redeclaredFunctions;
   StringToClassScopePtrVecMap m_classes;      // name => class
+  std::vector<ClassStatementPtr> m_anonClasses;
   FunctionScopeRawPtr m_pseudoMain;
 
   std::string m_pseudoMainName;

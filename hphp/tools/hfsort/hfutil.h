@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,8 +23,6 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
-
-#include <cxxabi.h>
 
 namespace HPHP { namespace hfsort {
 
@@ -60,7 +58,9 @@ void trace(const char* fmt, ...);
   if (tracing >= LEVEL) { trace(__VA_ARGS__); }
 
 typedef   int32_t FuncId;
-constexpr int32_t InvalidId = -1;
+constexpr int32_t  InvalidId   = -1;
+constexpr uint64_t InvalidAddr = std::numeric_limits<uint64_t>::max();
+
 
 extern struct CallGraph cg;
 struct Cluster;
@@ -74,6 +74,7 @@ struct Arc {
   FuncId dst;
   double weight;
   double normalizedWeight{0};
+  double avgCallOffset{0};
 };
 
 struct Func {
@@ -137,13 +138,23 @@ struct CallGraph {
     clusters.push_back(c);
   }
 
-  Arc* findArc(FuncId f1, FuncId f2) const {
-    const auto& outArcs = funcs[f1].outArcs;
+  Arc* findArc(FuncId src, FuncId dst) const {
+    const auto& outArcs = funcs[src].outArcs;
     for (size_t i = 0; i < outArcs.size(); i++) {
       Arc* arc = outArcs[i];
-      if (arc->dst == f2) return arc;
+      if (arc->dst == dst) return arc;
     }
     return nullptr;
+  }
+
+  Arc* getArc(FuncId src, FuncId dst) {
+    auto arc = findArc(src, dst);
+    if (arc) return arc;
+    arc = new Arc(src, dst, 0);
+    funcs[src].outArcs.push_back(arc);
+    funcs[dst].inArcs. push_back(arc);
+    arcs.push_back(arc);
+    return arc;
   }
 
   Arc* incArcWeight(FuncId src, FuncId dst, double w = 1.0) {
@@ -185,9 +196,15 @@ struct CallGraph {
     for (size_t f = 0; f < funcs.size(); f++) {
       if (funcs[f].samples == 0) continue;
       for (size_t i = 0; i < funcs[f].outArcs.size(); i++) {
-        fprintf(file, "f%lu -> f%u [label=%.3lf]\n", f,
-                funcs[f].outArcs[i]->dst,
-                funcs[f].outArcs[i]->normalizedWeight);
+        auto arc = funcs[f].outArcs[i];
+        fprintf(
+          file,
+          "f%lu -> f%u [label=normWgt=%.3lf,weight=%.0lf,callOffset=%.1lf]\n",
+          f,
+          arc->dst,
+          arc->normalizedWeight,
+          arc->weight,
+          arc->avgCallOffset);
       }
     }
     fprintf(file, "}\n");

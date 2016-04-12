@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,7 +61,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-struct ObjectData {
+struct ObjectData: type_scan::MarkCountable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()
@@ -81,8 +81,7 @@ struct ObjectData {
                             // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     HasNativePropHandler    // class has native magic props handler
-                  = 0x8000,
-    InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
+                  = 0x8000
   };
 
   enum {
@@ -115,18 +114,29 @@ struct ObjectData {
                       NoInit) noexcept;
 
  public:
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
+  bool kindIsValid() const { return isObjectKind(headerKind()); }
+
   template<class F> void scan(F&) const;
 
   size_t heapSize() const;
 
  public:
 
-  // Call newInstance() to instantiate a PHP object. The initial ref-count will
-  // be greater than zero. Since this gives you a raw pointer, it is your
-  // responsibility to manage the ref-count yourself. Whenever possible, prefer
-  // using the Object class instead, which takes care of this for you.
+  /*
+   * Call newInstance() to instantiate a PHP object. The initial ref-count will
+   * be greater than zero. Since this gives you a raw pointer, it is your
+   * responsibility to manage the ref-count yourself. Whenever possible, prefer
+   * using the Object class instead, which takes care of this for you.
+   */
   static ObjectData* newInstance(Class*);
+
+  /*
+   * Instantiate a new object without initializing its declared properties. The
+   * given Class must be a concrete, regular Class, without an instanceCtor or
+   * customInit.
+   */
+  static ObjectData* newInstanceNoPropInit(Class*);
 
   /*
    * Given a Class that is assumed to be a concrete, regular (not a trait or
@@ -177,9 +187,8 @@ struct ObjectData {
   HeaderKind headerKind() const;
 
   bool getAttribute(Attribute) const;
-  uint16_t getAttributes() const;
   void setAttribute(Attribute);
-
+  bool hasInstanceDtor() const;
   bool noDestruct() const;
   void setNoDestruct();
   void clearNoDestruct();
@@ -203,6 +212,7 @@ struct ObjectData {
   bool equal(const ObjectData&) const;
   bool less(const ObjectData&) const;
   bool more(const ObjectData&) const;
+  int64_t compare(const ObjectData&) const;
 
   /*
    * Call this object's destructor, if it has one. No restrictions are placed
@@ -289,6 +299,13 @@ struct ObjectData {
    */
   Array& reserveProperties(int nProp = 2);
 
+  /*
+   * Use the given array for this object's dynamic properties. HasDynPropArry
+   * must not already be set. Returns a reference to the Array in its final
+   * location.
+   */
+  Array& setDynPropArray(const Array&);
+
   // accessors for the declared properties area
   TypedValue* propVec();
   const TypedValue* propVec() const;
@@ -330,10 +347,27 @@ struct ObjectData {
   PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*,
                                       bool copyDynArray);
 
+  struct PropAccessInfo {
+    struct Hash;
+
+    bool operator==(const PropAccessInfo& o) const {
+      return obj == o.obj && attr == o.attr && key->same(o.key);
+    }
+
+    ObjectData* obj;
+    const StringData* key;      // note: not necessarily static
+    ObjectData::Attribute attr;
+  };
+
+  struct PropRecurInfo {
+    using RecurSet = req::hash_set<PropAccessInfo, PropAccessInfo::Hash>;
+    const PropAccessInfo* activePropInfo;
+    RecurSet* activeSet;
+  };
+
  private:
   template <bool warn, bool define>
   TypedValue* propImpl(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
@@ -341,15 +375,14 @@ struct ObjectData {
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
-  bool invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
+  bool invokeSet(const StringData* key, TypedValue* val);
   bool invokeGet(TypedValue* retval, const StringData* key);
   bool invokeIsset(TypedValue* retval, const StringData* key);
-  bool invokeUnset(TypedValue* retval, const StringData* key);
+  bool invokeUnset(const StringData* key);
   bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
-  bool invokeNativeSetProp(TypedValue* retval, const StringData* key,
-                           TypedValue* val);
+  bool invokeNativeSetProp(const StringData* key, TypedValue* val);
   bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
-  bool invokeNativeUnsetProp(TypedValue* retval, const StringData* key);
+  bool invokeNativeUnsetProp(const StringData* key);
 
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
                Array& props, std::vector<bool>& inserted) const;
@@ -360,28 +393,24 @@ struct ObjectData {
 
  public:
   TypedValue* prop(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
   );
 
   TypedValue* propD(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
   );
 
   TypedValue* propW(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
   );
 
   TypedValue* propWD(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
@@ -395,13 +424,8 @@ struct ObjectData {
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
 
-  template <bool setResult>
-  void incDecProp(
-    Class* ctx,
-    IncDecOp op,
-    const StringData* key,
-    TypedValue& dest
-  );
+  void incDecProp(Class* ctx, IncDecOp op, const StringData* key,
+                  TypedValue& dest);
 
   void unsetProp(Class* ctx, const StringData* key);
 
@@ -416,11 +440,10 @@ struct ObjectData {
     return offsetof(ObjectData, m_hdr) +
            offsetof(HeaderWord<uint16_t>, aux);
   }
+  const char* classname_cstr() const;
 
 private:
   friend struct MemoryProfile;
-
-  const char* classname_cstr() const;
 
   static void compileTimeAssertions();
 
@@ -450,13 +473,17 @@ private:
 struct GlobalsArray;
 typedef GlobalsArray GlobalVariables;
 
-struct CountableHelper : private boost::noncopyable {
+struct CountableHelper {
   explicit CountableHelper(ObjectData* object) : m_object(object) {
     object->incRefCount();
   }
   ~CountableHelper() {
     m_object->decRefCount();
   }
+
+  CountableHelper(const CountableHelper&) = delete;
+  CountableHelper& operator=(const CountableHelper&) = delete;
+
 private:
   ObjectData *m_object;
 };

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,6 +15,10 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm.h"
+
+#include "hphp/runtime/base/arch.h"
+
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -22,147 +26,227 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include <boost/dynamic_bitset.hpp>
+#include "hphp/util/asm-x64.h"
 
-TRACE_SET_MOD(hhir);
+#include <utility>
+
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 
 namespace {
 
-struct Simplifier {
+///////////////////////////////////////////////////////////////////////////////
+
+struct Env {
   Vunit& unit;
-  jit::vector<uint32_t> uses;
 
-  explicit Simplifier(Vunit& unit_in, const jit::vector<Vlabel>& blocks)
-  : unit(unit_in), uses(unit.next_vr) {
-    // Use count for each register.  Used to keep peepholes from
-    // firing if results are used beyond the scope of the instructions
-    // being checked.
-    for (auto b : blocks) {
-      for (auto& inst : unit.blocks[b].code) {
-        visitUses(unit, inst, [&](Vreg r) { ++uses[r]; });
-      }
+  // Number of uses of each Vreg.
+  jit::vector<uint32_t> use_counts;
+
+  // Instruction which def'd each Vreg.  Probably only useful when the def
+  // instruction only has a single dst, but that's all we need right now.
+  jit::vector<Vinstr::Opcode> def_insts;
+};
+
+template<Vinstr::Opcode op>
+using op_type = typename Vinstr::op_matcher<op>::type;
+
+/*
+ * Check if the instruction at block `b', index `i' of `env.unit' is an `op'.
+ * If so, call `f' on the specific instruction, and return the result.  If not,
+ * return a default-constructed instance of f's return type.
+ */
+template<Vinstr::Opcode op, typename F>
+auto if_inst(const Env& env, Vlabel b, size_t i, F f)
+  -> decltype(f(std::declval<const op_type<op>&>()))
+{
+  auto const& code = env.unit.blocks[b].code;
+  if (i >= code.size() || code[i].op != op) {
+    return decltype(f(code[i].get<op>())){};
+  }
+  return f(code[i].get<op>());
+}
+
+/*
+ * Helper for vasm-simplification routines.
+ *
+ * This just wraps vmodify() with some accounting logic for `env'.
+ */
+template<typename Simplify>
+bool simplify_impl(Env& env, Vlabel b, size_t i, Simplify simplify) {
+  auto& unit = env.unit;
+
+  return vmodify(unit, b, i, [&] (Vout& v) {
+    auto& blocks = unit.blocks;
+    auto const nremove = simplify(v);
+
+    // Update use counts for to-be-removed instructions.
+    for (auto j = i; j < i + nremove; ++j) {
+      visitUses(unit, blocks[b].code[j], [&] (Vreg r) {
+        --env.use_counts[r];
+      });
+    }
+
+    // Update use counts and def instructions for to-be-added instructions.
+    for (auto const& inst : blocks[Vlabel(v)].code) {
+      visitUses(unit, inst, [&] (Vreg r) {
+        assertx(r < env.use_counts.size());
+        ++env.use_counts[r];
+      });
+      visitDefs(unit, inst, [&] (Vreg r) {
+        env.def_insts[r] = inst.op;
+      });
+    }
+
+    return nremove;
+  });
+}
+
+/*
+ * Simplify an `inst' at block `b', instruction `i', returning whether or not
+ * any changes were made.
+ *
+ * Specializations are below.
+ */
+template<typename Inst>
+bool simplify(Env&, const Inst& inst, Vlabel b, size_t i) { return false; }
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const andq& vandq, Vlabel b, size_t i) {
+  return if_inst<Vinstr::testq>(env, b, i + 1, [&] (const testq& vtestq) {
+    // andq{s0, s1, tmp, _}; testq{tmp, tmp, sf} --> testq{s0, s1, sf}
+    if (!(env.use_counts[vandq.d] == 2 &&
+          env.use_counts[vandq.sf] == 0 &&
+          vtestq.s0 == vandq.d &&
+          vtestq.s1 == vandq.d)) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << testq{vandq.s0, vandq.s1, vtestq.sf};
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
+  return if_inst<Vinstr::xorbi>(env, b, i + 1, [&] (const xorbi& vxorbi) {
+    // setcc{cc, _, tmp}; xorbi{1, tmp, d, _}; --> setcc{~cc, _, tmp};
+    if (!(env.use_counts[vsetcc.d] == 1 &&
+          vxorbi.s0.b() == 1 &&
+          vxorbi.s1 == vsetcc.d &&
+          env.use_counts[vxorbi.sf] == 0)) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << setcc{ccNegate(vsetcc.cc), vsetcc.sf, vxorbi.d};
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {
+  auto const& srcs = env.unit.tuples[inst.s];
+  auto const& dsts = env.unit.tuples[inst.d];
+  assertx(srcs.size() == dsts.size());
+
+  for (auto const src : srcs) {
+    for (auto const dst : dsts) {
+      if (src == dst) return false;
     }
   }
 
-  bool match_instr(const Vblock& block, size_t iIdx, Vinstr::Opcode op) const {
-    auto const& code = block.code;
-    return (iIdx < code.size() && code[iIdx].op == op);
-  }
-
-  // Compute register use counts for the given range of instructions.
-  // Check to expand uses vector in case a new register was introduced.
-  void compute_uses(const Vblock& block, size_t iIdx, size_t num) {
-    for(auto i = iIdx; i < iIdx + num; ++i) {
-      visitUses(unit,
-                block.code[iIdx],
-                [&](Vreg r) {
-                  if (r > uses.size()) { uses.resize((size_t)r+1); }
-                  ++uses[r];
-                });
+  // If the srcs and dsts don't intersect, simplify to a sequence of copies.
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    for (auto i = 0; i < srcs.size(); ++i) {
+      v << copy{srcs[i], dsts[i]};
     }
-  }
+    return 1;
+  });
+}
 
-  // Undo any register uses from the given range of instructions.
-  void undo_uses(const Vblock& block, size_t iIdx, size_t num) {
-    for(auto i = iIdx; i < iIdx + num; ++i) {
-      visitUses(unit, block.code[iIdx], [&](Vreg r) { --uses[r]; });
-    }
-  }
+bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
+  if (arch() != Arch::X64) return false;
+  auto const def_op = env.def_insts[inst.s];
 
-  // If there is an adjacent setcc/xorbi pair where the xor is being used
-  // to invert the result of the setcc, just invert the setcc condition and
-  // omit the xor.
-  bool match_setcc_xorbi(const Vblock& block,
-                         size_t& iIdx,
-                         Vinstr& sinst,
-                         Vreg& xdst) {
-    if (match_instr(block, iIdx, Vinstr::setcc)) {
-      auto const& code = block.code;
-      auto const& inst = code[iIdx].setcc_;
-      auto const dst = inst.d;
-      // Make sure setcc result is only used by xor.
-      if (uses[inst.d] == 1 && match_instr(block, iIdx + 1, Vinstr::xorbi)) {
-        auto const& xor = code[iIdx + 1].xorbi_;
-        if (xor.s0.b() == 1 && xor.s1 == dst && uses[xor.sf] == 0) {
-          sinst = code[iIdx++];  // setcc instruction being modified.
-          xdst = xor.d;          // destination for xor result.
-          return true;
-        }
-      }
-    }
+  // Check if `inst.s' was defined by an instruction with Vreg32 operands, or
+  // movzbl{} in particular (which lowers to a movl{}).
+  if (width(def_op) != Width::Long &&
+      def_op != Vinstr::movzbl) {
     return false;
   }
 
-  // Perform any simplification steps for the instructions beginning
-  // at the given index.  Add additional simplification matchers here.
-  size_t simplify(Vout& v, const Vblock& block, size_t iIdx) {
-    Vinstr inst;
-    Vreg dst;
-    if (match_setcc_xorbi(block, iIdx, inst, dst)) {
-      // Rewrite setcc/xorbi pair as setcc with inverted condition.
-      v << setcc{ccNegate(inst.setcc_.cc), inst.setcc_.sf, dst};
-    }
-    return iIdx;
-  }
-};
+  // If so, the movzlq{} is redundant---instructions on 32-bit registers on x64
+  // always zero the upper bits.
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << copy{inst.s, inst.d};
+    return 1;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * The main work routine for the simplifier.  It runs a platform specific
- * simplify method on each instruction in the code stream.  The simplify
- * method is allowed to look ahead in the instruction stream in order to
- * match more than a single instruction if needed.  The simplify routines
- * are responsible for checking for the end of the instruction buffer.  If
- * a simplify routine finds a match, it emits the new instructions into
- * the provided emitter and returns the number of instructions to be replaced
- * in the original buffer by the newly emitted instructions.  The work()
- * routine then replaces the old instructions and calls work() again on
- * modified stream in case there are more simplifications to be had.
+ * Perform peephole simplification at instruction `i' of block `b'.
+ *
+ * Return true if changes were made, else false.
  */
-size_t work(Simplifier& s, Vlabel b, size_t iIdx) {
-  if (iIdx >= s.unit.blocks[b].code.size()) return iIdx;
+bool simplify(Env& env, Vlabel b, size_t i) {
+  assertx(i <= env.unit.blocks[b].code.size());
+  auto const& inst = env.unit.blocks[b].code[i];
 
-  auto scratch = s.unit.makeScratchBlock();
-  SCOPE_EXIT { s.unit.freeScratchBlock(scratch); };
-  Vout v(s.unit, scratch, s.unit.blocks[b].code[iIdx].origin);
+  switch (inst.op) {
+#define O(name, ...)    \
+    case Vinstr::name:  \
+      return simplify(env, inst.name##_, b, i); \
 
-  auto& blocks = s.unit.blocks;
-  auto& code = blocks[b].code;
-
-  size_t mIdx = s.simplify(v, blocks[b], iIdx);
-  if (!blocks[scratch].code.empty()) {
-    const auto numNewInsts = blocks[scratch].code.size();
-    const auto numInsts = mIdx - iIdx + 1;
-    s.undo_uses(blocks[b], iIdx, numInsts);
-    vector_splice(code, iIdx, numInsts, blocks[scratch].code);
-    s.compute_uses(blocks[b], iIdx, numNewInsts);
-    return work(s, b, iIdx);
+    VASM_OPCODES
+#undef O
   }
-  return iIdx + 1;
+  not_reached();
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }
 
 /*
- * Perform a simplification pass for an entire unit.
+ * Peephole simplification pass for a Vunit.
  */
 void simplify(Vunit& unit) {
-  assertx(check(unit)); // especially, SSA
-  // block order doesn't matter, but only visit reachable blocks.
-  auto blocks = sortBlocks(unit);
+  assertx(check(unit));
+  auto& blocks = unit.blocks;
 
-  Simplifier simplifier(unit, blocks);
+  Env env { unit };
+  env.use_counts.resize(unit.next_vr);
+  env.def_insts.resize(unit.next_vr, Vinstr::nop);
 
-  // now mutate instructions
-  for (auto b : blocks) {
-    size_t iIdx = 0;
-    while (iIdx < unit.blocks[b].code.size()) {
-      iIdx = work(simplifier, b, iIdx);
+  auto const labels = sortBlocks(unit);
+
+  // Set up Env, only visiting reachable blocks.
+  for (auto const b : labels) {
+    assertx(!blocks[b].code.empty());
+
+    for (auto const& inst : blocks[b].code) {
+      visitDefs(unit, inst, [&] (Vreg r) { env.def_insts[r] = inst.op; });
+      visitUses(unit, inst, [&] (Vreg r) { ++env.use_counts[r]; });
     }
-  }
+  };
+
+  // The simplify() implementations may allocate scratch blocks and modify
+  // instruction streams, so we cannot use standard iterators here.
+  for (auto const b : labels) {
+    for (size_t i = 0; i < blocks[b].code.size(); ++i) {
+      // Simplify at this index until no changes are made.
+      while (simplify(env, b, i)) {
+        // Stop if we simplified away the tail of the block.
+        if (i >= blocks[b].code.size()) break;
+      }
+    }
+  };
+
   printUnit(kVasmSimplifyLevel, "after vasm simplify", unit);
 }
 
-}
-}
+///////////////////////////////////////////////////////////////////////////////
+
+}}

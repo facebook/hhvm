@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,15 +64,16 @@ const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
 
 void NamedEntity::pushClass(Class* cls) {
   assert(!cls->m_nextClass);
-  cls->m_nextClass = m_clsList.load(std::memory_order_acquire);
-  m_clsList.store(cls, std::memory_order_release);
+  cls->m_nextClass = m_clsList;
+  m_clsList = cls;
 }
 
 void NamedEntity::removeClass(Class* goner) {
-  Class* head = m_clsList.load(std::memory_order_acquire);
+  Class* head = m_clsList;
   if (!head) return;
   if (head == goner) {
-    return m_clsList.store(head->m_nextClass, std::memory_order_release);
+    m_clsList = head->m_nextClass;
+    return;
   }
   LowPtr<Class>* cls = &head->m_nextClass;
   while (cls->get() != goner) {

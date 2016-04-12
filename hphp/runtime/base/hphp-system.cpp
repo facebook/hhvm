@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,19 +15,13 @@
 */
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/version.h"
-#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 const char* getHphpCompilerVersion() {
   return HHVM_VERSION;
-}
-
-const char* getHphpCompilerId() {
-  return kCompilerId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

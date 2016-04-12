@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,6 +21,17 @@
 #include "hphp/runtime/ext/mailparse/rfc822.h"
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
+static req::ptr<File> get_valid_file_resource(const Resource& fp) {
+  auto f = dyn_cast_or_null<File>(fp);
+  if (f == nullptr || f->isClosed()) {
+    raise_warning("Not a valid stream resource");
+    return nullptr;
+  }
+  return f;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -143,9 +154,12 @@ bool HHVM_FUNCTION(mailparse_stream_encode,
                    const Resource& sourcefp,
                    const Resource& destfp,
                    const String& encoding) {
-  auto srcstream = dyn_cast_or_null<File>(sourcefp);
-  auto deststream = dyn_cast_or_null<File>(destfp);
-  if (!srcstream || !deststream) {
+  auto srcstream = get_valid_file_resource(sourcefp);
+  if (!srcstream) {
+    return false;
+  }
+  auto deststream = get_valid_file_resource(destfp);
+  if (!deststream) {
     return false;
   }
 
@@ -259,7 +273,10 @@ const StaticString
   s_origfilename("origfilename");
 
 Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
-  auto instream = cast<File>(fp);
+  auto instream = get_valid_file_resource(fp);
+  if (!instream) {
+    return false;
+  }
   instream->rewind();
 
   auto outstream = req::make<TempFile>(false);
@@ -272,14 +289,19 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 
     /* Look for the "begin " sequence that identifies a uuencoded file */
     if (strncmp(line.data(), "begin ", 6) == 0) {
-      /* parse out the file name.
-       * The next 4 bytes are an octal number for perms; ignore it */
-       // TODO: Update gcc and get rid of this dumb workaround.
-      char *origfilename = (char *)((size_t)line.data() + (10 * sizeof(char)));
-      /* NUL terminate the filename */
-      int len = strlen(origfilename);
-      while (isspace(origfilename[len-1])) {
-        origfilename[--len] = '\0';
+
+      /*
+       * The next 4 bytes are an octal number for perms and a space; ignore them
+       * If for some reason they aren't found treat it as an empty filename.
+       */
+      const char *origfilename = "";
+      size_t namelen = 0;
+      if (line.size() >= 10) {
+        origfilename = line.data() + 10;
+        namelen = line.size() - 10;
+        while (namelen > 0 && isspace(origfilename[namelen-1])) {
+          --namelen;
+        }
       }
 
       /* make the return an array */
@@ -294,7 +316,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 
       /* add an item */
       Array item = Array::Create();
-      item.set(s_origfilename, String(origfilename, CopyString));
+      item.set(s_origfilename, String(origfilename, namelen, CopyString));
 
       /* create a temp file for the data */
       auto partstream = req::make<TempFile>(false);
@@ -321,7 +343,10 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 
 Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
                       const Resource& fp) {
-  auto stream = cast<File>(fp);
+  auto stream = get_valid_file_resource(fp);
+  if (!stream) {
+    return false;
+  }
   stream->rewind();
 
   int linelen = 0;
@@ -354,8 +379,7 @@ Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MailparseExtension final : public Extension {
- public:
+struct MailparseExtension final : Extension {
   MailparseExtension() : Extension("mailparse") { }
   void moduleInit() override {
     HHVM_FE(mailparse_msg_create);

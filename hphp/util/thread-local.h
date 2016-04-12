@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,13 @@
 
 namespace HPHP {
 
+// return the location of the current thread's tdata section
+std::pair<void*,size_t> getCppTdata();
+
+#ifdef _MSC_VER
+extern "C" int _tls_index;
+#endif
+
 inline uintptr_t tlsBase() {
   uintptr_t retval;
 #if defined(__x86_64__)
@@ -38,8 +45,8 @@ inline uintptr_t tlsBase() {
        "or  %0,%0,13\n\t"
       : "=r" (retval));
 #elif defined(_M_X64)
-  retval = (uintptr_t)_readfsbase_u64();
-  retval = *(uintptr_t*)(retval + 88);
+  retval = (uintptr_t)__readgsqword(88);
+  retval = *(uintptr_t*)(retval + (_tls_index * 8));
 #else
 # error How do you access thread-local storage on this machine?
 #endif
@@ -78,7 +85,7 @@ inline uintptr_t tlsBase() {
     !defined(__CYGWIN__) && !defined(__MINGW__) &&            \
    ((__llvm__ && __clang__) ||                                \
    __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||   \
-   __INTEL_COMPILER)
+   __INTEL_COMPILER || defined(_MSC_VER))
 #define USE_GCC_FAST_TLS
 #endif
 
@@ -140,13 +147,19 @@ struct ThreadLocalNode {
   T * m_p;
   void (*m_on_thread_exit_fn)(void * p);
   void * m_next;
+  size_t m_size;
 };
 
 struct ThreadLocalManager {
   template<class T>
-  static void PushTop(ThreadLocalNode<T>& node) { PushTop(&node); }
+  static void PushTop(ThreadLocalNode<T>& node) {
+    PushTop(&node, sizeof(T));
+  }
+  template<class F> void scan(F& mark) const;
+  static ThreadLocalManager& GetManager();
+
 private:
-  static void PushTop(void* node);
+  static void PushTop(void* node, size_t size);
   struct ThreadLocalList {
     void* head{nullptr};
 #ifdef __APPLE__
@@ -166,8 +179,6 @@ private:
   };
   static void OnThreadExit(void *p);
   pthread_key_t m_key;
-
-  static ThreadLocalManager& GetManager();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,33 +295,40 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Singleton thread-local storage for T
 
-template<typename T>
-void ThreadLocalSingletonOnThreadExit(void *obj) {
-  T::OnThreadExit((T*)obj);
-}
-
-// ThreadLocalSingleton has NoCheck property
+/*
+ * T must define:
+ *
+ *   static void Create(void* storage)
+ *     which should call new (storage) T, and is called on first getCheck.
+ *
+ *   static void Delete(T* singleton), and
+ *   static void OnThreadExit(T* singleton)
+ *     which should both call singleton->~T; Delete is called on manual
+ *     destruction, while OnThreadExit is called automatically. The argument
+ *     'singleton' is redundant (getters still work), but is for convenience.
+ *     These are only called if the singleton was actually created.
+ */
 template <typename T>
-class ThreadLocalSingleton {
-public:
+struct ThreadLocalSingleton {
+  // Call once per process just to guarantee order of initialization.
   ThreadLocalSingleton() { s_inited = true; }
 
   NEVER_INLINE static T *getCheck();
 
   static T* getNoCheck() {
     assert(s_inited);
-    assert(s_singleton == (T*)&s_storage);
+    assert(singleton() == (T*)&s_storage);
     return (T*)&s_storage;
   }
 
-  static bool isNull() { return s_singleton == nullptr; }
+  static bool isNull() { return singleton() == nullptr; }
 
   static void destroy() {
-    assert(!s_singleton || s_singleton == (T*)&s_storage);
-    T* p = s_singleton;
+    assert(!singleton() || singleton() == (T*)&s_storage);
+    T* p = singleton();
     if (p) {
       T::Delete(p);
-      s_singleton = nullptr;
+      s_node.m_p = nullptr;
     }
   }
 
@@ -323,7 +341,22 @@ public:
   }
 
 private:
-  static __thread T *s_singleton;
+  using NodeType = ThreadLocalNode<T>;
+
+  static T* singleton() {
+    return s_node.m_p;
+  }
+
+  static void OnThreadExit(void* p) {
+    NodeType* pNode = (NodeType*)p;
+    assert(pNode == &s_node);
+    if (pNode->m_p) {
+      T::OnThreadExit(pNode->m_p);
+      pNode->m_p = nullptr;
+    }
+  }
+
+  static __thread NodeType s_node;
   typedef typename std::aligned_storage<sizeof(T), sizeof(void*)>::type
           StorageType;
   static __thread StorageType s_storage;
@@ -336,15 +369,21 @@ bool ThreadLocalSingleton<T>::s_inited = false;
 template<typename T>
 T *ThreadLocalSingleton<T>::getCheck() {
   assert(s_inited);
-  if (!s_singleton) {
+  if (!singleton()) {
     T* p = (T*) &s_storage;
     T::Create(p);
-    s_singleton = p;
+    s_node.m_p = p;
+    // Register exit hook at most once; doing it twice makes TLM's list cyclic.
+    if (!s_node.m_on_thread_exit_fn) {
+      s_node.m_on_thread_exit_fn = OnThreadExit;
+      ThreadLocalManager::PushTop(s_node);
+    }
   }
-  return s_singleton;
+  return singleton();
 }
 
-template<typename T> __thread T *ThreadLocalSingleton<T>::s_singleton;
+template<typename T> __thread typename ThreadLocalSingleton<T>::NodeType
+                              ThreadLocalSingleton<T>::s_node;
 template<typename T> __thread typename ThreadLocalSingleton<T>::StorageType
                               ThreadLocalSingleton<T>::s_storage;
 
@@ -386,7 +425,7 @@ struct ThreadLocalProxy {
  * How to use the thread-local macros:
  *
  * Use DECLARE_THREAD_LOCAL to declare a *static* class field as thread local:
- *   class SomeClass {
+ *   struct SomeClass {
  *     static DECLARE_THREAD_LOCAL(SomeFieldType, f);
  *   }
  *
@@ -467,8 +506,7 @@ inline void ThreadLocalSetCleanupHandler(pthread_key_t cleanup_key,
  * pointer from pthread's thread-specific data management.
  */
 template<typename T>
-class ThreadLocal {
-public:
+struct ThreadLocal {
   /**
    * Constructor that has to be called from a thread-neutral place.
    */
@@ -526,8 +564,7 @@ private:
 };
 
 template<typename T>
-class ThreadLocalNoCheck {
-public:
+struct ThreadLocalNoCheck {
   /**
    * Constructor that has to be called from a thread-neutral place.
    */
@@ -609,10 +646,11 @@ void ThreadLocalSingletonOnThreadCleanup(void *key) {
 }
 #endif
 
-// ThreadLocalSingleton has NoCheck property
+/*
+ * See fast-TlS version of ThreadLocalSingleton above for documentation.
+ */
 template<typename T>
-class ThreadLocalSingleton {
-public:
+struct ThreadLocalSingleton {
   ThreadLocalSingleton() { getKey(); }
 
   NEVER_INLINE static T *getCheck();
@@ -695,8 +733,7 @@ pthread_key_t ThreadLocalSingleton<T>::s_cleanup_key;
 // some classes don't need new/delete at all
 
 template<typename T, bool throwOnNull = true>
-class ThreadLocalProxy {
-public:
+struct ThreadLocalProxy {
   /**
    * Constructor that has to be called from a thread-neutral place.
    */

@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function foo() must be of type int, string given in %sbasic-error.php on line 4

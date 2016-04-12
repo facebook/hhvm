@@ -35,3 +35,9 @@ function i() {
 function j() {
   return array(1, false);
 }
+
+function k() {
+  $a = array();
+  $a['a'] = 4;
+  return $a;
+}

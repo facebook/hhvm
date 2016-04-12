@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
@@ -30,8 +31,7 @@ namespace HPHP {
  * debugging HTTP requests that cause problems that are hard to debug on live
  * servers.
  */
-class ReplayTransport : public Transport {
-public:
+struct ReplayTransport final : Transport {
   ReplayTransport() : m_ini(IniSetting::Map::object), m_code(0) {}
 
   void recordInput(Transport* transport, const char *filename);
@@ -41,24 +41,24 @@ public:
   /**
    * Implementing Transport...
    */
-  virtual const char *getUrl();
-  virtual const char *getRemoteHost();
-  virtual uint16_t getRemotePort();
-  virtual const void *getPostData(int &size);
-  virtual Method getMethod();
-  virtual std::string getHeader(const char *name);
-  virtual void getHeaders(HeaderMap &headers);
-  virtual void addHeaderImpl(const char *name, const char *value);
-  virtual void removeHeaderImpl(const char *name);
-  virtual void sendImpl(const void *data, int size, int code, bool chunked,
-                        bool eom);
+  const char *getUrl() override;
+  const char *getRemoteHost() override;
+  uint16_t getRemotePort() override;
+  const void *getPostData(size_t &size) override;
+  Method getMethod() override;
+  std::string getHeader(const char *name) override;
+  void getHeaders(HeaderMap &headers) override;
+  void addHeaderImpl(const char *name, const char *value) override;
+  void removeHeaderImpl(const char *name) override;
+  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
+       override;
 
   int getResponseCode() const { return m_code;}
   const std::string &getResponse() const { return m_response;}
 
 private:
   Hdf m_hdf;
-  IniSetting::Map m_ini;
+  req::root<IniSetting::Map> m_ini;
   std::string m_postData;
   HeaderMap m_requestHeaders;
   HeaderMap m_responseHeaders;

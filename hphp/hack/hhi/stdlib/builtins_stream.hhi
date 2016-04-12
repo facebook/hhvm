@@ -9,6 +9,13 @@
  *
  */
 
+const int STREAM_AWAIT_READ = 1;
+const int STREAM_AWAIT_WRITE = 2;
+const int STREAM_AWAIT_READ_WRITE = 3;
+const int STREAM_AWAIT_ERROR = -1;
+const int STREAM_AWAIT_TIMEOUT = 0;
+const int STREAM_AWAIT_READY = 1;
+const int STREAM_AWAIT_CLOSED = 2;
 const int STREAM_CLIENT_CONNECT = 4;
 const int STREAM_CLIENT_ASYNC_CONNECT = 2;
 const int STREAM_CLIENT_PERSISTENT = 1;
@@ -78,6 +85,7 @@ const int STREAM_SOCK_SEQPACKET = 5;
 const int STREAM_SOCK_STREAM = 1;
 const int STREAM_USE_PATH = 1;
 
+function stream_await(resource $fp, int $events, float $timeout = 0.0): Awaitable<int>;
 function stream_context_create($options = null, $params = null);
 function stream_context_get_default($options = null);
 function stream_context_get_options($stream_or_context);

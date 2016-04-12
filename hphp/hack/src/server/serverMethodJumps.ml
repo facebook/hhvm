@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,8 +8,12 @@
  *
  *)
 
+open ServerEnv
+
 let go class_ find_children env genv oc =
-  let res_list = MethodJumps.get_inheritance class_ find_children env genv in
+  let res_list =
+    MethodJumps.get_inheritance env.tcopt class_ ~find_children
+      env.files_info genv.workers in
   Marshal.to_channel oc res_list [];
   flush oc;
   ()

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-
-open Utils
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -69,30 +67,19 @@ let emit_file { filename; read_stdin; is_test } () =
   let parsed_file = Parser_hack.program filename contents  in
   let {Parser_hack.file_mode; comments; ast} = parsed_file in
   let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
-  let file_info =
-    { FileInfo.
-      file_mode; funs; classes; typedefs; consts; comments;
-      consider_names_just_for_autoload = false } in
 
-  if file_mode <> Some FileInfo.Mstrict then
-    die "Can only emit files in strict mode\n";
+  if file_mode <> Some FileInfo.Mstrict &&
+     file_mode <> Some FileInfo.Mpartial then
+    die "Can only emit files in strict/partial mode\n";
 
   Parser_heap.ParserHeap.add filename ast;
 
-  let all_classes =
-    List.fold_left begin fun acc (_, cname) ->
-      SMap.add cname (Relative_path.Set.singleton filename) acc
-    end SMap.empty classes
-  in
-
   (* Build a naming environment and run naming *)
-  let nenv = Naming.empty TypecheckerOptions.default in
-  let nenv = Naming.make_env nenv ~funs ~classes ~typedefs ~consts in
-  (* Naming is driven by Typing_decl... *)
-  Typing_decl.make_env nenv all_classes filename;
+  let tcopt = TypecheckerOptions.default in
+  NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
 
   (* Actually emit. *)
-  Emitter.emit_file ~is_test nenv filename ast file_info
+  Emitter.emit_file ~is_test tcopt filename ast
 
 
 let main_hack options =

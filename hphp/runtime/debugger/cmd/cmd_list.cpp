@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -177,7 +177,6 @@ const StaticString
 bool CmdList::listFunctionOrClass(DebuggerClient &client) {
   assert(client.argCount() == 1);
   auto cmdInfo = std::make_shared<CmdInfo>();
-  DebuggerCommandPtr deleter(cmdInfo);
   std::string subsymbol;
   cmdInfo->parseOneArg(client, subsymbol);
   auto cmd = client.xend<CmdInfo>(cmdInfo.get());

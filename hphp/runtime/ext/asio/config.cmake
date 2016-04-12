@@ -13,9 +13,6 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
     ext_condition-wait-handle.cpp
     ext_asio.cpp
     ext_external-thread-event-wait-handle.cpp
-    ext_gen-array-wait-handle.cpp
-    ext_gen-map-wait-handle.cpp
-    ext_gen-vector-wait-handle.cpp
     ext_reschedule-wait-handle.cpp
     ext_resumable-wait-handle.cpp
     ext_sleep-wait-handle.cpp
@@ -41,12 +38,6 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
     ext_condition-wait-handle.h
     ext_asio.h
     ext_external-thread-event-wait-handle.h
-    ext_gen-array-wait-handle.h
-    ext_gen-array-wait-handle-inl.h
-    ext_gen-map-wait-handle.h
-    ext_gen-map-wait-handle-inl.h
-    ext_gen-vector-wait-handle.h
-    ext_gen-vector-wait-handle-inl.h
     ext_reschedule-wait-handle.h
     ext_resumable-wait-handle.h
     ext_resumable-wait-handle-defs.h
@@ -59,8 +50,6 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
   SYSTEMLIB
     ext_asio.php
     ext_async-generator.php
-  IDL
-    ../../../system/idl/asio.idl.json
   DEPENDS
     libFolly
 )

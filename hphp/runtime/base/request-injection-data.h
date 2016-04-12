@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,10 @@
 #include <vector>
 
 #ifdef __APPLE__
-#include <dispatch/dispatch.h>
+# include <dispatch/dispatch.h>
+#elif defined(_MSC_VER)
+# include <agents.h>
+# include <ppltasks.h>
 #endif
 
 namespace HPHP {
@@ -43,7 +46,7 @@ struct RequestInjectionData;
 //////////////////////////////////////////////////////////////////////
 
 struct RequestTimer {
-  friend class RequestInjectionData;
+  friend struct RequestInjectionData;
 
 #if defined(__APPLE__) || defined(_MSC_VER)
   RequestTimer(RequestInjectionData*);
@@ -66,7 +69,7 @@ private:
   dispatch_source_t m_timerSource;
   dispatch_group_t m_timerGroup;
 #elif defined(_MSC_VER)
-  // Dummy implmeentation only.
+  concurrency::task_completion_event<void>* m_tce;
 #else
   clockid_t m_clockType;
   timer_t m_timer_id;      // id of our timer
@@ -124,7 +127,7 @@ struct RequestInjectionData {
   }
 
   bool getDebuggerAttached() { return m_debuggerAttached; }
-  // Should only be set by DebuggerHookHandler::attach
+  // Should only be set by HphpdHook::attach
   void setDebuggerAttached(bool d) {
     m_debuggerAttached = d;
     updateJit();
@@ -301,6 +304,7 @@ private:
   std::string m_requestOrder;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
+  std::string m_brotliChunkedEnabled;
   std::string m_gzipCompressionLevel = "-1";
   std::string m_gzipCompression;
   std::string m_errorLog;
@@ -318,6 +322,9 @@ private:
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
   int64_t m_maxMemoryNumeric;
+  int64_t m_zendAssertions;
+  int64_t m_brotliLgWindowSize;
+  int64_t m_brotliQuality;
 
   /*
    * Keep track of the open_basedir_separator that may be used so we can

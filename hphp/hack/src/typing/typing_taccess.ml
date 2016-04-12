@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -16,7 +16,7 @@ open Utils
 module TUtils = Typing_utils
 module Reason = Typing_reason
 module Env = Typing_env
-module Inst = Typing_instantiate
+module Inst = Decl_instantiate
 module SN = Naming_special_names
 module TGen = Typing_generic
 module Phase = Typing_phase
@@ -104,10 +104,10 @@ and expand_ env (root_reason, root_ty as root) =
               dep_tys = (root_reason, dep_ty)::env.dep_tys } in
           expand_ env ty
       | Tunresolved tyl ->
-          let env, tyl = lfold begin fun prev_env ty ->
+          let env, tyl = List.map_env env tyl begin fun prev_env ty ->
             let env, ty = expand_ env ty in
             { prev_env with tenv = env.tenv }, ty
-          end env tyl in
+          end in
           env, (root_reason, Tunresolved tyl)
       | Tvar _ ->
           let tenv, seen, ty =
@@ -115,7 +115,7 @@ and expand_ env (root_reason, root_ty as root) =
           let env = { env with tenv = tenv; seen_tvar = seen } in
           expand_ env ty
       | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
-      | Tarray (_, _) | Tfun _ | Tabstract (_, _) ->
+      | Tarraykind _ | Tfun _ | Tabstract (_, _) ->
           let pos, tconst = head in
           let ty = Typing_print.error root_ty in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;
@@ -180,7 +180,7 @@ and get_typeconst env class_pos class_name pos tconst =
           Errors.unbound_name_typing class_pos class_name;
           raise Exit
       | Some c -> c in
-    let typeconst = match SMap.get tconst class_.tc_typeconsts with
+    let typeconst = match Env.get_typeconst env.tenv class_ tconst with
       | None ->
           Errors.smember_not_found
             `class_typeconst pos (class_.tc_pos, class_name) tconst `no_hint;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,12 +33,14 @@ namespace HPHP {
  * execution. A dependency on another wait handle is set up by awaiting such
  * wait handle, giving control of the execution back to the asio framework.
  */
-class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
- public:
-  DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
+struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
+  WAITHANDLE_CLASSOF(AsyncFunctionWaitHandle);
+  static void instanceDtor(ObjectData* obj, const Class*) {
+    auto wh = wait_handle<c_AsyncFunctionWaitHandle>(obj);
+    Resumable::Destroy(wh->resumable()->size(), wh);
+  }
 
-  class Node final {
-   public:
+  struct Node final {
     static constexpr ptrdiff_t childOff() {
       return offsetof(Node, m_child);
     }
@@ -61,7 +63,6 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
       c_AsyncFunctionWaitHandle::classof()) noexcept
     : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj) {}
   ~c_AsyncFunctionWaitHandle();
-  void t___construct();
 
  public:
   static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }
@@ -109,12 +110,18 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
     return resumable()->actRec();
   }
 
+  bool isFastResumable() const {
+    assert(getState() == STATE_READY);
+    return (resumable()->resumeAddr() &&
+            m_children[0].getChild()->isSucceeded());
+  }
+
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }
   void initialize(c_WaitableWaitHandle* child);
   void prepareChild(c_WaitableWaitHandle* child);
 
-  // valid if STATE_SCHEDULED || STATE_BLOCKED
+  // valid if STATE_READY || STATE_BLOCKED
   Node m_children[1];
 };
 

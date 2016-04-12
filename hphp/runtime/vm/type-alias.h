@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/user-attributes.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,10 +48,11 @@ struct ArrayData;
 struct TypeAlias {
   LowStringPtr name;
   LowStringPtr value;
-  Attr         attrs;
-  AnnotType    type;
-  Array        typeStructure{Array::Create()};
-  bool         nullable;  // null is allowed; for ?Foo aliases
+  Attr attrs;
+  AnnotType type;
+  bool nullable;  // null is allowed; for ?Foo aliases
+  UserAttributeMap userAttrs;
+  Array typeStructure{Array::Create()};
 
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type
@@ -59,6 +61,7 @@ struct TypeAlias {
       (value)
       (type)
       (nullable)
+      (userAttrs)
       (attrs)
       ;
     TypedValue tv = make_tv<KindOfArray>(typeStructure.get());
@@ -72,12 +75,13 @@ struct TypeAlias {
       (value)
       (type)
       (nullable)
+      (userAttrs)
       (attrs)
       ;
 
     TypedValue tv;
     sd(tv);
-    assert(tv.m_type == KindOfArray);
+    assert(isArrayType(tv.m_type));
     typeStructure = tv.m_data.parr;
   }
 
@@ -122,6 +126,7 @@ struct TypeAliasReq {
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};
   Array typeStructure{Array::Create()};
+  UserAttributeMap userAttrs;
 };
 
 bool operator==(const TypeAliasReq& l, const TypeAliasReq& r);

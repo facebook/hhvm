@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/vm/pc-filter.h"
 
+#include "hphp/runtime/vm/hhbc-codec.h"
+
 namespace HPHP {
 
 TRACE_SET_MOD(debuggerflow);
@@ -107,13 +109,13 @@ void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
     TRACE(3, "\toffsets [%d, %d)\n", range->base, range->past);
     for (PC pc = unit->at(range->base); pc < unit->at(range->past);
-         pc += instrLen((Op*)pc)) {
-      if (isOpcodeAllowed(*reinterpret_cast<const Op*>(pc))) {
+         pc += instrLen(pc)) {
+      if (isOpcodeAllowed(peek_op(pc))) {
         TRACE(3, "\t\tpc %p\n", pc);
         addPC(pc);
       } else {
         TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc,
-          unit->offsetOf(pc));
+              unit->offsetOf(pc));
       }
     }
   }
@@ -126,8 +128,8 @@ void PCFilter::removeRanges(const Unit* unit, const OffsetRangeVec& offsets,
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
     TRACE(3, "\toffsets [%d, %d) (remove)\n", range->base, range->past);
     for (PC pc = unit->at(range->base); pc < unit->at(range->past);
-         pc += instrLen((Op*) pc)) {
-      if (isOpcodeAllowed(*reinterpret_cast<const Op*>(pc))) {
+         pc += instrLen(pc)) {
+      if (isOpcodeAllowed(peek_op(pc))) {
         TRACE(3, "\t\tpc %p (remove)\n", pc);
         removePC(pc);
       } else {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -71,7 +72,7 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   Offset offset = unit->offsetOf(pc);
   TRACE(2, "CmdNext: pc %p, opcode %s at '%s' offset %d\n",
         pc,
-        opcodeToName(*reinterpret_cast<const Op*>(pc)),
+        opcodeToName(peek_op(pc)),
         fp->m_func->fullName()->data(),
         offset);
 
@@ -208,7 +209,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // returns from generators, we follow the execution stack for now,
   // and end up at the caller of ASIO or send(). For async functions
   // stepping over an await, we land on the next statement.
-  auto op = *reinterpret_cast<const Op*>(pc);
+  auto const op = peek_op(pc);
   if (op == OpAwait) {
     assert(fp->func()->isAsync());
     auto wh = c_WaitHandle::fromCell(vmsp());
@@ -262,11 +263,10 @@ bool CmdNext::atStepResumableOffset(Unit* unit, Offset o) {
 // opcode.
 void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   // Yield is followed by the label where execution will continue.
-  auto op = *reinterpret_cast<const Op*>(pc);
+  auto const op = decode_op(pc);
   assert(op == OpAwait || op == OpYield || op == OpYieldK);
-  ++pc;
   if (op == OpAwait) {
-    decodeVariableSizeImm(&pc);
+    decode_iva(pc);
   }
   Offset nextInst = fp->func()->unit()->offsetOf(pc);
   assert(nextInst != InvalidAbsoluteOffset);

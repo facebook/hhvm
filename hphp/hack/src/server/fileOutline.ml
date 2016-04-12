@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -37,6 +37,19 @@ let outline_ast ast =
     | Ast.Class c -> summarize_class c acc
     | _ -> acc
   end
+
+let to_json input =
+  let entries = List.map input begin fun (pos, name, type_) ->
+    let line, start, end_ = Pos.info_pos pos in
+    Hh_json.JSON_Object [
+        "name",  Hh_json.JSON_String name;
+        "type", Hh_json.JSON_String type_;
+        "line",  Hh_json.int_ line;
+        "char_start", Hh_json.int_ start;
+        "char_end", Hh_json.int_ end_;
+    ]
+  end in
+  Hh_json.JSON_Array entries
 
 let outline content =
   let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->

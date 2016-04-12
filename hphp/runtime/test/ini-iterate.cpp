@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include "hphp/runtime/vm/jit/code-cache.h"
+
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 
@@ -49,7 +51,7 @@ TEST(IniSetting, ini_iterate) {
   EXPECT_EQ(2, value.toArray().size());
 
   // Check some runtime options
-  EXPECT_EQ(22222222, RuntimeOption::EvalJitAColdSize);
+  EXPECT_EQ(22222222, jit::CodeCache::AColdSize);
   EXPECT_EQ("", RuntimeOption::ExtensionDir);
 }
 

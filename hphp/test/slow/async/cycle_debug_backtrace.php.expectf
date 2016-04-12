@@ -1,0 +1,36 @@
+array(4) {
+  [0]=>
+  string(28) "Closure$testCycleBackTrace#3"
+  [1]=>
+  string(4) "join"
+  [2]=>
+  string(12) "HH\Asio\join"
+  [3]=>
+  string(18) "testCycleBackTrace"
+}
+array(5) {
+  [0]=>
+  string(28) "Closure$testCycleBackTrace#5"
+  [1]=>
+  string(28) "Closure$testCycleBackTrace#3"
+  [2]=>
+  string(4) "join"
+  [3]=>
+  string(12) "HH\Asio\join"
+  [4]=>
+  string(18) "testCycleBackTrace"
+}
+string(184) "Encountered dependency cycle.
+Existing stack:
+  {closure} (%d) (dupe)
+  <await-all> (%d)
+Trying to introduce dependency on:
+  {closure} (%d) (dupe)
+"
+string(184) "Encountered dependency cycle.
+Existing stack:
+  {closure} (%d) (dupe)
+  <await-all> (%d)
+Trying to introduce dependency on:
+  {closure} (%d) (dupe)
+"

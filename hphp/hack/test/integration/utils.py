@@ -23,35 +23,23 @@ def write_files(files, dir_path):
         with open(path, 'w') as f:
             f.write(content)
 
-def proc_call(args, stdin=None):
-    """
-    Invoke a subprocess, return stdout, send stderr to our stderr (for
-    debugging)
-    """
-    print(" ".join(args), file=sys.stderr)
-    proc = subprocess.Popen(
-            args,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True)
-    (stdout_data, stderr_data) = proc.communicate(stdin)
-    sys.stderr.write(stderr_data)
-    sys.stderr.flush()
-    return stdout_data
-
-def ensure_output_contains(f, s, timeout=5):
+def ensure_output_contains(f, s, timeout=20):
     """
     Looks for a match in a process' output, subject to a timeout in case the
     process hangs
     """
+    lines = []
     def handler(signo, frame):
-        raise AssertionError('Failed to find %s in output' % s)
+        raise AssertionError('Failed to find %s in the following output: %s' %
+                (s, ''.join(lines)))
 
     try:
         signal.signal(signal.SIGALRM, handler)
         signal.alarm(timeout)
-        while s not in f.readline().decode('utf-8'):
-            pass
+        while True:
+            line = f.readline().decode('utf-8')
+            if s in line:
+                return
+            lines.append(line)
     finally:
         signal.alarm(0)

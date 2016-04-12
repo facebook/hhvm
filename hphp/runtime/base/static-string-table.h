@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,11 +39,14 @@ struct String;
  * We refer to these strings as "static strings"---they may be passed
  * around like request local strings, but have a bit set in their
  * reference count which indicates they should not actually be
- * incref'd or decref'd, and therefore are never freed.
+ * incref'd or decref'd, and therefore are never freed. Furthermore,
+ * any string marked static must be in the table and therefore can
+ * be compared by pointer.
  *
- * Note that when a static string is in a TypedValue, it may or may
- * not have KindOfStaticString.  (But no non-static strings will ever
- * have KindOfStaticString.)
+ * Note that when a static or uncounted string is in a TypedValue,
+ * it may or may not have KindOfPersistentString. (But no non-persistent
+ * strings will ever have KindOfPersistentString.) so-called "uncounted"
+ * strings are persistent (not ref counted) but not static.
  *
  * Because all constants defined in hhvm programs create a
  * process-lifetime string for the constant name, this module also
@@ -72,13 +75,9 @@ StringData* makeStaticString(char c);
 
 /*
  * Attempt to look up a static string for `str' if it exists, without
- * inserting it if not.
+ * inserting it if not. Requires the input string to be known non-static.
  *
  * Returns: a string that isStatic(), or nullptr if there was none.
- *
- * TODO(#2880477): can this have a precondition that str is not
- * static?  Also can't it assume the static string map is already
- * allocated...
  */
 StringData* lookupStaticString(const StringData* str);
 
@@ -110,6 +109,12 @@ std::vector<StringData*> lookupDefinedStaticStrings();
  * execution context.
  */
 Array lookupDefinedConstants(bool categorize = false);
+
+/*
+ * Return the number of static strings that correspond to defined
+ * constants.
+ */
+size_t countStaticStringConstants();
 
 /*
  * The static string table is generally initially created before main

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,8 +9,10 @@
  *)
 
 let main env =
-  if ClientConnectSimple.server_exists env.ClientStart.root
-  then ClientStop.kill_server env.ClientStart.root
+  HackEventLogger.client_restart ();
+  if MonitorConnection.server_exists
+  (ServerFiles.lock_file env.ClientStart.root) then
+    ClientStop.kill_server env.ClientStart.root
   else Printf.eprintf "Warning: no server to restart for %s\n%!"
     (Path.to_string env.ClientStart.root);
   ClientStart.start_server env;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,19 @@ inline void exception_handler(Action action) {
     ITRACE_MOD(Trace::unwind, 1, "unwind: Object of class {}\n",
                o->getVMClass()->name()->data());
     unwindPhp(o.get());
-    return;
+    if (LIKELY(o.get()->hasMultipleRefs()) ||
+        vmfp() != nullptr ||
+        !g_context->isNested()) {
+      return;
+    }
+
+    assert(!vmpc());
+    // o will be destroyed at the end of the catch block
+    // so we have to make sure the vm state is valid in
+    // case a __destruct method needs to run.
+    g_context->popVMState();
+    g_context->pushVMState(vmStack().top());
+    // fall through
   }
 
   catch (VMSwitchMode&) {
@@ -96,7 +108,15 @@ inline void exception_handler(Action action) {
     not_reached();
   }
 
-  not_reached();
+  // We've come from the const Object& case, and need to restore
+  // the vm state to where it was.
+  // Note that we've preserved vmStack.top(), and vmFirstAR was invalid
+  // prior to the popVMState above.
+  // Also, we don't really need to null out vmfp() here, but doing so will
+  // cause an assert to fire if we try to re-enter before the next
+  // popVMState.
+  vmpc() = nullptr;
+  vmfp() = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

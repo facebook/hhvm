@@ -53,12 +53,21 @@ macro(HHVM_SELECT_SOURCES DIR)
       list(APPEND C_SOURCES ${f})
     endif()
   endforeach()
-  auto_sources(files "*.S" "RECURSE" "${DIR}")
-  foreach(f ${files})
-    if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
-      list(APPEND ASM_SOURCES ${f})
-    endif()
-  endforeach()
+  if (MSVC)
+    auto_sources(files "*.asm" "RECURSE" "${DIR}")
+    foreach(f ${files})
+      if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
+        list(APPEND ASM_SOURCES ${f})
+      endif()
+    endforeach()
+  else()
+    auto_sources(files "*.S" "RECURSE" "${DIR}")
+    foreach(f ${files})
+      if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
+        list(APPEND ASM_SOURCES ${f})
+      endif()
+    endforeach()
+  endif()
   auto_sources(files "*.h" "RECURSE" "${DIR}")
   foreach(f ${files})
     if (NOT (${f} MATCHES "(/(old-)?tests?/)"))
@@ -101,12 +110,10 @@ endmacro()
 
 function(append_systemlib TARGET SOURCE SECTNAME)
   if(CYGWIN OR MSVC OR MINGW)
-    # for each library append the following line to embed.rc
-    # $sectionname RCDATA "$source"
-    add_custom_command(TARGET generate_rc
-      COMMAND echo "${SECTNAME} RCDATA \"${SOURCE}\"" >> embed.rc
-      COMMENT "Adding ${SOURCE} as ${SECTNAME} to embed.rc"
-      )
+    list(APPEND ${TARGET}_SLIBS_NAMES "${SECTNAME}")
+    set(${TARGET}_SLIBS_NAMES ${${TARGET}_SLIBS_NAMES} PARENT_SCOPE)
+    list(APPEND ${TARGET}_SLIBS_SOURCES "${SOURCE}")
+    set(${TARGET}_SLIBS_SOURCES ${${TARGET}_SLIBS_SOURCES} PARENT_SCOPE)
   else()
     if (APPLE)
       set(${TARGET}_SLIBS ${${TARGET}_SLIBS} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE} PARENT_SCOPE)
@@ -119,18 +126,47 @@ function(append_systemlib TARGET SOURCE SECTNAME)
   endif()
 endfunction(append_systemlib)
 
-function(embed_systemlibs TARGET DEST)
+function(embed_sections TARGET DEST)
+  add_custom_command(TARGET ${TARGET} PRE_BUILD
+    # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
+    #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
+    COMMAND "${HPHP_HOME}/hphp/util/generate-buildinfo.sh"
+    WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
+    COMMENT "Generating Repo Schema ID and Compiler ID"
+    VERBATIM)
+
   if (APPLE)
-    target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
+    set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
+    set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA})
   elseif(CYGWIN OR MSVC OR MINGW)
-    # nothing to do
+    set(RESOURCE_FILE "#pragma code_page(1252)\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}#include \"${HPHP_HOME}/hphp/runtime/version.h\"\n")
+    file(READ "${HPHP_HOME}/hphp/hhvm/hhvm.rc" VERSION_INFO)
+    set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${HPHP_HOME}/hphp/util/generated-compiler-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}${VERSION_INFO}\n")
+    set(i 0)
+    foreach (nm ${${TARGET}_SLIBS_NAMES})
+      list(GET ${TARGET}_SLIBS_SOURCES ${i} source)
+      set(RESOURCE_FILE "${RESOURCE_FILE}${nm} RCDATA \"${source}\"\n")
+      math(EXPR i "${i} + 1")
+    endforeach()
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/embed.rc "${RESOURCE_FILE}")
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"
-      ARGS ${${TARGET}_SLIBS} ${DEST}
+      ARGS "--add-section" "compiler_id=${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
+           "--add-section" "repo_schema_id=${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
+           ${${TARGET}_SLIBS}
+           ${DEST}
+      DEPENDS "${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
+              "${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
       COMMENT "Embedding php in ${TARGET}")
   endif()
-endfunction(embed_systemlibs)
+endfunction(embed_sections)
 
 macro(embed_systemlib_byname TARGET SLIB)
   get_filename_component(SLIB_BN ${SLIB} "NAME_WE")
@@ -154,7 +190,7 @@ function(embed_all_systemlibs TARGET ROOT DEST)
   foreach(SLIB ${EXTENSION_SYSTEMLIB_SOURCES} ${EZC_SYSTEMLIB_SOURCES})
     embed_systemlib_byname(${TARGET} ${SLIB})
   endforeach()
-  embed_systemlibs(${TARGET} ${DEST})
+  embed_sections(${TARGET} ${DEST})
 endfunction(embed_all_systemlibs)
 
 # Custom install function that doesn't relink, instead it uses chrpath to change it, if
@@ -225,9 +261,9 @@ endmacro()
 # matching "/test/" or "Test.cpp$", but not matching
 # "BobTest.cpp$".
 # HHVM_REMOVE_MATCHES_FROM_LISTS(CPP_SOURCES MATCHES "/test/" "Test.cpp$" IGNORE_MATCHES "BobTest.cpp$")
-# 
+#
 # Parameters:
-# 
+#
 # [...]:
 # The names of the lists to remove matches from.
 #
@@ -257,7 +293,7 @@ function(HHVM_REMOVE_MATCHES_FROM_LISTS)
       message(FATAL_ERROR "Unknown argument state!")
     endif()
   endforeach()
-  
+
   foreach (theList ${LISTS_TO_SEARCH})
     foreach (entry ${${theList}})
       foreach (match ${MATCHES_TO_REMOVE})
@@ -269,7 +305,7 @@ function(HHVM_REMOVE_MATCHES_FROM_LISTS)
               break()
             endif()
           endforeach()
-          
+
           if (NOT SHOULD_IGNORE)
             list(REMOVE_ITEM ${theList} ${entry})
           endif()
@@ -292,22 +328,71 @@ function(auto_source_group rootName rootDir)
       message(FATAL_ERROR "Unable to locate the final forward slash in '${filePath}'!")
     endif()
     string(SUBSTRING "${filePath}" 0 ${rIdx} filePath)
-    
+
     string(LENGTH "${filePath}" filePathLength)
     string(FIND "${filePath}" "${rootDir}" rIdx)
-    if (NOT rIdx EQUAL 0)
-      message(FATAL_ERROR "Source '${fil}' is outside of the root directory, '${rootDir}', that was passed to auto_source_group!")
-    endif()
-    math(EXPR filePathLength "${filePathLength} - ${rootDirLength}")
-    string(SUBSTRING "${filePath}" ${rootDirLength} ${filePathLength} fileGroup)
-    
-    string(REPLACE "/" "\\" fileGroup "${fileGroup}")
-    set(fileGroup "\\${rootName}${fileGroup}")
-    
-    list(FIND sourceGroups "${fileGroup}" rIdx)
-    if (rIdx EQUAL -1)
-      list(APPEND sourceGroups "${fileGroup}")
-      source_group("${fileGroup}" REGULAR_EXPRESSION "${filePath}/[^/.]+(.(idl|tab|yy))?.(c|cc|cpp|h|hpp|json|ll|php|tcc|y)$")
+    if (rIdx EQUAL 0)
+      math(EXPR filePathLength "${filePathLength} - ${rootDirLength}")
+      string(SUBSTRING "${filePath}" ${rootDirLength} ${filePathLength} fileGroup)
+
+      string(REPLACE "/" "\\" fileGroup "${fileGroup}")
+      set(fileGroup "\\${rootName}${fileGroup}")
+
+      list(FIND sourceGroups "${fileGroup}" rIdx)
+      if (rIdx EQUAL -1)
+        list(APPEND sourceGroups "${fileGroup}")
+        source_group("${fileGroup}" REGULAR_EXPRESSION "${filePath}/[^/.]+(.(idl|tab|yy))?.(c|cc|cpp|h|hpp|json|ll|php|tcc|y)$")
+      endif()
     endif()
   endforeach()
+endfunction()
+
+macro(add_precompiled_header PrecompiledHead PrecompiledSrc SourcesVar)
+  if (MSVC AND MSVC_ENABLE_PCH)
+    get_filename_component(PrecompiledHeader "${PrecompiledHead}" ABSOLUTE)
+    get_filename_component(PrecompiledSource "${PrecompiledSrc}" ABSOLUTE)
+    get_filename_component(PrecompiledBasename "${PrecompiledHeader}" NAME_WE)
+    get_filename_component(PrecompiledHeaderFilename "${PrecompiledHeader}" NAME)
+    set(PrecompiledBinary "${CMAKE_CURRENT_BINARY_DIR}/${PrecompiledBasename}.pch")
+    set(Sources ${${SourcesVar}})
+
+    set_source_files_properties(${PrecompiledSource} PROPERTIES
+      COMPILE_FLAGS "/Yc\"${PrecompiledHeaderFilename}\" /Fp\"${PrecompiledBinary}\""
+      OBJECT_OUTPUTS "${PrecompiledBinary}")
+    set_source_files_properties(${Sources} PROPERTIES
+      COMPILE_FLAGS "/Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\""
+      OBJECT_DEPENDS "${PrecompiledBinary}")
+
+    list(APPEND ${SourcesVar} ${PrecompiledSource} ${PrecompiledHeader})
+  endif()
+endmacro()
+
+function(parse_version PREFIX VERSION)
+  if (NOT ${VERSION} MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+)?(-.+)?$")
+    message(FATAL_ERROR "VERSION must conform to X.Y(.Z)?(-.+)?")
+  endif()
+
+  string(FIND ${VERSION} "-" SUFFIX_POS)
+  set(SUFFIX "")
+  if (SUFFIX_POS)
+    string(SUBSTRING ${VERSION} ${SUFFIX_POS} -1 SUFFIX)
+    string(SUBSTRING ${VERSION} 0 ${SUFFIX_POS} NUMERIC_VERSION)
+  else()
+    set(NUMERIC_VERSION ${VERSION})
+  endif()
+
+  string(REPLACE "." ";" VERSION_LIST "${NUMERIC_VERSION}")
+  list(GET VERSION_LIST 0 MAJOR)
+  list(GET VERSION_LIST 1 MINOR)
+  list(LENGTH VERSION_LIST VERSION_LIST_LENGTH)
+  if (VERSION_LIST_LENGTH GREATER 2)
+    list(GET VERSION_LIST 2 PATCH)
+  else()
+    set(PATCH 0)
+  endif()
+
+  set(${PREFIX}MAJOR ${MAJOR} PARENT_SCOPE)
+  set(${PREFIX}MINOR ${MINOR} PARENT_SCOPE)
+  set(${PREFIX}PATCH ${PATCH} PARENT_SCOPE)
+  set(${PREFIX}SUFFIX ${SUFFIX} PARENT_SCOPE)
 endfunction()

@@ -1,0 +1,6 @@
+File "pipe_operator_nested_wrong_type.php", line 16, characters 51-52:
+Invalid argument (Typing[4110])
+File "pipe_operator_nested_wrong_type.php", line 11, characters 17-19:
+This is an int
+File "pipe_operator_nested_wrong_type.php", line 11, characters 26-31:
+It is incompatible with a string

@@ -1,0 +1,6 @@
+File "array_get_newtype.php--file2.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+File "array_get_newtype.php--file2.php", line 3, characters 25-31:
+This is an object of type MyArray
+File "array_get_newtype.php--file1.php", line 4, characters 20-24:
+It is incompatible with an array (used like a hashtable)

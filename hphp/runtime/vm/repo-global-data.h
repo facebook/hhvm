@@ -70,6 +70,28 @@ struct Repo::GlobalData {
    */
   bool HardReturnTypeHints = false;
 
+  /*
+   * Indicates whether the repo was compiled with PHP7 integer semantics. This
+   * slightly changes the way certain arithmetic operations are evaluated, in
+   * small enough ways that don't warrant new bytecodes, but in ways that do
+   * affect everything from hphpc's constant folding up through the JIT, and
+   * so need to be kept consistent.
+   */
+  bool PHP7_IntSemantics = false;
+
+  /*
+   * Indicates whether the repo was compiled with PHP7 scalar type hint support.
+   * In this mode non hh units will default to weak types and scalar types will
+   * be available outside the HH namespace.
+   */
+  bool PHP7_ScalarTypes = false;
+
+  /*
+   * Indicates that generators should be autoprimed and not require an initial
+   * call to next() before calling other generator functions.
+   */
+  bool AutoprimeGenerators = true;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (HardTypeHints)
@@ -77,6 +99,9 @@ struct Repo::GlobalData {
       (arrayTypeTable)
       (DisallowDynamicVarEnvFuncs)
       (HardReturnTypeHints)
+      (PHP7_IntSemantics)
+      (PHP7_ScalarTypes)
+      (AutoprimeGenerators)
       ;
   }
 };

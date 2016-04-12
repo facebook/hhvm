@@ -1,0 +1,8 @@
+4:   class Foo {
+5:     public function bar(): void {
+6:       if (true) {
+7:         echo "a more";
+9:         echo "complicated stmt";
+12:       if (true) {
+13:         echo "a more";
+15:         echo "complicated stmt";

@@ -200,7 +200,7 @@ documented much here. See class.h.
 Closures
 --------
 
-Closures are implemented in hhbc as subclassses of Closure, in conjunction with
+Closures are implemented in hhbc as subclasses of Closure, in conjunction with
 the CreateCl opcode. It is legal hhbc to create other subclasses of Closure (to
 represent user code that attempts to do the same), but attempting to
 instantiate one will result in a fatal error. The documentation of the CreateCl
@@ -244,7 +244,7 @@ the result is wrapped into a succeeded StaticWaitHandle and returned to the
 caller. If an exception is thrown, it is wrapped into a failed StaticWaitHandle
 and returned to the caller. Otherwise, if an Await opcode was reached and the
 provided child WaitHandle has not finished, the current execution state is
-suspended into an AsyncFunctionWaitHandle object and retured to the caller.
+suspended into an AsyncFunctionWaitHandle object and returned to the caller.
 This mechanism allows fast execution if no blocking asynchronous operation was
 reached.
 
@@ -680,10 +680,8 @@ other FPI region. An FPI region may not contain backward jumps, nor may it
 contain forward jumps that jump past the end of the FPI region.
 
 Each function has an "FPI region table". Each row in the FPI region table
-consists of the starting offset of the FPI region (the bytecode offset
-immediately following the FPush* instruction), the ending offset of the FPI
-region (the bytecode offset of the FCall* instruction), and the number of
-parameters being passed.
+consists of offset of the FPush* instruction that begins the region, the FCall
+instruction that ends the region, and the number of parameters being passed.
 
 
 Flavor descriptors
@@ -897,10 +895,9 @@ instruction ends with a different location descriptor (for example, Set*). Each
 instruction in the group perform similar actions but take different kinds of
 inputs to specify the location to access.
 
-The Member instructions provide functionality to operate on elements and
-properties. These instructions incorporate an immediate argument vector which
-specifies a location descriptor (defined above) followed by one or more member
-descriptors:
+The member instructions provide functionality to operate on elements and
+properties. Many of these instructions incorporate an immediate argument which
+specifies a one of the following member descriptors:
 
   EC       - consume a cell from the evaluation stack as an element
   EL:<id>  - consume a local given by an immediate id as an element
@@ -915,29 +912,6 @@ descriptors:
              as a property
   W        - synthesize a new element (no corresponding local variable or
              evaluation stack slot)
-
-For example, the following correspondence exists (ignoring setup bytecode):
-
-  Source code: $a[3][$b][]['hi'] = 42;
-  Bytecode: SetM <L:0 EI:3 EL:1 W ET:hi>
-  Stack:    []  ->  [42]
-
-Instructions that have an immediate argument vector have different stack
-transition descriptions depending on the kind of location descriptor and member
-descriptors contained in the immediate argument vector. Member instructions
-denote the immediate argument vector using the notation "<loc-desc/M-vector>"
-and "C..C" is used to indicate that the member instructions consume a variable
-number of cells from the stack. In most cases the immediate vector arguments
-are ordered such that the loc-desc comes first (deepest in the stack), with the
-last M-vector element last (shallowest in the stack). However, classrefs that
-are part of the BaseSC and BaseSL loc-desc inputs always come last (the cell
-input to BaseSC comes first though). Instructions accepting an immediate vector
-containing a list of iterators and iterator types use the notation
-"<iter-vec>".
-
-In addition to describing each instruction, this instruction set documentation
-also describes several operations that encapsulate fundamental, but non-trivial
-processes that are shared by the Member instructions.
 
 The instruction set is organized into the following sections:
    1. Basic instructions
@@ -1043,6 +1017,12 @@ NewArray <capacity hint>    []  ->  [C:Arr]
 NewMixedArray <capacity hint>    []  ->  [C:Arr]
 
   New array in mixed mode, with a capacity hint. Creates a new array and pushes
+  it onto the stack. The implementation may make use of the hint in %1 to
+  pre-size the array. The hint %1 must be greater than or equal to 0.
+
+NewDictArray <capacity hint>    []  ->  [C:Arr]
+
+  New array in dict mode, with a capacity hint. Creates a new array and pushes
   it onto the stack. The implementation may make use of the hint in %1 to
   pre-size the array. The hint %1 must be greater than or equal to 0.
 
@@ -1273,14 +1253,6 @@ Sqrt   [C]    ->  [C:Null|Dbl]
   If $1 is a negative number, this instruction pushes a floating-point value
   representing NAN onto the stack.
 
-Strlen  [C] -> [C:Null|Int]
-
-  String length. If $1 is a string push the length of the string on the stack.
-  If $1 is an object with a __toString method, call this method and push the
-  length of the resulting string on the stack. If $1 is an array or resource,
-  raise a warning and push null on the stack. Otherwise convert $1 to a string
-  and push the length of that string on the stack.
-
 Xor    [C C]  ->  [C:Bool]
 
   Logical xor (xor). Pushes ((bool)$2 xor (bool)$1) onto the stack.
@@ -1320,6 +1292,11 @@ Gt    [C C]  ->  [C:Bool]
 Gte    [C C]  ->  [C:Bool]
 
   Greater than or equal to (>=). Pushes ($2 >= $1) onto the stack.
+
+Cmp    [C C]  ->  [C:Int]
+
+  Comparison. Pushes either -1, 0, or 1 onto the stack if ($1 < $2), ($1 ==
+  $2), or ($1 > $2), respectively.
 
 BitAnd    [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Str || T2 != Str)
           [C:Str C:Str]  ->  [C:Str]
@@ -1463,7 +1440,7 @@ JmpNZ <rel offset>    [C]  ->  []
   Jump if not zero. Conditionally transfers control to the location specified
   by %1 if (bool)$1 != (bool)0.
 
-Switch <offset vector> <base> <bounded>    [C]  ->  []
+Switch <bounded> <base> <offset vector>    [C]  ->  []
 
   Switch over integer case values. If bounded == SwitchKind::Unbounded, the
   implementation will assume that $1 is an integer in the range [0,
@@ -1531,6 +1508,13 @@ CGetL <local variable id>    []  ->  [C]
   as a cell. If the local variable is not defined, this instruction raises a
   warning and pushes null onto the stack.
 
+CGetQuietL <local variable id>    []  ->  [C]
+
+  Get local as cell. If the local variable given by %1 is defined, this
+  instruction gets the value of the local variable and pushes it onto the stack
+  as a cell. If the local variable is not defined, this instruction pushes null
+  onto the stack.
+
 CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
 
   Get local as cell. If the local variable given by %1 is defined, this
@@ -1572,6 +1556,15 @@ CGetN    [C]  ->  [C]
   If there is no local variable defined named x, this instruction pushes null
   onto the stack and raises a warning.
 
+CGetQuietN    [C]  ->  [C]
+
+  Get local as cell. This instruction first computes x = (string)$1. Next, this
+  instruction reads the local variable named x pushes its value onto the stack
+  as a cell.
+
+  If there is no local variable defined named x, this instruction pushes null
+  onto the stack.
+
 CGetG    [C]  ->  [C]
 
   Get global as cell. This instruction first computes x = (string)$1. Next,
@@ -1580,6 +1573,15 @@ CGetG    [C]  ->  [C]
 
   If there is not a global variable defined named x, this instruction pushes
   null onto the stack and raises a warning.
+
+CGetQuietG    [C]  ->  [C]
+
+  Get global as cell. This instruction first computes x = (string)$1. Next,
+  this instruction reads the global variable named x pushes its value onto the
+  stack as a cell.
+
+  If there is not a global variable defined named x, this instruction pushes
+  null onto the stack.
 
 CGetS    [C A]  ->  [C]
 
@@ -1961,8 +1963,9 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   Otherwise this instruction pushes a new entry on the FPI stack, initializing
   it with the number of parameters being passed (given by %1) and a reference
   to the FPI structure for the function named x. With FPushFuncD the litstr in
-  %2 must not start with a '\' character. Function names should be normalized
-  with respect to namespace and never start with a '\'.
+  %2 must not start with a '\' character, or be of the form "Class::Method".
+  Function names should be normalized with respect to namespace and never start
+  with a '\'.
 
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
@@ -1971,7 +1974,13 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   by %1) and a reference to the FPI structure for the __invoke method from
   object x.
 
-  If x is not a string or object, this instruction throws a fatal error.
+  if x is an array, this instruction will check that the first array element is
+  either the name of a class, or an instance of one, and that the second array
+  element is the name of a method.  If no such class exists, or no such method
+  on that class exists, then this instruction throws a fatal error.  Otherwise
+  this instruction does the same FPI manipulation mentioned above.
+
+  If x is not a string, object, or array, this instruction throws a fatal error.
 
 FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
 
@@ -2178,6 +2187,17 @@ FCallArray    [F]  ->  [R]
   When the callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
 
+FCallAwait <num params> <class name> <func name> [F..F] -> [R]
+
+  FPI call direct to a known async function. Equivalent to the sequence
+
+    FCallD
+    UnboxRNop
+    Await
+
+  but may enable the runtime to avoid creating a StaticWaitHandle in the event
+  that the called function returns eagerly.
+
 FCallUnpack <num params> [F..F] -> [R]
 
   FPI call with params and array. This instruction gets the bytecode address of
@@ -2205,39 +2225,25 @@ FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
 9. Member operations
 --------------------
 
-The following operations describe processes that are shared across the Member
-instructions. Operations are not considered instructions; they do not have
-opcodes associated with them.
+Member operations represent one part of a member expression such as
+"$a[0]['name'] = $foo". Each operation corresponds to one bytecode instruction,
+but the operations are described separately from their instruction mapping to
+separate them from any concerns about instruction encoding.
 
 Operations can produce and consume intermediate values called "bases". A "base"
-is a structure that contains either a cell or a ref or a reference to a memory
-location that is occupied by a cell or a ref. Bases are never pushed onto the
-evaluation stack.
+is a pointer to a memory location that is occupied by a cell or a ref, typically
+a local variable, array element, or object property. The current base is stored
+in a VM register called the member base register, or MBR for short. Bases are
+never stored on the evaluation stack or in any VM location other than the MBR.
 
-For operations that create a base, the operation descriptions specify whether
-the base created "contains" a value or "references" a location. In the former
-case, the base created contains a cell or a ref. In the latter case, the base
-created contains a reference to a memory location occupied by a cell or a ref.
+A base never owns a reference to the value it points to. It may point to a
+temporary value in a scratch register, but the lifetime of the value is always
+managed elsewhere.
 
-When a base that contains a cell is destroyed, if the cell points to data then
-the execution engine is responsible for honoring the data's refcount logic.
-Likewise when a base that contains a ref is destroyed, the execution engine is
-responsible for honoring the refcount logic of the cell container pointed to by
-the ref. When a base that contains a reference to a memory location occupied by
-a cell or a ref is destroyed, no refcounting is required.
-
-Some operations that take a base as input can modify that base as part of the
-work performed by the operation. Such operations are said to "set" the base to
-a new value. When a base that contains a cell or a reference to a memory
-location occupied by a cell is set to a new value, the new value overwrites the
-previous value contained in the cell (honoring the data refcount logic if the
-previous value was a refcounted type). When a base that contains a ref or a
-reference to a memory location occupied by a ref is set to the new value, the
-new value is written into the cell container referenced by the ref, overwriting
-the previous cell in that container (honoring the data refcount logic if the
-previous cell was a refcounted type). Note that for bases that contain a
-reference to a memory location, "setting" the base does not change which memory
-location the base references.
+There are three categories of member operations: base, intermediate, and
+final. Base operations produce a base, intermediate operations consume the
+current base and produce a new base, and final operations consume the current
+base without producing a new one.
 
 Operations are specified as if they directly operate on the top of the
 evaluation stack in the name of consistency and clarity, but in fact their
@@ -2245,101 +2251,79 @@ inputs and outputs may reside elsewhere. The symbol 'B' is used in the input
 descriptions and output descriptions of operations to indicate that a given
 operation consumes a base as input or produces a base as output.
 
+9.1 Member base operations
+--------------------------
+
 BaseC     [C]  ->  [B]
 
-  Get base from value. This operation outputs a base that contains the value
+  Get base from value. This operation outputs a base that points to the value
   given by $1.
 
 BaseR     [R]  ->  [B]
 
-  Get base from return value. This operation outputs a base that contains the
+  Get base from return value. This operation outputs a base that points to the
   return value given by $1.
 
 BaseL <local variable id>    []  ->  [B]
 
-  Get base from local. This operation outputs a base that references the local
+  Get base from local. This operation outputs a base that points to the local
   given by %1. If the local is not defined, this operation outputs a base that
-  contains null.
+  points to null.
 
 BaseLW <local variable id>    []  ->  [B]
 
-  Get base from local. This operation outputs a base that references the local
+  Get base from local. This operation outputs a base that points to the local
   given by %1. If the local is not defined, this operation raises a warning and
-  outputs a base that contains null.
+  outputs a base that points to null.
 
 BaseLD <local variable id>    []  ->  [B]
 
-  Get base from local. This operation outputs a base that references the local
-  given by %1. If the local is not defined, this operation defines it and
-  returns a base that references the local.
-
-BaseLWD <local variable id>    []  ->  [B]
-
-  Get base from local. This operation outputs a base that references the local
-  variable given by %1. If the local is not defined, this operation defines it,
-  raises a warning, and returns a base that references the local.
+  Get base from local. This operation outputs a base that points to the local
+  given by %1, whether or not it is defined.
 
 BaseNC                       [C]  ->  [B]
 BaseNL <local variable id>   []  ->  [B]
 
-  Get base from name. This operation outputs a base that references the local
+  Get base from name. This operation outputs a base that points to the local
   variable whose name is given by (string)%1 or (string)$1. If the local is not
-  defined, this operation outputs a base that contains null.
+  defined, this operation outputs a base that points to null.
 
 BaseNCW                      [C]  ->  [B]
 BaseNLW <local variable id>  []  ->  [B]
 
-  Get base from name. This operation outputs a base that references the local
+  Get base from name. This operation outputs a base that points to the local
   variable whose name is given by (string)%1 or (string)$1. If the local is not
-  defined, this operation raises a warning and outputs a base that contains
+  defined, this operation raises a warning and outputs a base that points to
   null.
 
 BaseNCD                      [C]  ->  [B]
 BaseNLD <local variable id>  []  ->  [B]
 
-  Get base from name. This operation outputs a base that references the local
-  variable whose name is given by (string)%1 or (string)$1. If the local is not
-  defined, this operation defines it and returns a base that references the
-  local.
-
-BaseNCWD                        [C]  ->  [B]
-BaseNLWD <local variable id>    []  ->  [B]
-
-  Get base from name. This operation outputs a base that references the local
-  variable whose name is given by (string)%1 or (string)$1. If the local is not
-  defined, this operation defines it, raises a warning, and returns a base that
-  references the local.
+  Get base from name. This operation outputs a base that points to the local
+  variable whose name is given by (string)%1 or (string)$1, defining it first if
+  necessary.
 
 BaseGC                        [C]  ->  [B]
 BaseGL <local variable id>    []  ->  [B]
 
-  Get base from global name. This operation outputs a base that references the
+  Get base from global name. This operation outputs a base that points to the
   global variable whose name is given by (string)%1 or (string)$1. If the
-  global is not defined, this operation produces a base that contains null.
+  global is not defined, this operation produces a base that points to null.
 
 BaseGCW                        [C]  ->  [B]
 BaseGLW <local variable id>    []  ->  [B]
 
-  Get base from global name. This operation outputs a base that references the
+  Get base from global name. This operation outputs a base that points to the
   global variable whose name is given by (string)%1 or (string)$1. If the
   global is not defined, this operation raises a warning and outputs a base
-  that contains null.
+  that points to null.
 
 BaseGCD                        [C]  ->  [B]
 BaseGLD <local variable id>    []  ->  [B]
 
-  Get base from global name. This operation outputs a base that references the
-  global variable whose name is given by (string)%1 or (string)$1. If the
-  global is not defined, this operation defines it and returns a base that
-  references the global.
-
-BaseGCWD                        [C]  ->  [B]
-BaseGLWD <local variable id>    []  ->  [B]
-
-  Get base from global name. This operation outputs a base that references the
-  global variable whose name is given by (string)%1 or (string)$1. If the
-  global is not defined, this operation defines it, raises a warning, and
-  returns a base that references the global.
+  Get base from global name. This operation outputs a base that points to the
+  global variable whose name is given by (string)%1 or (string)$1, defining it
+  first if necessary.
 
 BaseSC                        [C A]  ->  [B]
 BaseSL <local variable id>    [A]  ->  [B]
@@ -2354,13 +2338,16 @@ BaseSL <local variable id>    [A]  ->  [B]
 
   Next this operation computes y = (string)x. Then this instruction checks if
   class $1 has an accessible property named y. If it does, this operation
-  outputs a base that references the static property. Otherwise, this operation
+  outputs a base that points to the static property. Otherwise, this operation
   throws a fatal error.
 
 BaseH     []  ->  [B]
 
   Get base from $this. This operation assumes that the current frame contains a
-  valid $this pointer and outputs a base containing the object in $this.
+  valid $this pointer and outputs a base pointing to the object in $this.
+
+9.2 Intermediate member operations
+----------------------------------
 
 ElemC                        [C B]  ->  [B]
 ElemL <local variable id>    [B]  ->  [B]
@@ -2373,12 +2360,12 @@ ElemL <local variable id>    [B]  ->  [B]
          ElemC   | $2 | $1
          ElemL   | %1 | $1
 
-  Then, if y is an array, this operation outputs a base that references the
+  Then, if y is an array, this operation outputs a base that points to the
   element at index x from array y. If there is no element at index x, this
-  operation outputs a base that contains null.
+  operation outputs a base that points to null.
 
   If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that contains the result of y->offsetGet(x).
+  outputs a base that points to the result of y->offsetGet(x).
 
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
@@ -2386,10 +2373,10 @@ ElemL <local variable id>    [B]  ->  [B]
   If y is a string, this operation computes z = (int)x. If z >= 0 and z <
   strlen(z), this operation builds a new string consisting of the character at
   offset z from y and outputs a base that contains the new string. Otherwise,
-  this operation outputs a base that contains the empty string.
+  this operation outputs a base that points to the empty string.
 
-  If y is not a string, array, or object, this operation will output a null
-  base.
+  If y is not a string, array, or object, this operation will output a base
+  pointing to null.
 
 ElemCW                        [C B]  ->  [B]
 ElemLW <local variable id>    [B]  ->  [B]
@@ -2404,24 +2391,24 @@ ElemLW <local variable id>    [B]  ->  [B]
          ElemCW  | $2 | $1
          ElemLW  | %1 | $1
 
-  If y is an array, this operation outputs a base that references the element
-  at index x from array y. If there is no element at index x, this operation
-  outputs a base that contains null and raises a warning.
+  If y is an array, this operation outputs a base that points to the element at
+  index x from array y. If there is no element at index x, this operation
+  outputs a base that points to null and raises a warning.
 
   If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that contains the result of y->offsetGet(x).
+  outputs a base that points to the result of y->offsetGet(x).
 
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
   If y is a string, this operation continues to compute z = (int)x. If z >= 0
   and z < strlen(z), this operation builds a new string consisting of the
-  character at offset z from y and outputs a base that contains the new string.
-  Otherwise, this operation raises a warning and outputs a base that contains
+  character at offset z from y and outputs a base that points to the new string.
+  Otherwise, this operation raises a warning and outputs a base that points to
   the empty string.
 
-  If y is not a string, array, or object, this operation will output a null
-  base.
+  If y is not a string, array, or object, this operation will output a base
+  pointing to null.
 
 ElemCD                        [C B]  ->  [B]
 ElemLD <local variable id>    [B]  ->  [B]
@@ -2447,42 +2434,11 @@ ElemLD <local variable id>    [B]  ->  [B]
   interface, this operation throws a fatal error.
 
   If y is null, the empty string, or false, this operation will set y to a new
-  empty array, create an element at index x, and output a base that references
+  empty array, create an element at index x, and output a base that points to
   the element.
 
   If y is true, integer, double, this operation raises a warning and outputs a
-  base that contains null.
-
-ElemCWD                        [C B]  ->  [B]
-ElemLWD <local variable id>    [B]  ->  [B]
-
-  Fetch element; warn and define it if it doesn't exist.
-
-  First, these operations load a value into x and a base into y, as given by
-  the following table:
-
-       operation    x    y
-       ----------+----+-----
-         ElemCWD | $2 | $1
-         ElemLWD | %1 | $1
-
-  If y is an array, this operation outputs a base that references the element
-  at index x. If there is no element at index x, this operation creates an
-  element at index x, raises a warning, and outputs a base that references the
-  element.
-
-  If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that contains the result of y->offsetGet(x).
-
-  If y is non-empty string or an object that does not implement the ArrayAccess
-  interface, this operation throws a fatal error.
-
-  If y is null, the empty string, or false, this operation will set y to a new
-  empty array, create an element at index x, and output a base that references
-  the element.
-
-  If y is true, integer, or double, this operation raises a warning and outputs
-  a base that contains null.
+  base that points to null.
 
 ElemCU                        [C B]  ->  [B]
 ElemLU <local variable id>    [B]  ->  [B]
@@ -2497,39 +2453,39 @@ ElemLU <local variable id>    [B]  ->  [B]
          ElemCU  | $2 | $1
          ElemLU  | %1 | $1
 
-  If y is an array, this operation outputs a base that references the element
+  If y is an array, this operation outputs a base that points to the element
   at index x from array y. If there is no element at index x, this operation
-  outputs a base that contains null.
+  outputs a base that points to null.
 
   If y is an object that implements the ArrayAccess interface, this operation
-  outputs a base that contains the result of y->offsetGet(x).
+  outputs a base that points to the result of y->offsetGet(x).
 
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
   If y is a string, this operation throws a fatal error.
 
-  If y is not a string, array, or object, this operation will output a null
-  base.
+  If y is not a string, array, or object, this operation will output a base
+  pointing to null.
 
 NewElem    [B]  ->  [B]
 
   Fetch new element. If $1 is an array, this operation creates a new element
   with the next available numeric key in array $1 and outputs a base that
-  references the new element.
+  points to the new element.
 
   If $1 is an object that implements the ArrayAccess interface, this operation
-  outputs a base that contains the result of $1->offsetGet(null).
+  outputs a base that points to the result of $1->offsetGet(null).
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
   If $1 is null, false, or the empty string, this operation sets $1 to a new
   empty array, creates a new element with the next available numeric key in
-  array $1, and then outputs a base that references the new element.
+  array $1, and then outputs a base that points to the new element.
 
   If $1 is true, integer, or double, this operation raises a warning and
-  outputs a base that contains null.
+  outputs a base that points to null.
 
 PropC                        [C B]  ->  [B]
 PropL <local variable id>    [B]  ->  [B]
@@ -2544,7 +2500,7 @@ PropL <local variable id>    [B]  ->  [B]
          PropC   | $2 | $1
          PropL   | %1 | $1
 
-  Next, performs one of the following actions:
+  Next, produce a base pointing to:
 
     y is an object
      y->x is visible
@@ -2552,14 +2508,14 @@ PropL <local variable id>    [B]  ->  [B]
        y has eligible __get method
         y->x has been unset previously
     ------+---------------------------------------------------------------------
-    0XXXX | push null
-    10X0X | push null
-    10X1X | push ref(y->__get(x))
+    0XXXX | null
+    10X0X | null
+    10X1X | y->__get(x)
     1100X | throw fatal error
-    1101X | push ref(y->__get(x))
-    111X0 | push ref(y->x)
-    11101 | push null
-    11111 | push ref(y->__get(x))
+    1101X | y->__get(x)
+    111X0 | y->x
+    11101 | null
+    11111 | y->__get(x)
 
 PropCW                        [C B]  ->  [B]
 PropLW <local variable id>    [B]  ->  [B]
@@ -2574,7 +2530,7 @@ PropLW <local variable id>    [B]  ->  [B]
          PropCW  | $2 | $1
          PropLW  | %1 | $1
 
-  Next, performs one of the following actions:
+  Next, produce a base pointing to:
 
     y is an object
      y->x is visible
@@ -2582,14 +2538,14 @@ PropLW <local variable id>    [B]  ->  [B]
        y has eligible __get method
         y->x has been unset previously
     -----+----------------------------------------------------------------------
-    0XXXX | raise warning; push null
-    10X0X | raise warning; push null
-    10X1X | push ref(y->__get(x))
+    0XXXX | raise warning; null
+    10X0X | raise warning; null
+    10X1X | y->__get(x)
     1100X | throw fatal error
-    1101X | push ref(y->__get(x))
-    111X0 | push ref(y->x)
-    11101 | raise warning; push null
-    11111 | push ref(y->__get(x))
+    1101X | y->__get(x)
+    111X0 | y->x
+    11101 | raise warning; null
+    11111 | y->__get(x)
 
 PropCD                        [C B]  ->  [B]
 PropLD <local variable id>    [B]  ->  [B]
@@ -2604,7 +2560,7 @@ PropLD <local variable id>    [B]  ->  [B]
          PropCD  | $2 | $1
          PropLD  | %1 | $1
 
-  Next, performs one of the following actions:
+  Next, produce a base pointing to:
 
     y is an object
      y is null/false/""
@@ -2613,48 +2569,15 @@ PropLD <local variable id>    [B]  ->  [B]
         y has eligible __get method
          y->x has been unset previously
     ------+---------------------------------------------------------------------
-    00XXXX | push null
-    01XXXX | y = new stdclass; create property y->x; push ref(y->x)
-    1X0X0X | create property y->x; push ref(y->x)
-    1X0X1X | push ref(y->__get(x))
+    00XXXX | null
+    01XXXX | y = new stdclass; create property y->x; y->x
+    1X0X0X | create property y->x; y->x
+    1X0X1X | y->__get(x)
     1X100X | throw fatal error
-    1X101X | push ref(y->__get(x))
-    1X11X0 | push ref(y->x)
-    1X1101 | re-create property y->x, push ref(y->x)
-    1X1111 | push ref(y->__get(x))
-
-PropCWD                        [C B]  ->  [B]
-PropLWD <local variable id>    [B]  ->  [B]
-
-  Fetch property; warn and define it if it doesn't exist.
-
-  First, these operations load a value into x and a base into y, as given by
-  the following table:
-
-       operation    x    y
-       ----------+----+-----
-         PropCWD | $2 | $1
-         PropLWD | %1 | $1
-
-  Next, performs one of the following actions:
-
-    y is an object
-     y is null/false/""
-      y->x is visible
-       y->x is accessible
-        y has eligible __get method
-         y->x has been unset previously
-    ------+---------------------------------------------------------------------
-    00XXXX | raise warning; push null
-    01XXXX | raise warning; y = new stdclass; create property y->x;
-           | push ref(y->x)
-    1X0X0X | raise warning; create property y->x; push ref(y->x)
-    1X0X1X | push ref(y->__get(x))
-    1X100X | throw fatal error
-    1X101X | push ref(y->__get(x))
-    1X11X0 | push ref(y->x)
-    1X1101 | re-create property y->x, push ref(y->x)
-    1X1111 | push ref(y->__get(x))
+    1X101X | y->__get(x)
+    1X11X0 | y->x
+    1X1101 | re-create property y->x, y->x
+    1X1111 | y->__get(x)
 
 PropCU                        [C B]  ->  [B]
 PropLU <local variabld id>    [B]  ->  [B]
@@ -2669,7 +2592,7 @@ PropLU <local variabld id>    [B]  ->  [B]
          PropCW  | $2 | $1
          PropLW  | %1 | $1
 
-  Next, performs one of the following actions:
+  Next, produce a base pointing to:
 
     y is an object
      y->x is visible
@@ -2677,11 +2600,14 @@ PropLU <local variabld id>    [B]  ->  [B]
        y has eligible __get method
         y->x has been unset previously
     -----+----------------------------------------------------------------------
-    0XXXX | push null
-    10XXX | create property y->x; push ref(y->x)
+    0XXXX | null
+    10XXX | create property y->x; y->x
     110XX | throw fatal error
-    111X0 | push ref(y->x)
-    111X1 | re-create property y->x, push ref(y->x)
+    111X0 | y->x
+    111X1 | re-create property y->x; y->x
+
+9.3 Final member operations
+---------------------------
 
 CGetElemC                        [C B]  ->  [C]
 CGetElemL <local variable id>    [B]  ->  [C]
@@ -3427,223 +3353,128 @@ UnsetPropL <local variable id>    [B]  ->  []
 10. Member instructions
 -----------------------
 
-Member instructions perform series of operations that are structurally
-identical, but each instruction utilizes a distinct set of operations. For each
-member instruction, first use a Base* operation depending on the kind of
-location code. Next perform a series of intermediate operations depending on
-member code to process all but the last member. Finally, perform a final
-operation depending on member code to process the last member. See the
-instruction-specific tables for details.
+Each instruction in this section corresponds to one member operation from the
+previous section. The same bytecode may represent multiple different member
+operations, differentiating between the options using MOpFlags immediates and/or
+the reffiness of parameters (in the case of FPass* bytecodes).
 
-The member codes that represent immediate literal data (ET, EI, PT) are
-implemented using the corresponding EC or PC intermediate operation: they
-behave exactly as though that literal data had been pushed on the stack as a
-cell, then consumed by an ElemC* or PropC* operation.
+Since they represent member operations, these instructions produced and/or
+consume a base in the member base register. The MBR is live starting after a
+Base* bytecode, modified by zero or more Dim* bytecodes, then finally consumed
+by a final operation:
 
-CGetM <loc-desc/M-vector>    [C..C]  ->  [C]
+  bytecode  | MBR in-state | MBR out-state
+  ----------+--------------+--------------
+  Base*     | dead         | live
+  Dim*      | live         | live
+  Final Ops | live         | dead
 
-  Get member as cell.
+Finally, many of these instructions have a <member key> immediate. This is
+described in the "Instruction set" introduction section.
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+----------
-    C          | BaseC      EC     | ElemCW       | CGetElemC
-    R          | BaseR      PC     | PropCW       | CGetPropC
-    L          | BaseLW     EL     | ElemLW       | CGetElemL
-    NC         | BaseNCW    PL     | PropLW       | CGetPropL
-    NL         | BaseNLW    W      | N/A          | N/A
-    GC         | BaseGCW
-    GL         | BaseGLW
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+10.1 Base Operations
+---------------------
 
-VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
+BaseNC <stack index> <member op flags>    []  ->  []
+BaseNL <local id>    <member op flags>    []  ->  []
 
-  Get member as ref.
+FPassBaseNC <param id> <stack index>    []  ->  []
+FPassBaseNL <param id> <local id>       []  ->  []
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+------------
-    C          | BaseC      EC     |  ElemCD      | VGetElemC
-    R          | BaseR      PC     |  PropCD      | VGetPropC
-    L          | BaseLD     EL     |  ElemLD      | VGetElemL
-    NC         | BaseNCD    PL     |  PropLD      | VGetPropL
-    NL         | BaseNLD    W      |  NewElem     | VGetNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+  BaseN{C,L}{,W,D} member operation.
 
-FPassM <param id> <loc-desc/M-vector>    [C..C]  ->  [F]
+BaseGC <stack index> <member op flags>    []  ->  []
+BaseGL <local id>    <member op flags>    []  ->  []
 
-  FPI pass parameter. This instruction behaves as CGetM if parameter %1 is pass
-  by value, or it behaves like VGetM if parameter %1 is pass by reference. Then
-  it passes the value produced to the callee.
+FPassBaseGC <param id> <stack index>    []  ->  []
+FPassBaseGL <param id> <local id>       []  ->  []
 
-IssetM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
+  BaseG{C,L}{,W,D} member operation.
 
-  Isset member.
+BaseSC <stack index> <stack index>    [A CV?]  ->  [CV?]
+BaseSL <local id>    <stack index>    [A CV?]  ->  [CV?]
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemC        | IssetElemC
-    R          | BaseR      PC     | PropC        | IssetPropC
-    L          | BaseL      EL     | ElemL        | IssetElemL
-    NC         | BaseNC     PL     | PropL        | IssetPropL
-    NL         | BaseNL     W      | N/A          | N/A
-    GC         | BaseGC
-    GL         | BaseGL
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+  BaseS{C,L} member operation. %1 gives the location of the static property
+  name, and %2 gives the index of the class input. The class is consumed from
+  the stack, leaving an optional cell or var above the class undisturbed.
 
-EmptyM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
+BaseL <local id> <member op flags>    []  ->  []
 
-  Empty member.
+FPassBaseL <param id> <local id>    []  ->  []
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemC        | EmptyElemC
-    R          | BaseR      PC     | PropC        | EmptyPropC
-    L          | BaseL      EL     | ElemL        | EmptyElemL
-    NC         | BaseNC     PL     | PropL        | EmptyPropL
-    NL         | BaseNL     W      | N/A          | N/A
-    GC         | BaseGC
-    GL         | BaseGL
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+  BaseL{,W,D} member operation.
 
-SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
+BaseC <stack index>    []  ->  []
+BaseR <stack index>    []  ->  []
 
-  Set member.
+  Base{C,R} member operation.
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCD       | SetElemC
-    R          | BaseR      PC     | PropCD       | SetPropC
-    L          | BaseLD     EL     | ElemLD       | SetElemL
-    NC         | BaseNCD    PL     | PropLD       | SetPropL
-    NL         | BaseNLD    W      | NewElem      | SetNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+BaseH    []  ->  []
 
-SetWithRefLM <loc-desc/M-vector> <local variable id> [C..C] -> []
+  BaseH member operation.
 
-  Set member preserving the reffiness of the local.
+10.2 Intermediate operations
+-----------------------------
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
-    R          | BaseR      PC     | PropCD       | SetPropC
-    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
-    NC         | BaseNCD    PL     | PropLD       | SetPropL
-    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+Dim   <member key>    <prop/elem op> <member op flags>    []  ->  []
 
-SetWithRefRM <loc-desc/M-vector> [C..C R] -> []
+FPassDim   <param id> <member key> <prop/elem op>    []  ->  []
 
-  Set member preserving the reffiness of the stack element.
+  {Prop,Elem}{L,C,I,T}{W,D,U} member operation.
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
-    R          | BaseR      PC     | PropCD       | SetPropC
-    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
-    NC         | BaseNCD    PL     | PropLD       | SetPropL
-    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+DimNewElem <member op flags>    []  ->  []
 
-SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
+FPassDimNewElem <param id>    []  ->  []
 
-  Set op member.
+  NewElem operation.
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-------------
-    C          | BaseC      EC     | ElemCWD      | SetOpElemC
-    R          | BaseR      PC     | PropCWD      | SetOpPropC
-    L          | BaseLWD    EL     | ElemLWD      | SetOpElemL
-    NC         | BaseNCWD   PL     | PropLWD      | SetOpPropL
-    NL         | BaseNLWD   W      | NewElem      | SetOpNewElem
-    GC         | BaseGCWD
-    GL         | BaseGLWD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+10.3 Final operations
+----------------------
 
-IncDecM <op> <loc-desc/M-vector>    [C..C]  ->  [C]
+All final operations take a <stack count> immediate as %0, which indicates the
+number of member keys on the eval stack that must be consumed before pushing
+the final result, if any.
 
-  Increment/decrement member.
+QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+--------------
-    C          | BaseC      EC     | ElemCWD      | IncDecElemC
-    R          | BaseR      PC     | PropCWD      | IncDecPropC
-    L          | BaseLWD    EL     | ElemLWD      | IncDecElemL
-    NC         | BaseNCWD   PL     | PropLWD      | IncDecPropL
-    NL         | BaseNLWD   W      | NewElem      | IncDecNewElem
-    GC         | BaseGCWD
-    GL         | BaseGLWD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+  {CGet,Isset,Empty}{Prop,Elem} member operation.
 
-BindM <loc-desc/M-vector>    [C..C V]  ->  [V]
+VGetM <stack count> <member key>    [...]  ->  [V]
 
-  Bind member.
+  {VGet}{Prop,Elem} or VGetNewElem member operation.
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+------------
-    C          | BaseC      EC     | ElemCD       | BindElemC
-    R          | BaseR      PC     | PropCD       | BindPropC
-    L          | BaseLD     EL     | ElemLD       | BindElemL
-    NC         | BaseNCD    PL     | PropLD       | BindPropL
-    NL         | BaseNLD    W      | NewElem      | BindNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+FPassM <param id> <stack count> <member key>    [...]  ->  [V]
 
-UnsetM <loc-desc/M-vector>    [C..C]  ->  []
+  {CGet,VGet}{Prop,Elem} or VGetNewElem, member operation, depending
+  on the reffiness of the specified parameter.
 
-  Unset member.
+SetM <stack count> <member key>    [... C]  ->  [C]
 
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCU       | UnsetElemC
-    R          | BaseR      PC     | PropCU       | UnsetPropC
-    L          | BaseL      EL     | ElemLU       | UnsetElemL
-    NC         | BaseNC     PL     | PropLU       | UnsetPropL
-    NL         | BaseNL     W      | N/A          | N/A
-    GC         | BaseGC
-    GL         | BaseGL
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
+  Set{Prop,Elem} or SetNewElem member operation.
 
+IncDecM <stack count> <op> <member key>    [...]  ->  [C]
+
+  IncDec{Prop,Elem} or IncDecNewElem member operation.
+
+SetOpM <stack count> <op> <member key>    [... C]  ->  [C]
+
+  SetOp{Prop,Elem} or SetOpNewElem member operation.
+
+BindM <stack count> <member key>    [... V]  ->  [V]
+
+  Bind{Prop,Elem} or BindNewElem member operation.
+
+UnsetM <stack count> <member key>    [...]  ->  []
+
+  Unset{Prop,Elem} member operation.
+
+SetWithRefLML <local id> <local id>    []  ->  []
+
+  Set member %1, preserving reffiness of value in %2.
+
+SetWithRefRML <local id>    [R]  ->  []
+
+  Set member %1, preserving reffiness of stack input.
 
 11. Iterator instructions
 -------------------------
@@ -3856,13 +3687,13 @@ CIterFree <iterator id>    []  ->  []
 
   Cuf iterator free. This instruction frees the specified iterator variable.
 
-IterBreak <iter-vec> <rel offset>   []  ->  []
+IterBreak <rel offset> <iter-vec>    []  ->  []
 
-  Iterator break. Frees vectors in %1 in left to right order then transfers
-  control to the location specified by %2. Surprise checks are performed before
+  Iterator break. Frees vectors in %2 in left to right order then transfers
+  control to the location specified by %1. Surprise checks are performed before
   iterators are freed so that in the event of an exception iterators are not
   double freed. Note that as with normal jumps surprise checks will only be
-  performed if %2 is non-positive.
+  performed if %1 is non-positive.
 
 
 12. Include, eval, and define instructions
@@ -4214,6 +4045,12 @@ ContValid    []  ->  [C:Bool]
   Check generator validity. $this must be a Generator object. Pushes true
   onto the stack if the generator can be iterated further, false otherwise.
 
+ContStarted    []  ->  [C:Bool]
+
+  Check whether a generator was started. $this must be a Generator object.
+  Pushes true onto the stack if the generator has already been run once,
+  false otherwise.
+
 ContKey    []  ->  [C]
 
   Get generator key. $this must be a Generator object. Pushes the most
@@ -4223,6 +4060,86 @@ ContCurrent    []  ->  [C]
 
   Get generator value. $this must be a Generator object. Pushes the most
   recently yielded value from the generator onto the stack.
+
+ContGetReturn    [] -> [C]
+
+  Get generator's return value. $this must be a Generator object. Pushes the
+  return value of the generator onto the stack.
+
+14.1 Generator Delegation
+-------------------------
+
+The following bytecodes are used to implement the Generator Delegation feature
+of PHP7. Generator Delegation (which is exposed to programmers as `yield from`)
+allows generators to yield results from other generators (referred to as their
+"delegates") as if they were the ones yielding the value. For a full
+explanation of the feature, see https://wiki.php.net/rfc/generator-delegation.
+
+The important part of this feature is how it interacts with different inputs.
+The `yield from` pseudo-expression takes two different types of inputs, and
+interacts with them very differently. The first is other generators. When
+When the delegate is a generator we resume execution of the subgenerator and
+return to the caller of the delegating generator (the one containing
+`yield from`) when we encounter a yield. All of the features of generators
+(`send`, `throw`, etc) are piped through to the delegate, and the result of the
+`yield from` expression is the return value of the subgenerator.
+
+The second valid type of input to `yield from` is an object conforming to the
+Traversable interface. When the delegate of a generator is a Traversable the
+`send()` method does nothing more than continue execution of the delegating
+generator. The `throw()` method will throw from the context of the delegating
+generator, and the result of the `yield from` expression will always be NULL.
+At a high level, you can think of `yield from <traversable>` as being
+equivalent to `foreach(<traversable> as $val) { yield $val; }`.
+
+While the bytecodes implementing Generator Delegation have their own API and
+well defined contracts, they generally expect to be used in the following
+pattern:
+
+```
+ContAssignDelegate <expr>
+ContEnterDelegate
+YieldFromDelegate
+ContUnsetDelegate
+```
+
+ContAssignDelegate [C] -> []
+
+  This instruction may only appear in bodies of non-async generators. Stores $1
+  in the generator as it's delegate, for use later by the ContEnterDelegate
+  and YieldFromDelegate bytecodes. Throws an exception if $1 is not either a
+  Traversable or another Generator.
+
+ContEnterDelegate [C] -> []
+
+  This instruction may only appear in bodies of non-async generators, and the
+  delegate property of the current generator must be non-null. If the delegate
+  is a Generator, control flow is transfered to the saved resume offset of the
+  delegate. $1 describes the value given to either ContEnter or ContRaise when
+  execution of the current generator was resumed, and said value is then passed
+  to the delegate generator for use there.
+
+YieldFromDelegate [] -> [C]
+
+  This instruction may only appear in bodies of non-async generators, and the
+  delegate property of the current generator must be non-null. If the delegate
+  is a Traversable the current key/value pair is stored in the generator as
+  the result of the current iteration and the iterator is advanced. When the
+  delegate is a Generator, the ContCurrent and ContKey opcodes handle
+  returning the result from the deepest active generator. When iteration has
+  finished, this opcode continues executing the next instruction, otherwise it
+  sets the resume offset to the offset specified by its immediate and returns
+  control to the caller.
+
+ContUnsetDelegate <free iterator> [] -> []
+
+  This instruction may only appear in bodies of non-async generators. Removes
+  the currently assigned delegate of the generator. If <free iterator> is true
+  and the delegate is not another generator then this opcode is responsible for
+  freeing the internal iterator used by this group of opcodes. If false then it
+  is expected that the iterator is freed elsewhere. When the delegate is
+  another generator then it assumes that the iterator was never initialized
+  in the first place.
 
 15. Async functions
 -------------------
@@ -4234,7 +4151,7 @@ WHResult [C:Obj] -> [C]
   this instruction throws the exception stored in the WaitHandle. If $1 is not
   finished, throws an Exception.
 
-Await  <number of iterators>   [C]  ->  [C]
+Await    [C]  ->  [C]
 
   This instruction may only appear in bodies of async functions. Awaits
   a WaitHandle provided by $1, suspending the execution if the WaitHandle
@@ -4249,11 +4166,11 @@ Await  <number of iterators>   [C]  ->  [C]
   execution needs to be suspended:
 
   If the async function is executed eagerly, creates an AsyncFunctionWaitHandle
-  object, moves all local variables and first %1 iterators from the current
-  frame into the object, sets resume offset at the next opcode, marks the
+  object, moves all local variables and iterators from the current frame into
+  the object, sets resume offset at the next opcode, marks the
   AsyncFunctionWaitHandle as blocked on the WaitHandle provided by $1 and
-  suspends execution by transferring control flow back to the caller,
-  returning the AsyncFunctionWaitHandle object.
+  suspends execution by transferring control flow back to the caller, returning
+  the AsyncFunctionWaitHandle object.
 
   If the async function is executed in resumed mode, sets resume offset at
   the next opcode, marks the AsyncFunctionWaitHandle as blocked on the

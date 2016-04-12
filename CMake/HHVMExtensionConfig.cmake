@@ -27,12 +27,15 @@
 # The root directory to which all file paths
 # referenced by the extension are relative to.
 #
-# HHVM_EXTENSION_#_ENABLED_STATE: <int {0, 1, 2, 3}>
+# HHVM_EXTENSION_#_ENABLED_STATE: <int {0, 1, 2, 3, 4}>
 # The state of an extension's enabling. If this is 0, then the extension
 # may be enabled once dependency calculation is performed. If this is 1,
 # then the extension is enabled, and if it is 2, then it is disabled.
 # If this is 3, then the extension has been forcefully enabled, and its
-# dependencies should be checked.
+# dependencies should be checked. If this is 4, then the extension is a
+# 'wanted' extension, and we should error if dependencies for it can't
+# be resolved, unless the dependency that fails is an os* or var* dependency,
+# in which case, we don't error, but just disable the extension.
 #
 # HHVM_EXTENSION_#_SOURCE_FILES: <list>
 # The list of files to compile for the extension.
@@ -81,10 +84,12 @@
 # and it has not be explicitly enabled via `-DENABLE_EXTENSION_FOO=On`,
 # then it will be implicitly disabled by the build system.
 #
-# [EXPLICIT] (default)
+# [WANTED] (default)
 # If the library dependencies for this extension fail to resolve,
 # and it has not been explicitly disabled with `-DENABLE_EXTENSION_FOO=Off`
-# a FATAL_ERROR will be triggered.
+# a FATAL_ERROR will be triggered, unless the dependency that fails is
+# an os* or var* dependency, in which case the extension will be implicitly
+# disabled by the build system.
 #
 # Note that it does not make sense to specify more than one of the above
 # three settings as the behavior they imply is mutually exclusive.
@@ -157,11 +162,11 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
   set(extensionName "")
   set(extensionPrettyName "")
   set(extensionRequired OFF)
-  # If EXPLICIT is specified, then the extension must be explicitly disabled
+  # If WANTED is specified, then the extension must be explicitly disabled
   # If IMPLICIT is specified, then the extension will be implicitly disabled
-  #   when the dependencies are not found
-  # If neither is specified, we default to EXPLICIT anyway
-  set(extensionEnabledState 3)
+  # when the dependencies are not found
+  # If neither is specified, we default to WANTED anyway
+  set(extensionEnabledState 4)
   set(extensionSources)
   set(extensionHeaders)
   set(extensionLibrary)
@@ -209,17 +214,15 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
       endif()
       set(extensionRequired ON)
     elseif ("x${arg}" STREQUAL "xIMPLICIT")
-      if (${argumentState} EQUAL 0)
-        set(extensionEnabledState 0)
-      else()
-        message(FATAL_ERROR "The IMPLICIT modifier is only currently valid following the extension name")
+      if (NOT ${argumentState} EQUAL 0)
+        message(FATAL_ERROR "The IMPLICIT modifier should only be placed immediately after the extension's name! (while processing the '${extensionPrettyName}' extension)")
       endif()
-    elseif ("x${arg}" STREQUAL "xEXPLICIT")
-      if (${argumentState} EQUAL 0)
-        set(extensionEnabledState 3)
-      else()
-        message(FATAL_ERROR "The EXPLICIT modifier is only currently valid following the extension name")
+      set(extensionEnabledState 0)
+    elseif ("x${arg}" STREQUAL "xWANTED")
+      if (NOT ${argumentState} EQUAL 0)
+        message(FATAL_ERROR "The WANTED modifier should only be placed immediately after the extension's name! (while processing the '${extensionPrettyName}' extension)")
       endif()
+      set(extensionEnabledState 4)
     elseif ("x${arg}" STREQUAL "xOPTIONAL")
       if (${argumentState} EQUAL 7)
         list(LENGTH extensionDependenciesOptional optDepLen)
@@ -291,6 +294,8 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
   if (DEFINED ENABLE_EXTENSION_${upperExtName})
     if (${ENABLE_EXTENSION_${upperExtName}})
       set(extensionEnabledState 3)
+    elseif (${extensionRequired})
+      message(WARNING "Attempt to explicitly disable the required extension '${extensionPrettyName}' by setting 'ENABLE_EXTENSION_${upperExtName}' was ignored.")
     else()
       set(extensionEnabledState 2)
     endif()
@@ -368,7 +373,12 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
       if (HHVM_EXTENSION_${i}_IDL_FILES)
         list(APPEND IDL_DEFINES "-DENABLE_EXTENSION_${upperExtName}")
       endif()
-      set(ENABLE_EXTENSION_${upperExtName} ON CACHE BOOL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
+
+      if (HHVM_EXTENSION_${i}_REQUIRED)
+        set(ENABLE_EXTENSION_${upperExtName} ON CACHE INTERNAL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
+      else()
+        set(ENABLE_EXTENSION_${upperExtName} ON CACHE BOOL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
+      endif()
     else()
       if (HHVM_EXTENSION_${i}_REQUIRED)
         message(FATAL_ERROR "Failed to resolve a dependency of the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension, which is a required extension!")
@@ -443,7 +453,8 @@ endfunction()
 function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestVar extensionID)
   # If already resolved, return that state.
   if (NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 0 AND
-      NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3)
+      NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3 AND
+      NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 4)
     set(${resolvedDestVar} ${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} PARENT_SCOPE)
     return()
   endif()
@@ -478,11 +489,11 @@ function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestV
         string(SUBSTRING ${currentDependency} 3 ${depLength} varName)
         if (DEFINED ${varName})
           if (NOT ${${varName}})
-            HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency})
+            HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency} ON)
             break()
           endif()
         else()
-          HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency})
+          HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency} ON)
           break()
         endif()
       else()
@@ -491,7 +502,7 @@ function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestV
           # OS Dependency
           if (${currentDependency} STREQUAL "osPosix")
             if (MSVC)
-              HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency})
+              HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency} ON)
               break()
             endif()
           else()
@@ -509,7 +520,8 @@ function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestV
   endwhile()
 
   if (HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 0 OR
-      HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3)
+      HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3 OR
+      HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 4)
     set(HHVM_EXTENSION_${extensionID}_ENABLED_STATE 1 CACHE INTERNAL "" FORCE)
   endif()
   set(${resolvedDestVar} ${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} PARENT_SCOPE)
@@ -517,6 +529,8 @@ endfunction()
 
 # Set that an extension was disabled because of the specified dependency not being
 # possible to resolve.
+# This optionally takes a third BOOL parameter that should be set to ON only if the
+# dependency that failed to resolve is an os* or var* dependency.
 function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDependency)
   list(FIND HHVM_EXTENSION_${extensionID}_DEPENDENCIES ${failedDependency} depIdx)
   if (depIdx EQUAL -1)
@@ -525,7 +539,9 @@ function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDepende
   list(GET HHVM_EXTENSION_${extensionID}_DEPENDENCIES_OPTIONAL ${depIdx} isOptional)
 
   if (NOT ${isOptional})
-    if (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 3)
+    if (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 4 AND (NOT ${ARGC} EQUAL 3 OR NOT "${ARGV2}" STREQUAL "ON"))
+      message(FATAL_ERROR "The ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension is an extension you probably want, but resolving the dependency '${failedDependency}' failed!")
+    elseif (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 3)
       message(FATAL_ERROR "The ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension was forcefully enabled, but resolving the dependency '${failedDependency}' failed!")
     elseif (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 1)
       # Currently only triggers for issues with find_package when applying the library dependencies.
@@ -565,7 +581,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "editline" OR
     ${libraryName} STREQUAL "fastlz" OR
     ${libraryName} STREQUAL "folly" OR
-    ${libraryName} STREQUAL "iconv" OR
     ${libraryName} STREQUAL "lz4" OR
     ${libraryName} STREQUAL "mbfl" OR
     ${libraryName} STREQUAL "mcrouter" OR
@@ -593,6 +608,48 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       add_definitions(${BZIP2_DEFINITIONS})
       link_libraries(${BZIP2_LIBRARIES})
       add_definitions("-DHAVE_LIBBZIP2")
+    endif()
+  elseif (${libraryName} STREQUAL "cclient")
+    find_package(CClient ${requiredVersion})
+    if (NOT CCLIENT_INCLUDE_PATH OR NOT CCLIENT_LIBRARY)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
+    if (NOT RECENT_CCLIENT)
+      unset(RECENT_CCLIENT CACHE)
+      if (${addPaths})
+        message(FATAL_ERROR "Your version of c-client is too old, you need 2007")
+      else()
+        message(STATUS "Your version of c-client is too old, you need 2007")
+        HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+        return()
+      endif()
+    endif()
+
+    if (${addPaths})
+      include_directories(${CCLIENT_INCLUDE_PATH})
+      link_libraries(${CCLIENT_LIBRARY})
+      add_definitions("-DHAVE_LIBCCLIENT")
+
+      if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
+        CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" auth_gss CCLIENT_HAS_GSS)
+      elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
+        CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_HAS_GSS)
+      endif()
+      if (NOT CCLIENT_HAS_GSS)
+        add_definitions("-DSKIP_IMAP_GSS=1")
+      endif()
+
+      if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
+        CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" ssl_onceonlyinit CCLIENT_HAS_SSL)
+      elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
+        CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" ssl_onceonlyinit CCLIENT_HAS_SSL)
+      endif()
+      if (NOT CCLIENT_HAS_SSL)
+        add_definitions("-DSKIP_IMAP_SSL=1")
+      endif()
     endif()
   elseif (${libraryName} STREQUAL "curl")
     find_package(CURL ${requiredVersion})
@@ -630,6 +687,23 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       include_directories(${EXPAT_INCLUDE_DIRS})
       link_libraries(${EXPAT_LIBRARY})
       add_definitions("-DHAVE_LIBEXPAT")
+      if (EXPAT_STATIC)
+        add_definitions("-DXML_STATIC")
+      endif()
+    endif()
+  elseif (${libraryName} STREQUAL "freetype")
+    find_package(Freetype ${requiredVersion})
+    if (NOT FREETYPE_INCLUDE_DIRS OR NOT FREETYPE_LIBRARIES)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${FREETYPE_INCLUDE_DIRS})
+      link_libraries(${FREETYPE_LIBRARIES})
+      add_definitions("-DHAVE_LIBFREETYPE")
+      add_definitions("-DHAVE_GD_FREETYPE")
+      add_definitions("-DENABLE_GD_TTF")
     endif()
   elseif (${libraryName} STREQUAL "fribidi")
     find_package(fribidi ${requiredVersion})
@@ -666,6 +740,25 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       link_libraries(${GMP_LIBRARY})
       add_definitions("-DHAVE_LIBGMP")
     endif()
+  elseif (${libraryName} STREQUAL "iconv")
+    find_package(Libiconv ${requiredVersion})
+    if (NOT LIBICONV_INCLUDE_DIR)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${LIBICONV_INCLUDE_DIR})
+      if (LIBICONV_LIBRARY)
+        link_libraries(${LIBICONV_LIBRARY})
+      endif()
+      add_definitions("-DHAVE_ICONV")
+      add_definitions("-DHAVE_LIBICONV")
+      if (LIBICONV_CONST)
+        message(STATUS "Using const for input to iconv() call")
+        add_definitions("-DICONV_CONST=const")
+      endif()
+    endif()
   elseif (${libraryName} STREQUAL "icu")
     find_package(ICU ${requiredVersion})
     if (NOT ICU_FOUND OR NOT ICU_DATA_LIBRARIES OR NOT ICU_I18N_LIBRARIES OR NOT ICU_LIBRARIES)
@@ -690,6 +783,33 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       include_directories(${ICU_INCLUDE_DIRS})
       link_libraries(${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
       add_definitions("-DHAVE_LIBICU")
+    endif()
+  elseif (${libraryName} STREQUAL "intl")
+    find_package(LibIntl ${requiredVersion})
+    if (NOT LIBINTL_INCLUDE_DIRS)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${LIBINTL_INCLUDE_DIRS})
+      if (LIBINTL_LIBRARIES)
+        link_libraries(${LIBINTL_LIBRARIES})
+      endif()
+      add_definitions("-DHAVE_LIBINTL")
+    endif()
+  elseif (${libraryName} STREQUAL "jpeg")
+    find_package(LibJpeg ${requiredVersion})
+    if (NOT LIBJPEG_INCLUDE_DIRS OR NOT LIBJPEG_LIBRARIES)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${LIBJPEG_INCLUDE_DIRS})
+      link_libraries(${LIBJPEG_LIBRARIES})
+      add_definitions("-DHAVE_LIBJPEG")
+      add_definitions("-DHAVE_GD_JPG")
     endif()
   elseif (${libraryName} STREQUAL "jsonc")
     find_package(Libjsonc ${requiredVersion})
@@ -769,12 +889,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     # third-party/ instead
     if (ENABLE_ASYNC_MYSQL)
       set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-      # Unlike the .so, the static library intentionally does not link against
-      # yassl, despite building it :/
       set(MYSQL_CLIENT_LIBS
         ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
-        ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
-        ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
       )
 
       if (${addPaths})
@@ -813,6 +929,32 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     if (${addPaths})
       link_libraries(${MYSQL_CLIENT_LIBS})
     endif()
+  elseif (${libraryName} STREQUAL "png")
+    find_package(LibPng ${requiredVersion})
+    if (NOT LIBPNG_INCLUDE_DIRS OR NOT LIBPNG_LIBRARIES)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${LIBPNG_INCLUDE_DIRS})
+      link_libraries(${LIBPNG_LIBRARIES})
+      add_definitions("-DHAVE_LIBPNG")
+      add_definitions("-DHAVE_GD_PNG")
+      add_definitions("-DPNG_SKIP_SETJMP_CHECK")
+    endif()
+  elseif (${libraryName} STREQUAL "vpx")
+    find_package(LibVpx ${requiredVersion})
+    if (NOT LIBVPX_INCLUDE_DIRS OR NOT LIBVPX_LIBRARIES)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${LIBVPX_INCLUDE_DIRS})
+      link_libraries(${LIBVPX_LIBRARIES})
+      add_definitions("-DHAVE_LIBVPX")
+    endif()
   elseif (${libraryName} STREQUAL "xml2")
     find_package(LibXml2 ${requiredVersion})
     if (NOT LIBXML2_INCLUDE_DIR OR NOT LIBXML2_LIBRARIES)
@@ -838,6 +980,10 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       add_definitions(${LIBXSLT_DEFINITIONS})
       link_libraries(${LIBXSLT_LIBRARIES} ${LIBXSLT_EXSLT_LIBRARIES})
       add_definitions("-DHAVE_LIBXSLT")
+      if (LIBXSLT_STATIC)
+        add_definitions("-DLIBXSLT_STATIC=1")
+        add_definitions("-DLIBEXSLT_STATIC=1")
+      endif()
     endif()
   elseif (${libraryName} STREQUAL "uodbc")
     find_package(LibUODBC ${requiredVersion})

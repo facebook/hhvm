@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,8 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
-class HostEnt {
-public:
+struct HostEnt {
   HostEnt() : tmphstbuf(nullptr) {}
   ~HostEnt() { if (tmphstbuf) free(tmphstbuf);}
 
@@ -50,8 +49,7 @@ public:
 //   ssl, 192.168.1.0, 80
 // ssl://[2a03:2880::1]:443
 //   ssl, 2a03:2880::1, 443
-class HostURL {
-public:
+struct HostURL {
   explicit HostURL(const std::string &hosturl, int port = 0);
 
   bool isIPv6() const {return m_ipv6;}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,8 +31,8 @@ struct stat;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamContext;
-class StreamFilter;
+struct StreamContext;
+struct StreamFilter;
 
 extern int __thread s_pcloseRet;
 
@@ -63,7 +63,7 @@ struct FileData {
   int getFd() { return m_fd; }
 
  private:
-  friend class File;
+  friend struct File;
   int m_fd{-1};      // file descriptor
   bool m_isLocal{false}; // is this on the local disk?
   bool m_closed{false}; // whether close() was called
@@ -251,7 +251,7 @@ struct File : SweepableResourceData {
    * Write one line of csv record.
    */
   int64_t writeCSV(const Array& fields, char delimiter = ',',
-                   char enclosure = '"');
+                   char enclosure = '"', char escape_char = '\\');
 
   /**
    * Read one line of csv record.

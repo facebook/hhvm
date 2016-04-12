@@ -37,7 +37,7 @@ larger than a single basic block. This code lives in
 [region-tracelet.cpp](../../runtime/vm/jit/region-tracelet.cpp), and its goal
 is to select a region given only the current live VM state - most importantly
 the current program counter and the types of all locals and eval stack
-slots. `HhbcTranslator` (see the "HHIR" section) is used to simulate execution
+slots. `Translator` (see the "HHIR" section) is used to simulate execution
 of the bytecode using types instead of values, continuing until a control flow
 instruction is encountered or an instruction attempts to consume a value of an
 unknown type. These rules are not absolute; there are a number of
@@ -60,9 +60,15 @@ HHIR. HHIR is an SSA-form, strongly-typed intermediate representation
 positioned between HHBC and machine code. A few different classes are involved
 in this translation:
 
-* `HhbcTranslator`: Defined in
-  [hhbc-translator.h](../../runtime/vm/jit/hhbc-translator.h), this class
-  contains roughly one `emitXXX` method for each supported HHBC instruction. It
+* `Translator`: Defined in
+  [translator.h](../../runtime/vm/jit/translator.h), this class is used to
+  convert a RegionDesc into a sequence of HHIR instructions.
+  The interface for emitting HHIR code is located in
+  [irgen.h](../../runtime/vm/jit/irgen.h) and declares roughly one `emitXXX`
+  method for each supported HHBC instruction. The implementations for these
+  methods are grouped into `irgen-*.cpp` files (e.g.
+  [irgen-basic.cpp](../../runtime/vm/jit/irgen-basic.cpp),
+  [irgen-arith.cpp](../../runtime/vm/jit/irgen-arith.cpp)). The `Translator`
   decides which HHIR instructions to emit based primarily on the types of the
   inputs to each bytecode.
 * `IRBuilder`: Defined in [ir-builder.h](../../runtime/vm/jit/ir-builder.h),
@@ -71,7 +77,7 @@ in this translation:
 * `IRUnit`: Defined in [ir-unit.h](../../runtime/vm/jit/ir-unit.h), this class
   is responsible for creating the runtime data structures that represent HHIR
   instructions, values, and blocks.
-* `Simplifier`: Defined in [simplifier.h](../../runtime/vm/jit/simplifier.h),
+* `Simplify`: Defined in [simplify.h](../../runtime/vm/jit/simplify.h),
   this class is responsible for performing very basic optimizations such as
   constant folding/propagation or anything else that only requires inspecting
   an instruction and its sources.

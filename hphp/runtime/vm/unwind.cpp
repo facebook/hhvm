@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,14 +21,16 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
+
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -70,16 +72,18 @@ std::string describeFault(const Fault& f) {
 void discardStackTemps(const ActRec* const fp,
                        Stack& stack,
                        Offset const bcOffset) {
-  ITRACE(2, "discardStackTemps with fp {} sp {} pc {}\n",
+  ITRACE(2, "discardStackTemps with fp {} sp {} pc {} op {}\n",
          implicit_cast<const void*>(fp),
          implicit_cast<void*>(stack.top()),
-         bcOffset);
+         bcOffset, opcodeToName(fp->func()->unit()->getOp(bcOffset)));
 
   visitStackElems(
     fp, stack.top(), bcOffset,
-    [&] (ActRec* ar) {
+    [&] (ActRec* ar, Offset pushOff) {
       assert(ar == reinterpret_cast<ActRec*>(stack.top()));
-      if (ar->isFromFPushCtor()) {
+      // ar is a pre-live ActRec in fp's scope, and pushOff
+      // is the offset of the corresponding FPush* opcode.
+      if (isFPushCtor(fp->func()->unit()->getOp(pushOff))) {
         assert(ar->hasThis());
         ar->getThis()->setNoDestruct();
       }
@@ -97,6 +101,23 @@ void discardStackTemps(const ActRec* const fp,
 
   ITRACE(2, "discardStackTemps ends with sp = {}\n",
          implicit_cast<void*>(stack.top()));
+}
+
+void discardMemberTVRefs(PC pc) {
+  auto const throwOp = peek_op(pc);
+
+  /*
+   * If the opcode that threw was a member instruction, we have to decref tvRef
+   * and tvRef2. AssertRAT* instructions can appear while these values are live
+   * but they will never throw.
+   */
+  if (UNLIKELY(isMemberDimOp(throwOp) || isMemberFinalOp(throwOp))) {
+    auto& mstate = vmMInstrState();
+    tvRefcountedDecRef(mstate.tvRef);
+    tvWriteUninit(&mstate.tvRef);
+    tvRefcountedDecRef(mstate.tvRef2);
+    tvWriteUninit(&mstate.tvRef2);
+  }
 }
 
 UnwindAction checkHandlers(const EHEnt* eh,
@@ -162,7 +183,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
 ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
                           ObjectData* phpException) {
   auto const func = fp->func();
-  auto const curOp = *reinterpret_cast<const Op*>(pc);
+  auto const curOp = peek_op(pc);
   auto const prevFp = fp->sfp();
   auto const soff = fp->m_soff;
 
@@ -180,8 +201,22 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   // or user profiler, most likely). More importantly, fp->m_this may have
   // already been destructed and/or overwritten due to sharing space with
   // fp->m_r.
-  if (fp->isFromFPushCtor() && fp->hasThis() && curOp != OpRetC) {
-    fp->getThis()->setNoDestruct();
+  if (curOp != OpRetC &&
+      fp->hasThis() &&
+      fp->getThis()->getVMClass()->getCtor() == func &&
+      fp->getThis()->getVMClass()->getDtor()) {
+    /*
+     * Looks like an FPushCtor call, but it could still have been called
+     * directly. Check the fpi region to be sure.
+     */
+    Offset prevPc;
+    auto outer = g_context->getPrevVMState(fp, &prevPc);
+    if (outer) {
+      auto fe = outer->func()->findPrecedingFPI(prevPc);
+      if (fe && isFPushCtor(outer->func()->unit()->getOp(fe->m_fpushOff))) {
+        fp->getThis()->setNoDestruct();
+      }
+    }
   }
 
   auto const decRefLocals = [&] {
@@ -220,7 +255,9 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   if (LIKELY(!fp->resumed())) {
     decRefLocals();
-    if (UNLIKELY(func->isAsyncFunction()) && phpException) {
+    if (UNLIKELY(func->isAsyncFunction()) &&
+        phpException &&
+        !fp->isFCallAwait()) {
       // If in an eagerly executed async function, wrap the user exception
       // into a failed StaticWaitHandle and return it to the caller.
       auto const waitHandle = c_StaticWaitHandle::CreateFailed(phpException);
@@ -240,6 +277,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // Handle exception thrown by async function.
       decRefLocals();
       waitHandle->fail(phpException);
+      decRefObj(waitHandle);
       phpException = nullptr;
     } else if (waitHandle->isRunning()) {
       // Let the C++ exception propagate. If the current frame represents async
@@ -248,6 +286,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // decides to throw C++ exception.
       decRefLocals();
       waitHandle->failCpp();
+      decRefObj(waitHandle);
     }
   } else if (func->isAsyncGenerator()) {
     auto const gen = frame_async_generator(fp);
@@ -294,7 +333,9 @@ const StaticString s_previous("previous");
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   while (true) {
     auto const lookup = top->getProp(
-      SystemLib::s_ExceptionClass,
+      top->instanceof(SystemLib::s_ExceptionClass)
+        ? SystemLib::s_ExceptionClass
+        : SystemLib::s_ErrorClass,
       s_previous.get()
     );
     auto const top_tv = lookup.prop;
@@ -302,7 +343,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
 
     assert(top_tv->m_type != KindOfUninit && lookup.accessible);
     if (top_tv->m_type != KindOfObject ||
-        !top_tv->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
+        !top_tv->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
       // Since we are overwriting, decref.
       tvRefcountedDecRef(top_tv);
       // Objects held in m_faults are not refcounted, therefore we need to
@@ -383,13 +424,15 @@ void unwindPhp() {
     ITRACE(1, "leaving unwinder for fault: {}\n", describeFault(fault));
   };
 
+  discardMemberTVRefs(pc);
+
   do {
     bool discard = false;
     if (fault.m_raiseOffset == kInvalidOffset) {
       /*
        * This block executes whenever we want to treat the fault as if
        * it was freshly thrown. Freshly thrown faults either were never
-       * previosly seen by the unwinder OR were propagated from the
+       * previously seen by the unwinder OR were propagated from the
        * previous frame. In such a case, we fill in the fields with
        * the information from the current frame.
        */
@@ -474,8 +517,7 @@ void unwindPhp() {
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
   g_context->m_faults.pop_back();
 
-  Object obj = Object::attach(fault.m_userException);
-  throw obj;
+  throw_object(Object::attach(fault.m_userException));
 }
 
 void unwindPhp(ObjectData* phpException) {
@@ -515,6 +557,8 @@ void unwindCpp(Exception* exception) {
     ITRACE(1, "leaving unwinder for C++ exception: {}\n",
            implicit_cast<void*>(exception));
   };
+
+  discardMemberTVRefs(pc);
 
   do {
     auto const offset = fp->func()->unit()->offsetOf(pc);

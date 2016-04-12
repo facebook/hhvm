@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,7 +34,7 @@ struct InstantStatic {
 };
 
 template <class T, class TInit, TInit init()>
-T InstantStatic<T, TInit, init>::value { init() };
+T InstantStatic<T, TInit, init>::value(init());
 
 #define CLASSNAME_IS(str)                                               \
   static const char *GetClassName() { return str; }                     \

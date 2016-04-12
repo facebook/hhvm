@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ struct ArrayData;
 struct StringData;
 struct MArrayIter;
 struct MixedArray;
-class Shape;
+struct Shape;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,7 +47,8 @@ class Shape;
  * transitions from struct to mixed cheaper. See MixedArray::checkInvariants
  * for details.
  */
-struct StructArray : public ArrayData {
+struct StructArray final : public ArrayData,
+                           type_scan::MarkCountable<StructArray> {
   static ArrayData* MakeUncounted(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
@@ -100,6 +101,7 @@ struct StructArray : public ArrayData {
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* ToDict(ArrayData*);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);

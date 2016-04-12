@@ -53,14 +53,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# iconv checks
-find_package(Libiconv REQUIRED)
-include_directories(${LIBICONV_INCLUDE_DIR})
-if (LIBICONV_CONST)
-  message(STATUS "Using const for input to iconv() call")
-  add_definitions("-DICONV_CONST=const")
-endif()
-
 # mysql checks - if we're using async mysql, we use webscalesqlclient from
 # third-party/ instead
 if (ENABLE_ASYNC_MYSQL)
@@ -70,12 +62,8 @@ if (ENABLE_ASYNC_MYSQL)
     ${TP_DIR}/webscalesqlclient/src/include/
   )
   set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-  # Unlike the .so, the static library intentionally does not link against
-  # yassl, despite building it :/
   set(MYSQL_CLIENT_LIBS
     ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
-    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
-    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
   )
 else()
   find_package(MySQL REQUIRED)
@@ -277,6 +265,11 @@ if (GOOGLE_CPU_PROFILER_ENABLED)
   add_definitions(-DGOOGLE_CPU_PROFILER=1)
 endif()
 
+# HHProf
+if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
+  add_definitions(-DENABLE_HHPROF=1)
+endif()
+
 # tbb libs
 find_package(TBB REQUIRED)
 if (${TBB_INTERFACE_VERSION} LESS 5005)
@@ -354,13 +347,6 @@ if (NOT WINDOWS)
   endif()
 endif()
 
-# LLVM. Disabled in OSS for now: t5056266
-# find_package(LLVM)
-# if (LIBLLVM_INCLUDE_DIR)
-#   include_directories(LIBLLVM_INCLUDE_DIR)
-#   add_definitions("-DUSE_LLVM")
-# endif()
-
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
   FIND_LIBRARY (RT_LIB rt)
@@ -387,10 +373,6 @@ if (FREEBSD)
 endif()
 
 if (APPLE)
-  find_library(LIBINTL_LIBRARIES NAMES intl libintl)
-  if (LIBINTL_INCLUDE_DIR)
-    include_directories(${LIBINTL_INCLUDE_DIR})
-  endif()
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
 
   # This is required by Homebrew's libc. See
@@ -477,10 +459,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})
   endif()
 
-  if (LIBICONV_LIBRARY)
-    target_link_libraries(${target} ${LIBICONV_LIBRARY})
-  endif()
-
   if (LINUX)
     target_link_libraries(${target} ${CAP_LIB})
   endif()
@@ -562,6 +540,8 @@ macro(hphp_link target)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
   target_link_libraries(${target} wangle)
+  target_link_libraries(${target} brotli_enc)
+  target_link_libraries(${target} brotli_dec)
 
   if (ENABLE_MCROUTER)
     target_link_libraries(${target} mcrouter)
@@ -583,11 +563,11 @@ macro(hphp_link target)
     target_link_libraries(${target} ${LIBELF_LIBRARIES})
   endif()
 
-  if (LIBLLVM_LIBRARY)
-    target_link_libraries(${target} ${LIBLLVM_LIBRARY})
-  endif()
-
   if (LINUX)
     target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
+  endif()
+
+  if (MSVC)
+    target_link_libraries(${target} dbghelp.lib dnsapi.lib)
   endif()
 endmacro()

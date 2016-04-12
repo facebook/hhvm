@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,12 +81,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/utility.hpp>
-
 namespace HPHP {
 
-class CacheSaver : private boost::noncopyable {
- public:
+struct CacheSaver {
   struct DirEntry {
     uint64_t id;
     uint64_t flags;
@@ -99,6 +96,9 @@ class CacheSaver : private boost::noncopyable {
 
   explicit CacheSaver(const std::string& path);
   ~CacheSaver();
+
+  CacheSaver(const CacheSaver&) = delete;
+  CacheSaver& operator=(const CacheSaver&) = delete;
 
   // Open file for writing and write initial magic number and directory size.
   //

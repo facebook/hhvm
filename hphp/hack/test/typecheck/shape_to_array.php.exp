@@ -1,0 +1,6 @@
+array<Tarraykey, mixed>
+array<[1]intersect(), [2]intersect()>
+array<[3]intersect(Tstring), [4]intersect(Tstring, Tint)>
+array<[5]intersect(Tint), [6]intersect(Tstring, Tint)>
+array<[7]intersect(Tstring), [8]intersect(Tint)>
+No errors

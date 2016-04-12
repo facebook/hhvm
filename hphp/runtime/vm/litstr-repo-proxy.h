@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,21 +23,18 @@
 
 namespace HPHP {
 
-class LitstrRepoProxy : public RepoProxy {
-public:
+struct LitstrRepoProxy : RepoProxy {
   explicit LitstrRepoProxy(Repo& repo);
   ~LitstrRepoProxy() {}
   void createSchema(int repoId, RepoTxn& txn);
   void load();
 
-  class InsertLitstrStmt : public RepoProxy::Stmt {
-  public:
+  struct InsertLitstrStmt : RepoProxy::Stmt {
     InsertLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, Id litstrId, const StringData* litstr);
   };
 
-  class GetLitstrsStmt : public RepoProxy::Stmt {
-  public:
+  struct GetLitstrsStmt : RepoProxy::Stmt {
     GetLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     bool get();
   };

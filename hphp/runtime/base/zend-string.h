@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -261,26 +261,12 @@ String string_convert_hebrew_string(const String& str, int max_chars_per_line,
 // helpers
 
 /**
- * Calculates and adjusts "start" and "length" according to string's length.
- * This function determines how those two parameters are interpreted in varies
- * substr-related functions.
- */
-bool string_substr_check(int len, int &f, int &l);
-
-/**
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
  * it needs to be incrementing. This function determines how "charlist"
  * parameters are interpreted in varies functions that take a list of
  * characters.
  */
 void string_charmask(const char *input, int len, char *mask);
-
-///////////////////////////////////////////////////////////////////////////////
-// mac doesn't have memrchr
-
-#if defined(__APPLE__)
- void *memrchr(const void *s, int c, size_t n);
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

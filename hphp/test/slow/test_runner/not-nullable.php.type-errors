@@ -1,0 +1,22 @@
+<?hh
+
+namespace Hack\UserDocumentation\Operators\NullSafe\Examples\NotNullable;
+
+class Bar {
+  public function baz(): int {
+    return 5;
+  }
+}
+
+function get_Bar(): Bar {
+  return new Bar();
+}
+
+function foo(): ?int {
+  $b = get_Bar();
+  // $b cannot be null here. so the typechecker will complain about using the
+  // operator
+  return $b?->baz();
+}
+
+var_dump(foo());

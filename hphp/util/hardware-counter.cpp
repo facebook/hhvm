@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,8 +56,7 @@ static inline bool useCounters() {
 #endif
 }
 
-class HardwareCounterImpl {
-public:
+struct HardwareCounterImpl {
   HardwareCounterImpl(int type, unsigned long config,
                       const char* desc = nullptr)
     : m_desc(desc ? desc : ""), m_err(0), m_fd(-1), inited(false) {
@@ -176,21 +175,18 @@ private:
   }
 };
 
-class InstructionCounter : public HardwareCounterImpl {
-public:
+struct InstructionCounter : HardwareCounterImpl {
   InstructionCounter() :
     HardwareCounterImpl(PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS) {}
 };
 
-class LoadCounter : public HardwareCounterImpl {
-public:
+struct LoadCounter : HardwareCounterImpl {
   LoadCounter() :
     HardwareCounterImpl(PERF_TYPE_HW_CACHE,
         (PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_READ) << 8))) {}
 };
 
-class StoreCounter : public HardwareCounterImpl {
-public:
+struct StoreCounter : HardwareCounterImpl {
   StoreCounter() :
     HardwareCounterImpl(PERF_TYPE_HW_CACHE,
         PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_WRITE) << 8)) {}

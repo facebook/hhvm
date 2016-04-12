@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
-#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
+#include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
@@ -30,7 +30,6 @@
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/system/constants.h"
 
 namespace HPHP {
 
@@ -1089,7 +1088,7 @@ struct ContextGetCmd : XDebugCommand {
         // Iterate through the globals, filtering out non-superglobals
         Array globals = php_globals_as_array();
         for (ArrayIter iter(globals); iter; ++iter) {
-          String name = iter.first();
+          auto const name = iter.first().toString();
           if (!is_superglobal(name)) {
             continue;
           }
@@ -1287,7 +1286,7 @@ struct PropertyGetCmd : XDebugCommand {
   }
 
 private:
-  String m_name;
+  req::root<String> m_name;
   XDebugContext m_context = XDebugContext::LOCAL;
   int m_depth = 0; // desired stack depth
   int m_maxDepth = m_server.m_maxDepth; // max property depth
@@ -1372,9 +1371,9 @@ struct PropertySetCmd : XDebugCommand {
   }
 
 private:
-  String m_symbol;
-  String m_newValue;
-  Variant m_type ; // datatype name
+  req::root<String> m_symbol;
+  req::root<String> m_newValue;
+  req::root<Variant> m_type ; // datatype name
   int m_depth = 0; // desired stack depth
 };
 
@@ -1443,8 +1442,8 @@ struct SourceCmd : XDebugCommand {
   }
 
 private:
-  String m_filename;
-  String m_source;
+  req::root<String> m_filename;
+  req::root<String> m_source;
   int m_beginLine = 0;
   int m_endLine = -1;
 };

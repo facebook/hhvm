@@ -2,6 +2,7 @@
 
 # Order matters here. Put parent classes in this list before child classes
 hphp/system/php/lang/stdClass.php
+hphp/system/php/lang/Closure.php
 hphp/system/php/lang/pinitSentinel.php
 hphp/system/php/lang/string.php
 hphp/system/php/lang/resource.php
@@ -13,6 +14,9 @@ hphp/system/php/lang/Iterator.ns.php
 hphp/system/php/lang/IteratorAggregate.ns.php
 hphp/system/php/lang/KeyedIterator.ns.php
 hphp/system/php/lang/KeyedIterable.ns.php
+hphp/system/php/lang/Throwable.ns.php
+hphp/system/php/lang/BaseException.ns.php
+hphp/system/php/lang/Error.ns.php
 hphp/system/php/lang/Exception.php
 hphp/system/php/spl/exceptions/exceptions.php
 hphp/system/php/spl/interfaces/Countable.php
@@ -78,7 +82,15 @@ hphp/system/php/date/datetimeinterface.php
 hphp/system/php/date/datetimeimmutable.php
 
 hphp/system/php/collections/collections.ns.php
-hphp/system/php/async/util.ns.php
+
+hphp/system/php/async/ResultOrExceptionWrapper.ns.php
+hphp/system/php/async/WrappedException.ns.php
+hphp/system/php/async/WrappedResult.ns.php
+hphp/system/php/async/convenience.ns.php
+
+hphp/system/php/async/vm.ns.php
+hphp/system/php/async/maps.ns.php
+hphp/system/php/async/vectors.ns.php
 
 # If you have no inheritance relationship, go here in alphabetical order
 hphp/system/php/XhprofFrame.php
@@ -93,17 +105,14 @@ hphp/system/php/date/dateperiod.php
 hphp/system/php/date/datetime_funcs.php
 hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
-hphp/system/php/hash/furchash.php
-hphp/system/php/hash/hash.php
-hphp/system/php/hash/hphp_murmurhash.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/lang/fun.ns.php
 hphp/system/php/lang/invariant.ns.php
+hphp/system/php/lang/null.ns.php
 hphp/system/php/misc/fb_autoload_map.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/idx.php
 hphp/system/php/misc/php_strip_whitespace.php
-hphp/system/php/password/password.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php

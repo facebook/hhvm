@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,8 +9,12 @@
  *)
 
 open Core
-open Utils
+open ServerCheckUtils
 open ServerEnv
+open Reordered_argument_collections
+open Utils
+
+module SLC = ServerLocalConfig
 
 (*****************************************************************************)
 (* Debugging *)
@@ -22,31 +26,55 @@ let print_defs prefix defs =
   end
 
 let print_fast_pos fast_pos =
-  SMap.iter begin fun x (funs, classes) ->
+  SMap.iter fast_pos begin fun x (funs, classes) ->
     Printf.printf "File: %s\n" x;
     print_defs "Fun" funs;
     print_defs "Class" classes;
-  end fast_pos;
+  end;
   Printf.printf "\n";
   flush stdout;
   ()
 
 let print_fast fast =
-  SMap.iter begin fun x (funs, classes) ->
+  SMap.iter fast begin fun x (funs, classes) ->
     Printf.printf "File: %s\n" x;
-    SSet.iter (Printf.printf "  Fun %s\n") funs;
-    SSet.iter (Printf.printf "  Class %s\n") classes;
-  end fast;
+    SSet.iter funs (Printf.printf "  Fun %s\n");
+    SSet.iter classes (Printf.printf "  Class %s\n");
+  end;
   Printf.printf "\n";
   flush stdout;
   ()
+
+let debug_print_fast_keys genv name fast =
+  ServerDebug.log genv begin fun () ->
+    let open Hh_json in
+    let files = Relative_path.Map.fold fast ~init:[] ~f:begin fun k _v acc ->
+      JSON_String (Relative_path.suffix k) :: acc
+    end in
+    let decls = Relative_path.Map.fold fast ~init:[] ~f:begin fun _k v acc ->
+      let {FileInfo.n_funs; n_classes; n_types; n_consts} = v in
+      let prepend_json_strings decls acc =
+        SSet.fold decls ~init:acc ~f:(fun n acc -> JSON_String n :: acc) in
+      let acc = prepend_json_strings n_funs acc in
+      let acc = prepend_json_strings n_classes acc in
+      let acc = prepend_json_strings n_types acc in
+      let acc = prepend_json_strings n_consts acc in
+      acc
+    end in
+    JSON_Object [
+      "type", JSON_String "incremental_files";
+      "name", JSON_String name;
+      "files", JSON_Array files;
+      "decls", JSON_Array decls;
+    ]
+  end
 
 (*****************************************************************************)
 (* Given a set of Ast.id list produce a SSet.t (got rid of the positions)    *)
 (*****************************************************************************)
 
 let set_of_idl l =
-  List.fold_left l ~f:(fun acc (_, x) -> SSet.add x acc) ~init:SSet.empty
+  List.fold_left l ~f:(fun acc (_, x) -> SSet.add acc x) ~init:SSet.empty
 
 (*****************************************************************************)
 (* We want add all the declarations that were present in a file *before* the
@@ -67,88 +95,56 @@ let set_of_idl l =
 (*****************************************************************************)
 
 let add_old_decls old_files_info fast =
-  Relative_path.Map.fold begin fun filename info_names acc ->
-    match Relative_path.Map.get filename old_files_info with
+  Relative_path.Map.fold fast ~f:begin fun filename info_names acc ->
+    match Relative_path.Map.get old_files_info filename with
     | Some {FileInfo.consider_names_just_for_autoload = true; _}
     | None -> acc
     | Some old_info ->
       let old_info_names = FileInfo.simplify old_info in
       let info_names = FileInfo.merge_names old_info_names info_names in
-      Relative_path.Map.add filename info_names acc
-  end fast fast
-
-(*****************************************************************************)
-(* Reparsing helpers.
- * It's called reparse (as opposed to parse) because it retrieves the tree
- * from the datanodes where the Asts are stored in a serialized format.
- * Important: we never ever want to reparse a file that was already parsed.
- * If that was the case, an older version of the file would come and replace
- * a newer one (the one we just parsed). It would lead to very
- * subtle/terrible bugs.
- * This is why reparse takes a file->ast (fast). If we try to reparse a file
- * that we already parsed, the data is left unchanged.
- *)
-(*****************************************************************************)
-
-let reparse fast files_info additional_files =
-  Relative_path.Set.fold begin fun x acc ->
-    match Relative_path.Map.get x fast with
-    | None ->
-        (try
-           let info = Relative_path.Map.find_unsafe x files_info in
-           if info.FileInfo.consider_names_just_for_autoload then acc else
-           let info_names = FileInfo.simplify info in
-           Relative_path.Map.add x info_names acc
-         with Not_found ->
-           acc)
-    | Some _ -> acc
-  end additional_files fast
+      Relative_path.Map.add acc ~key:filename ~data:info_names
+  end ~init:fast
 
 let reparse_infos files_info fast =
-  Relative_path.Map.fold begin fun x _y acc ->
+  Relative_path.Map.fold fast ~f:begin fun x _y acc ->
     try
       let info = Relative_path.Map.find_unsafe x files_info in
       if info.FileInfo.consider_names_just_for_autoload then acc else
-      Relative_path.Map.add x info acc
+      Relative_path.Map.add acc ~key:x ~data:info
     with Not_found -> acc
-  end fast Relative_path.Map.empty
+  end ~init:Relative_path.Map.empty
 
 (*****************************************************************************)
 (* Removes the names that were defined in the files *)
 (*****************************************************************************)
 
 let remove_decls env fast_parsed =
-  let nenv = env.nenv in
-  let nenv =
-    Relative_path.Map.fold begin fun fn _ nenv ->
-      match Relative_path.Map.get fn env.files_info with
-      | Some {FileInfo.consider_names_just_for_autoload = true; _}
-      | None -> nenv
-      | Some {FileInfo.
-              funs = funl;
-              classes = classel;
-              typedefs = typel;
-              consts = constl;
-              file_mode;
-              comments;
-              consider_names_just_for_autoload} ->
-        let funs = set_of_idl funl in
-        let classes = set_of_idl classel in
-        let typedefs = set_of_idl typel in
-        let consts = set_of_idl constl in
-        let nenv = Naming.remove_decls nenv
-            (funs, classes, typedefs, consts) in
-        nenv
-    end fast_parsed nenv
-  in
-  { env with nenv = nenv }
+  Relative_path.Map.iter fast_parsed begin fun fn _ ->
+    match Relative_path.Map.get env.files_info fn with
+    | Some {FileInfo.consider_names_just_for_autoload = true; _}
+    | None -> ()
+    | Some {FileInfo.
+             funs = funl;
+             classes = classel;
+             typedefs = typel;
+             consts = constl;
+             file_mode;
+             comments;
+             consider_names_just_for_autoload} ->
+      let funs = set_of_idl funl in
+      let classes = set_of_idl classel in
+      let typedefs = set_of_idl typel in
+      let consts = set_of_idl constl in
+      NamingGlobal.remove_decls ~funs ~classes ~typedefs ~consts
+  end;
+  env
 
 (*****************************************************************************)
 (* Removes the files that failed *)
 (*****************************************************************************)
 
 let remove_failed fast failed =
-  Relative_path.Set.fold Relative_path.Map.remove failed fast
+  Relative_path.Set.fold failed ~init:fast ~f:Relative_path.Map.remove
 
 (*****************************************************************************)
 (* Parses the set of modified files *)
@@ -171,8 +167,7 @@ let parsing genv env =
 
 let update_file_info env fast_parsed =
   Typing_deps.update_files fast_parsed;
-  let files_info =
-    Relative_path.Map.fold Relative_path.Map.add fast_parsed env.files_info in
+  let files_info = Relative_path.Map.union fast_parsed env.files_info in
   files_info
 
 (*****************************************************************************)
@@ -183,12 +178,15 @@ let update_file_info env fast_parsed =
 
 let declare_names env files_info fast_parsed =
   let env = remove_decls env fast_parsed in
-  let errorl, failed_naming, nenv =
-    Relative_path.Map.fold
-      Naming.ndecl_file fast_parsed ([], Relative_path.Set.empty, env.nenv) in
+  let errorl, failed_naming =
+    Relative_path.Map.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
+      let errorl', failed'= NamingGlobal.ndecl_file k v in
+      let errorl = List.rev_append errorl' errorl in
+      let failed = Relative_path.Set.union failed' failed in
+      errorl, failed
+    end ~init:([], Relative_path.Set.empty) in
   let fast = remove_failed fast_parsed failed_naming in
   let fast = FileInfo.simplify_fast fast in
-  let env = { env with nenv = nenv } in
   env, errorl, failed_naming, fast
 
 (*****************************************************************************)
@@ -203,25 +201,30 @@ let hook_after_parsing = ref None
 
 let type_check genv env =
 
+  let reparse_count = Relative_path.Set.cardinal env.failed_parsing in
   Printf.eprintf "******************************************\n";
-  Hh_logger.log "Files to recompute: %d"
-    (Relative_path.Set.cardinal env.failed_parsing);
+  Hh_logger.log "Files to recompute: %d" reparse_count;
   (* PARSING *)
   let start_t = Unix.gettimeofday () in
   let t = start_t in
   let fast_parsed, errorl, failed_parsing = parsing genv env in
+  let hs = SharedMem.heap_size () in
+  Hh_logger.log "Heap size: %d" hs;
+  HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
   let t = Hh_logger.log_duration "Parsing" t in
 
   (* UPDATE FILE INFO *)
   let old_env = env in
   let updates = old_env.failed_parsing in
   let files_info = update_file_info env fast_parsed in
+  HackEventLogger.updating_deps_end t;
   let t = Hh_logger.log_duration "Updating deps" t in
 
   (* BUILDING AUTOLOADMAP *)
   Option.iter !hook_after_parsing begin fun f ->
     f genv old_env { env with files_info } updates
   end;
+  HackEventLogger.parsing_hook_end t;
   let t = Hh_logger.log_duration "Parsing Hook" t in
 
   (* NAMING *)
@@ -229,65 +232,78 @@ let type_check genv env =
     declare_names env files_info fast_parsed in
 
   (* COMPUTES WHAT MUST BE REDECLARED  *)
-  let fast = reparse fast files_info env.failed_decl in
+  let fast = extend_fast fast files_info env.failed_decl in
   let fast = add_old_decls env.files_info fast in
   let errorl = List.rev_append errorl' errorl in
+  HackEventLogger.naming_end t;
   let t = Hh_logger.log_duration "Naming" t in
 
+  let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
+  debug_print_fast_keys genv "to_redecl_phase1" fast;
   let _, _, to_redecl_phase2, to_recheck1 =
-    Typing_redecl_service.redo_type_decl genv.workers env.nenv fast in
+    Decl_redecl_service.redo_type_decl
+      ~bucket_size genv.workers env.tcopt fast in
   let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2 in
   let to_recheck1 = Typing_deps.get_files to_recheck1 in
+  let hs = SharedMem.heap_size () in
+  Hh_logger.log "Heap size: %d" hs;
+  HackEventLogger.first_redecl_end t hs;
   let t = Hh_logger.log_duration "Determining changes" t in
 
-  let fast_redecl_phase2 = reparse fast files_info to_redecl_phase2 in
-
   (* DECLARING TYPES: Phase2 *)
+  let fast_redecl_phase2 = extend_fast fast files_info to_redecl_phase2 in
+  debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2;
   let errorl', failed_decl, _to_redecl2, to_recheck2 =
-    Typing_redecl_service.redo_type_decl
-      genv.workers env.nenv fast_redecl_phase2 in
+    Decl_redecl_service.redo_type_decl
+      ~bucket_size genv.workers env.tcopt fast_redecl_phase2 in
   let to_recheck2 = Typing_deps.get_files to_recheck2 in
   let errorl = List.rev_append errorl' errorl in
 
   (* DECLARING TYPES: merging results of the 2 phases *)
-  let fast =
-    Relative_path.Map.fold Relative_path.Map.add fast fast_redecl_phase2 in
+  let fast = Relative_path.Map.union fast fast_redecl_phase2 in
   let to_recheck = Relative_path.Set.union env.failed_decl to_redecl_phase2 in
   let to_recheck = Relative_path.Set.union to_recheck1 to_recheck in
   let to_recheck = Relative_path.Set.union to_recheck2 to_recheck in
+  let hs = SharedMem.heap_size () in
+  Hh_logger.log "Heap size: %d" hs;
+  HackEventLogger.second_redecl_end t hs;
   let t = Hh_logger.log_duration "Type-decl" t in
 
   (* TYPE CHECKING *)
   let to_recheck = Relative_path.Set.union to_recheck env.failed_check in
-  let fast = reparse fast files_info to_recheck in
+  let fast = extend_fast fast files_info to_recheck in
   ServerCheckpoint.process_updates fast;
+  debug_print_fast_keys genv "to_recheck" fast;
   let errorl', failed_check =
-    Typing_check_service.go genv.workers env.nenv fast in
+    Typing_check_service.go genv.workers env.tcopt fast in
   let errorl', failed_check = match ServerArgs.ai_mode genv.options with
     | None -> errorl', failed_check
-    | Some optstr ->
+    | Some ai_opt ->
       let fast_infos = reparse_infos files_info fast in
       let ae, af = Ai.go_incremental
         Typing_check_utils.check_defs
-        genv.workers fast_infos env.nenv optstr in
+        genv.workers fast_infos env.tcopt ai_opt in
       (List.rev_append errorl' ae),
       (Relative_path.Set.union af failed_check)
   in
   let errorl = List.rev (List.rev_append errorl' errorl) in
+  let total_rechecked_count = Relative_path.Map.cardinal fast in
+  HackEventLogger.type_check_end total_rechecked_count t;
   let t = Hh_logger.log_duration "Type-check" t in
 
   Hh_logger.log "Total: %f\n%!" (t -. start_t);
-  let total_rechecked_count = Relative_path.Set.cardinal to_recheck in
-  HackEventLogger.recheck_once_end start_t total_rechecked_count;
+  ServerDebug.info genv "incremental_done";
 
   (* Done, that's the new environment *)
-  { files_info = files_info;
-    nenv = env.nenv;
+  let new_env = {
+    files_info;
+    tcopt = env.tcopt;
     errorl = errorl;
     failed_parsing = Relative_path.Set.union failed_naming failed_parsing;
     failed_decl = failed_decl;
     failed_check = failed_check;
-  }
+  } in
+  new_env, total_rechecked_count
 
 (*****************************************************************************)
 (* Checks that the working directory is clean *)

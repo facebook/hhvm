@@ -1,0 +1,5 @@
+Memory before loop: %d
+Threshold crossed, current peak: %d
+Threshold crossed again, peak: %d
+Threshold crossed again (2), peak: %d
+breaking...

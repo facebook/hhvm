@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,7 +42,7 @@ struct SocketData : FileData {
   ~SocketData();
 
  private:
-  friend class Socket;
+  friend struct Socket;
   std::string m_address;
   int m_port{0};
   int m_type{-1};
@@ -81,7 +81,8 @@ struct Socket : File {
 
   void setError(int err);
   int getError() const { return m_data->m_error;}
-  static int getLastError();
+  static int getLastError() { return s_lastErrno; }
+  static void clearLastError() { s_lastErrno = 0; }
   int getType() const { return m_data->m_type;}
 
   // This is only for updating a local copy of timeouts set by setsockopt()
@@ -116,6 +117,7 @@ protected:
 private:
   void inferStreamType();
   SocketData* m_data;
+  static __thread int s_lastErrno;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

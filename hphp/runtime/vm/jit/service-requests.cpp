@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,11 +20,10 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/back-end.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
@@ -54,6 +53,7 @@ namespace detail {
  * Emit a service request stub of type `sr' at `start' in `cb'.
  */
 void emit_svcreq(CodeBlock& cb,
+                 DataBlock& data,
                  TCA start,
                  bool persist,
                  folly::Optional<FPInvOffset> spOff,
@@ -66,7 +66,11 @@ void emit_svcreq(CodeBlock& cb,
   CodeBlock stub;
   stub.init(start, stub_size(), "svcreq_stub");
 
-  { Vauto vasm{stub};
+  {
+    CGMeta fixups;
+    SCOPE_EXIT { assert(fixups.empty()); };
+
+    Vauto vasm{stub, data, fixups};
     auto& v = vasm.main();
 
     // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do
@@ -109,7 +113,7 @@ void emit_svcreq(CodeBlock& cb,
       }
       live_out |= r;
     }
-    FTRACE(2, ") : stub@{}");
+    FTRACE(2, ") : stub@");
 
     if (persist) {
       FTRACE(2, "<none>");
@@ -123,7 +127,7 @@ void emit_svcreq(CodeBlock& cb,
     live_out |= r_svcreq_stub();
     live_out |= r_svcreq_req();
 
-    v << jmpi{TCA(handleSRHelper), live_out};
+    v << jmpi{mcg->ustubs().handleSRHelper, live_out};
 
     // We pad ephemeral stubs unconditionally.  This is required for
     // correctness by the x64 code relocator.
@@ -139,11 +143,13 @@ void emit_svcreq(CodeBlock& cb,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff, TCA jmp,
-                      SrcKey target, TransFlags trflags) {
+TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                      FPInvOffset spOff,
+                      TCA jmp, SrcKey target, TransFlags trflags) {
   return emit_ephemeral(
     cb,
-    mcg->getFreeStub(cb, &mcg->cgFixups()),
+    data,
+    mcg->getFreeStub(cb, &fixups),
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_JMP,
     jmp,
@@ -152,13 +158,15 @@ TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff, TCA jmp,
   );
 }
 
-TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff, TCA jcc,
-                         SrcKey taken, SrcKey next, ConditionCode cc) {
+TCA emit_bindjcc1st_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                         FPInvOffset spOff, TCA jcc, SrcKey taken, SrcKey next,
+                         ConditionCode cc) {
   always_assert_flog(taken.resumed() == next.resumed(),
                      "bind_jcc_1st was confused about resumables");
   return emit_ephemeral(
     cb,
-    mcg->getFreeStub(cb, &mcg->cgFixups()),
+    data,
+    mcg->getFreeStub(cb, &fixups),
     taken.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_JCC_FIRST,
     jcc,
@@ -168,11 +176,13 @@ TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff, TCA jcc,
   );
 }
 
-TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff, TCA* addr,
-                       SrcKey target, TransFlags trflags) {
+TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                       FPInvOffset spOff,
+                       TCA* addr, SrcKey target, TransFlags trflags) {
   return emit_ephemeral(
     cb,
-    mcg->getFreeStub(cb, &mcg->cgFixups()),
+    data,
+    mcg->getFreeStub(cb, &fixups),
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_ADDR,
     addr,
@@ -181,10 +191,11 @@ TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff, TCA* addr,
   );
 }
 
-TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
                           SrcKey target, TransFlags trflags) {
   return emit_persistent(
     cb,
+    data,
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE,
     target.offset(),
@@ -192,10 +203,11 @@ TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
   );
 }
 
-TCA emit_retranslate_opt_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
                               SrcKey target, TransID transID) {
   return emit_persistent(
     cb,
+    data,
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE_OPT,
     target.toAtomicInt(),
@@ -219,6 +231,8 @@ size_t stub_size() {
       return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
     case Arch::ARM:
       not_implemented();
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -228,7 +242,7 @@ size_t stub_size() {
 FPInvOffset extract_spoff(TCA stub) {
   switch (arch()) {
     case Arch::X64:
-      { DecodedInstruction instr(stub);
+      { HPHP::jit::x64::DecodedInstruction instr(stub);
 
         // If it's not a lea, vasm optimized a lea{rvmfp, rvmsp} to a mov, so
         // the offset was 0.
@@ -240,6 +254,9 @@ FPInvOffset extract_spoff(TCA stub) {
       }
 
     case Arch::ARM:
+      not_implemented();
+
+    case Arch::PPC64:
       not_implemented();
   }
   not_reached();

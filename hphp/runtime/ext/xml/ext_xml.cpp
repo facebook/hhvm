@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,8 +34,14 @@
 
 namespace HPHP {
 
-static class XMLExtension final : public Extension {
-public:
+enum php_xml_option {
+    PHP_XML_OPTION_CASE_FOLDING = 1,
+    PHP_XML_OPTION_TARGET_ENCODING,
+    PHP_XML_OPTION_SKIP_TAGSTART,
+    PHP_XML_OPTION_SKIP_WHITE
+};
+
+static struct XMLExtension final : Extension {
   XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(xml_parser_create);
@@ -63,14 +69,43 @@ public:
     HHVM_FE(utf8_decode);
     HHVM_FE(utf8_encode);
 
+    HHVM_RC_INT_SAME(XML_ERROR_ASYNC_ENTITY);
+    HHVM_RC_INT_SAME(XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF);
+    HHVM_RC_INT_SAME(XML_ERROR_BAD_CHAR_REF);
+    HHVM_RC_INT_SAME(XML_ERROR_BINARY_ENTITY_REF);
+    HHVM_RC_INT_SAME(XML_ERROR_DUPLICATE_ATTRIBUTE);
+    HHVM_RC_INT_SAME(XML_ERROR_EXTERNAL_ENTITY_HANDLING);
+    HHVM_RC_INT_SAME(XML_ERROR_INCORRECT_ENCODING);
+    HHVM_RC_INT_SAME(XML_ERROR_INVALID_TOKEN);
+    HHVM_RC_INT_SAME(XML_ERROR_JUNK_AFTER_DOC_ELEMENT);
+    HHVM_RC_INT_SAME(XML_ERROR_MISPLACED_XML_PI);
+    HHVM_RC_INT_SAME(XML_ERROR_NONE);
+    HHVM_RC_INT_SAME(XML_ERROR_NO_ELEMENTS);
+    HHVM_RC_INT_SAME(XML_ERROR_NO_MEMORY);
+    HHVM_RC_INT_SAME(XML_ERROR_PARAM_ENTITY_REF);
+    HHVM_RC_INT_SAME(XML_ERROR_PARTIAL_CHAR);
+    HHVM_RC_INT_SAME(XML_ERROR_RECURSIVE_ENTITY_REF);
+    HHVM_RC_INT_SAME(XML_ERROR_SYNTAX);
+    HHVM_RC_INT_SAME(XML_ERROR_TAG_MISMATCH);
+    HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_CDATA_SECTION);
+    HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_TOKEN);
+    HHVM_RC_INT_SAME(XML_ERROR_UNDEFINED_ENTITY);
+    HHVM_RC_INT_SAME(XML_ERROR_UNKNOWN_ENCODING);
+
+    HHVM_RC_INT(XML_OPTION_CASE_FOLDING,    PHP_XML_OPTION_CASE_FOLDING);
+    HHVM_RC_INT(XML_OPTION_TARGET_ENCODING, PHP_XML_OPTION_TARGET_ENCODING);
+    HHVM_RC_INT(XML_OPTION_SKIP_TAGSTART,   PHP_XML_OPTION_SKIP_TAGSTART);
+    HHVM_RC_INT(XML_OPTION_SKIP_WHITE,      PHP_XML_OPTION_SKIP_WHITE);
+
+    HHVM_RC_STR(XML_SAX_IMPL, "expat");
+
     loadSystemlib();
   }
 } s_xml_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XmlParser : public SweepableResourceData {
-public:
+struct XmlParser : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XmlParser)
   XmlParser() {}
   virtual ~XmlParser();
@@ -156,13 +191,6 @@ typedef struct {
   char (*decoding_function)(unsigned short);
   unsigned short (*encoding_function)(unsigned char);
 } xml_encoding;
-
-enum php_xml_option {
-    PHP_XML_OPTION_CASE_FOLDING = 1,
-    PHP_XML_OPTION_TARGET_ENCODING,
-    PHP_XML_OPTION_SKIP_TAGSTART,
-    PHP_XML_OPTION_SKIP_WHITE
-};
 
 static XML_Char * xml_globals_default_encoding = (XML_Char*)"UTF-8";
 // for xml_parse_into_struct
@@ -338,22 +366,27 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
   return Variant(std::move(parser));
 }
 
+static bool name_contains_class(const String& name) {
+  if (name) {
+    int pos = name.find("::");
+    return pos != 0 && pos != String::npos && pos + 2 < name.size();
+  }
+  return false;
+}
+
 static Variant xml_call_handler(const req::ptr<XmlParser>& parser,
                                 const Variant& handler,
                                 const Array& args) {
   if (parser && handler.toBoolean()) {
     Variant retval;
-    if (handler.isString()) {
+    if (handler.isString() && !name_contains_class(handler.toString())) {
       if (!parser->object.isObject()) {
         retval = invoke(handler.toString().c_str(), args, -1);
       } else {
         retval = parser->object.toObject()->
           o_invoke(handler.toString(), args);
       }
-    } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
-               (handler.toCArrRef()[0].isString() ||
-                handler.toCArrRef()[0].isObject()) &&
-               handler.toCArrRef()[1].isString()) {
+    } else if (is_callable(handler)) {
       vm_call_user_func(handler, args);
     } else {
       raise_warning("Handler is invalid");
@@ -695,9 +728,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 
 static void xml_set_handler(Variant * handler, const Variant& data) {
   if (data.isNull() || same(data, false) || data.isString() ||
-      (data.isArray() && data.getArrayData()->size() == 2 &&
-       (data.toCArrRef()[0].isString() || data.toCArrRef()[0].isObject()) &&
-       data.toCArrRef()[1].isString())) {
+        is_callable(data)) {
     *handler = data;
   } else {
     raise_warning("Handler is invalid");

@@ -1,0 +1,11 @@
+
+<?hh //strict
+
+class Foo {
+  public function bar(): void {
+    bar("added arg", "expr1", "expr2", "expr3", "another added arg");
+    return;
+  }
+}
+
+

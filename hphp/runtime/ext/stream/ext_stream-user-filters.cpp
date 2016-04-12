@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std.h"
-#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -53,7 +52,7 @@ struct StreamFilterRepository {
   }
 
   bool exists(const String& needle) const {
-    if (m_filters.exists(needle.toKey())) {
+    if (m_filters.exists(m_filters.convertKey(needle))) {
       return true;
     }
     /* Could not find exact match, now try wildcard match */
@@ -62,13 +61,14 @@ struct StreamFilterRepository {
       return false;
     }
     String wildcard = needle.substr(0, lastDotPos) + ".*";
-    return m_filters.exists(wildcard.toKey());
+    return m_filters.exists(m_filters.convertKey(wildcard));
   }
 
   Variant rvalAt(const String& needle) const {
     /* First try to find exact match, afterwards try wildcard matches */
     int lastDotPos = needle.rfind('.');
-    if (String::npos == lastDotPos || m_filters.exists(needle.toKey())) {
+    if (String::npos == lastDotPos ||
+        m_filters.exists(m_filters.convertKey(needle))) {
       return m_filters.rvalAtRef(needle);
     }
     String wildcard = needle.substr(0, lastDotPos) + ".*";
@@ -97,6 +97,14 @@ struct StreamUserFilters final : RequestEventHandler {
   virtual ~StreamUserFilters() {}
 
   bool registerFilter(const String& name, const String& class_name) {
+    if (name.empty()) {
+      raise_warning("stream_filter_register(): Filter name cannot be empty");
+      return false;
+    }
+    if (class_name.empty()) {
+      raise_warning("stream_filter_register(): Class name cannot be empty");
+      return false;
+    }
     if (m_registeredFilters.exists(name)) {
       return false;
     }
@@ -266,12 +274,11 @@ int64_t StreamFilter::invokeFilter(const req::ptr<BucketBrigade>& in,
                                    const req::ptr<BucketBrigade>& out,
                                    bool closing) {
   auto consumedTV = make_tv<KindOfInt64>(0);
-  auto consumedRef = RefData::Make(consumedTV);
-
+  auto consumedRef = Variant::attach(RefData::Make(consumedTV));
   PackedArrayInit params(4);
   params.append(Variant(in));
   params.append(Variant(out));
-  params.append(Variant{consumedRef});
+  params.append(consumedRef);
   params.append(closing);
   return m_filter->o_invoke(s_filter, params.toArray()).toInt64();
 }
@@ -379,18 +386,10 @@ void HHVM_FUNCTION(stream_bucket_prepend, const Resource& bb_res, const Object& 
   cast<BucketBrigade>(bb_res)->prependBucket(bucket);
 }
 
-const StaticString
-  s_STREAM_FILTER_READ("STREAM_FILTER_READ"),
-  s_STREAM_FILTER_WRITE("STREAM_FILTER_WRITE"),
-  s_STREAM_FILTER_ALL("STREAM_FILTER_ALL");
-
 void StandardExtension::initStreamUserFilters() {
-#define SFCNS(v) Native::registerConstant<KindOfInt64> \
-                         (s_STREAM_FILTER_##v.get(), k_STREAM_FILTER_##v)
-  SFCNS(READ);
-  SFCNS(WRITE);
-  SFCNS(ALL);
-#undef SFCNS
+  HHVM_RC_INT(STREAM_FILTER_READ, k_STREAM_FILTER_READ);
+  HHVM_RC_INT(STREAM_FILTER_WRITE, k_STREAM_FILTER_WRITE);
+  HHVM_RC_INT(STREAM_FILTER_ALL, k_STREAM_FILTER_ALL);
 
   HHVM_FE(stream_get_filters);
   HHVM_FE(stream_filter_register);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,14 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/target-cache.h"
 
-#include <cassert>
-#include <string>
-#include <vector>
-#include <mutex>
-#include <limits>
-
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -28,7 +24,6 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -36,6 +31,12 @@
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/text-util.h"
+
+#include <cassert>
+#include <limits>
+#include <mutex>
+#include <string>
+#include <vector>
 
 namespace HPHP { namespace jit {
 
@@ -84,7 +85,7 @@ rds::Handle FuncCache::alloc() {
 }
 
 const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
-  Func* func;
+  const Func* func;
   auto const thiz = handleToPtr<FuncCache>(handle);
   auto const pair = keyToPair(thiz, sd);
   const StringData* pairSd = pair->m_key;
@@ -93,7 +94,17 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
     func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
       VMRegAnchor _;
-      func = Unit::loadFunc(sd);
+      ObjectData *this_ = nullptr;
+      Class* self_ = nullptr;
+      StringData* inv = nullptr;
+      func = vm_decode_function(
+        String(sd),
+        vmfp(),
+        false /* forward */,
+        this_,
+        self_,
+        inv,
+        false /* warn */);
       if (!func) {
         raise_error("Call to undefined function %s()", sd->data());
       }
@@ -152,7 +163,7 @@ namespace MethodCache {
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-NEVER_INLINE ATTRIBUTE_NORETURN
+[[noreturn]] NEVER_INLINE
 void raiseFatal(ActRec* ar, Class* cls, StringData* name, Class* ctx) {
   try {
     g_context->lookupMethodCtx(
@@ -448,7 +459,7 @@ void handlePrimeCacheInit(Entry* mce,
   // determine which thread should free the SmashLoc---after getting the
   // lease, we need to re-check if someone else smashed it first.
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer) return;
+  if (!writer.canWrite()) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);
@@ -501,7 +512,12 @@ void handlePrimeCacheInit(Entry* mce,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+  auto hsp = handleSlowPath<fatal>;
+  smashCall(callAddr, reinterpret_cast<TCA>(hsp));
+#else
   smashCall(callAddr, reinterpret_cast<TCA>(handleSlowPath<fatal>));
+#endif
 }
 
 template

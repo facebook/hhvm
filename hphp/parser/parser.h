@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,8 +81,7 @@ enum ObjPropType {
 
 typedef void* TStatementPtr;
 
-class ParserBase {
-public:
+struct ParserBase {
   enum NameKind {
     StringName,
     VarName,
@@ -93,6 +92,11 @@ public:
 
   static bool IsClosureName                (const std::string &name);
   std::string newClosureName(
+      const std::string &namespaceName,
+      const std::string &className,
+      const std::string &funcName);
+  std::string newAnonClassName(
+      const std::string &prefix,
       const std::string &namespaceName,
       const std::string &className,
       const std::string &funcName);
@@ -112,7 +116,8 @@ public:
   /**
    * Raise a parser error.
    */
-  virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3) = 0;
+  virtual void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3) = 0;
 
   /**
    * Public accessors.
@@ -205,8 +210,7 @@ protected:
     TStatementPtr stmt;
   };
 
-  class LabelInfo {
-  public:
+  struct LabelInfo {
     LabelInfo() : scopeId(0) {}
     int scopeId;
     LabelScopes scopes;
@@ -226,7 +230,7 @@ protected:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   hphp_string_imap<std::string> m_aliases;
-  hphp_string_imap<int> m_seenClosures;
+  hphp_string_imap<int> m_seenAnonClasses;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

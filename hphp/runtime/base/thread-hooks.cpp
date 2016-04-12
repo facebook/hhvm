@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,13 +15,16 @@
 */
 #include "hphp/runtime/base/thread-hooks.h"
 #include <stdio.h>
-#include <dlfcn.h>
 #include <string.h>
+#ifndef _MSC_VER
 #include <execinfo.h>
+#include <dlfcn.h>
+#endif
 #include <unistd.h>
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/mutex.h"
 
 namespace HPHP {
@@ -35,6 +38,7 @@ PthreadInfo::PthreadInfo(start_routine_t start, void* arg) :
     start_routine(start), start_routine_arg(arg) {
   pid = getpid();
 
+#ifndef _MSC_VER
   if (RuntimeOption::EvalLogThreadCreateBacktraces) {
     num_frames = backtrace(reinterpret_cast<void **>(&parent_bt),
                            max_num_frames);
@@ -50,11 +54,16 @@ PthreadInfo::PthreadInfo(start_routine_t start, void* arg) :
       Logger::Error("pthread_create: unable to get start_routine name");
     }
   }
+#endif
 }
 
 PthreadInfo::~PthreadInfo() {
-  free(parent_bt_names);
-  free(start_name_ptr);
+  if (parent_bt_names) {
+    free(parent_bt_names);
+  }
+  if (start_name_ptr) {
+    free(start_name_ptr);
+  }
 }
 
 std::string get_thread_mem_usage() {

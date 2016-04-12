@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,22 +18,25 @@
 #define HPHP_STREAM_WRAPPER_H
 
 #include <string>
+
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/req-ptr.h"
 
-#include <boost/noncopyable.hpp>
-
 struct stat;
 
 namespace HPHP {
-class StreamContext;
+struct StreamContext;
+
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Wrapper : boost::noncopyable {
- public:
+struct Wrapper {
   Wrapper() : m_isLocal(true) { }
+
+  Wrapper(const Wrapper&) = delete;
+  Wrapper& operator=(const Wrapper&) = delete;
+
   void registerAs(const std::string &scheme);
 
   virtual req::ptr<File> open(const String& filename,

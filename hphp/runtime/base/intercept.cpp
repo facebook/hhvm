@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,9 +100,15 @@ bool register_intercept(const String& name, const Variant& callback,
   if (!callback.toBoolean()) {
     if (name.empty()) {
       s_intercept_data->m_global_handler.unset();
-      handlers.clear();
+      StringIMap<Variant> empty;
+      handlers.swap(empty);
     } else {
-      handlers.erase(name);
+      auto tmp = handlers[name];
+      auto it = handlers.find(name);
+      if (it != handlers.end()) {
+        auto tmp = it->second;
+        handlers.erase(it);
+      }
     }
     return true;
   }
@@ -113,7 +119,8 @@ bool register_intercept(const String& name, const Variant& callback,
 
   if (name.empty()) {
     s_intercept_data->m_global_handler = handler;
-    handlers.clear();
+    StringIMap<Variant> empty;
+    handlers.swap(empty);
   } else {
     handlers[name] = handler;
   }

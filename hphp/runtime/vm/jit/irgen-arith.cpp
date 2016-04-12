@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,6 +27,8 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 //////////////////////////////////////////////////////////////////////
+
+const StaticString s_emptyString("");
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
@@ -126,8 +128,8 @@ Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
 }
 
 void binaryBitOp(IRGS& env, Op op) {
-  auto const type2 = topC(env, BCSPOffset{0})->type();
-  auto const type1 = topC(env, BCSPOffset{1})->type();
+  auto const type2 = topC(env, BCSPRelOffset{0})->type();
+  auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     PUNT(BunaryBitOp-Unsupported);
     return;
@@ -139,8 +141,8 @@ void binaryBitOp(IRGS& env, Op op) {
 }
 
 void binaryArith(IRGS& env, Op op) {
-  auto const type2 = topC(env, BCSPOffset{0})->type();
-  auto const type1 = topC(env, BCSPOffset{1})->type();
+  auto const type2 = topC(env, BCSPRelOffset{0})->type();
+  auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     // either an int or a dbl, but can't tell
     PUNT(BinaryArith-Unsupported);
@@ -160,75 +162,661 @@ void binaryArith(IRGS& env, Op op) {
   }
 }
 
+// Helpers for comparison generation:
+
+Opcode toBoolCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtBool;
+    case Op::Gte:   return GteBool;
+    case Op::Lt:    return LtBool;
+    case Op::Lte:   return LteBool;
+    case Op::Eq:
+    case Op::Same:  return EqBool;
+    case Op::Neq:
+    case Op::NSame: return NeqBool;
+    case Op::Cmp:   return CmpBool;
+    default: always_assert(false);
+  }
+}
+
+Opcode toIntCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtInt;
+    case Op::Gte:   return GteInt;
+    case Op::Lt:    return LtInt;
+    case Op::Lte:   return LteInt;
+    case Op::Eq:
+    case Op::Same:  return EqInt;
+    case Op::Neq:
+    case Op::NSame: return NeqInt;
+    case Op::Cmp:   return CmpInt;
+    default: always_assert(false);
+  }
+}
+
+Opcode toDblCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtDbl;
+    case Op::Gte:   return GteDbl;
+    case Op::Lt:    return LtDbl;
+    case Op::Lte:   return LteDbl;
+    case Op::Eq:
+    case Op::Same:  return EqDbl;
+    case Op::Neq:
+    case Op::NSame: return NeqDbl;
+    case Op::Cmp:   return CmpDbl;
+    default: always_assert(false);
+  }
+}
+
+Opcode toStrCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtStr;
+    case Op::Gte:   return GteStr;
+    case Op::Lt:    return LtStr;
+    case Op::Lte:   return LteStr;
+    case Op::Eq:    return EqStr;
+    case Op::Same:  return SameStr;
+    case Op::Neq:   return NeqStr;
+    case Op::NSame: return NSameStr;
+    case Op::Cmp:   return CmpStr;
+    default: always_assert(false);
+  }
+}
+
+Opcode toStrIntCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtStrInt;
+    case Op::Gte:   return GteStrInt;
+    case Op::Lt:    return LtStrInt;
+    case Op::Lte:   return LteStrInt;
+    case Op::Eq:
+    case Op::Same:  return EqStrInt;
+    case Op::Neq:
+    case Op::NSame: return NeqStrInt;
+    case Op::Cmp:   return CmpStrInt;
+    default: always_assert(false);
+  }
+}
+
+Opcode toObjCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtObj;
+    case Op::Gte:   return GteObj;
+    case Op::Lt:    return LtObj;
+    case Op::Lte:   return LteObj;
+    case Op::Eq:    return EqObj;
+    case Op::Same:  return SameObj;
+    case Op::Neq:   return NeqObj;
+    case Op::NSame: return NSameObj;
+    case Op::Cmp:   return CmpObj;
+    default: always_assert(false);
+  }
+}
+
+Opcode toArrCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtArr;
+    case Op::Gte:   return GteArr;
+    case Op::Lt:    return LtArr;
+    case Op::Lte:   return LteArr;
+    case Op::Eq:    return EqArr;
+    case Op::Same:  return SameArr;
+    case Op::Neq:   return NeqArr;
+    case Op::NSame: return NSameArr;
+    case Op::Cmp:   return CmpArr;
+    default: always_assert(false);
+  }
+}
+
+Opcode toResCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtRes;
+    case Op::Gte:   return GteRes;
+    case Op::Lt:    return LtRes;
+    case Op::Lte:   return LteRes;
+    case Op::Eq:
+    case Op::Same:  return EqRes;
+    case Op::Neq:
+    case Op::NSame: return NeqRes;
+    case Op::Cmp:   return CmpRes;
+    default: always_assert(false);
+  }
+}
+
+// Emit a commuted version of the specified operation. The given callable is
+// invoked with the adjusted (if any) opcode to use. The callable should
+// generate the proper instruction(s) to perform the comparison operation which
+// matches the given opcode. The result from those instructions may be used as
+// inputs to additional instructions. Regardless, the return value is the result
+// of the commuted comparison.
+template <typename F>
+SSATmp* emitCommutedOp(IRGS& env, Op op, F f) {
+  switch (op) {
+    case Op::Gt:    return f(Op::Lt);
+    case Op::Gte:   return f(Op::Lte);
+    case Op::Lt:    return f(Op::Gt);
+    case Op::Lte:   return f(Op::Gte);
+    case Op::Eq:    return f(Op::Eq);
+    case Op::Same:  return f(Op::Same);
+    case Op::Neq:   return f(Op::Neq);
+    case Op::NSame: return f(Op::NSame);
+    case Op::Cmp:
+      return gen(env, SubInt, cns(env, 0), f(Op::Cmp));
+    default: always_assert(false);
+  }
+}
+
+// Emit a check for whether the given object is a collection.
+template <typename F>
+SSATmp* emitCollectionCheck(IRGS& env, Op op, SSATmp* src, F f) {
+  assertx(src->type() <= TObj);
+
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const isCol = gen(env, IsCol, src);
+      gen(env, JmpNZero, taken, isCol);
+    },
+    // Not a collection, just emit the code given by the callable.
+    [&] { return f(); },
+    [&] {
+      // It's a collection, so either ThrowInvalidOperation, or return a
+      // constant depending on the type of comparison being done.
+      hint(env, Block::Hint::Unlikely);
+      switch (op) {
+        case Op::Gt:
+        case Op::Gte:
+        case Op::Lt:
+        case Op::Lte:
+        case Op::Cmp:
+          gen(
+            env,
+            ThrowInvalidOperation,
+            cns(env, s_cmpWithCollection.get())
+          );
+          // Dead-code, but needed to satisfy cond().
+          return cns(env, false);
+        case Op::Eq: return cns(env, false);
+        case Op::Neq: return cns(env, true);
+        default: always_assert(false);
+      }
+    }
+  );
+}
+
+// Emit a comparison against an object and string. This needs special handling
+// because the behavior varies depending on whether the object has a toString()
+// method or not.
+SSATmp* emitObjStrCmp(IRGS& env, Op op, SSATmp* obj, SSATmp* str) {
+  assertx(obj->type() <= TObj);
+  assertx(str->type() <= TStr);
+
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const hasToString = gen(env, HasToString, obj);
+      gen(env, JmpNZero, taken, hasToString);
+    },
+    [&] {
+      // If there's no toString() method, than the object is always greater than
+      // the string.
+      switch (op) {
+        case Op::Neq:
+        case Op::Gt:
+        case Op::Gte: return cns(env, true);
+        case Op::Eq:
+        case Op::Lt:
+        case Op::Lte: return cns(env, false);
+        case Op::Cmp: return cns(env, 1);
+        default: always_assert(false);
+      }
+    },
+    [&] {
+      // If there is a toString() method, use it (via ConvObjToStr) to turn the
+      // object into a string, and then do a string comparison.
+      auto const converted = gen(env, ConvObjToStr, obj);
+      auto const result = gen(env, toStrCmpOpcode(op), converted, str);
+      decRef(env, converted);
+      return result;
+    }
+  );
+}
+
+// Emit a boolean comparison against two constants. Will be simplified to a
+// constant later on.
+SSATmp* emitConstCmp(IRGS& env, Op op, bool left, bool right) {
+  return gen(env, toBoolCmpOpcode(op), cns(env, left), cns(env, right));
+}
+
+void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TNull);
+  auto const rightTy = right->type();
+
+  // Left operand is null.
+
+  if (rightTy <= TStr) {
+    // Null converts to the empty string when being compared against a string.
+    push(env,
+         gen(env,
+             toStrCmpOpcode(op),
+             cns(env, s_emptyString.get()),
+             right));
+  } else if (rightTy <= TObj) {
+    // When compared to an object, null is treated as false, and the object as
+    // true. We cannot use ConvObjToBool here because that has special behavior
+    // in certain cases, which we do not want here. Also note that no collection
+    // check is done.
+    push(env, emitConstCmp(env, op, false, true));
+  } else {
+    // Otherwise, convert both sides to booleans (with null becoming false).
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             cns(env, false),
+             gen(env, ConvCellToBool, right)));
+  }
+}
+
+void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TBool);
+  // Convert whatever is on the right to a boolean and compare. The conversion
+  // may be a no-op if the right operand is already a bool.
+  push(env,
+       gen(env,
+           toBoolCmpOpcode(op),
+           left,
+           gen(env, ConvCellToBool, right)));
+}
+
+void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TInt);
+  auto const rightTy = right->type();
+
+  // Left operand is int.
+
+  if (rightTy <= TDbl) {
+    // If compared against a double, promote to a double.
+    push(env,
+         gen(env,
+             toDblCmpOpcode(op),
+             gen(env, ConvIntToDbl, left),
+             right));
+  } else if (rightTy <= TStr) {
+    // If compared against a string, commute the expression and do a specialized
+    // string-int comparison.
+    push(
+      env,
+      emitCommutedOp(
+        env,
+        op,
+        [&](Op op){ return gen(env, toStrIntCmpOpcode(op), right, left); }
+      )
+    );
+  } else if (rightTy.subtypeOfAny(TNull, TBool)) {
+    // If compared against null or bool, convert both sides to bools.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             gen(env, ConvIntToBool, left),
+             gen(env, ConvCellToBool, right)));
+  } else if (rightTy <= TArr) {
+    // All ints are implicity less than arrays.
+    push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TObj) {
+    // If compared against an object, emit a collection check before performing
+    // the comparison.
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        right,
+        [&]{
+          return gen(
+            env,
+            toIntCmpOpcode(op),
+            left,
+            gen(env, ConvObjToInt, right)
+          );
+        }
+      )
+    );
+  } else {
+    // For everything else, convert to an int. The conversion may be a no-op if
+    // the right operand is already an int.
+    push(env,
+         gen(env,
+             toIntCmpOpcode(op),
+             left,
+             gen(env, ConvCellToInt, right)));
+  }
+}
+
+void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TDbl);
+  auto const rightTy = right->type();
+
+  // Left operand is a double.
+
+  if (rightTy.subtypeOfAny(TNull, TBool)) {
+    // If compared against null or bool, convert both sides to bools.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             gen(env, ConvDblToBool, left),
+             gen(env, ConvCellToBool, right)));
+  } else if (rightTy <= TArr) {
+    // All doubles are implicitly less than arrays.
+    push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TObj) {
+    // If compared against an object, emit a collection check before performing
+    // the comparison.
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        right,
+        [&]{
+          return gen(
+            env,
+            toDblCmpOpcode(op),
+            left,
+            gen(env, ConvObjToDbl, right)
+          );
+        }
+      )
+    );
+  } else {
+    // For everything else, convert to a double. The conversion may be a no-op
+    // if the right operand is already a double.
+    push(env,
+         gen(env,
+             toDblCmpOpcode(op),
+             left,
+             gen(env, ConvCellToDbl, right)));
+  }
+}
+
+void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TArr);
+  auto const rightTy = right->type();
+
+  // Left operand is an array.
+
+  if (rightTy <= TArr) {
+    // No conversion needed.
+    push(env, gen(env, toArrCmpOpcode(op), left, right));
+  } else if (rightTy.subtypeOfAny(TNull, TBool)) {
+    // If compared against null or bool, convert both sides to bools.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             gen(env, ConvArrToBool, left),
+             gen(env, ConvCellToBool, right)));
+  } else if (rightTy <= TObj) {
+    // Objects are always greater than arrays. Emit a collection check first.
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        right,
+        [&]{ return emitConstCmp(env, op, false, true); }
+      )
+    );
+  } else {
+    // Array is always greater than everything else.
+    push(env, emitConstCmp(env, op, true, false));
+  }
+}
+
+void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TStr);
+  auto const rightTy = right->type();
+
+  // Left operand is a string.
+
+  if (rightTy <= TStr) {
+    // No conversion needed.
+    push(env, gen(env, toStrCmpOpcode(op), left, right));
+  } else if (rightTy <= TNull) {
+    // Comparisons against null are turned into comparisons with the empty
+    // string.
+    push(env,
+         gen(env,
+             toStrCmpOpcode(op),
+             left,
+             cns(env, s_emptyString.get())));
+  } else if (rightTy <= TBool) {
+    // If compared against a bool, convert the string to a bool.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             gen(env, ConvStrToBool, left),
+             right));
+  } else if (rightTy <= TInt) {
+    // If compared against an integer, do no conversion and use the specialized
+    // string-int comparison.
+    push(env,
+         gen(env,
+             toStrIntCmpOpcode(op),
+             left,
+             right));
+  } else if (rightTy <= TDbl) {
+    // If compared against a double, convert the string to a double.
+    push(env,
+         gen(env,
+             toDblCmpOpcode(op),
+             gen(env, ConvStrToDbl, left),
+             right));
+  } else if (rightTy <= TRes) {
+    // Bizarrely, comparison against a resource is done by converting both the
+    // string and the resource to a double and comparing the two.
+    push(env,
+         gen(env,
+             toDblCmpOpcode(op),
+             gen(env, ConvStrToDbl, left),
+             gen(env, ConvResToDbl, right)));
+  } else if (rightTy <= TObj) {
+    // If compared against an object, first do a collection check on the object,
+    // and then emit an object-string comparison (swapping the order of the
+    // operands).
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        right,
+        [&]{
+          return emitCommutedOp(
+            env,
+            op,
+            [&](Op op) { return emitObjStrCmp(env, op, right, left); }
+          );
+        }
+      )
+    );
+  } else {
+    // Strings are less than anything else (usually arrays).
+    push(env, emitConstCmp(env, op, false, true));
+  }
+}
+
+void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TObj);
+  auto const rightTy = right->type();
+
+  // Left operand is an object.
+
+  if (rightTy <= TObj) {
+    // No conversion needed.
+    push(env, gen(env, toObjCmpOpcode(op), left, right));
+  } else if (rightTy <= TBool) {
+    // If compared against a bool, convert to a bool.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             gen(env, ConvObjToBool, left),
+             right));
+  } else if (rightTy <= TInt) {
+    // If compared against an integer, emit a collection check before doing the
+    // comparison.
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        left,
+        [&]{
+          return gen(
+            env,
+            toIntCmpOpcode(op),
+            gen(env, ConvObjToInt, left),
+            right
+          );
+        }
+      )
+    );
+  } else if (rightTy <= TDbl) {
+    // If compared against a double, emit a collection check before performing
+    // the comparison.
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        left,
+        [&]{
+          return gen(
+            env,
+            toDblCmpOpcode(op),
+            gen(env, ConvObjToDbl, left),
+            right
+          );
+        }
+      )
+    );
+  } else if (rightTy <= TStr) {
+    // If compared against a string, first do a collection check, and then emit
+    // an object-string comparison.
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        left,
+        [&]{ return emitObjStrCmp(env, op, left, right); }
+      )
+    );
+  } else if (rightTy <= TArr) {
+    // Object is always greater than array, but we need a collection check
+    // first.
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        left,
+        [&]{ return emitConstCmp(env, op, true, false); }
+      )
+    );
+  } else {
+    // For anything else, the object is always greater.
+    push(env, emitConstCmp(env, op, true, false));
+  }
+}
+
+void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TRes);
+  auto const rightTy = right->type();
+
+  // Left operand is a resource.
+
+  if (rightTy <= TRes) {
+    // No conversion needed.
+    push(env, gen(env, toResCmpOpcode(op), left, right));
+  } else if (rightTy <= TNull) {
+    // Resources are always greater than nulls.
+    push(env, emitConstCmp(env, op, true, false));
+  } else if (rightTy <= TBool) {
+    // If compared against a boolean, convert to a boolean.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             cns(env, true),
+             right));
+  } else if (rightTy <= TInt) {
+    // If compared against an integer, convert to an integer.
+    push(env,
+         gen(env,
+             toIntCmpOpcode(op),
+             gen(env, ConvResToInt, left),
+             right));
+  } else if (rightTy <= TDbl) {
+    // If compared against a double, convert to a double.
+    push(env,
+         gen(env,
+             toDblCmpOpcode(op),
+             gen(env, ConvResToDbl, left),
+             right));
+  } else if (rightTy <= TStr) {
+    // Bizaarly, comparison against a string is done by converting both the
+    // string and the resource to a double and comparing the two.
+    push(env,
+         gen(env,
+             toDblCmpOpcode(op),
+             gen(env, ConvResToDbl, left),
+             gen(env, ConvStrToDbl, right)));
+  } else {
+    // Resources are always less than anything else.
+    push(env, emitConstCmp(env, op, false, true));
+  }
+}
+
 /*
- * True if comparison may throw or reenter.
- *
- * 1. Objects compared with strings may involve calling a user-defined
- * __toString function.
- *
- * 2. Objects compared with ints or doubles raises a notice when the object is
- * converted to a number.
- *
- * 3. Array comparisons can throw if recursion is detected.
+ * Responsible for converting the bytecode comparisons (which are type-agnostic)
+ * to IR comparisons (which are typed). This generally involves inserting the
+ * right kind of type conversions to satisfy PHP semantics. For a few special
+ * cases, (object-string and string-int), we have special IR opcodes because the
+ * required semantics cannot be easily represented via type conversions.
  */
-bool cmpOpTypesMayReenter(Type t0, Type t1) {
-  assertx(t0 != TGen && t1 != TGen);
-  auto const badObjConvs = TInt | TDbl | TStr;
-  return (t0.maybe(TObj) && t1.maybe(badObjConvs)) ||
-         (t0.maybe(badObjConvs) && t1.maybe(TObj)) ||
-         (t0.maybe(TObj) && t1.maybe(TObj)) ||
-         (t0.maybe(TArr) && t1.maybe(TArr));
-}
+void implCmp(IRGS& env, Op op) {
+  auto const right = popC(env);
+  auto const left = popC(env);
+  auto const leftTy = left->type();
+  auto const rightTy = right->type();
 
-Opcode matchReentrantCmp(Opcode opc) {
-  switch (opc) {
-  case Gt:  return GtX;
-  case Gte: return GteX;
-  case Lt:  return LtX;
-  case Lte: return LteX;
-  case Eq:  return EqX;
-  case Neq: return NeqX;
-  default:  return opc;
-  }
-}
-
-void implCmp(IRGS& env, Opcode opc) {
-  // The following if-block is historical behavior from ir-translator: this
-  // should be re-evaluated.
-  if (opc == Lt || opc == Lte || opc == Gt || opc == Gte) {
-    auto leftType = topC(env, BCSPOffset{1})->type();
-    auto rightType = topC(env, BCSPOffset{0})->type();
-    if (!leftType.isKnownDataType() || !rightType.isKnownDataType()) {
-      PUNT(LtGtOp-UnknownInput);
-    }
-    auto const ok =
-      leftType.subtypeOfAny(TNull, TBool, TInt, TDbl, TStr, TObj, TArr, TRes) &&
-      rightType.subtypeOfAny(TNull, TBool, TInt, TDbl, TStr, TObj, TArr, TRes);
-    if (!ok) {
-      PUNT(LtGtOp-NotOk);
-    }
+  if (!leftTy.isKnownDataType() || !rightTy.isKnownDataType()) {
+    // Can't do much if we don't even know the types.
+    PUNT(cmpUnknownDataType);
   }
 
-  auto const opc2 = matchReentrantCmp(opc);
-  // if the comparison operator could re-enter, convert it to the re-entrant
-  // form and add the required catch block.
-  // TODO #3446092 un-overload these opcodes.
-  if (cmpOpTypesMayReenter(topC(env, BCSPOffset{0})->type(),
-                           topC(env, BCSPOffset{1})->type()) &&
-      opc2 != opc) {
-    opc = opc2;
-  }
-  // src2 opc src1
-  auto const src1 = popC(env);
-  auto const src2 = popC(env);
-  push(env, gen(env, opc, src2, src1));
-  gen(env, DecRef, src2);
-  gen(env, DecRef, src1);
+  // If it's a same-ish comparison and the types don't match (taking into
+  // account Str and StaticStr), lower to a bool comparison of
+  // constants. Otherwise, switch on the type of the left operand to emit the
+  // right kind of comparison.
+  if ((op == Op::Same || op == Op::NSame) &&
+      !equivDataTypes(leftTy.toDataType(), rightTy.toDataType())) {
+    push(env, emitConstCmp(env, op, false, true));
+  } else if (leftTy <= TNull) implNullCmp(env, op, left, right);
+  else if (leftTy <= TBool) implBoolCmp(env, op, left, right);
+  else if (leftTy <= TInt) implIntCmp(env, op, left, right);
+  else if (leftTy <= TDbl) implDblCmp(env, op, left, right);
+  else if (leftTy <= TArr) implArrCmp(env, op, left, right);
+  else if (leftTy <= TStr) implStrCmp(env, op, left, right);
+  else if (leftTy <= TObj) implObjCmp(env, op, left, right);
+  else if (leftTy <= TRes) implResCmp(env, op, left, right);
+  else always_assert(false);
+
+  decRef(env, left);
+  decRef(env, right);
 }
 
 void implAdd(IRGS& env, Op op) {
-  if (topC(env, BCSPOffset{0})->type() <= TArr &&
-      topC(env, BCSPOffset{1})->type() <= TArr) {
+  if (topC(env, BCSPRelOffset{0})->type() <= TArr &&
+      topC(env, BCSPRelOffset{1})->type() <= TArr) {
     auto const tr = popC(env);
     auto const tl = popC(env);
     // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
@@ -257,7 +845,7 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
     preDecRef(str);
     // Note that the ConcatFoo opcode consumed the reference on its first
     // argument, so we only need to decref the second one.
-    gen(env, DecRef, c1);
+    decRef(env, c1);
     return;
   }
 
@@ -277,9 +865,9 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
   auto const s1 = t1 <= TStr ? c1 : gen(env, ConvCellToStr, c1);
   auto const r  = gen(env, ConcatStrStr, s2, s1);  // consumes s2 reference
   preDecRef(r);
-  gen(env, DecRef, s1);
-  if (s2 != c2) gen(env, DecRef, c2);
-  if (s1 != c1) gen(env, DecRef, c1);
+  decRef(env, s1);
+  if (s2 != c2) decRef(env, c2);
+  if (s1 != c1) decRef(env, c1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -307,8 +895,8 @@ void emitConcatN(IRGS& env, int32_t n) {
 
   if (n == 3) {
     push(env, gen(env, ConcatStr3, t3, t2, t1));
-    gen(env, DecRef, t2);
-    gen(env, DecRef, t1);
+    decRef(env, t2);
+    decRef(env, t1);
     return;
   }
 
@@ -317,9 +905,9 @@ void emitConcatN(IRGS& env, int32_t n) {
   if (!(t4->type() <= TStr)) PUNT(ConcatN);
 
   push(env, gen(env, ConcatStr4, t4, t3, t2, t1));
-  gen(env, DecRef, t3);
-  gen(env, DecRef, t2);
-  gen(env, DecRef, t1);
+  decRef(env, t3);
+  decRef(env, t2);
+  decRef(env, t1);
 }
 
 void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
@@ -357,7 +945,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
    * boxed locals.
    */
   bool const isAdd = (*subOpc == Op::Add || *subOpc == Op::AddO);
-  if (isAdd && (env.irb->localType(id, DataTypeSpecific) <= TArr) &&
+  if (isAdd && (env.irb->local(id, DataTypeSpecific).type <= TArr) &&
       topC(env)->isA(TArr)) {
     /*
      * ArrayAdd decrefs its sources and returns a new array with
@@ -433,6 +1021,8 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
 
   if (auto const result = incDec(env, subop, src)) {
     pushIncRef(env, isPre(subop) ? result : src);
+    // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
+    updateMarker(env);
     stLoc(env, id, ldrefExit, ldPMExit, result);
     return;
   }
@@ -446,30 +1036,88 @@ void emitXor(IRGS& env) {
   auto const tr = gen(env, ConvCellToBool, btr);
   auto const tl = gen(env, ConvCellToBool, btl);
   push(env, gen(env, XorBool, tl, tr));
-  gen(env, DecRef, btl);
-  gen(env, DecRef, btr);
+  decRef(env, btl);
+  decRef(env, btr);
+}
+
+void implShift(IRGS& env, Opcode op) {
+  auto const shiftAmount    = popC(env);
+  auto const lhs            = popC(env);
+  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
+  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
+
+  // - PHP7 defines shifts of width >= 64 to return the value you get from a
+  //   naive shift, i.e., either 0 or -1 depending on the shift and value. This
+  //   is notably *not* the semantics of the x86 shift instructions, so we need
+  //   to do some comparison logic here.
+  // - PHP7 defines negative shifts to throw an ArithmeticError.
+  // - PHP5 semantics for such operations are machine-dependent.
+  if (RuntimeOption::PHP7_IntSemantics &&
+      !(shiftAmountInt->hasConstVal() &&
+        shiftAmountInt->intVal() < 64 && shiftAmountInt->intVal() >= 0)) {
+    push(env, cond(
+      env,
+      [&] (Block* taken) {
+        auto const checkShift = gen(env, GteInt, shiftAmountInt, cns(env, 64));
+        gen(env, JmpNZero, taken, checkShift);
+      },
+      [&] {
+        return cond(
+          env,
+          [&] (Block* taken) {
+            auto const checkShift =
+              gen(env, LtInt, shiftAmountInt, cns(env, 0));
+            gen(env, JmpNZero, taken, checkShift);
+          },
+          [&] {
+            return gen(env, op, lhsInt, shiftAmountInt);
+          },
+          [&] {
+            // Unlikely: shifting by a negative amount.
+            hint(env, Block::Hint::Unlikely);
+
+            gen(env, ThrowArithmeticError,
+                cns(env, makeStaticString(Strings::NEGATIVE_SHIFT)));
+
+            // Dead-code, but needed to satisfy cond().
+            return cns(env, false);
+          }
+        );
+      },
+      [&] {
+        // Unlikely: shifting by >= 64.
+        hint(env, Block::Hint::Unlikely);
+
+        if (op != Shr) {
+          return cns(env, 0);
+        }
+
+        if (lhsInt->hasConstVal()) {
+          int64_t lhsConst = lhsInt->intVal();
+          if (lhsConst >= 0) {
+            return cns(env, 0);
+          } else {
+            return cns(env, -1);
+          }
+        }
+
+        return gen(env, op, lhsInt, cns(env, 63));
+      }
+    ));
+  } else {
+    push(env, gen(env, op, lhsInt, shiftAmountInt));
+  }
+
+  decRef(env, lhs);
+  decRef(env, shiftAmount);
 }
 
 void emitShl(IRGS& env) {
-  auto const shiftAmount    = popC(env);
-  auto const lhs            = popC(env);
-  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
-  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
-
-  push(env, gen(env, Shl, lhsInt, shiftAmountInt));
-  gen(env, DecRef, lhs);
-  gen(env, DecRef, shiftAmount);
+  implShift(env, Shl);
 }
 
 void emitShr(IRGS& env) {
-  auto const shiftAmount    = popC(env);
-  auto const lhs            = popC(env);
-  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
-  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
-
-  push(env, gen(env, Shr, lhsInt, shiftAmountInt));
-  gen(env, DecRef, lhs);
-  gen(env, DecRef, shiftAmount);
+  implShift(env, Shr);
 }
 
 void emitPow(IRGS& env) {
@@ -500,12 +1148,12 @@ void emitBitNot(IRGS& env) {
 void emitNot(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, XorBool, gen(env, ConvCellToBool, src), cns(env, true)));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitDiv(IRGS& env) {
-  auto const divisorType  = topC(env, BCSPOffset{0})->type();
-  auto const dividendType = topC(env, BCSPOffset{1})->type();
+  auto const divisorType  = topC(env, BCSPRelOffset{0})->type();
+  auto const dividendType = topC(env, BCSPRelOffset{1})->type();
 
   auto isNumeric = [&] (Type type) {
     return type.subtypeOfAny(TInt, TDbl, TBool);
@@ -517,85 +1165,93 @@ void emitDiv(IRGS& env) {
     return;
   }
 
-  auto divisor  = topC(env, BCSPOffset{0});
-  auto dividend = topC(env, BCSPOffset{1});
-
-  // we can't codegen this but we may be able to special case it away
-  if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
-    // TODO(#2570625): support integer-integer division, move this to
-    // simplifier:
-    if (divisor->hasConstVal()) {
-      int64_t divisorVal;
-      if (divisor->isA(TInt)) {
-        divisorVal = divisor->intVal();
-      } else {
-        assertx(divisor->isA(TBool));
-        divisorVal = divisor->boolVal();
-      }
-
-      if (divisorVal == 0) {
-        popC(env);
-        popC(env);
-        gen(env, RaiseWarning,
-            cns(env, makeStaticString(Strings::DIVISION_BY_ZERO)));
-        push(env, cns(env, false));
-        return;
-      }
-
-      if (dividend->hasConstVal()) {
-        int64_t dividendVal;
-        if (dividend->isA(TInt)) {
-          dividendVal = dividend->intVal();
-        } else {
-          assertx(dividend->isA(TBool));
-          dividendVal = dividend->boolVal();
-        }
-        popC(env);
-        popC(env);
-        if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
-          push(env, cns(env, (double)dividendVal / divisorVal));
-        } else {
-          push(env, cns(env, dividendVal / divisorVal));
-        }
-        return;
-      }
-      /* fall through */
-    }
-    interpOne(env, TUncountedInit, 2);
-    return;
-  }
-
-  auto make_double = [&] (SSATmp* src) {
-    if (src->isA(TInt)) {
-      return gen(env, ConvIntToDbl, src);
-    } else if (src->isA(TBool)) {
-      return gen(env, ConvBoolToDbl, src);
-    }
-    assertx(src->isA(TDbl));
-    return src;
+  auto toDbl = [&] (SSATmp* x) {
+    return
+      x->isA(TInt)  ? gen(env, ConvIntToDbl, x) :
+      x->isA(TBool) ? gen(env, ConvBoolToDbl, x) :
+      x;
   };
 
-  divisor  = make_double(popC(env));
-  dividend = make_double(popC(env));
+  auto toInt = [&] (SSATmp* x) {
+    return x->isA(TBool) ? gen(env, ConvBoolToInt, x) : x;
+  };
 
-  SSATmp* divVal = nullptr;  // edge-defined value
+  auto const divisor  = popC(env);
+  auto const dividend = popC(env);
+
   ifThen(
     env,
     [&] (Block* taken) {
-      divVal = gen(env, DivDbl, taken, dividend, divisor);
+      auto const checkZero =
+        divisor->isA(TInt) ? gen(env, EqInt,  divisor, cns(env, 0)) :
+        divisor->isA(TDbl) ? gen(env, EqDbl,  divisor, cns(env, 0.0)) :
+                             gen(env, EqBool, divisor, cns(env, false));
+      gen(env, JmpNZero, taken, checkZero);
     },
     [&] {
-      // Make progress by raising a warning and pushing false before
-      // side-exiting to the next instruction.
       hint(env, Block::Hint::Unlikely);
       auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
       gen(env, RaiseWarning, msg);
-      push(env, cns(env, false));
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+
+      // PHP5 results in false; we side exit since the type of the result
+      // has now dramatically changed. PHP7 falls through to the IEEE
+      // division semantics below (and doesn't side exit since the type is
+      // still a double).
+      if (!RuntimeOption::PHP7_IntSemantics) {
+        push(env, cns(env, false));
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      } else if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
+        // We don't need to side exit here, but it's cleaner, and we assume
+        // that division by zero is unikely
+        push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      }
     }
   );
 
-  push(env, divVal);
+  if (divisor->isA(TDbl) || dividend->isA(TDbl)) {
+    push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
+    return;
+  }
+
+  if (divisor->isA(TInt) && dividend->isA(TInt)) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const badDividend = gen(env, EqInt, dividend, cns(env, LLONG_MIN));
+        gen(env, JmpNZero, taken, badDividend);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        ifThen(
+          env,
+          [&] (Block* taken) {
+            auto const badDivisor = gen(env, EqInt, divisor, cns(env, -1));
+            gen(env, JmpNZero, taken, badDivisor);
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+
+            // Avoid SIGFPE when dividing the miniumum respresentable integer
+            // by -1.
+            push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
+            gen(env, Jmp, makeExit(env, nextBcOff(env)));
+          }
+        );
+      }
+    );
+  }
+
+  auto const result = cond(
+    env,
+    [&] (Block* taken) {
+      auto const mod = gen(env, Mod, toInt(dividend), toInt(divisor));
+      gen(env, JmpNZero, taken, mod);
+    },
+    [&] { return gen(env, DivInt, toInt(dividend), toInt(divisor)); },
+    [&] { return gen(env, DivDbl, toDbl(dividend), toDbl(divisor)); }
+  );
+  push(env, result);
 }
 
 void emitMod(IRGS& env) {
@@ -611,30 +1267,36 @@ void emitMod(IRGS& env) {
       gen(env, JmpZero, taken, tr);
     },
     [&] {
-      // Make progress before side-exiting to the next instruction: raise a
-      // warning and push false.
       hint(env, Block::Hint::Unlikely);
-      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
-      gen(env, RaiseWarning, msg);
-      gen(env, DecRef, btr);
-      gen(env, DecRef, btl);
-      push(env, cns(env, false));
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+
+      if (RuntimeOption::PHP7_IntSemantics) {
+        auto const msg = cns(env, makeStaticString(Strings::MODULO_BY_ZERO));
+        gen(env, ThrowDivisionByZeroError, msg);
+      } else {
+        // Make progress before side-exiting to the next instruction: raise a
+        // warning and push false.
+        auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+        gen(env, RaiseWarning, msg);
+        decRef(env, btr);
+        decRef(env, btl);
+        push(env, cns(env, false));
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      }
     }
   );
 
   // DecRefs on the main line must happen after the potentially-throwing exit
   // above: if we throw during the RaiseWarning, those values must still be on
   // the stack.
-  gen(env, DecRef, btr);
-  gen(env, DecRef, btl);
+  decRef(env, btr);
+  decRef(env, btl);
 
   // Check for -1.  The Mod IR instruction has undefined behavior for -1, but
   // php semantics are to return zero.
   auto const res = cond(
     env,
     [&] (Block* taken) {
-      auto const negone = gen(env, Eq, tr, cns(env, -1));
+      auto const negone = gen(env, EqInt, tr, cns(env, -1));
       gen(env, JmpNZero, taken, negone);
     },
     [&] {
@@ -659,14 +1321,15 @@ void emitMul(IRGS& env)    { binaryArith(env, Op::Mul); }
 void emitSubO(IRGS& env)   { binaryArith(env, Op::SubO); }
 void emitMulO(IRGS& env)   { binaryArith(env, Op::MulO); }
 
-void emitGt(IRGS& env)     { implCmp(env, Gt);    }
-void emitGte(IRGS& env)    { implCmp(env, Gte);   }
-void emitLt(IRGS& env)     { implCmp(env, Lt);    }
-void emitLte(IRGS& env)    { implCmp(env, Lte);   }
-void emitEq(IRGS& env)     { implCmp(env, Eq);    }
-void emitNeq(IRGS& env)    { implCmp(env, Neq);   }
-void emitSame(IRGS& env)   { implCmp(env, Same);  }
-void emitNSame(IRGS& env)  { implCmp(env, NSame); }
+void emitGt(IRGS& env)     { implCmp(env, Op::Gt);    }
+void emitGte(IRGS& env)    { implCmp(env, Op::Gte);   }
+void emitLt(IRGS& env)     { implCmp(env, Op::Lt);    }
+void emitLte(IRGS& env)    { implCmp(env, Op::Lte);   }
+void emitEq(IRGS& env)     { implCmp(env, Op::Eq);    }
+void emitNeq(IRGS& env)    { implCmp(env, Op::Neq);   }
+void emitSame(IRGS& env)   { implCmp(env, Op::Same);  }
+void emitNSame(IRGS& env)  { implCmp(env, Op::NSame); }
+void emitCmp(IRGS& env)    { implCmp(env, Op::Cmp); }
 
 void emitAdd(IRGS& env)    { implAdd(env, Op::Add); }
 void emitAddO(IRGS& env)   { implAdd(env, Op::AddO); }

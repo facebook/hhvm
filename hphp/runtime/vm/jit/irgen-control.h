@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,15 +17,15 @@
 #define incl_HPHP_JIT_IRGEN_CONTROL_H_
 
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/jit/jmpflags.h"
 
 namespace HPHP { namespace jit {
-struct IRGS;
+
 struct Block;
 struct SSATmp;
-}}
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ Block* getBlock(IRGS& env, Offset offset);
  * Helpers for unconditional and conditional jumps.
  */
 void surpriseCheck(IRGS&, Offset);
-void jmpImpl(IRGS&, Offset, JmpFlags);
+void jmpImpl(IRGS&, Offset);
 void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
 
 //////////////////////////////////////////////////////////////////////

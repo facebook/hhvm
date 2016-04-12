@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,12 +45,10 @@ struct BuiltinObjExtents {
   ptrdiff_t odOffsetBytes;
 };
 
-class PreClassEmitter {
- public:
+struct PreClassEmitter {
   typedef std::vector<FuncEmitter*> MethodVec;
 
-  class Prop {
-   public:
+  struct Prop {
     Prop()
       : m_name(nullptr)
       , m_mangledName(nullptr)
@@ -98,8 +96,7 @@ class PreClassEmitter {
     RepoAuthType m_repoAuthType;
   };
 
-  class Const {
-   public:
+  struct Const {
     Const()
       : m_name(nullptr)
       , m_typeConstraint(nullptr)
@@ -150,6 +147,9 @@ class PreClassEmitter {
                   PreClass::Hoistable hoistable);
   ~PreClassEmitter();
 
+
+
+  void setClosurePreClass();
   void init(int line1, int line2, Offset offset, Attr attrs,
             const StringData* parent, const StringData* docComment);
 
@@ -189,7 +189,7 @@ class PreClassEmitter {
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
                    const bool typeConst = false,
-                   const Array typeStructure = Array::Create());
+                   const Array& typeStructure = Array{});
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
                            const bool typeConst = false);
@@ -274,10 +274,10 @@ class PreClassEmitter {
   ConstMap::Builder m_constMap;
 };
 
-class PreClassRepoProxy : public RepoProxy {
-  friend class PreClass;
-  friend class PreClassEmitter;
- public:
+struct PreClassRepoProxy : RepoProxy {
+  friend struct PreClass;
+  friend struct PreClassEmitter;
+
   explicit PreClassRepoProxy(Repo& repo);
   ~PreClassRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);

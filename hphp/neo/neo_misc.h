@@ -73,31 +73,6 @@
 
 __BEGIN_DECLS
 
-#ifndef HAVE_STRTOK_R
-char * strtok_r (char *s,const char * delim, char **save_ptr);
-#endif
-
-#ifndef HAVE_LOCALTIME_R
-struct tm *localtime_r (const time_t *timep, struct tm *ttm);
-#endif
-
-#ifndef HAVE_GMTIME_R
-struct tm *gmtime_r(const time_t *timep, struct tm *ttm);
-#endif
-
-#ifndef HAVE_MKSTEMP
-int mkstemp(char *path);
-#endif
-
-#ifndef HAVE_SNPRINTF
-int snprintf (char *str, size_t count, const char *fmt, ...)
-              ATTRIBUTE_PRINTF(3,4);
-#endif
-
-#ifndef HAVE_VSNPRINTF
-int vsnprintf (char *str, size_t count, const char *fmt, va_list arg);
-#endif
-
 #include <stdarg.h>
 #include <sys/types.h>
 
@@ -123,14 +98,6 @@ void ne_warn (const char *fmt, ...)
 void ne_set_log (int level);
 void ne_log (int level, const char *fmt, ...)
              ATTRIBUTE_PRINTF(2,3);
-UINT32 python_string_hash (const char *s);
-UINT8 *ne_stream4 (UINT8  *dest, UINT32 num);
-UINT8 *ne_unstream4 (UINT32 *pnum, UINT8 *src);
-UINT8 *ne_stream2 (UINT8  *dest, UINT16 num);
-UINT8 *ne_unstream2 (UINT16 *pnum, UINT8 *src);
-UINT8 *ne_stream_str (UINT8 *dest, const char *s, int l);
-UINT8 *ne_unstream_str (char *s, int l, UINT8 *src);
-double ne_timef (void);
 UINT32 ne_crc (UINT8 *data, UINT32 bytes);
 
 __END_DECLS

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,23 +62,66 @@ EnumCache::~EnumCache() {
   m_enumValuesMap.clear();
 }
 
+const EnumCache::EnumValues* EnumCache::cachePersistentEnumValues(
+  const Class* klass,
+  bool recurse,
+  Array&& names,
+  Array&& values) {
+  std::unique_ptr<EnumCache::EnumValues> enums(new EnumCache::EnumValues());
+  enums->values = ArrayData::GetScalarArray(values.get());
+  enums->names = ArrayData::GetScalarArray(names.get());
+
+  intptr_t key = getKey(klass, recurse);
+  EnumValuesMap::accessor acc;
+  if (!m_enumValuesMap.insert(acc, key)) {
+    return acc->second;
+  }
+  // add to the map the newly created values
+  acc->second = enums.release();
+  return acc->second;
+}
+
+const EnumCache::EnumValues* EnumCache::cacheRequestEnumValues(
+  const Class* klass,
+  bool recurse,
+  Array&& names,
+  Array&& values) {
+
+  m_nonScalarEnumValuesMap.bind();
+  auto& enumValuesData = *m_nonScalarEnumValuesMap;
+  if (!enumValuesData) {
+    enumValuesData = req::make_raw<ReqEnumValuesMap>();
+  }
+
+  auto enums = req::make_raw<EnumCache::EnumValues>();
+  enums->values = std::move(values);
+  enums->names = std::move(names);
+
+  intptr_t key = getKey(klass, recurse);
+  enumValuesData->emplace(key, enums);
+
+  return enums;
+}
+
 const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
                                                        bool recurse) {
   auto const numConstants = klass->numConstants();
-  size_t foundOnClass = 0;
-  Array values;
-  Array names;
+  auto values = Array::Create();
+  auto names = Array::Create();
   auto const consts = klass->constants();
+  bool persist = true;
   for (size_t i = 0; i < numConstants; i++) {
     if (consts[i].isAbstract() || consts[i].isType()) {
       continue;
     }
-    if (consts[i].m_class == klass) foundOnClass++;
-    else if (!recurse) continue;
-    Cell value = consts[i].m_val;
+    if (consts[i].cls != klass && !recurse) {
+      continue;
+    }
+    Cell value = consts[i].val;
     // Handle dynamically set constants
     if (value.m_type == KindOfUninit) {
-      value = klass->clsCnsGet(consts[i].m_name);
+      persist = false;
+      value = klass->clsCnsGet(consts[i].name);
     }
     assert(value.m_type != KindOfUninit);
     if (UNLIKELY(!(isIntType(value.m_type) ||
@@ -90,30 +133,23 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
       msg += " enum can only contain static string and int values";
       EnumCache::failLookup(msg);
     }
-    values.set(StrNR(consts[i].m_name), cellAsCVarRef(value));
-    names.set(cellAsCVarRef(value), VarNR(consts[i].m_name));
-  }
-  if (UNLIKELY(foundOnClass == 0)) {
-    std::string msg;
-    msg += klass->name()->data();
-    msg += " enum must contain values";
-    EnumCache::failLookup(msg);
+    values.set(StrNR(consts[i].name), cellAsCVarRef(value));
+    names.set(cellAsCVarRef(value), VarNR(consts[i].name));
   }
 
-  {
-    std::unique_ptr<EnumCache::EnumValues> enums(new EnumCache::EnumValues());
-    enums->values = ArrayData::GetScalarArray(values.get());
-    enums->names = ArrayData::GetScalarArray(names.get());
-
-    intptr_t key = getKey(klass, recurse);
-    EnumValuesMap::accessor acc;
-    if (!m_enumValuesMap.insert(acc, key)) {
-      return acc->second;
-    }
-    // add to the map the newly created values
-    acc->second = enums.release();
-    return acc->second;
-  }
+  // If we saw dynamic constants we cannot cache the enum values across requests
+  // as they may not be the same in every request.
+  return persist
+    ? cachePersistentEnumValues(
+      klass,
+      recurse,
+      std::move(names),
+      std::move(values))
+    : cacheRequestEnumValues(
+      klass,
+      recurse,
+      std::move(names),
+      std::move(values));
 }
 
 const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
@@ -121,6 +157,14 @@ const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
   EnumValuesMap::const_accessor acc;
   if (m_enumValuesMap.find(acc, key)) {
     return acc->second;
+  }
+  if (!m_nonScalarEnumValuesMap.bound() || !*m_nonScalarEnumValuesMap) {
+    return nullptr;
+  }
+  auto data = *m_nonScalarEnumValuesMap;
+  auto it = data->find(key);
+  if (it != data->end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -140,6 +184,12 @@ void EnumCache::deleteEnumValues(intptr_t key) {
   if (m_enumValuesMap.find(acc, key)) {
     delete acc->second;
     m_enumValuesMap.erase(acc);
+    return;
+  }
+
+  if (m_nonScalarEnumValuesMap.bound() && *m_nonScalarEnumValuesMap) {
+    auto data = *m_nonScalarEnumValuesMap;
+    data->erase(key);
   }
 }
 

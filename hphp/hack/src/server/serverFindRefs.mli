@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,12 +8,9 @@
  *
  *)
 
-type action =
-  | Class of string
-  | Method of string * string
-  | Function of string
+open FindRefsService
 
-type result = (string * Pos.absolute) list
+val to_json: result -> Hh_json.json
 
 val get_refs_with_defs : action -> ServerEnv.genv ->
   ServerEnv.env -> (Naming_heap.FunHeap.key * Pos.t) list

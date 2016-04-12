@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 namespace HPHP {
 
@@ -50,6 +50,27 @@ TEST(MemoryManager, RootMaps) {
     MM().addRoot(vec);
     ASSERT_TRUE(MM().removeRoot(vec));
   }
+}
+
+static void allocAndJoin(size_t size, bool free) {
+  std::thread thread([&]() {
+      MemoryManager::TlsWrapper::getCheck();
+      if (free) {
+        String str(size, ReserveString);
+      } else {
+        StringData::Make(size); // Leak.
+      }
+    });
+  thread.join();
+}
+
+TEST(MemoryManager, OnThreadExit) {
+  allocAndJoin(42, true);
+  allocAndJoin(kMaxSmallSize + 1, true);
+#ifdef DEBUG
+  EXPECT_DEATH(allocAndJoin(42, false), "");
+  EXPECT_DEATH(allocAndJoin(kMaxSmallSize + 1, false), "");
+#endif
 }
 
 }

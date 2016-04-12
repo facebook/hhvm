@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@ EncapsListExpression::EncapsListExpression
 }
 
 ExpressionPtr EncapsListExpression::clone() {
-  EncapsListExpressionPtr exp(new EncapsListExpression(*this));
+  auto exp = std::make_shared<EncapsListExpression>(*this);
   Expression::deepCopy(exp);
   exp->m_exps = Clone(m_exps);
   return exp;
@@ -87,34 +87,18 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
     int count = m_exps->getCount();
     // turn into cascaded concat
     if (count > 1) {
-      ExpressionPtr exp =
-        BinaryOpExpressionPtr(new BinaryOpExpression(
-                                getScope(), getRange(),
-                                (*m_exps)[0], (*m_exps)[1], '.'));
+      auto exp = std::make_shared<BinaryOpExpression>(
+        getScope(), getRange(), (*m_exps)[0], (*m_exps)[1], '.'
+      );
       for (int i = 2; i < count; i++) {
-        exp =
-          BinaryOpExpressionPtr(new BinaryOpExpression(
-                                  getScope(), getRange(),
-                                  exp, (*m_exps)[i], '.'));
+        exp = std::make_shared<BinaryOpExpression>(
+          getScope(), getRange(), exp, (*m_exps)[i], '.'
+        );
       }
       return exp;
     }
   }
   return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void EncapsListExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("EncapsListExpression", 3);
-  cg.printPropertyHeader("delimiter");
-  std::string tstr(1, m_type);
-  cg.printValue(tstr);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exps);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

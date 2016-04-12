@@ -5,41 +5,10 @@
 #include <cstdlib>
 
 #include "gdhelpers.h"
-#include "php.h"
 
 #include "hphp/runtime/base/memory-manager.h"
 
 using std::abs;
-
-#ifdef _MSC_VER
-# if _MSC_VER >= 1300
-/* in MSVC.NET these are available but only for __cplusplus and not _MSC_EXTENSIONS */
-#  if !defined(_MSC_EXTENSIONS) && defined(__cplusplus)
-#   define HAVE_FABSF 1
-extern float fabsf(float x);
-#   define HAVE_FLOORF 1
-extern float floorf(float x);
-#  endif /*MSVC.NET */
-# endif /* MSC */
-#endif
-#ifndef HAVE_FABSF
-# define HAVE_FABSF 0
-#endif
-#ifndef HAVE_FLOORF
-# define HAVE_FLOORF 0
-#endif
-#if HAVE_FABSF == 0
-/* float fabsf(float x); */
-# ifndef fabsf
-#  define fabsf(x) ((float)(fabs(x)))
-# endif
-#endif
-#if HAVE_FLOORF == 0
-# ifndef floorf
-/* float floorf(float x);*/
-#  define floorf(x) ((float)(floor(x)))
-# endif
-#endif
 
 #ifdef _OSD_POSIX		/* BS2000 uses the EBCDIC char set instead of ASCII */
 #define CHARSET_EBCDIC
@@ -106,21 +75,28 @@ void php_gd_error_ex(int type, const char *format, ...)
 {
 	va_list args;
 
-	TSRMLS_FETCH();
-
 	va_start(args, format);
-	php_verror(NULL, "", type, format, args TSRMLS_CC);
-	va_end(args);
+  std::string msg;
+  HPHP::string_vsnprintf(msg, format, args);
+  va_end(args);
+
+  if (type == E_ERROR) {
+    HPHP::raise_error(msg);
+  } else if (type == E_WARNING) {
+    HPHP::raise_warning(msg);
+  } else if (type == E_NOTICE) {
+    HPHP::raise_notice(msg);
+  }
 }
 
 void php_gd_error(const char *format, ...)
 {
 	va_list args;
 
-	TSRMLS_FETCH();
-
 	va_start(args, format);
-	php_verror(NULL, "", E_WARNING, format, args TSRMLS_CC);
+  std::string msg;
+  HPHP::string_vsnprintf(msg, format, args);
+  HPHP::raise_warning(msg);
 	va_end(args);
 }
 
@@ -1796,9 +1772,13 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 
 	if (x >= im->sx) {
 		x = im->sx - 1;
+	} else if (x < 0) {
+		x = 0;
 	}
 	if (y >= im->sy) {
 		y = im->sy - 1;
+	} else if (y < 0) {
+		y = 0;
 	}
 
 	for (i = x; i >= 0; i--) {
@@ -1970,7 +1950,7 @@ skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 		} while (x<=x2);
 	}
 
-	efree(stack);
+	gdFree(stack);
 
 done:
 	im->alphaBlendingFlag = alphablending_bak;
@@ -1994,9 +1974,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 
 	nc =  gdImageTileGet(im,x,y);
 
-	pts = (char **) ecalloc(im->sy + 1, sizeof(char *));
+	pts = (char **) gdCalloc(im->sy + 1, sizeof(char *));
 	for (i = 0; i < im->sy + 1; i++) {
-		pts[i] = (char *) ecalloc(im->sx + 1, sizeof(char));
+		pts[i] = (char *) gdCalloc(im->sx + 1, sizeof(char));
 	}
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
@@ -2042,11 +2022,11 @@ skip:		for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
 	}
 
 	for(i = 0; i < im->sy + 1; i++) {
-		efree(pts[i]);
+    gdFree(pts[i]);
 	}
 
-	efree(pts);
-	efree(stack);
+  gdFree(pts);
+  gdFree(stack);
 }
 
 
@@ -3077,7 +3057,7 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 	}
 
 	/* free old palette buffer */
-	for (yy = y - 1; yy >= yy - 1; yy--) {
+	for (yy = 0; yy < y; yy++) {
 		gdFree(src->pixels[yy]);
 	}
 	gdFree(src->pixels);
@@ -3094,12 +3074,9 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 	return 1;
 
 clean_on_error:
-	if (y > 0) {
-
-		for (yy = y; yy >= yy - 1; y--) {
-			gdFree(src->tpixels[y]);
-		}
-		gdFree(src->tpixels);
-	}
+        for (yy = 0; yy < y; yy++) {
+          gdFree(src->tpixels[yy]);
+        }
+        gdFree(src->tpixels);
 	return 0;
 }

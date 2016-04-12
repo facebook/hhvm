@@ -1,0 +1,3 @@
+array<[1]intersect(Tstring), [2]intersect(Tint, Tstring)>
+array<[3]intersect(Tstring), [4]intersect(Tint, Tstring)>
+No errors

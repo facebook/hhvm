@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,52 +18,77 @@
 #define incl_HPHP_APC_TYPED_VALUE_H_
 
 #include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-/*
- * APCTypedValue is the APC object that holds non refcounted data. That is,
- * primitive values and static strings.
- * APCTypedValue has the same layout as TypedValue so it can be returned in
- * some cases and be used directly without any other allocation (see
- * APCLocalArray::getValueRef()). See comment below for more details.
- */
-class APCTypedValue {
-public:
-  static APCHandle* MakeSharedArray(ArrayData* array);
+//////////////////////////////////////////////////////////////////////
 
-  APCTypedValue(DataType type, int64_t data) : m_handle(type) {
+struct APCTypedValue {
+  // Int or bool
+  enum class Bool {};
+  APCTypedValue(Bool, bool data)
+    : m_handle(APCKind::Bool, KindOfBoolean) {
     m_data.num = data;
   }
 
-  APCTypedValue(DataType type, double data) : m_handle(type) {
+  explicit APCTypedValue(int64_t data)
+    : m_handle(APCKind::Int, KindOfInt64) {
+    m_data.num = data;
+  }
+
+  explicit APCTypedValue(double data)
+    : m_handle(APCKind::Double, KindOfDouble) {
     m_data.dbl = data;
   }
 
-  APCTypedValue(DataType type, StringData* data) : m_handle(type) {
+  enum class StaticStr {};
+  APCTypedValue(StaticStr, StringData* data)
+    : m_handle(APCKind::StaticString, KindOfPersistentString) {
+    assert(data->isStatic());
     m_data.str = data;
+    assert(checkInvariants());
   }
 
-  explicit APCTypedValue(StringData* data) : m_handle(KindOfString) {
-    m_handle.setUncounted();
+  enum class UncountedStr {};
+  APCTypedValue(UncountedStr, StringData* data)
+    : m_handle(APCKind::UncountedString, KindOfPersistentString) {
+    assert(data->isUncounted());
     m_data.str = data;
+    assert(checkInvariants());
   }
 
-  explicit APCTypedValue(ArrayData* data) : m_handle(KindOfArray) {
-    m_handle.setUncounted();
+  enum class StaticArr {};
+  APCTypedValue(StaticArr, ArrayData* data)
+    : m_handle(APCKind::StaticArray, KindOfPersistentArray) {
+    assert(data->isStatic());
     m_data.arr = data;
+    assert(checkInvariants());
   }
 
-  explicit APCTypedValue(DataType type) : m_handle(type) {
+  enum class UncountedArr {};
+  APCTypedValue(UncountedArr, ArrayData* data)
+    : m_handle(APCKind::UncountedArray, KindOfPersistentArray) {
+    assert(data->isUncounted());
+    m_data.arr = data;
+    assert(checkInvariants());
+  }
+
+  explicit APCTypedValue(DataType type)
+    : m_handle(type == KindOfUninit ? APCKind::Uninit : APCKind::Null, type) {
+    assert(isNullType(type)); // Uninit or Null
     m_data.num = 0;
   }
 
   static APCTypedValue* fromHandle(APCHandle* handle) {
+    assert(handle->checkInvariants() && !handle->isAtomicCounted());
+    static_assert(offsetof(APCTypedValue, m_handle) == sizeof(APCHandle), "");
     return reinterpret_cast<APCTypedValue*>(handle - 1);
   }
 
   static const APCTypedValue* fromHandle(const APCHandle* handle) {
+    assert(handle->checkInvariants() && !handle->isAtomicCounted());
+    static_assert(offsetof(APCTypedValue, m_handle) == sizeof(APCHandle), "");
     return reinterpret_cast<const APCTypedValue*>(handle - 1);
   }
 
@@ -72,90 +97,58 @@ public:
   }
 
   bool getBoolean() const {
-    assert(m_handle.type() == KindOfBoolean);
+    assert(checkInvariants() && m_handle.kind() == APCKind::Bool);
     return m_data.num != 0;
   }
 
   int64_t getInt64() const {
-    assert(m_handle.type() == KindOfInt64);
+    assert(checkInvariants() && m_handle.kind() == APCKind::Int);
     return m_data.num;
   }
 
   double getDouble() const {
-    assert(m_handle.type() == KindOfDouble);
+    assert(checkInvariants() && m_handle.kind() == APCKind::Double);
     return m_data.dbl;
   }
 
   StringData* getStringData() const {
-    assert(m_handle.type() == KindOfStaticString ||
-           (m_handle.isUncounted() && m_handle.type() == KindOfString));
+    assert(checkInvariants());
+    assert(m_handle.kind() == APCKind::StaticString ||
+           m_handle.kind() == APCKind::UncountedString);
     return m_data.str;
   }
 
   ArrayData* getArrayData() const {
-    assert(m_handle.isUncounted() && m_handle.type() == KindOfArray);
+    assert(checkInvariants());
+    assert(m_handle.kind() == APCKind::StaticArray ||
+           m_handle.kind() == APCKind::UncountedArray);
     return m_data.arr;
   }
 
-  const Variant& asCVarRef() const {
-    // Must be non-refcounted types
-    assert(m_handle.m_flags == 0);
-    assert(!isRefcountedType(m_handle.m_type));
-    return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
-  }
+  static APCTypedValue* tvUninit();
+  static APCTypedValue* tvNull();
+  static APCTypedValue* tvTrue();
+  static APCTypedValue* tvFalse();
 
   void deleteUncounted();
 
 private:
-  friend struct APCHandle;
-
   APCTypedValue(const APCTypedValue&) = delete;
   APCTypedValue& operator=(const APCTypedValue&) = delete;
+  bool checkInvariants() const;
 
 private:
-
-  /*
-   * Keep the object layout binary compatible with Variant for primitive types.
-   * For non-refcounted types m_flags is guaranteed to be 0, and other parts of
-   * runtime will not touch the count.
-   *
-   * Note that this is assuming a little-endian system: m_unused_space and
-   * m_flags have to overlay the higher-order bits of TypedValue::m_type.
-   */
-
-  union SharedData {
+  union {
     int64_t num;
     double dbl;
     StringData* str;
     ArrayData* arr;
-  };
-
-  SharedData m_data;
+  } m_data;
   APCHandle m_handle;
-
-  static void compileTimeAssertions() {
-    static_assert(
-      offsetof(APCTypedValue, m_handle) == sizeof(SharedData),
-      "m_handle must come after SharedData"
-    );
-    static_assert(
-        offsetof(APCTypedValue, m_data) == offsetof(TypedValue, m_data),
-        "Offset of m_data must be equal in APCHandle and TypedValue");
-    static_assert(
-        offsetof(APCTypedValue, m_handle) + offsetof(APCHandle, m_count) ==
-            TypedValueAux::auxOffset,
-        "Offset of m_count must equal offset of TV.m_aux");
-    static_assert(
-        offsetof(APCTypedValue, m_handle) + offsetof(APCHandle, m_type) ==
-            offsetof(TypedValue, m_type),
-        "Offset of m_type must be equal in APCHandle and TypedValue");
-    static_assert(
-        sizeof(APCTypedValue) == sizeof(TypedValue),
-        "Be careful with field layout");
-  }
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_APC_TYPED_VALUE_H_ */
+#endif

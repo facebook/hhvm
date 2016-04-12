@@ -1,7 +1,15 @@
 HHVM_DEFINE_EXTENSION("curl"
   SOURCES
+    curl-multi-await.cpp
+    curl-multi-resource.cpp
+    curl-pool.cpp
+    curl-resource.cpp
     ext_curl.cpp
   HEADERS
+    curl-multi-await.h
+    curl-multi-resource.h
+    curl-pool.h
+    curl-resource.h
     ext_curl.h
   SYSTEMLIB
     ext_curl.php

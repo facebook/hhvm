@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,31 +17,30 @@
 #ifndef incl_HPHP_VM_CG_X64_H_
 #define incl_HPHP_VM_CG_X64_H_
 
-#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 namespace HPHP { namespace jit {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Vout;
-namespace NativeCalls { struct CallInfo; }
-namespace arm { struct CodeGenerator; }
 
-namespace x64 {
+namespace NativeCalls { struct CallInfo; }
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace irlower {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CodeGenerator {
-  friend struct arm::CodeGenerator;
-
-  CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
-    : m_state(state)
-    , m_vmain(main)
-    , m_vcold(cold)
-  {}
+  explicit CodeGenerator(IRLS& state) : m_state(state) {}
 
   void cgInst(IRInstruction* inst);
 
@@ -64,14 +63,11 @@ private:
   CallDest callDestDbl(const IRInstruction*) const;
 
   // Main call helper:
-  void cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
+  void cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,
                     SyncOptions sync, const ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
   void emitTrashTV(Vreg, int32_t, char fillByte);
-
-  void emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
-  void emitLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref);
 
   template <class JmpFn>
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
@@ -87,27 +83,12 @@ private:
   void emitTypeCheck(Type type, Loc typeSrc,
                      Loc dataSrc, Block* taken);
 
-  template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
-  template<class Op, class Opi> void cgShiftCommon(IRInstruction*);
-
   void emitVerifyCls(IRInstruction* inst);
 
   void emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx, bool staticCallee);
 
   Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                     rds::Handle ch);
-
-  void emitCmpInt(IRInstruction* inst, ConditionCode cc);
-  void emitCmpBool(IRInstruction* inst, ConditionCode cc);
-  void emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred);
-  void emitCmpRelDbl(IRInstruction* inst, ConditionCode cc, bool flipOperands);
-  void cgCmpHelper(IRInstruction* inst, ConditionCode cc,
-                   int64_t (*str_cmp_str)(StringData*, StringData*),
-                   int64_t (*str_cmp_int)(StringData*, int64_t),
-                   int64_t (*str_cmp_obj)(StringData*, ObjectData*),
-                   int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
-                   int64_t (*obj_cmp_int)(ObjectData*, int64_t),
-                   int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
   void cgCoerceHelper(IRInstruction* inst, Vreg base, int offset,
                       Func const* callee, int argNum);
@@ -116,9 +97,6 @@ private:
   template<class Inst>
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,
                   SSATmp* src1, Vloc loc1, Vreg& sf);
-  Vreg emitAddInt(Vout& v, IRInstruction* inst);
-  Vreg emitSubInt(Vout& v, IRInstruction* inst);
-  Vreg emitMulInt(Vout& v, IRInstruction* inst);
 
 private:
   Vreg selectScratchReg(IRInstruction* inst);
@@ -141,7 +119,7 @@ private:
   void cgIterInitCommon(IRInstruction* inst);
   void cgMIterNextCommon(IRInstruction* inst);
   void cgMIterInitCommon(IRInstruction* inst);
-  Vreg cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst);
+  Vreg cgLdFuncCachedCommon(const StringData* name, Vreg dst);
   void cgLookupCnsCommon(IRInstruction* inst);
   rds::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
                                   Vreg sf);
@@ -169,7 +147,7 @@ private:
   };
 
   Fixup makeFixup(const BCMarker& marker,
-                  SyncOptions sync = SyncOptions::kSyncPoint);
+                  SyncOptions sync = SyncOptions::Sync);
   int iterOffset(const BCMarker& marker, uint32_t id);
 
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
@@ -178,36 +156,15 @@ private:
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
   void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
 
-  // This is for printing partially-generated traces when debugging
-  void print() const;
-
-  Vout& vmain() { return m_vmain; }
-  Vout& vcold() { return m_vcold; }
+  Vout& vmain() { assert(m_state.vmain); return *m_state.vmain; }
+  Vout& vcold() { assert(m_state.vcold); return *m_state.vcold; }
 
 private:
-  CodegenState&       m_state;
-  Vout&               m_vmain;
-  Vout&               m_vcold;
+  IRLS& m_state;
 };
 
-// Helpers to compute a reference to a TypedValue type and data
-inline Vptr refTVType(Vreg reg) {
-  return reg[TVOFF(m_type)];
-}
-
-inline Vptr refTVData(Vreg reg) {
-  return reg[TVOFF(m_data)];
-}
-
-inline Vptr refTVType(Vptr ref) {
-  return ref + TVOFF(m_type);
-}
-
-inline Vptr refTVData(Vptr ref) {
-  return ref + TVOFF(m_data);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
+
 }}}
 
 #endif

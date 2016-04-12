@@ -1547,7 +1547,7 @@ class Redis {
 
     $flen = strlen($format);
     for ($i = 0; $i < $flen; $i++) {
-      if (!isset($args[$i])) {
+      if (!array_key_exists($i, $args)) {
         if (isset($func['defaults']) AND
             array_key_exists($func['defaults'], $i)) {
           $args[$i] = $func['defaults'][$i];

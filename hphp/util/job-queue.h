@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,17 +45,15 @@ namespace HPHP {
  *
  * To use it, simply define your own job and worker class like this,
  *
- *   class MyJob {
- *     public:
- *       // storing job data
+ *   struct MyJob {
+ *     // storing job data
  *   };
  *
- *   class MyWorker : public JobQueueWorker<MyJob*> {
- *     public:
- *       virtual void doJob(MyJob *job) {
- *         // process the job
- *         delete job; // if it was new-ed
- *       }
+ *   struct MyWorker : JobQueueWorker<MyJob*> {
+ *     virtual void doJob(MyJob *job) {
+ *       // process the job
+ *       delete job; // if it was new-ed
+ *     }
  *   };
  *
  * Now, use JobQueueDispatcher to start the whole thing,
@@ -116,10 +114,9 @@ struct SimpleReleaser : IQueuedJobsReleaser {
 template<typename TJob,
          bool waitable = false,
          class DropCachePolicy = detail::NoDropCachePolicy>
-class JobQueue : public SynchronizableMulti {
-public:
+struct JobQueue : SynchronizableMulti {
   // trivial class for signaling queue stop
-  class StopSignal {};
+  struct StopSignal {};
 
 public:
   /**
@@ -239,8 +236,8 @@ public:
     *expired = false;
     Lock lock(this);
     bool flushed = false;
-    bool ableToDeque = (m_healthStatus == nullptr ?
-        true : (m_healthStatus->getStatus() != HealthLevel::BackOff));
+    bool ableToDeque = m_healthStatus == nullptr ||
+      m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
 
     while (m_jobCount == 0 || !ableToDeque) {
       uint32_t kNumPriority = m_jobQueues.size();
@@ -267,7 +264,7 @@ public:
         }
       }
       if (!ableToDeque) {
-        ableToDeque = m_healthStatus->getStatus() != HealthLevel::BackOff;
+        ableToDeque = m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
       }
     }
     if (inc) incActiveWorker();
@@ -405,8 +402,7 @@ template<typename TJob,
          bool countActive = false,
          bool waitable = false,
          class Policy = detail::NoDropCachePolicy>
-class JobQueueWorker {
-public:
+struct JobQueueWorker {
   typedef TJob JobType;
   typedef TContext ContextType;
   typedef JobQueue<TJob, waitable, Policy> QueueType;
@@ -501,8 +497,7 @@ private:
  * Driver class to push through the whole thing.
  */
 template<class TWorker>
-class JobQueueDispatcher : public IHostHealthObserver {
-public:
+struct JobQueueDispatcher : IHostHealthObserver {
   /**
    * Constructor.
    */
@@ -702,7 +697,7 @@ public:
     m_healthStatus = newStatus;
   }
 
-  HealthLevel getStatus() override {
+  HealthLevel getHealthLevel() override {
     return m_healthStatus;
   }
 

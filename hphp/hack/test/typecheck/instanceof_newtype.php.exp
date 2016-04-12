@@ -1,0 +1,7 @@
+App \Foo<>
+File "instanceof_newtype.php--file2.php", line 7, characters 10-11:
+Invalid return type (Typing[4110])
+File "instanceof_newtype.php--file2.php", line 4, characters 36-40:
+This is an object of type MyFoo
+File "instanceof_newtype.php--file1.php", line 7, characters 18-20:
+It is incompatible with an object of type Foo

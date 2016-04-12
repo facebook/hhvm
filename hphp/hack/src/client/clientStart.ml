@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,7 +8,7 @@
  *
  *)
 
-module CCS = ClientConnectSimple
+module SMUtils = ServerMonitorUtils
 
 let get_hhserver () =
   let exe_name =
@@ -21,15 +21,15 @@ let get_hhserver () =
 
 type env = {
   root: Path.t;
-  wait: bool;
   no_load : bool;
+  silent : bool;
 }
 
 let start_server env =
-
   (* Create a pipe for synchronization with the server: we will wait
      until the server finishes its initialisation phase. *)
   let in_fd, out_fd = Unix.pipe () in
+  Unix.set_close_on_exec in_fd;
   let ic = Unix.in_channel_of_descr in_fd in
 
   let hh_server = get_hhserver () in
@@ -37,47 +37,58 @@ let start_server env =
     Array.concat [
       [|hh_server; "-d"; Path.to_string env.root|];
       if env.no_load then [| "--no-load" |] else [||];
+      (** If the client starts up a server monitor process, the output of that
+       * bootup is passed to this FD - so this FD needs to be threaded
+       * through the server monitor process then to the typechecker process.
+       *
+       * Note: Yes, the FD is available in the monitor process as well, but
+       * it doesn't, and shouldn't, use it. *)
       [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |]
     ] in
-  Printf.eprintf "Server launched with the following command:\n\t%s\n%!"
-    (String.concat " "
-       (Array.to_list (Array.map Filename.quote hh_server_args)));
-
-  let rec wait_loop () =
-    let msg = input_line ic in
-    if env.wait && msg <> "ready" then wait_loop () in
+  if not env.silent then
+    Printf.eprintf "Server launched with the following command:\n\t%s\n%!"
+      (String.concat " "
+         (Array.to_list (Array.map Filename.quote hh_server_args)));
 
   try
     let server_pid =
       Unix.(create_process hh_server hh_server_args stdin stdout stderr) in
+    Unix.close out_fd;
 
     match Unix.waitpid [] server_pid with
     | _, Unix.WEXITED 0 ->
-        wait_loop ();
-        close_in ic
+      assert (input_line ic = ServerMonitorUtils.ready);
+      close_in ic
+    | _, Unix.WEXITED i ->
+      Printf.eprintf
+        "Starting hh_server failed. Exited with status code: %d!\n" i;
+      exit 77
     | _ ->
-        Printf.fprintf stderr "Could not start hh_server!\n";
-        exit 77
+      Printf.eprintf "Could not start hh_server!\n";
+      exit 77
   with _ ->
-    Printf.fprintf stderr "Could not start hh_server!\n";
+    Printf.eprintf "Could not start hh_server!\n";
     exit 77
 
 
 let should_start env =
   let root_s = Path.to_string env.root in
-  match CCS.connect_once env.root with
+  match ServerUtils.connect_to_monitor
+    env.root HhServerMonitorConfig.Program.hh_server with
   | Result.Ok _conn -> false
-  | Result.Error CCS.Server_missing
-  | Result.Error CCS.Build_id_mismatch -> true
-  | Result.Error CCS.Server_initializing ->
-      Printf.eprintf "Found initializing server for %s\n%!" root_s;
-      false
-  | Result.Error CCS.Server_busy ->
-      Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
-      ClientStop.kill_server env.root;
-      true
+  | Result.Error
+      ( SMUtils.Server_missing
+      | SMUtils.Build_id_mismatched
+      | SMUtils.Server_died
+      ) -> true
+  | Result.Error SMUtils.Server_busy
+  | Result.Error SMUtils.Monitor_connection_failure ->
+    Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
+    ClientStop.kill_server env.root;
+    true
 
 let main env =
+  HackEventLogger.client_start ();
   if should_start env
   then begin
     start_server env;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,37 +23,35 @@
 
 #define JIT_TIMERS                              \
   TIMER_NAME(analyze)                           \
-  TIMER_NAME(codeGen)                           \
   TIMER_NAME(collectPostConditions)             \
+  TIMER_NAME(hhir_lower)                        \
   TIMER_NAME(optimize)                          \
   TIMER_NAME(optimize_dce)                      \
   TIMER_NAME(optimize_cleancfg)                 \
   TIMER_NAME(optimize_predictionOpts)           \
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
-  TIMER_NAME(optimize_relaxGuards)              \
   TIMER_NAME(optimize_reoptimize)               \
+  TIMER_NAME(partial_dce_DefInlineFP)           \
   TIMER_NAME(regalloc)                          \
   TIMER_NAME(regionizeFunc)                     \
   TIMER_NAME(selectTracelet)                    \
-  TIMER_NAME(selectTracelet_relaxGuards)        \
-  TIMER_NAME(translate)                         \
-  TIMER_NAME(translateRegion)                   \
-  TIMER_NAME(translateRegion_irGeneration)      \
+  TIMER_NAME(mcg_translate)                     \
+  TIMER_NAME(mcg_finishTranslation)             \
+  TIMER_NAME(irGenRegion)                       \
+  TIMER_NAME(irGenRegionAttempt)                \
   TIMER_NAME(translateTracelet)                 \
   TIMER_NAME(translateTracelet_irGeneration)    \
   TIMER_NAME(vasm_layout)                       \
   TIMER_NAME(vasm_xls)                          \
   TIMER_NAME(vasm_xls_spill)                    \
   TIMER_NAME(vasm_jumps)                        \
-  TIMER_NAME(vasm_gen)                          \
+  TIMER_NAME(vasm_bind_ptrs)                    \
+  TIMER_NAME(vasm_emit)                         \
   TIMER_NAME(vasm_lower)                        \
   TIMER_NAME(vasm_copy)                         \
   TIMER_NAME(vasm_optimize)                     \
-  TIMER_NAME(llvm)                              \
-  TIMER_NAME(llvm_irGeneration)                 \
-  TIMER_NAME(llvm_optimize)                     \
-  TIMER_NAME(llvm_codegen)                      \
+  TIMER_NAME(vasm_dce)                          \
 
 namespace HPHP { namespace jit {
 

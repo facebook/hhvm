@@ -1,7 +1,7 @@
 Program %s/break4.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break :fb:my:thing::doIt()
 Breakpoint 1 set upon entering xhp_fb__my__thing::doIt()
-But wont break until class xhp_fb__my__thing has been loaded.
+But won't break until class xhp_fb__my__thing has been loaded.
 continue
 break4.php loaded
 Program %s/break4.php exited normally.

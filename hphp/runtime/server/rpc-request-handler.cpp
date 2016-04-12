@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/server/satellite-server.h"
-#include "hphp/system/constants.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -65,13 +64,20 @@ RPCRequestHandler::~RPCRequestHandler() {
 void RPCRequestHandler::initState() {
   hphp_session_init();
   bool isServer = RuntimeOption::ServerExecutionMode();
+  m_context = hphp_context_init();
   if (isServer) {
-    m_context = hphp_context_init();
+    m_context->obStart(uninit_null(),
+                       0,
+                       OBFlags::Default | OBFlags::OutputDisabled);
+    m_context->obProtect(true);
   } else {
     // In command line mode, we want the xbox workers to
     // output to STDOUT
-    m_context = g_context.getNoCheck();
     m_context->obSetImplicitFlush(true);
+    m_context->obStart(uninit_null(),
+                       0,
+                       OBFlags::Default | OBFlags::WriteToStdout);
+    m_context->obProtect(true);
   }
   m_lastReset = time(0);
 
@@ -217,11 +223,16 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 }
 
 void RPCRequestHandler::abortRequest(Transport *transport) {
+  g_context.getCheck();
   GetAccessLog().onNewRequest();
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
   assert(vhost);
   transport->sendString("Service Unavailable", 503);
   GetAccessLog().log(transport, vhost);
+  if (!vmStack().isAllocated()) {
+    hphp_memory_cleanup();
+  }
+  m_reset = true;
 }
 
 const StaticString
@@ -271,7 +282,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       }
     } else {
       // single string parameter, used by xbox to avoid any en/decoding
-      int size;
+      size_t size;
       const void *data = transport->getPostData(size);
       if (data && size) {
         params.append(String((char*)data, size, CopyString));
@@ -364,7 +375,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
           response =
             HHVM_FN(json_encode)(
               make_map_array(s_output, m_context->obDetachContents(),
-                             s_return, HHVM_FN(json_encode)(funcRet)));
+                             s_return, HHVM_FN(json_encode)(funcRet))
+            ).toString();
           break;
         case 3: response = f_serialize(funcRet); break;
       }

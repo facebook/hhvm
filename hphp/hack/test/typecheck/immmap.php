@@ -9,7 +9,7 @@
  *
  */
 
-function basic(): ImmMap<int, int> {
+function basic(): ImmMap<mixed, int> {
   return ImmMap { 1 => 1, 2 => 2};
 }
 

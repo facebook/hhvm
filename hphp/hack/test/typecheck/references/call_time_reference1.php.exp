@@ -1,0 +1,2 @@
+File "call_time_reference1.php", line 4, characters 12-14:
+Call-time pass-by-reference is not allowed (Parsing[1006])

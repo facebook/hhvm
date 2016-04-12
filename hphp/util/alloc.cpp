@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,10 +60,7 @@ static void numa_purge_arena();
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   if (mallctl) {
-    int err = mallctl("thread.tcache.flush", nullptr, nullptr, nullptr, 0);
-    if (UNLIKELY(err != 0)) {
-      Logger::Warning("mallctl thread.tcache.flush failed with error %d", err);
-    }
+    mallctlCall("thread.tcache.flush", true);
     numa_purge_arena();
   }
 #endif
@@ -72,6 +69,67 @@ void flush_thread_caches() {
     MallocExtensionInstance()->MarkThreadIdle();
   }
 #endif
+}
+
+bool purge_all(std::string* errStr) {
+#ifdef USE_JEMALLOC
+  if (mallctl) {
+    assert(mallctlnametomib && mallctlbymib);
+    // Purge all dirty unused pages.
+    int err = mallctlWrite<uint64_t>("epoch", 1, true);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctl(\"epoch\", ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+
+    unsigned narenas;
+    err = mallctlRead("arenas.narenas", &narenas, true);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
+             << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+
+    size_t mib[3];
+    size_t miblen = 3;
+    err = mallctlnametomib("arena.0.purge", mib, &miblen);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err
+             << " in mallctlnametomib(\"arenas.narenas\", ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+    mib[1] = narenas;
+
+    err = mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctlbymib([\"arena." << narenas
+             << ".purge\"], ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+  }
+#endif
+#ifdef USE_TCMALLOC
+  if (MallocExtensionInstance) {
+    MallocExtensionInstance()->ReleaseFreeMemory();
+  }
+#endif
+  return true;
 }
 
 __thread uintptr_t s_stackLimit;
@@ -190,12 +248,18 @@ static std::vector<bitmask*> *node_to_cpu_mask;
 static bool use_numa = false;
 static bool threads_bind_local = false;
 
-extern "C" void numa_init();
-
+extern "C" {
+HHVM_ATTRIBUTE_WEAK extern void numa_init(void);
+}
 static void initNuma() {
-  // numa_init is called automatically, but is probably called after
-  // JEMallocInitializer(). its idempotent, so call it here.
-  numa_init();
+
+  // When linked dynamically numa_init() is called before JEMallocInitializer()
+  // numa_init is not exported by libnuma.so so it will be NULL
+  // however when linked statically numa_init() is not guaranteed to be called
+  // before JEMallocInitializer(),so call it here.
+  if(&numa_init) {
+    numa_init();
+  }
   if (numa_available() < 0) return;
 
   // set interleave for early code. we'll then force interleave
@@ -228,9 +292,35 @@ static void initNuma() {
   numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
 }
 
+static bool purge_decay_hard() {
+  const char *purge;
+  if (mallctlRead("opt.purge", &purge, true) == 0) {
+    return (strcmp(purge, "decay") == 0);
+  }
+
+  // If "opt.purge" is absent, it's either because jemalloc is too old
+  // (pre-4.1.0), or because ratio-based purging is no longer present
+  // (likely post-4.x).
+  ssize_t decay_time;
+  return (mallctlRead("opt.decay_time", &decay_time, true) == 0);
+}
+
+static bool purge_decay() {
+  static bool initialized = false;
+  static bool decay;
+
+  if (!initialized) {
+    decay = purge_decay_hard();
+    initialized = true;
+  }
+  return decay;
+}
+
 static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
-  size_t miblen = 3;
-  size_t mib[miblen];
+  assert(!purge_decay());
+  constexpr size_t max_miblen = 3;
+  size_t miblen = max_miblen;
+  size_t mib[max_miblen];
   if (mallctlnametomib("arena.0.lg_dirty_mult", mib, &miblen) == 0) {
     mib[1] = arena;
     int err = mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,
@@ -246,10 +336,10 @@ static void numa_purge_arena() {
   // Only purge if the thread's assigned arena is one of those created for use
   // by request threads.
   if (!threads_bind_local) return;
+  // Only purge if ratio-based purging is active.
+  if (purge_decay()) return;
   unsigned arena;
-  size_t sz = sizeof(arena);
-  int DEBUG_ONLY err = mallctl("thread.arena", &arena, &sz, nullptr, 0);
-  assert(err == 0);
+  mallctlRead("thread.arena", &arena);
   if (arena >= base_arena && arena < base_arena + numa_num_nodes) {
     // Threads may race through the following calls, but the last call made by
     // any idling thread will correctly restore lg_dirty_mult.
@@ -267,24 +357,24 @@ void enable_numa(bool local) {
     threads_bind_local = true;
 
     unsigned arenas;
-    size_t sz_arenas = sizeof(arenas);
-    if (mallctl("arenas.narenas", &arenas, &sz_arenas, nullptr, 0) != 0) {
+    if (mallctlRead("arenas.narenas", &arenas, true) != 0) {
       return;
     }
 
     base_arena = arenas;
     for (int i = 0; i < numa_num_nodes; i++) {
       int arena;
-      size_t sz = sizeof(arena);
-      if (mallctl("arenas.extend", &arena, &sz, nullptr, 0) != 0) {
+      if (mallctlRead("arenas.extend", &arena, true) != 0) {
         return;
       }
       if (arena != arenas) {
         return;
       }
       arenas++;
-      // Tune dirty page purging for new arena.
-      set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
+      if (!purge_decay()) {
+        // Tune dirty page purging for new arena.
+        set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
+      }
     }
   }
 
@@ -342,9 +432,7 @@ void set_numa_binding(int node) {
     numa_bitmask_free(nodes);
 
     int arena = base_arena + node;
-    int DEBUG_ONLY e = mallctl("thread.arena", nullptr, nullptr,
-                               &arena, sizeof(arena));
-    assert(!e);
+    mallctlWrite("thread.arena", arena);
   }
 
   char buf[32];
@@ -401,18 +489,18 @@ struct JEMallocInitializer {
     dummy += "!";         // so the definition of dummy isn't optimized out
 #endif  /* __GLIBC__ */
 
+    // Enable backtracing through PHP frames (t9814472).
+    setenv("UNW_RBP_ALWAYS_VALID", "1", false);
+
     initNuma();
 
     // Create a special arena to be used for allocating objects in low memory.
-    size_t sz = sizeof(low_arena);
-    if (mallctl("arenas.extend", &low_arena, &sz, nullptr, 0) != 0) {
+    if (mallctlRead("arenas.extend", &low_arena, true) != 0) {
       // Error; bail out.
       return;
     }
-    const char *dss = "primary";
-    if (mallctl(folly::format("arena.{}.dss", low_arena).str().c_str(),
-                nullptr, nullptr,
-                (void *)&dss, sizeof(const char *)) != 0) {
+    if (mallctlWrite(folly::format("arena.{}.dss", low_arena).str().c_str(),
+                     "primary", true) != 0) {
       // Error; bail out.
       return;
     }
@@ -497,24 +585,24 @@ void low_malloc_skip_huge(void* start, void* end) {}
 
 #endif // USE_JEMALLOC
 
-#ifdef USE_JEMALLOC
+int mallctlCall(const char* cmd, bool errOk) {
+  // Use <unsigned> rather than <void> to avoid sizeof(void).
+  return mallctlHelper<unsigned>(cmd, nullptr, nullptr, errOk);
+}
 
 int jemalloc_pprof_enable() {
-  bool active = true;
-  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+  return mallctlWrite("prof.active", true, true);
 }
 
 int jemalloc_pprof_disable() {
-  bool active = false;
-  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+  return mallctlWrite("prof.active", false, true);
 }
 
 int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   if (!force) {
     bool active = false;
-    size_t activeSize = sizeof(active);
     // Check if profiling has been enabled before trying to dump.
-    int err = mallctl("opt.prof", &active, &activeSize, nullptr, 0);
+    int err = mallctlRead("opt.prof", &active, true);
     if (err || !active) {
       return 0; // nothing to do
     }
@@ -522,13 +610,11 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
   if (prefix != "") {
     const char *s = prefix.c_str();
-    return mallctl("prof.dump", nullptr, nullptr, (void *)&s, sizeof(char *));
+    return mallctlWrite("prof.dump", s, true);
   } else {
-    return mallctl("prof.dump", nullptr, nullptr, nullptr, 0);
+    return mallctlCall("prof.dump", true);
   }
 }
-
-#endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////
 }
@@ -538,5 +624,9 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16,"
-    "lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT);
+    "lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT)
+#ifdef ENABLE_HHPROF
+    ",prof:true,prof_active:false,prof_thread_active_init:false"
+#endif
+    ;
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,6 +37,8 @@ const char* show(RoundDirection rd) {
   }
   not_reached();
 }
+
+namespace x64 {
 
 void DecodedInstruction::decode(uint8_t* ip) {
   m_ip = ip;
@@ -206,7 +208,7 @@ void DecodedInstruction::determineOperandsMap0(uint8_t* ip) {
       if ((m_opcode & 0x0c) == 0) {
         m_offSz = m_flags.addrSzOvr ? sz::dword : sz::qword;
       } else if ((m_opcode & 0x0e) == 8) {
-        m_immSz = m_opcode & 1 ? sz::byte :
+        m_immSz = !(m_opcode & 1) ? sz::byte :
           m_flags.opndSzOvr ? sz::word : sz::dword;
       }
       break;
@@ -551,4 +553,4 @@ uint8_t DecodedInstruction::getModRm() const {
   return m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
 }
 
-} }
+}}}

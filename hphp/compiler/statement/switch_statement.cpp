@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -135,24 +135,6 @@ void SwitchStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void SwitchStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 2;
-  if (m_cases != nullptr) numProps++;
-
-  cg.printObjectHeader("SwitchStatement", numProps);
-  cg.printPropertyHeader("expression");
-  m_exp->outputCodeModel(cg);
-  if (m_cases != nullptr) {
-    cg.printPropertyHeader("caseStatements");
-    cg.printStatementVector(m_cases);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/filter/ext_filter.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
@@ -75,7 +74,7 @@ static int php_filter_parse_int(const char *str, unsigned int str_len,
   }
 
   if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
-   || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) &&
+   || (sizeof(long) == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) &&
        *str > '2')) {
     /* overflow */
     return -1;
@@ -356,7 +355,7 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
     return (double)lval;
   } else if (isDoubleType(dt)) {
     if ((!dval && p.size() > 1 && strpbrk(p.data(), "123456789")) ||
-         !zend_finite(dval)) {
+         !std::isfinite(dval)) {
       goto error;
     }
     return dval;
@@ -432,9 +431,6 @@ Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
       s++;
     }
 
-    if (*(e - 1) == '.') {
-      goto bad_url;
-    }
   }
 
   if (
@@ -644,8 +640,7 @@ Variant php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) {
       if (flags & k_FILTER_FLAG_NO_RES_RANGE) {
         if (
           (ip[0] == 0) ||
-          (ip[0] == 128 && ip[1] == 0) ||
-          (ip[0] == 191 && ip[1] == 255) ||
+          (ip[0] == 100 && (ip[1] >= 64 || ip[1] <= 127)) ||
           (ip[0] == 169 && ip[1] == 254) ||
           (ip[0] == 192 && ip[1] == 0 && ip[2] == 2) ||
           (ip[0] == 127 && ip[1] == 0 && ip[2] == 0 && ip[3] == 1) ||

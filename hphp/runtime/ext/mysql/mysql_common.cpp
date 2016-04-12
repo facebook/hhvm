@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -55,8 +55,7 @@ namespace HPHP {
 const StaticString
   s_mysqli_result("mysqli_result");
 
-class MySQLStaticInitializer {
-public:
+struct MySQLStaticInitializer {
   MySQLStaticInitializer() {
     mysql_library_init(0, NULL, NULL);
   }
@@ -68,7 +67,14 @@ static MySQLStaticInitializer s_mysql_initializer;
 int MySQLUtil::set_mysql_timeout(MYSQL *mysql,
                                  MySQLUtil::TimeoutType type,
                                  int ms) {
-   mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
+#ifdef __APPLE__
+  // Work around a bug in webscalesql where setting a read or write timeout
+  // causes most mysql connections to fail (depending on the exact timing of
+  // packets). See https://github.com/webscalesql/webscalesql-5.6/issues/23
+  return 0;
+#endif
+
+  mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
 #ifdef MYSQL_MILLISECOND_TIMEOUT
   switch (type) {
    case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;
@@ -780,8 +786,11 @@ int64_t MySQLResult::getRowCount() const {
 
 bool MySQLResult::seekRow(int64_t row) {
   if (row < 0 || row >= getRowCount()) {
-    raise_warning("Unable to jump to row %" PRId64 " on MySQL result index %d",
-                    row, getId());
+    if (row != 0) {
+      raise_warning("Unable to jump to row %"
+                      PRId64 " on MySQL result index %d",
+                      row, getId());
+    }
     return false;
   }
 
@@ -841,9 +850,9 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
 
 MySQLStmtVariables::MySQLStmtVariables(const Array& arr): m_arr(arr) {
   int count = m_arr.size();
-  m_vars   = (MYSQL_BIND*)req::calloc(count, sizeof(MYSQL_BIND));
-  m_null   = (my_bool*)req::calloc(count, sizeof(my_bool));
-  m_length = (unsigned long*)req::calloc(count, sizeof(unsigned long));
+  m_vars   = req::calloc_raw_array<MYSQL_BIND>(count);
+  m_null   = req::calloc_raw_array<my_bool>(count);
+  m_length = req::calloc_raw_array<unsigned long>(count);
 
   for (int i = 0; i < count; i++) {
     m_null[i] = false;
@@ -930,7 +939,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
     }
 
     if (b->buffer_length > 0) {
-      b->buffer = req::calloc(1, b->buffer_length);
+      b->buffer = req::calloc(b->buffer_length, 1);
     }
   }
   mysql_free_result(res);
@@ -1408,7 +1417,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
       if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
         MySqlStats::Record(verb, rconn->m_xaction_count, table);
         if (verb == "update") {
-          preg_match("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
+          preg_match("/([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]/",
                      q, &matches);
           marray = matches.toArray();
           size = marray.size();

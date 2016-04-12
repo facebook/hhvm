@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -16,7 +16,6 @@
  * to use a functor.
  *)
 (*****************************************************************************)
-open Utils
 
 type config = {
   global_size: int;
@@ -30,6 +29,13 @@ val default_config : config
 (*****************************************************************************)
 
 val init: config -> unit
+
+(*****************************************************************************)
+(* Resets the initialized and used memory to the state right after
+ * initialization.
+ *)
+(*****************************************************************************)
+val reset: unit -> unit
 
 (*****************************************************************************)
 (* The shared memory garbage collector. It must be called every time we
@@ -48,14 +54,14 @@ val collect: [ `gentle | `aggressive ] -> unit
 val init_done: unit -> unit
 
 (*****************************************************************************)
-(* Serializes the shared memory and writes it to a file *)
+(* Serializes the dependency table and writes it to a file *)
 (*****************************************************************************)
-val save: string -> unit
+val save_dep_table: string -> unit
 
 (*****************************************************************************)
-(* Loads the shared memory by reading from a file *)
+(* Loads the dependency table by reading from a file *)
 (*****************************************************************************)
-val load: string -> unit
+val load_dep_table: string -> unit
 
 (*****************************************************************************)
 (* The size of the dynamically allocated shared memory section *)
@@ -81,6 +87,31 @@ val hash_stats : unit -> table_stats
 
 val invalidate_caches: unit -> unit
 
+(* With local writes enabled, data written will not be stored in global shared
+ * memory, but in a local (to the process) hashtable.
+ * When reading previously written data, local version will be returned. Reading
+ * data that was not locally written will return version from shared memory.
+ *
+ * This is useful when non-master process needs to call a function that
+ * has a side effect of writing to shared memory that we don't want to
+ * persist outside of this process, and factoring out the side effect is
+ * too annoying. *)
+val enable_local_writes: unit -> unit
+
+(* Thread safety of master and worker processes is achieved implicitly by
+ * ordering of Hack typing phases - only master is allowed to perform
+ * non-parallelizable operations (moves and removals from hashtable), and does
+ * it when workers are not doing any tasks.
+ *
+ * Lock below is exposed for use of non-worker processes (like IDE process)
+ * that want to read shared memory at arbitrary times. *)
+
+val hashtable_mutex_lock: unit -> unit
+val hashtable_mutex_trylock: unit -> bool
+val hashtable_mutex_unlock: unit -> unit
+
+val try_lock_hashtable: do_:(unit -> 'a) -> 'a option
+
 (*****************************************************************************)
 (* The signature of a shared memory hashtable.
  * To create one: SharedMem.NoCache(struct type = my_type_of_value end).
@@ -92,11 +123,11 @@ val invalidate_caches: unit -> unit
  *)
 (*****************************************************************************)
 
-module type S = sig
+module type NoCache = sig
   type key
   type t
   module KeySet : Set.S with type elt = key
-  module KeyMap : MapSig with type key = key
+  module KeyMap : MyMap.S with type key = key
 
   (* Safe for concurrent writes, the first writer wins, the second write
    * is dismissed.
@@ -118,14 +149,19 @@ module type S = sig
   val mem: key -> bool
 
   (* This function takes the elements present in the set and keep the "old"
-   * version in a separate heap. This is useful when we want to compare 
-   * what has changed. We will be in a situation for type-checking 
+   * version in a separate heap. This is useful when we want to compare
+   * what has changed. We will be in a situation for type-checking
    * (cf typing/typing_redecl_service.ml) where we want to compare the type
    * of a class in the previous environment vs the current type.
    *)
   val oldify_batch: KeySet.t -> unit
   (* Reverse operation of oldify *)
   val revive_batch: KeySet.t -> unit
+end
+
+module type WithCache = sig
+  include NoCache
+  val write_through : key -> t -> unit
 end
 
 module type UserKeyType = sig
@@ -137,15 +173,15 @@ end
 module NoCache :
   functor (UserKeyType : UserKeyType) ->
   functor (Value:Value.Type) ->
-  S with type t = Value.t
+  NoCache with type t = Value.t
     and type key = UserKeyType.t
     and module KeySet = Set.Make (UserKeyType)
-    and module KeyMap = MyMap (UserKeyType)
+    and module KeyMap = MyMap.Make (UserKeyType)
 
 module WithCache :
   functor (UserKeyType : UserKeyType) ->
   functor (Value:Value.Type) ->
-  S with type t = Value.t
+  WithCache with type t = Value.t
     and type key = UserKeyType.t
     and module KeySet = Set.Make (UserKeyType)
-    and module KeyMap = MyMap (UserKeyType)
+    and module KeyMap = MyMap.Make (UserKeyType)

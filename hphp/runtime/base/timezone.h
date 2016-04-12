@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,25 +19,25 @@
 
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/system/constants.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
+
+#include <map>
+#include <memory>
 
 extern "C" {
 #include <timelib.h>
-#include <map>
-#include <memory>
 }
 
 namespace HPHP {
 
-class Array;
+struct Array;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Handles all timezone related functions.
  */
-class TimeZone : public SweepableResourceData {
-public:
+struct TimeZone : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(TimeZone);
 
   /**
@@ -52,7 +52,6 @@ public:
    */
   static bool IsValid(const char* name);
   static Array GetAbbreviations();
-  static Array GetNamesToCountryCodes();
   static String AbbreviationToName(String abbr, int utcoffset = -1,
                                    int isdst = 1);
 
@@ -117,9 +116,9 @@ public:
   req::ptr<TimeZone> cloneTimeZone() const;
 
 protected:
-  friend class DateTime;
-  friend class TimeStamp;
-  friend class DateInterval;
+  friend struct DateTime;
+  friend struct TimeStamp;
+  friend struct DateInterval;
 
   /**
    * Returns raw pointer. For internal use only.
@@ -140,6 +139,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 void timezone_init();
+const timelib_tzdb* timezone_get_builtin_tzdb();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -86,14 +86,9 @@ flood error logs.
     # E_USER_WARNING, E_NOTICE, and E_USER_NOTICE are supported.
     UpgradeLevel = 0 (default)
     CallUserHandlerOnFatals = false
-    MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
-    WarnTooManyArguments = false
-    EnableHipHopErrors = true
     NoticeFrequency = 1    # 1 out of these many notices to log
     WarningFrequency = 1   # 1 out of these many warnings to log
-    AssertActive = false
-    AssertWarning = false
   }
 
 = Resource Limits
@@ -107,7 +102,6 @@ flood error logs.
     DropCacheCycle = 0         # in seconds, how often to drop disk cache
     MaxSQLRowCount = 0
     SerializationSizeLimit = 0
-    StringOffsetLimit = 10 * 1024 * 1024
   }
 
 = Server
@@ -128,7 +122,7 @@ flood error logs.
     Host = www.default_domain.com
     IP = 0.0.0.0
     Port = 80
-    Type = libevent | fastcgi
+    Type = proxygen | fastcgi
     ThreadCount = 50
     ThreadRoundRobin = false   # last thread serves next
     ThreadDropCacheTimeoutSeconds = 0
@@ -177,7 +171,6 @@ flood error logs.
     GracefulShutdownWait = 0   # in seconds
     HarshShutdown = true
     EvilShutdown = true
-    DanglingWait = 0
 
     # SSL options
     EnableSSL = false
@@ -191,10 +184,6 @@ Graceful shutdown will try admin /stop command and it waits for number of
 seconds specified by GracefulShutdownWait. Harsh shutdown looks for pid file
 and try to kill that process. Evil shutdown kills anything listening on the
 server port it's trying to grab.
-
-- DanglingWait
-
-How long to wait for dangling server to respond.
 
     # HTTP settings
     GzipCompressionLevel = 3
@@ -211,25 +200,16 @@ How long to wait for dangling server to respond.
     EnableEarlyFlush = true
     ForceChunkedEncoding = false
     MaxPostSize = 8  # in MB
-    LibEventSyncSend = true
-    ResponseQueueCount = 0
 
 To further control idle connections, set
     ConnectionTimeoutSeconds = <some value>
-This parameter controls how long libevent will timeout a connection after
+This parameter controls how long the server will timeout a connection after
 idle on read or write. It takes effect when EnableKeepAlive is enabled.
 
 - EnableEarlyFlush, ForceChunkedEncoding
 
 EnableEarlyFlush allows chunked encoding responses, and ForceChunkedEncoding
 will only send chunked encoding responses, unless client doesn't understand.
-
-- LibEventSyncSend, ResponseQueueCount
-
-These are fine tuning options for libevent server. LibEventSyncSend allows
-response packets to be sent directly from worker thread, normally resulting in
-faster server responses. ResponseQueueCount specifies how many response queues
-to use for sending.
 
     # static contents
     FileCache = filename
@@ -428,7 +408,7 @@ to block access to certain files (ex. .htaccess.)
 
   Satellites {
     * {
-      Type = RPCServer | InternalPageServer | DanglingPageServer
+      Type = RPCServer | InternalPageServer
 
       Port = 0  # disabled
       ThreadCount = 5
@@ -449,9 +429,9 @@ to block access to certain files (ex. .htaccess.)
     }
   }
 
-- RPCServer, DanglingPageServer
+- RPCServer
 
-Please refer to their documentations for more details.
+Please refer to its documentation for more details.
 
 - Internal Page Server
 
@@ -583,9 +563,7 @@ next requests.
 = Debug Settings
 
   Debug {
-    FullBacktrace = false
     ServerErrorMessage = false
-    TranslateSource = false
 
     RecordInput = false
     ClearInputOnSuccess = true
@@ -599,11 +577,9 @@ next requests.
     StackTraceTimeout = 0
   }
 
-- FullBacktrace, ServerErrorMessage, TranslateSource
+- ServerErrorMessage
 
-These settings turn on error messages in HTTP responses with detailed
-stacktrace information. TranslateSource will translate C++ file and line
-numbers into original PHP file and line numbers.
+This setting turns on error messages in HTTP responses.
 
 - RecordInput, ClearInputOnSuccess
 

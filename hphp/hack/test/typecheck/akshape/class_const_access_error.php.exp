@@ -1,0 +1,6 @@
+File "class_const_access_error.php", line 17, characters 15-23:
+Invalid argument (Typing[4110])
+File "class_const_access_error.php", line 20, characters 22-27:
+This is a string
+File "class_const_access_error.php", line 14, characters 15-15:
+It is incompatible with an int

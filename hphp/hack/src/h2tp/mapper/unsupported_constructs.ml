@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -45,6 +45,7 @@ let map program =
     | (Some "\\HH\\Pair", _) ->
         unsupported (p, "Invalid initialization of Pair")
     | (Some "\\HH\\Map", _) | (Some "\\HH\\ImmMap", _) ->
+        (** TODO: task 10395133. support dict *)
         List.iter ~f:begin function
           | AFkvalue _ -> ()
           | AFvalue (p, _) ->

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,6 +117,18 @@ bool less(int64_t v1, const StringData *v2) {
   }
 }
 
+bool lessEqual(int64_t v1, const StringData *v2) {
+  int64_t lval; double dval;
+  DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  if (ret == KindOfInt64) {
+    return v1 <= lval;
+  }
+  if (ret == KindOfDouble) {
+    return (double)v1 <= dval;
+  }
+  return v1 <= 0;
+}
+
 bool more(int v1, const StringData *v2) {
   return more((int64_t)v1, v2);
 }
@@ -131,6 +143,31 @@ bool more(int64_t v1, const StringData *v2) {
   } else {
     return v1 > 0;
   }
+}
+
+bool moreEqual(int64_t v1, const StringData *v2) {
+  int64_t lval; double dval;
+  DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  if (ret == KindOfInt64) {
+    return v1 >= lval;
+  }
+  if (ret == KindOfDouble) {
+    return (double)v1 >= dval;
+  }
+  return v1 >= 0;
+}
+
+int64_t compare(const StringData* v1, int64_t v2) {
+  assert(v1);
+  int64_t lval;
+  double dval;
+  auto ret = v1->isNumericWithVal(lval, dval, 1);
+  if (ret == KindOfInt64) {
+    return compare(lval, v2);
+  } else if (ret == KindOfDouble) {
+    return compare(dval, (double)v2);
+  }
+  return compare((int64_t)0, v2);
 }
 
 //////////////////////////////////////////////////////////////////////

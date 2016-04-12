@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,6 @@
 
 #include <string>
 #include <vector>
-#include <cstdio>
 
 #include <sys/types.h>
 #ifdef _MSC_VER
@@ -34,8 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helper class
 
-class CPipe {
-public:
+struct CPipe {
   CPipe()  { m_fds[0] = m_fds[1] = 0;}
   ~CPipe() { close();}
 
@@ -60,10 +58,18 @@ private:
   int m_fds[2];
 };
 
+struct MemInfo {
+  int64_t freeMb{-1};
+  int64_t cachedMb{-1};
+  int64_t buffersMb{-1};
+  bool valid() const {
+    return freeMb >= 0 && cachedMb >= 0 && buffersMb >= 0;
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
-class Process {
-public:
+struct Process {
   // Cached process statics
   static std::string HostName;
   static std::string CurrentWorkingDirectory;
@@ -105,13 +111,24 @@ public:
    * Get command line with a process ID.
    */
   static std::string GetCommandLine(pid_t pid);
-  static bool CommandStartsWith(pid_t pid, const std::string &cmd);
+
+  /**
+   * Check if the current process is being run under GDB.  Will return false if
+   * we're unable to read /proc/{Process::GetProcessId()}/status.
+   */
   static bool IsUnderGDB();
 
   /**
    * Get memory usage in MB by a process.
    */
   static int64_t GetProcessRSS(pid_t pid);
+
+  /**
+   * Get system-wide memory usage information.  Returns false upon
+   * failure.  Note that previous value of `info` is reset, even upon
+   * failure.
+   */
+  static bool GetMemoryInfo(MemInfo& info);
 
   /**
    * Current thread's identifier.

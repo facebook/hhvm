@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 struct Variant;
 
 extern const StaticString k_HPHP_TRIM_CHARLIST;
@@ -35,8 +35,7 @@ extern const StaticString k_HPHP_TRIM_CHARLIST;
  * Utility string functions. These are mostly wrappers around zend/ string
  * functions, but in a safe and convenient form.
  */
-class StringUtil {
-public:
+struct StringUtil {
   enum class PadType {
     Left = 0,
     Right = 1,

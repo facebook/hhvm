@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/system/constants.h"
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>
@@ -837,7 +836,7 @@ static int php_mb_parse_encoding_array(const Array& array,
     bauto = 0;
     n = 0;
     for (ArrayIter iter(array); iter; ++iter) {
-      String hash_entry = iter.second();
+      auto const hash_entry = iter.second().toString();
       if (strcasecmp(hash_entry.data(), "auto") == 0) {
         if (!bauto) {
           bauto = 1;
@@ -890,7 +889,7 @@ static bool php_mb_parse_encoding(const Variant& encoding,
                                   mbfl_encoding ***return_list,
                                   int *return_size, bool persistent) {
   bool ret;
-  if (encoding.is(KindOfArray)) {
+  if (encoding.isArray()) {
     ret = php_mb_parse_encoding_array(encoding.toArray(),
                                       return_list, return_size,
                                       persistent ? 1 : 0);
@@ -1026,6 +1025,26 @@ Array HHVM_FUNCTION(mb_list_encodings) {
   const mbfl_encoding *encoding;
   while ((encoding = encodings[i++]) != nullptr) {
     ret.append(String(encoding->name, CopyString));
+  }
+  return ret;
+}
+
+Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
+  const mbfl_encoding *encoding;
+  int i = 0;
+  encoding = mbfl_name2encoding(name.data());
+  if (!encoding) {
+    raise_warning("mb_encoding_aliases(): Unknown encoding \"%s\"",
+                  name.data());
+    return false;
+  }
+
+  Array ret = Array::Create();
+  if (encoding->aliases != nullptr) {
+    while ((*encoding->aliases)[i] != nullptr) {
+      ret.append((*encoding->aliases)[i]);
+      i++;
+    }
   }
   return ret;
 }
@@ -1219,7 +1238,7 @@ Variant HHVM_FUNCTION(mb_convert_encoding,
                       const String& to_encoding,
                       const Variant& from_encoding /* = null_variant */) {
   String encoding = from_encoding.toString();
-  if (from_encoding.is(KindOfArray)) {
+  if (from_encoding.isArray()) {
     StringBuffer _from_encodings;
     Array encs = from_encoding.toArray();
     for (ArrayIter iter(encs); iter; ++iter) {
@@ -1306,7 +1325,7 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 static bool php_mbfl_encoding_detect(const Variant& var,
                                      mbfl_encoding_detector *identd,
                                      mbfl_string *string) {
-  if (var.is(KindOfArray) || var.is(KindOfObject)) {
+  if (var.isArray() || var.is(KindOfObject)) {
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
       if (php_mbfl_encoding_detect(iter.second(), identd, string)) {
@@ -1328,7 +1347,7 @@ static Variant php_mbfl_convert(const Variant& var,
                                 mbfl_buffer_converter *convd,
                                 mbfl_string *string,
                                 mbfl_string *result) {
-  if (var.is(KindOfArray)) {
+  if (var.isArray()) {
     Array ret = empty_array();
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
@@ -1505,7 +1524,7 @@ static Variant php_mb_numericentity_exec(const String& str,
 
   /* conversion map */
   int *iconvmap = nullptr;
-  if (convmap.is(KindOfArray)) {
+  if (convmap.isArray()) {
     Array convs = convmap.toArray();
     mapsize = convs.size();
     if (mapsize > 0) {
@@ -2282,15 +2301,23 @@ static Variant php_mb_substr(const String& str, int from,
     }
   }
 
-  int size;
+  int len = vlen.toInt64();
+  int size = 0;
+
   if (substr) {
-    size = mbfl_strlen(&string);
+    int size_tmp = -1;
+    if (vlen.isNull() || len == 0x7FFFFFFF) {
+      size_tmp = mbfl_strlen(&string);
+      len = size_tmp;
+    }
+    if (from < 0 || len < 0) {
+      size = size_tmp < 0 ? mbfl_strlen(&string) : size_tmp;
+    }
   } else {
     size = str.size();
-  }
-  int len = vlen.toInt64();
-  if (vlen.isNull() || len == 0x7FFFFFFF) {
-    len = size;
+    if (vlen.isNull() || len == 0x7FFFFFFF) {
+      len = size;
+    }
   }
 
   /* if "from" position is negative, count start position from the end
@@ -2313,11 +2340,8 @@ static Variant php_mb_substr(const String& str, int from,
     }
   }
 
-  if (from > size) {
-    if (!substr) {
-      return false;
-    }
-    from = size;
+  if (!substr && from > size) {
+    return false;
   }
 
   mbfl_string result;
@@ -4159,8 +4183,8 @@ bool HHVM_FUNCTION(mb_send_mail,
   }
 
   struct {
-    int cnt_type:1;
-    int cnt_trans_enc:1;
+    unsigned int cnt_type:1;
+    unsigned int cnt_trans_enc:1;
   } suppressed_hdrs = { 0, 0 };
 
   static const StaticString s_CONTENT_TYPE("CONTENT-TYPE");
@@ -4202,7 +4226,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   static const StaticString
          s_CONTENT_TRANSFER_ENCODING("CONTENT-TRANSFER-ENCODING");
-  s = ht_headers[s_CONTENT_TRANSFER_ENCODING];
+  s = ht_headers[s_CONTENT_TRANSFER_ENCODING].toString();
   if (!s.isNull()) {
     mbfl_no_encoding _body_enc = mbfl_name2no_encoding(s.data());
     switch (_body_enc) {
@@ -4377,8 +4401,7 @@ bool HHVM_FUNCTION(mb_send_mail,
   return ret;
 }
 
-static class mbstringExtension final : public Extension {
-  public:
+static struct mbstringExtension final : Extension {
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {
@@ -4390,6 +4413,15 @@ static class mbstringExtension final : public Extension {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "mbstring.substitute_character",
                      &MBSTRG(current_filter_illegal_mode));
+
+    HHVM_RC_INT(MB_OVERLOAD_MAIL, 1);
+    HHVM_RC_INT(MB_OVERLOAD_STRING, 2);
+    HHVM_RC_INT(MB_OVERLOAD_REGEX, 4);
+
+    HHVM_RC_INT(MB_CASE_UPPER, PHP_UNICODE_CASE_UPPER);
+    HHVM_RC_INT(MB_CASE_LOWER, PHP_UNICODE_CASE_LOWER);
+    HHVM_RC_INT(MB_CASE_TITLE, PHP_UNICODE_CASE_TITLE);
+
     HHVM_FE(mb_list_encodings);
     HHVM_FE(mb_list_encodings_alias_names);
     HHVM_FE(mb_list_mime_names);
@@ -4404,6 +4436,7 @@ static class mbstringExtension final : public Extension {
     HHVM_FE(mb_detect_order);
     HHVM_FE(mb_encode_mimeheader);
     HHVM_FE(mb_encode_numericentity);
+    HHVM_FE(mb_encoding_aliases);
     HHVM_FE(mb_ereg_match);
     HHVM_FE(mb_ereg_replace);
     HHVM_FE(mb_ereg_search_getpos);

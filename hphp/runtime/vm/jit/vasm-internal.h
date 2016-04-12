@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,17 +43,22 @@ struct Venv {
   struct LabelPatch { CodeAddress instr; Vlabel target; };
   struct SvcReqPatch { CodeAddress jmp, jcc; Vinstr svcreq; };
 
-  Venv(const Vunit& unit, Vtext& text) : unit(unit), text(text) {}
+  Venv(const Vunit& unit, Vtext& text, CGMeta& meta)
+    : unit(unit)
+    , text(text)
+    , meta(meta)
+  {}
 
   const Vunit& unit;
   Vtext& text;
+  CGMeta& meta;
 
   CodeBlock* cb;
 
   Vlabel current{0};
   Vlabel next{0};
 
-  jit::vector<CodeAddress> addrs, points;
+  jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jmps, jccs, bccs;
   jit::vector<LabelPatch> catches;
 
@@ -101,7 +106,15 @@ struct Venv {
  * };
  */
 template<class Vemit>
-void vasm_emit(const Vunit& u, Vtext& text, AsmInfo* asm_info);
+void vasm_emit(const Vunit& u, Vtext& text, CGMeta& fixups,
+               AsmInfo* asm_info);
+
+/*
+ * Allocate memory to hold the given value and return a pointer to it. If a
+ * previous translation allocated the same literal, a pointer to that may be
+ * returned instead.
+ */
+const uint64_t* alloc_literal(Venv& env, uint64_t val);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

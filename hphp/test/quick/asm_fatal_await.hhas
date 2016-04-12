@@ -21,7 +21,7 @@
   PopC
 
   CGetL $x
-  Await 0  # should fatal
+  Await # should fatal
   PopC
 
   Int 1

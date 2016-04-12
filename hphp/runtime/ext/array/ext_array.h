@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,44 +26,13 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64_t k_UCOL_DEFAULT;
-extern const int64_t k_UCOL_PRIMARY;
-extern const int64_t k_UCOL_SECONDARY;
-extern const int64_t k_UCOL_TERTIARY;
-extern const int64_t k_UCOL_DEFAULT_STRENGTH;
-extern const int64_t k_UCOL_QUATERNARY;
-extern const int64_t k_UCOL_IDENTICAL;
-extern const int64_t k_UCOL_OFF;
-extern const int64_t k_UCOL_ON;
-extern const int64_t k_UCOL_SHIFTED;
-extern const int64_t k_UCOL_NON_IGNORABLE;
-extern const int64_t k_UCOL_LOWER_FIRST;
-extern const int64_t k_UCOL_UPPER_FIRST;
-extern const int64_t k_UCOL_FRENCH_COLLATION;
-extern const int64_t k_UCOL_ALTERNATE_HANDLING;
-extern const int64_t k_UCOL_CASE_FIRST;
-extern const int64_t k_UCOL_CASE_LEVEL;
-extern const int64_t k_UCOL_NORMALIZATION_MODE;
-extern const int64_t k_UCOL_STRENGTH;
-extern const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE;
-extern const int64_t k_UCOL_NUMERIC_COLLATION;
-
-Variant HHVM_FUNCTION(array_change_key_case,
-                      const Variant& input,
-                      int64_t case_ = 0);
 Variant HHVM_FUNCTION(array_chunk,
                       const Variant& input,
                       int size,
                       bool preserve_keys = false);
-Variant HHVM_FUNCTION(array_column,
-                      const Variant& arr,
-                      const Variant& val_key,
-                      const Variant& idx_key = null_variant);
 Variant HHVM_FUNCTION(array_combine,
                       const Variant& keys,
                       const Variant& values);
-Variant HHVM_FUNCTION(array_count_values,
-                      const Variant& input);
 Variant HHVM_FUNCTION(array_fill_keys,
                       const Variant& keys,
                       const Variant& value);
@@ -80,18 +49,12 @@ bool HHVM_FUNCTION(key_exists,
                    const Variant& key,
                    const Variant& search);
 Variant array_keys_helper(const Variant& input,
-                          const Variant& search_value = uninit_null(),
+                          const Variant& search_value = null_variant,
                           bool strict = false);
-TypedValue* HHVM_FN(array_keys)(ActRec* ar);
 Variant HHVM_FUNCTION(array_map, const Variant& callback,
                                  const Variant& arr1,
                                  const Array& _argv = null_array);
 Variant HHVM_FUNCTION(array_merge_recursive,
-                      int64_t numArgs,
-                      const Variant& array1,
-                      const Variant& array2 = null_variant,
-                      const Array& args = null_array);
-Variant HHVM_FUNCTION(array_merge,
                       int64_t numArgs,
                       const Variant& array1,
                       const Variant& array2 = null_variant,
@@ -108,8 +71,6 @@ Variant HHVM_FUNCTION(array_pad,
                       const Variant& input,
                       int pad_size,
                       const Variant& pad_value);
-Variant HHVM_FUNCTION(array_pop,
-                      VRefParam array);
 Variant HHVM_FUNCTION(array_product,
                       const Variant& array);
 Variant HHVM_FUNCTION(array_push,
@@ -119,20 +80,12 @@ Variant HHVM_FUNCTION(array_push,
 Variant HHVM_FUNCTION(array_rand,
                       const Variant& input,
                       int num_req = 1);
-Variant HHVM_FUNCTION(array_reverse,
-                      const Variant& array,
-                      bool preserve_keys = false);
 Variant HHVM_FUNCTION(array_search,
                       const Variant& needle,
                       const Variant& haystack,
                       bool strict = false);
 Variant HHVM_FUNCTION(array_shift,
                       VRefParam array);
-Variant HHVM_FUNCTION(array_slice,
-                      const Variant& array,
-                      int64_t offset,
-                      const Variant& length = null_variant,
-                      bool preserve_keys = false);
 Variant HHVM_FUNCTION(array_splice,
                       VRefParam input,
                       int offset,
@@ -328,7 +281,7 @@ inline int64_t countHelper(TypedValue tv) {
 
 #define getCheckedArrayRet(input, fail)                           \
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
-  if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
+  if (UNLIKELY(!isArrayType(cell_##input->m_type))) {             \
     throw_expected_array_exception();                             \
     return fail;                                                  \
   }                                                               \
@@ -337,9 +290,9 @@ inline int64_t countHelper(TypedValue tv) {
 
 #define getCheckedArrayColumnRet(input, fail)                     \
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
-  if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
+  if (UNLIKELY(!isArrayType(cell_##input->m_type))) {             \
     if (cell_##input->m_type == KindOfString ||                   \
-        cell_##input->m_type == KindOfStaticString) {             \
+        cell_##input->m_type == KindOfPersistentString) {             \
       throw_bad_type_exception("array_column() expects parameter" \
                                " 1 to be array, string given");   \
     } else if (cell_##input->m_type == KindOfInt64) {             \

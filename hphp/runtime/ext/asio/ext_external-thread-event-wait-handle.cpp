@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
@@ -31,21 +32,18 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setoncreatecallback(
-  const Variant& callback
-) {
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventCreate(callback);
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setonsuccesscallback(
-  const Variant& callback
-) {
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventSuccess(callback);
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setonfailcallback(
-  const Variant& callback
-) {
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventFail(callback);
 }
 
@@ -122,6 +120,43 @@ void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
   destroyEvent(sweeping);
 }
 
+bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
+  if (getState() != STATE_WAITING) {
+    return false;               // already finished
+  }
+
+  if (!m_event->cancel()) {
+    return false;
+  }
+
+  // canceled; the processing thread will take care of cleanup
+
+  if (isInContext()) {
+    unregisterFromContext();
+  }
+
+  // clean up once we finish canceling event
+  auto exit_guard = folly::makeGuard([&] {
+      // unregister Sweepable
+      m_sweepable.unregister();
+      m_privData.reset();
+      // drop ownership by pending event (see initialize())
+      decRefObj(this);
+    });
+
+  auto parentChain = getParentChain();
+  setState(STATE_FAILED);
+  tvWriteObject(exception.get(), &m_resultOrException);
+  parentChain.unblock();
+
+  auto session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnExternalThreadEventFail())) {
+    session->onExternalThreadEventFail(this, exception);
+  }
+
+  return true;
+}
+
 void c_ExternalThreadEventWaitHandle::process() {
   assert(getState() == STATE_WAITING);
 
@@ -136,7 +171,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   try {
     m_event->unserialize(result);
   } catch (const Object& exception) {
-    assert(exception->instanceof(SystemLib::s_ExceptionClass));
+    assert(exception->instanceof(SystemLib::s_ThrowableClass));
     auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
@@ -197,6 +232,18 @@ void c_ExternalThreadEventWaitHandle::registerToContext() {
 void c_ExternalThreadEventWaitHandle::unregisterFromContext() {
   AsioContext *ctx = getContext();
   ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_ctxVecIndex);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initExternalThreadEventWaitHandle() {
+#define ETEWH_SME(meth) \
+  HHVM_STATIC_MALIAS(HH\\ExternalThreadEventWaitHandle, meth, \
+                     ExternalThreadEventWaitHandle, meth)
+  ETEWH_SME(setOnCreateCallback);
+  ETEWH_SME(setOnSuccessCallback);
+  ETEWH_SME(setOnFailCallback);
+#undef ETEWH_SME
 }
 
 ///////////////////////////////////////////////////////////////////////////////

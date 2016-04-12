@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,19 +30,16 @@ namespace HPHP {
  *
  * See asio-external-thread-event.h for more details.
  */
-class AsioExternalThreadEvent;
+struct AsioExternalThreadEvent;
 struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
-  DECLARE_CLASS_NO_SWEEP(ExternalThreadEventWaitHandle)
+  WAITHANDLE_CLASSOF(ExternalThreadEventWaitHandle);
+  WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);
   void sweep();
 
   explicit c_ExternalThreadEventWaitHandle(Class* cls =
       c_ExternalThreadEventWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_ExternalThreadEventWaitHandle() {}
-
-  static void ti_setoncreatecallback(const Variant& callback);
-  static void ti_setonsuccesscallback(const Variant& callback);
-  static void ti_setonfailcallback(const Variant& callback);
 
  public:
   static req::ptr<c_ExternalThreadEventWaitHandle>
@@ -59,6 +56,7 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   ObjectData* getPrivData() { return m_privData.get(); }
 
   void abandon(bool sweeping);
+  bool cancel(const Object& exception);
   void process();
   String getName();
   void exitContext(context_idx_t ctx_idx);
@@ -81,6 +79,13 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
 
   friend struct SweepableMember<c_ExternalThreadEventWaitHandle>;
 };
+
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
+                        const Variant& callback);
 
 inline c_ExternalThreadEventWaitHandle* c_WaitHandle::asExternalThreadEvent() {
   assert(getKind() == Kind::ExternalThreadEvent);

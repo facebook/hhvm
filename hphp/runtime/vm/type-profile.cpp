@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,8 @@ void profileInit() {
  * In server mode, we exclude warmup document requests from profiling, then
  * record samples for EvalJitProfileInterpRequests standard requests.
  */
-bool __thread profileOn = false;
+
+RequestKind __thread requestKind = RequestKind::Warmup;
 static bool warmingUp;
 static int64_t numRequests;
 bool __thread standardRequest = true;
@@ -67,10 +68,7 @@ void setRelocateRequests(int32_t n) {
 }
 
 namespace {
-
-using FuncProfileCounters = tbb::concurrent_hash_map<FuncId,uint32_t>;
-FuncProfileCounters s_func_counters;
-
+AtomicVector<uint32_t> s_func_counters{kFuncCountHint, 0};
 }
 
 void profileWarmupStart() {
@@ -91,9 +89,9 @@ static bool comp(const FuncHotness& a, const FuncHotness& b) {
  * set AttrHot to the top Eval.HotFuncCount functions.
  */
 static Mutex syncLock;
-static void setHotFuncAttr() {
+void profileSetHotFuncAttr() {
   static bool synced = false;
-  if (synced) return;
+  if (LIKELY(synced)) return;
 
   Lock lock(syncLock);
   if (synced) return;
@@ -117,9 +115,9 @@ static void setHotFuncAttr() {
     Func::getFuncVec().foreach([&](const Func* f) {
       if (!f) return;
       auto const profCounter = [&]() -> uint32_t {
-        FuncProfileCounters::const_accessor acc;
-        if (s_func_counters.find(acc, f->getFuncId())) {
-          return acc->second;
+        auto const id = f->getFuncId();
+        if (id < s_func_counters.size()) {
+          return s_func_counters[id].load(std::memory_order_relaxed);
         }
         return 0;
       }();
@@ -142,18 +140,16 @@ static void setHotFuncAttr() {
   // that still thought they were profiling, so we need to clear it on the
   // treadmill.
   Treadmill::enqueue([&] {
-    FuncProfileCounters newMap(0);
-    swap(s_func_counters, newMap);
+    s_func_counters.~AtomicVector<uint32_t>();
+    new (&s_func_counters) AtomicVector<uint32_t>{0, 0};
   });
 
   synced = true;
 }
 
 void profileIncrementFuncCounter(const Func* f) {
-  FuncProfileCounters::accessor acc;
-  auto const value = FuncProfileCounters::value_type(f->getFuncId(), 0);
-  s_func_counters.insert(acc, value);
-  ++acc->second;
+  s_func_counters.ensureSize(f->getFuncId() + 1);
+  s_func_counters[f->getFuncId()].fetch_add(1, std::memory_order_relaxed);
 }
 
 int64_t requestCount() {
@@ -166,23 +162,18 @@ static inline bool doneProfiling() {
      !RuntimeOption::EvalJitProfileRecord);
 }
 
-static inline bool profileThisRequest() {
-  if (warmingUp) return false;
-  if (doneProfiling()) return false;
-  if (RuntimeOption::ServerExecutionMode()) return true;
-  return RuntimeOption::EvalJitProfileRecord;
+static inline RequestKind getRequestKind() {
+  if (warmingUp) return RequestKind::Warmup;
+  if (doneProfiling()) return RequestKind::Standard;
+  if (RuntimeOption::ServerExecutionMode() ||
+      RuntimeOption::EvalJitProfileRecord) return RequestKind::Profile;
+  return RequestKind::Standard;
 }
 
 void profileRequestStart() {
-  bool p = profileThisRequest();
-  if (profileOn && !p) {
-    // If we are turning off profiling, set AttrHot on
-    // functions that are "hot".
-    setHotFuncAttr();
-  }
-  profileOn = p;
+  requestKind = getRequestKind();
 
-  bool okToJit = !warmingUp && !p;
+  bool okToJit = requestKind == RequestKind::Standard;
   if (okToJit) {
     jit::Lease::mayLock(true);
     if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {

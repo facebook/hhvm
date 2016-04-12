@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/code_model_enums.h"
 
 using namespace HPHP;
 
@@ -72,19 +71,6 @@ void AwaitExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void AwaitExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("UnaryOpExpression", 3);
-  cg.printPropertyHeader("expression");
-  m_exp->outputCodeModel(cg);
-  cg.printPropertyHeader("operation");
-  cg.printValue(PHP_AWAIT_OP);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

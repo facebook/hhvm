@@ -1,0 +1,4 @@
+6:     $a = 5;
+7:     return $foo($a);
+11:     echo $c;
+12:     return $c;

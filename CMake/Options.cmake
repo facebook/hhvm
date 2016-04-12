@@ -11,6 +11,7 @@ option(EXECUTION_PROFILER "Enable the execution profiler" OFF)
 option(ENABLE_FULL_SETLINE "Enable full setline function for debugger and code-coverage" OFF)
 
 option(USE_JEMALLOC "Use jemalloc" ON)
+option(ENABLE_HHPROF "Enable HHProf" OFF)
 
 option(CLANG_FORCE_LIBSTDCXX "Force libstdc++ when building against Clang/LLVM" OFF)
 

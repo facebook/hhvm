@@ -1,0 +1,26 @@
+dict(7) {
+  ["x"]=>
+  string(1) "y"
+  ["1"]=>
+  string(5) "dict1"
+  [2]=>
+  string(5) "dict2"
+  [1]=>
+  string(5) "dict3"
+  ["2"]=>
+  string(5) "dict4"
+  ["3"]=>
+  string(7) "arr-str"
+  [3]=>
+  string(7) "arr-num"
+}
+array(4) {
+  ["a"]=>
+  string(1) "b"
+  [1]=>
+  string(5) "dict3"
+  [2]=>
+  string(5) "dict4"
+  [3]=>
+  string(7) "arr-num"
+}

@@ -381,12 +381,12 @@ function get_unit_testing_infra_dependencies(): void {
     }
   }
 
-  $checksum = md5(serialize([
-    // Use both in case composer.json has been changed, but the lock file
-    // hasn't been updated yet.
-    file_get_contents(__DIR__.'/composer.json'),
-    file_get_contents(__DIR__.'/composer.lock'),
-  ]));
+
+  // Use both in case composer.json has been changed, but the lock file
+  // hasn't been updated yet.
+  $checksum = md5(file_get_contents(__DIR__.'/composer.json'));
+  $checksum .= '-';
+  $checksum .= md5(file_get_contents(__DIR__.'/composer.lock'));
   $stamp_file = __DIR__.'/vendor/'.$checksum.'.stamp';
   if (file_exists($stamp_file)) {
     return;
@@ -397,7 +397,8 @@ function get_unit_testing_infra_dependencies(): void {
   if (!file_exists($stamp_file)) {
     invariant(
       file_exists($cache_file) || !Options::$local_source_only,
-      '--local-source-only specified, but no vendor cache'
+      '--local-source-only specified, but no vendor cache (expected: %s)',
+      $cache_file
     );
     if ($cache_dir && file_exists($cache_file)) {
       human("Extracting vendor cache, eg PHPUnit...\n");
@@ -414,6 +415,10 @@ function get_unit_testing_infra_dependencies(): void {
 
   // We don't have a cached vendor/, but as --local-source-only wasn't
   // specified, we can try to download it.
+  invariant(
+    !Options::$local_source_only,
+    'trying to re-run composer, but --local-source-only specified',
+  );
 
   // Quick hack to make sure we get the latest phpunit binary from composer
   $md5_file = __DIR__."/composer.json.md5";

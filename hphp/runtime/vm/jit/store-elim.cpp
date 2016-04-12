@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -368,7 +368,7 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
       dbgInst = env.global.unit.gen(
         DbgTrashStk,
         inst.marker(),
-        IRSPOffsetData { inst.extra<StStk>()->offset },
+        IRSPRelOffsetData { inst.extra<StStk>()->offset },
         inst.src(0)
       );
       break;
@@ -376,7 +376,7 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
       dbgInst = env.global.unit.gen(
         DbgTrashFrame,
         inst.marker(),
-        IRSPOffsetData { inst.extra<SpillFrame>()->spOffset },
+        IRSPRelOffsetData { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
       break;
@@ -405,6 +405,7 @@ void addLoadSet(Local& env, const ALocBits& bits) {
 }
 
 void addAllLoad(Local& env) {
+  FTRACE(4, "           load: -1\n");
   env.mayLoad.set();
   env.antLoc.reset();
 }
@@ -428,6 +429,12 @@ void mustStoreSet(Local& env, const ALocBits& bits) {
   env.reStores &= ~bits;
 }
 
+void killSet(Local& env, const ALocBits& bits) {
+  FTRACE(4, "           kill: {}\n", show(bits));
+  env.mayLoad &= ~bits;
+  mustStoreSet(env, bits);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void load(Local& env, AliasClass acls) {
@@ -442,12 +449,12 @@ void mayStore(Local& env, AliasClass acls) {
   env.reStores &= ~mayStore;
 }
 
-void mustStore(Local& env, AliasClass acls) {
+void kill(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);
-  auto const kill = env.global.ainfo.expand(canon);
-  mayStore(env, acls);
-  mustStoreSet(env, kill);
+  killSet(env, env.global.ainfo.expand(canon));
 }
+
+//////////////////////////////////////////////////////////////////////
 
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
   if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
@@ -477,33 +484,25 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, l.src);
     },
-    [&] (GeneralEffects l)  { load(env, l.loads);
-                              mayStore(env, l.stores);
-                              mustStore(env, l.kills); },
+    [&] (GeneralEffects l)  {
+      load(env, l.loads);
+      mayStore(env, l.stores);
+      kill(env, l.kills);
+    },
 
     [&] (ReturnEffects l) {
-      if (inst.is(InlineReturn)) {
-        // Returning from an inlined function.  This adds nothing to gen, but
-        // kills frame and stack locations for the callee.
-        auto const fp = inst.src(0);
-        auto const killSet = env.global.ainfo.per_frame_bits[fp];
-        mustStoreSet(env, killSet);
-        mustStore(env, l.kills);
-        return;
-      }
-
       // Return from the main function.  Locations other than the frame and
       // stack (e.g. object properties and whatnot) are always live on a
       // function return---so mark everything read before we start killing
       // things.
       addAllLoad(env);
-      mustStoreSet(env, env.global.ainfo.all_frame);
-      mustStore(env, l.kills);
+      killSet(env, env.global.ainfo.all_frame);
+      kill(env, l.kills);
     },
 
     [&] (ExitEffects l) {
       load(env, l.live);
-      mustStore(env, l.kills);
+      kill(env, l.kills);
     },
 
     /*
@@ -517,7 +516,7 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrameAny);  // Not necessary for some builtin calls, but it
                              // depends which builtin...
       load(env, l.stack);
-      mustStore(env, l.kills);
+      kill(env, l.kills);
     },
 
     [&] (PureStore l) {
@@ -544,11 +543,9 @@ void visit(Local& env, IRInstruction& inst) {
         auto lbit = pure_store_bit(env, pl->src);
         if (!lbit || *lbit != *bit) return;
         /*
-         * The source of the store is a load from
-         * the same address, which is also in this
-         * block. If there's no interference, we
-         * can kill this store. We won't know until
-         * we see the load though.
+         * The source of the store is a load from the same address, which is
+         * also in this block. If there's no interference, we can kill this
+         * store. We won't know until we see the load though.
          */
         if (env.global.reStores.size() <= *bit) {
           env.global.reStores.resize(*bit + 1);

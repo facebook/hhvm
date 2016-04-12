@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,7 +108,7 @@ folly::Optional<Type> const_fold(ISS& env,
     auto const func = Unit::lookupFunc(name.get());
     always_assert_flog(func, "func not found for builtin {}\n", name.get());
     g_context->invokeFuncFew(&retVal, func, nullptr, nullptr,
-      args.size(), &args[0]);
+      args.size(), &args[0], !env.ctx.unit->useStrictTypes);
 
     // If we got here, we didn't throw, so we can pop the inputs.
     for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
@@ -346,7 +346,9 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 
 }
 
-void builtin(ISS& env, const bc::FCallBuiltin& op) {
+namespace interp_step {
+
+void in(ISS& env, const bc::FCallBuiltin& op) {
   if (options.ConstantFoldBuiltins) {
     if (auto const val = const_fold(env, op)) {
       constprop(env);
@@ -363,6 +365,8 @@ void builtin(ISS& env, const bc::FCallBuiltin& op) {
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
   specialFunctionEffects(env, name);
   push(env, rt);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////

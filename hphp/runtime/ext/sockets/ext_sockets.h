@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -156,7 +156,8 @@ Variant socket_server_impl(const HostURL &hosturl,
                            int flags = k_STREAM_SERVER_BIND |
                              k_STREAM_SERVER_LISTEN,
                            VRefParam errnum = uninit_null(),
-                           VRefParam errstr = uninit_null());
+                           VRefParam errstr = uninit_null(),
+                           const Variant& context = null_variant);
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent,
                       const Variant& context);

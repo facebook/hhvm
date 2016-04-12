@@ -50,7 +50,7 @@ static char* xdebug_raw_url_encode(const char* s, int len, int *new_length,
   register int x, y;
   unsigned char *str;
 
-  str = (unsigned char *) xdmalloc(3 * len + 1);
+  str = (unsigned char *) HPHP::req::malloc_noptrs(3 * len + 1);
   for (x = 0, y = 0; len--; x++, y++) {
     str[y] = (unsigned char) s[x];
     if ((str[y] < '0' && str[y] != '-' && str[y] != '.' &&
@@ -115,7 +115,7 @@ char* XDebugUtils::pathToUrl(const char* fileurl) {
       tmp[i]='/';
     }
   }
-  xdfree(encoded_fileurl); // Needs to be free
+  HPHP::req::free(encoded_fileurl);
   return tmp;
 }
 

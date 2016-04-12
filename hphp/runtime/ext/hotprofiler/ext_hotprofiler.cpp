@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -50,8 +50,6 @@
 #define HP_STACK_DELIM_LEN    (sizeof(HP_STACK_DELIM) - 1)
 
 namespace HPHP {
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(hotprofiler, NO_VERSION_YET);
 
 using std::vector;
 using std::string;
@@ -157,7 +155,8 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
       continue;
     }
     float freq;
-    if (sscanf(line, "cpu MHz : %f", &freq) == 1) {
+    if ((sscanf(line, "cpu MHz : %f", &freq) == 1) ||
+        (sscanf(line, "clock         : %f", &freq) == 1)) {
       if (processor != -1 && processor < ncpus) {
          freqs[processor] = nearbyint(freq);
          processor = -1;
@@ -176,8 +175,7 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
 ///////////////////////////////////////////////////////////////////////////////
 // Machine information that we collect just once.
 
-class MachineInfo {
-public:
+struct MachineInfo {
   /**
    * Bind the current process to a specified CPU. This function is to ensure
    * that the OS won't schedule the process to different processors, which
@@ -484,10 +482,9 @@ void Profiler::endFrame(const TypedValue *retval,
 ///////////////////////////////////////////////////////////////////////////////
 // HierarchicalProfiler
 
-class HierarchicalProfiler final : public Profiler {
+struct HierarchicalProfiler final : Profiler {
 private:
-  class CountMap {
-  public:
+  struct CountMap {
     CountMap() : count(0), wall_time(0), cpu(0), memory(0), peak_memory(0) {}
 
     int64_t count;
@@ -497,8 +494,7 @@ private:
     int64_t peak_memory;
   };
 
-  class HierarchicalProfilerFrame : public Frame {
-  public:
+  struct HierarchicalProfilerFrame : Frame {
     virtual ~HierarchicalProfilerFrame() {
     }
 
@@ -584,8 +580,7 @@ private:
 // Walks a log of function enter and exit events captured by
 // TraceProfiler and generates statistics for each function executed.
 template <class TraceIterator, class Stats>
-class TraceWalker {
- public:
+struct TraceWalker {
   struct Frame {
     TraceIterator trace; // Pointer to the log entry which pushed this frame
     int level; // Recursion level for this function
@@ -616,8 +611,9 @@ class TraceWalker {
       if (!current->is_func_exit) {
         unsigned level = ++functionLevel[current->symbol];
         if (level >= m_recursion.size()) {
-          char *level_string = new char[8];
-          sprintf(level_string, "@%u", level);
+          constexpr size_t bufferSize = 12;
+          char *level_string = new char[bufferSize];
+          snprintf(level_string, bufferSize, "@%u", level);
           m_recursion.push_back(std::make_pair(level_string,
                                                strlen(level_string)));
         }
@@ -757,8 +753,7 @@ class TraceWalker {
 // then processes that into per-function statistics. A single-frame
 // stack trace is used to aggregate stats for each function when
 // called from different call sites.
-class TraceProfiler : public Profiler {
- public:
+struct TraceProfiler : Profiler {
   explicit TraceProfiler(int flags)
     : Profiler(true)
     , m_traceBuffer(nullptr)
@@ -802,9 +797,9 @@ class TraceProfiler : public Profiler {
     // from the memory field to use as a flag. We want to keep this
     // data structure small since we need a huge number of them during
     // a profiled run.
-    int64_t memory : 63; // Total memory, or memory allocated depending on flags
-    bool is_func_exit : 1; // Is the entry for a function exit?
-    int64_t peak_memory : 63; // Peak memory, or memory freed depending on flags
+    uint64_t memory : 63;// Total memory, or memory allocated depending on flags
+    uint64_t is_func_exit : 1; // Is the entry for a function exit?
+    uint64_t peak_memory : 63;// Peak memory, or memory freed depending on flags
     uint64_t unused : 1; // Unused, to keep memory and peak_memory the same size
 
     void clear() {
@@ -986,8 +981,7 @@ class TraceProfiler : public Profiler {
 
   // Final stats, per-function per-callsite, with a count of how many
   // times the function was called from that callsite.
-  class CountedTraceData : public TraceData {
-  public:
+  struct CountedTraceData : TraceData {
     int64_t count;
     CountedTraceData() : count(0)  { clear(); }
   };
@@ -1005,7 +999,7 @@ pthread_mutex_t TraceProfiler::s_inUse = PTHREAD_MUTEX_INITIALIZER;
 /**
  * Sampling based profiler.
  */
-class SampleProfiler : public Profiler {
+struct SampleProfiler : Profiler {
 private:
   typedef std::pair<int64_t, int64_t> Timestamp;
   typedef req::vector<std::pair<Timestamp, std::string>> SampleVec;
@@ -1137,8 +1131,7 @@ private:
 // others. In particular, it should provide the results via the return
 // value from writeStats, not print to stderr :) Task 3396401 tracks this.
 
-class MemoProfiler : public Profiler {
- public:
+struct MemoProfiler : Profiler {
   explicit MemoProfiler(int flags) : Profiler(true) {}
 
   ~MemoProfiler() {
@@ -1453,6 +1446,27 @@ void end_profiler_frame(Profiler *p,
                         const char *symbol) {
   p->endFrame(retval, symbol);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+static struct HotProfilerExtension : Extension {
+  HotProfilerExtension(): Extension("hotprofiler", get_PHP_VERSION().data()) {}
+
+  void moduleInit() override {
+#ifdef CLOCK_REALTIME
+    HHVM_RC_INT_SAME(CLOCK_REALTIME);
+#endif
+#ifdef CLOCK_MONOTONIC
+    HHVM_RC_INT_SAME(CLOCK_MONOTONIC);
+#endif
+#ifdef CLOCK_PROCESS_CPUTIME_ID
+    HHVM_RC_INT_SAME(CLOCK_PROCESS_CPUTIME_ID);
+#endif
+#ifdef CLOCK_THREAD_CPUTIME_ID
+    HHVM_RC_INT_SAME(CLOCK_THREAD_CPUTIME_ID);
+#endif
+  }
+} s_hot_profiler_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

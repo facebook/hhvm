@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,9 +36,11 @@ namespace HPHP { namespace jit {
  * so usually you can use Block directly.  These methods also update
  * IRInstruction::m_block transparently.
  */
-struct Block : boost::noncopyable {
+struct Block {
   typedef InstructionList::iterator iterator;
   typedef InstructionList::const_iterator const_iterator;
+  typedef InstructionList::reverse_iterator reverse_iterator;
+  typedef InstructionList::const_reverse_iterator const_reverse_iterator;
   typedef InstructionList::reference reference;
   typedef InstructionList::const_reference const_reference;
 
@@ -62,19 +64,27 @@ struct Block : boost::noncopyable {
    * emitted in profiling mode (which become dead after optimized code is
    * emitted). Code for these blocks is emitted into the 'afrozen' section.
    *
-   * See also util/code-cache.h for comment on the 'ahot' and 'aprof' sections.
+   * See also runtime/vm/jit/code-cache.h for comment on the 'hot' and 'prof'
+   * sections.
    */
 
   enum class Hint { Neither, Likely, Unlikely, Unused };
 
-  explicit Block(unsigned id)
+  explicit Block(unsigned id, uint64_t profCount)
     : m_id(id)
     , m_hint(Hint::Neither)
+    , m_profCount(profCount)
   {}
+
+  Block(const Block&) = delete;
+  Block& operator=(const Block&) = delete;
 
   unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }
   void        setHint(Hint hint)   { m_hint = hint; }
+  uint64_t    profCount() const    { return m_profCount; }
+
+  void setProfCount(uint64_t count) { m_profCount = count; }
 
   // Returns true if this block has no successors.
   bool isExit() const { return !empty() && !taken() && !next(); }
@@ -161,6 +171,10 @@ struct Block : boost::noncopyable {
   iterator         end()         { return m_instrs.end(); }
   const_iterator   begin() const { return m_instrs.begin(); }
   const_iterator   end()   const { return m_instrs.end(); }
+  reverse_iterator rbegin()       { return m_instrs.rbegin(); }
+  reverse_iterator rend()         { return m_instrs.rend(); }
+  const_reverse_iterator rbegin() const { return m_instrs.rbegin(); }
+  const_reverse_iterator rend()   const { return m_instrs.rend(); }
   iterator         erase(iterator pos);
   iterator         erase(IRInstruction* inst);
   iterator insert(iterator pos, IRInstruction* inst);
@@ -187,6 +201,8 @@ struct Block : boost::noncopyable {
   const unsigned m_id;      // unit-assigned unique id of this block
   EdgeList m_preds;         // Edges that point to this block
   Hint m_hint;              // execution frequency hint
+  uint64_t m_profCount;     // execution profile count of the region block
+                            // containing this IR block.
 };
 
 using BlockList = jit::vector<Block*>;

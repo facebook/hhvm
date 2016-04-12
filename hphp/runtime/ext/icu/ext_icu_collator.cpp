@@ -203,7 +203,8 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
   // Preallocate sort keys buffer
   size_t sortKeysOffset = 0;
   size_t sortKeysLength = DEF_SORT_KEYS_BUF_SIZE;
-  char*  sortKeys = (char*)req::malloc(sortKeysLength);
+  char*  sortKeys = (char*)req::malloc_noptrs(sortKeysLength);
+
   if (!sortKeys) {
     throw Exception("Out of memory");
   }
@@ -212,12 +213,12 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
   // Preallocate index buffer
   size_t sortIndexPos = 0;
   size_t sortIndexLength = DEF_SORT_KEYS_INDX_BUF_SIZE;
-  auto   sortIndex = (collator_sort_key_index_t*)req::malloc(
-                  sortIndexLength * sizeof(collator_sort_key_index_t));
+  auto   sortIndex =
+    req::make_raw_array<collator_sort_key_index_t>(sortIndexLength);
   if (!sortIndex) {
     throw Exception("Out of memory");
   }
-  SCOPE_EXIT{ req::free(sortIndex); };
+  SCOPE_EXIT{ req::destroy_raw_array(sortIndex, sortIndexLength); };
 
   // Translate input hash to sortable index
   auto pos_limit = hash->iter_end();
@@ -247,7 +248,7 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
       int32_t inc = (sortkey_len > DEF_SORT_KEYS_BUF_INCREMENT)
                   ?  sortkey_len : DEF_SORT_KEYS_BUF_INCREMENT;
       sortKeysLength += inc;
-      sortKeys = (char*)req::realloc(sortKeys, sortKeysLength);
+      sortKeys = (char*)req::realloc_noptrs(sortKeys, sortKeysLength);
       if (!sortKeys) {
         throw Exception("Out of memory");
       }
@@ -262,8 +263,10 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
     // Check for index buffer overflow
     if ((sortIndexPos + 1) > sortIndexLength) {
       sortIndexLength += DEF_SORT_KEYS_INDX_BUF_INCREMENT;
-      sortIndex = (collator_sort_key_index_t*)req::realloc(sortIndex,
-                      sortIndexLength * sizeof(collator_sort_key_index_t));
+      sortIndex = (collator_sort_key_index_t*)req::realloc(
+        sortIndex,
+        sortIndexLength * sizeof(collator_sort_key_index_t)
+      );
       if (!sortIndex) {
         throw Exception("Out of memory");
       }
@@ -312,14 +315,6 @@ static bool HHVM_METHOD(Collator, sort, VRefParam arr,
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define CONST_SORT(v)  Native::registerClassConstant<KindOfInt64> \
-          (s_Collator.get(), makeStaticString("SORT_" #v), SORT_##v);
-
-#define CONST_UCOL(v)  Native::registerClassConstant<KindOfInt64> \
-          (s_Collator.get(), makeStaticString(#v), UCOL_##v);
-
-const StaticString s_DEFAULT_VALUE("DEFAULT_VALUE");
-
 void IntlExtension::initCollator() {
   HHVM_ME(Collator, __construct);
   HHVM_ME(Collator, asort);
@@ -335,33 +330,33 @@ void IntlExtension::initCollator() {
   HHVM_ME(Collator, sortWithSortKeys);
   HHVM_ME(Collator, sort);
 
-  CONST_SORT(REGULAR);
-  CONST_SORT(STRING);
-  CONST_SORT(NUMERIC);
+  HHVM_RCC_INT(Collator, SORT_REGULAR, SORT_REGULAR);
+  HHVM_RCC_INT(Collator, SORT_STRING, SORT_STRING);
+  HHVM_RCC_INT(Collator, SORT_NUMERIC, SORT_NUMERIC);
 
-  CONST_UCOL(FRENCH_COLLATION);
-  CONST_UCOL(ALTERNATE_HANDLING);
-  CONST_UCOL(CASE_FIRST);
-  CONST_UCOL(CASE_LEVEL);
-  CONST_UCOL(NORMALIZATION_MODE);
-  CONST_UCOL(STRENGTH);
-  CONST_UCOL(HIRAGANA_QUATERNARY_MODE);
-  CONST_UCOL(NUMERIC_COLLATION);
-  CONST_UCOL(PRIMARY);
-  CONST_UCOL(SECONDARY);
-  CONST_UCOL(TERTIARY);
-  CONST_UCOL(DEFAULT_STRENGTH);
-  CONST_UCOL(QUATERNARY);
-  CONST_UCOL(IDENTICAL);
-  CONST_UCOL(OFF);
-  CONST_UCOL(ON);
-  CONST_UCOL(SHIFTED);
-  CONST_UCOL(NON_IGNORABLE);
-  CONST_UCOL(LOWER_FIRST);
-  CONST_UCOL(UPPER_FIRST);
+  HHVM_RCC_INT(Collator, FRENCH_COLLATION, UCOL_FRENCH_COLLATION);
+  HHVM_RCC_INT(Collator, ALTERNATE_HANDLING, UCOL_ALTERNATE_HANDLING);
+  HHVM_RCC_INT(Collator, CASE_FIRST, UCOL_CASE_FIRST);
+  HHVM_RCC_INT(Collator, CASE_LEVEL, UCOL_CASE_LEVEL);
+  HHVM_RCC_INT(Collator, NORMALIZATION_MODE, UCOL_NORMALIZATION_MODE);
+  HHVM_RCC_INT(Collator, STRENGTH, UCOL_STRENGTH);
+  HHVM_RCC_INT(Collator, HIRAGANA_QUATERNARY_MODE,
+               UCOL_HIRAGANA_QUATERNARY_MODE);
+  HHVM_RCC_INT(Collator, NUMERIC_COLLATION, UCOL_NUMERIC_COLLATION);
+  HHVM_RCC_INT(Collator, PRIMARY, UCOL_PRIMARY);
+  HHVM_RCC_INT(Collator, SECONDARY, UCOL_SECONDARY);
+  HHVM_RCC_INT(Collator, TERTIARY, UCOL_TERTIARY);
+  HHVM_RCC_INT(Collator, DEFAULT_STRENGTH, UCOL_DEFAULT_STRENGTH);
+  HHVM_RCC_INT(Collator, QUATERNARY, UCOL_QUATERNARY);
+  HHVM_RCC_INT(Collator, IDENTICAL, UCOL_IDENTICAL);
+  HHVM_RCC_INT(Collator, OFF, UCOL_OFF);
+  HHVM_RCC_INT(Collator, ON, UCOL_ON);
+  HHVM_RCC_INT(Collator, SHIFTED, UCOL_SHIFTED);
+  HHVM_RCC_INT(Collator, NON_IGNORABLE, UCOL_NON_IGNORABLE);
+  HHVM_RCC_INT(Collator, LOWER_FIRST, UCOL_LOWER_FIRST);
+  HHVM_RCC_INT(Collator, UPPER_FIRST, UCOL_UPPER_FIRST);
 
-  Native::registerClassConstant<KindOfInt64>
-    (s_Collator.get(), s_DEFAULT_VALUE.get(), UCOL_DEFAULT);
+  HHVM_RCC_INT(Collator, DEFAULT_VALUE, UCOL_DEFAULT);
 
   Native::registerNativeDataInfo<Collator>(s_Collator.get());
 

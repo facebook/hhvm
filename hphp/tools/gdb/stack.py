@@ -20,7 +20,7 @@ class WalkstkCommand(gdb.Command):
 
 The output backtrace has the following format:
 
-    #<bt frame> <sp> @ <rip>: <function> [at <filename>:<line>]
+    #<bt frame> <fp> @ <rip>: <function> [at <filename>:<line>]
 """
 
     def __init__(self):
@@ -30,91 +30,98 @@ The output backtrace has the following format:
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 
-        if len(argv) > 2:
-            print('Usage: walkstk [sp] [rip]')
+        if len(argv) > 1:
+            print('Usage: walkstk [fp]')
             return
 
-        # Set sp = $rbp.
-        sp_type = T('uintptr_t').pointer()
-        sp = gdb.parse_and_eval('$rbp').cast(sp_type)
-        if len(argv) >= 1:
-            sp = argv[0].cast(sp_type)
+        # Set fp = $rbp.
+        fp_type = T('uintptr_t').pointer()
+        fp = gdb.parse_and_eval('$rbp').cast(fp_type)
+        if len(argv) == 1:
+            fp = argv[0].cast(fp_type)[0]
 
         # Set rip = $rip.
         rip_type = T('uintptr_t')
         rip = gdb.parse_and_eval('$rip').cast(rip_type)
-        if len(argv) == 2:
-            rip = argv[1].cast(rip_type)
+        if len(argv) == 1:
+            rip = argv[0].cast(fp_type)[1]
 
+        # Find the starting native frame.
+        native_frame = gdb.newest_frame()
+
+        while (native_frame is not None
+               and rip != native_frame.pc()):
+            native_frame = native_frame.older()
+
+        if native_frame is None:
+            if len(argv) == 0:
+                print('walkstk: Unknown error: corrupt stack?')
+            else:
+                print('walkstk: Invalid frame pointer')
+            return
+
+        # Get the address and value of `mcg', the global MCGenerator pointer.
+        # For some reason, gdb doesn't have debug info about the symbol, so we
+        # can't use V(); probably this is because we declare it extern "C" (and
+        # maybe also because we do so in a namespace).
+        mcg_type = T('HPHP::jit::MCGenerator').pointer()
+        mcg_addr = gdb.parse_and_eval('&::mcg').cast(mcg_type.pointer())
+        mcg = mcg_addr.dereference()
+
+        # Set the bounds of the TC.
         try:
-            mcg = V('HPHP::jit::mcg')
             tc_base = mcg['code']['m_base']
             tc_end = tc_base + mcg['code']['m_codeSize']
         except:
-            mcg = None
+            # We can't access `mcg' for whatever reason.  Assume that the TC is
+            # above the data section, but restricted to low memory.
+            tc_base = mcg_addr.cast(T('uintptr_t'))
+            tc_end = 0x100000000
 
         i = 0
-        native_frame = gdb.newest_frame()
-        skip_tc = False  # Only used when we can't find HPHP::mcg.
 
-        # Munge `sp' so that it looks like the stack pointer that would point
-        # to it if we had another frame---this lets us promote the "increment"
-        # to the beginning of the loop, so that we don't miss the final frame.
-        sp = (sp, rip)
+        # Make a fake frame for our `fp' and `rip'.  This lets us pop a frame
+        # at the top of the loop, which makes it easier to include the final
+        # frame.
+        fp = (fp, rip)
 
-        while sp:
-            rip = sp[1]
-            sp = sp[0].cast(sp_type)
+        while fp:
+            rip = fp[1]
+            fp = fp[0].cast(fp_type)
 
-            if mcg is not None:
-                in_tc = rip >= tc_base and rip < tc_end
-            elif not skip_tc:
-                # TC frames look like unnamed normal native frames.
-                try:
-                    next_frame = native_frame.older()
-                    in_tc = (next_frame is not None and
-                             next_frame.name() is None and
-                             next_frame.type() == gdb.NORMAL_FRAME)
-                except AttributeError:
-                    # No older frame.
-                    in_tc = False
-            else:
-                in_tc = False
-                skip_tc = False
+            in_tc = rip >= tc_base and rip < tc_end
 
-            # Try to get the PHP function name from the ActRec at %sp if we're
+            # Try to get the PHP function name from the ActRec at %fp if we're
             # executing in the TC.
             if in_tc:
                 ar_type = T('HPHP::ActRec').pointer()
                 try:
                     print(frame.stringify(frame.create_php(
-                        idx=i + 1, ar=sp.cast(ar_type), rip=rip)))
+                        idx=i + 1, ar=fp.cast(ar_type), rip=rip)))
                 except gdb.MemoryError:
-                    if mcg is None:
-                        # We guessed wrong about whether we're in the TC.
-                        skip_tc = True
-
                     print(frame.stringify(frame.create_native(
-                        idx=i + 1, sp=sp, rip=rip)))
+                        idx=i + 1, fp=fp, rip=rip, native_frame=native_frame)))
 
-            # Pop native frames until we find our current %sp.
+            # Pop native frames until we hit our caller's rip.
             else:
-                inlines = 0
+                frames = []
 
                 while (native_frame is not None
-                       and rip != native_frame.pc()):
-                    if inlines > 0 and native_frame.name() is not None:
-                        print(frame.stringify(frame.create_native(
-                            idx=i,
-                            sp='{inline frame}',
-                            rip=rip,
-                            native_frame=native_frame)))
+                       and fp[1] != native_frame.pc()):
+                    frames.append(frame.create_native(
+                        idx=i,
+                        fp='{inline frame}',
+                        rip=rip,
+                        native_frame=native_frame))
 
                     i += 1
-                    inlines += 1
                     native_frame = native_frame.older()
 
-                print(frame.stringify(frame.create_native(
-                    idx=i, sp=sp, rip=rip, native_frame=native_frame)))
+                if frames:
+                    # Associate the frame pointer with the un-inlined frame.
+                    frames[-1]['fp'] = str(fp)
+
+                for f in frames:
+                    print(frame.stringify(f))
 
 WalkstkCommand()

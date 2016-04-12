@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,46 +19,13 @@
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/variable-serializer.h"
-
-#include <arpa/inet.h>
-#if defined(__FreeBSD__)
-# include <sys/endian.h>
-# elif defined(__APPLE__)
-# include <machine/endian.h>
-# include <libkern/OSByteOrder.h>
-#else
-# include <byteswap.h>
-#include <map>
-#include <memory>
-#include <utility>
-#include <vector>
-#endif
-
-#if !defined(htonll) && !defined(ntohll)
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-# if defined(__FreeBSD__)
-#  define htonll(x) bswap64(x)
-#  define ntohll(x) bswap64(x)
-# elif defined(__APPLE__)
-#  define htonll(x) OSSwapInt64(x)
-#  define ntohll(x) OSSwapInt64(x)
-# else
-#  define htonll(x) bswap_64(x)
-#  define ntohll(x) bswap_64(x)
-# endif
-#else
-#define htonll(x) (x)
-#define ntohll(x) (x)
-#endif
-
-#endif
+#include "hphp/util/htonll.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class Object;
+struct Array;
+struct Object;
 struct Variant;
 
 /**
@@ -67,8 +34,7 @@ struct Variant;
  *
  *   thrift --gen hphp my_service.thrift
  */
-class ThriftBuffer {
-public:
+struct ThriftBuffer {
   enum TType {
     T_STOP   = 0,
     T_VOID   = 1,

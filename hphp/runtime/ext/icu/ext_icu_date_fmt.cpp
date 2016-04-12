@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -101,7 +101,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   if (!orig || !orig->datefmt()) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Cannot clone unconstructed IntlDateFormatter");
-    throw getException("%s", s_intl_error->getErrorMessage(false).c_str());
+    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   if (m_date_fmt) {
     udat_close(m_date_fmt);
@@ -110,7 +110,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   m_date_fmt = udat_clone(orig->datefmt(), &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "datefmt_clone: date formatter clone failed");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 
@@ -456,22 +456,15 @@ static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, const Variant& zone) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define UDAT_CONST(nm) Native::registerClassConstant<KindOfInt64>( \
-                       s_IntlDateFormatter.get(), \
-                       makeStaticString(#nm), UDAT_##nm);
-#define UCAL_CONST(nm) Native::registerClassConstant<KindOfInt64>( \
-                       s_IntlDateFormatter.get(), \
-                       makeStaticString(#nm), UCAL_##nm);
-
 void IntlExtension::initDateFormatter() {
-  UDAT_CONST(FULL);
-  UDAT_CONST(LONG);
-  UDAT_CONST(MEDIUM);
-  UDAT_CONST(SHORT);
-  UDAT_CONST(NONE);
+  HHVM_RCC_INT(IntlDateFormatter, FULL, UDAT_FULL);
+  HHVM_RCC_INT(IntlDateFormatter, LONG, UDAT_LONG);
+  HHVM_RCC_INT(IntlDateFormatter, MEDIUM, UDAT_MEDIUM);
+  HHVM_RCC_INT(IntlDateFormatter, SHORT, UDAT_SHORT);
+  HHVM_RCC_INT(IntlDateFormatter, NONE, UDAT_NONE);
 
-  UCAL_CONST(GREGORIAN);
-  UCAL_CONST(TRADITIONAL);
+  HHVM_RCC_INT(IntlDateFormatter, GREGORIAN, UCAL_GREGORIAN);
+  HHVM_RCC_INT(IntlDateFormatter, TRADITIONAL, UCAL_TRADITIONAL);
 
   HHVM_ME(IntlDateFormatter, __construct);
   HHVM_ME(IntlDateFormatter, format);

@@ -1,0 +1,2 @@
+3: newtype MyType = int;
+4: newtype MyType2 = (string, float);

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -19,4 +19,4 @@ val path: DfindEnv.t -> string -> unit
 (* Find all the files in a directory *)
 (*****************************************************************************)
 
-val get_files: string -> Unix.dir_handle -> Utils.SSet.t
+val get_files: string -> Unix.dir_handle -> SSet.t

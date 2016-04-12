@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,10 +60,12 @@ using namespace HPHP;
   Isset or empty expression
   Exit expression
   Instanceof expression
+  Anonymous class expression
 */
 static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   switch (rhs->getKindOf()) {
   case Construct::KindOfSimpleVariable:
+  case Construct::KindOfPipeVariable:
   case Construct::KindOfDynamicVariable:
   case Construct::KindOfArrayElementExpression:
   case Construct::KindOfObjectPropertyExpression:
@@ -76,8 +78,9 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   case Construct::KindOfExpressionList:
   case Construct::KindOfIncludeExpression:
   case Construct::KindOfYieldExpression:
+  case Construct::KindOfYieldFromExpression:
   case Construct::KindOfAwaitExpression:
-  case Construct::KindOfQueryExpression:
+  case Construct::KindOfClassExpression:
     return ListAssignment::Regular;
 
   case Construct::KindOfListAssignment:
@@ -104,6 +107,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
 
   case Construct::KindOfBinaryOpExpression: {
     auto b = static_pointer_cast<BinaryOpExpression>(rhs);
+    if (b->getOp() == T_PIPE) return GetRHSKind(b->getExp2());
     if (b->isAssignmentOp() ||
         b->getOp() == '+' ||
         b->getOp() == T_COLLECTION) {
@@ -112,6 +116,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     return ListAssignment::Null;
   }
   case Construct::KindOfQOpExpression:
+  case Construct::KindOfNullCoalesceExpression:
     return ListAssignment::Checked;
 
   // invalid context
@@ -120,15 +125,6 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   case Construct::KindOfParameterExpression:
   case Construct::KindOfModifierExpression:
   case Construct::KindOfUserAttribute:
-  case Construct::KindOfFromClause:
-  case Construct::KindOfLetClause:
-  case Construct::KindOfWhereClause:
-  case Construct::KindOfSelectClause:
-  case Construct::KindOfIntoClause:
-  case Construct::KindOfJoinClause:
-  case Construct::KindOfGroupClause:
-  case Construct::KindOfOrderbyClause:
-  case Construct::KindOfOrdering:
     always_assert(false);
 
   // non-arrays
@@ -247,22 +243,6 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ListAssignment::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_array != nullptr ? 3 : 2;
-  cg.printObjectHeader("ListAssignmentExpression", numProps);
-  cg.printPropertyHeader("variables");
-  cg.printExpressionVector(m_variables);
-  if (m_array != nullptr) {
-    cg.printPropertyHeader("expression");
-    m_array->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

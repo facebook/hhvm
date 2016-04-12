@@ -478,19 +478,10 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
 /////////////////////////////////////////////////////////////////////////////
 // Extension
 
-#define GRAPHEME_CONST(v) Native::registerConstant<KindOfInt64>( \
-                            s_GRAPHEME_EXTR_##v.get(), \
-                            GraphemeExtractType::v);
-
-const StaticString
-  s_GRAPHEME_EXTR_COUNT("GRAPHEME_EXTR_COUNT"),
-  s_GRAPHEME_EXTR_MAXBYTES("GRAPHEME_EXTR_MAXBYTES"),
-  s_GRAPHEME_EXTR_MAXCHARS("GRAPHEME_EXTR_MAXCHARS");
-
 void IntlExtension::initGrapheme() {
-  GRAPHEME_CONST(COUNT);
-  GRAPHEME_CONST(MAXBYTES);
-  GRAPHEME_CONST(MAXCHARS);
+  HHVM_RC_INT(GRAPHEME_EXTR_COUNT, GraphemeExtractType::COUNT);
+  HHVM_RC_INT(GRAPHEME_EXTR_MAXBYTES, GraphemeExtractType::MAXBYTES);
+  HHVM_RC_INT(GRAPHEME_EXTR_MAXCHARS, GraphemeExtractType::MAXCHARS);
 
   HHVM_FE(grapheme_extract);
   HHVM_FE(grapheme_stripos);

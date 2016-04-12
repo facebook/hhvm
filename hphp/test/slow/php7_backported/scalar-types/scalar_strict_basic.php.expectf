@@ -1,0 +1,117 @@
+Testing 'int' typehint:
+
+*** Trying integer value
+int(1)
+
+*** Trying float value
+*** Caught %s
+
+*** Trying string value
+*** Caught %s
+
+*** Trying true value
+*** Caught %s
+
+*** Trying false value
+*** Caught %s
+
+*** Trying null value
+*** Caught %s
+
+*** Trying array value
+*** Caught %s
+
+*** Trying object value
+*** Caught %s
+
+*** Trying resource value
+*** Caught %s
+
+Testing 'float' typehint:
+
+*** Trying integer value
+float(1)
+
+*** Trying float value
+float(1)
+
+*** Trying string value
+*** Caught %s
+
+*** Trying true value
+*** Caught %s
+
+*** Trying false value
+*** Caught %s
+
+*** Trying null value
+*** Caught %s
+
+*** Trying array value
+*** Caught %s
+
+*** Trying object value
+*** Caught %s
+
+*** Trying resource value
+*** Caught %s
+
+Testing 'string' typehint:
+
+*** Trying integer value
+*** Caught %s
+
+*** Trying float value
+*** Caught %s
+
+*** Trying string value
+string(1) "1"
+
+*** Trying true value
+*** Caught %s
+
+*** Trying false value
+*** Caught %s
+
+*** Trying null value
+*** Caught %s
+
+*** Trying array value
+*** Caught %s
+
+*** Trying object value
+*** Caught %s
+
+*** Trying resource value
+*** Caught %s
+
+Testing 'bool' typehint:
+
+*** Trying integer value
+*** Caught %s
+
+*** Trying float value
+*** Caught %s
+
+*** Trying string value
+*** Caught %s
+
+*** Trying true value
+bool(true)
+
+*** Trying false value
+bool(false)
+
+*** Trying null value
+*** Caught %s
+
+*** Trying array value
+*** Caught %s
+
+*** Trying object value
+*** Caught %s
+
+*** Trying resource value
+*** Caught %s
+
+Done

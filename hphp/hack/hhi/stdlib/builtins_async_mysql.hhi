@@ -64,13 +64,26 @@ function mysql_async_status($link_identifier);
 class AsyncMysqlClient {
   public function __construct() { }
   static public function setPoolsConnectionLimit(int $limit) { }
-  static public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1): Awaitable<AsyncMysqlConnection> { }
+  static public function connect(
+      string $host,
+      int $port,
+      string $dbname,
+      string $user,
+      string $password,
+      int $timeout_micros = -1,
+      ?MySSLContextProvider $ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
   static public function adoptConnection($connection) { }
 }
+
 class AsyncMysqlConnectionPool {
   public function __construct(array $options) { }
   public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = "") { }
   public function getPoolStats(): array { }
+}
+
+class MySSLContextProvider {
+  private function __contruct(): void { }
+  public function isValid(): bool { }
 }
 
 class AsyncMysqlClientStats {
@@ -83,11 +96,14 @@ class AsyncMysqlConnection {
   public function __construct() { }
   public function query(string $query, int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>{ }
   public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): Awaitable<AsyncMysqlQueryResult>{ }
-  public function multiQuery(Vector<string> $query, int $timeout_micros = -1) { }
+  public function multiQuery(Traversable<string> $query, int $timeout_micros = -1) { }
   public function escapeString(string $data): string { }
   public function close(): void{ }
   public function releaseConnection() { }
+  public function isValid() { }
   public function serverInfo() { }
+  public function sslSessionReused() { }
+  public function isSSL() { }
   public function warningCount() { }
   public function host(): string { }
   public function port(): int { }
@@ -114,11 +130,12 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
   public function __construct() { parent::__construct(); }
   public function mysql_errno() { }
   public function mysql_error() { }
+  public function mysql_normalize_error() { }
   public function failureType() { }
 }
 class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
   public function numSuccessfulQueries(): int { }
-  public function getSuccessfulResults(): Vector { }
+  public function getSuccessfulResults(): Vector<AsyncMysqlQueryResult> { }
 }
 class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function __construct() { parent::__construct();}
@@ -200,6 +217,7 @@ class AsyncMysqlException extends Exception {
   public function mysqlErrorCode(): int;
   public function mysqlErrorString(): string;
   public function timedOut(): bool;
+  public function failed(): bool;
   public function getResult(): AsyncMysqlErrorResult;
 }
 class AsyncMysqlConnectException extends AsyncMysqlException {}

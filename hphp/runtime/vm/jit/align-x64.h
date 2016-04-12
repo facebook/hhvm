@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,11 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
+
+struct CGMeta;
+
+namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,33 +36,15 @@ namespace HPHP { namespace jit { namespace x64 {
 
 bool is_aligned(TCA frontier, Alignment alignment);
 
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups = true);
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context);
 
-/*
- * All the Alignments can be expressed by stipulating that the code region
- * given by
- *
- *    [frontier + offset, nbytes)
- *
- * fits into the nearest `align'-aligned and -sized line.
- */
-struct AlignInfo {
-  size_t align;
-  size_t nbytes;
-  size_t offset;
-};
+constexpr size_t cache_line_size() { return 64; }
 
 /*
  * Get the AlignInfo for `alignment'; used by relocation.
  */
 const AlignInfo& alignment_info(Alignment alignment);
-
-/*
- * Cache line constants.
- */
-constexpr size_t kCacheLineSize = 64;
-constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 

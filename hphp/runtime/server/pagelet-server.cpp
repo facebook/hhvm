@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/server/pagelet-server.h"
 
-#include <folly/Singleton.h>
-
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/upload.h"
@@ -28,6 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/util/boot_timer.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -57,8 +56,8 @@ PageletTransport::PageletTransport(
   m_remoteHost.append(remoteHost.data(), remoteHost.size());
 
   for (ArrayIter iter(headers); iter; ++iter) {
-    Variant key = iter.first();
-    String header = iter.second();
+    auto const key = iter.first();
+    auto const header = iter.second().toString();
     if (key.isString() && !key.toString().empty()) {
       m_requestHeaders[key.toString().data()].push_back(header.data());
     } else {
@@ -97,7 +96,7 @@ uint16_t PageletTransport::getRemotePort() {
   return 0;
 }
 
-const void *PageletTransport::getPostData(int &size) {
+const void *PageletTransport::getPostData(size_t &size) {
   size = m_postData.size();
   return m_postData.data();
 }
@@ -309,8 +308,7 @@ struct PageletWorker
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PageletTask : public SweepableResourceData {
-public:
+struct PageletTask : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PageletTask)
 
   PageletTask(const String& url, const Array& headers, const String& post_data,
@@ -359,30 +357,18 @@ void PageletServer::Restart() {
          RuntimeOption::PageletServerThreadDropStack,
          nullptr);
 
-#ifdef FOLLY_SINGLETON_TRY_GET
-      auto monitor = folly::Singleton<HostHealthMonitor>::try_get();
-#else
-      auto monitor = folly::Singleton<HostHealthMonitor>::get();
-#endif
-
+      auto monitor = getSingleton<HostHealthMonitor>();
       monitor->subscribe(s_dispatcher);
-      monitor->start();
     }
     s_dispatcher->start();
-    BootTimer::mark("pagelet server started");
+    BootStats::mark("pagelet server started");
   }
 }
 
 void PageletServer::Stop() {
   if (s_dispatcher) {
-
-#ifdef FOLLY_SINGLETON_TRY_GET
-    auto monitor = folly::Singleton<HostHealthMonitor>::try_get();
-#else
-    auto monitor = folly::Singleton<HostHealthMonitor>::get();
-#endif
-
-    monitor->stop();
+    auto monitor = getSingleton<HostHealthMonitor>();
+    monitor->unsubscribe(s_dispatcher);
     s_dispatcher->stop();
     Lock l(s_dispatchMutex);
     delete s_dispatcher;

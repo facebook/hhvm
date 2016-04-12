@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,7 @@ void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
       m_variables.reset();
       if (error != DebuggerWireHelpers::HitLimit || m_version == 0) {
         // Unexpected error. Log it.
-        m_wireError = sdata;
+        m_wireError = sdata.toCppString();
       }
     }
   }
@@ -284,7 +284,7 @@ c_AsyncFunctionWaitHandle *getWaitHandleAtAsyncStackPosition(int position) {
   }
 
   Array depStack =
-    objToWaitableWaitHandle(top)->t_getdependencystack();
+    objToWaitableWaitHandle(top)->getDependencyStack();
 
   return objToContinuationWaitHandle(depStack[position].toObject());
 }

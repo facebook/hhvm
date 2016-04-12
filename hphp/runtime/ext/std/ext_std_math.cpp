@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/zend-multiply.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/ext/std/ext_std.h"
-#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,9 +186,9 @@ Variant HHVM_FUNCTION(abs, const Variant& number) {
   }
 }
 
-bool HHVM_FUNCTION(is_finite, double val) { return finite(val);}
-bool HHVM_FUNCTION(is_infinite, double val) { return isinf(val);}
-bool HHVM_FUNCTION(is_nan, double val) { return isnan(val);}
+bool HHVM_FUNCTION(is_finite, double val) { return std::isfinite(val);}
+bool HHVM_FUNCTION(is_infinite, double val) { return std::isinf(val);}
+bool HHVM_FUNCTION(is_nan, double val) { return std::isnan(val);}
 
 Variant HHVM_FUNCTION(ceil, const Variant& number) {
   int64_t ival;
@@ -293,7 +292,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
       dval = val.toDouble();
       return KindOfDouble;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString: {
       auto dt = val.toNumeric(ival, dval, true);
       if ((dt != KindOfInt64) && (dt != KindOfDouble)) {
@@ -303,6 +302,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
       return dt;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
       // Not reachable since HHVM_FN(pow) deals with these base cases first.
     case KindOfRef:
@@ -495,6 +495,17 @@ int64_t HHVM_FUNCTION(mt_rand,
 
 double HHVM_FUNCTION(lcg_value) { return math_combined_lcg();}
 
+Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
+  if (divisor == 0) {
+    SystemLib::throwDivisionByZeroErrorObject(Strings::DIVISION_BY_ZERO);
+  } else if (divisor == -1 &&
+             numerator == std::numeric_limits<int64_t>::min()) {
+    SystemLib::throwArithmeticErrorObject(
+      "Division of PHP_INT_MIN by -1 is not an integer");
+  }
+  return numerator/divisor;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_PHP_ROUND_HALF_UP("PHP_ROUND_HALF_UP");
@@ -508,7 +519,7 @@ const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
 #define DCONST(nm)                                                             \
   Native::registerConstant<KindOfDouble>(makeStaticString("M_"#nm), k_M_##nm)  \
 
-void StandardExtension::requestInit() {
+void StandardExtension::requestInitMath() {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   if (s_state.state == RandomBuf::RequestInit) {
     s_state.state = RandomBuf::ThreadInit;
@@ -587,6 +598,7 @@ void StandardExtension::initMath() {
   HHVM_FE(mt_srand);
   HHVM_FE(mt_rand);
   HHVM_FE(lcg_value);
+  HHVM_FE(intdiv);
 
   loadSystemlib("std_math");
 }

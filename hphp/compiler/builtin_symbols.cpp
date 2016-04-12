@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/logger.h"
-#include <dlfcn.h>
 #include <vector>
 
 using namespace HPHP;
@@ -48,7 +47,6 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 bool BuiltinSymbols::Loaded = false;
-StringBag BuiltinSymbols::s_strings;
 AnalysisResultPtr BuiltinSymbols::s_systemAr;
 
 const char *const BuiltinSymbols::GlobalNames[] = {
@@ -92,11 +90,6 @@ int BuiltinSymbols::NumGlobalNames() {
     sizeof(BuiltinSymbols::GlobalNames[0]);
 }
 
-const StaticString
-  s_fb_call_user_func_safe("fb_call_user_func_safe"),
-  s_fb_call_user_func_safe_return("fb_call_user_func_safe_return"),
-  s_fb_call_user_func_array_safe("fb_call_user_func_array_safe");
-
 FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(
   AnalysisResultPtr ar,
   const ClassInfo* cls,
@@ -127,14 +120,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(
   f->setClassInfoAttribute(attrs);
   f->setDocComment(method->docComment);
 
-  if (!isMethod && (attrs & ClassInfo::HasOptFunction)) {
-    // Legacy optimization functions
-    if (method->name.same(s_fb_call_user_func_safe) ||
-        method->name.same(s_fb_call_user_func_safe_return) ||
-        method->name.same(s_fb_call_user_func_array_safe)) {
-      f->setOptFunction(hphp_opt_fb_call_user_func);
-    }
-  }
+  assert(!(attrs & ClassInfo::HasOptFunction));
 
   if (isMethod) {
     if (attrs & ClassInfo::IsProtected) {

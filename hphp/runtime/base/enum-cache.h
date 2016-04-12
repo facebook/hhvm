@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +26,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 
-class EnumCache {
-public:
+struct EnumCache {
   EnumCache() {}
   ~EnumCache();
 
@@ -69,7 +68,7 @@ public:
   static void deleteValues(const Class* klass);
 
   // Helper that raises a PHP exception
-  ATTRIBUTE_NORETURN static void failLookup(const Variant& msg);
+  [[noreturn]] static void failLookup(const Variant& msg);
 
 private:
   // Class* to intptr_ti key helpers
@@ -83,6 +82,18 @@ private:
     return (recurse) ? key | RECURSE_MASK : key;
   }
 
+  const EnumValues* cachePersistentEnumValues(
+    const Class* klass,
+    bool recurse,
+    Array&& names,
+    Array&& values);
+
+  const EnumValues* cacheRequestEnumValues(
+    const Class* klass,
+    bool recurse,
+    Array&& names,
+    Array&& values);
+
   const EnumValues* getEnumValuesIfDefined(intptr_t key) const;
   const EnumValues* getEnumValues(const Class* klass, bool recurse);
   const EnumValues* loadEnumValues(const Class* klass, bool recurse);
@@ -90,10 +101,17 @@ private:
 
   // Map that contains associations between Enum classes and their array
   // values and array names.
-  typedef tbb::concurrent_hash_map<
-              intptr_t, const EnumValues*, clsCompare> EnumValuesMap;
+  using EnumValuesMap = tbb::concurrent_hash_map<
+    intptr_t,
+    const EnumValues*,
+    clsCompare>;
+
+  using ReqEnumValuesMap = req::hash_map<
+    intptr_t,
+    const EnumValues*>;
 
   EnumValuesMap m_enumValuesMap;
+  rds::Link<ReqEnumValuesMap*> m_nonScalarEnumValuesMap{rds::kInvalidHandle};
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -14,4 +14,13 @@ function heh() {
   var_dump($b['y']);
   var_dump($y);
 }
+
+function extract_empty_ref() {
+    $a = array();
+    extract($a, EXTR_REFS);
+
+    var_dump('OK');
+}
+
 heh();
+extract_empty_ref();

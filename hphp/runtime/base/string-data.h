@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,9 +34,9 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class APCString;
-class Array;
-class String;
+struct APCString;
+struct Array;
+struct String;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -54,12 +54,12 @@ enum CopyStringMode { CopyString };
  * StringData's have two different modes, not all of which we want to
  * keep forever.  The main mode is Flat, which means StringData is a
  * header in a contiguous allocation with the character array for the
- * string.  The other is for APCString-backed StringDatas.
+ * string.  The other (Proxy) is for APCString-backed StringDatas.
  *
  * StringDatas can also be allocated in multiple ways.  Normally, they
  * are created through one of the Make overloads, which drops them in
  * the request-local heap.  They can also be low-malloced (for static
- * strings), or malloc'd (MakeMalloc) for APC strings.
+ * strings), or malloc'd (MakeMalloc) for APC shared or uncounted strings.
  *
  * Here's a breakdown of string modes, and which configurations are
  * allowed in which allocation mode:
@@ -67,10 +67,10 @@ enum CopyStringMode { CopyString };
  *          | Static | Malloced | Normal (request local)
  *          +--------+----------+-----------------------
  *   Flat   |   X    |     X    |    X
- *   Shared |        |          |    X
+ *   Proxy  |        |          |    X
  */
-struct StringData {
-  friend class APCString;
+struct StringData final: type_scan::MarkCountable<StringData> {
+  friend struct APCString;
   friend StringData* allocFlatSmallImpl(size_t len);
   friend StringData* allocFlatSlowImpl(size_t len);
 
@@ -93,8 +93,8 @@ struct StringData {
    *
    * Most strings are created this way.
    */
-  static StringData* Make(const char* data);
-  static StringData* Make(const std::string& data);
+  static StringData* Make(folly::StringPiece);
+
   static StringData* Make(const char* data, CopyStringMode);
   static StringData* Make(const char* data, size_t len, CopyStringMode);
   static StringData* Make(const StringData* s, CopyStringMode);
@@ -131,10 +131,10 @@ struct StringData {
   static StringData* Make(size_t reserve);
 
   /*
-   * Create a request-local StringData that wraps an APCString that contains a
-   * string. Ref-count is pre-initialized to 1.
+   * Create a request-local "Proxy" StringData that wraps an APCString.
+   * Ref-count is pre-initialized to 1.
    */
-  static StringData* Make(const APCString* shared);
+  static StringData* MakeProxy(const APCString* apcstr);
 
   /*
    * Allocate a string with malloc, using the low-memory allocator if
@@ -166,7 +166,7 @@ struct StringData {
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
 
   /*
-   * Shared StringData's have a sweep list running through them for
+   * Proxy StringData's have a sweep list running through them for
    * decrefing the APCString they are fronting.  This function
    * must be called at request cleanup time to handle this.
    */
@@ -195,7 +195,9 @@ struct StringData {
   /*
    * Reference-counting related.
    */
-  IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
+
+  bool kindIsValid() const { return m_hdr.kind == HeaderKind::String; }
 
   /*
    * Append the supplied range to this string.  If there is not sufficient
@@ -436,31 +438,31 @@ struct StringData {
 
   static StringData* node2str(StringDataNode* node) {
     return reinterpret_cast<StringData*>(
-      uintptr_t(node) - offsetof(SharedPayload, node)
+      uintptr_t(node) - offsetof(Proxy, node)
                    - sizeof(StringData)
     );
   }
-  bool isShared() const;
+  bool isProxy() const;
 
 private:
-  struct SharedPayload {
+  struct Proxy {
     StringDataNode node;
-    const APCString* shared;
+    const APCString* apcstr;
   };
 
 private:
   static StringData* MakeShared(folly::StringPiece sl, bool trueStatic);
-  static StringData* MakeAPCSlowPath(const APCString*);
+  static StringData* MakeProxySlowPath(const APCString*);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
   ~StringData() = delete;
 
 private:
-  const void* voidPayload() const;
-  void* voidPayload();
-  const SharedPayload* sharedPayload() const;
-  SharedPayload* sharedPayload();
+  const void* payload() const;
+  void* payload();
+  const Proxy* proxy() const;
+  Proxy* proxy();
 
   bool isFlat() const;
   bool isImmutable() const;
@@ -480,7 +482,7 @@ private:
   // We have the next fields blocked into qword-size unions so
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
-  HeaderWord<CapCode> m_hdr;
+  HeaderWord<CapCode,Counted::Maybe> m_hdr;
   union {
     struct {
       uint32_t m_len;
@@ -536,7 +538,8 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 }
 
 namespace folly {
-template<> struct FormatValue<const HPHP::StringData*> {
+template<> class FormatValue<const HPHP::StringData*> {
+ public:
   explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
 
   template<typename Callback>
@@ -549,7 +552,8 @@ template<> struct FormatValue<const HPHP::StringData*> {
   const HPHP::StringData* m_val;
 };
 
-template<> struct FormatValue<HPHP::StringData*> {
+template<> class FormatValue<HPHP::StringData*> {
+ public:
   explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
 
   template<typename Callback>

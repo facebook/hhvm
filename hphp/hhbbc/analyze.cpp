@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,6 +48,7 @@ const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
 const StaticString s_Generator("Generator");
+const StaticString s_Closure("Closure");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -98,15 +99,16 @@ State entry_state(const Index& index,
 
   /*
    * Closures have a hidden local that's always the first (non-parameter)
-   * local, which stores the closure itself, and we also need to look up the
-   * types of use vars from the index.
+   * local, which stores the closure itself. Due to Class rescoping in the
+   * runtime, the strongest type we can assert here is <= Closure. We also need
+   * to look up the types of use vars from the index.
    */
   if (ctx.func->isClosureBody) {
     assert(locId < ret.locals.size());
     assert(ctx.func->cls);
-    auto const rcls = index.resolve_class(ctx, ctx.func->cls->name);
-    assert(rcls && "Closure classes must always be unique and must resolve");
-    ret.locals[locId++] = objExact(*rcls);
+    auto const rcls = index.resolve_class(ctx, s_Closure.get());
+    assert(rcls && "Closure class must always be unique and must resolve");
+    ret.locals[locId++] = subObj(*rcls);
   }
   auto const useVars = ctx.func->isClosureBody
     ? index.lookup_closure_use_vars(ctx.func)

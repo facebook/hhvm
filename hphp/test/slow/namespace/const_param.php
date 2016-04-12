@@ -21,6 +21,7 @@ namespace {
     foreach ($params as $param) {
       var_dump(
         $param->getDefaultValue(),
+        $param->getDefaultValueText(),
         $param->getDefaultValueConstantName()
       );
     }

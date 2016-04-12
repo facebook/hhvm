@@ -1,0 +1,4 @@
+string(%d) "get failed with result mc_res_%r(local|remote)%r_error: invalid key: space or control character"
+string(19) "Utterly Invalid Key"
+string(3) "get"
+string(%d) "mc_res_%r(local|remote)%r_error"

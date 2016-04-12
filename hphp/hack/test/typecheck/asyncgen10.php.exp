@@ -4,3 +4,5 @@ File "asyncgen10.php", line 3, characters 36-41:
 This is a string
 File "asyncgen10.php", line 4, characters 9-9:
 It is incompatible with an int
+File "asyncgen10.php", line 3, characters 36-41:
+Considering that this type argument is invariant with respect to AsyncGenerator

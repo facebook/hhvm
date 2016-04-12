@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -155,8 +155,12 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   {
     String sdata;
     thrift.read(sdata);
-    int error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
-    if (error) {
+    auto const error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
+    if (error == DebuggerWireHelpers::ErrorMsg) {
+      assert(m_ret.isString());
+      m_wireError = m_ret.toCStrRef().data();
+    }
+    if (error != DebuggerWireHelpers::NoError) {
       m_ret = uninit_null();
     }
     if (error == DebuggerWireHelpers::HitLimit) {

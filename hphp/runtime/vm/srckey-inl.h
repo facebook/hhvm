@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +125,7 @@ inline const Unit* SrcKey::unit() const {
 }
 
 inline Op SrcKey::op() const {
-  return unit()->getOpcode(offset());
+  return unit()->getOp(offset());
 }
 
 inline PC SrcKey::pc() const {
@@ -140,11 +140,11 @@ inline void SrcKey::setOffset(Offset o) {
 }
 
 inline OffsetSet SrcKey::succOffsets() const {
-  return instrSuccOffsets((Op*)pc(), unit());
+  return instrSuccOffsets(pc(), unit());
 }
 
 inline void SrcKey::advance(const Unit* u) {
-  m_offset += instrLen((Op*)(u ? u : unit())->at(offset()));
+  m_offset += instrLen((u ? u : unit())->at(offset()));
 }
 
 inline SrcKey SrcKey::advanced(const Unit* u) const {

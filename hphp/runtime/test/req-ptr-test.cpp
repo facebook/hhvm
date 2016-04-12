@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,7 +41,7 @@ TEST(ReqPtr, Refcounts) {
     auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     req::ptr<ResourceData> r(std::move(ptr));
-    EXPECT_TRUE(r.get()->getCount() == 1);
+    EXPECT_TRUE(r.get()->hasExactlyOneRef());
   }
 
   {
@@ -49,8 +49,8 @@ TEST(ReqPtr, Refcounts) {
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     {
       req::ptr<ResourceData> r(ptr);
-      EXPECT_TRUE(ptr->getCount() == 2);
-      EXPECT_TRUE(r.get()->getCount() == 2);
+      EXPECT_TRUE(ptr->hasMultipleRefs()); // count==2
+      EXPECT_TRUE(r.get()->hasMultipleRefs());
     }
     EXPECT_TRUE(ptr->hasExactlyOneRef());
   }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -517,58 +517,48 @@ void IntlExtension::initUConverter() {
   HHVM_STATIC_ME(UConverter, getStandards);
   HHVM_STATIC_ME(UConverter, getStandardName);
 
-#define UCNV_REASON_CONST(v) \
-        Native::registerClassConstant<KindOfInt64>( \
-          s_UConverter.get(), makeStaticString("REASON_" #v), UCNV_ ## v);
-#define UCNV_TYPE_CONST(v) \
-        Native::registerClassConstant<KindOfInt64>( \
-          s_UConverter.get(), makeStaticString(#v), UCNV_ ## v);
+  HHVM_RCC_INT(UConverter, REASON_UNASSIGNED, UCNV_UNASSIGNED);
+  HHVM_RCC_INT(UConverter, REASON_ILLEGAL, UCNV_ILLEGAL);
+  HHVM_RCC_INT(UConverter, REASON_IRREGULAR, UCNV_IRREGULAR);
+  HHVM_RCC_INT(UConverter, REASON_RESET, UCNV_RESET);
+  HHVM_RCC_INT(UConverter, REASON_CLOSE, UCNV_CLOSE);
+  HHVM_RCC_INT(UConverter, REASON_CLONE, UCNV_CLONE);
 
-  UCNV_REASON_CONST(UNASSIGNED);
-  UCNV_REASON_CONST(ILLEGAL);
-  UCNV_REASON_CONST(IRREGULAR);
-  UCNV_REASON_CONST(RESET);
-  UCNV_REASON_CONST(CLOSE);
-  UCNV_REASON_CONST(CLONE);
-
-  UCNV_TYPE_CONST(UNSUPPORTED_CONVERTER);
-  UCNV_TYPE_CONST(SBCS);
-  UCNV_TYPE_CONST(DBCS);
-  UCNV_TYPE_CONST(MBCS);
-  UCNV_TYPE_CONST(LATIN_1);
-  UCNV_TYPE_CONST(UTF8);
-  UCNV_TYPE_CONST(UTF16_BigEndian);
-  UCNV_TYPE_CONST(UTF16_LittleEndian);
-  UCNV_TYPE_CONST(UTF32_BigEndian);
-  UCNV_TYPE_CONST(UTF32_LittleEndian);
-  UCNV_TYPE_CONST(EBCDIC_STATEFUL);
-  UCNV_TYPE_CONST(ISO_2022);
-  UCNV_TYPE_CONST(LMBCS_1);
-  UCNV_TYPE_CONST(LMBCS_2);
-  UCNV_TYPE_CONST(LMBCS_3);
-  UCNV_TYPE_CONST(LMBCS_4);
-  UCNV_TYPE_CONST(LMBCS_5);
-  UCNV_TYPE_CONST(LMBCS_6);
-  UCNV_TYPE_CONST(LMBCS_8);
-  UCNV_TYPE_CONST(LMBCS_11);
-  UCNV_TYPE_CONST(LMBCS_16);
-  UCNV_TYPE_CONST(LMBCS_17);
-  UCNV_TYPE_CONST(LMBCS_18);
-  UCNV_TYPE_CONST(LMBCS_19);
-  UCNV_TYPE_CONST(LMBCS_LAST);
-  UCNV_TYPE_CONST(HZ);
-  UCNV_TYPE_CONST(SCSU);
-  UCNV_TYPE_CONST(ISCII);
-  UCNV_TYPE_CONST(US_ASCII);
-  UCNV_TYPE_CONST(UTF7);
-  UCNV_TYPE_CONST(BOCU1);
-  UCNV_TYPE_CONST(UTF16);
-  UCNV_TYPE_CONST(UTF32);
-  UCNV_TYPE_CONST(CESU8);
-  UCNV_TYPE_CONST(IMAP_MAILBOX);
-
-#undef UCNV_REASON_CONST
-#undef UCNV_TYPE_CONST
+  HHVM_RCC_INT(UConverter, UNSUPPORTED_CONVERTER, UCNV_UNSUPPORTED_CONVERTER);
+  HHVM_RCC_INT(UConverter, SBCS, UCNV_SBCS);
+  HHVM_RCC_INT(UConverter, DBCS, UCNV_DBCS);
+  HHVM_RCC_INT(UConverter, MBCS, UCNV_MBCS);
+  HHVM_RCC_INT(UConverter, LATIN_1, UCNV_LATIN_1);
+  HHVM_RCC_INT(UConverter, UTF8, UCNV_UTF8);
+  HHVM_RCC_INT(UConverter, UTF16_BigEndian, UCNV_UTF16_BigEndian);
+  HHVM_RCC_INT(UConverter, UTF16_LittleEndian, UCNV_UTF16_LittleEndian);
+  HHVM_RCC_INT(UConverter, UTF32_BigEndian, UCNV_UTF32_BigEndian);
+  HHVM_RCC_INT(UConverter, UTF32_LittleEndian, UCNV_UTF32_LittleEndian);
+  HHVM_RCC_INT(UConverter, EBCDIC_STATEFUL, UCNV_EBCDIC_STATEFUL);
+  HHVM_RCC_INT(UConverter, ISO_2022, UCNV_ISO_2022);
+  HHVM_RCC_INT(UConverter, LMBCS_1, UCNV_LMBCS_1);
+  HHVM_RCC_INT(UConverter, LMBCS_2, UCNV_LMBCS_2);
+  HHVM_RCC_INT(UConverter, LMBCS_3, UCNV_LMBCS_3);
+  HHVM_RCC_INT(UConverter, LMBCS_4, UCNV_LMBCS_4);
+  HHVM_RCC_INT(UConverter, LMBCS_5, UCNV_LMBCS_5);
+  HHVM_RCC_INT(UConverter, LMBCS_6, UCNV_LMBCS_6);
+  HHVM_RCC_INT(UConverter, LMBCS_8, UCNV_LMBCS_8);
+  HHVM_RCC_INT(UConverter, LMBCS_11, UCNV_LMBCS_11);
+  HHVM_RCC_INT(UConverter, LMBCS_16, UCNV_LMBCS_16);
+  HHVM_RCC_INT(UConverter, LMBCS_17, UCNV_LMBCS_17);
+  HHVM_RCC_INT(UConverter, LMBCS_18, UCNV_LMBCS_18);
+  HHVM_RCC_INT(UConverter, LMBCS_19, UCNV_LMBCS_19);
+  HHVM_RCC_INT(UConverter, LMBCS_LAST, UCNV_LMBCS_LAST);
+  HHVM_RCC_INT(UConverter, HZ, UCNV_HZ);
+  HHVM_RCC_INT(UConverter, SCSU, UCNV_SCSU);
+  HHVM_RCC_INT(UConverter, ISCII, UCNV_ISCII);
+  HHVM_RCC_INT(UConverter, US_ASCII, UCNV_US_ASCII);
+  HHVM_RCC_INT(UConverter, UTF7, UCNV_UTF7);
+  HHVM_RCC_INT(UConverter, BOCU1, UCNV_BOCU1);
+  HHVM_RCC_INT(UConverter, UTF16, UCNV_UTF16);
+  HHVM_RCC_INT(UConverter, UTF32, UCNV_UTF32);
+  HHVM_RCC_INT(UConverter, CESU8, UCNV_CESU8);
+  HHVM_RCC_INT(UConverter, IMAP_MAILBOX, UCNV_IMAP_MAILBOX);
 
   Native::registerNativeDataInfo<IntlUConverter>(s_UConverter.get());
 

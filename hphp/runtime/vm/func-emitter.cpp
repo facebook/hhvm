@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,6 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -233,14 +232,15 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_info = m_info;
     ex->m_line2 = line2;
     ex->m_past = past;
+    ex->m_returnByValue = false;
   }
 
   std::vector<Func::ParamInfo> fParams;
-  bool usesDoubles = false, variadic = false;
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
-    if (pi.builtinType == KindOfDouble) usesDoubles = true;
-    if (pi.isVariadic()) variadic = true;
+    if (pi.isVariadic()) {
+      pi.builtinType = KindOfArray;
+    }
     f->appendParam(params[i].byRef, pi, fParams);
   }
 
@@ -262,8 +262,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_originalFilename = originalFilename;
   f->shared()->m_isGenerated = isGenerated;
 
-  f->finishedEmittingParams(fParams);
-
   if (attrs & AttrNative) {
     auto const ex = f->extShared();
 
@@ -273,28 +271,42 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       f->isStatic()
     );
 
-    auto const nif = info.ptr;
-    if (nif) {
-      Attr dummy = AttrNone;
-      int nativeAttrs = parseNativeAttributes(dummy);
-      if (nativeAttrs & Native::AttrZendCompat) {
-        ex->m_nativeFuncPtr = nif;
-        ex->m_builtinFuncPtr = zend_wrap_func;
-      } else {
-        if (parseNativeAttributes(dummy) & Native::AttrActRec) {
-          ex->m_builtinFuncPtr = nif;
-          ex->m_nativeFuncPtr = nullptr;
-        } else {
-          ex->m_nativeFuncPtr = nif;
-          ex->m_builtinFuncPtr =
-            Native::getWrapper(m_pce, usesDoubles, variadic);
+    Attr dummy = AttrNone;
+    auto nativeAttributes = parseNativeAttributes(dummy);
+    Native::getFunctionPointers(
+      info,
+      nativeAttributes,
+      ex->m_builtinFuncPtr,
+      ex->m_nativeFuncPtr
+    );
+
+    if (ex->m_nativeFuncPtr &&
+        !(nativeAttributes & Native::AttrZendCompat)) {
+      if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
+        ex->m_returnByValue = true;
+      }
+      int extra =
+        (attrs & AttrNumArgs ? 1 : 0) +
+        (isMethod() ? 1 : 0);
+      assert(info.sig.args.size() == params.size() + extra);
+      for (auto i = params.size(); i--; ) {
+        switch (info.sig.args[extra + i]) {
+          case Native::NativeSig::Type::ObjectArg:
+          case Native::NativeSig::Type::StringArg:
+          case Native::NativeSig::Type::ArrayArg:
+          case Native::NativeSig::Type::ResourceArg:
+          case Native::NativeSig::Type::OutputArg:
+          case Native::NativeSig::Type::MixedTV:
+            fParams[i].nativeArg = true;
+            break;
+          default:
+            break;
         }
       }
-    } else {
-      ex->m_builtinFuncPtr = Native::unimplementedWrapper;
     }
   }
 
+  f->finishedEmittingParams(fParams);
   return f;
 }
 
@@ -511,7 +523,7 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   auto it = userAttributes.find(s_native.get());
   assert(it != userAttributes.end());
   const TypedValue userAttr = it->second;
-  assert(userAttr.m_type == KindOfArray);
+  assert(isArrayType(userAttr.m_type));
   for (ArrayIter it(userAttr.m_data.parr); it; ++it) {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {

@@ -16,8 +16,6 @@ __BEGIN_DECLS
 
 void neo_seed_rand (long int seed);
 int neo_rand (int max);
-int neo_rand_string (char *s, int slen);
-int neo_rand_word (char *s, int slen);
 
 __END_DECLS
 

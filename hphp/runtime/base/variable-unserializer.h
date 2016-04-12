@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,7 @@ struct VariableUnserializer {
     size_t len,
     Type type,
     bool allowUnknownSerializableClass = false,
-    const Array& classWhitelist = null_array);
+    const Array& options = null_array);
 
   /*
    * Main API; unserialize the buffer and return as a Variant.
@@ -66,13 +66,20 @@ struct VariableUnserializer {
   int64_t readInt();
   double readDouble();
   char readChar();
-  void read(char* buf, unsigned n);
+
+  // Return a StringPiece of up to n characters pointing into m_buf
+  folly::StringPiece readStr(unsigned n);
 
   /*
    * Read a character and throw if it differs from expected.
    */
   void expectChar(char expected);
-  void throwUnexpected(char expected, char got);
+
+  /*
+   * Attempt to consume a serialized string with content matching str.
+   * Return false and rewind stream on non-standard format or content mismatch.
+   */
+  bool matchString(folly::StringPiece str);
 
   /*
    * Accessors.
@@ -87,7 +94,7 @@ struct VariableUnserializer {
   /*
    * True if clsName is allowed to be unserialized.
    */
-  bool isWhitelistedClass(const String& clsName) const;
+  bool whitelistCheck(const String& clsName) const;
 
   /*
    * Set the beginning and end of internal buffer.
@@ -115,6 +122,12 @@ struct VariableUnserializer {
    */
   void putInOverwrittenList(const Variant& v);
 
+  /*
+   * Register an object that needs its __wakeup() method called after
+   * unserialization of the top-level value is complete.
+   */
+  void addSleepingObject(const Object&);
+
 private:
   /*
    * Hold references to previously-unserialized data, along with bits telling
@@ -138,13 +151,12 @@ private:
   const char* m_end;
   req::vector<RefInfo> m_refs;
   bool m_unknownSerializable;
-  const Array& m_classWhiteList;    // classes allowed to be unserialized
+  const Array& m_options; // e.g. classes allowed to be unserialized
+  req::vector<Object> m_sleepingObjects;
 };
 
-void reserialize(VariableUnserializer *uns, StringBuffer &buf);
+void reserialize(VariableUnserializer* uns, StringBuffer& buf);
 
 }
-
-#include "hphp/runtime/base/variable-unserializer-inl.h"
 
 #endif // incl_HPHP_VARIABLE_UNSERIALIZER_H_

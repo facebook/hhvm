@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_ABI_ARM_H
 #define incl_HPHP_JIT_ABI_ARM_H
 
+#include "hphp/runtime/vm/jit/abi-regs.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
 #include "hphp/util/asm-x64.h"
@@ -42,22 +43,25 @@ const Abi& abi(CodeKind kind = CodeKind::Trace);
 inline PhysReg rvmfp() { return vixl::x29; }
 inline PhysReg rvmsp() { return vixl::x19; }
 inline PhysReg rvmtl() { return vixl::x20; }
+inline PhysReg rsp()   { return vixl::sp; }
 
-namespace detail {
-  const RegSet kVMRegs      = rvmfp() | rvmtl();
-  const RegSet kVMRegsNoSP  = rvmfp() | rvmtl() | rvmsp();
-}
+inline RegSet vm_regs_no_sp()   { return rvmfp() | rvmtl(); }
+inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
 
-inline RegSet vm_regs_with_sp() { return detail::kVMRegs; }
-inline RegSet vm_regs_no_sp()   { return detail::kVMRegsNoSP; }
+inline PhysReg rret_data() { return vixl::x0; }
+inline PhysReg rret_type() { return vixl::x1; }
 
-RegSet interp_one_cf_regs();
+PhysReg rret(size_t i = 0);
+PhysReg rret_simd(size_t i);
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
 
 constexpr size_t num_arg_regs() { return 7; }
 constexpr size_t num_arg_regs_simd() { return 0; }
+
+RegSet arg_regs(size_t n);
+RegSet arg_regs_simd(size_t n);
 
 PhysReg r_svcreq_req();
 PhysReg r_svcreq_stub();
@@ -114,11 +118,9 @@ inline vixl::Register svcReqArgReg(unsigned index) {
   return x2a(rarg(index + 1));
 }
 
+// vixl MacroAssembler uses ip0/ip1 (x16-17) for macro instructions
 const vixl::Register rAsm(vixl::x9);
-const vixl::Register rAsm2(vixl::x10);
-const vixl::Register rGContextReg(vixl::x24);
 const vixl::Register rLinkReg(vixl::x30);
-const vixl::Register rReturnReg(vixl::x0);
 const vixl::Register rHostCallReg(vixl::x16);
 
 ///////////////////////////////////////////////////////////////////////////////

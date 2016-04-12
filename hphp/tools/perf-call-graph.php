@@ -1,23 +1,7 @@
 #!/usr/local/bin/php -j
 <?php
 
-# If $func looks like a mangled C++ symbol, attempt to demangle it, stripping
-# off any trailing junk first.
-function filter_func(string $func): string {
-  static $cache = Map {};
-
-  if (substr($func, 0, 2) === '_Z') {
-    if (preg_match('/^(.+)\.isra\.\d+$/', $func, $matches) === 1) {
-      $func = $matches[1];
-    }
-    if (!isset($cache[$func])) {
-      $cache[$func] = trim(shell_exec("echo '$func' | c++filt"));
-    }
-    $func = $cache[$func];
-  }
-
-  return $func;
-}
+require(__DIR__.'/perf-lib.php');
 
 # Returns true iff $sample contains a line containing $func.
 function contains_frame(Vector $sample, string $func): bool {
@@ -109,7 +93,7 @@ Usage:
 
 $script_name [symbol]
 
-This script expects the output of "perf script -f ip,sym" on stdin. If the
+This script expects the output of "perf script -f comm,ip,sym" on stdin. If the
 optional symbol argument is present, a call graph of all frames containing that
 symbol will be output, with the root of the frame truncated at the highest
 frame containing the symbol. Note that the symbol may appear anywhere in the
@@ -129,28 +113,7 @@ function main($argv) {
     return 1;
   }
 
-  $samples = Vector {};
-  $stack = null;
-
-  while ($line = fgets(STDIN)) {
-    $line = trim($line);
-    if ($line === '' || $line[0] == '#') {
-      if ($stack) {
-        $samples[] = $stack;
-        $stack = null;
-      }
-      continue;
-    }
-
-    if (preg_match('/^[a-f0-9]+ (.+)$/', $line, $matches) === 1) {
-      if (!$stack) $stack = Vector {};
-      $stack[] = filter_func($matches[1]);
-    } else {
-      echo "Unknown line '$line'\n";
-    }
-  }
-
-  if ($stack) $samples[] = $stack;
+  $samples = read_perf_samples(STDIN);
 
   if (count($argv) == 2) {
     $functions = Set { $argv[1] };

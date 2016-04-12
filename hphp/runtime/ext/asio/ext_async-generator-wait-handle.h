@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,25 +32,23 @@ namespace HPHP {
  * An async generator wait handle represents one step of asynchronous execution
  * between two yield statements of an async generator.
  */
-class AsyncGenerator;
+struct AsyncGenerator;
 
-class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
- public:
-  DECLARE_CLASS_NO_SWEEP(AsyncGeneratorWaitHandle)
+struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
+  WAITHANDLE_CLASSOF(AsyncGeneratorWaitHandle);
+  WAITHANDLE_DTOR(AsyncGeneratorWaitHandle);
 
-  explicit c_AsyncGeneratorWaitHandle(Class* cls =
-      c_AsyncGeneratorWaitHandle::classof())
-    : c_ResumableWaitHandle(cls) {}
+  c_AsyncGeneratorWaitHandle(AsyncGenerator* gen, c_WaitableWaitHandle* child);
   ~c_AsyncGeneratorWaitHandle();
-
-  void t___construct();
 
  public:
   static constexpr ptrdiff_t blockableOff() {
     return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
   }
-  static c_AsyncGeneratorWaitHandle* Create(AsyncGenerator* gen,
-                                            c_WaitableWaitHandle* child);
+
+  static req::ptr<c_AsyncGeneratorWaitHandle>
+  Create(AsyncGenerator* gen, c_WaitableWaitHandle* child);
+
   void resume();
   void onUnblocked();
   void await(c_WaitableWaitHandle* child);
@@ -64,12 +62,11 @@ class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
 
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncGenerator, state); }
-  void initialize(AsyncGenerator* gen, c_WaitableWaitHandle* child);
   void prepareChild(c_WaitableWaitHandle* child);
 
-  AsyncGenerator* m_generator;
+  Object m_generator; // has AsyncGenerator nativedata.
 
-  // valid if STATE_SCHEDULED || STATE_BLOCKED
+  // valid if STATE_READY || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
   AsioBlockable m_blockable;
 };

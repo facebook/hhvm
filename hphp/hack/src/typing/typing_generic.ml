@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -32,8 +32,17 @@ end = struct
     | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
     | Tabstract (AKgeneric (x, _), _) -> raise (Found x)
     | Tanon _ | Tany | Tmixed | Tprim _ -> ()
-    | Tarray (ty1, ty2) ->
-        ty_opt ty1; ty_opt ty2
+    | Tarraykind akind ->
+      begin match akind with
+        | AKany -> ()
+        | AKempty -> ()
+        | AKvec tv -> ty tv
+        | AKmap (tk, tv) -> ty tk; ty tv
+        | AKshape fdm ->
+            ShapeMap.iter (fun _ (tk, tv) -> ty tk; ty tv) fdm
+        | AKtuple fields ->
+            IMap.iter (fun _ tv -> ty tv) fields
+      end
     | Tvar _ -> assert false (* Expansion got rid of Tvars ... *)
     | Toption x -> ty x
     | Tfun fty ->

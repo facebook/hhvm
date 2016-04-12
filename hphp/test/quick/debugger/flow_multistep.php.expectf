@@ -1,7 +1,7 @@
 Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break flow_multistep.php:58
 Breakpoint 1 set on line 58 of flow_multistep.php
-But wont break until file flow_multistep.php has been loaded.
+But won't break until file flow_multistep.php has been loaded.
 run
 C1 oh hai
 C2 oh hai

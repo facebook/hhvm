@@ -1,0 +1,8 @@
+Warning: Not a valid stream resource in %s/test/slow/ext_mailparse/ext_mailparse_bad_files.php on line 5
+bool(false)
+
+Warning: Not a valid stream resource in %s/test/slow/ext_mailparse/ext_mailparse_bad_files.php on line 6
+bool(false)
+
+Warning: Not a valid stream resource in %s/test/slow/ext_mailparse/ext_mailparse_bad_files.php on line 7
+bool(false)

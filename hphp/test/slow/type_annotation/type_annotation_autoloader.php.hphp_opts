@@ -1,0 +1,4 @@
+--ffile=hphp/test/slow/type_annotation/type_annotation_autoloader-1.inc --ffile=test/slow/type_annotation/type_annotation_autoloader-1.inc --ffile=slow/type_annotation/type_annotation_autoloader-1.inc
+--ffile=hphp/test/slow/type_annotation/type_annotation_autoloader-2.inc --ffile=test/slow/type_annotation/type_annotation_autoloader-2.inc --ffile=slow/type_annotation/type_annotation_autoloader-2.inc
+--ffile=hphp/test/slow/type_annotation/type_annotation_autoloader-3.inc --ffile=test/slow/type_annotation/type_annotation_autoloader-3.inc --ffile=slow/type_annotation/type_annotation_autoloader-3.inc
+--ffile=hphp/test/slow/type_annotation/type_annotation_autoloader-4.inc --ffile=test/slow/type_annotation/type_annotation_autoloader-4.inc --ffile=slow/type_annotation/type_annotation_autoloader-4.inc

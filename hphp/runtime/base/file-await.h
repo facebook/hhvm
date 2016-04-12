@@ -8,32 +8,33 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-class FileAwait;
+struct FileAwait;
 
-class FileTimeoutHandler : public AsioTimeoutHandler {
- friend class FileAwait;
- public:
+struct FileTimeoutHandler : AsioTimeoutHandler {
+ friend struct FileAwait;
+
   FileTimeoutHandler(AsioEventBase* base, FileAwait* fa):
     AsioTimeoutHandler(base), m_fileAwait(fa) {}
 
   void timeoutExpired() noexcept override;
+
  private:
   FileAwait* m_fileAwait;
 };
 
-class FileEventHandler : public AsioEventHandler {
- friend class FileAwait;
- public:
+struct FileEventHandler : AsioEventHandler {
+ friend struct FileAwait;
+
   FileEventHandler(AsioEventBase* base, int fd, FileAwait* fa):
     AsioEventHandler(base, fd), m_fileAwait(fa) {}
 
   void handlerReady(uint16_t events) noexcept override;
+
  private:
   FileAwait* m_fileAwait;
 };
 
-class FileAwait : public AsioExternalThreadEvent {
- public:
+struct FileAwait : AsioExternalThreadEvent {
   enum Status {
     ERROR = -1,
     TIMEOUT = 0,

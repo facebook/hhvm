@@ -77,6 +77,10 @@ using std::abs;
 
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 /* only used here, let do a generic fixed point integers later if required by other
    part of GD */
 typedef long gdFixed;
@@ -955,6 +959,11 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 	gdImagePtr tmp_im;
 	gdImagePtr dst;
 
+	/* Convert to truecolor if it isn't; this code requires it. */
+	if (!src->trueColor) {
+		gdImagePaletteToTrueColor(src);
+	}
+
 	tmp_im = gdImageCreateTrueColor(new_width, src_height);
 	if (tmp_im == NULL) {
 		return NULL;
@@ -964,12 +973,12 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
-		gdFree(tmp_im);
+		gdImageDestroy(tmp_im);
 		return NULL;
 	}
 	gdImageSetInterpolationMethod(dst, src->interpolation_id);
 	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
-	gdFree(tmp_im);
+	gdImageDestroy(tmp_im);
 
 	return dst;
 }

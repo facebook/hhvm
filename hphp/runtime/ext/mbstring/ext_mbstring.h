@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -71,6 +71,8 @@ Variant HHVM_FUNCTION(mb_encode_numericentity,
                       const Variant& convmap,
                       const Variant& opt_encoding = null_variant,
                       bool is_hex = false);
+Variant HHVM_FUNCTION(mb_encoding_aliases,
+                      const String& name);
 bool HHVM_FUNCTION(mb_ereg_match,
                    const String& pattern,
                    const String& str,

@@ -33,21 +33,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t))f)(GP[0]);
         case 1:
-          return ((double (*)(double,int64_t))f)(SIMD[0],GP[0]);
+          return ((double (*)(int64_t,double))f)(GP[0],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+          return ((double (*)(int64_t,double,double))f)(GP[0],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+          return ((double (*)(int64_t,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+          return ((double (*)(int64_t,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+          return ((double (*)(int64_t,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+          return ((double (*)(int64_t,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+          return ((double (*)(int64_t,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+          return ((double (*)(int64_t,double,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 2:
@@ -55,21 +55,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t))f)(GP[0],GP[1]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double))f)(GP[0],GP[1],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+          return ((double (*)(int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 3:
@@ -77,21 +77,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+          return ((double (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 4:
@@ -99,21 +99,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 5:
@@ -121,21 +121,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 6:
@@ -143,21 +143,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 7:
@@ -165,21 +165,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 8:
@@ -187,21 +187,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 9:
@@ -209,21 +209,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 10:
@@ -231,21 +231,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 11:
@@ -253,21 +253,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 12:
@@ -275,21 +275,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 13:
@@ -297,21 +297,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 14:
@@ -319,21 +319,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 15:
@@ -341,21 +341,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 16:
@@ -363,21 +363,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 17:
@@ -385,21 +385,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 18:
@@ -407,21 +407,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 19:
@@ -429,21 +429,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 20:
@@ -451,21 +451,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 21:
@@ -473,21 +473,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 22:
@@ -495,21 +495,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 23:
@@ -517,21 +517,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 24:
@@ -539,21 +539,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 25:
@@ -561,21 +561,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 26:
@@ -583,21 +583,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 27:
@@ -605,21 +605,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 28:
@@ -627,21 +627,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 29:
@@ -649,21 +649,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 30:
@@ -671,21 +671,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 31:
@@ -693,21 +693,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 32:
@@ -715,21 +715,21 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
         case 1:
-          return ((double (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0]);
         case 2:
-          return ((double (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1]);
         case 3:
-          return ((double (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((double (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((double (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((double (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((double (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((double (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((double (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     default: not_reached();
@@ -765,21 +765,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t))f)(GP[0]);
         case 1:
-          return ((int64_t (*)(double,int64_t))f)(SIMD[0],GP[0]);
+          return ((int64_t (*)(int64_t,double))f)(GP[0],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+          return ((int64_t (*)(int64_t,double,double))f)(GP[0],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+          return ((int64_t (*)(int64_t,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+          return ((int64_t (*)(int64_t,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+          return ((int64_t (*)(int64_t,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+          return ((int64_t (*)(int64_t,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+          return ((int64_t (*)(int64_t,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+          return ((int64_t (*)(int64_t,double,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 2:
@@ -787,21 +787,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t))f)(GP[0],GP[1]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double))f)(GP[0],GP[1],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+          return ((int64_t (*)(int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 3:
@@ -809,21 +809,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 4:
@@ -831,21 +831,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 5:
@@ -853,21 +853,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 6:
@@ -875,21 +875,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 7:
@@ -897,21 +897,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 8:
@@ -919,21 +919,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 9:
@@ -941,21 +941,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 10:
@@ -963,21 +963,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 11:
@@ -985,21 +985,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 12:
@@ -1007,21 +1007,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 13:
@@ -1029,21 +1029,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 14:
@@ -1051,21 +1051,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 15:
@@ -1073,21 +1073,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 16:
@@ -1095,21 +1095,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 17:
@@ -1117,21 +1117,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 18:
@@ -1139,21 +1139,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 19:
@@ -1161,21 +1161,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 20:
@@ -1183,21 +1183,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 21:
@@ -1205,21 +1205,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 22:
@@ -1227,21 +1227,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 23:
@@ -1249,21 +1249,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 24:
@@ -1271,21 +1271,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 25:
@@ -1293,21 +1293,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 26:
@@ -1315,21 +1315,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 27:
@@ -1337,21 +1337,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 28:
@@ -1359,21 +1359,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 29:
@@ -1381,21 +1381,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 30:
@@ -1403,21 +1403,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 31:
@@ -1425,21 +1425,21 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     case 32:
@@ -1447,21 +1447,753 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
         case 0:
           return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
         case 1:
-          return ((int64_t (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0]);
         case 2:
-          return ((int64_t (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1]);
         case 3:
-          return ((int64_t (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2]);
         case 4:
-          return ((int64_t (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
         case 5:
-          return ((int64_t (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
         case 6:
-          return ((int64_t (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
         case 7:
-          return ((int64_t (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
         case 8:
-          return ((int64_t (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+          return ((int64_t (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+
+TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)())f)();
+        case 1:
+          return ((TypedValue (*)(double))f)(SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(double,double))f)(SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t))f)(GP[0]);
+        case 1:
+          return ((TypedValue (*)(int64_t,double))f)(GP[0],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,double,double))f)(GP[0],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,double,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,double))f)(GP[0],GP[1],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 1:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
         default: not_reached();
       }
     default: not_reached();

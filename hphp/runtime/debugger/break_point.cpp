@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -137,7 +137,7 @@ void InterruptSite::Initialize(ActRec *fp) {
   bail_on(!fp->m_func);
   m_unit = fp->m_func->unit();
   bail_on(!m_unit);
-  m_file = m_unit->filepath()->data();
+  m_file = String(StrNR{m_unit->filepath()});
   if (m_unit->getSourceLoc(m_offset, m_sourceLoc)) {
     m_line0 = m_sourceLoc.line0;
     m_char0 = m_sourceLoc.char0;
@@ -161,12 +161,13 @@ void InterruptSite::Initialize(ActRec *fp) {
 // is destructed, so do not hold on to the returned object for
 // longer than there is a guarantee that this site will be alive.
 const InterruptSite *InterruptSite::getCallingSite() const {
-  if (m_callingSite != nullptr) return m_callingSite.get();
+  if (m_callingSite) return m_callingSite.get();
   auto const context = g_context.getNoCheck();
   Offset parentOffset;
   auto parentFp = context->getPrevVMState(m_activationRecord, &parentOffset);
   if (parentFp == nullptr) return nullptr;
-  m_callingSite.reset(new InterruptSite(parentFp, parentOffset, m_error));
+  m_callingSite = req::make_unique<InterruptSite>(parentFp, parentOffset,
+                                                  m_error);
   return m_callingSite.get();
 }
 

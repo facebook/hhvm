@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class UserFile : public File, public UserFSNode {
-public:
+struct UserFile : File, UserFSNode {
   DECLARE_RESOURCE_ALLOCATION(UserFile);
 
   explicit UserFile(Class *cls,
@@ -85,24 +84,24 @@ private:
   Resource invokeCast(int castas);
 
 protected:
-  const Func* m_StreamOpen;
-  const Func* m_StreamClose;
-  const Func* m_StreamRead;
-  const Func* m_StreamWrite;
-  const Func* m_StreamSeek;
-  const Func* m_StreamTell;
-  const Func* m_StreamEof;
-  const Func* m_StreamFlush;
-  const Func* m_StreamTruncate;
-  const Func* m_StreamLock;
-  const Func* m_StreamStat;
-  const Func* m_StreamMetadata;
-  const Func* m_StreamCast;
-  const Func* m_UrlStat;
-  const Func* m_Unlink;
-  const Func* m_Rename;
-  const Func* m_Mkdir;
-  const Func* m_Rmdir;
+  LowPtr<const Func> m_StreamOpen;
+  LowPtr<const Func> m_StreamClose;
+  LowPtr<const Func> m_StreamRead;
+  LowPtr<const Func> m_StreamWrite;
+  LowPtr<const Func> m_StreamSeek;
+  LowPtr<const Func> m_StreamTell;
+  LowPtr<const Func> m_StreamEof;
+  LowPtr<const Func> m_StreamFlush;
+  LowPtr<const Func> m_StreamTruncate;
+  LowPtr<const Func> m_StreamLock;
+  LowPtr<const Func> m_StreamStat;
+  LowPtr<const Func> m_StreamMetadata;
+  LowPtr<const Func> m_StreamCast;
+  LowPtr<const Func> m_UrlStat;
+  LowPtr<const Func> m_Unlink;
+  LowPtr<const Func> m_Rename;
+  LowPtr<const Func> m_Mkdir;
+  LowPtr<const Func> m_Rmdir;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

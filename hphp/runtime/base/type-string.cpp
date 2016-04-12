@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
@@ -146,19 +145,22 @@ std::string convDblToStrWithPhpFormat(double n) {
 
 String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
 
-String::String(Variant&& src) : String(src.toString()) { }
-
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
-String String::substr(int start, int length /* = 0x7FFFFFFF */,
-                      bool nullable /* = false */) const {
-  auto r = slice();
-  // string_substr_check() will update start & length to a legal range.
-  if (string_substr_check(r.size(), start, length)) {
-    return String(r.data() + start, length, CopyString);
+String String::substr(int start, int length /* = StringData::MaxSize */) const {
+  if (start < 0 || start > size() || length < 0) {
+    return empty_string();
   }
-  return nullable ? String() : String("", 0, CopyString);
+
+  auto const max_len = size() - start;
+  if (length > max_len) {
+    length = max_len;
+  }
+
+  if (UNLIKELY(length == size())) return *this;
+  if (length == 0) return empty_string();
+  return String(data() + start, length, CopyString);
 }
 
 int String::find(char ch, int pos /* = 0 */,
@@ -220,18 +222,6 @@ int String::rfind(const String& s, int pos /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions: cannot inline these due to dependencies
 
-String String::rvalAt(const Array& key) const {
-  return rvalAtImpl(key.toInt32());
-}
-
-String String::rvalAt(const Object& key) const {
-  return rvalAtImpl(key.toInt32());
-}
-
-String String::rvalAt(const Variant& key) const {
-  return rvalAtImpl(key.toInt32());
-}
-
 char String::charAt(int pos) const {
   assert(pos >= 0 && pos <= size());
   const char *s = data();
@@ -253,14 +243,6 @@ String& String::operator=(const std::string& s) {
   return *this;
 }
 
-String& String::operator=(const Variant& var) {
-  return operator=(var.toString());
-}
-
-String& String::operator=(Variant&& var) {
-  return operator=(var.toString());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // concatenation and increments
 
@@ -268,7 +250,7 @@ String& String::operator+=(const char* s) {
   if (s && *s) {
     if (empty()) {
       m_str = req::ptr<StringData>::attach(StringData::Make(s, CopyString));
-    } else if (m_str->hasExactlyOneRef()) {
+    } else if (!m_str->cowCheck()) {
       auto const tmp = m_str->append(folly::StringPiece{s});
       if (UNLIKELY(tmp != m_str)) {
         m_str = req::ptr<StringData>::attach(tmp);
@@ -285,7 +267,7 @@ String& String::operator+=(const String& str) {
   if (!str.empty()) {
     if (empty()) {
       m_str = str.m_str;
-    } else if (m_str->hasExactlyOneRef()) {
+    } else if (!m_str->cowCheck()) {
       auto tmp = m_str->append(str.slice());
       if (UNLIKELY(tmp != m_str)) {
         m_str = req::ptr<StringData>::attach(tmp);
@@ -307,7 +289,7 @@ String& String::operator+=(folly::StringPiece slice) {
   if (slice.size() == 0) {
     return *this;
   }
-  if (m_str && m_str->hasExactlyOneRef()) {
+  if (m_str && !m_str->cowCheck()) {
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) {
       m_str = req::ptr<StringData>::attach(tmp);
@@ -359,19 +341,6 @@ String operator+(const String & lhs, const String & rhs) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// conversions
-
-VarNR String::toKey() const {
-  if (!m_str) return VarNR(staticEmptyString());
-  int64_t n = 0;
-  if (m_str->isStrictlyInteger(n)) {
-    return VarNR(n);
-  } else {
-    return VarNR(m_str.get());
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
 bool String::same(const StringData *v2) const {
@@ -379,18 +348,6 @@ bool String::same(const StringData *v2) const {
 }
 
 bool String::same(const String& v2) const {
-  return HPHP::same(get(), v2);
-}
-
-bool String::same(const Array& v2) const {
-  return HPHP::same(get(), v2);
-}
-
-bool String::same(const Object& v2) const {
-  return HPHP::same(get(), v2);
-}
-
-bool String::same(const Resource& v2) const {
   return HPHP::same(get(), v2);
 }
 
@@ -402,18 +359,6 @@ bool String::equal(const String& v2) const {
   return HPHP::equal(get(), v2);
 }
 
-bool String::equal(const Array& v2) const {
-  return HPHP::equal(get(), v2);
-}
-
-bool String::equal(const Object& v2) const {
-  return HPHP::equal(get(), v2);
-}
-
-bool String::equal(const Resource& v2) const {
-  return HPHP::equal(get(), v2);
-}
-
 bool String::less(const StringData *v2) const {
   return HPHP::less(get(), v2);
 }
@@ -422,35 +367,11 @@ bool String::less(const String& v2) const {
   return HPHP::less(get(), v2);
 }
 
-bool String::less(const Array& v2) const {
-  return HPHP::less(get(), v2);
-}
-
-bool String::less(const Object& v2) const {
-  return HPHP::less(get(), v2);
-}
-
-bool String::less(const Resource& v2) const {
-  return HPHP::less(get(), v2);
-}
-
 bool String::more(const StringData *v2) const {
   return HPHP::more(get(), v2);
 }
 
 bool String::more(const String& v2) const {
-  return HPHP::more(get(), v2);
-}
-
-bool String::more(const Array& v2) const {
-  return HPHP::more(get(), v2);
-}
-
-bool String::more(const Object& v2) const {
-  return HPHP::more(get(), v2);
-}
-
-bool String::more(const Resource& v2) const {
   return HPHP::more(get(), v2);
 }
 
@@ -486,22 +407,6 @@ bool String::operator>(const String& v) const {
 }
 
 bool String::operator<(const String& v) const {
-  return HPHP::less(get(), v);
-}
-
-bool String::operator==(const Variant& v) const {
-  return HPHP::equal(get(), v);
-}
-
-bool String::operator!=(const Variant& v) const {
-  return !HPHP::equal(get(), v);
-}
-
-bool String::operator>(const Variant& v) const {
-  return HPHP::more(get(), v);
-}
-
-bool String::operator<(const Variant& v) const {
   return HPHP::less(get(), v);
 }
 
@@ -555,8 +460,9 @@ StaticString getDataTypeString(DataType t) {
     case KindOfBoolean:    return s_boolean;
     case KindOfInt64:      return s_integer;
     case KindOfDouble:     return s_double;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:     return s_string;
+    case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;

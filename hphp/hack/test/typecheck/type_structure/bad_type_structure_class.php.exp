@@ -1,0 +1,24 @@
+Tint
+option(Tstring)
+option(Tstring)
+App \classname<App \C<Tint, >, >
+tuple(App \TypeStructure<Tint, >)
+X
+X
+X
+X
+X
+Tint
+Tint
+option(Tstring)
+option(Tstring)
+App \classname<generic T as <App \C<Tint, >>, >
+option(array)
+X
+X
+X
+X
+X
+Tint
+File "bad_type_structure_class.php", line 13, characters 15-24:
+The field nullable is undefined (Typing[4108])

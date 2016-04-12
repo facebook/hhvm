@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -106,15 +106,17 @@ struct InterruptSite {
   bool funcEntry() const { return m_funcEntry; }
   bool isBuiltin() const { return m_builtin; }
 
-private:
+  // for unique_ptr constructor
   InterruptSite(ActRec* fp, Offset offset, const Variant& error);
+
+private:
   void Initialize(ActRec *fp);
 
   Variant m_error;
   ActRec *m_activationRecord;
 
   // cached
-  mutable std::unique_ptr<const InterruptSite> m_callingSite;
+  mutable req::unique_ptr<const InterruptSite> m_callingSite;
   mutable const char *m_class;
   mutable std::string m_function;
   mutable String m_file;

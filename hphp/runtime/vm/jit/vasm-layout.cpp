@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <folly/MapUtil.h>
-
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
@@ -25,33 +23,33 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <boost/dynamic_bitset.hpp>
+#include <folly/MapUtil.h>
 
 #include <algorithm>
 
 /*
- * This module implements two code layout strategies for sorting the
- * Vasm blocks:
+ * This module implements two code layout strategies for sorting a Vunit's
+ * blocks:
  *
- *  1) rpoLayout() implements a simple layout that sorts the blocks in
- *     reverse post-order.  The final list of blocks is also
- *     partitioned so that any blocks assigned to the Main code area
- *     appear before the blocks assigned to the Cold area, which in
- *     turn appear before all blocks assigned to the Frozen area.
- *     This method is used when no profiling information is available.
+ *  1) rpoLayout() implements a simple layout that sorts the blocks in reverse
+ *     post-order.  The final list of blocks is also partitioned so that any
+ *     blocks assigned to the Main code area appear before the blocks assigned
+ *     to the Cold area, which in turn appear before all blocks assigned to the
+ *     Frozen area.  This method is used when no profiling information is
+ *     available.
  *
- *  2) pgoLayout() is enabled for Optimize, PGO-based regions.  This
- *     implements the algorithm described in "Profile Guided Code
- *     Positioning" (PLDI'1990) by Pettis & Hansen (more specifically,
- *     Algo2, from section 4.2.1).  This implementation uses estimated
- *     arc weights derived from a combination of profile counters
- *     inserted at the bytecode-level blocks (in Profile translations)
- *     and the JIT-time Likely/Unlikely/Unused hints (encoded in the
- *     "area" field of Vblocks).
- *
+ *  2) pgoLayout() is enabled for Optimize, PGO-based regions.  This implements
+ *     the algorithm described in "Profile Guided Code Positioning" (PLDI'1990)
+ *     by Pettis & Hansen (more specifically, Algo2, from section 4.2.1).  This
+ *     implementation uses estimated arc weights derived from a combination of
+ *     profile counters inserted at the bytecode-level blocks (in Profile
+ *     translations) and the JIT-time Likely/Unlikely/Unused hints (encoded in
+ *     the "area" field of Vblocks).
  */
 
 namespace HPHP { namespace jit {
@@ -64,21 +62,37 @@ TRACE_SET_MOD(layout);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
-  auto blocks = sortBlocks(unit);
+jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
+  auto labels = sortBlocks(unit);
+
+  auto const blk = [&] (Vlabel b) -> const Vblock& { return unit.blocks[b]; };
+
   // Partition into main/cold/frozen areas without changing relative order, and
-  // the end{} block will be last.
-  auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Main &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
+  // the fallthru{} block will be last if there is one.
+  auto coldIt = std::stable_partition(labels.begin(), labels.end(),
+    [&] (Vlabel b) {
+      return blk(b).area_idx == AreaIndex::Main &&
+             blk(b).code.back().op != Vinstr::fallthru;
     });
-  std::stable_partition(coldIt, blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Cold &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
+  std::stable_partition(coldIt, labels.end(),
+    [&] (Vlabel b) {
+      return blk(b).area_idx == AreaIndex::Cold &&
+             blk(b).code.back().op != Vinstr::fallthru;
     });
-  return blocks;
+
+  // We put fallthru{} blocks at the end, but we also need to make sure it's
+  // still partitioned with those blocks that share a code area.  This should
+  // always be true, so just assert it.
+  DEBUG_ONLY auto const n = labels.size();
+  assertx(n < 2 ||
+    IMPLIES(
+      blk(labels.back()).code.back().op == Vinstr::fallthru,
+      text.area(blk(labels.back()).area_idx) ==
+        text.area(blk(labels[n - 2]).area_idx)
+    )
+  );
+
+  return labels;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,9 +101,8 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
  * This keeps track of the weights of blocks and arcs in a Vunit.
  */
 struct Scale {
-  Scale(const Vunit& unit, const ProfData& prof)
+  explicit Scale(const Vunit& unit)
       : m_unit(unit)
-      , m_prof(prof)
       , m_blocks(sortBlocks(unit))
       , m_preds(computePreds(unit)) {
     computeWeights();
@@ -104,12 +117,11 @@ struct Scale {
   void    computeBlockWeights();
   void    computeArcWeights();
   TransID findProfTransID(Vlabel blk) const;
-  int64_t findProfWeight(Vlabel blk)  const;
+  int64_t findProfCount(Vlabel blk)   const;
 
   static uint64_t arcId(Vlabel src, Vlabel dst) { return (src << 32) + dst; }
 
   const Vunit&                     m_unit;
-  const ProfData&                  m_prof;
   const jit::vector<Vlabel>        m_blocks;
   const PredVector                 m_preds;
   jit::vector<int64_t>             m_blkWgts;
@@ -134,10 +146,13 @@ TransID Scale::findProfTransID(Vlabel blk) const {
   return kInvalidTransID;
 }
 
-int64_t Scale::findProfWeight(Vlabel blk) const {
-  auto profTransID = findProfTransID(blk);
-  return profTransID == kInvalidTransID ? 0
-                                        : m_prof.absTransCounter(profTransID);
+int64_t Scale::findProfCount(Vlabel blk) const {
+  for (auto& i : m_unit.blocks[blk].code) {
+    if (i.origin) {
+      return i.origin->block()->profCount();
+    }
+  }
+  return 1;
 }
 
 void Scale::computeBlockWeights() {
@@ -155,9 +170,9 @@ void Scale::computeBlockWeights() {
     "need to update areaWeightFactors");
 
   for (auto b : m_blocks) {
-    auto a = unsigned(m_unit.blocks[b].area);
+    auto a = unsigned(m_unit.blocks[b].area_idx);
     assertx(a < 3);
-    m_blkWgts[b] = findProfWeight(b) / areaWeightFactors[a];
+    m_blkWgts[b] = findProfCount(b) / areaWeightFactors[a];
   }
 }
 
@@ -189,17 +204,17 @@ void Scale::computeWeights() {
 std::string Scale::toString() const {
   std::ostringstream out;
   out << "digraph {\n";
-  int64_t maxWgt = 0;
+  int64_t maxWgt = 1;
   for (auto b : m_blocks) {
     maxWgt = std::max(maxWgt, weight(b));
   }
   for (auto b : m_blocks) {
     unsigned coldness = 255 - (255 * weight(b) / maxWgt);
     out << folly::format(
-      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\","
+      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\","
       "shape=box,style=filled,fillcolor=\"#ff{:02x}{:02x}\"]\n",
-      b, b, weight(b), findProfTransID(b), unsigned(m_unit.blocks[b].area),
-      coldness, coldness);
+      b, b, weight(b), findProfTransID(b), unsigned(m_unit.blocks[b].area_idx),
+      findProfCount(b), coldness, coldness);
     for (auto s : succs(m_unit.blocks[b])) {
       out << folly::format("{} -> {} [label={}];\n", b, s, weight(b, s));
     }
@@ -390,29 +405,46 @@ void Clusterizer::sortClusters() {
   }
 
   DFSSortClusters dfsSort(std::move(clusterGraph), m_unit);
-  m_clusterOrder = std::move(dfsSort.sort(m_blockCluster[m_unit.entry]));
+  m_clusterOrder = dfsSort.sort(m_blockCluster[m_unit.entry]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> pgoLayout(const Vunit& unit) {
-  // compute block & arc weights
-  Scale scale(unit, *(mcg->tx().profData()));
+jit::vector<Vlabel> pgoLayout(const Vunit& unit, const Vtext& text) {
+  // Compute block & arc weights.
+  Scale scale(unit);
   FTRACE(1, "profileGuidedLayout: Weighted CFG:\n{}\n", scale.toString());
 
-  // cluster the blocks based on weights and sort the clusters
+  // Cluster the blocks based on weights and sort the clusters.
   Clusterizer clusterizer(unit, scale);
-  return clusterizer.getBlockList();
+  auto labels = clusterizer.getBlockList();
+
+  // Partition by actual code area without changing relative order.
+  auto cold_iter = std::stable_partition(labels.begin(), labels.end(),
+    [&] (Vlabel b) {
+      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Main);
+    });
+  if (cold_iter == labels.end()) return labels;
+
+  std::stable_partition(cold_iter, labels.end(),
+    [&] (Vlabel b) {
+      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Cold);
+    });
+  return labels;
 }
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit, const Vtext& text) {
   Timer timer(Timer::vasm_layout);
-  return mcg->tx().mode() == TransKind::Optimize ? pgoLayout(unit)
-                                                 : rpoLayout(unit);
+
+  return unit.transKind == TransKind::Optimize
+    ? pgoLayout(unit, text)
+    : rpoLayout(unit, text);
 }
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+
+}}

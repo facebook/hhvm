@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/runtime/vm/jit/cg-meta.h"
 
 #include <algorithm>
 
@@ -38,11 +40,7 @@ inline Vout::operator Vlabel() const {
 }
 
 inline AreaIndex Vout::area() const {
-  return m_unit.blocks[m_block].area;
-}
-
-inline Vpoint Vout::makePoint() {
-  return Vpoint{m_unit.next_point++};
+  return m_unit.blocks[m_block].area_idx;
 }
 
 inline Vreg Vout::makeReg() {
@@ -66,5 +64,31 @@ inline Vreg Vout::cns(T v) {
   return m_unit.makeConst(Vconst{v});
 }
 
+template<class T, class... Args>
+T* Vout::allocData(Args&&... args) {
+  return m_unit.allocData<T>(std::forward<Args>(args)...);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+template<class GenFunc>
+TCA vwrap_impl(CodeBlock& cb, DataBlock& data, CGMeta* meta,
+               GenFunc gen, CodeKind kind) {
+  CGMeta dummy_meta;
+
+  auto const start = cb.frontier();
+  Vauto vauto { cb, data, meta ? *meta : dummy_meta, kind };
+  gen(vauto.main(), vauto.cold());
+
+  assertx(dummy_meta.empty());
+
+  return start;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}

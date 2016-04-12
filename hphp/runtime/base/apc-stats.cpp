@@ -37,14 +37,15 @@ namespace {
 size_t getMemSize(const TypedValue* tv) {
   const auto& v = tvAsCVarRef(tv);
   auto type = v.getType();
-  if (!isRefcountedType(type)) {
-    return sizeof(Variant);
+  if (type == KindOfPersistentArray || type == KindOfArray) {
+    auto a = v.getArrayData();
+    return a->isStatic() ? sizeof(v) : getMemSize(a);
   }
   if (type == KindOfString) {
     return getMemSize(v.getStringData());
   }
-  if (type == KindOfArray) {
-    return getMemSize(v.getArrayData());
+  if (!isRefcountedType(type)) {
+    return sizeof(Variant);
   }
   assert(!"Unsupported Variant type for getMemSize()");
   return 0;
@@ -53,34 +54,40 @@ size_t getMemSize(const TypedValue* tv) {
 }
 
 size_t getMemSize(const APCHandle* handle) {
-  auto t = handle->type();
-  if (!isRefcountedType(t)) {
-    return sizeof(APCHandle);
-  }
-  if (t == KindOfString) {
-    if (handle->isUncounted()) {
+  switch (handle->kind()) {
+    case APCKind::Uninit:
+    case APCKind::Null:
+    case APCKind::Bool:
+    case APCKind::Int:
+    case APCKind::Double:
+    case APCKind::StaticString:
+    case APCKind::StaticArray:
+      return sizeof(APCHandle);
+
+    case APCKind::UncountedString:
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getStringData());
-    }
-    return getMemSize(APCString::fromHandle(handle));
-  }
-  if (t == KindOfArray) {
-    if (handle->isSerializedArray()) {
+    case APCKind::SharedString:
       return getMemSize(APCString::fromHandle(handle));
-    }
-    if (handle->isUncounted()) {
+
+    case APCKind::SerializedArray:
+      return getMemSize(APCString::fromHandle(handle));
+
+    case APCKind::UncountedArray:
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getArrayData());
-    }
-    return getMemSize(APCArray::fromHandle(handle));
-  }
-  if (t == KindOfObject) {
-    if (handle->isSerializedObj()) {
-      return getMemSize(APCString::fromHandle(handle));
-    }
-    return getMemSize(APCObject::fromHandle(handle));
-  }
 
+    case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
+      return getMemSize(APCArray::fromHandle(handle));
+
+    case APCKind::SerializedObject:
+      return getMemSize(APCString::fromHandle(handle));
+
+    case APCKind::SharedObject:
+    case APCKind::SharedCollection:
+      return getMemSize(APCObject::fromHandle(handle));
+  }
   assert(!"Unsupported APCHandle Type in getMemSize");
   return 0;
 }
@@ -106,6 +113,17 @@ size_t getMemSize(const APCArray* arr) {
 }
 
 size_t getMemSize(const APCObject* obj) {
+  if (obj->isPersistent()) {
+    auto size = sizeof(APCObject) +
+                sizeof(APCHandle*) * obj->m_propCount;
+    auto prop = obj->persistentProps();
+    auto const propEnd = prop + obj->m_propCount;
+    for (; prop != propEnd; ++prop) {
+      if (*prop) size += getMemSize(*prop);
+    }
+    return size;
+  }
+
   auto size = sizeof(APCObject) +
               sizeof(APCObject::Prop) * obj->m_propCount;
   auto prop = obj->props();
@@ -183,17 +201,12 @@ APCStats::APCStats() : m_valueSize(nullptr)
                      , m_primedEntries(nullptr)
                      , m_livePrimedEntries(nullptr)
                      , m_detailedStats(nullptr) {
-  m_valueSize = ServiceData::createTimeseries(
-      "apc.value_size", {ServiceData::StatsType::SUM});
-  m_keySize = ServiceData::createTimeseries(
-      "apc.key_size", {ServiceData::StatsType::SUM});
-  m_inFileSize = ServiceData::createTimeseries(
-      "apc.in_file_size", {ServiceData::StatsType::SUM});
-  m_livePrimedSize = ServiceData::createTimeseries(
-      "apc.primed_live_size", {ServiceData::StatsType::SUM});
-  m_pendingDeleteSize = ServiceData::createTimeseries(
-      "apc.pending_delete_size", {ServiceData::StatsType::SUM});
-
+  m_valueSize = ServiceData::createCounter("apc.value_size.sum");
+  m_keySize = ServiceData::createCounter("apc.key_size.sum");
+  m_inFileSize = ServiceData::createCounter("apc.in_file_size.sum");
+  m_livePrimedSize = ServiceData::createCounter("apc.primed_live_size.sum");
+  m_pendingDeleteSize =
+    ServiceData::createCounter("apc.pending_delete_size.sum");
   m_entries = ServiceData::createCounter("apc.entries");
   m_primedEntries = ServiceData::createCounter("apc.primed_entries");
   m_livePrimedEntries =
@@ -209,13 +222,13 @@ APCStats::~APCStats() {
 
 std::string APCStats::getStatsInfo() const {
   std::string info("APC info\nValue size: ");
-  info += std::to_string(m_valueSize->getSum()) +
+  info += std::to_string(m_valueSize->getValue()) +
           "\nKey size: " +
-          std::to_string(m_keySize->getSum()) +
+          std::to_string(m_keySize->getValue()) +
           "\nMapped to file data size: " +
-          std::to_string(m_inFileSize->getSum()) +
+          std::to_string(m_inFileSize->getValue()) +
           "\nIn memory primed data size: " +
-          std::to_string(m_livePrimedSize->getSum()) +
+          std::to_string(m_livePrimedSize->getValue()) +
           "\nEntries count: " +
           std::to_string(m_entries->getValue()) +
           "\nPrimed entries count: " +
@@ -224,7 +237,7 @@ std::string APCStats::getStatsInfo() const {
           std::to_string(m_livePrimedEntries->getValue());
   if (apcExtension::UseUncounted) {
     info += "\nPending deletes via treadmill size: " +
-            std::to_string(m_pendingDeleteSize->getSum());
+            std::to_string(m_pendingDeleteSize->getValue());
   }
   if (m_detailedStats) {
     info += m_detailedStats->getStatsInfo();
@@ -253,19 +266,19 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
                                             m_livePrimedEntries->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_valuesSize.get(),
-                                            m_valueSize->getSum()));
+                                            m_valueSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_keysSize.get(),
-                                            m_keySize->getSum()));
+                                            m_keySize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primedInFileSize.get(),
-                                            m_inFileSize->getSum()));
+                                            m_inFileSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primeLiveSize.get(),
-                                            m_livePrimedSize->getSum()));
+                                            m_livePrimedSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_pendingDeleteSize.get(),
-                                            m_pendingDeleteSize->getSum()));
+                                            m_pendingDeleteSize->getValue()));
   if (m_detailedStats) {
     m_detailedStats->collectStats(stats);
   }
@@ -405,96 +418,50 @@ void APCDetailedStats::removeAPCValue(APCHandle* handle, bool expired) {
   }
 }
 
-void APCDetailedStats::addType(APCHandle* handle) {
-  DataType type = handle->type();
-  assert(!isRefcountedType(type) ||
-         type == KindOfString ||
-         type == KindOfArray ||
-         type == KindOfObject);
+ServiceData::ExportedCounter*
+APCDetailedStats::counterFor(const APCHandle* handle) {
+  switch (handle->kind()) {
+    case APCKind::Uninit:
+    case APCKind::Null:
+    case APCKind::Bool:
+    case APCKind::Int:
+    case APCKind::Double:
+    case APCKind::StaticString:
+    case APCKind::StaticArray:
+      return m_uncounted;
 
-  switch (type) {
-    DT_UNCOUNTED_CASE:
-      m_uncounted->increment();
-      return;
+    case APCKind::UncountedString:
+      return m_uncString;
 
-    case KindOfString:
-      if (handle->isUncounted()) {
-        m_uncString->increment();
-      } else {
-        m_apcString->increment();
-      }
-      return;
+    case APCKind::SharedString:
+      return m_apcString;
 
-    case KindOfArray:
-      if (handle->isUncounted()) {
-        m_uncArray->increment();
-      } else if (handle->isSerializedArray()) {
-        m_serArray->increment();
-      } else {
-        m_apcArray->increment();
-      }
-      return;
+    case APCKind::UncountedArray:
+      return m_uncArray;
 
-    case KindOfObject:
-      if (handle->isSerializedObj()) {
-        m_serObject->increment();
-      } else {
-        m_apcObject->increment();
-      }
-      return;
+    case APCKind::SerializedArray:
+      return m_serArray;
 
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      break;
+    case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
+      return m_apcArray;
+
+    case APCKind::SerializedObject:
+      return m_serObject;
+
+    case APCKind::SharedObject:
+    case APCKind::SharedCollection:
+      return m_apcObject;
   }
   not_reached();
 }
 
-void APCDetailedStats::removeType(APCHandle* handle) {
-  DataType type = handle->type();
-  assert(!isRefcountedType(type) ||
-         type == KindOfString ||
-         type == KindOfArray ||
-         type == KindOfObject);
+void APCDetailedStats::addType(const APCHandle* handle) {
+  counterFor(handle)->increment();
+}
 
-  switch (type) {
-    DT_UNCOUNTED_CASE:
-      m_uncounted->decrement();
-      return;
-
-    case KindOfString:
-      if (handle->isUncounted()) {
-        m_uncString->decrement();
-      } else {
-        m_apcString->decrement();
-      }
-      return;
-
-    case KindOfArray:
-      if (handle->isUncounted()) {
-        m_uncArray->decrement();
-      } else if (handle->isSerializedArray()) {
-        m_serArray->decrement();
-      } else {
-        m_apcArray->decrement();
-      }
-      return;
-
-    case KindOfObject:
-      if (handle->isSerializedObj()) {
-        m_serObject->decrement();
-      } else {
-        m_apcObject->decrement();
-      }
-      return;
-
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      break;
-  }
-  not_reached();
+void APCDetailedStats::removeType(const APCHandle* handle) {
+  counterFor(handle)->decrement();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

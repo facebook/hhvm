@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/std/ext_std_intrinsics.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -38,10 +39,15 @@ void HHVM_FUNCTION(disable_inlining, const Variant& function) {
   jit::InliningDecider::forbidInliningOf(f);
 }
 
+void HHVM_FUNCTION(trigger_oom, bool oom) {
+  if (oom) setSurpriseFlag(MemExceededFlag);
+}
+
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
   HHVM_FALIAS(__hhvm_intrinsics\\disable_inlining, disable_inlining);
+  HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
   loadSystemlib("std_intrinsics");
 }
 

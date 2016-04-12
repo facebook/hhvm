@@ -232,6 +232,23 @@ function test_icu_tokenize() {
      "    [12] => sein\n".
      "    [13] => _E_\n".
      ")\n");
+
+  $input_hebrew = "היום יום רביעי, וזה ממש טוב.";
+  $output_hebrew = icu_tokenize($input_hebrew);
+  VS(print_r($output_hebrew, true),
+     "Array\n".
+     "(\n".
+     "    [0] => _B_\n".
+     "    [1] => היום\n".
+     "    [2] => יום\n".
+     "    [3] => רביעי\n".
+     "    [4] => ,\n".
+     "    [5] => וזה\n".
+     "    [6] => ממש\n".
+     "    [7] => טוב\n".
+     "    [8] => .\n".
+     "    [9] => _E_\n".
+     ")\n");
 }
 
 test_icu_match();

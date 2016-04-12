@@ -30,3 +30,27 @@ array(2) {
     }
   }
 }
+array(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(8) "MyAlias1"
+}
+array(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(8) "MyAlias2"
+}
+array(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(8) "MyAlias3"
+}

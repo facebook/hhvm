@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,8 +29,7 @@
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestBase {
- public:
+struct TestBase {
   TestBase();
   virtual ~TestBase() {}
 
@@ -87,8 +86,7 @@ class TestBase {
 };
 
 template <bool value>
-class WithOption {
-public:
+struct WithOption {
   explicit WithOption(bool& option) :
     m_option(&option), m_save(option) {
     option = value;

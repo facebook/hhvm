@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -365,11 +365,11 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
       buf_size = buf_size << 1;
       buf = (char*)realloc(buf, buf_size);
       if (!buf) {
-        throw FatalErrorException(0,
-                                  "The structure buffer has been exceeded "
-                                  "(%d).  Please try decreasing the nesting "
-                                  "depth of messages and report this to the "
-                                  "developers.", buf_size);
+        raise_fatal_error(
+          folly::sformat("The structure buffer has been exceeded "
+                          "({}).  Please try decreasing the nesting "
+                          "depth of messages and report this to the "
+                          "developers.", buf_size).c_str());
       }
     }
     sprintf(&buf[i], "%s%c", intbuf, id->next ? '.' : '\0');

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,9 +79,10 @@ Variant SSATmp::variantVal() const {
       return intVal();
     case KindOfDouble:
       return dblVal();
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return Variant(const_cast<StringData*>(strVal()));
+    case KindOfPersistentArray:
     case KindOfArray:
       return Variant{const_cast<ArrayData*>(arrVal())};
     case KindOfObject:

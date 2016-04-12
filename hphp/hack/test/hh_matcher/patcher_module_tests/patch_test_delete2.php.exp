@@ -1,0 +1,46 @@
+Deleting: 
+: line num:8 beginning of line:148 char offset in file:152 : line num:8 beginning of line:148 char offset in file:160:
+"STMT 2"
+
+=====
+
+
+Deleting: 
+: line num:9 beginning of line:162 char offset in file:166 : line num:13 beginning of line:234 char offset in file:239:
+if (true) {
+      "STMT 3 true";
+    } else {
+      "STMT 3 false";
+    }
+
+=====
+
+
+Deleting: 
+: line num:15 beginning of line:256 char offset in file:260 : line num:15 beginning of line:256 char offset in file:268:
+"STMT 4"
+
+=====
+
+
+Deleting: 
+: line num:16 beginning of line:270 char offset in file:274 : line num:16 beginning of line:270 char offset in file:282:
+"STMT 5"
+
+=====
+
+
+Deleting: 
+: line num:18 beginning of line:307 char offset in file:322 : line num:18 beginning of line:307 char offset in file:328:
+"arg2"
+
+=====
+
+
+Deleting: 
+: line num:18 beginning of line:307 char offset in file:330 : line num:18 beginning of line:307 char offset in file:336:
+"arg3"
+
+=====
+
+

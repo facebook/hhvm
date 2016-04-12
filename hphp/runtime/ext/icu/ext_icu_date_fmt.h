@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,8 +27,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlDateFormatter;
 
-class IntlDateFormatter : public IntlError {
- public:
+struct IntlDateFormatter : IntlError {
   IntlDateFormatter() {}
   IntlDateFormatter(const IntlDateFormatter&) = delete;
   IntlDateFormatter& operator=(const IntlDateFormatter& src) {

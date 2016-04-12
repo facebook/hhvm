@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,7 @@ ArrayData* ArrayCommon::Pop(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     auto const pos = a->iter_last();
     value = a->getValue(pos);
-    return a->remove(a->getKey(pos), a->hasMultipleRefs());
+    return a->remove(a->getKey(pos), a->cowCheck());
   }
   value = uninit_null();
   return a;
@@ -61,7 +61,7 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     auto const pos = a->iter_begin();
     value = a->getValue(pos);
-    auto const ret = a->remove(a->getKey(pos), a->hasMultipleRefs());
+    auto const ret = a->remove(a->getKey(pos), a->cowCheck());
     // In PHP, array_shift() will cause all numerically key-ed values re-keyed
     ret->renumber();
     return ret;

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -21,15 +21,11 @@
   * ClientCommand.command where the data carried by each branch is only
   * the data required for logging. *)
 
-type build_kind =
-  | Push
-  | Full
-  | Incremental
-  | Steps
-
 type log_command =
   | LCCheck of Path.t * (* from *) string * (* mode *) string
   | LCStart of Path.t
   | LCStop of Path.t
   | LCRestart of Path.t
-  | LCBuild of Path.t * build_kind
+  | LCBuild of Path.t * [
+      `Push | `Full | `Incremental | `Steps
+    ] * (* random id *) string

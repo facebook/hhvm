@@ -110,6 +110,24 @@ class MCRouter {
   ): Awaitable<void>;
 
   /**
+   * Compare and set
+   *
+   * @param int $cas - CAS token as returned by getRecord()
+   * @param string $key - Name of the key to store
+   * @param string $value - Datum to store
+   * @param int $expiration
+   *
+   * @throws On failure or mismatched CAS token
+   */
+  <<__Native>>
+  public function cas(
+    int $cas,
+    string $key,
+    string $value,
+    int $expiration = 0,
+  ): Awaitable<void>;
+
+  /**
    * Store a value
    *
    * @param string $key - Name of the key to store
@@ -184,7 +202,7 @@ class MCRouter {
   public function del(string $key): Awaitable<void>;
 
   /**
-   * Flush deleted/expired values
+   * Flush all key/value pairs
    *
    * @param int $delay - Amount of time to delay before flush
    *
@@ -203,6 +221,22 @@ class MCRouter {
    */
   <<__Native>>
   public function get(string $key): Awaitable<string>;
+
+  /**
+   * Retreive a record and its metadata
+   *
+   * @param string $key = Name of the key to retreive
+   *
+   * @return array - Value retreived and additional metadata
+   *   array(
+   *     'value' => 'Value retreived',
+   *     'cas'   => 1234567890,
+   *     'flags' => 0x12345678,
+   *   )
+   * @throws On failure
+   */
+  <<__Native>>
+  public function gets(string $key): Awaitable<array>;
 
   /**
    * Get the remote server's current version

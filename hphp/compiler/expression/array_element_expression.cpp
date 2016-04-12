@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,6 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -255,32 +254,6 @@ ExpressionPtr ArrayElementExpression::unneeded() {
     if (m_offset) return m_offset->unneeded();
   }
   return Expression::unneeded();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ArrayElementExpression::outputCodeModel(CodeGenerator &cg) {
-  if (m_offset) {
-    cg.printObjectHeader("BinaryOpExpression", 4);
-    cg.printPropertyHeader("expression1");
-    m_variable->outputCodeModel(cg);
-    cg.printPropertyHeader("expression2");
-    cg.printExpression(m_offset, false);
-    cg.printPropertyHeader("operation");
-    cg.printValue(PHP_ARRAY_ELEMENT);
-    cg.printPropertyHeader("sourceLocation");
-    cg.printLocation(this);
-    cg.printObjectFooter();
-  } else {
-    cg.printObjectHeader("UnaryOpExpression", 3);
-    cg.printPropertyHeader("expression");
-    m_variable->outputCodeModel(cg);
-    cg.printPropertyHeader("operation");
-    cg.printValue(PHP_ARRAY_APPEND_POINT_OP);
-    cg.printPropertyHeader("sourceLocation");
-    cg.printLocation(this);
-    cg.printObjectFooter();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

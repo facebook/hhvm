@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,7 +116,7 @@ struct FPIEnt {
  *
  */
 struct Func {
-  friend class FuncEmitter;
+  friend struct FuncEmitter;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -137,6 +137,8 @@ struct Func {
     MaybeDataType builtinType{folly::none};
     // True if this is a `...' parameter.
     bool variadic{false};
+    // Does this use a NativeArg?
+    bool nativeArg{false};
     // DV initializer funclet offset.
     Offset funcletOff{InvalidAbsoluteOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
@@ -209,7 +211,7 @@ struct Func {
    *
    * @requires: isPreFunc()
    */
-  void freeClone() const;
+  void freeClone();
 
   /*
    * Rename a function and reload it.
@@ -433,6 +435,10 @@ struct Func {
    */
   MaybeDataType returnType() const;
 
+  /*
+   * For builtins, whether the return value is returned in registers.
+   */
+  bool isReturnByValue() const;
   /*
    * Whether this function returns by reference.
    */
@@ -903,7 +909,7 @@ struct Func {
   /*
    * Get and set the `index'-th function prologue.
    */
-  unsigned char* getPrologue(int index) const;
+  uint8_t* getPrologue(int index) const;
   void setPrologue(int index, unsigned char* tca);
 
   /*
@@ -925,11 +931,6 @@ struct Func {
    */
   void resetPrologue(int numParams);
   void resetPrologues();
-
-  /*
-   * Smash prologue guards to prevent function from being called.
-   */
-  void smashPrologues();
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -992,7 +993,7 @@ struct Func {
 
   void setAttrs(Attr attrs);
   void setBaseCls(Class* baseCls);
-  void setFuncHandle(rds::Link<Func*> l);
+  void setFuncHandle(rds::Link<LowPtr<Func>> l);
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
 
@@ -1067,7 +1068,7 @@ private:
     FPIEntVec m_fpitab;
 
     // One byte worth of bools right now.  Check what it does to
-    // sizeof(SharedData) if you are trying to add more than one more ...
+    // sizeof(SharedData) if you are trying to add any more ...
     bool m_top : 1;
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
@@ -1075,6 +1076,7 @@ private:
     bool m_isPairGenerator : 1;
     bool m_isGenerated : 1;
     bool m_hasExtendedSharedData : 1;
+    bool m_returnByValue : 1; // only for builtins
 
     MaybeDataType m_returnType;
     LowStringPtr m_retUserType;
@@ -1146,7 +1148,7 @@ private:
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
-
+  void setNamedEntity(const NamedEntity*);
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal types.
@@ -1202,7 +1204,6 @@ public:
   static std::atomic<bool>     s_treadmill;
   static std::atomic<uint32_t> s_totalClonedClosures;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1214,8 +1215,8 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  unsigned char* volatile m_funcBody;
-  mutable rds::Link<Func*> m_cachedFunc{rds::kInvalidHandle};
+  AtomicLowPtr<uint8_t> m_funcBody;
+  mutable rds::Link<LowPtr<Func>> m_cachedFunc{rds::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
   LowStringPtr m_fullName;
   LowStringPtr m_name;
@@ -1226,8 +1227,8 @@ private:
   // The Class that provided this method implementation.
   AtomicLowPtr<Class> m_cls{nullptr};
   union {
-    const NamedEntity* m_namedEntity{nullptr};
-    Slot m_methodSlot;
+    Slot m_methodSlot{0};
+    LowPtr<const NamedEntity>::storage_type m_namedEntity;
   };
   // Atomically-accessed intercept flag.  -1, 0, or 1.
   // TODO(#1114385) intercept should work via invalidation.
@@ -1246,7 +1247,7 @@ private:
   AtomicAttr m_attrs;
   // This must be the last field declared in this structure, and the Func class
   // should not be inherited from.
-  unsigned char* volatile m_prologueTable[kNumFixedPrologues];
+  AtomicLowPtr<uint8_t> m_prologueTable[kNumFixedPrologues];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

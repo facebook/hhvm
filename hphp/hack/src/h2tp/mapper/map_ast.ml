@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -91,7 +91,7 @@ let mk_mapper = fun m_in ->
       | NamespaceUse v1 ->
           let v1 =
             map_of_list
-              (fun (v1, v2) -> let v1 = map_id v1 and v2 = map_id v2 in (v1, v2))
+              (fun (k, v1, v2) -> let v1 = map_id v1 and v2 = map_id v2 in (k, v1, v2))
               v1
           in NamespaceUse ((v1))
     in m_in.k_def (k, all_mappers) def
@@ -408,7 +408,6 @@ let mk_mapper = fun m_in ->
                f_params = v_f_params;
                f_body = v_f_body;
                f_user_attributes = v_f_user_attributes;
-               f_mtime = v_f_mtime;
                f_fun_kind = v_f_fun_kind;
                f_namespace = v_f_namespace
              } =
@@ -421,7 +420,6 @@ let mk_mapper = fun m_in ->
       let v_f_body = map_block v_f_body in
       let v_f_user_attributes =
         map_smap map_user_attribute v_f_user_attributes in
-      let v_f_mtime = map_of_float v_f_mtime in
       let v_f_fun_kind = map_fun_kind v_f_fun_kind in
       let v_f_namespace = map_namespace_env v_f_namespace
       in
@@ -434,7 +432,6 @@ let mk_mapper = fun m_in ->
           f_params = v_f_params;
           f_body = v_f_body;
           f_user_attributes = v_f_user_attributes;
-          f_mtime = v_f_mtime;
           f_fun_kind = v_f_fun_kind;
           f_namespace = v_f_namespace;
         }
@@ -550,6 +547,7 @@ let mk_mapper = fun m_in ->
       | False -> False
       | Id v1 -> let v1 = map_id v1 in Id ((v1))
       | Lvar v1 -> let v1 = map_id v1 in Lvar ((v1))
+      | Dollardollar -> Dollardollar
       | Clone v1 -> let v1 = map_expr v1 in Clone ((v1))
       | Obj_get ((v1, v2, v3)) ->
           let v1 = map_expr v1
@@ -589,11 +587,19 @@ let mk_mapper = fun m_in ->
           and v2 = map_expr v2
           and v3 = map_expr v3
           in Binop ((v1, v2, v3))
+      | Pipe (v1, v2) ->
+          let v1 = map_expr v1
+          and v2 = map_expr v2
+          in Pipe (v1, v2)
       | Eif ((v1, v2, v3)) ->
           let v1 = map_expr v1
           and v2 = map_of_option map_expr v2
           and v3 = map_expr v3
           in Eif ((v1, v2, v3))
+      | NullCoalesce ((v1, v2)) ->
+          let v1 = map_expr v1
+          and v2 = map_expr v2
+          in NullCoalesce ((v1, v2))
       | InstanceOf ((v1, v2)) ->
           let v1 = map_expr v1 and v2 = map_expr v2 in InstanceOf ((v1, v2))
       | New ((v1, v2, v3)) ->

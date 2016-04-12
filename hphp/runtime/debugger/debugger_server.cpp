@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,7 +154,7 @@ void DebuggerServer::accept() {
   Debugger::InitUsageLogging();
   // server loop
   unsigned int count = m_socks.size();
-  struct pollfd fds[count];
+  struct pollfd* fds = (struct pollfd*)alloca(sizeof(struct pollfd) * count);
 
   for (unsigned int i = 0; i < count; i++) {
     fds[i].fd = nthSocket(i)->fd();

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,13 @@
 #include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/collections/hash-collection.h"
+
+#include <algorithm>
 
 namespace HPHP {
 
@@ -49,6 +55,9 @@ struct Header {
     ProxyArray proxy_;
     GlobalsArray globals_;
     ObjectData obj_;
+    c_Pair pair_;
+    BaseVector vector_;
+    HashCollection hashcoll_;
     ResourceHdr res_;
     RefData ref_;
     SmallNode small_;
@@ -74,20 +83,28 @@ struct Header {
   const ObjectData* resumableObj() const {
     DEBUG_ONLY auto const func = resumable()->actRec()->func();
     assert(func->isAsyncFunction());
-    return reinterpret_cast<const ObjectData*>(resumable() + 1);
+    auto obj = reinterpret_cast<const ObjectData*>(resumable() + 1);
+    assert(obj->headerKind() == HeaderKind::ResumableObj);
+    return obj;
   }
   ObjectData* resumableObj() {
     DEBUG_ONLY auto const func = resumable()->actRec()->func();
     assert(func->isAsyncFunction());
-    return reinterpret_cast<ObjectData*>(resumable() + 1);
+    auto obj = reinterpret_cast<ObjectData*>(resumable() + 1);
+    assert(obj->headerKind() == HeaderKind::ResumableObj);
+    return obj;
   }
   const ObjectData* nativeObj() const {
     assert(kind() == HeaderKind::NativeData);
-    return Native::obj(&native_);
+    auto obj = Native::obj(&native_);
+    assert(isObjectKind(obj->headerKind()));
+    return obj;
   }
   ObjectData* nativeObj() {
     assert(kind() == HeaderKind::NativeData);
-    return Native::obj(&native_);
+    auto obj = Native::obj(&native_);
+    assert(isObjectKind(obj->headerKind()));
+    return obj;
   }
 
   // if this header is one of the types that contains an ObjectData,
@@ -107,6 +124,7 @@ inline size_t Header::size() const {
     case HeaderKind::Struct:
       return StructArray::heapSize(&arr_);
     case HeaderKind::Mixed:
+    case HeaderKind::Dict:
       return mixed_.heapSize();
     case HeaderKind::Empty:
       return sizeof(ArrayData);
@@ -120,6 +138,8 @@ inline size_t Header::size() const {
       return str_.heapSize();
     case HeaderKind::Object:
     case HeaderKind::ResumableObj:
+      // [ObjectData][subclass][props]
+      return obj_.heapSize();
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:
@@ -127,8 +147,11 @@ inline size_t Header::size() const {
     case HeaderKind::ImmVector:
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
-      // [ObjectData][subclass][props]
-      return obj_.heapSize();
+      // [ObjectData][subclass]
+      return collections::heapSize(kind());
+    case HeaderKind::WaitHandle:
+      // [ObjectData][subclass]
+      return asio_object_size(&obj_);
     case HeaderKind::AwaitAllWH:
       // [ObjectData][children...]
       return awaitall_.heapSize();
@@ -179,6 +202,7 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
       auto size = hdr->hdr_.kind == HeaderKind::Hole ||
                   hdr->hdr_.kind == HeaderKind::Free ? hdr->free_.size() :
                   MemoryManager::smallSizeClass(hdr->size());
+      assert(size % 16 == 0);
       hdr = (Header*)((char*)hdr + size);
       if (hdr >= slab_end) {
         assert(hdr == slab_end && "hdr > slab_end indicates corruption");
@@ -228,11 +252,12 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
 // iterate just the ObjectDatas, including the kinds with prefixes.
 // (NativeData and ResumableFrame).
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
-  if (debug) checkHeap();
+  if (debug) checkHeap("MM::forEachObject");
   std::vector<ObjectData*> ptrs;
   forEachHeader([&](Header* h) {
     switch (h->kind()) {
       case HeaderKind::Object:
+      case HeaderKind::WaitHandle:
       case HeaderKind::ResumableObj:
       case HeaderKind::AwaitAllWH:
       case HeaderKind::Vector:
@@ -253,6 +278,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::Packed:
       case HeaderKind::Struct:
       case HeaderKind::Mixed:
+      case HeaderKind::Dict:
       case HeaderKind::Empty:
       case HeaderKind::Apc:
       case HeaderKind::Globals:
@@ -274,6 +300,88 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
     fn(ptr);
   }
 }
+
+// information about heap objects, indexed by valid object starts.
+struct PtrMap {
+  using Region = std::pair<const Header*, std::size_t>;
+  static constexpr auto Mask = 0xffffffffffffULL; // 48 bit address space
+
+  void insert(const Header* h) {
+    assert(!sorted_);
+    regions_.emplace_back(h, h->size());
+  }
+
+  const Region* region(const void* p) const {
+    assert(sorted_);
+    // Find the first region which begins beyond p.
+    p = reinterpret_cast<void*>(uintptr_t(p) & Mask);
+    auto it = std::upper_bound(regions_.begin(), regions_.end(), p,
+      [](const void* p, const Region& region) {
+        return p < region.first;
+      });
+    // If its the first region, p is before any region, so there's no
+    // header. Otherwise, backup to the previous region.
+    if (it == regions_.begin()) return nullptr;
+    --it;
+    // p can only potentially point within this previous region, so check that.
+    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ? &*it :
+           nullptr;
+  }
+
+  const Header* header(const void* p) const {
+    auto r = region(p);
+    return r ? r->first : nullptr;
+  }
+
+  bool isHeader(const void* p) const {
+    auto h = header(p);
+    return h && h == p;
+  }
+
+  size_t index(const Region* r) const {
+    return r - &regions_[0];
+  }
+
+  // where does this header sit in the regions_ vector?
+  size_t index(const Header* h) const {
+    assert(header(h));
+    return region(h) - &regions_[0];
+  }
+
+  void prepare() {
+    assert(!sorted_);
+    std::sort(regions_.begin(), regions_.end());
+    assert(sanityCheck());
+    sorted_ = true;
+  }
+
+  size_t size() const {
+    return regions_.size();
+  }
+
+  template<class Fn> void iterate(Fn fn) const {
+    for (auto& r : regions_) {
+      fn(r.first, r.second);
+    }
+  }
+
+private:
+  bool sanityCheck() const {
+    // Verify that all the regions are in increasing and non-overlapping order.
+    void* last = nullptr;
+    for (const auto& region : regions_) {
+      if (!last || last <= region.first) {
+        last = (void*)(uintptr_t(region.first) + region.second);
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  std::vector<std::pair<const Header*, std::size_t>> regions_;
+  bool sorted_ = false;
+};
 
 }
 

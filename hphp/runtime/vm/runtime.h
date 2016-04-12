@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,12 +58,6 @@ inline TypedValue*
 frame_local(const ActRec* fp, int n) {
   return (TypedValue*)(uintptr_t(fp) -
     uintptr_t((n+1) * sizeof(TypedValue)));
-}
-
-inline TypedValue*
-frame_local_inner(const ActRec* fp, int n) {
-  TypedValue* ret = frame_local(fp, n);
-  return ret->m_type == KindOfRef ? ret->m_data.pref->tv() : ret;
 }
 
 inline Resumable*
@@ -218,7 +212,7 @@ inline ObjectData*
 newInstance(Class* cls) {
   assert(cls);
   auto* inst = ObjectData::newInstance(cls);
-  assert(inst->getCount() > 0);
+  assert(inst->checkCount());
   Stats::inc(cls->getDtor() ? Stats::ObjectData_new_dtor_yes
                             : Stats::ObjectData_new_dtor_no);
 
@@ -230,7 +224,7 @@ newInstance(Class* cls) {
 
 // Returns a RefData* that is already incref'd.
 RefData* lookupStaticFromClosure(ObjectData* closure,
-                                 StringData* name,
+                                 const StringData* name,
                                  bool& inited);
 
 /*

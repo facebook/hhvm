@@ -50,3 +50,16 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_definitions("-DFOLLY_USE_LIBCPP=1")
   endif()
 endif()
+
+CHECK_CXX_SOURCE_COMPILES("
+int main(int argc, char** argv) {
+  unsigned size = argc;
+  char data[size];
+  return 0;
+}
+" FOLLY_HAVE_VLA)
+if (FOLLY_HAVE_VLA)
+  add_definitions("-DFOLLY_HAVE_VLA=1")
+elseif()
+  add_definitions("-DFOLLY_HAVE_VLA=0")
+endif()

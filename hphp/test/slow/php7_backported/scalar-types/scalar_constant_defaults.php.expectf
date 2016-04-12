@@ -1,0 +1,12 @@
+Testing int val
+int(10)
+Testing float val
+float(10.5)
+Testing string val
+string(14) "this is a test"
+Testing int add val
+int(25)
+Testing float add val
+float(10.7)
+Testing string add val
+string(14) "this is a test"

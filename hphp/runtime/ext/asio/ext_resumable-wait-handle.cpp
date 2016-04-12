@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
@@ -27,19 +28,23 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void c_ResumableWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnResumableCreate(callback);
 }
 
-void c_ResumableWaitHandle::ti_setonawaitcallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnAwaitCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnResumableAwait(callback);
 }
 
-void c_ResumableWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnSuccessCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnResumableSuccess(callback);
 }
 
-void c_ResumableWaitHandle::ti_setonfailcallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnFailCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnResumableFail(callback);
 }
 
@@ -60,6 +65,18 @@ c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {
   }
 
   return nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initResumableWaitHandle() {
+#define RWH_SME(meth) \
+  HHVM_STATIC_MALIAS(HH\\ResumableWaitHandle, meth, ResumableWaitHandle, meth)
+  RWH_SME(setOnCreateCallback);
+  RWH_SME(setOnAwaitCallback);
+  RWH_SME(setOnSuccessCallback);
+  RWH_SME(setOnFailCallback);
+#undef RWH_SME
 }
 
 ///////////////////////////////////////////////////////////////////////////////

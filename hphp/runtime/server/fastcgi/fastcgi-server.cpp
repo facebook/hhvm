@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,12 +28,10 @@ bool FastCGIAcceptor::canAccept(const folly::SocketAddress& address) {
 }
 
 void FastCGIAcceptor::onNewConnection(
-  folly::AsyncSocket::UniquePtr sock,
+  folly::AsyncTransportWrapper::UniquePtr sock,
   const folly::SocketAddress* peerAddress,
   const std::string& nextProtocolName,
-#ifdef HHVM_SECURE_PROTO_TYPE
   SecureTransportType secureProtocolType,
-#endif
   const ::wangle::TransportInfo& tinfo)
 {
   folly::SocketAddress localAddress;

@@ -117,8 +117,8 @@ function ignore_user_abort(bool $setting = false): int;
  * byte X Back up one byte @ NUL-fill to absolute position
  * @return mixed - Returns a binary string containing data.
  */
-<<__Native("ActRec")>>
-function pack(string $format, mixed $args, ...): mixed;
+<<__Native>>
+function pack(string $format, ...$args): mixed;
 
 /* @param int $seconds - Halt time in seconds.
  * @return int - Returns zero on success, or FALSE on errors. If the call was

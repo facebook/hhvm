@@ -9,7 +9,6 @@ function squares_cubes() {
 }
 
 $c = squares_cubes();
-$c->next();
 var_dump($c->key());
 var_dump($c->current());
 $c->next();

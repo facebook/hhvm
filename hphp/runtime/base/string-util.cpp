@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -122,17 +122,16 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   int size = getContainerSize(items);
   if (size == 0) return empty_string();
 
-  String* sitems = (String*)req::malloc(size * sizeof(String));
+  req::vector<String> sitems;
+  sitems.reserve(size);
   int len = 0;
   int lenDelim = delim.size();
-  int i = 0;
   for (ArrayIter iter(items); iter; ++iter) {
-    new (&sitems[i]) String(iter.second().toString());
-    len += sitems[i].size() + lenDelim;
-    i++;
+    sitems.emplace_back(iter.second().toString());
+    len += sitems.back().size() + lenDelim;
   }
   len -= lenDelim; // always one delimiter less than count of items
-  assert(i == size);
+  assert(sitems.size() == size);
 
   String s = String(len, ReserveString);
   char *buffer = s.mutableData();
@@ -142,7 +141,6 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   int init_len = init_str.size();
   memcpy(p, init_str.data(), init_len);
   p += init_len;
-  sitems[0].~String();
   for (int i = 1; i < size; i++) {
     String &item = sitems[i];
     memcpy(p, sdelim, lenDelim);
@@ -150,9 +148,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
     int lenItem = item.size();
     memcpy(p, item.data(), lenItem);
     p += lenItem;
-    sitems[i].~String();
   }
-  req::free(sitems);
   assert(p - buffer == len);
   s.setSize(len);
   return s;

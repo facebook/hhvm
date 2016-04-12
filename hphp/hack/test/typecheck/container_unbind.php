@@ -1,45 +1,114 @@
-<?hh
+<?hh //strict
 
-type t = (int, string);
+class MyContainer<Tv> {
+  public function setPair(Pair<string, Tv> $_): void {}
+  public function setTuple((string, Tv) $_): void {}
+  public function setVector(Vector<Tv> $_): void {}
+  public function setMap(Map<string, Tv> $_): void {}
+  public function setMapArray(array<string, Tv> $_): void {}
+  public function setVectorArray(array<Tv> $_): void {}
+  public function setShape(shape('x' => Tv) $_): void {}
+}
 
-function no_type() {}
+function take_int(int $_): void {}
 
-function test(t $tuple, bool $cond): int {
-  $v = Vector {no_type()};
+function testPair(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
 
-  if ($cond) {
-    $tuple = tuple(
-      $v[0],
-      'aaa',
-      4, // this element is here to force creation of an intersection of two
-    // tuples. Without it they could just unify into a single one.
-    );
-  }
+  $m = new MyContainer();
 
-  hh_show($tuple);
-  /**
-   *  $tuple is now:
-   *
-   * [1]intersect(
-   *    ([2]intersect(X), Tstring, Tint),
-   *    (Tint, Tstring)
-   * )
-   **/
+  // $x[0] and $y[0] are type variables that contain inferred types of elements
+  // in $x and $y - Pair constructor must remove (unbind) them, because in next
+  // two lines they would be unified with Tv type variable of $m, and
+  // transitively with each other. Putting element inside a container should
+  // not affect it's type.
+  $m->setPair(Pair {'x', $x[0]});
+  $m->setPair(Pair {'x', $y[0]});
 
-  hh_show($tuple[0]); // intersect([2]intersect(X), Tint)
-  // assignment to variable is removing the outermost typevars ("unbinds it")
-  $x = $tuple[0];
-  hh_show($x); // intersect(intersect(X), Tint)
+  take_int($x[0]);
+}
 
-  /**
-   * Container constructors must do the same thing as assignment, otherwise
-   * they will end up unifying [2]intersect(X) with Tstring and Tint.
-   */
-  $_ = Vector {$tuple[0], $tuple[1]};
-  $_ = Map {0 => $tuple[0], 1 => $tuple[1]};
-  $_ = array($tuple[0], $tuple[1]);
-  $_ = array($tuple[0] => 0, $tuple[1] => 1);
+function testTuple(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
 
-  // Now Hack would think that $tuple[0] is an intersection of string and int
-  return $tuple[0];
+  $m = new MyContainer();
+
+  $m->setTuple(tuple('x', $x[0]));
+  $m->setTuple(tuple('x', $y[0]));
+
+  take_int($x[0]);
+}
+
+function testVector(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
+
+  $m = new MyContainer();
+
+  $m->setVector(Vector {$x[0]});
+  $m->setVector(Vector {$y[0]});
+
+  take_int($x[0]);
+}
+
+function testMap(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
+
+  $m = new MyContainer();
+
+  $m->setMap(Map {'x' => $x[0]});
+  $m->setMap(Map {'x' => $y[0]});
+
+  take_int($x[0]);
+}
+
+function testMapArray(string $key): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
+
+  $m = new MyContainer();
+
+  $m->setMapArray(array($key => $x[0]));
+  $m->setMapArray(array($key => $y[0]));
+
+  take_int($x[0]);
+}
+
+function testVectorArray(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
+
+  $m = new MyContainer();
+
+  $m->setVectorArray(array($x[0]));
+  $m->setVectorArray(array($y[0]));
+
+  take_int($x[0]);
+}
+
+function testShape(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
+
+  $m = new MyContainer();
+
+  $m->setShape(shape('x' => $x[0]));
+  $m->setShape(shape('x' => $y[0]));
+
+  take_int($x[0]);
+}
+
+function testShapeLikeArray(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
+
+  $m = new MyContainer();
+
+  $m->setMapArray(array('x' => $x[0]));
+  $m->setMapArray(array('x' => $y[0]));
+
+  take_int($x[0]);
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,10 +29,8 @@ namespace HPHP { namespace jit {
 /**
  * A dynamic control-flow graph of single-block translations.
  */
-class TransCFG {
- public:
-  class Arc {
-   public:
+struct TransCFG {
+  struct Arc {
     static const int64_t kUnknownWeight = -1;
 
     Arc(TransID src, TransID dst, int64_t w)
@@ -57,8 +55,7 @@ class TransCFG {
   typedef std::vector<Arc*>                      ArcPtrVec;
   typedef hphp_hash_set<Arc*, pointer_hash<Arc>> ArcPtrSet;
 
-  class Node {
-   public:
+  struct Node {
     Node(TransID id, int64_t w)
         : m_id(id)
         , m_weight(w)
@@ -82,7 +79,8 @@ class TransCFG {
   TransCFG(FuncId funcId,
            const ProfData* profData,
            const SrcDB& srcDB,
-           const TcaTransIDMap& jmpToTransID);
+           const TCATransIDMap& jmpToTransID,
+           bool inlining = false);
 
   const std::vector<TransID>& nodes() const { return m_transIds; }
   ArcPtrVec                   arcs()  const;

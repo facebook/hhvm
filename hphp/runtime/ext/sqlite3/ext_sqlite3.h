@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,26 +24,12 @@
 #include <sqlite3.h>
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/req-containers.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64_t k_SQLITE3_ASSOC;
-extern const int64_t k_SQLITE3_NUM;
-extern const int64_t k_SQLITE3_BOTH;
-extern const int64_t k_SQLITE3_INTEGER;
-extern const int64_t k_SQLITE3_FLOAT;
-extern const int64_t k_SQLITE3_TEXT;
-extern const int64_t k_SQLITE3_BLOB;
-extern const int64_t k_SQLITE3_NULL;
-extern const int64_t k_SQLITE3_OPEN_READONLY;
-extern const int64_t k_SQLITE3_OPEN_READWRITE;
-extern const int64_t k_SQLITE3_OPEN_CREATE;
-
-///////////////////////////////////////////////////////////////////////////////
-// class SQLite3
-
-class SQLite3 {
-public:
+struct SQLite3 {
   SQLite3();
   ~SQLite3();
   void validate() const;
@@ -54,10 +40,20 @@ public:
     Variant func;
     Variant step;
     Variant fini;
+    template<class F> void scan(F& mark) const {
+      mark(func);
+      mark(step);
+      mark(fini);
+    }
   };
 
+  void scan(IMarker& mark) const {
+    for (auto& udf : m_udfs) udf->scan(mark);
+  }
+
+public:
   sqlite3 *m_raw_db;
-  std::vector<std::shared_ptr<UserDefinedFunc>> m_udfs;
+  req::vector<req::shared_ptr<UserDefinedFunc>> m_udfs;
   static Class *s_class;
   static const StaticString s_className;
 };
@@ -109,10 +105,8 @@ bool HHVM_METHOD(SQLite3, openblob,
                  const Variant& dbname /* = null */);
 
 ///////////////////////////////////////////////////////////////////////////////
-// class SQLite3Stmt
 
-class SQLite3Stmt {
-public:
+struct SQLite3Stmt {
   SQLite3Stmt();
   ~SQLite3Stmt();
   void validate() const;
@@ -122,11 +116,20 @@ public:
     int type;
     int index;
     Variant value;
+    template<class F> void scan(F& mark) const {
+      mark(value);
+    }
   };
 
+  void scan(IMarker& mark) const {
+    mark(m_db);
+    for (auto& p : m_bound_params) p->scan(mark);
+  }
+
+public:
   Object m_db;
   sqlite3_stmt *m_raw_stmt;
-  std::vector<std::shared_ptr<BoundParam>> m_bound_params;
+  req::vector<req::shared_ptr<BoundParam>> m_bound_params;
   static Class *s_class;
   static const StaticString s_className;
 };
@@ -149,14 +152,17 @@ bool HHVM_METHOD(SQLite3Stmt, bindvalue,
 Variant HHVM_METHOD(SQLite3Stmt, execute);
 
 ///////////////////////////////////////////////////////////////////////////////
-// class SQLite3Result
 
-class SQLite3Result {
-public:
+struct SQLite3Result {
   SQLite3Result();
   void validate() const;
   static Class *getClass();
 
+  void scan(IMarker& mark) const {
+    mark(m_stmt_obj);
+  }
+
+public:
   Object m_stmt_obj;
   SQLite3Stmt *m_stmt;
   static Class *s_class;

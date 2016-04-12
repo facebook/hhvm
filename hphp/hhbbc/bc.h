@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,60 +61,55 @@ namespace php {
 
 //////////////////////////////////////////////////////////////////////
 
-struct MElem {
+struct MKey {
+  MKey()
+    : mcode{MW}
+    , int64{0}
+  {}
+
+  MKey(MemberCode mcode, borrowed_ptr<php::Local> local)
+    : mcode{mcode}
+    , local{local}
+  {}
+
+  MKey(MemberCode mcode, int32_t idx)
+    : mcode{mcode}
+    , idx{idx}
+  {}
+
+  MKey(MemberCode mcode, int64_t int64)
+    : mcode{mcode}
+    , int64{int64}
+  {}
+
+  MKey(MemberCode mcode, SString litstr)
+    : mcode{mcode}
+    , litstr{litstr}
+  {}
+
   MemberCode mcode;
   union {
-    SString immStr;
-    int64_t immInt;
-    borrowed_ptr<php::Local> immLoc;
+    SString litstr;
+    int64_t int64;
+    int64_t idx;
+    borrowed_ptr<php::Local> local;
   };
-
-  bool operator==(const MElem& o) const {
-    if (mcode != o.mcode) return false;
-    switch (mcode) {
-    case MEC:  /* fallthrough */
-    case MPC:  return true;
-    case MEL:  /* fallthrough */
-    case MPL:  return immLoc == o.immLoc;
-    case MET:  /* fallthrough */
-    case MPT:  /* fallthrough */
-    case MQT:  return immStr == o.immStr;
-    case MEI:  return immInt == o.immInt;
-    case MW:   return true;
-    case InvalidMemberCode:
-      break;
-    }
-    not_reached();
-  }
-
-  bool operator!=(const MElem& o) const {
-    return !(*this == o);
-  }
 };
 
-struct MVector {
-  LocationCode lcode;
-  borrowed_ptr<php::Local> locBase;
-  std::vector<MElem> mcodes;
+inline bool operator==(MKey a, MKey b) {
+  return a.mcode == b.mcode && a.int64 == b.int64;
+}
 
-  bool operator==(const MVector& o) const {
-    return lcode   == o.lcode &&
-           locBase == o.locBase &&
-           mcodes  == o.mcodes;
-  }
-
-  bool operator!=(const MVector& o) const {
-    return !(*this == o);
-  }
-};
+inline bool operator!=(MKey a, MKey b) {
+  return !(a == b);
+}
 
 struct BCHashHelper {
-  static size_t hash(const MVector& vec) {
-    return vec.mcodes.size() | (static_cast<size_t>(vec.lcode) << 7);
-  }
-
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
   static size_t hash(SString s) { return s->hash(); }
+  static size_t hash(MKey mkey) {
+    return HPHP::hash_int64_pair(mkey.mcode, mkey.int64);
+  }
 
   template<class T>
   static size_t hash(const std::vector<T>& v) {
@@ -142,14 +137,6 @@ struct BCHashHelper {
   >::type hash(const T& t) { return std::hash<T>()(t); }
 };
 
-inline uint32_t numVecPops(const MVector& mvec) {
-  uint32_t ret = numLocationCodeStackVals(mvec.lcode);
-  for (auto& mc : mvec.mcodes) {
-    ret += mcodeStackVals(mc.mcode);
-  }
-  return ret;
-}
-
 using IterTabEnt    = std::pair<IterKind,borrowed_ptr<php::Iter>>;
 using IterTab       = std::vector<IterTabEnt>;
 
@@ -164,7 +151,6 @@ using SSwitchTab    = std::vector<SSwitchTabEnt>;
 
 namespace bc {
 
-#define IMM_TY_MA       MVector
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
 #define IMM_TY_ILA      IterTab
@@ -179,8 +165,8 @@ namespace bc {
 #define IMM_TY_BA       borrowed_ptr<php::Block>
 #define IMM_TY_OA(type) type
 #define IMM_TY_VSA      std::vector<SString>
+#define IMM_TY_KA       MKey
 
-#define IMM_NAME_MA(n)      mvec
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
 #define IMM_NAME_ILA(n)     iterTab
@@ -193,11 +179,11 @@ namespace bc {
 #define IMM_NAME_RATA(n)    rat
 #define IMM_NAME_AA(n)      arr##n
 #define IMM_NAME_BA(n)      target
-#define IMM_NAME_OA_IMPL(n) subop
+#define IMM_NAME_OA_IMPL(n) subop##n
 #define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
 #define IMM_NAME_VSA(n)     keys
+#define IMM_NAME_KA(n)      mkey
 
-#define IMM_EXTRA_MA
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
 #define IMM_EXTRA_ILA
@@ -212,6 +198,7 @@ namespace bc {
 #define IMM_EXTRA_BA        using has_target_flag = std::true_type;
 #define IMM_EXTRA_OA(x)
 #define IMM_EXTRA_VSA
+#define IMM_EXTRA_KA
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
@@ -298,17 +285,16 @@ namespace bc {
                               not_reached();                        \
                             }
 
-#define POP_MMANY   uint32_t numPop() const { return 0 + numVecPops(mvec); } \
+#define POP_MFINAL  uint32_t numPop() const { return arg1; } \
                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_C_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
-                    Flavor popFlavor(uint32_t) const { not_reached(); }
+#define POP_F_MFINAL uint32_t numPop() const { return arg2; } \
+                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_R_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
-                    Flavor popFlavor(uint32_t) const { not_reached(); }
+#define POP_C_MFINAL uint32_t numPop() const { return arg1 + 1; } \
+                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_V_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
-                    Flavor popFlavor(uint32_t) const { not_reached(); }
+#define POP_V_MFINAL POP_C_MFINAL
 
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
@@ -328,42 +314,27 @@ namespace bc {
                       return Flavor::F;                       \
                     }
 
-#define POP_CVMANY  uint32_t numPop() const { return arg1; }  \
-                    Flavor popFlavor(uint32_t i) const {      \
-                      not_reached();                          \
-                    }
-
 #define POP_CVUMANY uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
                       return Flavor::CVU;                     \
                     }
 
-#define PUSH_UV  if (i == 0) return TUninit
-#define PUSH_CV  if (i == 0) return TInitCell
-#define PUSH_CUV if (i == 0) return TCell
-#define PUSH_AV  if (i == 0) return TCls
-#define PUSH_VV  if (i == 0) return TRef
-#define PUSH_FV  if (i == 0) return TInitGen
-#define PUSH_RV  if (i == 0) return TInitGen
+#define POP_IDX_A  uint32_t numPop() const { return arg2 + 1; } \
+                   Flavor popFlavor(uint32_t i) const {         \
+                     return i == arg2 ? Flavor::C : Flavor::A;  \
+                   }
 
-#define PUSH_NOV          uint32_t numPush() const { return 0; } \
-                          Type pushType(uint32_t i) const { not_reached(); }
+#define PUSH_NOV          uint32_t numPush() const { return 0; }
 
-#define PUSH_ONE(x)       uint32_t numPush() const { return 1; }  \
-                          Type pushType(uint32_t i) const {       \
-                            PUSH_##x; not_reached();              \
-                          }
+#define PUSH_ONE(x)       uint32_t numPush() const { return 1; }
 
-#define PUSH_TWO(x, y)    uint32_t numPush() const { return 2; }    \
-                          Type pushType(uint32_t i) const {         \
-                            PUSH_##x; --i; PUSH_##y; not_reached(); \
-                          }
+#define PUSH_TWO(x, y)    uint32_t numPush() const { return 2; }
 
-#define PUSH_INS_1(...)   uint32_t numPush() const { return 1; }        \
-                          Type pushType(uint32_t i) const { not_reached(); }
+#define PUSH_INS_1(...)   uint32_t numPush() const { return 1; }
 
-#define PUSH_INS_2(...)   uint32_t numPush() const { return 1; }        \
-                          Type pushType(uint32_t i) const { not_reached(); }
+#define PUSH_INS_2(...)   uint32_t numPush() const { return 1; }
+
+#define PUSH_IDX_A        uint32_t numPush() const { return arg2; }
 
 #define O(opcode, imms, inputs, outputs, flags) \
   struct opcode {                               \
@@ -398,14 +369,7 @@ OPCODES
 #undef PUSH_TWO
 #undef PUSH_INS_1
 #undef PUSH_INS_2
-
-#undef PUSH_UV
-#undef PUSH_CV
-#undef PUSH_CUV
-#undef PUSH_AV
-#undef PUSH_VV
-#undef PUSH_FV
-#undef PUSH_RV
+#undef PUSH_IDX_A
 
 #undef POP_UV
 #undef POP_CV
@@ -418,15 +382,15 @@ OPCODES
 #undef POP_ONE
 #undef POP_TWO
 #undef POP_THREE
-#undef POP_MMANY
-#undef POP_C_MMANY
-#undef POP_R_MMANY
-#undef POP_V_MMANY
+#undef POP_MFINAL
+#undef POP_F_MFINAL
+#undef POP_C_MFINAL
+#undef POP_V_MFINAL
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_FMANY
-#undef POP_CVMANY
 #undef POP_CVUMANY
+#undef POP_IDX_A
 
 #undef IMM_TY_MA
 #undef IMM_TY_BLA
@@ -443,10 +407,10 @@ OPCODES
 #undef IMM_TY_BA
 #undef IMM_TY_OA
 #undef IMM_TY_VSA
+#undef IMM_TY_KA
 
 // These are deliberately not undefined, so they can be used in other
 // places.
-// #undef IMM_NAME_MA
 // #undef IMM_NAME_BLA
 // #undef IMM_NAME_SLA
 // #undef IMM_NAME_ILA
@@ -462,7 +426,6 @@ OPCODES
 // #undef IMM_NAME_OA
 // #undef IMM_NAME_OA_IMPL
 
-#undef IMM_EXTRA_MA
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
 #undef IMM_EXTRA_ILA
@@ -476,6 +439,7 @@ OPCODES
 #undef IMM_EXTRA_AA
 #undef IMM_EXTRA_BA
 #undef IMM_EXTRA_OA
+#undef IMM_EXTRA_KA
 
 #undef IMM_MEM
 #undef IMM_MEM_NA

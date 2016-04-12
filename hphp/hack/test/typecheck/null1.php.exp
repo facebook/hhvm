@@ -1,6 +1,6 @@
-File "null1.php", line 21, characters 12-13:
+File "null1.php", line 20, characters 12-13:
 Invalid return type (Typing[4110])
-File "null1.php", line 12, characters 17-19:
+File "null1.php", line 12, characters 24-26:
 This is an int
-File "null1.php", line 16, characters 12-15:
+File "null1.php", line 15, characters 12-15:
 It is incompatible with a nullable type

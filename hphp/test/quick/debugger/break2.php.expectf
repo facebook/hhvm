@@ -1,16 +1,16 @@
 Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break %s/break2.php:7
 Breakpoint 1 set on line 7 of %s/break2.php
-But wont break until file %s/break2.php has been loaded.
+But won't break until file %s/break2.php has been loaded.
 break foo2()
 Breakpoint 2 set upon entering foo2()
-But wont break until function foo2 has been loaded.
+But won't break until function foo2 has been loaded.
 break cls2::pubObj()
 Breakpoint 3 set upon entering cls2::pubObj()
-But wont break until class cls2 has been loaded.
+But won't break until class cls2 has been loaded.
 break cls2::pubCls()
 Breakpoint 4 set upon entering cls2::pubCls()
-But wont break until class cls2 has been loaded.
+But won't break until class cls2 has been loaded.
 break list
   1%r\x09%rALWAYS    on line 7 of %s/break2.php (unbound)
   2%r\x09%rALWAYS    upon entering foo2() (unbound)

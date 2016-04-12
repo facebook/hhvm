@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../"
+
+if [ "$1" = '--help' ] || [ "$1" = '-h' ]; then
+  echo "usage: $0 -Dvariable=argument ..."
+  echo ''
+  echo 'Variables: '
+  options=`cat $DIR/CMake/Options.cmake | grep option | sed -e 's/^[ \t]*//' |
+           sed 's/\s*option(/  -D/; s/ "/=ON|OFF : /;
+                s/" / : Default: /; s/)$//' | sort`
+  options="  -DCMAKE_BUILD_TYPE=Debug|Release|RelWithDebInfo|MinSizeRel : Sets build type \
+: Default: Release
+$options"
+  if which column > /dev/null; then
+    options=`echo "$options" | column -t -s : `
+  fi
+  echo "$options"
+  exit 2
+fi
+
+options+=" -DCMAKE_MODULE_PATH=$DIR/CMake"
+
+cmake $options "$@" .

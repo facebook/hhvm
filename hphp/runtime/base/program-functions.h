@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,16 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
+extern const void* __hot_start;
+extern const void* __hot_end;
+#else
+extern "C" {
+void __attribute__((__weak__)) __hot_start();
+void __attribute__((__weak__)) __hot_end();
+}
+#endif
 
 /**
  * Main entry point of the entire program.
@@ -77,7 +87,7 @@ std::string get_right_option_name(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ExecutionContext;
+struct ExecutionContext;
 
 void hphp_process_init();
 void hphp_session_init();

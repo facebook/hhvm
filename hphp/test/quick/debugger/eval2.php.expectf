@@ -1,7 +1,7 @@
 Program %s/eval2.php loaded. Type '[r]un' or '[c]ontinue' to go.
 b foo()
 Breakpoint 1 set upon entering foo()
-But wont break until function foo has been loaded.
+But won't break until function foo has been loaded.
 c
 Program %s/eval2.php exited normally.
 @ foo(1)

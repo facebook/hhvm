@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,8 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
 
 namespace HPHP {
 
@@ -49,7 +50,8 @@ TEST(Variant, Refcounts) {
     auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     Variant v(std::move(ptr));
-    EXPECT_TRUE(v.getRefCount() == 1);
+    auto& res = v.asCResRef();
+    EXPECT_TRUE(res->hasExactlyOneRef());
   }
 
   {
@@ -57,8 +59,8 @@ TEST(Variant, Refcounts) {
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     {
       Variant v(ptr);
-      EXPECT_TRUE(ptr->getCount() == 2);
-      EXPECT_TRUE(v.getRefCount() == 2);
+      auto& res = v.asCResRef();
+      EXPECT_TRUE(res->hasMultipleRefs()); // count==2
     }
     EXPECT_TRUE(ptr->hasExactlyOneRef());
   }
@@ -272,7 +274,7 @@ TEST(Variant, MoveCasts) {
     auto res = cast<DummyResource>(std::move(dummyRef));
     EXPECT_EQ(res, dummy);
     EXPECT_TRUE(dummyRef.isNull());
-    EXPECT_EQ(dummy.use_count(), 2);
+    EXPECT_TRUE(dummy->hasMultipleRefs());
   }
 }
 

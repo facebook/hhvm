@@ -1,76 +1,47 @@
 #!/bin/bash
-#
-# Generates compiler id and repo schema symbols in a .cpp file and
-# header.  The compiler id cpp files goes on every link line (see
-# .fbconfig), but that no build rules have a dependency on it (we're
-# ok not relinking it in some cases).
-#
-# The repo schema goes in a header that is only touched if its
-# contents would've changed.
-#
 
-unset CDPATH
-DIR="$( cd "$( dirname "$0" )" && pwd )"
-
-# OSS version depends on this fallback since it's obviously not using fbmake.
-if [ x"$FBMAKE_PRE_COMMAND_OUTDIR" = x"" ]; then
-  BUILD_DIR="$DIR/../"
-else
-  # Should be in /some/path/hphp/util/, so chop off the hphp/util.
-  BUILD_DIR="$DIR/../../$FBMAKE_PRE_COMMAND_OUTDIR"
+# Hacky way of disabling fbmake's pre_command.
+if [ ! -z "${FBMAKE_PRE_COMMAND_OUTDIR}" ]; then
+  exit 0
 fi
 
-BUILDINFO_FILE="$BUILD_DIR/hphp-build-info.cpp"
-REPO_SCHEMA_H="$BUILD_DIR/hphp-repo-schema.h"
+if echo $1 | grep -q -e 'install_dir=' -e 'fbcode_dir=' ; then
+  # Skip --install_dir and --fbcode_dir.
+  shift 2
+fi
+
+DIR=$(pwd -P)
 
 if git rev-parse --show-toplevel >& /dev/null; then
-    scm=git
-    root=$(git rev-parse --show-toplevel)
-    compiler="git describe --all --long --abbrev=40 --always"
-    find_files="git ls-files -- hphp"
-    alias scm_update='git fetch origin && git rebase origin/master'
+  root=$(git rev-parse --show-toplevel)
+  compiler="git describe --all --long --abbrev=40 --always"
+  find_files="git ls-files -- hphp"
+elif hg root >& /dev/null; then
+  root=$(hg root)
+  if [ -f "$root/fbcode/.projectid" ]; then
+    root="$root/fbcode"
+  fi
+  compiler="hg --config trusted.users='*' log -l1 -r'reverse(::.) & file(\"$root/**\")' -T'{branch}-0-g{sub(r\"^\$\",node,mirrornode(\"fbcode\",\"git\"))}\n' 2> /dev/null"
+  find_files="hg files -I hphp/"
 else
-    if hg root >& /dev/null; then
-        scm=hg
-        root=$(hg root)
-        compiler="hg log -r . --template '{branch}-0-g{gitnode}' 2> /dev/null"
-        compiler="$compiler || hg log -r . --template '{branch}-0-h{node}'"
-        find_files="hg files -I hphp/"
-        alias scm_update='hg pull && hg rebase -d master'
-    else
-        scm=""
-        root=$DIR/../../
-        find_files='find hphp \( -type f -o -type l \) \! -iregex ".*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)" | sort'
-    fi
+  root=$DIR/../../
+  # Building outside of a git repo, use system time instead.  This will make the
+  # sha appear to change constantly, but without any insight into file state,
+  # it's the safest fallback
+  compiler='date +%s_%N'
+  find_files='find hphp \( -type f -o -type l \) \! -iregex ".*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)" | LC_ALL=C sort'
 fi
 
-cd $root
+################################################################################
 
-######################################################################
+unset CDPATH
+cd $root || exit 1
 
-# First check if they configured anything hphp-related.  If not, skip
-# this stuff, because these commands take upwards of .5s.
-if [ -d $root/.fbbuild ]; then
-  if cat $root/.fbbuild/generated/info 2>/dev/null \
-    | grep fbconfig_argv \
-    | grep -v hphp >/dev/null 2>&1 ; then
-    exit 0
-  fi
+if [ -z "${COMPILER_ID}" ]; then
+  COMPILER_ID=$(sh -c "$compiler")
 fi
 
-
-######################################################################
-
-if [ x"$COMPILER_ID" = x"" ]; then
-  if [ -n "$scm" ]; then
-    COMPILER_ID=$(sh -c "$compiler")
-  else
-    # Building outside of a git repo, use system time instead.
-    # This will make the sha appear to change constantly,
-    # but without any insight into file state, it's the safest fallback
-    COMPILER_ID=$(date +%s_%N)
-  fi
-fi
+################################################################################
 
 # Compute a hash that can be used as a unique repo schema identifier.  The
 # identifier incorporates the current git revision and local modifications to
@@ -78,37 +49,23 @@ fi
 # could conceivably contain source code that meaningfully changes the repo
 # schema), because for some work flows the added instability of schema IDs is a
 # cure worse than the disease.
-if [ x"$HHVM_REPO_SCHEMA" = x"" ] ; then
+if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
   HHVM_REPO_SCHEMA=$(sh -c "$find_files" | \
       grep -v '^hphp/\(benchmarks\|bin\|hack\|hphp\|neo\|public_tld\|test\|tools\|util\|vixl\|zend\)' | \
       tr '\n' '\0' | xargs -0 cat | sha1sum | cut -b-40)
 fi
 
-######################################################################
+################################################################################
 
-# Generate header files that contains the repo schema, but only write
-# to them if the values have changed. This way, source files can
-# depend on the headers and get rebuilt as necessary.
-function make_define_header() {
-  local t
-  t=`mktemp -t hhvm_mk.hXXXXXX || exit 1`
-  echo "#define $2 \"$3\"" > $t
-  mkdir -p $(dirname $1)
-  if test -f "$1" ; then
-    diff $t $1 >/dev/null 2>&1 || cp $t $1
-  else
-    cp $t $1
-  fi
-  rm -f $t
-}
+if [ -z "${INSTALL_DIR}" ]; then
+  INSTALL_DIR=${DIR}
+fi
 
-######################################################################
+COMPILER_FILE="${INSTALL_DIR}/generated-compiler-id.txt"
+REPO_SCHEMA_FILE="${INSTALL_DIR}/generated-repo-schema-id.txt"
 
-make_define_header $REPO_SCHEMA_H REPO_SCHEMA $HHVM_REPO_SCHEMA
+INPUT=$1
+OUTPUT="${INSTALL_DIR}/hhvm"
 
-cat > $BUILDINFO_FILE <<EOF
-// Generated by fbmake_pre_command for hphp.
-namespace HPHP {
-extern const char* const kCompilerId = "$COMPILER_ID";
-}
-EOF
+echo -n "${COMPILER_ID}" > "${COMPILER_FILE}"
+echo -n "${HHVM_REPO_SCHEMA}" > "${REPO_SCHEMA_FILE}"

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -29,7 +29,6 @@
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,9 +63,9 @@ Variant HHVM_FUNCTION(base64_encode, const String& data) {
 
 Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {
   Variant c = HHVM_FN(curl_init)();
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HEADER, 1);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL, url);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_HEADER, 1);
   Variant res = HHVM_FN(curl_exec)(c.toResource());
   if (same(res, false)) {
     return false;
@@ -115,7 +114,7 @@ static String normalize_variable_name(const String& name) {
 
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */) {
-  String f = HHVM_FN(file_get_contents)(filename);
+  auto const f = HHVM_FN(file_get_contents)(filename).toString();
 
   Variant matches;
   preg_match_all("/<meta\\s+name=\"(.*?)\"\\s+content=\"(.*?)\".*?>/s",
@@ -136,7 +135,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
                              const String& num_prefix, const String& key_prefix,
                              const String& key_suffix, const String& arg_sep,
                              bool encode_plus = true) {
-  void *id = varr.is(KindOfArray) ?
+  void *id = varr.isArray() ?
     (void*)varr.getArrayData() : (void*)varr.getObjectData();
   if (!seen_arrs.insert(id).second) {
     return; // recursive
@@ -159,10 +158,10 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
     Variant data = iter.second();
     if (data.isNull() || data.isResource()) continue;
 
-    String key = iter.first();
+    auto const key = iter.first().toString();
     bool numeric = key.isNumeric();
 
-    if (data.is(KindOfArray) || data.is(KindOfObject)) {
+    if (data.isArray() || data.is(KindOfObject)) {
       String encoded;
       if (numeric) {
         encoded = key;
@@ -209,14 +208,14 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const String& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */,
                            int enc_type /* = k_PHP_QUERY_RFC1738 */) {
-  if (!formdata.is(KindOfArray) && !formdata.is(KindOfObject)) {
+  if (!formdata.isArray() && !formdata.is(KindOfObject)) {
     throw_invalid_argument("formdata: (need Array or Object)");
     return false;
   }
 
   String arg_sep;
   if (arg_separator.empty()) {
-    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output);
+    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output).toString();
   } else {
     arg_sep = arg_separator;
   }
@@ -312,51 +311,19 @@ String HHVM_FUNCTION(urlencode, const String& str) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_PHP_URL_SCHEME("PHP_URL_SCHEME");
-const StaticString s_PHP_URL_HOST("PHP_URL_HOST");
-const StaticString s_PHP_URL_PORT("PHP_URL_PORT");
-const StaticString s_PHP_URL_USER("PHP_URL_USER");
-const StaticString s_PHP_URL_PASS("PHP_URL_PASS");
-const StaticString s_PHP_URL_PATH("PHP_URL_PATH");
-const StaticString s_PHP_URL_QUERY("PHP_URL_QUERY");
-const StaticString s_PHP_URL_FRAGMENT("PHP_URL_FRAGMENT");
-const StaticString s_PHP_QUERY_RFC1738("PHP_QUERY_RFC1738");
-const StaticString s_PHP_QUERY_RFC3986("PHP_QUERY_RFC3986");
-
-class StandardURLExtension final : public Extension {
- public:
+struct StandardURLExtension final : Extension {
   StandardURLExtension() : Extension("url") {}
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_SCHEME.get(), k_PHP_URL_SCHEME
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_HOST.get(), k_PHP_URL_HOST
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_PORT.get(), k_PHP_URL_PORT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_USER.get(), k_PHP_URL_USER
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_PASS.get(), k_PHP_URL_PASS
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_PATH.get(), k_PHP_URL_PATH
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_QUERY.get(), k_PHP_URL_QUERY
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_FRAGMENT.get(), k_PHP_URL_FRAGMENT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_QUERY_RFC1738.get(), k_PHP_QUERY_RFC1738
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_QUERY_RFC3986.get(), k_PHP_QUERY_RFC3986
-    );
+    HHVM_RC_INT(PHP_URL_SCHEME, k_PHP_URL_SCHEME);
+    HHVM_RC_INT(PHP_URL_HOST, k_PHP_URL_HOST);
+    HHVM_RC_INT(PHP_URL_PORT, k_PHP_URL_PORT);
+    HHVM_RC_INT(PHP_URL_USER, k_PHP_URL_USER);
+    HHVM_RC_INT(PHP_URL_PASS, k_PHP_URL_PASS);
+    HHVM_RC_INT(PHP_URL_PATH, k_PHP_URL_PATH);
+    HHVM_RC_INT(PHP_URL_QUERY, k_PHP_URL_QUERY);
+    HHVM_RC_INT(PHP_URL_FRAGMENT, k_PHP_URL_FRAGMENT);
+    HHVM_RC_INT(PHP_QUERY_RFC1738, k_PHP_QUERY_RFC1738);
+    HHVM_RC_INT(PHP_QUERY_RFC3986, k_PHP_QUERY_RFC3986);
     HHVM_FE(base64_decode);
     HHVM_FE(base64_encode);
     HHVM_FE(get_headers);

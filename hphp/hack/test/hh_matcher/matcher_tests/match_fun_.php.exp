@@ -1,0 +1,2 @@
+4: function bar(int $arg): int {
+5:   return $arg;

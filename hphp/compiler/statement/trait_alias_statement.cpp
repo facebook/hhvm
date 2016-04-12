@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,28 +98,6 @@ void TraitAliasStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void TraitAliasStatement::outputCodeModel(CodeGenerator &cg) {
-  auto propCount = 3;
-  auto traitName = m_traitName->getString();
-  if (!traitName.empty()) propCount++;
-  cg.printObjectHeader("TraitAliasStatement", propCount);
-  if (!traitName.empty()) {
-    cg.printPropertyHeader("traitName");
-    cg.printValue(traitName);
-  }
-  cg.printPropertyHeader("methodName1");
-  m_methodName->outputCodeModel(cg);
-  cg.printPropertyHeader("modifiers");
-  m_modifiers->outputCodeModel(cg);
-  cg.printPropertyHeader("methodName2");
-  m_newMethodName->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

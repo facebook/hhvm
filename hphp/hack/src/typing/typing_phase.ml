@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -15,7 +15,8 @@ open Utils
 
 module Env = Typing_env
 module TUtils = Typing_utils
-module TSubst = Typing_subst
+module TGenConstraint = Typing_generic_constraint
+module Subst = Decl_subst
 module ShapeMap = Nast.ShapeMap
 
 (* Here is the general problem the delayed application of the phase solves.
@@ -108,9 +109,18 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
         | _ -> ty in
       env, (ety_env, ty)
   | r, Tarray (ty1, ty2) ->
-      let env, ty1 = opt (localize ~ety_env) env ty1 in
-      let env, ty2 = opt (localize ~ety_env) env ty2 in
-      env, (ety_env, (r, Tarray (ty1, ty2)))
+      let env, ty = match ty1, ty2 with
+        | None, None -> env, Tarraykind AKany
+        | Some tv, None ->
+            let env, tv = localize ~ety_env env tv in
+            env, Tarraykind (AKvec tv)
+        | Some tk, Some tv ->
+            let env, tk = localize ~ety_env env tk in
+            let env, tv = localize ~ety_env env tv in
+            env, Tarraykind (AKmap (tk, tv))
+        | None, Some _ ->
+            failwith "Invalid array declaration type" in
+      env, (ety_env, (r, ty))
   | r, Tgeneric (x, cstr_opt) ->
       (match SMap.get x ety_env.substs with
       | Some x_ty ->
@@ -118,7 +128,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             match cstr_opt with
             | Some (ck, ty) ->
                 let env, ty = localize ~ety_env env ty in
-                TSubst.add_check_constraint_todo env r x ck ty x_ty
+                TGenConstraint.add_check_constraint_todo env r x ck ty x_ty
             | None -> env
           in
           env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
@@ -146,9 +156,9 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       let env, ft = localize_ft ~ety_env env ft in
       env, (ety_env, (r, Tfun ft))
   | r, Tapply ((_, x), argl) when Env.is_typedef x ->
-      let env, argl = lfold (localize ~ety_env) env argl in
+      let env, argl = List.map_env env argl (localize ~ety_env) in
       TUtils.expand_typedef ety_env env r x argl
-  | r, Tapply ((p, x), _argl) when Env.is_enum x ->
+  | r, Tapply ((p, x), _argl) when Env.is_enum env x ->
       (* if argl <> [], nastInitCheck would have raised an error *)
       if Typing_defs.has_expanded ety_env x then begin
         Errors.cyclic_enum_constraint p;
@@ -157,14 +167,14 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
         let type_expansions = (p, x) :: ety_env.type_expansions in
         let ety_env = {ety_env with type_expansions} in
         let env, cstr =
-          opt (localize ~ety_env) env (Env.get_enum_constraint x) in
+          opt (localize ~ety_env) env (Env.get_enum_constraint env x) in
         env, (ety_env, (r, Tabstract (AKenum x, cstr)))
       end
   | r, Tapply (cls, tyl) ->
-      let env, tyl = lfold (localize ~ety_env) env tyl in
+      let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Tclass (cls, tyl)))
   | r, Ttuple tyl ->
-      let env, tyl = lfold (localize ~ety_env) env tyl in
+      let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Ttuple tyl))
   | r, Taccess (root_ty, ids) ->
       let env, root_ty = localize ~ety_env env root_ty in
@@ -189,17 +199,21 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
    *)
   let env, substs =
     if instantiate_tparams
-    then let env, tvarl = lfold TUtils.unresolved_tparam env ft.ft_tparams in
-         let ft_subst = TSubst.make ft.ft_tparams tvarl in
-         env, SMap.union ft_subst ety_env.substs
-    else env, List.fold_left ft.ft_tparams ~f:begin fun subst (_, (_, x), _) ->
-      SMap.remove x subst
-    end ~init:ety_env.substs in
+    then
+      let env, tvarl =
+        List.map_env env ft.ft_tparams TUtils.unresolved_tparam in
+      let ft_subst = Subst.make ft.ft_tparams tvarl in
+      env, SMap.union ft_subst ety_env.substs
+    else
+      env, List.fold_left ft.ft_tparams ~f:begin fun subst (_, (_, x), _) ->
+        SMap.remove x subst
+      end ~init:ety_env.substs
+  in
   let ety_env = {ety_env with substs = substs} in
-  let env, params = lfold begin fun env (name, param) ->
+  let env, params = List.map_env env ft.ft_params begin fun env (name, param) ->
     let env, param = localize ~ety_env env param in
     env, (name, param)
-  end env ft.ft_params in
+  end in
   let env, arity = match ft.ft_arity with
     | Fvariadic (min, (name, var_ty)) ->
        let env, var_ty = localize ~ety_env env var_ty in
@@ -221,6 +235,12 @@ let env_with_self env =
  *)
 let localize_with_self env ty =
   localize env ty ~ety_env:(env_with_self env)
+
+(* Helper functions *)
+
+let hint_locl env h =
+  let h = Decl_hint.hint env.Env.decl_env h in
+  localize_with_self env h
 
 let unify_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in

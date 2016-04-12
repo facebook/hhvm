@@ -77,7 +77,7 @@ function idx($arr, $idx, $default=null) {
       }
     } else if (\is_string($arr)) {
       if (isset($arr[$idx])) {
-        return $arr[$idx];
+        return $arr[(int)$idx];
       }
     }
   }

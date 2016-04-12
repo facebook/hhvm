@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -182,14 +182,12 @@ const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
   return s_command_map;
 }
 
-#define ELSE_IF_CMD(name) \
-  } else if (cls == "Cmd" #name) { ret = std::make_shared<Cmd##name>()
-
 DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
   std::shared_ptr<CmdExtended> ret;
-  if (cls.empty()) {
-    ELSE_IF_CMD(Example);
-    ELSE_IF_CMD(Extension);
+  if (cls == "CmdExample") {
+    ret = std::make_shared<CmdExample>();
+  } else if (cls == "CmdExtension") {
+    ret = std::make_shared<CmdExtension>();
   }
 
   if (ret) {

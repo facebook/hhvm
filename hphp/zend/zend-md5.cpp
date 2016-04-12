@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -14,6 +14,8 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/zend/zend-md5.h"
 
 #include "hphp/zend/zend-string.h"
 #include <cinttypes>
@@ -134,12 +136,6 @@ static void Decode(uint32_t *output, const unsigned char *input,
       (((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
   }
 }
-
-typedef struct {
-  uint32_t state[4];          /* state (ABCD) */
-  uint32_t count[2];          /* number of bits, modulo 2^64 (lsb first) */
-  unsigned char buffer[64]; /* input buffer */
-} PHP_MD5_CTX;
 
 /**
  * MD5 initialization. Begins an MD5 operation, writing a new context.

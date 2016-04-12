@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,7 @@ namespace HPHP { namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(ErrorInfo);
-class ErrorInfo : public JSON::CodeError::ISerializable {
-public:
+struct ErrorInfo : JSON::CodeError::ISerializable {
   ErrorType m_error;
   ConstructPtr m_construct1;
   ConstructPtr m_construct2;
@@ -48,8 +47,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeErrors : public JSON::CodeError::ISerializable {
-public:
+struct CodeErrors : JSON::CodeError::ISerializable {
   CodeErrors();
   void clear();
 

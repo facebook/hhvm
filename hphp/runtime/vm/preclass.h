@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -104,7 +104,7 @@ using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
  *
  */
 struct PreClass : AtomicCountable {
-  friend class PreClassEmitter;
+  friend struct PreClassEmitter;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -179,7 +179,7 @@ struct PreClass : AtomicCountable {
   /*
    * Trait precedence rule.  Describes a usage of the `insteadof' operator.
    *
-   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitPrecRule {
     TraitPrecRule();
@@ -205,7 +205,7 @@ struct PreClass : AtomicCountable {
   /*
    * Trait alias rule.  Describes a usage of the `as' operator.
    *
-   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitAliasRule {
     TraitAliasRule();
@@ -254,6 +254,7 @@ struct PreClass : AtomicCountable {
     const StringData* name() const;
     bool is_extends() const;
     bool is_implements() const;
+    bool is_same(const ClassRequirement* other) const;
 
     template<class SerDe>
     typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd);
@@ -381,6 +382,8 @@ public:
 
 #undef DEF_ACCESSORS
 
+  const ConstMap& constantsMap() const { return m_constants; }
+
   /*
    * NativeData type declared in <<__NativeData("Type")>>.
    */
@@ -445,7 +448,7 @@ public:
 
 private:
   Unit* m_unit;
-  NamedEntity* m_namedEntity;
+  LowPtr<NamedEntity> m_namedEntity;
   int m_line1;
   int m_line2;
   Offset m_offset;

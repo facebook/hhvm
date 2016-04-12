@@ -2,6 +2,35 @@
 
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
+#ifdef TSRM_WIN32
+#include <winioctl.h>
+struct REPARSE_DATA_BUFFER {
+  unsigned long  ReparseTag;
+  unsigned short ReparseDataLength;
+  unsigned short Reserved;
+  union {
+    struct {
+      unsigned short SubstituteNameOffset;
+      unsigned short SubstituteNameLength;
+      unsigned short PrintNameOffset;
+      unsigned short PrintNameLength;
+      unsigned long  Flags;
+      wchar_t        ReparseTarget[1];
+    } SymbolicLinkReparseBuffer;
+    struct {
+      unsigned short SubstituteNameOffset;
+      unsigned short SubstituteNameLength;
+      unsigned short PrintNameOffset;
+      unsigned short PrintNameLength;
+      wchar_t        ReparseTarget[1];
+    } MountPointReparseBuffer;
+    struct {
+      unsigned char  ReparseTarget[1];
+    } GenericReparseBuffer;
+  };
+};
+#endif
+
 #define CWD_STATE_COPY(d, s)                       \
   (d)->cwd_length = (s)->cwd_length;               \
   (d)->cwd = (char *) malloc((s)->cwd_length+1);   \
@@ -35,27 +64,6 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) {
   }
 }
 
-#ifdef PHP_WIN32
-static inline unsigned long realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
-{
-  register unsigned long h;
-  char *bucket_key_start = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
-  char *bucket_key = (char *)bucket_key_start;
-  const char *e = bucket_key + strlen(bucket_key);
-
-  if (!bucket_key) {
-    return 0;
-  }
-
-  for (h = 2166136261U; bucket_key < e;) {
-    h *= 16777619;
-    h ^= *bucket_key++;
-  }
-  HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
-  return h;
-}
-/* }}} */
-#else
 static inline unsigned long realpath_cache_key(const char *path, int path_len) /* {{{ */
 {
   register unsigned long h;
@@ -69,7 +77,6 @@ static inline unsigned long realpath_cache_key(const char *path, int path_len) /
   return h;
 }
 /* }}} */
-#endif /* defined(PHP_WIN32) */
 
 
 static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, int is_dir, time_t t TSRMLS_DC) /* {{{ */
@@ -91,11 +98,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
       return;
     }
 
-#ifdef PHP_WIN32
-    bucket->key = realpath_cache_key(path, path_len TSRMLS_CC);
-#else
     bucket->key = realpath_cache_key(path, path_len);
-#endif
     bucket->path = (char*)bucket + sizeof(realpath_cache_bucket);
     memcpy(bucket->path, path, path_len+1);
     bucket->path_len = path_len;
@@ -125,11 +128,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 
 static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
 {
-#ifdef PHP_WIN32
-  unsigned long key = realpath_cache_key(path, path_len TSRMLS_CC);
-#else
   unsigned long key = realpath_cache_key(path, path_len);
-#endif
 
   unsigned long n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
   realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
@@ -295,7 +294,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
       FindClose(hFind);
     }
 
-    tmp = tsrm_do_alloca(len+1, use_heap);
+    tmp = (char*)tsrm_do_alloca(len+1, use_heap);
     memcpy(tmp, path, len+1);
 
     if(save &&
@@ -326,7 +325,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
       if (pbuffer == NULL) {
         return -1;
       }
-      if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
+      if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, (LPDWORD)&retlength, NULL)) {
         tsrm_free_alloca(pbuffer, use_heap_large);
         CloseHandle(hLink);
         return -1;

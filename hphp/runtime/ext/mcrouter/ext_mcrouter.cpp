@@ -1,6 +1,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
@@ -22,11 +23,15 @@ const StaticString
   s_MCRouterException("MCRouterException"),
   s_MCRouterOptionException("MCRouterOptionException"),
   s_option("option"),
+  s_error("error"),
   s_value("value"),
-  s_error("error");
+  s_cas("cas"),
+  s_flags("flags");
 
 static Class* c_MCRouterException = nullptr;
-static Object mcr_getException(const std::string& message,
+
+[[noreturn]]
+static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
                                mc_res_t reply = mc_res_unknown,
                                const std::string& key = "") {
@@ -43,11 +48,13 @@ static Object mcr_getException(const std::string& message,
     make_packed_array(message, (int64_t)op, (int64_t)reply, key),
     obj.get());
   tvRefcountedDecRef(&ret);
-  return obj;
+  throw_object(obj);
 }
 
 static Class* c_MCRouterOptionException = nullptr;
-static Object mcr_getOptionException(
+
+[[noreturn]]
+static void mcr_throwOptionException(
   const std::vector<mc::McrouterOptionError>& errors) {
   if (!c_MCRouterOptionException) {
     c_MCRouterOptionException =
@@ -71,13 +78,12 @@ static Object mcr_getOptionException(
     c_MCRouterOptionException->getCtor(),
     make_packed_array(errorArray),
     obj.get());
-  return obj;
+  throw_object(obj);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-class MCRouter {
- public:
+struct MCRouter {
   MCRouter() {}
   MCRouter& operator=(const MCRouter& str) = delete;
 
@@ -101,7 +107,7 @@ class MCRouter {
     }
 
     if (!router) {
-      throw mcr_getException("Unable to initialize MCRouter instance");
+      mcr_throwException("Unable to initialize MCRouter instance");
     }
 
     m_client = router->createClient(
@@ -110,7 +116,7 @@ class MCRouter {
       0);
 
     if (!m_client) {
-      throw mcr_getException("Unable to initilize MCRouterClient instance");
+      mcr_throwException("Unable to initilize MCRouterClient instance");
     }
   }
 
@@ -143,44 +149,72 @@ class MCRouter {
 
     auto errors = opts.updateFromDict(dict);
     if (!errors.empty()) {
-      throw mcr_getOptionException(errors);
+      mcr_throwOptionException(errors);
     }
   }
 };
 
-class MCRouterResult : public AsioExternalThreadEvent {
- public:
+struct MCRouterResult : AsioExternalThreadEvent {
   MCRouterResult(MCRouter* router, mcr::mcrouter_msg_t& msg) {
     m_result.m_type = KindOfNull;
     msg.context = this;
     router->send(msg);
   }
 
+  /* Unserialize happens in the request thread where we can allocate smart pointers
+   * Use this opportunity to marshal the saved data from persistent data structures
+   * into per-request data.
+   */
   void unserialize(Cell& c) override {
     if (!m_exception.empty()) {
-      throw mcr_getException(m_exception, m_op, m_replyCode, m_key);
+      mcr_throwException(m_exception, m_op, m_replyCode, m_key);
     }
     if ((m_result.m_type == KindOfString) && !m_result.m_data.pstr) {
       // Deferred string init, see below
       m_result.m_data.pstr = StringData::Make(
         m_stringResult.c_str(), m_stringResult.size(), CopyString);
       m_stringResult.clear();
+    } else if ((m_result.m_type == KindOfArray) && !m_result.m_data.parr) {
+      // Deferred string value and cas, see below
+      Array ret = Array::Create();
+      ret.set(s_value,
+        String(m_stringResult.c_str(), m_stringResult.size(), CopyString));
+      ret.set(s_cas, (int64_t)m_cas);
+      ret.set(s_flags, (int64_t)m_flags);
+      m_result.m_data.parr = ret.detach();
+      m_stringResult.clear();
     }
     cellDup(m_result, c);
   }
 
+  /* Callback invoked by libmcrouter (by way of McRouter::onReply())
+   * We're in the worker thread here, so we can't do any request
+   * allocations or the memory manager will get confused.
+   * We also can't store `msg' directly on the object as it'll be
+   * freed after the result() method returns.
+   *
+   * Marshal the data we actually care about into fields on this
+   * object, then remarshal them into smart_ptr structures during unserialize()
+   */
   void result(const mcr::mcrouter_msg_t* msg) {
     if (msg->reply.isError()) {
       setResultException(msg);
     } else {
       switch (msg->req->op) {
         case mc_op_add:
+        case mc_op_cas:
         case mc_op_set:
         case mc_op_replace:
         case mc_op_prepend:
         case mc_op_append:
-        case mc_op_flushall:
           if (!msg->reply.isStored()) {
+            setResultException(msg);
+            break;
+          }
+          break;
+
+        case mc_op_flushall:
+          if (msg->reply.result() != mc_res_ok) {
             setResultException(msg);
             break;
           }
@@ -203,6 +237,10 @@ class MCRouterResult : public AsioExternalThreadEvent {
           m_result.m_data.num = msg->reply.delta();
           break;
 
+        case mc_op_gets:
+          m_cas = msg->reply.cas();
+          m_flags = msg->reply.flags();
+          /* fallthrough */
         case mc_op_get:
           if (msg->reply.isMiss()) {
             setResultException(msg);
@@ -210,7 +248,8 @@ class MCRouterResult : public AsioExternalThreadEvent {
           }
           /* fallthrough */
         case mc_op_version:
-          m_result.m_type = KindOfString;
+          m_result.m_type =
+            (msg->req->op == mc_op_gets) ? KindOfArray : KindOfString;
           m_result.m_data.pstr = nullptr;
           // We're in the wrong thread for making a StringData
           // so stash it in a std::string until we get to unserialize
@@ -245,8 +284,10 @@ class MCRouterResult : public AsioExternalThreadEvent {
 
   Cell m_result;
 
-  // Deferred string result
+  // Deferred string result and metadata
   std::string m_stringResult;
+  uint64_t m_cas{0};
+  uint64_t m_flags{0};
 
   // Deferred exception data
   mc_op_t m_op;
@@ -335,7 +376,21 @@ template<mc_op_t op>
 static Object mcr_void(ObjectData* this_) {
   mcr::mcrouter_msg_t msg;
   msg.req = mc_msg_new(0);
-  msg.req->op = mc_op_version;
+  msg.req->op = op;
+  return Native::data<MCRouter>(this_)->issue(msg);
+}
+
+static Object HHVM_METHOD(MCRouter, cas,
+                          int64_t cas,
+                          const String& key,
+                          const String& val,
+                          int64_t expiration /*=0*/) {
+  mcr::mcrouter_msg_t msg;
+  msg.req = mc_msg_new_with_key_and_value_full(key.c_str(), key.size(),
+                                               val.c_str(), val.size());
+  msg.req->op = mc_op_cas;
+  msg.req->cas = cas;
+  msg.req->exptime = expiration;
   return Native::data<MCRouter>(this_)->issue(msg);
 }
 
@@ -346,7 +401,7 @@ static String HHVM_STATIC_METHOD(MCRouter, getOpName, int64_t op) {
   if (!name) {
     std::string msg = "Unknown mc_op_* value: ";
     msg += op;
-    throw mcr_getException(msg, (mc_op_t)op);
+    mcr_throwException(msg, (mc_op_t)op);
   }
   return name;
 }
@@ -356,21 +411,21 @@ static String HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
   if (!name) {
     std::string msg = "Unknown mc_res_* value: ";
     msg += res;
-    throw mcr_getException(msg, mc_op_unknown, (mc_res_t)res);
+    mcr_throwException(msg, mc_op_unknown, (mc_res_t)res);
   }
   return name;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-class MCRouterExtension : public Extension {
- public:
+struct MCRouterExtension : Extension {
   MCRouterExtension(): Extension("mcrouter", "1.0.0") {}
 
   void moduleInit() override {
     HHVM_ME(MCRouter, __construct);
 
-    HHVM_NAMED_ME(MCRouter, get, mcr_str<mc_op_get>);
+    HHVM_NAMED_ME(MCRouter, get,  mcr_str<mc_op_get>);
+    HHVM_NAMED_ME(MCRouter, gets, mcr_str<mc_op_gets>);
 
     HHVM_NAMED_ME(MCRouter, add, mcr_set<mc_op_add>);
     HHVM_NAMED_ME(MCRouter, set, mcr_set<mc_op_set>);
@@ -385,6 +440,8 @@ class MCRouterExtension : public Extension {
     HHVM_NAMED_ME(MCRouter, flushAll, mcr_int<mc_op_flushall>);
 
     HHVM_NAMED_ME(MCRouter, version, mcr_void<mc_op_version>);
+
+    HHVM_ME(MCRouter, cas);
 
     Native::registerNativeDataInfo<MCRouter>(s_MCRouter.get());
 

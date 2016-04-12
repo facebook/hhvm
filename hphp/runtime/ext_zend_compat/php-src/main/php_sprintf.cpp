@@ -21,11 +21,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "php.h"
-#ifdef PHP_WIN32
-#include "config.w32.h"
-#else
 #include <php_config.h>
-#endif
 
 PHPAPI int
 php_sprintf (char*s, const char* format, ...)

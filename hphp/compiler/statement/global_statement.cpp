@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -96,17 +96,6 @@ StatementPtr GlobalStatement::preOptimize(AnalysisResultConstPtr ar) {
     return NULL_STATEMENT();
   }
   return StatementPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void GlobalStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("GlobalStatement", 2);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

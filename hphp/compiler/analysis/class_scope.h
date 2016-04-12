@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,7 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-class Symbol;
+struct Symbol;
 
 enum class Derivation {
   Normal,
@@ -58,11 +58,9 @@ enum class Derivation {
  * A class scope corresponds to a class declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-class ClassScope : public BlockScope, public FunctionContainer,
-                   public JSON::CodeError::ISerializable,
-                   public JSON::DocTarget::ISerializable {
-
-public:
+struct ClassScope : BlockScope, FunctionContainer,
+                    JSON::CodeError::ISerializable,
+                    JSON::DocTarget::ISerializable {
   enum class KindOf : int {
     ObjectClass,
     AbstractClass,
@@ -482,7 +480,7 @@ private:
     }
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
 public:
   using TMIData = TraitMethodImportData<TraitMethod, TMIOps,

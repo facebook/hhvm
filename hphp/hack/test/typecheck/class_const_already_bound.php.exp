@@ -1,0 +1,4 @@
+File "class_const_already_bound.php", line 4, characters 9-11:
+Name already bound: bar (Naming[2012])
+File "class_const_already_bound.php", line 5, characters 9-11:
+Previous definition is here

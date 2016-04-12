@@ -2,6 +2,8 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
+#include "hphp/util/compatibility.h"
+
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
@@ -23,19 +25,15 @@ FileAwait::FileAwait(int fd, uint16_t events, double timeout) {
   assert(fd >= 0);
   assert(events & FileEventHandler::READ_WRITE);
 
-  m_file = std::make_shared<FileEventHandler>
-    (s_asio_event_base.get(), fd, this);
+  auto asio_event_base = getSingleton<AsioEventBase>();
+  m_file = std::make_shared<FileEventHandler>(asio_event_base.get(), fd, this);
   m_file->registerHandler(events);
 
   int64_t timeout_ms = timeout * 1000.0;
   if (timeout_ms > 0) {
-    m_timeout = std::make_shared<FileTimeoutHandler>
-      (s_asio_event_base.get(), this);
-#ifdef FOLLY_SINGLETON_TRY_GET
-    s_asio_event_base.try_get()->runInEventBaseThread([this,timeout_ms]{
-#else
-    s_asio_event_base->runInEventBaseThread([this,timeout_ms]{
-#endif
+    m_timeout = std::make_shared<FileTimeoutHandler>(asio_event_base.get(),
+                                                     this);
+    asio_event_base->runInEventBaseThreadAndWait([this,timeout_ms] {
       if (m_timeout) {
         m_timeout->scheduleTimeout(timeout_ms);
       }
@@ -56,15 +54,10 @@ FileAwait::~FileAwait() {
     // before the timeout cancels
     m_timeout->m_fileAwait = nullptr;
 
-    std::shared_ptr<FileTimeoutHandler> to = m_timeout;
-#ifdef FOLLY_SINGLETON_TRY_GET
-    s_asio_event_base.try_get()->runInEventBaseThread([to]{
-#else
-    s_asio_event_base->runInEventBaseThread([to]{
-#endif
-      to.get()->cancelTimeout();
+    auto to = std::move(m_timeout);
+    getSingleton<AsioEventBase>()->runInEventBaseThreadAndWait([to] {
+      to->cancelTimeout();
     });
-    m_timeout.reset();
   }
 }
 

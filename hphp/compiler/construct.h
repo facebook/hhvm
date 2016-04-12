@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Variant;
+struct Variant;
+DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(IParseHandler);
 DECLARE_BOOST_TYPES(AnalysisResult);
@@ -36,14 +37,13 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-class AstWalkerStateVec;
+struct AstWalkerStateVec;
 
-class IParseHandler {
+struct IParseHandler {
   /**
    * To avoid iteration of parse tree, we move any work that can be done
    * in parse phase into this function, so to speed up static analysis.
    */
-public:
   virtual ~IParseHandler() {}
 
   /**
@@ -102,7 +102,9 @@ public:
   x(ClassRequireStatement)  \
   x(TraitPrecStatement)     \
   x(TraitAliasStatement)    \
-  x(TypedefStatement)
+  x(TypedefStatement)       \
+  x(UseDeclarationStatementFragment) \
+  x(DeclareStatement)
 
 #define DECLARE_EXPRESSION_TYPES(x)     \
   x(Expression,                  None) \
@@ -110,6 +112,7 @@ public:
   x(AssignmentExpression,       Store) \
   x(SimpleVariable,              Load) \
   x(DynamicVariable,             Load) \
+  x(PipeVariable,                Load) \
   x(StaticMemberExpression,      Load) \
   x(ArrayElementExpression,      Load) \
   x(DynamicFunctionCall,         Call) \
@@ -123,6 +126,7 @@ public:
   x(IncludeExpression,           Call) \
   x(BinaryOpExpression,        Update) \
   x(QOpExpression,               None) \
+  x(NullCoalesceExpression,      None) \
   x(ArrayPairExpression,         None) \
   x(ClassConstantExpression,    Const) \
   x(ParameterExpression,         None) \
@@ -130,26 +134,17 @@ public:
   x(ConstantExpression,         Const) \
   x(EncapsListExpression,        None) \
   x(ClosureExpression,           None) \
+  x(ClassExpression,             None) \
   x(YieldExpression,             None) \
+  x(YieldFromExpression,         None) \
   x(AwaitExpression,             None) \
-  x(UserAttribute,               None) \
-  x(QueryExpression,             None) \
-  x(FromClause,                  None) \
-  x(LetClause,                   None) \
-  x(WhereClause,                 None) \
-  x(SelectClause,                None) \
-  x(IntoClause,                  None) \
-  x(JoinClause,                  None) \
-  x(GroupClause,                 None) \
-  x(OrderbyClause,               None) \
-  x(Ordering,                    None)
+  x(UserAttribute,               None)
 
 /**
  * Base class of Expression and Statement.
  */
-class Construct : public std::enable_shared_from_this<Construct>,
-                  public JSON::CodeError::ISerializable {
-public:
+struct Construct : std::enable_shared_from_this<Construct>,
+                   JSON::CodeError::ISerializable {
   virtual ~Construct() {}
 
 #define DEC_STATEMENT_ENUM(x) KindOf##x,
@@ -244,9 +239,9 @@ public:
   }
   void resetScope(BlockScopeRawPtr scope);
   void parseTimeFatal(FileScopeRawPtr fs, Compiler::ErrorType error,
-                      const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
-  void analysisTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
-    ATTRIBUTE_PRINTF(3,4);
+    ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
+  void analysisTimeFatal(Compiler::ErrorType error,
+    ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;
@@ -300,11 +295,6 @@ public:
   void dumpNode(int spc, AnalysisResultConstPtr ar);
 
   /**
-   * Generates a serialized Code Model corresponding to this AST.
-   */
-  virtual void outputCodeModel(CodeGenerator &cg) = 0;
-
-  /**
    * Called when generating code.
    */
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) = 0;
@@ -317,7 +307,8 @@ public:
   /**
    * Get canonicalized PHP source code for this construct.
    */
-  std::string getText(AnalysisResultPtr ar = AnalysisResultPtr());
+  std::string getText(AnalysisResultPtr ar);
+  std::string getText();
 
   void recomputeEffects();
 
@@ -347,8 +338,7 @@ protected:
   mutable int m_effectsTag;
 };
 
-class LocalEffectsContainer {
-public:
+struct LocalEffectsContainer {
   int getLocalEffects() const { return m_localEffects; }
   virtual void effectsCallback() = 0;
 protected:

@@ -1,0 +1,9 @@
+4: class Foo {
+5:   public function bar(): void {
+16:           echo "match this";
+17:           return;
+18:           break;
+20:           echo "and this";
+21:           return;
+22:           break;
+28:     return;

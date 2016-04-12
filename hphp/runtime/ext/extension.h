@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -55,8 +55,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Extension : public IDebuggable {
-public:
+struct Extension : IDebuggable {
   static bool IsSystemlibPath(const std::string& path);
 
   // Look for "ext.{namehash}" in the binary and compile/merge it

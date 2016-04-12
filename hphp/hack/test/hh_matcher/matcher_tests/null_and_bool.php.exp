@@ -1,0 +1,5 @@
+4: class Foo {
+5:   public function bar(int $x): void {
+6:     Null;
+7:     True;
+8:     False;

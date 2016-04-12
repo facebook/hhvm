@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_READ_ONLY_ARENA_H_
 #define incl_HPHP_READ_ONLY_ARENA_H_
 
-#include <boost/noncopyable.hpp>
 #include <cstdlib>
 #include <mutex>
 #include <thread>
@@ -40,7 +39,7 @@ namespace HPHP {
  *
  * One read only arena may safely be concurrently accessed by multiple threads.
  */
-struct ReadOnlyArena : private boost::noncopyable {
+struct ReadOnlyArena {
   /*
    * All pointers returned from ReadOnlyArena will have at least this
    * alignment.
@@ -62,6 +61,9 @@ struct ReadOnlyArena : private boost::noncopyable {
    * generally ReadOnlyArenas should be used for extremely long-lived data.
    */
   ~ReadOnlyArena();
+
+  ReadOnlyArena(const ReadOnlyArena&) = delete;
+  ReadOnlyArena& operator=(const ReadOnlyArena&) = delete;
 
   /*
    * Returns: the number of bytes we've allocated (from malloc) in this arena.
@@ -94,4 +96,3 @@ private:
 
 
 #endif
-

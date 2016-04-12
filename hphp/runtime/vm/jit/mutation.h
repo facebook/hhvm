@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,6 +116,13 @@ void refineTmps(IRUnit&, const BlockList&, const IdomVector&);
  * If there's already a suitable phi, it will be returned.
  */
 SSATmp* insertPhi(IRUnit&, Block* blk, const jit::vector<SSATmp*>& inputs);
+
+/*
+ * Remove the i'th dest from `label' and all incoming Jmps, returning its
+ * SSATmp*. May leave the DefLabel with 0 dests, in which case the instruction
+ * may be deleted by the caller.
+ */
+SSATmp* deletePhiDest(IRInstruction* label, unsigned i);
 
 //////////////////////////////////////////////////////////////////////
 

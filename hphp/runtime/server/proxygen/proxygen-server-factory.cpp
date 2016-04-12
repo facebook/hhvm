@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,7 @@
 
 namespace HPHP {
 
-class ProxygenServerFactory : public ServerFactory {
-public:
+struct ProxygenServerFactory : ServerFactory {
   ProxygenServerFactory() {}
 
   virtual ServerPtr createServer(const ServerOptions& options) override {
@@ -29,16 +28,16 @@ public:
 
 }
 
-extern "C" {
-
+namespace {
 /*
- * Automatically register ProxygenServerFactory on program start
- */
-void register_proxygen_server() __attribute__((__constructor__));
-void register_proxygen_server() {
-  auto registry = HPHP::ServerFactoryRegistry::getInstance();
-  auto factory = std::make_shared<HPHP::ProxygenServerFactory>();
-  registry->registerFactory("proxygen", factory);
-}
-
+* Automatically register ProxygenServerFactory on program start
+*/
+struct RegisterProxygenServer {
+public:
+  RegisterProxygenServer() {
+    auto registry = HPHP::ServerFactoryRegistry::getInstance();
+    auto factory = std::make_shared<HPHP::ProxygenServerFactory>();
+    registry->registerFactory("proxygen", factory);
+  }
+} s_RegisterProxygenServer;
 }

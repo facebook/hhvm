@@ -68,6 +68,10 @@ function xhprof_sample_disable(): mixed;
  * exited. Takes 3 args, the function name, the mode (enter or exit), and an
  * array describing the frame.
  * @param mixed $callback - Profiler function to call or null to disable
+ * @param int $flags - Controls when it should get called back and with what
  */
 <<__HipHopSpecific, __Native>>
-function fb_setprofile(mixed $callback): void;
+function fb_setprofile(
+  mixed $callback,
+  int $flags = SETPROFILE_FLAGS_DEFAULT,
+): void;

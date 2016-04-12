@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,8 @@
 #include <folly/Conv.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+
+#include <boost/filesystem.hpp>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
@@ -503,36 +505,33 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
 }
 
 std::string Process::GetCommandLine(pid_t pid) {
-  string name = "/proc/" + folly::to<string>(pid) + "/cmdline";
+  auto const name = folly::sformat("/proc/{}/cmdline", pid);
 
-  string cmdline;
-  FILE * f = fopen(name.c_str(), "r");
+  std::string cmdline;
+  auto const f = fopen(name.c_str(), "r");
   if (f) {
     readString(f, cmdline);
     fclose(f);
   }
 
-  string converted;
-  for (unsigned int i = 0; i < cmdline.size(); i++) {
-    char ch = cmdline[i];
+  std::string converted;
+  for (auto ch : cmdline) {
     converted += ch ? ch : ' ';
   }
   return converted;
 }
 
-bool Process::CommandStartsWith(pid_t pid, const std::string &cmd) {
-  if (!cmd.empty()) {
-    std::string cmdline = GetCommandLine(pid);
-    if (cmdline.length() >= cmd.length() &&
-        cmdline.substr(0, cmd.length()) == cmd) {
-      return true;
-    }
-  }
-  return false;
-}
-
 bool Process::IsUnderGDB() {
-  return CommandStartsWith(GetParentProcessId(), "gdb ");
+  auto const cmdStr = GetCommandLine(GetParentProcessId());
+  auto const cmdPiece = folly::StringPiece{cmdStr};
+
+  if (cmdPiece.empty()) return false;
+
+  auto const spaceIdx = std::min(cmdPiece.find(' '), cmdPiece.size() - 1);
+  auto const binaryPiece = cmdPiece.subpiece(0, spaceIdx + 1);
+
+  boost::filesystem::path binaryPath(binaryPiece.begin(), binaryPiece.end());
+  return binaryPath.filename() == "gdb ";
 }
 
 int64_t Process::GetProcessRSS(pid_t pid) {
@@ -560,6 +559,42 @@ int64_t Process::GetProcessRSS(pid_t pid) {
   }
 
   return 0;
+}
+
+bool Process::GetMemoryInfo(MemInfo& info) {
+#ifdef _WIN32
+#error "Process::GetMemoryInfo() doesn't support Windows (yet)."
+  return false;
+#endif
+
+  info = MemInfo{};
+  FILE* f = fopen("/proc/meminfo", "r");
+  if (f) {
+    SCOPE_EXIT{ fclose(f); };
+
+    // Return size in MB
+    auto const parseLine = [] (const char* item, const char* line) -> int64_t {
+      int64_t amount = -1;
+      char mult = 'b';
+      char format[64];
+      snprintf(format, sizeof(format), "%s: %%%s %%c", item, PRId64);
+      sscanf(line, format, &amount, &mult);
+      if (amount <= 0) return -1;
+      if (mult == 'k' || mult == 'K') return amount >> 10;
+      if (mult == 'm' || mult == 'M') return amount;
+      if (mult == 'g' || mult == 'G') return amount << 10;
+      return amount >> 20;
+    };
+
+    char buf[128];
+    while (fgets(buf, sizeof(buf), f)) {
+      info.freeMb = std::max(info.freeMb, parseLine("MemFree", buf));
+      info.buffersMb = std::max(info.buffersMb, parseLine("Buffers", buf));
+      info.cachedMb = std::max(info.cachedMb, parseLine("Cached", buf));
+      if (info.valid()) return true;
+    }
+  }
+  return false;
 }
 
 int Process::GetCPUCount() {
@@ -702,8 +737,8 @@ std::string Process::GetCurrentDirectory() {
   auto const kDeletedLen = strlen(kDeleted);
 
   // Allocate additional space for kDeleted part.
-  char buf[PATH_MAX + kDeletedLen];
-  memset(buf, 0, sizeof(buf));
+  char* buf = (char*)alloca(sizeof(char) * (PATH_MAX + kDeletedLen));
+  memset(buf, 0, PATH_MAX + kDeletedLen);
   char* cwd = getcwd(buf, PATH_MAX);
 
   if (cwd != nullptr) {

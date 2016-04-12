@@ -12,16 +12,18 @@
 
 U_NAMESPACE_BEGIN
 /**
- * This class isolates our access to private internal methods of
- * MessageFormat.  It is never instantiated; it exists only for C++
- * access management.
+ * This class isolates our access to private internal methods of MessageFormat.
+ * It is never instantiated; it exists only for C++ access management.
+ *
+ * It also has to be declared `class' because it's referenced as a friend class
+ * in the ICU headers.
  */
 class MessageFormatAdapter {
 public:
     MessageFormatAdapter() = delete;
 
-    static const Formattable::Type* getArgTypeList(const MessageFormat& m,
-                                                   int32_t& count) {
+    static const Formattable::Type* getArgTypeListHHVM(const MessageFormat& m,
+                                                       int32_t& count) {
       return m.getArgTypeList(count);
     }
 
@@ -40,7 +42,7 @@ namespace HPHP { namespace Intl {
 #define FETCH_MFMT(data, obj) \
   auto data = MessageFormatter::Get(obj); \
   if (!data) { \
-    throw s_intl_error->getException("Uninitialized Message Formatter"); \
+    s_intl_error->throwException("Uninitialized Message Formatter"); \
   }
 
 const StaticString s_MessageFormatter("MessageFormatter");
@@ -78,7 +80,7 @@ static void HHVM_METHOD(MessageFormatter, __construct,
                         const String& pattern) {
   auto data = Native::data<MessageFormatter>(this_);
   if (!data->openFormatter(pattern, localeOrDefault(locale))) {
-    throw data->getException("%s", data->getErrorMessage().c_str());
+    data->throwException("%s", data->getErrorMessage().c_str());
   }
 }
 
@@ -196,7 +198,7 @@ bool MessageFormatter::processNamedTypes() {
 bool MessageFormatter::processNumericTypes() {
   auto formatter = formatterObj();
   int32_t count = 0;
-  auto types = MessageFormatAdapter::getArgTypeList(*formatter, count);
+  auto types = MessageFormatAdapter::getArgTypeListHHVM(*formatter, count);
 
   clearError();
   m_namedParts.clear();
@@ -393,7 +395,7 @@ static String HHVM_METHOD(MessageFormatter, getPattern) {
   UErrorCode error = U_ZERO_ERROR;
   String pat(u8(pat16, error));
   if (U_FAILURE(error)) {
-    throw data->getException("Unable to return pattern to utf8");
+    data->throwException("Unable to return pattern to utf8");
     not_reached();
   }
   return pat;

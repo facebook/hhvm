@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace jit {
 
-class SSATmp;
+struct SSATmp;
 struct IRInstruction;
 
 namespace NativeCalls { struct CallInfo; }
@@ -63,13 +63,17 @@ struct ArgDesc {
     Imm,     // 64-bit Immediate
     TypeImm, // DataType Immediate
     Addr,    // Address (register plus 32-bit displacement)
+    DataPtr, // Pointer to data section
   };
 
   PhysReg dstReg() const { return m_dstReg; }
   Vreg srcReg() const { return m_srcReg; }
   Kind kind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
-  Immed64 imm() const { assertx(m_kind == Kind::Imm); return m_imm64; }
+  Immed64 imm() const {
+    assertx(m_kind == Kind::Imm || m_kind == Kind::DataPtr);
+    return m_imm64;
+  }
   DataType typeImm() const {
     assertx(m_kind == Kind::TypeImm);
     return m_typeImm;
@@ -165,6 +169,11 @@ struct ArgGroup {
   }
 
   ArgGroup& immPtr(std::nullptr_t) { return imm(0); }
+
+  template<class T> ArgGroup& dataPtr(const T* ptr) {
+    push_arg(ArgDesc{ArgDesc::Kind::DataPtr, ptr});
+    return *this;
+  }
 
   ArgGroup& reg(Vreg reg) {
     push_arg(ArgDesc(ArgDesc::Kind::Reg, reg, -1));

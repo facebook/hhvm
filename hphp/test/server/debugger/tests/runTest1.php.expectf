@@ -16,7 +16,7 @@ Break on line 2 of %s/test1.php
 
 break break1.php:7
 Breakpoint 2 set on line 7 of break1.php
-But wont break until file break1.php has been loaded.
+But won't break until file break1.php has been loaded.
 continue
 Waiting for server response
 Breakpoint 2 reached at foo() on line 7 of %s/break1.php

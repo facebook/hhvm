@@ -1,0 +1,11 @@
+
+<?hh //strict
+
+class Foo {
+  public function bar(): void {
+    echo ("Stmt1 true");
+    return;
+  }
+}
+
+

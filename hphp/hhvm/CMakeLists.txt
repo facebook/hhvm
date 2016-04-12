@@ -2,28 +2,25 @@ set(CXX_SOURCES)
 auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 
-# Windows targets use a generate rc file for embedding libraries
+# Windows targets use a generated rc file for embedding libraries
 if(CYGWIN OR MSVC OR MINGW)
-  add_custom_target(generate_embed
-    COMMAND echo LANGUAGE 0, 0 > ${CMAKE_CURRENT_BINARY_DIR}/embed.rc
-    COMMENT "generating embed.rc")
-
-  # this is a cmake trick to allow items added later to depend properly
-  add_custom_target(generate_rc
-    DEPENDS generate_embed
-    COMMENT "Generating RC file")
-
-    list(APPEND CXX_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/embed.rc)
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-      ${CMAKE_CURRENT_BINARY_DIR}/embed.rc)
-    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/embed.rc
-      PROPERTIES GENERATED TRUE)
+  list(APPEND CXX_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/embed.rc)
 endif()
 
-find_package(Gold)
+option(ENABLE_LD_GOLD "Enable Hot Linker script using ld-gold" On)
+set(SECTION_ORDERING_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../tools/oss_hot_section_ordering CACHE FILEPATH "File used by ld-gold for the relocation of sections")
+if (ENABLE_LD_GOLD)
+  find_package(Gold)
+endif()
 
-if (GOLD_FOUND)
-  SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--section-ordering-file,${CMAKE_CURRENT_SOURCE_DIR}/../tools/oss_hot_section_ordering,--icf=all,--gc-sections)
+if (GOLD_FOUND AND ENABLE_LD_GOLD)
+  if (CMAKE_CONFIGURATION_TYPES)
+    SET(LINKER_SCRIPT -fuse-ld=gold;-Wl,--icf=all,--gc-sections;release;-Wl,--section-ordering-file,${CMAKE_CURRENT_SOURCE_DIR}/../tools/oss_hot_section_ordering;default)
+  elseif(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
+    SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--section-ordering-file,${SECTION_ORDERING_FILE},--icf=all,--gc-sections)
+  else()
+    SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--icf=all,--gc-sections)
+  endif()
   add_executable(hhvm ${CXX_SOURCES})
   target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES} ${LINKER_SCRIPT})
 else()
@@ -60,15 +57,11 @@ endif()
 set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 
 embed_all_systemlibs(hhvm "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/hhvm")
-if(CYGWIN OR MSVC OR MINGW)
-  add_dependencies(hhvm generate_rc)
-else()
-  add_dependencies(hhvm systemlib)
-endif()
+add_dependencies(hhvm systemlib)
 
 if (CMAKE_HOST_UNIX)
   add_custom_command(TARGET hhvm POST_BUILD
-    COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} sh "${CMAKE_CURRENT_SOURCE_DIR}/symlinks.sh"
+    COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} sh ${CMAKE_CURRENT_SOURCE_DIR}/symlinks.sh ${CMAKE_CURRENT_BINARY_DIR}/hhvm
     COMMENT "Creating symlinks for hhvm")
 endif()
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,6 +111,33 @@ bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const retransopt& i);
 
+template<class Vemit>
+void check_nop_interval(Venv& env, const Vinstr& inst,
+                        int& nop_counter, int nop_interval) {
+  if (LIKELY(nop_counter < 0)) return;
+
+  switch (inst.op) {
+    // These instructions are for exception handling or state syncing and do
+    // not represent any actual work, so they're excluded from the nop counter.
+    case Vinstr::landingpad:
+    case Vinstr::nothrow:
+    case Vinstr::syncpoint:
+    case Vinstr::unwind:
+      break;
+
+    default:
+      if (--nop_counter == 0) {
+        // We use a special emit_nop() function rather than emit(nop{}) because
+        // many performance counters exclude nops from their count of retired
+        // instructions. It's up the to arch-specific backends to emit some
+        // real work with no visible side-effects.
+        Vemit(env).emit_nop();
+        nop_counter = nop_interval;
+      }
+      break;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -118,21 +145,27 @@ bool emit(Venv& env, const retransopt& i);
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Vemit>
-void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
+void vasm_emit(const Vunit& unit, Vtext& text, CGMeta& fixups,
+               AsmInfo* asm_info) {
   using namespace vasm_detail;
 
-  Venv env { unit, text };
+  Venv env { unit, text, fixups };
   env.addrs.resize(unit.blocks.size());
-  env.points.resize(unit.next_point);
 
-  auto labels = layoutBlocks(unit);
+  auto labels = layoutBlocks(unit, text);
 
   IRMetadataUpdater irmu(env, asm_info);
 
   auto const area_start = [&] (Vlabel b) {
-    auto area = unit.blocks[b].area;
+    auto area = unit.blocks[b].area_idx;
     return text.area(area).start;
   };
+
+  // We don't want to put nops in Vunits representing stubs, and those Vunits
+  // don't have transKind set.
+  auto const nop_interval = unit.transKind != TransKind::Invalid
+    ? RuntimeOption::EvalJitNopInterval : 0;
+  auto nop_counter = nop_interval;
 
   for (int i = 0, n = labels.size(); i < n; ++i) {
     assertx(checkBlockEnd(unit, labels[i]));
@@ -140,7 +173,7 @@ void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
     auto b = labels[i];
     auto& block = unit.blocks[b];
 
-    env.cb = &text.area(block.area).code;
+    env.cb = &text.area(block.area_idx).code;
     env.addrs[b] = env.cb->frontier();
 
     { // Compute the next block we will emit into the current area.
@@ -160,6 +193,8 @@ void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
 
     for (auto& inst : block.code) {
       irmu.register_inst(inst);
+
+      check_nop_interval<Vemit>(env, inst, nop_counter, nop_interval);
 
       switch (inst.op) {
 #define O(name, imms, uses, defs)               \

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,8 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/ext/process/ext_process.h"
+#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,18 +103,12 @@ void ThreadInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
 }
 
-void ThreadInfo::clearPendingException() {
-  m_reqInjectionData.clearFlag(PendingExceptionFlag);
-
-  if (m_pendingException != nullptr) delete m_pendingException;
-  m_pendingException = nullptr;
-}
-
 void ThreadInfo::setPendingException(Exception* e) {
   m_reqInjectionData.setFlag(PendingExceptionFlag);
 
-  if (m_pendingException != nullptr) delete m_pendingException;
+  auto tmp = m_pendingException;
   m_pendingException = e;
+  delete tmp;
 }
 
 void ThreadInfo::onSessionExit() {
@@ -122,6 +118,16 @@ void ThreadInfo::onSessionExit() {
   m_reqInjectionData.setCPUTimeout(0);
 
   m_reqInjectionData.reset();
+
+  if (auto tmp = m_pendingException) {
+    m_pendingException = nullptr;
+    // request memory has already been freed
+    if (auto ee = dynamic_cast<ExtendedException*>(tmp)) {
+      ee->leakBacktrace();
+    }
+    delete tmp;
+  }
+
   rds::requestExit();
 }
 
@@ -208,7 +214,14 @@ size_t check_request_surprise() {
     }
   }
   if (do_GC) {
-    MM().collect();
+    if (StickyFlags & PendingGCFlag) {
+      clearSurpriseFlag(PendingGCFlag);
+    }
+    if (RuntimeOption::EvalEnableGC) {
+      MM().collect("surprise");
+    } else {
+      MM().checkHeap("surprise");
+    }
   }
   if (do_signaled) {
     HHVM_FN(pcntl_signal_dispatch)();

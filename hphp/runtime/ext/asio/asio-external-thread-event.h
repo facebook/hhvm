@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,8 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class AsioSession;
-class c_ExternalThreadEventWaitHandle;
+struct AsioSession;
+struct c_ExternalThreadEventWaitHandle;
 
 /**
  * An asynchronous external thread event.
@@ -45,7 +45,7 @@ class c_ExternalThreadEventWaitHandle;
  *
  * Example:
  *
- * class FooEvent : public AsioExternalThreadEvent {
+ * struct FooEvent : AsioExternalThreadEvent {
  *   public:
  *     FooEvent(int max_value) : m_maxValue(max_value), m_failed(false) {}
  *     ~FooEvent() {}
@@ -60,15 +60,15 @@ class c_ExternalThreadEventWaitHandle;
  *   protected:
  *     void unserialize(Cell& result) const {
  *       if (UNLIKELY(m_failed)) {
- *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
- *           "An error has occurred while scheduling the operation"));
- *         throw e;
+ *         SystemLib::throwInvalidOperationExceptionObject(
+ *           "An error has occurred while scheduling the operation"
+ *         );
  *       }
  *
  *       if (UNLIKELY(m_value > m_maxValue)) {
- *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
- *           "Invalid response returned by Foo backend"));
- *         throw e;
+ *         SystemLib::throwInvalidOperationExceptionObject(
+ *           "Invalid response returned by Foo backend"
+ *         );
  *       }
  *
  *       cellDup(make_tv<KindOfInt64>(m_value), result);
@@ -86,9 +86,9 @@ class c_ExternalThreadEventWaitHandle;
  * Object f_gen_foo(int max_value) {
  *   // validate user input early
  *   if (max_value < 0) {
- *     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
- *       "Expected max_value to be non-negative"));
- *     throw e;
+ *     SystemLib::throwInvalidArgumentExceptionObject(
+ *       "Expected max_value to be non-negative"
+ *     );
  *   }
  *
  *   FooEvent* event = new FooEvent(max_value);
@@ -102,9 +102,9 @@ class c_ExternalThreadEventWaitHandle;
  *     // unknown exception; should be never reached
  *     assert(false);
  *     event->abandon();
- *     Object e(SystemLib::AllocInvalidOperationExceptionObject(
- *       "Encountered unexpected exception"));
- *     throw e;
+ *     SystemLib::throwInvalidOperationExceptionObject(
+ *       "Encountered unexpected exception"
+ *     );
  *   }
  *   return event->getWaitHandle();
  * }
@@ -113,8 +113,7 @@ class c_ExternalThreadEventWaitHandle;
  *  - web request may die before the event is finished; never store pointers
  *    to any data owned by PHP as the PHP thread may die at any time
  */
-class AsioExternalThreadEvent {
-  public:
+struct AsioExternalThreadEvent {
     /**
      * Get wait handle representing this external thread event.
      *

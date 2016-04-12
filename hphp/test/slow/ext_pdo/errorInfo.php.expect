@@ -1,0 +1,8 @@
+array(3) {
+  [0]=>
+  string(5) "42S02"
+  [1]=>
+  int(1146)
+  [2]=>
+  string(42) "Table 'testdb.unknown_table' doesn't exist"
+}

@@ -1,0 +1,12 @@
+int(0)
+int(0)
+int(3)
+
+Warning: Closure::call() expects parameter 1 to be object, integer given in %s on line %d
+NULL
+
+Warning: Closure::call() expects parameter 1 to be object, null given in %s on line %d
+NULL
+int(7)
+int(21)
+int(3)

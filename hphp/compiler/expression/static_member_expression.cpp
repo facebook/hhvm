@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -150,24 +150,6 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
 ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (m_class) updateClassName();
   return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void StaticMemberExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassPropertyExpression", 3);
-  StaticClassName::outputCodeModel(cg);
-  if (m_exp->is(Expression::KindOfScalarExpression)) {
-    cg.printPropertyHeader("propertyName");
-    auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
-    cg.printValue(var->getString());
-  } else {
-    cg.printPropertyHeader("propertyExpression");
-    m_exp->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

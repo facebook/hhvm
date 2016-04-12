@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -138,6 +138,15 @@ int fadvise_dontneed(int fd, off_t len) {
 #else
   return posix_fadvise(fd, 0, len, POSIX_FADV_DONTNEED);
 #endif
+}
+
+int advise_out(const std::string& fileName) {
+  if (fileName.empty()) return -1;
+  int fd = open(fileName.c_str(), O_RDONLY);
+  if (fd == -1) return -1;
+  int result = fadvise_dontneed(fd, 0);
+  close(fd);
+  return result;
 }
 
 #if defined(__CYGWIN__) || defined(_MSC_VER)

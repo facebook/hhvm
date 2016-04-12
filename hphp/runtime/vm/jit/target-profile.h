@@ -65,17 +65,21 @@ namespace HPHP { namespace jit {
 template<class T>
 struct TargetProfile {
   TargetProfile(TransID profTransID,
+                TransKind kind,
                 Offset bcOff,
                 const StringData* name,
                 size_t extraSize = 0)
-    : m_link(createLink(profTransID, bcOff, name, extraSize))
+    : m_link(createLink(profTransID, kind, bcOff, name, extraSize))
+    , m_kind(kind)
   {}
 
   TargetProfile(const TransContext& context,
                 BCMarker marker,
                 const StringData* name,
                 size_t extraSize = 0)
-    : TargetProfile(profiling() ? context.transID : marker.profTransID(),
+    : TargetProfile(context.kind == TransKind::Profile ? context.transID
+                                                       : marker.profTransID(),
+                    context.kind,
                     marker.bcOff(),
                     name,
                     extraSize)
@@ -120,10 +124,10 @@ struct TargetProfile {
    * attached for some reason.).
    */
   bool profiling() const {
-    return mcg->tx().mode() == TransKind::Profile;
+    return m_kind == TransKind::Profile;
   }
   bool optimizing() const {
-    return mcg->tx().mode() == TransKind::Optimize && m_link.bound();
+    return m_kind == TransKind::Optimize && m_link.bound();
   }
 
   /*
@@ -134,12 +138,13 @@ struct TargetProfile {
 
 private:
   static rds::Link<T> createLink(TransID profTransID,
+                                 TransKind kind,
                                  Offset bcOff,
                                  const StringData* name,
                                  size_t extraSize) {
     auto const rdsKey = rds::Profile{profTransID, bcOff, name};
 
-    switch (mcg->tx().mode()) {
+    switch (kind) {
     case TransKind::Profile:
       return rds::bind<T>(rdsKey, rds::Mode::Local, extraSize);
 
@@ -160,6 +165,7 @@ private:
 
 private:
   rds::Link<T> const m_link;
+  TransKind const m_kind;
 };
 
 struct ClassProfile {

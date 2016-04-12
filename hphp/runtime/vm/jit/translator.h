@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,12 +26,11 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
+#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/recycle-tc.h"
-#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/hash-map-typedefs.h"
@@ -61,7 +60,7 @@ struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
-struct IRGS;
+namespace irgen { struct IRGS; }
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -109,7 +108,8 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
-  TransContext(TransID id, SrcKey sk, FPInvOffset spOff);
+  TransContext(TransID id, TransKind kind, TransFlags flags,
+               SrcKey sk, FPInvOffset spOff);
 
   /*
    * The SrcKey for this translation.
@@ -122,6 +122,8 @@ struct TransContext {
    * The contents of SrcKey are re-laid out to avoid func table lookups.
    */
   TransID transID;  // May be kInvalidTransID if not for a real translation.
+  TransKind kind{TransKind::Invalid};
+  TransFlags flags;
   FPInvOffset initSpOffset;
   const Func* func;
   Offset initBcOffset;
@@ -135,14 +137,15 @@ struct TransContext {
  * These include a variety of flags that help decide what to translate, or what
  * to do after we're done, so it's distinct from the TransContext above.
  */
-struct TranslArgs {
-  TranslArgs(SrcKey sk, bool align) : sk{sk}, align{align} {}
+struct TransArgs {
+  TransArgs(SrcKey sk, bool align) : sk{sk}, align{align} {}
 
   SrcKey sk;
   bool align;
-  bool setFuncBody{false};
+  bool allowPartial{false};
   TransFlags flags{0};
   TransID transId{kInvalidTransID};
+  TransKind kind{TransKind::Invalid};
   RegionDescPtr region{nullptr};
 };
 
@@ -180,24 +183,6 @@ struct Translator {
    * If no SrcRec exists, insert one into the SrcDB.
    */
   SrcRec* getSrcRec(SrcKey sk);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Configuration.
-
-  /*
-   * We call the TransKind `mode' for some reason.
-   */
-  TransKind mode() const;
-  void setMode(TransKind mode);
-
-  /*
-   * Whether to use ahot.
-   *
-   * This defaults to runtime option values, and is only changed if we're using
-   * ahot and it runs out of space.
-   */
-  bool useAHot() const;
-  void setUseAHot(bool val);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -292,15 +277,10 @@ struct Translator {
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
-public:
-  UniqueStubs uniqueStubs;
-
 private:
   int64_t m_createdTime;
 
-  TransKind m_mode;
   std::unique_ptr<ProfData> m_profData;
-  bool m_useAHot;
 
   SrcDB m_srcDB;
 
@@ -377,28 +357,23 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst);
  * Location and metadata for an instruction's input.
  */
 struct InputInfo {
-  explicit InputInfo(const Location& l)
-    : loc(l)
-    , dontBreak(false)
-    , dontGuard(l.isLiteral())
-    , dontGuardInner(false)
-  {}
+  explicit InputInfo(const Location& l) : loc(l) {}
 
   std::string pretty() const;
 
 public:
-  // Location tag for the input.
+  // Location specifier for the input.
   Location loc;
 
   // If an input is unknowable, don't break the tracelet just to find its
   // type---but still generate a guard if that will tell us its type.
-  bool dontBreak;
+  bool dontBreak{false};
 
   // Never break the tracelet nor generate a guard on account of this input.
-  bool dontGuard;
+  bool dontGuard{false};
 
   // Never guard the inner type if this input is KindOfRef.
-  bool dontGuardInner;
+  bool dontGuardInner{false};
 };
 
 /*
@@ -419,7 +394,12 @@ public:
  * Get input location info and flags for a NormalizedInstruction.  Some flags
  * on `ni' may be updated.
  */
-InputInfoVec getInputs(NormalizedInstruction&);
+InputInfoVec getInputs(NormalizedInstruction&, FPInvOffset bcSPOff);
+
+/*
+ * Return the index of op's local immediate.
+ */
+size_t localImmIdx(Op op);
 
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////
@@ -491,7 +471,6 @@ enum Operands {
   FuncdRef        = 1 << 5,  // Input to FPass*
   FStack          = 1 << 6,  // output of FPushFuncD and friends
   Local           = 1 << 7,  // Writes to a local
-  MVector         = 1 << 8,  // Member-vector input
   Iter            = 1 << 9,  // Iterator in imm[0]
   AllLocals       = 1 << 10, // All locals (used by RetC)
   DontGuardStack1 = 1 << 11, // Dont force a guard on behalf of stack1 input
@@ -501,6 +480,11 @@ enum Operands {
   StackN          = 1 << 15, // pop N cells from stack; n = imm[0].u_IVA
   BStackN         = 1 << 16, // consume N cells from stack for builtin call;
                              // n = imm[0].u_IVA
+  StackI          = 1 << 17, // consume 1 cell at index imm[0].u_IVA
+  MBase           = 1 << 18, // member operation base
+  IdxA            = 1 << 19, // consume 1 A at idx imm[0].u_IVA, preserving an
+                             // optional C on top of it
+  MKey            = 1 << 20, // member lookup key
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };
@@ -594,9 +578,8 @@ const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
  */
 inline bool isReqPtrRef(MaybeDataType t) {
-  return t == KindOfString || t == KindOfStaticString ||
-         t == KindOfArray || t == KindOfObject ||
-         t == KindOfResource;
+  return isStringType(t) || isArrayType(t) ||
+         t == KindOfObject || t == KindOfResource;
 }
 
 /*
@@ -616,13 +599,11 @@ int locPhysicalOffset(int32_t localIndex);
  * functions.  Updates the bytecode marker, handles interp one flags, etc.
  */
 void translateInstr(
-  IRGS&,
+  irgen::IRGS&,
   const NormalizedInstruction&,
   bool checkOuterTypeOnly,
   bool firstInst
 );
-
-extern bool tc_dump();
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

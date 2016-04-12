@@ -14,7 +14,7 @@ if [ -z "${EXP_EXT+x}" ]; then
   EXP_EXT=".exp"
 fi
 
-DIFF=`command -v colordiff` || diff
+DIFF=`command -v colordiff || echo diff`
 
 for f in $@; do
   nl --body-numbering=a $f

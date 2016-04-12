@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -10,7 +10,6 @@
 
 open Core
 open Typing_defs
-open Utils
 
 module ExprDepTy = struct
   module N = Nast
@@ -83,7 +82,7 @@ module ExprDepTy = struct
    *  } else {
    *    $x = new B(); // Dependent type (`cls '\B')
    *  }
-   *  $x; // Tunresolved[(`cls '\A', `cls '\B')
+   *  $x; // Tunresolved[(`cls '\A', `cls '\B')]
    *
    *  // When we call the function below, we need to generate
    *  // A new expression dependent type since
@@ -112,7 +111,7 @@ module ExprDepTy = struct
           ~default:false
           ~f:(fun {tc_final; _} -> not tc_final)
     | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
-    | Tarray _ | Tfun _ | Tabstract (_, None) | Tany ->
+    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany ->
         false
 
   (****************************************************************************)

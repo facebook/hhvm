@@ -33,3 +33,4 @@ array(6) {
 int(42)
 int(2)
 int(42)
+string(2) "OK"

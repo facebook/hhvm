@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,8 +30,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 //so that curl_global_init() is called ahead of time, avoiding crash
-class StaticInitializer {
-public:
+struct StaticInitializer {
   StaticInitializer() {
     curl_global_init(CURL_GLOBAL_ALL);
     SSLInit::Init();
@@ -98,7 +97,7 @@ int HttpClient::get(const char *url, StringBuffer &response,
                  url, nullptr, 0, response, requestHeaders, responseHeaders);
 }
 
-int HttpClient::post(const char *url, const char *data, int size,
+int HttpClient::post(const char *url, const char *data, size_t size,
                      StringBuffer &response,
                      const HeaderMap *requestHeaders /* = NULL */,
                      std::vector<String> *responseHeaders /* = NULL */) {
@@ -115,7 +114,7 @@ const StaticString
   s_passphrase("passphrase");
 
 int HttpClient::request(const char* verb,
-                     const char *url, const char *data, int size,
+                     const char *url, const char *data, size_t size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
                      std::vector<String> *responseHeaders) {
   SlowTimer timer(RuntimeOption::HttpSlowQueryThreshold, "curl", url);
@@ -195,7 +194,11 @@ int HttpClient::request(const char* verb,
   if (data && size) {
     curl_easy_setopt(cp, CURLOPT_POST,          1);
     curl_easy_setopt(cp, CURLOPT_POSTFIELDS,    data);
-    curl_easy_setopt(cp, CURLOPT_POSTFIELDSIZE, size);
+    if (size <= 0x7fffffffLL) {
+      curl_easy_setopt(cp, CURLOPT_POSTFIELDSIZE, size);
+    } else {
+      curl_easy_setopt(cp, CURLOPT_POSTFIELDSIZE_LARGE, size);
+    }
   }
 
   if (verb != nullptr) {

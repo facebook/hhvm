@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
@@ -34,24 +35,26 @@ namespace {
       "ConditionWaitHandle not notified by its child");
   }
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void throwNotNotifiedException() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "ConditionWaitHandle not notified by its child");
   }
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void failAlreadyFinished() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Unable to notify ConditionWaitHandle that has already finished");
   }
 }
 
-void c_ConditionWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnConditionCreate(callback);
 }
 
-Object c_ConditionWaitHandle::ti_create(const Variant& child) {
+Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
+                          const Variant& child) {
   // Child not a WaitHandle?
   auto const child_wh = c_WaitHandle::fromCell(child.asCell());
   if (UNLIKELY(!child_wh)) {
@@ -72,36 +75,34 @@ Object c_ConditionWaitHandle::ti_create(const Variant& child) {
   return Object(std::move(wh));
 }
 
-void c_ConditionWaitHandle::t_succeed(const Variant& result) {
-  if (isFinished()) {
+void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
+  auto obj = wait_handle<c_ConditionWaitHandle>(this_);
+  if (obj->isFinished()) {
     failAlreadyFinished();
   }
 
-  assert(getState() == STATE_BLOCKED);
-  auto parentChain = getParentChain();
-  setState(STATE_SUCCEEDED);
-  cellDup(*result.asCell(), m_resultOrException);
+  assert(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
+  auto parentChain = obj->getParentChain();
+  obj->setState(c_ConditionWaitHandle::STATE_SUCCEEDED);
+  cellDup(*result.asCell(), obj->m_resultOrException);
   parentChain.unblock();
 }
 
-void c_ConditionWaitHandle::t_fail(const Variant& exception) {
-  auto const cell = exception.asCell();
-  if (UNLIKELY(
-    cell->m_type != KindOfObject ||
-    !cell->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)
-  )) {
+void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
+  if (!exception->instanceof(SystemLib::s_ThrowableClass)) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected exception to be an instance of Exception");
+      "Expected exception to be an instance of Throwable");
   }
+  auto obj = wait_handle<c_ConditionWaitHandle>(this_);
 
-  if (isFinished()) {
+  if (obj->isFinished()) {
     failAlreadyFinished();
   }
 
-  assert(getState() == STATE_BLOCKED);
-  auto parentChain = getParentChain();
-  setState(STATE_FAILED);
-  cellDup(make_tv<KindOfObject>(cell->m_data.pobj), m_resultOrException);
+  assert(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
+  auto parentChain = obj->getParentChain();
+  obj->setState(c_ConditionWaitHandle::STATE_FAILED);
+  cellDup(make_tv<KindOfObject>(exception.get()), obj->m_resultOrException);
   parentChain.unblock();
 }
 
@@ -149,6 +150,17 @@ String c_ConditionWaitHandle::getName() {
 c_WaitableWaitHandle* c_ConditionWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return m_child;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initConditionWaitHandle() {
+  HHVM_STATIC_MALIAS(HH\\ConditionWaitHandle, create,
+                     ConditionWaitHandle, create);
+  HHVM_STATIC_MALIAS(HH\\ConditionWaitHandle, setOnCreateCallback,
+                     ConditionWaitHandle, setOnCreateCallback);
+  HHVM_MALIAS(HH\\ConditionWaitHandle, succeed, ConditionWaitHandle, succeed);
+  HHVM_MALIAS(HH\\ConditionWaitHandle, fail, ConditionWaitHandle, fail);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

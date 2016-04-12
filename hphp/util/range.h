@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,7 +82,8 @@ struct KeyRangePolicy {
  */
 template<typename Iter,
          template<typename> class RangePolicy = DefaultRangePolicy>
-class IterRange {
+struct IterRange {
+private:
   typedef RangePolicy<Iter> Extractor;
 public:
   typedef typename Extractor::value_type value_type;

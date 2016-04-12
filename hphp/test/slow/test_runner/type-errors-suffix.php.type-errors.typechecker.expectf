@@ -1,0 +1,6 @@
+File %s, line 4, characters 10-13:
+Invalid return type (Typing[4110])
+File %s, line 3, characters 17-19:
+This is an int
+File %s, line 4, characters 10-13:
+It is incompatible with a string

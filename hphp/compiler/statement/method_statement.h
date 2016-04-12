@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@ DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-class MethodStatement : public Statement, public IParseHandler {
+struct MethodStatement : Statement, IParseHandler {
 protected:
   MethodStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,

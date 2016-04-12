@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,58 +45,43 @@ DateInterval::DateInterval(timelib_rel_time *di) {
   m_di = DateIntervalPtr(di, dateinterval_deleter());
 }
 
-bool DateInterval::setDateString(const String& date_string) {
-  timelib_time *time;
-  timelib_rel_time *di;
+void DateInterval::setDateString(const String& date_string) {
   timelib_error_container *errors = nullptr;
 
-  time = timelib_strtotime((char*)date_string.data(), date_string.size(),
-                           &errors, TimeZone::GetDatabase(),
-                           TimeZone::GetTimeZoneInfoRaw);
-  int error_count = errors->error_count;
+  auto time = timelib_strtotime((char*)date_string.data(), date_string.size(),
+                                &errors, TimeZone::GetDatabase(),
+                                TimeZone::GetTimeZoneInfoRaw);
   DateTime::setLastErrors(errors);
 
-  if (error_count > 0) {
-    timelib_time_dtor(time);
-    return false;
-  } else {
-    di = timelib_rel_time_clone(&(time->relative));
-    timelib_time_dtor(time);
-    m_di = DateIntervalPtr(di, dateinterval_deleter());
-    return true;
-  }
+  auto di = timelib_rel_time_clone(&time->relative);
+
+  timelib_time_dtor(time);
+  m_di = DateIntervalPtr(di, dateinterval_deleter());
 }
 
-bool DateInterval::setInterval(const String& date_interval) {
+void DateInterval::setInterval(const String& date_interval) {
   timelib_rel_time *di = nullptr;
   timelib_error_container *errors = nullptr;
 
-#ifdef TIMELIB_HAVE_INTERVAL
   timelib_time *start = nullptr, *end = nullptr;
   int r = 0;
 
   timelib_strtointerval((char*)date_interval.data(), date_interval.size(),
                         &start, &end, &di, &r, &errors);
-#else
-  throw_not_implemented("timelib too old");
-#endif
 
   int error_count  = errors->error_count;
   DateTime::setLastErrors(errors);
   if (error_count > 0) {
     timelib_rel_time_dtor(di);
-    return false;
-  } else {
-#ifdef TIMELIB_HAVE_INTERVAL
-    if (UNLIKELY(!di && start && end)) {
-      timelib_update_ts(start, nullptr);
-      timelib_update_ts(end, nullptr);
-      di = timelib_diff(start, end);
-    }
-#endif
-    m_di = DateIntervalPtr(di, dateinterval_deleter());
-    return true;
+    return;
   }
+
+  if (UNLIKELY(!di && start && end)) {
+    timelib_update_ts(start, nullptr);
+    timelib_update_ts(end, nullptr);
+    di = timelib_diff(start, end);
+  }
+  m_di = DateIntervalPtr(di, dateinterval_deleter());
 }
 
 String DateInterval::format(const String& format_spec) {

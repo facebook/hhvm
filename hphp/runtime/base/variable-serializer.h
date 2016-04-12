@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,13 +18,15 @@
 #define incl_HPHP_VARIABLE_SERIALIZER_H_
 
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassInfo;
+struct ClassInfo;
 
 /**
  * Maintaining states during serialization of a variable. We use this single
@@ -47,14 +49,17 @@ struct VariableSerializer {
     PHPOutput, //used by compiler to output scalar values into byte code
   };
 
+  enum class ArrayKind { PHP, Dict };
+
   /**
    * Constructor and destructor.
    */
   explicit VariableSerializer(Type type, int option = 0, int maxRecur = 3);
   ~VariableSerializer() {
-    if (m_arrayIds) delete m_arrayIds;
+    if (m_arrayIds) req::destroy_raw(m_arrayIds);
   }
 
+  // Use UnlimitSerializationScope to suspend this temporarily.
   static __thread int64_t serializationSizeLimit;
 
   /**
@@ -66,6 +71,26 @@ struct VariableSerializer {
   // Serialize with limit size of output, always return the serialized string.
   // It does not work with Serialize, JSON, APCSerialize, DebuggerSerialize.
   String serializeWithLimit(const Variant& v, int limit);
+
+  // Generic wrapper around pointers to various countable types. Used instead of
+  // void* because it preserves enough type information for the type scanners to
+  // understand it.
+  union PtrWrapper {
+    PtrWrapper(const StringData* p): pstr{p} {}
+    PtrWrapper(const ArrayData* p): parr{p} {}
+    PtrWrapper(const ObjectData* p): pobj{p} {}
+    PtrWrapper(const RefData* p): pref{p} {}
+    PtrWrapper(const ResourceData* p): pres{p} {}
+    PtrWrapper(const Variant* p): pvar{p} {}
+    // So pointer_hash<void> works
+    /* implicit */operator const void*() const { return pstr; }
+    const StringData* pstr;
+    const ArrayData* parr;
+    const ObjectData* pobj;
+    const RefData* pref;
+    const ResourceData* pres;
+    const Variant* pvar;
+  };
 
   /**
    * Type specialized output functions.
@@ -86,10 +111,10 @@ struct VariableSerializer {
 
   void writeNull();
   // what to write if recursive level is over limit?
-  void writeOverflow(void* ptr, bool isObject = false);
+  void writeOverflow(PtrWrapper ptr, bool isObject = false);
   void writeRefCount(); // for DebugDump only
 
-  void writeArrayHeader(int size, bool isVectorData);
+  void writeArrayHeader(int size, bool isVectorData, ArrayKind kind);
   void writeArrayKey(const Variant& key);
   void writeArrayValue(const Variant& value);
   void writeCollectionKey(const Variant& key);
@@ -105,8 +130,8 @@ struct VariableSerializer {
   void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
   void incMaxCount() { m_maxCount++; }
-  bool incNestedLevel(void *ptr, bool isObject = false);
-  void decNestedLevel(void *ptr);
+  bool incNestedLevel(PtrWrapper ptr, bool isObject = false);
+  void decNestedLevel(PtrWrapper ptr);
   void pushObjectInfo(const String& objClass, int objId, char objCode);
   void popObjectInfo();
   void pushResourceInfo(const String& rsrcName, int rsrcId);
@@ -114,7 +139,8 @@ struct VariableSerializer {
   Type getType() const { return m_type; }
 
 private:
-  using ReqPtrCtrMap = req::hash_map<void*, int, pointer_hash<void>>;
+
+  using ReqPtrCtrMap = req::hash_map<PtrWrapper, int, pointer_hash<void>>;
   Type m_type;
   int m_option;                  // type specific extra options
   StringBuffer *m_buf;
@@ -157,6 +183,21 @@ private:
   // Otherwise, writeOverflow will be invoked instead.
   void preventOverflow(const Object& v, const std::function<void()>& func);
   void writePropertyKey(const String& prop);
+};
+
+// TODO: Move to util/folly?
+template<typename T> struct TmpAssign {
+  TmpAssign(T& v, const T tmp) : cur(v), save(cur) { cur = tmp; }
+  ~TmpAssign() { cur = save; }
+  T& cur;
+  const T save;
+};
+
+struct UnlimitSerializationScope {
+  static constexpr int32_t kTmpLimit = StringData::MaxSize;
+  TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit, kTmpLimit};
+  TmpAssign<int64_t> rs{RuntimeOption::SerializationSizeLimit, kTmpLimit};
+  TmpAssign<int32_t> rm{RuntimeOption::MaxSerializedStringSize, kTmpLimit};
 };
 
 extern const StaticString s_serializedNativeDataKey;

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -28,6 +28,8 @@ let parse_command () =
   | "stop" -> CKStop
   | "restart" -> CKRestart
   | "build" -> CKBuild
+  | "ide" -> CKIde
+  | "debug" -> CKDebug
   | _ -> CKNone
 
 let parse_without_command options usage command =
@@ -64,6 +66,12 @@ let parse_check_args cmd =
   let autostart = ref true in
   let from = ref "" in
   let version = ref false in
+  let ide_logname = ref false in
+  let monitor_logname = ref false in
+  let logname = ref false in
+  let refactor_mode = ref "" in
+  let refactor_before = ref "" in
+  let format_from = ref 0 in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -116,6 +124,7 @@ let parse_check_args cmd =
       " (mode) list all files with their associated hack modes";
     "--auto-complete", Arg.Unit (set_mode MODE_AUTO_COMPLETE),
       " (mode) auto-completes the text on stdin";
+    "--colour", Arg.String (fun x -> set_mode (MODE_COLORING x) ()), " ";
     "--color", Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
       " (mode) pretty prints the file content showing what is checked (give '-' for stdin)";
     "--coverage", Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
@@ -137,10 +146,22 @@ let parse_check_args cmd =
        *    ]
        *  Note: results list can be in any order *)
       "";
+    "--dump-ai-info", Arg.String (fun files ->
+        set_mode (MODE_DUMP_AI_INFO files) ()),
+        (* Just like --dump-symbol-info, but uses the AI to obtain info *)
+        "";
     "--identify-function", Arg.String (fun x -> set_mode (MODE_IDENTIFY_FUNCTION x) ()),
       " (mode) print the full function name at the position [line:character] of the text on stdin";
-    "--refactor", Arg.Unit (set_mode MODE_REFACTOR),
-      "";
+    "--refactor", Arg.Tuple ([
+        Arg.Symbol (
+          ["Class"; "Function"; "Method"],
+          (fun x -> refactor_mode := x));
+        Arg.String (fun x -> refactor_before := x);
+        Arg.String (fun x ->
+          set_mode (MODE_REFACTOR (!refactor_mode, !refactor_before, x)) ())
+      ]),
+      " (mode) rename a symbol, Usage: --refactor " ^
+      "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>";
     "--search", Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
       " (mode) fuzzy search symbol definitions";
     "--search-class",
@@ -178,6 +199,12 @@ let parse_check_args cmd =
       " (mode) find all occurrences of lint with the given error code";
     "--version", Arg.Set version,
       " (mode) show version and exit\n";
+    "--ide-logname", Arg.Set ide_logname,
+      " (mode) show ide server log filename and exit\n";
+    "--monitor-logname", Arg.Set monitor_logname,
+      " (mode) show monitor log filename and exit\n";
+    "--logname", Arg.Set logname,
+      " (mode) show log filename and exit\n";
     (* Create a checkpoint which can be used to retrieve changed files later *)
     "--create-checkpoint", Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x) ()),
       "";
@@ -195,6 +222,20 @@ let parse_check_args cmd =
     "--stats",
       Arg.Unit (set_mode MODE_STATS),
       " display some server statistics";
+    (* Server versions of methods that were exclusive to Javascript
+     * (see hh_ide.ml) so we can test how the editors are doing without it *)
+    "--find-lvar-refs",
+      Arg.String (fun x -> set_mode (MODE_FIND_LVAR_REFS x) ()),
+      (* (mode) finds references of local variable at [line:character] *)
+      (* position in file on stdin *) "";
+    "--get-method-name",
+      Arg.String (fun x -> set_mode (MODE_GET_METHOD_NAME x) ()),
+      (* (mode) same as --identify-function, but returns more information *) "";
+    "--format",
+      Arg.Tuple ([
+        Arg.Int (fun x -> format_from := x);
+        Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)) ())
+      ]), "";
 
     (* flags *)
     "--json", Arg.Set output_json,
@@ -240,6 +281,25 @@ let parse_check_args cmd =
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1;
   in
+
+  if !ide_logname then begin
+    let ide_log_link = ServerFiles.ide_log_link root in
+    Printf.printf "%s\n%!" ide_log_link;
+    exit 0;
+  end;
+
+  if !monitor_logname then begin
+    let monitor_log_link = ServerFiles.monitor_log_link root in
+    Printf.printf "%s\n%!" monitor_log_link;
+    exit 0;
+  end;
+
+  if !logname then begin
+    let log_link = ServerFiles.log_link root in
+    Printf.printf "%s\n%!" log_link;
+    exit 0;
+  end;
+
   let () = if (!from) = "emacs" then
       Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
   in
@@ -262,11 +322,13 @@ let parse_start_env command =
       %s a Hack server\n\n\
       WWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0) command (String.capitalize command) in
-  let wait = ref false in
   let no_load = ref false in
+  let wait_deprecation_msg () = Printf.eprintf
+    "WARNING: --wait is deprecated, does nothing, and will be going away \
+     soon!\n%!" in
   let options = [
-    "--wait", Arg.Set wait,
-    " wait for the server to finish initializing (default: false)";
+    "--wait", Arg.Unit wait_deprecation_msg,
+    " this flag is deprecated and does nothing!";
     "--no-load", Arg.Set no_load,
     " start from a fresh state"
   ] in
@@ -281,8 +343,8 @@ let parse_start_env command =
         exit 1 in
   { ClientStart.
     root = root;
-    wait = !wait;
     no_load = !no_load;
+    silent = false;
   }
 
 let parse_start_args () =
@@ -316,6 +378,7 @@ let parse_build_args () =
       Generates build files\n"
       Sys.argv.(0) in
   let steps = ref None in
+  let ignore_killswitch = ref false in
   let no_steps = ref None in
   let verbose = ref false in
   let serial = ref false in
@@ -333,6 +396,8 @@ let parse_build_args () =
     "--steps", Arg.String (fun x ->
       steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps to run";
+    "--ignore-killswitch", Arg.Set ignore_killswitch,
+    " run all steps (including kill-switched ones) except steps in --no-steps";
     "--no-steps", Arg.String (fun x ->
       no_steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps not to run";
@@ -372,6 +437,7 @@ let parse_build_args () =
     wait = !wait;
     build_opts = { ServerBuild.
       steps = !steps;
+      ignore_killswitch = !ignore_killswitch;
       no_steps = !no_steps;
       run_scripts = !run_scripts;
       serial = !serial;
@@ -384,7 +450,39 @@ let parse_build_args () =
       incremental = !incremental;
       user = Sys_utils.logname ();
       verbose = !verbose;
+      id = Random_id.short_string ();
     }
+  }
+
+let parse_ide_args () =
+  let usage =
+    Printf.sprintf
+      "Usage: %s ide [WWW-ROOT]\n"
+      Sys.argv.(0) in
+
+  let options = [] in
+  let args = parse_without_command options usage "ide" in
+  let root =
+    match args with
+    | [] -> get_root None
+    | [x] -> get_root (Some x)
+    | _ -> Printf.printf "%s\n" usage; exit 2 in
+  CIde { ClientIde.
+    root = root
+  }
+
+let parse_debug_args () =
+  let usage =
+    Printf.sprintf "Usage: %s debug [WWW-ROOT]\n" Sys.argv.(0) in
+  let options = [] in
+  let args = parse_without_command options usage "debug" in
+  let root =
+    match args with
+    | [] -> get_root None
+    | [x] -> get_root (Some x)
+    | _ -> Printf.printf "%s\n" usage; exit 2 in
+  CDebug { ClientDebug.
+    root
   }
 
 let parse_args () =
@@ -395,3 +493,14 @@ let parse_args () =
     | CKStop -> parse_stop_args ()
     | CKRestart -> parse_restart_args ()
     | CKBuild -> parse_build_args ()
+    | CKDebug -> parse_debug_args ()
+    | CKIde -> parse_ide_args ()
+
+let root = function
+  | CBuild { ClientBuild.root; _ }
+  | CCheck { ClientEnv.root; _ }
+  | CStart { ClientStart.root; _ }
+  | CRestart { ClientStart.root; _ }
+  | CStop { ClientStop.root; _ }
+  | CIde { ClientIde.root; _}
+  | CDebug { ClientDebug.root } -> root

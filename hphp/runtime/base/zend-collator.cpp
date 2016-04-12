@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -84,8 +84,14 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) {
     if (length < (int)sizeof(buf)) {
       numbuf = buf;
     } else {
-      numbuf = (char *) req::malloc(length + 1);
+      numbuf = (char *) req::malloc_noptrs(length + 1);
     }
+
+    SCOPE_EXIT {
+      if (numbuf != buf) {
+        req::free(numbuf);
+      }
+    };
 
     bufpos = numbuf;
 
@@ -95,10 +101,6 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) {
 
     *bufpos = '\0';
     value = zend_strtod(numbuf, nullptr);
-
-    if (numbuf != buf) {
-      req::free(numbuf);
-    }
 
     if (endptr != nullptr) {
       *endptr = (UChar *)u;
@@ -248,7 +250,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64_t *lval,
     end_ptr_double = nullptr;
   } else {
     if (end_ptr_double == str+length) { /* floating point string */
-      if (!finite(local_dval)) {
+      if (!std::isfinite(local_dval)) {
         /* "inf","nan" and maybe other weird ones */
         return KindOfNull;
       }
@@ -287,7 +289,7 @@ static String intl_convert_str_utf8_to_utf16(const String& utf8_str,
                              utf8_str.data(), utf8_str.length(),
                              status);
   if (U_FAILURE(*status)) {
-    return (const char *)(L"");
+    return empty_string();
   }
   return String((char*)ustr, UBYTES(ustr_len), AttachString);
 }

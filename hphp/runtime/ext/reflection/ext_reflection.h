@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -41,18 +41,16 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
                                              const String& prop, const Variant& value,
                                              bool force);
 
-class Reflection {
- public:
+struct Reflection {
   static HPHP::Class* s_ReflectionExceptionClass;
-  static Object AllocReflectionExceptionObject(const Variant& message);
+  [[noreturn]]
+  static void ThrowReflectionExceptionObject(const Variant& message);
 };
-
 
 /* A ReflectionFuncHandle is a NativeData object wrapping a Func*
  * for the purposes of ReflectionFunction and ReflectionMethod. */
 extern const StaticString s_ReflectionFuncHandle;
-class ReflectionFuncHandle {
- public:
+struct ReflectionFuncHandle {
   ReflectionFuncHandle(): m_func(nullptr) {}
   explicit ReflectionFuncHandle(const Func* func): m_func(func) {};
   ReflectionFuncHandle(const ReflectionFuncHandle&) = delete;
@@ -60,7 +58,6 @@ class ReflectionFuncHandle {
     m_func = other.m_func;
     return *this;
   }
-  ~ReflectionFuncHandle() {}
 
   static ReflectionFuncHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionFuncHandle>(obj);
@@ -78,14 +75,13 @@ class ReflectionFuncHandle {
   }
 
  private:
-  const Func* m_func{nullptr};
+  LowPtr<const Func> m_func{nullptr};
 };
 
 /* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
  * purposes of ReflectionClass. */
 extern const StaticString s_ReflectionClassHandle;
-class ReflectionClassHandle {
- public:
+struct ReflectionClassHandle {
   ReflectionClassHandle(): m_cls(nullptr) {}
   explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {};
   ReflectionClassHandle(const ReflectionClassHandle&) = delete;
@@ -93,7 +89,6 @@ class ReflectionClassHandle {
     m_cls = that_.m_cls;
     return *this;
   }
-  ~ReflectionClassHandle() {}
   String init(const String& name) {
     auto const cls = Unit::loadClass(name.get());
     if (!cls) return empty_string();
@@ -123,7 +118,7 @@ class ReflectionClassHandle {
   void wakeup(const Variant& content, ObjectData* obj);
 
  private:
-  const Class* m_cls{nullptr};
+  LowPtr<const Class> m_cls{nullptr};
 };
 
 /* A ReflectionConstHandle is a NativeData object wrapping a Const*
@@ -163,14 +158,13 @@ struct ReflectionConstHandle {
 
  private:
   const Class::Const* m_const;
-  const Class* m_cls;
+  LowPtr<const Class> m_cls;
 };
 
 /* A ReflectionPropHandle is a NativeData object wrapping a Prop*
  * for the purposes of ReflectionProperty. */
 extern const StaticString s_ReflectionPropHandle;
-class ReflectionPropHandle {
- public:
+struct ReflectionPropHandle {
   ReflectionPropHandle(): m_prop(nullptr) {}
   explicit ReflectionPropHandle(const Class::Prop* prop): m_prop(prop) {};
   ReflectionPropHandle(const ReflectionPropHandle& other) {
@@ -180,7 +174,6 @@ class ReflectionPropHandle {
     m_prop = other.m_prop;
     return *this;
   }
-  ~ReflectionPropHandle() {}
 
   static ReflectionPropHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionPropHandle>(obj);
@@ -205,8 +198,7 @@ class ReflectionPropHandle {
 /* A ReflectionSPropHandle is a NativeData object wrapping a SProp*
  * for the purposes of static ReflectionProperty. */
 extern const StaticString s_ReflectionSPropHandle;
-class ReflectionSPropHandle {
- public:
+struct ReflectionSPropHandle {
   ReflectionSPropHandle(): m_sprop(nullptr) {}
   explicit ReflectionSPropHandle(const Class::SProp* sprop): m_sprop(sprop) {};
   ReflectionSPropHandle(const ReflectionSPropHandle& other) {
@@ -216,7 +208,6 @@ class ReflectionSPropHandle {
     m_sprop = other.m_sprop;
     return *this;
   }
-  ~ReflectionSPropHandle() {}
 
   static ReflectionSPropHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionSPropHandle>(obj);

@@ -12,20 +12,20 @@ Class* IntlDatePatternGenerator::c_IntlDatePatternGenerator = nullptr;
 #define GENERATOR_GET(dest, src) \
   auto dest = IntlDatePatternGenerator::Get(src); \
   if (!dest) { \
-    throw data->getException("Invalid date pattern generator"); \
+    data->throwException("Invalid date pattern generator"); \
   }
 
 #define ICU_ERR_CHECK(data, ec) \
   if (U_FAILURE(ec)) { \
     data->setError(ec); \
-    throw data->getException("Date pattern generator error: %d (%s)", \
-                             error, u_errorName(error)); \
+    data->throwException("Date pattern generator error: %d (%s)", \
+                         error, u_errorName(error)); \
   }
 
 #define ICU_ERR_CHECK_MSG(data, ec, msg) \
   if (U_FAILURE(ec)) { \
     data->setError(ec, msg); \
-    throw data->getException(#msg ": %d (%s)", ec, u_errorName(ec)); \
+    data->throwException(#msg ": %d (%s)", ec, u_errorName(ec)); \
   }
 
 static UDateTimePatternField cast_ptn_field(IntlError *errorHandler,
@@ -34,7 +34,7 @@ static UDateTimePatternField cast_ptn_field(IntlError *errorHandler,
   if ((fieldInt < 0) || (fieldInt >= UDATPG_FIELD_COUNT)) {
     const char *msg = "Invalid value: %ld for pattern field";
     errorHandler->setError(U_ILLEGAL_ARGUMENT_ERROR, msg, fieldInt);
-    throw errorHandler->getException(msg, fieldInt);
+    errorHandler->throwException(msg, fieldInt);
   }
 
   return static_cast<UDateTimePatternField>(fieldInt);
@@ -46,7 +46,7 @@ static UDateTimePatternField cast_ptn_field(IntlError *errorHandler,
 static Object HHVM_STATIC_METHOD(IntlDatePatternGenerator, createInstance,
                                  const String& locale) {
   if (locale.empty()) {
-    throw s_intl_error->getException("No locale provided");
+    s_intl_error->throwException("No locale provided");
   }
 
   auto loc = icu::Locale::createFromName(locale.c_str());
@@ -321,15 +321,11 @@ static String HHVM_METHOD(IntlDatePatternGenerator, getErrorMessage) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define UDATPG_CONST_FIELD(nm)Native::registerClassConstant<KindOfInt64>( \
-                               s_IntlDatePatternGenerator.get(), \
-                               makeStaticString(#nm "_PATTERN_FIELD"), \
-                               UDATPG_ ## nm ## _FIELD);
+#define UDATPG_CONST_FIELD(nm) \
+HHVM_RCC_INT(IntlDatePatternGenerator, nm##_PATTERN_FIELD, UDATPG_##nm##_FIELD);
 
-#define UDATPG_CONST(nm)Native::registerClassConstant<KindOfInt64>( \
-                         s_IntlDatePatternGenerator.get(), \
-                         makeStaticString("PATTERN_" #nm), \
-                         UDATPG_ ## nm);
+#define UDATPG_CONST(nm) \
+  HHVM_RCC_INT(IntlDatePatternGenerator, PATTERN_##nm, UDATPG_##nm);
 
 void IntlExtension::initDatePatternGenerator() {
   // UDateTimePatternField

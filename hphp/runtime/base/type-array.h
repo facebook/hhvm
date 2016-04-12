@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,8 +28,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // forward declaration
-class ArrayIter;
-class VariableUnserializer;
+struct ArrayIter;
+struct VariableUnserializer;
 
 #define ACCESSPARAMS_DECL AccessFlags::Type flags = AccessFlags::None
 
@@ -42,7 +42,8 @@ class VariableUnserializer;
  * type of ArrayData to accomplish the task. This "upgrade" is called
  * escalation.
  */
-class Array {
+struct Array {
+private:
   using Ptr = req::ptr<ArrayData>;
   using NoIncRef = Ptr::NoIncRef;
   using NonNull = Ptr::NonNull;
@@ -50,6 +51,11 @@ class Array {
   Ptr m_arr;
 
   Array(ArrayData* ad, NoIncRef) : m_arr(ad, NoIncRef{}) {}
+
+public:
+  template<class F> void scan(F& mark) const {
+    mark(m_arr);
+  }
 
 public:
   /*
@@ -65,6 +71,7 @@ public:
   }
 
   static Array Create(const Variant& key, const Variant& value);
+  static Array ConvertToDict(const Array& arr);
 
 public:
   Array() {}
@@ -140,6 +147,17 @@ public:
     return !m_arr;
   }
   Array values() const;
+
+  bool useWeakKeys() const {
+    // If array isn't set we may implicitly create a mixed array. We never
+    // implicitly create a dict array
+    return !m_arr || m_arr->useWeakKeys();
+  }
+
+  /*
+   * Converts k to a valid key for this array type
+   */
+  VarNR convertKey(const Variant& k) const;
 
   /*
    * Operators
@@ -290,6 +308,7 @@ public:
   bool more (const Array& v2, bool flip = true) const;
   bool more (const Object& v2) const;
   bool more (const Variant& v2) const;
+  int compare (const Array& v2, bool flip = false) const;
 
   /*
    * Offset
@@ -433,7 +452,7 @@ public:
   template<typename T>
   void removeImpl(const T& key) {
     if (m_arr) {
-      ArrayData* escalated = m_arr->remove(key, (m_arr->hasMultipleRefs()));
+      ArrayData* escalated = m_arr->remove(key, m_arr->cowCheck());
       if (escalated != m_arr) m_arr = Ptr::attach(escalated);
     }
   }
@@ -442,7 +461,7 @@ public:
   Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
     Variant* ret = nullptr;
-    ArrayData* escalated = m_arr->lval(key, ret, m_arr->hasMultipleRefs());
+    ArrayData* escalated = m_arr->lval(key, ret, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
     assert(ret);
     return *ret;

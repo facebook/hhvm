@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,6 +91,31 @@ inline bool operator&(const InclOpFlags& l, const InclOpFlags& r) {
   return static_cast<int>(l) & static_cast<int>(r);
 }
 
+enum class OBFlags {
+  None = 0,
+  Cleanable = 1,
+  Flushable = 2,
+  Removable = 4,
+  OutputDisabled = 8,
+  WriteToStdout = 16,
+  Default = 1 | 2 | 4
+};
+
+inline OBFlags operator|(const OBFlags& l, const OBFlags& r) {
+  return static_cast<OBFlags>(static_cast<int>(l) | static_cast<int>(r));
+}
+
+inline OBFlags & operator|=(OBFlags& l, const OBFlags& r) {
+  return l = l | r;
+}
+
+inline OBFlags operator&(const OBFlags& l, const OBFlags& r) {
+  return static_cast<OBFlags>(static_cast<int>(l) & static_cast<int>(r));
+}
+
+inline bool any(OBFlags f) { return f != OBFlags::None; }
+inline bool operator!(OBFlags f) { return f == OBFlags::None; }
+
 struct VMParserFrame {
   std::string filename;
   int lineNumber;
@@ -169,22 +194,30 @@ public:
   void writeStdout(const char* s, int len);
   size_t getStdoutBytesWritten() const;
 
+  /**
+   * Write to the transport, or to stdout if there is no transport.
+   */
+  void writeTransport(const char* s, int len);
+
   using PFUNC_STDOUT = void (*)(const char* s, int len, void* data);
   void setStdout(PFUNC_STDOUT func, void* data);
 
   /**
    * Output buffering.
    */
-  void obStart(const Variant& handler = uninit_null(), int chunk_size = 0);
+  void obStart(const Variant& handler = uninit_null(),
+               int chunk_size = 0,
+               OBFlags flags = OBFlags::Default);
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();
   void obClean(int handler_flag);
-  bool obFlush();
+  bool obFlush(bool force = false);
   void obFlushAll();
   bool obEnd();
   void obEndAll();
   int obGetLevel();
+  String obGetBufferName();
   Array obGetStatus(bool full);
   void obSetImplicitFlush(bool on);
   Array obGetHandlers();
@@ -197,7 +230,9 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
-  void registerRequestEventHandler(RequestEventHandler* handler);
+  std::size_t registerRequestEventHandler(RequestEventHandler* handler);
+  void unregisterRequestEventHandler(RequestEventHandler* handler,
+                                     std::size_t index);
   void registerShutdownFunction(const Variant& function, Array arguments,
                                 ShutdownType type);
   bool removeShutdownFunction(const Variant& function, ShutdownType type);
@@ -271,12 +306,13 @@ public:
 
 private:
   struct OutputBuffer {
-    explicit OutputBuffer(Variant&& h, int chunk_sz)
-      : oss(8192), handler(std::move(h)), chunk_size(chunk_sz)
+    explicit OutputBuffer(Variant&& h, int chunk_sz, OBFlags flgs)
+      : oss(8192), handler(std::move(h)), chunk_size(chunk_sz), flags(flgs)
     {}
     StringBuffer oss;
     Variant handler;
     int chunk_size;
+    OBFlags flags;
     template<class F> void scan(F& mark) {
       mark(oss);
       mark(handler);
@@ -427,7 +463,8 @@ public:
                   Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
-                  InvokeFlags flags = InvokeNormal);
+                  InvokeFlags flags = InvokeNormal,
+                  bool useWeakTypes = false);
 
   void invokeFunc(TypedValue* retval,
                   const CallCtx& ctx,
@@ -439,7 +476,8 @@ public:
                      void* thisOrCls,
                      StringData* invName,
                      int argc,
-                     const TypedValue* argv);
+                     const TypedValue* argv,
+                     bool useWeakTypes = false);
 
   void invokeFuncFew(TypedValue* retval,
                      const Func* f,
@@ -468,9 +506,20 @@ public:
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
+  bool setHeaderCallback(const Variant& callback);
+
+private:
+  template<class FStackCheck, class FInitArgs, class FEnterVM>
+  void invokeFuncImpl(TypedValue* retptr, const Func* f,
+                      ObjectData* thiz, Class* cls, uint32_t argc,
+                      StringData* invName, bool useWeakTypes,
+                      FStackCheck doStackCheck,
+                      FInitArgs doInitArgs,
+                      FEnterVM doEnterVM);
+
 public:
   template<class F> void scan(F& mark) {
-    //mark(m_transport);
+    //mark(m_transport); Transport &subclasses must not contain heap ptrs.
     mark(m_cwd);
     //mark(m_sb); // points into m_buffers
     //mark(m_out); // points into m_buffers
@@ -501,7 +550,7 @@ public:
     mark(m_sandboxId);
     //mark(m_vhost); // VirtualHost* not allocated in php request heap
     //mark(debuggerSettings);
-    mark(m_liveBCObjs);
+    mark.implicit(m_liveBCObjs); // exact ptrs, but not refcounted.
     mark(m_apcMemSize);
     //mark(m_apcHandles);
     //mark(dynPropTable); // don't root objects with dyn props
@@ -518,8 +567,10 @@ public:
     mark(m_lastErrorPath);
     mark(m_lastErrorLine);
     mark(m_setprofileCallback);
+    mark(m_memThresholdCallback);
     mark(m_executingSetprofileCallback);
     //mark(m_activeSims);
+    mark(m_headerCallback);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -570,7 +621,7 @@ private:
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;
-  req::set<ObjectData*> m_liveBCObjs;
+  req::set<ObjectData*> m_liveBCObjs; // objects with destructors
 private:
   size_t m_apcMemSize{0};
   std::vector<APCHandle*> m_apcHandles; // gets moved to treadmill
@@ -586,7 +637,7 @@ public:
   req::vector<Unit*> m_createdFuncs;
   req::vector<Fault> m_faults;
   int m_lambdaCounter;
-  TinyVector<VMState, 32> m_nestedVMs;
+  req::TinyVector<VMState, 32> m_nestedVMs;
   int m_nesting;
   bool m_dbgNoBreak;
   bool m_unwindingCppException;
@@ -596,13 +647,26 @@ private:
   int m_lastErrorLine;
 public:
   Variant m_setprofileCallback;
+  Variant m_memThresholdCallback;
+  uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::vector<vixl::Simulator*> m_activeSims;
+public:
+  Cell m_headerCallback;
+  bool m_headerCallbackDone{false}; // used to prevent infinite loops
+
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_stdoutData);
+  TYPE_SCAN_IGNORE_FIELD(dynPropTable);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<> void ThreadLocalNoCheck<ExecutionContext>::destroy();
+// MSVC doesn't instantiate this, causing an undefined symbol at link time
+// if the template<> is present, but other compilers require it.
+#ifndef _MSC_VER
+template<>
+#endif
+void ThreadLocalNoCheck<ExecutionContext>::destroy();
 
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 

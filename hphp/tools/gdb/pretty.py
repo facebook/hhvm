@@ -78,10 +78,11 @@ class TypedValuePrinter(object):
             val = data['dbl']
 
         elif (t == V('HPHP::KindOfString') or
-              t == V('HPHP::KindOfStaticString')):
+              t == V('HPHP::KindOfPersistentString')):
             val = data['pstr'].dereference()
 
-        elif t == V('HPHP::KindOfArray'):
+        elif (t == V('HPHP::KindOfArray') or
+              t == V('HPHP::KindOfPersistentArray')):
             val = data['parr']
 
         elif t == V('HPHP::KindOfObject'):

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/ext/zlib/zip-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
@@ -45,8 +46,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 // compress.zlib:// stream wrapper
 
-static class ZlibStreamWrapper : public Stream::Wrapper {
- public:
+static struct ZlibStreamWrapper : Stream::Wrapper {
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,
                               int options,
@@ -101,6 +101,10 @@ const int64_t k_FORCE_DEFLATE         = k_ZLIB_ENCODING_DEFLATE;
 
 Variant HHVM_FUNCTION(readgzfile, const String& filename,
                                   int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
   if (stream.isBoolean() && !stream.toBoolean()) {
     return false;
@@ -110,6 +114,10 @@ Variant HHVM_FUNCTION(readgzfile, const String& filename,
 
 Variant HHVM_FUNCTION(gzfile, const String& filename,
                               int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
   if (stream.isBoolean() && !stream.toBoolean()) {
     return false;
@@ -313,6 +321,10 @@ String HHVM_FUNCTION(zlib_get_coding_type) {
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
                               int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   auto file = req::make<ZipFile>();
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
@@ -343,7 +355,7 @@ bool HHVM_FUNCTION(gzrewind, const Resource& zp) {
 Variant HHVM_FUNCTION(gzgetc, const Resource& zp) {
   return HHVM_FN(fgetc)(zp);
 }
-Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length /* = 1024 */) {
+Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length /* = 0 */) {
   return HHVM_FN(fgets)(zp, length);
 }
 Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length /* = 0 */,
@@ -567,12 +579,12 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Chunk-based API
+namespace {
 
-const StaticString s___SystemLib_ChunkedInflator("__SystemLib_ChunkedInflator");
+const StaticString s_SystemLib_ChunkedInflator("__SystemLib\\ChunkedInflator");
 
-class __SystemLib_ChunkedInflator {
- public:
-  __SystemLib_ChunkedInflator(): m_eof(false) {
+struct ChunkedInflator {
+  ChunkedInflator(): m_eof(false) {
     m_zstream.zalloc = (alloc_func) Z_NULL;
     m_zstream.zfree = (free_func) Z_NULL;
     int status = inflateInit2(&m_zstream, -MAX_WBITS);
@@ -581,7 +593,7 @@ class __SystemLib_ChunkedInflator {
     }
   }
 
-  ~__SystemLib_ChunkedInflator() {
+  ~ChunkedInflator() {
     if (!eof()) {
       inflateEnd(&m_zstream);
     }
@@ -630,15 +642,15 @@ class __SystemLib_ChunkedInflator {
 };
 
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
-  auto dest = Native::data<__SystemLib_ChunkedInflator>(src);
+  auto dest = Native::data<ChunkedInflator>(src);
 
-bool HHVM_METHOD(__SystemLib_ChunkedInflator, eof) {
+bool HHVM_METHOD(ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);
   assert(data);
   return data->eof();
 }
 
-String HHVM_METHOD(__SystemLib_ChunkedInflator,
+String HHVM_METHOD(ChunkedInflator,
                    inflateChunk,
                    const String& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
@@ -646,24 +658,22 @@ String HHVM_METHOD(__SystemLib_ChunkedInflator,
   return data->inflateChunk(chunk);
 }
 
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-class ZlibExtension final : public Extension {
- public:
+struct ZlibExtension final : Extension {
   ZlibExtension() : Extension("zlib", "2.0") {}
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }
   void moduleInit() override {
-#define X(cns) \
-    Native::registerConstant<KindOfInt64>(makeStaticString(#cns), k_##cns);
-    X(ZLIB_ENCODING_RAW);
-    X(ZLIB_ENCODING_GZIP);
-    X(ZLIB_ENCODING_DEFLATE);
-    X(ZLIB_ENCODING_ANY);
-    X(FORCE_GZIP);
-    X(FORCE_DEFLATE);
-#undef X
+    HHVM_RC_INT(ZLIB_ENCODING_RAW, k_ZLIB_ENCODING_RAW);
+    HHVM_RC_INT(ZLIB_ENCODING_GZIP, k_ZLIB_ENCODING_GZIP);
+    HHVM_RC_INT(ZLIB_ENCODING_DEFLATE, k_ZLIB_ENCODING_DEFLATE);
+    HHVM_RC_INT(ZLIB_ENCODING_ANY, k_ZLIB_ENCODING_ANY);
+    HHVM_RC_INT(FORCE_GZIP, k_FORCE_GZIP);
+    HHVM_RC_INT(FORCE_DEFLATE, k_FORCE_DEFLATE);
 
     HHVM_FE(zlib_encode);
     HHVM_FE(gzdeflate);
@@ -704,11 +714,13 @@ class ZlibExtension final : public Extension {
     HHVM_FE(lz4_hccompress);
     HHVM_FE(lz4_uncompress);
 
-    HHVM_ME(__SystemLib_ChunkedInflator, eof);
-    HHVM_ME(__SystemLib_ChunkedInflator, inflateChunk);
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, eof,
+                  HHVM_MN(ChunkedInflator, eof));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, inflateChunk,
+                  HHVM_MN(ChunkedInflator, inflateChunk));
 
-    Native::registerNativeDataInfo<__SystemLib_ChunkedInflator>(
-      s___SystemLib_ChunkedInflator.get());
+    Native::registerNativeDataInfo<ChunkedInflator>(
+      s_SystemLib_ChunkedInflator.get());
 
     loadSystemlib();
 #ifdef HAVE_QUICKLZ

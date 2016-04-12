@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -157,9 +157,9 @@ static const char *BuildCharSet(CharSet *cset, const char *format) {
     ch = end++;
   }
 
-  cset->chars = (char *)req::malloc(end - format - 1);
+  cset->chars = (char *)req::malloc_noptrs(end - format - 1);
   if (nranges > 0) {
-    cset->ranges = (::Range*)req::malloc(sizeof(::Range) * nranges);
+    cset->ranges = req::make_raw_array<::Range>(nranges);
   } else {
     cset->ranges = nullptr;
   }
@@ -309,7 +309,7 @@ static int ValidateFormat(const char *format, int numVars, int *totalSubs) {
    * a variable is multiply assigned or left unassigned.
    */
   if (numVars > nspace) {
-    nassign = (int*)req::malloc(sizeof(int) * numVars);
+    nassign = (int*)req::malloc_noptrs(sizeof(int) * numVars);
     nspace = numVars;
   }
   for (i = 0; i < nspace; i++) {
@@ -492,12 +492,13 @@ xpgCheckDone:
           nspace += STATIC_LIST_SIZE;
         }
         if (nassign == staticAssign) {
-          nassign = (int*)req::malloc(nspace * sizeof(int));
+          nassign = (int*)req::malloc_noptrs(nspace * sizeof(int));
           for (i = 0; i < STATIC_LIST_SIZE; ++i) {
             nassign[i] = staticAssign[i];
           }
         } else {
-          nassign = (int*)req::realloc((void *)nassign, nspace * sizeof(int));
+          nassign =
+            (int*)req::realloc_noptrs((void *)nassign, nspace * sizeof(int));
         }
         for (i = value; i < nspace; i++) {
           nassign[i] = 0;

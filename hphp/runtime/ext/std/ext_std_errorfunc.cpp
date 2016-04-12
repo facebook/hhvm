@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,8 +18,9 @@
 
 #include <iostream>
 
-#include <folly/Likely.h>
 #include <folly/Format.h>
+#include <folly/Likely.h>
+#include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -84,6 +85,10 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
  */
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
   return g_context->getCallerInfo();
+}
+
+int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash) {
+  return createBacktraceHash();
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
@@ -309,6 +314,15 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
   return false;
 }
 
+bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
+                   int sample_rate,
+                   int error_type /* = k_E_USER_NOTICE */) {
+  if (!folly::Random::oneIn(sample_rate)) {
+    return true;
+  }
+  return HHVM_FN(trigger_error)(error_msg, error_type);
+}
+
 bool HHVM_FUNCTION(user_error, const String& error_msg,
                                int error_type /* = k_E_USER_NOTICE */) {
   return HHVM_FN(trigger_error)(error_msg, error_type);
@@ -319,6 +333,7 @@ bool HHVM_FUNCTION(user_error, const String& error_msg,
 void StandardExtension::initErrorFunc() {
   HHVM_FE(debug_backtrace);
   HHVM_FE(hphp_debug_caller_info);
+  HHVM_FE(hphp_debug_backtrace_hash);
   HHVM_FE(debug_print_backtrace);
   HHVM_FE(error_get_last);
   HHVM_FE(error_log);
@@ -331,6 +346,7 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(hphp_throw_fatal_error);
   HHVM_FE(hphp_clear_unflushed);
   HHVM_FE(trigger_error);
+  HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
 
 #define INTCONST(v) Native::registerConstant<KindOfInt64> \

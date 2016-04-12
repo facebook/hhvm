@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@ namespace HPHP {
 struct AnalysisTimeFatalException : Exception {
   AnalysisTimeFatalException(const std::string& file,
                              int line,
-                             const char* msg, ...) ATTRIBUTE_PRINTF(4,5)
+     ATTRIBUTE_PRINTF_STRING const char* msg, ...) ATTRIBUTE_PRINTF(4,5)
     : m_file(file)
     , m_line(line)
   {

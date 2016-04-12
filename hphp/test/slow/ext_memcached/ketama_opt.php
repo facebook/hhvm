@@ -6,3 +6,4 @@ var_dump($mc->getOption(Memcached::OPT_DISTRIBUTION) === Memcached::DISTRIBUTION
 $mc->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, false);
 var_dump($mc->getOption(Memcached::OPT_HASH) === Memcached::HASH_DEFAULT);
 var_dump($mc->getOption(Memcached::OPT_DISTRIBUTION) === Memcached::DISTRIBUTION_MODULA);
+var_dump(defined('Memcached::OPT_LIBKETAMA_HASH'));

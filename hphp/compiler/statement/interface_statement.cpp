@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,6 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -240,39 +239,6 @@ StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstPtr ar) {
     checkVolatile(ar);
   }
   return StatementPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void InterfaceStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 4;
-  if (m_attrList != nullptr) numProps++;
-  if (m_base != nullptr) numProps++;
-  if (!m_docComment.empty()) numProps++;
-
-  cg.printObjectHeader("TypeStatement", numProps);
-  if (m_attrList != nullptr) {
-    cg.printPropertyHeader("attributes");
-    cg.printExpressionVector(m_attrList);
-  }
-  cg.printPropertyHeader("kind");
-  cg.printValue(PHP_INTERFACE);
-  cg.printPropertyHeader("name");
-  cg.printValue(m_originalName);
-  //TODO: type parameters (task 3262469)
-  if (m_base != nullptr) {
-    cg.printPropertyHeader("interfaces");
-    cg.printExpressionVector(m_base);
-  }
-  cg.printPropertyHeader("block");
-  cg.printAsEnclosedBlock(m_stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  if (!m_docComment.empty()) {
-    cg.printPropertyHeader("comments");
-    cg.printValue(m_docComment);
-  }
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
@@ -31,6 +32,7 @@ TRACE_SET_MOD(vasm);
 namespace HPHP { namespace jit {
 
 void optimizeJmps(Vunit& unit) {
+  Timer timer(Timer::vasm_jumps);
   auto isEmpty = [&](Vlabel b, Vinstr::Opcode op) {
     auto& code = unit.blocks[b].code;
     return code.size() == 1 && op == code[0].op;

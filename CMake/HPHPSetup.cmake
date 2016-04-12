@@ -33,7 +33,6 @@ endif()
 if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
-    -Wl,-u,_register_fastcgi_server
     -Wl,-pagezero_size,0x00001000
     # Set the .text.keep section to be executable.
     -Wl,-segprot,.text,rx,rx)
@@ -56,7 +55,6 @@ elseif (MSVC)
 else()
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
-    -Wl,-uregister_libevent_server,-uregister_fastcgi_server
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 endif()
 
@@ -77,6 +75,7 @@ set(HHVM_LINK_LIBRARIES
   hphp_util
   hphp_hhbbc
   jit_sort
+  ppc64-asm
   vixl neo)
 
 if(ENABLE_FASTCGI)
@@ -127,6 +126,21 @@ include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
+# Ubuntu 15.10 and 14.04 have been failing to include a dependency on jemalloc
+# as a these linked flags force the dependency to be recorded
+if (JEMALLOC_ENABLED AND LINUX)
+  LIST(APPEND HHVM_LINK_LIBRARIES -Wl,--no-as-needed ${JEMALLOC_LIB} -Wl,--as-needed)
+endif()
+
+if (HHVM_VERSION_OVERRIDE)
+  parse_version("HHVM_VERSION_" ${HHVM_VERSION_OVERRIDE})
+  add_definitions("-DHHVM_VERSION_OVERRIDE")
+  add_definitions("-DHHVM_VERSION_MAJOR=${HHVM_VERSION_MAJOR}")
+  add_definitions("-DHHVM_VERSION_MINOR=${HHVM_VERSION_MINOR}")
+  add_definitions("-DHHVM_VERSION_PATCH=${HHVM_VERSION_PATCH}")
+  add_definitions("-DHHVM_VERSION_SUFFIX=\"${HHVM_VERSION_SUFFIX}\"")
+endif()
+
 # Weak linking on Linux, Windows, and OS X all work somewhat differently. The following test
 # works well on Linux and Windows, but fails for annoying reasons on OS X, and even works
 # differently on different releases of OS X, cf. http://glandium.org/blog/?p=2764. Getting
@@ -152,6 +166,14 @@ else()
   add_definitions(-DFOLLY_HAVE_WEAK_SYMBOLS=0)
 endif()
 
+include(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(memrchr FOLLY_HAVE_MEMRCHR)
+if (FOLLY_HAVE_MEMRCHR)
+  add_definitions("-DFOLLY_HAVE_MEMRCHR=1")
+else()
+  add_definitions("-DFOLLY_HAVE_MEMRCHR=0")
+endif()
+
 add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
 
 if (LINUX)
@@ -172,8 +194,13 @@ if(CMAKE_CONFIGURATION_TYPES)
   if(NOT MSVC)
     message(FATAL_ERROR "Adding the appropriate defines for multi-config targets using anything other than MSVC is not yet supported!")
   endif()
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D DEBUG")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D DEBUG")
+  if (MSVC_NO_ASSERT_IN_DEBUG)
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D RELEASE=1 /D NDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D RELEASE=1 /D NDEBUG")
+  else()
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D DEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D DEBUG")
+  endif()
   foreach(flag_var
       CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
       CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
@@ -264,6 +291,7 @@ endif()
 
 if (NOT LIBZIP_INCLUDE_DIR_ZIP)
   include_directories("${TP_DIR}/libzip")
+  add_definitions("-DZIP_EXTERN=")
 endif()
 
 if (NOT PCRE_LIBRARY)
@@ -291,6 +319,7 @@ include_directories("${TP_DIR}/folly")
 include_directories("${TP_DIR}/folly/src")
 include_directories("${TP_DIR}/thrift/src")
 include_directories("${TP_DIR}/wangle/src")
+include_directories("${TP_DIR}/brotli/src")
 include_directories(${TP_DIR})
 
 include_directories(${HPHP_HOME}/hphp)

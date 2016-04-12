@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,7 +79,7 @@ inline bool fls64(I64 input, I64 &out) {
     "cc"
   );
 #else
-  out = folly::findLastSet(input);
+  out = folly::findLastSet(input) - 1;
   retval = input != 0;
 #endif
   return retval;

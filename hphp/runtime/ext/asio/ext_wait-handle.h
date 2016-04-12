@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,6 +25,20 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class WaitHandle
 
+void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitEnterCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitExitCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
+                        const Variant& callback);
+void HHVM_METHOD(WaitHandle, import);
+Variant HHVM_METHOD(WaitHandle, join);
+bool HHVM_METHOD(WaitHandle, isFinished);
+bool HHVM_METHOD(WaitHandle, isSucceeded);
+bool HHVM_METHOD(WaitHandle, isFailed);
+int64_t HHVM_METHOD(WaitHandle, getId);
+String HHVM_METHOD(WaitHandle, getName);
+
 /**
  * A wait handle is an object that describes operation that is potentially
  * asynchronous. A WaitHandle class is a base class of all such objects. There
@@ -43,40 +57,53 @@ namespace HPHP {
  *   SleepWaitHandle               - wait handle that finishes after a timeout
  *   ExternalThreadEventWaitHandle - thread-powered asynchronous execution
  *
- *   // DEPRECATED
- *   GenArrayWaitHandle            - wait handle representing an array of WHs
- *   GenMapWaitHandle              - wait handle representing an Map of WHs
- *   GenVectorWaitHandle           - wait handle representing an Vector of WHs
- *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
  * asynchronously (such as using await mechanism of async function or
- * passed as an array member of GenArrayWaitHandle).
+ * passed to AwaitAllWaitHandle).
  */
 
-class c_AsyncFunctionWaitHandle;
-class c_AsyncGeneratorWaitHandle;
-class c_AwaitAllWaitHandle;
-class c_GenArrayWaitHandle;
-class c_GenMapWaitHandle;
-class c_GenVectorWaitHandle;
-class c_ConditionWaitHandle;
-class c_RescheduleWaitHandle;
-class c_SleepWaitHandle;
-class c_ExternalThreadEventWaitHandle;
-class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
-                                               ObjectData::NoDestructor> {
- public:
-  DECLARE_CLASS_NO_SWEEP(WaitHandle)
+struct c_AsyncFunctionWaitHandle;
+struct c_AsyncGeneratorWaitHandle;
+struct c_AwaitAllWaitHandle;
+struct c_ConditionWaitHandle;
+struct c_RescheduleWaitHandle;
+struct c_SleepWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
+
+#define WAITHANDLE_CLASSOF(cn) \
+  static Class* classof() { \
+    static Class* cls = Unit::lookupClass(makeStaticString("HH\\" #cn)); \
+    return cls; \
+  }
+
+#define WAITHANDLE_DTOR(cn) \
+  static void instanceDtor(ObjectData* obj, const Class*) { \
+    auto wh = wait_handle<c_##cn>(obj); \
+    wh->~c_##cn(); \
+    MM().objFree(obj, sizeof(c_##cn)); \
+  }
+
+template<class T>
+T* wait_handle(const ObjectData* obj) {
+  assert(obj->instanceof(T::classof()));
+  assert(obj->getAttribute(ObjectData::IsWaitHandle));
+  return static_cast<T*>(const_cast<ObjectData*>(obj));
+}
+
+struct c_WaitHandle : ObjectData {
+  WAITHANDLE_CLASSOF(WaitHandle);
+  WAITHANDLE_DTOR(WaitHandle);
+
+  int64_t getId() const {
+    return ((intptr_t)this) / sizeof(void*);
+  }
 
   enum class Kind : uint8_t {
     Static,
     AsyncFunction,
     AsyncGenerator,
     AwaitAll,
-    GenArray,
-    GenMap,
-    GenVector,
     Condition,
     Reschedule,
     Sleep,
@@ -84,23 +111,13 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
   };
 
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
-                        HeaderKind kind = HeaderKind::Object) noexcept
-    : ExtObjectDataFlags(cls, kind, NoInit{}) {}
+                        HeaderKind kind = HeaderKind::WaitHandle) noexcept
+    : ObjectData(cls,
+                 ObjectData::IsWaitHandle | ObjectData::NoDestructor |
+                 ObjectData::IsCppBuiltin,
+                 kind,
+                 NoInit{}) {}
   ~c_WaitHandle() {}
-
-  void t___construct();
-  static void ti_setoniowaitentercallback(const Variant& callback);
-  static void ti_setoniowaitexitcallback(const Variant& callback);
-  static void ti_setonjoincallback(const Variant& callback);
-  Object t_getwaithandle();
-  void t_import();
-  Variant t_join();
-  Variant t_result();
-  bool t_isfinished();
-  bool t_issucceeded();
-  bool t_isfailed();
-  int64_t t_getid();
-  String t_getname();
 
  public:
   static constexpr ptrdiff_t stateOff() {
@@ -149,9 +166,6 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
   c_AsyncFunctionWaitHandle* asAsyncFunction();
   c_AsyncGeneratorWaitHandle* asAsyncGenerator();
   c_AwaitAllWaitHandle* asAwaitAll();
-  c_GenArrayWaitHandle* asGenArray();
-  c_GenMapWaitHandle* asGenMap();
-  c_GenVectorWaitHandle* asGenVector();
   c_ConditionWaitHandle* asCondition();
   c_RescheduleWaitHandle* asReschedule();
   c_ResumableWaitHandle* asResumable();
@@ -160,8 +174,8 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().
-  static const int8_t STATE_SUCCEEDED = 0;
-  static const int8_t STATE_FAILED    = 1;
+  static const int8_t STATE_SUCCEEDED = 0; // completed with result
+  static const int8_t STATE_FAILED    = 1; // completed with exception
 
  private: // layout, ignoring ObjectData fields.
   // 0                           8             9             10 12

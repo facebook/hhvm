@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,8 +25,9 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_boolean(name + "=KindOfBoolean")
   , m_int(name + "=KindOfInt64")
   , m_double(name + "=KindOfDouble")
-  , m_static_string(name + "=KindOfStaticString")
+  , m_persistent_string(name + "=KindOfPersistentString")
   , m_string(name + "=KindOfString")
+  , m_persistent_array(name + "=KindOfPersistentArray")
   , m_array(name + "=KindOfArray")
   , m_object(name + "=KindOfObject")
   , m_resource(name + "=KindOfResource")
@@ -40,8 +41,9 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfBoolean:       m_boolean.count(); break;
     case KindOfInt64:         m_int.count(); break;
     case KindOfDouble:        m_double.count(); break;
-    case KindOfStaticString:  m_static_string.count(); break;
+    case KindOfPersistentString:  m_persistent_string.count(); break;
     case KindOfString:        m_string.count(); break;
+    case KindOfPersistentArray:   m_persistent_array.count(); break;
     case KindOfArray:         m_array.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
@@ -58,8 +60,9 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_boolean.hits() +
                m_int.hits() +
                m_double.hits() +
-               m_static_string.hits() +
+               m_persistent_string.hits() +
                m_string.hits() +
+               m_persistent_array.hits() +
                m_array.hits() +
                m_object.hits() +
                m_resource.hits() +
@@ -70,8 +73,9 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfBoolean=%.1f%% "
                   "KindOfInt64=%.1f%% "
                   "KindOfDouble=%.1f%% "
-                  "KindOfStaticString=%.1f%% "
+                  "KindOfPersistentString=%.1f%% "
                   "KindOfString=%.1f%% "
+                  "KindOfPersistentArray=%.1f%% "
                   "KindOfArray=%.1f%% "
                   "KindOfObject=%.1f%% "
                   "KindOfResource=%.1f%% "
@@ -82,8 +86,9 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_boolean.hits() / total,
           100.0 * m_int.hits() / total,
           100.0 * m_double.hits() / total,
-          100.0 * m_static_string.hits() / total,
+          100.0 * m_persistent_string.hits() / total,
           100.0 * m_string.hits() / total,
+          100.0 * m_persistent_array.hits() / total,
           100.0 * m_array.hits() / total,
           100.0 * m_object.hits() / total,
           100.0 * m_resource.hits() / total,

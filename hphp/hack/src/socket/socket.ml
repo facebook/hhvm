@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -33,8 +33,8 @@ let unix_socket sock_name =
       sock
     end
   with Unix.Unix_error (err, _, _) ->
-    Printf.fprintf stderr "%s\n" (Unix.error_message err);
-    exit 1
+    Printf.eprintf "%s\n" (Unix.error_message err);
+    Exit_status.(exit Socket_error)
 
 (* So the sockaddr_un structure puts a strict limit on the length of a socket
   * address. This appears to be 104 chars on mac os x and 108 chars on my
@@ -43,6 +43,9 @@ let max_addr_length = 103
 let min_name_length = 17
 
 let get_path path =
+  (* Path will resolve the realpath, in case two processes are referring to the
+   * same socket using different paths (like with symlinks *)
+  let path = path |> Path.make |> Path.to_string in
   let dir = (Filename.dirname path)^"/" in
   let filename = Filename.basename path in
   let root_part = Filename.chop_extension filename in
@@ -74,5 +77,5 @@ let get_path path =
     end else root_part in
   Filename.concat dir (Printf.sprintf "%s%s" root_part extension)
 
-let init_unix_socket www_root_path =
-  unix_socket (get_path www_root_path)
+let init_unix_socket socket_file =
+  unix_socket (get_path socket_file)

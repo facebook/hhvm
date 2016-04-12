@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -186,6 +186,9 @@ private:
 
 /*
  * Visit reachable blocks in postorder, calling `fn' on each one.
+ *
+ * Guaranteed not to use standard iterators on u.blocks, because several passes
+ * (e.g., vlower) forbid it.
  */
 struct PostorderWalker {
   explicit PostorderWalker(const Vunit& u) : m_dfs{u} {}

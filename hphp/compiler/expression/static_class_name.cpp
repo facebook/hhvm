@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,11 +31,15 @@ StaticClassName::StaticClassName(ExpressionPtr classExp)
       m_self(false), m_parent(false), m_static(false),
       m_redeclared(false), m_present(false), m_unknown(true) {
   updateClassName();
-  if (m_origClassName == "parent") {
+  auto const isame = [](const std::string& a, const std::string& b) {
+    return (a.size() == b.size()) &&
+           !strncasecmp(a.c_str(), b.c_str(), a.size());
+  };
+  if (isame(m_origClassName, "parent")) {
     m_parent = true;
-  } else if (m_origClassName == "self") {
+  } else if (isame(m_origClassName, "self")) {
     m_self = true;
-  } else if (m_origClassName == "static") {
+  } else if (isame(m_origClassName, "static")) {
     m_static = true;
     m_present = true;
     m_class = classExp;
@@ -105,23 +109,6 @@ ClassScopePtr StaticClassName::resolveClass() {
     }
   }
   return cls;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void StaticClassName::outputCodeModel(CodeGenerator &cg) {
-  if (isStatic() || !m_origClassName.empty()) {
-    cg.printPropertyHeader("class");
-  } else {
-    cg.printPropertyHeader("classExpression");
-  }
-  if (isStatic()) {
-    cg.printTypeExpression("static");
-  } else if (!m_origClassName.empty()) {
-    cg.printTypeExpression(m_origClassName);
-  } else {
-    m_class->outputCodeModel(cg);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,5 @@
+4: class Foo {
+5:   public function bar(): void {
+6:     $foo = new Bar();
+7:     $foo->baz("arg1", "arg2", "arg3");
+8:     $foo->bar("arg1", "arg2", "arg3");

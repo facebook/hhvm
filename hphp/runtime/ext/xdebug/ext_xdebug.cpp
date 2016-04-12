@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
+#include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -723,17 +724,12 @@ static void HHVM_FUNCTION(_xdebug_check_trigger_vars) {
   }
 }
 
+bool HHVM_FUNCTION(xdebug_remote_attached) {
+  return XDebugServer::isAttached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Module implementation
-
-// XDebug constants
-const StaticString
-  s_XDEBUG_CC_UNUSED("XDEBUG_CC_UNUSED"),
-  s_XDEBUG_CC_DEAD_CODE("XDEBUG_CC_DEAD_CODE"),
-  s_XDEBUG_TRACE_APPEND("XDEBUG_TRACE_APPEND"),
-  s_XDEBUG_TRACE_COMPUTERIZED("XDEBUG_TRACE_COMPUTERIZED"),
-  s_XDEBUG_TRACE_HTML("XDEBUG_TRACE_HTML"),
-  s_XDEBUG_TRACE_NAKED_FILENAME("XDEBUG_TRACE_NAKED_FILENAME");
 
 // Helper for requestInit that returns the initial value for the given config
 // option.
@@ -834,18 +830,23 @@ void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
 
   auto debugger = xdebug_hdf["Eval"]["Debugger"];
 
-  // Get everything as bools.
-  #define XDEBUG_OPT(T, name, sym, val) { \
-    std::string key = "XDebug" #sym; \
-    config_values[#sym] = Config::GetBool(ini, xdebug_hdf, \
-                                       "Eval.Debugger." + key, val); \
+#define XDEBUG_OPT(T, name, sym, val) {                               \
+    std::string key = "XDebug" #sym;                                  \
+    /* Only load the HDF value if it was specified, don't use the defaults. */ \
+    if (debugger.exists(key)) {                                       \
+      if (std::is_same<T, bool>::value) {                             \
+        config_values[#sym] = Config::GetBool(                        \
+          ini, xdebug_hdf, "Eval.Debugger." + key, val                \
+        );                                                            \
+      } else if (std::is_same<T, int>::value) {                       \
+        config_values[#sym] = Config::GetInt32(                       \
+          ini, xdebug_hdf, "Eval.Debugger." + key, val                \
+        );                                                            \
+      }                                                               \
+    }                                                                 \
   }
   XDEBUG_HDF_CFG
   #undef XDEBUG_OPT
-
-  // But patch up overload_var_dump since it's actually an int.
-  config_values["OverloadVarDump"] =
-    Config::GetInt32(ini, xdebug_hdf, "Eval.Debugger.XDebugOverloadVarDump", 1);
 
   // XDebug is disabled by default.
   Config::Bind(Enable, ini, xdebug_hdf, "Eval.Debugger.XDebugEnable", false);
@@ -854,8 +855,17 @@ void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
   if (Enable) {
     constexpr auto key = "Eval.Debugger.XDebugDefaultEnable";
     if (Config::GetBool(ini, xdebug_hdf, key, true)) {
-      Logger::SetTheLogger(new ExtendedLogger());
+#ifdef FACEBOOK
+      if (RuntimeOption::UseThriftLogger) {
+        Logger::Warning("ThriftLogger enabled, won't use ExtendedLogger");
+      } else {
+        Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
+        ExtendedLogger::EnabledByDefault = true;
+      }
+#else
+      Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
       ExtendedLogger::EnabledByDefault = true;
+#endif
     }
   }
 }
@@ -865,24 +875,12 @@ void XDebugExtension::moduleInit() {
     return;
   }
 
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_CC_UNUSED.get(), k_XDEBUG_CC_UNUSED
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_CC_DEAD_CODE.get(), k_XDEBUG_CC_DEAD_CODE
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_APPEND.get(), k_XDEBUG_TRACE_APPEND
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_COMPUTERIZED.get(), k_XDEBUG_TRACE_COMPUTERIZED
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_HTML.get(), k_XDEBUG_TRACE_HTML
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_NAKED_FILENAME.get(), k_XDEBUG_TRACE_NAKED_FILENAME
-  );
+  HHVM_RC_INT(XDEBUG_CC_UNUSED, k_XDEBUG_CC_UNUSED);
+  HHVM_RC_INT(XDEBUG_CC_DEAD_CODE, k_XDEBUG_CC_DEAD_CODE);
+  HHVM_RC_INT(XDEBUG_TRACE_APPEND, k_XDEBUG_TRACE_APPEND);
+  HHVM_RC_INT(XDEBUG_TRACE_COMPUTERIZED, k_XDEBUG_TRACE_COMPUTERIZED);
+  HHVM_RC_INT(XDEBUG_TRACE_HTML, k_XDEBUG_TRACE_HTML);
+  HHVM_RC_INT(XDEBUG_TRACE_NAKED_FILENAME, k_XDEBUG_TRACE_NAKED_FILENAME);
   HHVM_FE(xdebug_break);
   HHVM_FE(xdebug_call_class);
   HHVM_FE(xdebug_call_file);
@@ -916,6 +914,7 @@ void XDebugExtension::moduleInit() {
   HHVM_FE(xdebug_time_index);
   HHVM_FE(xdebug_var_dump);
   HHVM_FE(_xdebug_check_trigger_vars);
+  HHVM_FALIAS(HH\\xdebug_remote_attached, xdebug_remote_attached);
   loadSystemlib("xdebug");
 }
 
@@ -1008,6 +1007,10 @@ void XDebugExtension::requestInit() {
   // Let the server do initialization
   XDebugServer::onRequestInit();
 
+  // Initialize our breakpoint maps.
+  assert(s_xdebug_breakpoints.isNull());
+  s_xdebug_breakpoints.getCheck();
+
   // Potentially attach the xdebug profiler
   if (XDebugProfiler::isAttachNeeded()) {
     attach_xdebug_profiler();
@@ -1018,6 +1021,8 @@ void XDebugExtension::requestShutdown() {
   if (!Enable) {
     return;
   }
+
+  s_xdebug_breakpoints.destroy();
 
   // Potentially kill the profiler
   if (XDEBUG_GLOBAL(ProfilerAttached)) {

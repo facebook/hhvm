@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,6 +154,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
     staticStreamer(&m_val, ss);
     out << ss.str();
   }
+  out << " (RAT = " << show(m_repoAuthType) << ")";
   out << std::endl;
 }
 
@@ -195,7 +196,8 @@ void PreClass::Const::prettyPrint(std::ostream& out,
 
 PreClass::TraitAliasRule::NamePair
 PreClass::TraitAliasRule::asNamePair() const {
-  char buf[traitName()->size() + origMethodName()->size() + 9];
+  char* buf = (char*)alloca(sizeof(char) *
+    (traitName()->size() + origMethodName()->size() + 9));
   sprintf(buf, "%s::%s",
           traitName()->empty() ? "(null)" : traitName()->data(),
           origMethodName()->data());

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -30,6 +30,11 @@ type variance =
   | Contravariant
   | Invariant
 
+type ns_kind =
+  | NSClass
+  | NSFun
+  | NSConst
+
 type program = def list
 
 and def =
@@ -39,7 +44,7 @@ and def =
   | Typedef of typedef
   | Constant of gconst
   | Namespace of id * program
-  | NamespaceUse of (id * id) list
+  | NamespaceUse of (ns_kind * id * id) list
 
 and typedef = {
   t_id: id;
@@ -149,7 +154,7 @@ and og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
 
-(* id without $ *)
+(* id is stored without the $ *)
 and class_var = id * expr option
 
 and method_ = {
@@ -197,7 +202,6 @@ and fun_ = {
   f_params          : fun_param list;
   f_body            : block;
   f_user_attributes : user_attribute list;
-  f_mtime           : float;
   f_fun_kind        : fun_kind;
   f_namespace       : Namespace_env.env;
 }
@@ -275,6 +279,7 @@ and expr_ =
   | False
   | Id of id
   | Lvar of id
+  | Dollardollar
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
@@ -293,7 +298,9 @@ and expr_ =
   | Cast of hint * expr
   | Unop of uop * expr
   | Binop of bop * expr * expr
+  | Pipe of expr * expr
   | Eif of expr * expr option * expr
+  | NullCoalesce of expr * expr
   | InstanceOf of expr * expr
   | New of expr * expr list * expr list
   (* Traditional PHP-style closure with a use list. Each use element is
@@ -314,6 +321,7 @@ and import_flavor =
   | IncludeOnce
   | RequireOnce
 
+(** "array" field. Fields of array, map, dict, and shape literals. *)
 and afield =
   | AFvalue of expr
   | AFkvalue of expr * expr

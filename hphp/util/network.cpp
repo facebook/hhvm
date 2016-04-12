@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,10 +16,13 @@
 #include "hphp/util/network.h"
 
 #include <netinet/in.h>
-#include <arpa/nameser.h>
 #include <arpa/inet.h>
+
+#ifndef _MSC_VER
+#include <arpa/nameser.h>
 #include <resolv.h>
 #include <sys/utsname.h>
+#endif
 
 #include <folly/String.h>
 #include <folly/IPAddress.h>
@@ -28,12 +31,13 @@
 #include "hphp/util/process.h"
 
 namespace HPHP {
+
+#ifndef _MSC_VER
 ///////////////////////////////////////////////////////////////////////////////
 // without calling res_init(), any call to getaddrinfo() may leak memory:
 //  http://sources.redhat.com/ml/libc-hacker/2004-02/msg00049.html
 
-class ResolverLibInitializer {
-public:
+struct ResolverLibInitializer {
   ResolverLibInitializer() {
     res_init();
     // We call sethostent with stayopen = 1 to keep /etc/hosts open across calls
@@ -44,6 +48,8 @@ public:
   }
 };
 static ResolverLibInitializer _resolver_lib_initializer;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
@@ -79,7 +85,6 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
 ///////////////////////////////////////////////////////////////////////////////
 std::string GetPrimaryIPImpl(int af) {
   const static std::string s_empty;
-  struct utsname buf;
   struct addrinfo hints;
   struct addrinfo *res = nullptr;
   int error;
@@ -90,12 +95,23 @@ std::string GetPrimaryIPImpl(int af) {
     }
   };
 
+#ifdef _MSC_VER
+  char* nodename = nullptr;
+  char nodenamebuf[65];
+  if (gethostname(nodenamebuf, 65) < 0)
+    nodename = "localhost";
+  else
+    nodename = nodenamebuf;
+#else
+  struct utsname buf;
   uname((struct utsname *)&buf);
+  const char* nodename = buf.nodename;
+#endif
 
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = af;
 
-  error = getaddrinfo(buf.nodename, nullptr, &hints, &res);
+  error = getaddrinfo(nodename, nullptr, &hints, &res);
   if (error) {
     return s_empty;
   }

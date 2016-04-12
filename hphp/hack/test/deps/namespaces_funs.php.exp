@@ -1,0 +1,3 @@
+Fun \NS\bar -> Fun \NS\foo
+Fun \NS\bar -> FunName \NS\foo
+Fun \NS\bar -> FunName \foo

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -43,10 +43,12 @@ let () =
    * detect and handle better than a signal). Ignore SIGUSR1 since we sometimes
    * use that for the server to tell us when it's done initializing, but if we
    * aren't explicitly listening we don't care. *)
-  if not Sys.win32 then Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
+  Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
+  Sys_utils.set_signal Sys.sigint (Sys.Signal_handle (fun _ ->
+    raise Exit_status.(Exit_with Interrupted)));
   let command = ClientArgs.parse_args () in
-  let log_cmd = ClientLogCommandUtils.log_command_of_command command in
-  HackEventLogger.client_startup log_cmd;
+  let root = ClientArgs.root command in
+  HackEventLogger.client_init root;
   let exit_status =
     try
       match command with
@@ -55,7 +57,10 @@ let () =
         | ClientCommand.CStop env -> ClientStop.main env
         | ClientCommand.CRestart env -> ClientRestart.main env
         | ClientCommand.CBuild env -> ClientBuild.main env
-    with Exit_status.Exit_with es -> es
+        | ClientCommand.CIde env -> ClientIde.main env
+        | ClientCommand.CDebug env -> ClientDebug.main env
+    with Exit_status.Exit_with es ->
+      HackEventLogger.client_bad_exit es;
+      es
   in
-  HackEventLogger.client_finish log_cmd (Exit_status.to_string exit_status);
   Exit_status.exit exit_status

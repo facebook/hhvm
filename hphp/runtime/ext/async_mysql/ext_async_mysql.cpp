@@ -23,7 +23,8 @@
 #include <squangle/mysql_client/AsyncHelpers.h>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -86,25 +87,14 @@ DEFINE_CONSTANT(MYSQL_TYPE_ENUM);
 DEFINE_CONSTANT(MYSQL_TYPE_GEOMETRY);
 DEFINE_CONSTANT(MYSQL_TYPE_NULL);
 
-#ifdef FOLLY_SINGLETON_TRY_GET
-
 static std::shared_ptr<am::AsyncMysqlClient> getDefaultClient() {
   return am::AsyncMysqlClient::defaultClient();
 }
 
-#else
-
-static am::AsyncMysqlClient* getDefaultClient() {
-  return am::AsyncMysqlClient::defaultClient();
-}
-
-#endif
-
 ///////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClientStats
 
-class AsyncMysqlClientStats {
- public:
+struct AsyncMysqlClientStats {
   AsyncMysqlClientStats& operator=(const AsyncMysqlClientStats& other) {
     m_values = other.m_values;
     return *this;
@@ -144,6 +134,38 @@ double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// MySSLContextProvider
+MySSLContextProvider::MySSLContextProvider(
+    std::shared_ptr<am::SSLOptionsProviderBase> provider)
+    : m_provider(provider) {}
+
+Object MySSLContextProvider::newInstance(
+    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+  Object obj{getClass()};
+  Native::data<MySSLContextProvider>(obj)->setSSLProvider(
+      std::move(ssl_provider));
+  return obj;
+}
+
+std::shared_ptr<am::SSLOptionsProviderBase>
+MySSLContextProvider::getSSLProvider() {
+  return m_provider;
+}
+void MySSLContextProvider::setSSLProvider(
+    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+  m_provider = std::move(ssl_provider);
+}
+
+bool HHVM_METHOD(MySSLContextProvider, isValid) {
+  auto* data = Native::data<MySSLContextProvider>(this_);
+  return data->m_provider != nullptr;
+}
+
+Class* MySSLContextProvider::s_class = nullptr;
+const StaticString MySSLContextProvider::s_className("MySSLContextProvider");
+IMPLEMENT_GET_CLASS(MySSLContextProvider)
+
+//////////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClient
 void HHVM_STATIC_METHOD(AsyncMysqlClient,
                         setPoolsConnectionLimit,
@@ -151,18 +173,27 @@ void HHVM_STATIC_METHOD(AsyncMysqlClient,
   getDefaultClient()->setPoolsConnectionLimit(limit);
 }
 
-Object HHVM_STATIC_METHOD(AsyncMysqlClient, connect,
+Object HHVM_STATIC_METHOD(AsyncMysqlClient,
+                          connect,
                           const String& host,
                           int port,
                           const String& dbname,
                           const String& user,
                           const String& password,
-                          int64_t timeout_micros /* = -1 */) {
-  auto op = getDefaultClient()->beginConnection(static_cast<std::string>(host),
-                                         port,
-                                         static_cast<std::string>(dbname),
-                                         static_cast<std::string>(user),
-                                         static_cast<std::string>(password));
+                          int64_t timeout_micros /* = -1 */,
+                          const Variant& sslContextProvider /* = null */) {
+  am::ConnectionKey key(static_cast<std::string>(host),
+                        port,
+                        static_cast<std::string>(dbname),
+                        static_cast<std::string>(user),
+                        static_cast<std::string>(password));
+  auto op = getDefaultClient()->beginConnection(key);
+  if (!sslContextProvider.isNull()) {
+    auto* mysslContextProvider =
+        Native::data<MySSLContextProvider>(sslContextProvider.toObject());
+    op->setSSLOptionsProvider(mysslContextProvider->getSSLProvider());
+  }
+
   if (timeout_micros < 0) {
     timeout_micros = mysqlExtension::ConnectTimeout * 1000;
   }
@@ -389,6 +420,12 @@ void AsyncMysqlConnection::verifyValidConnection() {
   }
 }
 
+bool AsyncMysqlConnection::isValidConnection() {
+  // When a query timeout happens, the connection is invalid and SQuangLe
+  // layer closes it for precaution.
+  return m_conn && m_conn->ok() && !m_closed;
+}
+
 Object AsyncMysqlConnection::query(
   ObjectData* this_,
   am::Query query,
@@ -464,7 +501,7 @@ Object HHVM_METHOD(AsyncMysqlConnection, queryf,
     } else if (arg.isString()) {
       list.push_back(static_cast<std::string>(arg.toString()));
     } else if (arg.isNull()) {
-      list.push_back(am::QueryArgument());
+      list.push_back(nullptr);
     } else {
       return false;
     }
@@ -481,7 +518,7 @@ Object HHVM_METHOD(AsyncMysqlConnection, queryf,
       const Object& obj = arg.asCObjRef();
       if (obj->isCollection() && isVectorCollection(obj->collectionType())) {
         std::vector<am::QueryArgument> out;
-        out.reserve(getCollectionSize(obj.get()));
+        out.reserve(collections::getSize(obj.get()));
         for (ArrayIter listIter(arg); listIter; ++listIter) {
           const Variant& item = listIter.second();
           if (scalarPush(out, item)) {
@@ -564,9 +601,15 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
   }
 }
 
+bool HHVM_METHOD(AsyncMysqlConnection, isValid) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  return data->isValidConnection();
+}
+
 String HHVM_METHOD(AsyncMysqlConnection, escapeString, const String& input) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
+  data->verifyValidConnection();
   String ret = data->m_conn->escapeString(input.data());
   return ret;
 }
@@ -575,18 +618,38 @@ String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   String ret = "";
-  if (data->m_conn && !data->m_closed) {
+  if (data->isValidConnection()) {
     ret = data->m_conn->serverInfo();
+  } else {
+    LOG(ERROR) << "Accessing closed connection";
   }
   return ret;
+}
+
+bool HHVM_METHOD(AsyncMysqlConnection, sslSessionReused) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+
+  // Will throw PHP catchable Exception in case the connection isn't valid.
+  data->verifyValidConnection();
+  return data->m_conn->sslSessionReused();
+}
+
+bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+
+  // Will throw PHP catchable Exception in case the connection isn't valid.
+  data->verifyValidConnection();
+  return data->m_conn->isSSL();
 }
 
 int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   int count = 0;
-  if (data->m_conn && !data->m_closed) {
+  if (data->isValidConnection()) {
     count = data->m_conn->warningCount();
+  } else {
+    LOG(ERROR) << "Accessing closed connection";
   }
   return count;
 }
@@ -766,6 +829,11 @@ String HHVM_METHOD(AsyncMysqlErrorResult, mysql_error) {
   return data->m_op->mysql_error();
 }
 
+String HHVM_METHOD(AsyncMysqlErrorResult, mysql_normalize_error) {
+  auto* data = Native::data<AsyncMysqlErrorResult>(this_);
+  return data->m_op->mysql_normalize_error();
+}
+
 String HHVM_METHOD(AsyncMysqlErrorResult, failureType) {
   auto* data = Native::data<AsyncMysqlErrorResult>(this_);
   return data->m_op->resultString().toString();
@@ -891,8 +959,8 @@ Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
   ret->reserve(row_blocks.size());
 
   for (auto& row_block : row_blocks) {
-    ret->t_add(AsyncMysqlRowBlock::newInstance(&row_block,
-                                               data->m_field_index));
+    ret->add(AsyncMysqlRowBlock::newInstance(&row_block,
+                                             data->m_field_index));
   }
   return Object{std::move(ret)};
 }
@@ -929,20 +997,20 @@ Object AsyncMysqlQueryResult::buildRows(bool as_maps, bool typed_values) {
     if (as_maps) {
       auto row_map = req::make<c_Map>();
       for (int i = 0; i < row.size(); ++i) {
-        row_map->t_set(
+        row_map->set(
             m_field_index->getFieldString(i),
             buildTypedValue(
                 m_query_result->getRowFields(), row, i, typed_values));
       }
-      ret->t_add(Variant(std::move(row_map)));
+      ret->add(Variant(std::move(row_map)));
     } else {
       auto row_vector = req::make<c_Vector>();
       row_vector->reserve(row.size());
       for (int i = 0; i < row.size(); ++i) {
-        row_vector->t_add(buildTypedValue(
+        row_vector->add(buildTypedValue(
             m_query_result->getRowFields(), row, i, typed_values));
       }
-      ret->t_add(Variant(std::move(row_vector)));
+      ret->add(Variant(std::move(row_vector)));
     }
   }
   return Object(std::move(ret));
@@ -986,7 +1054,7 @@ void throwAsyncMysqlException(const char* exception_type,
 
   Array params;
   params.append(std::move(error));
-  throw create_object(exception_type, params, true /* init */);
+  throw_object(exception_type, params, true /* init */);
 }
 
 void throwAsyncMysqlQueryException(const char* exception_type,
@@ -1002,7 +1070,7 @@ void throwAsyncMysqlQueryException(const char* exception_type,
 
   Array params;
   params.append(std::move(error));
-  throw create_object(exception_type, params, true /* init */);
+  throw_object(exception_type, params, true /* init */);
 }
 }
 
@@ -1052,7 +1120,7 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   for (int i = 0; i < query_results.size(); ++i) {
     auto ret = AsyncMysqlQueryResult::newInstance(
         m_multi_op, m_clientStats, std::move(query_results[i]));
-    results->t_add(std::move(ret));
+    results->add(std::move(ret));
   }
   query_results.clear();
 
@@ -1391,8 +1459,7 @@ void HHVM_METHOD(AsyncMysqlRowIterator, rewind) {
 static const int64_t DISABLE_COPY_AND_SWEEP = Native::NDIFlags::NO_COPY |
   Native::NDIFlags::NO_SWEEP;
 
-static class AsyncMysqlExtension final : public Extension {
-public:
+static struct AsyncMysqlExtension final : Extension {
   AsyncMysqlExtension() : Extension("async_mysql") {}
   void moduleInit() override {
     REGISTER_CONSTANT(NOT_NULL_FLAG);
@@ -1448,13 +1515,20 @@ public:
     Native::registerNativeDataInfo<AsyncMysqlClientStats>(
         AsyncMysqlClientStats::s_className.get());
 
+    Native::registerNativeDataInfo<MySSLContextProvider>(
+        MySSLContextProvider::s_className.get());
+    HHVM_ME(MySSLContextProvider, isValid);
+
     HHVM_ME(AsyncMysqlConnection, query);
     HHVM_ME(AsyncMysqlConnection, queryf);
     HHVM_ME(AsyncMysqlConnection, multiQuery);
     HHVM_ME(AsyncMysqlConnection, escapeString);
     HHVM_ME(AsyncMysqlConnection, close);
     HHVM_ME(AsyncMysqlConnection, releaseConnection);
+    HHVM_ME(AsyncMysqlConnection, isValid);
     HHVM_ME(AsyncMysqlConnection, serverInfo);
+    HHVM_ME(AsyncMysqlConnection, sslSessionReused);
+    HHVM_ME(AsyncMysqlConnection, isSSL);
     HHVM_ME(AsyncMysqlConnection, warningCount);
     HHVM_ME(AsyncMysqlConnection, host);
     HHVM_ME(AsyncMysqlConnection, port);
@@ -1479,6 +1553,7 @@ public:
     HHVM_ME(AsyncMysqlErrorResult, clientStats);
     HHVM_ME(AsyncMysqlErrorResult, mysql_errno);
     HHVM_ME(AsyncMysqlErrorResult, mysql_error);
+    HHVM_ME(AsyncMysqlErrorResult, mysql_normalize_error);
     HHVM_ME(AsyncMysqlErrorResult, failureType);
     Native::registerNativeDataInfo<AsyncMysqlErrorResult>(
       AsyncMysqlErrorResult::s_className.get(), Native::NDIFlags::NO_COPY);
@@ -1492,7 +1567,7 @@ public:
     HHVM_ME(AsyncMysqlQueryResult, elapsedMicros);
     HHVM_ME(AsyncMysqlQueryResult, startTime);
     HHVM_ME(AsyncMysqlQueryResult, endTime);
-    HHVM_ME(AsyncMysqlErrorResult, clientStats);
+    HHVM_ME(AsyncMysqlQueryResult, clientStats);
     HHVM_ME(AsyncMysqlQueryResult, numRowsAffected);
     HHVM_ME(AsyncMysqlQueryResult, lastInsertId);
     HHVM_ME(AsyncMysqlQueryResult, numRows);

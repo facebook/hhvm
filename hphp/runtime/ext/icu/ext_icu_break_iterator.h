@@ -12,8 +12,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlBreakIterator, s_IntlCodePointBreakIterator;
 
-class IntlBreakIterator : public IntlError {
- public:
+struct IntlBreakIterator : IntlError {
   IntlBreakIterator() {}
   IntlBreakIterator(const IntlBreakIterator&) = delete;
   IntlBreakIterator& operator=(const IntlBreakIterator& src) {

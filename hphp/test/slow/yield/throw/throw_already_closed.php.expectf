@@ -1,0 +1,6 @@
+bool(false)
+
+Fatal error: %s
+Stack trace:
+#0 %s/throw_already_closed.php(%d): Generator->throw()
+#1 {main}

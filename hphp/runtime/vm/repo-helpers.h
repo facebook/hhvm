@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,17 +23,16 @@
 #include "hphp/util/md5.h"
 #include "hphp/util/portability.h"
 
-#include <boost/noncopyable.hpp>
 #include <sqlite3.h>
 
 namespace HPHP {
 
 // Forward declaration.
-class BlobDecoder;
-class BlobEncoder;
+struct BlobDecoder;
+struct BlobEncoder;
 struct StringData;
 struct TypedValue;
-class Repo;
+struct Repo;
 
 enum RepoId {
   RepoIdInvalid = -1,
@@ -44,7 +43,8 @@ enum RepoId {
 };
 
 struct RepoExc : std::exception {
-  RepoExc(const char* fmt, ...) ATTRIBUTE_PRINTF(2, 3) {
+  RepoExc(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2, 3) {
     va_list(ap);
     va_start(ap, fmt);
     char* msg;
@@ -63,8 +63,7 @@ struct RepoExc : std::exception {
   std::string m_msg;
 };
 
-class RepoStmt {
- public:
+struct RepoStmt {
   explicit RepoStmt(Repo& repo);
   ~RepoStmt();
  private:
@@ -85,8 +84,7 @@ class RepoStmt {
 
 // Under most circumstances RepoTxnQuery should be used instead of RepoQuery;
 // queries outside of transactions are fraught with peril.
-class RepoQuery {
- public:
+struct RepoQuery {
   explicit RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
     assert(m_stmt.prepared());
@@ -154,10 +152,12 @@ class RepoQuery {
  * Semantics: the guard object will rollback the transaction unless
  * you tell it not to.  Call .commit() when you want things to stay.
  */
-class RepoTxn : boost::noncopyable {
- public:
+struct RepoTxn {
   explicit RepoTxn(Repo& repo);
   ~RepoTxn();
+
+  RepoTxn(const RepoTxn&) = delete;
+  RepoTxn& operator=(const RepoTxn&) = delete;
 
   /*
    * All these routines may throw if there is an error accessing the
@@ -173,7 +173,7 @@ class RepoTxn : boost::noncopyable {
   bool error() const { return m_error; }
 
  private:
-  friend class RepoTxnQuery;
+  friend struct RepoTxnQuery;
   void step(RepoQuery& query);
   void exec(RepoQuery& query);
   void rollback(); // nothrow
@@ -183,8 +183,7 @@ class RepoTxn : boost::noncopyable {
   bool m_error;
 };
 
-class RepoTxnQuery : public RepoQuery {
- public:
+struct RepoTxnQuery : RepoQuery {
   RepoTxnQuery(RepoTxn& txn, RepoStmt& stmt)
     : RepoQuery(stmt), m_txn(txn) {
   }
@@ -196,14 +195,12 @@ class RepoTxnQuery : public RepoQuery {
   RepoTxn& m_txn;
 };
 
-class RepoProxy {
- public:
+struct RepoProxy {
   explicit RepoProxy(Repo& repo) : m_repo(repo) {}
   ~RepoProxy() {}
 
  protected:
-  class Stmt : public RepoStmt {
-   public:
+  struct Stmt : RepoStmt {
     Stmt(Repo& repo, int repoId) : RepoStmt(repo), m_repoId(repoId) {}
    protected:
     int m_repoId;

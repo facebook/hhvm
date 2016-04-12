@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -289,32 +289,6 @@ bool in(StatsSS& env, const bc::IterInit& op) {
 
 bool in(StatsSS& env, const bc::IterInitK& op) {
   add_type(env.stats.iterInitKBase, topC(env));
-  return false;
-}
-
-bool in(StatsSS& env, const bc::CGetM& op) {
-  auto const pops = op.numPop();
-  auto const ty = [&]() -> Type {
-    switch (op.mvec.lcode) {
-    case LL:
-      return env.state.locals[op.mvec.locBase->id];
-    case LC:
-    case LR:
-      return topT(env, pops - 1);
-    case LH:
-    case LGL:
-    case LGC:
-    case LNL:
-    case LNC:
-    case LSL:
-    case LSC:
-      return TTop;
-    case InvalidLocationCode:
-      break;
-    }
-    not_reached();
-  }();
-  add_type(env.stats.cgetmBase, ty);
   return false;
 }
 

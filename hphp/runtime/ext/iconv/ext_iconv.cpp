@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1217,10 +1217,10 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
             /* pass the entire chunk through the converter */
             err = _php_iconv_appendl(retval, encoded_word,
                                      (size_t)(p1 - encoded_word), cd_pl);
+            encoded_word = nullptr;
             if (err != PHP_ICONV_ERR_SUCCESS) {
-              goto out;
+              break;
             }
-            encoded_word = NULL;
           } else {
             goto out;
           }
@@ -1622,7 +1622,7 @@ static Variant HHVM_FUNCTION(iconv_mime_encode,
         prev_in_left = ini_in_left = in_left;
         ini_in_p = in_p;
 
-        for (out_size = char_cnt; out_size > 0;) {
+        for (out_size = (char_cnt - 2) / 3; out_size > 0;) {
           size_t prev_out_left ATTRIBUTE_UNUSED;
 
           nbytes_required = 0;
@@ -1795,7 +1795,7 @@ static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
       String value(header_value, header_value_len, CopyString);
       if (ret.exists(header)) {
         Variant elem = ret[header];
-        if (!elem.is(KindOfArray)) {
+        if (!elem.isArray()) {
           ret.set(header, make_packed_array(elem, value));
         } else {
           elem.toArrRef().append(value);
@@ -1989,31 +1989,14 @@ const char* iconv_version() { return "2.5"; }
 #endif
 #endif
 
-const StaticString
-  s_ICONV_IMPL("ICONV_IMPL"),
-  s_ICONV_MIME_DECODE_CONTINUE_ON_ERROR("ICONV_MIME_DECODE_CONTINUE_ON_ERROR"),
-  s_ICONV_MIME_DECODE_STRICT("ICONV_MIME_DECODE_STRICT"),
-  s_ICONV_VERSION("ICONV_VERSION"),
-  s_iconv_impl(iconv_impl()),
-  s_iconv_version(iconv_version());
-
-class iconvExtension final : public Extension {
-public:
+struct iconvExtension final : Extension {
   iconvExtension() : Extension("iconv") {}
 
   void moduleInit() override {
-    Native::registerConstant<KindOfStaticString>(
-        s_ICONV_IMPL.get(), s_iconv_impl.get()
-    );
-    Native::registerConstant<KindOfInt64>(
-        s_ICONV_MIME_DECODE_CONTINUE_ON_ERROR.get(), 2
-    );
-    Native::registerConstant<KindOfInt64>(
-        s_ICONV_MIME_DECODE_STRICT.get(), 1
-    );
-    Native::registerConstant<KindOfStaticString>(
-        s_ICONV_VERSION.get(), s_iconv_version.get()
-    );
+    HHVM_RC_STR(ICONV_IMPL, iconv_impl());
+    HHVM_RC_INT(ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 2);
+    HHVM_RC_INT(ICONV_MIME_DECODE_STRICT, 1);
+    HHVM_RC_STR(ICONV_VERSION, iconv_version());
 
     HHVM_FE(iconv_get_encoding);
     HHVM_FE(iconv_mime_decode_headers);

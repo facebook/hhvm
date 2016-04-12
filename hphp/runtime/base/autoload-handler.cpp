@@ -44,6 +44,7 @@ const StaticString
   s_failure("failure"),
   s_autoload("__autoload"),
   s_exception("exception"),
+  s_error("SystemLib\\Error"),
   s_previous("previous");
 
 using CufIterPtr = req::unique_ptr<CufIter>;
@@ -237,7 +238,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   const String& name = normalizeNS(clsName);
   const Variant& type_map = m_map.get()->get(kind);
   auto const typeMapCell = type_map.asCell();
-  if (typeMapCell->m_type != KindOfArray) return Failure;
+  if (!isArrayType(typeMapCell->m_type)) return Failure;
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
   const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
   bool ok = false;
@@ -400,7 +401,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // Make sure state is cleaned up from this load; autoloading of arbitrary
   // code below can throw
   SCOPE_EXIT {
-    String l_className = m_loading.pop();
+    DEBUG_ONLY auto const l_className = m_loading.pop().toString();
     assert(l_className == className);
   };
 
@@ -420,17 +421,20 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     try {
       vm_call_user_func_cufiter(*hb.m_cufIter, params);
     } catch (Object& ex) {
-      assert(ex.instanceof(SystemLib::s_ExceptionClass));
+      assert(ex.instanceof(SystemLib::s_ThrowableClass));
       if (autoloadException.isNull()) {
         autoloadException = ex;
       } else {
         Object cur = ex;
-        Variant next = cur->o_get(s_previous, false, s_exception);
+        auto const ctx = cur->instanceof(SystemLib::s_ExceptionClass)
+          ? s_exception
+          : s_error;
+        Variant next = cur->o_get(s_previous, false, ctx);
         while (next.isObject()) {
           cur = next.toObject();
-          next = cur->o_get(s_previous, false, s_exception);
+          next = cur->o_get(s_previous, false, ctx);
         }
-        cur->o_set(s_previous, autoloadException, s_exception);
+        cur->o_set(s_previous, autoloadException, ctx);
         autoloadException = ex;
       }
     }
@@ -439,7 +443,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     }
   }
   if (!autoloadException.isNull()) {
-    throw autoloadException;
+    throw_object(autoloadException);
   }
   return true;
 }

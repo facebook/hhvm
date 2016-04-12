@@ -1,0 +1,6 @@
+4: class Foo {
+5:   public function foo() : void {
+6:     $var = new Bar();
+7:     if (true) {
+8:       $var->baz("argument");
+9:       $var->foo(a1, a2);

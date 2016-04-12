@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -711,7 +711,7 @@ DCls dcls_of(Type t);
 Type from_cell(Cell tv);
 
 /*
- * Create a Type from a DataType.  KindOfString and KindOfStaticString
+ * Create a Type from a DataType. KindOfString and KindOfPersistentString
  * are both treated as TStr.
  *
  * Pre: dt is one of the DataTypes that actually represent php values

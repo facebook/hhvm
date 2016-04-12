@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,10 +19,13 @@
 #ifndef incl_HPHP_FILE_UTIL_H_
 #define incl_HPHP_FILE_UTIL_H_
 
+#include "hphp/util/file.h"
+
 #include "hphp/runtime/base/type-string.h"
-#include <vector>
-#include <string>
+
 #include <set>
+#include <string>
+#include <vector>
 
 namespace HPHP { namespace FileUtil {
 
@@ -103,6 +106,22 @@ void find(std::vector<std::string> &out,
           const std::string &root, const char *path, bool php,
           const std::set<std::string> *excludeDirs = nullptr,
           const std::set<std::string> *excludeFiles = nullptr);
+
+/**
+ * Determines if a given string is a valid path or not
+ * (ie: contains no null bytes)
+ */
+bool isValidPath(const String& path);
+
+/**
+ * Helper functions for use with FileUtil::isValidPath
+ */
+bool checkPathAndWarn(const String& path,
+                      const char* func_name,
+                      int param_pos);
+void checkPathAndError(const String& path,
+                       const char* func_name,
+                       int param_pos);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

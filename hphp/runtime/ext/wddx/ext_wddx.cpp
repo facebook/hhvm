@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -198,7 +198,7 @@ void find_var_recursive(const TypedValue* tv,
     String var_name{tvCastToString(tv)};
     wddxPacket->add_var(var_name, true);
   }
-  if (tv->m_type == KindOfArray) {
+  if (isArrayType(tv->m_type)) {
     for (ArrayIter iter(tv->m_data.parr); iter; ++iter) {
       find_var_recursive(iter.secondRef().asTypedValue(), wddxPacket);
     }
@@ -257,8 +257,7 @@ static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
 
 //////////////////////////////////////////////////////////////////////////////
 
-class wddxExtension final : public Extension {
- public:
+struct wddxExtension final : Extension {
   wddxExtension() : Extension("wddx") {}
   void moduleInit() override {
     HHVM_FE(wddx_add_vars);

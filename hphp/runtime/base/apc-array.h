@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,33 +23,36 @@
 #include "hphp/util/hash.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-class APCLocalArray;
+//////////////////////////////////////////////////////////////////////
 
-/**
- * APCArray is a php-style array that can take strings and
- * ints as keys. We also store the order in which the elements
- * are inserted. Once an element is added, it can not be
- * removed.
- */
+struct APCLocalArray;
+
+//////////////////////////////////////////////////////////////////////
+
 struct APCArray {
-  // Entry point to create an APCArray of any kind
-  static APCHandle::Pair MakeSharedArray(ArrayData* data, bool inner,
+  static APCHandle::Pair MakeSharedArray(ArrayData* data,
+                                         APCHandleLevel level,
                                          bool unserializeObj);
+
+  static APCHandle* MakeUncountedArray(ArrayData* array);
+
   static APCHandle::Pair MakeSharedEmptyArray();
-
-  static Variant MakeArray(const APCHandle* handle);
-
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {
-    assert(offsetof(APCArray, m_handle) == 0);
+    assert(handle->checkInvariants());
+    assert(handle->kind() == APCKind::SharedArray ||
+           handle->kind() == APCKind::SharedPackedArray);
+    static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<APCArray*>(handle);
   }
 
   static const APCArray* fromHandle(const APCHandle* handle) {
-    assert(offsetof(APCArray, m_handle) == 0);
+    assert(handle->checkInvariants());
+    assert(handle->kind() == APCKind::SharedArray ||
+           handle->kind() == APCKind::SharedPackedArray);
+    static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
   }
 
@@ -101,23 +104,11 @@ struct APCArray {
     return indexOf(key);
   }
 
-  bool isPacked() const { return m_handle.isPacked(); }
+  bool isPacked() const {
+    return m_handle.kind() == APCKind::SharedPackedArray;
+  }
 
 private:
-  explicit APCArray(size_t size) : m_handle(KindOfArray), m_size(size) {
-    m_handle.setPacked();
-  }
-  explicit APCArray(unsigned int cap) : m_handle(KindOfArray) {
-    m.m_capacity_mask = cap - 1;
-    m.m_num = 0;
-  }
-  ~APCArray();
-
-  APCArray(const APCArray&) = delete;
-  APCArray& operator=(const APCArray&) = delete;
-
-  void operator delete(void* ptr) { free(ptr); }
-
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
@@ -126,17 +117,26 @@ private:
     APCHandle *val;
   };
 
-  //
-  // Create API
-  //
+private:
+  explicit APCArray(size_t size)
+    : m_handle(APCKind::SharedPackedArray, kInvalidDataType), m_size(size)
+  {}
+  explicit APCArray(unsigned int cap) : m_handle(APCKind::SharedArray) {
+    m.m_capacity_mask = cap - 1;
+    m.m_num = 0;
+  }
+  ~APCArray();
+
+  APCArray(const APCArray&) = delete;
+  APCArray& operator=(const APCArray&) = delete;
+
+private:
   static APCHandle::Pair MakeHash(ArrayData* data, bool unserializeObj);
   static APCHandle::Pair MakePacked(ArrayData* data, bool unserializeObj);
 
-  void setPacked() { m_handle.setPacked(); }
+private:
+  friend size_t getMemSize(const APCArray*);
 
-  //
-  // Array internal API
-  //
   void add(APCHandle* key, APCHandle* val);
   ssize_t indexOf(const StringData* key) const;
   ssize_t indexOf(int64_t key) const;
@@ -149,9 +149,6 @@ private:
   APCHandle** vals() const { return (APCHandle**)(this + 1); }
 
 private:
-  friend struct APCHandle;
-  friend size_t getMemSize(const APCArray*);
-
   APCHandle m_handle;
   union {
     // for map style arrays
@@ -164,7 +161,8 @@ private:
   };
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_APC_ARRAY_H_ */
+#endif

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -12,7 +12,6 @@ open Core
 open ServerEnv
 open Utils
 
-module Json = Hh_json
 module RP = Relative_path
 
 type result = string Lint.t list
@@ -20,10 +19,11 @@ type result = string Lint.t list
 let output_json oc el =
   let errors_json = List.map el Lint.to_json in
   let res =
-    Json.JAssoc [ "errors", Json.JList errors_json;
-                  "version", Json.JString Build_id.build_id_ohai;
-                ] in
-  output_string oc (Json.json_to_string res);
+    Hh_json.JSON_Object [
+        "errors", Hh_json.JSON_Array errors_json;
+        "version", Hh_json.JSON_String Build_id.build_id_ohai;
+    ] in
+  output_string oc (Hh_json.json_to_string res);
   flush stderr
 
 let output_text oc el =
@@ -39,45 +39,45 @@ let output_text oc el =
   end;
   flush oc
 
-let lint _acc fnl =
+let lint tcopt _acc fnl =
   List.fold_left fnl ~f:begin fun acc fn ->
     let errs, () =
       Lint.do_ begin fun () ->
         Errors.ignore_ begin fun () ->
-          Linting_service.lint fn (Sys_utils.cat (Relative_path.to_absolute fn))
+          Linting_service.lint tcopt fn
+            (Sys_utils.cat (Relative_path.to_absolute fn))
         end
       end in
     errs @ acc
   end ~init:[]
 
-let lint_all genv code =
-  let root = ServerArgs.root genv.options in
+let lint_all genv env code =
   let next = compose
     (List.map ~f:(RP.create RP.Root))
-    (Find.make_next_files FindUtils.is_php root) in
+    (genv.indexer FindUtils.is_php) in
   let errs = MultiWorker.call
     genv.workers
     ~job:(fun acc fnl ->
-      let lint_errs = lint acc fnl in
+      let lint_errs = lint env.tcopt acc fnl in
       List.filter lint_errs (fun err -> Lint.get_code err = code))
     ~merge:List.rev_append
     ~neutral:[]
     ~next in
   List.map errs Lint.to_absolute
 
-let go genv fnl =
+let go genv env fnl =
   let fnl = List.map fnl (Relative_path.create Relative_path.Root) in
   let errs =
     if List.length fnl > 10
     then
       MultiWorker.call
         genv.workers
-        ~job:lint
+        ~job:(lint env.tcopt)
         ~merge:List.rev_append
         ~neutral:[]
         ~next:(Bucket.make fnl)
     else
-      lint [] fnl in
+      lint env.tcopt [] fnl in
   let errs = List.sort begin fun x y ->
     Pos.compare (Lint.get_pos x) (Lint.get_pos y)
   end errs in

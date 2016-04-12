@@ -4,9 +4,9 @@ object(Closure%s)#2 (1) {
   }
 }
 string(1) "d"
-object(Closure%s)#2 (1) {
+object(Closure%s)#4 (1) {
   ["this"]=>
-  object(F)#1 (0) {
+  object(F)#3 (0) {
   }
 }
 string(1) "d"

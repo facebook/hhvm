@@ -534,6 +534,17 @@ void Assembler::adr(const Register& rd, Label* label) {
 }
 
 
+void Assembler::adrp(const Register& rd, int imm21) {
+  assert(rd.Is64Bits());
+  Emit(ADRP | ImmPCRelAddress(imm21) | Rd(rd));
+}
+
+
+void Assembler::adrp(const Register& rd, Label* label) {
+  adrp(rd, UpdateAndGetByteOffsetTo(label));
+}
+
+
 void Assembler::add(const Register& rd,
                     const Register& rn,
                     const Operand& operand,
@@ -1124,6 +1135,22 @@ void Assembler::ldr(const FPRegister& ft, double imm) {
 }
 
 
+void Assembler::ldxr(const Register& rt, const MemOperand& src) {
+  assert(src.IsImmediateOffset() && (src.offset() == 0));
+  LoadStoreExclusive op = rt.Is64Bits() ? LDXR_x : LDXR_w;
+  Emit(op | Rs_mask | Rt(rt) | Rt2_mask | RnSP(src.base()));
+}
+
+
+void Assembler::stxr(const Register& rs,
+                     const Register& rt,
+                     const MemOperand& dst) {
+  assert(dst.IsImmediateOffset() && (dst.offset() == 0));
+  LoadStoreExclusive op = rt.Is64Bits() ? STXR_x : STXR_w;
+  Emit(op | Rs(rs) | Rt(rt) | Rt2_mask | RnSP(dst.base()));
+}
+
+
 void Assembler::mov(const Register& rd, const Register& rm) {
   // Moves involving the stack pointer are encoded as add immediate with
   // second operand of zero. Otherwise, orr with first operand zr is
@@ -1267,6 +1294,20 @@ void Assembler::frintn(const FPRegister& fd,
                        const FPRegister& fn) {
   assert(fd.SizeInBits() == fn.SizeInBits());
   FPDataProcessing1Source(fd, fn, FRINTN);
+}
+
+
+void Assembler::frintm(const FPRegister& fd,
+                       const FPRegister& fn) {
+  assert(fd.SizeInBits() == fn.SizeInBits());
+  FPDataProcessing1Source(fd, fn, FRINTM);
+}
+
+
+void Assembler::frintp(const FPRegister& fd,
+                       const FPRegister& fn) {
+  assert(fd.SizeInBits() == fn.SizeInBits());
+  FPDataProcessing1Source(fd, fn, FRINTP);
 }
 
 

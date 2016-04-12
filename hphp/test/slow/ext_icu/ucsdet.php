@@ -42,7 +42,7 @@ function test_cannot_detect() {
   $detector = new EncodingDetector();
 
   // The detector has no idea what to do with this.
-  $detector->settext("\xc7\xe8\xec\xed\xe8\xe9 \xe2\xe5\xf7\xe5\xf0");
+  $detector->settext("\x74\x68\xa1");
   $match = $detector->detect();
   VERIFY($match->isvalid() == false);
 }

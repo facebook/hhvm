@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -149,15 +149,15 @@ std::string escapeStringForPHP(const char *input, int len) {
   return output;
 }
 
-const void *buffer_duplicate(const void *src, int size) {
+const void *buffer_duplicate(const void *src, size_t size) {
   char *s = (char *)malloc(size + 1); // '\0' in the end
   memcpy(s, src, size);
   s[size] = '\0';
   return s;
 }
 
-const void *buffer_append(const void *buf1, int size1,
-                          const void *buf2, int size2) {
+const void *buffer_append(const void *buf1, size_t size1,
+                          const void *buf2, size_t size2) {
   char *s = (char *)realloc(const_cast<void *>(buf1), size1 + size2 + 1);
   memcpy((char *)s + size1, buf2, size2);
   s[size1 + size2] = '\0';

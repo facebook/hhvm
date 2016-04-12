@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -182,7 +182,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfInt64:
       append(cell->m_data.num);
       break;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       append(cell->m_data.pstr);
       break;
@@ -190,6 +190,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfDouble:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -238,12 +239,12 @@ void StringBuffer::printf(const char *format, ...) {
     va_list v;
     va_copy(v, ap);
 
-    char *buf = (char*)req::malloc(len);
+    char *buf = (char*)req::malloc_noptrs(len);
+    SCOPE_EXIT { req::free(buf); };
     if (vsnprintf(buf, len, format, v) < len) {
       append(buf);
       printed = true;
     }
-    req::free(buf);
 
     va_end(v);
   }

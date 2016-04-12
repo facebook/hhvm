@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -316,8 +316,8 @@ void loadPerfEvents() {
   uint32_t hhvmSamples[NUM_EVENT_TYPES];
   size_t numEntries = 0;
   PerfEventType eventType = NUM_EVENT_TYPES;
-  // samplesPerKind[event][kind][isLLVM]
-  uint32_t samplesPerKind[NUM_EVENT_TYPES][NumTransKinds][2];
+  // samplesPerKind[event][kind]
+  uint32_t samplesPerKind[NUM_EVENT_TYPES][NumTransKinds];
   uint32_t samplesPerTCRegion[NUM_EVENT_TYPES][TCRCount];
 
   memset(tcSamples  , 0, sizeof(tcSamples));
@@ -370,7 +370,7 @@ void loadPerfEvents() {
 
       const TransRec* trec = g_transData->getTransRec(transId);
       TransKind kind = trec->kind;
-      samplesPerKind[eventType][static_cast<uint32_t>(kind)][trec->isLLVM]++;
+      samplesPerKind[eventType][static_cast<uint32_t>(kind)]++;
       TCRegion region = transCode->findTCRegionContaining(addr);
       always_assert(region != TCRCount);
       samplesPerTCRegion[eventType][region]++;
@@ -412,14 +412,11 @@ void loadPerfEvents() {
            100.0 * tcSamples[i] / hhvmSamples[i]);
 
     for (size_t j = 0; j < NumTransKinds; ++j) {
-      for (size_t llvm = 0; llvm <= 1; ++llvm) {
-        auto ct = samplesPerKind[i][j][llvm];
-        if (!ct) continue;
-        std::string kind = show(static_cast<TransKind>(j));
-        if (llvm) kind = "LLVM " + kind;
-        printf("# %26s:             %-8u (%5.2lf%%)\n",
-               kind.c_str(), ct, 100.0 * ct / tcSamples[i]);
-      }
+      auto ct = samplesPerKind[i][j];
+      if (!ct) continue;
+      std::string kind = show(static_cast<TransKind>(j));
+      printf("# %26s:             %-8u (%5.2lf%%)\n",
+             kind.c_str(), ct, 100.0 * ct / tcSamples[i]);
     }
     printf("#\n");
   }
@@ -502,8 +499,12 @@ void printTrans(TransID transId) {
                          tRec->bcMapping, tcaPerfEvents);
 
   printf("----------\nx64: cold\n----------\n");
-  transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
-                         tRec->bcMapping, tcaPerfEvents);
+  // Sometimes acoldStart is the same as afrozenStart.  Avoid printing the code
+  // twice in such cases.
+  if (tRec->acoldStart != tRec->afrozenStart) {
+    transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
+                           tRec->bcMapping, tcaPerfEvents);
+  }
 
   printf("----------\nx64: frozen\n----------\n");
   transCode->printDisasm(tRec->afrozenStart, tRec->afrozenLen,
@@ -593,7 +594,8 @@ void printTopFuncs() {
                                     helpersMinPercentage);
 }
 
-class CompTrans {
+struct CompTrans {
+private:
   const PerfEventsMap<TransID>& transPerfEvents;
   const PerfEventType           etype;
 

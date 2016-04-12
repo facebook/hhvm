@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -101,8 +101,7 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
   }
 }
 
-static class FunctionTypeMapInitializer {
-public:
+static struct FunctionTypeMapInitializer {
   FunctionTypeMapInitializer() {
     SimpleFunctionCall::InitFunctionTypeMap();
   }
@@ -818,7 +817,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
       try {
         g_context->setThrowAllErrors(true);
         Variant v = invoke(m_funcScope->getScopeName().c_str(),
-                           arr, -1, true, true);
+                           arr, -1, true, true,
+                           !getFileScope()->useStrictTypes());
         g_context->setThrowAllErrors(false);
         return makeScalarExpression(ar, v);
       } catch (...) {
@@ -1014,25 +1014,6 @@ int SimpleFunctionCall::getLocalEffects() const {
   }
 
   return UnknownEffect;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void SimpleFunctionCall::outputCodeModel(CodeGenerator &cg) {
-  if (m_class || hasStaticClass()) {
-    cg.printObjectHeader("ClassMethodCallExpression", 4);
-    StaticClassName::outputCodeModel(cg);
-    cg.printPropertyHeader("methodName");
-  } else {
-    cg.printObjectHeader("SimpleFunctionCallExpression", 3);
-    cg.printPropertyHeader("functionName");
-  }
-  cg.printValue(m_origName);
-  cg.printPropertyHeader("arguments");
-  cg.printExpressionVector(m_params);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

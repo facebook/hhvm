@@ -1,0 +1,2 @@
+
+Fatal error: Call to undefined method stdClass::s() in %s/dimmable_object_call.php on line %d

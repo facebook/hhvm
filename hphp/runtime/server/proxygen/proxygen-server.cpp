@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,19 +28,17 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/process.h"
+#include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace HPHP {
 
-using folly::EventBase;
-using folly::SocketAddress;
-using apache::thrift::async::TAsyncTimeout;
 using apache::thrift::transport::TTransportException;
+using folly::SocketAddress;
 using folly::AsyncServerSocket;
 using wangle::Acceptor;
-using proxygen::SPDYCodec;
-using std::shared_ptr;
-using std::string;
 
 HPHPSessionAcceptor::HPHPSessionAcceptor(
     const proxygen::AcceptorConfiguration& config,
@@ -60,16 +58,15 @@ void HPHPSessionAcceptor::onIngressError(const proxygen::HTTPSession& session,
   // it could completely parse the headers.  Most of these are HTTP garbage
   // (400 Bad Request) or client timeouts (408).
   FakeTransport transport((error == proxygen::kErrorTimeout) ? 408 : 400);
-  transport.m_url = folly::to<string>("/onIngressError?error=",
-                                      proxygen::getErrorString(error));
+  transport.m_url = folly::to<std::string>("/onIngressError?error=",
+                                           proxygen::getErrorString(error));
   m_server->onRequestError(&transport);
 }
 
 proxygen::HTTPTransaction::Handler* HPHPSessionAcceptor::newHandler(
   proxygen::HTTPTransaction& txn,
   proxygen::HTTPMessage *msg) noexcept {
-  auto transport = std::make_shared<ProxygenTransport>(
-    m_server, m_server->getEventBase());
+  auto transport = std::make_shared<ProxygenTransport>(m_server);
   transport->setTransactionReference(transport);
   return transport.get();
 }
@@ -78,8 +75,7 @@ void HPHPSessionAcceptor::onConnectionsDrained() {
   m_server->onConnectionsDrained();
 }
 
-
-ProxygenJob::ProxygenJob(shared_ptr<ProxygenTransport> t) :
+ProxygenJob::ProxygenJob(std::shared_ptr<ProxygenTransport> t) :
     transport(t),
     reqStart(t->getRequestStart()) {
 }
@@ -153,6 +149,15 @@ ProxygenServer::ProxygenServer(
   m_httpsConfig.connectionIdleTimeout = timeout;
   m_httpsConfig.transactionIdleTimeout = timeout;
 
+  if (RuntimeOption::ServerEnableH2C) {
+    m_httpConfig.allowedPlaintextUpgradeProtocols = {
+      proxygen::http2::kProtocolCleartextString };
+    // Set flow control (for uploads) to 1MB.  We could also make this
+    // configurable if needed
+    m_httpConfig.initialReceiveWindow = 1 << 20;
+    m_httpConfig.receiveSessionWindowSize = 1 << 20;
+  }
+
   if (!options.m_takeoverFilename.empty()) {
     m_takeover_agent.reset(new TakeoverAgent(options.m_takeoverFilename));
   }
@@ -160,12 +165,14 @@ ProxygenServer::ProxygenServer(
 
 int ProxygenServer::onTakeoverRequest(TakeoverAgent::RequestType type) {
   if (type == TakeoverAgent::RequestType::LISTEN_SOCKET) {
-    // TODO: don't pause here, wait for the TERMINATE message to take
-    // any action.  For now I'm copying broken LibEventServer
-    // behavior.
-    m_httpServerSocket->pauseAccepting();
+    // Subsequent calls to ProxygenServer::stop() won't do anything.
+    // The server continues accepting until RequestType::TERMINATE is
+    // seen.
+    setStatus(RunStatus::STOPPING);
   } else if (type == TakeoverAgent::RequestType::TERMINATE) {
     stopListening(true /*hard*/);
+    // No need to do m_takeover_agent->stop(), as the afdt server is
+    // going to be closed when this returns.
   }
   return 0;
 }
@@ -189,12 +196,20 @@ void ProxygenServer::removeTakeoverListener(TakeoverListener* listener) {
 void ProxygenServer::start() {
   m_httpServerSocket.reset(new AsyncServerSocket(m_worker.getEventBase()));
   bool needListen = true;
+  auto failedToListen = [](const std::exception& ex,
+                           const folly::SocketAddress& addr) {
+    Logger::Error("failed to listen: %s", ex.what());
+    throw FailedToListenException(addr.getAddressStr(), addr.getPort());
+  };
+
   try {
     if (m_accept_sock >= 0) {
       Logger::Info("inheritfd: using inherited fd %d for server",
                    m_accept_sock);
       m_httpServerSocket->useExistingSocket(m_accept_sock);
     } else {
+      // make it possible to quickly reuse the port
+      m_httpServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
       m_httpServerSocket->bind(m_httpConfig.bindAddress);
     }
   } catch (const std::system_error& ex) {
@@ -212,9 +227,7 @@ void ProxygenServer::start() {
       }
     }
     if (!takoverSucceeded) {
-      Logger::Error("%s", ex.what());
-      throw FailedToListenException(m_httpConfig.bindAddress.getAddressStr(),
-                                    m_httpConfig.bindAddress.getPort());
+      failedToListen(ex, m_httpConfig.bindAddress);
     }
   }
   if (m_takeover_agent) {
@@ -232,12 +245,11 @@ void ProxygenServer::start() {
                      m_accept_sock_ssl);
         m_httpsServerSocket->useExistingSocket(m_accept_sock_ssl);
       } else {
+        m_httpsServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
         m_httpsServerSocket->bind(m_httpsConfig.bindAddress);
       }
     } catch (const TTransportException& ex) {
-      Logger::Error("%s", ex.what());
-      throw FailedToListenException(m_httpsConfig.bindAddress.getAddressStr(),
-                                    m_httpsConfig.bindAddress.getPort());
+      failedToListen(ex, m_httpsConfig.bindAddress);
     }
 
     m_httpsAcceptor.reset(new HPHPSessionAcceptor(m_httpsConfig, this));
@@ -245,28 +257,31 @@ void ProxygenServer::start() {
       m_httpsAcceptor->init(m_httpsServerSocket.get(), m_worker.getEventBase());
     } catch (const std::exception& ex) {
       // Could be some cert thing
-      Logger::Error("%s", ex.what());
-      throw FailedToListenException(m_httpsConfig.bindAddress.getAddressStr(),
-                                    m_httpsConfig.bindAddress.getPort());
+      failedToListen(ex, m_httpsConfig.bindAddress);
     }
   }
-  m_worker.getEventBase()->runInEventBaseThread([this, needListen] {
-      if (!m_httpServerSocket) {
-        // someone called stop before we got here
-        return;
-      }
-      if (needListen) {
-        m_httpServerSocket->listen(m_httpConfig.acceptBacklog);
-      }
-      m_httpServerSocket->startAccepting();
-      if (m_httpsServerSocket) {
-        m_httpsServerSocket->listen(m_httpsConfig.acceptBacklog);
-        m_httpsServerSocket->startAccepting();
-      }
-      startConsuming(m_worker.getEventBase(), &m_responseQueue);
-    });
+  if (needListen) {
+    try {
+      m_httpServerSocket->listen(m_httpConfig.acceptBacklog);
+    } catch (const std::system_error& ex) {
+      failedToListen(ex, m_httpConfig.bindAddress);
+    }
+  }
+  if (m_httpsServerSocket) {
+    try {
+      m_httpsServerSocket->listen(m_httpsConfig.acceptBacklog);
+    } catch (const std::system_error& ex) {
+      failedToListen(ex, m_httpsConfig.bindAddress);
+    }
+  }
+  m_httpServerSocket->startAccepting();
+  if (m_httpsServerSocket) {
+    m_httpsServerSocket->startAccepting();
+  }
+  startConsuming(m_worker.getEventBase(), &m_responseQueue);
+
   setStatus(RunStatus::RUNNING);
-  TAsyncTimeout::attachEventBase(m_worker.getEventBase());
+  folly::AsyncTimeout::attachEventBase(m_worker.getEventBase());
   m_worker.start();
   m_dispatcher.start();
 }
@@ -280,20 +295,25 @@ void ProxygenServer::waitForEnd() {
 // Server shutdown - Explained
 //
 // 0. An alarm may be set in http-server.cpp to kill this process after
-//    ServerShutdownListenWait + ServerGracefulShutdownWait seconds
-//
-// 1. Set run status to STOPPING.  This should fail downstream healthchecks
-// 2. TODO: there should be a timeout for failing healthchecks only
-// 3. Shutdown the listen sockets, this will
-//     3.a Close any idle connections
-//     3.b Send SPDY GOAWAY frames
-//     3.c Insert Connection: close on HTTP/1.1 keep-alive connections as the
+//    ServerPreShutdownWait + ServerShutdownListenWait +
+//    ServerGracefulShutdownWait seconds
+// 1. Set run status to STOPPING.  This should fail downstream healthchecks.
+//    If it is the page server, it will continue accepting requests for
+//    ServerPreShutdownWait seconds
+// 2. Shutdown the listen sockets, this will
+//     2.a Close any idle connections
+//     2.b Send SPDY GOAWAY frames
+//     2.c Insert Connection: close on HTTP/1.1 keep-alive connections as the
 //         response headers are sent
-//    Note: LibEventServer doesn't close the listen sockets if there is no
-//    ServerShutdownListenWait.
-// 4. After all connections close OR ServerShutdownListenWait seconds
-//    elapse, stop the VM.  Incomplete requests in the I/O thread will not be
-//    executed.  Stopping the VM is synchronous and all requests will run to
+// 3. If the server hasn't received the entire request body
+//    ServerShutdownEOM seconds after shutdown starts, the request
+//    will be aborted.  ServerShutdownEOM isn't required to be smaller
+//    than ServerShutdownListenWait, but it makes sense to make it be,
+//    in order to make shutdown faster.
+// 4. After all requests finish executing OR all connections close OR
+//    ServerShutdownListenWait seconds elapse, stop the VM.
+//    Incomplete requests in the I/O thread will not be executed.
+//    Stopping the VM is synchronous and all requests will run to
 //    completion, unless the alarm fires.
 // 5. Allow responses to drain for up to ServerGracefulShutdownWait seconds.
 //    Note if shutting the VM down took non-zero time it's possible that the
@@ -306,16 +326,24 @@ void ProxygenServer::stop() {
   Logger::Info("%p: Stopping ProxygenServer port=%d", this, m_port);
 
   setStatus(RunStatus::STOPPING);
-  // TODO: allow a configurable timeout before proceeding to the next phase
+
+  if (m_takeover_agent) {
+    m_worker.getEventBase()->runInEventBaseThread([this] {
+        m_takeover_agent->stop();
+      });
+  }
 
   // close listening sockets, this will initiate draining, including closing
   // idle conns
-  m_worker.getEventBase()->runInEventBaseThread([&] {
-      if (m_takeover_agent) {
-        m_takeover_agent->stop();
+  m_worker.getEventBase()->runInEventBaseThread([this] {
+      // Only wait ServerPreShutdownWait seconds for the page server.
+      int delayMilliSeconds = RuntimeOption::ServerPreShutdownWait * 1000;
+      if (delayMilliSeconds < 0 || getPort() != RuntimeOption::ServerPort) {
+        delayMilliSeconds = 0;
       }
-
-      stopListening();
+      m_worker.getEventBase()->runAfterDelay([this] { stopListening(); },
+                                             delayMilliSeconds);
+      reportShutdownStatus();
     });
 }
 
@@ -347,18 +375,42 @@ void ProxygenServer::stopListening(bool hard) {
   if (RuntimeOption::ServerShutdownListenWait > 0) {
     std::chrono::seconds s(RuntimeOption::ServerShutdownListenWait);
     VLOG(4) << this << ": scheduling shutdown listen timeout=" <<
-      s.count() << " port=" << m_port;
+      s.count() <<
+      " port=" << m_port;
     scheduleTimeout(s);
+    if (RuntimeOption::ServerShutdownEOMWait > 0) {
+      int delayMilliSeconds = RuntimeOption::ServerShutdownEOMWait * 1000;
+      m_worker.getEventBase()->runAfterDelay(
+        [this] { abortPendingTransports(); }, delayMilliSeconds);
+    }
   } else {
     doShutdown();
   }
 }
 
-void ProxygenServer::onConnectionsDrained() {
-  VLOG(2) << "All connections drained from ProxygenServer drainCount=" <<
-    m_drainCount;
+void ProxygenServer::abortPendingTransports() {
+  if (!m_pendingTransports.empty()) {
+    Logger::Warning("aborting %lu incomplete requests",
+                    m_pendingTransports.size());
+    // Avoid iterating the list, as abort() will unlink(), leaving the
+    // list iterator in a corrupt state.
+    do {
+      auto& transport = m_pendingTransports.front();
+      transport.abort();                // will unlink()
+    } while (!m_pendingTransports.empty());
+  }
+  // Accelerate shutdown if all requests that were enqueued are done,
+  // since no more is coming in.
+  if (m_enqueuedCount == 0 &&
+      m_shutdownState == ShutdownState::DRAINING_READS) {
+    doShutdown();
+  }
+}
 
+void ProxygenServer::onConnectionsDrained() {
   ++m_drainCount;
+  Logger::Info("All connections drained from ProxygenServer drainCount=%d",
+               m_drainCount);
   if (!drained()) {
     // both servers have to finish
     Logger::Verbose("%p: waiting for other server port=%d", this, m_port);
@@ -383,6 +435,11 @@ void ProxygenServer::timeoutExpired() noexcept {
 
 void ProxygenServer::doShutdown() {
   switch(m_shutdownState) {
+    case ShutdownState::SHUTDOWN_NONE:
+      // Transition from SHUTDOWN_NONE to DRAINING_READS needs to happen
+      // explicitly through `stopListening`, not here.
+      not_reached();
+      break;
     case ShutdownState::DRAINING_READS:
       // Even though connections may be open for reading, they will not be
       // executed in the VM
@@ -397,8 +454,6 @@ void ProxygenServer::doShutdown() {
     case ShutdownState::DRAINING_WRITES:
       forceStop();
       break;
-    default:
-      CHECK(false);
   }
 }
 
@@ -407,6 +462,7 @@ void ProxygenServer::stopVM() {
   // we can't call m_dispatcher.stop() from the event loop, because it blocks
   // all I/O.  Spawn a thread to call it and callback when it's done.
   std::thread vmStopper([this] {
+      purge_all();
       Logger::Info("%p: Stopping dispatcher port=%d", this, m_port);
       m_dispatcher.stop();
       Logger::Info("%p: Dispatcher stopped port=%d.  conns=%d", this, m_port,
@@ -420,8 +476,7 @@ void ProxygenServer::stopVM() {
 
 void ProxygenServer::vmStopped() {
   m_shutdownState = ShutdownState::DRAINING_WRITES;
-  if (!drained() && RuntimeOption::ServerGracefulShutdownWait > 0 &&
-      m_enqueuedCount > 0) {
+  if (!drained() && RuntimeOption::ServerGracefulShutdownWait > 0) {
     m_worker.getEventBase()->runInEventBaseThread([&] {
         std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);
         VLOG(4) << this << ": scheduling graceful timeout=" << s.count() <<
@@ -434,7 +489,8 @@ void ProxygenServer::vmStopped() {
 }
 
 void ProxygenServer::forceStop() {
-  Logger::Info("%p: forceStop ProxygenServer port=%d", this, m_port);
+  Logger::Info("%p: forceStop ProxygenServer port=%d, enqueued=%d, conns=%d",
+               this, m_port, m_enqueuedCount, getLibEventConnectionCount());
 
   m_httpServerSocket.reset();
   m_httpsServerSocket.reset();
@@ -460,6 +516,19 @@ void ProxygenServer::forceStop() {
   for (auto listener: m_listeners) {
     listener->serverStopped(this);
   }
+}
+
+void ProxygenServer::reportShutdownStatus() {
+  if (m_port != RuntimeOption::ServerPort) return;
+  if (getStatus() == RunStatus::STOPPED) return;
+  Logger::FInfo("Shutdown state={}, a/q/e/p {}/{}/{}/{}, RSS={}Mb",
+                static_cast<int>(m_shutdownState),
+                getActiveWorker(),
+                getQueuedJobs(),
+                getLibEventConnectionCount(),
+                m_pendingTransports.size(),
+                Process::GetProcessRSS(Process::GetProcessId()));
+  m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
 }
 
 bool ProxygenServer::canAccept() {
@@ -519,14 +588,13 @@ bool ProxygenServer::dynamicCertHandler(const std::string &server_name,
     m_httpsAcceptor->addSSLContextConfig(sslCtxConfig);
     return true;
   } catch (const std::exception &ex) {
-    Logger::Error(folly::to<string>("Invalid certificate file or key file: ",
-                                    ex.what()));
+    Logger::Error("Invalid certificate file or key file: %s", ex.what());
     return false;
   }
 }
 
 bool ProxygenServer::sniNoMatchHandler(const char *server_name) {
-  string fqdn(server_name);
+  std::string fqdn(server_name);
   size_t pos = fqdn.find('.');
   std::string wildcard;
   if (pos != std::string::npos) {
@@ -572,8 +640,7 @@ bool ProxygenServer::enableSSL(int port) {
         std::end(RuntimeOption::ServerNextProtocols)
       });
     } catch (const std::exception &ex) {
-      Logger::Error(folly::to<string>("Invalid certificate file or key file: ",
-                                      ex.what()));
+      Logger::Error("Invalid certificate file or key file: %s", ex.what());
     }
     if (!RuntimeOption::SSLCertificateDir.empty()) {
       ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
@@ -588,22 +655,12 @@ bool ProxygenServer::enableSSL(int port) {
     Logger::Error("Invalid certificate file or key file");
   }
 
-
-
   m_httpsConfig.sslContextConfigs.emplace_back(m_sslCtxConfig);
   m_https = true;
   return true;
 }
 
-void ProxygenServer::onRequest(shared_ptr<ProxygenTransport> transport) {
-  // If we are in the process of crashing, we want to reject incoming work.
-  // This will prompt the load balancers to choose another server. Using
-  // shutdown rather than close has the advantage that it makes fewer changes
-  // to the process (eg, it doesn't close the FD so if the FD number were
-  // corrupted it would be mostly harmless).
-  //
-  // Note: the above comment came from LibEventServer, but ProxygenServer
-  // just invokes AsyncServerSocket::destroy, which just calls close.
+void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
   if (IsCrashing) {
     Logger::Error("Discarding request while crashing");
     if (m_shutdownState == ShutdownState::SHUTDOWN_NONE) {
@@ -611,21 +668,22 @@ void ProxygenServer::onRequest(shared_ptr<ProxygenTransport> transport) {
     }
     m_httpServerSocket.reset();
     m_httpsServerSocket.reset();
-    transport->timeoutExpired();
+    transport->abort();
     return;
   }
 
   if (getStatus() == RunStatus::RUNNING ||
       (getStatus() == RunStatus::STOPPING &&
-       m_shutdownState == ShutdownState::DRAINING_READS)) {
+       m_shutdownState <= ShutdownState::DRAINING_READS)) {
     RequestPriority priority = getRequestPriority(transport->getUrl());
     VLOG(4) << this << ": enqueing request with path=" << transport->getUrl() <<
       " and priority=" << priority;
     m_enqueuedCount++;
+    transport->setEnqueued();
     m_dispatcher.enqueue(std::make_shared<ProxygenJob>(transport), priority);
   } else {
     // VM is shutdown
-    transport->timeoutExpired();
+    transport->abort();
     Logger::Error("%p: throwing away one new request while shutting down",
                   this);
   }
@@ -633,19 +691,21 @@ void ProxygenServer::onRequest(shared_ptr<ProxygenTransport> transport) {
 
 void ProxygenServer::decrementEnqueuedCount() {
   m_enqueuedCount--;
-  if (m_enqueuedCount == 0 &&
-      m_shutdownState == ShutdownState::DRAINING_WRITES &&
-      isScheduled()) {
-    // If all requests that got enqueued are done, accelerate shutdown.
-    // All other connections must be reading new requests, which cannot be
-    // executed.
-    cancelTimeout();
-    timeoutExpired();
+  if (m_enqueuedCount == 0 && isScheduled()) {
+    // If all requests that got enqueued are done, and no more request
+    // is coming in, accelerate shutdown.
+    if ((m_shutdownState == ShutdownState::DRAINING_READS &&
+         m_pendingTransports.empty()) ||
+        m_shutdownState == ShutdownState::DRAINING_WRITES) {
+      cancelTimeout();
+      doShutdown();
+    }
   }
 }
+
 ProxygenServer::RequestPriority ProxygenServer::getRequestPriority(
   const char *uri) {
-  string command = URL::getCommand(URL::getServerObject(uri));
+  auto const command = URL::getCommand(URL::getServerObject(uri));
   if (RuntimeOption::ServerHighPriorityEndPoints.find(command) ==
       RuntimeOption::ServerHighPriorityEndPoints.end()) {
     return PRIORITY_NORMAL;
@@ -662,6 +722,9 @@ void ProxygenServer::onRequestError(Transport* transport) {
   }
 
   try {
+    timespec start;
+    Timer::GetMonotonicTime(start);
+    transport->onRequestStart(start);
     m_handler->logToAccessLog(transport);
   } catch (...) {}
 }

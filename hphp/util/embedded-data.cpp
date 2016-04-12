@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,12 +20,15 @@
 
 #include <folly/ScopeGuard.h>
 
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <cstdio>
+#include <cstring>
 #include <fcntl.h>
-#include <string.h>
 #include <unistd.h>
+
+#include <fstream>
+#include <memory>
 
 #ifdef __APPLE__
 #include <mach-o/getsect.h>
@@ -44,21 +47,22 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   std::string fname(filename.empty() ? current_executable_path() : filename);
 
 #if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  HMODULE moduleHandle = GetModuleHandleA(fname.data());
   HGLOBAL loadedResource;
   HRSRC   resourceInfo;
   DWORD   resourceSize;
 
-  resourceInfo = FindResource(nullptr, section, RT_RCDATA);
+  resourceInfo = FindResource(moduleHandle, section, RT_RCDATA);
   if (!resourceInfo) {
     return false;
   }
 
-  loadedResource = LoadResource(nullptr, resourceInfo);
+  loadedResource = LoadResource(moduleHandle, resourceInfo);
   if (!loadedResource) {
     return false;
   }
 
-  resourceSize = SizeofResource(nullptr, resourceInfo);
+  resourceSize = SizeofResource(moduleHandle, resourceInfo);
 
   desc->m_filename = fname;
   desc->m_handle = loadedResource;
@@ -120,6 +124,19 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   }
 #endif // __APPLE__
   return false;
+}
+
+std::string read_embedded_data(const embedded_data& desc) {
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+  return std::string((const char*)LockResource(desc.m_handle), desc.m_len);
+#else
+  std::ifstream ifs(desc.m_filename);
+  if (!ifs.good()) return "";
+  ifs.seekg(desc.m_start, std::ios::beg);
+  std::unique_ptr<char[]> data(new char[desc.m_len]);
+  ifs.read(data.get(), desc.m_len);
+  return std::string(data.get(), desc.m_len);
+#endif
 }
 
 }

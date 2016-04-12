@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,7 @@
 
 namespace HPHP {
 
-class FastCGIServerFactory : public ServerFactory {
-public:
+struct FastCGIServerFactory : ServerFactory {
   FastCGIServerFactory() {}
 
   virtual ServerPtr createServer(const ServerOptions& options) override {
@@ -32,16 +31,16 @@ public:
 
 }
 
-extern "C" {
-
+namespace {
 /*
- * Automatically register FastCGIServerFactory on program start
- */
-void register_fastcgi_server() __attribute__((__constructor__));
-void register_fastcgi_server() {
-  auto registry = HPHP::ServerFactoryRegistry::getInstance();
-  auto factory = std::make_shared<HPHP::FastCGIServerFactory>();
-  registry->registerFactory("fastcgi", factory);
-}
-
+* Automatically register FastCGIServerFactory on program start
+*/
+struct RegisterFastCGIServer {
+public:
+  RegisterFastCGIServer() {
+    auto registry = HPHP::ServerFactoryRegistry::getInstance();
+    auto factory = std::make_shared<HPHP::FastCGIServerFactory>();
+    registry->registerFactory("fastcgi", factory);
+  }
+} s_RegisterFastCGIServer;
 }

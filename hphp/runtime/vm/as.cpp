@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,7 +87,6 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
 #include <folly/Conv.h>
@@ -496,16 +495,22 @@ struct Label {
   std::map<std::string,std::vector<size_t>> ehCatches;
 };
 
-struct AsmState : private boost::noncopyable {
+struct AsmState {
   explicit AsmState(std::istream& in)
     : in(in)
   {
     currentStackDepth->setBase(*this, 0);
   }
 
-  void error(const std::string& what) {
-    throw Error(in.getLineNumber(), what);
+  AsmState(const AsmState&) = delete;
+  AsmState& operator=(const AsmState&) = delete;
+
+  template<typename... Args>
+  void error(const std::string& fmt, Args&&... args) {
+    throw Error(in.getLineNumber(),
+                folly::sformat(fmt, std::forward<Args>(args)...));
   }
+
 
   void adjustStack(int delta) {
     if (currentStackDepth == nullptr) {
@@ -803,7 +808,8 @@ void StackDepth::addListener(AsmState& as, StackDepth* target) {
 
 void StackDepth::setBase(AsmState& as, int stackDepth) {
   if (baseValue && stackDepth != *baseValue) {
-    as.error("stack depth do not match");
+    as.error("stack depth {} does not match base value {}",
+             stackDepth, *baseValue);
   }
 
   baseValue = stackDepth;
@@ -835,7 +841,7 @@ void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {
 /*
  * Opcode arguments must be on the same line as the opcode itself,
  * although certain argument types may contain internal newlines (see,
- * for example, read_immvector, read_jmpvector, or string literals).
+ * for example, read_jmpvector or string literals).
  */
 template<class Target> Target read_opcode_arg(AsmState& as) {
   as.in.skipSpaceTab();
@@ -915,80 +921,6 @@ ArrayData* read_litarray(AsmState& as) {
     as.error("unknown array data literal name " + name);
   }
   return it->second;
-}
-
-void read_immvector_immediate(AsmState& as, std::vector<unsigned char>& ret,
-                              MemberCode mcode = InvalidMemberCode) {
-  if (memberCodeImmIsLoc(mcode) || mcode == InvalidMemberCode) {
-    if (as.in.getc() != '$') {
-      as.error("*L member code in vector immediate must be followed by "
-               "a local variable name");
-    }
-    std::string name;
-    if (!as.in.readword(name)) {
-      as.error("couldn't read name for local variable in vector immediate");
-    }
-    encodeIvaToVector(ret, as.getLocalId("$" + name));
-  } else if (memberCodeImmIsString(mcode)) {
-    encodeToVector<int32_t>(ret, as.ue->mergeLitstr(read_litstr(as)));
-  } else if (memberCodeImmIsInt(mcode)) {
-    encodeToVector<int64_t>(ret, read_opcode_arg<int64_t>(as));
-  } else {
-    as.error(std::string("don't understand immediate for member code ") +
-             memberCodeString(mcode));
-  }
-}
-
-std::vector<unsigned char> read_immvector(AsmState& as, int& stackCount) {
-  std::vector<unsigned char> ret;
-
-  as.in.skipSpaceTab();
-  as.in.expect('<');
-
-  std::string word;
-  if (!as.in.readword(word)) {
-    as.error("expected location code in immediate vector");
-  }
-
-  auto lcode = parseLocationCode(word.c_str());
-  if (lcode == InvalidLocationCode) {
-    as.error("expected location code, saw `" + word + "'");
-  }
-  ret.push_back(uint8_t(lcode));
-  if (word[word.size() - 1] == 'L') {
-    if (as.in.getc() != ':') {
-      as.error("expected `:' after location code `" + word + "'");
-    }
-  }
-  for (int i = 0; i < numLocationCodeImms(lcode); ++i) {
-    read_immvector_immediate(as, ret);
-  }
-  stackCount = numLocationCodeStackVals(lcode);
-
-  // Read all the member entries.
-  for (;;) {
-    as.in.skipWhitespace();
-    if (as.in.peek() == '>') { as.in.getc(); break; }
-
-    if (!as.in.readword(word)) {
-      as.error("expected member code in immediate vector");
-    }
-    MemberCode mcode = parseMemberCode(word.c_str());
-    if (mcode == InvalidMemberCode) {
-      as.error("unrecognized member code `" + word + "'");
-    }
-    ret.push_back(uint8_t(mcode));
-    if (memberCodeHasImm(mcode)) {
-      if (as.in.getc() != ':') {
-        as.error("expected `:' after member code `" + word + "'");
-      }
-      read_immvector_immediate(as, ret, mcode);
-    } else if (mcode != MW) {
-      ++stackCount;
-    }
-  }
-
-  return ret;
 }
 
 RepoAuthType read_repo_auth_type(AsmState& as) {
@@ -1187,21 +1119,58 @@ SSwitchJmpVector read_sswitch_jmpvector(AsmState& as) {
   return ret;
 }
 
+MemberKey read_member_key(AsmState& as) {
+  as.in.skipWhitespace();
+
+  std::string word;
+  if (!as.in.readword(word)) as.error("expected member code");
+
+  auto optMcode = parseMemberCode(word.c_str());
+  if (!optMcode) as.error("unrecognized member code `" + word + "'");
+
+  auto const mcode = *optMcode;
+  if (mcode != MW && as.in.getc() != ':') {
+    as.error("expected `:' after member code `" + word + "'");
+  }
+
+  switch (mcode) {
+    case MW:
+      return MemberKey{};
+    case MEL: case MPL: {
+      if (as.in.getc() != '$') {
+        as.error("*L member code must be followed by a local variable name");
+      }
+      std::string name;
+      if (!as.in.readword(name)) {
+        as.error("couldn't read name for local variable in member key");
+      }
+      return MemberKey{mcode, as.getLocalId("$" + name)};
+    }
+    case MEC: case MPC:
+      return MemberKey{mcode, read_opcode_arg<int32_t>(as)};
+    case MEI:
+      return MemberKey{mcode, read_opcode_arg<int64_t>(as)};
+    case MET: case MPT: case MQT:
+      return MemberKey{mcode, read_litstr(as)};
+  }
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::map<std::string,ParserFunc> opcode_parsers;
 
 #define IMM_NA
 #define IMM_ONE(t) IMM_##t
-#define IMM_TWO(t1, t2) IMM_##t1; IMM_##t2
-#define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
-#define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
+#define IMM_TWO(t1, t2) IMM_ONE(t1); ++immIdx; IMM_##t2
+#define IMM_THREE(t1, t2, t3) IMM_TWO(t1, t2); ++immIdx; IMM_##t3
+#define IMM_FOUR(t1, t2, t3, t4) IMM_THREE(t1, t2, t3); ++immIdx; IMM_##t4
 
-// FCall and NewPackedArray need to know the the first imm do POP_*MANY.
+// Some bytecodes need to know an iva imm for (PUSH|POP)_*.
 #define IMM_IVA do {                            \
-    int imm = read_opcode_arg<int64_t>(as);     \
+    int imm = read_opcode_arg<int32_t>(as);     \
     as.ue->emitIVA(imm);                        \
-    if (immIVA < 0) immIVA = imm;               \
+    immIVA[immIdx] = imm;                       \
   } while (0)
 
 #define IMM_VSA \
@@ -1229,15 +1198,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
  * NUM_POP_*, so the member vector guy exposes a vecImmStackValues
  * integer.
  */
-#define IMM_MA                                                        \
-  int vecImmStackValues = 0;                                          \
-  auto vecImm = read_immvector(as, vecImmStackValues);                \
-  as.ue->emitInt32(vecImm.size());                                    \
-  as.ue->emitInt32(vecImmStackValues);                                \
-  for (auto const& imm : vecImm) {                                    \
-    as.ue->emitByte(imm);                                             \
-  }
-
 #define IMM_ILA do {                               \
   std::vector<uint32_t> vecImm = read_itervec(as); \
   as.ue->emitInt32(vecImm.size() / 2);             \
@@ -1273,29 +1233,32 @@ std::map<std::string,ParserFunc> opcode_parsers;
   as.ue->emitInt32(0);                                              \
 } while (0)
 
+#define IMM_KA encode_member_key(read_member_key(as), *as.ue)
+
 #define NUM_PUSH_NOV 0
 #define NUM_PUSH_ONE(a) 1
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
 #define NUM_PUSH_INS_2(a) 1
+#define NUM_PUSH_IDX_A immIVA[1]
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
 #define NUM_POP_THREE(a,b,c) 3
-#define NUM_POP_MMANY vecImmStackValues
-#define NUM_POP_V_MMANY (1 + vecImmStackValues)
-#define NUM_POP_R_MMANY (1 + vecImmStackValues)
-#define NUM_POP_C_MMANY (1 + vecImmStackValues)
-#define NUM_POP_FMANY immIVA /* number of arguments */
-#define NUM_POP_CVMANY immIVA /* number of arguments */
-#define NUM_POP_CVUMANY immIVA /* number of arguments */
-#define NUM_POP_CMANY immIVA /* number of arguments */
+#define NUM_POP_MFINAL immIVA[0]
+#define NUM_POP_F_MFINAL immIVA[1]
+#define NUM_POP_C_MFINAL (immIVA[0] + 1)
+#define NUM_POP_V_MFINAL NUM_POP_C_MFINAL
+#define NUM_POP_FMANY immIVA[0] /* number of arguments */
+#define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
+#define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
+#define NUM_POP_IDX_A (immIVA[1] + 1)
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED int64_t immIVA = -1;                                        \
+    UNUSED int32_t immIVA[4];                                          \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \
     std::vector<std::pair<std::string, Offset> > labelJumps;           \
@@ -1314,6 +1277,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     as.ue->emitOp(Op##name);                                           \
                                                                        \
+    UNUSED size_t immIdx = 0;                                          \
     IMM_##imm;                                                         \
                                                                        \
     int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;                  \
@@ -1334,7 +1298,8 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     /* Stack depth should be 1 after resume from suspend. */           \
     if (thisOpcode == OpCreateCont || thisOpcode == OpAwait ||         \
-        thisOpcode == OpYield || thisOpcode == OpYieldK) {             \
+        thisOpcode == OpYield || thisOpcode == OpYieldK ||             \
+        thisOpcode == OpYieldFromDelegate) {                           \
       as.enforceStackDepth(1);                                         \
     }                                                                  \
                                                                        \
@@ -1360,6 +1325,7 @@ OPCODES
 #undef IMM_MA
 #undef IMM_AA
 #undef IMM_VSA
+#undef IMM_KA
 
 #undef NUM_PUSH_NOV
 #undef NUM_PUSH_ONE
@@ -1367,20 +1333,21 @@ OPCODES
 #undef NUM_PUSH_THREE
 #undef NUM_PUSH_POS_N
 #undef NUM_PUSH_INS_1
+#undef NUM_PUSH_IDX_A
 #undef NUM_POP_NOV
 #undef NUM_POP_ONE
 #undef NUM_POP_TWO
 #undef NUM_POP_THREE
 #undef NUM_POP_POS_N
-#undef NUM_POP_MMANY
-#undef NUM_POP_V_MMANY
-#undef NUM_POP_R_MMANY
-#undef NUM_POP_C_MMANY
+#undef NUM_POP_MFINAL
+#undef NUM_POP_F_MFINAL
+#undef NUM_POP_C_MFINAL
+#undef NUM_POP_V_MFINAL
 #undef NUM_POP_FMANY
-#undef NUM_POP_CVMANY
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY
+#undef NUM_POP_IDX_A
 
 void initialize_opcode_map() {
 #define O(name, imm, pop, push, flags) \
@@ -1935,9 +1902,11 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
     tvAsVariant(&tvInit) = parse_php_serialized(as);
     if (isStringType(tvInit.m_type)) {
       tvInit.m_data.pstr = makeStaticString(tvInit.m_data.pstr);
+      tvInit.m_type = KindOfPersistentString;
       as.ue->mergeLitstr(tvInit.m_data.pstr);
     } else if (isArrayType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
+      tvInit.m_type = KindOfPersistentArray;
       as.ue->mergeArray(tvInit.m_data.parr);
     } else if (tvInit.m_type == KindOfObject) {
       as.error("property initializer can't be an object");
@@ -2403,6 +2372,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   auto ue = folly::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
+  ue->m_useStrictTypes = true;
 
   try {
     std::istringstream instr(std::string(code, codeLen));

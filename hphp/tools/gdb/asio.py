@@ -142,9 +142,6 @@ class WaitHandle(object):
 
         if wh_name == 'AsyncGenerator':
             offset = 48
-        elif wh_name.startswith('Gen'):
-            # GenArray, GenMap, and GenVector wait handles.
-            offset = 56
         else:
             # AsyncFunction, AwaitAll, and Condition wait handles.
             offset = 40

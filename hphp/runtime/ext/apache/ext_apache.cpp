@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -140,6 +140,9 @@ void ApacheExtension::moduleInit() {
     HHVM_FALIAS(getallheaders, apache_request_headers);
     HHVM_FE(apache_get_config);
     HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
+
+    HHVM_RC_INT(APACHE_MAP, 200);
+
     loadSystemlib();
   }
 }

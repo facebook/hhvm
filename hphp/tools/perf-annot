@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings FATAL => qw/all/;
+use Getopt::Long;
+
+my($event,$debug);
+
+GetOptions(
+    "event=s" => \$event,
+    "debug=i" => \$debug,
+    );
+
+$event = "cycles" unless defined $event;
+
+die "$0 <options> irdump script" unless @ARGV == 2;
+
+my$irdump = shift;
+my$script = shift;
+
+my$addrs = read_irdump($irdump);
+count_hits($addrs, $script);
+annotate($irdump, $addrs);
+
+sub read_irdump {
+    my($file) = @_;
+
+    my%addrs;
+    open IRDUMP, $file or die "Error opening irdump $file: $!";
+    while (<IRDUMP>) {
+        if (m/^\s*0x0*([a-f0-9]+):/) {
+            $addrs{$1} = { count => 0 };
+        }
+    }
+    close IRDUMP or die "Error closing irdump $file: $!";
+    return \%addrs;
+}
+
+sub count_hits {
+    my($addrs, $file) = @_;
+
+    open SCRIPT, $file or die "Error opening script $file: $!";
+    my$cur_event;
+    while (<SCRIPT>) {
+        if (defined $cur_event) {
+            if ($cur_event eq $event) {
+                if (m/^\s+0*([0-9a-fA-F]+)\s+(.*?)\s+\(([^\(\)]*)\)\s*$/) {
+                    if (defined $addrs->{$1}) {
+                        $addrs->{$1}{count} += 1;
+                    }
+                    undef $cur_event;
+                }
+            }
+        } elsif (m/^\s*#/) {
+            next;
+        } elsif (m/^\s*(\S+)\s+(\d+)(?:\s+\[\d+\])?\s+(?:(\d+\.\d+):)?\s*(?:\d+\s*)?([-\w]+)(?::p+)?:\s*$/) {
+            $cur_event = $4;
+        }
+    }
+    close SCRIPT or die "Error closing script $file: $!";
+}
+
+sub annotate {
+    my($file, $addrs) = @_;
+
+    my$total = 0;
+    open IRDUMP, $file or die "Error opening irdump $file: $!";
+    while (<IRDUMP>) {
+        if (m/^\s*0x([a-f0-9]+):/) {
+            if (defined $addrs->{$1}) {
+                my$c = $addrs->{$1}{count};
+                if ($c) {
+                    $total += $c;
+                    $_ =~ s/^\s+//;
+                    $_ = sprintf "Q%6d %s", $c, $_;
+                }
+            }
+        }
+        print;
+    }
+    close IRDUMP or die "Error closing irdump $file: $!";
+
+    print "Total: $total\n";
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,7 +54,7 @@ void for_each_strong_iterator(Fn fn) {
   fn(tl_miter_table.ents[4]);
   fn(tl_miter_table.ents[5]);
   fn(tl_miter_table.ents[6]);
-  static_assert(tl_miter_table.ents.size() == 7, "");
+  static_assert(tl_miter_table.ents_size == 7, "");
   if (UNLIKELY(!tl_miter_table.extras.empty())) {
     for_each_strong_iterator_slow(fn);
   }

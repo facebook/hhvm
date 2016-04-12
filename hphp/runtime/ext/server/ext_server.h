@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,10 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64_t k_PAGELET_NOT_READY;
-extern const int64_t k_PAGELET_READY;
-extern const int64_t k_PAGELET_DONE;
-
 enum PageletStatusType {
   PAGELET_NOT_READY,
   PAGELET_READY,
@@ -38,7 +34,6 @@ enum PageletStatusType {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t HHVM_FUNCTION(hphp_thread_type);
-bool HHVM_FUNCTION(dangling_server_proxy_old_request);
 bool HHVM_FUNCTION(pagelet_server_is_enabled);
 Resource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,
@@ -77,6 +72,9 @@ void HHVM_FUNCTION(xbox_set_thread_timeout,
                    int timeout);
 void HHVM_FUNCTION(xbox_schedule_thread_reset);
 int64_t HHVM_FUNCTION(xbox_get_thread_time);
+bool HHVM_FUNCTION(server_is_stopping);
+int64_t HHVM_FUNCTION(server_health_level);
+int64_t HHVM_FUNCTION(server_uptime);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

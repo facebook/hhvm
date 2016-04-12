@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,7 +34,8 @@
 #include "hphp/runtime/ext/hash/hash_fnv1.h"
 #include "hphp/runtime/ext/hash/hash_furc.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
-#include "hphp/system/constants.h"
+#include "hphp/runtime/ext/hash/hash_keccak.h"
+#include "hphp/runtime/ext/hash/hash_joaat.h"
 
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
@@ -44,10 +45,9 @@
 
 namespace HPHP {
 
-static class HashExtension final : public Extension {
- public:
+static struct HashExtension final : Extension {
   HashExtension() : Extension("hash", "1.0") { }
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+  void moduleInit() override {
     HHVM_FE(hash);
     HHVM_FE(hash_algos);
     HHVM_FE(hash_file);
@@ -58,6 +58,10 @@ static class HashExtension final : public Extension {
     HHVM_FE(hash_equals);
     HHVM_FE(furchash_hphp_ext);
     HHVM_FE(hphp_murmurhash);
+
+    HHVM_RC_INT(HASH_HMAC, k_HASH_HMAC);
+
+    loadSystemlib();
   }
 } s_hash_extension;
 
@@ -67,8 +71,7 @@ static class HashExtension final : public Extension {
 static HashEngineMap HashEngines;
 using HashEnginePtr = std::shared_ptr<HashEngine>;
 
-class HashEngineMapInitializer {
-public:
+struct HashEngineMapInitializer {
   HashEngineMapInitializer() {
     HashEngines["md2"]        = HashEnginePtr(new hash_md2());
     HashEngines["md4"]        = HashEnginePtr(new hash_md4());
@@ -98,6 +101,7 @@ public:
 
     HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
     HashEngines["gost"]       = HashEnginePtr(new hash_gost());
+    HashEngines["joaat"]      = HashEnginePtr(new hash_joaat());
 #ifdef FACEBOOK
     HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
 #endif
@@ -123,6 +127,10 @@ public:
     HashEngines["fnv1a32"]    = HashEnginePtr(new hash_fnv132(true));
     HashEngines["fnv164"]     = HashEnginePtr(new hash_fnv164(false));
     HashEngines["fnv1a64"]    = HashEnginePtr(new hash_fnv164(true));
+    HashEngines["sha3-224"]   = HashEnginePtr(new hash_keccak( 448, 28));
+    HashEngines["sha3-256"]   = HashEnginePtr(new hash_keccak( 512, 32));
+    HashEngines["sha3-384"]   = HashEnginePtr(new hash_keccak( 768, 48));
+    HashEngines["sha3-512"]   = HashEnginePtr(new hash_keccak(1024, 64));
   }
 };
 
@@ -164,6 +172,10 @@ struct HashContext : SweepableResourceData {
     free(key);
   }
 
+  bool isInvalid() const override {
+    return context == nullptr;
+  }
+
   CLASSNAME_IS("Hash Context")
   DECLARE_RESOURCE_ALLOCATION(HashContext)
 
@@ -174,9 +186,26 @@ struct HashContext : SweepableResourceData {
   void *context;
   int options;
   char *key;
+
+  TYPE_SCAN_IGNORE_FIELD(context);
 };
 
 IMPLEMENT_RESOURCE_ALLOCATION(HashContext)
+
+///////////////////////////////////////////////////////////////////////////////
+
+static req::ptr<HashContext> get_valid_hash_context_resource(const Resource& context,
+                                                             const char* func_name) {
+  auto hash = dyn_cast_or_null<HashContext>(context);
+  if (hash == nullptr || hash->isInvalid()) {
+    raise_warning(
+      "%s(): supplied resource is not a valid Hash Context resource",
+      func_name + 2
+    );
+    return nullptr;
+  }
+  return hash;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // hash functions
@@ -322,7 +351,10 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
 }
 
 bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
-  auto hash = dyn_cast<HashContext>(context);
+  auto hash = get_valid_hash_context_resource(context, __FUNCTION__);
+  if (!hash) {
+    return false;
+  }
   hash->ops->hash_update(hash->context, (unsigned char *)data.data(),
                          data.size());
   return true;
@@ -330,12 +362,8 @@ bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
 
 Variant HHVM_FUNCTION(hash_final, const Resource& context,
                                  bool raw_output /* = false */) {
-  auto hash = dyn_cast<HashContext>(context);
-
-  if (hash->context == nullptr) {
-    raise_warning(
-      "hash_final(): supplied resource is not a valid Hash Context resource"
-    );
+  auto hash = get_valid_hash_context_resource(context, __FUNCTION__);
+  if (!hash) {
     return false;
   }
 
@@ -356,8 +384,11 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
   return HHVM_FN(bin2hex)(raw);
 }
 
-Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
-  auto oldhash = dyn_cast<HashContext>(context);
+Variant HHVM_FUNCTION(hash_copy, const Resource& context) {
+  auto oldhash = get_valid_hash_context_resource(context, __FUNCTION__);
+  if (!oldhash) {
+    return false;
+  }
   return Resource(req::make<HashContext>(std::move(oldhash)));
 }
 

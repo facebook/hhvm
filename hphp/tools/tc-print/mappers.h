@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,22 +41,19 @@ std::string tcRegionToString(TCRegion tcr);
 
 /* AddrToBcMapper */
 
-class AddrToBcMapper : public Mapper<TCA, ExtOpcode> {
-  const OfflineTransData* transData;
-
-public:
+struct AddrToBcMapper : Mapper<TCA, ExtOpcode> {
   explicit AddrToBcMapper(const OfflineTransData* _transData) :
     transData(_transData) {}
 
   folly::Optional<ExtOpcode> operator()(const TCA& addr);
+
+private:
+  const OfflineTransData* transData;
 };
 
 /* AddrToTransMapper */
 
-class AddrToTransMapper : public Mapper<TCA, TransID> {
-  const OfflineTransData* tdata;
-
-public:
+struct AddrToTransMapper : Mapper<TCA, TransID> {
   explicit AddrToTransMapper(const OfflineTransData* _tdata) : tdata(_tdata) {}
 
   folly::Optional<TransID> operator()(const TCA& addr) {
@@ -65,6 +62,9 @@ public:
     if (tid != INVALID_ID) return tid;
     return folly::none;
   }
+
+private:
+  const OfflineTransData* tdata;
 };
 
 /* AddrToTransFragmentMapper */
@@ -84,32 +84,33 @@ struct TransFragment {
   }
 };
 
-class AddrToTransFragmentMapper : public Mapper<TCA, TransFragment> {
-  const     OfflineTransData* tdata;
-  ExtOpcode filterBy;
-
-  TransFragment extractTransFragment(TCA addr, ExtOpcode opcode);
-
-public:
+struct AddrToTransFragmentMapper : Mapper<TCA, TransFragment> {
   AddrToTransFragmentMapper(const OfflineTransData* _tdata,
                             ExtOpcode _filterBy) :
     tdata(_tdata), filterBy(_filterBy) {}
 
   folly::Optional<TransFragment> operator()(const TCA& addr);
+
+private:
+  TransFragment extractTransFragment(TCA addr, ExtOpcode opcode);
+
+private:
+  const     OfflineTransData* tdata;
+  ExtOpcode filterBy;
 };
 
 /* TransToFuncMapper */
 
-class TransToFuncMapper : public Mapper<TransID, FuncId> {
-  const OfflineTransData* tdata;
-
-public:
+struct TransToFuncMapper : Mapper<TransID, FuncId> {
   explicit TransToFuncMapper(const OfflineTransData* _tdata) : tdata(_tdata) {}
 
   folly::Optional<FuncId> operator()(const TransID& tid) {
     always_assert(tdata);
     return tdata->getTransRec(tid)->src.funcID();
   }
+
+private:
+  const OfflineTransData* tdata;
 };
 
 } }

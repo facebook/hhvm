@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -73,6 +73,8 @@ bool HHVM_FUNCTION(openlog, const String& ident, int option, int facility);
 bool HHVM_FUNCTION(closelog);
 bool HHVM_FUNCTION(syslog, int priority, const String& message);
 
+bool validate_dns_arguments(const String& host, const String& type,
+                            int& ntype);
 }
 
 #endif // incl_HPHP_EXT_NETWORK_H_

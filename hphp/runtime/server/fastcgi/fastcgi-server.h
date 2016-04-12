@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FastCGIServer;
+struct FastCGIServer;
 
 /*
  * FastCGIAcceptor accepts new connections from a listening socket, wrapping
@@ -49,13 +49,10 @@ struct FastCGIAcceptor : public wangle::Acceptor {
   virtual ~FastCGIAcceptor() {}
 
   bool canAccept(const folly::SocketAddress& address) override;
-  void onNewConnection(folly::AsyncSocket::UniquePtr sock,
+  void onNewConnection(folly::AsyncTransportWrapper::UniquePtr sock,
                        const folly::SocketAddress* peerAddress,
                        const std::string& nextProtocolName,
-// This is a temporary workaround for dependent projects for OSS HHVM
-#ifdef HHVM_SECURE_PROTO_TYPE
                        SecureTransportType secureProtocolType,
-#endif
                        const wangle::TransportInfo& tinfo) override;
   void onConnectionsDrained() override;
 

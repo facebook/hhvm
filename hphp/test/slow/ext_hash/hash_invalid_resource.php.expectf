@@ -1,0 +1,9 @@
+5c6ffbdd40d9556b73a21e63c3e0e904
+Warning: hash_copy(): supplied resource is not a valid Hash Context resource in %s/test/slow/ext_hash/hash_invalid_resource.php on line 7
+bool(false)
+
+Warning: hash_update(): supplied resource is not a valid Hash Context resource in %s/test/slow/ext_hash/hash_invalid_resource.php on line 9
+bool(false)
+
+Warning: hash_final(): supplied resource is not a valid Hash Context resource in %s/test/slow/ext_hash/hash_invalid_resource.php on line 10
+bool(false)

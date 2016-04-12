@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,11 +78,10 @@ static String wordwrap(const String& str, int width /* = 75 */,
   args.append(width);
   args.append(wordbreak);
   args.append(cut);
-  return vm_call_user_func("wordwrap", args);
+  return vm_call_user_func("wordwrap", args).toString();
 }
 
-class DebuggerExtension final : public Extension {
- public:
+struct DebuggerExtension final : Extension {
   DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET) {}
 } s_debugger_extension;
 
@@ -173,8 +172,7 @@ int DebuggerClient::pollSignal() {
 /**
  * Initialization and shutdown.
  */
-class ReadlineApp {
-public:
+struct ReadlineApp {
   ReadlineApp() {
     TRACE(2, "ReadlineApp::ReadlineApp\n");
     DebuggerClient::AdjustScreenMetrics();
@@ -203,8 +201,7 @@ public:
 /**
  * Displaying a spinning wait icon.
  */
-class ReadlineWaitCursor {
-public:
+struct ReadlineWaitCursor {
   ReadlineWaitCursor()
       : m_thread(this, &ReadlineWaitCursor::animate), m_waiting(true) {
     TRACE(2, "ReadlineWaitCursor::ReadlineWaitCursor\n");
@@ -988,7 +985,6 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
             auto cmd = createCommand();
             if (cmd) {
               if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
-              DebuggerCommandPtr deleter(cmd);
               cmd->list(*this);
             }
           }
@@ -1611,71 +1607,66 @@ void DebuggerClient::shiftCommand() {
   }
 }
 
-DebuggerCommand *DebuggerClient::createCommand() {
-  TRACE(2, "DebuggerClient::createCommand\n");
-#define MATCH_CMD(name, cmd)                 \
-do {                                         \
-  if (match(name)) {                         \
-    m_commandCanonical = name;               \
-    return new cmd();                        \
-  }                                          \
-  return nullptr;                            \
-} while(0)                                   \
+template<class T>
+DebuggerCommandPtr DebuggerClient::new_cmd(const char* name) {
+  m_commandCanonical = name;
+  return std::make_shared<T>();
+}
 
-#define NEW_CMD_NAME(name, cmd)              \
-do {                                         \
-  m_commandCanonical = name;                 \
-  return new cmd();                          \
-} while(0)                                   \
+template<class T>
+DebuggerCommandPtr DebuggerClient::match_cmd(const char* name) {
+  return match(name) ? new_cmd<T>(name) : nullptr;
+}
+
+DebuggerCommandPtr DebuggerClient::createCommand() {
+  TRACE(2, "DebuggerClient::createCommand\n");
 
   // give gdb users some love
-  if (m_command == "bt") NEW_CMD_NAME("where", CmdWhere);
-  if (m_command == "set") NEW_CMD_NAME("config", CmdConfig);
-  if (m_command == "complete") NEW_CMD_NAME("complete", CmdComplete);
+  if (m_command == "bt") return new_cmd<CmdWhere>("where");
+  if (m_command == "set") return new_cmd<CmdConfig>("config");
+  if (m_command == "complete") return new_cmd<CmdComplete>("complete");
 
   // Internal testing
   if (m_command == "internaltesting") {
-    NEW_CMD_NAME("internaltesting", CmdInternalTesting);
+    return new_cmd<CmdInternalTesting>("internaltesting");
   }
 
   // Make 'wa' a quick shortcut for 'where async'
   if (m_command == "wa") {
     m_args.insert(m_args.begin(), "async");
-    NEW_CMD_NAME("where", CmdWhere);
+    return new_cmd<CmdWhere>("where");
   }
 
   switch (tolower(m_command[0])) {
-    case 'a': MATCH_CMD("abort"    , CmdAbort    );
-    case 'b': MATCH_CMD("break"    , CmdBreak    );
-    case 'c': MATCH_CMD("continue" , CmdContinue );
-    case 'd': MATCH_CMD("down"     , CmdDown     );
-    case 'e': MATCH_CMD("exception", CmdException);
-    case 'f': MATCH_CMD("frame"    , CmdFrame    );
-    case 'g': MATCH_CMD("global"   , CmdGlobal   );
-    case 'h': MATCH_CMD("help"     , CmdHelp     );
-    case 'i': MATCH_CMD("info"     , CmdInfo     );
-    case 'k': MATCH_CMD("konstant" , CmdConstant );
-    case 'l': MATCH_CMD("list"     , CmdList     );
-    case 'm': MATCH_CMD("machine"  , CmdMachine  );
-    case 'n': MATCH_CMD("next"     , CmdNext     );
-    case 'o': MATCH_CMD("out"      , CmdOut      );
-    case 'p': MATCH_CMD("print"    , CmdPrint    );
-    case 'q': MATCH_CMD("quit"     , CmdQuit     );
-    case 'r': MATCH_CMD("run"      , CmdRun      );
-    case 's': MATCH_CMD("step"     , CmdStep     );
-    case 't': MATCH_CMD("thread"   , CmdThread   );
-    case 'u': MATCH_CMD("up"       , CmdUp       );
-    case 'v': MATCH_CMD("variable" , CmdVariable );
-    case 'w': MATCH_CMD("where"    , CmdWhere    );
+    case 'a': return match_cmd<CmdAbort>("abort");
+    case 'b': return match_cmd<CmdBreak>("break");
+    case 'c': return match_cmd<CmdContinue>("continue");
+    case 'd': return match_cmd<CmdDown>("down");
+    case 'e': return match_cmd<CmdException>("exception");
+    case 'f': return match_cmd<CmdFrame>("frame");
+    case 'g': return match_cmd<CmdGlobal>("global");
+    case 'h': return match_cmd<CmdHelp>("help");
+    case 'i': return match_cmd<CmdInfo>("info");
+    case 'k': return match_cmd<CmdConstant>("konstant");
+    case 'l': return match_cmd<CmdList>("list");
+    case 'm': return match_cmd<CmdMachine>("machine");
+    case 'n': return match_cmd<CmdNext>("next");
+    case 'o': return match_cmd<CmdOut>("out");
+    case 'p': return match_cmd<CmdPrint>("print");
+    case 'q': return match_cmd<CmdQuit>("quit");
+    case 'r': return match_cmd<CmdRun>("run");
+    case 's': return match_cmd<CmdStep>("step");
+    case 't': return match_cmd<CmdThread>("thread");
+    case 'u': return match_cmd<CmdUp>("up");
+    case 'v': return match_cmd<CmdVariable>("variable");
+    case 'w': return match_cmd<CmdWhere>("where");
 
     // these single lettter commands allow "x{cmd}" and "x {cmd}"
-    case 'x': shiftCommand(); NEW_CMD_NAME("extended", CmdExtended);
-    case '!': shiftCommand(); NEW_CMD_NAME("shell", CmdShell);
-    case '&': shiftCommand(); NEW_CMD_NAME("macro", CmdMacro);
+    case 'x': shiftCommand(); return new_cmd<CmdExtended>("extended");
+    case '!': shiftCommand(); return new_cmd<CmdShell>("shell");
+    case '&': shiftCommand(); return new_cmd<CmdMacro>("macro");
   }
   return nullptr;
-#undef MATCH_CMD
-#undef NEW_CMD_NAME
 }
 
 // Parses the current command string. If invalid return false.
@@ -1714,11 +1705,10 @@ bool DebuggerClient::process() {
       break;
     }
     default: {
-      DebuggerCommand *cmd = createCommand();
+      auto cmd = createCommand();
       if (cmd) {
         usageLogCommand(m_commandCanonical, m_line);
         if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
-        DebuggerCommandPtr deleter(cmd);
         cmd->onClient(*this);
       } else {
         m_unknownCmd = true;

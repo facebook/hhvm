@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -218,7 +218,7 @@ Block* cloneCFG(IRUnit& unit,
   while (!toClone.empty()) {
     auto origBlock = toClone.front();
     toClone.pop();
-    auto copyBlock = unit.defBlock(origBlock->hint());
+    auto copyBlock = unit.defBlock(origBlock->profCount(), origBlock->hint());
     blockRenames[origBlock] = copyBlock;
     FTRACE(5, "cloneCFG: copying B{} to B{}\n",
            origBlock->id(), copyBlock->id());
@@ -308,7 +308,7 @@ uint64_t countInvocations(const LoopInfo& loop, const IRUnit& unit) {
   auto const profData = mcg->tx().profData();
   uint64_t count = 0;
   for (auto tid : predTIDs) {
-    count += profData->absTransCounter(tid);
+    count += profData->transCounter(tid);
   }
   return count;
 }
@@ -478,7 +478,8 @@ Block* insertLoopPreExit(IRUnit& unit,
 
   // Split oldPreHeader before the Jmp, and append an
   // ExitPlaceholder{ fallthru=newPreHeader, taken=preExit }.
-  auto newPreHeader = unit.defBlock(oldPreHeader->hint());
+  auto newPreHeader = unit.defBlock(oldPreHeader->profCount(),
+                                    oldPreHeader->hint());
   assertx(oldPreHeader->back().is(Jmp));
   auto const jmp = &(oldPreHeader->back());
   oldPreHeader->erase(jmp);
@@ -528,7 +529,7 @@ void insertLoopPreHeader(IRUnit& unit,
     );
   }
 
-  auto const preHeader = unit.defBlock();
+  auto const preHeader = unit.defBlock(loop.numInvocations);
   auto const marker = header->front().marker();
 
   // If the header starts with a DefLabel, the arguments from all the incoming

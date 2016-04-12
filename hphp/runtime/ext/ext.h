@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,33 +20,5 @@
 
 #ifndef incl_EXT_LIST_EXT_H_
 #define incl_EXT_LIST_EXT_H_
-
-// Super temporary
-#ifndef USE_CMAKE
-#include "hphp/facebook/extensions/phpmc/ext_phpmc.h"
-#define ENABLE_EXTENSION_ASIO
-#define ENABLE_EXTENSION_CLOSURE
-#define ENABLE_EXTENSION_COLLECTIONS
-#define ENABLE_EXTENSION_FB
-#define ENABLE_EXTENSION_SIMPLEXML
-#endif
-
-#ifdef ENABLE_EXTENSION_CLOSURE
-#include "hphp/runtime/ext/ext_closure.h"
-#endif
-#ifdef ENABLE_EXTENSION_COLLECTIONS
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#endif
-#ifdef ENABLE_EXTENSION_FB
-#include "hphp/runtime/ext/fb/ext_fb.h"
-#endif
-#ifdef ENABLE_EXTENSION_SIMPLEXML
-#include "hphp/runtime/ext/simplexml/ext_simplexml.h"
-#endif
-
-// half-IDL, half-HNI
-#ifdef ENABLE_EXTENSION_ASIO
-#include "hphp/runtime/ext/asio/ext_asio.h"
-#endif
 
 #endif // incl_EXT_LIST_EXT_H_

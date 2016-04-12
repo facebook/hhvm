@@ -14,7 +14,7 @@ function test3(KeyedContainer<int, Iterable<C>> $x): void { foo3($x); }
 function foo4(Iterable<Traversable<B>> $x): void {}
 function test4(Vector<Iterable<C>> $x): void { foo4($x); }
 
-function foo5(KeyedIterable<mixed, Traversable<B>> $x): void {}
+function foo5(KeyedIterable<string, Traversable<B>> $x): void {}
 function test5(Map<string, Iterable<C>> $x): void { foo5($x); }
 
 function foo6(KeyedContainer<mixed, Traversable<B>> $x): void {}

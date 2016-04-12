@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -45,7 +46,9 @@ const int64_t k_XSL_SECPREF_WRITE_FILE        = 4;
 const int64_t k_XSL_SECPREF_CREATE_DIRECTORY  = 8;
 const int64_t k_XSL_SECPREF_READ_NETWORK      = 16;
 const int64_t k_XSL_SECPREF_WRITE_NETWORK     = 32;
-const int64_t k_XSL_SECPREF_DEFAULT           = 44;
+const int64_t k_XSL_SECPREF_DEFAULT = k_XSL_SECPREF_WRITE_FILE |
+                                      k_XSL_SECPREF_CREATE_DIRECTORY |
+                                      k_XSL_SECPREF_WRITE_NETWORK;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -54,8 +57,8 @@ static xmlChar *xslt_string_to_xpathexpr(const char *);
 static void xslt_ext_function_php(xmlXPathParserContextPtr, int, int);
 static void xslt_ext_function_string_php(xmlXPathParserContextPtr, int);
 static void xslt_ext_function_object_php(xmlXPathParserContextPtr, int);
-static void xslt_ext_error_handler(void *, const char *, ...)
-  ATTRIBUTE_PRINTF(2,3);
+static void xslt_ext_error_handler(void *,
+  ATTRIBUTE_PRINTF_STRING const char *, ...) ATTRIBUTE_PRINTF(2,3);
 
 ///////////////////////////////////////////////////////////////////////////////
 // NativeData
@@ -366,7 +369,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   }
 
   obj = valuePop(ctxt);
-  if (obj->stringval == nullptr) {
+  if ((obj == nullptr) || (obj->stringval == nullptr)) {
     raise_warning("Handler name must be a string");
     xmlXPathFreeObject(obj);
     // Push an empty string to get an xslt result.
@@ -470,11 +473,11 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
     if (doc == nullptr) {
       raise_error("Unable to import stylesheet");
     }
-  } else if (stylesheet.instanceof(c_SimpleXMLElement::classof())) {
-    auto elem = cast<c_SimpleXMLElement>(stylesheet);
+  } else if (stylesheet.instanceof(SimpleXMLElement_classof())) {
+    auto ssNode = SimpleXMLElement_exportNode(stylesheet);
     // This doc will be freed by xsltFreeStylesheet.
     doc = xmlNewDoc((const xmlChar*)"1.0");
-    xmlNodePtr node = xmlCopyNode(elem->nodep(), /*extended*/ 1);
+    xmlNodePtr node = xmlCopyNode(ssNode, /*extended*/ 1);
     if (doc == nullptr || node == nullptr) {
       raise_error("Unable to import stylesheet");
     }
@@ -595,6 +598,10 @@ static bool HHVM_METHOD(XSLTProcessor, setProfiling,
                         const String& filename) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
+  if (!FileUtil::checkPathAndWarn(filename, "XSLTProcessor::setProfiling", 1)) {
+    return false;
+  }
+
   if (filename.length() > 0) {
     String translated = File::TranslatePath(filename);
     Stream::Wrapper* w = Stream::getWrapperFromURI(translated);
@@ -632,6 +639,10 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
                            const Object& doc,
                            const String& uri) {
   auto data = Native::data<XSLTProcessorData>(this_);
+
+  if (!FileUtil::checkPathAndWarn(uri, "XSLTProcessor::transformToUri", 2)) {
+    return false;
+  }
 
   if (doc.instanceof(s_DOMDocument)) {
     auto domdoc = Native::data<DOMNode>(doc);
@@ -701,54 +712,22 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 
-const StaticString s_XSL_SECPREF_NONE("XSL_SECPREF_NONE");
-const StaticString s_XSL_SECPREF_READ_FILE("XSL_SECPREF_READ_FILE");
-const StaticString s_XSL_SECPREF_WRITE_FILE("XSL_SECPREF_WRITE_FILE");
-const StaticString
-  s_XSL_SECPREF_CREATE_DIRECTORY("XSL_SECPREF_CREATE_DIRECTORY");
-const StaticString s_XSL_SECPREF_READ_NETWORK("XSL_SECPREF_READ_NETWORK");
-const StaticString s_XSL_SECPREF_WRITE_NETWORK("XSL_SECPREF_WRITE_NETWORK");
-const StaticString s_XSL_SECPREF_DEFAULT("XSL_SECPREF_DEFAULT");
-
-const StaticString s_xslt_version("LIBXSLT_VERSION");
-const StaticString s_xslt_dotted_version("LIBXSLT_DOTTED_VERSION");
-const StaticString s_xslt_dotted_version_value(LIBXSLT_DOTTED_VERSION);
-
-class XSLExtension final : public Extension {
-  public:
+struct XSLExtension final : Extension {
     XSLExtension() : Extension("xsl", "0.1") {};
 
     void moduleInit() override {
       xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
       exsltRegisterAll();
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_NONE.get(), k_XSL_SECPREF_NONE
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_READ_FILE.get(), k_XSL_SECPREF_READ_FILE
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_WRITE_FILE.get(), k_XSL_SECPREF_WRITE_FILE
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_CREATE_DIRECTORY.get(), k_XSL_SECPREF_CREATE_DIRECTORY
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_READ_NETWORK.get(), k_XSL_SECPREF_READ_NETWORK
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_WRITE_NETWORK.get(), k_XSL_SECPREF_WRITE_NETWORK
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_DEFAULT.get(), k_XSL_SECPREF_DEFAULT
-      );
+      HHVM_RC_INT(XSL_SECPREF_NONE, k_XSL_SECPREF_NONE);
+      HHVM_RC_INT(XSL_SECPREF_READ_FILE, k_XSL_SECPREF_READ_FILE);
+      HHVM_RC_INT(XSL_SECPREF_WRITE_FILE, k_XSL_SECPREF_WRITE_FILE);
+      HHVM_RC_INT(XSL_SECPREF_CREATE_DIRECTORY, k_XSL_SECPREF_CREATE_DIRECTORY);
+      HHVM_RC_INT(XSL_SECPREF_READ_NETWORK, k_XSL_SECPREF_READ_NETWORK);
+      HHVM_RC_INT(XSL_SECPREF_WRITE_NETWORK, k_XSL_SECPREF_WRITE_NETWORK);
+      HHVM_RC_INT(XSL_SECPREF_DEFAULT, k_XSL_SECPREF_DEFAULT);
 
-      Native::registerConstant<KindOfInt64>(
-        s_xslt_version.get(), LIBXSLT_VERSION
-      );
-      Native::registerConstant<KindOfString>(
-        s_xslt_dotted_version.get(), s_xslt_dotted_version_value.get()
-      );
+      HHVM_RC_INT_SAME(LIBXSLT_VERSION);
+      HHVM_RC_STR_SAME(LIBXSLT_DOTTED_VERSION);
 
       HHVM_ME(XSLTProcessor, getParameter);
       HHVM_ME(XSLTProcessor, getSecurityPrefs);

@@ -6,5 +6,4 @@
 #
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
-: ${FBMAKE_BIN_ROOT=_bin}
 cd $DIR/../ && $DIR/../../$1 "$2" "$3" "$4"

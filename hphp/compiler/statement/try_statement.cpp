@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -118,28 +118,6 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void TryStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 2;
-  if (m_catches->getCount() > 0) numProps++;
-  if (m_finallyStmt != nullptr) numProps++;
-  cg.printObjectHeader("TryStatement", numProps);
-  cg.printPropertyHeader("block");
-  cg.printAsEnclosedBlock(m_tryStmt);
-  if (m_catches->getCount() > 0)  {
-    cg.printPropertyHeader("catchStatements");
-    cg.printStatementVector(m_catches);
-  }
-  if (m_finallyStmt != nullptr) {
-    cg.printPropertyHeader("finallyStatement");
-    m_finallyStmt->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

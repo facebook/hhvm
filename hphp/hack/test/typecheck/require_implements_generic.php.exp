@@ -1,0 +1,2 @@
+File "require_implements_generic.php", line 6, characters 22-22:
+Was expecting a class or interface but got a generic (Typing[4026])

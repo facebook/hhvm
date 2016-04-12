@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_UTIL_ASM_X64_H_
 #define incl_HPHP_UTIL_ASM_X64_H_
 
-#include <boost/noncopyable.hpp>
 #include <type_traits>
 
 #include "hphp/util/data-block.h"
@@ -112,8 +111,12 @@ inline Reg8 rbyte(Reg64 r)     { return Reg8(int(r)); }
 inline Reg16 r16(Reg8 r)       { return Reg16(int(r)); }
 inline Reg32 r32(Reg8 r)       { return Reg32(int(r)); }
 inline Reg32 r32(Reg16 r)      { return Reg32(int(r)); }
-inline Reg32 r32(Reg64 r)      { return Reg32(int(r)); }
 inline Reg32 r32(Reg32 r)      { return r; }
+inline Reg32 r32(Reg64 r)      { return Reg32(int(r)); }
+inline Reg64 r64(Reg8 r)       { return Reg64(int(r)); }
+inline Reg64 r64(Reg16 r)      { return Reg64(int(r)); }
+inline Reg64 r64(Reg32 r)      { return Reg64(int(r)); }
+inline Reg64 r64(Reg64 r)      { return r; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -253,7 +256,7 @@ struct DispRIP {
     return DispRIP(disp - x);
   }
 
-  intptr_t disp; // TODO #4613274: should be int32_t
+  intptr_t disp;
 };
 
 // *(reg + x)
@@ -712,7 +715,8 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class X64Assembler : private boost::noncopyable {
+struct X64Assembler {
+private:
   friend struct Label;
 
   /*
@@ -726,6 +730,9 @@ class X64Assembler : private boost::noncopyable {
 
 public:
   explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
+
+  X64Assembler(const X64Assembler&) = delete;
+  X64Assembler& operator=(const X64Assembler&) = delete;
 
   CodeBlock& code() const { return codeBlock; }
 
@@ -936,6 +943,8 @@ public:
   void decl(MemoryRef m) { instrM32(instr_dec, m); }
   void decw(MemoryRef m) { instrM16(instr_dec, m); }
 
+  void push(Immed64 i) { emitI(instr_push, i.q()); }
+
   void movups(RegXMM x, MemoryRef m)        { instrRM(instr_movups, x, m); }
   void movups(MemoryRef m, RegXMM x)        { instrMR(instr_movups, m, x); }
   void movdqu(RegXMM x, MemoryRef m)        { instrRM(instr_movdqu, x, m); }
@@ -983,6 +992,7 @@ public:
 
   void jmp(Reg64 r)            { instrR(instr_jmp, r); }
   void jmp(MemoryRef m)        { instrM(instr_jmp, m); }
+  void jmp(RIPRelativeRef m)   { instrM(instr_jmp, m); }
   void call(Reg64 r)           { instrR(instr_call, r); }
   void call(MemoryRef m)       { instrM(instr_call, m); }
   void call(RIPRelativeRef m)  { instrM(instr_call, m); }
@@ -2085,7 +2095,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-struct Label : private boost::noncopyable {
+struct Label {
   explicit Label()
     : m_a(nullptr)
     , m_address(nullptr)
@@ -2105,6 +2115,9 @@ struct Label : private boost::noncopyable {
       }
     }
   }
+
+  Label(const Label&) = delete;
+  Label& operator=(const Label&) = delete;
 
   void jmp(X64Assembler& a) {
     addJump(&a, Branch::Jmp);
@@ -2222,6 +2235,8 @@ CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace x64 {
+
 struct DecodedInstruction {
   explicit DecodedInstruction(uint8_t* ip) { decode(ip); }
   std::string toString();
@@ -2309,6 +2324,6 @@ private:
 #undef logical_const
 #undef CCS
 
-}}
+}}}
 
 #endif

@@ -9,8 +9,7 @@
  *
  */
 
-function foo(): int {
-  $x = 0;
+function foo(?int $x): int {
   try {
     if($x === null) {
       $x = null;

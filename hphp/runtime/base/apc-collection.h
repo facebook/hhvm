@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,12 +27,14 @@ struct Object;
 
 struct APCCollection {
   static APCHandle::Pair Make(const ObjectData*,
-                              bool inner,
+                              APCHandleLevel level,
                               bool unserializeObj);
   static void Delete(APCHandle*);
 
   static const APCCollection* fromHandle(const APCHandle* handle) {
-    assert(offsetof(APCCollection, m_handle) == 0);
+    assert(handle->checkInvariants());
+    assert(handle->kind() == APCKind::SharedCollection);
+    static_assert(offsetof(APCCollection, m_handle) == 0, "");
     return reinterpret_cast<const APCCollection*>(handle);
   }
 

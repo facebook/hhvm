@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -192,6 +193,7 @@ void HttpRequestHandler::logToAccessLog(Transport* transport) {
 
 void HttpRequestHandler::setupRequest(Transport* transport) {
   MemoryManager::requestInit();
+  HHProf::Request::Setup(transport);
 
   g_context.getCheck();
   GetAccessLog().onNewRequest();
@@ -220,6 +222,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   }
 
   MemoryManager::requestShutdown();
+  HHProf::Request::Teardown();
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {
@@ -326,7 +329,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       if (!original && compressed) {
         data = gzdecode(data, len);
         if (data == nullptr) {
-          throw FatalErrorException("cannot unzip compressed data");
+          raise_fatal_error("cannot unzip compressed data");
         }
         decompressed_data = const_cast<char*>(data);
         compressed = false;
@@ -429,6 +432,13 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            SourceRootInfo &sourceRootInfo,
                                            bool cacheableDynamicContent) {
   ExecutionContext *context = hphp_context_init();
+  OBFlags obFlags = OBFlags::Default;
+  if (cacheableDynamicContent ||
+      transport->getHTTPVersion() != "1.1") {
+    obFlags |= OBFlags::OutputDisabled;
+  }
+  context->obStart(uninit_null(), 0, obFlags);
+  context->obProtect(true);
   if (RuntimeOption::ImplicitFlush) {
     context->obSetImplicitFlush(true);
   }

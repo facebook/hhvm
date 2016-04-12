@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,27 +25,32 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const Abi& abi(CodeKind kind) { ARCH_SWITCH_CALL(abi, kind); }
+const Abi& abi(CodeKind kind) { return ARCH_SWITCH_CALL(abi, kind); }
 
-PhysReg rvmfp() { ARCH_SWITCH_CALL(rvmfp); }
-PhysReg rvmsp() { ARCH_SWITCH_CALL(rvmsp); }
-PhysReg rvmtl() { ARCH_SWITCH_CALL(rvmtl); }
+PhysReg rvmfp() { return ARCH_SWITCH_CALL(rvmfp); }
+PhysReg rvmsp() { return ARCH_SWITCH_CALL(rvmsp); }
+PhysReg rvmtl() { return ARCH_SWITCH_CALL(rvmtl); }
+PhysReg rsp() { return ARCH_SWITCH_CALL(rsp); }
 
-RegSet vm_regs_with_sp() { ARCH_SWITCH_CALL(vm_regs_with_sp); }
-RegSet vm_regs_no_sp() { ARCH_SWITCH_CALL(vm_regs_no_sp); }
+RegSet vm_regs_with_sp() { return ARCH_SWITCH_CALL(vm_regs_with_sp); }
+RegSet vm_regs_no_sp() { return ARCH_SWITCH_CALL(vm_regs_no_sp); }
 
-RegSet interp_one_cf_regs() { ARCH_SWITCH_CALL(interp_one_cf_regs); }
+PhysReg rret_data() { return ARCH_SWITCH_CALL(rret_data); }
+PhysReg rret_type() { return ARCH_SWITCH_CALL(rret_type); }
 
-PhysReg rarg(size_t i) { ARCH_SWITCH_CALL(rarg, i); }
-PhysReg rarg_simd(size_t i) { ARCH_SWITCH_CALL(rarg_simd, i); }
+PhysReg rret(size_t i) { return ARCH_SWITCH_CALL(rret, i); }
+PhysReg rret_simd(size_t i) { return ARCH_SWITCH_CALL(rret_simd, i); }
 
-size_t num_arg_regs() { ARCH_SWITCH_CALL(num_arg_regs); }
-size_t num_arg_regs_simd() { ARCH_SWITCH_CALL(num_arg_regs_simd); }
+PhysReg rarg(size_t i) { return ARCH_SWITCH_CALL(rarg, i); }
+PhysReg rarg_simd(size_t i) { return ARCH_SWITCH_CALL(rarg_simd, i); }
 
-PhysReg r_svcreq_req() { ARCH_SWITCH_CALL(r_svcreq_req); }
-PhysReg r_svcreq_stub() { ARCH_SWITCH_CALL(r_svcreq_stub); }
-PhysReg r_svcreq_sf() { ARCH_SWITCH_CALL(r_svcreq_sf); }
-PhysReg r_svcreq_arg(size_t i) { ARCH_SWITCH_CALL(r_svcreq_arg, i); }
+size_t num_arg_regs() { return ARCH_SWITCH_CALL(num_arg_regs); }
+size_t num_arg_regs_simd() { return ARCH_SWITCH_CALL(num_arg_regs_simd); }
+
+PhysReg r_svcreq_req() { return ARCH_SWITCH_CALL(r_svcreq_req); }
+PhysReg r_svcreq_stub() { return ARCH_SWITCH_CALL(r_svcreq_stub); }
+PhysReg r_svcreq_sf() { return ARCH_SWITCH_CALL(r_svcreq_sf); }
+PhysReg r_svcreq_arg(size_t i) { return ARCH_SWITCH_CALL(r_svcreq_arg, i); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

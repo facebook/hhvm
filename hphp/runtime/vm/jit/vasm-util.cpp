@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,9 @@ namespace {
 bool is_nop(const copy& i) { return i.s == i.d; }
 bool is_nop(const copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
 
+// movb r,r is a nop, however movl is not since it zeros upper bits.
+bool is_nop(const movb& i) { return i.s == i.d; }
+
 bool is_nop(const lea& i) {
   if (i.s.disp != 0) return false;
   return
@@ -47,6 +50,7 @@ bool is_trivial_nop(const Vinstr& inst) {
     (inst.op == Vinstr::copy && is_nop(inst.copy_)) ||
     (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
     (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
+    (inst.op == Vinstr::movb && is_nop(inst.movb_)) ||
     inst.op == Vinstr::nop;
 }
 
@@ -116,7 +120,7 @@ bool splitCriticalEdges(Vunit& unit) {
     for (auto& succ : succlist) {
       if (preds[succ] <= 1) continue;
       // split the critical edge.
-      auto middle = unit.makeBlock(unit.blocks[succ].area);
+      auto middle = unit.makeBlock(unit.blocks[succ].area_idx);
       forwardJmp(unit, catch_blocks, middle, succ);
       succ = middle;
       changed = true;
@@ -133,6 +137,18 @@ bool splitCriticalEdges(Vunit& unit) {
   return changed;
 }
 
+Vreg make_const(Vunit& unit, Type type) {
+  if (type.subtypeOfAny(TUninit, TInitNull)) {
+    // Return undefined value.
+    return unit.makeConst(Vconst::Quad);
+  }
+  if (type <= TNullptr) return unit.makeConst(0);
+
+  assertx(type.hasConstVal());
+  if (type <= TBool) return unit.makeConst(type.boolVal());
+  if (type <= TDbl) return unit.makeConst(type.dblVal());
+  return unit.makeConst(type.rawVal());
+}
 
 //////////////////////////////////////////////////////////////////////
 

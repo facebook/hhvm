@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,8 @@ struct MArrayIter;
  * via APC. It has a pointer to the APCArray that it represents and it may
  * cache values locally depending on the type accessed and/or the operation.
  */
-struct APCLocalArray : private ArrayData {
+struct APCLocalArray final : private ArrayData,
+                             type_scan::MarkCountable<APCLocalArray> {
   template<class... Args> static APCLocalArray* Make(Args&&...);
 
   static size_t Vsize(const ArrayData*);
@@ -99,6 +100,7 @@ public:
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;
+  using ArrayData::decWillRelease;
   using ArrayData::incRefCount;
 
   ssize_t iterAdvanceImpl(ssize_t prev) const {

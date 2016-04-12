@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,6 +41,8 @@ namespace detail {
  */
 template <class T, class S>
 struct LowPtrImpl {
+  using storage_type = typename S::storage_type;
+
   /*
    * Constructors.
    */
@@ -175,16 +177,16 @@ struct RawStorage {
   }
 };
 
-template <class S>
+template <class S, std::memory_order read_order, std::memory_order write_order>
 struct AtomicStorage {
   using raw_type = S;
   using storage_type = std::atomic<S>;
 
   static ALWAYS_INLINE raw_type get(const storage_type& s) {
-    return s.load(std::memory_order_relaxed);
+    return s.load(read_order);
   }
   static ALWAYS_INLINE void set(storage_type& s, raw_type r) {
-    s.store(r, std::memory_order_relaxed);
+    s.store(r, write_order);
   }
 };
 
@@ -201,20 +203,28 @@ struct AtomicStorage {
 #ifdef USE_LOWPTR
 constexpr bool use_lowptr = true;
 
-template<class T>
-using LowPtr       = detail::LowPtrImpl<T, detail::RawStorage<uint32_t>>;
-template<class T>
-using AtomicLowPtr = detail::LowPtrImpl<T, detail::AtomicStorage<uint32_t>>;
-
+namespace detail {
+using low_storage_t = uint32_t;
+}
 #else
 constexpr bool use_lowptr = false;
 
-template<class T>
-using LowPtr       = detail::LowPtrImpl<T, detail::RawStorage<uintptr_t>>;
-template<class T>
-using AtomicLowPtr = detail::LowPtrImpl<T, detail::AtomicStorage<uintptr_t>>;
-
+namespace detail {
+using low_storage_t = uintptr_t;
+}
 #endif
+
+template<class T>
+using LowPtr =
+  detail::LowPtrImpl<T, detail::RawStorage<detail::low_storage_t>>;
+
+template<class T,
+         std::memory_order read_order = std::memory_order_relaxed,
+         std::memory_order write_order = std::memory_order_relaxed>
+using AtomicLowPtr =
+  detail::LowPtrImpl<T, detail::AtomicStorage<detail::low_storage_t,
+                                              read_order,
+                                              write_order>>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

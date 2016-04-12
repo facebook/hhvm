@@ -16,6 +16,10 @@
 #include "str.h"
 #include <sys/types.h>
 
+namespace {
+template <typename T> inline T mcon_bson_helper_id(T t) { return t; }
+}
+
 #if PHP_C_BIGENDIAN
 /* reverse the bytes in an int, wheeee stupid byte tricks */
 # define BYTE1_32(b) ((b & 0xff000000) >> 24)
@@ -35,8 +39,8 @@
 # define MONGO_64(b) (BYTE8_64(b) | BYTE7_64(b) | BYTE6_64(b) | BYTE5_64(b) | BYTE4_64(b) | BYTE3_64(b) | BYTE2_64(b) | BYTE1_64(b))
 
 #else
-# define MONGO_32(b) (b)
-# define MONGO_64(b) (b)
+# define MONGO_32(b) mcon_bson_helper_id(b)
+# define MONGO_64(b) mcon_bson_helper_id(b)
 #endif
 
 void mcon_serialize_int(struct mcon_str *str, int num);

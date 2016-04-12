@@ -1,0 +1,25 @@
+int(3)
+
+int(7)
+int(3)
+
+int(7)
+int(3)
+int(7)
+int(3)
+
+int(7)
+string(3) "bar"
+int(3)
+object(stdClass)#%d (%d) {
+  ["boo"]=>
+  int(7)
+}
+string(4) "bang"
+int(3)
+
+called
+string(1) "a"
+
+f(0)
+f(1)

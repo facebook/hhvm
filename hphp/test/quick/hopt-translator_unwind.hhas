@@ -8,6 +8,17 @@
   FCall 1
   PopR
 
+  # If get_undefined_var is inlined then the context passed to handler will
+  # contain the locals from test_unwind_dirty_stack_regs in an array which will
+  # be stored along wtih other arguments inside the exception unless we pass
+  # ignore args. If this happens the exception will keep the DtorPrinter objects
+  # alive past the end of test_unwind_dirty_stack_regs.
+  FPushClsMethodD 1 "setTraceOptions" "Exception"
+    Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
+    FPassCE 0
+  FCall 1
+  PopR
+
   .try_catch (Exception handler) {
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
     FCall 0
@@ -51,7 +62,8 @@ handler:
 
     This
     CGetL $id
-    SetM <C PT:"x">
+    BaseC 1
+    SetM 1 PT:"x"
     PopC
     Int 1
     RetC
@@ -60,7 +72,8 @@ handler:
   .method [public] __destruct() {
     String "dtor: "
     This
-    CGetM <C PT:"x">
+    BaseC 0
+    QueryM 1 CGet PT:"x"
     Concat
     String "\n"
     Concat

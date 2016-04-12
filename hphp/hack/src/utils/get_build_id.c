@@ -12,13 +12,13 @@
 #include <caml/alloc.h>
 
 #include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
-#define __USE_XOPEN
 #include <time.h>
 
 extern const char* const BuildInfo_kRevision;
-const char* const build_time = __DATE__ " " __TIME__;
+extern const uint64_t BuildInfo_kRevisionCommitTimeUnix;
 
 /**
  * Export the constants provided by Facebook's build system to ocaml-land, since
@@ -29,24 +29,30 @@ const char* const build_time = __DATE__ " " __TIME__;
  * is very roundabout for external users who have to have CMake codegen these
  * constants anyways. Sorry about that.
  */
-value hh_get_build_id(void) {
+value hh_get_build_revision(void) {
   CAMLparam0();
   CAMLlocal1(result);
 
-  size_t revlen = strlen(BuildInfo_kRevision);
-  size_t timelen = strlen(build_time);
-  result = caml_alloc_string(revlen + timelen + 1);
+  size_t len = strlen(BuildInfo_kRevision);
+  result = caml_alloc_string(len);
 
-  memcpy(String_val(result), BuildInfo_kRevision, revlen);
-  String_val(result)[revlen] = ' ';
-  memcpy(String_val(result) + revlen + 1, build_time, timelen);
-
+  memcpy(String_val(result), BuildInfo_kRevision, len);
   CAMLreturn(result);
 }
 
-value hh_get_build_time(void) {
-  struct tm tm;
-  char* success = strptime(build_time, "%b %d %Y %H:%M:%S", &tm);
-  assert(success != NULL && "Failed to parse build time");
-  return Val_long(mktime(&tm));
+value hh_get_build_commit_time_string(void) {
+  CAMLparam0();
+  CAMLlocal1(result);
+
+  char s[25];
+  struct tm p;
+  localtime_r((time_t*)&BuildInfo_kRevisionCommitTimeUnix, &p);
+  strftime(s, sizeof(s), "%c", &p);
+
+  result = caml_copy_string(s);
+  CAMLreturn(result);
+}
+
+value hh_get_build_commit_time(void) {
+  return Val_long(BuildInfo_kRevisionCommitTimeUnix);
 }

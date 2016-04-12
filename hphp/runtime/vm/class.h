@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,6 +51,11 @@ struct ClassInfo;
 struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
+struct c_WaitHandle;
+
+namespace collections {
+struct CollectionsExtension;
+}
 
 namespace Native {
 struct NativeDataInfo;
@@ -105,50 +110,59 @@ struct Class : AtomicCountable {
    * Instance property information.
    */
   struct Prop {
-    // m_name is "" for inaccessible properties (i.e. private properties
-    // declared by parents).
-    LowStringPtr m_name;
-    LowStringPtr m_mangledName;
-    LowStringPtr m_originalMangledName;
-    // First parent class that declares this property.
-    LowPtr<Class> m_class;
-    Attr m_attrs;
-    LowStringPtr m_typeConstraint;
-    // When built in RepoAuthoritative mode, this is a control-flow
-    // insensitive, always-true type assertion for this property.  (It may be
-    // Gen if there was nothing interesting known.)
-    RepoAuthType m_repoAuthType;
-    LowStringPtr m_docComment;
-    int m_idx;
+    /*
+     * name is "" for inaccessible properties (i.e. private properties declared
+     * by parents).
+     */
+    LowStringPtr name;
+    LowStringPtr mangledName;
+    LowStringPtr originalMangledName;
+
+    /* First parent class that declares this property. */
+    LowPtr<Class> cls;
+
+    Attr attrs;
+    LowStringPtr typeConstraint;
+    /*
+     * When built in RepoAuthoritative mode, this is a control-flow insensitive,
+     * always-true type assertion for this property.  (It may be Gen if there
+     * was nothing interesting known.)
+     */
+    RepoAuthType repoAuthType;
+    LowStringPtr docComment;
+    int idx;
   };
 
   /*
    * Static property information.
    */
   struct SProp {
-    LowStringPtr m_name;
-    Attr m_attrs;
-    LowStringPtr m_typeConstraint;
-    LowStringPtr m_docComment;
-    // Most derived class that declared this property.
-    LowPtr<Class> m_class;
-    int m_idx;
-    // Used if (m_class == this).
-    TypedValue m_val;
-    RepoAuthType m_repoAuthType;
+    LowStringPtr name;
+    Attr attrs;
+    LowStringPtr typeConstraint;
+    LowStringPtr docComment;
+
+    /* Most derived class that declared this property. */
+    LowPtr<Class> cls;
+    int idx;
+
+    /* Used if (cls == this). */
+    TypedValue val;
+
+    RepoAuthType repoAuthType;
   };
 
   /*
    * Class constant information.
    */
   struct Const {
-    // Most derived class that declared this constant.
-    LowPtr<Class> m_class;
-    LowStringPtr m_name;
-    TypedValueAux m_val;
+    /* Most derived class that declared this constant. */
+    LowPtr<Class> cls;
+    LowStringPtr name;
+    TypedValueAux val;
 
-    bool isAbstract()      const { return m_val.constModifiers().m_isAbstract; }
-    bool isType()          const { return m_val.constModifiers().m_isType; }
+    bool isAbstract() const { return val.constModifiers().m_isAbstract; }
+    bool isType()     const { return val.constModifiers().m_isType; }
   };
 
   /*
@@ -555,8 +569,8 @@ public:
   /*
    * The info vector for declared instance properties or static properties.
    */
-  const Prop* declProperties() const;
-  const SProp* staticProperties() const;
+  folly::Range<const Prop*> declProperties() const;
+  folly::Range<const SProp*> staticProperties() const;
 
   /*
    * Look up the index of a declared instance property or static property.
@@ -839,7 +853,7 @@ public:
    * only a single name-to-class mapping will exist per request.
    */
   rds::Handle classHandle() const;
-  void setClassHandle(rds::Link<Class*> link) const;
+  void setClassHandle(rds::Link<LowPtr<Class>> link) const;
 
   /*
    * Get and set the RDS-cached class with this class's name.
@@ -1078,7 +1092,7 @@ private:
                                      const StringData* methName);
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
   using TMIData = TraitMethodImportData<TraitMethod,
                                         TMIOps,
@@ -1180,6 +1194,11 @@ public:
 
 private:
   default_ptr<ExtraData> m_extra;
+  template<class T> friend typename
+    std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
+  finish_class();
+
+  friend struct collections::CollectionsExtension;
 
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
@@ -1193,7 +1212,7 @@ private:
 
   ClassPtr m_parent;
   int32_t m_declPropNumAccessible;
-  mutable rds::Link<Class*> m_cachedClass{rds::kInvalidHandle};
+  mutable rds::Link<LowPtr<Class>> m_cachedClass{rds::kInvalidHandle};
 
   /*
    * Whether this is a subclass of Closure whose m_invoke->m_cls has been set
@@ -1322,6 +1341,11 @@ bool isNormalClass(const Class* cls);
  * allocate the handle before we loaded the class.
  */
 bool classHasPersistentRDS(const Class* cls);
+
+/*
+ * Returns whether cls or any of its children may have magic property methods.
+ */
+bool classMayHaveMagicPropMethods(const Class* cls);
 
 /*
  * Return the class that "owns" f.  This will normally be f->cls(), but for

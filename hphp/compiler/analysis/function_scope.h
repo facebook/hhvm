@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(ParameterExpression);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-class CodeGenerator;
+struct CodeGenerator;
 
 typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
                                         AnalysisResultConstPtr ar,
@@ -60,10 +60,9 @@ typedef std::vector< ParameterExpressionPtrIdxPair >
  * A FunctionScope corresponds to a function declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-class FunctionScope : public BlockScope,
-                      public JSON::CodeError::ISerializable,
-                      public JSON::DocTarget::ISerializable {
-public:
+struct FunctionScope : BlockScope,
+                       JSON::CodeError::ISerializable,
+                       JSON::DocTarget::ISerializable {
   /**
    * User defined functions.
    */
@@ -283,7 +282,8 @@ public:
 
   UserAttributeMap& userAttributes() { return m_userAttributes;}
 
-  std::vector<std::string> getUserAttributeStringParams(const std::string& key);
+  std::vector<ScalarExpressionPtr> getUserAttributeParams(
+      const std::string& key);
 
   /**
    * Override BlockScope::outputPHP() to generate return type.
@@ -313,8 +313,7 @@ public:
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);
 
-  class FunctionInfo {
-  public:
+  struct FunctionInfo {
     explicit FunctionInfo(int rva = -1)
       : m_maybeStatic(false)
       /*

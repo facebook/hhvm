@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,10 +29,17 @@ namespace HPHP {
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
-class Object {
+struct Object {
+private:
   req::ptr<ObjectData> m_obj;
 
   using NoIncRef = req::ptr<ObjectData>::NoIncRef;
+
+public:
+  template<class F> void scan(F& mark) const {
+    mark(m_obj);
+  }
+
 public:
   Object() {}
 
@@ -62,19 +69,19 @@ public:
 
   template <typename T>
   explicit Object(req::ptr<T>&& ptr) : m_obj(std::move(ptr)) {
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->checkCount());
   }
 
   explicit Object(Class* cls)
     : m_obj(ObjectData::newInstance(cls), NoIncRef{}) {
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->checkCount());
   }
 
   // Move ctor
   Object(Object&& src) noexcept : m_obj(std::move(src.m_obj)) {
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->checkCount());
   }
 
   // Regular assign
@@ -94,14 +101,14 @@ public:
   // Move assign
   Object& operator=(Object&& src) {
     m_obj = std::move(src.m_obj);
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->checkCount());
     return *this;
   }
 
   template <typename T>
   Object& operator=(req::ptr<T>&& src) {
     m_obj = std::move(src);
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->checkCount());
     return *this;
   }
 
@@ -202,7 +209,7 @@ public:
 
   // Take ownership of a reference without touching the ref count
   static Object attach(ObjectData *object) {
-    assert(!object || object->getCount() > 0);
+    assert(!object || object->checkCount());
     return Object{req::ptr<ObjectData>::attach(object)};
   }
 
@@ -229,8 +236,7 @@ extern const Object null_object;
 ///////////////////////////////////////////////////////////////////////////////
 // ObjNR
 
-class ObjNR {
-public:
+struct ObjNR {
   explicit ObjNR(ObjectData* data) {
     m_px = data;
   }

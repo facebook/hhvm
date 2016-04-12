@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,18 @@ namespace HPHP { namespace jit {
 struct NormalizedInstruction;
 struct SSATmp;
 
+namespace irgen {
+
 //////////////////////////////////////////////////////////////////////
+
+struct ReturnTarget {
+  // Block that will contain the InlineReturn and serve as a branch target for
+  // returning to the caller
+  Block* target;
+  // If the inlined region has multiple returns and will require a merge into
+  // the returnStub and target blocks
+  bool needsMerge;
+};
 
 /*
  * IR-Generation State.
@@ -46,16 +57,11 @@ struct SSATmp;
  * required to determine high-level compilation strategy.
  */
 struct IRGS {
-  explicit IRGS(TransContext ctx, TransFlags);
+  explicit IRGS(IRUnit& unit);
 
-  /*
-   * TODO: refactor this code eventually so IRGS doesn't own its IRUnit (or its
-   * IRBuilder).  The IRUnit should be the result of running the code in the ht
-   * module.
-   */
   TransContext context;
   TransFlags transFlags;
-  IRUnit unit;
+  IRUnit& unit;
   std::unique_ptr<IRBuilder> irb;
 
   /*
@@ -68,6 +74,13 @@ struct IRGS {
    * The current inlining level.  0 means we're not inlining.
    */
   uint16_t inlineLevel{0};
+
+  /*
+   * Tracks the branch target for all inlined blocks return to caller. The
+   * target block will Phi the return values in the case of multiple returns
+   * and contain the InlineReturn
+   */
+  std::vector<ReturnTarget> inlineReturnTarget;
 
   /*
    * The id of the profiling translation for the code we're currently
@@ -98,6 +111,12 @@ struct IRGS {
   bool lastBcInst{false};
 
   /*
+   * Profile-weight factor, to be multiplied by the region blocks'
+   * profile-translation counters in PGO mode.
+   */
+  double profFactor{1};
+
+  /*
    * The function to use to create catch blocks when instructions that can
    * throw are created with no catch block.  The default (when this function is
    * null) is to spill the stack and then leave.  We allow a non-default
@@ -116,6 +135,6 @@ std::string show(const IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}
 
 #endif

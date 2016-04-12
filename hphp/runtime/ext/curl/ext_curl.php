@@ -224,6 +224,15 @@ function curl_multi_info_read(resource $mh,
 function curl_multi_init(): resource;
 
 /**
+ * Returns a text error message describing the given CURLM error code.
+ *
+ * @return string - Returns error string for valid error code,
+ *   NULL otherwise.
+ */
+<<__Native>>
+function curl_multi_strerror(int $errornum): mixed;
+
+/**
  * Remove a multi handle from a set of cURL handles
  *
  * @param resource $mh -
@@ -250,9 +259,43 @@ function curl_multi_remove_handle(resource $mh,
 function curl_multi_select(resource $mh,
                            float $timeout = 1.0): ?int;
 
+/**
+ * The async equivalent to
+ * [`curl_multi_select`](http://php.net/manual/en/function.curl-multi-select.php)
+ *
+ * This function waits until there is activity on a cURL handle within `$mh`.
+ * Once there is activity, you process the result with
+ * [`curl_multi_exec`](http://php.net/manual/en/function.curl-multi-exec.php)
+ *
+ * @param $mh - A cURL multi handle returned from
+ *              [`curl_multi_init`](http://php.net/manual/en/function.curl-multi-init.php).
+ * @param $timeout - The time to wait for a response indicating some activity.
+ *
+ * @return Awaitable<int> - An `Awaitable` representing the `int` result of the
+ *                          activity. If returned `int` is positive, that
+ *                          represents the number of handles on which there
+ *                          was activity. If `0`, that means no activity
+ *                          occurred. If negative, then there was a select
+ *                          failure.
+ *
+ * @guide /hack/async/introduction
+ * @guide /hack/async/extensions
+ */
 <<__Native>>
 function curl_multi_await(resource $mh,
                           float $timeout = 1.0): Awaitable<int>;
+
+/**
+ * Wait for activity on any curl_multi connection
+ *
+ * @param resource $mh -
+ * @param int $option - One of the CURLMOPT_* constants.
+ * @param int $option - The value to be set on option.
+ *
+ * @return Returns TRUE on success or FALSE on failure.
+ */
+<<__Native>>
+function curl_multi_setopt(resource $mh, int $option, mixed $value) : bool;
 
 /**
  * Set multiple options for a cURL transfer
@@ -339,11 +382,20 @@ function fb_curl_multi_fdset(resource $mh, mixed &$read_fd_set,
 namespace HH\Asio {
 
 /**
- * Wind a curl handle through an awaitable loop to fetch the result
+ * A convenience wrapper around
+ * [`curl_multi_await`](/hack/reference/function/curl_multi_await/).
  *
- * @param mixed $urlOrHandle - An existing cURL handle or a URL as a string.
- *                           - String URLs will create a default cURL GET
- * @return Awaitable<string> - Awaitable handle yielding a string
+ * Pass a cURL handle, or, more simply, a string containing a URL (and the
+ * cURL handle will be created for you), and the cURL request will be executed
+ * via async and the `string` result will be retuned.
+ *
+ * @param $urlOrHandle - An existing cURL handle or a URL as a `string`. String
+ *                       URLs will create a default cURL GET handle.
+ * @return Awaitable<string> - An `Awaitable` representing the `string` result
+ *                             of the cURL request.
+ *
+ * @guide /hack/async/introduction
+ * @guide /hack/async/extensions
  */
 async function curl_exec(mixed $urlOrHandle): Awaitable<string> {
   if (is_string($urlOrHandle)) {

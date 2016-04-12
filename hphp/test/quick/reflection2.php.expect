@@ -64,9 +64,9 @@ isStatic: bool(false)
 array(0) {
 }
 ReflectionException: Method my_child::my_trait_method does not have a prototype
-object(ReflectionParameter)#18 (2) {
+object(ReflectionParameter)#18 (3) {
   ["info"]=>
-  array(8) {
+  array(10) {
     ["index"]=>
     int(0)
     ["name"]=>
@@ -75,10 +75,14 @@ object(ReflectionParameter)#18 (2) {
     string(7) "MyClass"
     ["type_hint"]=>
     string(7) "MyClass"
+    ["type_hint_builtin"]=>
+    bool(false)
     ["function"]=>
     string(1) "f"
     ["class"]=>
     string(1) "I"
+    ["type_hint_nullable"]=>
+    bool(false)
     ["attributes"]=>
     array(0) {
     }
@@ -87,4 +91,13 @@ object(ReflectionParameter)#18 (2) {
   }
   ["name"]=>
   string(1) "c"
+  ["paramTypeInfo"]=>
+  array(3) {
+    ["name"]=>
+    string(7) "MyClass"
+    ["nullable"]=>
+    bool(false)
+    ["builtin"]=>
+    bool(false)
+  }
 }

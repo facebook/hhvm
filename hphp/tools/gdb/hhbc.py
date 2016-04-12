@@ -69,6 +69,23 @@ class HHBC(object):
     Namespace for HHBC inspection helpers.
     """
 
+    ##
+    # HPHP::Op decoding and info.
+    #
+    @staticmethod
+    def decode_op(pc):
+        """Decode the HPHP::Op at `pc', returning it as well as the size of its
+        encoding."""
+
+        pc = pc.cast(T('uint8_t').pointer())
+        raw_val = ~pc.dereference()
+
+        if (raw_val == 0xff):
+            byte = ~pc.dereference()
+            raw_val += byte
+
+        return raw_val.cast(T('HPHP::Op'))
+
     @staticmethod
     def op_name(op):
         """Return the name of HPHP::Op `op'."""
@@ -77,6 +94,15 @@ class HHBC(object):
         table_type = T('char').pointer().pointer()
         return op_table(table_name).cast(table_type)[as_idx(op)]
 
+    @staticmethod
+    def op_size(op):
+        """Return the encoding size of the HPHP::Op `op'."""
+
+        return 1 if op.cast(T('size_t')) < 0xff else 2
+
+    ##
+    # Opcode immediate info.
+    #
     @staticmethod
     def num_imms(op):
         """Return the number of immediates for HPHP::Op `op'."""
@@ -139,7 +165,7 @@ class HHBC(object):
             info['value'] = str(tag)[len('HPHP::RepoAuthType::Tag::'):]
 
         else:
-            table_name = 'HPHP::immSize(HPHP::Op const*, int)::argTypeToSizes'
+            table_name = 'HPHP::immSize(unsigned char const*, int)::argTypeToSizes'
             if immtype >= 0:
                 size = op_table(table_name)[as_idx(immtype)]
 
@@ -160,16 +186,18 @@ class HHBC(object):
 
         return info
 
+    ##
+    # Main public interface.
+    #
     @staticmethod
     def instr_info(bc):
-        bc = bc.cast(T('HPHP::Op').pointer())
-        op = bc.dereference()
+        op = HHBC.decode_op(bc)
 
         if op <= V('HPHP::OpLowInvalid') or op >= V('HPHP::OpHighInvalid'):
             print('Invalid Op %d @ %p' % (op, bc))
             return 1
 
-        instrlen = 1
+        instrlen = HHBC.op_size(op)
         imms = []
 
         for i in xrange(0, int(HHBC.num_imms(op))):
@@ -180,7 +208,7 @@ class HHBC(object):
             instrlen += imminfo['size']
             imms.append(imminfo['value'])
 
-        return {'len': instrlen, 'imms': imms}
+        return {'op': op, 'len': instrlen, 'imms': imms}
 
 
 #------------------------------------------------------------------------------
@@ -224,14 +252,14 @@ remains where it left off after the previous call.
             self.bcoff = 0
             self.count = int(argv[1])
 
-        bctype = T('HPHP::Op').const().pointer()
+        bctype = T('HPHP::PC')
         self.bcpos = self.bcpos.cast(bctype)
 
         bcstart = self.bcpos - self.bcoff
 
         for i in xrange(0, self.count):
             instr = HHBC.instr_info(self.bcpos)
-            name = HHBC.op_name(self.bcpos.dereference()).string()
+            name = HHBC.op_name(instr['op']).string()
 
             out = "%s+%d: %s" % (str(bcstart), self.bcoff, name)
             for imm in instr['imms']:

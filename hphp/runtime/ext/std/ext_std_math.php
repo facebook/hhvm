@@ -606,3 +606,18 @@ function mt_rand(int $min = 0, ?int $max = null): int;
  */
 <<__Native>>
 function lcg_value(): float;
+
+/**
+ * intdiv() Integer division.
+ *
+ * @param int numerator - Number to be divided.
+ * @param int divisor - Number which divides the numerator.
+ *
+ * @return mixed - The integer division of numerator by divisor. If divisor
+ *   is 0, a DivisionByZeroError exception is thrown. If the numerator is
+ *   PHP_INT_MIN and the divisor is -1, then an ArithmeticError exception
+ *   is thrown.
+ *
+ */
+<<__Native>>
+function intdiv(int $numerator, int $divisor): mixed;

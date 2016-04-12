@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,13 +24,13 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/punt.h"
@@ -76,7 +76,7 @@ SSATmp* simplifyWork(State&, const IRInstruction*);
 
 bool mightRelax(State& env, SSATmp* tmp) {
   if (!env.typesMightRelax) return false;
-  return jit::typeMightRelax(tmp);
+  return irgen::typeMightRelax(tmp);
 }
 
 template<class... Args>
@@ -123,6 +123,7 @@ bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
     case ArrayData::kMixedKind:
     case ArrayData::kEmptyKind:
     case ArrayData::kApcKind:
+    case ArrayData::kDictKind:
       return false;
     default:
       return true;
@@ -131,16 +132,14 @@ bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Simplifier rules are not allowed to add new uses to SSATmps that aren't
- * known to be available.  All the sources to the original instruction must
- * be available, and non-reference counted values reachable through the
- * source chain are also always available.  Anything else requires more
- * complicated analysis than belongs in the simplifier right now.
- */
 DEBUG_ONLY bool validate(const State& env,
                          SSATmp* newDst,
                          const IRInstruction* origInst) {
+  // simplify() rules are not allowed to add new uses to SSATmps that aren't
+  // known to be available.  All the sources to the original instruction must
+  // be available, and non-reference counted values reachable through the
+  // source chain are also always available.  Anything else requires more
+  // complicated analysis than belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
@@ -198,7 +197,7 @@ DEBUG_ONLY bool validate(const State& env,
 
     always_assert_flog(
       available,
-      "Simplifier produced a new destination that wasn't known to be "
+      "simplify() produced a new destination that wasn't known to be "
       "available:\n"
       "  original inst: {}\n"
       "  new dst:       {}\n",
@@ -227,7 +226,7 @@ DEBUG_ONLY bool validate(const State& env,
   );
 
   assert_last(
-    origInst->hasDst() == (bool)newDst,
+    origInst->hasDst() == (newDst != nullptr),
     "HasDest mismatch between input and output"
   );
 
@@ -679,23 +678,45 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
-  auto src1 = inst->src(0);
-  auto src2 = inst->src(1);
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
 
   if (!src2->hasConstVal()) return nullptr;
 
-  // not supporting integers (#2570625)
-  double src2Val = src2->dblVal();
+  auto src2Val = src2->dblVal();
 
-  // X / 0 -> bool(false)
   if (src2Val == 0.0) {
-    // Ideally we'd generate a RaiseWarning and return false here, but we need
-    // a catch trace for that and we can't make a catch trace here.
+    // The branch emitted during irgen will deal with this
     return nullptr;
   }
 
   // statically compute X / Y
   return src1->hasConstVal() ? cns(env, src1->dblVal() / src2Val) : nullptr;
+}
+
+SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
+  auto const dividend = inst->src(0);
+  auto const divisor  = inst->src(1);
+
+  if (!divisor->hasConstVal()) return nullptr;
+
+  auto const divisorVal = divisor->intVal();
+
+  if (divisorVal == 0) {
+    // The branch emitted during irgen will deal with this
+    return nullptr;
+  }
+
+  if (!dividend->hasConstVal()) return nullptr;
+
+  auto const dividendVal = dividend->intVal();
+
+  if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
+    // This should be unreachable
+    return nullptr;
+  }
+
+  return cns(env, dividendVal / divisorVal);
 }
 
 SSATmp* simplifyAndInt(State& env, const IRInstruction* inst) {
@@ -771,59 +792,43 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   auto const inst = src->inst();
   auto const op = inst->op();
 
-  switch (op) {
-  // !!X --> X
-  case XorBool:
-    if (inst->src(1)->hasConstVal(true)) {
-      // This is safe to add a new use to because inst->src(0) is a bool.
-      assertx(inst->src(0)->isA(TBool));
-      return inst->src(0);
-    }
-    return nullptr;
-
   // !(X cmp Y) --> X opposite_cmp Y
-  case Lt:
-  case Lte:
-  case Gt:
-  case Gte:
-  case Eq:
-  case Neq:
-  case Same:
-  case NSame: {
+  if (auto negated = negateCmpOp(op)) {
     auto const s0 = inst->src(0);
     auto const s1 = inst->src(1);
-    // Not for Dbl:  (x < NaN) != !(x >= NaN)
-    //
-    // Also don't do it for arrays; we haven't thought through whether this
-    // transformation always holds on that type (and we could only plausibly do
-    // it for static ones anyway, because of the !maybeCounted restriction we
-    // have below).
-    auto const unsafeTypes = TDbl|TArr;
-    auto const safeToFold =
-      !s0->type().maybe(unsafeTypes) && !s1->type().maybe(unsafeTypes) &&
-      // We can't add new uses to reference counted types without a more
-      // advanced availability analysis.
-      !s0->type().maybe(TCounted) && !s1->type().maybe(TCounted);
-    if (safeToFold) {
-      return gen(env, negateQueryOp(op), s0, s1);
+    // We can't add new uses to reference counted types without a more
+    // advanced availability analysis.
+    if (!s0->type().maybe(TCounted) && !s1->type().maybe(TCounted)) {
+      return gen(env, *negated, s0, s1);
     }
-    break;
+    return nullptr;
   }
 
-  case InstanceOfBitmask:
-  case NInstanceOfBitmask:
-    // This is safe because instanceofs don't take reference counted arguments.
-    assertx(!inst->src(0)->type().maybe(TCounted) &&
-           !inst->src(1)->type().maybe(TCounted));
-    return gen(
-      env,
-      negateQueryOp(op),
-      inst->src(0),
-      inst->src(1)
-    );
-    return nullptr;
-  default:
-    break;
+  switch (op) {
+    // !!X --> X
+    case XorBool:
+      if (inst->src(1)->hasConstVal(true)) {
+        // This is safe to add a new use to because inst->src(0) is a bool.
+        assertx(inst->src(0)->isA(TBool));
+        return inst->src(0);
+      }
+      return nullptr;
+    case InstanceOfBitmask:
+    case NInstanceOfBitmask:
+      // This is safe because instanceofs don't take reference counted
+      // arguments.
+      assertx(!inst->src(0)->type().maybe(TCounted) &&
+              !inst->src(1)->type().maybe(TCounted));
+      return gen(
+        env,
+        (op == InstanceOfBitmask) ?
+        NInstanceOfBitmask :
+        InstanceOfBitmask,
+        inst->src(0),
+        inst->src(1)
+      );
+    default:
+      break;
   }
 
   return nullptr;
@@ -881,488 +886,516 @@ SSATmp* simplifyShr(State& env, const IRInstruction* inst) {
   return shiftImpl(env, inst, [] (int64_t a, int64_t b) { return a >> b; });
 }
 
+// This function isn't meant to perform the actual comparison at
+// compile-time. Instead, it performs the matching comparison against a
+// primitive type (usually bool).
 template<class T, class U>
-static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
-  switch (opName) {
+static bool cmpOp(Opcode opc, T a, U b) {
+  switch (opc) {
+  case GtBool:
   case GtInt:
   case GtStr:
-  case GtBool:
+  case GtStrInt:
   case GtObj:
   case GtArr:
-  case GtRes:
-  case GtX:
-  case Gt:   return a > b;
+  case GtRes: return a > b;
+  case GteBool:
   case GteInt:
   case GteStr:
-  case GteBool:
+  case GteStrInt:
   case GteObj:
   case GteArr:
-  case GteRes:
-  case GteX:
-  case Gte:  return a >= b;
+  case GteRes: return a >= b;
+  case LtBool:
   case LtInt:
   case LtStr:
-  case LtBool:
+  case LtStrInt:
   case LtObj:
   case LtArr:
-  case LtRes:
-  case LtX:
-  case Lt:   return a < b;
+  case LtRes: return a < b;
+  case LteBool:
   case LteInt:
   case LteStr:
-  case LteBool:
+  case LteStrInt:
   case LteObj:
   case LteArr:
-  case LteRes:
-  case LteX:
-  case Lte:  return a <= b;
-  case Same:
+  case LteRes: return a <= b;
   case SameStr:
   case SameObj:
   case SameArr:
+  case EqBool:
   case EqInt:
   case EqStr:
-  case EqBool:
+  case EqStrInt:
   case EqObj:
   case EqArr:
-  case EqRes:
-  case EqX:
-  case Eq:   return a == b;
-  case NSame:
+  case EqRes: return a == b;
   case NSameStr:
   case NSameObj:
   case NSameArr:
+  case NeqBool:
   case NeqInt:
   case NeqStr:
-  case NeqBool:
+  case NeqStrInt:
   case NeqObj:
   case NeqArr:
-  case NeqRes:
-  case NeqX:
-  case Neq:  return a != b;
+  case NeqRes: return a != b;
   default:
-    not_reached();
+    always_assert(false);
   }
 }
 
-SSATmp* cmpImpl(State& env,
-                Opcode opName,
-                const IRInstruction* const inst,
-                SSATmp* src1,
-                SSATmp* src2) {
-  auto newInst = [&] (Opcode op, SSATmp* src1, SSATmp* src2) {
+SSATmp* cmpBoolImpl(State& env,
+                    Opcode opc,
+                    const IRInstruction* const inst,
+                    SSATmp* left,
+                    SSATmp* right) {
+  assertx(left->type() <= TBool);
+  assertx(right->type() <= TBool);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
     return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
   };
 
-  auto const type1 = src1->type();
-  auto const type2 = src2->type();
-
-  // Normally we wouldn't try to simplify side-effectful comparisons, but we
-  // want to at least transform object and array comparisons to their specific
-  // comparison ops.
-  if (isSideEffectfulQueryOp(opName)) {
-    // Only allow TObj/TNull <=> TObj/TNull and TArr/TNull <=> TArr/TNull.
-    if (type1 <= TObj) {
-      if (!(type2 <= TObj || type2 <= TNull)) {
-        return nullptr;
-      }
-    } else if (type1 <= TArr) {
-      if (!(type2 <= TArr || type2 <= TNull)) {
-        return nullptr;
-      }
-    } else if (type1 <= TNull) {
-      if (!(type2 <= TObj || type2 <= TArr || type2 <= TNull)) {
-        return nullptr;
-      }
-    } else {
-      return nullptr;
-    }
-  }
-
   // Identity optimization
-  if (src1 == src2 && !type1.maybe(TDbl)) {
-    // (val1 == val1) does not simplify to true when val1 is a NaN
-    return cns(env, bool(cmpOp(opName, 0, 0)));
+  if (left == right) {
+    return cns(env, cmpOp(opc, true, true));
   }
 
-  assertx(type1 <= TGen && type2 <= TGen);
-
-  // Need both types to be unboxed to simplify, and the code below assumes the
-  // types are known DataTypes.
-  if (!type1.isKnownDataType() || type1.maybe(TBoxedCell) ||
-      !type2.isKnownDataType() || type2.maybe(TBoxedCell)) {
-    return nullptr;
-  }
-
-  // Same/NSame have some special rules
-  if (opName == Same || opName == NSame ||
-      opName == SameStr || opName == NSameStr ||
-      opName == SameObj || opName == NSameObj ||
-      opName == SameArr || opName == NSameArr) {
-    // Same and NSame do not perform type juggling
-    if (type1.toDataType() != type2.toDataType() &&
-        !(type1 <= TStr && type2 <= TStr)) {
-      return cns(env, bool(cmpOp(opName, 0, 1)));
-    }
-    // Here src1 and src2 are same type, treating Str and StaticStr as the
-    // same.
-
-    if (type1 <= TStr && type2 <= TStr) {
-      // Constant fold if they are both constant strings.
-      if (src1->hasConstVal() && src2->hasConstVal()) {
-        auto const str1 = src1->strVal();
-        auto const str2 = src2->strVal();
-        bool same = str1->same(str2);
-        return cns(env, bool(cmpOp(opName, same, 1)));
-      } else if (!isStrQueryOp(opName)) {
-        // Otherwise, lower to str comparison if possible.
-        return newInst(queryToStrQueryOp(opName), src1, src2);
-      }
-      return nullptr;
-    } else if (type1 <= TObj && type2 <= TObj) {
-      if (!isObjQueryOp(opName)) {
-        return newInst(queryToObjQueryOp(opName), src1, src2);
-      }
-      return nullptr;
-    } else if (type1 <= TArr && type2 <= TArr) {
-      if (!isArrQueryOp(opName)) {
-        return newInst(queryToArrQueryOp(opName), src1, src2);
-      }
-      return nullptr;
-    }
-
-    assertx(opName != SameStr && opName != NSameStr);
-    assertx(opName != SameObj && opName != NSameObj);
-    assertx(opName != SameArr && opName != NSameArr);
-
-    // Simplify to Eq/Neq. Str/Obj/Arr was already removed above.
-    return newInst(opName == Same ? Eq : Neq, src1, src2);
-  }
-
-  // ---------------------------------------------------------------------
-  // We may now perform constant-constant optimizations
-  // ---------------------------------------------------------------------
-
-  // Null cmp Null
-  if (type1 <= TNull && type2 <= TNull) {
-    return cns(env, bool(cmpOp(opName, 0, 0)));
-  }
-
-  // const cmp const
-  if (src1->hasConstVal() && src2->hasConstVal()) {
-    // StaticStr cmp StaticStr
-    if (src1->isA(TStaticStr) &&
-        src2->isA(TStaticStr)) {
-      int cmp = src1->strVal()->compare(src2->strVal());
-      return cns(env, bool(cmpOp(opName, cmp, 0)));
-    }
-    // ConstInt cmp ConstInt
-    if (src1->isA(TInt) && src2->isA(TInt)) {
-      return cns(env, bool(
-        cmpOp(opName, src1->intVal(), src2->intVal())));
-    }
-    // ConstBool cmp ConstBool
-    if (src1->isA(TBool) && src2->isA(TBool)) {
-      return cns(env, bool(
-        cmpOp(opName, src1->boolVal(), src2->boolVal())));
+  if (left->hasConstVal()) {
+    // If both operands are constants, constant-fold them. Otherwise, move the
+    // constant over to the right.
+    if (right->hasConstVal()) {
+      return cns(env, cmpOp(opc, left->boolVal(), right->boolVal()));
+    } else {
+      auto newOpc = [](Opcode opc) {
+        switch (opc) {
+          case GtBool:  return LtBool;
+          case GteBool: return LteBool;
+          case LtBool:  return GtBool;
+          case LteBool: return GteBool;
+          case EqBool:  return EqBool;
+          case NeqBool: return NeqBool;
+          default: always_assert(false);
+        }
+      }(opc);
+      return newInst(newOpc, right, left);
     }
   }
 
-  // Optimize comparisons with the empty string by just checking its length.
-  if (type1 <= TStr && src2->hasConstVal(TStaticStr)) {
-    if (src2->strVal()->empty()) {
-      switch (opName) {
-        case EqStr:
-        case SameStr:
-        case LteStr:
-          return newInst(EqInt, gen(env, LdStrLen, src1), cns(env, 0));
-        case NeqStr:
-        case NSameStr:
-        case GtStr:
-          return newInst(NeqInt, gen(env, LdStrLen, src1), cns(env, 0));
-        case LtStr:
-          return cns(env, false);
-        case GteStr:
-          return cns(env, true);
-        default:
-          break;
-      }
-    }
-  }
-
-  // ---------------------------------------------------------------------
-  // Constant bool comparisons can be strength-reduced
-  // NOTE: Comparisons with bools get juggled to bool.
-  // ---------------------------------------------------------------------
-
-  // Perform constant-bool optimizations
-  if (src2->hasConstVal(TBool)) {
-    bool b = src2->boolVal();
+  if (right->hasConstVal()) {
+    bool b = right->boolVal();
 
     // The result of the comparison might be independent of the truth
     // value of the LHS. If so, then simplify.
-    // E.g. `some-int > true`. some-int may juggle to false or true
-    //  (0 or 1), but `0 > true` and `1 > true` are both false, so we can
-    //  simplify to false immediately.
-    if (cmpOp(opName, false, b) == cmpOp(opName, true, b)) {
-      return cns(env, bool(cmpOp(opName, false, b)));
+    if (cmpOp(opc, false, b) == cmpOp(opc, true, b)) {
+      return cns(env, cmpOp(opc, false, b));
     }
 
     // There are only two distinct booleans - false and true (0 and 1).
     // From above, we know that (0 OP b) != (1 OP b).
     // Hence exactly one of (0 OP b) and (1 OP b) is true.
-    // Hence there is exactly one boolean value of src1 that results in the
-    // overall expression being true (after type-juggling).
+    // Hence there is exactly one boolean value of "left" that results in the
+    // overall expression being true.
     // Hence we may check for equality with that boolean.
-    // E.g. `some-int > false` is equivalent to `some-int == true`
-    if (opName != Eq && opName != EqBool) {
-      bool const res = cmpOp(opName, false, b);
-      return newInst(isBoolQueryOp(opName) ? EqBool : Eq, src1, cns(env, !res));
-    }
-  }
-
-  // Lower to int-comparison if possible.
-  if (!isIntQueryOp(opName) && type1 <= TInt && type2 <= TInt) {
-    return newInst(queryToIntQueryOp(opName), src1, src2);
-  }
-
-  // Dbl-dbl or dbl-int comparison lower to dbl-comparison
-  if (!isDblQueryOp(opName) &&
-      (type1 <= TDbl || type2 <= TDbl) &&
-      (type1.subtypeOfAny(TInt, TDbl) &&
-       type2.subtypeOfAny(TInt, TDbl))) {
-    return newInst(queryToDblQueryOp(opName),
-                   gen(env, ConvCellToDbl, src1),
-                   gen(env, ConvCellToDbl, src2));
-  }
-
-  // Lower to str-comparison if possible.
-  if (!isStrQueryOp(opName) && type1 <= TStr && type2 <= TStr) {
-    return newInst(queryToStrQueryOp(opName), src1, src2);
-  }
-
-  // Lower to bool-comparison if possible.
-  if (!isBoolQueryOp(opName) && type1 <= TBool && type2 <= TBool) {
-    return newInst(queryToBoolQueryOp(opName), src1, src2);
-  }
-
-  // Lower to obj-comparison if possible.
-  if (!isObjQueryOp(opName) && type1 <= TObj && type2 <= TObj) {
-    return newInst(queryToObjQueryOp(opName), src1, src2);
-  }
-
-  // Lower to array-comparison if possible.
-  if (!isArrQueryOp(opName) && type1 <= TArr && type2 <= TArr) {
-    return newInst(queryToArrQueryOp(opName), src1, src2);
-  }
-
-  // Lower to resource-comparison if possible.
-  if (!isResQueryOp(opName) && type1 <= TRes && type2 <= TRes) {
-    return newInst(queryToResQueryOp(opName), src1, src2);
-  }
-
-  // ---------------------------------------------------------------------
-  // For same-type cmps, canonicalize any constants to the right
-  // Then stop - there are no more simplifications left
-  // ---------------------------------------------------------------------
-
-  if ((type1.toDataType() == type2.toDataType()) ||
-      (type1 <= TStr && type2 <= TStr)) {
-    if (src1->hasConstVal() && !src2->hasConstVal()) {
-      return newInst(commuteQueryOp(opName), src2, src1);
-    }
-    return nullptr;
-  }
-
-  // ---------------------------------------------------------------------
-  // Perform type juggling and type canonicalization for different types
-  // see http://docs.hhvm.com/manual/en/language.operators.comparison.php
-  // ---------------------------------------------------------------------
-
-  // nulls get canonicalized to the right
-  if (type1 <= TNull) {
-    return newInst(commuteQueryOp(opName), src2, src1);
-  }
-
-  // case 1a: null cmp string. Convert null to ""
-  if (type1 <= TStr && type2 <= TNull) {
-    return newInst(opName, src1, cns(env, s_empty.get()));
-  }
-
-  // case 1b: null cmp object. Convert null to false and the object to true
-  if (type1 <= TObj && type2 <= TNull) {
-    return newInst(opName, cns(env, true), cns(env, false));
-  }
-
-  // case 2a: null cmp anything. Convert null to false
-  if (type2 <= TNull) {
-    return newInst(opName, src1, cns(env, false));
-  }
-
-  // bools get canonicalized to the right
-  if (src1->isA(TBool)) {
-    return newInst(commuteQueryOp(opName), src2, src1);
-  }
-
-  // case 2b: bool cmp anything. Convert anything to bool
-  if (src2->isA(TBool)) {
-    if (src1->hasConstVal()) {
-      if (src1->isA(TInt)) {
-        return newInst(opName, cns(env, bool(src1->intVal())), src2);
-      } else if (src1->isA(TStr)) {
-        auto str = src1->strVal();
-        return newInst(opName, cns(env, str->toBoolean()), src2);
-      }
+    if (opc != EqBool) {
+      return newInst(EqBool, left, cns(env, !cmpOp(opc, false, b)));
     }
 
-    // Optimize comparison between int and const bool
-    if (src1->isA(TInt) && src2->hasConstVal()) {
-      // Based on the const bool optimization (above) opName should be Eq
-      always_assert(opName == Eq);
-      return newInst(src2->boolVal() ? Neq : Eq, src1, cns(env, 0));
-    }
-
-    // Nothing fancy to do - perform juggling as normal.
-    return newInst(opName, gen(env, ConvCellToBool, src1), src2);
+    // If we reach here, this is an equality comparison against a
+    // constant. Testing for equality with true simplifies to just the left
+    // operand, while equality with false is the negation of the left operand
+    // (equivalent to XORing with true).
+    return b ? left : newInst(XorBool, left, cns(env, true));
   }
 
-  // case 3: object cmp object. No juggling to do same-type simplification is
-  // performed above.
+  return nullptr;
+}
 
-  // strings get canonicalized to the left
-  if (type2 <= TStr) {
-    return newInst(commuteQueryOp(opName), src2, src1);
+SSATmp* cmpIntImpl(State& env,
+                   Opcode opc,
+                   const IRInstruction* const inst,
+                   SSATmp* left,
+                   SSATmp* right) {
+  assertx(left->type() <= TInt);
+  assertx(right->type() <= TInt);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
+
+  // Identity optimization
+  if (left == right) {
+    return cns(env, cmpOp(opc, true, true));
   }
 
-  // ints get canonicalized to the right
-  if (src1->isA(TInt)) {
-    return newInst(commuteQueryOp(opName), src2, src1);
-  }
-
-  // case 4: number/string/resource cmp. Convert to number (int OR double)
-  // NOTE: The following if-test only checks for some of the SRON-SRON
-  //  cases (specifically, string-int). Other cases (like string-string)
-  //  are dealt with earlier, while other cases (like number-resource)
-  //  are not caught at all (and end up exiting this macro at the bottom).
-  if (src1->hasConstVal(TStr) && src2->isA(TInt)) {
-    auto str = src1->strVal();
-    int64_t si; double sd;
-    auto st = str->isNumericWithVal(si, sd, true /* allow errors */);
-    if (st == KindOfDouble) {
-      return newInst(opName, cns(env, sd), src2);
-    }
-    if (st == KindOfNull) {
-      si = 0;
-    }
-    return newInst(opName, cns(env, si), src2);
-  }
-
-  // case 5: array cmp array. No juggling to do same-type simplification is
-  // performed above
-
-  // case 6: array cmp anything. Array is greater than everything except an
-  // object. We can't simplify non-equality comparisons with objects because we
-  // have to throw if the object is a collection.
-  if (src1->isA(TArr)) {
-    if (src2->isA(TObj)) {
-      switch (opName) {
-        case Eq:
-        case EqX:
-        case Neq:
-        case NeqX:
-        case Same:
-        case NSame:
-          return cns(env, bool(cmpOp(opName, 0, 1)));
-        default:
-          break;
-      }
+  if (left->hasConstVal()) {
+    // If both operands are constants, constant-fold them. Otherwise, move the
+    // constant over to the right.
+    if (right->hasConstVal()) {
+      return cns(env, cmpOp(opc, left->intVal(), right->intVal()));
     } else {
-      return cns(env, bool(cmpOp(opName, 1, 0)));
-    }
-  }
-  if (src2->isA(TArr)) {
-    if (src1->isA(TObj)) {
-      switch (opName) {
-        case Eq:
-        case EqX:
-        case Neq:
-        case NeqX:
-        case Same:
-        case NSame:
-          return cns(env, bool(cmpOp(opName, 1, 0)));
-        default:
-          break;
-      }
-    } else {
-      return cns(env, bool(cmpOp(opName, 0, 1)));
+      auto newOpc = [](Opcode opc) {
+        switch (opc) {
+          case GtInt:  return LtInt;
+          case GteInt: return LteInt;
+          case LtInt:  return GtInt;
+          case LteInt: return GteInt;
+          case EqInt:  return EqInt;
+          case NeqInt: return NeqInt;
+          default: always_assert(false);
+        }
+      }(opc);
+      return newInst(newOpc, right, left);
     }
   }
 
   return nullptr;
 }
 
-#define X(x)                                                \
-  SSATmp* simplify##x(State& env, const IRInstruction* i) { \
-    return cmpImpl(env, i->op(), i, i->src(0), i->src(1));  \
+SSATmp* cmpStrImpl(State& env,
+                   Opcode opc,
+                   const IRInstruction* const inst,
+                   SSATmp* left,
+                   SSATmp* right) {
+  assertx(left->type() <= TStr);
+  assertx(right->type() <= TStr);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
+
+  // Identity optimization
+  if (left == right) {
+    return cns(env, cmpOp(opc, true, true));
   }
 
-X(Gt)
-X(Gte)
-X(Lt)
-X(Lte)
-X(Eq)
-X(Neq)
-X(GtX)
-X(GteX)
-X(LtX)
-X(LteX)
-X(EqX)
-X(NeqX)
-X(GtInt)
-X(GteInt)
-X(LtInt)
-X(LteInt)
-X(EqInt)
-X(NeqInt)
-X(GtBool)
-X(GteBool)
-X(LtBool)
-X(LteBool)
-X(EqBool)
-X(NeqBool)
-X(Same)
-X(NSame)
-X(GtStr)
-X(GteStr)
-X(LtStr)
-X(LteStr)
-X(EqStr)
-X(NeqStr)
-X(SameStr)
-X(NSameStr)
-X(GtObj)
-X(GteObj)
-X(LtObj)
-X(LteObj)
-X(EqObj)
-X(NeqObj)
-X(SameObj)
-X(NSameObj)
-X(GtArr)
-X(GteArr)
-X(LtArr)
-X(LteArr)
-X(EqArr)
-X(NeqArr)
-X(SameArr)
-X(NSameArr)
-X(GtRes)
-X(GteRes)
-X(LtRes)
-X(LteRes)
-X(EqRes)
-X(NeqRes)
+  if (left->hasConstVal()) {
+    // If both operands are constants, constant-fold them. Otherwise, move the
+    // constant over to the right.
+    if (right->hasConstVal()) {
+      if (opc == SameStr || opc == NSameStr) {
+        return cns(
+          env,
+          cmpOp(opc, left->strVal()->same(right->strVal()), true)
+        );
+      } else {
+        return cns(
+          env,
+          cmpOp(opc, left->strVal()->compare(right->strVal()), 0)
+        );
+      }
+    } else {
+      auto newOpc = [](Opcode opc) {
+        switch (opc) {
+          case GtStr:    return LtStr;
+          case GteStr:   return LteStr;
+          case LtStr:    return GtStr;
+          case LteStr:   return GteStr;
+          case EqStr:    return EqStr;
+          case NeqStr:   return NeqStr;
+          case SameStr:  return SameStr;
+          case NSameStr: return NSameStr;
+          default: always_assert(false);
+        }
+      }(opc);
+      return newInst(newOpc, right, left);
+    }
+  }
+
+  // Comparisons against the empty string can be optimized to checks on the
+  // string length.
+  if (right->hasConstVal() && right->strVal()->empty()) {
+    switch (opc) {
+      case EqStr:
+      case SameStr:
+      case LteStr: return newInst(EqInt, gen(env, LdStrLen, left), cns(env, 0));
+      case NeqStr:
+      case NSameStr:
+      case GtStr: return newInst(NeqInt, gen(env, LdStrLen, left), cns(env, 0));
+      case LtStr: return cns(env, false);
+      case GteStr: return cns(env, true);
+      default: always_assert(false);
+    }
+  }
+
+  return nullptr;
+}
+
+SSATmp* cmpStrIntImpl(State& env,
+                      Opcode opc,
+                      const IRInstruction* const inst,
+                      SSATmp* left,
+                      SSATmp* right) {
+  assertx(left->type() <= TStr);
+  assertx(right->type() <= TInt);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
+
+  // If the string operand has a constant value, convert it to the appropriate
+  // numeric and lower to a numeric comparison.
+  if (left->hasConstVal()) {
+    int64_t si;
+    double sd;
+    auto type =
+      left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
+    if (type == KindOfDouble) {
+      auto dblOpc = [](Opcode opc) {
+        switch (opc) {
+          case GtStrInt:  return GtDbl;
+          case GteStrInt: return GteDbl;
+          case LtStrInt:  return LtDbl;
+          case LteStrInt: return LteDbl;
+          case EqStrInt:  return EqDbl;
+          case NeqStrInt: return NeqDbl;
+          default: always_assert(false);
+        }
+      }(opc);
+      return newInst(
+        dblOpc,
+        cns(env, sd),
+        gen(env, ConvIntToDbl, right)
+      );
+    } else {
+      auto intOpc = [](Opcode opc) {
+        switch (opc) {
+          case GtStrInt:  return GtInt;
+          case GteStrInt: return GteInt;
+          case LtStrInt:  return LtInt;
+          case LteStrInt: return LteInt;
+          case EqStrInt:  return EqInt;
+          case NeqStrInt: return NeqInt;
+          default: always_assert(false);
+        }
+      }(opc);
+      return newInst(
+        intOpc,
+        cns(env, type == KindOfNull ? (int64_t)0 : si),
+        right
+      );
+    }
+  }
+
+  return nullptr;
+}
+
+SSATmp* cmpObjImpl(State& env,
+                   Opcode opc,
+                   const IRInstruction* const inst,
+                   SSATmp* left,
+                   SSATmp* right) {
+  assertx(left->type() <= TObj);
+  assertx(right->type() <= TObj);
+
+  // Identity optimization. Object comparisons can produce arbitrary
+  // side-effects, so we can only eliminate the comparison if its checking for
+  // sameness.
+  if ((opc == SameObj || opc == NSameObj) && left == right) {
+    return cns(env, cmpOp(opc, true, true));
+  }
+
+  return nullptr;
+}
+
+SSATmp* cmpArrImpl(State& env,
+                   Opcode opc,
+                   const IRInstruction* const inst,
+                   SSATmp* left,
+                   SSATmp* right) {
+  assertx(left->type() <= TArr);
+  assertx(right->type() <= TArr);
+
+  // Identity optimization. Array comparisons can produce arbitrary
+  // side-effects, so we can only eliminate the comparison if its checking for
+  // sameness.
+  if ((opc == SameArr || opc == NSameArr) && left == right) {
+    return cns(env, cmpOp(opc, true, true));
+  }
+
+  return nullptr;
+}
+
+
+SSATmp* cmpResImpl(State& env,
+                   Opcode opc,
+                   const IRInstruction* const inst,
+                   SSATmp* left,
+                   SSATmp* right) {
+  assertx(left->type() <= TRes);
+  assertx(right->type() <= TRes);
+
+  // Identity optimization.
+  if (left == right) {
+    return cns(env, cmpOp(opc, true, true));
+  }
+
+  return nullptr;
+}
+
+#define X(name, type)                                                   \
+  SSATmp* simplify##name(State& env, const IRInstruction* i) {          \
+    return cmp##type##Impl(env, i->op(), i, i->src(0), i->src(1));      \
+  }
+
+X(GtBool, Bool)
+X(GteBool, Bool)
+X(LtBool, Bool)
+X(LteBool, Bool)
+X(EqBool, Bool)
+X(NeqBool, Bool)
+
+X(GtInt, Int)
+X(GteInt, Int)
+X(LtInt, Int)
+X(LteInt, Int)
+X(EqInt, Int)
+X(NeqInt, Int)
+
+X(GtStr, Str)
+X(GteStr, Str)
+X(LtStr, Str)
+X(LteStr, Str)
+X(EqStr, Str)
+X(NeqStr, Str)
+X(SameStr, Str)
+X(NSameStr, Str)
+
+X(GtStrInt, StrInt)
+X(GteStrInt, StrInt)
+X(LtStrInt, StrInt)
+X(LteStrInt, StrInt)
+X(EqStrInt, StrInt)
+X(NeqStrInt, StrInt)
+
+X(GtObj, Obj)
+X(GteObj, Obj)
+X(LtObj, Obj)
+X(LteObj, Obj)
+X(EqObj, Obj)
+X(NeqObj, Obj)
+X(SameObj, Obj)
+X(NSameObj, Obj)
+
+X(GtArr, Arr)
+X(GteArr, Arr)
+X(LtArr, Arr)
+X(LteArr, Arr)
+X(EqArr, Arr)
+X(NeqArr, Arr)
+X(SameArr, Arr)
+X(NSameArr, Arr)
+
+X(GtRes, Res)
+X(GteRes, Res)
+X(LtRes, Res)
+X(LteRes, Res)
+X(EqRes, Res)
+X(NeqRes, Res)
+
 #undef X
+
+SSATmp* simplifyEqCls(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, left->clsVal() == right->clsVal());
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyCmpBool(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  assertx(left->type() <= TBool);
+  assertx(right->type() <= TBool);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, HPHP::compare(left->boolVal(), right->boolVal()));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyCmpInt(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  assertx(left->type() <= TInt);
+  assertx(right->type() <= TInt);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, HPHP::compare(left->intVal(), right->intVal()));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyCmpStr(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+
+  assertx(left->type() <= TStr);
+  assertx(right->type() <= TStr);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
+
+  if (left->hasConstVal()) {
+    if (right->hasConstVal()) {
+      return cns(env, HPHP::compare(left->strVal(), right->strVal()));
+    } else if (left->strVal()->empty()) {
+      // Comparisons against the empty string can be optimized to a comparison
+      // on the string length.
+      return newInst(CmpInt, cns(env, 0), gen(env, LdStrLen, right));
+    }
+  } else if (right->hasConstVal() && right->strVal()->empty()) {
+    return newInst(CmpInt, gen(env, LdStrLen, left), cns(env, 0));
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyCmpStrInt(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+
+  assertx(left->type() <= TStr);
+  assertx(right->type() <= TInt);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
+
+  // If the string operand has a constant value, convert it to the appropriate
+  // numeric and lower to a numeric comparison.
+  if (left->hasConstVal()) {
+    int64_t si;
+    double sd;
+    auto type =
+      left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
+    if (type == KindOfDouble) {
+      return newInst(
+        CmpDbl,
+        cns(env, sd),
+        gen(env, ConvIntToDbl, right)
+      );
+    } else {
+      return newInst(
+        CmpInt,
+        cns(env, type == KindOfNull ? (int64_t)0 : si),
+        right
+      );
+    }
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  assertx(left->type() <= TRes);
+  assertx(right->type() <= TRes);
+  return (left == right) ? cns(env, 0) : nullptr;
+}
 
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   bool const trueSense = inst->op() == IsType;
@@ -1382,6 +1415,17 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   assertx(IMPLIES(type <= TStr, type == TStr));
   assertx(IMPLIES(type <= TArr, type == TArr));
 
+  // Specially handle checking if an uninit var's type is null. The Type class
+  // doesn't fully correctly handle the fact that the earlier stages of the
+  // compiler consider null to be either initalized or uninitalized, so we need
+  // to do this check first. Right here is really the only place in the backend
+  // it seems to matter, especially since manipulating an uninit is kind of
+  // weird; as of this writing, "$uninitalized_variable ?? 42" is the only
+  // place it really comes up.
+  if (srcType <= TUninit && type <= TNull) {
+    return cns(env, trueSense);
+  }
+
   // The types are disjoint; the result must be false.
   if (!srcType.maybe(type)) {
     return cns(env, !trueSense);
@@ -1398,28 +1442,70 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* instanceOfImpl(State& env, ClassSpec spec1, ClassSpec spec2) {
+  if (!spec1 || !spec2) return nullptr;
+
+  auto const cls1 = spec1.cls();
+  auto const cls2 = spec2.cls();
+
+  if (spec1.exact() && spec2.exact()) {
+    return cns(env, cls1->classof(cls2));
+  }
+
+  if (spec2.exact() && cls1->classof(cls2)) {
+    return cns(env, true);
+  }
+
+  return nullptr;
+}
+
 SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  if (src2->isA(TNullptr)) return cns(env, false);
+  auto const spec2 = src2->type().clsSpec();
 
-  if (!src1->hasConstVal() || !src2->hasConstVal()) return nullptr;
+  if (src2->isA(TNullptr)) {
+    return cns(env, false);
+  }
 
-  return cns(env, src1->clsVal()->classof(src2->clsVal()));
+  if (mightRelax(env, src1) || mightRelax(env, src2)) {
+    return nullptr;
+  }
+
+  if (auto const cls = spec2.exactCls()) {
+    if (isNormalClass(cls) && (cls->attrs() & AttrUnique)) {
+      return gen(env, ExtendsClass, src1, src2);
+    }
+    if (isInterface(cls) && (cls->attrs() & AttrUnique)) {
+      return gen(env, InstanceOfIface, src1, cns(env, cls->name()));
+    }
+  }
+
+  return instanceOfImpl(env, src1->type().clsSpec(), src2->type().clsSpec());
 }
 
-SSATmp* simplifyExtendsClass(State& env, const IRInstruction* i) {
-  return simplifyInstanceOf(env, i);
+SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  auto const spec2 = src2->type().clsSpec();
+
+  DEBUG_ONLY auto const cls2 = spec2.exactCls();
+  assertx(cls2 && isNormalClass(cls2));
+
+  return instanceOfImpl(env, src1->type().clsSpec(), spec2);
 }
 
 SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  if (!src1->hasConstVal() || !src2->hasConstVal()) return nullptr;
+  auto const cls2 = Unit::lookupClassOrUniqueClass(src2->strVal());
+  assertx(cls2 && isInterface(cls2));
+  auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 
-  return cns(env, src1->clsVal()->ifaceofDirect(src2->strVal()));
+  return instanceOfImpl(env, src1->type().clsSpec(), spec2);
 }
 
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
@@ -1434,6 +1520,21 @@ SSATmp* simplifyIsScalarType(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->type().isKnownDataType()) {
     return cns(env, src->isA(TInt | TDbl | TStr | TBool));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  auto const clsSpec = src1->type().clsSpec();
+
+  if (clsSpec.cls() != nullptr && src2->hasConstVal(TStr)) {
+    // If we don't have an exact type, then we can't say for sure the class
+    // doesn't have the method.
+    auto const result = clsSpec.cls()->lookupMethod(src2->strVal()) != nullptr;
+    return (clsSpec.exact() || result) ? cns(env, result) : nullptr;
   }
   return nullptr;
 }
@@ -1631,7 +1732,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
     }
     return gen(env, ConvObjToBool, src);
   }
-  if (srcType <= TRes)  return nullptr; // No specialization yet
+  if (srcType <= TRes)  return cns(env, true);
 
   return nullptr;
 }
@@ -1671,7 +1772,7 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TDbl)  return gen(env, ConvDblToInt, src);
   if (srcType <= TStr)  return gen(env, ConvStrToInt, src);
   if (srcType <= TObj)  return gen(env, ConvObjToInt, inst->taken(), src);
-  if (srcType <= TRes)  return nullptr; // No specialization yet
+  if (srcType <= TRes)  return gen(env, ConvResToInt, src);
 
   return nullptr;
 }
@@ -1687,7 +1788,7 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TInt)  return gen(env, ConvIntToDbl, src);
   if (srcType <= TStr)  return gen(env, ConvStrToDbl, src);
   if (srcType <= TObj)  return gen(env, ConvObjToDbl, inst->taken(), src);
-  if (srcType <= TRes)  return nullptr; // No specialization yet
+  if (srcType <= TRes)  return gen(env, ConvResToDbl, src);
 
   return nullptr;
 }
@@ -1695,7 +1796,7 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
-  if (!typeMightRelax(inst->src(0)) &&
+  if (!irgen::typeMightRelax(inst->src(0)) &&
       ty < TObj &&
       ty.clsSpec().cls() &&
       ty.clsSpec().cls()->isCollectionClass()) {
@@ -1952,17 +2053,41 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
     return gen(env, Nop);
   }
 
-  // Absorb negations.
-  if (srcInst->is(XorBool) && srcInst->src(1)->hasConstVal(true)) {
+  auto absorb = [&](){
+    return gen(env, inst->op(), inst->taken(), srcInst->src(0));
+  };
+  auto absorbOpp = [&](){
     return gen(env,
                inst->op() == JmpZero ? JmpNZero : JmpZero,
                inst->taken(),
                srcInst->src(0)
               );
+  };
+
+  // Absorb negations.
+  if (srcInst->is(XorBool) && srcInst->src(1)->hasConstVal(true)) {
+    return absorbOpp();
   }
+
   // Absorb ConvIntToBool.
   if (srcInst->is(ConvIntToBool)) {
-    return gen(env, inst->op(), inst->taken(), srcInst->src(0));
+    return absorb();
+  }
+
+  // Absorb boolean comparisons.
+  if (srcInst->is(EqBool) && srcInst->src(1)->hasConstVal()) {
+    return srcInst->src(1)->boolVal() ? absorb() : absorbOpp();
+  }
+  if (srcInst->is(NeqBool) && srcInst->src(1)->hasConstVal()) {
+    return srcInst->src(1)->boolVal() ? absorbOpp() : absorb();
+  }
+
+  // Absorb integer comparisons against constant zero.
+  if (srcInst->is(EqInt) && srcInst->src(1)->hasConstVal(0)) {
+    return absorbOpp();
+  }
+  if (srcInst->is(NeqInt) && srcInst->src(1)->hasConstVal(0)) {
+    return absorb();
   }
 
   return nullptr;
@@ -2003,7 +2128,7 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
-  if (!idx->hasConstVal()) return nullptr;
+  assertx(idx->hasConstVal(TInt));
   auto const value = arr->arrVal()->nvGet(idx->intVal());
   return value ? cns(env, *value) : nullptr;
 }
@@ -2012,10 +2137,10 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
-  if (!idx->hasConstVal()) return nullptr;
+  assertx(idx->hasConstVal(TStr));
   auto const value = [&] {
     int64_t val;
-    if (idx->strVal()->isStrictlyInteger(val)) {
+    if (arr->arrVal()->convertKey(idx->strVal(), val)) {
       return arr->arrVal()->nvGet(val);
     }
     return arr->arrVal()->nvGet(idx->strVal());
@@ -2024,9 +2149,57 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->hasConstVal()) {
-    if (inst->src(1)->type() <= TInt) return arrIntKeyImpl(env, inst);
-    if (inst->src(1)->type() <= TStr) return arrStrKeyImpl(env, inst);
+  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (inst->src(1)->type() <= TInt) {
+      if (auto result = arrIntKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, RaiseArrayIndexNotice, inst->taken(), inst->src(1));
+      return cns(env, TInitNull);
+    }
+    if (inst->src(1)->type() <= TStr) {
+      if (auto result = arrStrKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, RaiseArrayKeyNotice, inst->taken(), inst->src(1));
+      return cns(env, TInitNull);
+    }
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (inst->src(1)->isA(TInt)) {
+      if (auto result = arrIntKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, IncRef, inst->src(2));
+      return inst->src(2);
+    }
+    if (inst->src(1)->isA(TStr)) {
+      if (auto result = arrStrKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, IncRef, inst->src(2));
+      return inst->src(2);
+    }
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (inst->src(1)->isA(TInt)) {
+      if (arrIntKeyImpl(env, inst)) {
+        return cns(env, true);
+      }
+    } else if (inst->src(1)->isA(TStr)) {
+      if (arrStrKeyImpl(env, inst)) {
+        return cns(env, true);
+      }
+    }
+    return cns(env, false);
   }
   return nullptr;
 }
@@ -2153,6 +2326,31 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
     inst->src(0)->type().clsSpec().cls()->classof(c_WaitHandle::classof());
   if (baseIsWaitHandle) {
     return cns(env, true);
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyIsCol(State& env, const IRInstruction* inst) {
+  auto const ty = inst->src(0)->type();
+
+  if (!irgen::typeMightRelax(inst->src(0)) &&
+      ty < TObj &&
+      ty.clsSpec().cls()) {
+    return cns(env, ty.clsSpec().cls()->isCollectionClass());
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyHasToString(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+
+  if (!mightRelax(env, src) &&
+      src->isA(TObj) &&
+      src->type().clsSpec()) {
+    return cns(
+      env,
+      src->type().clsSpec().cls()->getToString() != nullptr
+    );
   }
   return nullptr;
 }
@@ -2290,6 +2488,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(DecRefNZ)
   X(DefLabel)
   X(DivDbl)
+  X(DivInt)
   X(ExtendsClass)
   X(Floor)
   X(GetCtxFwdCall)
@@ -2302,9 +2501,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsScalarType)
   X(IsType)
   X(IsWaitHandle)
+  X(IsCol)
+  X(HasToString)
   X(LdClsCtx)
   X(LdClsName)
   X(LdStrLen)
+  X(MethodExists)
   X(CheckCtxThis)
   X(CastCtxThis)
   X(LdObjClass)
@@ -2327,32 +2529,20 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(AddIntO)
   X(SubIntO)
   X(MulIntO)
-  X(Gt)
-  X(Gte)
-  X(Lt)
-  X(Lte)
-  X(Eq)
-  X(Neq)
-  X(GtX)
-  X(GteX)
-  X(LtX)
-  X(LteX)
-  X(EqX)
-  X(NeqX)
-  X(GtInt)
-  X(GteInt)
-  X(LtInt)
-  X(LteInt)
-  X(EqInt)
-  X(NeqInt)
   X(GtBool)
   X(GteBool)
   X(LtBool)
   X(LteBool)
   X(EqBool)
   X(NeqBool)
-  X(Same)
-  X(NSame)
+  X(CmpBool)
+  X(GtInt)
+  X(GteInt)
+  X(LtInt)
+  X(LteInt)
+  X(EqInt)
+  X(NeqInt)
+  X(CmpInt)
   X(GtStr)
   X(GteStr)
   X(LtStr)
@@ -2361,6 +2551,14 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqStr)
   X(SameStr)
   X(NSameStr)
+  X(CmpStr)
+  X(GtStrInt)
+  X(GteStrInt)
+  X(LtStrInt)
+  X(LteStrInt)
+  X(EqStrInt)
+  X(NeqStrInt)
+  X(CmpStrInt)
   X(GtObj)
   X(GteObj)
   X(LtObj)
@@ -2383,7 +2581,11 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LteRes)
   X(EqRes)
   X(NeqRes)
+  X(CmpRes)
+  X(EqCls)
   X(ArrayGet)
+  X(ArrayIdx)
+  X(AKExistsArr)
   X(OrdStr)
   X(LdLoc)
   X(LdStk)
@@ -2441,7 +2643,7 @@ bool canSimplifyAssertType(const IRInstruction* inst,
     if (!srcMightRelax) return true;
 
     if (srcType < newType) {
-      // This can happen because of limitations in how Toperator& handles
+      // This can happen because of limitations in how Type::operator& handles
       // specialized types: sometimes it returns a Type that's wider than it
       // needs to be.  It shouldn't affect correctness but it can cause us to
       // miss out on some perf.
@@ -2614,17 +2816,8 @@ void simplifyPass(IRUnit& unit) {
 //////////////////////////////////////////////////////////////////////
 
 void copyProp(IRInstruction* inst) {
-  for (uint32_t i = 0; i < inst->numSrcs(); i++) {
-    auto tmp     = inst->src(i);
-    auto srcInst = tmp->inst();
-
-    if (srcInst->is(Mov)) {
-      inst->setSrc(i, srcInst->src(0));
-    }
-
-    // We're assuming that all of our src instructions have already been
-    // copyPropped.
-    assertx(!inst->src(i)->inst()->is(Mov));
+  for (auto& src : inst->srcs()) {
+    while (src->inst()->is(Mov)) src = src->inst()->src(0);
   }
 }
 
@@ -2668,7 +2861,7 @@ Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
     return TInitNull;
   }
 
-  Type t = arr->isA(TStaticArr) ? TInitCell : TGen;
+  Type t = arr->isA(TPersistentArr) ? TInitCell : TGen;
 
   auto const at = arr->type().arrSpec().type();
   if (!at) return t;

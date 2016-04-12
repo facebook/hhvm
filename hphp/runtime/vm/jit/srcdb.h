@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@
 namespace HPHP { namespace jit {
 ////////////////////////////////////////////////////////////////////////////////
 
-struct CodeGenFixups;
+struct CGMeta;
 struct RelocationInfo;
 
 /*
@@ -85,7 +85,7 @@ private:
   }
 
   /* needed to allow IncomingBranch to be put in a GrowableVector */
-  friend class GrowableVector<IncomingBranch>;
+  friend struct GrowableVector<IncomingBranch>;
   IncomingBranch() {}
 
   CompactTaggedPtr<void,Tag> m_ptr;
@@ -132,12 +132,19 @@ struct TransLoc {
   uint32_t coldSize()   const { return *(uint32_t*)coldStart(); }
   uint32_t frozenSize() const { return *(uint32_t*)frozenStart(); }
 
+  bool empty() const {
+    return m_mainOff == kDefaultOff && m_mainLen == 0 &&
+      m_coldOff == kDefaultOff && m_frozenOff == kDefaultOff;
+  }
+
 private:
-  uint32_t m_mainOff {std::numeric_limits<uint32_t>::max()};
+  static auto constexpr kDefaultOff = std::numeric_limits<uint32_t>::max();
+
+  uint32_t m_mainOff {kDefaultOff};
   uint32_t m_mainLen {0};
 
-  uint32_t m_coldOff   {std::numeric_limits<uint32_t>::max()};
-  uint32_t m_frozenOff {std::numeric_limits<uint32_t>::max()};
+  uint32_t m_coldOff   {kDefaultOff};
+  uint32_t m_frozenOff {kDefaultOff};
 };
 
 // Prevent unintentional growth of the SrcDB
@@ -149,7 +156,7 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
 struct SrcRec {
   SrcRec()
     : m_topTranslation(nullptr)
-    , m_anchorTranslation(0)
+    , m_anchorTranslation(nullptr)
     , m_dbgBranchGuardSrc(nullptr)
     , m_guard(0)
   {}
@@ -163,7 +170,7 @@ struct SrcRec {
    * lease.
    */
   TCA getTopTranslation() const {
-    return m_topTranslation.load(std::memory_order_acquire);
+    return m_topTranslation.get();
   }
 
   /*
@@ -173,7 +180,7 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
-  void registerFallbackJump(TCA from, ConditionCode cc = CC_None);
+  void registerFallbackJump(TCA from, ConditionCode cc, CGMeta& fixups);
   TCA getFallbackTranslation() const;
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
@@ -220,7 +227,7 @@ struct SrcRec {
   /*
    * There is an unlikely race in retranslate, where two threads
    * could simultaneously generate the same translation for a
-   * tracelet. In practice its almost impossible to hit this, unless
+   * tracelet. In practice it's almost impossible to hit this, unless
    * Eval.JitRequireWriteLease is set. But when it is set, we hit
    * it a lot.
    * m_guard doesn't quite solve it, but its as good as things were
@@ -242,7 +249,7 @@ private:
   // This either points to the most recent translation in the
   // translations vector, or if hasDebuggerGuard() it points to the
   // debug guard.
-  std::atomic<TCA> m_topTranslation;
+  AtomicLowTCA m_topTranslation;
 
   /*
    * The following members are all protected by the translator write
@@ -252,14 +259,14 @@ private:
   // We chain new translations onto the end of the list, so we need to
   // track all the fallback jumps from the "tail" translation so we
   // can rewrire them to new ones.
-  TCA m_anchorTranslation;
+  LowTCA m_anchorTranslation;
   GrowableVector<IncomingBranch> m_tailFallbackJumps;
 
   GrowableVector<TransLoc> m_translations;
   GrowableVector<IncomingBranch> m_incomingBranches;
   MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
-  TCA m_dbgBranchGuardSrc;
+  LowTCA m_dbgBranchGuardSrc;
   std::atomic<uint32_t> m_guard;
 };
 

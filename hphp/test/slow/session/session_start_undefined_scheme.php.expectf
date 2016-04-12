@@ -1,0 +1,5 @@
+
+Warning: failed to connect to 127.0.0.1 [%d]: Connection refused
+
+Warning: Failed connecting to redis server at 127.0.0.1: Connection refused
+

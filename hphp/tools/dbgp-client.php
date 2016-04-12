@@ -44,6 +44,7 @@ function format_socket_error($fd, $prefix) {
 /* Starts a client.  Returns the socket and port used. */
 function start_client($port) {
   $socket = socket_create(AF_INET, SOCK_STREAM, 0);
+  @socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);
   @socket_bind($socket, 'localhost', $port);
   $result = socket_listen($socket);
   assert($result);

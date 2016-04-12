@@ -9,18 +9,6 @@
 function hphp_thread_type(): int;
 
 /**
- * When I'm running a newer version of the server software and I'm getting an
- *   HTTP request that's from old version of a web page, proxy it to a local
- *   instance that is still running or dangling just for handling old version of
- *   requests. Please read server documentation for more details.
- *
- * @return bool - TRUE if successful, FALSE otherwise.
- *
- */
-<<__HipHopSpecific, __Native>>
-function dangling_server_proxy_old_request(): bool;
-
-/**
  * Whether pagelet server is enabled or not. Please read server documentation
  *   for what a pagelet server is.
  *
@@ -219,3 +207,35 @@ function xbox_schedule_thread_reset(): void;
  */
 <<__HipHopSpecific, __Native>>
 function xbox_get_thread_time(): int;
+
+namespace HH {
+/**
+ * Whether the server is going to stop soon.
+ *
+ * @return bool - True if server is going to stop soon, False if
+ * server is not running, or is running without a schedule to stop.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_is_stopping(): bool;
+
+/**
+ * Return the health level of the server in the range of 0~100.
+ *
+ * @return int - 100 if the server is very healthy, and 0 if the
+ * server should not receive any more request.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_health_level(): int;
+
+/**
+ * Returns the time that the http server has been running.
+ *
+ * @return int - number of seconds the server has been running.  -1 if
+ * server is not started.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_uptime(): int;
+}

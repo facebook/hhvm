@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,8 +34,7 @@ class ClassInfoHook;
  * Therefore, this is the place we store meta information of both global
  * functions and class methods and properties.
  */
-class ClassInfo {
-public:
+struct ClassInfo {
   enum Attribute {                      //  class   prop   func  method param
     ParamCoerceModeNull    = (1 <<  0), //                  x      x
     IsRedeclared           = (1 <<  1), //    x             x
@@ -83,8 +82,7 @@ public:
     NoFCallBuiltin         = (1u << 31),//                  x      x
   };
 
-  class ConstantInfo {
-  public:
+  struct ConstantInfo {
     ConstantInfo();
 
     String name;
@@ -99,8 +97,7 @@ public:
     std::string svalue; // serialized, only used by eval
   };
 
-  class UserAttributeInfo {
-  public:
+  struct UserAttributeInfo {
     UserAttributeInfo();
 
     String name;
@@ -145,8 +142,7 @@ public:
     MaybeDataType returnType;
   };
 
-  class PropertyInfo {
-  public:
+  struct PropertyInfo {
     PropertyInfo() : docComment(nullptr) {}
     Attribute attribute;
     String name;
@@ -292,7 +288,8 @@ public:
 
       case KindOfUninit:
       case KindOfNull:
-      case KindOfStaticString:
+      case KindOfPersistentString:
+      case KindOfPersistentArray:
       case KindOfRef:
       case KindOfClass:
         break;
@@ -378,8 +375,7 @@ private:
 /**
  * Stores info about a class that appears once in the codebase.
  */
-class ClassInfoUnique : public ClassInfo {
-public:
+struct ClassInfoUnique : ClassInfo {
 
   /**
    * Read one class's information from specified map pointer and move it.

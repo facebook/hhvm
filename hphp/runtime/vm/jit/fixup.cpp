@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,26 +29,26 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-bool FixupMap::getFrameRegs(const ActRec* ar,
-                            const ActRec* prevAr,
-                            VMRegs* outVMRegs) const {
+bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
   CTCA tca = (CTCA)ar->m_savedRip;
+
+  auto ent = m_fixups.find(tca);
+  if (!ent) return false;
+
+  // Note: If indirect fixups happen frequently enough, we could just compare
+  // savedRip to be less than some threshold where stubs in a.code stop.
+  if (ent->isIndirect()) {
+    auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
+                        ent->indirect.returnIpDisp;
+    ent = m_fixups.find(*reinterpret_cast<CTCA*>(savedRIPAddr));
+    assertx(ent && !ent->isIndirect());
+  }
+
   // Non-obvious off-by-one fun: if the *return address* points into the TC,
   // then the frame we were running on in the TC is actually the previous
   // frame.
   ar = ar->m_sfp;
-  auto* ent = m_fixups.find(tca);
-  if (!ent) return false;
-  if (ent->isIndirect()) {
-    // Note: if indirect fixups happen frequently enough, we could
-    // just compare savedRip to be less than some threshold where
-    // stubs in a.code stop.
-    assertx(prevAr);
-    auto pRealRip = ent->indirect.returnIpDisp +
-      uintptr_t(prevAr->m_sfp);
-    ent = m_fixups.find(*reinterpret_cast<CTCA*>(pRealRip));
-    assertx(ent && !ent->isIndirect());
-  }
+
   regsFromActRec(tca, ar, ent->fixup, outVMRegs);
   return true;
 }
@@ -58,10 +58,10 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
 
   TRACE(1, "fixup(begin):\n");
 
-  auto* nextRbp = rbp;
+  auto nextRbp = rbp;
   rbp = 0;
+
   do {
-    auto* prevRbp = rbp;
     rbp = nextRbp;
     assertx(rbp && "Missing fixup for native call");
     nextRbp = rbp->m_sfp;
@@ -71,7 +71,7 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
       TRACE(2, "fixup checking vm frame %s\n",
                nextRbp->m_func->name()->data());
       VMRegs regs;
-      if (getFrameRegs(rbp, prevRbp, &regs)) {
+      if (getFrameRegs(rbp, &regs)) {
         TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
               regs.fp->m_func->name()->data(),
               regs.fp, regs.sp, regs.pc);
@@ -156,7 +156,11 @@ void FixupMap::fixup(ExecutionContext* ec) const {
     // Start looking for fixup entries at the current (C++) frame.  This
     // will walk the frames upward until we find a TC frame.
     DECLARE_FRAME_POINTER(framePtr);
-    fixupWork(ec, framePtr);
+    // In order to avoid tail call elimination optimization issues, grab the
+    // parent frame pointer in order make sure this pointer is valid. The
+    // fixupWork() looks for a TC frame, and we never call fixup() directly
+    // from the TC, so skipping this frame isn't a problem.
+    fixupWork(ec, framePtr->m_sfp);
   }
 }
 
@@ -173,6 +177,10 @@ bool FixupMap::eagerRecord(const Func* func) {
     "array_filter",
     "array_map",
     "__SystemLib\\func_slice_args",
+    "thrift_protocol_read_binary",
+    "thrift_protocol_read_binary_struct",
+    "thrift_protocol_read_compact",
+    "thrift_protocol_read_compact_struct",
   };
 
   for (auto str : list) {

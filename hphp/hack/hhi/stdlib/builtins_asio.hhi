@@ -16,4 +16,5 @@ namespace HH\Asio {
   function join<T>(Awaitable<T> $awaitable): T;
   function result<T>(Awaitable<T> $awaitable): T;
   function has_finished<T>(Awaitable<T> $awaitable): bool;
+  function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
 }

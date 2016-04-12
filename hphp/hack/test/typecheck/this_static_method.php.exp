@@ -1,0 +1,7 @@
+[this][1]intersect(App \Foo<>)
+File "this_static_method.php", line 11, characters 12-21:
+Invalid return type (Typing[4110])
+File "this_static_method.php", line 7, characters 24-29:
+This is a string
+File "this_static_method.php", line 6, characters 31-33:
+It is incompatible with an int

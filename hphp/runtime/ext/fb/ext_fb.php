@@ -48,13 +48,13 @@ function fb_compact_unserialize(mixed $thing,
  * handler returns FALSE, code will continue with original function.
  * Otherwise, it will return what handler tells. The handler function looks
  * like "intercept_handler($name, $obj, $params, $data, &$done)", where $name
- * is original function's name, $obj is $this for an instance method call or
- * null for static method call or function calls, and $params are original
- * call's parameters. $data is what's passed to fb_intercept() and set $done
- * to false to indicate function should continue its execution with old
- * function as if interception did not happen. By default $done is true so it
- * will return handler's return immediately without executing old function's
- * code. Note that built-in functions are not interceptable.
+ * is original function's fully-qualified name ('Class::method'), $obj is $this
+ * for an instance method call or null for static method call or function calls,
+ * and $params are original call's parameters. $data is what's passed to
+ * fb_intercept() and set $done to false to indicate function should continue its
+ * execution with old function as if interception did not happen. By default $done
+ * is true so it will return handler's return immediately without executing old
+ * function's code. Note that built-in functions are not interceptable.
  * @param string $name - The function or class method name to intercept. Use
  * "class::method" for method name. If empty, all functions will be
  * intercepted by the specified handler and registered individual handlers
@@ -193,4 +193,47 @@ function fb_lazy_lstat(string $filename): mixed;
  * @return string - Real path of the file.
  */
 <<__Native>>
-function fb_lazy_realpath(string $filename): string;
+function fb_lazy_realpath(string $filename): mixed;
+
+/* This function invokes $function with the arguments specified in its
+ * parameter list. It returns an array of two elements, the first being a
+ * boolean specifying whether or not the function was invoked, the latter
+ * being the return value, or null if it was not invoked. The function may be
+ * any PHP callable, either a string function name, an array of object
+ * instance and method, or array of classname and static class method.
+ * @param mixed $function - The callback to invoke.
+ * @return array - Two elements, 0 is a bool whether function was invoked, 1
+ * is the return value if invoked.
+ */
+<<__HipHopSpecific, __Native>>
+function fb_call_user_func_safe(mixed $function,
+                                ...$argv): array;
+
+/* This function invokes $function with the arguments specified in its
+ * parameter list. If the function is not defined, $default_rval is returned.
+ * Note that the default return value comes BEFORE the arguments to the
+ * function.
+ * @param mixed $function - The callback to invoke.
+ * @param mixed $def - Value returned when function does not exist.
+ * @return mixed - The result of the function call if defined, otherwise
+ * default.
+ */
+<<__HipHopSpecific, __Native>>
+function fb_call_user_func_safe_return(mixed $function,
+                                       mixed $def,
+                                       ...$argv): mixed;
+
+/* This function invokes $function with the arguments specified in its
+ * parameter list. It returns an array of two elements, the first being a
+ * boolean specifying whether or not the function was invoked, the latter
+ * being the return value, or null if it was not invoked. The function may be
+ * any PHP callable, either a string function name, an array of object
+ * instance and method, or array of classname and static class method.
+ * @param mixed $function - The callback to invoke.
+ * @param array $params - The function parameters to invoke with.
+ * @return array - Two elements, 0 is a bool whether function was invoked, 1
+ * is the return value if invoked.
+ */
+<<__HipHopSpecific, __Native>>
+function fb_call_user_func_array_safe(mixed $function,
+                                      array $params): array;

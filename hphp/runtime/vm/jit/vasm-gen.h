@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,11 +17,12 @@
 #ifndef incl_HPHP_JIT_VASM_GEN_H_
 #define incl_HPHP_JIT_VASM_GEN_H_
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/util/data-block.h"
 
@@ -95,12 +96,12 @@ struct Vout {
   /*
    * Vunit delegations.
    */
-  Vpoint makePoint();
   Vreg makeReg();
   Vtuple makeTuple(const VregList& regs) const;
   Vtuple makeTuple(VregList&& regs) const;
   VcallArgsId makeVcallArgs(VcallArgs&& args) const;
   template<class T> Vreg cns(T v);
+  template<class T, class... Args> T* allocData(Args&&... args);
 
 private:
   Vunit& m_unit;
@@ -116,7 +117,7 @@ private:
  * A Vasm manages Vout streams for a Vunit.
  */
 struct Vasm {
-  Vasm() { m_outs.reserve(kNumAreas); }
+  explicit Vasm(Vunit& unit) : m_unit(unit) { m_outs.reserve(kNumAreas); }
 
   /*
    * Obtain the managed Vunit.
@@ -130,13 +131,11 @@ struct Vasm {
   Vout& cold() { return out(AreaIndex::Cold); }
   Vout& frozen() { return out(AreaIndex::Frozen); }
 
-  static X64Assembler& prefix(X64Assembler& a, const Vptr& ptr);
-
 private:
   Vout& out(AreaIndex i);
 
 private:
-  Vunit m_unit;
+  Vunit& m_unit;
   jit::vector<Vout> m_outs; // one for each AreaIndex
 };
 
@@ -149,11 +148,13 @@ private:
  * it will finalize and emit any code it contains.
  */
 struct Vauto {
-  explicit Vauto(CodeBlock& code, CodeKind kind = CodeKind::Helper)
-    : m_kind{kind}
-    , m_text{code, code}
+  explicit Vauto(CodeBlock& code, DataBlock& data,
+                 CGMeta& fixups, CodeKind kind = CodeKind::Helper)
+    : m_text{code, code, data}
+    , m_fixups(fixups)
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
     , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
+    , m_kind{kind}
   {
     m_unit.entry = Vlabel(main());
   }
@@ -165,29 +166,37 @@ struct Vauto {
   ~Vauto();
 
 private:
-  CodeKind m_kind;
   Vunit m_unit;
   Vtext m_text;
+  CGMeta& m_fixups;
   Vout m_main;
   Vout m_cold;
+  CodeKind m_kind;
 };
 
+namespace detail {
+  template<class GenFunc>
+  TCA vwrap_impl(CodeBlock& cb, DataBlock& data, CGMeta* meta,
+                 GenFunc gen, CodeKind kind);
+}
+
 /*
- * Convenience wrappers around Vauto for cross-trace code.
+ * Convenience wrappers around Vauto for cross-trace or helper code.
  */
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, GenFunc gen) {
-  auto const start = cb.frontier();
-  Vauto vauto { cb, CodeKind::CrossTrace };
-  gen(vauto.main());
-  return start;
+TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
+          CodeKind kind = CodeKind::CrossTrace) {
+  return detail::vwrap_impl(cb, data, &meta,
+                            [&] (Vout& v, Vout&) { gen(v); }, kind);
 }
 template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, GenFunc gen) {
-  auto const start = cb.frontier();
-  Vauto vauto { cb, CodeKind::CrossTrace };
-  gen(vauto.main(), vauto.cold());
-  return start;
+TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen) {
+  return detail::vwrap_impl(cb, data, nullptr, [&] (Vout& v, Vout&) { gen(v); },
+                            CodeKind::CrossTrace);
+}
+template<class GenFunc>
+TCA vwrap2(CodeBlock& cb, DataBlock& data, GenFunc gen) {
+  return detail::vwrap_impl(cb, data, nullptr, gen, CodeKind::CrossTrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

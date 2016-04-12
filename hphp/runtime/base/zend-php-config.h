@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -2298,6 +2298,23 @@
 
 /* */
 /* #undef ZTS */
+
+#ifdef _MSC_VER
+# undef HAVE_HSTRERROR
+# undef HAVE_SYS_PARAM_H
+# undef HAVE_SYS_POLL_H
+# undef HAVE_SYS_RESOURCE_H
+# undef HAVE_SYS_SELECT_H
+# undef HAVE_SYS_SOCKET_H
+# undef HAVE_SYS_STATFS_H
+# undef HAVE_SYS_STATVFS_H
+# undef HAVE_SYS_TIME_H
+# undef HAVE_SYS_UN_H
+# undef HAVE_SYS_UTSNAME_H
+# undef HAVE_SYS_VFS_H
+# undef HAVE_SYS_WAIT_H
+# undef TIME_WITH_SYS_TIME
+#endif
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.

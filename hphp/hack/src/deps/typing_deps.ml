@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -62,6 +62,20 @@ module Dep = struct
 
   let compare = (-)
 
+  let to_string = function
+    | GConst s -> "GConst "^s
+    | GConstName s -> "GConstName "^s
+    | Const (cls, s) -> spf "Const %s::%s" cls s
+    | Class s -> "Class "^s
+    | Fun s -> "Fun "^s
+    | FunName s -> "FunName "^s
+    | Prop (cls, s) -> spf "Prop %s::%s" cls s
+    | SProp (cls, s) -> spf "SProp %s::%s" cls s
+    | Method (cls, s) -> spf "Method %s::%s" cls s
+    | SMethod (cls, s) -> spf "SMethod %s::%s" cls s
+    | Cstr s -> "Cstr "^s
+    | Extends s -> "Extends "^s
+
 end
 
 module DepSet = Set.Make (Dep)
@@ -88,16 +102,24 @@ end
 (*****************************************************************************)
 let trace = ref true
 
+(* Instead of actually recording the dependencies in shared memory, we record
+ * string representations of them for printing out *)
+let debug_trace = ref false
+let dbg_dep_set = HashSet.create 0
+
 let add_idep root obj =
-  if !trace
-  then
-    let root =
-      match root with
-      | None -> assert_false_log_backtrace ()
-      | Some x -> x
-    in
-    Graph.add (Dep.make obj) (Dep.make root)
-  else ()
+  if !trace then Graph.add (Dep.make obj) (Dep.make root);
+  if !debug_trace then
+    (* Note: this is the inverse of what is actually stored in the shared
+     * memory table. I find it easier to read "X depends on Y" instead of
+     * "Y is a dependent of X" *)
+    HashSet.add dbg_dep_set
+      ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
+
+let dump_deps oc =
+  let xs = HashSet.fold (fun x xs -> x :: xs) dbg_dep_set [] in
+  let xs = List.sort String.compare xs in
+  List.iter xs print_endline
 
 let get_ideps_from_hash x =
   Graph.get x
@@ -127,10 +149,6 @@ let get_bazooka x =
 
 let (ifiles: (Dep.t, Relative_path.Set.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
 
-let marshal chan = Marshal.to_channel chan !ifiles []
-
-let unmarshal chan = ifiles := Marshal.from_channel chan
-
 let get_files deps =
   DepSet.fold begin fun dep acc ->
     try
@@ -140,7 +158,7 @@ let get_files deps =
   end deps Relative_path.Set.empty
 
 let update_files fast =
-  Relative_path.Map.iter begin fun filename info ->
+  Relative_path.Map.iter fast begin fun filename info ->
     let {FileInfo.funs; classes; typedefs;
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;
@@ -161,6 +179,6 @@ let update_files fast =
       let previous =
         try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
       in
-      Hashtbl.replace !ifiles def (Relative_path.Set.add filename previous)
+      Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename)
     end defs
-  end fast
+  end

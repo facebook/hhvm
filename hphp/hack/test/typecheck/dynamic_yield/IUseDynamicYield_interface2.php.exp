@@ -1,6 +1,6 @@
-File "IUseDynamicYield_interface2.php", line 36, characters 23-29:
+File "IUseDynamicYield_interface2.php", line 35, characters 23-29:
 Could not find method genBlah in an object of type IFoo (Typing[4053])
-File "IUseDynamicYield_interface2.php", line 30, characters 22-25:
+File "IUseDynamicYield_interface2.php", line 29, characters 22-25:
 This is why I think it is an object of type IFoo
-File "IUseDynamicYield_interface2.php", line 19, characters 11-14:
+File "IUseDynamicYield_interface2.php", line 18, characters 11-14:
 Declaration of IFoo is here

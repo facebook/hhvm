@@ -11,3 +11,6 @@ under the following licenses:
 - src/third-party/inotify: Files from ocaml-inotify, under the GNU Library
   General Public License 2.1 with a linking exception. License can be found in
   src/third-party/inotify/LICENSE.
+
+- src/third-party/libancillary: Files from Nicolas George's libancillary, under
+  its license. See license in src/third-party/libancillary/COPYING

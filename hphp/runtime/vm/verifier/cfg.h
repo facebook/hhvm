@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_VERIFIER_CFG_H_
 #define incl_HPHP_VM_VERIFIER_CFG_H_
 
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/util/arena.h"
@@ -80,25 +81,24 @@ struct Graph {
 };
 
 inline bool isTF(PC pc) {
-  return (instrFlags(*reinterpret_cast<const Op*>(pc)) & TF) != 0;
+  return (instrFlags(peek_op(pc)) & TF) != 0;
 }
 
 inline bool isCF(PC pc) {
-  return instrIsNonCallControlFlow(*reinterpret_cast<const Op*>(pc));
+  return instrIsNonCallControlFlow(peek_op(pc));
 }
 
 inline bool isFF(PC pc) {
-  return instrReadsCurrentFpi(*reinterpret_cast<const Op*>(pc));
+  return instrReadsCurrentFpi(peek_op(pc));
 }
 
 inline bool isRet(PC pc) {
-  return isTF(pc) &&
-    (*reinterpret_cast<const Op*>(pc) == Op::RetC ||
-     *reinterpret_cast<const Op*>(pc) == Op::RetV);
+  auto const op = peek_op(pc);
+  return op == Op::RetC || op == Op::RetV;
 }
 
 inline bool isIter(PC pc) {
-  switch (*reinterpret_cast<const Op*>(pc)) {
+  switch (peek_op(pc)) {
   case Op::IterInit:
   case Op::MIterInit:
   case Op::WIterInit:
@@ -126,18 +126,19 @@ inline bool isIter(PC pc) {
 }
 
 inline int getImmIva(PC pc) {
-  return getImm((Op*)pc, 0).u_IVA;
+  return getImm(pc, 0).u_IVA;
 }
 
 inline int numSuccBlocks(const Block* b) {
-  return numSuccs((Op*)b->last);
+  return numSuccs(b->last);
 }
 
 /**
  * A GraphBuilder holds the temporary state required for building
  * a graph and is typically not needed once a Graph is built.
  */
-class GraphBuilder {
+struct GraphBuilder {
+private:
   typedef hphp_hash_map<PC, Block*> BlockMap;
   enum EdgeKind { FallThrough, Taken };
  public:
@@ -171,8 +172,7 @@ class GraphBuilder {
 /**
  * Range over blocks in linear order
  */
-class LinearBlocks {
- public:
+struct LinearBlocks {
   LinearBlocks(Block* first, Block* end) : b(first), end(end) {
   }
   bool empty() const { return b == end; }
@@ -186,8 +186,7 @@ class LinearBlocks {
 /**
  * Range over the non-null Block* pointers in array.
  */
-class BlockPtrRange {
- public:
+struct BlockPtrRange {
   BlockPtrRange(Block** a, int cap) : i(a), end(&a[cap]) {
     trimFront();
     trimBack();
@@ -216,8 +215,7 @@ class BlockPtrRange {
 /**
  * Iterate through a contiguous range of instructions
  */
-class InstrRange {
- public:
+struct InstrRange {
   InstrRange(PC pc, PC end) : pc(pc), end(end) {
   }
   bool empty() const {
@@ -229,7 +227,7 @@ class InstrRange {
   }
   PC popFront() {
     PC i = front();
-    pc += instrLen((Op*)i);
+    pc += instrLen(i);
     return i;
   }
  private:
@@ -277,12 +275,12 @@ typedef std::pair<Id, Offset> CatchEnt;
 
 inline Offset fpiBase(const FPIEnt& fpi, PC bc) {
   PC fpush = bc + fpi.m_fpushOff;
-  return fpush + instrLen((Op*)fpush) - bc;
+  return fpush + instrLen(fpush) - bc;
 }
 
 inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
   PC fcall = bc + fpi.m_fcallOff;
-  return fcall + instrLen((Op*)fcall) - bc;
+  return fcall + instrLen(fcall) - bc;
 }
 
 }} // HPHP::Verifier

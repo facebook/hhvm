@@ -1,8 +1,8 @@
-if ((NOT DEFINED EXT_GD) OR (EXT_GD STREQUAL "ON"))
-  HHVM_EXTENSION(gd
+HHVM_DEFINE_EXTENSION("gd"
+  IS_ENABLED EXT_GD
+  SOURCES
     ext_gd.cpp
     libgd/gd_arc.cpp
-    libgd/gd_arc_f_buggy.cpp
     libgd/gdcache.cpp
     libgd/gd_color.cpp
     libgd/gd.cpp
@@ -39,34 +39,28 @@ if ((NOT DEFINED EXT_GD) OR (EXT_GD STREQUAL "ON"))
     libgd/gd_webp.cpp
     libgd/wbmp.cpp
     libgd/webpimg.cpp
-    libgd/xbm.cpp)
-  HHVM_SYSTEMLIB(gd ext_gd.php ext_exif.php)
-
-  # GD checks
-  HHVM_DEFINE(gd -DPNG_SKIP_SETJMP_CHECK)
-  find_package(LibJpeg REQUIRED)
-  if (LIBJPEG_INCLUDE_DIRS AND LIBJPEG_LIBRARIES)
-    HHVM_LINK_LIBRARIES(gd ${LIBJPEG_LIBRARIES})
-    HHVM_ADD_INCLUDES(gd ${LIBJPEG_INCLUDE_DIRS})
-    HHVM_DEFINE(gd "-DHAVE_GD_JPG")
-  endif()
-  find_package(LibPng REQUIRED)
-  if (LIBPNG_INCLUDE_DIRS AND LIBPNG_LIBRARIES)
-    HHVM_LINK_LIBRARIES(gd ${LIBPNG_LIBRARIES})
-    HHVM_ADD_INCLUDES(gd ${LIBPNG_INCLUDE_DIRS})
-    HHVM_DEFINE(gd "-DHAVE_GD_PNG")
-  endif()
-  find_package(LibVpx)
-  if (LIBVPX_INCLUDE_DIRS AND LIBVPX_LIBRARIES)
-    HHVM_LINK_LIBRARIES(gd ${LIBVPX_LIBRARIES})
-    HHVM_ADD_INCLUDES(gd ${LIBVPX_INCLUDE_DIRS})
-    HHVM_DEFINE(gd "-DHAVE_LIBVPX")
-  endif()
-  find_package(Freetype)
-  if (FREETYPE_INCLUDE_DIRS AND FREETYPE_LIBRARIES)
-    HHVM_LINK_LIBRARIES(gd ${FREETYPE_LIBRARIES})
-    HHVM_ADD_INCLUDES(gd ${FREETYPE_INCLUDE_DIRS})
-    HHVM_DEFINE(gd "-DHAVE_LIBFREETYPE -DHAVE_GD_FREETYPE -DENABLE_GD_TTF")
-  endif()
-
-endif()
+    libgd/xbm.cpp
+  HEADERS
+    ext_gd.h
+    libgd/gd.h
+    libgd/gd_intern.h
+    libgd/gd_io.h
+    libgd/gdcache.h
+    libgd/gdfontg.h
+    libgd/gdfontl.h
+    libgd/gdfontmb.h
+    libgd/gdfonts.h
+    libgd/gdfontt.h
+    libgd/jisx0208.h
+    libgd/wbmp.h
+    libgd/webpimg.h
+  SYSTEMLIB
+    ext_exif.php
+    ext_gd.php
+  DEPENDS
+    libFreetype OPTIONAL
+    libJpeg OPTIONAL
+    libIConv
+    libPng OPTIONAL
+    libVpx OPTIONAL
+)

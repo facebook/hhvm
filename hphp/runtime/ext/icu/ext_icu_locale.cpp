@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -442,36 +442,41 @@ static String HHVM_STATIC_METHOD(Locale, getDefault) {
 static String HHVM_STATIC_METHOD(Locale, getDisplayLanguage,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_LANG);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_LANG
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayName,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_DISPLAY);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_DISPLAY
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayRegion,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_REGION);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_REGION
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayScript,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_SCRIPT);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_SCRIPT
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayVariant,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_VARIANT);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_VARIANT
+  ).toString();
 }
 
 static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
@@ -509,7 +514,7 @@ tryagain:
 
 static String HHVM_STATIC_METHOD(Locale, getPrimaryLanguage,
                                  const String& locale) {
-  return get_icu_value(localeOrDefault(locale), LOC_LANG);
+  return get_icu_value(localeOrDefault(locale), LOC_LANG).toString();
 }
 
 static Variant HHVM_STATIC_METHOD(Locale, getRegion, const String& locale) {
@@ -560,7 +565,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
     String normalized(val.toString(), CopyString);
     normalize_for_match(normalized);
     if (canonicalize) {
-      normalized = get_icu_value(normalized, LOC_CANONICALIZE);
+      normalized = get_icu_value(normalized, LOC_CANONICALIZE).toString();
       if (normalized.isNull()) {
         s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: "
                                "unable to canonicalize lang_tag");
@@ -572,7 +577,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
   }
 
   if (canonicalize) {
-    locname = get_icu_value(locname, LOC_CANONICALIZE);
+    locname = get_icu_value(locname, LOC_CANONICALIZE).toString();
     if (locname.isNull()) {
       s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: "
                              "unable to canonicalize loc_range");
@@ -691,30 +696,22 @@ void IntlExtension::initLocale() {
   HHVM_STATIC_ME(Locale, parseLocale);
   HHVM_STATIC_ME(Locale, setDefault);
 
-#define ULOC_CONST(nm,val) Native::registerClassConstant<KindOfStaticString>\
-                               (s_Locale.get(), s_##nm.get(), s_##val.get())
-
   Native::registerClassConstant<KindOfNull>(s_Locale.get(),
                                             s_DEFAULT_LOCALE.get());
-  ULOC_CONST(LANG_TAG,               LOC_LANG);
-  ULOC_CONST(EXTLANG_TAG,            LOC_EXTLANG);
-  ULOC_CONST(SCRIPT_TAG,             LOC_SCRIPT);
-  ULOC_CONST(REGION_TAG,             LOC_REGION);
-  ULOC_CONST(VARIANT_TAG,            LOC_VARIANT);
-  ULOC_CONST(GRANDFATHERED_LANG_TAG, GRANDFATHERED);
-  ULOC_CONST(PRIVATE_TAG,            LOC_PRIVATE);
+  HHVM_RCC_STR(Locale, LANG_TAG,               s_LOC_LANG);
+  HHVM_RCC_STR(Locale, EXTLANG_TAG,            s_LOC_EXTLANG);
+  HHVM_RCC_STR(Locale, SCRIPT_TAG,             s_LOC_SCRIPT);
+  HHVM_RCC_STR(Locale, REGION_TAG,             s_LOC_REGION);
+  HHVM_RCC_STR(Locale, VARIANT_TAG,            s_LOC_VARIANT);
+  HHVM_RCC_STR(Locale, GRANDFATHERED_LANG_TAG, s_GRANDFATHERED);
+  HHVM_RCC_STR(Locale, PRIVATE_TAG,            s_LOC_PRIVATE);
 
-#undef ULOC_CONST
+  HHVM_RC_INT_SAME(ULOC_ACTUAL_LOCALE);
+  HHVM_RCC_INT(Locale, ACTUAL_LOCALE, ULOC_ACTUAL_LOCALE);
+  HHVM_RC_INT_SAME(ULOC_VALID_LOCALE);
+  HHVM_RCC_INT(Locale, VALID_LOCALE, ULOC_VALID_LOCALE);
 
-#define ULOC_LOCALE_CONST(cns) \
-  Native::registerConstant<KindOfInt64>\
-    (makeStaticString("ULOC_" #cns), ULOC_##cns); \
-  Native::registerClassConstant<KindOfInt64>\
-    (s_Locale.get(), makeStaticString(#cns), ULOC_##cns);
-
-  ULOC_LOCALE_CONST(ACTUAL_LOCALE);
-  ULOC_LOCALE_CONST(VALID_LOCALE);
-#undef ULOC_LOCALE_CONST
+  HHVM_RC_INT(INTL_MAX_LOCALE_LEN, 80);
 
   loadSystemlib("icu_locale");
 }

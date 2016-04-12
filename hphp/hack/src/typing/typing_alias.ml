@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -34,7 +34,6 @@
 
 open Core
 open Nast
-open Utils
 
 module Env = Typing_env
 
@@ -61,7 +60,7 @@ module Dep = struct
 
   let visitor local =
     object
-      inherit [string list SMap.t] NastVisitor.nast_visitor as parent
+      inherit [string list SMap.t] Nast_visitor.nast_visitor as parent
 
       method! on_expr acc (_, e_ as e) =
         match e_ with
@@ -102,7 +101,7 @@ end = struct
 
   let visitor =
     object(this)
-      inherit [string list SMap.t] NastVisitor.nast_visitor as parent
+      inherit [string list SMap.t] Nast_visitor.nast_visitor as parent
 
       method! on_expr acc (_, e_ as e) =
         match e_ with
@@ -155,7 +154,7 @@ end = struct
     else
       let visited = SMap.add k 0 visited in
       let kl = AliasMap.get k aliases in
-      let visited, depth_l = lfold (key aliases) visited kl in
+      let visited, depth_l = List.map_env visited kl (key aliases) in
       let my_depth = 1 + List.fold_left ~f:max ~init:0 depth_l in
       SMap.add k my_depth visited, my_depth
 

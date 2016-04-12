@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,6 +15,19 @@
 */
 
 #include "hphp/util/thread-local.h"
+
+#if defined(__linux__) && defined(__x86_64__)
+#define HAVE_ARCH_PRCTL 1
+#endif
+
+#ifdef HAVE_ARCH_PRCTL
+#include <link.h>
+#include <asm/prctl.h>
+#include <sys/prctl.h>
+extern "C" {
+extern int arch_prctl(int, unsigned long*);
+}
+#endif //HAVE_ARCH_PRCTL
 
 namespace HPHP {
 
@@ -33,15 +46,16 @@ void ThreadLocalManager::OnThreadExit(void* p) {
   }
 }
 
-void ThreadLocalManager::PushTop(void* nodePtr) {
+void ThreadLocalManager::PushTop(void* nodePtr, size_t nodeSize) {
   auto& node = *static_cast<ThreadLocalNode<void>*>(nodePtr);
   auto key = GetManager().m_key;
-  auto tmp = getList(pthread_getspecific(key));
-  if (UNLIKELY(!tmp)) {
-    ThreadLocalSetValue(key, tmp = new ThreadLocalList);
+  auto list = getList(pthread_getspecific(key));
+  if (UNLIKELY(!list)) {
+    ThreadLocalSetValue(key, list = new ThreadLocalList);
   }
-  node.m_next = tmp->head;
-  tmp->head = node.m_next;
+  node.m_next = list->head;
+  node.m_size = nodeSize;
+  list->head = &node;
 }
 
 ThreadLocalManager& ThreadLocalManager::GetManager() {
@@ -60,5 +74,44 @@ ThreadLocalManager::ThreadLocalList::ThreadLocalList() {
 #endif
 
 #endif
+
+#ifdef HAVE_ARCH_PRCTL
+
+static int visit_phdr(dl_phdr_info* info, size_t, void*) {
+  for (size_t i = 0, n = info->dlpi_phnum; i < n; ++i) {
+    const auto& hdr = info->dlpi_phdr[i];
+    auto addr = info->dlpi_addr + hdr.p_vaddr;
+    if (addr < 0x100000000LL && hdr.p_type == PT_TLS) {
+      // found the main thread-local section
+      assert(int(hdr.p_memsz) == hdr.p_memsz); // ensure no truncation
+      return hdr.p_memsz;
+    }
+  }
+  return 0;
+}
+
+std::pair<void*,size_t> getCppTdata() {
+  uintptr_t addr;
+#if defined(__x86_64__)
+  if (!arch_prctl(ARCH_GET_FS, &addr)) {
+#elif defined(__powerpc64__)
+  __asm__ ("\tmr %0, 13" : "=r" (addr));
+  if (addr) {
+#endif
+    // fs points to the end of the threadlocal area.
+    size_t size = dl_iterate_phdr(&visit_phdr, nullptr);
+    return {(void*)(addr - size), size};
+  }
+  return {nullptr, 0};
+}
+
+#else
+
+// how do you find the thread local section on your system?
+std::pair<void*,size_t> getCppTdata() {
+  return {nullptr, 0};
+}
+
+#endif //HAVE_ARCH_PRCTL
 
 }

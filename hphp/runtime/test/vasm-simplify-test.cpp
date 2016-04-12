@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,8 +68,8 @@ void testSetccXor() {
     // Test that setcc/xor pair is collapsed.
     EXPECT_EQ(
       "B0 main\n"
-      "movl %67(42l) => %64\n"
-      "setcc NE, %64 => %66\n",
+      "movl %131(42l) => %128\n"
+      "setcc NE, %128 => %130\n",
       stripWhitespace(show(unit))
     );
   }
@@ -93,10 +93,10 @@ void testSetccXor() {
     // has more than one use.
     EXPECT_EQ(
       "B0 main\n"
-      "movl %67(42l) => %64\n"
-      "setcc E, %64 => %65\n"
-      "xorbi 1, %65 => %66, %68\n"
-      "movl %65 => %69\n",
+      "movl %131(42l) => %128\n"
+      "setcc E, %128 => %129\n"
+      "xorbi 1, %129 => %130, %132\n"
+      "movl %129 => %133\n",
       stripWhitespace(show(unit))
     );
   }
@@ -118,8 +118,8 @@ void testSetccXor() {
     // Check that setcc/xor pair is collapsed with different condition.
     EXPECT_EQ(
       "B0 main\n"
-      "movl %67(42l) => %64\n"
-      "setcc E, %64 => %66\n",
+      "movl %131(42l) => %128\n"
+      "setcc E, %128 => %130\n",
       stripWhitespace(show(unit))
     );
   }
@@ -139,8 +139,8 @@ void testSetccXor() {
     // Make sure that setcc with no xor doesn't cause a buffer overrun.
     EXPECT_EQ(
       "B0 main\n"
-      "movl %66(42l) => %64\n"
-      "setcc NE, %64 => %65\n",
+      "movl %130(42l) => %128\n"
+      "setcc NE, %128 => %129\n",
       stripWhitespace(show(unit))
     );
   }
@@ -162,9 +162,9 @@ void testSetccXor() {
     // Make sure that setcc/xor with an non-1 xor constant is skipped.
     EXPECT_EQ(
       "B0 main\n"
-      "movl %67(42l) => %64\n"
-      "setcc NE, %64 => %65\n"
-      "xorbi 2, %65 => %66, %68\n",
+      "movl %131(42l) => %128\n"
+      "setcc NE, %128 => %129\n"
+      "xorbi 2, %129 => %130, %132\n",
       stripWhitespace(show(unit))
     );
   }
@@ -188,10 +188,10 @@ void testSetccXor() {
     // Make sure that setcc/xor with xor status flags being used is skipped.
     EXPECT_EQ(
       "B0 main\n"
-      "movl %68(42l) => %64\n"
-      "setcc NE, %64 => %65\n"
-      "xorbi 1, %65 => %66, %67\n"
-      "movl %67 => %69\n",
+      "movl %132(42l) => %128\n"
+      "setcc NE, %128 => %129\n"
+      "xorbi 1, %129 => %130, %131\n"
+      "movl %131 => %133\n",
       stripWhitespace(show(unit))
     );
   }

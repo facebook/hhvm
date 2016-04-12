@@ -1,0 +1,24 @@
+Tint
+option(Tstring)
+option(Tstring)
+tuple(App \TypeStructure<Tint, >)
+X
+X
+X
+X
+X
+X
+Tint
+Tint
+option(Tstring)
+option(Tstring)
+option(array)
+X
+X
+X
+X
+X
+X
+Tint
+File "bad_type_structure_array.php", line 10, characters 15-25:
+The field classname is undefined (Typing[4108])

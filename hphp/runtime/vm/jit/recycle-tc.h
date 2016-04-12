@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -146,7 +146,7 @@ void reclaimTranslation(TransLoc loc);
  * This function should only be called from Func::destroy() and may access the
  * fullname and ID of the function.
  */
-void reclaimFunction(Func* func);
+void reclaimFunction(const Func* func);
 
 /*
  * Information about the number of bound calls, branches, and tracked functions

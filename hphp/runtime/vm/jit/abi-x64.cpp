@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,11 +40,11 @@ const RegSet kGPCallerSaved =
   reg::r8  | reg::r9  | reg::r10 | reg::r11;
 
 const RegSet kGPCalleeSaved =
-  reg::rbx | reg::r13 | reg::r14 | reg::r15;
+  reg::rbx | reg::r12 | reg::r13 | reg::r14 | reg::r15;
 #endif
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
-const RegSet kGPReserved = reg::rsp | x64::rvmfp() | x64::rvmtl();
+const RegSet kGPReserved = x64::rsp() | x64::rvmfp() | x64::rvmtl();
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kXMMCallerSaved =
@@ -70,7 +70,7 @@ const RegSet kSF = RegSet(RegSF{0});
  * Registers that can safely be used for scratch purposes in-between traces.
  */
 const RegSet kScratchCrossTraceRegs =
-  kXMMCallerSaved | (kGPUnreserved - vm_regs_with_sp());
+  kXMMCallerSaved | (kGPUnreserved - x64::vm_regs_with_sp());
 
 /*
  * Helper code ABI registers.
@@ -153,11 +153,16 @@ const Abi& abi(CodeKind kind) {
   not_reached();
 }
 
-RegSet interp_one_cf_regs() {
-  return vm_regs_with_sp() | rAsm;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
+
+PhysReg rret(size_t i) {
+  assertx(i < 2);
+  return i == 0 ? reg::rax : reg::rdx;
+}
+PhysReg rret_simd(size_t i) {
+  assertx(i == 0);
+  return reg::xmm0;
+}
 
 PhysReg rarg(size_t i) {
   assertx(i < num_arg_regs());
@@ -175,8 +180,15 @@ size_t num_arg_regs_simd() {
   return sizeof(simd_args) / sizeof(PhysReg);
 }
 
+RegSet arg_regs(size_t n) {
+  return jit::arg_regs(n);
+}
+RegSet arg_regs_simd(size_t n) {
+  return jit::arg_regs_simd(n);
+}
+
 PhysReg r_svcreq_sf() {
-  return abi().sf.findFirst();
+  return abi().sf.choose();
 }
 PhysReg r_svcreq_arg(size_t i) {
   return svcreq_args[i];

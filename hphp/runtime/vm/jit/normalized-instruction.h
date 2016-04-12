@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,16 +43,11 @@ struct NormalizedInstruction {
                      // known Func* that /this/ instruction is pushing)
   const Unit* m_unit;
 
-  std::vector<Location> inputs;
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
 
-  // The member codes for the M-vector.
-  std::vector<MemberCode> immVecM;
-
   bool endsRegion:1;
-  bool nextIsMerge:1;
   bool preppedByRef:1;
   bool ignoreInnerType:1;
 
@@ -63,7 +58,6 @@ struct NormalizedInstruction {
   bool interp:1;
 
   Op op() const;
-  Op mInstrOp() const;
   PC pc() const;
   const Unit* unit() const;
   const Func* func() const;

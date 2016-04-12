@@ -1,0 +1,4 @@
+
+Fatal error: request has exceeded memory limit in %s/hphp/test/slow/memory/oom_does_not_oom_shutdown_handler.php on line %d
+IN SHUTDOWN
+65536

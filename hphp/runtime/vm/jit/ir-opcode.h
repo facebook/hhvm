@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,6 @@ namespace jit {
 struct IRUnit;
 struct IRInstruction;
 struct SSATmp;
-struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -139,99 +138,10 @@ bool isCallOp(Opcode opc);
 bool isGuardOp(Opcode opc);
 
 /*
- * A "query op" is any instruction returning TBool that is
- * negateable.
+ * Returns the negated version of the specified opcode, if its a comparison
+ * opcode and can be negated (not all comparisons can be negated).
  */
-bool isQueryOp(Opcode opc);
-
-/*
- * Return true if opc is a comparison operator which may invoke side-effects
- * (hence shouldn't be negated or commuted).
- */
-bool isSideEffectfulQueryOp(Opcode opc);
-
-/*
- * Return true if opc is an int comparison operator
- */
-bool isIntQueryOp(Opcode opc);
-
-/*
- * Return the int-query opcode for the given non-int-query opcode
- */
-Opcode queryToIntQueryOp(Opcode opc);
-
-/*
- * Return true if opc is a dbl comparison operator
- */
-bool isDblQueryOp(Opcode opc);
-
-/*
- * Return the dbl-query opcode for the given non-dbl-query opcode
- */
-Opcode queryToDblQueryOp(Opcode opc);
-
-/*
- * Return true if opc is a boolean comparison operator
- */
-bool isBoolQueryOp(Opcode opc);
-
-/*
- * Return the bool-query opcode for the given non-bool-query opcode
- */
-Opcode queryToBoolQueryOp(Opcode opc);
-
-/*
- * Return true if opc is a str comparison operator
- */
-bool isStrQueryOp(Opcode opc);
-
-/*
- * Return the str-query opcode for the given non-str-query opcode
- */
-Opcode queryToStrQueryOp(Opcode opc);
-
-/*
- * Return true if opc is an obj comparison operator
- */
-bool isObjQueryOp(Opcode opc);
-
-/*
- * Return the obj-query opcode for the given non-obj-query opcode
- */
-Opcode queryToObjQueryOp(Opcode opc);
-
-/*
- * Return true if opc is an array comparison operator
- */
-bool isArrQueryOp(Opcode opc);
-
-/*
- * Return the array-query opcode for the given non-array-query opcode
- */
-Opcode queryToArrQueryOp(Opcode opc);
-
-/*
- * Return true if opc is a resource comparison ooperator
- */
-bool isResQueryOp(Opcode opc);
-
-/*
- * Return the resource-query opcode for the give non-resource-query-opcode.
- */
-Opcode queryToResQueryOp(Opcode opc);
-
-/*
- * Return the opcode that corresponds to negation of opc.
- */
-Opcode negateQueryOp(Opcode opc);
-
-/*
- * Return the opcode that corresponds to commuting the arguments of
- * opc.
- *
- * Pre: opc is a 2-argument query op.
- */
-Opcode commuteQueryOp(Opcode opc);
+folly::Optional<Opcode> negateCmpOp(Opcode opc);
 
 const char* opcodeName(Opcode opcode);
 
@@ -270,13 +180,11 @@ namespace std {
   template<> struct hash<HPHP::jit::Opcode> {
     size_t operator()(HPHP::jit::Opcode op) const { return uint16_t(op); }
   };
-  template<> struct hash<HPHP::jit::Type> {
-    size_t operator()(HPHP::jit::Type t) const { return t.hash(); }
-  };
 }
 
 namespace folly {
-template<> struct FormatValue<HPHP::jit::Opcode> {
+template<> class FormatValue<HPHP::jit::Opcode> {
+ public:
   explicit FormatValue(HPHP::jit::Opcode op) : m_op(op) {}
 
   template<typename Callback> void format(FormatArg& arg, Callback& cb) const {

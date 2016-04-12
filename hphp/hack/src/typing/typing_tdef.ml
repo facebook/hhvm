@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -10,17 +10,15 @@
 
 open Core
 open Typing_defs
+open Utils
 
 module Reason = Typing_reason
 module Env    = Typing_env
-module DefsDB = Typing_heap
-module Inst   = Typing_instantiate
-module TSubst = Typing_subst
+module Inst   = Decl_instantiate
+module Subst = Decl_subst
 module TUtils = Typing_utils
 module TAccess = Typing_taccess
 module Phase  = Typing_phase
-module TS     = Typing_structure
-
 
 (*****************************************************************************)
 (* Expanding type definition *)
@@ -30,59 +28,46 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
   let pos = Reason.to_pos r in
   if Typing_defs.has_expanded ety_env x
   then begin
-      Errors.cyclic_typedef pos;
-      env, (ety_env, (r, Tany))
-    end
-  else begin
-      let tdef = Typing_env.get_typedef env x in
-      let tdef = match tdef with None -> assert false | Some x -> x in
-      match tdef with
-      | DefsDB.Typedef.Error -> env, (ety_env, (r, Tany))
-      | DefsDB.Typedef.Ok tdef ->
-         let visibility, tparaml, tcstr, expanded_ty, tdef_pos = tdef in
-         let should_expand =
-           force_expand ||
-             match visibility with
-             | DefsDB.Typedef.Private ->
-                Pos.filename tdef_pos = Env.get_file env
-             | DefsDB.Typedef.Public -> true
-         in
-         if List.length tparaml <> List.length argl
-         then begin
-             let n = List.length tparaml in
-             let n = string_of_int n in
-             Errors.type_param_arity pos x n
-           end;
-         let ety_env = {
-           ety_env with
-           type_expansions = (tdef_pos, x) :: ety_env.type_expansions;
-           substs = TSubst.make tparaml argl;
-         } in
-         let env, expanded_ty =
-           if should_expand
-           then begin
-               let env, expanded_ty =
-                 Phase.localize ~ety_env env expanded_ty in
-               env, expanded_ty
-             end
-           else begin
-               let env, tcstr =
-                 match tcstr with
-                 | None -> env, None
-                 | Some tcstr ->
-                    let env, tcstr =
-                      Phase.localize ~ety_env env tcstr in
-                    env, Some tcstr
-               in
-               env, (r, Tabstract (AKnewtype (x, argl), tcstr))
-             end
-         in
-         if Naming_special_names.Classes.is_format_string x
-         then env, (ety_env, (r, Tclass ((pos, x), argl)))
-         else if x = SN.FB.cTypeStructure
-         then env, (ety_env, TS.transform_classname_ty (r, snd expanded_ty))
-         else env, (ety_env, (r, snd expanded_ty))
-    end
+    Errors.cyclic_typedef pos;
+    env, (ety_env, (r, Tany))
+  end else begin
+    let {td_pos; td_vis; td_tparams; td_type; td_constraint} =
+      unsafe_opt @@ Typing_env.get_typedef env x in
+    let should_expand =
+      force_expand ||
+        match td_vis with
+        | Opaque ->
+          Pos.filename td_pos = Env.get_file env
+        | Transparent -> true
+    in
+    if List.length td_tparams <> List.length argl then begin
+      let n = List.length td_tparams in
+      let n = string_of_int n in
+      Errors.type_param_arity pos x n
+    end;
+    let ety_env = {
+      ety_env with
+      type_expansions = (td_pos, x) :: ety_env.type_expansions;
+      substs = Subst.make td_tparams argl;
+    } in
+    let env, expanded_ty =
+      if should_expand
+      then Phase.localize ~ety_env env td_type
+      else begin
+        let env, td_constraint =
+          match td_constraint with
+          | None -> env, None
+          | Some cstr ->
+            let env, cstr = Phase.localize ~ety_env env cstr in
+            env, Some cstr
+        in
+        env, (r, Tabstract (AKnewtype (x, argl), td_constraint))
+      end
+    in
+    if Naming_special_names.Classes.is_format_string x
+    then env, (ety_env, (r, Tclass ((pos, x), argl)))
+    else env, (ety_env, (r, snd expanded_ty))
+  end
 
 let expand_typedef ety_env env r x argl = expand_typedef_ ety_env env r x argl
 

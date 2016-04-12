@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,8 @@ namespace HPHP {
 
 using std::string;
 
-XboxTransport::XboxTransport(const String& message, const String& reqInitDoc /* = "" */)
+XboxTransport::XboxTransport(const String& message,
+                             const String& reqInitDoc /* = "" */)
     : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
   Timer::GetMonotonicTime(m_queueTime);
 
@@ -108,8 +109,7 @@ static IMPLEMENT_THREAD_LOCAL(std::shared_ptr<XboxServerInfo>,
   s_xbox_server_info);
 static IMPLEMENT_THREAD_LOCAL(std::string, s_xbox_prev_req_init_doc);
 
-class XboxRequestHandler: public RPCRequestHandler {
-public:
+struct XboxRequestHandler : RPCRequestHandler {
   XboxRequestHandler() : RPCRequestHandler(
     (*s_xbox_server_info)->getTimeoutSeconds().count(), Info) {}
   static bool Info;
@@ -331,8 +331,7 @@ bool XboxServer::PostMessage(const String& message,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxTask : public SweepableResourceData {
-public:
+struct XboxTask : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XboxTask)
 
   XboxTask(const String& message, const String& reqInitDoc = "") {
@@ -357,7 +356,8 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = "" */,
+Resource XboxServer::TaskStart(const String& msg,
+                               const String& reqInitDoc /* = "" */,
   ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
   {
     Lock l(s_dispatchMutex);

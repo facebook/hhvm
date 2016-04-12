@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -33,30 +34,6 @@ namespace HPHP {
 #define PHP_SQLITE3_ASSOC  (1<<0)
 #define PHP_SQLITE3_NUM    (1<<1)
 #define PHP_SQLITE3_BOTH   (PHP_SQLITE3_ASSOC|PHP_SQLITE3_NUM)
-
-const int64_t k_SQLITE3_ASSOC = PHP_SQLITE3_ASSOC;
-const int64_t k_SQLITE3_NUM = PHP_SQLITE3_NUM;
-const int64_t k_SQLITE3_BOTH = PHP_SQLITE3_BOTH;
-const int64_t k_SQLITE3_INTEGER = SQLITE_INTEGER;
-const int64_t k_SQLITE3_FLOAT = SQLITE_FLOAT;
-const int64_t k_SQLITE3_TEXT = SQLITE3_TEXT;
-const int64_t k_SQLITE3_BLOB = SQLITE_BLOB;
-const int64_t k_SQLITE3_NULL = SQLITE_NULL;
-const int64_t k_SQLITE3_OPEN_READONLY = SQLITE_OPEN_READONLY;
-const int64_t k_SQLITE3_OPEN_READWRITE = SQLITE_OPEN_READWRITE;
-const int64_t k_SQLITE3_OPEN_CREATE = SQLITE_OPEN_CREATE;
-
-const StaticString s_SQLITE3_ASSOC("SQLITE3_ASSOC");
-const StaticString s_SQLITE3_NUM("SQLITE3_NUM");
-const StaticString s_SQLITE3_BOTH("SQLITE3_BOTH");
-const StaticString s_SQLITE3_INTEGER("SQLITE3_INTEGER");
-const StaticString s_SQLITE3_FLOAT("SQLITE3_FLOAT");
-const StaticString s_SQLITE3_TEXT("SQLITE3_TEXT");
-const StaticString s_SQLITE3_BLOB("SQLITE3_BLOB");
-const StaticString s_SQLITE3_NULL("SQLITE3_NULL");
-const StaticString s_SQLITE3_OPEN_READONLY("SQLITE3_OPEN_READONLY");
-const StaticString s_SQLITE3_OPEN_READWRITE("SQLITE3_OPEN_READWRITE");
-const StaticString s_SQLITE3_OPEN_CREATE("SQLITE3_OPEN_CREATE");
 
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class *cls::getClass() {                                                     \
@@ -230,6 +207,7 @@ void HHVM_METHOD(SQLite3, open,
 
   String fname;
   if (strncmp(filename.data(), ":memory:", 8) != 0) {
+    FileUtil::checkPathAndError(filename, "SQLite3::__construct", 1);
     fname = File::TranslatePath(filename);
   } else {
     fname = filename; // in-memory db
@@ -330,6 +308,10 @@ bool HHVM_METHOD(SQLite3, loadextension,
                  const String& extension) {
   auto *data = Native::data<SQLite3>(this_);
   data->validate();
+
+  if (!FileUtil::checkPathAndWarn(extension, "SQLite3::loadExtension", 1)) {
+    return false;
+  }
 
   String translated = File::TranslatePath(extension);
   if (translated.empty()) {
@@ -454,7 +436,7 @@ bool HHVM_METHOD(SQLite3, createfunction,
     return false;
   }
 
-  auto udf = std::make_shared<SQLite3::UserDefinedFunc>();
+  auto udf = req::make_shared<SQLite3::UserDefinedFunc>();
   if (sqlite3_create_function(data->m_raw_db, name.data(), argcount,
                               SQLITE_UTF8, udf.get(), php_sqlite3_callback_func,
                               nullptr, nullptr) == SQLITE_OK) {
@@ -487,7 +469,7 @@ bool HHVM_METHOD(SQLite3, createaggregate,
     return false;
   }
 
-  auto udf = std::make_shared<SQLite3::UserDefinedFunc>();
+  auto udf = req::make_shared<SQLite3::UserDefinedFunc>();
   if (sqlite3_create_function(data->m_raw_db, name.data(), argcount,
                               SQLITE_UTF8, udf.get(), nullptr,
                               php_sqlite3_callback_step,
@@ -594,7 +576,7 @@ bool HHVM_METHOD(SQLite3Stmt, bindparam,
                  VRefParam parameter,
                  int64_t type /* = SQLITE3_TEXT */) {
   auto *data = Native::data<SQLite3Stmt>(this_);
-  auto param = std::make_shared<SQLite3Stmt::BoundParam>();
+  auto param = req::make_shared<SQLite3Stmt::BoundParam>();
   param->type = type;
   param->value.setWithRef(parameter);
 
@@ -784,24 +766,21 @@ bool HHVM_METHOD(SQLite3Result, finalize) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define REGISTER_CONSTANT(name)                                                \
-  Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
-
-static class SQLite3Extension final : public Extension {
-public:
+static struct SQLite3Extension final : Extension {
   SQLite3Extension() : Extension("sqlite3", "0.7-dev") {}
   void moduleInit() override {
-    REGISTER_CONSTANT(SQLITE3_ASSOC);
-    REGISTER_CONSTANT(SQLITE3_NUM);
-    REGISTER_CONSTANT(SQLITE3_BOTH);
-    REGISTER_CONSTANT(SQLITE3_INTEGER);
-    REGISTER_CONSTANT(SQLITE3_FLOAT);
-    REGISTER_CONSTANT(SQLITE3_TEXT);
-    REGISTER_CONSTANT(SQLITE3_BLOB);
-    REGISTER_CONSTANT(SQLITE3_NULL);
-    REGISTER_CONSTANT(SQLITE3_OPEN_READONLY);
-    REGISTER_CONSTANT(SQLITE3_OPEN_READWRITE);
-    REGISTER_CONSTANT(SQLITE3_OPEN_CREATE);
+    HHVM_RC_INT(SQLITE3_ASSOC, PHP_SQLITE3_ASSOC);
+    HHVM_RC_INT(SQLITE3_NUM, PHP_SQLITE3_NUM);
+    HHVM_RC_INT(SQLITE3_BOTH, PHP_SQLITE3_BOTH);
+
+    HHVM_RC_INT(SQLITE3_INTEGER, SQLITE_INTEGER);
+    HHVM_RC_INT(SQLITE3_FLOAT, SQLITE_FLOAT);
+    HHVM_RC_INT_SAME(SQLITE3_TEXT);
+    HHVM_RC_INT(SQLITE3_BLOB, SQLITE_BLOB);
+    HHVM_RC_INT(SQLITE3_NULL, SQLITE_NULL);
+    HHVM_RC_INT(SQLITE3_OPEN_READONLY, SQLITE_OPEN_READONLY);
+    HHVM_RC_INT(SQLITE3_OPEN_READWRITE, SQLITE_OPEN_READWRITE);
+    HHVM_RC_INT(SQLITE3_OPEN_CREATE, SQLITE_OPEN_CREATE);
 
     HHVM_ME(SQLite3, __construct);
     HHVM_ME(SQLite3, open);

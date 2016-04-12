@@ -1,0 +1,21 @@
+DEFAULT
+exit fb_setprofile return
+enter some_function args
+exit some_function return
+
+EXITS
+exit some_function return
+
+ENTERS
+enter some_function args
+
+FRAME PTRS
+enter some_function args,this_ptr,frame_ptr,parent_frame_ptr
+exit some_function return,frame_ptr,parent_frame_ptr
+
+IMPLICIT CTORS
+enter some_function args
+enter SomeClass::86ctor args
+exit SomeClass::86ctor return
+exit some_function return
+exit  return

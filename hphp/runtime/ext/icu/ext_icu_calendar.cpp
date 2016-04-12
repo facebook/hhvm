@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -744,77 +744,56 @@ static bool HHVM_METHOD(IntlGregorianCalendar, setGregorianChange,
 /////////////////////////////////////////////////////////////////////////////
 // Extension
 
-#define CAL_CONST(v)   Native::registerClassConstant<KindOfInt64>( \
-                         s_IntlCalendar.get(), \
-                         makeStaticString(#v), \
-                         UCAL_ ## v);
-
-#define FIELD_CONST(v) Native::registerClassConstant<KindOfInt64>( \
-                         s_IntlCalendar.get(), \
-                         makeStaticString("FIELD_" #v), \
-                         UCAL_ ## v);
-
-#define DOW_CONST(v)   Native::registerClassConstant<KindOfInt64>( \
-                         s_IntlCalendar.get(), \
-                         makeStaticString("DOW_" #v), \
-                         UCAL_ ## v);
-
-#define TYPE_CONST(v)  Native::registerClassConstant<KindOfInt64>( \
-                         s_IntlCalendar.get(), \
-                         makeStaticString("DOW_TYPE_" #v), \
-                         UCAL_ ## v);
-
 void IntlExtension::initCalendar() {
-  FIELD_CONST(ERA);
-  FIELD_CONST(YEAR);
-  FIELD_CONST(MONTH);
-  FIELD_CONST(WEEK_OF_YEAR);
-  FIELD_CONST(WEEK_OF_MONTH);
-  FIELD_CONST(DATE);
-  FIELD_CONST(DAY_OF_YEAR);
-  FIELD_CONST(DAY_OF_WEEK);
-  FIELD_CONST(DAY_OF_WEEK_IN_MONTH);
-  FIELD_CONST(AM_PM);
-  FIELD_CONST(HOUR);
-  FIELD_CONST(HOUR_OF_DAY);
-  FIELD_CONST(MINUTE);
-  FIELD_CONST(SECOND);
-  FIELD_CONST(MILLISECOND);
-  FIELD_CONST(ZONE_OFFSET);
-  FIELD_CONST(DST_OFFSET);
-  FIELD_CONST(YEAR_WOY);
-  FIELD_CONST(DOW_LOCAL);
-  FIELD_CONST(EXTENDED_YEAR);
-  FIELD_CONST(JULIAN_DAY);
-  FIELD_CONST(MILLISECONDS_IN_DAY);
-  FIELD_CONST(IS_LEAP_MONTH);
-  FIELD_CONST(FIELD_COUNT);
-  FIELD_CONST(DAY_OF_MONTH);
+  HHVM_RCC_INT(IntlCalendar, FIELD_ERA, UCAL_ERA);
+  HHVM_RCC_INT(IntlCalendar, FIELD_YEAR, UCAL_YEAR);
+  HHVM_RCC_INT(IntlCalendar, FIELD_MONTH, UCAL_MONTH);
+  HHVM_RCC_INT(IntlCalendar, FIELD_WEEK_OF_YEAR, UCAL_WEEK_OF_YEAR);
+  HHVM_RCC_INT(IntlCalendar, FIELD_WEEK_OF_MONTH, UCAL_WEEK_OF_MONTH);
+  HHVM_RCC_INT(IntlCalendar, FIELD_DATE, UCAL_DATE);
+  HHVM_RCC_INT(IntlCalendar, FIELD_DAY_OF_YEAR, UCAL_DAY_OF_YEAR);
+  HHVM_RCC_INT(IntlCalendar, FIELD_DAY_OF_WEEK, UCAL_DAY_OF_WEEK);
+  HHVM_RCC_INT(IntlCalendar, FIELD_DAY_OF_WEEK_IN_MONTH,
+               UCAL_DAY_OF_WEEK_IN_MONTH);
+  HHVM_RCC_INT(IntlCalendar, FIELD_AM_PM, UCAL_AM_PM);
+  HHVM_RCC_INT(IntlCalendar, FIELD_HOUR, UCAL_HOUR);
+  HHVM_RCC_INT(IntlCalendar, FIELD_HOUR_OF_DAY, UCAL_HOUR_OF_DAY);
+  HHVM_RCC_INT(IntlCalendar, FIELD_MINUTE, UCAL_MINUTE);
+  HHVM_RCC_INT(IntlCalendar, FIELD_SECOND, UCAL_SECOND);
+  HHVM_RCC_INT(IntlCalendar, FIELD_MILLISECOND, UCAL_MILLISECOND);
+  HHVM_RCC_INT(IntlCalendar, FIELD_ZONE_OFFSET, UCAL_ZONE_OFFSET);
+  HHVM_RCC_INT(IntlCalendar, FIELD_DST_OFFSET, UCAL_DST_OFFSET);
+  HHVM_RCC_INT(IntlCalendar, FIELD_YEAR_WOY, UCAL_YEAR_WOY);
+  HHVM_RCC_INT(IntlCalendar, FIELD_DOW_LOCAL, UCAL_DOW_LOCAL);
+  HHVM_RCC_INT(IntlCalendar, FIELD_EXTENDED_YEAR, UCAL_EXTENDED_YEAR);
+  HHVM_RCC_INT(IntlCalendar, FIELD_JULIAN_DAY, UCAL_JULIAN_DAY);
+  HHVM_RCC_INT(IntlCalendar, FIELD_MILLISECONDS_IN_DAY,
+               UCAL_MILLISECONDS_IN_DAY);
+  HHVM_RCC_INT(IntlCalendar, FIELD_IS_LEAP_MONTH, UCAL_IS_LEAP_MONTH);
+  HHVM_RCC_INT(IntlCalendar, FIELD_FIELD_COUNT, UCAL_FIELD_COUNT);
+  HHVM_RCC_INT(IntlCalendar, FIELD_DAY_OF_MONTH, UCAL_DAY_OF_MONTH);
 
-  DOW_CONST(SUNDAY);
-  DOW_CONST(MONDAY);
-  DOW_CONST(TUESDAY);
-  DOW_CONST(WEDNESDAY);
-  DOW_CONST(THURSDAY);
-  DOW_CONST(FRIDAY);
-  DOW_CONST(SATURDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_SUNDAY, UCAL_SUNDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_MONDAY, UCAL_MONDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_TUESDAY, UCAL_TUESDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_WEDNESDAY, UCAL_WEDNESDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_THURSDAY, UCAL_THURSDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_FRIDAY, UCAL_FRIDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_SATURDAY, UCAL_SATURDAY);
 
 #if ((U_ICU_VERSION_MAJOR_NUM * 100) + U_ICU_VERSION_MINOR_NUM) >= 404
-  TYPE_CONST(WEEKDAY);
-  TYPE_CONST(WEEKEND);
-  TYPE_CONST(WEEKEND_CEASE);
+  HHVM_RCC_INT(IntlCalendar, DOW_TYPE_WEEKDAY, UCAL_WEEKDAY);
+  HHVM_RCC_INT(IntlCalendar, DOW_TYPE_WEEKEND, UCAL_WEEKEND);
+  HHVM_RCC_INT(IntlCalendar, DOW_TYPE_WEEKEND_CEASE, UCAL_WEEKEND_CEASE);
 
   // Not a typo: Zend defines OFFSET as ONSET
-  Native::registerClassConstant<KindOfInt64>(
-    s_IntlCalendar.get(),
-    makeStaticString("DOW_TYPE_WEEKEND_OFFSET"),
-    UCAL_WEEKEND_ONSET);
+  HHVM_RCC_INT(IntlCalendar, DOW_TYPE_WEEKEND_OFFSET, UCAL_WEEKEND_ONSET);
 #endif
 
 #if ((U_ICU_VERSION_MAJOR_NUM * 100) + U_ICU_VERSION_MINOR_NUM) >= 409
-  CAL_CONST(WALLTIME_FIRST);
-  CAL_CONST(WALLTIME_LAST);
-  CAL_CONST(WALLTIME_NEXT_VALID);
+  HHVM_RCC_INT(IntlCalendar, WALLTIME_FIRST, UCAL_WALLTIME_FIRST);
+  HHVM_RCC_INT(IntlCalendar, WALLTIME_LAST, UCAL_WALLTIME_LAST);
+  HHVM_RCC_INT(IntlCalendar, WALLTIME_NEXT_VALID, UCAL_WALLTIME_NEXT_VALID);
 #endif
 
   HHVM_ME(IntlCalendar, add);

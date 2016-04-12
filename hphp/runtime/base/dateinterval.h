@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,38 +21,11 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/alloc.h"
 
+#include <memory>
+
 extern "C" {
 #include <timelib.h>
-#include <memory>
 }
-
-/**
- * Older versions of timelib don't support certain
- * relative interval functions.  Mock them as needed here.
- */
-#if defined(TIMELIB_VERSION) && (TIMELIB_VERSION >= 201101)
-# define TIMELIB_HAVE_INTERVAL
-# define TIMELIB_HAVE_TZLOCATION
-
-# define TIMELIB_REL_INVERT(rel)          (rel)->invert
-# define TIMELIB_REL_DAYS(rel)            (rel)->days
-# define TIMELIB_REL_INVERT_SET(rel, val) (rel)->invert = (val)
-# define TIMELIB_REL_DAYS_SET(rel, val)   (rel)->days = (val)
-#else
-# define TIMELIB_REL_INVERT(rel)          0
-# define TIMELIB_REL_DAYS(rel)            -99999
-# define TIMELIB_REL_INVERT_SET(rel, val)
-# define TIMELIB_REL_DAYS_SET(rel, val)
-inline timelib_rel_time* timelib_rel_time_clone(timelib_rel_time* t) {
-  timelib_rel_time *ret = (timelib_rel_time*)
-          HPHP::safe_malloc(sizeof(timelib_rel_time));
-  memcpy(ret, t, sizeof(timelib_rel_time));
-  return ret;
-}
-inline void timelib_rel_time_dtor(timelib_rel_time *t) {
-  HPHP::safe_free(t);
-}
-#endif /* TIMELIB_HAVE_INTERVAL */
 
 namespace HPHP {
 
@@ -60,10 +33,9 @@ namespace HPHP {
 typedef std::shared_ptr<timelib_rel_time> DateIntervalPtr;
 
 /**
- * Handles all date interal related functions.
+ * Handles all date interval related functions.
  */
-class DateInterval : public SweepableResourceData {
-public:
+struct DateInterval : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(DateInterval);
   static const StaticString& classnameof() {
     static const StaticString result("DateInterval");
@@ -81,9 +53,9 @@ public:
   int64_t getHours()      const    { return m_di->h;                      }
   int64_t getMinutes()    const    { return m_di->i;                      }
   int64_t getSeconds()    const    { return m_di->s;                      }
-  bool  isInverted()    const    { return TIMELIB_REL_INVERT(m_di);     }
-  bool  haveTotalDays() const    { return TIMELIB_REL_DAYS(m_di) != -99999; }
-  int64_t getTotalDays()  const    { return TIMELIB_REL_DAYS(m_di);       }
+  bool  isInverted()      const    { return m_di->invert;                 }
+  bool  haveTotalDays()   const    { return m_di->days != -99999;         }
+  int64_t getTotalDays()  const    { return m_di->days;                   }
 
   void setYears(int64_t value)     { if (isValid()) m_di->y      = value; }
   void setMonths(int64_t value)    { if (isValid()) m_di->m      = value; }
@@ -92,25 +64,25 @@ public:
   void setMinutes(int64_t value)   { if (isValid()) m_di->i      = value; }
   void setSeconds(int64_t value)   { if (isValid()) m_di->s      = value; }
   void setInverted(bool value)   {
-    if (isValid()) TIMELIB_REL_INVERT_SET(m_di, value);
+    if (isValid()) m_di->invert = value;
   }
   void setTotalDays(int64_t value) {
-    if (isValid()) TIMELIB_REL_DAYS_SET(m_di, value);
+    if (isValid()) m_di->days = value;
   }
 
-  bool setDateString(const String& date_string);
-  bool setInterval(const String& date_interval);
   String format(const String& format_spec);
 
   bool isValid() const { return get(); }
   req::ptr<DateInterval> cloneDateInterval() const;
 
 protected:
-  friend class DateTime;
+  friend struct DateTime;
 
   timelib_rel_time *get() const { return m_di.get(); }
 
 private:
+  void setDateString(const String& date_string);
+  void setInterval(const String& date_interval);
   struct dateinterval_deleter {
     void operator()(timelib_rel_time *di) {
       if (di) {

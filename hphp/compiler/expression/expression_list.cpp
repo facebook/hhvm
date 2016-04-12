@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -370,19 +370,6 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
 ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstPtr ar) {
   optimize(ar);
   return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ExpressionList::outputCodeModel(CodeGenerator &cg) {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ExpressionPtr exp = m_exps[i];
-    if (exp) {
-      cg.printExpression(exp, exp->hasContext(RefParameter));
-    } else {
-      cg.printNull();
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

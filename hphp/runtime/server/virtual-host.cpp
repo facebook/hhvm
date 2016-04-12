@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -59,13 +60,35 @@ const VirtualHost *VirtualHost::GetCurrent() {
   return ret;
 }
 
+VirtualHost* VirtualHost::Resolve(const std::string& host) {
+  for (auto vhost : RuntimeOption::VirtualHosts) {
+    if (vhost->match(host)) {
+      return vhost.get();
+    }
+  }
+  return nullptr;
+}
+
+int64_t VirtualHost::getMaxPostSize() const {
+  if (m_runtimeOption.maxPostSize != -1) {
+    return m_runtimeOption.maxPostSize;
+  }
+  return RuntimeOption::MaxPostSize;
+}
+
+int64_t VirtualHost::GetLowestMaxPostSize() {
+  auto lowest = RuntimeOption::MaxPostSize;
+  for (auto vhost : RuntimeOption::VirtualHosts) {
+    auto max = vhost->getMaxPostSize();
+    lowest = std::min(lowest, max);
+  }
+  return lowest;
+}
+
 int64_t VirtualHost::GetMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  if (vh->m_runtimeOption.maxPostSize != -1) {
-    return vh->m_runtimeOption.maxPostSize;
-  }
-  return RuntimeOption::MaxPostSize;
+  return vh->getMaxPostSize();
 }
 
 int64_t VirtualHost::GetUploadMaxFileSize() {
@@ -84,6 +107,12 @@ void VirtualHost::UpdateSerializationSizeLimit() {
     VariableSerializer::serializationSizeLimit =
       vh->m_runtimeOption.serializationSizeLimit;
   }
+}
+
+bool VirtualHost::alwaysDecodePostData(const String& origPath) const {
+  if (!m_alwaysDecodePostData) return false;
+  if (m_decodePostDataBlackList.empty()) return true;
+  return !m_decodePostDataBlackList.count(origPath.toCppString());
 }
 
 const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
@@ -155,9 +184,12 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, const Hdf& vh) {
   m_runtimeOption.serializationSizeLimit = serializationSizeLimit;
 
   m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
-  if (!m_documentRoot.empty() &&
-      m_documentRoot[m_documentRoot.length() - 1] == '/') {
-    m_documentRoot = m_documentRoot.substr(0, m_documentRoot.length() - 1);
+  if (m_documentRoot.length() > 1 &&
+      m_documentRoot.back() == '/') {
+    m_documentRoot.pop_back();
+    // Make sure we've not converted "/" to "" (which is why we're checking
+    // length() > 1 instead of !empty() above)
+    assert(!m_documentRoot.empty());
   }
 }
 
@@ -213,6 +245,12 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
 
   m_checkExistenceBeforeRewrite =
     Config::GetBool(ini, vh, "CheckExistenceBeforeRewrite", true, false);
+
+  m_alwaysDecodePostData =
+    Config::GetBool(ini, vh, "AlwaysDecodePostData", true, false);
+
+  m_decodePostDataBlackList =
+    Config::GetSetC(ini, vh, "DecodePostDataBlackList");
 
   auto rr_callback = [&] (const IniSetting::Map &ini_rr,
                           const Hdf &hdf_rr,
@@ -345,6 +383,9 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
     normalized = String("/") + normalized;
   }
 
+  Logger::Verbose("Matching host:%s url:%s using vhost:%s",
+                  host.c_str(), url.c_str(), m_name.c_str());
+
   for (unsigned int i = 0; i < m_rewriteRules.size(); i++) {
     const RewriteRule &rule = m_rewriteRules[i];
 
@@ -370,6 +411,8 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
                            normalized,
                            &matches).toInt64();
     if (count > 0) {
+      Logger::Verbose("Matched pattern %s", rule.pattern.c_str());
+
       const char *s = rule.to.c_str();
       StringBuffer ret;
       while (*s) {
@@ -413,6 +456,8 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
       qsa = rule.qsa;
       redirect = rule.redirect;
       return true;
+    } else {
+      Logger::Verbose("Did not match pattern %s", rule.pattern.c_str());
     }
   }
   return false;

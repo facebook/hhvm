@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,33 +33,38 @@ struct ActRec;
  * execution of PHP code that can be resumed once the result of awaited
  * WaitHandle becomes available.
  */
-class c_ResumableWaitHandle : public c_WaitableWaitHandle {
- public:
-  DECLARE_CLASS_NO_SWEEP(ResumableWaitHandle)
+struct c_ResumableWaitHandle : c_WaitableWaitHandle {
+  WAITHANDLE_CLASSOF(ResumableWaitHandle);
+  WAITHANDLE_DTOR(ResumableWaitHandle);
 
   explicit c_ResumableWaitHandle(Class* cls = c_ResumableWaitHandle::classof(),
-                                 HeaderKind kind = HeaderKind::Object) noexcept
-    : c_WaitableWaitHandle(cls, kind) {}
+                                 HeaderKind kind = HeaderKind::WaitHandle)
+  noexcept : c_WaitableWaitHandle(cls, kind) {}
   ~c_ResumableWaitHandle() {}
-  static void ti_setoncreatecallback(const Variant& callback);
-  static void ti_setonawaitcallback(const Variant& callback);
-  static void ti_setonsuccesscallback(const Variant& callback);
-  static void ti_setonfailcallback(const Variant& callback);
 
  public:
   static c_ResumableWaitHandle* getRunning(ActRec* fp);
   void resume();
   void exitContext(context_idx_t ctx_idx);
 
-  static const int8_t STATE_BLOCKED   = 2;
-  static const int8_t STATE_SCHEDULED = 3;
-  static const int8_t STATE_RUNNING   = 4;
+  static const int8_t STATE_BLOCKED   = 2; // waiting on dependencies.
+  static const int8_t STATE_READY     = 3; // ready to run
+  static const int8_t STATE_RUNNING   = 4; // currently running
 };
 
 inline c_ResumableWaitHandle* c_WaitHandle::asResumable() {
   assert(getKind() == Kind::AsyncFunction || getKind() == Kind::AsyncGenerator);
   return static_cast<c_ResumableWaitHandle*>(this);
 }
+
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnAwaitCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnSuccessCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnFailCallback,
+                        const Variant& callback);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

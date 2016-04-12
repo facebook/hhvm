@@ -1,0 +1,266 @@
+array(5) {
+  ["ts"]=>
+  int(1000000)
+  ["time"]=>
+  string(24) "1970-01-12T13:46:40+0000"
+  ["offset"]=>
+  int(3600)
+  ["isdst"]=>
+  bool(false)
+  ["abbr"]=>
+  string(3) "BST"
+}
+array(5) {
+  ["ts"]=>
+  int(89172000)
+  ["time"]=>
+  string(24) "1972-10-29T02:00:00+0000"
+  ["offset"]=>
+  int(0)
+  ["isdst"]=>
+  bool(false)
+  ["abbr"]=>
+  string(3) "GMT"
+}
+array(5) {
+  ["ts"]=>
+  int(985482000)
+  ["time"]=>
+  string(24) "2001-03-25T01:00:00+0000"
+  ["offset"]=>
+  int(3600)
+  ["isdst"]=>
+  bool(true)
+  ["abbr"]=>
+  string(3) "BST"
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(1383176624)
+    ["time"]=>
+    string(24) "2013-10-30T23:43:44+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-2147483648)
+    ["time"]=>
+    string(24) "1901-12-13T20:45:52+0000"
+    ["offset"]=>
+    int(21200)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "HMT"
+  }
+}
+array(5) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-2147483648)
+    ["time"]=>
+    string(24) "1901-12-13T20:45:52+0000"
+    ["offset"]=>
+    int(21200)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "HMT"
+  }
+  [1]=>
+  array(5) {
+    ["ts"]=>
+    int(-891582800)
+    ["time"]=>
+    string(24) "1941-09-30T18:06:40+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(4) "BURT"
+  }
+  [2]=>
+  array(5) {
+    ["ts"]=>
+    int(-872058600)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+  [3]=>
+  array(5) {
+    ["ts"]=>
+    int(-862637400)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+  [4]=>
+  array(5) {
+    ["ts"]=>
+    int(-764145000)
+    ["time"]=>
+    string(24) "1945-10-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-872058600)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(2) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-872058600)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:00+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+  [1]=>
+  array(5) {
+    ["ts"]=>
+    int(-862637400)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-872058599)
+    ["time"]=>
+    string(24) "1942-05-14T17:30:01+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-862637400)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-862637399)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:01+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-862637399)
+    ["time"]=>
+    string(24) "1942-08-31T18:30:01+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(1000000)
+    ["time"]=>
+    string(24) "1970-01-12T13:46:40+0000"
+    ["offset"]=>
+    int(0)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "UTC"
+  }
+}
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(-9223372036854775808)
+    ["time"]=>
+    string(30) "-219246529-01-27T08:29:52+0000"
+    ["offset"]=>
+    int(0)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "UTC"
+  }
+}

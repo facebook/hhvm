@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -228,7 +228,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       sb.append(';');
       return sb.detach();
     }
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString: {
       StringData *str = value.getStringData();
       StringBuffer sb;
@@ -241,6 +241,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     }
     case KindOfResource:
       return s_Res;
+    case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
       if (arr->empty()) return s_EmptyArray;
@@ -259,8 +260,8 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
-                                   const Array& class_whitelist /* =[] */) {
-  return unserialize_from_string(str, class_whitelist);
+                                   const Array& options /* =[] */) {
+  return unserialize_from_string(str, options);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -379,7 +380,7 @@ int64_t extract_impl(VRefParam vref_array,
     arr_tv = arr_tv->m_data.pref->tv();
     arrByRef = true;
   }
-  if (arr_tv->m_type != KindOfArray) {
+  if (!isArrayType(arr_tv->m_type)) {
     raise_warning("extract() expects parameter 1 to be array");
     return 0;
   }
@@ -391,39 +392,40 @@ int64_t extract_impl(VRefParam vref_array,
   auto const varEnv = g_context->getOrCreateVarEnv();
   if (!varEnv) return 0;
 
-  auto& arr = tvAsCVarRef(arr_tv).asCArrRef();
+  auto& carr = tvAsCVarRef(arr_tv).asCArrRef();
   if (UNLIKELY(reference)) {
     auto extr_refs = [&](Array& arr) {
-      {
-        // force arr to escalate (if necessary) by getting an
-        // lvalue to the first element.
+      if (arr.size() > 0) {
+        // force arr to escalate (if necessary) by getting an lvalue to the
+        // first element.
         ArrayData* ad = arr.get();
         auto const& first_key = ad->getKey(ad->iter_begin());
         arr.lvalAt(first_key);
       }
       int count = 0;
       for (ArrayIter iter(arr); iter; ++iter) {
-        String name = iter.first();
+        auto name = iter.first().toString();
         if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
-        // the const_cast is safe because we escalated the array
-        // we can't use arr.lvalAt(name), because arr may have been modified
-        // as a side effect of an earlier iteration
+        // The const_cast is safe because we escalated the array.  We can't use
+        // arr.lvalAt(name), because arr may have been modified as a side
+        // effect of an earlier iteration.
         auto& ref = const_cast<Variant&>(iter.secondRef());
         g_context->bindVar(name.get(), ref.asTypedValue());
         ++count;
       }
       return count;
     };
+
     if (arrByRef) {
-      return extr_refs(const_cast<Array&>(arr));
+      return extr_refs(tvAsVariant(vref_array.getRefData()->tv()).asArrRef());
     }
-    Array tmp = arr;
+    Array tmp = carr;
     return extr_refs(tmp);
   }
 
   int count = 0;
-  for (ArrayIter iter(arr); iter; ++iter) {
-    String name = iter.first();
+  for (ArrayIter iter(carr); iter; ++iter) {
+    auto name = iter.first().toString();
     if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
     g_context->setVar(name.get(), iter.secondRef().asTypedValue());
     ++count;

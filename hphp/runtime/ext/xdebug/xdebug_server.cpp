@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 
+#include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
-#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
 #include "hphp/runtime/base/externals.h"
@@ -106,14 +106,16 @@ XDebugServer::XDebugServer(Mode mode)
   }
 
   // Create the socket
-  m_socket = createSocket(hostname, port);
-  if (m_socket == -1) {
+  auto const status = createSocket(hostname, port);
+  if (status == -1) {
     log("E: Could not connect to client. :-(\n");
     goto failure;
-  } else if (m_socket == -2) {
+  } else if (status == -2) {
     log("E: Time-out connecting to client. :-(\n");
     goto failure;
   }
+
+  assert(status == 0);
 
   // Get the requested handler
   log("I: Connected to client. :-)\n");
@@ -171,11 +173,13 @@ int XDebugServer::createSocket(const char* hostname, int port) {
 
   // Create the socket
   auto const sockfd = socket(address.sin_family, SOCK_STREAM, 0);
-  if (sockfd == -1) {
+  if (sockfd < 0) {
     log("create_debugger_socket(\"%s\", %d) socket: %s\n",
         hostname, port, folly::errnoStr(errno).c_str());
     return -1;
   }
+
+  m_socket = sockfd;
 
   // Put socket in non-blocking mode so we can use poll() for timeouts.
   fcntl(sockfd, F_SETFL, O_NONBLOCK);
@@ -222,7 +226,7 @@ int XDebugServer::createSocket(const char* hostname, int port) {
   fcntl(sockfd, F_SETFL, 0);
   long optval = 1;
   setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
-  return sockfd;
+  return 0;
 }
 
 void XDebugServer::destroySocket() {
@@ -316,7 +320,7 @@ void XDebugServer::pollSocketLoop() {
       always_assert(old == nullptr);
 
       // Force request thread to run in the interpreter, and hit
-      // XDebugHookHandler::onOpcode().
+      // XDebugHook::onOpcode().
       m_requestThread->m_reqInjectionData.setDebuggerIntr(true);
       m_requestThread->m_reqInjectionData.setFlag(DebuggerSignalFlag);
     } catch (const XDebugExn&) {
@@ -354,9 +358,9 @@ void XDebugServer::onRequestInit() {
     return;
   }
 
-  // Need to turn on debugging regardless of the remote mode in order to
-  // capture exceptions/errors
-  if (!DebugHookHandler::attach<XDebugHookHandler>()) {
+  // Need to turn on debugging regardless of the remote mode in order to capture
+  // exceptions/errors.
+  if (!DebuggerHook::attach<XDebugHook>()) {
     raise_warning("Could not attach xdebug remote debugger to the current "
                   "thread. A debugger is already attached.");
     return;
@@ -418,6 +422,13 @@ void XDebugServer::attach(Mode mode) {
       detach();
     }
   } catch (...) {
+    // If we fail to attach to a debugger, then we can choose to wait for an
+    // exception to be thrown so we try again, or we can just detach the
+    // debugger hook completely.  Leaving the debugger hook attached encurs a
+    // large performance cost.
+    if (LIKELY(XDEBUG_GLOBAL(RemoteMode) == "req")) {
+      DebuggerHook::detach();
+    }
     // Fail silently, continue running the request.
   }
 }
@@ -760,7 +771,7 @@ bool XDebugServer::readInput() {
       m_bufferSize = (m_bufferSize == 0) ?
         INPUT_BUFFER_INIT_SIZE : m_bufferSize * INPUT_BUFFER_EXPANSION;
       bytes_left = m_bufferSize - bytes_read;
-      m_buffer = (char*) req::realloc(m_buffer, m_bufferSize);
+      m_buffer = (char*) req::realloc_noptrs(m_buffer, m_bufferSize);
     }
 
     // Read into the buffer

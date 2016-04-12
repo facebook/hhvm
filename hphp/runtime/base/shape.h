@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,12 +24,12 @@
 
 namespace HPHP {
 
-class Shape {
-public:
+struct Shape {
+  using PropName = const StringData*;
   static Shape* emptyShape();
-  static Shape* create(StringData** properties, uint32_t numProperties);
+  static Shape* create(const PropName* properties, uint32_t numProperties);
   static Shape* clone(Shape* from);
-  Shape* transition(StringData* property);
+  Shape* transition(const StringData* property);
 
   size_t size() const;
   size_t capacity() const;
@@ -47,11 +47,11 @@ private:
   Shape();
   Shape(const Shape&);
 
-  void addProperty(StringData* property);
+  void addProperty(const StringData* property);
   bool shouldCacheTransition() const;
   size_t maxCachedTransitions(size_t size);
 
-  typedef hphp_hash_map<StringData*, Shape*> TransitionMap;
+  typedef hphp_hash_map<const StringData*, Shape*> TransitionMap;
 
   size_t m_size;
   size_t m_capacity;
@@ -104,17 +104,17 @@ inline bool Shape::hasOffsetFor(const StringData* property) const {
   return offsetFor(property) != PropertyTable::kInvalidOffset;
 }
 
-inline Shape* Shape::create(StringData** properties, uint32_t numProperties) {
+inline Shape* Shape::create(const PropName* props, uint32_t numProperties) {
   Shape* start = emptyShape();
   Shape* curr = start;
   for (uint32_t i = 0; i < numProperties; ++i) {
-    curr = curr->transition(properties[i]);
+    curr = curr->transition(props[i]);
     if (!curr) return nullptr;
   }
   return curr;
 }
 
-inline void Shape::addProperty(StringData* property) {
+inline void Shape::addProperty(const StringData* property) {
   m_table.add(property);
   if (transitionRequiresGrowth()) {
     m_capacity = suggestedNewCapacity();
@@ -122,7 +122,7 @@ inline void Shape::addProperty(StringData* property) {
   m_size++;
 }
 
-inline Shape* Shape::transition(StringData* property) {
+inline Shape* Shape::transition(const StringData* property) {
   assert(property->isStatic());
 
   {

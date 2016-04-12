@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,14 +50,14 @@ void TypeConstraint::init() {
   auto const mptr = nameToAnnotType(m_typeName);
   if (mptr) {
     m_type = *mptr;
-    assert(getAnnotDataType(m_type) != KindOfStaticString);
+    assert(getAnnotDataType(m_type) != KindOfPersistentString);
     return;
   }
   TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
         this, m_typeName->data());
   m_type = Type::Object;
   m_namedEntity = NamedEntity::get(m_typeName);
-  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
+  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity.get());
 }
 
 std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
@@ -384,8 +384,9 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfBoolean:       return "bool";
     case KindOfInt64:         return "int";
     case KindOfDouble:        return isHHType ? "float" : "double";
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return "string";
+    case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfObject:        return tv->m_data.pobj->getClassName().c_str();
     case KindOfResource:
@@ -399,10 +400,44 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
 }
 
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
-                                int id) const {
+                                int id, bool useStrictTypes) const {
   VMRegAnchor _;
   std::string name = displayName(func);
   auto const givenType = describe_actual_type(tv, isHHType());
+
+  if (UNLIKELY(!useStrictTypes)) {
+    if (auto dt = underlyingDataType()) {
+      // In non-strict mode we may be able to coerce a type failure. For object
+      // typehints there is no possible coercion in the failure case, but HNI
+      // builtins currently only guard on kind not class so the following wil
+      // generate false positives for objects.
+      if (*dt != KindOfObject) {
+        // HNI conversions implicitly unbox references, this behavior is wrong,
+        // in particular it breaks the way type conversion works for PHP 7
+        // scalar type hints
+        if (tv->m_type == KindOfRef) {
+          auto inner = tv->m_data.pref->var()->asTypedValue();
+          if (tvCoerceParamInPlace(inner, *dt)) {
+            tvAsVariant(tv) = tvAsVariant(inner);
+            return;
+          }
+        } else {
+          if (tvCoerceParamInPlace(tv, *dt)) return;
+        }
+      }
+    }
+  } else if (UNLIKELY(!func->unit()->isHHFile() &&
+                      !RuntimeOption::EnableHipHopSyntax)) {
+    // PHP 7 allows for a widening conversion from Int to Float, we still ban
+    // this in HH files.
+    if (auto dt = underlyingDataType()) {
+      if (*dt == KindOfDouble && tv->m_type == KindOfInt64 &&
+          tvCoerceParamToDoubleInPlace(tv)) {
+        return;
+      }
+    }
+  }
+
   // Handle return type constraint failures
   if (id == ReturnId) {
     std::string msg;

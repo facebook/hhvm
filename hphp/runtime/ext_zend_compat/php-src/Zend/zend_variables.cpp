@@ -30,8 +30,9 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
   if (HPHP::isStringType(zvalue->tv()->m_type)) {
     zvalue->tv()->m_data.pstr =
       HPHP::StringData::Make(zvalue->tv()->m_data.pstr, HPHP::CopyString);
-    zvalue->tv()->m_type = HPHP::KindOfString; // not KindOfStaticString anymore
-  } else if (zvalue->tv()->m_type == HPHP::KindOfArray) {
+    // m_type is not KindOfPersistentString anymore
+    zvalue->tv()->m_type = HPHP::KindOfString;
+  } else if (HPHP::isArrayType(zvalue->tv()->m_type)) {
     HPHP::ArrayData * ad = zvalue->tv()->m_data.parr->copy();
     assert(ad != zvalue->tv()->m_data.parr);
     if (!ad->isProxyArray()) {
@@ -39,6 +40,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
       assert(ad->hasExactlyOneRef());
     }
     zvalue->tv()->m_data.parr = ad;
+    zvalue->tv()->m_type = HPHP::KindOfArray;
   } else if (isRefcountedType(zvalue->tv()->m_type)) {
     TV_GENERIC_DISPATCH(*zvalue->tv(), incRefCount);
   }

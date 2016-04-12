@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,10 +59,11 @@ std::string DEBUG_ONLY show(const State& state) {
   return ret;
 }
 
-State entry_state(const RegionDesc& region) {
+State entry_state(const RegionDesc& region, std::vector<Type>* input) {
   auto const numLocals = region.start().func()->numLocals();
   auto ret = State{};
   ret.initialized = true;
+  if (input) ret.locals = *input;
   ret.locals.resize(numLocals, TGen);
   return ret;
 }
@@ -97,11 +98,8 @@ bool preconds_may_pass(const RegionDesc::Block& block,
 
   auto const& preConds = block.typePreConditions();
   for (auto const& preCond : preConds) {
-    using L = RegionDesc::Location::Tag;
     switch (preCond.location.tag()) {
-    case L::Stack: break;
-    case L::Local:
-      {
+      case LTag::Local: {
         auto const loc = preCond.location.localId();
         assertx(loc < state.locals.size());
         if (!state.locals[loc].maybe(preCond.type)) {
@@ -109,8 +107,10 @@ bool preconds_may_pass(const RegionDesc::Block& block,
                  block.id(), show(preCond), loc, state.locals[loc]);
           return false;
         }
+        break;
       }
-      break;
+      case LTag::Stack:
+        break;
     }
   }
   return true;
@@ -121,30 +121,28 @@ bool preconds_may_pass(const RegionDesc::Block& block,
 // with the current type.
 void apply_transfer_function(State& dst, const PostConditions& postConds) {
   for (auto& p : postConds.refined) {
-    using L = RegionDesc::Location::Tag;
     switch (p.location.tag()) {
-      case L::Stack:
-        break;
-      case L::Local: {
+      case LTag::Local: {
         const auto locId = p.location.localId();
         assert(locId < dst.locals.size());
         dst.locals[locId] = dst.locals[locId] & p.type;
         break;
       }
+      case LTag::Stack:
+        break;
     }
   }
 
   for (auto& p : postConds.changed) {
-    using L = RegionDesc::Location::Tag;
     switch (p.location.tag()) {
-      case L::Stack:
-        break;
-      case L::Local: {
+      case LTag::Local: {
         const auto locId = p.location.localId();
         assert(locId < dst.locals.size());
         dst.locals[locId] = p.type;
         break;
       }
+      case LTag::Stack:
+        break;
     }
   }
 }
@@ -153,7 +151,7 @@ void apply_transfer_function(State& dst, const PostConditions& postConds) {
 
 }
 
-void region_prune_arcs(RegionDesc& region) {
+void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
   FTRACE(4, "region_prune_arcs\n");
 
   region.sortBlocks();
@@ -171,7 +169,7 @@ void region_prune_arcs(RegionDesc& region) {
     blockToRPO[binfo.blockID] = rpoID;
   }
   workQ.push(0);
-  blockInfos[0].in = entry_state(region);
+  blockInfos[0].in = entry_state(region, input);
 
   FTRACE(4, "Iterating:\n");
   do {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,11 +33,19 @@ std::string ParserBase::newClosureName(
     const std::string &namespaceName,
     const std::string &className,
     const std::string &funcName) {
-  // Closure names must be globally unique.  The easiest way to do
+  return newAnonClassName("Closure", namespaceName, className, funcName);
+}
+
+std::string ParserBase::newAnonClassName(
+    const std::string &prefix,
+    const std::string &namespaceName,
+    const std::string &className,
+    const std::string &funcName) {
+  // Class names must be globally unique.  The easiest way to do
   // this is include a hash of the filename.
   int64_t hash = hash_string_cs(m_fileName, strlen(m_fileName));
 
-  std::string name = "Closure$";
+  std::string name = prefix + "$";
   if (!className.empty()) {
     name += className + "::";
   } else if (!namespaceName.empty()) {
@@ -46,7 +54,7 @@ std::string ParserBase::newClosureName(
   }
   name += funcName;
 
-  int id = ++m_seenClosures[name];
+  int id = ++m_seenAnonClasses[name];
   if (id > 1) {
     // we've seen the same name before, uniquify
     name = name + '#' + std::to_string(id);

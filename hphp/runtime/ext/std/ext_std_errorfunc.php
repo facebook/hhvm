@@ -5,7 +5,7 @@
  * Generates a backtrace
  *
  * @param int $options - As of 5.3.6, this parameter is a bitmask for the
- *   following options:  debug_backtrace() options  
+ *   following options:  debug_backtrace() options
  *   DEBUG_BACKTRACE_PROVIDE_OBJECT  Whether or not to populate the
  *   "object" index.    DEBUG_BACKTRACE_IGNORE_ARGS  Whether or not to omit
  *   the "args" index, and thus all the function/method arguments, to save
@@ -34,10 +34,10 @@ function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
 
 /**
  * Prints a backtrace
- *    
+ *
  *
  * @param int $options - As of 5.3.6, this parameter is a bitmask for the
- *   following options:  debug_print_backtrace() options  
+ *   following options:  debug_print_backtrace() options
  *   DEBUG_BACKTRACE_IGNORE_ARGS  Whether or not to omit the "args" index,
  *   and thus all the function/method arguments, to save memory.
  * @param int $limit - As of 5.4.0, this parameter can be used to limit
@@ -117,7 +117,7 @@ function restore_error_handler(): bool;
 
 /**
  * Restores the previously defined exception handler function
- *  
+ *
  *
  * @return bool - This function always returns TRUE.
  */
@@ -131,10 +131,10 @@ function restore_exception_handler(): bool;
  *   signature. NULL may be passed instead, to reset this handler to its
  *   default state.    boolhandler interrno stringerrstr stringerrfile
  *   interrline arrayerrcontext    errno   The first parameter, errno,
- *   contains the level of the error raised, as an integer.     errstr 
+ *   contains the level of the error raised, as an integer.     errstr
  *   The second parameter, errstr, contains the error message, as a string.
  *       errfile   The third parameter is optional, errfile, which contains
- *   the filename that the error was raised in, as a string.     errline 
+ *   the filename that the error was raised in, as a string.     errline
  *   The fourth parameter is optional, errline, which contains the line
  *   number the error was raised at, as an integer.     errcontext   The
  *   fifth parameter is optional, errcontext, which is an array that points
@@ -162,13 +162,13 @@ function set_error_handler(mixed $error_handler,
 
 /**
  * Sets a user-defined exception handler function
- *  
+ *
  *
  * @param callable $exception_handler - Name of the function to be called
  *   when an uncaught exception occurs. This function must be defined
  *   before calling set_exception_handler(). This handler function needs to
  *   accept one parameter, which will be the exception object that was
- *   thrown. This is the handler signature:    voidhandler Exceptionex  
+ *   thrown. This is the handler signature:    voidhandler Exceptionex
  *   NULL may be passed instead, to reset this handler to its default
  *   state.
  *
@@ -197,6 +197,11 @@ function trigger_error(string $error_msg,
                        int $error_type = E_USER_NOTICE): bool;
 
 <<__Native>>
+function trigger_sampled_error(string $error_msg,
+                               int $sample_rate,
+                               int $error_type = E_USER_NOTICE): bool;
+
+<<__Native>>
 function user_error(string $error_msg, int $error_type = E_USER_NOTICE): bool;
 
 /**
@@ -221,7 +226,7 @@ function hphp_set_error_page(string $page): void;
 function hphp_throw_fatal_error(string $error_msg): void;
 
 /**
- * Clears any output contents that have not been flushed to networked. 
+ * Clears any output contents that have not been flushed to networked.
  *
  * This is useful when handling a fatal error. Before displaying a customized
  * PHP page, one may call this function to clear previously written content, so
@@ -240,3 +245,6 @@ function hphp_clear_unflushed(): void;
  */
 <<__Native, __HipHopSpecific>>
 function hphp_debug_caller_info(): array<string, mixed>;
+
+<<__Native, __HipHopSpecific>>
+function hphp_debug_backtrace_hash(): int;

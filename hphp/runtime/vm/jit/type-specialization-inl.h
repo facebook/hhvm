@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -165,7 +165,7 @@ inline ArraySpec::ArraySpec(const Shape* shape)
 {}
 
 inline folly::Optional<ArrayData::ArrayKind> ArraySpec::kind() const {
-  auto kind = m_kind;
+  auto kind = static_cast<ArrayData::ArrayKind>(m_kind);
   return (m_sort & HasKind) ? folly::make_optional(kind) : folly::none;
 }
 

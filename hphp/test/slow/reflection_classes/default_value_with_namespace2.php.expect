@@ -11,6 +11,7 @@ array(3) {
   string(3) "foo"
 }
 string(65) "array(SORT_NUMERIC, array(\Foo\Derived::NUM), \Foo\Bar\Base::STR)"
+NULL
 call:
 array(3) {
   [0]=>

@@ -16,6 +16,26 @@ array(4) {
   ["typevars"]=>
   string(1) "T"
 }
+array(5) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(6) "HH\Set"
+  ["generic_types"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(1) "T"
+    }
+  }
+  ["typevars"]=>
+  string(1) "T"
+  ["alias"]=>
+  string(7) "MyAlias"
+}
 array(4) {
   ["kind"]=>
   int(11)
@@ -56,7 +76,7 @@ array(4) {
   ["typevars"]=>
   string(5) "Tk,Tv"
 }
-array(6) {
+array(5) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
@@ -97,15 +117,69 @@ array(6) {
   string(5) "Tk,Tv"
   ["alias"]=>
   string(8) "MyAlias2"
-  ["typevar_types"]=>
-  array(2) {
+}
+array(5) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  array(3) {
+    ["kind"]=>
+    int(15)
+    ["classname"]=>
+    string(6) "HH\Map"
+    ["generic_types"]=>
+    array(2) {
+      [0]=>
+      array(1) {
+        ["kind"]=>
+        int(1)
+      }
+      [1]=>
+      array(5) {
+        ["kind"]=>
+        int(15)
+        ["classname"]=>
+        string(6) "HH\Set"
+        ["generic_types"]=>
+        array(1) {
+          [0]=>
+          array(1) {
+            ["kind"]=>
+            int(4)
+          }
+        }
+        ["alias"]=>
+        string(7) "MyAlias"
+        ["typevar_types"]=>
+        array(1) {
+          ["T"]=>
+          array(1) {
+            ["kind"]=>
+            int(4)
+          }
+        }
+      }
+    }
+  }
+  ["param_types"]=>
+  array(1) {
     [0]=>
     array(1) {
       ["kind"]=>
       int(1)
     }
-    [1]=>
-    array(6) {
+  }
+  ["alias"]=>
+  string(8) "MyAlias2"
+  ["typevar_types"]=>
+  array(2) {
+    ["Tk"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["Tv"]=>
+    array(5) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -113,20 +187,16 @@ array(6) {
       ["generic_types"]=>
       array(1) {
         [0]=>
-        array(2) {
+        array(1) {
           ["kind"]=>
-          int(13)
-          ["name"]=>
-          string(1) "T"
+          int(4)
         }
       }
-      ["typevars"]=>
-      string(1) "T"
       ["alias"]=>
       string(7) "MyAlias"
       ["typevar_types"]=>
       array(1) {
-        [0]=>
+        ["T"]=>
         array(1) {
           ["kind"]=>
           int(4)

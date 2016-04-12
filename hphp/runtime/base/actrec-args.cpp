@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -45,8 +45,9 @@ static const char *argTypeName(DataType dt) {
     case KindOfBoolean:       return "boolean";
     case KindOfInt64:         return "integer";
     case KindOfDouble:        return "double";
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return "string";
+    case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfObject:        return "object";
     case KindOfResource:      return "resource";
@@ -202,8 +203,7 @@ bool parseArgs(ActRec *ar, const char *format, ...) {
       }
 
       case 'A': // KindOfArray || KindOfObject
-        if ((tv->m_type != KindOfArray) &&
-            (tv->m_type != KindOfObject)) {
+        if (!isArrayType(tv->m_type) && tv->m_type != KindOfObject) {
           throw_invalid_argument("Expected array or object, got %s",
                                  argTypeName(tv->m_type));
           return false;

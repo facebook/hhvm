@@ -47,7 +47,8 @@
     CGetL $x
     Print
     PopC
-    CGetM <L:$x PT:"x">
+    BaseL $x Warn
+    QueryM 0 CGet PT:"x"
     PopC
     Int 1
     RetC

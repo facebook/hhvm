@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,14 +37,14 @@ struct VscaledDisp;
  * XMM, or virtual register.
  */
 struct Vreg {
-  static const unsigned kNumGP{PhysReg::kSIMDOffset}; // 33
-  static const unsigned kNumXMM{30};
-  static const unsigned kNumSF{1};
-  static const unsigned G0{0};
-  static const unsigned X0{kNumGP};
-  static const unsigned S0{X0+kNumXMM};
-  static const unsigned V0{S0+kNumSF};
-  static const unsigned kInvalidReg{0xffffffffU};
+  static constexpr unsigned kNumGP = PhysReg::kNumGP;
+  static constexpr unsigned kNumXMM = PhysReg::kNumSIMD;
+  static constexpr unsigned kNumSF = PhysReg::kNumSF;
+  static constexpr unsigned G0 = PhysReg::kGPOffset;
+  static constexpr unsigned X0 = PhysReg::kSIMDOffset;
+  static constexpr unsigned S0 = PhysReg::kSFOffset;
+  static constexpr unsigned V0 = PhysReg::kMaxRegs;
+  static constexpr unsigned kInvalidReg = 0xffffffffU;
 
   /*
    * Constructors.
@@ -175,6 +175,8 @@ private:
   unsigned rn;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 using Vreg64  = Vr<Reg64>;
 using Vreg32  = Vr<Reg32>;
 using Vreg16  = Vr<Reg16>;
@@ -196,6 +198,39 @@ struct Vreg128 : Vr<RegXMM> {
 };
 
 inline Reg64 r64(Vreg64 r) { return r; }
+
+/*
+ * Vreg width constraint (or flags).
+ *
+ * Guaranteed to be a bitfield, which users of Width can do with as they
+ * please.
+ */
+enum class Width : uint8_t {
+  Byte  = 1,
+  Word  = 1 << 1,
+  Long  = 1 << 2,
+  Quad  = 1 << 3,
+  Octa  = 1 << 4,
+  Dbl   = 1 << 5,
+  Flags = 1 << 6,
+  // X-or-narrower widths.
+  WordN = Byte | Word,
+  LongN = Byte | Word | Long,
+  QuadN = Byte | Word | Long | Quad,
+  // Any non-flags register.
+  Any   = Byte | Word | Long | Quad | Octa | Dbl
+};
+
+inline Width width(Vreg)    { return Width::Any; }
+inline Width width(Vreg8)   { return Width::Byte; }
+inline Width width(Vreg16)  { return Width::Word; }
+inline Width width(Vreg32)  { return Width::Long; }
+inline Width width(Vreg64)  { return Width::Quad; }
+inline Width width(Vreg128) { return Width::Octa; }
+inline Width width(VregDbl) { return Width::Dbl; }
+inline Width width(VregSF)  { return Width::Flags; }
+
+std::string show(Width w);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -224,18 +259,26 @@ struct Vptr {
     , index(Vreg{})
     , disp(0)
   {}
-  template<class Base> Vptr(Base b, int d)
+
+  template<class Base>
+  Vptr(Base b, int d)
     : base(b)
     , index(Vreg{})
     , scale(1)
     , disp(d)
   {}
-  template<class Base, class Index> Vptr(Base b, Index i, int s, int d)
+
+  template<class Base, class Index>
+  Vptr(Base b, Index i, int s, int d)
     : base(b)
     , index(i)
     , scale(s)
     , disp(d)
-  {}
+  {
+    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
+           "Invalid index register scaling (must be 1,2,4 or 8).");
+  }
+
   /* implicit */ Vptr(MemoryRef m, Segment s = DS)
     : base(m.r.base)
     , index(m.r.index)
@@ -244,12 +287,14 @@ struct Vptr {
     , disp(m.r.disp)
   {}
 
+  Vptr(const Vptr& o) = default;
+  Vptr& operator=(const Vptr& o) = default;
+
   MemoryRef mr() const;
   /* implicit */ operator MemoryRef() const;
 
   bool operator==(const Vptr&) const;
   bool operator!=(const Vptr&) const;
-
 
   Vreg64 base;      // optional, for baseless mode
   Vreg64 index;     // optional
@@ -260,6 +305,8 @@ struct Vptr {
 
 Vptr operator+(Vptr lhs, int32_t d);
 Vptr operator+(Vptr lhs, intptr_t d);
+
+Vptr baseless(VscaledDisp);
 
 ///////////////////////////////////////////////////////////////////////////////
 

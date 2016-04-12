@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -14,7 +14,8 @@ type parser_return = {
     ast        : Ast.program;
   }
 
-val program : ?elaborate_namespaces:bool -> Relative_path.t ->
+val program : ?elaborate_namespaces:bool -> ?include_line_comments:bool ->
+  Relative_path.t ->
   string -> parser_return
 
 (* Parses a file *)

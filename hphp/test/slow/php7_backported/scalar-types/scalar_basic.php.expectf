@@ -1,0 +1,216 @@
+
+Testing 'int' typehint:
+
+*** Trying int(1)
+int(1)
+
+*** Trying string(1) "1"
+int(1)
+
+*** Trying float(1)
+int(1)
+
+*** Trying float(1.5)
+int(1)
+
+*** Trying string(2) "1a"
+E_NOTICE: A non well formed numeric value encountered on line %d
+int(1)
+
+*** Trying string(1) "a"
+*** Caught %s
+
+*** Trying string(0) ""
+*** Caught %s
+
+*** Trying int(%d)
+int(%d)
+
+*** Trying float(NAN)
+*** Caught %s
+
+*** Trying bool(true)
+int(1)
+
+*** Trying bool(false)
+int(0)
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#%s (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#%s (0) {
+}
+*** Caught %s
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Testing 'float' typehint:
+
+*** Trying int(1)
+float(1)
+
+*** Trying string(1) "1"
+float(1)
+
+*** Trying float(1)
+float(1)
+
+*** Trying float(1.5)
+float(1.5)
+
+*** Trying string(2) "1a"
+E_NOTICE: A non well formed numeric value encountered on line %d
+float(1)
+
+*** Trying string(1) "a"
+*** Caught %s
+
+*** Trying string(0) ""
+*** Caught %s
+
+*** Trying int(%d)
+float(%s)
+
+*** Trying float(NAN)
+float(NAN)
+
+*** Trying bool(true)
+float(1)
+
+*** Trying bool(false)
+float(0)
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#%s (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#%s (0) {
+}
+*** Caught %s
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Testing 'string' typehint:
+
+*** Trying int(1)
+string(1) "1"
+
+*** Trying string(1) "1"
+string(1) "1"
+
+*** Trying float(1)
+string(1) "1"
+
+*** Trying float(1.5)
+string(3) "1.5"
+
+*** Trying string(2) "1a"
+string(2) "1a"
+
+*** Trying string(1) "a"
+string(1) "a"
+
+*** Trying string(0) ""
+string(0) ""
+
+*** Trying int(%d)
+string(%d) "%d"
+
+*** Trying float(NAN)
+string(3) "NAN"
+
+*** Trying bool(true)
+string(1) "1"
+
+*** Trying bool(false)
+string(0) ""
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#%s (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#%s (0) {
+}
+string(6) "foobar"
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Testing 'bool' typehint:
+
+*** Trying int(1)
+bool(true)
+
+*** Trying string(1) "1"
+bool(true)
+
+*** Trying float(1)
+bool(true)
+
+*** Trying float(1.5)
+bool(true)
+
+*** Trying string(2) "1a"
+bool(true)
+
+*** Trying string(1) "a"
+bool(true)
+
+*** Trying string(0) ""
+bool(false)
+
+*** Trying int(%d)
+bool(true)
+
+*** Trying float(NAN)
+bool(true)
+
+*** Trying bool(true)
+bool(true)
+
+*** Trying bool(false)
+bool(false)
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#%s (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#%s (0) {
+}
+*** Caught %s
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Done

@@ -2,6 +2,11 @@
 
 // Test showing async stacks in the debugger.
 
+async function genList(...$args) {
+  await AwaitAllWaitHandle::fromArray($args);
+  return array_map($wh ==> \HH\Asio\result($wh), $args);
+}
+
 async function gen1($a) {
   error_log('In gen1');
   error_log('Finished in gen1');
@@ -29,12 +34,10 @@ async function genFoo($a) {
   error_log('In genFoo');
   var_dump($a);
   $a++;
-  list($x, $y) = await GenArrayWaitHandle::Create(
-    array(
-      genBar($a),
-      genBar($a + 1),
-      gen2($a + 2)
-    )
+  list($x, $y) = await genList(
+    genBar($a),
+    genBar($a + 1),
+    gen2($a + 2)
   );
   var_dump($x);
   var_dump($y);

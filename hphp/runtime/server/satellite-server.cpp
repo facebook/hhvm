@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::set<std::string> SatelliteServerInfo::InternalURLs;
-int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
                                          const Hdf& hdf,
@@ -64,9 +63,6 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
     if (Config::GetBool(ini, hdf, "BlockMainServer", true, false)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
-  } else if (type == "DanglingPageServer") {
-    m_type = SatelliteServer::Type::KindOfDanglingPageServer;
-    DanglingServerPort = m_port;
   } else if (type == "RPCServer") {
     m_type = SatelliteServer::Type::KindOfRPCServer;
   } else {
@@ -90,8 +86,7 @@ bool SatelliteServerInfo::checkMainURL(const std::string& path) {
 ///////////////////////////////////////////////////////////////////////////////
 // InternalPageServer: Server + allowed URL checking
 
-class InternalPageServer : public SatelliteServer {
-public:
+struct InternalPageServer : SatelliteServer {
   explicit InternalPageServer(std::shared_ptr<SatelliteServerInfo> info)
     : m_allowedURLs(info->getURLs()) {
     m_server = ServerFactoryRegistry::createServer
@@ -135,40 +130,9 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// DanglingPageServer: same as Server
-
-class DanglingPageServer : public SatelliteServer {
-public:
-  explicit DanglingPageServer(std::shared_ptr<SatelliteServerInfo> info) {
-    m_server = ServerFactoryRegistry::createServer
-      (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount());
-    m_server->setRequestHandlerFactory<HttpRequestHandler>(
-      info->getTimeoutSeconds().count());
-  }
-
-  virtual void start() {
-    m_server->start();
-  }
-  virtual void stop() {
-    m_server->stop();
-    m_server->waitForEnd();
-  }
-  virtual int getActiveWorker() {
-    return m_server->getActiveWorker();
-  }
-  virtual int getQueuedJobs() {
-    return m_server->getQueuedJobs();
-  }
-private:
-  ServerPtr m_server;
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // RPCServer: Server + RPCRequestHandler
 
-class RPCServer : public SatelliteServer {
-public:
+struct RPCServer : SatelliteServer {
   explicit RPCServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
@@ -208,9 +172,6 @@ SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
     switch (info->getType()) {
     case Type::KindOfInternalPageServer:
       satellite.reset(new InternalPageServer(info));
-      break;
-    case Type::KindOfDanglingPageServer:
-      satellite.reset(new DanglingPageServer(info));
       break;
     case Type::KindOfRPCServer:
       satellite.reset(new RPCServer(info));

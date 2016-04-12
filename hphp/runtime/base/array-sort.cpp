@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,6 @@ namespace HPHP {
 template <typename AccessorT>
 SortFlavor MixedArray::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
-  assert(!isPacked());
   if (!checkTypes && m_size == m_used) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -121,7 +120,7 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   // if (a->m_size <= 1 && !isSortFamily(sf)) {
   //   return a;
   // }
-  if (UNLIKELY(hasUserDefinedCmp(sf) || a->hasMultipleRefs())) {
+  if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copyMixed();
     assert(ret->hasExactlyOneRef());
     return ret;
@@ -138,7 +137,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     return ad;                          // trivial for packed arrays.
   }
   if (isSortFamily(sf)) {               // sort/rsort/usort
-    if (UNLIKELY(ad->hasMultipleRefs())) {
+    if (UNLIKELY(ad->cowCheck())) {
       auto ret = PackedArray::Copy(ad);
       assert(ret->hasExactlyOneRef());
       return ret;

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -12,8 +12,6 @@ include Sys
 
 module CE = Common_exns
 module Str = Str_ext
-
-open Utils
 
 exception NotADirectory of string
 let (=~) = Str.(=~)
@@ -45,32 +43,13 @@ let filename_without_leading_path prefix s =
     then Str.matched_group 1 s
     else raise CE.Impossible
 
-let process_output_to_list2 command =
-  let chan = Unix.open_process_in command in
-  let res = ref ([] : string list) in
-  let rec process_otl_aux () =
-    let e = input_line chan in
-    res := e::!res;
-    process_otl_aux() in
-  try process_otl_aux ()
-  with End_of_file ->
-    let stat = Unix.close_process_in chan in (List.rev !res,stat)
-
-let cmd_to_list command =
-  let (l,exit_status) = process_output_to_list2 command in
-  match exit_status with
-  | Unix.WEXITED 0 -> l
-  | _ -> raise (CE.CmdError (exit_status,
-                         (Printf.sprintf "CMD = %s, RESULT = %s"
-                             command (String.concat "\n" l))))
-
 let recursive_file_pairs src dest =
-  let escaped_src =
-    cmd_to_list ("find \"" ^ src ^ "\" -maxdepth 0") |> List.hd in
+  let src = Path.make src in
+  let escaped_src = Path.to_string src in
   List.map begin fun f ->
     let suffix = filename_without_leading_path escaped_src f in
     if suffix = "." then (f, dest) else (f, dest ^ "/" ^ suffix)
-    end (cmd_to_list ("find \"" ^ src ^ "\""))
+  end (Find.find [ src ])
 
 let has_extension f ext =
   if ext.[0] <> '.'
@@ -84,7 +63,14 @@ let set_extension f ext =
   then (Str.matched_group 1 f) ^ ext
   else failwith "Regex match failure on extension"
 
-let copy_file s d = ignore (command ("cp -p \"" ^ s ^ "\" \"" ^ d ^ "\""))
+let copy_file s d =
+  if Sys.win32 then begin
+    let st = Unix.stat s in
+    ignore (command ("copy \"" ^ s ^ "\" \"" ^ d ^ "\""));
+    (* `copy` does not preserve last access time (`atime`). *)
+    Unix.(utimes d st.st_atime st.st_mtime)
+  end else
+    ignore (command ("cp -p \"" ^ s ^ "\" \"" ^ d ^ "\""))
 
 let rec mkdir_p = function
   | "" -> raise CE.Impossible

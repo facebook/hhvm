@@ -189,11 +189,7 @@ create_subdirs(char *filename)
 	    else
 	    {
 		CRONO_DEBUG(("Directory \"%s\" does not exist -- creating\n", dirname));
-#ifndef _MSC_VER
                 if ((mkdir(dirname, DIR_MODE) < 0) && (errno != EEXIST))
-#else
-                if ((mkdir(dirname) < 0) && (errno != EEXIST))
-#endif
                 {
 		    perror(dirname);
 		    return;
@@ -218,7 +214,7 @@ create_link(const char *pfilename,
 #ifndef _MSC_VER
     struct stat		stat_buf;
 
-    if (lstat(prevlinkname, &stat_buf) == 0)
+    if (prevlinkname && lstat(prevlinkname, &stat_buf) == 0)
     {
 	unlink(prevlinkname);
     }
@@ -234,13 +230,15 @@ create_link(const char *pfilename,
     if (linktype == S_IFLNK)
     {
 	if (symlink(pfilename, linkname) < 0) {
-          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+          fprintf(stderr, "Creating link from %s to %s failed",
+                  pfilename, linkname);
         }
     }
     else
     {
 	if (link(pfilename, linkname) < 0) {
-          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+          fprintf(stderr, "Creating link from %s to %s failed",
+                  pfilename, linkname);
         }
     }
 #else

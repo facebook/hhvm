@@ -19,11 +19,13 @@ interface IMemoizeParam {
  *
  * The map has the form:
  *
+ * ```
  *  array('class'    => array('cls' => 'cls_file.php', ...),
  *        'function' => array('fun' => 'fun_file.php', ...),
  *        'constant' => array('con' => 'con_file.php', ...),
  *        'type'     => array('type' => 'type_file.php', ...),
  *        'failure'  => callable);
+ * ```
  *
  *  If the 'failure' element exists, it will be called if the
  *  lookup in the map fails, or the file cant be included. It

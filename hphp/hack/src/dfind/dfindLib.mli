@@ -8,11 +8,9 @@
  *
  *)
 
-open Utils
-
 type t
 
-val init : Path.t list -> t
+val init : (Unix.file_descr * Unix.file_descr) -> (string * Path.t list) -> t
+val wait_until_ready : t -> unit
 val pid : t -> int
-val request_changes : t -> SSet.t
-val get_changes : t -> SSet.t
+val get_changes : ?timeout:Timeout.t -> t -> SSet.t

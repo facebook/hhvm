@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,12 +8,14 @@
  *
  *)
 
-type command = 
+type command =
   | CCheck of ClientEnv.client_check_env
   | CStart of ClientStart.env
   | CStop of ClientStop.env
   | CRestart of ClientStart.env
   | CBuild of ClientBuild.env
+  | CIde of ClientIde.env
+  | CDebug of ClientDebug.env
 
 type command_keyword =
   | CKCheck
@@ -22,3 +24,5 @@ type command_keyword =
   | CKRestart
   | CKBuild
   | CKNone
+  | CKIde
+  | CKDebug

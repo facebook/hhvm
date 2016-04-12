@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -14,8 +14,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#ifdef HAVE_UODBC
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -42,8 +40,7 @@ static req::ptr<T> safe_cast(const Resource& res) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ODBCContext {
-public:
+struct ODBCContext {
   // extract an error from a handle
   static void extract_error(const SQLSMALLINT type, const SQLHANDLE hdl);
 
@@ -101,8 +98,7 @@ SQLCHAR* ODBCContext::get_last_error_msg()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ODBCColumn : public SweepableResourceData {
-public:
+struct ODBCColumn : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ODBCColumn);
 
   explicit ODBCColumn(const SQLHSTMT hdl_stmt, const int i_col);
@@ -204,8 +200,7 @@ SQLLEN ODBCColumn::total_column_size() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ODBCParam : public SweepableResourceData {
-public:
+struct ODBCParam : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ODBCParam);
 
   ODBCParam(const SQLHSTMT hdl_stmt, const int i_col);
@@ -233,8 +228,7 @@ ODBCParam::ODBCParam(const SQLHSTMT hdl_stmt, const int i_col)
 ///////////////////////////////////////////////////////////////////////////////
 
 // created per-query
-class ODBCCursor : public SweepableResourceData {
-public:
+struct ODBCCursor : SweepableResourceData {
   CLASSNAME_IS("odbc cursor")
   const String& o_getClassNameHook() const override { return classnameof(); }
   DECLARE_RESOURCE_ALLOCATION(ODBCCursor);
@@ -276,9 +270,11 @@ private:
 
   // buffer itself
   SQLPOINTER buffer_;
+  TYPE_SCAN_IGNORE_FIELD(buffer_);
 
   // current position inside buffer
   SQLPOINTER buffer_cursor_;
+  TYPE_SCAN_IGNORE_FIELD(buffer_cursor_);
 
   // number of rows returned by the ODBC call
   SQLULEN num_rows_fetched_;
@@ -300,6 +296,7 @@ private:
 
   // statement handler
   SQLHSTMT hdl_stmt_;
+  TYPE_SCAN_IGNORE_FIELD(hdl_stmt_);
 };
 
 ODBCCursor::ODBCCursor(SQLHDBC hdl_dbconn)
@@ -382,8 +379,12 @@ bool ODBCCursor::exec_prepared_query(const Array params)
 {
   SYNC_VM_REGS_SCOPED();
 
-  SQLCHAR* input[params_size_];
+  req::vector<SQLCHAR*> input;
+  input.reserve(params_size_);
   int64_t num_rows;
+  SCOPE_EXIT {
+    for (auto p : input) req::free(p);
+  };
 
   for (int i=0; i < params_size_; i++) {
     const Array &cur_array = params[i].toArray();
@@ -391,7 +392,7 @@ bool ODBCCursor::exec_prepared_query(const Array params)
     num_rows = cur_array.size();
 
     // allocate buffer we'll pass to odbc
-    input[i] = (SQLCHAR*)req::malloc(num_rows * param->col_size);
+    input.push_back((SQLCHAR*)req::malloc(num_rows * param->col_size));
 
     // copy each element of our input array to the buffer
     for (int j=0; j < num_rows; j++) {
@@ -422,10 +423,6 @@ bool ODBCCursor::exec_prepared_query(const Array params)
         SQLExecute(hdl_stmt_))) {
     ODBCContext::extract_error(SQL_HANDLE_STMT, hdl_stmt_);
     return false;
-  }
-
-  for (int i=0; i < params_size_; i++) {
-    req::free(input[i]);
   }
 
   set_num_cols();
@@ -567,8 +564,7 @@ int64_t ODBCCursor::num_rows() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ODBCLink : public SweepableResourceData {
-public:
+struct ODBCLink : SweepableResourceData {
   CLASSNAME_IS("odbc link")
   const String& o_getClassNameHook() const override { return classnameof(); }
   DECLARE_RESOURCE_ALLOCATION(ODBCLink);
@@ -604,9 +600,11 @@ public:
 private:
   // env handler
   SQLHENV hdl_env_;
+  TYPE_SCAN_IGNORE_FIELD(hdl_env_);
 
   // connection handler
   SQLHDBC hdl_dbconn_;
+  TYPE_SCAN_IGNORE_FIELD(hdl_dbconn_);
 
   // finish current transaction (commit or rollback)
   bool end_transaction(const bool is_commit);
@@ -875,8 +873,7 @@ bool HHVM_FUNCTION(odbc_rollback, const Resource& link)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static class ODBCExtension final : public Extension {
- public:
+static struct ODBCExtension final : Extension {
   ODBCExtension() : Extension("odbc") { }
   void moduleInit() override {
     HHVM_FE(odbc_set_autocommit);
@@ -898,5 +895,3 @@ static class ODBCExtension final : public Extension {
 } s_odbc_extension;
 
 }
-
-#endif // HAVE_UODBC

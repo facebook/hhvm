@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -35,6 +35,7 @@ namespace HPHP {
 
 static void destroy_uploaded_files();
 
+namespace {
 struct Rfc1867Data final : RequestEventHandler {
   std::set<std::string> rfc1867ProtectedVariables;
   std::set<std::string> rfc1867UploadedFiles;
@@ -53,6 +54,7 @@ struct Rfc1867Data final : RequestEventHandler {
   }
   void vscan(IMarker&) const override {}
 };
+}
 IMPLEMENT_STATIC_REQUEST_LOCAL(Rfc1867Data, s_rfc1867_data);
 
 /*
@@ -183,23 +185,23 @@ static void destroy_uploaded_files() {
   rfc1867UploadedFiles.clear();
 }
 
-
 /*
  *  Following code is based on apache_multipart_buffer.c from
  *  libapreq-0.33 package.
  *
  */
 
-#define FILLUNIT (1024 * 5)
+constexpr size_t FILLUNIT = 1024 * 5;
 
-typedef struct {
+namespace {
+struct multipart_buffer {
   Transport *transport;
 
   /* read buffer */
   char *buffer;
   char *buf_begin;
-  uint32_t  bufsize;
-  int64_t   bytes_in_buffer; // signed to catch underflow errors
+  size_t bufsize;
+  int64_t bytes_in_buffer; // signed to catch underflow errors
 
   /* boundary info */
   char *boundary;
@@ -212,9 +214,10 @@ typedef struct {
   uint64_t throw_size; // sum of all previously read chunks
   char *cursor;
   uint64_t read_post_bytes;
-} multipart_buffer;
+};
+}
 
-typedef std::list<std::pair<std::string, std::string> > header_list;
+using header_list = std::list<std::pair<std::string, std::string>>;
 
 static uint32_t read_post(multipart_buffer *self, char *buf,
                           uint32_t bytes_to_read) {
@@ -237,7 +240,7 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
   always_assert(self->cursor == (char *)self->post_data +
                         (self->post_size - self->throw_size));
   while (bytes_to_read > 0 && self->transport->hasMorePostData()) {
-    int extra_byte_read = 0;
+    size_t extra_byte_read = 0;
     const void *extra = self->transport->getMorePostData(extra_byte_read);
     if (extra_byte_read == 0) break;
     if (RuntimeOption::AlwaysPopulateRawPostData) {
@@ -260,6 +263,7 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
     memcpy(buf + bytes_read, self->cursor, extra_byte_read);
     bytes_to_read -= extra_byte_read;
     bytes_read += extra_byte_read;
+    self->cursor += extra_byte_read;
   }
   return bytes_read;
 }
@@ -318,13 +322,13 @@ static int multipart_buffer_eof(multipart_buffer *self) {
 
 /* create new multipart_buffer structure */
 static multipart_buffer *multipart_buffer_new(Transport *transport,
-                                              const char *data, int size,
+                                              const char *data, size_t size,
                                               std::string boundary) {
   multipart_buffer *self =
     (multipart_buffer *)calloc(1, sizeof(multipart_buffer));
 
   self->transport = transport;
-  int minsize = boundary.length() + 6;
+  auto minsize = boundary.length() + 6;
   if (minsize < FILLUNIT) minsize = FILLUNIT;
 
   self->buffer = (char *) calloc(1, minsize + 1);
@@ -706,8 +710,8 @@ static char *multipart_buffer_read_body(multipart_buffer *self,
 void rfc1867PostHandler(Transport* transport,
                         Array& post,
                         Array& files,
-                        int content_length,
-                        const void*& data, int& size,
+                        size_t content_length,
+                        const void*& data, size_t& size,
                         const std::string boundary) {
   char *s=nullptr, *start_arr=nullptr;
   std::string array_index, abuf;

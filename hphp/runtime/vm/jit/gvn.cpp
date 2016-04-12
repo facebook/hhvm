@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -228,6 +228,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case SubDbl:
   case MulDbl:
   case DivDbl:
+  case DivInt:
   case Mod:
   case Sqrt:
   case OrInt:
@@ -251,26 +252,20 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvDblToInt:
   case ConvBoolToStr:
   case ConvClsToCctx:
-  case Gt:
-  case Gte:
-  case Lt:
-  case Lte:
-  case Eq:
-  case Neq:
-  case Same:
-  case NSame:
   case GtInt:
   case GteInt:
   case LtInt:
   case LteInt:
   case EqInt:
   case NeqInt:
+  case CmpInt:
   case GtDbl:
   case GteDbl:
   case LtDbl:
   case LteDbl:
   case EqDbl:
   case NeqDbl:
+  case CmpDbl:
   case GtStr:
   case GteStr:
   case LtStr:
@@ -279,12 +274,21 @@ bool supportsGVN(const IRInstruction* inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case CmpStr:
+  case GtStrInt:
+  case GteStrInt:
+  case LtStrInt:
+  case LteStrInt:
+  case EqStrInt:
+  case NeqStrInt:
+  case CmpStrInt:
   case GtBool:
   case GteBool:
   case LtBool:
   case LteBool:
   case EqBool:
   case NeqBool:
+  case CmpBool:
   case SameObj:
   case NSameObj:
   case SameArr:
@@ -295,6 +299,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case LteRes:
   case EqRes:
   case NeqRes:
+  case CmpRes:
+  case EqCls:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -305,13 +311,12 @@ bool supportsGVN(const IRInstruction* inst) {
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
+  case HasToString:
   case IsType:
   case IsNType:
   case IsScalarType:
   case IsWaitHandle:
-  case ClsNeq:
-  case LdStkAddr:
-  case LdLocAddr:
+  case IsCol:
   case LdRDSAddr:
   case LdCtx:
   case LdCctx:
@@ -331,13 +336,11 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsPropAddrOrRaise:
   case LdObjClass:
   case LdClsName:
-  case LdARFuncPtr:
   case LdARNumParams:
   case Mov:
   case LdContActRec:
   case LdAFWHActRec:
   case LdResumableArObj:
-  case LdMIStateAddr:
   case LdPackedArrayElemAddr:
   case OrdStr:
   case CheckRange:

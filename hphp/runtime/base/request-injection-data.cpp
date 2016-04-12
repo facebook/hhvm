@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,10 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+void RequestTimer::onTimeout() {
+  m_reqInjectionData->onTimeout(this);
+}
 
 #if defined(__APPLE__)
 
@@ -115,11 +119,6 @@ void RequestTimer::setTimeout(int seconds) {
   dispatch_resume(m_timerSource);
 }
 
-
-void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
-}
-
 int RequestTimer::getRemainingTime() const {
   // Unfortunately, not a good way to detect this. The best we can say is if the
   // timer exists and fired and cancelled itself, we can clip to 0, otherwise
@@ -138,18 +137,43 @@ int RequestTimer::getRemainingTime() const {
 RequestTimer::RequestTimer(RequestInjectionData* data)
     : m_reqInjectionData(data)
     , m_timeoutSeconds(0)
+    , m_tce(nullptr)
 {}
 
 RequestTimer::~RequestTimer() {
+  if (m_tce) {
+    m_tce->set();
+    m_tce = nullptr;
+  }
 }
 
 void RequestTimer::setTimeout(int seconds) {
   m_timeoutSeconds = seconds > 0 ? seconds : 0;
-}
 
+  if (m_tce) {
+    m_tce->set();
+    m_tce = nullptr;
+  }
 
-void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
+  if (m_timeoutSeconds) {
+    auto call = new concurrency::call<int>([this](int) {
+      this->onTimeout();
+      m_tce->set();
+      m_tce = nullptr;
+    });
+
+    auto timer = new concurrency::timer<int>(m_timeoutSeconds * 1000,
+                                             0, call, false);
+
+    concurrency::task<void> event_set(*m_tce);
+    event_set.then([call, timer]() {
+      timer->pause();
+      delete call;
+      delete timer;
+    });
+
+    timer->start();
+  }
 }
 
 int RequestTimer::getRemainingTime() const {
@@ -196,7 +220,7 @@ void RequestTimer::setTimeout(int seconds) {
 
   /*
    * There is a potential race here. Callers want to assume that
-   * if they cancel the timeout (seconds = 0), they *wont* get
+   * if they cancel the timeout (seconds = 0), they *won't* get
    * a signal after they call this (although they may get a signal
    * during the call).
    * So we need to clear the timeout, wait (if necessary) for a
@@ -222,10 +246,6 @@ void RequestTimer::setTimeout(int seconds) {
   } else {
     m_timerActive.store(false, std::memory_order_relaxed);
   }
-}
-
-void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
 }
 
 int RequestTimer::getRemainingTime() const {
@@ -262,10 +282,6 @@ bool RequestInjectionData::setAllowedDirectories(const std::string& value) {
     if (!path.empty() &&
         File::TranslatePathKeepRelative(path).empty()) {
       return false;
-    }
-
-    if (path == ".") {
-      path = g_context->getCwd().toCppString();
     }
   }
   m_safeFileAccess = !boom.empty();
@@ -475,11 +491,47 @@ void RequestInjectionData::threadInit() {
   // TODO(T5601927): output_compression supports int values where the value
   // represents the output buffer size. Also need to add a
   // zlib.output_handler ini setting as well.
-  // http://docs.hhvm.com/zlib.configuration.php
+  // http://php.net/zlib.configuration.php
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "zlib.output_compression", &m_gzipCompression);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
+
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "brotli.chunked_compression", &m_brotliChunkedEnabled);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "brotli.compression_quality",
+      std::to_string(RuntimeOption::BrotliCompressionQuality).c_str(),
+      &m_brotliQuality);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "brotli.compression_lgwin",
+      std::to_string(RuntimeOption::BrotliCompressionLgWindowSize).c_str(),
+      &m_brotliLgWindowSize);
+
+  // Assertions
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "zend.assertions", "1",
+    IniSetting::SetAndGet<int64_t>(
+      [this](const int64_t& value) {
+        if ((value >= 0) != RuntimeOption::AssertEmitted) {
+          // Setting the option to < 0 changes a RuntimeOption which affects
+          // bytecode emission, so you can't move between < 0 and >= 0 at
+          // runtime. (This is also a restriction in PHP7 for similar reasons.)
+          raise_warning("zend.assertions may be completely enabled or "
+            "disabled only in php.ini");
+          return false;
+        }
+        m_zendAssertions = value;
+        return true;
+      },
+      [this]() {
+        return m_zendAssertions;
+      }
+    ));
 }
 
 std::string RequestInjectionData::getDefaultIncludePath() {

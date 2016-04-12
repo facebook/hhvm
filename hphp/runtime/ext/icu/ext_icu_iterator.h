@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,8 +26,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlIterator;
 
-class IntlIterator : public IntlError {
-public:
+struct IntlIterator : IntlError {
   IntlIterator() {}
   IntlIterator(const IntlIterator&) = delete;
   IntlIterator& operator=(const IntlIterator& src) {
@@ -108,9 +107,7 @@ private:
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 // Proxy StringEnumeration for consistent behavior
-class BugStringCharEnumeration : public icu::StringEnumeration
-{
-public:
+struct BugStringCharEnumeration : icu::StringEnumeration {
   explicit BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
   ~BugStringCharEnumeration() { uenum_close(uenum); }
 

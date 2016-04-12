@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,8 @@ namespace HPHP {
  * Most things won't have attributes, so we've made the map optimize for the
  * case that it's empty (minimizing sizeof(UserAttributeMap)).
  */
-class UserAttributeMap {
+struct UserAttributeMap {
+private:
   using Map = hphp_hash_map<
     LowStringPtr,
     TypedValue,

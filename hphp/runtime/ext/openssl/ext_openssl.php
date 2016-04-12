@@ -134,6 +134,8 @@ function openssl_error_string(): mixed;
  * @param string $env_key
  * @param mixed $priv_key_id
  * @param string $method
+ * @param string $iv Initialization Vector, only required if the encryption
+ * requires one
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
 <<__Native>>
@@ -141,7 +143,8 @@ function openssl_open(string $sealed_data,
                       mixed &$open_data,
                       string $env_key,
                       mixed $priv_key_id,
-                      string $method = ""): bool;
+                      string $method = "",
+                      string $iv = ""): bool;
 
 /* openssl_pkcs12_export_to_file() stores x509 into a file named by filename
  * in a PKCS#12 file format.
@@ -490,16 +493,19 @@ function openssl_public_encrypt(string $data,
  * @param mixed $env_keys
  * @param array $pub_key_ids
  * @param string $method
+ * @param string $iv
  * @return mixed - Returns the length of the sealed data on success, or FALSE
  * on error. If successful the sealed data is returned in sealed_data, and the
- * envelope keys in env_keys.
+ * envelope keys in env_keys. If an IV was used during encryption, it is
+ * returned via iv.
  */
 <<__Native>>
 function openssl_seal(string $data,
                       mixed &$sealed_data,
                       mixed &$env_keys,
                       array $pub_key_ids,
-                      string $method = ""): mixed;
+                      string $method = "",
+                      mixed &$iv = null): mixed;
 
 /* openssl_sign() computes a signature for the specified data by using SHA1
  * for hashing followed by encryption using the private key associated with

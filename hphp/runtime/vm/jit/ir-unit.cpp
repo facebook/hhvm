@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,10 +29,14 @@ TRACE_SET_MOD(hhir);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IRUnit::IRUnit(TransContext context)
-  : m_context(context)
-  , m_entry(defBlock())
-{}
+IRUnit::IRUnit(TransContext context) : m_context(context)
+{
+  // Setup m_entry after property initialization, since it depends on
+  // the value of m_defHint.
+  // For Optimize translations, the entry block's profCount is
+  // adjusted later in translateRegion.
+  m_entry = defBlock();
+}
 
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
@@ -63,18 +67,22 @@ void IRUnit::expandLabel(IRInstruction* label, unsigned extraDst) {
 
 void IRUnit::expandJmp(IRInstruction* jmp, SSATmp* value) {
   assertx(jmp->is(Jmp));
-  std::vector<SSATmp*> newSrcs(jmp->numSrcs() + 1);
+  auto const newSrcs = new (m_arena) SSATmp*[jmp->numSrcs() + 1];
   size_t i = 0;
   for (auto src : jmp->srcs()) {
     newSrcs[i++] = src;
   }
   newSrcs[i++] = value;
-  replace(jmp, Jmp, jmp->taken(), std::make_pair(i, &newSrcs[0]));
+  jmp->setSrcs(i, newSrcs);
 }
 
-Block* IRUnit::defBlock(Block::Hint hint) {
+Block* IRUnit::defBlock(uint64_t profCount /* =1 */,
+                        Block::Hint hint   /* =Neither */ ) {
   FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId);
-  auto const block = new (m_arena) Block(m_nextBlockId++);
+  auto const block = new (m_arena) Block(m_nextBlockId++, profCount);
+  if (hint == Block::Hint::Neither) {
+    hint = m_defHint;
+  }
   block->setHint(hint);
   return block;
 }
@@ -110,13 +118,18 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case JmpSSwitchDest:
     case JmpSwitchDest:
     case RaiseError:
-      return instSk == sk;;
+    case ThrowOutOfBounds:
+    case ThrowInvalidOperation:
+    case ThrowArithmeticError:
+    case ThrowDivisionByZeroError:
+      return instSk == sk;
 
     // The RetCtrl is generally ending a bytecode instruction, with the
     // exception being in an Await bytecode instruction, where we consider the
     // end of the bytecode instruction to be the non-suspending path.
     case RetCtrl:
     case AsyncRetCtrl:
+    case AsyncRetFast:
       return inst.marker().sk().op() != Op::Await;
 
     // A ReqBindJmp ends a unit and it jumps to the next instruction

@@ -1,0 +1,6 @@
+File "map_literal_nested.php", line 17, characters 15-25:
+Invalid argument (Typing[4110])
+File "map_literal_nested.php", line 21, characters 22-24:
+This is an int
+File "map_literal_nested.php", line 13, characters 17-21:
+It is incompatible with a string

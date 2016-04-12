@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,7 +33,11 @@ namespace HPHP {
 #define k_STDIN (BuiltinFiles::GetSTDIN())
 #define k_STDOUT (BuiltinFiles::GetSTDOUT())
 #define k_STDERR (BuiltinFiles::GetSTDERR())
+#ifdef _MSC_VER
+const StaticString s_DIRECTORY_SEPARATOR("\\");
+#else
 const StaticString s_DIRECTORY_SEPARATOR("/");
+#endif
 const int64_t k_FILE_USE_INCLUDE_PATH = 1;
 const int64_t k_FILE_IGNORE_NEW_LINES = 2;
 const int64_t k_FILE_SKIP_EMPTY_LINES = 4;
@@ -66,9 +70,8 @@ const int64_t k_SEEK_SET = SEEK_SET;
 const int64_t k_SEEK_CUR = SEEK_CUR;
 const int64_t k_SEEK_END = SEEK_END;
 
-// This can probably be removed when we register this constant via HNI
-// in the appropriate extension or global constants file
-extern const int64_t k_INI_SCANNER_NORMAL;
+constexpr int64_t k_INI_SCANNER_NORMAL = 0;
+constexpr int64_t k_INI_SCANNER_RAW = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // file handle based file operations
@@ -141,7 +144,8 @@ Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,
                       const String& delimiter = ",",
-                      const String& enclosure = "\"");
+                      const String& enclosure = "\"",
+                      const String& escape = "\\");
 Variant HHVM_FUNCTION(fgetcsv,
                       const Resource& handle,
                       int64_t length = 0,

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -15,7 +15,6 @@
 open Core
 open DfindEnv
 open DfindMaybe
-open Utils
 
 (*****************************************************************************)
 (* helpers *)
@@ -42,9 +41,7 @@ let get_files path dir_handle =
       if file = "." || file = ".."
       then ()
       else
-        let path =
-          Path.to_string @@
-          Path.concat (Path.expanduser path) file in
+        let path = Filename.concat path file in
         paths := SSet.add path !paths;
     done;
     assert false

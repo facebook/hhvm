@@ -30,22 +30,43 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef void (*BootTimerCallback)(const std::map<std::string, int64_t>);
+struct ResourceUsage {
+  ResourceUsage() : m_wall{0}, m_cpu{0}, m_rssMb(0) {}
+  // Returns total usage for entire process.
+  static ResourceUsage sinceEpoch();
+
+  void operator=(const ResourceUsage& rhs);
+  ResourceUsage operator-(const ResourceUsage& rhs) const;
+  ResourceUsage operator+(const ResourceUsage& rhs) const;
+
+  using TimeUnit = std::chrono::nanoseconds;
+  TimeUnit wall() const { return m_wall; }
+  TimeUnit cpu() const { return m_cpu; }
+  int64_t rssMb() const { return m_rssMb; }
+  std::string toString() const;
+
+private:
+  ResourceUsage(TimeUnit wall, TimeUnit cpu, int64_t rssMb)
+      : m_wall{wall}, m_cpu{cpu}, m_rssMb(rssMb) {}
+  TimeUnit m_wall;
+  TimeUnit m_cpu;
+  int64_t m_rssMb;
+};
 
 /**
- * Times execution of the different parts of HHVM startup and warmup.
+ * Measures execution of the different parts of HHVM startup and warmup.
  *
- * BootTimer should be initialized once, soon after HHVM starts up, by calling
+ * BootStats should be initialized once, soon after HHVM starts up, by calling
  * the start() static method; it will continue collecting samples until the
  * done() static method is called, once the start up process is complete.
  *
  * There are two ways of adding a sample:
- * - BootTimer::mark('foo') adds a sample for foo, using the elapsed time from
+ * - BootStats::mark('foo') adds a sample for foo, using the elapsed time from
  *   start or from the last call to mark();
- * - using an instance of the Timer class during start up automatically
- *   collects a sample.
+ * - using an instance of the BootStats::Block class during startup
+ *   automatically collects a sample.
  */
-struct BootTimer {
+struct BootStats {
   // Creates a new instance and starts the timer
   static void start();
   // Stops the timer and logs information
@@ -54,29 +75,23 @@ struct BootTimer {
   // method and stores it as a sample with the given name
   static void mark(const std::string& name);
 
-  // Sets the callback to be invoked after BootTimer::done is called. Note
-  // that only one callback is supported; subsequent calls will overwrite it.
-  static void setDoneCallback(BootTimerCallback cb);
-
   struct Block {
     explicit Block(const std::string& name);
     ~Block();
 
   private:
     std::string m_name;
-    std::chrono::steady_clock::time_point m_start;
+    ResourceUsage m_start;
   };
 
 private:
-  static void add(const std::string& name,
-    const std::chrono::nanoseconds value);
+  static void add(const std::string& name, const ResourceUsage value);
 
-  class Impl;
+  struct Impl;
 
   static bool s_started;
-  static std::chrono::steady_clock::time_point s_start;
-  static std::unique_ptr<BootTimer::Impl> s_instance;
-  static BootTimerCallback s_doneCallback;
+  static ResourceUsage s_start;
+  static std::unique_ptr<BootStats::Impl> s_instance;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

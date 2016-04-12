@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-helpers.h"
-
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
@@ -47,8 +47,11 @@ struct Resumable;
 
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
+// perform the set(op) operation on lhs & rhs, leaving the result in lhs.
+// The old value of lhs is decrefed. Caller must call tvToCell() if lhs or
+// rhs might be a ref.
 ALWAYS_INLINE
-void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
+void setopBody(Cell* lhs, SetOpOp op, Cell* rhs) {
   assert(cellIsPlausible(*lhs));
   assert(cellIsPlausible(*rhs));
 
@@ -74,14 +77,12 @@ void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
   not_reached();
 }
 
-ALWAYS_INLINE
-void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
-  SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ExtraArgs : private boost::noncopyable {
+struct ExtraArgs {
+  ExtraArgs(const ExtraArgs&) = delete;
+  ExtraArgs& operator=(const ExtraArgs&) = delete;
+
   /*
    * Allocate an ExtraArgs structure, with arguments copied from the
    * evaluation stack.  This takes ownership of the args without
@@ -114,6 +115,11 @@ struct ExtraArgs : private boost::noncopyable {
    */
   TypedValue* getExtraArg(unsigned argInd) const;
 
+  template<class F> void scan(F& mark, unsigned int nargs) const {
+    for (unsigned i = 0; i < nargs; ++i) {
+      mark(*(m_extraArgs + i));
+    }
+  }
 private:
   ExtraArgs();
   ~ExtraArgs();
@@ -122,6 +128,7 @@ private:
 
 private:
   TypedValue m_extraArgs[];
+  TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_extraArgs);
 };
 
 /*
@@ -142,7 +149,7 @@ private:
  * a VarEnv is attached. Internally uses a NameValueTable to hook up names to
  * the local locations.
  */
-class VarEnv {
+struct VarEnv {
  private:
   NameValueTable m_nvTable;
   ExtraArgs* m_extraArgs;
@@ -150,11 +157,7 @@ class VarEnv {
   const bool m_global;
 
  public:
-  template<class F> void scan(F& mark) const {
-    mark(m_nvTable);
-    // TODO #6511877 scan ExtraArgs. requires calculating numExtra
-    //mark(m_extraArgs);
-  }
+  template<class F> void scan(F& mark) const;
 
  public:
   explicit VarEnv();
@@ -226,296 +229,6 @@ inline ExtraArgsAction extra_args_action(const Func* func, uint32_t argc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * An "ActRec" is a call activation record. The ordering of the fields assumes
- * that stacks grow toward lower addresses.
- *
- * For most purposes, an ActRec can be considered to be in one of three
- * possible states:
- *   Pre-live:
- *     After the FPush* instruction which materialized the ActRec on the stack
- *     but before the corresponding FCall instruction
- *   Live:
- *     After the corresponding FCall instruction but before the ActRec fields
- *     and locals/iters have been decref'd (either by return or unwinding)
- *   Post-live:
- *     After the ActRec fields and locals/iters have been decref'd
- *
- * Note that when a function is invoked by the runtime via invokeFunc(), the
- * "pre-live" state is skipped and the ActRec is materialized in the "live"
- * state.
- */
-struct ActRec {
-  union {
-    // This pair of uint64_t's must be the first two elements in the structure
-    // so that the pointer to the ActRec can also be used for RBP chaining.
-    // Note that ActRec's are also x64 frames, so this is an implicit machine
-    // dependency.
-    TypedValue _dummyA;
-    struct {
-      ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
-      uint64_t m_savedRip;   // In-TC address to return to.
-    };
-  };
-  union {
-    TypedValue _dummyB;
-    struct {
-      const Func* m_func;  // Function.
-      uint32_t m_soff;         // Saved offset of caller from beginning of
-                               //   caller's Func's bytecode.
-
-      // Bits 0-28 are the number of function args.  Bits 29-31 are values from
-      // the Flags enum.
-      uint32_t m_numArgsAndFlags;
-    };
-  };
-  union {
-    TypedValue m_r;          // Return value teleported here when the ActRec
-                             //   is post-live.
-    struct {
-      union {
-        ObjectData* m_this;    // This.
-        Class* m_cls;          // Late bound class.
-      };
-      union {
-        VarEnv* m_varEnv;       // Variable environment; only used when the
-                                //   ActRec is live.
-        ExtraArgs* m_extraArgs; // Light-weight extra args; used only when the
-                                //   ActRec is live.
-        StringData* m_invName;  // Invoked function name (used for __call);
-                                //   only used when ActRec is pre-live.
-      };
-    };
-  };
-
-  // Get the next outermost VM frame, but if this is
-  // a re-entry frame, return nullptr
-  ActRec* sfp() const;
-
-  void setReturn(ActRec* fp, PC pc, void* retAddr);
-  void setJitReturn(void* addr);
-  void setReturnVMExit();
-
-  // skip this frame if it is for a builtin function
-  bool skipFrame() const;
-
-  enum Flags : uint32_t {
-    None          = 0,
-
-    // This bit can be independently set on ActRecs with any other flag state.
-    // It's used by the unwinder to know that an ActRec has been partially torn
-    // down (locals freed).
-    LocalsDecRefd = (1u << 29),
-
-    // Mutually exclusive execution mode states in these 2 bits.
-    InResumed     = (1u << 30),
-    FromFPushCtor = (1u << 31),
-    MagicDispatch = InResumed|FromFPushCtor,
-  };
-
-  static constexpr int kNumArgsBits       = 29;
-  static constexpr int kNumArgsMask       = (1 << kNumArgsBits) - 1;
-  static constexpr int kFlagsMask         = ~kNumArgsMask;
-  static constexpr int kExecutionModeMask = ~LocalsDecRefd;
-
-  int32_t numArgs() const { return m_numArgsAndFlags & kNumArgsMask; }
-  Flags flags() const {
-    return static_cast<Flags>(m_numArgsAndFlags & kFlagsMask);
-  }
-
-  bool localsDecRefd() const { return flags() & LocalsDecRefd; }
-  bool resumed() const {
-    return (flags() & kExecutionModeMask) == InResumed;
-  }
-  bool isFromFPushCtor() const {
-    return (flags() & kExecutionModeMask) == FromFPushCtor;
-  }
-  bool magicDispatch() const {
-    return (flags() & kExecutionModeMask) == MagicDispatch;
-  }
-
-  static uint32_t encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
-    assert((numArgs & ~kNumArgsMask) == 0);
-    assert((uint32_t{flags} & ~kFlagsMask) == 0);
-    return numArgs | flags;
-  }
-
-  void initNumArgs(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, Flags::None);
-  }
-
-  void setNumArgs(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, flags());
-  }
-
-  void setLocalsDecRefd() {
-    m_numArgsAndFlags = m_numArgsAndFlags | LocalsDecRefd;
-  }
-  void setResumed() {
-    assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
-  }
-  void setFromFPushCtor() {
-    assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), FromFPushCtor);
-  }
-
-  void setMagicDispatch(StringData* invName) {
-    assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), MagicDispatch);
-    m_invName = invName;
-  }
-
-  StringData* clearMagicDispatch() {
-    assert(magicDispatch());
-    auto const invName = getInvName();
-    m_numArgsAndFlags = encodeNumArgsAndFlags(
-      numArgs(),
-      static_cast<Flags>(flags() & ~MagicDispatch)
-    );
-    trashVarEnv();
-    return invName;
-  }
-
-  static void* encodeThis(ObjectData* obj, Class* cls) {
-    if (obj) return obj;
-    if (cls) return (char*)cls + 1;
-    not_reached();
-  }
-
-  static void* encodeThis(ObjectData* obj) { return obj; }
-  static void* encodeClass(const Class* cls) {
-    return cls ? (char*)cls + 1 : nullptr;
-  }
-  static ObjectData* decodeThis(void* p) {
-    return (uintptr_t(p) & 1) ? nullptr : (ObjectData*)p;
-  }
-  static Class* decodeClass(void* p) {
-    return (uintptr_t(p) & 1) ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
-  }
-
-  void setThisOrClass(void* objOrCls) {
-    setThisOrClassAllowNull(objOrCls);
-    assert(hasThis() || hasClass());
-  }
-  void setThisOrClassAllowNull(void* objOrCls) {
-    m_this = (ObjectData*)objOrCls;
-  }
-
-  void* getThisOrClass() const {
-    return m_this;
-  }
-
-  const Unit* unit() const {
-    func()->validate();
-    return func()->unit();
-  }
-
-  const Func* func() const {
-    return m_func;
-  }
-
-  /*
-   * To conserve space, we use unions for pairs of mutually exclusive fields
-   * (fields that are not used at the same time). We use unions for
-   * m_this/m_cls and m_varEnv/m_invName.
-   *
-   * The least significant bit is used as a marker for each pair of fields so
-   * that we can distinguish at runtime which field is valid. We define
-   * accessors below to encapsulate this logic.
-   */
-
-  static constexpr uintptr_t kHasClassBit       = 0x1;
-  static constexpr uintptr_t kExtraArgsBit      = 0x1;
-  static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
-
-  bool hasThis() const {
-    return m_this && !(reinterpret_cast<uintptr_t>(m_this) & kHasClassBit);
-  }
-
-  ObjectData* getThis() const {
-    assert(hasThis());
-    return m_this;
-  }
-
-  void setThis(ObjectData* val) {
-    m_this = val;
-  }
-
-  bool hasClass() const {
-    return reinterpret_cast<uintptr_t>(m_cls) & kHasClassBit;
-  }
-
-  Class* getClass() const {
-    assert(hasClass());
-    return reinterpret_cast<Class*>(
-      reinterpret_cast<uintptr_t>(m_cls) & ~kHasClassBit);
-  }
-
-  void setClass(Class* val) {
-    m_cls = reinterpret_cast<Class*>(
-      reinterpret_cast<uintptr_t>(val) | kHasClassBit);
-  }
-
-  void trashVarEnv() {
-    if (debug) setVarEnv(reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
-  }
-
-  bool checkVarEnv() const {
-    always_assert(m_varEnv != reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
-    return true;
-  }
-
-  bool hasVarEnv() const {
-    assert(checkVarEnv());
-    assert(!magicDispatch());
-    return m_varEnv && !(reinterpret_cast<uintptr_t>(m_varEnv) & kExtraArgsBit);
-  }
-
-  bool hasExtraArgs() const {
-    assert(checkVarEnv());
-    return reinterpret_cast<uintptr_t>(m_extraArgs) & kExtraArgsBit;
-  }
-
-  VarEnv* getVarEnv() const {
-    assert(hasVarEnv());
-    return m_varEnv;
-  }
-
-  StringData* getInvName() const {
-    assert(magicDispatch());
-    assert(checkVarEnv());
-    return m_invName;
-  }
-
-  ExtraArgs* getExtraArgs() const {
-    if (!hasExtraArgs()) return nullptr;
-    return reinterpret_cast<ExtraArgs*>(
-      reinterpret_cast<uintptr_t>(m_extraArgs) & ~kExtraArgsBit);
-  }
-
-  void setVarEnv(VarEnv* val) {
-    m_varEnv = val;
-  }
-
-  void setExtraArgs(ExtraArgs* val) {
-    m_extraArgs = reinterpret_cast<ExtraArgs*>(
-      reinterpret_cast<uintptr_t>(val) | kExtraArgsBit);
-  }
-
-  TypedValue* getExtraArg(unsigned ind) const {
-    assert(hasExtraArgs() || hasVarEnv());
-    return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :
-           hasVarEnv()    ? getVarEnv()->getExtraArg(ind) :
-           static_cast<TypedValue*>(0);
-  }
-};
-
-static_assert(offsetof(ActRec, m_sfp) == 0,
-              "m_sfp should be at offset 0 of ActRec");
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
  * Returns true iff ar represents a frame on the VM eval stack or a Resumable
  * object on the PHP heap.
  */
@@ -557,12 +270,23 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
 
 void frame_free_locals_no_hook(ActRec* fp);
 
-inline TypedValue* arReturn(ActRec* ar, Variant&& value) {
-  frame_free_locals_no_hook(ar);
-  ar->m_r = *value.asTypedValue();
-  tvWriteNull(value.asTypedValue());
-  return &ar->m_r;
-}
+#define arReturn(a, x)                          \
+  ([&] {                                        \
+    ActRec* ar_ = (a);                          \
+    TypedValue val_;                            \
+    new (&val_) Variant(x);                     \
+    frame_free_locals_no_hook(ar_);             \
+    ar_->m_r = val_;                            \
+    return &ar_->m_r;                           \
+  }())
+
+#define tvReturn(x)                                                     \
+  ([&] {                                                                \
+    TypedValue val_;                                                    \
+    new (&val_) Variant(x);                                             \
+    assert(val_.m_type != KindOfRef && val_.m_type != KindOfUninit);    \
+    return val_;                                                        \
+  }())
 
 template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
 template <> Class* arGetContextClassImpl<true>(const ActRec* ar);
@@ -643,7 +367,8 @@ struct Fault {
 };
 
 // Interpreter evaluation stack.
-class Stack {
+struct Stack {
+private:
   TypedValue* m_elms;
   TypedValue* m_top;
   TypedValue* m_base; // Stack grows down, so m_base is beyond the end of
@@ -856,17 +581,15 @@ public:
   void pushStringNoRc(StringData* s) {
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.pstr = s;
-    m_top->m_type = KindOfString;
+    *m_top = make_tv<KindOfString>(s);
   }
 
   ALWAYS_INLINE
-  void pushStaticString(StringData* s) {
+  void pushStaticString(const StringData* s) {
     assert(s->isStatic()); // No need to call s->incRefCount().
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.pstr = s;
-    m_top->m_type = KindOfStaticString;
+    *m_top = make_tv<KindOfPersistentString>(s);
   }
 
   // This should only be called directly when the caller has
@@ -875,8 +598,7 @@ public:
   void pushArrayNoRc(ArrayData* a) {
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.parr = a;
-    m_top->m_type = KindOfArray;
+    *m_top = make_tv<KindOfArray>(a);
   }
 
   ALWAYS_INLINE
@@ -889,7 +611,9 @@ public:
   ALWAYS_INLINE
   void pushStaticArray(ArrayData* a) {
     assert(a->isStatic()); // No need to call a->incRefCount().
-    pushArrayNoRc(a);
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfPersistentArray>(a);
   }
 
   // This should only be called directly when the caller has
@@ -898,8 +622,7 @@ public:
   void pushObjectNoRc(ObjectData* o) {
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.pobj = o;
-    m_top->m_type = KindOfObject;
+    *m_top = make_tv<KindOfObject>(o);
   }
 
   ALWAYS_INLINE
@@ -1096,7 +819,7 @@ visitStackElems(const ActRec* const fp,
       while (cursor < reinterpret_cast<TypedValue*>(ar)) {
         tvFun(cursor++);
       }
-      arFun(ar);
+      arFun(ar, fe->m_fpushOff);
 
       cursor += kNumActRecCells;
       if (fe->m_parentIndex == -1) break;
@@ -1115,13 +838,38 @@ void resetCoverageCounters();
 using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
-bool doFCallArrayTC(PC pc);
+bool doFCallArrayTC(PC pc, int32_t numArgs, void*);
 bool doFCall(ActRec* ar, PC& pc);
 jit::TCA dispatchBB();
 void pushLocalsAndIterators(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
+jit::TCA suspendStack(PC& pc);
+
+enum class StackArgsState { // tells prepareFuncEntry how much work to do
+  // the stack may contain more arguments than the function expects
+  Untrimmed,
+  // the stack has already been trimmed of any extra arguments, which
+  // have been teleported away into ExtraArgs and/or a variadic param
+  Trimmed
+};
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv);
+void enterVMAtCurPC();
+bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
+                      int nregular, bool doCufRefParamChecks,
+                      TypedValue* retval);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template<class F> void VarEnv::scan(F& mark) const {
+  mark(m_nvTable);
+  if (m_extraArgs) {
+    if (const auto ar = m_nvTable.getFP()) {
+      const int numExtra =
+        ar->numArgs() - ar->m_func->numNonVariadicParams();
+      m_extraArgs->scan(mark, numExtra);
+    }
+  }
+}
 
 }
 

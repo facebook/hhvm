@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -20,6 +20,10 @@ val make_error : int -> (Pos.t * string) list -> error
 
 val error_code_to_string : int -> string
 
+val internal_error : Pos.t -> string -> unit
+val unimplemented_feature : Pos.t -> string -> unit
+
+val call_time_pass_by_reference : Pos.t -> unit
 val fixme_format : Pos.t -> unit
 val typeparam_alok : Pos.t * string -> unit
 val unexpected_eof : Pos.t -> unit
@@ -34,6 +38,8 @@ val overflow : Pos.t -> unit
 val unterminated_comment : Pos.t -> unit
 val unterminated_xhp_comment : Pos.t -> unit
 val name_already_bound : string -> Pos.t -> Pos.t -> unit
+val name_is_reserved : string -> Pos.t -> unit
+val dollardollar_unused : Pos.t -> unit
 val method_name_already_bound : Pos.t -> string -> unit
 val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val unbound_name : Pos.t -> string -> [< `cls | `func | `const ] -> unit
@@ -76,8 +82,8 @@ val assert_arity : Pos.t -> unit
 val gena_arity : Pos.t -> unit
 val genva_arity : Pos.t -> unit
 val gen_array_rec_arity : Pos.t -> unit
-val dynamic_class : Pos.t -> unit
-val uninstantiable_class : Pos.t -> Pos.t -> string -> unit
+val uninstantiable_class : Pos.t -> Pos.t -> string -> (Pos.t * string) list
+  -> unit
 val abstract_const_usage: Pos.t -> Pos.t -> string -> unit
 val typedef_constraint : Pos.t -> unit
 val add_a_typehint : Pos.t -> unit
@@ -101,7 +107,6 @@ val field_kinds : Pos.t -> Pos.t -> unit
 val unbound_name_typing : Pos.t -> string -> unit
 val did_you_mean_naming : Pos.t -> string -> Pos.t -> string -> unit
 val previous_default : Pos.t -> unit
-val nullable_parameter: Pos.t -> unit
 val return_only_typehint : Pos.t -> [< `void | `noreturn ] -> unit
 val unexpected_type_arguments : Pos.t -> unit
 val too_many_type_arguments : Pos.t -> unit
@@ -136,7 +141,7 @@ val undefined_field : Pos.t -> string -> unit
 val array_access : Pos.t -> Pos.t -> string -> unit
 val array_append : Pos.t -> Pos.t -> string -> unit
 val const_mutation : Pos.t -> Pos.t -> string -> unit
-val expected_class : Pos.t -> unit
+val expected_class : ?suffix:string -> Pos.t -> unit
 val smember_not_found :
   [< `class_constant | `class_variable | `static_method | `class_typeconst] ->
   Pos.t ->
@@ -197,7 +202,7 @@ val declared_covariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
 val declared_contravariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
 val wrong_extend_kind : Pos.t -> string -> Pos.t -> string -> unit
 val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
-val cyclic_class_def : Utils.SSet.t -> Pos.t -> unit
+val cyclic_class_def : SSet.t -> Pos.t -> unit
 val override_final : parent:Pos.t -> child:Pos.t -> unit
 val should_be_override : Pos.t -> string -> string -> unit
 val override_per_trait : Pos.t * string -> string -> Pos.t -> unit
@@ -205,8 +210,8 @@ val missing_assign : Pos.t -> unit
 val private_override : Pos.t -> string -> string -> unit
 val invalid_memoized_param : Pos.t -> (Pos.t * string) list -> unit
 val no_construct_parent : Pos.t -> unit
-val constructor_required : Pos.t * string -> Utils.SSet.t -> unit
-val not_initialized : Pos.t * string -> Utils.SSet.t -> unit
+val constructor_required : Pos.t * string -> SSet.t -> unit
+val not_initialized : Pos.t * string -> SSet.t -> unit
 val call_before_init : Pos.t -> string -> unit
 val type_arity : Pos.t -> string -> string -> unit
 val invalid_req_implements : Pos.t -> unit
@@ -262,6 +267,8 @@ val using_internal_class : Pos.t -> string -> unit
 val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
 val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list
   -> (Pos.t * string) list -> Pos.t list -> Pos.t list -> unit
+val trivial_strict_not_nullable_compare_null : Pos.t -> string
+  -> (Pos.t * string) list -> unit
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
 val noreturn_usage : Pos.t -> (Pos.t * string) list -> unit
 val generic_at_runtime : Pos.t -> unit
@@ -273,7 +280,8 @@ val typeconst_assigned_tparam : Pos.t -> string -> unit
 val invalid_type_access_root : (Pos.t * string) -> unit
 val duplicate_user_attribute : (Pos.t * string) -> Pos.t -> unit
 val unbound_attribute_name : Pos.t -> string -> unit
-val attribute_arity : Pos.t -> string -> int -> unit
+val attribute_too_many_arguments : Pos.t -> string -> int -> unit
+val attribute_too_few_arguments : Pos.t -> string -> int -> unit
 val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> Pos.t -> string -> unit
 val abstract_with_typeconst : (Pos.t * string) -> unit
@@ -293,6 +301,8 @@ val cyclic_enum_constraint : Pos.t -> unit
 val invalid_classname : Pos.t -> unit
 val illegal_type_structure : Pos.t -> string -> unit
 val illegal_typeconst_direct_access : Pos.t -> unit
+val class_property_only_static_literal : Pos.t -> unit
+val reference_expr : Pos.t -> unit
 
 val to_json : Pos.absolute error_ -> Hh_json.json
 val to_string : Pos.absolute error_ -> string

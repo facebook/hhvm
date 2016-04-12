@@ -8,6 +8,8 @@
  *
  *)
 
+(* Code for emitting expressions and various related forms (like lvalues) *)
+
 open Core
 open Utils
 open Nast
@@ -15,11 +17,17 @@ open Nast
 open Emitter_core
 module SN = Naming_special_names
 
+let not_supported msg =
+  Printf.eprintf "Not supported: %s" msg;
+  exit 1
+
 let is_xhp_prop = function | _, Id (_, s) -> s.[0] = ':' | _ -> false
 
 let is_lval expr =
   match expr with
   | Lvar _  | Array_get _ | Class_get _ | Lplaceholder _ -> true
+  | Pipe _ ->
+    not_supported "Pipe operator"
   | Obj_get (_, prop, _) -> not (is_xhp_prop prop)
   | _ -> false
 
@@ -127,7 +135,7 @@ and emit_lval_inner env (_, expr_) =
     env, Lglobal
 
   | Lvar id -> env, llocal id
-  | Lplaceholder (_, s) -> env, Llocal s
+  | Lplaceholder _ -> env, Llocal SN.SpecialIdents.placeholder
   | Array_get (e1, maybe_e2) ->
     let env, base = emit_base env e1 in
     let env, member = (match maybe_e2 with
@@ -216,7 +224,7 @@ and emit_assignment env obop e1 e2 =
       let env, lval = emit_lval env lhs in
       env, (lval, path)
     in
-    let env, assignments = lmap emit_lhs env assignments in
+    let env, assignments = List.map_env env assignments emit_lhs in
 
     (* Store off the rhs to a (maybe temporary) local *)
     let env, opt_faultlet, id = match rhs_tag with
@@ -278,12 +286,21 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
     emit_FPushObjMethodD env nargs name (fmt_null_flavor null_flavor)
 
   | Class_const (cid, (_, field)) ->
-    (match resolve_class_id env cid with
-    | RCstatic class_name -> emit_FPushClsMethodD env nargs field class_name
-    | RCdynamic dyid ->
-        let env = emit_String env field in
-        let env = emit_dynamic_class_id env dyid in
-        emit_FPushClsMethod env nargs)
+    let emit_dynamic_call env emit_op =
+      let env = emit_String env field in
+      let env = emit_class_id env (resolve_class_id env cid) in
+      emit_op env nargs
+    in
+
+    (match cid with
+    | CI (_, s) -> emit_FPushClsMethodD env nargs field (fmt_name s)
+    | CIself | CIparent ->
+      (* Calls through self:: or parent:: need to be "forwarding"
+       * calls that preserve the late static binding "called class".
+       * FPushClsMethodF is forwarding, the others aren't *)
+      emit_dynamic_call env emit_FPushClsMethodF
+    | CIexpr _ | CIstatic ->
+      emit_dynamic_call env emit_FPushClsMethod)
 
   (* what all is even allowed here? *)
   | _ ->
@@ -375,6 +392,20 @@ and emit_call env (pos, expr_ as expr) args uargs =
     (* emit a dummy null so the expression has a return value *)
     emit_Null env, FC
 
+  (* Functions that call set_frame_metadata need an "86metadata" local
+   * allocated. *)
+  | Id (_, "\\HH\\set_frame_metadata"), _  -> unimpl "set_frame_metadata"
+  (* Different variants of call_user_func;
+   * see emitCallUserFunc in emitter.cpp *)
+  | Id (_, ("\\call_user_func_array" |
+            "\\forward_static_call" |
+            "\\forward_static_call_array" |
+            "\\fb_call_user_func_safe" |
+            "\\fb_call_user_func_array_safe" |
+            "\\fb_call_user_func_safe_return")), _  ->
+    unimpl "call_user_func"
+
+
   (* TODO: a billion other builtins *)
 
   | _ -> emit_normal_call env expr args uargs
@@ -436,13 +467,15 @@ and emit_expr env (pos, expr_ as expr) =
 
   (* N.B: duplicate with is_lval but we want to exhaustiveness check  *)
   | Lplaceholder _
+  | Dollardollar _
   | Lvar _
   | Obj_get _
   | Array_get _
   | Class_get _ ->
     let env, lval = emit_lval env expr in
     emit_CGet env lval
-
+  | Pipe _ ->
+    not_supported "Pipe operator"
   (* Assignment is technically a binop, although it is weird. *)
   | Binop (Ast.Eq obop, e1, e2) -> emit_assignment env obop e1 e2
 
@@ -488,7 +521,19 @@ and emit_expr env (pos, expr_ as expr) =
 
     emit_label env end_label
 
+  | NullCoalesce (etrue, efalse) ->
+      (* Desugar `$a ?? $b` into `isset($a) ? $a : $b` *)
+      let c = pos, Call (Cnormal, (pos, (Id (pos, SN.PseudoFunctions.isset))),
+                         [etrue], []) in
+      let eif = (pos, Eif (c, Some etrue, efalse)) in
+      emit_expr env eif
+
   (* Normal binops *)
+  (* HHVM can sometimes evaluate binops (and some other things) right to left
+   * if the LHS is a variable. We don't do this (because it seems silly),
+   * but it wouldn't be that hard to handle. *Most* situations where it
+   * it actually observable are ruled out by the typechecker, but it can
+   * be observed with effectful __toString() methods or HH_FIXME. *)
   | Binop (bop, e1, e2) ->
     let env = emit_expr env e1 in
     let env = emit_expr env e2 in
@@ -525,7 +570,7 @@ and emit_expr env (pos, expr_ as expr) =
   (* comma operator: evaluate all the expressions, ignoring all but the last *)
   | Expr_list es ->
     (match List.rev es with
-    | [] -> env
+    | [] -> emit_Null env (* output a dummy value *)
     | last :: rest ->
       let env = List.fold_right
         ~f:(fun e env -> emit_ignored_expr env e) ~init:env rest in
@@ -539,7 +584,7 @@ and emit_expr env (pos, expr_ as expr) =
   | String (_, s) -> emit_String env s
 
   | String2 [] -> bug "empty String2"
-  (* If we there are multiple parts of the String2, they will get
+  (* If there are multiple parts of the String2, they will get
    * stringified when they get concatenated. If there is just one
    * we need to cast it manually. *)
   | String2 [e] ->
@@ -579,6 +624,10 @@ and emit_expr env (pos, expr_ as expr) =
     let env = emit_expr env e in
     emit_cast env h
 
+  (* Transform back into a Class_const *)
+  | Typename sid ->
+    emit_expr env (pos, Class_const (CI sid, (pos, "class")))
+
   (* handle ::class; just emit the name if we have it,
    * otherwise use NameA to get it *)
   | Class_const (cid, (_, "class")) ->
@@ -605,7 +654,7 @@ and emit_expr env (pos, expr_ as expr) =
     let env = emit_Dup env in
     let env = emit_IsTypeC env "Null" in
     let env = emit_cjmp env true skip_label in
-    let env = emit_Await env env.next_iterator in
+    let env = emit_Await env in
     emit_label env skip_label
 
   | Yield af ->
@@ -654,8 +703,8 @@ and emit_expr env (pos, expr_ as expr) =
         emit_ColAddNewElemC env
     in
     List.fold_left ~f:emit_entry ~init:env es
-  | KeyValCollection (col, fields) ->
-    let col_id = get_collection_id col in
+  | KeyValCollection (col_kind, fields) ->
+    let col_id = get_collection_id (kvc_kind_to_name col_kind) in
     let env = emit_NewCol env col_id in
     let emit_field env (ek, ev) =
         let env = emit_expr env ek in
@@ -713,9 +762,9 @@ and emit_expr env (pos, expr_ as expr) =
     { env with
       pending_closures = (name, cstate, (fun_, vars)) :: env.pending_closures }
 
+
+  | Id (_, id) when SN.PseudoConsts.is_pseudo_const id -> unimpl "pseudo consts"
   (* In this context, Id is a global constant *)
-  (* XXX: we should support all the pseudoconstants but Naming translates
-   * them to bogus strings and integers! *)
   | Id (_, id) -> emit_Cns env id
 
   | Assert _ -> unimpl "Assert"

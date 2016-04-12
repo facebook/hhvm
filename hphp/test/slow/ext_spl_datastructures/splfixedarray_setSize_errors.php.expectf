@@ -1,0 +1,10 @@
+Errors:
+
+Warning: SplFixedArray::setSize() expects parameter 1 to be long, array given in %s/splfixedarray_setSize_errors.php on line 6
+
+Warning: SplFixedArray::setSize() expects parameter 1 to be long, string given in %s/splfixedarray_setSize_errors.php on line 7
+No Error:
+bool(true)
+bool(true)
+bool(true)
+bool(true)

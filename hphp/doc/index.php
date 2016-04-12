@@ -33,7 +33,6 @@ $topics =
         'Server documents' => 'server.documents',
         'RPC server' => 'server.rpc_server',
         'Xbox server' => 'server.xbox_server',
-        'Dangling server' => 'server.dangling_server',
       ),
       'Foreign Function Interfaces' => array(
         'C++' => 'ffi.c++',

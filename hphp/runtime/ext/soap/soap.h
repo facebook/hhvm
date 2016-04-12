@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -78,19 +78,20 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapData final : public RequestEventHandler {
+struct SoapData final : RequestEventHandler {
+private:
   // SDL cache
   struct sdlCacheBucket {
     sdlPtr sdl;
     time_t time;
   };
-  typedef hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>
-          sdlCache;
+  using sdlCache =
+        hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>;
 
 public:
   SoapData();
 
-  sdl *get_sdl(const char *uri, long cache_wsdl, HttpClient *http = NULL);
+  sdl *get_sdl(const char *uri, long cache_wsdl, HttpClient *http = nullptr);
   encodeMap *register_typemap(encodeMapPtr typemap);
   void register_encoding(xmlCharEncodingHandlerPtr encoding);
 
@@ -162,8 +163,7 @@ struct soapClass {
   int persistance;
 };
 
-class soapHeader : public ResourceData {
-public:
+struct soapHeader : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader);
 
   CLASSNAME_IS("soapHeader")
@@ -181,9 +181,9 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapException : public ExtendedException {
-public:
-  SoapException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+struct SoapException : ExtendedException {
+  SoapException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,8 +39,7 @@ namespace HPHP {
 
 typedef int TokenID;
 
-class ScannerToken {
-public:
+struct ScannerToken {
   ScannerToken() : m_num(0), m_check(false), m_id(-1) {}
   void reset() { m_num = 0; m_text.clear(); m_id = -1; }
 
@@ -194,8 +193,7 @@ struct TokenListener {
   virtual ~TokenListener() {}
 };
 
-class Scanner {
-public:
+struct Scanner {
   enum Type {
     AllowShortTags       = 0x01, // allow <?
     AllowAspTags         = 0x02, // allow <% %>
@@ -275,8 +273,10 @@ public:
     incLoc(rawText, rawLeng, type);
   }
   // also used for YY_FATAL_ERROR in hphp.x
-  void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void warn(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void warn(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   std::string escape(const char *str, int len, char quote_type) const;
 
   /**

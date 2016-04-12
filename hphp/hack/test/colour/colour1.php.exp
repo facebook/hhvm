@@ -1,0 +1,39 @@
+<?hh
+
+// untyped
+function f($a) {
+  <checked>echo</checked> <unchecked>$a</unchecked>;
+}
+
+// partially typed array
+function g(array $a) {
+  <checked>echo</checked> <partial>$a</partial>;
+}
+
+// partially typed return value
+async function h() {
+  return <checked>1</checked>;
+}
+
+// partially typed return value used here
+function i() {
+  <checked>echo</checked> <partial>h()</partial>;
+}
+
+function strict(int $x): int {
+  return <checked>$x</checked>;
+}
+
+function use_strict() {
+  <checked>echo</checked> <checked>strict(</checked><checked>1</checked><checked>)</checked>;
+}
+
+function has_unsafe(int $a) {
+  <checked>echo</checked> <checked>$a</checked>;
+  // UNSAFE
+  echo $a;
+}
+
+function has_unsafeexpr(string $a) {
+  <checked>echo</checked> <unchecked>/* UNSAFE_EXPR */ $a + 1</unchecked>;
+}

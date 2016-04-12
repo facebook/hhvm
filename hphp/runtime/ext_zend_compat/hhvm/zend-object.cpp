@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -38,7 +38,8 @@ void ZendObject::registerNativeData() {
         nativeDataDtor,
         nullptr /* sweep */,
         nullptr /* sleep */,
-        nullptr /* wakeup */);
+        nullptr /* wakeup */,
+        nullptr /* scan */);
   }
 }
 
@@ -63,9 +64,10 @@ void ZendObject::nativeDataCopy(ObjectData* dest, ObjectData* src) {
     raise_error("Trying to clone uncloneable object of class %s",
         src->getVMClass()->name()->data());
   }
-  TypedValue tv_src = make_tv<KindOfObject>(src);
-  tvBox(&tv_src);
-  zend_object_value ov = clone_call(tv_src.m_data.pref TSRMLS_CC);
+  TypedValue tv;
+  tvWriteObject(src, &tv);
+  auto ref = req::ptr<RefData>::attach(RefData::Make(tv));
+  zend_object_value ov = clone_call(ref.get() TSRMLS_CC);
 
   zop_dest->setHandle(ov.handle);
   zop_dest->setHandlers(ov.handlers);

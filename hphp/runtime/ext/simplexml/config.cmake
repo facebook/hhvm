@@ -4,8 +4,8 @@ HHVM_DEFINE_EXTENSION("simplexml" REQUIRED
   HEADERS
     ext_simplexml.h
     ext_simplexml_include.h
-  IDL
-    ../../../system/idl/simplexml.idl.json
+  SYSTEMLIB
+    ext_simplexml.php
   DEPENDS
     libXML2
 )

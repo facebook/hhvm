@@ -1,0 +1,20 @@
+
+<?hh // strict
+
+class Foo {
+  public function bar(): void {
+    $val = true;
+    "Stmt 1";
+    if ($val) {
+      "nested stmt";
+      $var->afun("arg1", "arg3");
+    } else {
+      "else clause";
+      $var->afun("arg1", "arg3");
+    }
+    "Not nested";
+    $var->afun("arg1", "arg3");
+  }
+}
+
+

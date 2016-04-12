@@ -1,0 +1,7 @@
+[1]intersect(array<[2]intersect(Tstring), [3]intersect(Tstring, Tint)>)
+File "nested_dynamic_index_lvalue.php", line 14, characters 15-25:
+Invalid argument (Typing[4110])
+File "nested_dynamic_index_lvalue.php", line 17, characters 22-27:
+This is a string
+File "nested_dynamic_index_lvalue.php", line 10, characters 17-17:
+It is incompatible with an int

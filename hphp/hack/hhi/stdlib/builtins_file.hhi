@@ -8,9 +8,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-const STDIN = 0;
-const STDOUT = 0;
-const STDERR = 0;
+const resource STDIN = /* UNSAFE_EXPR */ 0;
+const resource STDOUT = /* UNSAFE_EXPR */ 0;
+const resource STDERR = /* UNSAFE_EXPR */ 0;
 
 const PATHINFO_DIRNAME = 0;
 const PATHINFO_BASENAME = 0;
@@ -98,7 +98,7 @@ function tempnam($dir, $prefix);
 function tmpfile();
 function fileperms($filename);
 function fileinode($filename);
-function filesize($filename);
+function filesize(?Stringish $filename);
 function fileowner($filename);
 function filegroup($filename);
 function fileatime($filename);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,49 +16,30 @@
 #ifndef incl_HPHP_TRANSLATE_REGION_H_
 #define incl_HPHP_TRANSLATE_REGION_H_
 
-#include "hphp/runtime/vm/jit/types.h"  // TransFlags
+#include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
 
 namespace HPHP { namespace jit {
 
 struct IRGS;
+struct IRUnit;
+struct TransContext;
 
 //////////////////////////////////////////////////////////////////////
 
-enum class TranslateResult {
-  Failure,
-  Retry,
-  Success
-};
-const char* show(TranslateResult);
-
 /*
- * Data used by translateRegion() to pass information between retries.
- */
-struct TranslateRetryContext {
-  // Instructions that must be interpreted.
-  ProfSrcKeySet toInterp;
-
-  // Inlined regions.
-  std::unordered_map<ProfSrcKey,
-                     RegionDescPtr,
-                     ProfSrcKey::Hasher> inlines;
-};
-
-/*
- * Translate `region'.
+ * Populate and optimize an IRUnit for `region'. Returns the new IRUnit on
+ * success, nullptr on failure.
  *
- * The caller is expected to continue calling translateRegion() until either
- * Success or Failure is returned.  Otherwise, Retry is returned, and the
- * caller is responsible for threading the same RetryContext through to the
- * retried translations.
+ * `pconds' and `annotations' must be empty on entry, and if hhir generation is
+ * successful they will be populated appropriately.
  */
-TranslateResult translateRegion(IRGS& irgs,
-                                const RegionDesc& region,
-                                TranslateRetryContext& retry,
-                                TransFlags trflags,
-                                PostConditions& pconds);
+std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
+                                    const TransContext& context,
+                                    PostConditions& pconds,
+                                    Annotations& annotations) noexcept;
 
 //////////////////////////////////////////////////////////////////////
 

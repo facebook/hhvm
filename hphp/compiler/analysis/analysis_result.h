@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,8 +47,7 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
 
-class AnalysisResult : public BlockScope, public FunctionContainer {
-public:
+struct AnalysisResult : BlockScope, FunctionContainer {
   /**
    * There are multiple passes over our syntax trees. This lists all of them.
    */
@@ -82,8 +81,7 @@ public:
     GlobalSymbolTypeCount
   };
 
-  class Locker {
-  public:
+  struct Locker {
     explicit Locker(const AnalysisResult *ar) :
         m_ar(const_cast<AnalysisResult*>(ar)),
         m_mutex(m_ar->getMutex()) {
@@ -345,19 +343,7 @@ public:
                               s_changedScopesMapThreadLocal);
 
 private:
-  template <typename Visitor>
-  void processScopesParallel(const char *id, void *opaque = nullptr);
-
-  template <typename Visitor>
-  void preWaitCallback(bool first,
-                       const BlockScopeRawPtrQueue &scopes,
-                       void *opaque);
-
-  template <typename Visitor>
-  bool postWaitCallback(bool first,
-                        bool again,
-                        const BlockScopeRawPtrQueue &scopes,
-                        void *opaque);
+  void processScopesParallel(const char* id, void* context = nullptr);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,29 +19,30 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include <folly/String.h>
+#ifndef _MSC_VER
 #include <afdt.h>
+#endif
 
 /*
-TakeoverAgent provides the ability
-to transfer the accept socket (the file descriptor used to accept
-new connections) from an older instance of the server to a new one
-that has just been brought up.
-
-In takeover, the agent will attempt to
-use libafdt to transfer a file descriptor from an existing process
-(which should exist, since we couldn't bind to the socket).
-The transfer is performed in a separate event loop that we wait on,
-so it is effectively synchronous.  If we fail to get the socket,
-we just return up to higher-level code (the HttpServer class will
-then try to kill the existing server).  If we do get the socket,
-we send another request to the existing server to make it shut down
-its main port, then we set up our own file descriptor server so
-we can give the socket to the next instance that starts.
-
-It is a little bit of a hack to use libafdt to send the shutdown
-request, but we need to synchronously shut down the admin server,
-so we cannot use the admin server for it.
-*/
+ * TakeoverAgent provides the ability to transfer the accept socket
+ * (the file descriptor used to accept new connections) from an older
+ * instance of the server to a new one that has just been brought up.
+ *
+ * In takeover, the agent will attempt to use libafdt to transfer a
+ * file descriptor from an existing process (which should exist, since
+ * we couldn't bind to the socket).  The transfer is performed in a
+ * separate event loop that we wait on, so it is effectively
+ * synchronous.  If we fail to get the socket, we just return up to
+ * higher-level code (the HttpServer class will then try to kill the
+ * existing server).  If we do get the socket, we send another request
+ * to the existing server to make it shut down its main port, then we
+ * set up our own file descriptor server so we can give the socket to
+ * the next instance that starts.
+ *
+ * It is a little bit of a hack to use libafdt to send the shutdown
+ * request, but we need to synchronously shut down the admin server,
+ * so we cannot use the admin server for it.
+ */
 
 // We use a very simple protocol for communicating over libafdt:
 // One byte for the protocol version and a second code byte.
@@ -55,25 +56,22 @@ so we cannot use the admin server for it.
 
 namespace HPHP {
 
-static void fd_transfer_error_hander(
-    const struct afdt_error_t* err,
-    void* userdata) {
-  (void)userdata;
-  Logger::Error(
-      "AFDT ERROR: phase=%s operation=%s "
-      "message=\"%s\" errno=\"%s\"",
-      afdt_phase_str(err->phase),
-      afdt_operation_str(err->operation),
-      err->message,
-      folly::errnoStr(errno).c_str());
+#ifndef _MSC_VER
+static void fd_transfer_error_handler(const struct afdt_error_t* err,
+                                      void* userdata) {
+  Logger::Error("AFDT ERROR: phase=%s operation=%s "
+                "message=\"%s\" errno=\"%s\"",
+                afdt_phase_str(err->phase),
+                afdt_operation_str(err->operation),
+                err->message,
+                folly::errnoStr(errno).c_str());
 }
 
-static int fd_transfer_request_handler(
-    const uint8_t* request,
-    uint32_t request_length,
-    uint8_t* response,
-    uint32_t* response_length,
-    void* userdata) {
+static int fd_transfer_request_handler(const uint8_t* request,
+                                       uint32_t request_length,
+                                       uint8_t* response,
+                                       uint32_t* response_length,
+                                       void* userdata) {
   TakeoverAgent* agent = (TakeoverAgent*)userdata;
   String req((const char*)request, request_length, CopyString);
   String resp;
@@ -83,6 +81,7 @@ static int fd_transfer_request_handler(
   *response_length = resp.size();
   return fd;
 }
+#endif
 
 TakeoverAgent::TakeoverAgent(const std::string &fname)
   : m_delete_handle(nullptr),
@@ -98,12 +97,15 @@ const StaticString
   s_ver_C_TERM_OK(P_VERSION C_TERM_OK);
 
 int TakeoverAgent::afdtRequest(String request, String* response) {
+#ifdef _MSC_VER
+  return -1;
+#else
   Logger::Info("takeover: received request");
   if (request == s_ver_C_FD_REQ) {
     Logger::Info("takeover: request is a listen socket request");
     *response = P_VERSION C_FD_RESP;
     m_takeover_state = TakeoverState::Started;
-    (void)m_callback->onTakeoverRequest(RequestType::LISTEN_SOCKET);
+    m_callback->onTakeoverRequest(RequestType::LISTEN_SOCKET);
     return m_sock;
   } else if (request == s_ver_C_TERM_REQ) {
     Logger::Info("takeover: request is a terminate request");
@@ -125,22 +127,24 @@ int TakeoverAgent::afdtRequest(String request, String* response) {
 
     *response = P_VERSION C_TERM_OK;
     Logger::Info("takeover: notifying all listeners");
-    for (std::set<TakeoverListener*>::iterator it =
-           m_takeover_listeners.begin();
-         it != m_takeover_listeners.end(); ++it) {
-      (*it)->takeoverShutdown();
+    for (auto listener : m_takeover_listeners) {
+      listener->takeoverShutdown();
     }
     Logger::Info("takeover: notification complete");
     return -1;
   } else {
-    Logger::Info("takeover: request is unrecognize");
+    Logger::Error("takeover: request is unrecognized");
     *response = P_VERSION C_UNKNOWN;
     return -1;
   }
+#endif
 }
 
 int TakeoverAgent::setupFdServer(event_base *eventBase, int sock,
                                  Callback *callback) {
+#ifdef _MSC_VER
+  return -1;
+#else
   int ret;
   m_sock = sock;
   m_callback = callback;
@@ -151,14 +155,13 @@ int TakeoverAgent::setupFdServer(event_base *eventBase, int sock,
     return -1;
   }
 
-  ret = afdt_create_server(
-      m_transfer_fname.c_str(),
-      eventBase,
-      fd_transfer_request_handler,
-      afdt_no_post,
-      fd_transfer_error_hander,
-      &m_delete_handle,
-      this);
+  ret = afdt_create_server(m_transfer_fname.c_str(),
+                           eventBase,
+                           fd_transfer_request_handler,
+                           afdt_no_post,
+                           fd_transfer_error_handler,
+                           &m_delete_handle,
+                           this);
   // We don't really care if this worked or not.
   // If it didn't, the next invocation of the server
   // will just have to kill us.
@@ -166,9 +169,13 @@ int TakeoverAgent::setupFdServer(event_base *eventBase, int sock,
     Logger::Info("takeover: fd server set up successfully");
   }
   return ret;
+#endif
 }
 
 int TakeoverAgent::takeover(std::chrono::seconds timeoutSec) {
+#ifdef _MSC_VER
+  return -1;
+#else
   int ret;
 
   Logger::Info("takeover: beginning listen socket acquisition");
@@ -178,25 +185,22 @@ int TakeoverAgent::takeover(std::chrono::seconds timeoutSec) {
   afdt_error_t err = AFDT_ERROR_T_INIT;
   // TODO(dreiss): Make this timeout configurable.
   struct timeval timeout = { timeoutSec.count() , 0 };
-  ret = afdt_sync_client(
-      m_transfer_fname.c_str(),
-      fd_request,
-      sizeof(fd_request) - 1,
-      fd_response,
-      &response_len,
-      &m_sock,
-      &timeout,
-      &err);
+  ret = afdt_sync_client(m_transfer_fname.c_str(),
+                         fd_request,
+                         sizeof(fd_request) - 1,
+                         fd_response,
+                         &response_len,
+                         &m_sock,
+                         &timeout,
+                         &err);
   if (ret < 0) {
-    fd_transfer_error_hander(&err, nullptr);
+    fd_transfer_error_handler(&err, nullptr);
     errno = EADDRINUSE;
     return -1;
   } else if (m_sock < 0) {
     String resp((const char*)fd_response, response_len, CopyString);
-    Logger::Error(
-        "AFDT did not receive a file descriptor: "
-        "response = '%s'",
-        HHVM_FN(addcslashes)(resp, null_string).data());
+    Logger::Error("AFDT did not receive a file descriptor: response = '%s'",
+                  HHVM_FN(addcslashes)(resp, null_string).data());
     errno = EADDRINUSE;
     return -1;
   }
@@ -205,9 +209,11 @@ int TakeoverAgent::takeover(std::chrono::seconds timeoutSec) {
   m_took_over = true;
 
   return m_sock;
+#endif
 }
 
 void TakeoverAgent::requestShutdown() {
+#ifndef _MSC_VER
   if (m_took_over) {
     Logger::Info("takeover: requesting shutdown of satellites");
     // Use AFDT to synchronously shut down the old server's satellites
@@ -219,37 +225,36 @@ void TakeoverAgent::requestShutdown() {
     int should_not_receive_fd;
     afdt_error_t err = AFDT_ERROR_T_INIT;
     // TODO(dreiss): Make this timeout configurable.
-    // We can aford to wait a long time here, since we've already started
+    // We can afford to wait a long time here, since we've already started
     // the dispatcher for this server.  We want to give the old server
     // plenty of time to shut down all of its satellite servers.
     struct timeval timeout = { 10 , 0 };
-    int ret = afdt_sync_client(
-        m_transfer_fname.c_str(),
-        shutdown_request,
-        sizeof(shutdown_request) - 1,
-        shutdown_response,
-        &response_len,
-        &should_not_receive_fd,
-        &timeout,
-        &err);
+    int ret = afdt_sync_client(m_transfer_fname.c_str(),
+                               shutdown_request,
+                               sizeof(shutdown_request) - 1,
+                               shutdown_response,
+                               &response_len,
+                               &should_not_receive_fd,
+                               &timeout,
+                               &err);
     if (ret < 0) {
-      fd_transfer_error_hander(&err, nullptr);
-      Logger::Warning("Failed to shut-down old server with AFDT.");
+      fd_transfer_error_handler(&err, nullptr);
+      Logger::Warning("takeover: failed to shutdown old server with AFDT.");
       // The higher-level start logic will try *very* hard to recover from this.
     }
     String resp((const char*)shutdown_response, response_len, CopyString);
     if (resp != s_ver_C_TERM_OK) {
-      Logger::Error(
-          "Old server could not shut down: "
-          "response = '%s'",
-          HHVM_FN(addcslashes)(resp, null_string).data());
+      Logger::Error("Old server could not shut down: response = '%s'",
+                    HHVM_FN(addcslashes)(resp, null_string).data());
     } else {
       Logger::Info("takeover: old satellites have shut down");
     }
   }
+#endif
 }
 
 void TakeoverAgent::stop() {
+#ifndef _MSC_VER
   if (m_delete_handle != nullptr) {
     afdt_close_server(m_delete_handle);
   }
@@ -265,6 +270,7 @@ void TakeoverAgent::stop() {
   if (m_takeover_state != TakeoverState::NotStarted) {
     m_callback->takeoverAborted();
   }
+#endif
 }
 
 TakeoverListener::~TakeoverListener() {

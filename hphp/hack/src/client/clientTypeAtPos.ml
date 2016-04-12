@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -11,19 +11,7 @@
 let go pos ty output_json =
   if output_json
   then begin
-    let ty_json = match ty with
-      | Some ty -> Hh_json.JString ty
-      | None -> Hh_json.JNull
-    in
-    let pos_json = match pos with
-      | Some pos -> Pos.json pos
-      | None -> Hh_json.JNull
-    in
-    print_endline (Hh_json.json_to_string
-                    (Hh_json.JAssoc [
-                      "type", ty_json;
-                      "pos", pos_json;
-                    ]))
+    print_endline (Hh_json.json_to_string (ServerInferType.to_json pos ty))
   end else begin
     match ty with
       | Some ty -> print_endline ty

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,6 +49,9 @@ enum SurpriseFlag : size_t {
   /* Set if a GC should be run at the next safe point. */
   PendingGCFlag        = 1ull << 60,
 
+  /* Set when memory threshold exceeds a PHP specified limit */
+  MemThresholdFlag     = 1ull << 61,
+
   /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to
@@ -67,6 +70,7 @@ enum SurpriseFlag : size_t {
     InterceptFlag |
     XenonSignalFlag |
     IntervalTimerFlag |
+    MemThresholdFlag |
     ResourceFlags,
 };
 

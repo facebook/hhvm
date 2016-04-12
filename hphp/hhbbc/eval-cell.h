@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,14 +59,14 @@ folly::Optional<Type> eval_cell(Pred p) {
           }
           auto const sstr = makeStaticString(c.m_data.pstr);
           tvDecRef(&c);
-          c = make_tv<KindOfStaticString>(sstr);
+          c = make_tv<KindOfPersistentString>(sstr);
         }
         break;
       case KindOfArray:
         {
           auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
           tvDecRef(&c);
-          c = make_tv<KindOfArray>(sarr);
+          c = make_tv<KindOfPersistentArray>(sarr);
         }
         break;
       default:
@@ -87,6 +87,8 @@ folly::Optional<Type> eval_cell(Pred p) {
      */
     auto const t = from_cell(c);
     return options.ConstantProp ? t : loosen_statics(t);
+  } catch (const Object&) {
+    return folly::none;
   } catch (const std::exception&) {
     return folly::none;
   } catch (...) {

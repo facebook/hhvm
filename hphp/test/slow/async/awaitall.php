@@ -5,7 +5,10 @@ async function answer() {
   return 42;
 };
 function reschedule() {
-  return RescheduleWaitHandle::create(1, 1);
+  return RescheduleWaitHandle::create(
+    RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
+    1,
+  );
 }
 
 function t(WaitHandle $wh, $a): void {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,7 @@ namespace HPHP {
  * Encapsulating all date/time manipulations, conversions, input and output
  * into this one single class.
  */
-class DateTime final : public SweepableResourceData {
-public:
+struct DateTime final : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(DateTime);
 
   /**
@@ -228,6 +227,7 @@ public:
 public:
   // constructor
   DateTime();
+  DateTime(const DateTime&);
   explicit DateTime(int64_t timestamp, bool utc = false); // from a timestamp
   explicit DateTime(int64_t timestamp, req::ptr<TimeZone> tz);
 
@@ -267,7 +267,7 @@ public:
   void setISODate(int year, int week, int day = 1);
   void setTime(int hour, int minute, int second = 0);
   void setTimezone(req::ptr<TimeZone> tz);
-  void modify(const String& diff); // PHP's date_modify() function, muy powerful
+  bool modify(const String& diff); // PHP's date_modify() function, muy powerful
   void add(const req::ptr<DateInterval>& interval);
   void sub(const req::ptr<DateInterval>& interval);
 
@@ -299,7 +299,7 @@ public:
 private:
   void internalModify(timelib_time *t);
   void internalModifyRelative(timelib_rel_time *rel, bool have_relative,
-                              char bias);
+                              int8_t bias);
   struct LastErrors final : RequestEventHandler {
     void requestInit() override {
       m_errors = nullptr;

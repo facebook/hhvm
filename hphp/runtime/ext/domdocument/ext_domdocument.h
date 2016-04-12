@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -42,13 +42,17 @@ Object newDOMDocument(bool construct = true);
 // class DOMNode
 
 struct DOMNode {
-  virtual ~DOMNode() {
+  ~DOMNode() {
     if (m_node) {
       assert(m_node->getCache() &&
              Native::data<DOMNode>(m_node->getCache()) == this);
       m_node->clearCache();
     }
   }
+
+  // for __clone
+  DOMNode& operator=(const DOMNode& copy);
+
   req::ptr<XMLDocumentData> doc() const { return m_node->doc(); }
   XMLNode node() const { return m_node; }
   xmlNodePtr nodep() const {

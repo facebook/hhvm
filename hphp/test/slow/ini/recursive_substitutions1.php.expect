@@ -1,0 +1,3 @@
+A false recursive setting at key hhvm.stats.slot_duration with offset : and value hhvm.stats.slot_duration. Value is literal or pointing to setting that does not exist. Skipping!
+A false recursive setting at key hhvm.stats.slot_duration with offset : and value hhvm.stats.slot_duration. Value is literal or pointing to setting that does not exist. Skipping!
+string(3) "600"

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,9 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfBoolean:       return cns(env, !!tv->m_data.num);
     case KindOfInt64:         return cns(env, tv->m_data.num);
     case KindOfDouble:        return cns(env, tv->m_data.dbl);
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return cns(env, tv->m_data.pstr);
+    case KindOfPersistentArray:
     case KindOfArray:         return cns(env, tv->m_data.parr);
 
     case KindOfUninit:

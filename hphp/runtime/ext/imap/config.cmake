@@ -1,36 +1,9 @@
-HHVM_EXT_OPTION(IMAP CClient)
-
-if (CCLIENT_INCLUDE_PATH AND CCLIENT_LIBRARY)
-  CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
-  if (NOT RECENT_CCLIENT)
-    unset(RECENT_CCLIENT CACHE)
-    if (EXT_IMAP STREQUAL "ON")
-      message(FATAL_ERROR "Your version of c-client is too old, you need 2007")
-    endif()
-  else()
-    HHVM_EXTENSION(imap ext_imap.cpp)
-    HHVM_SYSTEMLIB(imap ext_imap.php)
-    HHVM_ADD_INCLUDES(imap ${CCLIENT_INCLUDE_PATH})
-    HHVM_LINK_LIBRARIES(imap ${CCLIENT_LIBRARY})
-
-    if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
-      CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" auth_gss CCLIENT_HAS_GSS)
-    elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
-      CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_HAS_GSS)
-    endif()
-
-    if (NOT CCLIENT_HAS_GSS)
-      HHVM_DEFINE(IMAP -DSKIP_IMAP_GSS=1)
-    endif()
-
-    if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
-      CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" ssl_onceonlyinit CCLIENT_HAS_SSL)
-    elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
-      CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" ssl_onceonlyinit CCLIENT_HAS_SSL)
-    endif()
-
-    if (NOT CCLIENT_HAS_SSL)
-      HHVM_DEFINE(IMAP -DSKIP_IMAP_SSL=1)
-    endif()
-  endif()
-endif()
+HHVM_DEFINE_EXTENSION("imap" IMPLICIT
+  IS_ENABLED EXT_IMAP
+  SOURCES
+    ext_imap.cpp
+  SYSTEMLIB
+    ext_imap.php
+  DEPENDS
+    libCClient
+)

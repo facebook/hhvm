@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -45,15 +45,18 @@ bool HHVM_FUNCTION(fb_output_compression, bool new_value);
 void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
 int64_t HHVM_FUNCTION(fb_get_last_flush_size);
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
-String HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
+Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
 
-Array f_fb_call_user_func_safe(int _argc, const Variant& function,
-                               const Array& _argv = null_array);
-Variant f_fb_call_user_func_safe_return(
-  int _argc, const Variant& function,
-  const Variant& def, const Array& _argv = null_array);
-Array f_fb_call_user_func_array_safe(const Variant& function,
-                                     const Array& params);
+Array HHVM_FUNCTION(fb_call_user_func_safe,
+                    const Variant& function,
+                    const Array& argv);
+Variant HHVM_FUNCTION(fb_call_user_func_safe_return,
+                      const Variant& function,
+                      const Variant& def,
+                      const Array& argv);
+Array HHVM_FUNCTION(fb_call_user_func_array_safe,
+                    const Variant& function,
+                    const Array& params);
 
 ///////////////////////////////////////////////////////////////////////////////
 

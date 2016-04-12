@@ -1,7 +1,7 @@
-Program %s/async_stack_traversal.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s.php loaded. Type '[r]un' or '[c]ontinue' to go.
 b async_stack_traversal.php:7
 Breakpoint 1 set on line 7 of async_stack_traversal.php
-But wont break until file async_stack_traversal.php has been loaded.
+But won't break until file async_stack_traversal.php has been loaded.
 r
 int(43)
 Breakpoint 1 reached at gen1() on line 7 of %s/async_stack_traversal.php
@@ -15,7 +15,7 @@ switching stack contexts (sync->async) resetting stack state
 #0  gen1 [%d]
 #1  <<join>>
 #2  gen2 [%d]
-#3  <gen-array> [%d]
+#3  <await-all> [%d]
 #4  genFoo [%d]
     at %s/async_stack_traversal.php:32
 #5  <<join>>
@@ -52,7 +52,7 @@ Fetching async stacktrace...
 #0  gen1 [%d]
 #1  <<join>>
 #2  gen2 [%d]
-#3  <gen-array> [%d]
+#3  <await-all> [%d]
 #4  genFoo [%d]
     at %s/async_stack_traversal.php:32
 #5  <<join>>

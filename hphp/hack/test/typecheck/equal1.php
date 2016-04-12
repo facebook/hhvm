@@ -24,6 +24,9 @@ function createFromMeta(): ?I {
   case 1:
     $result = new B();
     break;
+  default:
+    $result = null;
+    break;
   }
 
   if ($result === null) {

@@ -46,7 +46,8 @@ fwrite($fp, "static_assert(kNumSIMDRegs == " . NUM_SIMD_ARGS.
 
 $callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
               'double* SIMD, int SIMD_count';
-foreach(['double'=>'Double','int64_t'=>'Int64'] as $ret => $name) {
+foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV'] as
+        $ret => $name) {
   fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");
   fwrite($fp, "  switch (GP_count) {\n");
   $gpargs = [];
@@ -55,13 +56,13 @@ foreach(['double'=>'Double','int64_t'=>'Int64'] as $ret => $name) {
     fwrite($fp, "      switch (SIMD_count) {\n");
     $simdargs = [];
     for($simd = 0; $simd <= NUM_SIMD_ARGS; ++$simd) {
-      $argsD = implode(',', array_merge($simdargs, $gpargs));
+      $argsD = implode(',', array_merge($gpargs, $simdargs));
       $argsC = [];
-      for ($i = 0; $i < $simd; ++$i) {
-        $argsC[] = "SIMD[$i]";
-      }
       for ($i = 0; $i < $gp; ++$i) {
         $argsC[] = "GP[$i]";
+      }
+      for ($i = 0; $i < $simd; ++$i) {
+        $argsC[] = "SIMD[$i]";
       }
       $argsC = implode(',', $argsC);
       fwrite($fp, "        case ${simd}:\n");

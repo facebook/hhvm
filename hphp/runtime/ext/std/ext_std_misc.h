@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +24,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+constexpr int64_t k_PHP_INT_MIN = std::numeric_limits<int64_t>::lowest();
+constexpr int64_t k_PHP_INT_MAX = std::numeric_limits<int64_t>::max();
+
+StaticString get_PHP_VERSION();
+
 int64_t HHVM_FUNCTION(connection_aborted);
 int64_t HHVM_FUNCTION(connection_status);
 int64_t HHVM_FUNCTION(connection_timeout);
@@ -32,7 +37,7 @@ bool HHVM_FUNCTION(define, const String& name, const Variant& value,
                    bool case_insensitive = false);
 bool HHVM_FUNCTION(defined, const String& name, bool autoload = true);
 int64_t HHVM_FUNCTION(ignore_user_abort, bool setting = false);
-TypedValue* HHVM_FUNCTION(pack, ActRec* ar);
+Variant HHVM_FUNCTION(pack, const String& format, const Array& argv);
 int64_t HHVM_FUNCTION(sleep, int seconds);
 void HHVM_FUNCTION(usleep, int micro_seconds);
 Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds);

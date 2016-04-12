@@ -28,7 +28,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class AutoloadHandler final : public RequestEventHandler {
+struct AutoloadHandler final : RequestEventHandler {
+private:
   enum Result {
     Failure,
     Success,

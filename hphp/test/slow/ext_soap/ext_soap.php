@@ -130,15 +130,6 @@ VSOAP("<ns1:sum xmlns:ns1=\"http://testuri.org\">".
 
 $server = new SoapServer(__DIR__."/1809.wsdl",
                         array("uri" => "http://testuri.org"));
-$server->addfunction("Add");
-
-VSOAPNS("<ns1:Add xmlns:ns1=\"http://testuri.org\">".
-        "<x xsi:type=\"xsd:int\">22</x>".
-        "<y xsi:type=\"xsd:int\">33</y>".
-        "</ns1:Add>",
-        "<ns1:AddResponse><result xsi:type=\"xsd:double\">55".
-        "</result></ns1:AddResponse>",
-        "");
 
 $server->addfunction("Fault");
 

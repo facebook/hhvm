@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,10 +29,6 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
                         std::string &which, std::string &set) {
   // individual test suites
   s_suite = suite;
-  if (suite == "TestLibEventServer") {
-    RUN_TESTSUITE(TestLibEventServer);
-    return;
-  }
 
   // set based tests with many suites
   if (set == "TestUnit") {

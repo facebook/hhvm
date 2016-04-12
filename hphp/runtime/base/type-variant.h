@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,10 +111,9 @@ struct Variant : private TypedValue {
     m_data.pstr = s;
   }
   /* implicit */ Variant(const StaticString &v) noexcept {
-    m_type = KindOfStaticString;
-    StringData *s = v.get();
-    assert(s);
-    m_data.pstr = s;
+    assert(v.get() && !v.get()->isRefCounted());
+    m_type = KindOfPersistentString;
+    m_data.pstr = v.get();
   }
 
   Variant(const Variant& other, WithRefBind) {
@@ -133,9 +132,13 @@ struct Variant : private TypedValue {
   explicit Variant(StringData* v) noexcept;
   explicit Variant(ArrayData* v) noexcept {
     if (v) {
-      m_type = KindOfArray;
       m_data.parr = v;
-      v->incRefCount();
+      if (v->isRefCounted()) {
+        m_type = KindOfArray;
+        v->rawIncRefCount();
+      } else {
+        m_type = KindOfPersistentArray;
+      }
     } else {
       m_type = KindOfNull;
     }
@@ -174,16 +177,19 @@ struct Variant : private TypedValue {
     m_data.parr = ad;
   }
 
-  // for static strings only
-  enum class StaticStrInit {};
-  explicit Variant(const StringData *v, StaticStrInit) noexcept {
-    if (v) {
-      assert(v->isStatic());
-      m_data.pstr = const_cast<StringData*>(v);
-      m_type = KindOfStaticString;
-    } else {
-      m_type = KindOfNull;
-    }
+  enum class PersistentArrInit {};
+  Variant(ArrayData* ad, PersistentArrInit) noexcept {
+    assert(!ad->isRefCounted());
+    m_data.parr = ad;
+    m_type = KindOfPersistentArray;
+  }
+
+  // for persistent strings only
+  enum class PersistentStrInit {};
+  explicit Variant(const StringData *s, PersistentStrInit) noexcept {
+    assert(!s->isRefCounted());
+    m_data.pstr = const_cast<StringData*>(s);
+    m_type = KindOfPersistentString;
   }
 
   // These are prohibited, but declared just to prevent accidentally
@@ -253,9 +259,7 @@ struct Variant : private TypedValue {
     StringData *s = v.get();
     if (LIKELY(s != nullptr)) {
       m_data.pstr = s;
-      m_type = s->isStatic()
-        ? KindOfStaticString
-        : KindOfString;
+      m_type = s->isRefCounted() ? KindOfString : KindOfPersistentString;
       v.detach();
     } else {
       m_type = KindOfNull;
@@ -266,8 +270,8 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(Array&& v) noexcept {
     ArrayData *a = v.get();
     if (LIKELY(a != nullptr)) {
-      m_type = KindOfArray;
       m_data.parr = a;
+      m_type = a->isRefCounted() ? KindOfArray : KindOfPersistentArray;
       v.detach();
     } else {
       m_type = KindOfNull;
@@ -326,8 +330,13 @@ struct Variant : private TypedValue {
     return *this;
   }
 
-  // D462768 showed no gain from inlining, even just into mixed-array.o
-  ~Variant() noexcept;
+  ALWAYS_INLINE ~Variant() noexcept {
+    tvRefcountedDecRef(asTypedValue());
+    if (debug) {
+      memset(this, kTVTrashFill2, sizeof(*this));
+    }
+  }
+
 
   //////////////////////////////////////////////////////////////////////
 
@@ -441,7 +450,7 @@ struct Variant : private TypedValue {
   }
 
   ALWAYS_INLINE const String& toCStrRef() const {
-    assert(is(KindOfString) || is(KindOfStaticString));
+    assert(isString());
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
     return *reinterpret_cast<const String*>(LIKELY(isStringType(m_type)) ?
         &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
@@ -449,41 +458,49 @@ struct Variant : private TypedValue {
 
   ALWAYS_INLINE String& asStrRef() {
     assert(isStringType(m_type) && m_data.pstr);
+    // The caller is likely going to modify the string, so we have to eagerly
+    // promote KindOfPersistentString -> KindOfString.
+    m_type = KindOfString;
     return *reinterpret_cast<String*>(&m_data.pstr);
   }
 
   ALWAYS_INLINE String& toStrRef() {
-    assert(is(KindOfString) || is(KindOfStaticString));
+    assert(isString());
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    return *reinterpret_cast<String*>(LIKELY(isStringType(m_type)) ?
-        &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
+    // The caller is likely going to modify the string, so we have to eagerly
+    // promote KindOfPersistentString -> KindOfString.
+    auto tv = LIKELY(isStringType(m_type)) ? this : m_data.pref->tv();
+    tv->m_type = KindOfString;
+    return *reinterpret_cast<String*>(&tv->m_data.pstr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
 // array
 
   ALWAYS_INLINE const Array& asCArrRef() const {
-    assert(m_type == KindOfArray && m_data.parr);
+    assert(isArrayType(m_type) && m_data.parr);
     return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
   ALWAYS_INLINE const Array& toCArrRef() const {
-    assert(is(KindOfArray));
+    assert(isArray());
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    return *reinterpret_cast<const Array*>(LIKELY(m_type == KindOfArray) ?
+    return *reinterpret_cast<const Array*>(LIKELY(isArrayType(m_type)) ?
         &m_data.parr : &m_data.pref->tv()->m_data.parr);
   }
 
   ALWAYS_INLINE Array& asArrRef() {
-    assert(m_type == KindOfArray && m_data.parr);
+    assert(isArrayType(m_type) && m_data.parr);
+    m_type = KindOfArray;
     return *reinterpret_cast<Array*>(&m_data.parr);
   }
 
   ALWAYS_INLINE Array& toArrRef() {
-    assert(is(KindOfArray));
+    assert(isArray());
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    return *reinterpret_cast<Array*>(LIKELY(m_type == KindOfArray) ?
-        &m_data.parr : &m_data.pref->tv()->m_data.parr);
+    auto tv = LIKELY(isArrayType(m_type)) ? this : m_data.pref->tv();
+    tv->m_type = KindOfArray;
+    return *reinterpret_cast<Array*>(&tv->m_data.parr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -551,14 +568,20 @@ struct Variant : private TypedValue {
   bool isBoolean() const {
     return getType() == KindOfBoolean;
   }
+  bool isInteger() const {
+    return getType() == KindOfInt64;
+  }
   bool isDouble() const {
     return getType() == KindOfDouble;
   }
   bool isString() const {
     return isStringType(getType());
   }
-  bool isInteger() const {
-    return getType() == KindOfInt64;
+  bool isArray() const {
+    return isArrayType(getType());
+  }
+  bool isObject() const {
+    return getType() == KindOfObject;
   }
   bool isResource() const {
     return getType() == KindOfResource;
@@ -568,9 +591,6 @@ struct Variant : private TypedValue {
   DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)
     const;
   bool isScalar() const noexcept;
-  bool isObject() const {
-    return getType() == KindOfObject;
-  }
   bool isIntVal() const {
     switch (m_type) {
       case KindOfUninit:
@@ -581,8 +601,9 @@ struct Variant : private TypedValue {
       case KindOfResource:
         return true;
       case KindOfDouble:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
+      case KindOfPersistentArray:
       case KindOfArray:
         return false;
       case KindOfRef:
@@ -591,9 +612,6 @@ struct Variant : private TypedValue {
         break;
     }
     not_reached();
-  }
-  bool isArray() const {
-    return getType() == KindOfArray;
   }
   // Is "define('CONSTANT', <this value>)" legal?
   bool isAllowedAsConstantValue() const {
@@ -735,14 +753,22 @@ struct Variant : private TypedValue {
     if (m_type == KindOfDouble) return m_data.dbl;
     return toDoubleHelper();
   }
-  String toString() const {
+
+  String toString() const& {
+    if (isStringType(m_type)) return String{m_data.pstr};
+    return toStringHelper();
+  }
+
+  String toString() && {
     if (isStringType(m_type)) {
-      return String{m_data.pstr};
+      m_type = KindOfNull;
+      return String::attach(m_data.pstr);
     }
     return toStringHelper();
   }
+
   Array toArray() const {
-    if (m_type == KindOfArray) return Array(m_data.parr);
+    if (isArrayType(m_type)) return Array(m_data.parr);
     return toArrayHelper();
   }
   Object toObject() const {
@@ -785,7 +811,13 @@ struct Variant : private TypedValue {
   bool canBeValidKey() const {
     return !isArrayType(getType()) && getType() != KindOfObject;
   }
-  VarNR toKey() const;
+
+  /*
+   * Convert to a valid key or throw an exception. If convertStrKeys is true
+   * int-like string keys will be converted to int keys.
+   */
+  VarNR toKey(bool convertStrKeys) const;
+
   /* Creating a temporary Array, String, or Object with no ref-counting and
    * no type checking, use it only when we have checked the variant type and
    * we are sure the internal data will have a reference until the temporary
@@ -821,20 +853,20 @@ struct Variant : private TypedValue {
   StringData *getStringDataOrNull() const {
     // This is a necessary evil because getStringData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || is(KindOfString) || is(KindOfStaticString));
+    assert(isNull() || isString());
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.pstr) :
       (m_type <= KindOfNull ? nullptr : m_data.pstr);
   }
   ArrayData *getArrayData() const {
-    assert(is(KindOfArray));
+    assert(isArray());
     return m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr;
   }
   ArrayData *getArrayDataOrNull() const {
     // This is a necessary evil because getArrayData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || is(KindOfArray));
+    assert(isNull() || isArray());
     return m_type == KindOfRef ?
       (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
         m_data.pref->var()->m_data.parr) :
@@ -901,6 +933,12 @@ struct Variant : private TypedValue {
    * one.
    */
   Ref* asRef() { PromoteToRef(*this); return this; }
+
+  TypedValue detach() noexcept {
+    auto tv = *asTypedValue();
+    m_type = KindOfNull;
+    return tv;
+  }
 
  private:
   ResourceData* getResourceData() const {
@@ -980,7 +1018,7 @@ struct Variant : private TypedValue {
    */
   Variant(StringData* var, Attach) noexcept {
     if (var) {
-      m_type = var->isStatic() ? KindOfStaticString : KindOfString;
+      m_type = var->isRefCounted() ? KindOfString : KindOfPersistentString;
       m_data.pstr = var;
     } else {
       m_type = KindOfNull;
@@ -988,7 +1026,7 @@ struct Variant : private TypedValue {
   }
   Variant(ArrayData* var, Attach) noexcept {
     if (var) {
-      m_type = KindOfArray;
+      m_type = var->isRefCounted() ? KindOfArray : KindOfPersistentArray;
       m_data.parr = var;
     } else {
       m_type = KindOfNull;
@@ -1063,7 +1101,7 @@ struct Variant : private TypedValue {
   void set(String&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
-  void set(Resource&& v) noexcept { steal(detach<ResourceData>(std::move(v))); }
+  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
 
   template<typename T>
   void set(const req::ptr<T> &v) noexcept {
@@ -1187,6 +1225,10 @@ struct Variant : private TypedValue {
     setWithRefHelper(v, false);
   }
 
+  template<class F> void scan(F& mark) const {
+    mark(*asTypedValue());
+  }
+
 private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
@@ -1201,15 +1243,13 @@ private:
 
 Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
 
-class RefResultValue {
-public:
+struct RefResultValue {
   const Variant& get() const { return m_var; }
 private:
   Variant m_var;
 };
 
-class VRefParamValue {
-public:
+struct VRefParamValue {
   template <class T> /* implicit */ VRefParamValue(const T &v) : m_var(v) {}
 
   /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
@@ -1275,8 +1315,14 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR
 
-class VarNR : private TypedValueAux {
-public:
+struct VarNR : private TypedValueAux {
+  static VarNR MakeKey(const String& s) {
+    if (s.empty()) return VarNR(staticEmptyString());
+    int64_t n;
+    if (s.get()->isStrictlyInteger(n)) return VarNR(n);
+    return VarNR(s);
+  }
+
   // Use to hold variant that do not need ref-counting
   explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
   explicit VarNR(int     v) { init(KindOfInt64  ); m_data.num = v;}
@@ -1288,10 +1334,9 @@ public:
   explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {
-    init(KindOfStaticString);
-    StringData *s = v.get();
-    assert(s);
-    m_data.pstr = s;
+    assert(v.get() && !v.get()->isRefCounted());
+    init(KindOfPersistentString);
+    m_data.pstr = v.get();
   }
 
   explicit VarNR(const String& v);
@@ -1299,8 +1344,8 @@ public:
   explicit VarNR(const Object& v);
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
-    assert(v && v->isStatic());
-    init(KindOfStaticString);
+    assert(v && !v->isRefCounted());
+    init(KindOfPersistentString);
     m_data.pstr = const_cast<StringData*>(v);
   }
   explicit VarNR(ArrayData *v);
@@ -1346,16 +1391,16 @@ private:
       DT_UNCOUNTED_CASE:
         return;
       case KindOfString:
-        assert(check_refcount(m_data.pstr->getCount()));
+        assert(m_data.pstr->checkCount());
         return;
       case KindOfArray:
-        assert(check_refcount(m_data.parr->getCount()));
+        assert(m_data.parr->checkCount());
         return;
       case KindOfObject:
-        assert(check_refcount(m_data.pobj->getCount()));
+        assert(m_data.pobj->checkCount());
         return;
       case KindOfResource:
-        assert(check_refcount(m_data.pres->getCount()));
+        assert(m_data.pres->checkCount());
         return;
       case KindOfRef:
       case KindOfClass:
@@ -1411,7 +1456,7 @@ inline Variant &concat_assign(Variant &v1, const char* s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
-    if (str.get()->hasExactlyOneRef()) {
+    if (!str.get()->cowCheck()) {
       str += s2.slice();
       return v1;
     }
@@ -1441,7 +1486,7 @@ inline Array& forceToArray(Variant& var) {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Variant empty_string_variant() {
-  return Variant(staticEmptyString(), Variant::StaticStrInit{});
+  return Variant(staticEmptyString(), Variant::PersistentStrInit{});
 }
 
 template <typename T>
@@ -1462,6 +1507,59 @@ inline bool is_null(const Variant& v) {
 template <typename T>
 inline bool isa_non_null(const Variant& v) {
   return v.isa<T>();
+}
+
+// Defined here to avoid introducing a dependency cycle between type-variant
+// and type-array
+ALWAYS_INLINE VarNR Array::convertKey(const Variant& k) const {
+  return k.toKey(useWeakKeys());
+}
+
+inline VarNR Variant::toKey(bool convertKeys) const {
+  if (isStringType(m_type)) {
+    int64_t n;
+    if (m_data.pstr->isStrictlyInteger(n) && convertKeys) {
+      return VarNR(n);
+    }
+    return VarNR(m_data.pstr);
+  }
+  if (LIKELY(m_type == KindOfInt64)) {
+    return VarNR(m_data.num);
+  }
+  if (m_type == KindOfRef) {
+    return m_data.pref->var()->toKey(convertKeys);
+  }
+
+  if (!convertKeys) {
+    throwInvalidArrayKeyException(this);
+  }
+
+  switch (m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+    return VarNR(staticEmptyString());
+
+  case KindOfBoolean:
+    return VarNR(m_data.num);
+
+  case KindOfDouble:
+  case KindOfResource:
+    return VarNR(toInt64());
+
+  case KindOfPersistentArray:
+  case KindOfArray:
+  case KindOfObject:
+    raise_warning("Invalid operand type was used: Invalid type used as key");
+    return null_varNR;
+
+  case KindOfRef:
+  case KindOfPersistentString:
+  case KindOfString:
+  case KindOfInt64:
+  case KindOfClass:
+    break;
+  }
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

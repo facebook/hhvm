@@ -10,3 +10,25 @@ array(2) {
   ["alias"]=>
   string(6) "MyType"
 }
+array(3) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(6) "MyType"
+  ["nullable"]=>
+  bool(true)
+}
+array(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(6) "MyType"
+}
+array(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(7) "MyClass"
+}

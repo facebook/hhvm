@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@ namespace HPHP {
 struct MemoryManager;
 struct Profiler;
 struct CodeCoverage;
-struct DebugHookHandler;
+struct DebuggerHook;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -63,10 +63,9 @@ struct ThreadInfo {
   void onSessionExit();
 
   /*
-   * Setting and clearing the pending exception.
+   * Setting the pending exception.
    */
   void setPendingException(Exception*);
-  void clearPendingException();
 
   static bool valid(ThreadInfo*);
 
@@ -75,7 +74,9 @@ struct ThreadInfo {
 
   template<class F> void scan(F& mark) const {
     //if (m_profiler) m_profiler->scan(mark);
-    if (m_pendingException) m_pendingException->scan(mark);
+
+    // m_pendingException, if present, will register itself as a root, so no
+    // need to scan it here.
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -87,8 +88,8 @@ struct ThreadInfo {
 
   CodeCoverage* m_coverage{nullptr};
 
-  /* Set by DebugHookHandler::attach(). */
-  DebugHookHandler* m_debugHookHandler{nullptr};
+  /* Set by DebuggerHook::attach(). */
+  DebuggerHook* m_debuggerHook{nullptr};
 
   /* A C++ exception which will be thrown by the next surprise check. */
   Exception* m_pendingException{nullptr};

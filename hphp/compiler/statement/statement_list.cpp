@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -224,14 +224,6 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
 
   return changed ? static_pointer_cast<Statement>(shared_from_this())
                  : StatementPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void StatementList::outputCodeModel(CodeGenerator &cg) {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    m_stmts[i]->outputCodeModel(cg);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

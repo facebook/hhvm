@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/ext/apc/snapshot-loader.h"
 #include "hphp/runtime/server/server-stats.h"
 
 namespace HPHP {
@@ -217,12 +218,16 @@ struct ConcurrentTableSharedStore {
   bool clear();
 
   /*
-   * The API for priming APC.  Not yet documented.
+   * The API for priming APC.  Poorly documented.
    */
   void prime(const std::vector<KeyValuePair>& vars);
   bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
   bool constructPrime(const Variant& v, KeyValuePair& item);
   void primeDone();
+  // Returns false on failure (in particular, for the old file format).
+  bool primeFromSnapshot(const char* filename);
+  // Evict any file-backed APC values from OS page cache.
+  void adviseOut();
 
   /*
    * Debugging.  Dump information about the table to an output stream.
@@ -241,6 +246,12 @@ struct ConcurrentTableSharedStore {
    * Dump random key and entry size to output stream
    */
   void dumpRandomKeys(std::ostream& out, uint32_t count);
+
+  /*
+   * Return 'count' randomly chosen entries, possibly with duplicates. If the
+   * store is empty or this operation is not supported, returns an empty vector.
+   */
+  std::vector<EntryInfo> sampleEntriesInfo(uint32_t count);
 
   /*
    * Debugging.  Access information about all the entries in this table.
@@ -288,9 +299,10 @@ private:
 
 private:
   template<typename Key, typename T, typename HashCompare>
-  class APCMap : public tbb::concurrent_hash_map<Key,T,HashCompare> {
-  public:
-    void dumpRandomAPCEntry(std::ostream& out);
+  struct APCMap : tbb::concurrent_hash_map<Key,T,HashCompare> {
+    // Append a random entry to 'entries'. The map must be non-empty and not
+    // concurrently accessed. Returns false if this operation is not supported.
+    bool getRandomAPCEntry(std::vector<EntryInfo>& entries);
   };
 
   using Map = APCMap<const char*,StoreValue,CharHashCompare>;
@@ -351,6 +363,8 @@ private:
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
   std::atomic<uint64_t> m_purgeCounter{0};
+
+  std::unique_ptr<SnapshotLoader> m_snapshotLoader;
 };
 
 //////////////////////////////////////////////////////////////////////

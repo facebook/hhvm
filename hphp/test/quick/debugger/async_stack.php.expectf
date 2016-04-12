@@ -1,37 +1,37 @@
-Program %s/async_stack.php loaded. Type '[r]un' or '[c]ontinue' to go.
-break async_stack.php:8
-Breakpoint 1 set on line 8 of async_stack.php
-But wont break until file async_stack.php has been loaded.
-break async_stack.php:9
-Breakpoint 2 set on line 9 of async_stack.php
-But wont break until file async_stack.php has been loaded.
-break async_stack.php:15
-Breakpoint 3 set on line 15 of async_stack.php
-But wont break until file async_stack.php has been loaded.
-break async_stack.php:24
-Breakpoint 4 set on line 24 of async_stack.php
-But wont break until file async_stack.php has been loaded.
-break async_stack.php:31
-Breakpoint 5 set on line 31 of async_stack.php
-But wont break until file async_stack.php has been loaded.
-break async_stack.php:39
-Breakpoint 6 set on line 39 of async_stack.php
-But wont break until file async_stack.php has been loaded.
+Program %s.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break async_stack.php:%d
+Breakpoint 1 set on line %d of async_stack.php
+But won't break until file async_stack.php has been loaded.
+break async_stack.php:%d
+Breakpoint 2 set on line %d of async_stack.php
+But won't break until file async_stack.php has been loaded.
+break async_stack.php:%d
+Breakpoint 3 set on line %d of async_stack.php
+But won't break until file async_stack.php has been loaded.
+break async_stack.php:%d
+Breakpoint 4 set on line %d of async_stack.php
+But won't break until file async_stack.php has been loaded.
+break async_stack.php:%d
+Breakpoint 5 set on line %d of async_stack.php
+But won't break until file async_stack.php has been loaded.
+break async_stack.php:%d
+Breakpoint 6 set on line %d of async_stack.php
+But won't break until file async_stack.php has been loaded.
 continue
 In genFoo
 int(42)
-Breakpoint 5 reached at genFoo() on line 31 of %s/async_stack.php
-  30   var_dump($a);
-  31*  $a++;
-  32   list($x, $y) = await GenArrayWaitHandle::Create(
+Breakpoint 5 reached at genFoo() on line %d of %s/async_stack.php
+  %d   var_dump($a);
+  %d*  $a++;
+  %d   list($x, $y) = await genList(
 
 w
 #0   ()
-    at %s/async_stack.php:31
+    at %s/async_stack.php:%d
 #1  genFoo (42)
-    at %s/async_stack.php:46
+    at %s/async_stack.php:%d
 #2  main (42)
-    at %s/async_stack.php:50
+    at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
 switching stack contexts (sync->async) resetting stack state
@@ -42,151 +42,171 @@ int(43)
 In genBar
 int(44)
 In gen2
-Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
-  23   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
-  24*  error_log('Finished in genBar');
-  25   return $a + 2;
+Breakpoint 4 reached at genBar() on line %d of %s/async_stack.php
+  %d   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
+  %d*  error_log('Finished in genBar');
+  %d   return $a + 2;
 
 w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
-    at %s/async_stack.php:24
+    at %s/async_stack.php:%d
 #1  genBar (43)
-    at %s/async_stack.php:38
-#2  genFoo (43)
-#3  HH\WaitHandle::join ()
-#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
-    at %s/async_stack.php:46
-#5  main (42)
-    at %s/async_stack.php:50
+    at %s/async_stack.php:%d
+#2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#3  genFoo (43)
+#4  HH\WaitHandle::join ()
+#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#6  main (42)
+    at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
 switching stack contexts (sync->async) resetting stack state
 #0  genBar [%d]
-#1  <gen-array> [%d]
-#2  genFoo [%d]
-    at %s/async_stack.php:38
-#3  <<join>>
+#1  <await-all> [%d]
+#2  genList [%d]
+    at %s/async_stack.php:%d
+#3  genFoo [%d]
+    at %s/async_stack.php:%d
+#4  <<join>>
 c
 Finished in genBar
-Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
-  23   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
-  24*  error_log('Finished in genBar');
-  25   return $a + 2;
+Breakpoint 4 reached at genBar() on line 29 of %s/async_stack.php
+  %d   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
+  %d*  error_log('Finished in genBar');
+  %d   return $a + 2;
 
 w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
-    at %s/async_stack.php:24
+    at %s/async_stack.php:%d
 #1  genBar (44)
-    at %s/async_stack.php:38
-#2  genFoo (43)
-#3  HH\WaitHandle::join ()
-#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
-    at %s/async_stack.php:46
-#5  main (42)
-    at %s/async_stack.php:50
+    at %s/async_stack.php:%d
+#2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#3  genFoo (43)
+#4  HH\WaitHandle::join ()
+#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#6  main (42)
+    at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
 switching stack contexts (sync->async) resetting stack state
 #0  genBar [%d]
-#1  <gen-array> [%d]
-#2  genFoo [%d]
-    at %s/async_stack.php:38
-#3  <<join>>
+#1  <await-all> [%d]
+#2  genList [%d]
+    at %s/async_stack.php:%d
+#3  genFoo [%d]
+    at %s/async_stack.php:%d
+#4  <<join>>
 c
 Finished in genBar
-Breakpoint 3 reached at gen2() on line 15 of %s/async_stack.php
-  14   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
-  15*  $x = HH\Asio\join(gen1($a));
-  16   error_log('Finished in gen2');
+Breakpoint 3 reached at gen2() on line 20 of %s/async_stack.php
+  %d   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
+  %d*  $x = HH\Asio\join(gen1($a));
+  %d   error_log('Finished in gen2');
 
 w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
-    at %s/async_stack.php:15
+    at %s/async_stack.php:%d
 #1  gen2 (45)
-    at %s/async_stack.php:38
-#2  genFoo (43)
-#3  HH\WaitHandle::join ()
-#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
-    at %s/async_stack.php:46
-#5  main (42)
-    at %s/async_stack.php:50
+    at %s/async_stack.php:%d
+#2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#3  genFoo (43)
+#4  HH\WaitHandle::join ()
+#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#6  main (42)
+    at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
 switching stack contexts (sync->async) resetting stack state
 #0  gen2 [%d]
-#1  <gen-array> [%d]
-#2  genFoo [%d]
-    at %s/async_stack.php:38
-#3  <<join>>
+#1  <await-all> [%d]
+#2  genList [%d]
+    at %s/async_stack.php:%d
+#3  genFoo [%d]
+    at %s/async_stack.php:%d
+#4  <<join>>
 c
 In gen1
 Finished in gen1
-Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
-   7   error_log('Finished in gen1');
-   8*  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
-   9   return $a + 1;
+Breakpoint 1 reached at gen1() on line 13 of %s/async_stack.php
+  %d   error_log('Finished in gen1');
+  %d*  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
+  %d   return $a + 1;
 
 w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
-    at %s/async_stack.php:8
+    at %s/async_stack.php:%d
 #1  gen1 (45)
-    at %s/async_stack.php:15
+    at %s/async_stack.php:%d
 #2  gen2 (45)
-    at %s/async_stack.php:38
-#3  genFoo (43)
-#4  HH\WaitHandle::join ()
-#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
-    at %s/async_stack.php:46
-#6  main (42)
-    at %s/async_stack.php:50
+    at %s/async_stack.php:%d
+#3  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#4  genFoo (43)
+#5  HH\WaitHandle::join ()
+#6  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#7  main (42)
+    at %s/async_stack.php:%d
 w a
 Fetching async stacktrace...
 switching stack contexts (sync->async) resetting stack state
 #0  gen2 [%d]
-#1  <gen-array> [%d]
-#2  genFoo [%d]
-    at %s/async_stack.php:38
-#3  <<join>>
+#1  <await-all> [%d]
+#2  genList [%d]
+    at %s/async_stack.php:%d
+#3  genFoo [%d]
+    at %s/async_stack.php:%d
+#4  <<join>>
 c
-Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
-   7   error_log('Finished in gen1');
-   8*  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
-   9   return $a + 1;
+Breakpoint 1 reached at gen1() on line 13 of %s/async_stack.php
+  %d   error_log('Finished in gen1');
+  %d*  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
+  %d   return $a + 1;
 
 w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
-    at %s/async_stack.php:8
+    at %s/async_stack.php:%d
 #1  gen1 (45)
 #2  HH\WaitHandle::join ()
 #3  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
-    at %s/async_stack.php:15
+    at %s/async_stack.php:%d
 #4  gen2 (45)
-    at %s/async_stack.php:38
-#5  genFoo (43)
-#6  HH\WaitHandle::join ()
-#7  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
-    at %s/async_stack.php:46
-#8  main (42)
-    at %s/async_stack.php:50
+    at %s/async_stack.php:%d
+#5  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#6  genFoo (43)
+#7  HH\WaitHandle::join ()
+#8  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack.php:%d
+#9  main (42)
+    at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
 switching stack contexts (sync->async) resetting stack state
 #0  gen1 [%d]
 #1  <<join>>
 #2  gen2 [%d]
-#3  <gen-array> [%d]
-#4  genFoo [%d]
-    at %s/async_stack.php:38
-#5  <<join>>
+#3  <await-all> [%d]
+#4  genList [%d]
+    at %s/async_stack.php:%d
+#5  genFoo [%d]
+    at %s/async_stack.php:%d
+#6  <<join>>
 c
-Breakpoint 2 reached at gen1() on line 9 of %s/async_stack.php
-   8   await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
-   9*  return $a + 1;
-  10 }
+Breakpoint 2 reached at gen1() on line 14 of %s/async_stack.php
+  %d   await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
+  %d*  return $a + 1;
+  %d }
 
 quit

@@ -1,6 +1,6 @@
-File "DynamicYield2.php", line 27, characters 19-31:
+File "DynamicYield2.php", line 26, characters 19-31:
 Could not find method getSomeString in an object of type Bar (Typing[4053])
-File "DynamicYield2.php", line 27, characters 12-16:
+File "DynamicYield2.php", line 26, characters 12-16:
 This is why I think it is an object of type Bar
-File "DynamicYield2.php", line 25, characters 7-9:
+File "DynamicYield2.php", line 24, characters 7-9:
 Declaration of Bar is here

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -38,11 +38,14 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/iterators.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
+size_t asio_object_size(const ObjectData*);
 
 namespace {
 
@@ -51,6 +54,8 @@ TRACE_SET_MOD(objprof);
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
+  s_cpp_stack("cpp_stack"),
+  s_cpp_stack_peak("cpp_stack_peak"),
   s_dups("dups"),
   s_refs("refs"),
   s_srefs("srefs"),
@@ -171,7 +176,7 @@ std::pair<int, double> sizeOfArray(
       const TypedValue* val;
       std::pair<int, double> key_size_pair;
       switch (key.m_type) {
-        case HPHP::KindOfString: {
+        case KindOfString: {
           StringData* str = key.m_data.pstr;
           val = MixedArray::NvGetStr(props, str);
           if (stack) {
@@ -187,7 +192,7 @@ std::pair<int, double> sizeOfArray(
           str->decRefCount();
           break;
         }
-        case HPHP::KindOfInt64: {
+        case KindOfInt64: {
           int64_t num = key.m_data.num;
           val = MixedArray::NvGetInt(props, num);
           if (stack) {
@@ -260,7 +265,7 @@ void stringsOfArray(
       // Measure val
       const TypedValue* val;
       switch (key.m_type) {
-        case HPHP::KindOfString: {
+        case KindOfString: {
           StringData* str = key.m_data.pstr;
           val = MixedArray::NvGetStr(props, str);
           auto key_str = str->toCppString();
@@ -269,7 +274,7 @@ void stringsOfArray(
           path->push_back(std::string("[\"" + key_str + "\"]"));
           break;
         }
-        case HPHP::KindOfInt64: {
+        case KindOfInt64: {
           int64_t num = key.m_data.num;
           val = MixedArray::NvGetInt(props, num);
           auto key_str = std::to_string(num);
@@ -329,15 +334,16 @@ std::pair<int, double> tvGetSize(
   double sized = size;
 
   switch (tv->m_type) {
-    case HPHP::KindOfUninit:
-    case HPHP::KindOfNull:
-    case HPHP::KindOfBoolean:
-    case HPHP::KindOfInt64:
-    case HPHP::KindOfDouble: {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfClass: {
       // Counted as part sizeof(TypedValue)
       break;
     }
-    case HPHP::KindOfObject: {
+    case KindOfObject: {
       if (stack && paths) {
         ObjectData* obj = tv->m_data.pobj;
         // notice we might have multiple OBJ->path->OBJ for same path
@@ -364,26 +370,37 @@ std::pair<int, double> tvGetSize(
       // This is a shallow size function, not a recursive one
       break;
     }
-    case HPHP::KindOfArray: {
+    case KindOfPersistentArray:
+    case KindOfArray: {
       ArrayData* arr = tv->m_data.parr;
-      auto arr_ref_count = arr->getCount() + ref_adjust;
-      FTRACE(3, " ArrayData tv: at {} that with ref count {} after adjust {}\n",
-        (void*)arr,
-        arr_ref_count,
-        ref_adjust
-      );
-      auto size_of_array_pair = sizeOfArray(arr, source, stack, paths);
-      size += sizeof(*arr);
-      size += size_of_array_pair.first;
-      if (arr_ref_count > 0) {
-        sized += sizeof(*arr) / (double)arr_ref_count;
-        sized += size_of_array_pair.second / (double)(arr_ref_count);
+      if (arr->isRefCounted()) {
+        auto arr_ref_count = tvGetCount(tv) + ref_adjust;
+        FTRACE(3, " ArrayData tv: at {} with ref count {} after adjust {}\n",
+          (void*)arr,
+          arr_ref_count,
+          ref_adjust
+        );
+        auto size_of_array_pair = sizeOfArray(arr, source, stack, paths);
+        size += sizeof(*arr);
+        size += size_of_array_pair.first;
+        if (arr_ref_count > 0) {
+          sized += sizeof(*arr) / (double)arr_ref_count;
+          sized += size_of_array_pair.second / (double)(arr_ref_count);
+        }
+      } else {
+        // static or uncounted array
+        FTRACE(3, " ArrayData tv: at {} not refcounted, after adjust {}\n",
+          (void*)arr, ref_adjust
+        );
+        auto size_of_array_pair = sizeOfArray(arr, source, stack, paths);
+        size += sizeof(*arr);
+        size += size_of_array_pair.first;
       }
       break;
     }
-    case HPHP::KindOfResource: {
+    case KindOfResource: {
+      auto res_ref_count = tvGetCount(tv) + ref_adjust;
       auto resource = tv->m_data.pres;
-      auto res_ref_count = resource->getCount() + ref_adjust;
       auto resource_size = resource->heapSize();
       size += resource_size;
       if (res_ref_count > 0) {
@@ -391,7 +408,7 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    case HPHP::KindOfRef: {
+    case KindOfRef: {
       RefData* ref = tv->m_data.pref;
       size += sizeof(*ref);
       sized += sizeof(*ref);
@@ -413,26 +430,27 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    case HPHP::KindOfStaticString:
-    case HPHP::KindOfString: {
+    case KindOfPersistentString:
+    case KindOfString: {
       StringData* str = tv->m_data.pstr;
       size += str->size();
-      auto str_ref_count = str->getCount() + ref_adjust;
-      FTRACE(3, " String tv: {} string at {} ref count: {} after adjust {}\n",
-        str->data(),
-        (void*)str,
-        str_ref_count,
-        ref_adjust
-      );
-
-      if (str_ref_count > 0) {
+      if (str->isRefCounted()) {
+        auto str_ref_count = tvGetCount(tv) + ref_adjust;
+        FTRACE(3, " String tv: {} string at {} ref count: {} after adjust {}\n",
+          str->data(),
+          (void*)str,
+          str_ref_count,
+          ref_adjust
+        );
         sized += (str->size() / (double)(str_ref_count));
+      } else {
+        // static or uncounted string
+        FTRACE(3, " String tv: {} string at {} uncounted, after adjust {}\n",
+          str->data(), (void*)str, ref_adjust
+        );
       }
       break;
     }
-    default:
-      // Not interesting
-      break;
   }
 
   return std::make_pair(size, sized);
@@ -469,7 +487,7 @@ void tvGetStrings(
       tvGetStrings((TypedValue*)cell, metrics, path, pointers);
       break;
     }
-    case HPHP::KindOfStaticString:
+    case HPHP::KindOfPersistentString:
     case HPHP::KindOfString: {
       StringData* str = tv->m_data.pstr;
 
@@ -491,7 +509,7 @@ void tvGetStrings(
         pointers->insert(str);
         str_agg.dups++;
       }
-      if (str->getCount() < 0) {
+      if (!str->isRefCounted()) {
         str_agg.srefs++;
       }
 
@@ -521,17 +539,17 @@ bool supportsToArray(ObjectData* obj) {
     assertx(isValidCollection(obj->collectionType()));
     return true;
   } else if (UNLIKELY(obj->getAttribute(ObjectData::CallToImpl))) {
-    return obj->instanceof(c_SimpleXMLElement::classof());
+    return obj->instanceof(SimpleXMLElement_classof());
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayObjectClass))) {
     return true;
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
     return true;
-  } else if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
+  } else if (UNLIKELY(obj->instanceof(c_Closure::classof()))) {
     return true;
   } else if (UNLIKELY(obj->instanceof(DateTimeData::getClass()))) {
     return true;
   } else {
-    if (LIKELY(!obj->getAttribute(ObjectData::InstanceDtor))) {
+    if (LIKELY(!obj->hasInstanceDtor())) {
       return true;
     }
 
@@ -550,7 +568,13 @@ std::pair<int, double> getObjSize(
     obj->getClassName().data(),
     obj
   );
-  int size = getClassSize(cls);
+  int size;
+  if (UNLIKELY(obj->getAttribute(ObjectData::IsWaitHandle))) {
+    size = asio_object_size(obj);
+  } else {
+    size = getClassSize(cls);
+  }
+
   double sized = size;
   if (stack) stack->push_back(
     std::string("Object:" + cls->name()->toCppString())
@@ -795,22 +819,22 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
       assert(stack.size() == 0);
   });
 
-  for (auto cls = all_classes().begin(); cls != all_classes().end(); ++cls) {
+  NamedEntity::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
-      continue;
+      return;
     }
-    auto staticProps = cls->staticProperties();
-    const size_t nSProps = cls->numStaticProperties();
+    auto const staticProps = cls->staticProperties();
+    auto const nSProps = cls->numStaticProperties();
     for (Slot i = 0; i < nSProps; ++i) {
-      auto prop = staticProps[i];
-      TypedValue* tv = cls->getSPropData(i);
+      auto const& prop = staticProps[i];
+      auto tv = cls->getSPropData(i);
       if (tv == nullptr) {
         continue;
       }
 
       FTRACE(2, "Traversing static prop {}::{}\n",
         cls->name()->data(),
-        StrNR(prop.m_name).data()
+        StrNR(prop.name).data()
       );
 
       ObjprofStack stack;
@@ -819,11 +843,11 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
       auto refname = std::string(
         "ClassProperty:" +
         cls->name()->toCppString() + ":" +
-        StrNR(prop.m_name).data()
+        StrNR(prop.name).data()
       );
 
       if (tv->m_data.num == 0) {
-          continue;
+        continue;
       }
 
       stack.push_back(refname);
@@ -844,7 +868,7 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
       }
       assert(stack.size() == 0);
     }
-  }
+  });
 
   // Create response
   ArrayInit objs(histogram.size(), ArrayInit::Map{});
@@ -876,16 +900,87 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t get_thread_stack_size() {
+  auto sp = stack_top_ptr();
+  return s_stackLimit + s_stackSize - uintptr_t(sp);
 }
 
-class objprofExtension final : public Extension {
-public:
+size_t get_thread_stack_peak_size() {
+  size_t consecutive = 0;
+  size_t total = 0;
+  uint8_t marker = 0x00;
+  uint8_t* cursor = &marker;
+  uintptr_t cursor_p = uintptr_t(&marker);
+  for (;cursor_p > s_stackLimit; cursor_p--, cursor--) {
+    total++;
+    if (*cursor == 0x00) {
+      if (++consecutive == s_pageSize) {
+        return get_thread_stack_size() + total - consecutive;
+      }
+    } else {
+      consecutive = 0;
+    }
+  }
+
+  return s_stackSize;
+}
+
+void HHVM_FUNCTION(thread_mark_stack, void) {
+  size_t consecutive = 0;
+  uint8_t marker = 0x00;
+  uint8_t* cursor = &marker;
+  uintptr_t cursor_p = uintptr_t(&marker);
+  for (;cursor_p > s_stackLimit; cursor_p--, cursor--) {
+    if (*cursor == 0x00) {
+      if (++consecutive == s_pageSize) {
+        return;
+      }
+    } else {
+      consecutive = 0;
+      *cursor = 0x00;
+    }
+  }
+}
+
+Array HHVM_FUNCTION(thread_memory_stats, void) {
+  auto stack_size = get_thread_stack_size();
+  auto stack_size_peak = get_thread_stack_peak_size();
+
+  auto stats = make_map_array(
+      s_cpp_stack, Variant(stack_size),
+      s_cpp_stack_peak, Variant(stack_size_peak)
+  );
+
+  return stats;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void HHVM_FUNCTION(set_mem_threshold_callback,
+  int64_t threshold,
+  const Variant& callback
+) {
+  // In a similar way to fb_setprofile storing in m_setprofileCallback
+  g_context->m_memThresholdCallback = callback;
+
+  // Notify MM that surprise flag should be set upon reaching the threshold
+  MM().setMemThresholdCallback(threshold);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+struct objprofExtension final : Extension {
   objprofExtension() : Extension("objprof", "1.0") { }
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
     HHVM_FALIAS(HH\\objprof_get_strings, objprof_get_strings);
     HHVM_FALIAS(HH\\objprof_get_paths, objprof_get_paths);
+    HHVM_FALIAS(HH\\thread_memory_stats, thread_memory_stats);
+    HHVM_FALIAS(HH\\thread_mark_stack, thread_mark_stack);
+    HHVM_FALIAS(HH\\set_mem_threshold_callback, set_mem_threshold_callback);
     loadSystemlib();
   }
 } s_objprof_extension;

@@ -52,7 +52,8 @@ start:          IsTypeL $arr Arr
                 FCall 1
                 UnboxR
                 JmpZ next_val
-                SetWithRefLM <L:$res EL:$k> $v
+                BaseL $res DefineReffy
+                SetWithRefLML $k $v
     next_val:   WIterNextK 1 loop_val $v $k
                 Jmp endloop_a
 
@@ -62,7 +63,8 @@ start:          IsTypeL $arr Arr
                 FCall 2
                 UnboxR
                 JmpZ next_both
-                SetWithRefLM <L:$res EL:$k> $v
+                BaseL $res DefineReffy
+                SetWithRefLML $k $v
     next_both:  WIterNextK 1 loop_both $v $k
                 Jmp endloop_a
 
@@ -71,7 +73,8 @@ start:          IsTypeL $arr Arr
                 FCall 1
                 UnboxR
                 JmpZ next_key
-                SetWithRefLM <L:$res EL:$k> $v
+                BaseL $res DefineReffy
+                SetWithRefLML $k $v
     next_key:   WIterNextK 1 loop_key $v $k
   }
 }
@@ -87,7 +90,8 @@ no_func:  NewLikeArrayL $arr 0
 .try_fault kill_iter_1_only 1 {
 loop_n:   CGetL $v
           JmpZ skip_n
-          SetWithRefLM <L:$res EL:$k> $v
+          BaseL $res DefineReffy
+          SetWithRefLML $k $v
 skip_n:   WIterNextK 1 loop_n $v $k
 }
           Jmp endloop_n
@@ -122,7 +126,8 @@ start_kt:         IssetL $func
                   UnboxR
                   JmpZ next_val_kt
                   CGetL $v
-                  SetM <L:$res EL:$k>
+                  BaseL $res Define
+                  SetM 0 EL:$k
                   PopC
     next_val_kt:  IterNextK 1 loop_val_kt $v $k
                   Jmp endloop_a_kt
@@ -134,7 +139,8 @@ start_kt:         IssetL $func
                   UnboxR
                   JmpZ next_both_kt
                   CGetL $v
-                  SetM <L:$res EL:$k>
+                  BaseL $res Define
+                  SetM 0 EL:$k
                   PopC
     next_both_kt: IterNextK 1 loop_both_kt $v $k
                   Jmp endloop_a_kt
@@ -145,7 +151,8 @@ start_kt:         IssetL $func
                   UnboxR
                   JmpZ next_key_kt
                   CGetL $v
-                  SetM <L:$res EL:$k>
+                  BaseL $res Define
+                  SetM 0 EL:$k
                   PopC
     next_key_kt:  IterNextK 1 loop_key_kt $v $k
   }
@@ -163,7 +170,8 @@ no_func_kt:  NewLikeArrayL $arr 0
 loop_n_kt:   CGetL $v
              JmpZ skip_n_kt
              CGetL $v
-             SetM <L:$res EL:$k>
+             BaseL $res Define
+             SetM 0 EL:$k
              PopC
 skip_n_kt:   IterNextK 1 loop_n_kt $v $k
 }

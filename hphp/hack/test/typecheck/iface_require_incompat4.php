@@ -1,6 +1,8 @@
 <?hh
 
-class Super<T> {}
+class Super<T> {
+  public ?T $x;
+}
 
 interface I1 {
   require extends Super<int>;

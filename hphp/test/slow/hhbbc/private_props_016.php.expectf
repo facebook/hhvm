@@ -1,5 +1,5 @@
 
-Warning: Creating default object from empty value in %s/test/slow/hhbbc/private_props_016.php on line 8
+Warning: Creating default object from empty value in %s/test/slow/hhbbc/private_props_016.php on line %d
 object(stdClass)#2 (1) {
   ["prop"]=>
   int(2)

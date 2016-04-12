@@ -37,65 +37,65 @@ object(HH\Set)#1 (4) {
   int(4)
 }
 ----
-object(HH\Set)#1 (4) {
+object(HH\Set)#3 (4) {
   int(3)
   int(4)
   int(1)
   int(2)
 }
-object(HH\Set)#1 (4) {
+object(HH\Set)#3 (4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
 ----
-object(HH\Set)#1 (4) {
+object(HH\Set)#5 (4) {
   string(1) "b"
   string(1) "a"
   string(1) "d"
   string(1) "c"
 }
-object(HH\Set)#1 (4) {
-  string(1) "a"
-  string(1) "b"
-  string(1) "c"
-  string(1) "d"
-}
-----
-object(HH\Set)#1 (4) {
-  string(1) "b"
-  string(1) "a"
-  string(1) "d"
-  string(1) "c"
-}
-object(HH\Set)#1 (4) {
+object(HH\Set)#5 (4) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
   string(1) "d"
 }
 ----
-object(HH\Set)#1 (4) {
+object(HH\Set)#5 (4) {
   string(1) "b"
   string(1) "a"
   string(1) "d"
   string(1) "c"
 }
-object(HH\Set)#1 (4) {
+object(HH\Set)#5 (4) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
   string(1) "d"
 }
 ----
-object(HH\Set)#1 (4) {
+object(HH\Set)#5 (4) {
   string(1) "b"
   string(1) "a"
   string(1) "d"
   string(1) "c"
 }
-object(HH\Set)#1 (4) {
+object(HH\Set)#5 (4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+}
+----
+object(HH\Set)#7 (4) {
+  string(1) "b"
+  string(1) "a"
+  string(1) "d"
+  string(1) "c"
+}
+object(HH\Set)#7 (4) {
   string(1) "a"
   string(1) "b"
   string(1) "c"

@@ -1,7 +1,7 @@
 Program %s/printThis-ob.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break printThis-ob.php:7
 Breakpoint 1 set on line 7 of printThis-ob.php
-But wont break until file printThis-ob.php has been loaded.
+But won't break until file printThis-ob.php has been loaded.
 run
 ob: I am going to see if this ob: chunking works well
 Breakpoint 1 reached at Foo::method() on line 7 of %s/printThis-ob.php

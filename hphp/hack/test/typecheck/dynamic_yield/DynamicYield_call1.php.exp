@@ -1,6 +1,6 @@
-File "DynamicYield_call1.php", line 22, characters 23-28:
+File "DynamicYield_call1.php", line 21, characters 23-28:
 Could not find method getBar in an object of type Foo (Typing[4053])
-File "DynamicYield_call1.php", line 22, characters 10-20:
+File "DynamicYield_call1.php", line 21, characters 10-20:
 This is why I think it is an object of type Foo
-File "DynamicYield_call1.php", line 17, characters 7-9:
+File "DynamicYield_call1.php", line 16, characters 7-9:
 Declaration of Foo is here

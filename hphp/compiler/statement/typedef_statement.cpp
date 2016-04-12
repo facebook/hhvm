@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,16 +24,18 @@ namespace HPHP {
 TypedefStatement::TypedefStatement(
     STATEMENT_CONSTRUCTOR_PARAMETERS,
     const std::string& name,
+    const ExpressionListPtr& attrList,
     const TypeAnnotationPtr& annot)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(TypedefStatement))
   , name(name)
+  , attrList(attrList)
   , annot(annot)
 {}
 
 TypedefStatement::~TypedefStatement() {}
 
 StatementPtr TypedefStatement::clone() {
-  return StatementPtr(new TypedefStatement(*this));
+  return std::make_shared<TypedefStatement>(*this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -53,17 +55,6 @@ void TypedefStatement::setNthKid(int n, ConstructPtr cp) {
 //////////////////////////////////////////////////////////////////////
 
 void TypedefStatement::analyzeProgram(AnalysisResultPtr) {}
-
-void TypedefStatement::outputCodeModel(CodeGenerator& cg) {
-  cg.printObjectHeader("TypedefStatement", 3);
-  cg.printPropertyHeader("name");
-  cg.printValue(name);
-  cg.printPropertyHeader("typeAnnotation");
-  annot->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
 
 void TypedefStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
 }

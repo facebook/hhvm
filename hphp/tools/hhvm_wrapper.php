@@ -22,6 +22,7 @@ function my_option_map(): OptionInfoMap {
 'compile'         => Pair { 'c', 'Compile with hphpc; run RepoAuthoritative' },
 'create-repo'     => Pair { 'C', 'Compile unoptimized repo named hhvm.hhbc' },
 'repo:'           => Pair { 'R', 'Use an already-compiled repo' },
+'php7'            => Pair { '7', 'Enable PHP7 mode' },
 'jit-gdb'         => Pair { '',  'Enable JIT symbols in GDB' },
 'print-command'   => Pair { '',  'Just print the command, don\'t run it' },
 'region-mode:'    => Pair { '',
@@ -106,7 +107,6 @@ function determine_flags(OptionMap $opts): string {
   if ($opts->containsKey('region-mode')) {
     if ($opts['region-mode'] == 'method') {
       $flags .=
-        '-v Eval.JitLoops=1 '.
         '-v Eval.JitPGO=0 '.
         '';
       if (!$opts->containsKey('compile')) {
@@ -117,7 +117,6 @@ function determine_flags(OptionMap $opts): string {
     if ($opts['region-mode'] == 'wholecfg') {
       $flags .=
         '-v Eval.JitPGORegionSelector='.((string)$opts['region-mode']).' '.
-        '-v Eval.JitLoops=1 '.
         '';
     } else {
       $flags .=
@@ -130,6 +129,7 @@ function determine_flags(OptionMap $opts): string {
     'dump-hhbc'       => '-v Eval.DumpBytecode=1 ',
     'dump-hhas'       => '-v Eval.DumpHhas=true ',
     'dump-tc'         => '-v Eval.DumpTC=1 ',
+    'php7'            => '-d hhvm.php7.all=1 ',
     'opt-ir'          => '-v Eval.HHIRGenerateAsserts=0 ',
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
@@ -202,13 +202,16 @@ function argv_for_shell(): string {
 function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   $echo_command = $opts->containsKey('print-command');
   echo "Compiling with hphp...";
-
+  $runtime_flags = determine_flags($opts);
+  $hphpc_flags = preg_replace("/-v\s*/", "-vRuntime.", $runtime_flags);
   $hphp_out='/tmp/hphp_out'.posix_getpid();
   $cmd = get_paths($opts)['hphp'].' '.
     '-v EnableHipHopSyntax=1 '.
     '-v EnableHipHopExperimentalSyntax=1 '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
+    ($opts->containsKey('php7') ? '-d hhvm.php7.all=1 ' : '').
     '-t hhbc -k1 -l3 '.
+    $hphpc_flags.
     argv_for_shell().
     " >$hphp_out 2>&1";
   if ($echo_command) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -21,8 +21,11 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/overflow.h"
-#include <math.h>
+#include <cmath>
+
+#ifndef _MSC_VER
 #include <monetary.h>
+#endif
 
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -32,70 +35,13 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
-#ifdef __APPLE__
-#ifndef isnan
-#define isnan(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
-  : __inline_isnan ((long double)(x)))
-#endif
-
-#ifndef isinf
-#define isinf(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
-  : __inline_isinf ((long double)(x)))
-#endif
-#endif
-
+#include <folly/portability/String.h>
 
 #define PHP_QPRINT_MAXL 75
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
-
-bool string_substr_check(int len, int &f, int &l) {
-  if (l < 0 && -l > len) {
-    return false;
-  } else if (l > len) {
-    l = len;
-  }
-
-  if (f > len) {
-    return false;
-  } else if (f < 0 && -f > len) {
-    f = 0;
-  }
-
-  if (l < 0 && (l + len - f) < 0) {
-    return false;
-  }
-
-  // if "from" position is negative, count start position from the end
-  if (f < 0) {
-    f += len;
-    if (f < 0) {
-      f = 0;
-    }
-  }
-  if (f >= len) {
-    return false;
-  }
-
-  // if "length" position is negative, set it to the length
-  // needed to stop that many chars from the end of the string
-  if (l < 0) {
-    l += len - f;
-    if (l < 0) {
-      l = 0;
-    }
-  }
-  if ((unsigned int)f + (unsigned int)l > (unsigned int)len) {
-    l = len - f;
-  }
-  return true;
-}
 
 void string_charmask(const char *sinput, int len, char *mask) {
   const unsigned char *input = (unsigned char *)sinput;
@@ -678,7 +624,8 @@ static int string_tag_find(const char *tag, int len, const char *set) {
     return 0;
   }
 
-  norm = (char *)req::malloc(len+1);
+  norm = (char *)req::malloc_noptrs(len+1);
+  SCOPE_EXIT { req::free(norm); };
 
   n = norm;
   t = tag;
@@ -719,7 +666,6 @@ static int string_tag_find(const char *tag, int len, const char *set) {
   } else {
     done=0;
   }
-  req::free(norm);
   return done;
 }
 
@@ -774,7 +720,7 @@ String string_strip_tags(const char *s, const int len,
     allowString.setSize(allow_len);
     abuf = allowString.data();
 
-    tbuf = (char *)req::malloc(PHP_TAG_BUF_SIZE+1);
+    tbuf = (char *)req::malloc_noptrs(PHP_TAG_BUF_SIZE+1);
     tp = tbuf;
   } else {
     abuf = nullptr;
@@ -784,7 +730,8 @@ String string_strip_tags(const char *s, const int len,
   auto move = [&pos, &tbuf, &tp]() {
     if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
       pos = tp - tbuf;
-      tbuf = (char*)req::realloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+      tbuf = (char*)req::realloc_noptrs(tbuf,
+                                        (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
       tp = tbuf + pos;
     }
   };
@@ -1558,20 +1505,44 @@ String string_escape_shell_arg(const char *str) {
   String ret(safe_address(l, 4, 3), ReserveString); /* worst case */
   cmd = ret.mutableData();
 
+#ifdef _MSC_VER
+  cmd[y++] = '"';
+#else
   cmd[y++] = '\'';
+#endif
 
   for (x = 0; x < l; x++) {
     switch (str[x]) {
+#ifdef _MSC_VER
+    case '"':
+    case '%':
+    case '!':
+      cmd[y++] = ' ';
+      break;
+#else
     case '\'':
       cmd[y++] = '\'';
       cmd[y++] = '\\';
       cmd[y++] = '\'';
+#endif
       /* fall-through */
     default:
       cmd[y++] = str[x];
     }
   }
+#ifdef _MSC_VER
+  if (y > 0 && '\\' == cmd[y - 1]) {
+    int k = 0, n = y - 1;
+    for (; n >= 0 && '\\' == cmd[n]; n--, k++);
+    if (k % 2) {
+      cmd[y++] = '\\';
+    }
+  }
+
+  cmd[y++] = '"';
+#else
   cmd[y++] = '\'';
+#endif
   ret.setSize(y);
   return ret;
 }
@@ -1587,6 +1558,7 @@ String string_escape_shell_cmd(const char *str) {
 
   for (x = 0, y = 0; x < l; x++) {
     switch (str[x]) {
+#ifndef _MSC_VER
     case '"':
     case '\'':
       if (!p && (p = (char *)memchr(str + x + 1, str[x], l - x - 1))) {
@@ -1598,6 +1570,16 @@ String string_escape_shell_cmd(const char *str) {
       }
       cmd[y++] = str[x];
       break;
+#else
+    /* % is Windows specific for environmental variables, ^%PATH% will
+    output PATH while ^%PATH^% will not. escapeshellcmd->val will
+    escape all % and !.
+    */
+    case '%':
+    case '!':
+    case '"':
+    case '\'':
+#endif
     case '#': /* This is character-set independent */
     case '&':
     case ';':
@@ -1619,7 +1601,11 @@ String string_escape_shell_cmd(const char *str) {
     case '\\':
     case '\x0A': /* excluding these two */
     case '\xFF':
+#ifdef _MSC_VER
+      cmd[y++] = '^';
+#else
       cmd[y++] = '\\';
+#endif
       /* fall-through */
     default:
       cmd[y++] = str[x];
@@ -1701,8 +1687,10 @@ int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
     return -1;
   }
 
-  p1 = (int*)req::malloc((l2+1) * sizeof(int));
-  p2 = (int*)req::malloc((l2+1) * sizeof(int));
+  p1 = (int*)req::malloc_noptrs((l2+1) * sizeof(int));
+  SCOPE_EXIT { req::free(p1); };
+  p2 = (int*)req::malloc_noptrs((l2+1) * sizeof(int));
+  SCOPE_EXIT { req::free(p2); };
 
   for(i2=0;i2<=l2;i2++) {
     p1[i2] = i2*cost_ins;
@@ -1720,8 +1708,6 @@ int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
   }
 
   c0=p1[l2];
-  req::free(p1);
-  req::free(p2);
   return c0;
 }
 
@@ -2593,7 +2579,7 @@ String string_convert_hebrew_string(const String& inStr,
   tmp = str;
   block_start=block_end=0;
 
-  heb_str = (char *) req::malloc(str_len + 1);
+  heb_str = (char *) req::malloc_noptrs(str_len + 1);
   SCOPE_EXIT { req::free(heb_str); };
   target = heb_str+str_len;
   *target = 0;
@@ -2729,17 +2715,6 @@ String string_convert_hebrew_string(const String& inStr,
   brokenStr.setSize(str_len);
   return brokenStr;
 }
-
-#if defined(__APPLE__)
-
-  void *memrchr(const void *s, int c, size_t n) {
-    for (const char *p = (const char *)s + n - 1; p >= s; p--) {
-      if (*p == c) return (void *)p;
-    }
-    return nullptr;
-  }
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

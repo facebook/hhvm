@@ -38,7 +38,7 @@ function assert_options(int $what,
  * literal values such as 1 or "two" will not be passed via this argument)
  */
 <<__Native>>
-function assert(mixed $assertion, ?string $message = null): mixed;
+function assert(mixed $assertion, mixed $message = null): mixed;
 
 /* Loads the PHP extension given by the parameter library.  Use
  * extension_loaded() to test whether a given extension is already available
@@ -223,6 +223,14 @@ function ini_restore(string $varname): void;
 function ini_set(string $varname,
                  mixed $newvalue): mixed;
 
+/* Sets the value of the given configuration option. The configuration option
+ * will keep this new value during the script's execution, and will be
+ * restored at the script's ending.
+ */
+<<__Native>>
+function ini_alter(string $varname,
+                   mixed $newvalue): mixed;
+
 /* Returns the peak of memory, in bytes, that's been allocated to your PHP
  * script.
  */
@@ -332,7 +340,7 @@ function phpinfo(int $what = 0): bool {
   \__SystemLib\phpinfo_tr('uname', php_uname());
   echo '</table>';
 
-  \__SystemLib\phpinfo_table('INI', ini_get_all(null, false));
+  \__SystemLib\phpinfo_table('INI', ini_get_all('', false));
 
   if (function_exists('getallheaders')) {
     \__SystemLib\phpinfo_table('Headers', getallheaders());
@@ -364,7 +372,7 @@ function phpversion(string $extension = ""): mixed;
  * modify ANY environment variable!  The safe_mode_protected_env_vars
  * directive contains a comma-delimited list of environment variables, that
  * the end user won't be able to change using putenv(). These variables will
- * be protected even if safe_mode_allowed_env_vars is set to allow to change
+ * be protected even if safe_mode_allowed_env_vars is set to allow changing
  * them.
  */
 <<__Native>>
@@ -433,7 +441,7 @@ function zend_version(): string;
 
 namespace __SystemLib {
   <<__Native>>
-  function assert(mixed $assertion, ?string $message = null): ?bool;
+  function assert(mixed $assertion, mixed $message = null): ?bool;
 
   function phpinfo_tr($l, $d) {
     echo "<tr><td class=\"l\">$l</td><td class=\"r\">$d</td></tr>";

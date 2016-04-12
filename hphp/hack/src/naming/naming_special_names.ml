@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -43,6 +43,7 @@ module Classes = struct
   let cXHPChild = "\\XHPChild"
   let cIMemoizeParam = "\\IMemoizeParam"
   let cClassname = "\\classname"
+  let cTypename = "\\typename"
 end
 
 module Collections = struct
@@ -71,6 +72,7 @@ module Collections = struct
   let cCollection       = "\\Collection"
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
+  let cDict             = "\\dict"
 
 end
 
@@ -94,8 +96,6 @@ module Members = struct
   let is_special_xhp_attribute s =
     (Utils.str_starts_with s ":data-") || (Utils.str_starts_with s ":aria-")
 end
-
-open Utils
 
 module UserAttributes = struct
 
@@ -138,6 +138,7 @@ module SpecialIdents = struct
 
   let this = "$this"
   let placeholder = "$_"
+  let dollardollar = "$$"
 
 end
 
@@ -198,14 +199,23 @@ end
 
 module PseudoConsts = struct
 
-  let g__LINE__      = "__LINE__"
-  let g__CLASS__     = "__CLASS__"
-  let g__TRAIT__     = "__TRAIT__"
-  let g__FILE__      = "__FILE__"
-  let g__DIR__       = "__DIR__"
-  let g__FUNCTION__  = "__FUNCTION__"
-  let g__METHOD__    = "__METHOD__"
-  let g__NAMESPACE__ = "__NAMESPACE__"
+  let g__LINE__      = "\\__LINE__"
+  let g__CLASS__     = "\\__CLASS__"
+  let g__TRAIT__     = "\\__TRAIT__"
+  let g__FILE__      = "\\__FILE__"
+  let g__DIR__       = "\\__DIR__"
+  let g__FUNCTION__  = "\\__FUNCTION__"
+  let g__METHOD__    = "\\__METHOD__"
+  let g__NAMESPACE__ = "\\__NAMESPACE__"
+
+  let all_pseudo_consts = [
+    g__LINE__; g__CLASS__; g__TRAIT__; g__FILE__; g__DIR__;
+    g__FUNCTION__; g__METHOD__; g__NAMESPACE__
+  ]
+  let is_pseudo_const =
+    let h = HashSet.create 23 in
+    List.iter all_pseudo_consts (HashSet.add h);
+    fun x -> HashSet.mem h x
 
 end
 
@@ -232,6 +242,7 @@ module Shapes = struct
   let idx                    = "idx"
   let keyExists              = "keyExists"
   let removeKey              = "removeKey"
+  let toArray                = "toArray"
 end
 
 module Superglobals = struct
@@ -243,7 +254,7 @@ module Superglobals = struct
     ]
 
   let is_superglobal =
-    let h = Hashtbl.create 23 in
-    List.iter all_superglobals (fun x -> Hashtbl.add h x true);
-    fun x -> Hashtbl.mem h x
+    let h = HashSet.create 23 in
+    List.iter all_superglobals (HashSet.add h);
+    fun x -> HashSet.mem h x
 end

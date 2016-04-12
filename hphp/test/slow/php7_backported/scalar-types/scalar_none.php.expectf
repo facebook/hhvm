@@ -1,0 +1,18 @@
+Testing int:
+*** Caught %s
+Testing float:
+*** Caught %s
+Testing string:
+*** Caught %s
+Testing bool:
+*** Caught %s
+Testing int nullable:
+NULL
+Testing float nullable:
+NULL
+Testing string nullable:
+NULL
+Testing bool nullable:
+NULL
+
+Done

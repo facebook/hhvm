@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
 #define incl_HPHP_VM_TREAD_HASH_MAP_H_
 
 #include <atomic>
-#include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <type_traits>
 #include <utility>
@@ -51,7 +50,7 @@ namespace Treadmill { void deferredFree(void*); }
  * Uses the treadmill to collect garbage.
  */
 template<class Key, class Val, class HashFunc>
-struct TreadHashMap : private boost::noncopyable {
+struct TreadHashMap {
   typedef std::pair<std::atomic<Key>,Val> value_type;
 
 private:
@@ -69,6 +68,9 @@ public:
   ~TreadHashMap() {
     free(m_table);
   }
+
+  TreadHashMap(const TreadHashMap&) = delete;
+  TreadHashMap& operator=(const TreadHashMap&) = delete;
 
   template<class IterVal>
   struct thm_iterator
@@ -98,7 +100,7 @@ public:
     }
 
   private:
-    friend class TreadHashMap;
+    friend struct TreadHashMap;
     friend class boost::iterator_core_access;
 
     void increment() {
@@ -209,7 +211,11 @@ private:
     auto newTable = allocTable(old->capac * 2);
     for (auto i = 0; i < old->capac; ++i) {
       value_type* ent = old->entries + i;
+#ifdef MSVC_NO_NONVOID_ATOMIC_IF
+      if (ent->first.load()) {
+#else
       if (ent->first) {
+#endif
         insertImpl(newTable, ent->first, ent->second);
       }
     }

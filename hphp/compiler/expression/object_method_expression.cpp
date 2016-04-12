@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -104,28 +104,6 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
 
 ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ObjectMethodExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ObjectMethodCallExpression",
-      m_params == nullptr ? 3 : 4);
-  cg.printPropertyHeader("object");
-  m_object->outputCodeModel(cg);
-  if (m_nameExp->is(Expression::KindOfScalarExpression)) {
-    cg.printPropertyHeader("methodName");
-  } else {
-    cg.printPropertyHeader("methodExpression");
-  }
-  m_nameExp->outputCodeModel(cg);
-  if (m_params != nullptr) {
-    cg.printPropertyHeader("arguments");
-    cg.printExpressionVector(m_params);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

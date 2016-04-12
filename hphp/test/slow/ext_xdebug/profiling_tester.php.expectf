@@ -60,7 +60,7 @@ calls=1 0 0
 
 fl=php:internal
 fn=php::time
-840 %d
+829 %d
 
 fl=php:internal
 fn=php::var_dump

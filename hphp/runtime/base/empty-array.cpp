@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -329,6 +329,10 @@ ArrayData* EmptyArray::Prepend(ArrayData*, const Variant& vin, bool) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (cell.m_type == KindOfUninit) cell.m_type = KindOfNull;
   return EmptyArray::MakePacked(cell).first;
+}
+
+ArrayData* EmptyArray::ToDict(ArrayData*) {
+  return MixedArray::MakeReserveDict(0);
 }
 
 //////////////////////////////////////////////////////////////////////

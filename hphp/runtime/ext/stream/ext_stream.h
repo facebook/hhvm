@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,6 +21,13 @@
 #include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
+
+  const int64_t k_PSFS_ERR_FATAL = 0;
+  const int64_t k_PSFS_FEED_ME = 1;
+  const int64_t k_PSFS_FLAG_FLUSH_CLOSE = 2;
+  const int64_t k_PSFS_FLAG_FLUSH_INC = 1;
+  const int64_t k_PSFS_FLAG_NORMAL = 0;
+  const int64_t k_PSFS_PASS_ON = 2;
 
   const int64_t k_STREAM_CLIENT_CONNECT = 4;
   const int64_t k_STREAM_CLIENT_ASYNC_CONNECT = 2;

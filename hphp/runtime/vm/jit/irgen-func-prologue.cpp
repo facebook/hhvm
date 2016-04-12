@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -114,26 +114,27 @@ SSATmp* juggle_closure_ctx(IRGS& env) {
  */
 void init_use_vars(IRGS& env, SSATmp* closure) {
   auto const func = env.context.func;
+  auto const cls = func->implCls();
   auto const nparams = func->numParams();
 
   assertx(func->isClosureBody());
 
   // Closure object properties are the use vars followed by the static locals
   // (which are per-instance).
-  auto const nuse = func->implCls()->numDeclProperties() -
-                    func->numStaticLocals();
+  auto const nuse = cls->numDeclProperties() - func->numStaticLocals();
 
-  int use_var_off = sizeof(ObjectData) + func->implCls()->builtinODTailSize();
+  int use_var_off = sizeof(ObjectData) + cls->builtinODTailSize();
 
   for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
+    auto const ty = typeFromRAT(cls->declPropRepoAuthType(i));
     auto const addr = gen(
       env,
       LdPropAddr,
       PropOffset { use_var_off },
-      TPtrToPropGen,
+      ty.ptr(Ptr::Prop),
       closure
     );
-    auto const prop = gen(env, LdMem, TGen, addr);
+    auto const prop = gen(env, LdMem, ty, addr);
     gen(env, StLoc, LocalId{nparams + 1 + i}, fp(env), prop);
     gen(env, IncRef, prop);
   }
@@ -269,7 +270,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = env.context.func;
 
   // Increment profiling counter.
-  if (mcg->tx().mode() == TransKind::Proflogue) {
+  if (env.context.kind == TransKind::Proflogue) {
     assertx(shouldPGOFunc(*func));
     auto profData = mcg->tx().profData();
 
@@ -303,7 +304,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     ReqBindJmpData {
       SrcKey { func, func->getEntryForNumArgs(argc), false },
       FPInvOffset { func->numSlotsInFrame() },
-      offsetFromIRSP(env, BCSPOffset{0}),
+      bcSPOffset(env),
       TransFlags{}
     },
     sp(env),
@@ -376,9 +377,7 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 
 void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
   auto const func = env.context.func;
-
-  // TODO(#8060661): Why don't we need to mask out the flags?
-  auto const num_args = gen(env, LdARNumArgsAndFlags, fp(env));
+  auto const num_args = gen(env, LdARNumParams, fp(env));
 
   for (auto const& dv : dvs) {
     ifThen(
@@ -394,7 +393,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
           ReqBindJmpData {
             SrcKey { func, dv.second, false },
             FPInvOffset { func->numSlotsInFrame() },
-            offsetFromIRSP(env, BCSPOffset{0}),
+            bcSPOffset(env),
             TransFlags{}
           },
           sp(env),
@@ -410,7 +409,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
     ReqBindJmpData {
       SrcKey { func, func->base(), false },
       FPInvOffset { func->numSlotsInFrame() },
-      offsetFromIRSP(env, BCSPOffset{0}),
+      bcSPOffset(env),
       TransFlags{}
     },
     sp(env),

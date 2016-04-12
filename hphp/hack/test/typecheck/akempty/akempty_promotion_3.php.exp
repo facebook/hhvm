@@ -1,0 +1,7 @@
+[1]intersect(array)
+File "akempty_promotion_3.php", line 12, characters 5-6:
+Invalid argument (Typing[4110])
+File "akempty_promotion_3.php", line 15, characters 12-14:
+This is an int
+File "akempty_promotion_3.php", line 11, characters 3-6:
+It is incompatible with an array (used like a vector) because a value is appended to it

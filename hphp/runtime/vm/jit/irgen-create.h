@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,14 +16,17 @@
 #ifndef incl_HPHP_JIT_IRGEN_CREATE_H_
 #define incl_HPHP_JIT_IRGEN_CREATE_H_
 
-namespace HPHP { struct Class; }
-namespace HPHP { namespace jit {
-struct IRGS;
-struct Block;
-struct SSATmp;
-}}
+namespace HPHP {
 
-namespace HPHP { namespace jit { namespace irgen {
+struct Class;
+
+namespace jit {
+
+struct SSATmp;
+
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,110 +26,17 @@ const StaticString s_NumberFormatter("NumberFormatter");
 
 Class* NumberFormatter::c_NumberFormatter = nullptr;
 
-#define UNUM_DECL(cns, val) \
-  const int64_t q_NumberFormatter_ ## cns = val; \
-  const StaticString s_NumberFormatter_ ## cns(#cns)
-
-#define UNUM_ICU_DECL(cns) \
-  const int64_t q_NumberFormatter_ ## cns = UNUM_ ## cns; \
-  const StaticString s_NumberFormatter_ ## cns(#cns)
-
-#define UNUM(cns) q_NumberFormatter_ ## cns
-
-/* UNumberFormatStyle constants */
-UNUM_ICU_DECL(PATTERN_DECIMAL);
-UNUM_ICU_DECL(DECIMAL);
-UNUM_ICU_DECL(CURRENCY);
-UNUM_ICU_DECL(PERCENT);
-UNUM_ICU_DECL(SCIENTIFIC);
-UNUM_ICU_DECL(SPELLOUT);
-UNUM_ICU_DECL(ORDINAL);
-UNUM_ICU_DECL(DURATION);
-UNUM_ICU_DECL(PATTERN_RULEBASED);
-UNUM_ICU_DECL(IGNORE);
-UNUM_DECL(DEFAULT_STYLE, UNUM_DEFAULT);
-
 /* workaround for ICU bug */
 #if U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM < 8
 #define UNUM_ROUND_HALFEVEN UNUM_FOUND_HALFEVEN
 #endif
 
-/* UNumberFormatRoundingMode */
-UNUM_ICU_DECL(ROUND_CEILING);
-UNUM_ICU_DECL(ROUND_FLOOR);
-UNUM_ICU_DECL(ROUND_DOWN);
-UNUM_ICU_DECL(ROUND_UP);
-UNUM_ICU_DECL(ROUND_HALFEVEN);
-UNUM_ICU_DECL(ROUND_HALFDOWN);
-UNUM_ICU_DECL(ROUND_HALFUP);
-
-/* UNumberFormatPadPosition */
-UNUM_ICU_DECL(PAD_BEFORE_PREFIX);
-UNUM_ICU_DECL(PAD_AFTER_PREFIX);
-UNUM_ICU_DECL(PAD_BEFORE_SUFFIX);
-UNUM_ICU_DECL(PAD_AFTER_SUFFIX);
-
-/* UNumberFormatAttribute */
-UNUM_ICU_DECL(PARSE_INT_ONLY);
-UNUM_ICU_DECL(GROUPING_USED);
-UNUM_ICU_DECL(DECIMAL_ALWAYS_SHOWN);
-UNUM_ICU_DECL(MAX_INTEGER_DIGITS);
-UNUM_ICU_DECL(MIN_INTEGER_DIGITS);
-UNUM_ICU_DECL(INTEGER_DIGITS);
-UNUM_ICU_DECL(MAX_FRACTION_DIGITS);
-UNUM_ICU_DECL(MIN_FRACTION_DIGITS);
-UNUM_ICU_DECL(FRACTION_DIGITS);
-UNUM_ICU_DECL(MULTIPLIER);
-UNUM_ICU_DECL(GROUPING_SIZE);
-UNUM_ICU_DECL(ROUNDING_MODE);
-UNUM_ICU_DECL(FORMAT_WIDTH);
-UNUM_ICU_DECL(PADDING_POSITION);
-UNUM_ICU_DECL(SECONDARY_GROUPING_SIZE);
-UNUM_ICU_DECL(SIGNIFICANT_DIGITS_USED);
-UNUM_ICU_DECL(MIN_SIGNIFICANT_DIGITS);
-UNUM_ICU_DECL(MAX_SIGNIFICANT_DIGITS);
-UNUM_ICU_DECL(LENIENT_PARSE);
-UNUM_ICU_DECL(ROUNDING_INCREMENT);
-
-/* UNumberFormatTextAttribute */
-UNUM_ICU_DECL(POSITIVE_PREFIX);
-UNUM_ICU_DECL(POSITIVE_SUFFIX);
-UNUM_ICU_DECL(NEGATIVE_PREFIX);
-UNUM_ICU_DECL(NEGATIVE_SUFFIX);
-UNUM_ICU_DECL(PADDING_CHARACTER);
-UNUM_ICU_DECL(CURRENCY_CODE);
-UNUM_ICU_DECL(DEFAULT_RULESET);
-UNUM_ICU_DECL(PUBLIC_RULESETS);
-
-/* UNumberFormatSymbol */
-UNUM_ICU_DECL(DECIMAL_SEPARATOR_SYMBOL);
-UNUM_ICU_DECL(GROUPING_SEPARATOR_SYMBOL);
-UNUM_ICU_DECL(PATTERN_SEPARATOR_SYMBOL);
-UNUM_ICU_DECL(PERCENT_SYMBOL);
-UNUM_ICU_DECL(ZERO_DIGIT_SYMBOL);
-UNUM_ICU_DECL(DIGIT_SYMBOL);
-UNUM_ICU_DECL(MINUS_SIGN_SYMBOL);
-UNUM_ICU_DECL(PLUS_SIGN_SYMBOL);
-UNUM_ICU_DECL(CURRENCY_SYMBOL);
-UNUM_ICU_DECL(INTL_CURRENCY_SYMBOL);
-UNUM_ICU_DECL(MONETARY_SEPARATOR_SYMBOL);
-UNUM_ICU_DECL(EXPONENTIAL_SYMBOL);
-UNUM_ICU_DECL(PERMILL_SYMBOL);
-UNUM_ICU_DECL(PAD_ESCAPE_SYMBOL);
-UNUM_ICU_DECL(INFINITY_SYMBOL);
-UNUM_ICU_DECL(NAN_SYMBOL);
-UNUM_ICU_DECL(SIGNIFICANT_DIGIT_SYMBOL);
-UNUM_ICU_DECL(MONETARY_GROUPING_SEPARATOR_SYMBOL);
-
 /* Format/Parse types */
-UNUM_DECL(TYPE_DEFAULT, 0);
-UNUM_DECL(TYPE_INT32, 1);
-UNUM_DECL(TYPE_INT64, 2);
-UNUM_DECL(TYPE_DOUBLE, 3);
-UNUM_DECL(TYPE_CURRENCY, 4);
-
-#undef UNUM_DECL
-#undef UNUM_ICU_DECL
+static const int64_t k_UNUM_TYPE_DEFAULT = 0;
+static const int64_t k_UNUM_TYPE_INT32 = 1;
+static const int64_t k_UNUM_TYPE_INT64 = 2;
+static const int64_t k_UNUM_TYPE_DOUBLE = 3;
+static const int64_t k_UNUM_TYPE_CURRENCY = 4;
 
 void NumberFormatter::setNumberFormatter(const String& locale,
                                          int64_t style,
@@ -139,7 +46,7 @@ void NumberFormatter::setNumberFormatter(const String& locale,
   if (U_FAILURE(error)) {
     s_intl_error->setError(error,
         "numfmt_create: error converting pattern to UTF-16");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 
   const String loc(localeOrDefault(locale));
@@ -152,7 +59,7 @@ void NumberFormatter::setNumberFormatter(const String& locale,
   if (U_FAILURE(error)) {
     s_intl_error->setError(error,
         "numfmt_create: number formatter creation failed");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 
@@ -160,14 +67,14 @@ void NumberFormatter::setNumberFormatter(const NumberFormatter *orig) {
   if (!orig || !orig->formatter()) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Cannot clone unconstructed NumberFormatter");
-    throw getException("%s", s_intl_error->getErrorMessage(false).c_str());
+    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   UErrorCode error = U_ZERO_ERROR;
   m_formatter = unum_clone(orig->formatter(), &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "numfmt_clone: "
                                   "number formatter clone failed");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 
@@ -290,15 +197,15 @@ static Variant HHVM_METHOD(NumberFormatter, format, const Variant& value,
     num = value.toInt64();
   }
 
-  if (type == UNUM(TYPE_DEFAULT)) {
+  if (type == k_UNUM_TYPE_DEFAULT) {
     if (num.isInteger()) {
-      type = UNUM(TYPE_INT64);
+      type = k_UNUM_TYPE_INT64;
     } else if (num.isDouble()) {
-      type = UNUM(TYPE_DOUBLE);
+      type = k_UNUM_TYPE_DOUBLE;
     }
   }
 
-  if (type == UNUM(TYPE_DOUBLE)) {
+  if (type == k_UNUM_TYPE_DOUBLE) {
     return doFormat(obj, num.toDouble());
   } else {
     return doFormat(obj, num.toInt64());
@@ -308,25 +215,25 @@ static Variant HHVM_METHOD(NumberFormatter, format, const Variant& value,
 static Variant HHVM_METHOD(NumberFormatter, getAttribute, int64_t attr) {
   NUMFMT_GET(obj, this_, false);
   switch (attr) {
-    case UNUM(PARSE_INT_ONLY):
-    case UNUM(GROUPING_USED):
-    case UNUM(DECIMAL_ALWAYS_SHOWN):
-    case UNUM(MAX_INTEGER_DIGITS):
-    case UNUM(MIN_INTEGER_DIGITS):
-    case UNUM(INTEGER_DIGITS):
-    case UNUM(MAX_FRACTION_DIGITS):
-    case UNUM(MIN_FRACTION_DIGITS):
-    case UNUM(FRACTION_DIGITS):
-    case UNUM(MULTIPLIER):
-    case UNUM(GROUPING_SIZE):
-    case UNUM(ROUNDING_MODE):
-    case UNUM(FORMAT_WIDTH):
-    case UNUM(PADDING_POSITION):
-    case UNUM(SECONDARY_GROUPING_SIZE):
-    case UNUM(SIGNIFICANT_DIGITS_USED):
-    case UNUM(MIN_SIGNIFICANT_DIGITS):
-    case UNUM(MAX_SIGNIFICANT_DIGITS):
-    case UNUM(LENIENT_PARSE): {
+    case UNUM_PARSE_INT_ONLY:
+    case UNUM_GROUPING_USED:
+    case UNUM_DECIMAL_ALWAYS_SHOWN:
+    case UNUM_MAX_INTEGER_DIGITS:
+    case UNUM_MIN_INTEGER_DIGITS:
+    case UNUM_INTEGER_DIGITS:
+    case UNUM_MAX_FRACTION_DIGITS:
+    case UNUM_MIN_FRACTION_DIGITS:
+    case UNUM_FRACTION_DIGITS:
+    case UNUM_MULTIPLIER:
+    case UNUM_GROUPING_SIZE:
+    case UNUM_ROUNDING_MODE:
+    case UNUM_FORMAT_WIDTH:
+    case UNUM_PADDING_POSITION:
+    case UNUM_SECONDARY_GROUPING_SIZE:
+    case UNUM_SIGNIFICANT_DIGITS_USED:
+    case UNUM_MIN_SIGNIFICANT_DIGITS:
+    case UNUM_MAX_SIGNIFICANT_DIGITS:
+    case UNUM_LENIENT_PARSE: {
       int64_t lval = unum_getAttribute(obj->formatter(),
                                        (UNumberFormatAttribute)attr);
       if (lval == -1) {
@@ -335,7 +242,7 @@ static Variant HHVM_METHOD(NumberFormatter, getAttribute, int64_t attr) {
       }
       return lval;
     }
-    case UNUM(ROUNDING_INCREMENT): {
+    case UNUM_ROUNDING_INCREMENT: {
       double dval = unum_getDoubleAttribute(obj->formatter(),
                                             (UNumberFormatAttribute)attr);
       if (dval == -1) {
@@ -463,15 +370,15 @@ static Variant HHVM_METHOD(NumberFormatter, parse,
   int32_t pos = position.toInt64();
   error = U_ZERO_ERROR;
   switch (type) {
-    case UNUM(TYPE_INT32):
+    case k_UNUM_TYPE_INT32:
       ret = unum_parse(obj->formatter(), val.getBuffer(), val.length(),
                        &pos, &error);
       break;
-    case UNUM(TYPE_INT64):
+    case k_UNUM_TYPE_INT64:
       ret = unum_parseInt64(obj->formatter(), val.getBuffer(), val.length(),
                             &pos, &error);
       break;
-    case UNUM(TYPE_DOUBLE):
+    case k_UNUM_TYPE_DOUBLE:
       ret = unum_parseDouble(obj->formatter(), val.getBuffer(), val.length(),
                              &pos, &error);
       break;
@@ -488,29 +395,29 @@ static bool HHVM_METHOD(NumberFormatter, setAttribute,
                         int64_t attr, const Variant& value) {
   NUMFMT_GET(obj, this_, false);
   switch (attr) {
-    case UNUM(PARSE_INT_ONLY):
-    case UNUM(GROUPING_USED):
-    case UNUM(DECIMAL_ALWAYS_SHOWN):
-    case UNUM(MAX_INTEGER_DIGITS):
-    case UNUM(MIN_INTEGER_DIGITS):
-    case UNUM(INTEGER_DIGITS):
-    case UNUM(MAX_FRACTION_DIGITS):
-    case UNUM(MIN_FRACTION_DIGITS):
-    case UNUM(FRACTION_DIGITS):
-    case UNUM(MULTIPLIER):
-    case UNUM(GROUPING_SIZE):
-    case UNUM(ROUNDING_MODE):
-    case UNUM(FORMAT_WIDTH):
-    case UNUM(PADDING_POSITION):
-    case UNUM(SECONDARY_GROUPING_SIZE):
-    case UNUM(SIGNIFICANT_DIGITS_USED):
-    case UNUM(MIN_SIGNIFICANT_DIGITS):
-    case UNUM(MAX_SIGNIFICANT_DIGITS):
-    case UNUM(LENIENT_PARSE):
+    case UNUM_PARSE_INT_ONLY:
+    case UNUM_GROUPING_USED:
+    case UNUM_DECIMAL_ALWAYS_SHOWN:
+    case UNUM_MAX_INTEGER_DIGITS:
+    case UNUM_MIN_INTEGER_DIGITS:
+    case UNUM_INTEGER_DIGITS:
+    case UNUM_MAX_FRACTION_DIGITS:
+    case UNUM_MIN_FRACTION_DIGITS:
+    case UNUM_FRACTION_DIGITS:
+    case UNUM_MULTIPLIER:
+    case UNUM_GROUPING_SIZE:
+    case UNUM_ROUNDING_MODE:
+    case UNUM_FORMAT_WIDTH:
+    case UNUM_PADDING_POSITION:
+    case UNUM_SECONDARY_GROUPING_SIZE:
+    case UNUM_SIGNIFICANT_DIGITS_USED:
+    case UNUM_MIN_SIGNIFICANT_DIGITS:
+    case UNUM_MAX_SIGNIFICANT_DIGITS:
+    case UNUM_LENIENT_PARSE:
       unum_setAttribute(obj->formatter(),
                         (UNumberFormatAttribute)attr, value.toInt64());
       return true;
-    case UNUM(ROUNDING_INCREMENT):
+    case UNUM_ROUNDING_INCREMENT:
       unum_setDoubleAttribute(obj->formatter(),
                               (UNumberFormatAttribute)attr, value.toDouble());
       return true;
@@ -582,85 +489,104 @@ void IntlExtension::initNumberFormatter() {
   HHVM_ME(NumberFormatter, setSymbol);
   HHVM_ME(NumberFormatter, setTextAttribute);
 
-#define NUMFMT_CONST(n) \
-  Native::registerClassConstant<KindOfInt64>(s_NumberFormatter.get(), \
-                                             s_NumberFormatter_ ## n .get(), \
-                                             q_NumberFormatter_ ## n)
+  /* UNumberFormatStyle constants */
+  HHVM_RCC_INT(NumberFormatter, PATTERN_DECIMAL, UNUM_PATTERN_DECIMAL);
+  HHVM_RCC_INT(NumberFormatter, DECIMAL, UNUM_DECIMAL);
+  HHVM_RCC_INT(NumberFormatter, CURRENCY, UNUM_CURRENCY);
+  HHVM_RCC_INT(NumberFormatter, PERCENT, UNUM_PERCENT);
+  HHVM_RCC_INT(NumberFormatter, SCIENTIFIC, UNUM_SCIENTIFIC);
+  HHVM_RCC_INT(NumberFormatter, SPELLOUT, UNUM_SPELLOUT);
+  HHVM_RCC_INT(NumberFormatter, ORDINAL, UNUM_ORDINAL);
+  HHVM_RCC_INT(NumberFormatter, DURATION, UNUM_DURATION);
+  HHVM_RCC_INT(NumberFormatter, PATTERN_RULEBASED, UNUM_PATTERN_RULEBASED);
+  HHVM_RCC_INT(NumberFormatter, IGNORE, UNUM_IGNORE);
+  HHVM_RCC_INT(NumberFormatter, DEFAULT_STYLE, UNUM_DEFAULT);
 
-  NUMFMT_CONST(PATTERN_DECIMAL);
-  NUMFMT_CONST(DECIMAL);
-  NUMFMT_CONST(CURRENCY);
-  NUMFMT_CONST(PERCENT);
-  NUMFMT_CONST(SCIENTIFIC);
-  NUMFMT_CONST(SPELLOUT);
-  NUMFMT_CONST(ORDINAL);
-  NUMFMT_CONST(DURATION);
-  NUMFMT_CONST(PATTERN_RULEBASED);
-  NUMFMT_CONST(IGNORE);
-  NUMFMT_CONST(DEFAULT_STYLE);
-  NUMFMT_CONST(ROUND_CEILING);
-  NUMFMT_CONST(ROUND_FLOOR);
-  NUMFMT_CONST(ROUND_DOWN);
-  NUMFMT_CONST(ROUND_UP);
-  NUMFMT_CONST(ROUND_HALFEVEN);
-  NUMFMT_CONST(ROUND_HALFDOWN);
-  NUMFMT_CONST(ROUND_HALFUP);
-  NUMFMT_CONST(PAD_BEFORE_PREFIX);
-  NUMFMT_CONST(PAD_AFTER_PREFIX);
-  NUMFMT_CONST(PAD_BEFORE_SUFFIX);
-  NUMFMT_CONST(PAD_AFTER_SUFFIX);
-  NUMFMT_CONST(PARSE_INT_ONLY);
-  NUMFMT_CONST(GROUPING_USED);
-  NUMFMT_CONST(DECIMAL_ALWAYS_SHOWN);
-  NUMFMT_CONST(MAX_INTEGER_DIGITS);
-  NUMFMT_CONST(MIN_INTEGER_DIGITS);
-  NUMFMT_CONST(INTEGER_DIGITS);
-  NUMFMT_CONST(MAX_FRACTION_DIGITS);
-  NUMFMT_CONST(MIN_FRACTION_DIGITS);
-  NUMFMT_CONST(FRACTION_DIGITS);
-  NUMFMT_CONST(MULTIPLIER);
-  NUMFMT_CONST(GROUPING_SIZE);
-  NUMFMT_CONST(ROUNDING_MODE);
-  NUMFMT_CONST(ROUNDING_INCREMENT);
-  NUMFMT_CONST(FORMAT_WIDTH);
-  NUMFMT_CONST(PADDING_POSITION);
-  NUMFMT_CONST(SECONDARY_GROUPING_SIZE);
-  NUMFMT_CONST(SIGNIFICANT_DIGITS_USED);
-  NUMFMT_CONST(MIN_SIGNIFICANT_DIGITS);
-  NUMFMT_CONST(MAX_SIGNIFICANT_DIGITS);
-  NUMFMT_CONST(LENIENT_PARSE);
-  NUMFMT_CONST(POSITIVE_PREFIX);
-  NUMFMT_CONST(POSITIVE_SUFFIX);
-  NUMFMT_CONST(NEGATIVE_PREFIX);
-  NUMFMT_CONST(NEGATIVE_SUFFIX);
-  NUMFMT_CONST(PADDING_CHARACTER);
-  NUMFMT_CONST(CURRENCY_CODE);
-  NUMFMT_CONST(DEFAULT_RULESET);
-  NUMFMT_CONST(PUBLIC_RULESETS);
-  NUMFMT_CONST(DECIMAL_SEPARATOR_SYMBOL);
-  NUMFMT_CONST(GROUPING_SEPARATOR_SYMBOL);
-  NUMFMT_CONST(PATTERN_SEPARATOR_SYMBOL);
-  NUMFMT_CONST(PERCENT_SYMBOL);
-  NUMFMT_CONST(ZERO_DIGIT_SYMBOL);
-  NUMFMT_CONST(DIGIT_SYMBOL);
-  NUMFMT_CONST(MINUS_SIGN_SYMBOL);
-  NUMFMT_CONST(PLUS_SIGN_SYMBOL);
-  NUMFMT_CONST(CURRENCY_SYMBOL);
-  NUMFMT_CONST(INTL_CURRENCY_SYMBOL);
-  NUMFMT_CONST(MONETARY_SEPARATOR_SYMBOL);
-  NUMFMT_CONST(EXPONENTIAL_SYMBOL);
-  NUMFMT_CONST(PERMILL_SYMBOL);
-  NUMFMT_CONST(PAD_ESCAPE_SYMBOL);
-  NUMFMT_CONST(INFINITY_SYMBOL);
-  NUMFMT_CONST(NAN_SYMBOL);
-  NUMFMT_CONST(SIGNIFICANT_DIGIT_SYMBOL);
-  NUMFMT_CONST(MONETARY_GROUPING_SEPARATOR_SYMBOL);
-  NUMFMT_CONST(TYPE_DEFAULT);
-  NUMFMT_CONST(TYPE_INT32);
-  NUMFMT_CONST(TYPE_INT64);
-  NUMFMT_CONST(TYPE_DOUBLE);
-  NUMFMT_CONST(TYPE_CURRENCY);
-#undef NUMFMT_CONST
+  /* UNumberFormatRoundingMode */
+  HHVM_RCC_INT(NumberFormatter, ROUND_CEILING, UNUM_ROUND_CEILING);
+  HHVM_RCC_INT(NumberFormatter, ROUND_FLOOR, UNUM_ROUND_FLOOR);
+  HHVM_RCC_INT(NumberFormatter, ROUND_DOWN, UNUM_ROUND_DOWN);
+  HHVM_RCC_INT(NumberFormatter, ROUND_UP, UNUM_ROUND_UP);
+  HHVM_RCC_INT(NumberFormatter, ROUND_HALFEVEN, UNUM_ROUND_HALFEVEN);
+  HHVM_RCC_INT(NumberFormatter, ROUND_HALFDOWN, UNUM_ROUND_HALFDOWN);
+  HHVM_RCC_INT(NumberFormatter, ROUND_HALFUP, UNUM_ROUND_HALFUP);
+
+  /* UNumberFormatPadPosition */
+  HHVM_RCC_INT(NumberFormatter, PAD_BEFORE_PREFIX, UNUM_PAD_BEFORE_PREFIX);
+  HHVM_RCC_INT(NumberFormatter, PAD_AFTER_PREFIX, UNUM_PAD_AFTER_PREFIX);
+  HHVM_RCC_INT(NumberFormatter, PAD_BEFORE_SUFFIX, UNUM_PAD_BEFORE_SUFFIX);
+  HHVM_RCC_INT(NumberFormatter, PAD_AFTER_SUFFIX, UNUM_PAD_AFTER_SUFFIX);
+
+  /* UNumberFormatAttribute */
+  HHVM_RCC_INT(NumberFormatter, PARSE_INT_ONLY, UNUM_PARSE_INT_ONLY);
+  HHVM_RCC_INT(NumberFormatter, GROUPING_USED, UNUM_GROUPING_USED);
+  HHVM_RCC_INT(NumberFormatter, DECIMAL_ALWAYS_SHOWN,
+               UNUM_DECIMAL_ALWAYS_SHOWN);
+  HHVM_RCC_INT(NumberFormatter, MAX_INTEGER_DIGITS, UNUM_MAX_INTEGER_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, MIN_INTEGER_DIGITS, UNUM_MIN_INTEGER_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, INTEGER_DIGITS, UNUM_INTEGER_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, MAX_FRACTION_DIGITS, UNUM_MAX_FRACTION_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, MIN_FRACTION_DIGITS, UNUM_MIN_FRACTION_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, FRACTION_DIGITS, UNUM_FRACTION_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, MULTIPLIER, UNUM_MULTIPLIER);
+  HHVM_RCC_INT(NumberFormatter, GROUPING_SIZE, UNUM_GROUPING_SIZE);
+  HHVM_RCC_INT(NumberFormatter, ROUNDING_MODE, UNUM_ROUNDING_MODE);
+  HHVM_RCC_INT(NumberFormatter, FORMAT_WIDTH, UNUM_FORMAT_WIDTH);
+  HHVM_RCC_INT(NumberFormatter, PADDING_POSITION, UNUM_PADDING_POSITION);
+  HHVM_RCC_INT(NumberFormatter, SECONDARY_GROUPING_SIZE,
+               UNUM_SECONDARY_GROUPING_SIZE);
+  HHVM_RCC_INT(NumberFormatter, SIGNIFICANT_DIGITS_USED,
+               UNUM_SIGNIFICANT_DIGITS_USED);
+  HHVM_RCC_INT(NumberFormatter, MIN_SIGNIFICANT_DIGITS,
+               UNUM_MIN_SIGNIFICANT_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, MAX_SIGNIFICANT_DIGITS
+               , UNUM_MAX_SIGNIFICANT_DIGITS);
+  HHVM_RCC_INT(NumberFormatter, LENIENT_PARSE, UNUM_LENIENT_PARSE);
+  HHVM_RCC_INT(NumberFormatter, ROUNDING_INCREMENT, UNUM_ROUNDING_INCREMENT);
+
+  /* UNumberFormatTextAttribute */
+  HHVM_RCC_INT(NumberFormatter, POSITIVE_PREFIX, UNUM_POSITIVE_PREFIX);
+  HHVM_RCC_INT(NumberFormatter, POSITIVE_SUFFIX, UNUM_POSITIVE_SUFFIX);
+  HHVM_RCC_INT(NumberFormatter, NEGATIVE_PREFIX, UNUM_NEGATIVE_PREFIX);
+  HHVM_RCC_INT(NumberFormatter, NEGATIVE_SUFFIX, UNUM_NEGATIVE_SUFFIX);
+  HHVM_RCC_INT(NumberFormatter, PADDING_CHARACTER, UNUM_PADDING_CHARACTER);
+  HHVM_RCC_INT(NumberFormatter, CURRENCY_CODE, UNUM_CURRENCY_CODE);
+  HHVM_RCC_INT(NumberFormatter, DEFAULT_RULESET, UNUM_DEFAULT_RULESET);
+  HHVM_RCC_INT(NumberFormatter, PUBLIC_RULESETS, UNUM_PUBLIC_RULESETS);
+
+  /* UNumberFormatSymbol */
+  HHVM_RCC_INT(NumberFormatter, DECIMAL_SEPARATOR_SYMBOL,
+               UNUM_DECIMAL_SEPARATOR_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, GROUPING_SEPARATOR_SYMBOL,
+               UNUM_GROUPING_SEPARATOR_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, PATTERN_SEPARATOR_SYMBOL,
+               UNUM_PATTERN_SEPARATOR_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, PERCENT_SYMBOL, UNUM_PERCENT_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, ZERO_DIGIT_SYMBOL, UNUM_ZERO_DIGIT_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, DIGIT_SYMBOL, UNUM_DIGIT_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, MINUS_SIGN_SYMBOL, UNUM_MINUS_SIGN_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, PLUS_SIGN_SYMBOL, UNUM_PLUS_SIGN_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, CURRENCY_SYMBOL, UNUM_CURRENCY_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, INTL_CURRENCY_SYMBOL,
+               UNUM_INTL_CURRENCY_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, MONETARY_SEPARATOR_SYMBOL,
+               UNUM_MONETARY_SEPARATOR_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, EXPONENTIAL_SYMBOL, UNUM_EXPONENTIAL_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, PERMILL_SYMBOL, UNUM_PERMILL_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, PAD_ESCAPE_SYMBOL, UNUM_PAD_ESCAPE_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, INFINITY_SYMBOL, UNUM_INFINITY_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, NAN_SYMBOL, UNUM_NAN_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, SIGNIFICANT_DIGIT_SYMBOL,
+               UNUM_SIGNIFICANT_DIGIT_SYMBOL);
+  HHVM_RCC_INT(NumberFormatter, MONETARY_GROUPING_SEPARATOR_SYMBOL,
+               UNUM_MONETARY_GROUPING_SEPARATOR_SYMBOL);
+
+  /* Format/Parse types */
+  HHVM_RCC_INT(NumberFormatter, TYPE_DEFAULT, k_UNUM_TYPE_DEFAULT);
+  HHVM_RCC_INT(NumberFormatter, TYPE_INT32, k_UNUM_TYPE_INT32);
+  HHVM_RCC_INT(NumberFormatter, TYPE_INT64, k_UNUM_TYPE_INT64);
+  HHVM_RCC_INT(NumberFormatter, TYPE_DOUBLE, k_UNUM_TYPE_DOUBLE);
+  HHVM_RCC_INT(NumberFormatter, TYPE_CURRENCY, k_UNUM_TYPE_CURRENCY);
 
   Native::registerNativeDataInfo<NumberFormatter>(s_NumberFormatter.get());
 

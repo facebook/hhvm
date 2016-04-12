@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -17,10 +17,8 @@ let dummy_path : t = ""
 let cat = Sys_utils.cat
 let compare = Pervasives.compare
 let dirname = Filename.dirname
-let expanduser = Sys_utils.expanduser
-let null_path = if Sys.win32 then "nul" else "/dev/null"
-let temp_dir_name =
-  if Sys.win32 then Filename.get_temp_dir_name () else "/tmp"
+let null_path = Sys_utils.null_path
+let temp_dir_name = Sys_utils.temp_dir_name
 
 (**
  * Resolves a path (using realpath)
@@ -34,9 +32,16 @@ let temp_dir_name =
  *   the current directory (in absolute)
  *)
 let make path =
-  match Sys_utils.realpath (expanduser path) with
+  match Sys_utils.realpath path with
   | Some path -> path
   | None -> path (* assert false? *)
+
+(**
+ * Creates a Path without running it through `realpath`. This is unsafe because
+ * it doesn't normalize symlinks, trailing slashes, or relative paths. The path
+ * you pass here must be absolute, and free of symlinks (including ../).
+ *)
+let make_unsafe path = path
 
 let to_string path = path
 

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -83,8 +83,12 @@ let debug () fnl =
         let oc = open_out file2 in
         output_string oc content2;
         close_out oc;
-        let _ = Sys.command ("diff "^file1^" "^file2) in
-        let _ = Sys.command ("rm "^file1^" "^file2) in
+        if Sys.win32 then
+          ignore (Sys.command ("fc "^file1^" "^file2))
+        else
+          ignore (Sys.command ("diff "^file1^" "^file2));
+        Sys_utils.unlink_no_fail file1;
+        Sys_utils.unlink_no_fail file2;
         flush stdout
       end;
 
@@ -112,7 +116,7 @@ let debug_directory dir =
   let path = Path.make dir in
   let next = compose
     (List.map ~f:Path.make)
-    (Find.make_next_files FindUtils.is_php path) in
+    (Find.make_next_files ~filter:FindUtils.is_php path) in
   let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
   MultiWorker.call
     (Some workers)
@@ -193,7 +197,7 @@ let format_in_place modes (filepath : Path.t) =
       close_out oc;
       None
   | Format_hack.Internal_error ->
-      Some "Internal error\n"
+      Some (Printf.sprintf "Internal error in %s\n" (Path.to_string filepath))
   | Format_hack.Parsing_error errorl ->
       Some (Errors.to_string (Errors.to_absolute (List.hd_exn errorl)))
   | Format_hack.Disabled_mode ->
@@ -214,7 +218,7 @@ let directory modes dir =
   let path = Path.make dir in
   let next = compose
     (List.map ~f:Path.make)
-    (Find.make_next_files FindUtils.is_php path) in
+    (Find.make_next_files ~filter:FindUtils.is_php path) in
   let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
   let messages =
     MultiWorker.call
@@ -235,10 +239,11 @@ let format_string modes file from to_ content =
   | Format_hack.Success content ->
       output_string stdout content
   | Format_hack.Internal_error ->
-      Printf.fprintf stderr "Internal error\n%!";
+      Printf.eprintf "Internal error in %s\n%!"
+        (Path.to_string file);
       exit 2
   | Format_hack.Parsing_error error ->
-      Printf.fprintf stderr "Parsing error\n%s\n%!"
+      Printf.eprintf "Parsing error\n%s\n%!"
         (Errors.to_string (Errors.to_absolute (List.hd_exn error)));
       exit 2
   | Format_hack.Disabled_mode ->
@@ -272,7 +277,7 @@ let () =
   PidLog.log_oc := Some (open_out "/dev/null");
   let files, from, to_, apply_mode, debug, diff, modes, root, test =
     parse_args() in
-  if not test then FormatEventLogger.init (Unix.time());
+  if not test then FormatEventLogger.init (Unix.gettimeofday());
   match files with
   | [] when diff ->
       let prefix =
@@ -288,10 +293,10 @@ let () =
       let file_and_modified_lines = Format_diff.parse_diff prefix diff in
       Format_diff.apply modes apply_mode ~diff:file_and_modified_lines
   | _ when diff ->
-      Printf.fprintf stderr "--diff mode expects no files\n";
+      Printf.eprintf "--diff mode expects no files\n";
       exit 2
   | [] when apply_mode <> Format_mode.Print ->
-      Printf.fprintf stderr "Cannot modify stdin in-place\n";
+      Printf.eprintf "Cannot modify stdin in-place\n";
       exit 2
   | [] -> format_stdin modes from to_
   | [dir] when Sys.is_directory dir ->

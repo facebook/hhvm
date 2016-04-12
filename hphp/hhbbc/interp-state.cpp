@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,6 +91,24 @@ State without_stacks(const State& src) {
   auto ret          = State{};
   ret.initialized   = src.initialized;
   ret.thisAvailable = src.thisAvailable;
+
+  if (UNLIKELY(src.locals.size() > (1LL << 50))) {
+    // gcc 4.9 has a bug where it will spit out a warning:
+    //
+    // > In function 'HPHP::HHBBC::State HPHP::HHBBC::without_stacks':
+    // > cc1plus: error: iteration 461168601842738791u invokes undefined
+    // >   behavior [-Werror=aggressive-loop-optimizations]
+    // > include/c++/4.9.x/bits/stl_algobase.h:334:4: note: containing loop
+    //
+    // The warning is a bug because it computes the number of
+    // iterations by subtracting two pointers; and the result *cannot*
+    // exceed 461168601842738790.  (its also a bug because it
+    // shouldn't generate such warnings in its own headers).
+    //
+    // in any case, this disables it, and generates no code in O3 builds
+    not_reached();
+  }
+
   ret.locals        = src.locals;
   ret.iters         = src.iters;
   return ret;

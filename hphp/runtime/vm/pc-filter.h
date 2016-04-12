@@ -26,17 +26,16 @@ namespace HPHP {
 // Map which holds a set of PCs and supports reasonably fast addition and
 // lookup. Used to decide if a given PC falls within an interesting area, e.g.,
 // for breakpoints and stepping.
-class PCFilter {
+struct PCFilter {
 private:
   // Radix-tree implementation of pointer map
   struct PtrMapNode;
-  class PtrMap {
+struct PtrMap {
 #define PTRMAP_PTR_SIZE       (sizeof(void*) * 8)
 #define PTRMAP_LEVEL_BITS     8LL
 #define PTRMAP_LEVEL_ENTRIES  (1LL << PTRMAP_LEVEL_BITS)
 #define PTRMAP_LEVEL_MASK     (PTRMAP_LEVEL_ENTRIES - 1LL)
 
-  public:
     PtrMap() {
       static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
                     "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");

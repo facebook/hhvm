@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/abi-ppc64.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -68,15 +69,6 @@ Vout& Vasm::out(AreaIndex area) {
   return m_outs[a];
 }
 
-X64Assembler& Vasm::prefix(X64Assembler& a, const Vptr& ptr) {
-  if (ptr.seg == Vptr::Segment::FS) {
-    a.fs();
-  } else if (ptr.seg == Vptr::Segment::GS) {
-    a.gs();
-  }
-  return a;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Vauto.
 
@@ -90,13 +82,19 @@ Vauto::~Vauto() {
       // Prevent spurious printir traces.
       Trace::Bump bumper{Trace::printir, 10};
 
+      auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:
-          optimizeX64(unit(), abi(m_kind));
-          emitX64(unit(), m_text, nullptr);
+          optimizeX64(unit(), abi);
+          emitX64(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::ARM:
-          finishARM(unit(), m_text, abi(m_kind), nullptr);
+          optimizeARM(unit(), abi);
+          emitARM(unit(), m_text, m_fixups, nullptr);
+          break;
+        case Arch::PPC64:
+          optimizePPC64(unit(), abi);
+          emitPPC64(unit(), m_text, m_fixups, nullptr);
           break;
       }
       return;

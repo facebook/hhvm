@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,6 +68,11 @@ struct IRInstruction;
  * locations again (without writing to them first).  This is used for the
  * ReturnHook to prevent uses of the stack and frame, and for killing stack
  * slots below the re-entry depth for potentially re-entering instructions.
+ *
+ * If there is an overlap between `loads' and `kills', then `kills' takes
+ * precedence for locations that are contained in both (i.e. those locations
+ * should be treated as actually killed).
+
  */
 struct GeneralEffects   { AliasClass loads;
                           AliasClass stores;
@@ -151,10 +156,6 @@ struct ReturnEffects  { AliasClass kills; };
  * are considered live exiting the region, and locations that will never be
  * read (unless written again) after exiting the region (`kills').  Various
  * instructions that exit regions populate these in different ways.
- *
- * If there is an overlap between `live' and `kills', then `kills' takes
- * precedence for locations that are contained in both (i.e. those locations
- * should be treated as actually killed).
  */
 struct ExitEffects    { AliasClass live; AliasClass kills; };
 
@@ -196,6 +197,12 @@ MemEffects memory_effects(const IRInstruction&);
  * analysis.h)
  */
 MemEffects canonicalize(MemEffects);
+
+/*
+ * Return an alias class representing the pointee of the given value, which
+ * must be <= TPtrToGen.
+ */
+AliasClass pointee(const SSATmp*);
 
 /*
  * Produces a string about some MemEffects for debug-printing.

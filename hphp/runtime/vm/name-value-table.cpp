@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,8 +78,7 @@ NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
 }
 
 NameValueTable::~NameValueTable() {
-  if (!m_table) return;
-
+  if (leaked()) return;
   for (Elm* elm = &m_table[m_tabMask]; elm != &m_table[-1]; --elm) {
     if (elm->m_name) {
       decRefStr(const_cast<StringData*>(elm->m_name));
@@ -146,6 +145,7 @@ void NameValueTable::leak() {
   m_tabMask = 0;
   req::free(m_table);
   m_table = nullptr;
+  assert(leaked());
 }
 
 TypedValue* NameValueTable::set(const StringData* name, const TypedValue* val) {
@@ -207,7 +207,7 @@ void NameValueTable::allocate(const size_t newCapac) {
   Elm* oldTab = m_table;
   const size_t oldMask = m_tabMask;
 
-  m_table = static_cast<Elm*>(req::calloc(sizeof(Elm), newCapac));
+  m_table = req::calloc_raw_array<Elm>(newCapac);
   m_tabMask = uint32_t(newCapac - 1);
 
   if (oldTab) {

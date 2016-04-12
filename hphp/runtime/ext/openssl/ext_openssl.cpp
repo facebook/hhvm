@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
 
 #include <openssl/conf.h>
@@ -39,39 +38,6 @@ namespace HPHP {
 
 #define MIN_KEY_LENGTH          384
 
-#define OPENSSL_ALGO_SHA1       1
-#define OPENSSL_ALGO_MD5        2
-#define OPENSSL_ALGO_MD4        3
-#ifdef HAVE_OPENSSL_MD2_H
-#define OPENSSL_ALGO_MD2        4
-#endif
-#define OPENSSL_ALGO_DSS1       5
-#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
-#define OPENSSL_ALGO_SHA224     6
-#define OPENSSL_ALGO_SHA256     7
-#define OPENSSL_ALGO_SHA384     8
-#define OPENSSL_ALGO_SHA512     9
-#define OPENSSL_ALGO_RMD160     10
-#endif
-
-enum php_openssl_key_type {
-  OPENSSL_KEYTYPE_RSA,
-  OPENSSL_KEYTYPE_DSA,
-  OPENSSL_KEYTYPE_DH,
-  OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-#ifdef EVP_PKEY_EC
-  OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
-#endif
-};
-enum php_openssl_cipher_type {
-  PHP_OPENSSL_CIPHER_RC2_40,
-  PHP_OPENSSL_CIPHER_RC2_128,
-  PHP_OPENSSL_CIPHER_RC2_64,
-  PHP_OPENSSL_CIPHER_DES,
-  PHP_OPENSSL_CIPHER_3DES,
-  PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
-};
-
 // bitfields
 const int64_t k_OPENSSL_RAW_DATA = 1;
 const int64_t k_OPENSSL_ZERO_PADDING = 2;
@@ -79,49 +45,12 @@ const int64_t k_OPENSSL_NO_PADDING = 3;
 const int64_t k_OPENSSL_PKCS1_OAEP_PADDING = 4;
 
 // exported constants
-const int64_t k_OPENSSL_ALGO_SHA1 = 1;
-const int64_t k_OPENSSL_ALGO_MD5 = 2;
-const int64_t k_OPENSSL_ALGO_MD4 = 3;
-const int64_t k_OPENSSL_ALGO_MD2 = 4;
-const int64_t k_OPENSSL_ALGO_DSS1 = 5;
-const int64_t k_OPENSSL_ALGO_SHA224 = 6;
-const int64_t k_OPENSSL_ALGO_SHA256 = 7;
-const int64_t k_OPENSSL_ALGO_SHA384 = 8;
-const int64_t k_OPENSSL_ALGO_SHA512 = 9;
-const int64_t k_OPENSSL_ALGO_RMD160 = 10;
-
-const int64_t k_OPENSSL_CIPHER_RC2_40 = 0;
-const int64_t k_OPENSSL_CIPHER_RC2_128 = 1;
-const int64_t k_OPENSSL_CIPHER_RC2_64 = 2;
-const int64_t k_OPENSSL_CIPHER_DES = 3;
-const int64_t k_OPENSSL_CIPHER_3DES = 4;
-
-const int64_t k_OPENSSL_KEYTYPE_RSA = 0;
-const int64_t k_OPENSSL_KEYTYPE_DSA = 1;
-const int64_t k_OPENSSL_KEYTYPE_DH = 2;
-const int64_t k_OPENSSL_KEYTYPE_EC = 3;
-
 const int64_t k_OPENSSL_SSLV23_PADDING = 2;
 const int64_t k_OPENSSL_PKCS1_PADDING = 1;
 
-const int64_t k_OPENSSL_VERSION_NUMBER = OPENSSL_VERSION_NUMBER;
-const StaticString k_OPENSSL_VERSION_TEXT(OPENSSL_VERSION_TEXT);
-
-// PKCS
-const int64_t k_PKCS7_TEXT = 1;
-const int64_t k_PKCS7_NOCERTS = 2;
-const int64_t k_PKCS7_NOSIGS = 4;
-const int64_t k_PKCS7_NOCHAIN = 8;
-const int64_t k_PKCS7_NOINTERN = 16;
-const int64_t k_PKCS7_NOVERIFY = 32;
-const int64_t k_PKCS7_DETACHED = 64;
-const int64_t k_PKCS7_BINARY = 128;
-const int64_t k_PKCS7_NOATTR = 256;
-
 static char default_ssl_conf_filename[PATH_MAX];
 
-class OpenSSLInitializer {
-public:
+struct OpenSSLInitializer {
   OpenSSLInitializer() {
     SSL_library_init();
     OpenSSL_add_all_ciphers();
@@ -158,8 +87,7 @@ static OpenSSLInitializer s_openssl_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // resource classes
 
-class Key : public SweepableResourceData {
-public:
+struct Key : SweepableResourceData {
   EVP_PKEY *m_key;
   explicit Key(EVP_PKEY *key) : m_key(key) { assert(m_key);}
   ~Key() {
@@ -231,7 +159,7 @@ public:
    */
   static req::ptr<Key> Get(const Variant& var, bool public_key,
                            const char *passphrase = nullptr) {
-    if (var.is(KindOfArray)) {
+    if (var.isArray()) {
       Array arr = var.toArray();
       if (!arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
         raise_warning("key array must be of the form "
@@ -307,7 +235,8 @@ IMPLEMENT_RESOURCE_ALLOCATION(Key)
 /**
  * Certificate Signing Request
  */
-class CSRequest : public SweepableResourceData {
+struct CSRequest : SweepableResourceData {
+private:
   X509_REQ *m_csr;
 
 public:
@@ -358,8 +287,7 @@ private:
 
 IMPLEMENT_RESOURCE_ALLOCATION(CSRequest)
 
-class php_x509_request {
-public:
+struct php_x509_request {
 #if OPENSSL_VERSION_NUMBER >= 0x10000002L
   LHASH_OF(CONF_VALUE) * global_config; /* Global SSL config */
   LHASH_OF(CONF_VALUE) * req_config;    /* SSL config for this request */
@@ -831,8 +759,8 @@ static X509_STORE *setup_verify(const Array& calist) {
 
 static bool add_entries(X509_NAME *subj, const Array& items) {
   for (ArrayIter iter(items); iter; ++iter) {
-    String index = iter.first();
-    String item = iter.second();
+    auto const index = iter.first().toString();
+    auto const item = iter.second().toString();
     int nid = OBJ_txt2nid(index.data());
     if (nid != NID_undef) {
       if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC,
@@ -1190,10 +1118,12 @@ Variant HHVM_FUNCTION(openssl_error_string) {
   return false;
 }
 
+
 bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
                                  const String& env_key,
                                  const Variant& priv_key_id,
-                                 const String& method /* = null_string */) {
+                                 const String& method, /* = null_string */
+                                 const String& iv /* = null_string */) {
   const EVP_CIPHER *cipher_type;
   if (method.empty()) {
     cipher_type = EVP_rc4();
@@ -1212,15 +1142,28 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
   }
   EVP_PKEY *pkey = okey->m_key;
 
+  const unsigned char *iv_buf = nullptr;
+  int iv_len = EVP_CIPHER_iv_length(cipher_type);
+  if (iv_len > 0) {
+    if (iv.empty()) {
+      raise_warning(
+        "Cipher algorithm requires an IV to be supplied as a sixth parameter");
+      return false;
+    }
+    if (iv.length() != iv_len) {
+      raise_warning("IV length is invalid");
+      return false;
+    }
+    iv_buf = reinterpret_cast<const unsigned char*>(iv.c_str());
+  }
+
   String s = String(sealed_data.size(), ReserveString);
   unsigned char *buf = (unsigned char *)s.mutableData();
 
   EVP_CIPHER_CTX ctx;
   int len1, len2;
   if (!EVP_OpenInit(&ctx, cipher_type, (unsigned char *)env_key.data(),
-                    env_key.size(), NULL, pkey) ||
-
-      EVP_CIPHER_CTX_iv_length(&ctx) > 0 ||
+                    env_key.size(), iv_buf, pkey) ||
       !EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)sealed_data.data(),
                       sealed_data.size()) ||
       !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
@@ -1234,7 +1177,7 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
 static STACK_OF(X509) *php_array_to_X509_sk(const Variant& certs) {
   STACK_OF(X509) *pcerts = sk_X509_new_null();
   Array arrCerts;
-  if (certs.is(KindOfArray)) {
+  if (certs.isArray()) {
     arrCerts = certs.toArray();
   } else {
     arrCerts.append(certs);
@@ -1814,10 +1757,10 @@ static void add_bignum_as_string(Array &arr,
     return;
   }
   int num_bytes = BN_num_bytes(bn);
-  unsigned char *out = (unsigned char *)req::malloc(num_bytes);
-  BN_bn2bin(bn, out);
-  arr.set(key, String((const char *)out, num_bytes, CopyString));
-  req::free(out);
+  String str{size_t(num_bytes), ReserveString};
+  BN_bn2bin(bn, (unsigned char*)str.mutableData());
+  str.setSize(num_bytes);
+  arr.set(key, std::move(str));
 }
 
 Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
@@ -1839,7 +1782,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   switch (EVP_PKEY_type(pkey->type)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    ktype = k_OPENSSL_KEYTYPE_RSA;
+    ktype = OPENSSL_KEYTYPE_RSA;
     assert(rsa);
     add_bignum_as_string(details, s_n, rsa->n);
     add_bignum_as_string(details, s_e, rsa->e);
@@ -1855,7 +1798,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_DSA2:
   case EVP_PKEY_DSA3:
   case EVP_PKEY_DSA4:
-    ktype = k_OPENSSL_KEYTYPE_DSA;
+    ktype = OPENSSL_KEYTYPE_DSA;
     assert(dsa);
     add_bignum_as_string(details, s_p, dsa->p);
     add_bignum_as_string(details, s_q, dsa->q);
@@ -1865,7 +1808,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     ret.set(s_dsa, details);
     break;
   case EVP_PKEY_DH:
-    ktype = k_OPENSSL_KEYTYPE_DH;
+    ktype = OPENSSL_KEYTYPE_DH;
     assert(dh);
     add_bignum_as_string(details, s_p, dh->p);
     add_bignum_as_string(details, s_g, dh->g);
@@ -1874,7 +1817,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     ret.set(s_dh, details);
     break;
 #ifdef EVP_PKEY_EC
-  case EVP_PKEY_EC:      ktype = k_OPENSSL_KEYTYPE_EC;    break;
+  case EVP_PKEY_EC:      ktype = OPENSSL_KEYTYPE_EC;    break;
 #endif
   }
   ret.set(s_type, ktype);
@@ -2062,7 +2005,8 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
 Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
                                     VRefParam env_keys,
                                     const Array& pub_key_ids,
-                                    const String& method /* = null_string */) {
+                                    const String& method /* = null_string */,
+                                    VRefParam iv /* = null_string */) {
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
     raise_warning("Fourth argument to openssl_seal() must be "
@@ -2077,6 +2021,24 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     cipher_type = EVP_get_cipherbyname(method.c_str());
     if (!cipher_type) {
       raise_warning("Unknown cipher algorithm");
+      return false;
+    }
+  }
+
+  int iv_len = EVP_CIPHER_iv_length(cipher_type);
+  unsigned char *iv_buf = nullptr;
+  String iv_s;
+  if (iv_len > 0) {
+    if (!iv.isRefData()) {
+      raise_warning(
+        "Cipher algorithm requires an IV to be supplied as a sixth parameter");
+    }
+
+    iv_s = String(iv_len, ReserveString);
+    iv_buf = (unsigned char*)iv_s.mutableData();
+
+    if (!RAND_bytes(iv_buf, iv_len)) {
+      raise_warning("Could not generate an IV.");
       return false;
     }
   }
@@ -2114,17 +2076,11 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     goto clean_exit;
   }
 
-  if (EVP_CIPHER_CTX_iv_length(&ctx) > 0) {
-    raise_warning("Cipher algorithm requires an IV");
-    ret = false;
-    goto clean_exit;
-  }
-
   int len1, len2;
 
   s = String(data.size() + EVP_CIPHER_CTX_block_size(&ctx), ReserveString);
   buf = (unsigned char *)s.mutableData();
-  if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, nullptr, pkeys, nkeys) ||
+  if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) ||
       !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data.data(),
                       data.size())) {
     ret = false;
@@ -2151,6 +2107,12 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   free(eks);
   free(eksl);
   free(pkeys);
+
+  if (iv_buf != nullptr) {
+    if (ret) {
+      iv.assignIfRef(iv_s.setSize(iv_len));
+    }
+  }
 
   if (ret) return len1 + len2;
   return false;
@@ -2630,13 +2592,11 @@ Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
   String s = String(length, ReserveString);
   buffer = (unsigned char *)s.mutableData();
 
-  int crypto_strength = 0;
-
-  if ((crypto_strength = RAND_pseudo_bytes(buffer, length)) < 0) {
+  if (RAND_bytes(buffer, length) <= 0) {
     crypto_strong.assignIfRef(false);
     return false;
   } else {
-    crypto_strong.assignIfRef((bool)crypto_strength);
+    crypto_strong.assignIfRef(true);
     s.setSize(length);
     return s;
   }
@@ -2895,55 +2855,63 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
 
 const StaticString s_OPENSSL_VERSION_TEXT("OPENSSL_VERSION_TEXT");
 
-class opensslExtension final : public Extension {
- public:
+struct opensslExtension final : Extension {
   opensslExtension() : Extension("openssl") {}
   void moduleInit() override {
-#define SSLCNS(cns) Native::registerConstant<KindOfInt64> \
-                      (makeStaticString("OPENSSL_"#cns), k_OPENSSL_##cns)
-    SSLCNS(RAW_DATA);
-    SSLCNS(ZERO_PADDING);
-    SSLCNS(ALGO_RMD160);
-    SSLCNS(ALGO_SHA512);
-    SSLCNS(ALGO_SHA384);
-    SSLCNS(ALGO_SHA256);
-    SSLCNS(ALGO_SHA224);
-    SSLCNS(ALGO_DSS1);
-    SSLCNS(ALGO_MD2);
-    SSLCNS(ALGO_MD4);
-    SSLCNS(ALGO_MD5);
-    SSLCNS(ALGO_SHA1);
-    SSLCNS(CIPHER_3DES);
-    SSLCNS(CIPHER_DES);
-    SSLCNS(CIPHER_RC2_128);
-    SSLCNS(CIPHER_RC2_40);
-    SSLCNS(CIPHER_RC2_64);
-    SSLCNS(KEYTYPE_DH);
-    SSLCNS(KEYTYPE_DSA);
-    SSLCNS(KEYTYPE_EC);
-    SSLCNS(KEYTYPE_RSA);
-    SSLCNS(NO_PADDING);
-    SSLCNS(PKCS1_OAEP_PADDING);
-    SSLCNS(PKCS1_PADDING);
-    SSLCNS(SSLV23_PADDING);
-    SSLCNS(VERSION_NUMBER);
-#undef SSLCNS
-#define PKCSCNS(cns) Native::registerConstant<KindOfInt64> \
-                       (makeStaticString("PKCS7_" #cns), k_PKCS7_##cns)
-    PKCSCNS(BINARY);
-    PKCSCNS(DETACHED);
-    PKCSCNS(NOATTR);
-    PKCSCNS(NOCERTS);
-    PKCSCNS(NOCHAIN);
-    PKCSCNS(NOINTERN);
-    PKCSCNS(NOSIGS);
-    PKCSCNS(NOVERIFY);
-    PKCSCNS(TEXT);
-#undef PKCSCNS
+    HHVM_RC_INT(OPENSSL_RAW_DATA, k_OPENSSL_RAW_DATA);
+    HHVM_RC_INT(OPENSSL_ZERO_PADDING, k_OPENSSL_ZERO_PADDING);
+    HHVM_RC_INT(OPENSSL_NO_PADDING, k_OPENSSL_NO_PADDING);
+    HHVM_RC_INT(OPENSSL_PKCS1_OAEP_PADDING, k_OPENSSL_PKCS1_OAEP_PADDING);
+    HHVM_RC_INT(OPENSSL_SSLV23_PADDING, k_OPENSSL_SSLV23_PADDING);
+    HHVM_RC_INT(OPENSSL_PKCS1_PADDING, k_OPENSSL_PKCS1_PADDING);
 
-    Native::registerConstant<KindOfString>(
-      s_OPENSSL_VERSION_TEXT.get(), k_OPENSSL_VERSION_TEXT.get()
-    );
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA1);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_MD5);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_MD4);
+#ifdef HAVE_OPENSSL_MD2_H
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_MD2);
+#endif
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_DSS1);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA224);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA256);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA384);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA512);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_RMD160);
+
+    HHVM_RC_INT(OPENSSL_CIPHER_RC2_40, PHP_OPENSSL_CIPHER_RC2_40);
+    HHVM_RC_INT(OPENSSL_CIPHER_RC2_128, PHP_OPENSSL_CIPHER_RC2_128);
+    HHVM_RC_INT(OPENSSL_CIPHER_RC2_64, PHP_OPENSSL_CIPHER_RC2_64);
+    HHVM_RC_INT(OPENSSL_CIPHER_DES, PHP_OPENSSL_CIPHER_DES);
+    HHVM_RC_INT(OPENSSL_CIPHER_3DES, PHP_OPENSSL_CIPHER_3DES);
+
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_RSA);
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DSA);
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DH);
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_EC);
+
+    HHVM_RC_INT_SAME(OPENSSL_VERSION_NUMBER);
+
+    HHVM_RC_INT_SAME(PKCS7_TEXT);
+    HHVM_RC_INT_SAME(PKCS7_NOCERTS);
+    HHVM_RC_INT_SAME(PKCS7_NOSIGS);
+    HHVM_RC_INT_SAME(PKCS7_NOCHAIN);
+    HHVM_RC_INT_SAME(PKCS7_NOINTERN);
+    HHVM_RC_INT_SAME(PKCS7_NOVERIFY);
+    HHVM_RC_INT_SAME(PKCS7_DETACHED);
+    HHVM_RC_INT_SAME(PKCS7_BINARY);
+    HHVM_RC_INT_SAME(PKCS7_NOATTR);
+
+    HHVM_RC_STR_SAME(OPENSSL_VERSION_TEXT);
+
+    HHVM_RC_INT_SAME(X509_PURPOSE_SSL_CLIENT);
+    HHVM_RC_INT_SAME(X509_PURPOSE_SSL_SERVER);
+    HHVM_RC_INT_SAME(X509_PURPOSE_NS_SSL_SERVER);
+    HHVM_RC_INT_SAME(X509_PURPOSE_SMIME_SIGN);
+    HHVM_RC_INT_SAME(X509_PURPOSE_SMIME_ENCRYPT);
+    HHVM_RC_INT_SAME(X509_PURPOSE_CRL_SIGN);
+#ifdef X509_PURPOSE_ANY
+    HHVM_RC_INT_SAME(X509_PURPOSE_ANY);
+#endif
 
     HHVM_FE(openssl_csr_export_to_file);
     HHVM_FE(openssl_csr_export);

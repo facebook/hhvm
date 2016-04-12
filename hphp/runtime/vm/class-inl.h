@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -207,12 +207,12 @@ inline uint32_t Class::declPropNumAccessible() const {
   return m_declPropNumAccessible;
 }
 
-inline const Class::Prop* Class::declProperties() const {
-  return m_declProperties.accessList();
+inline folly::Range<const Class::Prop*> Class::declProperties() const {
+  return m_declProperties.range();
 }
 
-inline const Class::SProp* Class::staticProperties() const {
-  return m_staticProperties.accessList();
+inline folly::Range<const Class::SProp*> Class::staticProperties() const {
+  return m_staticProperties.range();
 }
 
 inline Slot Class::lookupDeclProp(const StringData* propName) const {
@@ -224,11 +224,11 @@ inline Slot Class::lookupSProp(const StringData* sPropName) const {
 }
 
 inline RepoAuthType Class::declPropRepoAuthType(Slot index) const {
-  return m_declProperties[index].m_repoAuthType;
+  return m_declProperties[index].repoAuthType;
 }
 
 inline RepoAuthType Class::staticPropRepoAuthType(Slot index) const {
-  return m_staticProperties[index].m_repoAuthType;
+  return m_staticProperties[index].repoAuthType;
 }
 
 inline bool Class::hasDeepInitProps() const {
@@ -346,7 +346,7 @@ inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
-inline void Class::setClassHandle(rds::Link<Class*> link) const {
+inline void Class::setClassHandle(rds::Link<LowPtr<Class>> link) const {
   assert(!m_cachedClass.bound());
   m_cachedClass = link;
 }
@@ -516,6 +516,16 @@ inline bool isAbstract(const Class* cls) {
 
 inline bool classHasPersistentRDS(const Class* cls) {
   return cls && rds::isPersistentHandle(cls->classHandle());
+}
+
+inline bool classMayHaveMagicPropMethods(const Class* cls) {
+  auto constexpr no_overrides =
+    AttrNoOverrideMagicGet |
+    AttrNoOverrideMagicSet |
+    AttrNoOverrideMagicIsset |
+    AttrNoOverrideMagicUnset;
+
+  return (cls->attrs() & no_overrides) != no_overrides;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

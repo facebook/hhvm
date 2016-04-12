@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -163,11 +163,16 @@ public:
   /**
    * Output functions
    */
-  void print  (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void help   (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void info   (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void output (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void error  (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void print  (ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void help   (ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void info   (ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void output (ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void error  (ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
 
   void print  (const String& s);
   void help   (const String& s);
@@ -191,7 +196,7 @@ public:
             int line2 = 0,
             int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
   void shortCode(BreakPointInfoPtr bp);
-  char ask(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  char ask(ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
   std::string wrap(const std::string &s);
   void helpTitle(const char *title);
@@ -480,7 +485,9 @@ private:
   int  checkEvalEnd();
   void processTakeCode();
   bool processEval();
-  DebuggerCommand *createCommand();
+  DebuggerCommandPtr createCommand();
+  template<class T> DebuggerCommandPtr new_cmd(const char* name);
+  template<class T> DebuggerCommandPtr match_cmd(const char* name);
 
   void updateLiveLists();
   void promptFunctionPrototype();

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -11,57 +11,12 @@
 open Core
 
 (*****************************************************************************)
-(* Dependencies *)
-(*****************************************************************************)
-
-(* Module adding the dependencies related to inheritance.
- * We need a complete accurate graph of dependencies related to inheritance.
- * Because without them, we can't recompute the set of files that must be
- * rechecked when something changes.
- * It is safer for us to add them as soon as possible, that's why we add
- * them just after parsing, because that's as soon as it gets.
- *)
-module AddDeps = struct
-  module Dep = Typing_deps.Dep
-  open Ast
-
-  let rec program defl = List.iter defl def
-
-  and def = function
-    | Class c -> class_ c
-    | Fun _  | Stmt _  | Typedef _ | Constant _ -> ()
-    | Namespace _ | NamespaceUse _ -> assert false
-
-  and class_ c =
-    let name = snd c.c_name in
-    List.iter c.c_extends (hint name);
-    List.iter c.c_implements (hint name);
-    List.iter c.c_body (class_def name)
-
-  and class_def root = function
-    | ClassUse h -> hint root h
-    | XhpAttrUse h -> hint root h
-    | ClassTraitRequire (_, h) -> hint root h
-    | Attributes _  | Const _ | AbsConst _ | ClassVars _ | XhpAttr _ | Method _
-    | TypeConst _ | XhpCategory _ -> ()
-
-  and hint root (_, h) =
-    match h with
-    | Happly ((_, parent), _) ->
-        Typing_deps.add_idep (Some (Dep.Class root)) (Dep.Extends parent)
-    | Hoption _ | Hfun _ | Htuple _ | Hshape _ | Haccess _ -> ()
-
-
-end
-
-
-(*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
 
 let neutral = (
   Relative_path.Map.empty, [],
-  Relative_path.Set.empty, Relative_path.Set.empty
+  Relative_path.Set.empty
   )
 
 let empty_file_info : FileInfo.t = {
@@ -83,7 +38,7 @@ let legacy_php_file_info = ref (fun fn ->
  * errorl is a list of errors
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
-let parse (acc, errorl, error_files, php_files) fn =
+let really_parse (acc, errorl, error_files) fn =
   let errorl', {Parser_hack.file_mode; comments; ast} =
     Errors.do_ begin fun () ->
       Parser_hack.from_file fn
@@ -91,40 +46,49 @@ let parse (acc, errorl, error_files, php_files) fn =
   in
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
   if file_mode <> None then begin
-    AddDeps.program ast;
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
-    Parser_heap.ParserHeap.add fn ast;
+    Parser_heap.ParserHeap.write_through fn ast;
     let defs =
       {FileInfo.funs; classes; typedefs; consts; comments; file_mode;
        consider_names_just_for_autoload = false}
     in
-    let acc = Relative_path.Map.add fn defs acc in
+    let acc = Relative_path.Map.add acc ~key:fn ~data:defs in
     let errorl = List.rev_append errorl' errorl in
     let error_files =
       if errorl' = []
       then error_files
-      else Relative_path.Set.add fn error_files
+      else Relative_path.Set.add error_files fn
     in
-    acc, errorl, error_files, php_files
+    acc, errorl, error_files
   end
   else begin
     let info = try !legacy_php_file_info fn with _ -> empty_file_info in
-    let acc = Relative_path.Map.add fn info acc in
-    let php_files = Relative_path.Set.add fn php_files in
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build
      *)
-    acc, errorl, error_files, php_files
+    let acc = Relative_path.Map.add acc ~key:fn ~data:info in
+    acc, errorl, error_files
   end
+
+let parse (acc, errorl, error_files) fn =
+  (* Ugly hack... hack build requires that we keep JS files in our
+   * files_info map, but we don't want to actually read them from disk
+   * because we don't do anything with them. See also
+   * ServerMain.Program.make_next_files *)
+  if FindUtils.is_php (Relative_path.suffix fn) then
+    really_parse (acc, errorl, error_files) fn
+  else
+    let info = empty_file_info in
+    let acc = Relative_path.Map.add acc ~key:fn ~data:info in
+    acc, errorl, error_files
 
 (* Merging the results when the operation is done in parallel *)
 let merge_parse
-    (acc1, status1, files1, pfiles1)
-    (acc2, status2, files2, pfiles2) =
-  Relative_path.Map.fold Relative_path.Map.add acc1 acc2,
+    (acc1, status1, files1)
+    (acc2, status2, files2) =
+  Relative_path.Map.union acc1 acc2,
   List.rev_append status1 status2,
-  Relative_path.Set.union files1 files2,
-  Relative_path.Set.union pfiles1 pfiles2
+  Relative_path.Set.union files1 files2
 
 let parse_files acc fnl =
   let parse =
@@ -153,8 +117,8 @@ let parse_parallel workers get_next =
 (*****************************************************************************)
 
 let go workers ~get_next =
-  let fast, errorl, failed_parsing, php_files =
+  let fast, errorl, failed_parsing =
     parse_parallel workers get_next in
   Parsing_hooks.dispatch_parse_task_completed_hook
-    (Relative_path.Map.keys fast) php_files;
+    (Relative_path.Map.keys fast);
   fast, errorl, failed_parsing

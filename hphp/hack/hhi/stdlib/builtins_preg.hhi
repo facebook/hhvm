@@ -18,10 +18,16 @@ function preg_grep($pattern, $input, $flags = 0) { }
  *
  * This will eventually be fixed with more type inference magic.
  */
-function preg_match($pattern, $subject, &$matches = array(), $flags = 0, $offset = 0): int { }
-function preg_match_all($pattern, $subject, &$matches = array(), $flags = 0, $offset = 0) { }
-function preg_replace($pattern, $replacement, $subject, $limit = -1, &$count = null) { }
-function preg_replace_callback($pattern, $callback, $subject, $limit = -1, &$count = null) { }
+function preg_match($pattern, $subject, &$matches = array(), $flags = 0,
+                    $offset = 0): int { }
+function preg_match_all($pattern, $subject, &$matches = array(), $flags = 0,
+                        $offset = 0) { }
+function preg_replace($pattern, $replacement, $subject, $limit = -1,
+                      &$count = null) { }
+function preg_replace_callback($pattern, $callback, $subject, $limit = -1,
+                               &$count = null) { }
+function preg_replace_callback_array($patterns_and_callbacks, $subject,
+                                     $limit = -1, &$count = null) { }
 function preg_split($pattern, $subject, $limit = -1, $flags = 0) { }
 function preg_quote($str, $delimiter = null) { }
 function preg_last_error() { }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,8 +40,6 @@ ClassConstant::ClassConstant
   // for now only store TypeAnnotation info for type constants
   if (typeconst && typeAnnot) {
     m_typeStructure = Array(typeAnnot->getScalarArrayRep());
-  } else {
-    m_typeStructure = Array::Create();
   }
 }
 
@@ -170,22 +168,6 @@ StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
   // abstract constants are not added to the constant table and don't have
   // any values to propagate.
   return StatementPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ClassConstant::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_typeConstraint.empty() ? 2 : 3;
-  cg.printObjectHeader("ConstantStatement", numProps);
-  if (!m_typeConstraint.empty()) {
-    cg.printPropertyHeader("typeAnnotation");
-    cg.printTypeExpression(m_typeConstraint);
-  }
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

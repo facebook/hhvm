@@ -14,9 +14,9 @@ function throw_one_time($why, $what) {
 fb_setprofile('throw_one_time');
 
 async function a() {
-  await RescheduleWaitHandle::create(0,0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
   echo "a woke up\n";
-  await RescheduleWaitHandle::create(0,0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
   echo "a woke up2\n";
 }
 

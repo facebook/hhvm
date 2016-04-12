@@ -657,7 +657,8 @@ apply_filter(zval **zpp, yaml_event_t event, HashTable *callbacks TSRMLS_DC)
         zval_ptr_dtor(&retval_ptr);
       } else {
         /* copy result into our return var */
-        REPLACE_ZVAL_VALUE(zpp, retval_ptr, 0);
+        REPLACE_ZVAL_VALUE(zpp, retval_ptr, 1);
+        zval_ptr_dtor(&retval_ptr);
       }
       return Y_FILTER_SUCCESS;
     }
@@ -1091,7 +1092,8 @@ eval_timestamp(zval ** zpp, char *ts, int ts_len TSRMLS_DC)
 
     } else {
       zval_ptr_dtor(&arg);
-      REPLACE_ZVAL_VALUE(zpp, retval, 0);
+      REPLACE_ZVAL_VALUE(zpp, retval, 1);
+      zval_ptr_dtor(&retval);
       return SUCCESS;
     }
 

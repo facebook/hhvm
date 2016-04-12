@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -10,8 +10,8 @@
 
 type env = {
   root: Path.t;
-  wait: bool;
   no_load: bool;
+  silent: bool;
 }
 
 val main : env -> Exit_status.t

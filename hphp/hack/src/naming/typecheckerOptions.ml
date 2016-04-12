@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -25,7 +25,7 @@ type t = {
   tco_unsafe_xhp : bool;
 
   (* List of <<UserAttribute>> names expected in the codebase *)
-  tco_user_attrs : Utils.SSet.t option;
+  tco_user_attrs : SSet.t option;
 }
 
 let default = {
@@ -48,4 +48,4 @@ let unsafe_xhp t = t.tco_unsafe_xhp
 let user_attrs t = t.tco_user_attrs
 let allowed_attribute t name = match t.tco_user_attrs with
   | None -> true
-  | Some attr_names -> Utils.SSet.mem name attr_names
+  | Some attr_names -> SSet.mem name attr_names

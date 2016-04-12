@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,10 +30,9 @@ using folly::fbvector;
 using namespace HPHP::IDL;
 
 int main(int argc, const char* argv[]) {
-  if (argc < 4) {
+  if (argc < 3) {
     std::cout << "Usage: " << argv[0]
               << " <output file>"
-              << " <header file>"
               << " <*.idl.json>...\n";
     return 0;
   }
@@ -44,7 +43,7 @@ int main(int argc, const char* argv[]) {
   fbstring invocation_trace;
   makeInvocationTrace(invocation_trace, argc, argv);
 
-  for (auto i = 3; i < argc; ++i) {
+  for (auto i = 2; i < argc; ++i) {
     try {
       parseIDL(argv[i], funcs, classes);
     } catch (const std::exception& exc) {
@@ -60,12 +59,11 @@ int main(int argc, const char* argv[]) {
   cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "#include \"hphp/runtime/vm/runtime.h\"\n"
-      << "#include \"" << argv[2] << "\"\n"
       << "#include \"hphp/util/abi-cxx.h\"\n"
       << "namespace HPHP {\n"
       << "  struct TypedValue;\n"
       << "  struct ActRec;\n"
-      << "  class Class;\n"
+      << "  struct Class;\n"
       << "\n\n";
 
   std::unordered_set<fbstring> classesWithCtors;
@@ -113,6 +111,9 @@ int main(int argc, const char* argv[]) {
     cpp << "{ \"" << escapeCpp(func.getPhpName()) << "\", "
         << "fg_" << name << ", (void*)(&"
         << func.getPrefixedCppName() << ") }";
+  }
+  if (!funcs.size()) {
+    cpp << "  { }";
   }
   cpp << "\n};\n\n";
 

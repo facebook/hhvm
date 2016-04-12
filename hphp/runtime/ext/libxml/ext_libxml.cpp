@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -47,8 +47,7 @@ TRACE_SET_MOD(libxml);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class xmlErrorVec : public folly::fbvector<xmlError> {
-public:
+struct xmlErrorVec : folly::fbvector<xmlError> {
   ~xmlErrorVec() {
     clearErrors();
   }
@@ -614,8 +613,7 @@ void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
 ///////////////////////////////////////////////////////////////////////////////
 // Extension
 
-class LibXMLExtension final : public Extension {
-  public:
+struct LibXMLExtension final : Extension {
     LibXMLExtension() : Extension("libxml") {}
 
   private:
@@ -625,7 +623,7 @@ class LibXMLExtension final : public Extension {
     }
 
     inline static void cnsStr(const StaticString & name, const char * value) {
-      Native::registerConstant<KindOfStaticString>(
+      Native::registerConstant<KindOfPersistentString>(
           name.get(), StaticString(value).get());
     }
 

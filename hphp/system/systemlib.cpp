@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include <vector>
 
@@ -57,6 +58,15 @@ Func* s_nullFunc = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
+Class* s_ThrowableClass;
+Class* s_BaseExceptionClass;
+Class* s_ErrorClass;
+Class* s_ArithmeticErrorClass;
+Class* s_AssertionErrorClass;
+Class* s_DivisionByZeroErrorClass;
+Class* s_ParseErrorClass;
+Class* s_TypeErrorClass;
+
 Object AllocStdClassObject() {
   return Object{s_stdclassClass};
 }
@@ -67,6 +77,27 @@ Object AllocPinitSentinel() {
 
 Object AllocExceptionObject(const Variant& message) {
   return createAndConstruct(s_ExceptionClass, make_packed_array(message));
+}
+
+Object AllocErrorObject(const Variant& message) {
+  return createAndConstruct(s_ErrorClass, make_packed_array(message));
+}
+
+Object AllocArithmeticErrorObject(const Variant& message) {
+  return createAndConstruct(s_ArithmeticErrorClass, make_packed_array(message));
+}
+
+Object AllocDivisionByZeroErrorObject(const Variant& message) {
+  return createAndConstruct(s_DivisionByZeroErrorClass,
+                            make_packed_array(message));
+}
+
+Object AllocParseErrorObject(const Variant& message) {
+  return createAndConstruct(s_ParseErrorClass, make_packed_array(message));
+}
+
+Object AllocTypeErrorObject(const Variant& message) {
+  return createAndConstruct(s_TypeErrorClass, make_packed_array(message));
 }
 
 Object AllocBadMethodCallExceptionObject(const Variant& message) {
@@ -134,32 +165,52 @@ Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
 }
 
 void throwExceptionObject(const Variant& message) {
-  throw AllocExceptionObject(message);
+  throw_object(AllocExceptionObject(message));
+}
+
+void throwErrorObject(const Variant& message) {
+  throw_object(AllocErrorObject(message));
+}
+
+void throwArithmeticErrorObject(const Variant& message) {
+  throw_object(AllocArithmeticErrorObject(message));
+}
+
+void throwDivisionByZeroErrorObject(const Variant& message) {
+  throw_object(AllocDivisionByZeroErrorObject(message));
+}
+
+void throwParseErrorObject(const Variant& message) {
+  throw_object(AllocParseErrorObject(message));
+}
+
+void throwTypeErrorObject(const Variant& message) {
+  throw_object(AllocTypeErrorObject(message));
 }
 
 void throwBadMethodCallExceptionObject(const Variant& message) {
-  throw AllocBadMethodCallExceptionObject(message);
+  throw_object(AllocBadMethodCallExceptionObject(message));
 }
 
 void throwInvalidArgumentExceptionObject(const Variant& message) {
-  throw AllocInvalidArgumentExceptionObject(message);
+  throw_object(AllocInvalidArgumentExceptionObject(message));
 }
 
 void throwRuntimeExceptionObject(const Variant& message) {
-  throw AllocRuntimeExceptionObject(message);
+  throw_object(AllocRuntimeExceptionObject(message));
 }
 
 void throwOutOfBoundsExceptionObject(const Variant& message) {
-  throw AllocOutOfBoundsExceptionObject(message);
+  throw_object(AllocOutOfBoundsExceptionObject(message));
 }
 
 void throwInvalidOperationExceptionObject(const Variant& message) {
-  throw AllocInvalidOperationExceptionObject(message);
+  throw_object(AllocInvalidOperationExceptionObject(message));
 }
 
 void throwDOMExceptionObject(const Variant& message,
                              const Variant& code) {
-  throw AllocDOMExceptionObject(message, code);
+  throw_object(AllocDOMExceptionObject(message, code));
 }
 
 void throwSoapFaultObject(const Variant& code,
@@ -168,9 +219,9 @@ void throwSoapFaultObject(const Variant& code,
                           const Variant& detail /* = null_variant */,
                           const Variant& name /* = null_variant */,
                           const Variant& header /* = null_variant */) {
-  throw Object{AllocSoapFaultObject(code, message,
+  throw_object(Object{AllocSoapFaultObject(code, message,
                                     actor, detail,
-                                    name, header)};
+                                    name, header)});
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

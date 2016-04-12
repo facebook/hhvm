@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -340,6 +340,7 @@ static void get_color(int tokid, int prev, int next,
     COLOR_ENTRY(T_IS_EQUAL,                 None        );
     COLOR_ENTRY(T_IS_GREATER_OR_EQUAL,      None        );
     COLOR_ENTRY(T_IS_SMALLER_OR_EQUAL,      None        );
+    COLOR_ENTRY(T_SPACESHIP,                None        );
     COLOR_ENTRY(T_SR,                       None        );
     COLOR_ENTRY(T_SL,                       None        );
     COLOR_ENTRY(T_DEC,                      None        );

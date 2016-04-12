@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,5 +8,5 @@
  *
  *)
 
-val elaborate_id : Namespace_env.env -> Ast.id -> Ast.id
+val elaborate_id : Namespace_env.env -> Ast.ns_kind -> Ast.id -> Ast.id
 val elaborate_defs : Ast.program -> Ast.program

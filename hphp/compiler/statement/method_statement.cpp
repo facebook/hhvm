@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -525,60 +525,6 @@ void MethodStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void MethodStatement::outputCodeModel(CodeGenerator &cg) {
-  auto isAnonymous = ParserBase::IsClosureName(m_originalName);
-  auto numProps = 4;
-  if (m_attrList != nullptr) numProps++;
-  if (m_ref) numProps++;
-  if (m_params != nullptr) numProps++;
-  if (m_retTypeAnnotation != nullptr) numProps++;
-  if (!m_docComment.empty()) numProps++;
-  cg.printObjectHeader("FunctionStatement", numProps);
-  if (m_attrList != nullptr) {
-    cg.printPropertyHeader("attributes");
-    cg.printExpressionVector(m_attrList);
-  }
-  cg.printPropertyHeader("modifiers");
-  m_modifiers->outputCodeModel(cg);
-  if (m_ref) {
-    cg.printPropertyHeader("returnsReference");
-    cg.printBool(true);
-  }
-  cg.printPropertyHeader("name");
-  cg.printValue(isAnonymous ? "" : m_originalName);
-  //TODO: type parameters (task 3262469)
-  if (m_params != nullptr) {
-    cg.printPropertyHeader("parameters");
-    cg.printExpressionVector(m_params);
-  }
-  if (m_retTypeAnnotation != nullptr) {
-    cg.printPropertyHeader("returnType");
-    m_retTypeAnnotation->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("block");
-  if (m_stmt != nullptr) {
-    auto stmt = m_stmt;
-    if (m_autoPropCount > 0) {
-      stmt = static_pointer_cast<StatementList>(stmt->clone());
-      for (int i = m_autoPropCount; i > 0; i--) {
-        stmt->removeElement(0);
-      }
-    }
-    cg.printAsEnclosedBlock(stmt);
-  } else {
-    cg.printAsBlock(nullptr);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  if (!m_docComment.empty()) {
-    cg.printPropertyHeader("comments");
-    cg.printValue(m_docComment);
-  }
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

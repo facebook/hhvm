@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -208,6 +208,7 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   trace_time timer("load units");
 
   open_repo(input_repo);
+  Repo::get().loadGlobalData();
   SCOPE_EXIT { Repo::shutdown(); };
 
   if (Repo::get().global().UsedHHBBC) {
@@ -237,6 +238,9 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
+  gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
+  gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
+  gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
 
   gd.arrayTypeTable.repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);
@@ -284,16 +288,15 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoJournal         = "memory";
   RuntimeOption::RepoCommit          = false;
   RuntimeOption::EvalJit             = false;
-
-  register_process_init();
-  initialize_repo();
-  Repo::shutdown();
-
-  hphp_process_init();
-
   // We only need to set this flag so Repo::global will let us access
   // it.
   RuntimeOption::RepoAuthoritative = true;
+
+  register_process_init();
+  initialize_repo();
+
+  hphp_process_init();
+  Repo::shutdown();
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
   compile_repo();

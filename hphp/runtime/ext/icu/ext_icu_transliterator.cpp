@@ -8,7 +8,7 @@ Class* Transliterator::c_Transliterator = nullptr;
 #define FETCH_TRANS(data, obj) \
   auto data = Transliterator::Get(obj); \
   if (!data) { \
-    throw s_intl_error->getException("Uninitialized Message Formatter"); \
+    s_intl_error->throwException("Uninitialized Message Formatter"); \
   }
 
 
@@ -158,10 +158,6 @@ static Variant HHVM_METHOD(Transliterator, transliterate,
 
 //////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_FORWARD("FORWARD"),
-  s_REVERSE("REVERSE");
-
 void IntlExtension::initTransliterator() {
   HHVM_ME(Transliterator, __init);
   HHVM_ME(Transliterator, __createInverse);
@@ -171,10 +167,8 @@ void IntlExtension::initTransliterator() {
   HHVM_STATIC_ME(Transliterator, listIDs);
   HHVM_ME(Transliterator, transliterate);
 
-  Native::registerClassConstant<KindOfInt64>
-    (s_Transliterator.get(), s_FORWARD.get(), UTRANS_FORWARD);
-  Native::registerClassConstant<KindOfInt64>
-    (s_Transliterator.get(), s_REVERSE.get(), UTRANS_REVERSE);
+  HHVM_RCC_INT(Transliterator, FORWARD, UTRANS_FORWARD);
+  HHVM_RCC_INT(Transliterator, REVERSE, UTRANS_REVERSE);
 
   Native::registerNativeDataInfo<Transliterator>(s_Transliterator.get());
 

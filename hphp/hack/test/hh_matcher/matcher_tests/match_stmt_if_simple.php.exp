@@ -1,0 +1,5 @@
+4: class Foo {
+5:   public function bar(): void {
+6:     if (true) {
+7:       echo "hi";
+9:       echo "bye";

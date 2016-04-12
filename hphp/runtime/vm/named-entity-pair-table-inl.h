@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@ inline bool NamedEntityPairTable::contains(Id id) const {
 
 inline StringData* NamedEntityPairTable::lookupLitstr(Id id) const {
   assert(contains(id));
-  return const_cast<StringData*>((*this)[id].first);
+  return const_cast<StringData*>((*this)[id].first.get());
 }
 
 inline const NamedEntity*
@@ -48,7 +48,8 @@ NamedEntityPairTable::lookupNamedEntityPair(Id id) const {
 
   // Create the NamedEntity if necessary.
   if (UNLIKELY(!nep.second)) {
-    const_cast<const NamedEntity*&>(nep.second) = NamedEntity::get(nep.first);
+    const_cast<LowPtr<const NamedEntity>&>(nep.second) =
+      NamedEntity::get(nep.first);
   }
   return nep;
 }

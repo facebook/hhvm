@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,18 +19,19 @@
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/imarker.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class File;
+struct File;
 
 struct StringBufferLimitException : FatalErrorException {
   StringBufferLimitException(int size, const String& partialResult)
     : FatalErrorException(0, "StringBuffer exceeded %d bytes of memory", size),
       m_result(partialResult) {}
-
-  String m_result;
+  req::root<String> m_result;
 };
 
 /*
@@ -41,6 +42,12 @@ struct StringBufferLimitException : FatalErrorException {
  */
 struct StringBuffer {
   static constexpr uint32_t kDefaultOutputLimit = StringData::MaxSize;
+
+  /*
+   * This class does not need to be swept when used as a NativeData from
+   * the StringBuffer HNI class.
+   */
+  static constexpr bool sweep = false;
 
   /*
    * Construct a string buffer with some initial size, subsequent allocation
@@ -189,7 +196,8 @@ struct StringBuffer {
   /*
    * Append to this string using a printf-style format specification.
    */
-  void printf(const char* format, ...) ATTRIBUTE_PRINTF(2,3);
+  void printf(ATTRIBUTE_PRINTF_STRING const char* format, ...)
+    ATTRIBUTE_PRINTF(2,3);
 
   /*
    * Read a file into this buffer. Use a larger page size to read more bytes

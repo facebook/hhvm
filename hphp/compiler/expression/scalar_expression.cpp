@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,6 +36,7 @@
 #include <folly/Conv.h>
 
 #include <sstream>
+#include <cctype>
 #include <cmath>
 #include <limits.h>
 
@@ -82,7 +83,7 @@ ScalarExpression::ScalarExpression
         m_type = T_DNUMBER;
         return;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         m_type = T_STRING;
         return;
@@ -90,6 +91,7 @@ ScalarExpression::ScalarExpression
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
+      case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -293,81 +295,6 @@ std::string ScalarExpression::getIdentifier() const {
     }
   }
   return "";
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
-  switch (m_type) {
-    case T_COMPILER_HALT_OFFSET:
-    case T_NS_C:
-    case T_LINE:
-    case T_TRAIT_C:
-    case T_CLASS_C:
-    case T_METHOD_C:
-    case T_FUNC_C:
-      {
-        cg.printObjectHeader("SimpleConstantExpression", 2);
-        std::string constName;
-        switch (m_type) {
-          case T_COMPILER_HALT_OFFSET:
-            constName = "__COMPILER_HALT_OFFSET__"; break;
-          case T_NS_C: constName = "__NAMESPACE__"; break;
-          case T_LINE: constName = "__LINE__"; break;
-          case T_TRAIT_C: constName = "__TRAIT__"; break;
-          case T_CLASS_C: constName = "__CLASS__"; break;
-          case T_METHOD_C: constName = "__METHOD__"; break;
-          case T_FUNC_C: constName = "__FUNCTION__"; break;
-          default: break;
-        }
-        cg.printPropertyHeader("constantName");
-        cg.printValue(constName);
-        cg.printPropertyHeader("sourceLocation");
-        cg.printLocation(this);
-        cg.printObjectFooter();
-      }
-      return;
-    case T_STRING:
-      if (!m_quoted) {
-        // This is in fact an identifier, not a scalar value
-        cg.printValue(m_originalValue);
-        return;
-      }
-      break;
-    default:
-      break;
-  }
-
-  cg.printObjectHeader("ScalarExpression", 2);
-  cg.printPropertyHeader("value");
-
-  auto printInt = [&]() {
-    auto i = static_cast<int64_t>(std::stoll(m_value, nullptr, 0));
-    cg.printValue(i);
-  };
-  auto printDouble = [&]() {
-    auto d = String(m_value).toDouble();
-    cg.printValue(d);
-  };
-
-  switch (m_type) {
-    case T_NUM_STRING:
-    case T_LNUMBER:
-      printInt();
-      break;
-    case T_DNUMBER:
-      printDouble();
-      break;
-    case T_ONUMBER:
-      RuntimeOption::IntsOverflowToInts ? printInt() : printDouble();
-      break;
-    default:
-      cg.printValue(m_originalValue);
-      break;
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

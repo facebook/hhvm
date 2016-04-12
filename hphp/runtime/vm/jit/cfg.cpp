@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -96,7 +96,9 @@ BlockIDs numberBlocks(const IRUnit& unit, const BlockList& input) {
 
 Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   auto& branch = from->back();
-  Block* middle = unit.defBlock();
+  // Guesstimate the weight of the new block.
+  auto profCount = std::min(from->profCount(), to->profCount()) / 2;
+  Block* middle = unit.defBlock(profCount);
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
          from->id(), to->id(), middle->id());
   if (branch.taken() == to) {

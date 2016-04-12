@@ -37,7 +37,8 @@
     FCall 1
     PopR
   # line 7
-    VGetM <L:$ar EI:0>
+    BaseL $ar DefineReffy
+    VGetM 0 EI:0
     BindL $x
     PopV
   # line 8
@@ -90,7 +91,8 @@ loop:
     PopC
   # line 17
     CGetL $v
-    SetM <L:$ar2 EL:$k>
+    BaseL $ar2 Define
+    SetM 0 EL:$k
     PopC
   # line 18
     WIterNextK 0 loop $v $k

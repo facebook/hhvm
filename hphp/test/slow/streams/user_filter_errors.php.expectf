@@ -1,0 +1,24 @@
+
+Warning: stream_get_filters() expects exactly 0 parameters, 1 given in %s/slow/streams/user_filter_errors.php on line 2
+NULL
+
+Warning: stream_filter_register() expects exactly 2 parameters, 0 given in %s/slow/streams/user_filter_errors.php on line 3
+bool(false)
+
+Warning: stream_filter_append() expects at least 2 parameters, 0 given in %s/slow/streams/user_filter_errors.php on line 4
+bool(false)
+
+Warning: stream_filter_prepend() expects at least 2 parameters, 0 given in %s/slow/streams/user_filter_errors.php on line 5
+bool(false)
+
+Warning: stream_filter_remove() expects exactly 1 parameter, 0 given in %s/slow/streams/user_filter_errors.php on line 6
+bool(false)
+
+Warning: stream_bucket_make_writeable() expects exactly 1 parameter, 0 given in %s/slow/streams/user_filter_errors.php on line 8
+bool(false)
+
+Warning: stream_bucket_append() expects exactly 2 parameters, 0 given in %s/slow/streams/user_filter_errors.php on line 9
+bool(false)
+
+Warning: stream_bucket_prepend() expects exactly 2 parameters, 0 given in %s/slow/streams/user_filter_errors.php on line 10
+bool(false)

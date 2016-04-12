@@ -12,8 +12,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_MessageFormatter;
 
-class MessageFormatter : public IntlError {
-public:
+struct MessageFormatter : IntlError {
   MessageFormatter() {}
   MessageFormatter(const MessageFormatter&) = delete;
   MessageFormatter& operator=(const MessageFormatter& src) {

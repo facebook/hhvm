@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_APC_LOCAL_ARRAY_DEFS_H_
 #define incl_HPHP_APC_LOCAL_ARRAY_DEFS_H_
 
+#include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {

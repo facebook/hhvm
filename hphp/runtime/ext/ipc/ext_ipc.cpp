@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +19,6 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/system/constants.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include <folly/String.h>
@@ -55,10 +54,15 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-static class SysvmsgExtension final : public Extension {
-public:
+static struct SysvmsgExtension final : Extension {
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
+    HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
+    HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
+    HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
+    HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
+    HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
+
     HHVM_FE(ftok);
     HHVM_FE(msg_get_queue);
     HHVM_FE(msg_queue_exists);
@@ -72,8 +76,7 @@ public:
   }
 } s_sysvmsg_extension;
 
-static class SysvsemExtension final : public Extension {
-public:
+static struct SysvsemExtension final : Extension {
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(sem_acquire);
@@ -85,8 +88,7 @@ public:
   }
 } s_sysvsem_extension;
 
-static class SysvshmExtension final : public Extension {
-public:
+static struct SysvshmExtension final : Extension {
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(shm_attach);
@@ -121,8 +123,7 @@ int64_t HHVM_FUNCTION(ftok,
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
-class MessageQueue : public ResourceData {
-public:
+struct MessageQueue : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MessageQueue)
 
   int64_t key;
@@ -576,8 +577,7 @@ typedef struct {
   long total;
 } sysvshm_chunk_head;
 
-class sysvshm_shm {
-public:
+struct sysvshm_shm {
   key_t key;               /* Key set by user */
   long id;                 /* Returned by shmget. */
   sysvshm_chunk_head *ptr; /* memoryaddress of shared memory */
@@ -587,8 +587,7 @@ public:
   }
 };
 
-class shm_set : public std::set<sysvshm_shm*> {
-public:
+struct shm_set : std::set<sysvshm_shm*> {
   ~shm_set() {
     for (auto iter = begin(); iter != end(); ++iter) {
       delete *iter;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -155,6 +155,8 @@ inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
  * possible in HPHP when you know you dealing with request-allocated memory).
  * The final word compare is adjusted to handle the slack in lenBytes so only
  * the bytes we care about are compared.
+ *
+ * Assumes that the the buffer addresses are 8-bytes aligned.
  */
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
@@ -162,10 +164,7 @@ bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
   auto constexpr W = sizeof(T);
 
   assert(reinterpret_cast<const uintptr_t>(mem1) % W == 0);
-  // We would like to make sure `mem2' is also aligned.  But `strintern_eq' has
-  // always been using `wordsame()' on non-aligned pointers, and this doesn't
-  // seem to cause crashes in practice.
-  // assert(reinterpret_cast<const uintptr_t>(mem2) % W == 0);
+  assert(reinterpret_cast<const uintptr_t>(mem2) % W == 0);
 
   // Inverse of lenBytes.  Do the negation here to avoid doing it later on the
   // critical path.

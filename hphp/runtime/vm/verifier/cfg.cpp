@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,12 +55,10 @@ void GraphBuilder::createBlocks() {
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
     if ((isCF(pc) || isTF(pc)) && !i.empty()) createBlock(i.front());
-    if (isSwitch(*reinterpret_cast<const Op*>(pc))) {
-      foreachSwitchTarget(reinterpret_cast<const Op*>(pc), [&](Offset& o) {
-        createBlock(pc + o);
-      });
+    if (isSwitch(peek_op(pc))) {
+      foreachSwitchTarget(pc, [&](Offset o) { createBlock(pc + o); });
     } else {
-      Offset target = instrJumpTarget((Op*)bc, pc - bc);
+      Offset target = instrJumpTarget(bc, pc - bc);
       if (target != InvalidAbsoluteOffset) createBlock(target);
     }
   }
@@ -78,13 +76,13 @@ void GraphBuilder::linkBlocks() {
     PC pc = i.popFront();
     block->last = pc;
     if (isCF(pc)) {
-      if (isSwitch(*reinterpret_cast<const Op*>(pc))) {
+      if (isSwitch(peek_op(pc))) {
         int i = 0;
-        foreachSwitchTarget((Op*)pc, [&](Offset& o) {
+        foreachSwitchTarget(pc, [&](Offset o) {
           succs(block)[i++] = at(pc + o);
         });
       } else {
-        Offset target = instrJumpTarget((Op*)bc, pc - bc);
+        Offset target = instrJumpTarget(bc, pc - bc);
         if (target != InvalidAbsoluteOffset) {
           assert(numSuccBlocks(block) > 0);
           succs(block)[numSuccBlocks(block) - 1] = at(target);
@@ -190,7 +188,7 @@ void GraphBuilder::linkExBlocks() {
         break;
       }
     }
-    if (Op(*b->last) == OpUnwind) {
+    if (peek_op(b->last) == OpUnwind) {
       // We're in a fault funclet.  Find which one, then add edges
       // to reachable catches and the enclosing fault funclet, if any.
       const EHEnt* eh = findFunclet(ehtab, offset(b->last));
@@ -257,8 +255,7 @@ Block* GraphBuilder::at(PC target) {
  * higher-numbered DV entry points, the last of which ultimately jumps to
  * the primary function body.
  */
-class RpoSort {
- public:
+struct RpoSort {
   explicit RpoSort(Graph* g);
  private:
   void visit(Block* b);

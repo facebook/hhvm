@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,7 @@ void CmdConstant::onClient(DebuggerClient &client) {
     {
       Variant forSort(cmd->m_constants);
       HHVM_FN(ksort)(ref(forSort));
-      assert(forSort.is(KindOfArray));
+      assert(forSort.isArray());
       m_constants = forSort.asCell()->m_data.parr;
     }
 

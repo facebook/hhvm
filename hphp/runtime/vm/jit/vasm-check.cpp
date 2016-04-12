@@ -36,33 +36,32 @@ namespace HPHP { namespace jit {
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
-bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
-  using namespace reg;
+DEBUG_ONLY bool
+checkSSA(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
   using Bits = boost::dynamic_bitset<>;
 
   jit::vector<Bits> block_defs(unit.blocks.size()); // index by [Vlabel]
   Bits global_defs(unit.next_vr);
   Bits consts(unit.next_vr);
 
-  for (auto& c : unit.constToReg) {
+  for (auto const& c : unit.constToReg) {
     global_defs.set(c.second);
     consts.set(c.second);
   }
-  for (auto b : blocks) {
+  for (auto const b : blocks) {
     Bits local_defs;
     if (block_defs[b].empty()) {
       local_defs.resize(unit.next_vr);
-      for (auto& c : unit.constToReg) {
+      for (auto const& c : unit.constToReg) {
         local_defs.set(c.second);
       }
     } else {
       local_defs = block_defs[b];
     }
-    for (auto& inst : unit.blocks[b].code) {
+    for (auto const& inst : unit.blocks[b].code) {
       visitUses(unit, inst, [&](Vreg v) {
         assert_flog(v.isValid(), "invalid vreg used in B{}\n{}",
-                                 size_t(b), show(unit));
+                    size_t(b), show(unit));
         assert_flog(!v.isVirt() || local_defs[v],
                     "%{} used before def in B{}\n{}",
                     size_t(v), size_t(b), show(unit));
@@ -83,16 +82,20 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
         global_defs.set(v);
       });
     }
-    auto& block = unit.blocks[b];
-    auto lastOp = block.code.back().op;
+
+    auto const& block = unit.blocks[b];
+    auto const lastOp = block.code.back().op;
     if (lastOp == Vinstr::phijmp || lastOp == Vinstr::phijcc) {
       for (DEBUG_ONLY auto s : succs(block)) {
-        assert_flog(!unit.blocks[s].code.empty()
-          && unit.blocks[s].code.front().op == Vinstr::phidef,
+        assert_flog(
+          !unit.blocks[s].code.empty() &&
+            unit.blocks[s].code.front().op == Vinstr::phidef,
           "B{} ends in {} but successor B{} doesn't begin with phidef\n",
-          size_t(b), vinst_names[lastOp], size_t(s));
+          size_t(b), vinst_names[lastOp], size_t(s)
+        );
       }
     }
+
     for (auto s : succs(block)) {
       if (block_defs[s].empty()) {
         block_defs[s] = local_defs;
@@ -108,23 +111,22 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
  * Make sure syncpoint{}, nothrow{}, or unwind{} only appear immediately after
  * a call.
  */
-bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
-bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
-  for (auto b: blocks) {
+DEBUG_ONLY bool
+checkCalls(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
+  for (auto const b : blocks) {
     bool unwind_valid = false;
     bool nothrow_valid = false;
     bool sync_valid = false;
-    bool hcunwind_valid = false;
-    bool hcsync_valid = false;
-    bool hcnocatch_valid = false;
-    for (auto& inst : unit.blocks[b].code) {
+    for (auto const& inst : unit.blocks[b].code) {
       switch (inst.op) {
         case Vinstr::call:
         case Vinstr::callm:
         case Vinstr::callr:
+        case Vinstr::calls:
+        case Vinstr::callstub:
         case Vinstr::callarray:
-        case Vinstr::mccall:
         case Vinstr::contenter:
+        case Vinstr::hostcall:
           sync_valid = unwind_valid = nothrow_valid = true;
           break;
         case Vinstr::syncpoint:
@@ -139,24 +141,8 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
           assertx(nothrow_valid);
           unwind_valid = nothrow_valid = false;
           break;
-        case Vinstr::hostcall:
-          hcsync_valid = hcunwind_valid = hcnocatch_valid = true;
-          break;
-        case Vinstr::hcsync:
-          assertx(hcsync_valid);
-          hcsync_valid = false;
-          break;
-        case Vinstr::hcunwind:
-          assertx(hcunwind_valid);
-          hcunwind_valid = hcnocatch_valid = false;
-          break;
-        case Vinstr::hcnocatch:
-          assertx(hcnocatch_valid);
-          hcunwind_valid = hcnocatch_valid = false;
-          break;
         default:
           unwind_valid = nothrow_valid = sync_valid = false;
-          hcunwind_valid = hcnocatch_valid = hcsync_valid = false;
           break;
       }
     }
@@ -164,8 +150,9 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
   return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct FlagUseChecker {
-  VregSF& cur_sf;
   explicit FlagUseChecker(VregSF& sf) : cur_sf(sf) {}
   template<class T> void imm(const T&) {}
   template<class T> void def(T) {}
@@ -183,10 +170,10 @@ struct FlagUseChecker {
     assert(!r.isValid() || r.isSF() || r.isVirt());
     cur_sf = r;
   }
+  VregSF& cur_sf;
 };
 
 struct FlagDefChecker {
-  VregSF& cur_sf;
   explicit FlagDefChecker(VregSF& sf) : cur_sf(sf) {}
   template<class T> void imm(const T&) {}
   template<class T> void def(T) {}
@@ -203,6 +190,7 @@ struct FlagDefChecker {
     assertx(!cur_sf.isValid() || cur_sf == r);
     cur_sf = InvalidReg;
   }
+  VregSF& cur_sf;
 };
 
 const Abi sf_abi {
@@ -210,12 +198,15 @@ const Abi sf_abi {
   RegSet{RegSF{0}}
 };
 
-// Check that no two status-flag register lifetimes overlap, by traversing
-// code bottom up, keeping track of the currently live (single) status-flag
-// register, or InvalidReg if there isn't one live, then iterating to a fixed
-// point.
-bool checkSF(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
-bool checkSF(Vunit& unit, jit::vector<Vlabel>& blocks) {
+/*
+ * Check that no two status-flag register lifetimes overlap.
+ *
+ * Traverses the code bottom up, keeping track of the currently live (single)
+ * status-flag register, or InvalidReg if there isn't one live, then iterates
+ * to a fixed point.
+ */
+DEBUG_ONLY bool
+checkSF(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
   auto const preds = computePreds(unit);
   jit::vector<uint32_t> blockPO(unit.blocks.size());
   auto revBlocks = blocks;
@@ -262,13 +253,138 @@ bool checkSF(Vunit& unit, jit::vector<Vlabel>& blocks) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Check if two width constraints have any overlap.
+ *
+ * This is sufficient for our purposes because at a use, the width will always
+ * be a single-bit constraint or Any (i.e., no constraint).
+ */
+DEBUG_ONLY bool compatible(Width w1, Width w2) {
+  return static_cast<uint8_t>(w1) & static_cast<uint8_t>(w2);
+}
+
+struct WidthChecker {
+  explicit WidthChecker(const Vunit& unit,
+                        jit::vector<Width>& widths)
+    : m_unit(unit)
+    , m_widths(widths)
+  {}
+
+  template<class T> void imm(const T&) {}
+  template<class T> void across(T r) { use(r); }
+  template<class T, class H> void defHint(T r, H) { def(r); }
+  template<class T, class H> void useHint(T r, H) { use(r); }
+
+  template<class T> void def(T r) {
+    if (r.isPhys()) return;
+    m_widths[r] = width(r);
+  }
+  // We don't check doubles yet.
+  void def(VregDbl) {}
+  // We can skip the rest, since their contained Vregs are untyped.
+  void def(RegSet) {}
+  void def(Vptr) {}
+  void def(Vtuple) {}
+  void def(VcallArgsId) {}
+
+  template<class T> void use(T r) {
+    if (r.isPhys()) return;
+
+    DEBUG_ONLY auto const dw = m_widths[r];
+    DEBUG_ONLY auto const uw = width(r);
+
+    assert_flog(compatible(dw, uw),
+                "width mismatch for %{}: def {}, use {}\n{}",
+                size_t(r), show(dw), show(uw), show(m_unit));
+  }
+  void use(Vptr m) {
+    if (m.base.isValid())  use(m.base);
+    if (m.index.isValid()) use(m.index);
+  }
+  // We don't check doubles yet.
+  void use(VregDbl) {}
+  // We can skip the rest, since their contained Vregs are untyped.
+  void use(RegSet) {}
+  void use(Vtuple) {}
+  void use(VcallArgsId) {}
+
+private:
+  DEBUG_ONLY const Vunit& m_unit;
+  jit::vector<Width>& m_widths;
+};
+
+DEBUG_ONLY bool
+checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
+  auto widths = jit::vector<Width>(unit.next_vr, Width::Any);
+  WidthChecker wc(unit, widths);
+
+  for (auto const& pair : unit.constToReg) {
+    auto const& cns = pair.first;
+    auto const r = pair.second;
+
+    widths[r] = [&] {
+      switch (cns.kind) {
+        case Vconst::Quad:
+        case Vconst::Long:
+        case Vconst::Byte:   return Width::QuadN;
+        case Vconst::Double: return Width::Dbl;
+      }
+      not_reached();
+    }();
+  }
+
+  for (auto const b : blocks) {
+    for (auto const& inst : unit.blocks[b].code) {
+      if (inst.op == Vinstr::copy) {
+        auto const& i = inst.copy_;
+
+        if (!i.s.isPhys() && !i.d.isPhys()) {
+          widths[i.d] = widths[i.s];
+        }
+      } else if (inst.op == Vinstr::copy2) {
+        auto const& i = inst.copy2_;
+
+        if (!i.s0.isPhys() && !i.d0.isPhys()) {
+          widths[i.d0] = widths[i.s0];
+        }
+        if (!i.s1.isPhys() && !i.d1.isPhys()) {
+          widths[i.d1] = widths[i.s1];
+        }
+      } else if (inst.op == Vinstr::copyargs) {
+        auto const& i = inst.copyargs_;
+
+        auto const& srcs = unit.tuples[i.s];
+        auto const& dsts = unit.tuples[i.d];
+        assertx(srcs.size() == dsts.size());
+
+        for (auto i = 0; i < srcs.size(); ++i) {
+          if (!srcs[i].isPhys() && !dsts[i].isPhys()) {
+            widths[dsts[i]] = widths[srcs[i]];
+          }
+        }
+      } else {
+        visitOperands(inst, wc);
+      }
+    }
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 bool check(Vunit& unit) {
-  auto blocks = sortBlocks(unit);
+  auto const blocks = sortBlocks(unit);
   assertx(checkSSA(unit, blocks));
   assertx(checkCalls(unit, blocks));
   assertx(checkSF(unit, blocks));
+  return true;
+}
+
+bool checkWidths(Vunit& unit) {
+  auto const blocks = sortBlocks(unit);
+  assertx(checkWidths(unit, blocks));
   return true;
 }
 

@@ -16,7 +16,7 @@ targeted at C++ developers looking to hack on HHVM itself.
     * PreClass/Class
     * SrcKey
   * Execution Context
-  * Bytecode interpreter
+  * [Bytecode interpreter](bytecode-interpreter.md)
   * Unwinder
   * Treadmill
   * Debugger

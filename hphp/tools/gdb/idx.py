@@ -63,7 +63,7 @@ def unordered_map_at(umap, key):
 # Boost accessors.
 
 def boost_flat_map_at(flat_map, key):
-    vec = flat_map['m_flat_tree']['m_data']['m_vect']['members_']
+    vec = flat_map['m_flat_tree']['m_data']['m_vect']['m_holder']
 
     first = vec['m_start']
     last = first + vec['m_size']
@@ -92,6 +92,11 @@ def boost_flat_map_at(flat_map, key):
 # TBB accessors.
 
 def tbb_atomic_get(atomic):
+    try:
+        return atomic['rep']['value']
+    except gdb.error:
+        # atomic_impl representation since version 4.1 Update 2
+        return atomic['my_storage']['my_value']
     return atomic['rep']['value']
 
 

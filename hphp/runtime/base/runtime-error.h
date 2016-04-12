@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,28 +71,36 @@ enum class ErrorMode {
   UPGRADEABLE_ERROR = WARNING | USER_WARNING | NOTICE | USER_NOTICE
 };
 
-ATTRIBUTE_NORETURN void raise_error(const std::string&);
-ATTRIBUTE_NORETURN void raise_error(const char*, ...) ATTRIBUTE_PRINTF(1, 2);
-ATTRIBUTE_NORETURN void raise_error_without_first_frame(const std::string&);
+[[noreturn]] void raise_error(const std::string&);
+[[noreturn]] void raise_error(ATTRIBUTE_PRINTF_STRING const char*, ...)
+  ATTRIBUTE_PRINTF(1, 2);
+[[noreturn]] void raise_error_without_first_frame(const std::string&);
 void raise_recoverable_error(const std::string &msg);
-void raise_recoverable_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_recoverable_error(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1, 2);
 void raise_recoverable_error_without_first_frame(const std::string &msg);
 void raise_strict_warning(const std::string &msg);
-void raise_strict_warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_strict_warning(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1, 2);
 void raise_strict_warning_without_first_frame(const std::string &msg);
 void raise_warning(const std::string &msg);
-void raise_warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_warning(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1, 2);
 void raise_warning_without_first_frame(const std::string &msg);
 void raise_notice(const std::string &msg);
-void raise_notice(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_notice(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1, 2);
 void raise_notice_without_first_frame(const std::string &msg);
 void raise_deprecated(const std::string &msg);
-void raise_deprecated(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_deprecated(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1, 2);
 void raise_deprecated_without_first_frame(const std::string &msg);
 void raise_warning_unsampled(const std::string &msg);
-void raise_warning_unsampled(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_warning_unsampled(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1, 2);
 void raise_message(ErrorMode mode, const char *fmt, va_list ap);
-void raise_message(ErrorMode mode, const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
+void raise_message(ErrorMode mode,
+  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
 void raise_message(ErrorMode mode, bool skipTop, const std::string& msg);
 void raise_param_type_warning(
     const char* func_name,

@@ -4,6 +4,13 @@
 interface IBase {}
 interface IChild extends IBase {}
 
+abstract class P {
+  abstract const type T;
+  public static function foo(): void {
+    hh_show(type_structure(static::class, 'T')['classname']);
+  }
+}
+
 abstract class C {
   abstract const type T as IBase;
   public static function foo(): void {

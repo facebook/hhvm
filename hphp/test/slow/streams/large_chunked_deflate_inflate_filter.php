@@ -42,7 +42,7 @@ function main() {
 
 /* Handy for debugging - should match. Commented out as it's HHVM-only.
 
-  $inflator = new __SystemLib_ChunkedInflator();
+  $inflator = new __SystemLib\ChunkedInflator();
   $output = '';
   foreach (str_split($contents, 8096) as $chunk) {
     $output .= $inflator->inflateChunk($chunk);

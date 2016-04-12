@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_out.h"
 
 #include "hphp/runtime/debugger/debugger_client.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -84,7 +85,7 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   if (depth == 0) {
     PC pc = vmpc();
     // Step over PopR following a call
-    if (*reinterpret_cast<const Op*>(pc) == Op::PopR) {
+    if (peek_op(pc) == Op::PopR) {
       m_skippingOverPopR = true;
       m_needsVMInterrupt = true;
     } else {

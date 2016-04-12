@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
 
 #include "hphp/tools/tc-print/tc-print.h"
 #include "hphp/tools/tc-print/offline-x86-code.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 #include "hphp/runtime/vm/repo.h"
 
 using std::string;
@@ -119,9 +119,6 @@ void OfflineTransData::loadTCData(string dumpDir) {
     }
 
     READ(" kind = %u %*s", &kind);
-    int isLLVM;
-    READ(" isLLVM = %d", &isLLVM);
-    tRec.isLLVM = isLLVM;
     int hasLoop;
     READ(" hasLoop = %d", &hasLoop);
     tRec.hasLoop = hasLoop;
@@ -327,7 +324,6 @@ void OfflineTransData::printTransRec(TransID transId,
 
   std::cout << folly::format(
     "  kind = {}\n"
-    "  isLLVM = {:d}\n"
     "  hasLoop = {:d}\n"
     "  aStart = {}\n"
     "  aLen = {:#x}\n"
@@ -336,7 +332,6 @@ void OfflineTransData::printTransRec(TransID transId,
     "  frozenStart = {}\n"
     "  frozenLen = {:#x}\n",
     show(tRec->kind),
-    tRec->isLLVM,
     tRec->hasLoop,
     tRec->aStart,
     tRec->aLen,

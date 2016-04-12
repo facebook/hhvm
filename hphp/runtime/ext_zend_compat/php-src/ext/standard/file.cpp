@@ -38,13 +38,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
-# include <io.h>
-# define O_RDONLY _O_RDONLY
-# include "win32/param.h"
-# include "win32/winutil.h"
-# include "win32/fnmatch.h"
-#else
+#ifndef PHP_WIN32
 # if HAVE_SYS_PARAM_H
 #  include <sys/param.h>
 # endif

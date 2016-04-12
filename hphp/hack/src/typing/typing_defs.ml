@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Utils
 
 module Reason = Typing_reason
 module SN = Naming_special_names
@@ -54,6 +53,14 @@ and _ ty_ =
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : taccess_type -> decl ty_
 
+  (* The type of the various forms of "array":
+   * Tarray (None, None)         => "array"
+   * Tarray (Some ty, None)      => "array<ty>"
+   * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
+   * Tarray (None, Some ty)      => [invalid]
+   *)
+  | Tarray : decl ty option * decl ty option -> decl ty_
+
   (*========== Following Types Exist in Both Phases ==========*)
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
@@ -79,14 +86,6 @@ and _ ty_ =
    *)
   | Tany
   | Tmixed
-
-  (* The type of the various forms of "array":
-   * Tarray (None, None)         => "array"
-   * Tarray (Some ty, None)      => "array<ty>"
-   * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
-   * Tarray (None, Some ty)      => [invalid]
-   *)
-  | Tarray : 'phase ty option * 'phase ty option -> 'phase ty_
 
   (* Nullable, called "option" in the ML parlance. *)
   | Toption : 'phase ty -> 'phase ty_
@@ -210,6 +209,24 @@ and _ ty_ =
 
   (* An instance of a class or interface, ty list are the arguments *)
   | Tclass : Nast.sid * locl ty list -> locl ty_
+
+  (* Localized version of Tarray *)
+  | Tarraykind : array_kind -> locl ty_
+
+and array_kind =
+  (* Those three types directly correspond to their decl level counterparts:
+   * array, array<_> and array<_, _> *)
+  | AKany
+  | AKvec of locl ty
+  | AKmap of locl ty * locl ty
+  (* This is a type created when we see array() literal *)
+  | AKempty
+  (* Array "used like a shape" - initialized and indexed with keys that are
+   * only string/class constants *)
+  | AKshape of (locl ty * locl ty) Nast.ShapeMap.t
+  (* Array "used like a tuple" - initialized without keys and indexed with
+   * integers that are within initialized range *)
+  | AKtuple of (locl ty) IMap.t
 
 (* An abstract type derived from either a newtype, a type parameter, or some
  * dependent type
@@ -339,6 +356,28 @@ and class_elt = {
   ce_origin      : string;
 }
 
+and class_const = {
+  cc_synthesized : bool;
+  cc_type        : decl ty;
+  cc_expr        : Nast.expr option;
+  (* identifies the class from which this const originates *)
+  cc_origin      : string;
+}
+
+(* The position is that of the hint in the `use` / `implements` AST node
+ * that causes a class to have this requirement applied to it. E.g.
+ *
+ * class Foo {}
+ *
+ * interface Bar {
+ *   require extends Foo; <- position of the decl ty
+ * }
+ *
+ * class Baz extends Foo implements Bar { <- position of the `implements`
+ * }
+ *)
+and requirement = Pos.t * decl ty
+
 and class_type = {
   tc_need_init           : bool;
   (* Whether the typechecker knows of all (non-interface) ancestors
@@ -353,7 +392,7 @@ and class_type = {
   tc_name                : string ;
   tc_pos                 : Pos.t ;
   tc_tparams             : tparam list ;
-  tc_consts              : class_elt SMap.t;
+  tc_consts              : class_const SMap.t;
   tc_typeconsts          : typeconst_type SMap.t;
   tc_props               : class_elt SMap.t;
   tc_sprops              : class_elt SMap.t;
@@ -363,10 +402,9 @@ and class_type = {
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
   tc_ancestors           : decl ty SMap.t ;
-  tc_req_ancestors       : decl ty SMap.t;
+  tc_req_ancestors       : requirement list;
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
-  tc_user_attributes     : Nast.user_attribute list;
   tc_enum_type           : enum_type option;
 }
 
@@ -380,6 +418,16 @@ and typeconst_type = {
 and enum_type = {
   te_base       : decl ty;
   te_constraint : decl ty option;
+}
+
+and typedef_visibility = Transparent | Opaque
+
+and typedef_type = {
+  td_pos: Pos.t;
+  td_vis: typedef_visibility;
+  td_tparams: tparam list;
+  td_constraint: decl ty option;
+  td_type: decl ty;
 }
 
 and tparam = Ast.variance * Ast.id * (Ast.constraint_kind * decl ty) option
@@ -431,11 +479,6 @@ module AbstractKind = struct
              let display_id = Reason.get_expr_display_id i in
              "<expr#"^string_of_int display_id^">" in
        String.concat "::" (dt::ids)
-  let is_classname = function
-    | AKnewtype (name, _) -> (name = Naming_special_names.Classes.cClassname)
-    | AKenum _ -> false
-    | AKgeneric _ -> false
-    | AKdependent _ -> false
 end
 
 (*****************************************************************************)

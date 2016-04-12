@@ -81,8 +81,9 @@ struct APCDetailedStats {
   void removeAPCValue(APCHandle* handle, bool expired);
 
 private:
-  void addType(APCHandle* handle);
-  void removeType(APCHandle* handle);
+  void addType(const APCHandle* handle);
+  void removeType(const APCHandle* handle);
+  ServiceData::ExportedCounter* counterFor(const APCHandle*);
 
 private:
   /*
@@ -241,17 +242,17 @@ private:
    */
 
   // Keep track of the overall memory usage from all live values
-  ServiceData::ExportedTimeSeries* m_valueSize;
+  ServiceData::ExportedCounter* m_valueSize;
   // Keep track of the overall memory usage of all keys
-  ServiceData::ExportedTimeSeries* m_keySize;
+  ServiceData::ExportedCounter* m_keySize;
   // Size of data stored in the paged out in memory file. This
   // is basically the size of the primed data that goes into the file
-  ServiceData::ExportedTimeSeries* m_inFileSize;
+  ServiceData::ExportedCounter* m_inFileSize;
   // Size of primed data that is brought to life, that is, that goes
   // into memory
-  ServiceData::ExportedTimeSeries* m_livePrimedSize;
+  ServiceData::ExportedCounter* m_livePrimedSize;
   // Size of the APC data pending deletes in the treadmill
-  ServiceData::ExportedTimeSeries* m_pendingDeleteSize;
+  ServiceData::ExportedCounter* m_pendingDeleteSize;
 
   /*
    * Number of entry counters

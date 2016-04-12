@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Utils
 
 (*****************************************************************************)
 (* Periodically called by the daemon *)
@@ -20,6 +21,7 @@ type callback =
 
 module Periodical: sig
   val always : float
+  val one_hour: float
   val one_day: float
   val one_week: float
 
@@ -35,6 +37,7 @@ module Periodical: sig
 
 end = struct
   let always = 0.0
+  let one_hour = 3600.0
   let one_day = 86400.0
   let one_week = 604800.0
 
@@ -98,16 +101,27 @@ let exit_if_unused() =
 (*****************************************************************************)
 let init (root : Path.t) =
   let jobs = [
+    (* I'm not sure explicitly invoking the Gc here is necessary, but
+     * major_slice takes something like ~0.0001s to run, so why not *)
+    Periodical.always   , (fun () -> ignore @@ Gc.major_slice 0);
+    Periodical.one_hour *. 3., EventLogger.log_gc_stats;
     Periodical.always   , (fun () -> SharedMem.collect `aggressive);
+    Periodical.always   , EventLogger.flush;
     Periodical.one_day  , exit_if_unused;
     Periodical.one_day  , Hhi.touch;
-    (* try_touch wraps Unix.utimes, which doesn't open/close any fds, so we
-     * won't lose our lock by doing this. *)
+    (* try_touch wraps Unix.lutimes, which doesn't open/close any fds, so we
+     * won't lose our lock by doing this. We are only touching the top level
+     * of files, however -- we don't want to do it recursively so that old
+     * files under e.g. /tmp/hh_server/logs still get cleaned up. *)
     Periodical.one_day  , (fun () ->
-      Sys_utils.try_touch (ServerFiles.lock_file root)
-    );
-    Periodical.one_day  , (fun () ->
-      Sys_utils.try_touch (Socket.get_path (ServerFiles.socket_file root))
+      Array.iter begin fun fn ->
+        let fn = Filename.concat GlobalConfig.tmp_dir fn in
+        if (try Sys.is_directory fn with _ -> false)
+          (* We don't want to touch things like .watchman_failed *)
+          || str_starts_with fn "."
+          || not (ServerFiles.is_of_root root fn) then ()
+        else Sys_utils.try_touch ~follow_symlinks:false fn
+      end (Sys.readdir GlobalConfig.tmp_dir);
     );
   ] in
   List.iter jobs begin fun (period, cb) ->

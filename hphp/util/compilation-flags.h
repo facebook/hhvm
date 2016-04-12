@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-const bool debug =
+constexpr bool debug =
 #ifdef DEBUG
   true
 #else
@@ -39,7 +39,7 @@ const bool debug =
 #endif
   ;
 
-const bool contiguous_heap =
+constexpr bool contiguous_heap =
 #if CONTIGUOUS_HEAP
   true
 #else
@@ -47,7 +47,7 @@ const bool contiguous_heap =
 #endif
   ;
 
-const bool hhvm_reuse_tc =
+constexpr bool hhvm_reuse_tc =
 #ifdef HHVM_REUSE_TC
   true
 #else

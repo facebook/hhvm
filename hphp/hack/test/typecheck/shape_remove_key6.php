@@ -1,7 +1,7 @@
 <?hh
 
 /**
- * Removing optional field allows to omit it even when fields are only
+ * Removing optional field allows omitting it even when fields are only
  * partially known.
  */
 type s = shape('x' => int);

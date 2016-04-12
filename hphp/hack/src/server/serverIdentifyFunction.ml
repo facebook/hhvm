@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -11,10 +11,11 @@
 let go content line char =
   let result = ref None in
   IdentifySymbolService.attach_hooks result line char;
-  let funs, classes = ServerIdeUtils.declare Relative_path.default content in
-  ServerIdeUtils.fix_file_and_def Relative_path.default content;
+  let funs, classes =
+    ServerIdeUtils.declare_and_check Relative_path.default content in
   ServerIdeUtils.revive funs classes;
   IdentifySymbolService.detach_hooks ();
-  match !result with
-  | Some result -> Utils.strip_ns result.IdentifySymbolService.name
-  | _ -> ""
+  !result
+
+let go_absolute content line char =
+  Option.map (go content line char) IdentifySymbolService.to_absolute

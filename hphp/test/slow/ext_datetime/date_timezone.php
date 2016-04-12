@@ -54,9 +54,3 @@ $tz = timezone_open("CHAST");
 var_dump(timezone_name_get($tz));
 
 var_dump((bool)timezone_version_get());
-
-$timezone = new DateTimeZone("Europe/London");
-$transitions = $timezone->getTransitions(1000000, 999999999);
-var_dump($transitions[0]);
-var_dump($transitions[3]);
-var_dump($transitions[count($transitions)-1]);

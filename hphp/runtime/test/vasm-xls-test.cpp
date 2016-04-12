@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,14 +41,18 @@ template<class T> uint64_t test_const(T val) {
     .sf = x64::abi().sf
   };
   static uint8_t code[1000];
+  // None of these tests should use any data.
+  static uint8_t data_buffer[0];
 
   CodeBlock main;
   main.init(code, sizeof(code), "test");
+  DataBlock data;
+  data.init(data_buffer, sizeof(data), "data");
 
-  Vasm vasm;
-  Vtext text { main };
+  Vunit unit;
+  Vasm vasm{unit};
+  Vtext text { main, data };
 
-  auto& unit = vasm.unit();
   auto& v = vasm.main();
   unit.entry = v;
 
@@ -56,7 +60,13 @@ template<class T> uint64_t test_const(T val) {
   v << ret{RegSet{xmm0}};
 
   optimizeX64(vasm.unit(), test_abi);
-  emitX64(unit, text, nullptr);
+  CGMeta fixups;
+  LeaseHolder writer{Translator::WriteLease()};
+  EXPECT_TRUE(writer.canWrite());
+  emitX64(unit, text, fixups, nullptr);
+  // The above code might use fixups.literals but shouldn't use anything else.
+  fixups.literals.clear();
+  EXPECT_TRUE(fixups.empty());
 
   union { double d; uint64_t c; } u;
   u.d = ((testfunc)code)();

@@ -248,6 +248,37 @@ class Memcached {
   }
 
   /**
+   * Add an item under a new key on a specific server
+   *
+   * @param string $server_key - The key identifying the server to store the value on
+   * or retrieve it from. Instead of hashing on the actual key for the item, we
+   * hash on the server key when deciding which memcached server to talk to.
+   * This allows related items to be grouped together on a single server for
+   * efficiency with multi operations..
+   * @param array $keys - The keys to be deleted.
+   * @param int $time - The amount of time the server will wait to delete
+   *   the items.
+   *
+   * @return array
+   */
+  <<__Native>>
+  public function deleteMultiByKey(string $server_key, array $keys,
+                                   int $time = 0): mixed;
+
+  /**
+   * Add an item under a new key on a specific server
+   *
+   * @param array $keys - The keys to be deleted.
+   * @param int $time - The amount of time the server will wait to delete
+   *   the items.
+   *
+   * @return array
+   */
+  public function deleteMulti(array $keys, int $time = 0): mixed {
+    return $this->deleteMultiByKey('', $keys, $time);
+  }
+
+  /**
    * Delete an item from a specific server
    *
    * @param string $server_key -
@@ -688,6 +719,37 @@ class Memcached {
     }
     return true;
   }
+
+  /**
+   * Set a new expiration on an item
+   *
+   * @param string $key - The key under which to store the value.
+   * @param int $expiration - The expiration time, defaults to 0.
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  public function touch(string $key,
+                        int $expiration = 0): bool {
+    return $this->touchByKey('', $key, $expiration);
+  }
+
+  /**
+   * Set a new expiration on an item on a specific server
+   *
+   * @param string $server_key - The key identifying the server to store the
+   *   value on or retrieve it from. Instead of hashing on the actual key for
+   *   the item, we hash on the server key when deciding which memcached server
+   *   to talk to. This allows related items to be grouped together on a single
+   *   server for efficiency with multi operations.
+   * @param string $key - The key under which to store the value.
+   * @param int $expiration - The expiration time, defaults to 0.
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  public function touchByKey(string $server_key,
+                             string $key,
+                             int $expiration = 0): bool;
 
 }
 

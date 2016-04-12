@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,18 +33,14 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(Statement);
-DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(LoopStatement);
-DECLARE_BOOST_TYPES(Expression);
-DECLARE_BOOST_TYPES(ExpressionList);
 
-class CodeGenerator {
-public:
+struct CodeGenerator {
   enum Output {
     InvalidOutput,
 
@@ -57,7 +53,6 @@ public:
     SystemCPP,  // special mode for generating builtin classes
     TextHHBC,   // HHBC dump in human-readable format
     BinaryHHBC, // serialized HHBC
-    CodeModel,  // serialized Code Model classes
   };
 
   enum Stream {
@@ -136,10 +131,13 @@ public:
   /**
    * Output strings.
    */
-  void printf(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void indentBegin(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void printf(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void indentBegin(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   void indentBegin();
-  void indentEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void indentEnd(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   void indentEnd();
   void printRaw(const char *msg) { print(msg, false);}
   /**
@@ -151,8 +149,10 @@ public:
   void namespaceEnd();
   bool ensureInNamespace();
   bool ensureOutOfNamespace();
-  void ifdefBegin(bool ifdef, const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
-  void ifdefEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void ifdefBegin(bool ifdef, ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(3,4);
+  void ifdefEnd(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   void printDocComment(const std::string comment);
   const char *getGlobals(AnalysisResultPtr ar);
   static std::string EscapeLabel(const std::string &name, bool *binary = nullptr);
@@ -244,40 +244,12 @@ public:
     return m_literalScope;
   }
 
-  /**
-   * Support for printing AST nodes in PHP serialize() format.
-   */
-  void printObjectHeader(const std::string& className, int numProperties);
-  void printPropertyHeader(const std::string& propertyName);
-  void printObjectFooter();
-  void printNull();
-  void printBool(bool value);
-  void printValue(double value);
-  void printValue(int32_t value);
-  void printValue(int64_t value);
-  void printValue(const std::string& value);
-  void printModifierVector(const std::string& value);
-  void printTypeExpression(const std::string& value);
-  void printTypeExpression(ExpressionPtr expression);
-  void printExpression(ExpressionPtr expression, bool isRef);
-  void printExpressionVector(ExpressionListPtr el);
-  void printTypeExpressionVector(ExpressionListPtr el);
-  void printExpressionVector(ExpressionPtr e);
-  void printAsBlock(StatementPtr s, bool isEnclosed = false);
-  void printAsEnclosedBlock(StatementPtr s) { printAsBlock(s, true); }
-  void printStatementVector(StatementListPtr sl);
-  void printStatementVector(StatementPtr s);
-  void printLocation(ConstructPtr what) { printLocation(what.get()); }
-  void printLocation(const Construct* what);
-  void setAstClassPrefix(const std::string &prefix) { m_astPrefix = prefix; }
 private:
   std::string m_filename;
   Stream m_curStream;
   std::ostream *m_streams[StreamCount];
   std::ostream *m_out;
   Output m_output;
-  std::string m_astPrefix;
-  std::vector<std::string> m_astClassNames;
   bool m_verbose;
 
   int m_indentation[StreamCount];
@@ -315,7 +287,8 @@ private:
   public: void print(const char *msg, bool indent = true);
 
  private:
-  void print(const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
+  void print(ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF(2,0);
   void printSubstring(const char *start, int length);
   void printIndent();
   std::string getFormattedName(const std::string &file);

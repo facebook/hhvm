@@ -14,9 +14,11 @@ final class Generator implements HH\KeyedIterator {
   <<__Native("OpCodeImpl")>>
   function next(): mixed;
 
-  function rewind(): void {
-    $this->next();
-  }
+  <<__Native("OpCodeImpl")>>
+  private function throw(object $ex): mixed;
+
+  <<__Native("OpCodeImpl")>>
+  function rewind(): mixed;
 
   <<__Native("OpCodeImpl")>>
   function valid(): bool;
@@ -26,6 +28,9 @@ final class Generator implements HH\KeyedIterator {
 
   <<__Native("OpCodeImpl")>>
   function raise(mixed $v): mixed;
+
+  <<__Native("OpCodeImpl")>>
+  function getReturn(): mixed;
 
   <<__Native>>
   function getOrigFuncName(): string;

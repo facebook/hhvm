@@ -13,8 +13,8 @@ cmake_install.cmake
 Makefile
 /compiler/analysis/code_error.inc
 /runtime/ir-opcode-generated.h
-/hphp-build-info.cpp
-/hphp-repo-schema.h
+/util/generated-compiler-id.txt
+/util/generated-repo-schema-id.txt
 
 # precompiled headers
 *_cotire.cmake

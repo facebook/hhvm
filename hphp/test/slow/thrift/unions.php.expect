@@ -1,0 +1,32 @@
+object(ComplexUnion)#5 (3) {
+  ["intValue"]=>
+  NULL
+  ["stringValue"]=>
+  string(19) "What is the answer?"
+  ["_type":protected]=>
+  int(2)
+}
+object(ComplexUnion)#8 (3) {
+  ["intValue"]=>
+  int(42)
+  ["stringValue"]=>
+  NULL
+  ["_type":protected]=>
+  int(1)
+}
+object(ComplexUnion)#11 (3) {
+  ["intValue"]=>
+  NULL
+  ["stringValue"]=>
+  string(19) "What is the answer?"
+  ["_type":protected]=>
+  int(2)
+}
+object(ComplexUnion)#14 (3) {
+  ["intValue"]=>
+  int(42)
+  ["stringValue"]=>
+  NULL
+  ["_type":protected]=>
+  int(1)
+}

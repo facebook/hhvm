@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/compiler/code_model_enums.h"
 #include "hphp/parser/hphp.tab.hpp"
 
 using namespace HPHP;
@@ -104,26 +103,6 @@ void ArrayPairExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ArrayPairExpression::outputCodeModel(CodeGenerator &cg) {
-  if (m_name) {
-    cg.printObjectHeader("BinaryOpExpression", 4);
-    cg.printPropertyHeader("expression1");
-    m_name->outputCodeModel(cg);
-    cg.printPropertyHeader("expression2");
-    cg.printExpression(m_value, m_ref);
-    cg.printPropertyHeader("operation");
-    cg.printValue(PHP_ARRAY_PAIR);
-    cg.printPropertyHeader("sourceLocation");
-    cg.printLocation(this);
-    cg.printObjectFooter();
-  } else {
-    cg.printExpression(m_value, m_ref);
-  }
-  return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

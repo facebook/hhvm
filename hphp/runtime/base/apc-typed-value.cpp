@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,34 +17,67 @@
 
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
-
-APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
-  assert(apcExtension::UseUncounted);
-  APCTypedValue* value;
-  if (array->isPacked()) {
-    value = new APCTypedValue(MixedArray::MakeUncountedPacked(array));
-  } else if (array->isStruct()) {
-    value = new APCTypedValue(StructArray::MakeUncounted(array));
-  } else {
-    value = new APCTypedValue(MixedArray::MakeUncounted(array));
-  }
-  return value->getHandle();
+APCTypedValue* APCTypedValue::tvUninit() {
+  static APCTypedValue* value = new APCTypedValue(KindOfUninit);
+  return value;
 }
+
+APCTypedValue* APCTypedValue::tvNull() {
+  static APCTypedValue* value = new APCTypedValue(KindOfNull);
+  return value;
+}
+
+APCTypedValue* APCTypedValue::tvTrue() {
+  static auto value = new APCTypedValue(APCTypedValue::Bool{}, true);
+  return value;
+}
+
+APCTypedValue* APCTypedValue::tvFalse() {
+  static auto value = new APCTypedValue(APCTypedValue::Bool{}, false);
+  return value;
+}
+
+bool APCTypedValue::checkInvariants() const {
+  assert(m_handle.checkInvariants());
+  switch (m_handle.kind()) {
+    case APCKind::Uninit:
+    case APCKind::Null: assert(m_data.num == 0); break;
+    case APCKind::Bool:
+    case APCKind::Int:
+    case APCKind::Double: break;
+    case APCKind::StaticString: assert(m_data.str->isStatic()); break;
+    case APCKind::UncountedString: assert(m_data.str->isUncounted()); break;
+    case APCKind::StaticArray: assert(m_data.arr->isStatic()); break;
+    case APCKind::UncountedArray: assert(m_data.arr->isUncounted()); break;
+    case APCKind::SharedString:
+    case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
+    case APCKind::SharedObject:
+    case APCKind::SharedCollection:
+    case APCKind::SerializedArray:
+    case APCKind::SerializedObject:
+      assert(false);
+      break;
+  }
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void APCTypedValue::deleteUncounted() {
   assert(m_handle.isUncounted());
-  DataType type = m_handle.type();
-  assert(type == KindOfString || type == KindOfArray);
-  if (type == KindOfString) {
+  auto kind = m_handle.kind();
+  assert(kind == APCKind::UncountedString || kind == APCKind::UncountedArray);
+  if (kind == APCKind::UncountedString) {
     m_data.str->destructUncounted();
-  } else if (type == KindOfArray) {
+  } else if (kind == APCKind::UncountedArray) {
     if (m_data.arr->isPacked()) {
-      MixedArray::ReleaseUncountedPacked(m_data.arr);
+      PackedArray::ReleaseUncounted(m_data.arr);
     } else if (m_data.arr->isStruct()) {
       StructArray::ReleaseUncounted(m_data.arr);
     } else {
@@ -57,4 +90,3 @@ void APCTypedValue::deleteUncounted() {
 //////////////////////////////////////////////////////////////////////
 
 }
-

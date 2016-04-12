@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,10 +22,11 @@
 #include <vector>
 
 #include <sys/mman.h>
-#ifndef __CYGWIN__
+#if !defined(__CYGWIN__) && !defined(_MSC_VER)
 #include <execinfo.h>
 #endif
 
+#include <folly/sorted_vector_types.h>
 #include <folly/String.h>
 #include <folly/Hash.h>
 #include <folly/Bits.h>
@@ -207,27 +208,89 @@ const char* mode_name(Mode mode) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Space wasted by alignment is tracked in these maps. We don't bother with
+ * free lists for local RDS because we aren't sensitive to its layout or
+ * compactness.
+ */
+using FreeLists = folly::sorted_vector_map<unsigned,
+                                           std::deque<rds::Handle>>;
+FreeLists s_normal_free_lists;
+FreeLists s_persistent_free_lists;
+
 }
 
 //////////////////////////////////////////////////////////////////////
 
 namespace detail {
 
+/*
+ * Round base up to align, which must be a power of two.
+ */
+size_t roundUp(size_t base, size_t align) {
+  assert(folly::isPowTwo(align));
+  --align;
+  return (base + align) & ~align;
+}
+
+/*
+ * Add the given offset to the free list for its size.
+ */
+void addFreeBlock(FreeLists& lists, size_t where, size_t size) {
+  if (size == 0) return;
+  lists[size].emplace_back(where);
+}
+
+/*
+ * Try to find a tracked free block of a suitable size. If an oversized block is
+ * found instead, the remaining space before and/or after the return space it
+ * re-added to the appropriate free lists.
+ */
+folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
+                                     size_t align) {
+  for (auto it = lists.lower_bound(size); it != lists.end(); ++it) {
+    if (it->second.empty()) continue;
+
+    auto const blockSize = it->first;
+    auto const raw = it->second.front();
+    it->second.pop_front();
+    auto const end = raw + it->first;
+    auto const handle = roundUp(raw, align);
+    always_assert(handle + size <= end);
+
+    auto const headerSize = handle - raw;
+    addFreeBlock(lists, raw, headerSize);
+
+    auto const footerSize = blockSize - size - headerSize;
+    addFreeBlock(lists, handle + size, footerSize);
+
+    return handle;
+  }
+
+  return folly::none;
+}
+
 Handle alloc(Mode mode, size_t numBytes, size_t align) {
   align = folly::nextPowTwo(align);
+  always_assert(align <= numBytes);
 
   switch (mode) {
-  case Mode::Persistent:
-  case Mode::Normal:
-    {
+    case Mode::Persistent:
+    case Mode::Normal: {
       auto& frontier = mode == Mode::Persistent ? s_persistent_frontier
                                                 : s_normal_frontier;
+      auto& freeLists = mode == Mode::Persistent ? s_persistent_free_lists
+                                                 : s_normal_free_lists;
 
-      // Note: it's ok not to zero new allocations, because we've never
-      // done anything with this part of the page yet, so it must still be
-      // zero.
-      frontier += align - 1;
-      frontier &= ~(align - 1);
+      if (auto free = findFreeBlock(freeLists, numBytes, align)) {
+        return *free;
+      }
+
+      // Note: it's ok not to zero new allocations, because we've never done
+      // anything with this part of the page yet, so it must still be zero.
+      auto const oldFrontier = frontier;
+      frontier = roundUp(frontier, align);
+      addFreeBlock(freeLists, oldFrontier, frontier - oldFrontier);
       frontier += numBytes;
 
       auto const limit = mode == Mode::Persistent
@@ -241,8 +304,7 @@ Handle alloc(Mode mode, size_t numBytes, size_t align) {
 
       return frontier - numBytes;
     }
-  case Mode::Local:
-    {
+    case Mode::Local: {
       auto& frontier = s_local_frontier;
 
       frontier -= numBytes;
@@ -413,12 +475,12 @@ Array& s_constants() {
 
 size_t allocBit() {
   Guard g(s_allocMutex);
-  if (!s_bits_to_go) {
-    static const int kNumBytes = 512;
+  if (s_bits_to_go == 0) {
+    static const int kNumBytes = 8;
     static const int kNumBytesMask = kNumBytes - 1;
     s_next_bit = s_normal_frontier * CHAR_BIT;
-    // allocate at least kNumBytes bytes, and make sure we end
-    // on a 64 byte aligned boundary.
+    // allocate at least kNumBytes bytes, and make sure we end on a kNumBytes
+    // aligned boundary.
     int bytes = ((~s_normal_frontier + 1) & kNumBytesMask) + kNumBytes;
     s_bits_to_go = bytes * CHAR_BIT;
     s_normal_frontier += bytes;
@@ -470,7 +532,7 @@ void threadInit() {
     "Failed to mmap persistent RDS region. errno = {}",
     folly::errnoStr(errno).c_str()
   );
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
   // MapViewOfFileEx() requires "the specified memory region is not already in
   // use by the calling process" when mapping the shared area below. Otherwise
   // it will return MAP_FAILED. We first map the full size to make sure the
@@ -529,7 +591,7 @@ void threadExit() {
       (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
       "-rds");
   }
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
   munmap(tl_base, s_persistent_base);
   munmap((char*)tl_base + s_persistent_base,
          RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);

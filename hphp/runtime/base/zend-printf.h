@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -24,8 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class String;
-class Array;
+struct String;
+struct Array;
 
 /**
  * How PHP formats a string. Called by ext/ext_string.cpp.

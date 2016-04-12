@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,10 +31,9 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class Array;
-class VarNR;
-class VariableSerializer;
-class VariableUnserializer;
+struct VarNR;
+struct VariableSerializer;
+struct VariableUnserializer;
 
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };
@@ -66,12 +65,18 @@ std::string convDblToStrWithPhpFormat(double n);
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String {
+struct String {
+private:
   req::ptr<StringData> m_str;
 
 protected:
   using NoIncRef = req::ptr<StringData>::NoIncRef;
   String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
+
+public:
+  template<class F> void scan(F& mark) const {
+    mark(m_str);
+  }
 
 public:
   typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
@@ -136,7 +141,10 @@ public:
 
   String(const String& str) : m_str(str.m_str) { }
   /* implicit */ String(const StaticString& str);
-  /* implicit */ String(char) = delete; // prevent unintentional promotion
+
+  /* Prevent unintentional promotion. */
+  /* implicit */ String(char) = delete;
+  /* implicit */ String(Variant&&) = delete;
 
   // Disable this---otherwise this would generally implicitly create a
   // Variant(bool) and then call String(Variant&&) ...
@@ -144,7 +152,7 @@ public:
 
   // Move ctor
   /* implicit */ String(String&& str) noexcept : m_str(std::move(str.m_str)) {}
-  /* implicit */ String(Variant&& src);
+
   // Move assign
   String& operator=(String&& src) {
     m_str = std::move(src.m_str);
@@ -155,8 +163,8 @@ public:
     return *this;
   }
 
-  // Move assign from Variant
-  String& operator=(Variant&& src);
+  String& operator=(const Variant&) = delete;
+  String& operator=(Variant&&) = delete;
 
   /* implicit */ String(const std::string &s)
   : m_str(StringData::Make(s.data(), s.size(), CopyString), NoIncRef{}) { }
@@ -260,12 +268,14 @@ public:
     return m_str ? m_str->isZero() : false;
   }
 
-  /**
-   * Take a sub-string from start with specified length. Note, read
-   * http://www.php.net/substr about meanings of negative start or length.
+  /*
+   * Create a sub-string from start with specified length.
+   *
+   * If the start is outside the bounds of the string, or the length is
+   * negative, the empty string is returned.  The range [start, start+length]
+   * gets clamped to [start, size()].
    */
-  String substr(int start, int length = 0x7FFFFFFF,
-                bool nullable = false) const;
+  String substr(int start, int length = StringData::MaxSize) const;
 
   /**
    * Find a character or a substring and return its position. "pos" has to be
@@ -292,7 +302,6 @@ public:
   }
   String& operator=(const StaticString& v);
   String& operator=(const char* v);
-  String& operator=(const Variant& v);
   String& operator=(const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
   // reference notation on lhs (http://goo.gl/LuCTo).
@@ -328,18 +337,20 @@ public:
   bool operator <= (const char* v) const = delete;
   bool operator >  (const char* v) const = delete;
   bool operator <  (const char* v) const = delete;
+
   bool operator == (const String& v) const;
   bool operator != (const String& v) const;
   bool operator >= (const String& v) const = delete;
   bool operator <= (const String& v) const = delete;
   bool operator >  (const String& v) const;
   bool operator <  (const String& v) const;
-  bool operator == (const Variant& v) const;
-  bool operator != (const Variant& v) const;
+
+  bool operator == (const Variant& v) const = delete;
+  bool operator != (const Variant& v) const = delete;
   bool operator >= (const Variant& v) const = delete;
   bool operator <= (const Variant& v) const = delete;
-  bool operator >  (const Variant& v) const;
-  bool operator <  (const Variant& v) const;
+  bool operator >  (const Variant& v) const = delete;
+  bool operator <  (const Variant& v) const = delete;
 
   /**
    * Type conversions
@@ -350,7 +361,6 @@ public:
   int    toInt32  () const { return m_str ? m_str->toInt32  () : 0;}
   int64_t toInt64 () const { return m_str ? m_str->toInt64  () : 0;}
   double toDouble () const { return m_str ? m_str->toDouble () : 0;}
-  VarNR  toKey   () const;
   std::string toCppString() const { return std::string(c_str(), size()); }
 
   /**
@@ -359,27 +369,30 @@ public:
   bool same (const char* v2) const = delete;
   bool same (const StringData *v2) const;
   bool same (const String& v2) const;
-  bool same (const Array& v2) const;
-  bool same (const Object& v2) const;
-  bool same (const Resource& v2) const;
+  bool same (const Array& v2) const = delete;
+  bool same (const Object& v2) const = delete;
+  bool same (const Resource& v2) const = delete;
+
   bool equal(const char* v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
-  bool equal(const Array& v2) const;
-  bool equal(const Object& v2) const;
-  bool equal(const Resource& v2) const;
+  bool equal(const Array& v2) const = delete;
+  bool equal(const Object& v2) const = delete;
+  bool equal(const Resource& v2) const = delete;
+
   bool less (const char* v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
-  bool less (const Array& v2) const;
-  bool less (const Object& v2) const;
-  bool less (const Resource& v2) const;
+  bool less (const Array& v2) const = delete;
+  bool less (const Object& v2) const = delete;
+  bool less (const Resource& v2) const = delete;
+
   bool more (const char* v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
-  bool more (const Array& v2) const;
-  bool more (const Object& v2) const;
-  bool more (const Resource& v2) const;
+  bool more (const Array& v2) const = delete;
+  bool more (const Object& v2) const = delete;
+  bool more (const Resource& v2) const = delete;
 
   int compare(const char* v2) const;
   int compare(const String& v2) const;
@@ -401,9 +414,10 @@ public:
     return rvalAtImpl(key ? key->toInt32() : 0);
   }
   String rvalAt(const String& key) const { return rvalAtImpl(key.toInt32());}
-  String rvalAt(const Array& key) const;
-  String rvalAt(const Object& key) const;
-  String rvalAt(const Variant& key) const;
+
+  String rvalAt(const Array& key) const = delete;
+  String rvalAt(const Object& key) const = delete;
+  String rvalAt(const Variant& key) const = delete;
 
   /**
    * Returns one character at specified position.
@@ -506,19 +520,19 @@ struct StringDataHashICompare {
 typedef hphp_hash_set<String, hphp_string_hash, hphp_string_isame> StringISet;
 
 template<typename T>
-class StringIMap :
-  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame> { };
+using StringIMap =
+  hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame>;
 
-typedef hphp_hash_set<String, hphp_string_hash, hphp_string_same> StringSet;
+using StringSet = hphp_hash_set<String, hphp_string_hash, hphp_string_same>;
 
 template<typename T>
-class StringMap :
-  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_same> { };
+using StringMap = hphp_hash_map<String, T, hphp_string_hash, hphp_string_same>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR
 
-class StrNR {
+struct StrNR {
+private:
   StringData *m_px;
 
 public:
@@ -566,10 +580,7 @@ private:
  * so that they won't be garbage collected by MemoryManager. This is used by
  * constant strings, so they can be pre-allocated before request handling.
  */
-class StaticString : public String {
-public:
-  friend class StringUtil;
-
+struct StaticString : String {
   explicit StaticString(const char* s);
   StaticString(const char* s, int length); // binary string
   explicit StaticString(std::string s);
@@ -578,12 +589,7 @@ public:
     detach();
   }
   StaticString& operator=(const StaticString &str);
-
-private:
-  void insert();
 };
-
-#define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 
 StaticString getDataTypeString(DataType t);
 
@@ -610,7 +616,8 @@ ALWAYS_INLINE String empty_string() {
 }
 
 namespace folly {
-template<> struct FormatValue<HPHP::String> {
+template<> class FormatValue<HPHP::String> {
+ public:
   explicit FormatValue(const HPHP::String& str) : m_val(str) {}
 
   template<typename Callback>
@@ -620,6 +627,19 @@ template<> struct FormatValue<HPHP::String> {
 
  private:
   const HPHP::String& m_val;
+};
+
+template<> class FormatValue<HPHP::StaticString> {
+ public:
+  explicit FormatValue(const HPHP::StaticString& str) : m_val(str) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    FormatValue<HPHP::StringData*>(m_val.get()).format(arg, cb);
+  }
+
+ private:
+  const HPHP::StaticString& m_val;
 };
 }
 

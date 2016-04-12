@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@ namespace HPHP {
 
 hphp_string_map<SSL_CTX *> ServerNameIndication::s_sn_ctxd_map;
 std::string ServerNameIndication::s_path;
-ServerNameIndication::CertHanlderFn ServerNameIndication::s_certHandlerFn;
+ServerNameIndication::CertHandlerFn ServerNameIndication::s_certHandlerFn;
 
 const std::string ServerNameIndication::crt_ext = ".crt";
 const std::string ServerNameIndication::key_ext = ".key";
@@ -36,7 +36,7 @@ const std::string ServerNameIndication::key_ext = ".key";
  * Given a default SSL config, SSL_CTX, and certificate path, load certs.
  */
 void ServerNameIndication::load(const std::string &cert_dir,
-                                CertHanlderFn certHandlerFn) {
+                                CertHandlerFn certHandlerFn) {
   // We use these later to dynamically load certs, so make copies.
   s_path = cert_dir;
   s_certHandlerFn = certHandlerFn;
@@ -56,7 +56,7 @@ void ServerNameIndication::load(const std::string &cert_dir,
 
 bool ServerNameIndication::loadFromFile(const std::string &server_name,
                                         bool duplicate,
-                                        CertHanlderFn certHandlerFn) {
+                                        CertHandlerFn certHandlerFn) {
   std::string key_file = s_path + server_name + key_ext;
   std::string crt_file = s_path + server_name + crt_ext;
 

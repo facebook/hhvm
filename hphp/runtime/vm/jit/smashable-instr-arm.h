@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,11 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit { namespace arm {
+namespace HPHP { namespace jit {
+
+struct CGMeta;
+
+namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -31,19 +35,27 @@ namespace HPHP { namespace jit { namespace arm {
  * Mirrors the API of smashable-instr.h.
  */
 
-constexpr size_t smashableMovqLen() { return 0; }
+/*
+ * Number of instructions (each of which is four bytes) in the sequence, plus
+ * the size of the smashable immediate.
+ */
+constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 0; }
-constexpr size_t smashableJmpLen()  { return 0; }
-constexpr size_t smashableJccLen()  { return 0; }
+constexpr size_t smashableCallLen() { return 3 * 4 + 8; }
+constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
+constexpr size_t smashableJccLen()  { return 3 * 4 + 8; }
 
-TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
-TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
-TCA emitSmashableCall(CodeBlock& cb, TCA target);
-TCA emitSmashableJmp(CodeBlock& cb, TCA target);
-TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc);
+TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
+                      PhysReg d);
+TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
+                      PhysReg r, int8_t disp);
+TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
+TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
+TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
+                     ConditionCode cc);
 std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc);
+emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
+                       ConditionCode cc);
 
 void smashMovq(TCA inst, uint64_t imm);
 void smashCmpq(TCA inst, uint32_t imm);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,30 +18,12 @@
 #define incl_HPHP_JIT_ABI_H
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/abi-regs.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Machine-specific register conventions.
- */
-struct Abi {
-  RegSet gpUnreserved;   // unreserved general purpose 64-bit registers
-  RegSet gpReserved;     // reserved general purpose 64-bit registers
-  RegSet simdUnreserved; // unreserved floating point / simd 128-bit registers
-  RegSet simdReserved;   // reserved floating point / simd 128-bit registers
-  RegSet calleeSaved;    // callee-saved (gp and simd)
-  RegSet sf;             // status flags
-  bool   canSpill;       // are we allowed to spill values to the stack?
-
-  // convenience methods
-  RegSet unreserved() const { return gpUnreserved | simdUnreserved | sf; }
-  RegSet gp() const { return gpUnreserved | gpReserved; }
-  RegSet simd() const { return simdUnreserved | simdReserved; }
-  RegSet all() const { return gp() | simd() | sf; }
-};
 
 /*
  * Return a suitable ABI for the targeted architecture and `kind'.
@@ -76,6 +58,53 @@ PhysReg rvmsp();
  */
 PhysReg rvmtl();
 
+/*
+ * Native stack pointer.
+ */
+PhysReg rsp();
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Calling convention registers.
+
+/*
+ * PHP return value registers.
+ */
+PhysReg rret_data();
+PhysReg rret_type();
+
+/*
+ * Native return value registers.
+ */
+PhysReg rret(size_t i = 0);
+PhysReg rret_simd(size_t i);
+
+/*
+ * Native argument registers.
+ */
+PhysReg rarg(size_t i);
+PhysReg rarg_simd(size_t i);
+
+/*
+ * Number of available argument registers.
+ */
+size_t num_arg_regs();
+size_t num_arg_regs_simd();
+
+/*
+ * RegSet for a call with `n' arguments.
+ */
+RegSet arg_regs(size_t n);
+RegSet arg_regs_simd(size_t n);
+
+/*
+ * Service request argument registers.
+ */
+PhysReg r_svcreq_req();
+PhysReg r_svcreq_stub();
+PhysReg r_svcreq_sf();
+PhysReg r_svcreq_arg(size_t i);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // JIT and TC boundary ABI registers.
@@ -104,17 +133,19 @@ inline RegSet cross_trace_regs_resumed()  { return vm_regs_with_sp(); }
 inline RegSet leave_trace_regs() { return vm_regs_with_sp(); }
 
 /*
- * Registers that are live during a PHP function call, between the caller and
- * the callee.
+ * Registers that are live between the caller and the callee when making a PHP
+ * function call.
  */
-inline RegSet cross_call_regs() { return cross_trace_regs(); }
+inline RegSet php_call_regs() { return cross_trace_regs(); }
 
 /*
  * Registers that are live after a PHP function return.
  *
  * TODO(#2288359): We don't want this to include rvmsp() eventually.
  */
-inline RegSet php_return_regs() { return vm_regs_with_sp(); }
+inline RegSet php_return_regs() {
+  return vm_regs_with_sp() | rret_data() | rret_type();
+}
 
 /*
  * Registers that are live on entry to fcallArrayHelper.
@@ -122,41 +153,6 @@ inline RegSet php_return_regs() { return vm_regs_with_sp(); }
  * TODO(#2288359): We don't want this to include rvmsp() eventually.
  */
 inline RegSet fcall_array_regs() { return vm_regs_with_sp(); }
-
-/*
- * Registers that are live on entry to an interpOneCFHelper.
- */
-RegSet interp_one_cf_regs();
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Calling convention registers.
-
-/*
- * Native argument registers.
- */
-PhysReg rarg(size_t i);
-PhysReg rarg_simd(size_t i);
-
-/*
- * Number of available argument registers.
- */
-size_t num_arg_regs();
-size_t num_arg_regs_simd();
-
-/*
- * RegSet for a call with `n' arguments.
- */
-RegSet arg_regs(size_t n);
-RegSet arg_regs_simd(size_t n);
-
-/*
- * Service request argument registers.
- */
-PhysReg r_svcreq_req();
-PhysReg r_svcreq_stub();
-PhysReg r_svcreq_sf();
-PhysReg r_svcreq_arg(size_t i);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,9 +27,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class Extension;
-class String;
+struct Array;
+struct Extension;
+struct String;
 
 bool ini_on_update(const Variant& value, bool& p);
 bool ini_on_update(const Variant& value, double& p);
@@ -98,12 +98,12 @@ const IniSettingMap ini_iterate(const IniSettingMap& ini,
  * is done privately with the statics s_user_callbacks and
  * s_system_ini_callbacks.
  *
- * In addition, a unique instance of the class UserIniData can be
+ * In addition, a unique instance of the struct UserIniData can be
  * associated with the IniCallbackData. The IniCallbackData instance
  * is the point of ownership of the instance of UserIniData, and is
  * responsible for firing the destructor.
  *
- * The class UserIniData should be subclassed to hold data specific
+ * The struct UserIniData should be subclassed to hold data specific
  * to an initialization regime, such as the zend compatibility layer
  * implementation of zend_ini_entry. That subclass is responsible for
  * allocating/freeing its own internal data.
@@ -112,8 +112,7 @@ const IniSettingMap ini_iterate(const IniSettingMap& ini,
  * produce UserIniData. This registration is done at the same time that
  * the setter and getter are established; see the class SetAndGet
  */
-class UserIniData {
-public:
+struct UserIniData {
   virtual ~UserIniData() {}
 };
 
@@ -133,6 +132,7 @@ public:
   const IniSettingMap operator[](const String& key) const;
   String toString() const { return m_map.toString();}
   Array toArray() const { return m_map.toArray();}
+  Array& toArrRef() { return m_map.toArrRef(); }
   Object toObject() const { return m_map.toObject();}
   bool isNull() const { return m_map.isNull();}
   bool isString() const { return m_map.isString();}
@@ -140,11 +140,18 @@ public:
   bool isObject() const { return m_map.isObject();}
   Variant& toVariant() { return m_map; }
   void set(const String& key, const Variant& v);
+  template<class F> void scan(F& mark) const {
+    mark(m_map);
+  }
+  TypedValue detach() noexcept {
+    return m_map.detach();
+  }
 private:
   Variant m_map;
 };
 
-class IniSetting {
+struct IniSetting {
+private:
 
   struct CallbackData {
     Variant active_section;
@@ -161,8 +168,7 @@ public:
     RawScanner,
   };
 
-  class ParserCallback {
-  public:
+  struct ParserCallback {
     virtual ~ParserCallback() {};
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
@@ -177,9 +183,15 @@ public:
   protected:
     void makeArray(Variant &hash, const std::string &offset,
                    const std::string &value);
+  private:
+    // Substitution copy or symlink via @ or : markers in the config line
+    void makeSettingSub(const String &key, const std::string &offset,
+                        const std::string &value, Variant& cur_settings);
+    void traverseToSet(const String &key, const std::string& offset,
+                       Variant& value, Variant& cur_settings,
+                       const std::string& stopChar);
   };
-  class SectionParserCallback : public ParserCallback {
-  public:
+  struct SectionParserCallback : ParserCallback {
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
     virtual void onEntry(const std::string &key, const std::string &value,
@@ -189,8 +201,7 @@ public:
   private:
     Variant* activeArray(CallbackData* data);
   };
-  class SystemParserCallback : public ParserCallback {
-  public:
+  struct SystemParserCallback : ParserCallback {
     virtual void onEntry(const std::string &key, const std::string &value,
                          void *arg);
     virtual void onPopEntry(const std::string &key, const std::string &value,
@@ -255,7 +266,7 @@ public:
     explicit SetAndGet(
       std::function<bool (const T&)> setter,
       std::function<T ()> getter,
-      std::function<class UserIniData *()>initter = nullptr)
+      std::function<struct UserIniData *()>initter = nullptr)
       : setter(setter),
         getter(getter),
         initter(initter) {}
@@ -264,7 +275,7 @@ public:
 
     std::function<bool (const T&)> setter;
     std::function<T ()> getter;
-    std::function<class UserIniData *()> initter;
+    std::function<struct UserIniData *()> initter;
   };
 
   /**
@@ -286,14 +297,15 @@ public:
   static void Bind(const Extension* extension, const Mode mode,
                    const std::string& name, const char *defaultValue,
                    SetAndGet<T> callbacks, T* p = nullptr) {
-    auto setter = [callbacks, p](const Variant &value) {
+    auto callback_set = callbacks.setter;
+    auto setter = [callback_set, p](const Variant &value) {
       T v;
       auto ret = ini_on_update(value, v);
       if (!ret) {
         return false;
       }
-      if (callbacks.setter) {
-        ret = callbacks.setter(v);
+      if (callback_set) {
+        ret = callback_set(v);
         if (!ret) {
           return false;
         }
@@ -303,19 +315,17 @@ public:
       }
       return true;
     };
-    auto getter = [callbacks, p]() {
+    auto callback_get = callbacks.getter;
+    auto getter = [callback_get, p]() {
       T v;
-      if (callbacks.getter) {
-        v = callbacks.getter();
+      if (callback_get) {
+        v = callback_get();
       } else if (p) {
         v = *p;
       }
       return ini_get(v);
     };
-    auto initter = [callbacks, p]() {
-      return callbacks.initter ? callbacks.initter() : nullptr;
-    };
-    Bind(extension, mode, name, setter, getter, initter);
+    Bind(extension, mode, name, setter, getter, callbacks.initter);
     auto hasSystemDefault = ResetSystemDefault(name);
     if (!hasSystemDefault && defaultValue) {
       setter(defaultValue);
@@ -384,6 +394,12 @@ private:
     std::function<bool(const Variant&)>updateCallback,
     std::function<Variant()> getCallback,
     std::function<UserIniData *(void)> userDataCallback = nullptr);
+
+  /**
+   * Take a Variant full of KindOfRefs and unbox it.
+   */
+  static Variant Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
+                       bool& use_defaults, const String& array_key);
 };
 
 int64_t convert_bytes_to_long(const std::string& value);

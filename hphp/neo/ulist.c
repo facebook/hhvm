@@ -78,32 +78,6 @@ NEOERR *uListInit(ULIST **ul, int size, int flags)
   return STATUS_OK;
 }
 
-NEOERR *uListvInit(ULIST **ul, ...)
-{
-  NEOERR *err;
-  va_list ap;
-  void *it;
-
-  err = uListInit (ul, 0, 0);
-  if (err) return nerr_pass (err);
-
-  va_start (ap, ul);
-
-  it = va_arg (ap, void *);
-
-  while (it)
-  {
-    err = uListAppend (*ul, it);
-    if (err) 
-    {
-      uListDestroy(ul, 0);
-      return nerr_pass (err);
-    }
-    it = va_arg (ap, void *);
-  }
-  return STATUS_OK;
-}
-
 NEOERR *uListAppend (ULIST *ul, void *data)
 {
   NEOERR *r;
@@ -114,62 +88,6 @@ NEOERR *uListAppend (ULIST *ul, void *data)
 
   ul->items[ul->num] = data;
   ul->num++;
-
-  return STATUS_OK;
-}
-
-NEOERR *uListPop (ULIST *ul, void **data)
-{
-  if (ul->num == 0)
-    return nerr_raise(NERR_OUTOFRANGE, "uListPop: empty list");
-
-  *data = ul->items[ul->num - 1];
-  ul->num--;
-
-  return STATUS_OK;
-}
-
-NEOERR *uListInsert (ULIST *ul, int x, void *data)
-{
-  void **start;
-  NEOERR *r;
-
-  if (x < 0)
-    x = ul->num + x;
-
-  if (x >= ul->num)
-    return nerr_raise(NERR_OUTOFRANGE, "uListInsert: past end (%d > %d)", 
-	x, ul->num);
-
-  r = check_resize (ul, ul->num + 1);
-  if (r != STATUS_OK)
-    return r;
-
-  start = &(ul->items[x]);
-  memmove (start + 1, start, (ul->num - x) * sizeof(void *));
-  ul->items[x] = data;
-  ++ul->num;
-
-  return STATUS_OK;
-}
-
-NEOERR *uListDelete (ULIST *ul, int x, void **data)
-{
-  void **start;
-
-  if (x < 0)
-    x = ul->num + x;
-
-  if (x >= ul->num)
-    return nerr_raise(NERR_OUTOFRANGE, "uListDelete: past end (%d > %d)", 
-	x, ul->num);
-
-  if (data != NULL)
-    *data = ul->items[x];
-
-  start = &(ul->items[x]);
-  memmove (start, start+1, (ul->num - x - 1) * sizeof(void *));
-  --ul->num;
 
   return STATUS_OK;
 }
@@ -191,57 +109,10 @@ NEOERR *uListGet (ULIST *ul, int x, void **data)
   return STATUS_OK;
 }
 
-NEOERR *uListSet (ULIST *ul, int x, void *data)
-{
-  if (x >= ul->num)
-    return nerr_raise(NERR_OUTOFRANGE, "uListSet: past end (%d > %d)", 
-	x, ul->num);
-
-  ul->items[x] = data;
-
-  return STATUS_OK;
-}
-
-NEOERR *uListReverse (ULIST *ul)
-{
-  int i;
-
-  for (i = 0; i < ul->num/2; ++i) {
-    void *tmp = ul->items[i];
-    ul->items[i] = ul->items[ul->num-1-i];
-    ul->items[ul->num-1-i] = tmp;
-  }
-
-  return STATUS_OK;
-}
-
 NEOERR *uListSort (ULIST *ul, int (*compareFunc)(const void *, const void*)) {
   qsort(ul->items, ul->num, sizeof(void *), compareFunc);
   return STATUS_OK;
 }
-
-void *uListSearch (ULIST *ul, const void *key, int
-    (*compareFunc)(const void *, const void*)) {
-  return bsearch(key, ul->items, ul->num, sizeof(void *), compareFunc);
-}
-
-void *uListIn (ULIST *ul, const void *key, int (*compareFunc)(const void *, const void*)) {
-  int i;
-
-  for (i = 0; i < ul->num; ++i) {
-    if (!compareFunc(key, &ul->items[i])) {
-      return &ul->items[i];
-    }
-  }
-  return NULL;
-}
-
-int uListIndex (ULIST *ul, const void *key, int (*compareFunc)(const void *, const void*)) {
-  void **p = uListIn(ul, key, compareFunc);
-  return p ? (p - ul->items) : -1;
-}
-
-
 
 NEOERR *uListDestroy (ULIST **ul, int flags)
 {

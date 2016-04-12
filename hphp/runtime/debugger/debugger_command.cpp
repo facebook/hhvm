@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -119,36 +119,39 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
 
   // Not all commands are here, as not all commands need to be sent over wire.
   switch (type) {
-    case KindOfBreak    :  cmd = DebuggerCommandPtr(new CmdBreak    ()); break;
-    case KindOfContinue :  cmd = DebuggerCommandPtr(new CmdContinue ()); break;
-    case KindOfDown     :  cmd = DebuggerCommandPtr(new CmdDown     ()); break;
-    case KindOfException:  cmd = DebuggerCommandPtr(new CmdException()); break;
-    case KindOfFrame    :  cmd = DebuggerCommandPtr(new CmdFrame    ()); break;
-    case KindOfGlobal   :  cmd = DebuggerCommandPtr(new CmdGlobal   ()); break;
-    case KindOfInfo     :  cmd = DebuggerCommandPtr(new CmdInfo     ()); break;
-    case KindOfConstant :  cmd = DebuggerCommandPtr(new CmdConstant ()); break;
-    case KindOfList     :  cmd = DebuggerCommandPtr(new CmdList     ()); break;
-    case KindOfMachine  :  cmd = DebuggerCommandPtr(new CmdMachine  ()); break;
-    case KindOfNext     :  cmd = DebuggerCommandPtr(new CmdNext     ()); break;
-    case KindOfOut      :  cmd = DebuggerCommandPtr(new CmdOut      ()); break;
-    case KindOfPrint    :  cmd = DebuggerCommandPtr(new CmdPrint    ()); break;
-    case KindOfQuit     :  cmd = DebuggerCommandPtr(new CmdQuit     ()); break;
-    case KindOfRun      :  cmd = DebuggerCommandPtr(new CmdRun      ()); break;
-    case KindOfStep     :  cmd = DebuggerCommandPtr(new CmdStep     ()); break;
-    case KindOfThread   :  cmd = DebuggerCommandPtr(new CmdThread   ()); break;
-    case KindOfUp       :  cmd = DebuggerCommandPtr(new CmdUp       ()); break;
-    case KindOfVariable :  cmd = DebuggerCommandPtr(new CmdVariable ()); break;
+    case KindOfBreak    : cmd = std::make_shared<CmdBreak>(); break;
+    case KindOfContinue : cmd = std::make_shared<CmdContinue>(); break;
+    case KindOfDown     : cmd = std::make_shared<CmdDown>(); break;
+    case KindOfException: cmd = std::make_shared<CmdException>(); break;
+    case KindOfFrame    : cmd = std::make_shared<CmdFrame>(); break;
+    case KindOfGlobal   : cmd = std::make_shared<CmdGlobal>(); break;
+    case KindOfInfo     : cmd = std::make_shared<CmdInfo>(); break;
+    case KindOfConstant : cmd = std::make_shared<CmdConstant>(); break;
+    case KindOfList     : cmd = std::make_shared<CmdList>(); break;
+    case KindOfMachine  : cmd = std::make_shared<CmdMachine>(); break;
+    case KindOfNext     : cmd = std::make_shared<CmdNext>(); break;
+    case KindOfOut      : cmd = std::make_shared<CmdOut>(); break;
+    case KindOfPrint    : cmd = std::make_shared<CmdPrint>(); break;
+    case KindOfQuit     : cmd = std::make_shared<CmdQuit>(); break;
+    case KindOfRun      : cmd = std::make_shared<CmdRun>(); break;
+    case KindOfStep     : cmd = std::make_shared<CmdStep>(); break;
+    case KindOfThread   : cmd = std::make_shared<CmdThread>(); break;
+    case KindOfUp       : cmd = std::make_shared<CmdUp>(); break;
+    case KindOfVariable : cmd = std::make_shared<CmdVariable>(); break;
     case KindOfVariableAsync :
-      cmd = DebuggerCommandPtr(new CmdVariable (KindOfVariableAsync)); break;
-    case KindOfWhere    :  cmd = DebuggerCommandPtr(new CmdWhere    ()); break;
+      cmd = std::make_shared<CmdVariable>(KindOfVariableAsync);
+      break;
+    case KindOfWhere    : cmd = std::make_shared<CmdWhere>(); break;
     case KindOfWhereAsync:
-      cmd = DebuggerCommandPtr(new CmdWhere(KindOfWhereAsync)); break;
-    case KindOfEval     :  cmd = DebuggerCommandPtr(new CmdEval     ()); break;
-    case KindOfInterrupt:  cmd = DebuggerCommandPtr(new CmdInterrupt()); break;
-    case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;
-    case KindOfShell    :  cmd = DebuggerCommandPtr(new CmdShell    ()); break;
+      cmd = std::make_shared<CmdWhere>(KindOfWhereAsync);
+      break;
+    case KindOfEval     : cmd = std::make_shared<CmdEval>(); break;
+    case KindOfInterrupt: cmd = std::make_shared<CmdInterrupt>(); break;
+    case KindOfSignal   : cmd = std::make_shared<CmdSignal>(); break;
+    case KindOfShell    : cmd = std::make_shared<CmdShell>(); break;
     case KindOfInternalTesting :
-      cmd = DebuggerCommandPtr(new CmdInternalTesting()); break;
+      cmd = std::make_shared<CmdInternalTesting>();
+      break;
 
     case KindOfExtended: {
       assert(!clsname.empty());

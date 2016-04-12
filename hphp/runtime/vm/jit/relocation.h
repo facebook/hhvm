@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,9 +20,9 @@
 #include <cstdio>
 #include <vector>
 
-#include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {
 
@@ -31,6 +31,7 @@ struct CodeCache;
 namespace jit {
 
 struct AsmInfo;
+struct IRUnit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,10 +51,10 @@ struct RelocationInfo {
   }
   void rewind(TCA start, TCA end);
   void markAddressImmediates(const std::set<TCA>& ai) {
-    m_addressImmediates.insert(ai.begin(), ai.end());
+    addressImmediates.insert(ai.begin(), ai.end());
   }
   bool isAddressImmediate(TCA ip) {
-    return m_addressImmediates.count(ip);
+    return addressImmediates.count(ip);
   }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
   const RangeVec& srcRanges() { return m_srcRanges; }
@@ -69,7 +70,7 @@ struct RelocationInfo {
    * the fixup map would want the address of the nop.
    */
   std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
-  std::set<TCA> m_addressImmediates;
+  std::set<TCA> addressImmediates;
 };
 
 /*
@@ -93,13 +94,13 @@ void recordPerfRelocMap(
   TCA coldStart, TCA coldEnd,
   SrcKey sk, int argNum,
   const GrowableVector<IncomingBranch> &incomingBranches,
-  CodeGenFixups& fixups);
+  CGMeta& fixups);
 String perfRelocMapInfo(
   TCA start, TCA end,
   TCA coldStart, TCA coldEnd,
   SrcKey sk, int argNum,
   const GrowableVector<IncomingBranch> &incomingBranches,
-  CodeGenFixups& fixups);
+  CGMeta& fixups);
 
 struct TransRelocInfo;
 void readRelocations(
@@ -107,7 +108,22 @@ void readRelocations(
   std::set<TCA>* liveStubs,
   void (*callback)(TransRelocInfo&& tri, void* data),
   void* data);
-void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot);
+void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot,
+              CGMeta& fixups);
+
+/*
+ * Relocate a new translation to the current frontiers of main and cold. Code
+ * in frozen is not moved.
+ *
+ * TODO(t10543562): This can probably be merged with relocateNewTranslation.
+ */
+void relocateTranslation(
+  const IRUnit& unit,
+  CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
+  CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
+  CodeBlock& frozen, CodeAddress frozen_start,
+  AsmInfo* ai, CGMeta& meta
+);
 
 /*
  * Relocate a new translation into a free region in the TC and update the
@@ -120,7 +136,8 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot);
  *
  * If set *adjust will be updated to its post relocation address.
  */
-bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
+bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
+                            CGMeta& fixups,
                             TCA* adjust = nullptr);
 
 //////////////////////////////////////////////////////////////////////
@@ -131,15 +148,15 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
 namespace x64 {
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
-void adjustCodeForRelocation(RelocationInfo& rel, CodeGenFixups& fixups);
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
 void adjustMetaDataForRelocation(RelocationInfo& rel,
                                  AsmInfo* asmInfo,
-                                 CodeGenFixups& fixups);
-void findFixups(TCA start, TCA end, CodeGenFixups& fixups);
+                                 CGMeta& fixups);
+void findFixups(TCA start, TCA end, CGMeta& fixups);
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
-                CodeGenFixups& fixups,
+                CGMeta& fixups,
                 TCA* exitAddr);
 
 }

@@ -5,17 +5,13 @@ endforeach()
 # This will be run after runtime/ext has, so we can use the output of
 # that.
 add_custom_command(
-  OUTPUT "class_map.cpp" "constants.h"
+  OUTPUT "class_map.cpp"
   DEPENDS ${IDL_SRCS} gen-class-map
   COMMAND gen-class-map
   ARGS "--system"
        "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
-       "${CMAKE_CURRENT_BINARY_DIR}/constants.h"
-       "${CMAKE_CURRENT_SOURCE_DIR}/idl/constants.idl.json"
        ${EXTENSION_IDL_SOURCES}
-       # TODO: This will get moved into a config.cmake soon, until then...
-       "${CMAKE_CURRENT_SOURCE_DIR}/idl/closure.idl.json"
-  COMMENT "Generating class_map.cpp and constants.h")
+  COMMENT "Generating class_map.cpp")
 
 set(CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
                 "systemlib.cpp")
@@ -26,12 +22,8 @@ if (ENABLE_ASYNC_MYSQL)
 endif ()
 
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
-# constants.h doesn't exist until build time,
-# so we need to manually inject it here
-list(APPEND files "${CMAKE_CURRENT_SOURCE_DIR}/constants.h")
 HHVM_PUBLIC_HEADERS(system ${files})
 
-# Needed to force system/constants.h to generate prior to files which need it
 if (ENABLE_ZEND_COMPAT)
   add_dependencies(hphp_ext_zend_compat hphp_system)
 endif()
@@ -56,7 +48,7 @@ add_custom_command(
   DEPENDS "php.txt" ${SYSTEMLIB_SRCS}
   COMMAND "INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR}"
           "FBCODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../.."
-          "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_hhvm/make_systemlib.sh"
+          "${CMAKE_CURRENT_SOURCE_DIR}/make_systemlib.sh"
           "--install_dir=${CMAKE_CURRENT_BINARY_DIR}"
           "--fbcode_dir=${CMAKE_CURRENT_SOURCE_DIR}/.."
           "${SYSTEMLIB_SRCS_STR}"

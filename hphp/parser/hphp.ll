@@ -103,6 +103,7 @@ static int getNextTokenType(int t) {
     case T_IS_NOT_IDENTICAL:
     case T_IS_SMALLER_OR_EQUAL:
     case T_IS_GREATER_OR_EQUAL:
+    case T_SPACESHIP:
     case T_PLUS_EQUAL:
     case T_MINUS_EQUAL:
     case T_MUL_EQUAL:
@@ -120,6 +121,7 @@ static int getNextTokenType(int t) {
     case T_EXIT:
     case T_RETURN:
     case T_YIELD:
+    case T_YIELD_FROM:
     case T_AWAIT:
     case T_ASYNC:
     case T_NEW:
@@ -164,20 +166,7 @@ static int getNextTokenType(int t) {
     case T_XHP_REQUIRED:
     case T_ENUM:
     case T_ARRAY:
-    case T_FROM:
-    case T_IN:
-    case T_WHERE:
-    case T_JOIN:
-    case T_ON:
-    case T_EQUALS:
-    case T_INTO:
-    case T_LET:
-    case T_ORDERBY:
-    case T_ASCENDING:
-    case T_DESCENDING:
-    case T_SELECT:
-    case T_GROUP:
-    case T_BY:
+    case T_DICT:
       return NextTokenType::TypeListMaybe;
     case T_SUPER:
     case T_XHP_ATTRIBUTE:
@@ -268,6 +257,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from" { RETTOKEN(T_YIELD_FROM);}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
@@ -301,6 +291,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"interface"            { RETTOKEN(T_INTERFACE);}
 <ST_IN_SCRIPTING>"trait"                { RETTOKEN(T_TRAIT);}
 <ST_IN_SCRIPTING>"..."                  { RETTOKEN(T_ELLIPSIS);}
+<ST_IN_SCRIPTING>"??"                   { RETTOKEN(T_COALESCE); }
 <ST_IN_SCRIPTING>"insteadof"            { RETTOKEN(T_INSTEADOF);}
 <ST_IN_SCRIPTING>"extends"              { RETTOKEN(T_EXTENDS);}
 <ST_IN_SCRIPTING>"implements"           { RETTOKEN(T_IMPLEMENTS);}
@@ -464,6 +455,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"!="|"<>"            { RETSTEP(T_IS_NOT_EQUAL);}
 <ST_IN_SCRIPTING>"<="                 { RETSTEP(T_IS_SMALLER_OR_EQUAL);}
 <ST_IN_SCRIPTING>">="                 { RETSTEP(T_IS_GREATER_OR_EQUAL);}
+<ST_IN_SCRIPTING>"<=>"                { RETSTEP(T_SPACESHIP);}
 <ST_IN_SCRIPTING>"+="                 { RETSTEP(T_PLUS_EQUAL);}
 <ST_IN_SCRIPTING>"-="                 { RETSTEP(T_MINUS_EQUAL);}
 <ST_IN_SCRIPTING>"*="                 { RETSTEP(T_MUL_EQUAL);}
@@ -484,26 +476,12 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"XOR"                { RETTOKEN(T_LOGICAL_XOR);}
 <ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
 
+<ST_IN_SCRIPTING>"|>"                 { HH_ONLY_KEYWORD(T_PIPE); }
+<ST_IN_SCRIPTING>"dict"               { HH_ONLY_KEYWORD(T_DICT); }
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
-<ST_IN_SCRIPTING>"from"/{WHITESPACE_AND_COMMENTS}\$[a-zA-Z0-9_\x7f-\xff] {
-  HH_ONLY_KEYWORD(T_FROM);
-}
-<ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
-<ST_IN_SCRIPTING>"join"               { HH_ONLY_KEYWORD(T_JOIN); }
-<ST_IN_SCRIPTING>"in"                 { HH_ONLY_KEYWORD(T_IN); }
-<ST_IN_SCRIPTING>"on"                 { HH_ONLY_KEYWORD(T_ON); }
-<ST_IN_SCRIPTING>"equals"             { HH_ONLY_KEYWORD(T_EQUALS); }
-<ST_IN_SCRIPTING>"into"               { HH_ONLY_KEYWORD(T_INTO); }
-<ST_IN_SCRIPTING>"let"                { HH_ONLY_KEYWORD(T_LET); }
-<ST_IN_SCRIPTING>"orderby"            { HH_ONLY_KEYWORD(T_ORDERBY); }
-<ST_IN_SCRIPTING>"ascending"          { HH_ONLY_KEYWORD(T_ASCENDING); }
-<ST_IN_SCRIPTING>"descending"         { HH_ONLY_KEYWORD(T_DESCENDING); }
-<ST_IN_SCRIPTING>"select"             { HH_ONLY_KEYWORD(T_SELECT); }
-<ST_IN_SCRIPTING>"group"              { HH_ONLY_KEYWORD(T_GROUP); }
-<ST_IN_SCRIPTING>"by"                 { HH_ONLY_KEYWORD(T_BY); }
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }
@@ -917,6 +895,16 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_OPEN_TAG;
 }
 
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$$"/[^a-zA-Z_\x7f-\xff${] {
+  if (_scanner->isXHPSyntaxEnabled()) {
+    RETTOKEN(T_PIPE_VAR);
+  }
+  unput('$');
+  return '$';
+}
+
+
+
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
         _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1, T_VARIABLE);
         return T_VARIABLE;
@@ -965,14 +953,18 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>("#"|"//")[^\r\n]*{NEWLINE}? {
         const char* asptag = nullptr;
+        const auto searchTwoChars = [](const char* str, size_t len, char d) {
+                for (auto t = str; t + 1 < str + len; t++) {
+                        if (t[0] == d && t[1] == '>') {
+                                return t;
+                        }
+                }
+                return (const char*)nullptr;
+        };
         if (_scanner->aspTags()) {
-                asptag = static_cast<const char*>(
-                  memmem(yytext, yyleng, "%>", 2)
-                );
+                asptag = searchTwoChars(yytext, yyleng, '%');
         }
-        auto phptag = static_cast<const char*>(
-          memmem(yytext, yyleng, "?>", 2)
-        );
+        auto phptag = searchTwoChars(yytext, yyleng, '?');
         if (asptag && (!phptag || (asptag < phptag))) {
                 if (_scanner->isHHFile()) {
                         _scanner->error("HH mode: %%> not allowed");

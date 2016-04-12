@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -29,6 +29,44 @@ namespace HPHP {
 
 using namespace entity_charset_enum;
 
+static entity_table_t ent_cp_866[] = {
+  "Acy", "Bcy", "Vcy", "Gcy", "Dcy", "IEcy", "ZHcy", "Zcy",
+  "Icy", "Jcy", "Kcy", "Lcy", "Mcy", "Ncy", "Ocy", "Pcy",
+  "Rcy", "Scy", "Tcy", "Ucy", "Fcy", "KHcy", "TScy", "CHcy",
+  "SHcy", "SHCHcy", "HARDcy", "Ycy", "SOFTcy", "Ecy", "YUcy", "YAcy",
+  "acy", "bcy", "vcy", "gcy", "dcy", "iecy", "zhcy", "zcy",
+  "icy", "jcy", "kcy", "lcy", "mcy", "ncy", "ocy", "pcy",
+  "blk14", "blk12", "blk34", "boxv", "boxvl", "boxvL", "boxVl", "boxDl",
+  "boxdL", "boxVL", "boxV", "boxDL", "boxUL", "boxUl", "boxuL", "boxdl",
+  "boxur", "boxhu", "boxhd", "boxvr", "boxh", "boxvh", "boxvR", "boxVr",
+  "boxUR", "boxDR", "boxHU", "boxHD", "boxVR", "boxH", "boxVH", "boxHu",
+  "boxhU", "boxHd", "boxhD", "boxUr", "boxuR", "boxdR", "boxDr", "boxVh",
+  "boxvH", "boxul", "boxdr", "block", "lhblk", nullptr, nullptr, "uhblk",
+  "rcy", "scy", "tcy", "ucy", "fcy", "khcy", "tscy", "chcy",
+  "shcy", "shchcy", "hardcy", "ycy", "softcy", "ecy", "yucy", "yacy",
+  "IOcy", "iocy", "Jukcy", "jukcy", "YIcy", "yicy", "Ubrcy", "ubrcy",
+  "deg", nullptr, "middot", "Sqrt", "numero", "curren", nullptr, "nbsp"
+};
+
+static entity_table_t ent_cp_1251[] = {
+  "DJcy", "GJcy", "sbquo", "gjcy", "bdquo", "hellip", "dagger", "Dagger",
+  "euro", "permil", "LJcy", "lsaquo", "NJcy", "KJcy", "TSHcy", "DZcy",
+  "djcy", "lsquo", "rsquo", "ldquo", "rdquo", "bull", "ndash", "mdash",
+  nullptr, "trade", "ljcy", "rsaquo", "njcy", "kjcy", "tshcy", "dzcy",
+  "nbsp", "Ubrcy", "ubrcy", "Jsercy", "curren", nullptr, "brvbar", "sect",
+  "IOcy", "copy", "Jukcy", "laquo", "not", "shy", "reg", "YIcy",
+  "deg", "pm", "Iukcy", "iukcy", nullptr, "micro", "para", "middot",
+  "iocy", "numero", "jukcy", "raquo", "jsercy", "DScy", "dscy", "yicy",
+  "Acy", "Bcy", "Vcy", "Gcy", "Dcy", "IEcy", "ZHcy", "Zcy",
+  "Icy", "Jcy", "Kcy", "Lcy", "Mcy", "Ncy", "Ocy", "Pcy",
+  "Rcy", "Scy", "Tcy", "Ucy", "Fcy", "KHcy", "TScy", "CHcy",
+  "SHcy", "SHCHcy", "HARDcy", "Ycy", "SOFTcy", "Ecy", "YUcy", "YAcy",
+  "acy", "bcy", "vcy", "gcy", "dcy", "iecy", "zhcy", "zcy",
+  "icy", "jcy", "kcy", "lcy", "mcy", "ncy", "ocy", "pcy",
+  "rcy", "scy", "tcy", "ucy", "fcy", "khcy", "tscy", "chcy",
+  "shcy", "shchcy", "hardcy", "ycy", "softcy", "ecy", "yucy", "yacy"
+};
+
 /* codepage 1252 is a Windows extension to iso-8859-1. */
 static entity_table_t ent_cp_1252[] = {
   "euro", nullptr, "sbquo", "fnof", "bdquo", "hellip", "dagger",
@@ -54,6 +92,21 @@ static entity_table_t ent_iso_8859_1[] = {
   "iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde",
   "ouml", "divide", "oslash", "ugrave", "uacute", "ucirc",
   "uuml", "yacute", "thorn", "yuml"
+};
+
+static entity_table_t ent_iso_8859_5[] = {
+  "nbsp", "IOcy", "DJcy", "GJcy", "Jukcy", "DScy", "Iukcy", "YIcy",
+  "Jsercy", "LJcy", "NJcy", "TSHcy", "KJcy", "shy", "Ubrcy", "DZcy",
+  "Acy", "Bcy", "Vcy", "Gcy", "Dcy", "IEcy", "ZHcy", "Zcy",
+  "Icy", "Jcy", "Kcy", "Lcy", "Mcy", "Ncy", "Ocy", "Pcy",
+  "Rcy", "Scy", "Tcy", "Ucy", "Fcy", "KHcy", "TScy", "CHcy",
+  "SHcy", "SHCHcy", "HARDcy", "Ycy", "SOFTcy", "Ecy", "YUcy", "YAcy",
+  "acy", "bcy", "vcy", "gcy", "dcy", "iecy", "zhcy", "zcy",
+  "icy", "jcy", "kcy", "lcy", "mcy", "ncy", "ocy", "pcy",
+  "rcy", "scy", "tcy", "ucy", "fcy", "khcy", "tscy", "chcy",
+  "shcy", "shchcy", "hardcy", "ycy", "softcy", "ecy", "yucy", "yacy",
+  "numero", "iocy", "djcy", "gjcy", "jukcy", "dscy", "iukcy", "yicy",
+  "jsercy", "ljcy", "njcy", "tshcy", "kjcy", "sect", "ubrcy", "dzcy"
 };
 
 static entity_table_t ent_iso_8859_15[] = {
@@ -241,9 +294,12 @@ static entity_table_t ent_uni_9824_9830[] = {
 };
 
 static const struct html_entity_map entity_map[] = {
+  { cs_cp866,     0x80, 0xff, ent_cp_866 },
+  { cs_cp1251,    0x80, 0xff, ent_cp_1251 },
   { cs_cp1252,    0x80, 0x9f, ent_cp_1252 },
   { cs_cp1252,    0xa0, 0xff, ent_iso_8859_1 },
   { cs_8859_1,    0xa0, 0xff, ent_iso_8859_1 },
+  { cs_8859_5,    0xa0, 0xff, ent_iso_8859_5 },
   { cs_8859_15,   0xa0, 0xff, ent_iso_8859_15 },
   { cs_utf_8,     0xa0, 0xff, ent_iso_8859_1 },
   { cs_utf_8,     338,  402,  ent_uni_338_402 },
@@ -262,9 +318,6 @@ static const struct html_entity_map entity_map[] = {
   { cs_eucjp,     0xa0, 0xff, ent_iso_8859_1 },
   /* Missing support for these at the moment
   { cs_koi8r,     0xa3, 0xff, ent_koi8r },
-  { cs_cp1251,    0x80, 0xff, ent_cp_1251 },
-  { cs_8859_5,    0xc0, 0xff, ent_iso_8859_5 },
-  { cs_cp866,     0xc0, 0xff, ent_cp_866 },
   { cs_macroman,  0x0b, 0xff, ent_macroman },
   */
   { cs_terminator }
@@ -276,9 +329,17 @@ static const struct {
 } charset_map[] = {
   { "ISO-8859-1",     cs_8859_1 },
   { "ISO8859-1",      cs_8859_1 },
+  { "ISO-8859-5",     cs_8859_5 },
+  { "ISO8859-5",      cs_8859_5 },
   { "ISO-8859-15",    cs_8859_15 },
   { "ISO8859-15",     cs_8859_15 },
   { "utf-8",          cs_utf_8 },
+  { "cp866",          cs_cp866 },
+  { "866",            cs_cp866 },
+  { "ibm866",         cs_cp866 },
+  { "cp1251",         cs_cp1251 },
+  { "Windows-1251",   cs_cp1251 },
+  { "win-1251",       cs_cp1251 },
   { "cp1252",         cs_cp1252 },
   { "Windows-1252",   cs_cp1252 },
   { "1252",           cs_cp1252 },
@@ -296,14 +357,6 @@ static const struct {
   { "KOI8-R",         cs_koi8r },
   { "koi8-ru",        cs_koi8r },
   { "koi8r",          cs_koi8r },
-  { "cp1251",         cs_cp1251 },
-  { "Windows-1251",   cs_cp1251 },
-  { "win-1251",       cs_cp1251 },
-  { "iso8859-5",      cs_8859_5 },
-  { "iso-8859-5",     cs_8859_5 },
-  { "cp866",          cs_cp866 },
-  { "866",            cs_cp866 },
-  { "ibm866",         cs_cp866 },
   { "MacRoman",       cs_macroman },
   */
   { nullptr }

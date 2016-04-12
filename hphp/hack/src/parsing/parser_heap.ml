@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -17,7 +17,7 @@ open Core
 (*****************************************************************************)
 
 module HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
-  type t = Pos.t Utils.IMap.t Utils.IMap.t
+  type t = Pos.t IMap.t IMap.t
   let prefix = Prefix.make()
 end)
 
@@ -33,22 +33,22 @@ end)
 
 let () =
   Errors.is_hh_fixme := begin fun pos err_code ->
-    let filename = pos.Pos.pos_file in
-    let line = pos.Pos.pos_start.Lexing.pos_lnum in
+    let filename = Pos.filename pos in
+    let line, _, _ = Pos.info_pos pos in
     match HH_FIXMES.get filename with
     | None -> false
     | Some fixme_map ->
-        match Utils.IMap.get line fixme_map with
+        match IMap.get line fixme_map with
         | None -> false
         | Some code_map ->
-            Utils.IMap.mem err_code code_map
+            IMap.mem err_code code_map
   end
 
 (*****************************************************************************)
 (* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
 (*****************************************************************************)
 
-module ParserHeap = SharedMem.NoCache (Relative_path.S) (struct
+module ParserHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = Ast.program
     let prefix = Prefix.make()
   end)
@@ -57,8 +57,38 @@ let find_class_in_file file_name class_name =
   match ParserHeap.get file_name with
   | None -> None
   | Some defs ->
-      List.fold_left defs ~init:None ~f:begin fun acc def ->
-        match def with
-        | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
-        | _ -> acc
-      end
+    List.fold_left defs ~init:None ~f:begin fun acc def ->
+      match def with
+      | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
+      | _ -> acc
+    end
+
+let find_fun_in_file file_name fun_name =
+  match ParserHeap.get file_name with
+  | None -> None
+  | Some defs ->
+    List.fold_left defs ~init:None ~f:begin fun acc def ->
+      match def with
+      | Ast.Fun f when snd f.Ast.f_name = fun_name -> Some f
+      | _ -> acc
+    end
+
+let find_typedef_in_file file_name name =
+  match ParserHeap.get file_name with
+  | None -> None
+  | Some defs ->
+    List.fold_left defs ~init:None ~f:begin fun acc def ->
+      match def with
+      | Ast.Typedef typedef when snd typedef.Ast.t_id = name -> Some typedef
+      | _ -> acc
+    end
+
+let find_const_in_file file_name name =
+  match ParserHeap.get file_name with
+  | None -> None
+  | Some defs ->
+    List.fold_left defs ~init:None ~f:begin fun acc def ->
+      match def with
+      | Ast.Constant cst when snd cst.Ast.cst_name = name -> Some cst
+      | _ -> acc
+    end

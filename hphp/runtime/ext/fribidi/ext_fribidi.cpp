@@ -3,9 +3,6 @@
 
 #include <fribidi/fribidi.h>
 
-#define emalloc HPHP::req::malloc
-#define efree HPHP::req::free
-
 namespace HPHP {
 
 static inline bool
@@ -78,7 +75,10 @@ static Variant HHVM_FUNCTION(
   }
 
   // Convert input string to internal Unicode
-  logical_ustr = (FriBidiChar*) emalloc(sizeof(FriBidiChar) * logical_str_len);
+  logical_ustr =
+    (FriBidiChar*) req::malloc_noptrs(sizeof(FriBidiChar) * logical_str_len);
+  SCOPE_EXIT { req::free(logical_ustr); };
+
   ustr_len = fribidi_charset_to_unicode(
     (FriBidiCharSet)charset,
     logical_str.c_str(),
@@ -88,29 +88,27 @@ static Variant HHVM_FUNCTION(
 
   // Visualize the Unicode string
   base_direction = direction;
-  visual_ustr = (FriBidiChar*) emalloc(sizeof(FriBidiChar) * ustr_len);
+  visual_ustr =
+    (FriBidiChar*) req::malloc_noptrs(sizeof(FriBidiChar) * ustr_len);
+  SCOPE_EXIT { req::free(visual_ustr); };
   status = fribidi_log2vis(
     logical_ustr, ustr_len, &base_direction,
     visual_ustr, nullptr, nullptr, nullptr);
-  efree(logical_ustr);
 
   // Return false if FriBidi failed
   if (status == 0) {
-    efree(visual_ustr);
     return false;
   }
 
   // Convert back from internal Unicode to original character set
   visual_str_len = 4 * ustr_len;
-  visual_str = (char *) emalloc(sizeof(char) * visual_str_len);
+  visual_str = (char *) req::malloc_noptrs(sizeof(char) * visual_str_len);
+  SCOPE_EXIT { req::free(visual_str); };
+
   visual_str_len = fribidi_unicode_to_charset(
     (FriBidiCharSet)charset, visual_ustr, ustr_len, visual_str);
-  efree(visual_ustr);
 
-  String result(visual_str, visual_str_len, CopyString);
-  efree(visual_str);
-
-  return result;
+  return String(visual_str, visual_str_len, CopyString);
 }
 
 static Array HHVM_FUNCTION(
@@ -156,8 +154,7 @@ static Array HHVM_FUNCTION(
   return result;
 }
 
-class FribidiExtension final : public Extension {
-public:
+struct FribidiExtension final : Extension {
   FribidiExtension() : Extension("fribidi") {}
   void moduleInit() override {
     // Charsets

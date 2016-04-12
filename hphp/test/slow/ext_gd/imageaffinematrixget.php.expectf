@@ -1,0 +1,194 @@
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(1)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(1)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(1)
+  [4]=>
+  float(-20)
+  [5]=>
+  float(-20)
+}
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(1)
+  [4]=>
+  float(2147483392)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(1)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 14
+bool(false)
+
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 16
+bool(false)
+array(6) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(0)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(0)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(-20)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(-20)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(2147483392)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(0)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(0)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0)
+  [3]=>
+  float(0)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 28
+bool(false)
+
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 30
+bool(false)
+array(6) {
+  [0]=>
+  float(0.99984769515639)
+  [1]=>
+  float(0.017452406437284)
+  [2]=>
+  float(-0.017452406437284)
+  [3]=>
+  float(0.99984769515639)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0)
+  [2]=>
+  float(0.017455064928218)
+  [3]=>
+  float(1)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}
+array(6) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(0.017455064928218)
+  [2]=>
+  float(0)
+  [3]=>
+  float(1)
+  [4]=>
+  float(0)
+  [5]=>
+  float(0)
+}

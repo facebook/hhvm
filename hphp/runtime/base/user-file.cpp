@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -208,8 +208,8 @@ bool UserFile::close() {
 int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool invoked = false;
-  String str = invoke(m_StreamRead, s_stream_read,
-                      make_packed_array(length), invoked);
+  auto const str = invoke(m_StreamRead, s_stream_read,
+                          make_packed_array(length), invoked).toString();
   if (!invoked) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
@@ -411,8 +411,10 @@ static int statFill(Variant stat_array, struct stat* stat_sb)
   stat_sb->st_atime = a->get(s_atime.get()).toInt64();
   stat_sb->st_mtime = a->get(s_mtime.get()).toInt64();
   stat_sb->st_ctime = a->get(s_ctime.get()).toInt64();
+#ifndef _MSC_VER
   stat_sb->st_blksize = a->get(s_blksize.get()).toInt64();
   stat_sb->st_blocks = a->get(s_blocks.get()).toInt64();
+#endif
   return 0;
 }
 
@@ -450,8 +452,13 @@ int UserFile::access(const String& path, int mode) {
   }
 
   // The mode flags in stat are different from the flags used by access.
+#ifdef _MSC_VER
+  auto uid = -1;
+  auto gid = -1;
+#else
   auto uid = geteuid();
   auto gid = getegid();
+#endif
   switch (mode) {
     case R_OK: // Test for read permission.
       return simulateAccessResult(

@@ -9,7 +9,7 @@
  *)
 
 (* Entry point to the experimental Hack based bytecode emitter. Contains
- * code for emitting "top level" constructs like classes andfunctions. *)
+ * code for emitting "top level" constructs like classes and functions. *)
 
 open Core
 open Utils
@@ -17,6 +17,7 @@ open Nast
 
 open Emitter_core
 
+module TNBody = Typing_naming_body
 module SN = Naming_special_names
 
 let emit_generator_prologue env m =
@@ -50,7 +51,7 @@ let emit_func_body env m =
 (* returns the param text for this param along with
  * Some (name, DV id, expr) if there is a default param and None otherwise *)
 let emit_param ~tparams i p =
-  assert (not p.param_is_reference); (* actually right *)
+  if p.param_is_reference then unimpl "reference params";
   if p.param_is_variadic then unimpl "variadic params";
   let type_info =
     Emitter_types.fmt_hint_info ~tparams ~always_extended:false p.param_hint in
@@ -204,18 +205,18 @@ let fun_to_method f =
     m_user_attributes = f.f_user_attributes; m_ret = f.f_ret
   }
 
-let emit_fun nenv env (_, x) =
-  let f = Naming_heap.FunHeap.find_unsafe x in
-  let nb = Naming.func_body nenv f in
+let emit_fun nenv env f =
+  let f = Naming.fun_ TypecheckerOptions.default f in
+  let nb = TNBody.func_body nenv f in
   let f = { f with f_body = NamedBody nb } in
   let dummy_method = fun_to_method f in
 
   let env = start_new_function env in
+  let full_name = snd f.f_name in
   let env =
     emit_method_or_func env ~is_method:false ~is_static:true
-      ~tparams:[] ~full_name:x dummy_method (fmt_name x) in
+      ~tparams:[] ~full_name dummy_method (fmt_name full_name) in
   emit_str env ""
-
 
 (* extends lists and things are hints,
  * but I *think* it needs to be an apply? *)
@@ -373,9 +374,9 @@ let handle_class_attrs env cls =
       else unimpl ("function user attribute: " ^ name)
   end
 
-let emit_class nenv env (_, x) =
-  let cls = Naming_heap.ClassHeap.find_unsafe x in
-  let cls = Naming.class_meth_bodies nenv cls in
+let emit_class nenv env cls =
+  let cls = Naming.class_ TypecheckerOptions.default cls in
+  let cls = TNBody.class_meth_bodies nenv cls in
 
   (* make any adjustments to the class that are needed for xhp *)
   let cls = Emitter_xhp.convert_class cls in
@@ -399,7 +400,7 @@ let emit_class nenv env (_, x) =
   let extends_list = fmt_extends_list extends in
   let implements_list = fmt_implements_list implements in
 
-  let name = fmt_name x in
+  let name = fmt_name (snd cls.c_name) in
   let self_name, parent_name = match cls.c_kind with
     (* interfaces don't have code so we don't need the names;
      * traits can make self and parent calls to things that are actually
@@ -419,14 +420,15 @@ let emit_class nenv env (_, x) =
   (* Emit all of the main content parts of the class *)
   let env = opt_fold (emit_enum ~cls) env cls.c_enum in
   let env = List.fold_left ~f:emit_use ~init:env cls.c_uses in
-  let env, uninit_vars = lmap (emit_var ~is_static:false) env cls.c_vars in
+  let env, uninit_vars =
+    List.map_env env cls.c_vars (emit_var ~is_static:false) in
   let env, uninit_svars =
-    lmap (emit_var ~is_static:true) env cls.c_static_vars in
+    List.map_env env cls.c_static_vars (emit_var ~is_static:true) in
   let env = List.fold_left ~f:(emit_method ~is_static:false ~cls) ~init:env
     cls.c_methods in
   let env = List.fold_left ~f:(emit_method ~is_static:true ~cls) ~init:env
     cls.c_static_methods in
-  let env, uninit_consts = lmap emit_const env cls.c_consts in
+  let env, uninit_consts = List.map_env env cls.c_consts emit_const in
   let env = List.fold_left ~f:emit_tconst ~init:env cls.c_typeconsts in
 
   let uninit_vars = List.filter_opt uninit_vars in
@@ -445,6 +447,7 @@ let emit_class nenv env (_, x) =
   let env = emit_const_init env uninit_consts in
 
   let env = emit_exit env in
+  let env = { env with self_name = None; parent_name = None; } in
 
   emit_str env ""
 
@@ -467,6 +470,9 @@ let emit_closure (name, {full_name; closure_counter; is_static; tparams},
    * (see emitMethodMetadata in emitter.cpp) *)
   let declvars = "$0Closure" :: names in
 
+  (* Closures don't close over self_name/parent_made, but it would
+   * be nice, possibly. emitter.cpp doesn't, though, and just uses
+   * Self/Parent. *)
   let m = fun_to_method fun_ in
   let env = emit_method_or_func env ~is_method:true
     ~closure_vars:declvars
@@ -487,9 +493,9 @@ let rec emit_all_closures env =
   emit_all_closures env
 
 
-let emit_typedef _nenv env (_, x) =
-  let typedef = Naming_heap.TypedefHeap.find_unsafe x in
-  emit_strs env [".alias"; fmt_name x; "=";
+let emit_typedef _nenv env t =
+  let typedef = Naming.typedef TypecheckerOptions.default t in
+  emit_strs env [".alias"; fmt_name (snd t.Ast.t_id); "=";
                  Emitter_types.fmt_hint_constraint
                    ~tparams:[] ~always_extended:false typedef.t_kind ^ ";"]
 
@@ -539,19 +545,20 @@ let emit_main env ~is_test ast =
   let env = emit_exit env in
   emit_str env ""
 
-let emit_file ~is_test nenv filename ast
-    {FileInfo.file_mode; funs; classes; typedefs; consts; _} =
-  assert (file_mode = Some FileInfo.Mstrict);
-  if consts <> [] then unimpl "global consts";
-
+let emit_file ~is_test nenv filename ast =
   let env = new_env () in
 
   let env = emit_strs env
     [".filepath"; quote_str (Relative_path.to_absolute filename) ^ ";\n"] in
   let env = emit_main env ~is_test ast in
-  let env = List.fold_left ~f:(emit_fun nenv) ~init:env funs in
-  let env = List.fold_left ~f:(emit_class nenv) ~init:env classes in
-  let env = List.fold_left ~f:(emit_typedef nenv) ~init:env typedefs in
+  let env = List.fold_left ast ~init:env ~f:begin fun env stmt ->
+    match stmt with
+    | Ast.Fun f -> emit_fun nenv env f
+    | Ast.Class c -> emit_class nenv env c
+    | Ast.Typedef t -> emit_typedef nenv env t
+    | Ast.Constant _ -> unimpl "global consts"
+    | _ -> env
+  end in
   let env = emit_all_closures env in
   let env = emit_str env "" in
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -29,12 +29,14 @@
 
 #include <folly/String.h>
 
+#include "hphp/util/htonll.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/intercept.h"
@@ -75,24 +77,6 @@ const StaticString
   s_getInstanceKey("getInstanceKey");
 
 ///////////////////////////////////////////////////////////////////////////////
-
-#if defined __BYTE_ORDER && defined __BIG_ENDIAN
-/* Linux and other systems don't currently support a ntohx or htonx
-   set of functions for 64-bit values.  We've implemented our own here
-   which is based off of GNU Net's implementation with some slight
-   modifications (changed to macro's rather than functions). */
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define ntohll(n) (n)
-#define htonll(n) (n)
-#else
-#define ntohll(n)                                                       \
-  ( (((uint64_t)ntohl(n)) << 32)                                        \
-    | ((uint64_t)ntohl((n) >> 32) & 0x00000000ffffffff) )
-#define htonll(n)                                                       \
-  ( (((uint64_t)htonl(n)) << 32)                                        \
-    | ((uint64_t)htonl((n) >> 32) & 0x00000000ffffffff) )
-#endif
-#endif
 
 /* enum of thrift types */
 enum TType {
@@ -437,11 +421,12 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
       return 0;
     }
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       fb_compact_serialize_string(sb, var.toString());
       return 0;
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = var.toArray();
       int64_t index_limit;
@@ -524,7 +509,7 @@ String fb_compact_serialize(const Variant& thing,
 
   StringBuffer sb;
   if (fb_compact_serialize_variant(sb, thing, 0, behavior)) {
-    return init_null();
+    return String();
   }
 
   return sb.detach();
@@ -714,7 +699,7 @@ int fb_compact_unserialize_from_buffer(
         if (key.getType() == KindOfInt64) {
           arr.set(key.toInt64(), value);
         } else if (key.getType() == KindOfString ||
-                   key.getType() == KindOfStaticString) {
+                   key.getType() == KindOfPersistentString) {
           arr.set(key, value);
         } else {
           return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
@@ -1053,25 +1038,29 @@ bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
 // call_user_func extensions
 // Linked in via fb.json.idl for now - Need OptFunc solution...
 
-Array f_fb_call_user_func_safe(int _argc, const Variant& function,
-                               const Array& _argv /* = null_array */) {
-  return f_fb_call_user_func_array_safe(function, _argv);
+Array HHVM_FUNCTION(fb_call_user_func_safe,
+                    const Variant& function,
+                    const Array& argv) {
+  return HHVM_FN(fb_call_user_func_array_safe)(function, argv);
 }
 
-Variant f_fb_call_user_func_safe_return(int _argc, const Variant& function,
-                                        const Variant& def,
-                                        const Array& _argv /* = null_array */) {
+Variant HHVM_FUNCTION(fb_call_user_func_safe_return,
+                      const Variant& function,
+                      const Variant& def,
+                      const Array& argv) {
   if (is_callable(function)) {
-    return vm_call_user_func(function, _argv);
+    return vm_call_user_func(function, argv);
   }
   return def;
 }
 
-Array f_fb_call_user_func_array_safe(const Variant& function, const Array& params) {
+Array HHVM_FUNCTION(fb_call_user_func_array_safe,
+                    const Variant& function,
+                    const Array& params) {
   if (is_callable(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }
-  return make_packed_array(false, uninit_null());
+  return make_packed_array(false, null_variant);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1153,10 +1142,17 @@ static Variant do_lazy_stat(Function dostat, const String& filename) {
 }
 
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return false;
+  }
   return do_lazy_stat(StatCache::lstat, filename);
 }
 
-String HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
+Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return false;
+  }
+
   return StatCache::realpath(filename.c_str());
 }
 
@@ -1171,29 +1167,18 @@ void const_load() {
   // legacy entry point, no longer used.
 }
 
-/////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_FBUNS_NONSTRING_VALUE("FB_UNSERIALIZE_NONSTRING_VALUE"),
-  s_FBUNS_UNEXPECTED_END("FB_UNSERIALIZE_UNEXPECTED_END"),
-  s_FBUNS_UNRECOGNIZED_OBJECT_TYPE("FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE"),
-  s_FBUNS_UNEXPECTED_ARRAY_KEY_TYPE("FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE"),
-  s_HHVM_FACEBOOK("HHVM_FACEBOOK");
-
-#define FBUNS(cns) Native::registerConstant<KindOfInt64> \
-  (s_FBUNS_##cns.get(), FB_UNSERIALIZE_##cns)
-
-class FBExtension : public Extension {
- public:
+struct FBExtension : Extension {
   FBExtension(): Extension("fb", "1.0.0") {}
 
   void moduleInit() override {
     Native::registerConstant<KindOfBoolean>
-      (s_HHVM_FACEBOOK.get(), HHVM_FACEBOOK);
-    FBUNS(NONSTRING_VALUE);
-    FBUNS(UNEXPECTED_END);
-    FBUNS(UNRECOGNIZED_OBJECT_TYPE);
-    FBUNS(UNEXPECTED_ARRAY_KEY_TYPE);
+      (makeStaticString("HHVM_FACEBOOK"), HHVM_FACEBOOK);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_NONSTRING_VALUE);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);
@@ -1213,6 +1198,9 @@ class FBExtension : public Extension {
     HHVM_FE(fb_get_last_flush_size);
     HHVM_FE(fb_lazy_lstat);
     HHVM_FE(fb_lazy_realpath);
+    HHVM_FE(fb_call_user_func_safe);
+    HHVM_FE(fb_call_user_func_safe_return);
+    HHVM_FE(fb_call_user_func_array_safe);
 
     loadSystemlib();
   }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,7 +109,7 @@ Array TestLogger::postData(Array arr) {
   Array data = make_map_array("method", "recordTestResults", "args",
                               HHVM_FN(json_encode)(make_packed_array(arr)));
 
-  String str = HHVM_FN(http_build_query)(data, "", "");
+  auto const str = HHVM_FN(http_build_query)(data, "", "").toString();
 
   client.post(log_url, str.c_str(), str.length(), response);
 

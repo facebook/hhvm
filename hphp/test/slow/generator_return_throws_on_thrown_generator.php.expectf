@@ -1,0 +1,5 @@
+
+Fatal error: Uncaught exception 'Exception' with message 'Cannot get return value of a generator that hasn't returned' in %s:16
+Stack trace:
+#0 %s(16): Generator->getReturn()
+#1 {main}

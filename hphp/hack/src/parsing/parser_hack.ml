@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -240,8 +240,8 @@ let rec check_lvalue env = function
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break
   | Await _ | Expr_list _ | Cast _ | Unop _
-  | Binop _ | Eif _ | InstanceOf _ | New _ | Efun _ | Lfun _ | Xml _
-  | Import _) ->
+  | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _ | New _ | Efun _ | Lfun _
+  | Xml _ | Import _ | Pipe _ | Dollardollar) ->
       error_at env pos "Invalid lvalue"
 
 (* The bound variable of a foreach can be a reference (but not inside
@@ -275,7 +275,9 @@ let priorities = [
   (Left, [Timport; Teval;]);
   (Left, [Tcomma]);
   (Right, [Tprint]);
+  (Left, [Tpipe]);
   (Left, [Tqm; Tcolon]);
+  (Right, [Tqmqm]);
   (Left, [Tbarbar]);
   (Left, [Txor]);
   (Left, [Tampamp]);
@@ -394,7 +396,7 @@ let identifier env =
 (* $variable *)
 let variable env =
   match L.token env.file env.lb with
-  | Tlvar ->
+  | Tlvar | Tdollardollar ->
       Pos.make env.file env.lb, Lexing.lexeme env.lb
   | _ ->
       error_expect env "variable";
@@ -419,16 +421,20 @@ let ref_param env =
 (* Entry point *)
 (*****************************************************************************)
 
-let rec program ?(elaborate_namespaces = true) file content =
+let rec program
+    ?(elaborate_namespaces = true)
+    ?(include_line_comments = false)
+    file content =
+  L.include_line_comments := include_line_comments;
   L.comment_list := [];
-  L.fixmes := Utils.IMap.empty;
+  L.fixmes := IMap.empty;
   let lb = Lexing.from_string content in
   let env = init_env file lb in
   let ast, file_mode = header env in
   let comments = !L.comment_list in
   let fixmes = !L.fixmes in
   L.comment_list := [];
-  L.fixmes := Utils.IMap.empty;
+  L.fixmes := IMap.empty;
   Parser_heap.HH_FIXMES.add env.file fixmes;
   Option.iter (List.last !(env.errors)) Errors.parsing_error;
   let ast = if elaborate_namespaces
@@ -622,7 +628,7 @@ and toplevel_word ~attr env = function
       let id, body = namespace env in
       [Namespace (id, body)]
   | "use" ->
-      let usel = namespace_use_list env [] in
+      let usel = namespace_use env in
       [NamespaceUse usel]
   | "const" ->
       let consts = class_const_def env in
@@ -725,7 +731,6 @@ and fun_ ~attr ~(sync:fun_decl_kind) env =
     f_user_attributes = attr;
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
-    f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
   }
 
@@ -889,10 +894,26 @@ and class_param_list env =
   | Tcomma ->
       if !(env.errors) != error_state
       then [cst]
-      else cst :: class_param_list env
+      else cst :: class_param_list_remain env
   | _ ->
       error_expect env ">";
       [cst]
+
+and class_param_list_remain env =
+  match L.gt_or_comma env.file env.lb with
+  | Tgt -> []
+  | _ ->
+      L.back env.lb;
+      let error_state = !(env.errors) in
+      let cst = class_param env in
+      match L.gt_or_comma env.file env.lb with
+      | Tgt ->
+          [cst]
+      | Tcomma ->
+          if !(env.errors) != error_state
+          then [cst]
+          else cst :: class_param_list_remain env
+      | _ -> error_expect env ">"; [cst]
 
 and class_param env =
   match L.token env.file env.lb with
@@ -958,9 +979,25 @@ and class_hint_param_list env =
   | Tcomma ->
       if !(env.errors) != error_state
       then [h]
-      else h :: class_hint_param_list env
+      else h :: class_hint_param_list_remain env
   | _ ->
       error_expect env ">"; [h]
+
+and class_hint_param_list_remain env =
+  match L.gt_or_comma env.file env.lb with
+  | Tgt -> []
+  | _ ->
+      L.back env.lb;
+      let error_state = !(env.errors) in
+      let h = hint env in
+      match L.gt_or_comma env.file env.lb with
+      | Tgt ->
+          [h]
+      | Tcomma ->
+          if !(env.errors) != error_state
+          then [h]
+          else h :: class_hint_param_list_remain env
+      | _ -> error_expect env ">"; [h]
 
 (*****************************************************************************)
 (* Type hints: int, ?int, A<T>, array<...> etc ... *)
@@ -2449,6 +2486,8 @@ and expr_remain env e1 =
       expr_binop env Tgtgt Gtgt e1
   | Txor ->
       expr_binop env Txor Xor e1
+  | Tpipe ->
+      expr_pipe env e1 Tpipe
   | Tincr | Tdecr as uop  ->
       expr_postfix_unary env uop e1
   | Tarrow | Tnsarrow as tok ->
@@ -2464,6 +2503,8 @@ and expr_remain env e1 =
       expr_array_get env e1
   | Tqm ->
       expr_if env e1
+  | Tqmqm ->
+      expr_null_coalesce env e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->
       expr_instanceof env e1
   | Tword when Lexing.lexeme env.lb = "and" ->
@@ -2557,7 +2598,6 @@ and lambda_body ~sync env params ret =
     f_user_attributes = [];
     f_fun_kind;
     f_mode = env.mode;
-    f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
   }
   in Lfun f
@@ -2647,8 +2687,10 @@ and expr_atomic ~allow_class ~class_const env =
   | Tdquote ->
       expr_encapsed env pos
   | Tlvar ->
+      (** We store the variable-variable $$foo as $foo. Hackhackhack.
+       * TODO: t10209852*)
       let tok_value = Lexing.lexeme env.lb in
-      let var_id = (pos, tok_value) in
+      let var_id = (pos, strip_variablevariable tok_value) in
       pos, if peek env = Tlambda
         then lambda_single_arg ~sync:FDeclSync env var_id
         else Lvar var_id
@@ -2683,10 +2725,14 @@ and expr_atomic ~allow_class ~class_const env =
   | Theredoc ->
       expr_heredoc env
   | Tdollar ->
-      error env ("A valid variable name starts with a letter or underscore,"^
-        "followed by any number of letters, numbers, or underscores");
-      expr env
+    error env ("A valid variable name starts with a letter or underscore,"^
+      "followed by any number of letters, numbers, or underscores");
+    expr env
+  | Tdollardollar ->
+      pos, Dollardollar
   | Tunsafeexpr ->
+      (* Consume the rest of the comment. *)
+      ignore (L.comment (Buffer.create 256) env.file env.lb);
       let e = expr env in
       let end_ = Pos.make env.file env.lb in
       Pos.btw pos end_, Unsafeexpr e
@@ -2717,7 +2763,7 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
       expr_anon_async env pos
   | "function" ->
       expr_anon_fun env pos ~sync:FDeclSync
-  | name when is_collection env ->
+  | name when is_collection env name ->
       expr_collection env pos name
   | "await" ->
       expr_await env pos
@@ -2748,6 +2794,13 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
       expr_array env pos
   | x ->
       pos, Id (pos, x)
+
+and strip_variablevariable token =
+  if (token.[0] = '$') && (token.[1] = '$') then
+    strip_variablevariable (String.sub token 1 ((String.length token) - 1))
+  else
+    token
+
 
 (*****************************************************************************)
 (* Expressions in parens. *)
@@ -2783,18 +2836,32 @@ and expr_binop env bop ast_bop e1 =
   end
 
 (*****************************************************************************)
+(* Pipe operator |> *)
+(*****************************************************************************)
+
+and expr_pipe env e1 tok =
+  reduce env e1 tok begin fun e1 env ->
+    let e2 = expr env in
+    let pos = btw e1 e2 in
+    pos, Pipe (e1, e2)
+  end
+
+(*****************************************************************************)
 (* Object Access ($obj->method) *)
 (*****************************************************************************)
 
 and expr_arrow env e1 tok =
   reduce env e1 tok begin fun e1 env ->
     let e2 =
+      let saved = save_lexbuf_state env.lb in
       match L.varname env.lb with
       | Tword ->
           let name = Lexing.lexeme env.lb in
           let pos = Pos.make env.file env.lb in
           pos, Id (pos, name)
-      | _ -> L.back env.lb; expr env
+      | _ ->
+        restore_lexbuf_state env.lb saved;
+        expr env
     in
     btw e1 e2, (match tok with
       | Tarrow -> Obj_get (e1, e2, OG_nullthrows)
@@ -2856,6 +2923,7 @@ and expr_call_list_remain env =
     | Trp -> [], []
     | Tellipsis -> (* f($x, $y, << ...$args >> ) *)
       let unpack_e = expr { env with priority = 0 } in
+      check_call_time_reference unpack_e;
       (* no regular params after an unpack *)
       (match L.token env.file env.lb with
         | Tcomma ->
@@ -2867,6 +2935,7 @@ and expr_call_list_remain env =
       L.back env.lb;
       let error_state = !(env.errors) in
       let e = expr { env with priority = 0 } in
+      check_call_time_reference e;
       match L.token env.file env.lb with
         | Trp -> [e], []
         | Tcomma ->
@@ -2878,43 +2947,46 @@ and expr_call_list_remain env =
           end
         | _ -> error_expect env ")"; [e], []
 
+and check_call_time_reference = function
+  | p, Unop (Uref, _) -> Errors.call_time_pass_by_reference p
+  | _ -> ()
+
 (*****************************************************************************)
 (* Collections *)
 (*****************************************************************************)
 
-and is_collection env = peek env = Tlcb
+and is_collection env name =
+  (peek env = Tlcb) || (name = "dict" && peek env = Tlb)
 
 and expr_collection env pos name =
-  if is_collection env
-  then build_collection env pos name
-  else pos, Id (pos, name)
-
-and build_collection env pos name =
-  let name = pos, name in
-  let fds = collection_field_list env in
+  let sentinels = match name with
+    | x when x = "dict" -> (Tlb, Trb)
+    | _ -> (Tlcb, Trcb)
+  in
+  let fds = collection_field_list env sentinels in
   let end_ = Pos.make env.file env.lb in
-  Pos.btw pos end_, Collection (name, fds)
+  Pos.btw pos end_, Collection ((pos, name), fds)
 
-and collection_field_list env =
-  expect env Tlcb;
-  collection_field_list_remain env
+and collection_field_list env (start_sentinel, end_sentinel) =
+  expect env start_sentinel;
+  collection_field_list_remain env end_sentinel
 
-and collection_field_list_remain env =
+and collection_field_list_remain env end_sentinel =
   match L.token env.file env.lb with
-  | Trcb -> []
+  | x when x = end_sentinel -> []
   | _ ->
       L.back env.lb;
       let error_state = !(env.errors) in
       let fd = array_field env in
       match L.token env.file env.lb with
-      | Trcb ->
+      | x when x = end_sentinel ->
           [fd]
       | Tcomma ->
           if !(env.errors) != error_state
           then [fd]
-          else fd :: collection_field_list_remain env
+          else fd :: collection_field_list_remain env end_sentinel
       | _ ->
-          error_expect env "}"; []
+          error_expect env (L.token_to_string end_sentinel); []
 
 (*****************************************************************************)
 (* Imports - require/include/require_once/include_once *)
@@ -3028,7 +3100,6 @@ and expr_anon_fun env pos ~(sync:fun_decl_kind) =
     f_user_attributes = [];
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
-    f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
   }
   in
@@ -3199,6 +3270,15 @@ and colon_if env e1 =
   let e2 = expr env in
   Pos.btw (fst e1) (fst e2), Eif (e1, None, e2)
 
+(*****************************************************************************)
+(* Null coalesce expression: _??_ *)
+(*****************************************************************************)
+
+and expr_null_coalesce env e1 =
+  reduce env e1 Tqmqm begin fun e1 env ->
+    let e2 = expr env in
+    btw e1 e2, NullCoalesce (e1, e2)
+  end
 
 (*****************************************************************************)
 (* Strings *)
@@ -3238,9 +3318,10 @@ and encapsed_nested start env =
   (* Advance the lexer so we can get a start position that doesn't
    * include the opening quote or the last bit of the expression or
    * whatever. Then rewind it. *)
-  let _ = L.string2 env.file env.lb in
-  let frag_start = Pos.make env.file env.lb in
-  L.back env.lb;
+  let frag_start = look_ahead env (fun env ->
+    let _ = L.string2 env.file env.lb in
+    Pos.make env.file env.lb
+  ) in
   encapsed_nested_inner start (frag_start, abs_start) env
 
 and encapsed_text env (start, abs_start) (stop, abs_stop) =
@@ -3255,6 +3336,11 @@ and encapsed_nested_inner start frag env =
   (* Get any literal string part that occurs before this point *)
   let get_text () = encapsed_text env frag cur_pos in
 
+  (* We need to save the lexbuf here because L.string2 can match across
+   * newlines, changing the line number in the process. Thus, L.back will
+   * not restore us to a valid state; we need restore_lexbuf_state for that.
+   *)
+  let saved = save_lexbuf_state env.lb in
   match L.string2 env.file env.lb with
   | Tdquote ->
       get_text ()
@@ -3264,13 +3350,14 @@ and encapsed_nested_inner start frag env =
   | Tlcb when env.mode = FileInfo.Mdecl ->
       encapsed_nested start env
   | Tlcb ->
+      let saved = save_lexbuf_state env.lb in
       (match L.string2 env.file env.lb with
       | Tdollar ->
           error env "{ not supported";
-          L.back env.lb;
+          restore_lexbuf_state env.lb saved;
           encapsed_nested start env
       | Tlvar ->
-          L.back env.lb;
+          restore_lexbuf_state env.lb saved;
           let error_state = !(env.errors) in
           let e = expr env in
           (match L.string2 env.file env.lb with
@@ -3280,10 +3367,11 @@ and encapsed_nested_inner start frag env =
           then [e]
           else get_text () @ e :: encapsed_nested start env
       | _ ->
-          L.back env.lb;
+          restore_lexbuf_state env.lb saved;
           encapsed_nested_inner start frag env
       )
   | Tdollar ->
+      let saved = save_lexbuf_state env.lb in
       (match L.string2 env.file env.lb with
       | Tlcb ->
           if env.mode = FileInfo.Mstrict
@@ -3305,11 +3393,11 @@ and encapsed_nested_inner start frag env =
           then [result]
           else get_text () @ result :: encapsed_nested start env
       | _ ->
-          L.back env.lb;
+          restore_lexbuf_state env.lb saved;
           encapsed_nested_inner start frag env
       )
   | Tlvar ->
-      L.back env.lb;
+      restore_lexbuf_state env.lb saved;
       let error_state = !(env.errors) in
       let e = encapsed_expr env in
       if !(env.errors) != error_state
@@ -3348,6 +3436,7 @@ and encapsed_expr_reduce start env e1 =
   else e1
 
 and encapsed_expr_reduce_left start env e1 =
+  let saved = save_lexbuf_state env.lb in
   match L.string2 env.file env.lb with
   | Tlb ->
       let e2 =
@@ -3382,7 +3471,7 @@ and encapsed_expr_reduce_left start env e1 =
           e1, false
       )
   | _ ->
-      L.back env.lb;
+      restore_lexbuf_state env.lb saved;
       e1, false
 
 (*****************************************************************************)
@@ -3637,8 +3726,9 @@ and xhp_attribute_string env start abs_start =
 and xhp_body pos name env =
   (* First grab any literal text that appears before the next
    * bit of markup *)
-  let start = Pos.make env.file env.lb in
   let abs_start = env.lb.Lexing.lex_curr_pos in
+  let start_pos = File_pos.of_lexing_pos env.lb.Lexing.lex_curr_p in
+  let start = Pos.make_from_file_pos env.file start_pos start_pos in
   let text = xhp_text env start abs_start in
   (* Now handle any markup *)
   text @ xhp_body_inner pos name env
@@ -3661,6 +3751,7 @@ and xhp_text env start abs_start =
     (* if it is empty or all whitespace just ignore it *)
     if squished = "" || squished = " " then [] else
       [pos, String (pos, squished)]
+    (* TODO: xhp can contain html/xhp entities that need to be decoded. *)
 
   | _ -> xhp_text env start abs_start
 
@@ -3819,7 +3910,34 @@ and namespace env =
       error_expect env "{ or ;";
       id, []
 
-and namespace_use_list env acc =
+and namespace_kind env =
+  match L.token env.file env.lb with
+    | Tword -> begin
+      match Lexing.lexeme env.lb with
+        | "function" -> NSFun
+        | "const" -> NSConst
+        | _ -> (L.back env.lb; NSClass)
+    end
+    | _ -> (L.back env.lb; NSClass)
+
+and namespace_use env =
+  let kind = namespace_kind env in
+  let maybe_group_use_prefix = try_parse env begin fun env ->
+    match L.token env.file env.lb with
+      | Tword -> begin
+        let prefix = Lexing.lexeme env.lb in
+        match L.token env.file env.lb with
+          | Tlcb -> Some prefix
+          | _ -> None
+      end
+      | _ -> None
+  end in
+  match maybe_group_use_prefix with
+    | Some prefix -> namespace_group_use env kind prefix
+    | None -> namespace_use_list env false Tsc kind []
+
+and namespace_use_list env allow_change_kind end_token kind acc =
+  let kind = if allow_change_kind then namespace_kind env else kind in
   let p1, s1 = identifier env in
   let id1 = p1, if s1.[0] = '\\' then s1 else "\\" ^ s1 in
   let id2 =
@@ -3833,13 +3951,35 @@ and namespace_use_list env acc =
         let len = (String.length str) - start in
         fst id1, String.sub str start len
   in
-  let acc = (id1, id2) :: acc in
+  let acc = (kind, id1, id2) :: acc in
   match L.token env.file env.lb with
-    | Tsc -> acc
-    | Tcomma -> namespace_use_list env acc
+    | x when x = end_token -> acc
+    | Tcomma -> namespace_use_list env allow_change_kind end_token kind acc
     | _ ->
-      error_expect env "Namespace use list";
+      error_expect env "namespace use list";
       acc
+
+and namespace_group_use env kind prefix =
+  (* This should be an assert, but those tend to just crash the server in an
+   * impossible to debug way. *)
+  let prefix =
+    if String.length prefix > 0 then prefix
+    else (error env "Internal error: prefix length is 0"; "parse_error") in
+  let prefix = if prefix.[0] = '\\' then prefix else "\\" ^ prefix in
+
+  (* The prefix must end with a namespace separator in the syntax, but when we
+   * smash it up with the suffixes, we don't want to double-up on the
+   * separators, so check to make sure it's there and then strip it off. *)
+  let prefix_len = String.length prefix in
+  let prefix = if prefix.[prefix_len - 1] = '\\'
+    then String.sub prefix 0 (prefix_len - 1)
+    else (error_expect env "group use prefix to end with '\\'"; prefix) in
+
+  let allow_change_kind = (kind = NSClass) in
+  let unprefixed = namespace_use_list env allow_change_kind Trcb kind [] in
+  List.map unprefixed begin fun (kind, (p1, s1), id2) ->
+    (kind, (p1, prefix ^ s1), id2)
+  end
 
 (*****************************************************************************)
 (* Helper *)

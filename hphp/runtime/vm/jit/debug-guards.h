@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,9 +18,15 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/util/data-block.h"
+
 namespace HPHP { namespace jit {
-class SrcRec;
-void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec);
+
+struct SrcRec;
+struct CGMeta;
+
+void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec, CodeBlock& cb,
+                     DataBlock& data, CGMeta& fixup);
 
 }}
 

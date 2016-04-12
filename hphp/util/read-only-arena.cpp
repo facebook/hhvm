@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,11 @@ namespace {
  */
 void checked_mprotect(void* addr, size_t size, int prot) {
   auto const rval = mprotect(addr, size, prot);
-  always_assert_flog(rval == 0, "mprotect failed in ReadOnlyArena");
+  always_assert_flog(rval == 0,
+                     "mprotect({},{},{})={} failed in ReadOnlyArena",
+                     addr, size,
+                     prot == PROT_READ ? "R" : "RW",
+                     rval);
 }
 
 }

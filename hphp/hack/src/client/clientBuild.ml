@@ -8,6 +8,8 @@
  *
  *)
 
+open Utils
+
 (* 800s was chosen because it was above most of the historical p95 of
  * hack server startup times as observed here:
  * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
@@ -19,26 +21,15 @@ type env = {
   build_opts : ServerBuild.build_opts;
 }
 
-let build_kind_of build_opts =
-  let module LC = ClientLogCommand in
-  let {ServerBuild.steps; no_steps; is_push; incremental; _} = build_opts in
-  if steps <> None || no_steps <> None then
-    LC.Steps
-  else if is_push then
-    LC.Push
-  else if incremental then
-    LC.Incremental
-  else
-    LC.Full
-
 let handle_response env ic =
   let finished = ref false in
   let exit_code = ref Exit_status.Ok in
-  HackEventLogger.client_begin_work (ClientLogCommand.LCBuild
-    (env.root, build_kind_of env.build_opts));
+  HackEventLogger.client_build_begin_work
+    (ServerBuild.build_type_of env.build_opts)
+    env.build_opts.ServerBuild.id;
   try
     while true do
-      let line:ServerBuild.build_progress = Marshal.from_channel ic in
+      let line:ServerBuild.build_progress = Timeout.input_value ic in
       match line with
       | ServerBuild.BUILD_PROGRESS s -> print_endline s
       | ServerBuild.BUILD_ERROR s ->
@@ -65,6 +56,9 @@ let handle_response env ic =
     raise e
 
 let main env =
+  let build_type = ServerBuild.build_type_of env.build_opts in
+  let request_id = env.build_opts.ServerBuild.id in
+  HackEventLogger.client_build build_type request_id;
   let ic, oc = ClientConnect.connect { ClientConnect.
     root = env.root;
     autostart = true;
@@ -72,6 +66,21 @@ let main env =
     retry_if_init = true;
     expiry = None;
     no_load = false;
+    to_ide = false;
   } in
-  ServerCommand.(stream_request oc (BUILD env.build_opts));
-  handle_response env ic
+  let old_svnrev = Option.try_with begin fun () ->
+    Sys_utils.read_file ServerBuild.svnrev_path
+  end in
+  let exit_status = with_context
+    ~enter:(fun () -> ())
+    ~exit:(fun () ->
+      Printf.eprintf "\nHack build id: %s\n%!" request_id)
+    ~do_:(fun () ->
+      ServerCommand.(stream_request oc (BUILD env.build_opts));
+      handle_response env ic) in
+  let svnrev = Option.try_with begin fun () ->
+    Sys_utils.read_file ServerBuild.svnrev_path
+  end in
+  HackEventLogger.client_build_finish
+    ~rev_changed:(svnrev <> old_svnrev) ~build_type ~request_id ~exit_status;
+  exit_status

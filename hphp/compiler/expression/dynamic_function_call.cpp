@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -69,25 +69,6 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   if (ExpressionPtr rep = FunctionCall::preOptimize(ar)) return rep;
   return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void DynamicFunctionCall::outputCodeModel(CodeGenerator &cg) {
-  if (m_class || hasStaticClass()) {
-    cg.printObjectHeader("ClassMethodCallExpression", 4);
-    StaticClassName::outputCodeModel(cg);
-    cg.printPropertyHeader("methodExpression");
-  } else {
-    cg.printObjectHeader("SimpleFunctionCallExpression", 3);
-    cg.printPropertyHeader("functionExpression");
-  }
-  m_nameExp->outputCodeModel(cg);
-  cg.printPropertyHeader("arguments");
-  cg.printExpressionVector(m_params);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(m_nameExp);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

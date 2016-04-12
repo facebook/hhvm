@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -116,14 +116,6 @@ extern const StaticString
   s_ImagickDraw,
   s_ImagickPixel,
   s_ImagickPixelIterator;
-
-template<typename T>
-ALWAYS_INLINE
-bool registerImagickConstants(const StaticString& name, T value) {
-  return Native::registerClassConstant<KindOfInt64>(s_Imagick.get(),
-                                                    name.get(),
-                                                    (int64_t)value);
-}
 
 void loadImagickConstants();
 

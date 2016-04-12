@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/server/static-content-cache.h"
-#include "hphp/system/constants.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -133,14 +132,14 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
   strncpy(dir, fullpath.data(), sizeof(dir));
 
   for (p = dir + 1; *p; p++) {
-    if (*p == '/') {
+    if (FileUtil::isDirSeparator(*p)) {
       *p = '\0';
       if (::access(dir, F_OK) < 0) {
         if (::mkdir(dir, mode) < 0) {
           return -1;
         }
       }
-      *p = '/';
+      *p = FileUtil::getDirSeparator();
     }
   }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,8 @@ void WarmupRequestHandler::logToAccessLog(Transport *transport) {
 }
 
 std::unique_ptr<RequestHandler> WarmupRequestHandlerFactory::createHandler() {
-  return make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
+  return
+    folly::make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
 }
 
 void WarmupRequestHandlerFactory::bumpReqCount() {

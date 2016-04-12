@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,6 +32,7 @@ namespace HPHP {
 int execute_program(int argc, char **argv);
 
 bool check_option(const char *option) {
+#ifndef _MSC_VER
   // Parameters that can be directly passed through to hhvm.
   static const char *passthru[] = {
   };
@@ -39,16 +40,23 @@ bool check_option(const char *option) {
   for (int i = 0; i < sizeof(passthru) / sizeof(const char *); i++) {
     if (strcmp(option, passthru[i]) == 0) return true;
   }
+#endif
   return false;
 }
 
 static int get_tempfile_if_not_exists(int ini_fd, char ini_path[]) {
   if (ini_fd == -1) {
-     ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
-     if (ini_fd == -1) {
-       fprintf(stderr, "Error: unable to open temporary file");
-       exit(EXIT_FAILURE);
-     }
+#ifdef _MSC_VER
+    // MSVC doesn't require the characters to be the last
+    // 6 in the string.
+    ini_fd = open(mktemp(ini_path), O_RDWR | O_EXCL);
+#else
+    ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
+#endif
+    if (ini_fd == -1) {
+      fprintf(stderr, "Error: unable to open temporary file");
+      exit(EXIT_FAILURE);
+    }
   }
   return ini_fd;
 }
@@ -116,6 +124,13 @@ int emulate_zend(int argc, char** argv) {
       need_file = false;
       break;
     }
+    if (strcmp(argv[cnt], "--modules") == 0) {
+    // zend has a -m flag but we're already using it for --mode
+      newargv.push_back("--modules");
+      cnt = argc; // no need to check the rest of options and arguments
+      need_file = false;
+      break;
+    }
     if (strcmp(argv[cnt], "-f") == 0 || strcmp(argv[cnt], "--file") == 0) {
       cnt++;
       newargv.push_back(lint ? "-l" : "-f");
@@ -140,7 +155,7 @@ int emulate_zend(int argc, char** argv) {
         exit(EXIT_FAILURE);
       }
     }
-    if (strcmp(argv[cnt], "-d")  == 0) {
+    if (strcmp(argv[cnt], "-d")  == 0 || strcmp(argv[cnt], "--define") == 0) {
       ini_fd = get_tempfile_if_not_exists(ini_fd, ini_path);
 
       std::string line = argv[cnt+1];
@@ -247,7 +262,7 @@ int emulate_zend(int argc, char** argv) {
     }
   }
 
-  char *newargv_array[newargv.size() + 1];
+  char** newargv_array = (char**)alloca(sizeof(char*) * (newargv.size() + 1));
   for (unsigned i = 0; i < newargv.size(); i++) {
     // printf("%s\n", newargv[i].data());
     newargv_array[i] = (char *)newargv[i].data();

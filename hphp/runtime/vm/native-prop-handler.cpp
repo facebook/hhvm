@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,7 +71,7 @@ Variant (*PropAccessorMap::get(const String& name))(const Object& this_) {
 }
 
 void (*PropAccessorMap::set(const String& name))
-     (const Object& this_, Variant& value) {
+     (const Object& this_, const Variant& value) {
   return (*lookupProp(name))->set;
 }
 
@@ -101,7 +101,7 @@ Variant getProp(const Object& obj, const String& name) {
   return nph->get(obj, name);
 }
 
-Variant setProp(const Object& obj, const String& name, Variant& value) {
+Variant setProp(const Object& obj, const String& name, const Variant& value) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assert(nph);
   assert(nph->set);

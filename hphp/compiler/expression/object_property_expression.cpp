@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -176,23 +176,6 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ObjectPropertyExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ObjectPropertyExpression", 3);
-  cg.printPropertyHeader("object");
-  m_object->outputCodeModel(cg);
-  if (m_property->is(Expression::KindOfScalarExpression)) {
-    cg.printPropertyHeader("propertyName");
-  } else {
-    cg.printPropertyHeader("propertyExpression");
-  }
-  m_property->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

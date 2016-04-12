@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,8 +31,7 @@ int64_t HHVM_FUNCTION(_soap_active_version);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapServer {
-public:
+struct SoapServer {
   SoapServer();
 
   int                        m_type;
@@ -55,8 +54,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapClient {
-public:
+struct SoapClient {
   SoapClient();
 
   int                         m_soap_version;
@@ -103,8 +101,7 @@ extern const StaticString
   s_enc_type, s_enc_value, s_enc_stype,
   s_enc_ns, s_enc_name, s_enc_namens;
 
-class SoapVar {
-public:
+struct SoapVar {
   static Class* getClass();
 
   static int64_t getEncType(ObjectData* obj) {
@@ -160,8 +157,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapParam {
-public:
+struct SoapParam {
   static Class* getClass();
 
   String                      m_name;
@@ -173,8 +169,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapHeader {
-public:
+struct SoapHeader {
   static Class* getClass();
 
   String                      m_namespace;

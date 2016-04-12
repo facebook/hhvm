@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,37 +13,51 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_MEMORY_HEAP_CONTAINERS_H_
-#define incl_HPHP_RUNTIME_BASE_MEMORY_HEAP_CONTAINERS_H_
+#ifndef incl_HPHP_RUNTIME_BASE_REQ_CONTAINERS_H_
+#define incl_HPHP_RUNTIME_BASE_REQ_CONTAINERS_H_
 
 #include <cstdlib>
 #include <deque>
+#include <forward_list>
 #include <functional>
+#include <limits>
+#include <list>
 #include <map>
 #include <memory>
 #include <queue>
+#include <set>
 #include <stack>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/container/flat_map.hpp>
-#include <limits>
-#include <list>
-#include <set>
-#include <utility>
 
-#include "hphp/runtime/base/memory-manager.h"
+#include <folly/Memory.h>
+
+#include "hphp/runtime/base/req-malloc.h"
+
+#include "hphp/util/fixed-vector.h"
+#include "hphp/util/tiny-vector.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP { namespace req {
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Defines a family of types similar to std:: collections and
- * pointers, except using the request-local allocator.
+ * Defines a family of types similar to std:: collections and pointers, except
+ * using the request-local allocator and with GC type-scanner annotations.
  *
  * Replace std:: with req:: if you know the data is request-local.
+ */
+
+/*
+ * All these replacements purposefully derive from standard types and
+ * containers, which is normally not recommended. This is needed so we can add
+ * GC type-scanner annotations. This is safe because we don't add any members,
+ * nor change any functionality.
  */
 
 /*
@@ -56,10 +70,16 @@ namespace HPHP { namespace req {
  *   auto ptr = req::make_shared<Foo>(...);
  */
 
-template<class T>
-using unique_ptr = typename folly::AllocatorUniquePtr<T,Allocator<T>>::type;
+template <typename T>
+struct unique_ptr final : folly::AllocatorUniquePtr<T, Allocator<T>>::type {
+  using Base = typename folly::AllocatorUniquePtr<T,Allocator<T>>::type;
+  using Base::Base;
+  // Unlike the rest, we don't want to ignore the base. Its easy to type-scan
+  // unique_ptr and more efficient to let it do it itself.
+  TYPE_SCAN_SILENCE_FORBIDDEN_BASES(Base);
+};
 
-template<class T, class... Args>
+template<typename T, class... Args>
 unique_ptr<T> make_unique(Args&&... args) {
   return folly::allocate_unique<T>(
     Allocator<T>(),
@@ -67,11 +87,27 @@ unique_ptr<T> make_unique(Args&&... args) {
   );
 }
 
+template <typename T>
+struct shared_ptr final : std::shared_ptr<T> {
+  using Base = std::shared_ptr<T>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    // FIXME: This will cause T to get conservative scanned (because get() might
+    // be an interior pointer). We can't just eagerly scan the pointer as a T
+    // here because it might be actually be pointing to something derived from
+    // T. See t10336778.
+    scanner.enqueue(this->get());
+  }
+};
+
 template<class T, class... Args>
-std::shared_ptr<T> make_shared(Args&&... args) {
-  return std::allocate_shared<T>(
-    Allocator<T>(),
-    std::forward<Args>(args)...
+shared_ptr<T> make_shared(Args&&... args) {
+  return static_cast<shared_ptr<T>>(
+    std::allocate_shared<T>(
+      ConservativeAllocator<T>(),
+      std::forward<Args>(args)...
+    )
   );
 }
 
@@ -82,115 +118,296 @@ static_assert(
 );
 #endif
 
-template <class Key, class T, class Compare = std::less<Key>>
-using map = std::map<Key, T, Compare, Allocator<std::pair<const Key,T>>>;
+/*
+ * Container replacements.
+ *
+ * For all the containers, instruct the type-scanning machinery to ignore the
+ * base class (the actual container). This is because the container internals
+ * typically use something like std::aligned_storage<> for the actual value, so
+ * the scanner will not find it on its own. Instead, ignore the base, and
+ * provide a custom scanner which uses the public interface to get at the
+ * values. The actual container nodes are allocated with a conservative scan
+ * action, so if the container lies on the stack or anywhere else we're
+ * conservative scanning, we'll conservative scan that as well.
+ *
+ * scanPtr() is used in the custom scanners because its possible for two types
+ * to mutually refer to each other via certain containers (so we need a cycle
+ * check).
+ */
 
-template <class Key, class T, class Compare = std::less<Key>>
-using multimap = std::multimap<Key,T,Compare,Allocator<std::pair<const Key,T>>>;
+template <typename Key,
+          typename T,
+          typename Compare = std::less<Key>>
+struct map final : std::map<Key, T, Compare,
+                            ConservativeAllocator<std::pair<const Key,T>>
+                            > {
+  using Base = std::map<Key, T, Compare,
+                        ConservativeAllocator<std::pair<const Key, T>>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(Key, T) {
+    for (const auto& pair : *this) scanner.scanPtr(&pair);
+  }
+};
 
-template <class T, class Compare = std::less<T>>
-using set = std::set<T, Compare, Allocator<T>>;
+template <typename Key,
+          typename T,
+          typename Compare = std::less<Key>>
+struct multimap final : std::multimap<Key, T, Compare,
+                                      ConservativeAllocator<
+                                        std::pair<const Key,T>>> {
+  using Base = std::multimap<Key, T, Compare,
+                             ConservativeAllocator<std::pair<const Key, T>>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(Key, T) {
+    for (const auto& pair : *this) scanner.scanPtr(&pair);
+  }
+};
 
-template <class T, class Compare = std::less<T>>
-using multiset = std::set<T, Compare, Allocator<T>>;
+template <typename T, typename Compare = std::less<T>>
+struct set final : std::set<T, Compare, ConservativeAllocator<T>> {
+  using Base = std::set<T, Compare, ConservativeAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
 
-template <class T>
-using deque = std::deque<T,Allocator<T>>;
+template <typename T, typename Compare = std::less<T>>
+struct multiset final : std::multiset<T, Compare, ConservativeAllocator<T>> {
+  using Base = std::multiset<T, Compare, ConservativeAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
 
-template <class T>
-using vector = std::vector<T,Allocator<T>>;
+template <typename T>
+struct deque final : std::deque<T, ConservativeAllocator<T>> {
+  using Base = std::deque<T, ConservativeAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
 
-template <class T, class Container = deque<T>>
+template <typename T>
+struct vector final : std::vector<T, ConservativeAllocator<T>> {
+  using Base = std::vector<T, ConservativeAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
+
+template <typename T>
+struct list final : std::list<T, ConservativeAllocator<T>> {
+  using Base = std::list<T, ConservativeAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
+
+template <typename T>
+struct forward_list final : std::forward_list<T, ConservativeAllocator<T>> {
+  using Base = std::forward_list<T, ConservativeAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
+
+template <typename T, typename Container = req::deque<T>>
 using stack = std::stack<T, Container>;
 
-template <class T>
-using list = std::list<T,Allocator<T>>;
+template <typename T, typename Container = req::deque<T>>
+using queue = std::queue<T, Container>;
 
-template <class T>
-using queue = std::queue<T, deque<T>>;
-
-template <class T, class Compare = std::less<T>>
-using priority_queue = std::priority_queue<T, vector<T>, Compare>;
+template <typename T,
+          typename Container = req::vector<T>,
+          typename Compare = std::less<T>>
+using priority_queue = std::priority_queue<T, Container, Compare>;
 
 #ifdef HAVE_BOOST1_49
 // These classes are oddly broken in older boost versions.
-template<class K, class V, class Pred = std::less<K>>
-using flat_map = boost::container::flat_map<K,V,Pred,Allocator<std::pair<K,V>>>;
 
-template<class K, class V, class Pred = std::less<K>>
-using flat_multimap =
-  boost::container::flat_multimap<K,V,Pred,Allocator<std::pair<K,V>>>;
+template<typename K, typename V, typename Pred = std::less<K>>
+struct flat_map final : boost::container::flat_map<
+  K, V, Pred, ConservativeAllocator<std::pair<K,V>>
+> {
+  using Base =
+    boost::container::flat_map<K, V, Pred,
+                               ConservativeAllocator<std::pair<K,V>>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(K, V) {
+    for (const auto& pair : *this) scanner.scanPtr(&pair);
+  }
+};
+
+template<typename K, typename V, typename Pred = std::less<K>>
+struct flat_multimap final : boost::container::flat_multimap<
+  K, V, Pred, ConservativeAllocator<std::pair<K,V>>
+> {
+  using Base = boost::container::flat_multimap<
+    K, V, Pred, ConservativeAllocator<std::pair<K,V>>
+  >;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(K, V) {
+    for (const auto& pair : *this) scanner.scanPtr(&pair);
+  }
+};
+
 #else
-template <class Key, class T, class Compare = std::less<Key>>
-using flat_map = std::map<Key, T, Compare, Allocator<std::pair<const Key,T>>>;
+template <typename Key, typename T, typename Compare = std::less<Key>>
+using flat_map = req::map<Key, T, Compare>;
 
-template <class Key, class T, class Compare = std::less<Key>>
-using flat_multimap =
-  std::multimap<Key,T,Compare,Allocator<std::pair<const Key,T>>>;
+template <typename Key, typename T, typename Compare = std::less<Key>>
+using flat_multimap = req::multimap<Key,T,Compare>;
 #endif
 
-template<class K, class Pred = std::less<K>>
-using flat_set = boost::container::flat_set<K, Pred, Allocator<K>>;
+template<typename K, typename Compare = std::less<K>>
+struct flat_set final : boost::container::flat_set<K, Compare,
+                                                   ConservativeAllocator<K>> {
+  using Base = boost::container::flat_set<K, Compare, ConservativeAllocator<K>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(K) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
 
-template<class K, class Pref = std::less<K>>
-using flat_multiset = boost::container::flat_multiset<K, Pref, Allocator<K>>;
-
-/*
- * We are deriving from the std::collection classes to get
- * req::collection classes that use request-heap allocation. To avoid the
- * various issues involved with deriving from value types, we want to
- * make sure that there are no references to the base classes here
- * other than the ones below. That way we know that a pointer to a
- * req::collection can never decay to a pointer to a
- * std::collection.
- *
- * Derivation from value types is generally bad. We also add no
- * functionality to the derived class. Your code will not get past
- * code review if you try to do so.
- *
- * When we upgrade compilers we can change these to C++11 type
- * aliases.
- */
+template<typename K, typename Compare = std::less<K>>
+struct flat_multiset final : boost::container::flat_multiset<
+  K, Compare, ConservativeAllocator<K>
+> {
+  using Base =
+    boost::container::flat_multiset<K, Compare, ConservativeAllocator<K>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(K) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
 
 template <class T,
           class U,
           class V = std::hash<T>,
           class W = std::equal_to<T>>
-struct hash_map : std::unordered_map<
+struct hash_map final : std::unordered_map<
   T, U, V, W,
-  Allocator<std::pair<const T,U>>
+  ConservativeAllocator<std::pair<const T,U>>
 > {
   hash_map()
     : std::unordered_map<
         T, U, V, W,
-        Allocator<std::pair<const T,U>>
+      ConservativeAllocator<std::pair<const T,U>>
       >(0)
   {}
+
+  using Base = std::unordered_map<
+    T, U, V, W, ConservativeAllocator<std::pair<const T, U>>
+  >;
+
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T, U) {
+   for (const auto& pair : *this) scanner.scanPtr(&pair);
+  }
 };
 
 template <class T,
           class U,
           class V = std::hash<T>,
           class W = std::equal_to<T>>
-struct hash_multimap : std::unordered_multimap<
+struct hash_multimap final : std::unordered_multimap<
   T, U, V, W,
-  Allocator<std::pair<const T,U>>
+  ConservativeAllocator<std::pair<const T,U>>
 > {
   hash_multimap()
     : std::unordered_multimap<
         T, U, V, W,
-        Allocator<std::pair<const T,U>>
+      ConservativeAllocator<std::pair<const T,U>>
       >(0)
   {}
+
+  using Base = std::unordered_multimap<
+    T, U, V, W, ConservativeAllocator<std::pair<const T, U>>
+  >;
+
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T, U) {
+   for (const auto& pair : *this) scanner.scanPtr(&pair);
+  }
 };
 
 template <class T,
           class V = std::hash<T>,
           class W = std::equal_to<T>>
-struct hash_set : std::unordered_set<T,V,W,Allocator<T> > {
+struct hash_set final : std::unordered_set<T,V,W,ConservativeAllocator<T> > {
   hash_set()
-    : std::unordered_set<T,V,W,Allocator<T>>(0)
+      : std::unordered_set<T,V,W,ConservativeAllocator<T>>(0)
   {}
+
+  using Base = std::unordered_set<T,V,W,ConservativeAllocator<T>>;
+
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+   for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
+
+template <typename T>
+struct FixedVector final : HPHP::FixedVector<T, ConservativeAllocator<T>> {
+  using Base = HPHP::FixedVector<T, ConservativeAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
+};
+
+// Special allocator for TinyVector using request heap allocation.
+template <typename T, typename Element = T> struct TinyVectorReqAllocator {
+  template <typename U> struct rebind {
+    using type = TinyVectorReqAllocator<U, Element>;
+  };
+
+  void* allocate(std::size_t size) const {
+    return req::malloc(
+      size,
+      type_scan::getIndexForMalloc<
+        T, type_scan::Action::Conservative<Element>
+      >()
+    );
+  }
+  void deallocate(void* ptr) const { req::free(ptr); }
+  std::size_t usable_size(void* ptr, std::size_t size) const {
+    return size;
+  }
+};
+
+template<typename T,
+         std::size_t Internal = 1,
+         std::size_t MinHeap = 0>
+struct TinyVector final : HPHP::TinyVector<T,
+                                           Internal,
+                                           MinHeap,
+                                           TinyVectorReqAllocator<T>> {
+  using Base = HPHP::TinyVector<T,Internal,MinHeap,TinyVectorReqAllocator<T>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    for (const auto& v : *this) scanner.scanPtr(&v);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

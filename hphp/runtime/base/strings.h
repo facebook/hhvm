@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,8 +29,10 @@ const char* const CONSTANTS_MUST_BE_SCALAR =
   "Constants may only evaluate to scalar values";
 const char* const CONSTANTS_CASE_SENSITIVE =
   "Case insensitive constant names are not supported in HipHop";
+const char* const MODULO_BY_ZERO = "Modulo by zero";
 const char* const DIVISION_BY_ZERO =
   "Division by zero";
+const char* const NEGATIVE_SHIFT = "Bit shift by negative number";
 const char* const UNDEFINED_CONSTANT =
   "Use of undefined constant %s - assumed '%s'";
 const char* const UNDEFINED_VARIABLE = "Undefined variable: %s";

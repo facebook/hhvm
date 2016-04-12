@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -26,12 +26,10 @@ let recheck_naming filename_l =
           (* We only need to name to find references to locals *)
           List.iter ast begin function
             | Ast.Fun f ->
-                let nenv = Naming.empty tcopt in
-                let _ = Naming.fun_ nenv f in
+                let _ = Naming.fun_ tcopt f in
                 ()
             | Ast.Class c ->
-                let nenv = Naming.empty tcopt in
-                let _ = Naming.class_ nenv c in
+                let _ = Naming.class_ tcopt c in
                 ()
             | _ -> ()
           end
@@ -40,9 +38,9 @@ let recheck_naming filename_l =
     | None -> () (* Do nothing if the file is not in parser heap *)
   end
 
-let recheck_typing fileinfo_l =
-  let nenv = Naming.empty (TypecheckerOptions.permissive) in
-  ignore(ServerIdeUtils.recheck nenv fileinfo_l)
+let recheck_typing filetuple_l =
+  let tcopt = TypecheckerOptions.permissive in
+  ignore(ServerIdeUtils.recheck tcopt filetuple_l)
 
 let helper acc filetuple_l =
   let fun_call_map = ref Pos.Map.empty in
@@ -51,9 +49,8 @@ let helper acc filetuple_l =
   let lvar_map = ref Pos.Map.empty in
   SymbolTypeService.attach_hooks type_map lvar_map;
   let filename_l = List.rev_map filetuple_l fst in
-  let fileinfo_l = List.rev_map filetuple_l snd in
   recheck_naming filename_l;
-  recheck_typing fileinfo_l;
+  recheck_typing filetuple_l;
   SymbolFunCallService.detach_hooks ();
   SymbolTypeService.detach_hooks ();
   let fun_calls = Pos.Map.values !fun_call_map in
@@ -87,7 +84,7 @@ let go workers file_list env =
   (* Convert 'string list' into 'fileinfo list' *)
   let filetuple_l = List.fold_left file_list ~f:begin fun acc file_path ->
     let fn = Relative_path.create Relative_path.Root file_path in
-    match Relative_path.Map.get fn env.ServerEnv.files_info with
+    match Relative_path.Map.get env.ServerEnv.files_info fn with
     | Some fileinfo -> (fn, fileinfo) :: acc
     | None -> acc
   end ~init:[]

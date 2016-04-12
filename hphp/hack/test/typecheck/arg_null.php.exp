@@ -1,2 +1,6 @@
+File "arg_null.php", line 12, characters 18-19:
+Wrong type hint (Typing[4110])
 File "arg_null.php", line 12, characters 14-16:
-Please add a ?, this argument can be null (Typing[4065])
+This is an int
+File "arg_null.php", line 12, characters 23-26:
+It is incompatible with a nullable type

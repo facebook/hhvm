@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,8 +45,8 @@ DECLARE_BOOST_TYPES(FunctionScope);
  *   try {...} catch (T obj) {...}
  *   extract(name_value_pair)
  */
-class VariableTable : public SymbolTable {
-  friend class AssignmentExpression;
+struct VariableTable : SymbolTable {
+  friend struct AssignmentExpression;
 public:
   enum Attribute {
     ContainsDynamicVariable = 1,

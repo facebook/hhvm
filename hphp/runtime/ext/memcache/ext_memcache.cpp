@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -54,8 +54,7 @@ static __thread MEMCACHEGlobals* s_memcache_globals;
 
 const StaticString s_MemcacheData("MemcacheData");
 
-class MemcacheData {
- public:
+struct MemcacheData {
   memcached_st m_memcache;
   int m_compress_threshold;
   double m_min_compress_savings;
@@ -155,8 +154,9 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
 
     case KindOfUninit:
     case KindOfNull:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -378,7 +378,7 @@ static Variant HHVM_METHOD(Memcache, get, const Variant& key,
     return false;
   }
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     std::vector<const char *> real_keys;
     std::vector<size_t> key_len;
     Array keyArr = key.toArray();
@@ -744,8 +744,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
 const StaticString s_MEMCACHE_HAVE_SESSION("MEMCACHE_HAVE_SESSION");
 
-class MemcacheExtension final : public Extension {
-  public:
+struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {
       // TODO: t5226715 We shouldn't need to check s_defaultLocale here,

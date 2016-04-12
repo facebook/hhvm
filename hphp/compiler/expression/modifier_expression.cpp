@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -156,29 +156,6 @@ bool ModifierExpression::validForTraitAliasRule() const {
 
 void ModifierExpression::analyzeProgram(AnalysisResultPtr ar) {
   // do nothing
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ModifierExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printf("V:9:\"HH\\Vector\":%d:{", (int)m_modifiers.size());
-  for (unsigned int i = 0; i < m_modifiers.size(); i++) {
-    cg.printObjectHeader("Modifier", 1);
-    cg.printPropertyHeader("name");
-    switch (m_modifiers[i]) {
-      case T_PUBLIC:    cg.printValue("public");    break;
-      case T_PROTECTED: cg.printValue("protected"); break;
-      case T_PRIVATE:   cg.printValue("private");   break;
-      case T_STATIC:    cg.printValue("static");    break;
-      case T_ABSTRACT:  cg.printValue("abstract");  break;
-      case T_FINAL:     cg.printValue("final");     break;
-      case T_ASYNC:     cg.printValue("async");     break;
-      default:
-        assert(false);
-    }
-    cg.printObjectFooter();
-  }
-  cg.printf("}");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

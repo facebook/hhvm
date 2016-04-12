@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,12 +20,14 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 
+#include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
 #include <folly/MoveWrapper.h>
@@ -68,17 +70,17 @@ std::unordered_map<const Func*, FuncInfo> s_funcTCData;
 void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
                             bool isGuard) {
   auto data = mcg->tx().profData();
-  auto tid = data->prologueTransId(func, numArgs);
-  if (tid == kInvalidTransID || !data->hasTransRec(tid) ||
-      data->transKind(tid) != TransKind::Proflogue) {
-    return;
-  }
-  auto* pc = data->prologueCallers(tid);
+  auto const tid = data->proflogueTransId(func, numArgs);
+  if (tid == kInvalidTransID) return;
+
+  auto rec = data->transRec(tid);
+  if (!rec || !rec->isProflogue()) return;
+
   if (isGuard) {
-    pc->removeGuardCaller(toSmash);
+    rec->removeGuardCaller(toSmash);
     return;
   }
-  pc->removeMainCaller(toSmash);
+  rec->removeMainCaller(toSmash);
 }
 
 /*
@@ -89,9 +91,9 @@ void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
  */
 void clearTCMaps(TCA start, TCA end) {
   auto& catchMap = mcg->catchTraceMap();
-  auto& jmpMap = mcg->getJmpToTransIDMap();
+  auto& jmpMap = mcg->jmpToTransIDMap();
   while (start < end) {
-    DecodedInstruction di (start);
+    x64::DecodedInstruction di (start);
     if (di.isBranch()) {
       auto it = jmpMap.find(start);
       if (it != jmpMap.end()) {
@@ -136,7 +138,7 @@ void reclaimSrcRec(const SrcRec* rec) {
   Trace::Indent _i;
 
   auto anchor = rec->getFallbackTranslation();
-  mcg->code.blockFor(anchor).free(anchor, svcreq::stub_size());
+  mcg->code().blockFor(anchor).free(anchor, svcreq::stub_size());
 
   for (auto& loc : rec->translations()) {
     reclaimTranslation(loc);
@@ -192,7 +194,6 @@ void recordJump(TCA toSmash, SrcRec* sr) {
 
 void reclaimTranslation(TransLoc loc) {
   BlockingLeaseHolder writer(Translator::WriteLease());
-  if (!writer) return;
 
   ITRACE(1, "Reclaiming translation M[{}, {}] C[{}, {}] F[{}, {}]\n",
          loc.mainStart(), loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
@@ -200,7 +201,7 @@ void reclaimTranslation(TransLoc loc) {
 
   Trace::Indent _i;
 
-  auto& cache = mcg->code;
+  auto& cache = mcg->code();
   cache.blockFor(loc.mainStart()).free(loc.mainStart(), loc.mainSize());
   cache.blockFor(loc.coldStart()).free(loc.coldStart(), loc.coldSize());
   if (loc.coldStart() != loc.frozenStart()) {
@@ -230,7 +231,7 @@ void reclaimTranslation(TransLoc loc) {
     // Ensure no one calls into the function
     ITRACE(1, "Overwriting function\n");
     auto clearBlock = [] (CodeBlock& cb) {
-      Asm a {cb};
+      X64Assembler a {cb};
       while (cb.available() >= 2) a.ud2();
       if (cb.available() > 0) a.int3();
       always_assert(!cb.available());
@@ -247,9 +248,8 @@ void reclaimTranslation(TransLoc loc) {
   }
 }
 
-void reclaimFunction(Func* func) {
+void reclaimFunction(const Func* func) {
   BlockingLeaseHolder writer(Translator::WriteLease());
-  if (!writer) return;
 
   auto it = s_funcTCData.find(func);
   if (it == s_funcTCData.end()) return;
@@ -260,10 +260,10 @@ void reclaimFunction(Func* func) {
   Trace::Indent _i;
 
   auto& data = it->second;
-  auto& us = mcg->tx().uniqueStubs;
+  auto& us = mcg->ustubs();
 
   ITRACE(1, "Smashing prologues\n");
-  func->smashPrologues();
+  clobberFuncGuards(func);
 
   for (auto& caller : data.callers) {
     ITRACE(1, "Unsmashing call @ {} (guard = {})\n",
@@ -287,7 +287,6 @@ void reclaimFunction(Func* func) {
   // should be unreachable.
   Treadmill::enqueue([fname, fid, movedData] {
     BlockingLeaseHolder writer(Translator::WriteLease());
-    if (!writer) return;
 
     ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
     Trace::Indent _i;

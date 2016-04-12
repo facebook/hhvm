@@ -28,8 +28,8 @@ namespace HPHP {
 
 // Frame data gathered on function enter/exit.
 struct FrameData {
-  const Func* func;
   int64_t time;
+  LowPtr<const Func> func;
   Offset line; // For begin frames, the line called from
   // We don't need all 64 bits for memory_usage and we need to save space as
   // this struct is massive and we allocate a ton of them. The TraceProfiler

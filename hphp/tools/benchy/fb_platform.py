@@ -19,7 +19,7 @@ class Platform(object):
     def __init__(self):
         self.name = "fb"
         self.build_internal_path = os.path.join(
-            config.SRCROOT_PATH[1:], '_build', 'opt', 'hphp')
+            config.SRCROOT_PATH[1:], '_build', 'USE_LOWPTR-opt', 'hphp')
 
     def switch_to_branch(self, branch):
         """Switches the current repository to the specified branch.
@@ -45,4 +45,4 @@ class Platform(object):
         env['FBMAKE_BUILD_ROOT'] = build_dir
         cpus = multiprocessing.cpu_count()
         utils.run_command('/usr/local/bin/fbmake --build-root "%s" '
-                        '--distcc=off opt -j%d' % (build_dir, cpus), env=env)
+                        '--build-flag USE_LOWPTR --distcc=off opt -j%d' % (build_dir, cpus), env=env)

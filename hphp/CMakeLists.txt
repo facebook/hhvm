@@ -93,6 +93,7 @@ if (ENABLE_ZEND_COMPAT)
 endif()
 add_subdirectory(system)
 add_subdirectory(util)
+add_subdirectory(ppc64-asm)
 add_subdirectory(vixl)
 add_subdirectory(zend)
 

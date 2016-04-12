@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -94,8 +94,7 @@ struct FBSerializeBase {
 };
 
 template <class V>
-class FBSerializer : private FBSerializeBase {
- public:
+struct FBSerializer : private FBSerializeBase {
   template <typename Variant>
   static size_t serializedSize(const Variant& thing);
   template <typename Variant>
@@ -132,8 +131,7 @@ class FBSerializer : private FBSerializeBase {
 };
 
 template <class V>
-class FBUnserializer : private FBSerializeBase {
- public:
+struct FBUnserializer : private FBSerializeBase {
   static typename V::VariantType unserialize(folly::StringPiece serialized);
 
   explicit FBUnserializer(folly::StringPiece serialized);

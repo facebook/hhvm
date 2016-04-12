@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +24,61 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // utility functions
+
+/**
+ * Detects multiple/malformed multiple newlines in mail headers.
+ */
+static int php_mail_detect_multiple_crlf(const String& str) {
+
+  std::string hdr(str.c_str());
+  unsigned int l = hdr.length();
+  unsigned int i = 0;
+
+  if (l == 0) {
+    return 0;
+  }
+
+  /* Should not have any newlines at the beginning. */
+  /* RFC 2822 2.2. Header Fields */
+  if (hdr[0] < 33 || hdr[0] > 126 || hdr[0] == ':') {
+    return 1;
+  }
+
+  while (i < l) {
+
+    if (hdr[i] == '\r') {
+      if ((i+1 == l) || (hdr[i+1] == '\r') || ((hdr[i+1] == '\n') && ((i+2 == l) || (hdr[i+2] == '\r') || (hdr[i+2] == '\n')))) {
+        /* Malformed or multiple newlines. */
+        return 1;
+      } else {
+        i += 2;
+      }
+    } else if (hdr[i] == '\n') {
+      if ((i+1 == l) || (hdr[i+1] == '\r') || (hdr[i+1] == '\n')) {
+        /* Malformed or multiple newlines. */
+        return 1;
+      } else {
+        i += 2;
+      }
+    } else {
+      i++;
+    }
+  }
+
+  return 0;
+}
+
+/**
+ * Removes whitespaces from the end.
+ */
+static String php_rtrim(const String& str) {
+  std::string s(str.c_str());
+  unsigned int l = s.length();
+  while (l > 0 && isspace((unsigned char)s[l - 1])) {
+    l--;
+  }
+  return s.substr(0, l);
+}
 
 /**
  * Removes whitespaces from the end, and replaces control characters with ' '
@@ -84,7 +139,7 @@ bool php_mail(const String& to, const String& subject, const String& message,
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_zero(LITSTR_INIT("\0")),
+  s_zero("\0", 1),
   s_space(" ");
 
 bool HHVM_FUNCTION(mail,
@@ -101,6 +156,12 @@ bool HHVM_FUNCTION(mail,
   String headers2;
   if (!additional_headers.empty()) {
     headers2 = string_replace(additional_headers, s_zero, s_space);
+    headers2 = php_rtrim(headers2);
+
+    if (php_mail_detect_multiple_crlf(headers2)) {
+      raise_warning("Multiple or malformed newlines found in additional_headers");
+      return false;
+    }
   }
   String params2;
   if (!additional_parameters.empty()) {
@@ -133,8 +194,7 @@ int64_t HHVM_FUNCTION(ezmlm_hash, const String& addr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MailExtension final : public Extension {
- public:
+struct MailExtension final : Extension {
   MailExtension() : Extension("mail") { }
   void moduleInit() override {
     HHVM_FE(mail);

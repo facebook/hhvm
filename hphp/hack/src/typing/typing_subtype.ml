@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -16,8 +16,7 @@ open Typing_dependent_type
 module Reason = Typing_reason
 module Unify = Typing_unify
 module Env = Typing_env
-module DefsDB = Typing_heap
-module TSubst = Typing_subst
+module Subst = Decl_subst
 module TUtils = Typing_utils
 module TUEnv = Typing_unification_env
 module SN = Naming_special_names
@@ -311,6 +310,10 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
 (****************************************************************************)
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)
+  | _, (_, Tany) -> env
+  (* This case is for when Tany comes from expanding an empty Tvar - it will
+   * result in binding the type variable to the other type. *)
+  | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
   | (r1, Tabstract (AKdependent d1, Some ty_super)),
     (r2, Tabstract (AKdependent d2, Some ty_sub))
         when d1 = d2 ->
@@ -353,12 +356,8 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tabstract (AKgeneric (_, Some _), _)),
       (_, Tabstract (AKgeneric _, _)) ->
       typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub)
-  | (_, Tclass ((_, stringish), _)), (_, Tabstract (ak, _))
-    when stringish = SN.Classes.cStringish &&
-      AbstractKind.is_classname ak -> env
   | (p_super, (Tclass (x_super, tyl_super) as ty_super_)),
-      (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_))
-      when Typing_env.get_enum_constraint (snd x_sub) = None  ->
+      (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_)) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     if cid_super = cid_sub then
       if tyl_super <> [] && List.length tyl_super = List.length tyl_sub
@@ -381,7 +380,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
               (* a trait is never the runtime type, but it can be used
                * as a constraint if it has requirements for its using
                * classes *)
-              let _, ret = SMap.fold begin fun _ elt_type acc ->
+              let _, ret = List.fold_left ~f:begin fun acc (_p, req_type) ->
                 match acc with
                   | _, Some _ -> acc
                   | env, None ->
@@ -392,12 +391,12 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                         this_ty = ExprDepTy.apply uenv_sub.TUEnv.dep_tys ty_sub;
                         from_class = None;
                       } in
-                      let env, elt_type =
-                        Phase.localize ~ety_env env elt_type in
-                      let _, elt_ty = elt_type in
-                      env, Some (sub_type env ty_super (p_sub, elt_ty))
+                      let env, req_type =
+                        Phase.localize ~ety_env env req_type in
+                      let _, req_ty = req_type in
+                      env, Some (sub_type env ty_super (p_sub, req_ty))
                     end (fun _ -> acc)
-              end class_.tc_req_ancestors (env, None) in
+              end class_.tc_req_ancestors ~init:(env, None) in
               ret
             else None in
           (match subtype_req_ancestor with
@@ -426,7 +425,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                    *)
                   let ety_env = {
                     type_expansions = [];
-                    substs = TSubst.make class_.tc_tparams tyl_sub;
+                    substs = Subst.make class_.tc_tparams tyl_sub;
                     this_ty = ExprDepTy.apply uenv_sub.TUEnv.dep_tys ty_sub;
                     from_class = None;
                   } in
@@ -442,50 +441,69 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
   | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
-  | (_, Tprim (Nast.Tstring | Nast.Tarraykey)), (_, Tabstract (ak, _))
-    when AbstractKind.is_classname ak -> env
-  | (_, Tclass ((_, coll), [tv_super])), (_, Tarray (ty3, ty4))
+  | (_, Tclass ((_, coll), [tv_super])), (r, Tarraykind akind)
     when (coll = SN.Collections.cTraversable ||
         coll = SN.Collections.cContainer) ->
-      (match ty3, ty4 with
-      | None, _ -> env
-      | Some ty3, None ->
-          sub_type env tv_super ty3
-      | Some _ty3, Some ty4 ->
-          sub_type env tv_super ty4
+      (match akind with
+      | AKany -> env
+      | AKempty -> env
+      | AKvec tv ->
+          sub_type env tv_super tv
+      | AKmap (_, tv) ->
+          sub_type env tv_super tv
+      | AKshape fdm ->
+          Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+            sub_type env ty_super ty_sub
+          end env r fdm
+      | AKtuple fields ->
+          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
+            sub_type env ty_super ty_sub
+          end env r fields
       )
-  | (_, Tclass ((_, coll), [tk_super; tv_super])), (r, Tarray (ty3, ty4))
+  | (_, Tclass ((_, coll), [tk_super; tv_super])), (r, Tarraykind akind)
     when (coll = SN.Collections.cKeyedTraversable
          || coll = SN.Collections.cKeyedContainer
          || coll = SN.Collections.cIndexish) ->
-      (match ty3 with
-      | None -> env
-      | Some ty3 ->
-          (match ty4 with
-          | None ->
-              let env = sub_type env tk_super (r, Tprim Nast.Tint) in
-              sub_type env tv_super ty3
-          | Some ty4 ->
-              let env = sub_type env tk_super ty3 in
-              sub_type env tv_super ty4
-          )
+      (match akind with
+      | AKany -> env
+      | AKempty -> env
+      | AKvec tv ->
+        let env = sub_type env tk_super (r, Tprim Nast.Tint) in
+        sub_type env tv_super tv
+      | AKmap (tk, tv) ->
+        let env = sub_type env tk_super tk in
+        sub_type env tv_super tv
+      | AKshape fdm ->
+        Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+          sub_type env ty_super ty_sub
+        end env r fdm
+      | AKtuple fields ->
+          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
+            sub_type env ty_super ty_sub
+          end env r fields
       )
   | (_, Tclass ((_, stringish), _)), (_, Tprim Nast.Tstring)
     when stringish = SN.Classes.cStringish -> env
-  | (_, Tclass ((_, xhp_child), _)), (_, Tarray _)
+  | (_, Tclass ((_, xhp_child), _)), (_, Tarraykind _)
   | (_, Tclass ((_, xhp_child), _)), (_, Tprim (Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum))
     when xhp_child = SN.Classes.cXHPChild -> env
-  | (_, (Tarray (Some ty_super, None))), (_, (Tarray (Some ty_sub, None))) ->
+  | (_, (Tarraykind (AKvec ty_super))), (_, (Tarraykind (AKvec ty_sub))) ->
       sub_type env ty_super ty_sub
-  | (_, (Tarray (Some tk_super, Some tv_super))), (_, Tarray (Some tk_sub, Some tv_sub)) ->
+  | (_, (Tarraykind (AKmap (tk_super, tv_super)))), (_, Tarraykind AKmap (tk_sub, tv_sub)) ->
       let env = sub_type env tk_super tk_sub in
       sub_type env tv_super tv_sub
-  | (_, Tarray (Some _, Some _)), (reason, Tarray (Some elt_ty, None)) ->
-      let int_reason = Reason.Ridx (Reason.to_pos reason) in
+  | (_, Tarraykind AKmap _), (reason, Tarraykind (AKvec elt_ty)) ->
+      let int_reason = Reason.Ridx (Reason.to_pos reason, Reason.Rnone) in
       let int_type = int_reason, Tprim Nast.Tint in
-      sub_type env ty_super (reason, Tarray (Some int_type, Some elt_ty))
-  | _, (_, Tany) -> env
-  | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
+      sub_type env ty_super (reason, Tarraykind (AKmap (int_type, elt_ty)))
+  | _, (r, Tarraykind AKshape fdm_sub) ->
+      Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+        sub_type env ty_super ty_sub
+      end env r fdm_sub
+  | _, (r, Tarraykind AKtuple fields_sub) ->
+      Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
+        sub_type env ty_super ty_sub
+      end env r fields_sub
     (* recording seen_tvars for Toption variants to avoid infinte recursion
        in case of type variable X = ?X *)
   | (_, Toption ty_super), _ when uenv_super.TUEnv.non_null ->
@@ -545,14 +563,13 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
     (_, Tabstract (AKnewtype (name_sub, tyl_sub), _))
     when name_super = name_sub ->
       let td = Env.get_typedef env name_super in
-      (match td with
-      | Some (DefsDB.Typedef.Ok (_, tparams, _, _, _)) ->
+      begin match td with
+        | Some {td_tparams; _} ->
           let variancel =
-            List.map tparams (fun (variance, _, _) -> variance)
-          in
+            List.map td_tparams (fun (variance, _, _) -> variance) in
           subtype_tparams env name_super variancel tyl_super tyl_sub
-      | _ -> env
-      )
+        | _ -> env
+      end
   | _, (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some x)) ->
       Errors.try_
         (fun () ->
@@ -584,7 +601,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
          (fun l ->
            Reason.explain_generic_constraint env.Env.pos r_super x l; env)
       )
-  | (_, (Tarray (_, _) | Tprim _ | Tvar _
+  | (_, (Tarraykind _ | Tprim _ | Tvar _
     | Tabstract (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tobject | Tshape _ | Tclass (_, _))
     ), _ -> fst (Unify.unify env ty_super ty_sub)
@@ -594,23 +611,20 @@ and is_sub_type env ty_super ty_sub =
     (fun () -> ignore(sub_type env ty_super ty_sub); true)
     (fun _ -> false)
 
-and sub_string p env ty2 =
-  let env, ety2 = Env.expand_type env ty2 in
+and sub_string ?(seen = ISet.empty) p env ty2 =
+  let env, seen, ety2 = Env.expand_type_recorded env seen ty2 in
   match ety2 with
-  | (_, Toption ty2) -> sub_string p env ty2
+  | (_, Toption ty2) -> sub_string ~seen p env ty2
   | (_, Tunresolved tyl) ->
-      List.fold_left tyl ~f:(sub_string p) ~init:env
+      List.fold_left tyl ~f:(sub_string ~seen p) ~init:env
   | (_, Tprim _) ->
       env
   | (_, Tabstract (AKenum _, _)) ->
       (* Enums are either ints or strings, and so can always be used in a
        * stringish context *)
       env
-  | (_, Tabstract (ak, _)) when AbstractKind.is_classname ak ->
-      (* A classname is the string 'Foo' obtained via Foo::class *)
-      env
   | (_, Tabstract (_, Some ty)) ->
-      sub_string p env ty
+      sub_string ~seen p env ty
   | (r2, Tclass (x, _)) ->
       let class_ = Env.get_class env (snd x) in
       (match class_ with
@@ -628,7 +642,7 @@ and sub_string p env ty2 =
   | _, Tany ->
     env (* Unifies with anything *)
   | _, Tobject -> env
-  | _, (Tmixed | Tarray (_, _) | Tvar _ | Tabstract (_, _)
+  | _, (Tmixed | Tarraykind _ | Tvar _ | Tabstract (_, _)
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
       fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 

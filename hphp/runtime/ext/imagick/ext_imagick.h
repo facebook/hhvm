@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/imagick/constants.h"
 #include "hphp/util/string-vsnprintf.h"
@@ -34,8 +35,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
-class ImagickExtension final : public Extension {
- public:
+struct ImagickExtension final : Extension {
   ImagickExtension();
   void moduleInit() override;
   void threadInit() override;
@@ -99,27 +99,29 @@ IMAGICK_DEFINE_CLASS(ImagickPixelIterator)
 #undef IMAGICK_DEFINE_CLASS
 
 template<typename T>
-ATTRIBUTE_NORETURN
-void imagickThrow(const char* fmt, ...)
+[[noreturn]]
+void imagickThrow(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
   ATTRIBUTE_PRINTF(1, 2);
 
 template<typename T>
+[[noreturn]]
 void imagickThrow(const char* fmt, ...) {
   va_list ap;
   std::string msg;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  throw T::allocObject(msg);
+  throw_object(T::allocObject(msg));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // WandResource
 template<typename Wand>
-class WandResource : public SweepableResourceData {
+struct WandResource : SweepableResourceData {
+private:
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
- public:
+public:
   explicit WandResource(Wand* wand, bool owner = true) :
       m_wand(wand), m_owner(owner) {
   }
@@ -148,7 +150,7 @@ class WandResource : public SweepableResourceData {
     return w;
   }
 
- private:
+private:
   void destroyWand();
   Wand* m_wand;
   bool m_owner;
@@ -212,10 +214,9 @@ req::ptr<WandResource<Wand>> getWandResource(const StaticString& className,
                                              const std::string& msg) {
   auto ret = getWandResource<Wand>(className, obj);
   if (ret == nullptr || ret->getWand() == nullptr) {
-    throw T::allocObject(msg);
-  } else {
-    return ret;
+    throw_object(T::allocObject(msg));
   }
+  return ret;
 }
 
 ALWAYS_INLINE

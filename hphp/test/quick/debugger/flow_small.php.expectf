@@ -4,7 +4,7 @@ SmallStep(ss) set to on.
 
 break cls::pub()
 Breakpoint 1 set upon entering cls::pub()
-But wont break until class cls has been loaded.
+But won't break until class cls has been loaded.
 run
 flow_small.php loaded
 Program %s/flow_small.php exited normally.

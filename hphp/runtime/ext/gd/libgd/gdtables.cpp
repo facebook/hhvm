@@ -1,12 +1,3 @@
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-extern "C" {
-#include "php_compat.h"
-}
-
 int gdCosT[] =
 {
   1024,

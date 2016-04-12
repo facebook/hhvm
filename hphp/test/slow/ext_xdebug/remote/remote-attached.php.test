@@ -1,0 +1,3 @@
+<?php
+
+var_dump(HH\xdebug_remote_attached());

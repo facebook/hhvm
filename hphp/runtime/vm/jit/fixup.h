@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,7 @@ namespace HPHP { namespace jit {
  *        +------------------------------+  <call to C++>
  *        |    RetIP to the dtor stub    |
  *        |--                          --|
- *        |         saved rvmfp()          |  push %rbp; mov %rsp, %rbp
+ *        |         saved rvmfp()        |  push %rbp; mov %rsp, %rbp
  *    +-->|--                          --|
  *    |   |    < C++ local variables>    |
  *    |   +------------------------------+
@@ -139,7 +139,7 @@ struct FixupMap {
   TRACE_SET_MOD(fixup);
 
   struct VMRegs {
-    const Op* pc;
+    PC pc;
     TypedValue* sp;
     const ActRec* fp;
   };
@@ -163,8 +163,7 @@ struct FixupMap {
     return &ent->fixup;
   }
 
-  bool getFrameRegs(const ActRec* ar, const ActRec* prevAr,
-                    VMRegs* outVMRegs) const;
+  bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const;
 
   void fixup(ExecutionContext* ec) const;
   void fixupWork(ExecutionContext* ec, ActRec* rbp) const;
@@ -204,7 +203,7 @@ private:
     TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
           (void*)tca, fixup.pcOffset, fixup.spOffset);
     assertx(fixup.spOffset >= 0);
-    outRegs->pc = reinterpret_cast<const Op*>(pc(ar, f, fixup));
+    outRegs->pc = pc(ar, f, fixup);
     outRegs->fp = ar;
 
     if (UNLIKELY(ar->resumed())) {

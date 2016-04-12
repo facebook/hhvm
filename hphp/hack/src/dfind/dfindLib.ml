@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,21 +8,26 @@
  *
  *)
 
-open Utils
+type t = (DfindServer.msg, unit) Daemon.handle
 
-type t = (SSet.t, unit) Daemon.handle
-
-let init roots = Daemon.fork (DfindServer.run_daemon roots)
+let init log_fds (scuba_table, roots) =
+  Daemon.spawn log_fds DfindServer.entry_point (scuba_table, roots)
 
 let pid handle = handle.Daemon.pid
 
-let request_changes {Daemon.channels = (ic, oc); pid = _} =
-  Daemon.to_channel oc ();
-  Daemon.from_channel ic
+let wait_until_ready {Daemon.channels = (ic, _oc); pid = _} =
+  assert (Daemon.from_channel ic = DfindServer.Ready)
 
-let get_changes daemon =
+let request_changes ?timeout {Daemon.channels = (ic, oc); pid = _} =
+  Daemon.to_channel oc ();
+  Daemon.from_channel ?timeout ic
+
+let get_changes ?timeout daemon =
   let rec loop acc =
-    let diff = request_changes daemon in
+    let diff =
+      match request_changes ?timeout daemon with
+      | DfindServer.Updates s -> s
+      | DfindServer.Ready -> assert false in
     if SSet.is_empty diff
     then acc
     else begin

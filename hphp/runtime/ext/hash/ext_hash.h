@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+constexpr int64_t k_HASH_HMAC = 1;
+
 Variant HHVM_FUNCTION(hash, const String& algo, const String& data,
                             bool raw_output = false);
 Array HHVM_FUNCTION(hash_algos);
@@ -35,7 +37,7 @@ Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
 Variant HHVM_FUNCTION(hash_final, const Resource& context,
                                   bool raw_output = false);
 bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data);
-Resource HHVM_FUNCTION(hash_copy, const Resource& context);
+Variant HHVM_FUNCTION(hash_copy, const Resource& context);
 bool HHVM_FUNCTION(hash_equals, const Variant& known, const Variant& user);
 int64_t HHVM_FUNCTION(furchash_hphp_ext, const String& key,
                                          int64_t len, int64_t nPart);

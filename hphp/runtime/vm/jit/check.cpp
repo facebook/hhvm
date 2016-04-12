@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -501,6 +501,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DParamMayRelax requireTypeParam();
 #define DParam         requireTypeParam();
 #define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
+#define DLdObjCls
 #define DUnboxPtr
 #define DBoxPtr
 #define DAllocObj
@@ -539,6 +540,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
+#undef DLdObjCls
 #undef DUnboxPtr
 #undef DBoxPtr
 #undef DAllocObj

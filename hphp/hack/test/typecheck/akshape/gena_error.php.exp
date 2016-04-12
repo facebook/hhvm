@@ -1,0 +1,6 @@
+File "gena_error.php", line 17, characters 12-23:
+Invalid argument (Typing[4110])
+File "gena_error.php", line 7, characters 34-39:
+This is a string
+File "gena_error.php", line 11, characters 19-21:
+It is incompatible with an int

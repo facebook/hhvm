@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,32 +44,22 @@ Block* getBlock(IRGS& env, Offset offset) {
   // to the region, so we just create an exit block.
   if (!env.irb->hasBlock(sk)) return makeExit(env, offset);
 
-  return env.irb->makeBlock(sk);
+  return env.irb->makeBlock(sk, curProfCount(env));
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void jmpImpl(IRGS& env, Offset offset, JmpFlags flags) {
-  if (flags & JmpFlagNextIsMerge) {
-    prepareForHHBCMergePoint(env);
-  }
+void jmpImpl(IRGS& env, Offset offset) {
   auto target = getBlock(env, offset);
   assertx(target != nullptr);
   gen(env, Jmp, target);
 }
 
 void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
-  auto const flags = instrJmpFlags(*env.currentNormalizedInstruction);
-  if (flags & JmpFlagEndsRegion) {
-    spillStack(env);
-  }
-  if ((flags & JmpFlagNextIsMerge) != 0) {
-    prepareForHHBCMergePoint(env);
-  }
   auto const target = getBlock(env, taken);
   assertx(target != nullptr);
   auto const boolSrc = gen(env, ConvCellToBool, src);
-  gen(env, DecRef, src);
+  decRef(env, src);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
@@ -78,12 +68,11 @@ void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
 void emitJmp(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const offset = bcOff(env) + relOffset;
-  jmpImpl(env, offset, instrJmpFlags(*env.currentNormalizedInstruction));
+  jmpImpl(env, offset);
 }
 
 void emitJmpNS(IRGS& env, Offset relOffset) {
-  jmpImpl(env, bcOff(env) + relOffset,
-    instrJmpFlags(*env.currentNormalizedInstruction));
+  jmpImpl(env, bcOff(env) + relOffset);
 }
 
 void emitJmpZ(IRGS& env, Offset relOffset) {
@@ -102,10 +91,8 @@ void emitJmpNZ(IRGS& env, Offset relOffset) {
 
 static const StaticString s_switchProfile("SwitchProfile");
 
-void emitSwitch(IRGS& env,
-                const ImmVector& iv,
-                int64_t base,
-                SwitchKind kind) {
+void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
+                const ImmVector& iv) {
   auto bounded = kind == SwitchKind::Bounded;
   int nTargets = bounded ? iv.size() - 2 : iv.size();
 
@@ -125,10 +112,6 @@ void emitSwitch(IRGS& env,
     zeroOff = defaultOff;
   }
 
-  if (instrJmpFlags(*env.currentNormalizedInstruction) & JmpFlagNextIsMerge) {
-    prepareForHHBCMergePoint(env);
-  }
-
   if (type <= TNull) {
     gen(env, Jmp, getBlock(env, zeroOff));
     return;
@@ -140,7 +123,7 @@ void emitSwitch(IRGS& env,
     return;
   }
   if (type <= TArr) {
-    gen(env, DecRef, switchVal);
+    decRef(env, switchVal);
     gen(env, Jmp, getBlock(env, defaultOff));
     return;
   }
@@ -239,9 +222,8 @@ void emitSwitch(IRGS& env,
   data.cases       = iv.size();
   data.targets     = &targets[0];
   data.invSPOff    = invSPOff(env);
-  data.irSPOff     = offsetFromIRSP(env, BCSPOffset{0});
+  data.irSPOff     = bcSPOffset(env);
 
-  spillStack(env);
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
 
@@ -284,11 +266,11 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
                                  : LdSSwitchDestSlow,
                         data,
                         testVal);
-  gen(env, DecRef, testVal);
+  decRef(env, testVal);
   gen(
     env,
     JmpSSwitchDest,
-    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    IRSPRelOffsetData { bcSPOffset(env) },
     dest,
     sp(env),
     fp(env)

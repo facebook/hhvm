@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/stack-trace.h"
+
+#include <set>
 
 #if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER))
 #include <execinfo.h>
@@ -220,8 +222,7 @@ std::string StackTrace::hexEncode(int minLevel /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // crash log
 
-class StackTraceLog {
-public:
+struct StackTraceLog {
   hphp_string_map<std::string> data;
 
   static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
@@ -274,6 +275,57 @@ struct addr2line_data {
 };
 
 
+void StackTrace::PerfMap::rebuild() {
+  m_map.clear();
+
+  char perfMapName[64];
+  snprintf(perfMapName, sizeof(perfMapName), "/tmp/perf-%d.map", getpid());
+  FILE* perfMap = fopen(perfMapName, "r");
+  if (!perfMap) {
+    return;
+  }
+  SCOPE_EXIT { fclose(perfMap); };
+  uintptr_t addr;
+  uint32_t size;
+  char name[1024];
+  while (fscanf(perfMap, "%lx %x %1023s", &addr, &size, name) == 3) {
+    uintptr_t past = addr + size;
+    PerfMap::Range range = {addr, past};
+    m_map[range] = name;
+  }
+  m_built = true;
+}
+
+bool StackTrace::PerfMap::translate(const void* addr, Frame* f) const {
+  if (!m_built) {
+    const_cast<StackTrace::PerfMap*>(this)->rebuild();
+  }
+
+  // Use a key with non-zero span, because otherwise a key right at the base of
+  // a range will be treated as before the range (bad) rather than within it
+  // (good).
+  PerfMap::Range key{uintptr_t(addr), uintptr_t(addr)+1};
+  auto const& it = m_map.find(key);
+  if (it == m_map.end()) {
+    // Not found.
+    f->filename = "?";
+    f->funcname = "TC?"; // Note HHProf::HandlePProfSymbol() dependency.
+    return true;
+  }
+  // Found.
+  std::string filefunc = it->second;
+  size_t endPhp = filefunc.find("::");
+  if (endPhp == std::string::npos) {
+    f->funcname = std::string(filefunc);
+    return false;
+  }
+  endPhp += 2;   // Skip the ::
+  size_t endFile = filefunc.find("::", endPhp);
+  f->filename = std::string(filefunc, endPhp, endFile - endPhp);
+  f->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
+  return false;
+}
+
 bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
                                Dl_info &dlInfo, void* data,
                                void *bfds, unsigned bfds_size) {
@@ -303,16 +355,21 @@ bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
   return true;
 }
 
-std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *frame) {
+std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void* frame,
+                                                         PerfMap* pm) {
   Dl_info dlInfo;
   addr2line_data adata;
 
-  Frame * f1 = new Frame(frame);
+  Frame* f1 = new Frame(frame);
   std::shared_ptr<Frame> f(f1);
   if (!StackTraceBase::Translate(frame, f1, dlInfo, &adata)) {
     // Lookup using dladdr() failed, so this is probably a PHP symbol.
     // Let's check the perf map.
-    StackTrace::TranslateFromPerfMap(frame, f1);
+    if (pm != nullptr) {
+      pm->translate(frame, f1);
+    } else {
+      StackTrace::TranslateFromPerfMap(frame, f1);
+    }
     return f;
   }
 
@@ -332,39 +389,24 @@ std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *frame) {
   return f;
 }
 
+static std::mutex s_perfMapCacheMutex;
+static StackTrace::PerfMap s_perfMapCache;
+static std::set<void*> s_perfMapNegCache;
+
 void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
-  // For now just read the whole map file every time.  If this is
-  // egregiously slow I'll build a map and cache it.
-  char perfMapName[64];
-  snprintf(perfMapName,
-           sizeof(perfMapName),
-           "/tmp/perf-%d.map", getpid());
-  FILE* perfMap = fopen(perfMapName, "r");
-  if (!perfMap) {
-    f->filename = "?";
-    f->funcname = "TC?";
-    return;
-  }
-  SCOPE_EXIT { fclose(perfMap); };
-  uintptr_t begin;
-  uint32_t size;
-  char name[256];
-  while (fscanf(perfMap, "%lx %x %255s", &begin, &size, name) == 3) {
-    uintptr_t end = begin + size;
-    if (bt >= (void*)begin && bt <= (void*)end) {
-      break;
+  std::unique_lock<std::mutex> lock(s_perfMapCacheMutex);
+
+  if (s_perfMapCache.translate(bt, f)) {
+    if (s_perfMapNegCache.find(bt) != s_perfMapNegCache.end()) {
+      // A prior failed lookup of bt already triggered a rebuild.
+      return;
+    }
+    // Rebuild the cache, then search again.
+    s_perfMapCache.rebuild();
+    if (s_perfMapCache.translate(bt, f)) {
+      s_perfMapNegCache.insert(bt);
     }
   }
-  std::string filefunc = std::string(name);
-  size_t endPhp = filefunc.find("::");
-  if (endPhp == std::string::npos) {
-    f->funcname = std::string(filefunc);
-    return;
-  }
-  endPhp += 2;   // Skip the ::
-  size_t endFile = filefunc.find("::", endPhp);
-  f->filename = std::string(filefunc, endPhp, endFile - endPhp);
-  f->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
 }
 
 bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num,
@@ -636,7 +678,8 @@ std::string StackTrace::Frame::toString() const {
 StackTrace::StackTrace(bool trace) {
 }
 
-std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *bt) {
+std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *bt,
+                                                         PerfMap* pm) {
   return std::shared_ptr<StackTrace::Frame>(new Frame(bt));
 }
 

@@ -464,15 +464,15 @@ inline const TypedValue& zval_follow_ref(const zval &z) {
  * certain uses Z_ARRVAL so that we can make a copy of the array when
  * appropriate so that PHP5 extensions work correctly.
  */
-class ZArrVal {
+struct ZArrVal {
 private:
   TypedValue* m_tv;
 public:
   explicit ZArrVal(TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
-    ArrayData * ad = m_tv->m_data.parr;
-    if (ad->isStatic() || ad->hasMultipleRefs()) {
-      forceAsProxyArray ();
+    auto ad = m_tv->m_data.parr;
+    if (ad->cowCheck()) {
+      forceAsProxyArray();
     }
   }
   inline void forceAsProxyArray () {
@@ -480,19 +480,20 @@ public:
     if (ad->isEmptyArray()) {
       assert(!"can't forceAsProxyArray an empty array");
     } else {
-	  auto tmp = ad->copy();
-	  assert(tmp != ad);
-	  ad = tmp;
+      auto tmp = ad->copy();
+      assert(tmp != ad);
+      ad = tmp;
     }
 
     // copy() causes an array to be unproxied, so we normally need
     // to reproxy it
     if (!ad->isProxyArray()) {
       ad = ProxyArray::Make(ad);
-	  assert(ad->hasExactlyOneRef());
+      assert(ad->hasExactlyOneRef());
     }
     m_tv->m_data.parr->decRefCount();
     m_tv->m_data.parr = ad;
+    m_tv->m_type = KindOfArray;
   }
   /* implicit */ operator HashTable*() {
     cowCheck();
@@ -513,6 +514,7 @@ public:
   }
   ZArrVal& operator=(HashTable* a) {
     m_tv->m_data.parr = a;
+	m_tv->m_type = KindOfArray;
     return *this;
   }
 private:

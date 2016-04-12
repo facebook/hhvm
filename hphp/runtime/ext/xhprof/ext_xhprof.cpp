@@ -8,12 +8,16 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-void HHVM_FUNCTION(fb_setprofile, const Variant& callback) {
+void HHVM_FUNCTION(fb_setprofile,
+  const Variant& callback,
+  int64_t flags = EventHook::ProfileDefault
+) {
   if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it
     return;
   }
   g_context->m_setprofileCallback = callback;
+  g_context->m_setprofileFlags = flags;
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
   } else {
@@ -104,31 +108,24 @@ Variant HHVM_FUNCTION(xhprof_sample_disable) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_XHPROF_FLAGS_NO_BUILTINS("XHPROF_FLAGS_NO_BUILTINS"),
-  s_XHPROF_FLAGS_CPU("XHPROF_FLAGS_CPU"),
-  s_XHPROF_FLAGS_MEMORY("XHPROF_FLAGS_MEMORY"),
-  s_XHPROF_FLAGS_VTSC("XHPROF_FLAGS_VTSC"),
-  s_XHPROF_FLAGS_TRACE("XHPROF_FLAGS_TRACE"),
-  s_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE("XHPROF_FLAGS_MEASURE_XHPROF_DISABLE"),
-  s_XHPROF_FLAGS_MALLOC("XHPROF_FLAGS_MALLOC"),
-  s_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY("XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY");
-
-class XHProfExtension : public Extension {
- public:
+struct XHProfExtension : Extension {
   XHProfExtension(): Extension("xhprof", "0.9.4") {}
 
   void moduleInit() override {
-#define XHPROFCNS(n,v) Native::registerConstant<KindOfInt64> (s_##n.get(), v)
-    XHPROFCNS(XHPROF_FLAGS_NO_BUILTINS, NoTrackBuiltins);
-    XHPROFCNS(XHPROF_FLAGS_CPU, TrackCPU);
-    XHPROFCNS(XHPROF_FLAGS_MEMORY, TrackMemory);
-    XHPROFCNS(XHPROF_FLAGS_VTSC, TrackVtsc);
-    XHPROFCNS(XHPROF_FLAGS_TRACE, XhpTrace);
-    XHPROFCNS(XHPROF_FLAGS_MEASURE_XHPROF_DISABLE, MeasureXhprofDisable);
-    XHPROFCNS(XHPROF_FLAGS_MALLOC, TrackMalloc);
-    XHPROFCNS(XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY, IHaveInfiniteMemory);
-#undef XHPROFCNS
+    HHVM_RC_INT(XHPROF_FLAGS_NO_BUILTINS, NoTrackBuiltins);
+    HHVM_RC_INT(XHPROF_FLAGS_CPU, TrackCPU);
+    HHVM_RC_INT(XHPROF_FLAGS_MEMORY, TrackMemory);
+    HHVM_RC_INT(XHPROF_FLAGS_VTSC, TrackVtsc);
+    HHVM_RC_INT(XHPROF_FLAGS_TRACE, XhpTrace);
+    HHVM_RC_INT(XHPROF_FLAGS_MEASURE_XHPROF_DISABLE, MeasureXhprofDisable);
+    HHVM_RC_INT(XHPROF_FLAGS_MALLOC, TrackMalloc);
+    HHVM_RC_INT(XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY, IHaveInfiniteMemory);
+    HHVM_RC_INT(SETPROFILE_FLAGS_ENTERS, EventHook::ProfileEnters);
+    HHVM_RC_INT(SETPROFILE_FLAGS_EXITS, EventHook::ProfileExits);
+    HHVM_RC_INT(SETPROFILE_FLAGS_DEFAULT, EventHook::ProfileDefault);
+    HHVM_RC_INT(SETPROFILE_FLAGS_FRAME_PTRS, EventHook::ProfileFramePointers);
+    HHVM_RC_INT(SETPROFILE_FLAGS_CTORS, EventHook::ProfileConstructors);
+    HHVM_RC_INT(SETPROFILE_FLAGS_RESUME_AWARE, EventHook::ProfileResumeAware);
 
     HHVM_FE(fb_setprofile);
     HHVM_FE(xhprof_frame_begin);

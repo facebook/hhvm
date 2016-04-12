@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -430,7 +430,8 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
           return;
         case KindOfUninit:
         case KindOfDouble:
-        case KindOfStaticString:
+        case KindOfPersistentString:
+        case KindOfPersistentArray:
         case KindOfArray:
         case KindOfObject:
         case KindOfResource:
@@ -707,7 +708,7 @@ static Variant mysqli_driver_reconnect_get(const Object& this_) {
   return *getRawProp(this_, s_reconnect, s_mysqli_driver);
 }
 
-void mysqli_driver_reconnect_set(const Object& this_, Variant& value) {
+void mysqli_driver_reconnect_set(const Object& this_, const Variant& value) {
   this_->o_set(s_reconnect, value, s_mysqli_driver);
 }
 
@@ -715,7 +716,7 @@ static Variant mysqli_driver_report_mode_get(const Object& this_) {
   return *getRawProp(this_, s_report_mode, s_mysqli_driver);
 }
 
-void mysqli_driver_report_mode_set(const Object& this_, Variant& value) {
+void mysqli_driver_report_mode_set(const Object& this_, const Variant& value) {
   this_->o_set(s_report_mode, value, s_mysqli_driver);
 }
 
@@ -1086,8 +1087,7 @@ static bool HHVM_FUNCTION(mysqli_thread_safe) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class mysqliExtension final : public Extension {
-public:
+struct mysqliExtension final : Extension {
   mysqliExtension() : Extension("mysqli") {}
   // Use moduleLoad() for settings that are system-wide and cannot
   // change per request (e.g. PHP_INI_SYSTEM)

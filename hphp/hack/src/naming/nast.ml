@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-
-open Utils
 
 module SN = Naming_special_names
 
@@ -41,7 +39,7 @@ module ShapeField = struct
 
 end
 
-module ShapeMap = MyMap(ShapeField)
+module ShapeMap = MyMap.Make (ShapeField)
 
 type hint = Pos.t * hint_
 and hint_ =
@@ -207,6 +205,7 @@ and fun_ = {
 }
 
 and typedef = {
+  t_pos : Pos.t;
   t_tparams : tparam list;
   t_constraint : hint option;
   t_kind : hint;
@@ -276,17 +275,23 @@ and class_id =
   | CIexpr of expr
   | CI of sid
 
+and kvc_kind = [
+  | `Map
+  | `ImmMap
+  | `Dict ]
+
 and expr = Pos.t * expr_
 and expr_ =
   | Any
   | Array of afield list
   | Shape of expr ShapeMap.t
   | ValCollection of string * expr list
-  | KeyValCollection of string * field list
+  | KeyValCollection of kvc_kind * field list
   | This
   | Id of sid
   | Lvar of id
-  | Lplaceholder of sid
+  | Lplaceholder of Pos.t
+  | Dollardollar of id
   | Fun_id of sid
   | Method_id of expr * pstring
   (* meth_caller('Class name', 'method name') *)
@@ -317,13 +322,17 @@ and expr_ =
   | Cast of hint * expr
   | Unop of Ast.uop * expr
   | Binop of Ast.bop * expr * expr
+  (** The ID of the $$ that is implicitly declared by this pipe. *)
+  | Pipe of id * expr * expr
   | Eif of expr * expr option * expr
+  | NullCoalesce of expr * expr
   | InstanceOf of expr * class_id
   | New of class_id * expr list * expr list
   | Efun of fun_ * id list
   | Xml of sid * (pstring * expr) list * expr list
   | Assert of assert_expr
   | Clone of expr
+  | Typename of sid
 
 (* These are "very special" constructs that we look for in, among
  * other places, terminality checks. invariant does not appear here
@@ -354,6 +363,7 @@ type def =
   | Fun of fun_
   | Class of class_
   | Typedef of typedef
+  | Constant of gconst
 
 type program = def list
 
@@ -372,3 +382,25 @@ let class_id_to_str = function
   | CIexpr (_, Lvar (_, x)) -> "$"^string_of_int(x)
   | CIexpr _ -> assert false
   | CI (_, x) -> x
+
+let is_kvc_kind name = match name with
+  | x when
+    x = SN.Collections.cMap
+    || x = SN.Collections.cImmMap
+    || x = SN.Collections.cStableMap
+    || x = SN.Collections.cDict -> true
+  | _ -> false
+
+let get_kvc_kind name = match name with
+  | x when x = SN.Collections.cMap -> `Map
+  | x when x = SN.Collections.cImmMap -> `ImmMap
+  | x when x = SN.Collections.cDict -> `Dict
+  | _ -> begin
+    Errors.internal_error Pos.none ("Invalid KeyValueCollection name: "^name);
+    `Map
+  end
+
+let kvc_kind_to_name kind = match kind with
+  | `Map -> SN.Collections.cMap
+  | `ImmMap -> SN.Collections.cImmMap
+  | `Dict -> SN.Collections.cDict

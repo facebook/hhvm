@@ -1,0 +1,4 @@
+File "array.php", line 5, characters 7-17:
+This expression is always false (Typing[4151])
+File "array.php", line 3, characters 12-16:
+This is an array (used like a vector) and cannot be null

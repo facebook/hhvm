@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -105,7 +105,7 @@ let simplified_uerror env ty1 ty2 =
 let process_static_find_ref cid mid =
   match cid with
   | Nast.CI c ->
-    Typing_hooks.dispatch_class_id_hook c (Some mid);
+    Decl_hooks.dispatch_class_id_hook c (Some mid);
   | _ -> ()
 
 (* Find the first defined position in a list of types *)
@@ -170,12 +170,33 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
         on_common_field (env, acc) name ty1 ty2
   end fdm1 (env, acc)
 
-and shape_field_name p field =
+let shape_field_name_ env field =
   let open Nast in match field with
-    | String name -> SFlit name
-    | Class_const (CI x, y) -> SFclass_const (x, y)
-    | _ -> Errors.invalid_shape_field_name p;
-      SFlit (p, "")
+    | String name -> Result.Ok (SFlit name)
+    | Class_const (CI x, y) -> Result.Ok (SFclass_const (x, y))
+    | Class_const (CIself, y) ->
+      let _, c_ty = Env.get_self env in
+      (match c_ty with
+      | Tclass (sid, _) ->
+        Result.Ok (SFclass_const(sid, y))
+      | _ ->
+        Result.Error `Expected_class)
+    | _ -> Result.Error `Invalid_shape_field_name
+
+let maybe_shape_field_name env field =
+  match shape_field_name_ env field with
+    | Result.Ok x -> Some x
+    | Result.Error _ -> None
+
+let shape_field_name env p field =
+  match shape_field_name_ env field with
+    | Result.Ok x -> Some x
+    | Result.Error `Expected_class ->
+        Errors.expected_class p;
+        None
+    | Result.Error `Invalid_shape_field_name ->
+        Errors.invalid_shape_field_name p;
+        None
 
 (*****************************************************************************)
 (* Try to unify all the types in a intersection *)
@@ -267,45 +288,23 @@ let unresolved env ty =
   | _, Tunresolved _ -> in_var env ety
   | _ -> in_var env (fst ty, Tunresolved [ty])
 
-(*****************************************************************************)
-(* Function checking if an array is used as a tuple *)
-(*****************************************************************************)
+let unwrap_class_hint = function
+  | (_, N.Happly ((pos, class_name), type_parameters)) ->
+      pos, class_name, type_parameters
+  | p, N.Habstr(_, _) ->
+      Errors.expected_class ~suffix:" or interface but got a generic" p;
+      Pos.none, "", []
+  | p, _ ->
+      Errors.expected_class ~suffix:" or interface" p;
+      Pos.none, "", []
 
-let is_array_as_tuple env ty =
-  let env, ety = Env.expand_type env ty in
-  let env, ety = fold_unresolved env ety in
-  match ety with
-  | _, Tarray (Some elt_type, None) ->
-      let env, normalized_elt_ty = Env.expand_type env elt_type in
-      let _env, normalized_elt_ty = fold_unresolved env normalized_elt_ty in
-      (match normalized_elt_ty with
-      | _, Tunresolved _ -> true
-      | _ -> false
-      )
-  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Toption _
-    | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-    | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> false
+let unwrap_class_type = function
+  | r, Tapply (name, tparaml) -> r, name, tparaml
+  | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_,_) | Toption _ | Tprim _
+  | Tfun _ | Ttuple _ | Tshape _ | Taccess (_, _) | Tthis) ->
+    raise @@ Invalid_argument "unwrap_class_type got non-class"
 
-(*****************************************************************************)
-(* Keep the most restrictive visibility (private < protected < public).
- * This is useful when dealing with unresolved types.
- * When there are several candidates for a given visibility we need to be
- * conservative and consider the most restrictive one.
- *)
-(*****************************************************************************)
-
-let min_vis vis1 vis2 =
-  match vis1, vis2 with
-  | x, Vpublic | Vpublic, x -> x
-  | Vprotected _, x | x, Vprotected _ -> x
-  | Vprivate _ as vis, Vprivate _ -> vis
-
-let min_vis_opt vis_opt1 vis_opt2 =
-  match vis_opt1, vis_opt2 with
-  | None, x | x, None -> x
-  | Some (pos1, x), Some (pos2, y) ->
-      let pos = if pos1 = Pos.none then pos2 else pos1 in
-      Some (pos, min_vis x y)
+let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 
 (*****************************************************************************)
 (* Check if a type is not fully constrained *)
@@ -313,18 +312,39 @@ let min_vis_opt vis_opt1 vis_opt2 =
 
 module HasTany : sig
   val check: locl ty -> bool
+  val check_why: locl ty -> Reason.t option
 end = struct
+
+  let merge x y = Option.merge x y (fun x _ -> x)
+
   let visitor =
     object(this)
-      inherit [bool] TypeVisitor.type_visitor
-      method! on_tany _ = true
-      method! on_tarray acc ty1_opt ty2_opt =
+      inherit [Reason.t option] Type_visitor.type_visitor
+      method! on_tany _ r = Some r
+      method! on_tarray acc r ty1_opt ty2_opt =
         (* Check for array without its type parameters specified *)
         match ty1_opt, ty2_opt with
-        | None, None -> true
-        | _ ->
-          (Option.fold ~f:this#on_type ~init:acc ty1_opt) ||
-          (Option.fold ~f:this#on_type ~init:acc ty2_opt)
+        | None, None -> Some r
+        | _ -> merge
+            (Option.fold ~f:this#on_type ~init:acc ty1_opt)
+            (Option.fold ~f:this#on_type ~init:acc ty2_opt)
+      method! on_tarraykind acc r akind =
+        match akind with
+        | AKany -> Some r
+        | AKempty -> acc
+        | AKvec ty -> this#on_type acc ty
+        | AKmap (tk, tv) -> merge
+            (this#on_type acc tk)
+            (this#on_type acc tv)
+        | AKshape fdm -> ShapeMap.fold (fun _ (tk, tv) acc ->
+            merge
+              (this#on_type acc tk)
+              (this#on_type acc tv)
+          ) fdm acc
+        | AKtuple fields ->
+          IMap.fold (fun _ ty acc -> this#on_type acc ty) fields acc
     end
-  let check ty = visitor#on_type false ty
+  let check_why ty = visitor#on_type None ty
+
+  let check ty = Option.is_some (check_why ty)
 end

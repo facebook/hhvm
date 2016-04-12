@@ -1,0 +1,6 @@
+File "akempty_promotion_5.php", line 10, characters 5-6:
+Invalid argument (Typing[4110])
+File "akempty_promotion_5.php", line 13, characters 12-14:
+This is an int
+File "akempty_promotion_5.php", line 9, characters 3-16:
+It is incompatible with an array (used like a hashtable) because it is used as map here

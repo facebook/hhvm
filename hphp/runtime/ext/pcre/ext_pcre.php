@@ -171,6 +171,41 @@ function preg_replace_callback(mixed $pattern,
                                ?int &$count = null): mixed;
 
 /**
+ * Perform a regular expression search and replace using an associative array of
+ * pattern and callback key/value pairs. In array order, each callback is called
+ * for the pattern in question, and the return value is then used as the subject
+ * for the next pattern/callback pair. This function alleviates the need for a
+ * a bunch of branching checks that are required if you called something like
+ * preg_replace_callback() that uses a single callback.
+ *
+ * @param mixed $patterns_and_callbacks - An associative array mapping patterns
+ *   (keys) to callbacks (values). Each callback that will be called will be
+ *   passed an array of matched elements in the subject string. The callback
+ *   should return the replacement string. This is the callback signature:
+ *     `string handler (array matches)`
+ *   If you need the callback function just in one place in the array, use an
+ *   anonymous function to declare the callback within the call to
+ *   preg_replace_callback_array(). By doing it this way you have all the
+ *   information for the call in one place and do not clutter the function
+ *   namespace with a callback function's name not used anywhere else.
+ * @param mixed $subject - The string or an array with strings to search
+ *   and replace.
+ * @param int $limit - The maximum possible replacements for each pattern
+ *   in each subject string. Defaults to -1 (no limit).
+ * @param int $count - If specified, this variable will be filled with
+ *   the number of replacements done.
+ *
+ * @return mixed - preg_replace_callback_array() returns an array if the
+ *   subject parameter is an array, or a string otherwise. On errors the
+ *   return value is NULL   If matches are found, the new subject will be
+ *   returned, otherwise subject will be returned unchanged.
+ */
+<<__Native>>
+function preg_replace_callback_array(mixed $patterns_and_callbacks,
+                                     mixed $subject,
+                                     int $limit = -1,
+                                     ?int &$count = null): mixed;
+/**
  * Perform a regular expression search and replace
  *
  * @param mixed $pattern - The pattern to search for. It can be either a

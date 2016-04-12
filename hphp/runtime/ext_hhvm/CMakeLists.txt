@@ -15,14 +15,13 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_ARCH SOURCE_REL BUILD_TARGET)
   set(f_SRC "${SOURCE_ABS}/${REL}")
   set(f_OBJ "${TARGET_ABS}/CMakeFiles/${BUILD_TARGET}.dir/${REL}")
   list(APPEND ${SOURCES} "${f_OBJ}.ext_hhvm.cpp")
-  list(APPEND ${HEADERS} "${f_OBJ}.ext_hhvm.h")
 
   file(MAKE_DIRECTORY "${TARGET_ABS}/CMakeFiles/${BUILD_TARGET}.dir")
   add_custom_command(
-    OUTPUT "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
+    OUTPUT "${f_OBJ}.ext_hhvm.cpp"
     DEPENDS ${f_SRC} gen-ext-hhvm
     COMMAND gen-ext-hhvm
-    ARGS ${EHHVM_ARCH} "${f_OBJ}.ext_hhvm.h" "${f_OBJ}.ext_hhvm.cpp" "${f_SRC}"
+    ARGS ${EHHVM_ARCH} "${f_OBJ}.ext_hhvm.cpp" "${f_SRC}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/bootstrap"
     COMMENT "Generating ext_hhvm wrapper for ${SOURCE_REL}/${REL}")
 endmacro()
@@ -58,24 +57,25 @@ EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "../../system/idl" "hphp_runtime_ext")
 set(ROOT_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/generated")
 set(GENERATED_DIR "${ROOT_GEN_DIR}/hphp/runtime/ext_hhvm/")
 include_directories(BEFORE "${ROOT_GEN_DIR}")
-set(INFOTABS_HEADER "${GENERATED_DIR}/ext_hhvm_infotabs.h")
 set(INFOTABS_SOURCE "${GENERATED_DIR}/ext_hhvm_infotabs.cpp")
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE"
              "${CMAKE_CURRENT_SOURCE_DIR}/../../system/idl")
 
-# Generate ext_hhvm_infotabs.h based on ext_hhvm files being generated
-file(WRITE ${INFOTABS_HEADER} "")
-foreach (header ${CXX_HEADERS})
-  file(APPEND ${INFOTABS_HEADER} "#include \"${header}\"\n")
-endforeach()
+# Generate ext_hhvm_infotabs.cpp.
+if (NOT EXISTS ${INFOTABS_SOURCE})
+  # There's no `mkdir -p` in CMake, but file(WRITE) will do the job
+  # Remove the file afterward though, so that the gen-infotabs command
+  # doesn't think there's nothing to do
+  file(WRITE ${INFOTABS_SOURCE} "")
+  file(REMOVE ${INFOTABS_SOURCE})
+endif()
 
-# Generate ext_hhvm_infotabs.cpp
 add_custom_command(
   OUTPUT ${INFOTABS_SOURCE}
   DEPENDS ${CXX_HEADERS} ${HPHP_IDLS} gen-infotabs
   COMMAND gen-infotabs
-  ARGS ${INFOTABS_SOURCE} ${INFOTABS_HEADER} ${HPHP_IDLS})
+  ARGS ${INFOTABS_SOURCE} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
 
 # Enable IDL based extensions

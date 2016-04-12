@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -202,7 +202,8 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
   [&] {
     switch (defaultType) {
       case KindOfUninit:
-        compat = m_hhType;
+        // PHP 7 allows user defined constants as parameter default values
+        compat = m_hhType || RuntimeOption::PHP7_ScalarTypes;
         return;
       case KindOfNull:
         compat = true;
@@ -216,6 +217,9 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
         compat = (!strcasecmp(hint, "HH\\int") ||
                   !strcasecmp(hint, "HH\\num") ||
                   !strcasecmp(hint, "HH\\arraykey") ||
+                  // PHP 7 allows widening conversions
+                  (RuntimeOption::PHP7_ScalarTypes &&
+                   !strcasecmp(hint, "HH\\float")) ||
                   (m_hhType && interface_supports_int(hint)));
         return;
 
@@ -225,13 +229,14 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                   (m_hhType && interface_supports_double(hint)));
         return;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         compat = (!strcasecmp(hint, "HH\\string") ||
                   !strcasecmp(hint, "HH\\arraykey") ||
                   (m_hhType && interface_supports_string(hint)));
         return;
 
+      case KindOfPersistentArray:
       case KindOfArray:
         compat = (!strcasecmp(hint, "array") ||
                   (m_hhType && interface_supports_array(hint)));
@@ -271,53 +276,6 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                    name.c_str(), tdefault.c_str(),
                    getTypeHintDisplayName().c_str());
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
-  auto propCount = 2;
-  if (m_attributeList) propCount++;
-  if (m_modifier != 0) propCount++;
-  if (m_originalType) propCount++;
-  if (m_ref) propCount++;
-  if (m_defaultValue != nullptr) propCount++;
-  cg.printObjectHeader("ParameterDeclaration", propCount);
-  if (m_attributeList) {
-    cg.printPropertyHeader("attributes");
-    cg.printExpressionVector(m_attributeList);
-  }
-  if (m_modifier != 0) {
-    cg.printPropertyHeader("modifiers");
-    cg.printf("V:9:\"HH\\Vector\":1:{");
-    cg.printObjectHeader("Modifier", 1);
-    cg.printPropertyHeader("name");
-    switch (m_modifier) {
-      case T_PUBLIC: cg.printValue("public"); break;
-      case T_PROTECTED: cg.printValue("protected"); break;
-      case T_PRIVATE: cg.printValue("private"); break;
-      default: assert(false);
-    }
-    cg.printObjectFooter();
-    cg.printf("}");
-  }
-  if (m_originalType) {
-    cg.printPropertyHeader("typeAnnotation");
-    m_originalType->outputCodeModel(cg);
-  }
-  if (m_ref) {
-    cg.printPropertyHeader("isPassedByReference");
-    cg.printBool(true);
-  }
-  cg.printPropertyHeader("name");
-  cg.printValue(m_name);
-  if (m_defaultValue) {
-    cg.printPropertyHeader("expression");
-    m_defaultValue->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

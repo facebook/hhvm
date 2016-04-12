@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -324,8 +324,7 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
 
 } // namespace
 
-class xenonExtension final : public Extension {
- public:
+struct xenonExtension final : Extension {
   xenonExtension() : Extension("xenon", "1.0") { }
 
   void moduleInit() override {

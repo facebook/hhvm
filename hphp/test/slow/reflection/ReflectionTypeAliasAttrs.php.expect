@@ -1,0 +1,25 @@
+TypeAlias [ MyTypeNoAttrs : HH\int ]
+array(0) {
+}
+TypeAlias [ MyType : HH\int ]
+array(1) {
+  ["Attr1"]=>
+  array(1) {
+    [0]=>
+    int(1337)
+  }
+}
+NULL
+array(1) {
+  [0]=>
+  int(1337)
+}
+TypeAlias [ MyNewType : HH\int ]
+array(2) {
+  ["Attr2"]=>
+  array(0) {
+  }
+  ["Attr3"]=>
+  array(0) {
+  }
+}

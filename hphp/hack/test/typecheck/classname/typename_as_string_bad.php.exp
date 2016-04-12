@@ -1,0 +1,6 @@
+File "typename_as_string_bad.php", line 15, characters 10-17:
+Invalid return type (Typing[4110])
+File "typename_as_string_bad.php", line 14, characters 15-17:
+This is an int
+File "builtins.hhi", line 69, characters 25-30:
+It is incompatible with a string

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,12 +16,13 @@
 #ifndef incl_HPHP_VM_EVENT_HOOK_H_
 #define incl_HPHP_VM_EVENT_HOOK_H_
 
-#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/vm/act-rec.h"
+
+#include "hphp/util/ringbuffer.h"
 
 #include <atomic>
 
@@ -38,13 +39,21 @@ namespace HPHP {
  *  - pending out of memory exceptions
  *  - pending timeout exceptions
  */
-class EventHook {
- public:
+struct EventHook {
   enum {
     NormalFunc,
     PseudoMain,
     Eval,
   };
+  enum {
+    ProfileEnters = 1,
+    ProfileExits = 2,
+    ProfileDefault = 3,
+    ProfileFramePointers = 4,
+    ProfileConstructors = 8,
+    ProfileResumeAware = 16,
+  };
+
 
   static void Enable();
   static void Disable();
@@ -54,6 +63,8 @@ class EventHook {
   static void DisableDebug();
   static void EnableIntercept();
   static void DisableIntercept();
+
+  static void DoMemoryThresholdCallback();
 
   /**
    * Event hooks -- interpreter entry points.
@@ -110,10 +121,11 @@ private:
   static void onFunctionResumeYield(const ActRec* ar);
   static void onFunctionUnwind(ActRec* ar, ObjectData* phpException);
 
-  static void onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags);
+  static void onFunctionEnter(const ActRec* ar, int funcType,
+                              ssize_t flags, bool isResume);
   static void onFunctionExit(const ActRec* ar, const TypedValue* retval,
                              bool unwind, ObjectData* phpException,
-                             size_t flags);
+                             size_t flags, bool isSuspend);
 
   static bool RunInterceptHandler(ActRec* ar);
   static const char* GetFunctionNameForProfiler(const Func* func,

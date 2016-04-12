@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/stacktrace-profiler.h"
 
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -237,8 +238,8 @@ void StringData::destructUncounted() {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void StringData::delist() {
-  assert(isShared());
-  auto& payload = *sharedPayload();
+  assert(isProxy());
+  auto& payload = *proxy();
   auto const next = payload.node.next;
   auto const prev = payload.node.prev;
   assert(uintptr_t(next) != kMallocFreeWord);
@@ -256,8 +257,8 @@ unsigned StringData::sweepAll() {
     assert(next && uintptr_t(next) != kSmallFreeWord);
     assert(next && uintptr_t(next) != kMallocFreeWord);
     auto const s = node2str(n);
-    assert(s->isShared());
-    s->sharedPayload()->shared->getHandle()->unreference();
+    assert(s->isProxy());
+    s->proxy()->apcstr->getHandle()->unreference();
   }
   head.next = head.prev = &head;
   return count;
@@ -355,7 +356,7 @@ StringData* StringData::Make(const StringData* s1, const StringData* s2) {
   auto const next = memcpy8(data, s1->m_data, s1->m_len);
   *memcpy8(next, s2->m_data, s2->m_len) = 0;
 
-  assert(sd->getCount() == 1);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -405,11 +406,11 @@ StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2,
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void StringData::enlist() {
-  assert(isShared());
+  assert(isProxy());
   auto& head = MM().getStringList();
   // insert after head
   auto const next = head.next;
-  auto& payload = *sharedPayload();
+  auto& payload = *proxy();
   assert(uintptr_t(next) != kMallocFreeWord);
   payload.node.next = next;
   payload.node.prev = &head;
@@ -417,37 +418,37 @@ ALWAYS_INLINE void StringData::enlist() {
 }
 
 NEVER_INLINE
-StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
+StringData* StringData::MakeProxySlowPath(const APCString* apcstr) {
   auto const sd = static_cast<StringData*>(
-    MM().mallocSmallSize(sizeof(StringData) + sizeof(SharedPayload))
+    MM().mallocSmallSize(sizeof(StringData) + sizeof(Proxy))
   );
-  auto const data = shared->getStringData();
+  auto const data = apcstr->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
   sd->m_hdr.init(data->m_hdr, 1);
   sd->m_lenAndHash = data->m_lenAndHash;
-  sd->sharedPayload()->shared = shared;
+  sd->proxy()->apcstr = apcstr;
   sd->enlist();
-  shared->getHandle()->reference();
+  apcstr->getHandle()->reference();
 
   assert(sd->m_len == data->size());
   assert(sd->m_hdr.aux == data->m_hdr.aux);
   assert(sd->m_hdr.kind == HeaderKind::String);
   assert(sd->hasExactlyOneRef());
   assert(sd->m_hash == data->m_hash);
-  assert(sd->isShared());
+  assert(sd->isProxy());
   assert(sd->checkSane());
   return sd;
 }
 
-StringData* StringData::Make(const APCString* shared) {
+StringData* StringData::MakeProxy(const APCString* apcstr) {
   // No need to check if len > MaxSize, because if it were we'd never
   // have made the StringData in the APCVariant without throwing.
-  assert(size_t(shared->getStringData()->size()) <= size_t(MaxSize));
+  assert(size_t(apcstr->getStringData()->size()) <= size_t(MaxSize));
 
-  auto const data = shared->getStringData();
+  auto const data = apcstr->getStringData();
   auto const len = data->size();
   if (UNLIKELY(len > SmallStringReserve)) {
-    return MakeAPCSlowPath(shared);
+    return MakeProxySlowPath(apcstr);
   }
 
   // small-string path: make a flat copy.
@@ -473,11 +474,11 @@ StringData* StringData::Make(const APCString* shared) {
 
 NEVER_INLINE
 void StringData::releaseDataSlowPath() {
-  assert(isShared());
+  assert(isProxy());
   assert(checkSane());
-  sharedPayload()->shared->getHandle()->unreference();
+  proxy()->apcstr->getHandle()->unreference();
   delist();
-  MM().freeSmallSize(this, sizeof(StringData) + sizeof(SharedPayload));
+  MM().freeSmallSize(this, sizeof(StringData) + sizeof(Proxy));
 }
 
 void StringData::release() noexcept {
@@ -530,7 +531,7 @@ StringData* StringData::append(folly::StringPiece range) {
   ALIASING_APPEND_ASSERT(s, len);
 
   auto const requestLen = static_cast<uint32_t>(newLen);
-  auto const target = UNLIKELY(isShared()) ? escalate(requestLen)
+  auto const target = UNLIKELY(isProxy()) ? escalate(requestLen)
                                            : reserve(requestLen);
   memcpy(target->mutableData() + m_len, s, len);
   target->setSize(newLen);
@@ -559,8 +560,8 @@ StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
   ALIASING_APPEND_ASSERT(r1.data(), r1.size());
   ALIASING_APPEND_ASSERT(r2.data(), r2.size());
 
-  auto const target = UNLIKELY(isShared()) ? escalate(newLen)
-                                           : reserve(newLen);
+  auto const target = UNLIKELY(isProxy()) ? escalate(newLen)
+                                          : reserve(newLen);
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
@@ -600,8 +601,8 @@ StringData* StringData::append(folly::StringPiece r1,
   ALIASING_APPEND_ASSERT(r2.data(), r2.size());
   ALIASING_APPEND_ASSERT(r3.data(), r3.size());
 
-  auto const target = UNLIKELY(isShared()) ? escalate(newLen)
-                                           : reserve(newLen);
+  auto const target = UNLIKELY(isProxy()) ? escalate(newLen)
+                                          : reserve(newLen);
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
@@ -673,7 +674,7 @@ StringData* StringData::shrink(size_t len) {
 
 // State transition from Mode::Shared to Mode::Flat.
 StringData* StringData::escalate(size_t cap) {
-  assert(isShared() && !isStatic() && cap >= m_len);
+  assert(isProxy() && !isStatic() && cap >= m_len);
 
   auto const sd = allocFlatForLenSmall(cap);
   sd->m_lenAndHash = m_lenAndHash;
@@ -689,9 +690,10 @@ StringData* StringData::escalate(size_t cap) {
 void StringData::dump() const {
   auto s = slice();
 
-  printf("StringData(%d) (%s%s%d): [", getCount(),
-         isShared() ? "shared " : "",
+  printf("StringData(%d) (%s%s%s%d): [", m_hdr.count,
+         isProxy() ? "proxy " : "",
          isStatic() ? "static " : "",
+         isUncounted() ? "uncounted " : "",
          static_cast<int>(s.size()));
   for (uint32_t i = 0; i < s.size(); i++) {
     char ch = s.data()[i];
@@ -704,19 +706,19 @@ void StringData::dump() const {
   printf("]\n");
 }
 
-StringData *StringData::getChar(int offset) const {
+StringData* StringData::getChar(int offset) const {
   if (offset >= 0 && offset < size()) {
     return makeStaticString(m_data[offset]);
   }
   raise_notice("Uninitialized string offset: %d", offset);
-  return makeStaticString("");
+  return staticEmptyString();
 }
 
 StringData* StringData::increment() {
   assert(!isStatic());
   assert(!empty());
 
-  auto const sd = UNLIKELY(isShared())
+  auto const sd = UNLIKELY(isProxy())
     ? escalate(m_len + 1)
     : reserve(m_len + 1);
   sd->incrementHelper();
@@ -817,7 +819,7 @@ void StringData::preCompute() {
 }
 
 NEVER_INLINE strhash_t StringData::hashHelper() const {
-  assert(!isShared());
+  assert(!isProxy());
   strhash_t h = hash_string_i_unsafe(m_data, m_len);
   assert(h >= 0);
   m_hash |= h;
@@ -841,7 +843,7 @@ DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
       allow_errors,
       overflow
     );
-    if (ret == KindOfNull && !isShared() && allow_errors) {
+    if (ret == KindOfNull && !isProxy() && allow_errors) {
       m_hash |= STRHASH_MSB;
     }
   }
@@ -860,8 +862,9 @@ bool StringData::isNumeric() const {
       return true;
     case KindOfUninit:
     case KindOfBoolean:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -884,8 +887,9 @@ bool StringData::isInteger() const {
       return true;
     case KindOfUninit:
     case KindOfBoolean:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -942,9 +946,9 @@ int StringData::numericCompare(const StringData *v2) const {
   double dval1, dval2;
   DataType ret1, ret2;
   if ((ret1 = isNumericWithVal(lval1, dval1, 0, &oflow1)) == KindOfNull ||
-      (ret1 == KindOfDouble && !finite(dval1)) ||
+      (ret1 == KindOfDouble && !std::isfinite(dval1)) ||
       (ret2 = v2->isNumericWithVal(lval2, dval2, 0, &oflow2)) == KindOfNull ||
-      (ret2 == KindOfDouble && !finite(dval2))) {
+      (ret2 == KindOfDouble && !std::isfinite(dval2))) {
     return -2;
   }
   if (oflow1 && oflow1 == oflow2 && dval1 == dval2) {
@@ -1016,8 +1020,8 @@ bool StringData::checkSane() const {
   assert(capacity() <= MaxSize);
   assert(size() >= 0);
   assert(size() <= capacity());
-  // isFlat() and isShared() both check whether m_data == voidPayload,
-  // which guarantees by definition that isFlat() != isShared()
+  // isFlat() and isProxy() both check whether m_data == payload(),
+  // which guarantees by definition that isFlat() != isProxy()
   return true;
 }
 

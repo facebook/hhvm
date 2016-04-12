@@ -13,6 +13,7 @@
 open Core
 open Utils
 
+(* TODO: these ought to take positions *)
 let unimpl s =
   Printf.eprintf "UNIMPLEMENTED: %s\n" s; exit 1
 (* anything that trips this shouldn't have passed the typechecker, I think. *)
@@ -134,7 +135,7 @@ let fmt_base base =
 
 (* returns the suffix to use on opcodes operating on the lval,
  * the argument describing the lval,
- * and whether to reverse the arguments to any 2 operand opcode
+ * and whether to reverse the arguments to some of the 2 operand opcode
  * using this (argh!) *)
 let fmt_lval lval =
   match lval with
@@ -170,11 +171,20 @@ type closure_state = {
   closure_counter: int ref;
 }
 type pending_closure = string * closure_state * (Nast.fun_ * Nast.id list)
+(* Functions that emit code for nonlocal flow. Updated with with_actions
+ * when entering a loop or a try/finally block. This setup is so that
+ * knowledge about how to break/continue/return out of various
+ * constructs can live with the code that emits those constructs and not
+ * with the code for break/continue/return. *)
 type nonlocal_actions = {
   continue_action: is_initial:bool -> env -> env;
   break_action: is_initial:bool -> env -> env;
   return_action: has_value:bool -> is_initial:bool -> env -> env;
 }
+(* Big ol' ugly state object that gets threaded through everything and
+ * does too much. Collects output and deferred work to do, tracks state
+ * about what we are compiling, tracks a counter for label allocation,
+ * and more! *)
 and env = {
   (* Global state *)
   reversed_output: string list;
@@ -269,10 +279,10 @@ let free_iterator env i =
 let enter_construct env = { env with indent = env.indent+1 }
 let exit_construct env = { env with indent = env.indent-1 }
 
-(* we basically use env as the state in a State monad, but really we
+(* We basically use env as the state in a State monad, but really we
  * also want Reader and Writer, so we do some /mildly/ hokey simulation
  * of them.
- * Sigh. Maybe I would be happier actually just using state.
+ * Sigh. Maybe this would be nicer if we just actually used mutable state?
  *)
 
 (* Reader like things *)
@@ -295,13 +305,19 @@ let emit_strs env ss = emit_str env (String.concat " " ss)
 let emit_op_strs env ss = emit_strs env ss
 let get_output env = String.concat "\n" (List.rev env.reversed_output)
 
+(* Run `f env arg` but return any output f produces instead of adding
+ * it to env's output buffer. Any other changes to env will take effect.
+ * This is useful to reorder things when information that we collect needs
+ * to appear in the hhas in a different order than we compute it.
+ * This is kind of unfortunate. *)
 let collect_output env f arg =
   let old = env.reversed_output in
   let env = f { env with reversed_output = [] } arg in
   { env with reversed_output = old }, get_output env
 
-(* Cleanup handling; unfortunate? *)
-(* XXX: doc rationale?? *)
+(* Cleanup handling; add_cleanup adds a function to be run once the body of
+ * the function has been emitted. The functions are run in order.
+ * This is used to to arrange for faultlet handlers to be emitted. *)
 let add_cleanup env f = { env with cleanups = f :: env.cleanups }
 let run_cleanups env =
   let env = List.fold_right ~f:(fun f env -> f env) ~init:env env.cleanups in
@@ -385,6 +401,7 @@ let emit_FPushCtor =      emit_op1i   "FPushCtor"
 let emit_FPushCtorD =     emit_op2ie  "FPushCtorD"
 let emit_FPushObjMethodD =emit_op3ies "FPushObjMethodD"
 let emit_FPushClsMethod = emit_op1i   "FPushClsMethod"
+let emit_FPushClsMethodF =emit_op1i   "FPushClsMethodF"
 let emit_FPushClsMethodD =emit_op3iee "FPushClsMethodD"
 let emit_Cns =            emit_op1e   "Cns"
 let emit_ClsCns =         emit_op1e   "ClsCns"
@@ -423,7 +440,7 @@ let emit_Self =           emit_op0    "Self"
 let emit_Parent =         emit_op0    "Parent"
 let emit_AGetL =          emit_op1s   "AGetL"
 let emit_AGetC =          emit_op0    "AGetC"
-let emit_Await =          emit_op1i   "Await"
+let emit_Await =          emit_op0    "Await"
 let emit_IsTypeC =        emit_op1s   "IsTypeC"
 let emit_CreateCont =     emit_op0    "CreateCont"
 let emit_Yield =          emit_op0    "Yield"
@@ -435,11 +452,11 @@ let emit_InstanceOf =     emit_op0    "InstanceOf"
 let emit_InstanceOfD =    emit_op1e   "InstanceOfD"
 let emit_CreateCl =       emit_op2ie  "CreateCl"
 
-let emit_Switch env labels base bound =
-  emit_op_strs env ["Switch"; fmt_str_vec labels; string_of_int base; bound]
-let emit_IterBreak env iters label =
+let emit_Switch env bound base labels =
+  emit_op_strs env ["Switch"; bound; string_of_int base; fmt_str_vec labels]
+let emit_IterBreak env label iters =
   let fmt_iter i = "(Iter) " ^ string_of_int i in
-  emit_op_strs env ["IterBreak"; fmt_vec fmt_iter iters; label]
+  emit_op_strs env ["IterBreak"; label; fmt_vec fmt_iter iters]
 
 let emit_bool env = function | true -> emit_op0 "True" env
                              | false -> emit_op0 "False" env

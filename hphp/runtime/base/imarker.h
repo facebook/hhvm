@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,17 +16,21 @@
 #ifndef incl_HPHP_RUNTIME_IMARKER_H_
 #define incl_HPHP_RUNTIME_IMARKER_H_
 
-#include <list>
-#include <bitset>
-#include <boost/variant.hpp>
-#include "hphp/util/range.h"
-#include "hphp/util/low-ptr.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/vm/indexed-string-map.h"
+
+#include "hphp/runtime/vm/jit/containers.h"
+
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/hphp-raw-ptr.h"
-#include "hphp/runtime/base/req-containers.h"
-#include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/util/low-ptr.h"
+#include "hphp/util/range.h"
+#include "hphp/util/tiny-vector.h"
+
+#include <boost/variant.hpp>
+
+#include <bitset>
+#include <list>
 
 namespace folly {
 template <class T> class Optional;
@@ -61,7 +65,7 @@ struct StreamContext;
 struct DateTime;
 struct Extension;
 template <typename T, bool isLow> struct AtomicSharedPtrImpl;
-template <typename T> struct FixedVector;
+template <typename T, typename A> struct FixedVector;
 template <typename T> struct SweepableMember;
 template <typename A, typename B, typename P> struct Either;
 template<class T, class Allocator> struct TlsPodBag;
@@ -402,8 +406,8 @@ struct IMarker {
     for (const auto& elem : p) scan(elem, *this);
   }
 
-  template <typename T>
-  void operator()(const FixedVector<T>& p) {
+  template <typename T, typename A>
+  void operator()(const FixedVector<T,A>& p) {
     for (const auto& elem : p) scan(elem, *this);
   }
 
@@ -479,6 +483,43 @@ struct scanner {
   template <typename F> void scan(const AsioContext& v, F& mark) {
     // do nothing for now.
   }
+};
+
+// bridge between the templated-based marker interface and the
+// virtual-call based marker interface.
+template<class F> struct ExtMarker final: IMarker {
+  explicit ExtMarker(F& mark) : mark_(mark) {}
+  void operator()(const Array& p) override { mark_(p); }
+  void operator()(const Object& p) override { mark_(p); }
+  void operator()(const Resource& p) override { mark_(p); }
+  void operator()(const String& p) override { mark_(p); }
+  void operator()(const Variant& p) override { mark_(p); }
+  void operator()(const ArrayIter& p) override { mark_(p); }
+  void operator()(const MArrayIter& p) override { mark_(p); }
+  void operator()(const StringBuffer& p) override { mark_(p); }
+  void operator()(const ActRec& p) override { mark_(p); }
+  void operator()(const Stack& p) override { mark_(p); }
+  void operator()(const VarEnv& p) override { mark_(p); }
+  void operator()(const RequestEventHandler& p) override { mark_(p); }
+  void operator()(const Extension& p) override { mark_(p); }
+  void operator()(const AsioContext& p) override { mark_(p); }
+
+  void operator()(const StringData* p) override { mark_(p); }
+  void operator()(const ArrayData* p) override { mark_(p); }
+  void operator()(const ObjectData* p) override { mark_(p); }
+  void operator()(const ResourceData* p) override { mark_(p); }
+  void operator()(const RefData* p) override { mark_(p); }
+  void operator()(const Func* p) override { mark_(p); }
+  void operator()(const Class* p) override { mark_(p); }
+  void operator()(const TypedValue* p) override { mark_(*p); }
+  void operator()(const NameValueTable* p) override { mark_(*p); }
+  void operator()(const Unit* p) override { mark_(p); }
+
+  void operator()(const void* start, size_t len) override {
+    mark_(start, len);
+  }
+private:
+  F& mark_;
 };
 
 }

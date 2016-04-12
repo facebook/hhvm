@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
-#include "hphp/runtime/vm/jit/irgen-guards.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -59,7 +58,7 @@ void emitAGetC(IRGS& env) {
   if (name->type().subtypeOfAny(TObj, TStr)) {
     popC(env);
     implAGet(env, name);
-    gen(env, DecRef, name);
+    decRef(env, name);
   } else {
     interpOne(env, TCls, 1);
   }
@@ -80,6 +79,19 @@ void emitCGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const loc = ldLocInnerWarn(
+    env,
+    id,
+    ldrefExit,
+    ldPMExit,
+    DataTypeCountnessInit
+  );
+  pushIncRef(env, loc);
+}
+
+void emitCGetQuietL(IRGS& env, int32_t id) {
+  auto const ldrefExit = makeExit(env);
+  auto const ldPMExit = makePseudoMainExit(env);
+  auto const loc = ldLocInner(
     env,
     id,
     ldrefExit,
@@ -177,7 +189,7 @@ void emitBoxR(IRGS& env) {
 void emitUnsetL(IRGS& env, int32_t id) {
   auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountness);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
-  gen(env, DecRef, prev);
+  decRef(env, prev);
 }
 
 void emitBindL(IRGS& env, int32_t id) {
@@ -194,7 +206,7 @@ void emitBindL(IRGS& env, int32_t id) {
   pushIncRef(env, newValue);
   auto const oldValue = ldLoc(env, id, ldPMExit, DataTypeSpecific);
   stLocRaw(env, id, fp(env), newValue);
-  gen(env, DecRef, oldValue);
+  decRef(env, oldValue);
 }
 
 void emitSetL(IRGS& env, int32_t id) {
@@ -220,7 +232,7 @@ void emitInitThisLoc(IRGS& env, int32_t id) {
   auto const this_     = gen(env, CastCtxThis, ctx);
   gen(env, IncRef, this_);
   stLocRaw(env, id, fp(env), this_);
-  gen(env, DecRef, oldLoc);
+  decRef(env, oldLoc);
 }
 
 void emitPrint(IRGS& env) {
@@ -255,7 +267,7 @@ void emitUnbox(IRGS& env) {
   auto const srcBox = popV(env);
   auto const unboxed = unbox(env, srcBox, exit);
   pushIncRef(env, unboxed);
-  gen(env, DecRef, srcBox);
+  decRef(env, srcBox);
 }
 
 void emitThis(IRGS& env) {
@@ -277,7 +289,7 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
   }
   auto const ctx = gen(env, LdCtx, fp(env));
   if (subop == BareThisOp::NeverNull) {
-    env.irb->setThisAvailable();
+    env.irb->fs().setThisAvailable();
   } else {
     gen(env, CheckCtxThis, makeExitSlow(env), ctx);
   }
@@ -288,7 +300,7 @@ void emitClone(IRGS& env) {
   if (!topC(env)->isA(TObj)) PUNT(Clone-NonObj);
   auto const obj        = popC(env);
   push(env, gen(env, Clone, obj));
-  gen(env, DecRef, obj);
+  decRef(env, obj);
 }
 
 void emitLateBoundCls(IRGS& env) {
@@ -346,19 +358,19 @@ void emitCastArray(IRGS& env) {
 void emitCastBool(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToBool, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitCastDouble(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToDbl, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitCastInt(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToInt, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitCastObject(IRGS& env) {
@@ -369,7 +381,7 @@ void emitCastObject(IRGS& env) {
 void emitCastString(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToStr, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
@@ -404,8 +416,12 @@ void emitNullUninit(IRGS& env) { push(env, cns(env, TUninit)); }
 //////////////////////////////////////////////////////////////////////
 
 void emitNop(IRGS&)                {}
-void emitBoxRNop(IRGS&)            {}
-void emitUnboxRNop(IRGS&)          {}
+void emitBoxRNop(IRGS& env) {
+  assertTypeStack(env, BCSPRelOffset{0}, TBoxedCell);
+}
+void emitUnboxRNop(IRGS& env) {
+  assertTypeStack(env, BCSPRelOffset{0}, TCell);
+}
 void emitRGetCNop(IRGS&)           {}
 void emitFPassC(IRGS&, int32_t)    {}
 void emitFPassVNop(IRGS&, int32_t) {}

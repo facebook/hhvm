@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,9 +31,9 @@ void zBoxAndProxy(TypedValue* arg) {
     tvBox(arg);
   }
   auto inner = arg->m_data.pref->tv();
-  if (inner->m_type == KindOfArray && !inner->m_data.parr->isProxyArray()) {
+  if (isArrayType(inner->m_type) && !inner->m_data.parr->isProxyArray()) {
     ArrayData * inner_arr = inner->m_data.parr;
-    if (inner_arr->isStatic() || inner_arr->hasMultipleRefs()) {
+    if (inner_arr->cowCheck()) {
       ArrayData * tmp = inner_arr->copy();
       if (inner_arr != tmp) {
         inner_arr->decRefAndRelease();
@@ -41,6 +41,7 @@ void zBoxAndProxy(TypedValue* arg) {
       }
     }
     inner->m_data.parr = ProxyArray::Make(inner_arr);
+    inner->m_type = KindOfArray;
   }
 }
 

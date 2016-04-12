@@ -61,6 +61,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       }
     }
 
+    Method [ <internal:Reflection> public method isAnonymous ] {
+
+      - Parameters [0] {
+      }
+    }
+
     Method [ <internal:Reflection> public method isInstantiable ] {
 
       - Parameters [0] {

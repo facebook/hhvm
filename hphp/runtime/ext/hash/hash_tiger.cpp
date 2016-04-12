@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -226,8 +226,9 @@ void hash_tiger::hash_final(unsigned char *digest, void *context_) {
   TigerFinalize(context);
 
   for(int i = 0; i < (m_digest >> 3); ++i) {
+    auto b = i % 8;
     digest[i] = (unsigned char) ((context->state[i >> 3] >>
-                                    ((m_invert ? (7 - i) : i) << 3))
+                                    ((m_invert ? (7 - b) : b) << 3))
                                     & 0xff);
   }
 

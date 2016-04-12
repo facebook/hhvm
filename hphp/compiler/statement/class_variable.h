@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassVariable);
 DECLARE_BOOST_TYPES(SimpleVariable);
 
-class ClassVariable : public Statement, public IParseHandler {
-public:
+struct ClassVariable : Statement, IParseHandler {
   ClassVariable(STATEMENT_CONSTRUCTOR_PARAMETERS,
                 ModifierExpressionPtr modifiers,
                 std::string typeConstraint,

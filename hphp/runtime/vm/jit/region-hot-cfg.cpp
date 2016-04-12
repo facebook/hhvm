@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,12 +47,15 @@ const StaticString s_switchProfile("SwitchProfile");
 //////////////////////////////////////////////////////////////////////
 
 struct DFS {
-  DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv)
+  DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv,
+      int32_t maxBCInstrs,
+      bool inlining)
     : m_profData(p)
     , m_cfg(c)
     , m_selectedSet(ts)
     , m_selectedVec(tv)
-    , m_numBCInstrs(0)
+    , m_numBCInstrs(maxBCInstrs)
+    , m_inlining(inlining)
   {}
 
   RegionDescPtr formRegion(TransID head) {
@@ -99,7 +102,9 @@ private:
 
     auto sk = profRegion.blocks().back()->last();
     assert(sk.op() == OpSwitch);
-    TargetProfile<SwitchProfile> profile(tid, sk.offset(),
+    TargetProfile<SwitchProfile> profile(tid,
+                                         TransKind::Optimize,
+                                         sk.offset(),
                                          s_switchProfile.get());
     assert(!profile.profiling());
     if (!profile.optimizing()) {
@@ -157,7 +162,8 @@ private:
            includedCases, includedHits, totalHits);
     auto firstDead = std::remove_if(
       begin(arcs), end(arcs), [&](const TransCFG::Arc* arc) {
-        const bool ok = allowedSks.count(m_profData->transSrcKey(arc->dst()));
+        auto const rec = m_profData->transRec(arc->dst());
+        const bool ok = allowedSks.count(rec->srcKey());
         ITRACE(5, "Arc {} -> {} {}included\n",
                arc->src(), arc->dst(), ok ? "" : "not ");
         return !ok;
@@ -167,9 +173,11 @@ private:
   }
 
   void visit(TransID tid) {
-    auto tidRegion = m_profData->transRegion(tid);
+    auto rec = m_profData->transRec(tid);
+    auto tidRegion = rec->region();
     auto tidInstrs = tidRegion->instrSize();
-    if (m_numBCInstrs + tidInstrs > RuntimeOption::EvalJitMaxRegionInstrs) {
+    if (tidInstrs > m_numBCInstrs) {
+      ITRACE(5, "- visit: skipping {} due to region size\n", tid);
       return;
     }
 
@@ -185,10 +193,10 @@ private:
 
     if (!m_visited.insert(tid).second) return;
     m_visiting.insert(tid);
-    m_numBCInstrs += tidInstrs;
+    m_numBCInstrs -= tidInstrs;
     ITRACE(5, "- visit: adding {} ({})\n", tid, tidWeight);
 
-    auto const termSk = m_profData->transLastSrcKey(tid);
+    auto const termSk = rec->lastSrcKey();
     auto const termOp = termSk.op();
     if (!breaksRegion(termSk)) {
       auto srcBlockId = tidRegion->blocks().back().get()->id();
@@ -212,22 +220,15 @@ private:
           continue;
         }
 
-        // If dst is in the visiting set then this arc forms a cycle. Don't
-        // include it unless we've asked for loops.
-        if (!RuntimeOption::EvalJitLoops && m_visiting.count(dst)) {
-          ITRACE(5, "- visit: skipping arc {} -> {} because it would create "
-                 "a loop\n", tid, dst);
-          continue;
-        }
-
         // Skip dst if we already generated a region starting at that SrcKey.
-        auto dstSK = m_profData->transSrcKey(dst);
-        if (m_profData->optimized(dstSK)) {
+        auto dstRec = m_profData->transRec(dst);
+        auto dstSK = dstRec->srcKey();
+        if (!m_inlining && m_profData->optimized(dstSK)) {
           ITRACE(5, "- visit: skipping {} because SrcKey was already "
                  "optimize", showShort(dstSK));
           continue;
         }
-        always_assert(dst == m_profData->transRegion(dst)->entry()->id());
+        always_assert(dst == dstRec->region()->entry()->id());
 
         visit(dst);
 
@@ -246,7 +247,7 @@ private:
     m_region->prepend(*tidRegion);
     m_selectedSet.insert(tid);
     if (m_selectedVec) m_selectedVec->push_back(tid);
-    always_assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
+    always_assert(m_numBCInstrs >= 0);
 
     m_visiting.erase(tid);
   }
@@ -257,34 +258,44 @@ private:
   TransIDSet&                  m_selectedSet;
   TransIDVec*                  m_selectedVec;
   RegionDescPtr                m_region;
-  uint32_t                     m_numBCInstrs;
+  int32_t                      m_numBCInstrs;
   jit::hash_set<TransID>       m_visiting;
   jit::hash_set<TransID>       m_visited;
   jit::vector<RegionDesc::Arc> m_arcs;
   double                       m_minBlockWeight;
   double                       m_minArcProb;
+  bool                         m_inlining;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-RegionDescPtr selectHotCFG(TransID head,
-                           const ProfData* profData,
-                           const TransCFG& cfg,
+RegionDescPtr selectHotCFG(HotTransContext& ctx,
                            TransIDSet& selectedSet,
-                           TransIDVec* selectedVec) {
-  ITRACE(1, "selectHotCFG\n");
+                           TransIDVec* selectedVec /* = nullptr */) {
+  ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", ctx.maxBCInstrs);
   auto const region =
-    DFS(profData, cfg, selectedSet, selectedVec)
-      .formRegion(head);
+    DFS(ctx.profData, *ctx.cfg, selectedSet, selectedVec, ctx.maxBCInstrs,
+        ctx.inlining)
+      .formRegion(ctx.tid);
+
+  if (region->empty()) return nullptr;
+
   ITRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
          show(*region));
-  region_prune_arcs(*region);
+  region_prune_arcs(*region, ctx.inputTypes);
   ITRACE(3, "selectHotCFG: before chainRetransBlocks:\n{}\n",
          show(*region));
   region->chainRetransBlocks();
-  ITRACE(3, "selectHotCFG: after chainRetransBlocks:\n{}\n",
+
+  // Relax the region guards.
+  if (RuntimeOption::EvalRegionRelaxGuards) {
+    ITRACE(3, "selectHotCFG: before optimizeProfiledGuards:\n{}\n",
+           show(*region));
+    optimizeProfiledGuards(*region, *ctx.profData);
+  }
+  ITRACE(1, "selectHotCFG: final version after optimizeProfiledGuards:\n{}\n",
          show(*region));
   return region;
 }

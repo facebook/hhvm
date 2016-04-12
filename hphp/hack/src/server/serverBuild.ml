@@ -8,9 +8,12 @@
  *
  *)
 
+let svnrev_path = "scripts/build/artifacts/SVN_REVISION"
+
 type build_opts = {
   steps: string list option; (* steps for hack build to run.
-                         None means 'all' *)
+                         None means 'all except kill-switched' *)
+  ignore_killswitch: bool; (* when true, also build kill-switched steps *)
   no_steps: string list option; (* ...but don't run these steps *)
   run_scripts: bool; (* when true, run remaining arc build steps
                      that we haven't figured out how to port yet*)
@@ -27,9 +30,21 @@ type build_opts = {
    * we will probably have hard-to-debug permissions issues, so error out *)
   user: string;
   verbose: bool;
+  id: string;
 }
 
 type build_progress =
   | BUILD_PROGRESS of string
   | BUILD_ERROR of string
   | BUILD_FINISHED
+
+let build_type_of build_opts =
+  let {steps; no_steps; is_push; incremental; _} = build_opts in
+  if steps <> None || no_steps <> None then
+    `Steps
+  else if is_push then
+    `Push
+  else if incremental then
+    `Incremental
+  else
+    `Full

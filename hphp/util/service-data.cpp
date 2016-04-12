@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,8 +123,7 @@ void ExportedHistogram::exportAll(const std::string& prefix,
 
 namespace detail {
 template <class ClassWithPrivateDestructor>
-class FriendDeleter {
- public:
+struct FriendDeleter {
   template <class... Args>
   explicit FriendDeleter(Args&&... args)
       : m_instance(new ClassWithPrivateDestructor(
@@ -197,8 +196,7 @@ Value* getOrCreateWithArgs(tbb::concurrent_unordered_map<Key, Value*>& map,
   return result.first->second;
 }
 
-class Impl {
- public:
+struct Impl {
   ExportedCounter* createCounter(const std::string& name) {
     return getOrCreateWithArgs(m_counterMap, name);
   }

@@ -1,15 +1,19 @@
 #ifndef GD_H
 #define GD_H 1
 
+#include "hphp/runtime/base/directory.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-php-config.h"
+#include "hphp/util/string-vsnprintf.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "php_compat.h"
 
 #define GD_MAJOR_VERSION 2
 #define GD_MINOR_VERSION 0
@@ -46,7 +50,14 @@ extern "C" {
 #include <stdio.h>
 #include "gd_io.h"
 
+#define E_ERROR        (1<<0L)
+#define E_WARNING      (1<<1L)
+#define E_NOTICE       (1<<3L)
 void php_gd_error_ex(int type, const char *format, ...);
+
+inline void *safe_emalloc(size_t nmemb, size_t size, size_t offset) {
+  return HPHP::req::malloc(nmemb * size + offset);
+}
 
 void php_gd_error(const char *format, ...);
 

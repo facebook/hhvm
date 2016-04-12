@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,20 +61,16 @@ namespace HPHP {
  * The server side push handler is just here to catch errors and
  * egress state changes.
  */
-class PushTxnHandler : public proxygen::HTTPPushTransactionHandler {
-
- public:
+struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   PushTxnHandler(uint64_t pushId,
-                 const std::shared_ptr<ProxygenTransport>& transport,
-                 uint8_t priority)
+                 const std::shared_ptr<ProxygenTransport>& transport)
       : m_pushId(pushId),
-        m_transport(transport),
-        m_priority(priority) {}
+        m_transport(transport) {}
 
   proxygen::HTTPTransaction *getOrCreateTransaction(
     proxygen::HTTPTransaction *clientTxn, bool newPushOk) {
     if (!m_pushTxn && newPushOk) {
-      m_pushTxn = clientTxn->newPushedTransaction(this, m_priority);
+      m_pushTxn = clientTxn->newPushedTransaction(this);
     }
     return m_pushTxn;
   }
@@ -115,17 +111,14 @@ class PushTxnHandler : public proxygen::HTTPPushTransactionHandler {
   std::shared_ptr<ProxygenTransport> m_transport;
   proxygen::HTTPTransaction *m_pushTxn{nullptr};
   proxygen::HTTPMessage m_pushMessage;
-  uint8_t m_priority;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ProxygenTransport::ProxygenTransport(
-  ProxygenServer *server,
-  folly::EventBase *eventBase)
-    : AsyncTimeout(eventBase),
-      m_server(server) {
-  m_eventBase = eventBase;
+ProxygenTransport::ProxygenTransport(ProxygenServer *server)
+  : m_server(server)
+{
+  m_server->addPendingTransport(*this);
 }
 
 ProxygenTransport::~ProxygenTransport() {
@@ -137,6 +130,7 @@ ProxygenTransport::~ProxygenTransport() {
     Lock lock(this);
     CHECK(m_pushHandlers.empty());
   }
+  // Destructor of IntrusiveListHook will automatically unlink()
 }
 
 bool ProxygenTransport::bufferRequest() const {
@@ -181,6 +175,24 @@ void ProxygenTransport::onHeadersComplete(
     });
 
   if (m_method == Transport::Method::POST && m_request->isHTTP1_1()) {
+    // fail fast if the post is too large, but only bother resolving host
+    // if content_length is larger than the minimum setting.
+    auto clen_str = getHeader("Content-Length");
+    auto content_length = strtoll(clen_str.c_str(), nullptr, 10);
+    auto max_post = RuntimeOption::LowestMaxPostSize;
+    if (content_length > max_post) {
+      auto host = headers.getSingleOrEmpty(HTTP_HEADER_HOST);
+      if (auto vhost = VirtualHost::Resolve(host)) {
+        max_post = vhost->getMaxPostSize();
+      }
+    }
+    auto post_too_big = false;
+    if (content_length < 0 || content_length > max_post) {
+      Logger::Warning("POST Content-Length of %lld bytes exceeds "
+                      "the limit of %" PRId64 " bytes",
+                      content_length, max_post);
+      post_too_big = true;
+    }
     const std::string& expectation =
       headers.getSingleOrEmpty(HTTP_HEADER_EXPECT);
     if (!expectation.empty()) {
@@ -189,6 +201,12 @@ void ProxygenTransport::onHeadersComplete(
       if (!boost::iequals(expectation, "100-continue")) {
         response.setStatusCode(417);
         response.setStatusMessage(HTTPMessage::getDefaultReason(417));
+        response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
+        sendEom = true;
+      } else if (post_too_big) {
+        // got expect 100-continue, but content_length is too big.
+        response.setStatusCode(413 /* Payload Too Large */);
+        response.setStatusMessage(HTTPMessage::getDefaultReason(413));
         response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
         sendEom = true;
       } else {
@@ -206,11 +224,14 @@ void ProxygenTransport::onHeadersComplete(
         // this object is no longer valid
         return;
       }
+    } else if (post_too_big) {
+      // did not receive "expect" header, but too much post data.
+      sendErrorResponse(413 /* Payload Too Large */);
+      return;
     }
   }
 
   if (!bufferRequest()) {
-    m_enqueued = true;
     m_server->onRequest(shared_from_this());
   } // otherwise we wait for EOM
 }
@@ -246,7 +267,6 @@ void ProxygenTransport::onEOM() noexcept {
         m_currentBodyBuf->length();
     }
     m_clientComplete = true;
-    m_enqueued = true;
     m_server->onRequest(shared_from_this());
     return;
   } else {
@@ -269,7 +289,7 @@ uint16_t ProxygenTransport::getRemotePort() {
   return m_clientAddress.getPort();
 }
 
-const void *ProxygenTransport::getPostData(int &size) {
+const void *ProxygenTransport::getPostData(size_t &size) {
   if (m_sendEnded) {
     size = 0;
     return 0;
@@ -299,7 +319,7 @@ bool ProxygenTransport::hasMorePostData() {
   return result;
 }
 
-const void *ProxygenTransport::getMorePostData(int &size) {
+const void *ProxygenTransport::getMorePostData(size_t &size) {
   if (bufferRequest()) {
     CHECK(m_clientComplete);
     size = 0;
@@ -316,7 +336,7 @@ const void *ProxygenTransport::getMorePostData(int &size) {
     VLOG(4) << "waiting for POST data for maxWait=" << maxWait;
     wait(maxWait);
   }
-  uint32_t oldLength = m_bodyData.chainLength();
+  auto oldLength = m_bodyData.chainLength();
 
   // For chunk encodings, we way receive an EOM with no data, such that
   // hasMorePostData returns true (because client is not yet complete),
@@ -332,13 +352,12 @@ const void *ProxygenTransport::getMorePostData(int &size) {
     data = m_currentBodyBuf->data();
     break;
   }
+  // RequestBodyReadLimit is int64_t and could be -1
   if (oldLength >= RuntimeOption::RequestBodyReadLimit &&
       m_bodyData.chainLength() < RuntimeOption::RequestBodyReadLimit) {
     VLOG(4) << "resuming ingress";
-    m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::RESUME_INGRESS)));
-
+    m_server->putResponseMessage(ResponseMessage(
+        shared_from_this(), ResponseMessage::Type::RESUME_INGRESS));
   }
   VLOG(4) << "returning POST body chunk size=" << size;
   return data;
@@ -356,7 +375,7 @@ std::string ProxygenTransport::getHTTPVersion() const {
   return m_request->getVersionString();
 }
 
-int ProxygenTransport::getRequestSize() const {
+size_t ProxygenTransport::getRequestSize() const {
   return m_requestBodyLength; // header length isn't tracked
 }
 
@@ -437,14 +456,14 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
 
 void ProxygenTransport::onError(const HTTPException& err) noexcept {
   Logger::Error("HPHP transport error: %s", err.describe().c_str());
+  unlink();
   // For now, just send a naked RST.  It's closer to the LibEventServer behavior
   m_clientTxn->sendAbort();
   requestDoneLocking();
 }
 
 void ProxygenTransport::finish(shared_ptr<ProxygenTransport> &&transport) {
-  m_server->putResponseMessage(
-    std::move(ResponseMessage(std::move(transport))));
+  m_server->putResponseMessage(ResponseMessage(std::move(transport)));
 }
 
 HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
@@ -484,7 +503,7 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
         break;
       } // else fall through
     case ResponseMessage::Type::BODY:
-      if (message.m_chunk) {
+      if (message.m_chunk && m_method != Transport::Method::HEAD) {
         // TODO: experiment with disabling this chunked flag and letting
         // proxygen framework do the chunking
         if (message.m_chunked) {
@@ -499,7 +518,6 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
         break;
       } // else fall through
     case ResponseMessage::Type::EOM:
-      cancelTimeout();
       txn->sendEOM();
       break;
     case ResponseMessage::Type::FINISH:
@@ -562,15 +580,15 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
     m_response.setIsChunked(chunked);
     m_response.dumpMessage(4);
     m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::HEADERS, 0,
-                                chunked, data, size, eom)));
+      ResponseMessage(shared_from_this(),
+                      ResponseMessage::Type::HEADERS, 0,
+                      chunked, data, size, eom));
     m_sendStarted = true;
   } else {
     m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::BODY, 0,
-                                chunked, data, size, eom)));
+      ResponseMessage(shared_from_this(),
+                      ResponseMessage::Type::BODY, 0,
+                      chunked, data, size, eom));
   }
 
   if (eom) {
@@ -578,7 +596,6 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
   }
 
   if (chunked) {
-    assert(m_method != Method::HEAD);
     /*
      * Chunked replies are sent async, so there is no way to know the
      * time it took to flush the response, but tracking the bytes sent is
@@ -592,8 +609,7 @@ void ProxygenTransport::onSendEndImpl() {
   if (!m_sendEnded) {
     VLOG(4) << "onSendEndImpl called";
     m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::EOM)));
+        ResponseMessage(shared_from_this(), ResponseMessage::Type::EOM));
     m_sendEnded = true;
   }
 }
@@ -614,16 +630,16 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   }
 
   int64_t pushId = m_nextPushId++;
-  PushTxnHandler *handler = new PushTxnHandler(pushId, shared_from_this(),
-                                               priority);
+  PushTxnHandler *handler = new PushTxnHandler(pushId, shared_from_this());
   HTTPMessage& pushMsg = handler->getPushMessage();
   pushMsg.setURL(path);
   pushMsg.setIsChunked(true); // implicitly chunked
   pushMsg.setSecure(true); // should we allow setting scheme?
+  pushMsg.setPriority(priority);
 
   for (ArrayIter iter(headers); iter; ++iter) {
     Variant key = iter.first();
-    String header = iter.second();
+    auto header = iter.second().toString();
     if (key.isString() && !key.toString().empty()) {
       pushMsg.getHeaders().add(key.toString().data(), header.data());
     } else {
@@ -645,9 +661,9 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   }
 
   m_server->putResponseMessage(
-    std::move(ResponseMessage(shared_from_this(),
-                              ResponseMessage::Type::HEADERS,
-                              pushId, false, data, size, eom)));
+    ResponseMessage(shared_from_this(),
+                    ResponseMessage::Type::HEADERS,
+                    pushId, false, data, size, eom));
 
 
   return pushId;
@@ -659,11 +675,12 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
     return;
   }
   m_server->putResponseMessage(
-    std::move(ResponseMessage(shared_from_this(), ResponseMessage::Type::BODY,
-                              id, false, data, size, eom)));
+    ResponseMessage(shared_from_this(), ResponseMessage::Type::BODY,
+                    id, false, data, size, eom));
 }
 
-void ProxygenTransport::timeoutExpired() noexcept {
+void ProxygenTransport::abort() {
+  unlink();
   if (m_clientTxn) {
     m_clientTxn->sendAbort();
   }

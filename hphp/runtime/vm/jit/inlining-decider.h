@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,8 +30,8 @@ struct SrcKey;
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct IRGS;
 struct RegionDesc;
+namespace irgen { struct IRGS; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -125,7 +125,13 @@ struct InliningDecider {
    * If inlining is not performed when true is returned, registerEndInlining()
    * must be called immediately to correctly reset the internal inlining costs.
    */
-  bool shouldInline(const Func* callee, const RegionDesc& region);
+  bool shouldInline(const Func* callee, const RegionDesc& region,
+                    uint32_t maxTotalCost);
+
+  /*
+   * Update our context to account for the beginning of an inlined call.
+   */
+  void accountForInlining(const Func* callee, const RegionDesc& region);
 
   /*
    * Update internal state for when an inlining event ends.
@@ -163,7 +169,9 @@ private:
  */
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
-                                 const IRGS& irgs);
+                                 const irgen::IRGS& irgs,
+                                 InliningDecider& inl,
+                                 int32_t maxBCInstrs);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

@@ -1,0 +1,13 @@
+object(DateTimeImmutable)#%d (1) {
+  ["data":"DateTimeImmutable":private]=>
+  object(DateTime)#%d (3) {
+    ["date"]=>
+    string(26) "2014-03-02 16:24:08.000000"
+    ["timezone_type"]=>
+    int(3)
+    ["timezone"]=>
+    string(%s) "%s"
+  }
+}
+
+Catchable fatal error: Argument 1 passed to DateTimeImmutable::createFromMutable() must be an instance of DateTime, DateTimeImmutable given in %s/DateTimeImmutable_createFromMutable.php on line 7

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,9 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -46,25 +49,29 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfInt64:
       case KindOfDouble:
         return;
-      case KindOfStaticString:
+      case KindOfPersistentString:
         assertPtr(cell.m_data.pstr);
-        assert(cell.m_data.pstr->isStatic());
+        assert(!cell.m_data.pstr->isRefCounted());
         return;
       case KindOfString:
         assertPtr(cell.m_data.pstr);
-        assert(check_refcount(cell.m_data.pstr->getCount()));
+        assert(cell.m_data.pstr->checkCount());
+        return;
+      case KindOfPersistentArray:
+        assertPtr(cell.m_data.parr);
+        assert(!cell.m_data.parr->isRefCounted());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
-        assert(check_refcount(cell.m_data.parr->getCount()));
+        assert(cell.m_data.parr->checkCount());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
-        assert(check_refcount_ns(cell.m_data.pobj->getCount()));
+        assert(cell.m_data.pobj->checkCount());
         return;
       case KindOfResource:
         assertPtr(cell.m_data.pres);
-        assert(check_refcount_ns(cell.m_data.pres->getCount()));
+        assert(cell.m_data.pres->checkCount());
         return;
       case KindOfRef:
         assert(!"KindOfRef found in a Cell");
@@ -83,7 +90,7 @@ bool tvIsPlausible(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     assert(tv.m_data.pref);
     assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
-    assert(check_refcount(tv.m_data.pref->getRealCount()));
+    assert(tv.m_data.pref->checkCount());
     tv = *tv.m_data.pref->tv();
   }
   return cellIsPlausible(tv);
@@ -101,7 +108,7 @@ bool tvDecRefWillRelease(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     return tv->m_data.pref->getRealCount() <= 1;
   }
-  return !TV_GENERIC_DISPATCH(*tv, hasMultipleRefs);
+  return TV_GENERIC_DISPATCH(*tv, decWillRelease);
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
@@ -127,7 +134,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         b = (tv->m_data.dbl != 0);
         continue;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
         b = tv->m_data.pstr->toBoolean();
         continue;
 
@@ -136,8 +143,12 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentArray:
+        b = !tv->m_data.parr->empty();
+        continue;
+
       case KindOfArray:
-        b = !!tv->m_data.parr->size();
+        b = !tv->m_data.parr->empty();
         tvDecRefArr(tv);
         continue;
 
@@ -184,16 +195,21 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
       case KindOfDouble:
         return;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
         d = tv->m_data.pstr->toDouble();
         continue;
 
       case KindOfString:
-        d = tv->m_data.pstr->toDouble(); tvDecRefStr(tv);
+        d = tv->m_data.pstr->toDouble();
+        tvDecRefStr(tv);
+        continue;
+
+      case KindOfPersistentArray:
+        d = tv->m_data.parr->empty() ? 0 : 1;
         continue;
 
       case KindOfArray:
-        d = (double)(tv->m_data.parr->empty() ? 0LL : 1LL);
+        d = tv->m_data.parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
         continue;
 
@@ -239,13 +255,17 @@ void cellCastToInt64InPlace(Cell* cell) {
         i = toInt64(cell->m_data.dbl);
         continue;
 
-      case KindOfStaticString:
-        i = (cell->m_data.pstr->toInt64());
+      case KindOfPersistentString:
+        i = cell->m_data.pstr->toInt64();
         continue;
 
       case KindOfString:
         i = cell->m_data.pstr->toInt64();
         tvDecRefStr(cell);
+        continue;
+
+      case KindOfPersistentArray:
+        i = cell->m_data.parr->empty() ? 0 : 1;
         continue;
 
       case KindOfArray:
@@ -300,10 +320,11 @@ double tvCastToDouble(TypedValue* tv) {
     case KindOfDouble:
       return tv->m_data.dbl;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return tv->m_data.pstr->toDouble();
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return tv->m_data.parr->empty() ? 0.0 : 1.0;
 
@@ -327,61 +348,56 @@ const StaticString
 void tvCastToStringInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
-  StringData* s;
 
-  do {
-    switch (tv->m_type) {
-      case KindOfUninit:
-      case KindOfNull:
-        s = staticEmptyString();
-        goto static_string;
+  auto string = [&](StringData* s) {
+    tv->m_type = KindOfString;
+    tv->m_data.pstr = s;
+  };
+  auto persistentString = [&](StringData* s) {
+    assert(!s->isRefCounted());
+    tv->m_type = KindOfPersistentString;
+    tv->m_data.pstr = s;
+  };
 
-      case KindOfBoolean:
-        s = tv->m_data.num ? s_1.get() : staticEmptyString();
-        goto static_string;
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return persistentString(staticEmptyString());
 
-      case KindOfInt64:
-        s = buildStringData(tv->m_data.num);
-        continue;
+    case KindOfBoolean:
+      return persistentString(tv->m_data.num ? s_1.get() : staticEmptyString());
 
-      case KindOfDouble:
-        s = buildStringData(tv->m_data.dbl);
-        continue;
+    case KindOfInt64:
+      return string(buildStringData(tv->m_data.num));
 
-      case KindOfStaticString:
-      case KindOfString:
-        return;
+    case KindOfDouble:
+      return string(buildStringData(tv->m_data.dbl));
 
-      case KindOfArray:
-        raise_notice("Array to string conversion");
-        s = array_string.get();
-        tvDecRefArr(tv);
-        goto static_string;
+    case KindOfPersistentString:
+    case KindOfString:
+      return;
 
-      case KindOfObject:
-        // For objects, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pobj->invokeToString();
-        return;
+    case KindOfArray:
+    case KindOfPersistentArray:
+      raise_notice("Array to string conversion");
+      if (tv->m_type == KindOfArray) tvDecRefArr(tv);
+      return persistentString(array_string.get());
 
-      case KindOfResource:
-        // For resources, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pres->data()->o_toString();
-        return;
+    case KindOfObject:
+      // For objects, we fall back on the Variant machinery
+      tvAsVariant(tv) = tv->m_data.pobj->invokeToString();
+      return;
 
-      case KindOfRef:
-      case KindOfClass:
-        break;
-    }
-    not_reached();
-  } while (0);
+    case KindOfResource:
+      // For resources, we fall back on the Variant machinery
+      tvAsVariant(tv) = tv->m_data.pres->data()->o_toString();
+      return;
 
-  tv->m_data.pstr = s;
-  tv->m_type = KindOfString;
-  return;
-
-static_string:
-  tv->m_data.pstr = s;
-  tv->m_type = KindOfStaticString;
+    case KindOfRef:
+    case KindOfClass:
+      break;
+  }
+  not_reached();
 }
 
 StringData* tvCastToString(const TypedValue* tv) {
@@ -404,7 +420,7 @@ StringData* tvCastToString(const TypedValue* tv) {
     case KindOfDouble:
       return buildStringData(tv->m_data.dbl);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
       return tv->m_data.pstr;
 
     case KindOfString: {
@@ -413,6 +429,7 @@ StringData* tvCastToString(const TypedValue* tv) {
       return s;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
       return array_string.get();
@@ -445,7 +462,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
-      case KindOfStaticString:
+      case KindOfPersistentString:
         a = ArrayData::Create(tvAsVariant(tv));
         continue;
 
@@ -454,6 +471,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentArray:
       case KindOfArray:
         return;
 
@@ -474,7 +492,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(a->isStatic() || a->hasExactlyOneRef());
+  assert(!a->isRefCounted() || a->hasExactlyOneRef());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
@@ -495,7 +513,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfResource:
         o = SystemLib::AllocStdClassObject().detach();
         o->o_set(s_scalar, tvAsVariant(tv));
@@ -507,6 +525,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentArray:
       case KindOfArray:
         // For arrays, we fall back on the Variant machinery
         tvAsVariant(tv) = ObjectData::FromArray(tv->m_data.parr);
@@ -572,11 +591,21 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    DT_UNCOUNTED_CASE:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
     case KindOfString:
+      // In PHP 7 mode handling of null types is stricter
+      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
+        return false;
+      }
       tvCastToBooleanInPlace(tv);
       return true;
 
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -592,25 +621,35 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
 bool tvCanBeCoercedToNumber(TypedValue* tv) {
   switch (tv->m_type) {
     case KindOfUninit:
-    case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
       return true;
 
-    case KindOfStaticString:
+    case KindOfNull:
+      // In PHP 7 mode handling of null types is stricter
+      return !RuntimeOption::PHP7_ScalarTypes;
+
+    case KindOfPersistentString:
     case KindOfString: {
       // Simplified version of is_numeric_string
       // which also allows for non-numeric garbage
       // Because PHP
-      auto p = tv->m_data.pstr->data();
+      auto str = tv->m_data.pstr;
+      auto p = str->data();
       auto l = tv->m_data.pstr->size();
       while (l && isspace(*p)) { ++p; --l; }
       if (l && (*p == '+' || *p == '-')) { ++p; --l; }
       if (l && *p == '.') { ++p; --l; }
-      return l && isdigit(*p);
+      bool okay = l && isdigit(*p);
+      // In PHP7 garbage at the end of a numeric string will trigger a notice
+      if (RuntimeOption::PHP7_ScalarTypes && okay && !str->isNumeric()) {
+        raise_notice("A non well formed numeric value encountered");
+      }
+      return okay;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -628,6 +667,13 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
   if (!tvCanBeCoercedToNumber(tv)) {
     return false;
+  }
+  // In PHP 7 mode doubles only convert to integers when the conversion is non-
+  // narrowing
+  if (RuntimeOption::PHP7_ScalarTypes && tv->m_type == KindOfDouble) {
+    if (tv->m_data.dbl < std::numeric_limits<int64_t>::min()) return false;
+    if (tv->m_data.dbl > std::numeric_limits<int64_t>::max()) return false;
+    if (std::isnan(tv->m_data.dbl)) return false;
   }
   tvCastToInt64InPlace(tv);
   return true;
@@ -648,11 +694,21 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    DT_UNCOUNTED_CASE:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
     case KindOfString:
+      // In PHP 7 mode handling of null types is stricter
+      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
+        return false;
+      }
       tvCastToStringInPlace(tv);
       return true;
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return false;
 
@@ -678,10 +734,16 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    DT_UNCOUNTED_CASE:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
     case KindOfString:
       return false;
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return true;
 
@@ -724,10 +786,41 @@ bool tvCoerceParamToResourceInPlace(TypedValue* tv) {
   return tv->m_type == KindOfResource;
 }
 
+namespace {
+/*
+ * Sometimes calls to builtin functions are inlined so that the call itself can
+ * occur via CallBuiltin rather than NativeImpl. In these instances it's
+ * possible that no ActRec was pushed for the builtin call, in which case the
+ * liveFunc() will be the caller rather than the callee.
+ *
+ * If no ActRec was pushed for the builtin function inspect the caller to
+ * determine if the call used strict types.
+ */
+bool useStrictTypes(const Func* callee) {
+  return liveFunc() == callee
+    ? !liveFrame()->useWeakTypes()
+    : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
+}
+}
+
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
+  if (LIKELY(!RuntimeOption::PHP7_ScalarTypes ||
+             RuntimeOption::EnableHipHopSyntax)) {
+    return;
+  }
+
+  VMRegAnchor _;
+  if (!useStrictTypes(func)) return;
+
+  auto const& tc = func->params()[argNum - 1].typeConstraint;
+  tc.verifyParam(&tv, func, argNum - 1, true);
+}
+
 #define XX(kind, expkind)                                         \
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
                                     const Func* callee,           \
                                     unsigned int arg_num) {       \
+  tvCoerceIfStrict(*tv, arg_num, callee);                         \
   if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
     return;                                                       \
   }                                                               \

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,8 +30,7 @@ bool Server::StackTraceOnError = true;
 
 Server::Server(const std::string &address, int port, int threadCount)
   : m_address(address), m_port(port), m_threadCount(threadCount),
-    m_urlChecker(SatelliteServerInfo::checkMainURL),
-    m_status(RunStatus::NOT_YET_STARTED) {
+    m_urlChecker(SatelliteServerInfo::checkMainURL) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

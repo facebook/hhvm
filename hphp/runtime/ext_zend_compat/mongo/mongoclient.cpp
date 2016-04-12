@@ -147,7 +147,6 @@ zval *mongo_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		char *error_message = NULL;
 		mongo_connection *conn = mongo_get_read_write_connection(obj->manager, obj->servers, MONGO_CON_FLAG_READ|MONGO_CON_FLAG_DONT_CONNECT, (char**) &error_message);
 		ALLOC_INIT_ZVAL(retval);
-		Z_SET_REFCOUNT_P(retval, 0);
 		ZVAL_BOOL(retval, conn ? 1 : 0);
 		if (error_message) {
 			free(error_message);
@@ -367,7 +366,7 @@ void php_mongo_ctor(INTERNAL_FUNCTION_PARAMETERS, int bc)
 
 	/* Set the manager from the global manager */
 	link->manager = MonGlo(manager);
-	
+
 	/* Parse the server specification
 	 * Default to the mongo.default_host & mongo.default_port INI options */
 	link->servers = mongo_parse_init();
@@ -646,7 +645,7 @@ PHP_METHOD(MongoClient, selectDB)
 			zval       *new_link;
 			mongoclient *tmp_link;
 			int i;
-		
+
 			if (strcmp(link->servers->server[0]->db, "admin") == 0) {
 				mongo_manager_log(
 					link->manager, MLOG_CON, MLOG_FINE,

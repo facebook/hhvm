@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -334,8 +334,8 @@ private:
  * Proxy for converting in-repo function representations into FuncEmitters.
  */
 struct FuncRepoProxy : public RepoProxy {
-  friend class Func;
-  friend class FuncEmitter;
+  friend struct Func;
+  friend struct FuncEmitter;
 
   explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();

@@ -1,0 +1,2 @@
+4: class Bar {
+5:   public function bar(): void {}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,38 +18,283 @@
 #include <algorithm>
 #include <utility>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/zend-strtod.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
+
+#include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/repo.h"
+
+#include "hphp/runtime/vm/jit/perf-counters.h"
 
 namespace HPHP {
 
-static void unserializeVariant(Variant&, VariableUnserializer *unserializer,
-                               UnserializeMode mode = UnserializeMode::Value);
-static void unserializeArray(Array&, VariableUnserializer*);
-static String unserializeString(VariableUnserializer*, char delimiter0 = '"',
-                                char delimiter1 = '"');
-static void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
-                                  int64_t sz, char type);
-static void unserializeVector(ObjectData*, VariableUnserializer*, int64_t sz,
-                              char type);
-static void unserializeMap(ObjectData*, VariableUnserializer*, int64_t sz,
-                           char type);
-static void unserializeSet(ObjectData*, VariableUnserializer*, int64_t sz,
-                           char type);
-static void unserializePair(ObjectData*, VariableUnserializer*, int64_t sz,
-                            char type);
+namespace {
+
+enum class ArrayKind { PHP, Dict };
+
+void unserializeVariant(Variant&, VariableUnserializer* unserializer,
+                        UnserializeMode mode = UnserializeMode::Value);
+Array unserializeArray(VariableUnserializer*, ArrayKind);
+String unserializeString(VariableUnserializer*, char delimiter0 = '"',
+                         char delimiter1 = '"');
+void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
+                           int64_t sz, char type);
+void unserializeVector(ObjectData*, VariableUnserializer*, int64_t sz,
+                       char type);
+void unserializeMap(ObjectData*, VariableUnserializer*, int64_t sz,
+                    char type);
+void unserializeSet(ObjectData*, VariableUnserializer*, int64_t sz,
+                    char type);
+void unserializePair(ObjectData*, VariableUnserializer*, int64_t sz,
+                     char type);
+
+[[noreturn]] NEVER_INLINE
+void throwUnexpectedSep(char expect, char actual) {
+  throw Exception("Expected '%c' but got '%c'", expect, actual);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwOutOfRange(int64_t id) {
+  throw Exception("Id %" PRId64 " out of range", id);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwUnexpectedStr(const char* expect, folly::StringPiece& actual) {
+  throw Exception("Expected '%s' but got '%.*s'", expect,
+                  (int)actual.size(), actual.data());
+}
+
+[[noreturn]] NEVER_INLINE
+void throwUnknownType(char type) {
+  throw Exception("Unknown type '%c'", type);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwInvalidPair() {
+  throw Exception("Pair objects must have exactly 2 elements");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwInvalidOFormat(const String& clsName) {
+  throw Exception("%s does not support the 'O' serialization format",
+                  clsName.data());
+}
+
+[[noreturn]] NEVER_INLINE
+void throwMangledPrivateProperty() {
+  throw Exception("Mangled private object property");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwUnterminatedProperty() {
+  throw Exception("Object property not terminated properly");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwNotCollection(const String& clsName) {
+  throw Exception("%s is not a collection class", clsName.data());
+}
+
+[[noreturn]] NEVER_INLINE
+void throwUnexpectedType(const String& key, const ObjectData* obj,
+                         const Variant& type) {
+  auto msg = folly::format(
+    "Property {} for class {} was deserialized with type ({}) that "
+    "didn't match what we inferred in static analysis",
+    key,
+    obj->getVMClass()->name(),
+    tname(type.asTypedValue()->m_type)
+  ).str();
+  throw Exception(msg);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwUnexpectedType(const StringData* key, const ObjectData* obj,
+                         const Variant& type) {
+  String str(key->data(), key->size(), CopyString);
+  throwUnexpectedType(str, obj, type);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwArraySizeOutOfBounds() {
+  throw Exception("Array size out of bounds");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwInvalidKey() {
+  throw Exception("Invalid key");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwUnterminatedElement() {
+  throw Exception("Array element not terminated properly");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwLargeStringSize(int64_t size) {
+  throw Exception("Size of serialized string (%ld) exceeds max", size);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwNegativeStringSize(int64_t size) {
+  throw Exception("Size of serialized string (%ld) must not be negative", size);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwBadFormat(const ObjectData* obj, char type) {
+  throw Exception("%s does not support the '%c' serialization format",
+                  header_names[(int)obj->headerKind()], type);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwInvalidHashKey(const ObjectData* obj) {
+  throw Exception("%s values must be integers or strings",
+                  header_names[(int)obj->headerKind()]);
+}
+
+[[noreturn]] NEVER_INLINE
+void throwColRKey() {
+  throw Exception("Referring to collection keys using the 'r' encoding "
+                    "is not supported");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwColRefValue() {
+  throw Exception("Collection values cannot be taken by reference");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwColRefKey() {
+  throw Exception("Collection keys cannot be taken by reference");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwUnexpectedEOB() {
+  throw Exception("Unexpected end of buffer during unserialization");
+}
+}
+
+const StaticString
+  s_unserialize("unserialize"),
+  s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
+  s___wakeup("__wakeup");
+
 ///////////////////////////////////////////////////////////////////////////////
+
+VariableUnserializer::RefInfo::RefInfo(Variant* v)
+    : m_data(reinterpret_cast<uintptr_t>(v))
+{}
+
+VariableUnserializer::RefInfo
+VariableUnserializer::RefInfo::makeNonRefable(Variant* v) {
+  RefInfo r(v);
+  r.m_data |= 1;
+  return r;
+}
+
+Variant* VariableUnserializer::RefInfo::var() const  {
+  return reinterpret_cast<Variant*>(m_data & ~1);
+}
+
+bool VariableUnserializer::RefInfo::canBeReferenced() const {
+  return !(m_data & 1);
+}
+
+VariableUnserializer::VariableUnserializer(
+  const char* str,
+  size_t len,
+  Type type,
+  bool allowUnknownSerializableClass,
+  const Array& options)
+    : m_type(type)
+    , m_buf(str)
+    , m_end(str + len)
+    , m_unknownSerializable(allowUnknownSerializableClass)
+    , m_options(options)
+{}
+
+VariableUnserializer::Type VariableUnserializer::type() const {
+  return m_type;
+}
+
+bool VariableUnserializer::allowUnknownSerializableClass() const {
+  return m_unknownSerializable;
+}
+
+const char* VariableUnserializer::head() const {
+  return m_buf;
+}
+
+char VariableUnserializer::peek() const {
+  check();
+  return *m_buf;
+}
+
+char VariableUnserializer::peekBack() const {
+  return m_buf[-1];
+}
+
+bool VariableUnserializer::endOfBuffer() const {
+  return m_buf >= m_end;
+}
+
+char VariableUnserializer::readChar() {
+  check();
+  return *(m_buf++);
+}
+
+void VariableUnserializer::add(Variant* v, UnserializeMode mode) {
+  if (mode == UnserializeMode::Value) {
+    m_refs.emplace_back(RefInfo(v));
+  } else if (mode == UnserializeMode::Key) {
+    // do nothing
+  } else if (mode == UnserializeMode::ColValue) {
+    m_refs.emplace_back(RefInfo::makeNonRefable(v));
+  } else {
+    assert(mode == UnserializeMode::ColKey);
+    // We don't currently support using the 'r' encoding to refer
+    // to collection keys, but eventually we'll need to make this
+    // work to allow objects as keys. For now we encode collections
+    // keys in m_refs using a null pointer.
+    m_refs.emplace_back(RefInfo(nullptr));
+  }
+}
+
+Variant* VariableUnserializer::getByVal(int id) {
+  if (id <= 0 || id > (int)m_refs.size()) return nullptr;
+  Variant* ret = m_refs[id-1].var();
+  if (!ret) throwColRKey();
+  return ret;
+}
+
+Variant* VariableUnserializer::getByRef(int id) {
+  if (id <= 0 || id > (int)m_refs.size()) return nullptr;
+  if (!m_refs[id-1].canBeReferenced()) {
+    throwColRefValue();
+  }
+  Variant* ret = m_refs[id-1].var();
+  if (!ret) throwColRefKey();
+  return ret;
+}
+
+void VariableUnserializer::check() const {
+  if (m_buf >= m_end) throwUnexpectedEOB();
+}
 
 void VariableUnserializer::set(const char* buf, const char* end) {
   m_buf = buf;
@@ -59,10 +304,16 @@ void VariableUnserializer::set(const char* buf, const char* end) {
 Variant VariableUnserializer::unserialize() {
   Variant v;
   unserializeVariant(v, this);
+
+  for (auto& obj : m_sleepingObjects) {
+    obj->invokeWakeup();
+  }
+
   return v;
 }
 
-static std::pair<int64_t,const char*> hh_strtoll_base10(const char* p) {
+namespace {
+std::pair<int64_t,const char*> hh_strtoll_base10(const char* p) {
   int64_t x = 0;
   bool neg = false;
   if (*p == '-') {
@@ -77,6 +328,7 @@ static std::pair<int64_t,const char*> hh_strtoll_base10(const char* p) {
     x = -x;
   }
   return std::pair<int64_t,const char*>(x, p);
+}
 }
 
 int64_t VariableUnserializer::readInt() {
@@ -94,105 +346,135 @@ double VariableUnserializer::readDouble() {
   return r;
 }
 
-void VariableUnserializer::read(char* buf, unsigned n) {
+folly::StringPiece VariableUnserializer::readStr(unsigned n) {
   check();
   auto const bufferLimit = std::min(size_t(m_end - m_buf), size_t(n));
-  memcpy(buf, m_buf, bufferLimit);
+  auto str = folly::StringPiece(m_buf, bufferLimit);
   m_buf += bufferLimit;
+  return str;
 }
 
-void VariableUnserializer::throwUnexpected(char expected, char got) {
-  throw Exception("Expected '%c' but got '%c'", expected, got);
-}
-
-bool VariableUnserializer::isWhitelistedClass(const String& clsName) const {
-  if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
-    return true;
+void VariableUnserializer::expectChar(char expected) {
+  char ch = readChar();
+  if (UNLIKELY(ch != expected)) {
+    throwUnexpectedSep(expected, ch);
   }
-  if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
-    for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
-      const Variant& value(iter.secondRef());
-      if (HHVM_FN(is_subclass_of)(clsName, value.toString()) ||
-          same(value, clsName)) {
+}
+
+namespace {
+bool isWhitelistClass(const String& clsName, const Array& list) {
+  if (!list.empty()) {
+    for (ArrayIter iter(list); iter; ++iter) {
+      auto val = iter.second().toString();
+      if (val.get()->isame(clsName.get())) {
         return true;
       }
     }
   }
   return false;
 }
+}
+
+const StaticString s_allowed_classes("allowed_classes");
+
+bool VariableUnserializer::whitelistCheck(const String& clsName) const {
+  if (m_type != Type::Serialize || m_options.isNull()) {
+    return true;
+  }
+
+  // PHP7-style class whitelisting
+  // Allowed classes are allowed,
+  // all others result in __Incomplete_PHP_Class
+  if (m_options.exists(s_allowed_classes)) {
+    auto allowed_classes = m_options[s_allowed_classes];
+    if (allowed_classes.isArray()) {
+      return isWhitelistClass(clsName, allowed_classes.toArray());
+    }
+    return allowed_classes.toBoolean();
+  }
+
+  if (!RuntimeOption::UnserializationWhitelistCheck) {
+    // No need for BC HHVM-style whitelist check,
+    // since the check isn't enabled.
+    // Go with PHP5 default behavior of allowing all
+    return true;
+  }
+
+  // Check for old-style whitelist
+  if (isWhitelistClass(clsName, m_options)) {
+    return true;
+  }
+
+  // Non-whitelisted class with a check enabled,
+  // are we willing to hard-error over it?
+  const char* err_msg =
+    "The object being unserialized with class name '%s' "
+    "is not in the given whitelist.";
+
+  if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
+    // Nope, just whine to the user and let it through
+    raise_warning(err_msg, clsName.c_str());
+    return true;
+  } else {
+    // Yes, shut it down.
+    raise_error(err_msg, clsName.c_str());
+    return false;
+  }
+}
 
 void VariableUnserializer::putInOverwrittenList(const Variant& v) {
   m_overwrittenList.append(v);
 }
 
+void VariableUnserializer::addSleepingObject(const Object& o) {
+  m_sleepingObjects.emplace_back(o);
+}
+
+bool VariableUnserializer::matchString(folly::StringPiece str) {
+  const char* p = m_buf;
+  const auto ss = str.size();
+  if (ss >= 100) return false;
+  int digs = ss >= 10 ? 2 : 1;
+  int total = 2 + digs + 2 + ss + 2;
+  if (p + total > m_end) return false;
+  if (*p++ != 's') return false;
+  if (*p++ != ':') return false;
+  if (digs == 2) {
+    if (*p++ != '0' + ss/10) return false;
+    if (*p++ != '0' + ss%10) return false;
+  } else {
+    if (*p++ != '0' + ss) return false;
+  }
+  if (*p++ != ':') return false;
+  if (*p++ != '\"') return false;
+  if (memcmp(p, str.data(), ss)) return false;
+  p += ss;
+  if (*p++ != '\"') return false;
+  if (*p++ != ';') return false;
+  assert(m_buf + total == p);
+  m_buf = p;
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_unserialize("unserialize"),
-  s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
-  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnexpectedSep(char expect, char actual) {
-  throw Exception("Expected '%c' but got '%c'", expect, actual);
+namespace {
+// remainingProps should include the current property being unserialized.
+void unserializePropertyValue(Variant& v, VariableUnserializer* uns,
+                                     int remainingProps) {
+  assert(remainingProps > 0);
+  unserializeVariant(v, uns);
+  if (--remainingProps > 0) {
+    auto lastChar = uns->peekBack();
+    if (lastChar != ';' && lastChar != '}') {
+      throwUnterminatedProperty();
+    }
+  }
 }
 
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwOutOfRange(int64_t id) {
-  throw Exception("Id %" PRId64 " out of range", id);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnexpectedStr(const char* expect, const char* actual) {
-  throw Exception("Expected '%s' but got '%s'", expect, actual);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnknownType(char type) {
-  throw Exception("Unknown type '%c'", type);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidPair() {
-  throw Exception("Pair objects must have exactly 2 elements");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidOFormat(const String& clsName) {
-  throw Exception("%s does not support the 'O' serialization format",
-                  clsName.data());
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwMangledPrivateProperty() {
-  throw Exception("Mangled private object property");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnterminatedProperty() {
-  throw Exception("Object property not terminated properly");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwNotCollection(const String& clsName) {
-  throw Exception("%s is not a collection class", clsName.data());
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnexpectedType(const String& key, const ObjectData* obj,
-                                const Variant& type) {
-  auto msg = folly::format(
-    "Property {} for class {} was deserialized with type ({}) that "
-    "didn't match what we inferred in static analysis",
-    key,
-    obj->getVMClass()->name(),
-    tname(type.asTypedValue()->m_type)
-  ).str();
-  throw Exception(msg);
-}
-
+// nProp should include the current property being unserialized.
 NEVER_INLINE
-static void unserializeProp(VariableUnserializer* uns,
+void unserializeProp(VariableUnserializer* uns,
                             ObjectData* obj,
                             const String& key,
                             Class* ctx,
@@ -218,7 +500,7 @@ static void unserializeProp(VariableUnserializer* uns,
     uns->putInOverwrittenList(*t);
   }
 
-  unserializeVariant(*t, uns);
+  unserializePropertyValue(*t, uns, nProp);
   if (!RuntimeOption::RepoAuthoritative) return;
   if (!Repo::get().global().HardPrivatePropInference) return;
 
@@ -240,13 +522,64 @@ static void unserializeProp(VariableUnserializer* uns,
   throwUnexpectedType(key, obj, *t);
 }
 
+
+NEVER_INLINE
+void unserializeRemainingProps(VariableUnserializer* uns,
+                                      Object& obj,
+                                      int remainingProps,
+                                      Variant& serializedNativeData,
+                                      bool& hasSerializedNativeData) {
+  while (remainingProps > 0) {
+    /*
+      use the number of properties remaining as an estimate for
+      the total number of dynamic properties when we see the
+      first dynamic prop.  see getVariantPtr
+    */
+    Variant v;
+    unserializeVariant(v, uns, UnserializeMode::Key);
+    String key = v.toString();
+    int ksize = key.size();
+    const char *kdata = key.data();
+    int subLen = 0;
+    if (key == s_serializedNativeDataKey) {
+      unserializePropertyValue(serializedNativeData,
+                               uns, remainingProps--);
+      hasSerializedNativeData = true;
+    } else if (kdata[0] == '\0') {
+      if (UNLIKELY(!ksize)) {
+        raise_error("Cannot access empty property");
+      }
+      // private or protected
+      subLen = strlen(kdata + 1) + 2;
+      if (UNLIKELY(subLen >= ksize)) {
+        if (subLen == ksize) {
+          raise_error("Cannot access empty property");
+        } else {
+          throwMangledPrivateProperty();
+        }
+      }
+      String k(kdata + subLen, ksize - subLen, CopyString);
+      Class* ctx = (Class*)-1;
+      if (kdata[1] != '*') {
+        ctx = Unit::lookupClass(
+          String(kdata + 1, subLen - 2, CopyString).get());
+      }
+      unserializeProp(uns, obj.get(), k, ctx, key,
+                      remainingProps--);
+    } else {
+      unserializeProp(uns, obj.get(), key, nullptr, key,
+                      remainingProps--);
+    }
+  }
+}
+
 /*
  * For namespaced collections, returns an "alternate" name, which is a
  * collection name with or without the namespace qualifier, depending on
  * what's passed.
  * If no alternate name is found, returns nullptr.
  */
-static const StringData* getAlternateCollectionName(const StringData* clsName) {
+const StringData* getAlternateCollectionName(const StringData* clsName) {
   typedef hphp_hash_map<const StringData*, const StringData*,
                         string_data_hash, string_data_isame> ClsNameMap;
 
@@ -279,18 +612,18 @@ static const StringData* getAlternateCollectionName(const StringData* clsName) {
   return it != altMap->end() ? it->second : nullptr;
 }
 
-static Class* tryAlternateCollectionClass(const StringData* clsName) {
+Class* tryAlternateCollectionClass(const StringData* clsName) {
   auto altName = getAlternateCollectionName(clsName);
   return altName ? Unit::getClass(altName, /* autoload */ false) : nullptr;
 }
 
-NEVER_INLINE static
-void unserializeVariant(Variant& self, VariableUnserializer *uns,
+NEVER_INLINE
+void unserializeVariant(Variant& self, VariableUnserializer* uns,
                         UnserializeMode mode /* = UnserializeMode::Value */) {
 
   // NOTE: If you make changes to how serialization and unserialization work,
-  // make sure to update the reserialize() method in "runtime/ext/ext_apc.cpp"
-  // and to update test_apc_reserialize() in "test/ext/test_ext_apc.cpp".
+  // make sure to update reserialize() here and test_apc_reserialize()
+  // in "test/ext/test_ext_apc.cpp".
 
   char type = uns->readChar();
   char sep = uns->readChar();
@@ -337,23 +670,26 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     }
   case 'd':
     {
-      double v;
       char ch = uns->peek();
       bool negative = false;
-      char buf[4];
       if (ch == '-') {
         negative = true;
-        ch = uns->readChar();
+        uns->readChar();
         ch = uns->peek();
       }
+      double v;
       if (ch == 'I') {
-        uns->read(buf, 3); buf[3] = '\0';
-        if (strcmp(buf, "INF")) throwUnexpectedStr("INF", buf);
-        v = atof("inf");
+        auto str = uns->readStr(3);
+        if (str.size() != 3 || str[1] != 'N' || str[2] != 'F') {
+          throwUnexpectedStr("INF", str);
+        }
+        v = std::numeric_limits<double>::infinity();
       } else if (ch == 'N') {
-        uns->read(buf, 3); buf[3] = '\0';
-        if (strcmp(buf, "NAN")) throwUnexpectedStr("NAN", buf);
-        v = atof("nan");
+        auto str = uns->readStr(3);
+        if (str.size() != 3 || str[1] != 'A' || str[2] != 'N') {
+          throwUnexpectedStr("NAN", str);
+        }
+        v = std::numeric_limits<double>::quiet_NaN();
       } else {
         v = uns->readDouble();
       }
@@ -376,24 +712,23 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     return;
   case 'S':
     if (uns->type() == VariableUnserializer::Type::APCSerialize) {
-      union {
-        char buf[8];
-        StringData *sd;
-      } u;
-      uns->read(u.buf, 8);
-      assert(u.sd->isStatic());
-      tvMove(make_tv<KindOfStaticString>(u.sd), *self.asTypedValue());
+      auto str = uns->readStr(8);
+      assert(str.size() == 8);
+      auto sdp = reinterpret_cast<StringData*const*>(&str[0]);
+      assert((*sdp)->isStatic());
+      tvMove(make_tv<KindOfPersistentString>(*sdp), *self.asTypedValue());
     } else {
       throwUnknownType(type);
     }
     break;
+  case 'D':
   case 'a':
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
-      auto v = Array::Create();
-      unserializeArray(v, uns);
-      tvMove(make_tv<KindOfArray>(v.detach()), *self.asTypedValue());
+      auto const kind = type == 'D' ? ArrayKind::Dict : ArrayKind::PHP;
+      auto a = unserializeArray(uns, kind);
+      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'L':
@@ -417,7 +752,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       String clsName = unserializeString(uns);
 
       uns->expectChar(':');
-      int64_t size = uns->readInt();
+      const int64_t size = uns->readInt();
       uns->expectChar(':');
       uns->expectChar('{');
 
@@ -450,25 +785,17 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         cls = Unit::loadClass(clsName.get()); // with autoloading
       }
 
-      if (RuntimeOption::UnserializationWhitelistCheck &&
-          (type == 'O') &&
-          !uns->isWhitelistedClass(clsName)) {
-        const char* err_msg =
-          "The object being unserialized with class name '%s' "
-          "is not in the given whitelist. "
-          "See http://fburl.com/SafeSerializable for more detail";
-        if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
-          raise_warning(err_msg, clsName.c_str());
-        } else {
-          raise_error(err_msg, clsName.c_str());
-        }
+      if ((type == 'O') && !uns->whitelistCheck(clsName)) {
+        cls = nullptr;
       }
+
       Object obj;
       if (cls) {
         // Only unserialize CPP extension types which can actually
         // support it. Otherwise, we risk creating a CPP object
         // without having it initialized completely.
-        if (cls->instanceCtor() && !cls->isCppSerializable()) {
+        if (cls->instanceCtor() && !cls->isCppSerializable() &&
+            !cls->isCollectionClass()) {
           assert(obj.isNull());
           throw_null_pointer_exception();
         } else {
@@ -497,53 +824,62 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
 
           Variant serializedNativeData = init_null();
           bool hasSerializedNativeData = false;
+          bool checkRepoAuthType =
+            RuntimeOption::RepoAuthoritative &&
+            Repo::get().global().HardPrivatePropInference;
+          Class* objCls = obj->getVMClass();
+          auto remainingProps = size;
+          // Try fast case.
+          if (size >= objCls->numDeclProperties()) {
+            bool mismatch = false;
+            auto objProps = obj->propVec();
 
-          /*
-            Count backwards so that i is the number of properties
-            remaining (to be used as an estimate for the total number
-            of dynamic properties when we see the first dynamic prop).
-            see getVariantPtr
-          */
-          for (int64_t i = size; i--; ) {
-            Variant v;
-            unserializeVariant(v, uns, UnserializeMode::Key);
-            String key = v.toString();
-            int ksize = key.size();
-            const char *kdata = key.data();
-            int subLen = 0;
-            if (key == s_serializedNativeDataKey) {
-              unserializeVariant(serializedNativeData, uns);
-              hasSerializedNativeData = true;
-            } else if (kdata[0] == '\0') {
-              if (UNLIKELY(!ksize)) {
-                raise_error("Cannot access empty property");
+            for (auto prop : objCls->declProperties()) {
+              if (!uns->matchString(prop.mangledName->slice())) {
+                mismatch = true;
+                break;
               }
-              // private or protected
-              subLen = strlen(kdata + 1) + 2;
-              if (UNLIKELY(subLen >= ksize)) {
-                if (subLen == ksize) {
-                  raise_error("Cannot access empty property");
+              // don't need to worry about overwritten list, because
+              // this is definitely the first time we're setting this
+              // property.
+              TypedValue* tv = objProps++;
+              Variant& t = tvAsVariant(tv);
+              unserializePropertyValue(t, uns, remainingProps--);
+
+              if (UNLIKELY(checkRepoAuthType &&
+                           !tvMatchesRepoAuthType(*tv, prop.repoAuthType))) {
+                throwUnexpectedType(prop.name, obj.get(), t);
+              }
+            }
+            // If everything matched, all remaining properties are dynamic.
+            if (!mismatch && remainingProps > 0) {
+              auto& arr = obj->reserveProperties(remainingProps);
+              while (remainingProps > 0) {
+                Variant v;
+                unserializeVariant(v, uns, UnserializeMode::Key);
+                String key = v.toString();
+                if (key == s_serializedNativeDataKey) {
+                  unserializePropertyValue(serializedNativeData,
+                                           uns, remainingProps--);
+                  hasSerializedNativeData = true;
                 } else {
-                  throwMangledPrivateProperty();
+                  auto t = &arr.lvalAt(key, AccessFlags::Key);
+                  if (UNLIKELY(isRefcountedType(t->getRawType()))) {
+                    uns->putInOverwrittenList(*t);
+                  }
+                  unserializePropertyValue(*t, uns, remainingProps--);
                 }
               }
-              String k(kdata + subLen, ksize - subLen, CopyString);
-              Class* ctx = (Class*)-1;
-              if (kdata[1] != '*') {
-                ctx = Unit::lookupClass(
-                  String(kdata + 1, subLen - 2, CopyString).get());
-              }
-              unserializeProp(uns, obj.get(), k, ctx, key, i + 1);
-            } else {
-              unserializeProp(uns, obj.get(), key, nullptr, key, i + 1);
             }
-
-            if (i > 0) {
-              auto lastChar = uns->peekBack();
-              if ((lastChar != ';') && (lastChar != '}')) {
-                throwUnterminatedProperty();
-              }
-            }
+          }
+          if (remainingProps > 0) {
+            INC_TPC(unser_prop_slow);
+            unserializeRemainingProps(uns, obj, remainingProps,
+                                      serializedNativeData,
+                                      hasSerializedNativeData);
+            remainingProps = 0;
+          } else {
+            INC_TPC(unser_prop_fast);
           }
 
           // nativeDataWakeup is called last to ensure that all properties are
@@ -567,11 +903,13 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       }
       uns->expectChar('}');
 
-      if (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
-          (cls && cls->instanceCtor() && cls->isCppSerializable())) {
+      if (cls &&
+          cls->lookupMethod(s___wakeup.get()) &&
+          (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
+           (cls->instanceCtor() && cls->isCppSerializable()))) {
         // Don't call wakeup when unserializing for the debugger, except for
         // natively implemented classes.
-        obj->invokeWakeup();
+        uns->addSleepingObject(obj);
       }
 
       check_request_surprise_unlikely();
@@ -618,85 +956,68 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
   uns->expectChar(';');
 }
 
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwArraySizeOutOfBounds() {
-  throw Exception("Array size out of bounds");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidKey() {
-  throw Exception("Invalid key");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnterminatedElement() {
-  throw Exception("Array element not terminated properly");
-}
-
-void unserializeArray(Array& arr, VariableUnserializer* uns) {
+Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
   int64_t size = uns->readInt();
   uns->expectChar(':');
   uns->expectChar('{');
-
   if (size == 0) {
-    arr = Array::Create();
-  } else {
-    if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
-      throwArraySizeOutOfBounds();
+    uns->expectChar('}');
+    switch (kind) {
+    case ArrayKind::Dict: return DictInit(0).toArray();
+    case ArrayKind::PHP:  return Array::Create(); // static empty array
     }
-    auto const scale = computeScaleFromSize(size);
-    auto const allocsz = computeAllocBytes(scale);
+    not_reached();
+  }
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+  auto const scale = computeScaleFromSize(size);
+  auto const allocsz = computeAllocBytes(scale);
 
-    // For large arrays, do a naive pre-check for OOM.
-    if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-      check_request_surprise_unlikely();
+  // For large arrays, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+
+  // Pre-allocate an ArrayData of the given size, to avoid escalation in the
+  // middle, which breaks references.
+  Array arr = [&] {
+    switch (kind) {
+    case ArrayKind::Dict: return DictInit(size).toArray();
+    case ArrayKind::PHP:  return ArrayInit(size, ArrayInit::Mixed{}).toArray();
     }
+    not_reached();
+  }();
 
-    // Pre-allocate an ArrayData of the given size, to avoid escalation in the
-    // middle, which breaks references.
-    arr = ArrayInit(size, ArrayInit::Mixed{}).toArray();
-    for (int64_t i = 0; i < size; i++) {
-      Variant key;
-      unserializeVariant(key, uns, UnserializeMode::Key);
-      if (!key.isString() && !key.isInteger()) {
-        throwInvalidKey();
-      }
-      // for apc, we know the key can't exist, but ignore that optimization
-      assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
-             !arr.exists(key, true));
+  for (int64_t i = 0; i < size; i++) {
+    Variant key;
+    unserializeVariant(key, uns, UnserializeMode::Key);
+    if (!key.isString() && !key.isInteger()) {
+      throwInvalidKey();
+    }
+    // for apc, we know the key can't exist, but ignore that optimization
+    assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
+           !arr.exists(key, true));
 
-      Variant &value = arr.lvalAt(key, AccessFlags::Key);
-      if (UNLIKELY(isRefcountedType(value.getRawType()))) {
-        uns->putInOverwrittenList(value);
-      }
-      unserializeVariant(value, uns);
+    Variant& value = arr.lvalAt(key, AccessFlags::Key);
+    if (UNLIKELY(isRefcountedType(value.getRawType()))) {
+      uns->putInOverwrittenList(value);
+    }
+    unserializeVariant(value, uns);
 
-      if (i < (size - 1)) {
-        auto lastChar = uns->peekBack();
-        if ((lastChar != ';' && lastChar != '}')) {
-          throwUnterminatedElement();
-        }
+    if (i < (size - 1)) {
+      auto lastChar = uns->peekBack();
+      if ((lastChar != ';' && lastChar != '}')) {
+        throwUnterminatedElement();
       }
     }
   }
-
   check_request_surprise_unlikely();
-
   uns->expectChar('}');
+  return arr;
 }
 
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwLargeStringSize(int64_t size) {
-  throw Exception("Size of serialized string (%ld) exceeds max", size);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwNegativeStringSize(int64_t size) {
-  throw Exception("Size of serialized string (%ld) must not be negative", size);
-}
-
-static
-String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
+String unserializeString(VariableUnserializer* uns, char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
   int64_t size = uns->readInt();
   if (size >= RuntimeOption::MaxSerializedStringSize) {
@@ -705,20 +1026,14 @@ String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
   if (size < 0) {
     throwNegativeStringSize(size);
   }
-
   uns->expectChar(':');
   uns->expectChar(delimiter0);
-
-  String px(size, ReserveString);
-  auto const buf = px.bufferSlice();
-  assert(size <= buf.size());
-  uns->read(buf.data(), size);
-  px.setSize(size);
+  auto r = uns->readStr(size);
+  auto str = String::attach(StringData::Make(r, CopyString));
   uns->expectChar(delimiter1);
-  return px;
+  return str;
 }
 
-static
 void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type) {
   switch (obj->collectionType()) {
@@ -740,19 +1055,6 @@ void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
   }
 }
 
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwBadFormat(const ObjectData* obj, char type) {
-  throw Exception("%s does not support the '%c' serialization format",
-                  header_names[(int)obj->headerKind()], type);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidHashKey(const ObjectData* obj) {
-  throw Exception("%s values must be integers or strings",
-                  header_names[(int)obj->headerKind()]);
-}
-
-static
 void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
                        int64_t sz, char type) {
   if (type != 'V') throwBadFormat(obj, type);
@@ -766,7 +1068,6 @@ void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
   }
 }
 
-static
 void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
                     int64_t sz, char type) {
   if (type != 'K') throwBadFormat(obj, type);
@@ -780,12 +1081,18 @@ void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
       auto h = k.toInt64();
       tv = map->findForUnserialize(h);
       // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
+      if (UNLIKELY(!tv)) {
+        tv = k.asTypedValue();
+        goto do_unserialize;
+      }
     } else if (k.isString()) {
       auto key = k.getStringData();
       tv = map->findForUnserialize(key);
       // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
+      if (UNLIKELY(!tv)) {
+        tv = k.asTypedValue();
+        goto do_unserialize;
+      }
     } else {
       throwInvalidKey();
     }
@@ -795,7 +1102,6 @@ do_unserialize:
   }
 }
 
-static
 void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
                     char type) {
   if (type != 'V') throwBadFormat(obj, type);
@@ -827,7 +1133,6 @@ void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
   }
 }
 
-static
 void unserializePair(ObjectData* obj, VariableUnserializer* uns,
                      int64_t sz, char type) {
   assert(sz == 2);
@@ -837,8 +1142,11 @@ void unserializePair(ObjectData* obj, VariableUnserializer* uns,
   unserializeVariant(tvAsVariant(&elms[0]), uns, UnserializeMode::ColValue);
   unserializeVariant(tvAsVariant(&elms[1]), uns, UnserializeMode::ColValue);
 }
+}
 
-void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
+////////////////////////////////////////////////////////////////////////////////
+
+void reserialize(VariableUnserializer* uns, StringBuffer& buf) {
   char type = uns->readChar();
   char sep = uns->readChar();
 
@@ -870,9 +1178,8 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       // shouldn't happen, but keep the code here anyway.
       buf.append(type);
       buf.append(sep);
-      char pointer[8];
-      uns->read(pointer, 8);
-      buf.append(pointer, 8);
+      auto str = uns->readStr(8);
+      buf.append(str.data(), str.size());
     }
     break;
   case 's':
@@ -971,7 +1278,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
     }
     break;
   default:
-    throw Exception("Unknown type '%c'", type);
+    throwUnknownType(type);
   }
 
   sep = uns->readChar(); // the last ';'

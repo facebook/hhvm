@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,13 +67,6 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ExtendedLogger::log(LogLevelType level, const char *type,
-                         const Exception &e, const char *file /* = NULL */,
-                         int line /* = 0 */) {
-  if (!IsEnabled()) return;
-  Logger::log(level, type, e, file, line);
-}
-
 void ExtendedLogger::log(LogLevelType level, const std::string &msg,
                          const StackTrace *stackTrace,
                          bool escape /* = true */,
@@ -101,10 +94,14 @@ void ExtendedLogger::Log(LogLevelType level, const Array& stackTrace,
   if (stackTrace.isNull()) return;
 
   if (UseLogFile) {
-    FILE *f = Output ? Output : GetStandardOut(level);
-    PrintStackTrace(f, stackTrace, escape, escapeMore);
-
-    FILE *tf = threadData->log;
+    FILE* tf = threadData->log;
+    for (const auto& l : s_loggers) {
+      const auto& logger = l.second;
+      if (auto* f = (logger ? logger->fileForStackTrace() : nullptr)) {
+          PrintStackTrace(f, stackTrace, escape, escapeMore);
+          if (tf == f) tf = nullptr; // only print to thread local log once
+      }
+    }
     if (tf) {
       PrintStackTrace(tf, stackTrace, escape, escapeMore);
     }

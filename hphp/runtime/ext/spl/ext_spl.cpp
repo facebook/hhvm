@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -51,7 +51,8 @@ const StaticString
   s_directory_iterator("DirectoryIterator");
 
 
-void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+void throw_spl_exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1,2);
 void throw_spl_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -353,8 +354,7 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SPLExtension final : public Extension {
-public:
+struct SPLExtension final : Extension {
   SPLExtension() : Extension("spl", "0.2") { }
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     HHVM_ME(DirectoryIterator, hh_readdir);

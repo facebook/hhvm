@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -47,10 +47,6 @@ void initialize_repo() {
   }
   if (sqlite3_config(SQLITE_CONFIG_MEMSTATUS, 0) != SQLITE_OK) {
     TRACE(1, "Failed to disable SQLite memory statistics\n");
-  }
-  if (const char* schemaOverride = getenv("HHVM_RUNTIME_REPO_SCHEMA")) {
-    TRACE(1, "Schema override: HHVM_RUNTIME_REPO_SCHEMA=%s\n", schemaOverride);
-    kRepoSchemaId = schemaOverride;
   }
 }
 
@@ -171,6 +167,14 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
       failures.push_back(repoName(repoId) + ": "  + e.msg());
       continue;
     }
+
+    // TODO: this should probably read out the other elements of the global data
+    // which control Option or RuntimeOption values -- the others are read out
+    // in an inconsistent and ad-hoc manner. But I don't understand their uses
+    // and interactions well enough to feel comfortable fixing now.
+    RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
+    RuntimeOption::PHP7_ScalarTypes  = s_globalData.PHP7_ScalarTypes;
+    RuntimeOption::AutoprimeGenerators = s_globalData.AutoprimeGenerators;
 
     return;
   }
@@ -366,7 +370,7 @@ void Repo::commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue) {
 
 std::string Repo::table(int repoId, const char* tablePrefix) {
   std::stringstream ss;
-  ss << dbName(repoId) << "." << tablePrefix << "_" << kRepoSchemaId;
+  ss << dbName(repoId) << "." << tablePrefix << "_" << repoSchemaId();
   return ss.str();
 }
 
@@ -547,6 +551,7 @@ void Repo::initCentral() {
     }
   }
 
+#ifndef _WIN32
   // Try the equivalent of "$HOME/.hhvm.hhbc", but look up the home directory
   // in the password database.
   {
@@ -554,7 +559,8 @@ void Repo::initCentral() {
     struct passwd* pwbufp;
     long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize != -1) {
-      char buf[size_t(bufsize)];
+      auto buf = new char[bufsize];
+      SCOPE_EXIT { delete[] buf; };
       if (!getpwuid_r(getuid(), &pwbuf, buf, size_t(bufsize), &pwbufp)
           && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
         std::string centralPath = pwbufp->pw_dir;
@@ -565,8 +571,7 @@ void Repo::initCentral() {
       }
     }
   }
-
-#ifdef _WIN32
+#else // _WIN32
   // Try "$HOMEDRIVE$HOMEPATH/.hhvm.hhbc"
   char* HOMEDRIVE = getenv("HOMEDRIVE");
   if (HOMEDRIVE != nullptr) {
@@ -600,11 +605,11 @@ static int busyHandler(void* opaque, int nCalls) {
 }
 
 std::string Repo::insertSchema(const char* path) {
-  assert(strstr(kRepoSchemaId, kSchemaPlaceholder) == nullptr);
+  assert(strstr(repoSchemaId().begin(), kSchemaPlaceholder) == nullptr);
   std::string result = path;
   size_t idx;
   if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
-    result.replace(idx, strlen(kSchemaPlaceholder), kRepoSchemaId);
+    result.replace(idx, strlen(kSchemaPlaceholder), repoSchemaId().begin());
   }
   TRACE(2, "Repo::%s() transformed %s into %s\n",
         __func__, path, result.c_str());

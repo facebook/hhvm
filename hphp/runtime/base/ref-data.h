@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-class Variant;
+struct Variant;
 
 /*
  * We heap allocate a RefData when we make a reference to something.
@@ -50,7 +50,7 @@ class Variant;
  * For more info on the PHP extension compatibility layer, check out
  * the documentation at "doc/php.extension.compat.layer".
  */
-struct RefData {
+struct RefData final : type_scan::MarkCountable<RefData> {
   /*
    * Some RefData's (static locals) are allocated in RDS, and
    * live until the end of the request.  In this case, we start with a
@@ -89,7 +89,7 @@ struct RefData {
    * Deallocate a RefData.
    */
   void release() noexcept {
-    assert(!hasMultipleRefs());
+    assert(kindIsValid());
     if (UNLIKELY(m_hdr.aux.cow)) {
       m_hdr.count = 1;
       m_hdr.aux.cow = m_hdr.aux.z = 0;
@@ -103,17 +103,18 @@ struct RefData {
     MM().freeSmallSize(const_cast<RefData*>(this), sizeof(RefData));
   }
 
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
+  bool kindIsValid() const { return m_hdr.kind == HeaderKind::Ref; }
 
   /*
    * Note, despite the name, this can never return a non-Cell.
    */
   const Cell* tv() const {
-    assert(m_hdr.kind == HeaderKind::Ref);
+    assert(kindIsValid());
     return &m_tv;
   }
   Cell* tv() {
-    assert(m_hdr.kind == HeaderKind::Ref);
+    assert(kindIsValid());
     return &m_tv;
   }
 
@@ -122,16 +123,16 @@ struct RefData {
 
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
-  void assertValid() const {
-    assert(m_hdr.kind == HeaderKind::Ref);
-  }
+  void assertValid() const { assert(kindIsValid()); }
 
   int32_t getRealCount() const {
+    assert(kindIsValid());
     assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
     return m_hdr.count + m_hdr.aux.cow;
   }
 
   bool isReferenced() const {
+    assert(kindIsValid());
     assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
     return m_hdr.count >= 2 && !m_hdr.aux.cow;
   }
@@ -151,6 +152,7 @@ struct RefData {
   }
 
   bool zIsRef() const {
+    assert(kindIsValid());
     assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
     return !m_hdr.aux.cow && (m_hdr.count >= 2 || m_hdr.aux.z);
   }
@@ -215,6 +217,7 @@ struct RefData {
   }
 
   void zSetRefcount(int val) {
+    assert(kindIsValid());
     if (val < 0) {
       val = 0;
     }

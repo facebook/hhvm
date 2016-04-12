@@ -139,6 +139,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getExtension();
   public function getExtensionName();
   final private function __clone();
+  public function hasReturnType(): bool;
+  public function getReturnType(): ?ReflectionType;
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector {
@@ -215,6 +217,8 @@ class ReflectionParameter implements Reflector {
   public function getTypeText(): string;
   public function getDefaultValueText();
   public function isVariadic();
+  public function hasType(): bool;
+  public function getType(): ?ReflectionType;
 }
 
 class ReflectionProperty implements Reflector {
@@ -295,9 +299,6 @@ class ReflectionTypeConstant implements Reflector {
 }
 
 class ReflectionTypeAlias implements Reflector {
-
-  private $name = '';
-
   final private function __clone();
   final public function __construct(string $name);
   public function __toString(): string;
@@ -307,10 +308,11 @@ class ReflectionTypeAlias implements Reflector {
   public function getName(): string;
 }
 
-/*
- * returns the shape associated with the type constant.
- */
-function type_structure(mixed $cls_or_obj, string $cns_name);
-// becomes:
-// type_structure(C::class or new C, 'type_const_name')
-//   : TypeStructure
+class ReflectionType {
+  final private function __clone();
+  public function __construct(?Reflector $param_or_ret = null,
+                              array $type_hint_info = array());
+  public function allowsNull(): bool;
+  public function isBuiltin(): bool;
+  public function __toString(): string;
+}

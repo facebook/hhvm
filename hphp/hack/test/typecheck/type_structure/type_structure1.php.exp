@@ -1,7 +1,16 @@
-shape<FieldsPartiallyKnown(unset fields:)>(alias => option(Tstring), classname => option(App \classname<Tint, >), elem_types => option(array), fields => option(array), generic_types => option(array), kind => Tint, name => option(Tstring), nullable => option(Tbool), param_types => option(array), return_type => option(array))
+App \TypeStructure<Tint, >
 App \classname<App \C<[1]intersect(), >, >
 App \classname<App \D<>, >
 App \classname<App \Vector<Tint, >, >
+tuple(App \TypeStructure<Tint, >)
 App \classname<App \C<Tstring, >, >
-option(App \classname<fun tuple(App \C<Tint, >, App \C<Tint, >),  -> App \Vector<App \C<Tint, >, >, >)
+tuple(App \TypeStructure<Tstring, >)
+tuple(App \TypeStructure<tuple(App \C<Tint, >, App \C<Tint, >), >)
+App \TypeStructure<Tint, >
+tuple(App \TypeStructure<App \Vector<App \C<Tint, >, >, >)
+App \classname<App \Vector<App \C<Tint, >, >, >
+App \classname<App \C<Tint, >, >
+shape<FieldsPartiallyKnown(unset fields:)>(bar => App \TypeStructure<shape<FieldsPartiallyKnown(unset fields:)>(x => tuple(Tnum, Tnum)), >, foo => App \TypeStructure<App \D<>, >)
+App \TypeStructure<App \D<>, >
+App \TypeStructure<Tnum, >
 No errors

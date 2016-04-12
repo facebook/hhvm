@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,52 +21,11 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/htonll.h"
 
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <unistd.h>
-#if defined(__FreeBSD__)
-# include <sys/endian.h>
-#elif defined(__APPLE__)
-# include <machine/endian.h>
-# include <libkern/OSByteOrder.h>
-#else
-# include <endian.h>
-# include <byteswap.h>
-#endif
 #include <stdexcept>
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-# define htolell(x) (x)
-# define letohll(x) (x)
-# ifndef htonll
-# if defined(__FreeBSD__)
-#  define htonll(x) bswap64(x)
-#  define ntohll(x) bswap64(x)
-# elif defined(__APPLE__)
-#  define htonll(x) OSSwapInt64(x)
-#  define ntohll(x) OSSwapInt64(x)
-# else
-#  define htonll(x) bswap_64(x)
-#  define ntohll(x) bswap_64(x)
-# endif
-# endif
-#else
-# if defined(__FreeBSD__)
-#  define htolell(x) bswap64(x)
-#  define letohll(x) bswap64(x)
-# elif defined(__APPLE__)
-#  define htolell(x) OSSwapInt64(x)
-#  define letohll(x) OSSwapInt64(x)
-# else
-#  define htolell(x) bswap_64(x)
-#  define letohll(x) bswap_64(x)
-# endif
-# ifndef htonll
-# define htonll(x) (x)
-# define ntohll(x) (x)
-# endif
-#endif
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,7 +64,9 @@ extern const StaticString
   s_val,
   s_elem,
   s_var,
+  s_union,
   s_type,
+  s__type,
   s_ktype,
   s_vtype,
   s_etype,
@@ -242,20 +203,21 @@ struct PHPInputTransport {
       m_transport->o_invoke_few_args(s_putBack,
                            1, String(buffer_ptr, buffer_used, CopyString));
     }
+    buffer = String();
     buffer_used = 0;
-    buffer_ptr = buffer;
+    buffer_ptr = nullptr;
   }
 
   void skip(size_t len) {
     while (len) {
       size_t chunk_size = len < buffer_used ? len : buffer_used;
       if (chunk_size) {
-        buffer_ptr = reinterpret_cast<char*>(buffer_ptr) + chunk_size;
+        buffer_ptr += chunk_size;
         buffer_used -= chunk_size;
         len -= chunk_size;
       }
       if (! len) break;
-      refill();
+      refill(len);
     }
   }
 
@@ -264,13 +226,13 @@ struct PHPInputTransport {
       size_t chunk_size = len < buffer_used ? len : buffer_used;
       if (chunk_size) {
         memcpy(buf, buffer_ptr, chunk_size);
-        buffer_ptr = reinterpret_cast<char*>(buffer_ptr) + chunk_size;
+        buffer_ptr += chunk_size;
         buffer_used -= chunk_size;
         buf = reinterpret_cast<char*>(buf) + chunk_size;
         len -= chunk_size;
       }
       if (! len) break;
-      refill();
+      refill(len);
     }
   }
 
@@ -299,17 +261,16 @@ struct PHPInputTransport {
   }
 
 private:
-  void refill() {
+  void refill(size_t len) {
     assert(buffer_used == 0);
-    String ret =
-      m_transport->o_invoke_few_args(s_read, 1, (int64_t)SIZE);
-    buffer_used = ret.size();
-    memcpy(buffer, ret.data(), buffer_used);
-    buffer_ptr = buffer;
+    len = std::max<size_t>(len, SIZE);
+    buffer = m_transport->o_invoke_few_args(s_read, 1, (int64_t)len).toString();
+    buffer_used = buffer.size();
+    buffer_ptr = buffer.data();
   }
 
-  char buffer[SIZE];
-  char* buffer_ptr{buffer};
+  String buffer;
+  const char* buffer_ptr{nullptr};
   size_t buffer_used{0};
 
   Object m_transport;

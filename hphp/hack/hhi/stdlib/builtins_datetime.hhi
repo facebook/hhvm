@@ -79,7 +79,16 @@ function timezone_transitions_get(DateTimeZone $object,
                                   int $timestamp_begin = PHP_INT_MIN,
                                   int $timestamp_end = PHP_INT_MAX) { }
 function timezone_version_get() { }
-class DateTime {
+
+interface DateTimeInterface {
+  public function diff(DateTimeInterface $datetime2, bool $absolute = false);
+  public function format(string $format);
+  public function getOffset();
+  public function getTimestamp();
+  public function getTimezone();
+}
+
+class DateTime implements DateTimeInterface {
   const ATOM = '';
   const COOKIE = '';
   const ISO8601 = '';
@@ -91,23 +100,55 @@ class DateTime {
   const RFC3339 = '';
   const RSS = '';
   const W3C = '';
-  public function add($interval) { }
-  public function __construct($time = "now", $timezone = null) { }
-  static public function createFromFormat($format, $time, $timezone = null) { }
-  public function diff($datetime2, $absolute = false) { }
-  public function format($format) { }
-  static public function getLastErrors() { }
-  public function getOffset() { }
-  public function getTimestamp() { }
-  public function getTimezone() { }
-  public function modify($modify) { }
-  public function setDate($year, $month, $day) { }
-  public function setISODate($year, $week, $day = 1) { }
-  public function setTime($hour, $minute, $second = 0) { }
-  public function setTimestamp($unixtimestamp) { }
-  public function setTimezone($timezone) { }
-  public function sub($interval) { }
+  public function __construct(mixed $time = 'now', ?DateTimeZone $timezone = null);
+  public function add(DateInterval $interval);
+  public function modify(string $modify);
+  public function getOffset();
+  public function getTimestamp();
+  public function getTimezone();
+  public function setDate(int $year, int $month, int $day);
+  public function setISODate(int $year, int $week, int $day = 1);
+  public function setTime(int $hour, int $minute, int $second = 0);
+  public function setTimestamp(int $unixtimestamp);
+  public function setTimezone(DateTimeZone $timezone);
+  public function sub(DateInterval $interval) { }
+  public function diff(DateTimeInterface $datetime2, bool $absolute = false);
+  public function format(string $format);
+  public static function createFromFormat(
+    string $format,
+    mixed $time,
+    ?DateTimeZone $timezone = null,
+  );
+  public static function getLastErrors(): array;
 }
+
+class DateTimeImmutable implements DateTimeInterface {
+  private DateTime $data;
+
+  public function __construct(mixed $time = 'now', ?DateTimeZone $timezone = null);
+  public function add(DateInterval $interval);
+  public function modify(string $modify);
+  public function getOffset();
+  public function getTimestamp();
+  public function getTimezone();
+  public function setDate(int $year, int $month, int $day);
+  public function setISODate(int $year, int $week, int $day = 1);
+  public function setTime(int $hour, int $minute, int $second = 0);
+  public function setTimestamp(int $unixtimestamp);
+  public function setTimezone(DateTimeZone $timezone);
+  public function sub(DateInterval $interval);
+  public function diff(DateTimeInterface $datetime2, bool $absolute = false);
+  public function format(string $format);
+  public static function createFromFormat(
+    string $format,
+    mixed $time,
+    ?DateTimeZone $timezone = null,
+  );
+  public static function createFromMutable(DateTime $datetime);
+  public static function getLastErrors(): array;
+  public function __clone();
+}
+
 class DateTimeZone {
   const AFRICA = 0;
   const AMERICA = 0;
@@ -123,19 +164,45 @@ class DateTimeZone {
   const ALL = 0;
   const ALL_WITH_BC = 0;
   const PER_COUNTRY = 0;
-  public function __construct($timezone) { }
-  public function getLocation() { }
-  public function getName() { }
-  public function getOffset($datetime) { }
+  public function __construct(string $timezone);
+  public function getLocation(): array { }
+  public function getName(): string { }
+  public function getOffset(DateTime $datetime);
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
-                                 int $timestamp_end = PHP_INT_MAX) { }
-  static public function listAbbreviations() { }
-  static public function listIdentifiers(int $what = 2047, string $country = '') { }
+                                 int $timestamp_end = PHP_INT_MAX);
+  static public function listAbbreviations();
+  static public function listIdentifiers(int $what = 2047, string $country = '');
 }
+
 class DateInterval {
-  public function __construct($interval_spec) { }
-  public function __get($member) { }
-  public function __set($member, $value) { }
-  static public function createFromDateString($time) { }
-  public function format($format) { }
+  public int $y;
+  public int $m;
+  public int $d;
+  public int $h;
+  public int $i;
+  public int $s;
+  public int $invert;
+  public mixed $days;
+
+  public function __construct(string $interval_spec);
+  public function __get($member);
+  public function __set($member, $value);
+  static public function createFromDateString(string $time);
+  public function format(string $format);
+}
+
+class DatePeriod implements Iterator<DateTime> {
+  const EXCLUDE_START_DATE = 1;
+
+  public function __construct(
+    /* DateTimeInterface */ $start, // date string converts
+    ?DateInterval $interval = null,
+    /* ?DateTimeInterface */ $end = null, // date string converts
+    int $options = 0,
+  );
+  public function current(): DateTime;
+  public function rewind(): void;
+  public function key();
+  public function next();
+  public function valid(): bool;
 }

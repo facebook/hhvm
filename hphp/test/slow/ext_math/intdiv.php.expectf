@@ -1,0 +1,9 @@
+int(1)
+int(-1)
+int(-1)
+int(1)
+int(1)
+int(1)
+string(47) "Division of PHP_INT_MIN by -1 is not an integer"
+string(47) "Division of PHP_INT_MIN by -1 is not an integer"
+string(16) "Division by zero"

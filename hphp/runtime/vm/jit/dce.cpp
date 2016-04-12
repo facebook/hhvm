@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <array>
+#include "hphp/runtime/vm/jit/dce.h"
 
+#include <array>
 #include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"
@@ -70,35 +71,31 @@ bool canDCE(IRInstruction* inst) {
   case ConvBoolToDbl:
   case ConvIntToDbl:
   case ConvStrToDbl:
+  case ConvResToDbl:
   case ConvArrToInt:
   case ConvBoolToInt:
   case ConvDblToInt:
   case ConvStrToInt:
+  case ConvResToInt:
   case ConvBoolToStr:
   case ConvDblToStr:
   case ConvIntToStr:
   case ConvClsToCctx:
   case NewColFromArray:
-  case Gt:
-  case Gte:
-  case Lt:
-  case Lte:
-  case Eq:
-  case Neq:
-  case Same:
-  case NSame:
   case GtInt:
   case GteInt:
   case LtInt:
   case LteInt:
   case EqInt:
   case NeqInt:
+  case CmpInt:
   case GtDbl:
   case GteDbl:
   case LtDbl:
   case LteDbl:
   case EqDbl:
   case NeqDbl:
+  case CmpDbl:
   case GtStr:
   case GteStr:
   case LtStr:
@@ -107,12 +104,21 @@ bool canDCE(IRInstruction* inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case CmpStr:
+  case GtStrInt:
+  case GteStrInt:
+  case LtStrInt:
+  case LteStrInt:
+  case EqStrInt:
+  case NeqStrInt:
+  case CmpStrInt:
   case GtBool:
   case GteBool:
   case LtBool:
   case LteBool:
   case EqBool:
   case NeqBool:
+  case CmpBool:
   case SameObj:
   case NSameObj:
   case SameArr:
@@ -123,6 +129,8 @@ bool canDCE(IRInstruction* inst) {
   case LteRes:
   case EqRes:
   case NeqRes:
+  case CmpRes:
+  case EqCls:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -133,13 +141,14 @@ bool canDCE(IRInstruction* inst) {
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
+  case HasToString:
   case IsType:
   case IsNType:
   case IsTypeMem:
   case IsNTypeMem:
   case IsScalarType:
   case IsWaitHandle:
-  case ClsNeq:
+  case IsCol:
   case UnboxPtr:
   case BoxPtr:
   case LdStk:
@@ -183,11 +192,13 @@ bool canDCE(IRInstruction* inst) {
   case NewInstanceRaw:
   case NewArray:
   case NewMixedArray:
+  case NewDictArray:
   case NewLikeArray:
   case LdPackedArrayElemAddr:
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
+  case LdRetVal:
   case Mov:
   case CountArray:
   case CountArrayFast:
@@ -208,7 +219,6 @@ bool canDCE(IRInstruction* inst) {
   case LdWHResult:
   case LdAFWHActRec:
   case LdResumableArObj:
-  case DefMIStateBase:
   case LdMIStateAddr:
   case StringIsset:
   case ColIsEmpty:
@@ -219,6 +229,9 @@ bool canDCE(IRInstruction* inst) {
   case CheckRange:
   case LdARInvName:
   case PackMagicArgs:
+  case LdMBase:
+  case MethodExists:
+  case LdTVAux:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -253,6 +266,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckNonNull:
   case CheckStaticLocInit:
   case DivDbl:
+  case DivInt:
   case AddIntO:
   case SubIntO:
   case MulIntO:
@@ -266,24 +280,20 @@ bool canDCE(IRInstruction* inst) {
   case ConvObjToStr:
   case ConvResToStr:
   case ConvCellToStr:
-  case GtX:
-  case GteX:
-  case LtX:
-  case LteX:
-  case EqX:
-  case NeqX:
   case GtObj:
   case GteObj:
   case LtObj:
   case LteObj:
   case EqObj:
   case NeqObj:
+  case CmpObj:
   case GtArr:
   case GteArr:
   case LtArr:
   case LteArr:
   case EqArr:
   case NeqArr:
+  case CmpArr:
   case JmpZero:
   case JmpNZero:
   case JmpSSwitchDest:
@@ -345,7 +355,6 @@ bool canDCE(IRInstruction* inst) {
   case CallBuiltin:
   case RetCtrl:
   case AsyncRetCtrl:
-  case StRetVal:
   case ReleaseVVAndSkip:
   case GenericRetDecRefs:
   case StMem:
@@ -395,7 +404,6 @@ bool canDCE(IRInstruction* inst) {
   case ArrayAdd:
   case ArrayIdx:
   case GetMemoKey:
-  case GenericIdx:
   case LdSwitchObjIndex:
   case LdSSwitchDestSlow:
   case InterpOne:
@@ -411,6 +419,7 @@ bool canDCE(IRInstruction* inst) {
   case ContPreNext:
   case ContStartedCheck:
   case ContValid:
+  case ContStarted:
   case ContArIncKey:
   case ContArIncIdx:
   case ContArUpdateIdx:
@@ -423,6 +432,7 @@ bool canDCE(IRInstruction* inst) {
   case StAsyncArResume:
   case StAsyncArResult:
   case AFWHBlockOn:
+  case AsyncRetFast:
   case ABCUnblock:
   case IncStat:
   case IncTransCounter:
@@ -431,6 +441,7 @@ bool canDCE(IRInstruction* inst) {
   case DbgAssertRefCount:
   case DbgAssertPtr:
   case DbgAssertType:
+  case DbgAssertFunc:
   case RBTraceEntry:
   case RBTraceMsg:
   case ZeroErrorLevel:
@@ -467,11 +478,14 @@ bool canDCE(IRInstruction* inst) {
   case IssetProp:
   case ElemX:
   case ElemArray:
+  case ElemArrayD:
   case ElemArrayW:
+  case ElemArrayU:
   case ElemDX:
   case ElemUX:
   case ArrayGet:
   case StringGet:
+  case OrdStrIdx:
   case MapGet:
   case CGetElem:
   case VGetElem:
@@ -507,10 +521,10 @@ bool canDCE(IRInstruction* inst) {
   case BeginCatch:
   case EndCatch:
   case UnwindCheckSideExit:
-  case CountBytecode:
   case DbgTrashStk:
   case DbgTrashFrame:
   case DbgTrashMem:
+  case DbgTrashRetVal:
   case EnterFrame:
   case CheckStackOverflow:
   case InitExtraArgs:
@@ -522,7 +536,15 @@ bool canDCE(IRInstruction* inst) {
   case StARInvName:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
+  case ThrowInvalidOperation:
+  case ThrowArithmeticError:
+  case ThrowDivisionByZeroError:
   case MapIdx:
+  case StMBase:
+  case FinishMemberOp:
+  case InlineReturnNoFrame:
+  case BeginInlining:
+  case SyncReturnBC:
     return false;
   }
   not_reached();
@@ -676,8 +698,13 @@ bool findWeakActRecUses(const BlockList& blocks,
     if (state[inst].isDead()) return;
 
     switch (inst->op()) {
-    // We don't need to generate stores to a frame if it can be eliminated.
+    // these can be made stack relative
     case StLoc:
+    case LdLoc:
+    case CheckLoc:
+    case AssertLoc:
+    case LdLocAddr:
+    case HintLocInner:
       incWeak(inst, inst->src(0));
       break;
 
@@ -698,8 +725,11 @@ bool findWeakActRecUses(const BlockList& blocks,
         if (frameUses - (weakUses + 1) == 0) {
           ITRACE(1, "killing frame {}\n", *frameInst);
           killedFrames = true;
-          state[inst].setDead();
           state[frameInst].setDead();
+
+          // Ensure that the frame is still dead for the purposes of
+          // memory-effects
+          convertToInlineReturnNoFrame(unit, *inst);
         }
       }
       break;
@@ -712,6 +742,20 @@ bool findWeakActRecUses(const BlockList& blocks,
   });
 
   return killedFrames;
+}
+
+/*
+ * Convert a localId in a callee frame into an SP relative offset in the caller
+ * frame.
+ */
+IRSPRelOffset locToStkOff(IRInstruction& inst) {
+  assertx(inst.is(LdLoc, StLoc, LdLocAddr, AssertLoc, CheckLoc, HintLocInner));
+
+  auto locId = inst.extra<LocalId>()->locId;
+  auto fpInst = inst.src(0)->inst();
+  assertx(fpInst->is(DefInlineFP));
+
+  return fpInst->extra<DefInlineFP>()->spOffset - locId - 1;
 }
 
 /*
@@ -764,9 +808,13 @@ void performActRecFixups(const BlockList& blocks,
         break;
 
       case StLoc:
+      case LdLoc:
+      case LdLocAddr:
+      case AssertLoc:
+      case CheckLoc:
+      case HintLocInner:
         if (state[inst.src(0)->inst()].isDead()) {
-          ITRACE(3, "marking {} as dead\n", inst);
-          state[inst].setDead();
+          convertToStackInst(unit, inst);
         }
         break;
 
@@ -822,6 +870,58 @@ void optimizeActRecs(const BlockList& blocks,
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
+
+void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
+  assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner));
+  assertx(inst.src(0)->inst()->is(DefInlineFP));
+
+  auto const data = IRSPRelOffsetData { locToStkOff(inst) };
+  auto const mainSP = unit.mainSP();
+
+  switch (inst.op()) {
+    case StLoc:
+      unit.replace(&inst, StStk, data, mainSP, inst.src(1));
+      return;
+    case LdLoc:
+      unit.replace(&inst, LdStk, data, inst.typeParam(), mainSP);
+      return;
+    case LdLocAddr:
+      unit.replace(&inst, LdStkAddr, data, mainSP);
+      retypeDests(&inst, &unit);
+      return;
+    case AssertLoc:
+      unit.replace(&inst, AssertStk, data, inst.typeParam(), mainSP);
+      return;
+    case CheckLoc: {
+      auto next = inst.next();
+      unit.replace(&inst, CheckStk, data, inst.typeParam(),
+                   inst.taken(), mainSP);
+      inst.setNext(next);
+      return;
+    }
+    case HintLocInner:
+      unit.replace(&inst, HintStkInner, data, inst.typeParam(), mainSP);
+      return;
+
+    default: break;
+  }
+  not_reached();
+}
+
+void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
+  assertx(inst.is(InlineReturn));
+  auto const frameInst = inst.src(0)->inst();
+  auto const spInst = frameInst->src(0)->inst();
+
+  auto const calleeAROff = frameInst->extra<DefInlineFP>()->spOffset;
+  auto const spOff = spInst->extra<DefSP>()->offset;
+
+  InlineReturnNoFrameData data {
+    // Offset of the callee's return value relative to the frame pointer.
+    calleeAROff.to<FPRelOffset>(spOff) + (AROFF(m_r) / sizeof(TypedValue))
+  };
+  unit.replace(&inst, InlineReturnNoFrame, data);
+}
 
 void mandatoryDCE(IRUnit& unit) {
   if (removeUnreachable(unit)) {

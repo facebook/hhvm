@@ -177,148 +177,6 @@
     commit: d97cf3ce890fe80f247fc08594a1c8a1029fc7ed
     install_root: json_schema
     test_root: json_schema
-  joomla:
-    url: https://github.com/joomla/joomla-framework.git
-    branch: 1.1.0
-    commit: f8a2343d3147f595d43e735b89b11c277520f141
-    install_root: joomla-framework
-    test_root: joomla-framework
-    clowns:
-      # These are subtests which need their own composer set and aren't run
-      # by their travis setup
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleAuthOauth2Test.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataAdsenseTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataCalendarTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPicasaAlbumTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPicasaPhotoTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPicasaTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusActivitiesTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusCommentsTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusPeopleTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusTest.php
-      - joomla-framework/src/Joomla/Google/Tests/JGoogleTest.php
-      # Intermittently hang:
-      - joomla-framework/src/Joomla/Form/Tests/JFormFieldTest.php
-      - joomla-framework/src/Joomla/Form/Tests/JFormHelperTest.php
-      - joomla-framework/src/Joomla/Form/Tests/JFormRuleTest.php
-      - joomla-framework/src/Joomla/Form/Tests/JFormTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldCheckboxTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldCheckboxesTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldDatabaseConnectionTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldEmailTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldFileListTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldFileTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldFolderListTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldGroupedListTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldHiddenTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldImageListTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldLanguageTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldListTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldPasswordTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldRadioTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldSpacerTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldTelTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldTextTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldTextareaTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldTimezoneTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldUrlTest.php
-      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldIntegerTest.php
-      - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleBooleanTest.php
-      - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleColorTest.php
-      - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleEmailTest.php
-      - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleEqualsTest.php
-      - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleOptionsTest.php
-      - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleTelTest.php
-      - joomla-framework/src/Joomla/Form/Tests/rule/JFormRuleUrlTest.php
-    flakey:
-      # Uses fixed location on filesystem (__DIR__) - can't be run in parallel
-      - joomla-framework/src/Joomla/Archive/Tests/Bzip2Test.php
-      - joomla-framework/src/Joomla/Archive/Tests/GzipTest.php
-      - joomla-framework/src/Joomla/Archive/Tests/ArchiveTest.php
-      - joomla-framework/src/Joomla/Filesystem/Tests/JFileTest.php
-      - joomla-framework/src/Joomla/Log/Tests/Logger/FormattedtextTest.php
-      - joomla-framework/src/Joomla/Log/Tests/Logger/W3cTest.php
-      - joomla-framework/src/Joomla/Archive/Tests/TarTest.php
-      - joomla-framework/src/Joomla/Archive/Tests/ZipTest.php
-      # Assumes that getting the current time twice in a row will get
-      # the same result
-      - joomla-framework/src/Joomla/Log/Tests/LogEntryTest.php
-  joomlacms:
-    url: https://github.com/joomla/joomla-cms.git
-    branch: "3.4.1-rc"
-    commit: 7689d922ca373989e7328f510e94aa2fc541e272
-    install_root: joomla-cms
-    test_root: joomla-cms
-    test_find_mode: token
-    clowns:
-      - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/cache/storage/JCacheStorageMainTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaAlbumTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaPhotoTest.php
-      # Intermittently hang:
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldCaptchaTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldChromestyleTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldContentlanguageTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldEditorTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldHeadertagTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldHelpsiteTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldMediaTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldMenuTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldMenuitemTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldModuleorderTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldModulepositionTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldModuletagTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldTemplatestyleTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/field/JFormFieldUserTest.php
-      - joomla-cms/tests/unit/suites/libraries/cms/form/rule/JFormRuleCaptchaTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/JFormFieldTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/JFormRuleTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/JFormTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/field/JFormFieldCategoryTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/field/JFormFieldComponentLayoutTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/field/JFormFieldModuleLayoutTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldAccessLevelTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldCacheHandlerTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldCalendarTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldCheckboxTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldCheckboxesTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldColorTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldComboTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldDatabaseConnectionTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldEmailTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldFileListTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldFileTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldFolderListTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldGroupedListTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldHiddenTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldImageListTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldLanguageTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldListTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldNumberTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldPasswordTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldPluginsTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldRadioTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldRulesTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldSQLTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldSessionHandlerTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldSpacerTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldTelTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldTextTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldTextareaTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldTimezoneTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldUrlTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldUsergroupTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldIntegerTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleBooleanTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleColorTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleEmailTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleEqualsTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleOptionsTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleRulesTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleTelTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleUrlTest.php
-      - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleUsernameTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: master
@@ -380,6 +238,8 @@
       # starting with '0x', and gmp is available, it will error out saying it's
       # an invalid conversion. Also true on php5.
       - mediawiki-core/tests/phpunit/includes/GlobalFunctions/wfBaseConvertTest.php
+      # tests a directory listing in a predefined, written-to location
+      - mediawiki-core/tests/phpunit/includes/filebackend/FileBackendTest.php
   jshrink:
     url: https://github.com/tedivm/JShrink.git
     branch: master
@@ -398,6 +258,9 @@
     commit: 6225b22de9dcf36546be3a0b2fa8e3d986153f57
     install_root: monolog
     test_root: monolog
+    flakey:
+      # writes to a fixed location
+      - monolog/tests/Monolog/Handler/RotatingFileHandlerTest.php
   mustache:
     url: https://github.com/bobthecow/mustache.php.git
     branch: v2.5.1
@@ -413,83 +276,6 @@
     commit: 8d94afe0b39e29f2a84bf9ce7e06088d5b93bb5b
     install_root: paris
     test_root: paris
-  pear:
-    url: https://github.com/pear/pear-core.git
-    # master is the best branch for pear
-    branch: master
-    commit: def22219cfd80fab6f8f8c982fcabbbe9fb41917
-    install_root: pear-core
-    test_root: pear-core
-    test_file_regex: /.*(\.phpt)$/
-    test_name_regex: /[\-_a-zA-Z0-9\.\/]*\.phpt/
-    pull_requests:
-      - pull_dir: pear-core
-        pull_repo: https://github.com/pear/Console_Getopt
-        git_commit: trunk
-        type: submodulemove
-        move_from_dir: pear-core/Console_Getopt
-        dir_to_move: pear-core/Console_Getopt/Console
-      - pull_dir: pear-core
-        pull_repo: https://github.com/pear/XML_Util
-        git_commit: trunk
-        type: submodulemove
-        move_from_dir: pear-core/XML_Util
-        dir_to_move: pear-core/XML_Util/XML
-      - pull_dir: pear-core
-        pull_repo: https://github.com/pear/Archive_Tar
-        git_commit: master
-        type: submodulemove
-        move_from_dir: pear-core/Archive_Tar
-        dir_to_move: pear-core/Archive_Tar/Archive
-      - pull_dir: pear-core
-        pull_repo: https://github.com/pear/Structures_Graph
-        git_commit: trunk
-        type: submodulemove
-        move_from_dir: pear-core/Structures_Graph
-        dir_to_move: pear-core/Structures_Graph/Structures
-    clowns:
-      - pear-core/tests/PEAR_Command/test_registerCommands_standard.phpt
-      - pear-core/tests/PEAR_Command_Config/config-create/test.phpt
-      - pear-core/tests/PEAR_Command_Config/config-create/test_windows.phpt
-      - pear-core/tests/PEAR_Command_Config/config-help/test.phpt
-      - pear-core/tests/PEAR_Command_Config/config-show/test.phpt
-      - pear-core/tests/PEAR_Command_Install/upgrade/test_bug17986.phpt
-      - pear-core/tests/PEAR_Command_Package/convert/test_fail.phpt
-      - pear-core/tests/PEAR_Config/test_getGroupKeys.phpt
-      - pear-core/tests/PEAR_Config/test_getKeys.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_abstractpackage_channelneedsupdating.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_abstractpackage_rest.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_alreadyinstalled.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage_alphapostfix.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_onlyreqdeps.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_optional.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_complexlocaltgz.phpt
-      - pear-core/tests/PEAR_Downloader/test_download_complexremotetgz.phpt
-      - pear-core/tests/PEAR_Downloader/test_upgrade_pear_to_pecl.phpt
-      - pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage_discover.phpt
-      - pear-core/tests/PEAR_Downloader_Package/test_initialize_downloadurl.phpt
-      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage5.phpt
-      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage6.phpt
-      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage_discover.phpt
-      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invaliddownloadurl.phpt
-      - pear-core/tests/PEAR_Downloader_Package/test_mergeDependencies_basic_required_uri.phpt
-      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage.phpt
-      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2.phpt
-      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_force.phpt
-      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errors.phpt
-      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errorssoft.phpt
-      - pear-core/tests/PEAR_Installer/test_upgrade_complexlocalpackage2.phpt
-      - pear-core/tests/PEAR_Installer_Role/test_getInstallableRoles.phpt
-      - pear-core/tests/PEAR_Installer_Role/test_getValidRoles.phpt
-      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extbinrelease.phpt
-      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extsrcrelease.phpt
-      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_phprelease.phpt
-      - pear-core/tests/PEAR_RunTest/bug16057.phpt
-      - pear-core/tests/System/find_test.phpt
-      - pear-core/tests/System/test_which.phpt
-      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
   pdepend:
     url: https://github.com/pdepend/pdepend.git
     branch: release-1.1.x
@@ -553,6 +339,10 @@
     commit: 58db726aa45fe26bca93f692cb3d77e9a46b7830
     install_root: phpunit
     test_root: phpunit
+    blacklist:
+      # Breaks because of the weird way xdebug is enabled under hhvm, just
+      # blacklist for now to stop sandcastle errors.
+      - phpunit/tests/Framework/Constraint/ExceptionMessageTest.php
   phpunit-mock-objects:
     url: https://github.com/sebastianbergmann/phpunit-mock-objects.git
     branch: "2.2.0"
@@ -649,6 +439,10 @@
     clowns:
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
+    flakey:
+      # last data set intermittently fails, spent too long trying to get debug
+      # # data out of it and getting nowhere
+      - twig/test/Twig/Tests/IntegrationTest.php
   typo3:
     url: git://github.com/TYPO3/TYPO3.CMS.git
     branch: TYPO3_6-2

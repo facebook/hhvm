@@ -11,19 +11,18 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_EncodingDetector;
 
-class EncodingDetector : public IntlError {
- public:
+struct EncodingDetector : IntlError {
   EncodingDetector() {
     UErrorCode error = U_ZERO_ERROR;
     m_encodingDetector = ucsdet_open(&error);
     if (U_FAILURE(error)) {
-      throw getException("Could not open spoof checker, error %d (%s)",
+      throwException("Could not open spoof checker, error %d (%s)",
                      error, u_errorName(error));
     }
   }
   EncodingDetector(const EncodingDetector&) = delete;
   EncodingDetector& operator=(const EncodingDetector& src) {
-    throw getException("EncodingDetector may not be cloned.");
+    throwException("EncodingDetector may not be cloned.");
     not_reached();
   }
   ~EncodingDetector() {
@@ -45,7 +44,7 @@ class EncodingDetector : public IntlError {
     UErrorCode error = U_ZERO_ERROR;
     ucsdet_setText(m_encodingDetector, m_text.c_str(), m_text.size(), &error);
     if (U_FAILURE(error)) {
-      throw getException("Could not set encoding detector text to "
+      throwException("Could not set encoding detector text to "
                      "[%s], error %d (%s)",
                      m_text.c_str(), error, u_errorName(error));
     }
@@ -58,7 +57,7 @@ class EncodingDetector : public IntlError {
                                m_declaredEncoding.c_str(),
                                m_declaredEncoding.size(), &error);
     if (U_FAILURE(error)) {
-      throw getException("Could not set encoding detector declaredEncoding to "
+      throwException("Could not set encoding detector declaredEncoding to "
                      "[%s], error %d (%s)",
                      m_text.c_str(), error, u_errorName(error));
     }
@@ -74,8 +73,7 @@ class EncodingDetector : public IntlError {
 
 extern const StaticString s_EncodingMatch;
 
-class EncodingMatch : public IntlError {
- public:
+struct EncodingMatch : IntlError {
   EncodingMatch() {}
   EncodingMatch(const EncodingMatch&) = delete;
   EncodingMatch& operator=(const EncodingMatch& src) {

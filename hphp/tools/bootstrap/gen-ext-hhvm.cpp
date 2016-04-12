@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -602,8 +602,7 @@ static void emitClassCtorAndDtor(const PhpClass& klass, std::ostream& out) {
  * fh_ or th_ function pointer alias, which is the f_/t_ signature with ABI
  * exposed.
  */
-void processFunc(const PhpFunc& func, std::ostream& header,
-                 std::ostream& cpp) {
+void processFunc(const PhpFunc& func, std::ostream& cpp) {
   bool isMethod = func.isMethod();
   auto classIt = g_classMap.find(func.className());
   if (classIt != g_classMap.end()) {
@@ -737,9 +736,9 @@ void processFunc(const PhpFunc& func, std::ostream& header,
 }
 
 int main(int argc, const char* argv[]) {
-  if (argc < 5) {
+  if (argc < 4) {
     std::cout << "Usage: " << argv[0]
-              << " <x64|arm> <output .h> <output .cpp> <*.idl.json>...\n";
+              << " <x64|arm> <output .cpp> <*.idl.json>...\n";
     return 0;
   }
 
@@ -748,16 +747,14 @@ int main(int argc, const char* argv[]) {
 
   g_armMode = (strcmp(argv[1], "arm") == 0);
 
-  std::ofstream header(argv[2]);
-  std::ofstream cpp(argv[3]);
+  std::ofstream cpp(argv[2]);
 
-  brandOutputFile(header, "gen-ext-hhvm.cpp", invocation_trace);
   brandOutputFile(cpp, "gen-ext-hhvm.cpp", invocation_trace);
 
   fbvector<PhpFunc> funcs;
   fbvector<PhpClass> classes;
 
-  for (auto i = 4; i < argc; ++i) {
+  for (auto i = 3; i < argc; ++i) {
     try {
       parseIDL(argv[i], funcs, classes);
     } catch (const std::exception& exc) {
@@ -776,16 +773,14 @@ int main(int argc, const char* argv[]) {
     }
   }
 
-  header << "namespace HPHP {\n\n";
   cpp << g_allIncludes << "\n";
   cpp << "namespace HPHP {\n\n";
 
   auto idlIt = g_funcVec.begin();
   for (; idlIt != g_funcVec.end(); ++idlIt) {
-    processFunc(**idlIt, header, cpp);
+    processFunc(**idlIt, cpp);
   }
 
-  header << "} // namespace HPHP\n";
   cpp << "} // namespace HPHP\n";
 
   return 0;

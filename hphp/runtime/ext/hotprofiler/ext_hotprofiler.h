@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -72,8 +72,7 @@ namespace HPHP {
  * in case they need additional information,
  * and then override allocateFrame().
  */
-class Frame {
-public:
+struct Frame {
   Frame          *m_parent;        // pointer to parent frame
   const char     *m_name;          // function name
   uint8_t         m_hash_code;     // hash_code for the function name

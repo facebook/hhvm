@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -188,12 +188,33 @@ struct IRUnit {
    */
   SSATmp* mainFP() const;
 
+  /*
+   * Return the main StkPtr for the unit.  This is the result of the DefSP
+   * instruction on the entry block. (note that tere should be no other stack
+   * pointers in the unit).
+   */
+  SSATmp* mainSP() const;
+
   /////////////////////////////////////////////////////////////////////////////
+
+  struct Hinter {
+    Hinter(IRUnit& unit, Block::Hint defHint) :
+        m_unit(unit), m_saved(unit.m_defHint) {
+      m_unit.m_defHint = defHint;
+    }
+    ~Hinter() {
+      m_unit.m_defHint = m_saved;
+    }
+   private:
+    IRUnit& m_unit;
+    Block::Hint m_saved;
+  };
 
   /*
    * Add a block to the IRUnit's arena.
    */
-  Block* defBlock(Block::Hint hint = Block::Hint::Neither);
+  Block* defBlock(uint64_t profCount = 1,
+                  Block::Hint hint = Block::Hint::Neither);
 
   /*
    * Add a DefConst instruction to the const table.
@@ -239,6 +260,8 @@ private:
 
   // Map from SSATmp ids to SSATmp*.
   jit::vector<SSATmp*> m_ssaTmps;
+
+  Block::Hint m_defHint = Block::Hint::Neither;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -367,6 +367,7 @@ function flock(resource $handle,
  *   delimiter (one character only).
  * @param string $enclosure - The optional enclosure parameter sets the field
  *   enclosure (one character only).
+ * @param string $escape_char - Set the escape character (one character only).
  *
  * @return mixed - Returns the length of the written string or FALSE on
  *   failure.
@@ -376,7 +377,8 @@ function flock(resource $handle,
 function fputcsv(resource $handle,
                  array $fields,
                  string $delimiter = ",",
-                 string $enclosure = "\""): mixed;
+                 string $enclosure = "\"",
+                 string $escape_char = "\\"): mixed;
 
 /**
  * Similar to fgets() except that fgetcsv() parses the line it reads for

@@ -26,6 +26,7 @@ namespace {
     echo "A\\$func reflection:\n";
     $rc = new ReflectionFunction("A\\$func");
     var_dump($rc->getParameters()[0]->getDefaultValue());
+    var_dump($rc->getParameters()[0]->getDefaultValueText());
     var_dump($rc->getParameters()[0]->getDefaultValueConstantName());
     echo "\n";
     echo "A\\$func call:\n";

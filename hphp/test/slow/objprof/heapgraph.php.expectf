@@ -1,0 +1,50 @@
+Capturing two snapshots...
+resource(%d) of type (HeapGraphContext)
+resource(%d) of type (HeapGraphContext)
+Stats for first capture:
+array(3) {
+  ["nodes"]=>
+  int(%d)
+  ["edges"]=>
+  int(%d)
+  ["roots"]=>
+  int(%d)
+}
+Getting invalid nodes and edges:
+Invalid nodes and edges work OK.
+
+Traversing second capture:
+ChildWithClosureMember
+ClassForSecondCapture
+ParentWithClosureTarget
+RootClass
+
+Traversing first capture:
+ChildWithClosureMember
+ParentWithClosureTarget
+RootClass
+
+Traversing edges for first capture:
+Property:child
+Property:children
+Property:closure
+Property:somestring
+
+Traversing roots for first capture:
+
+Getting in edges of root class:
+onsome-stack
+rds-local
+
+Getting out edges of root class:
+Property:children
+
+Doing DFS from root class on nodes:
+ChildWithClosureMember
+Closure$ParentWithClosureTarget::createClosure;%d
+MixedArray
+ParentWithClosureTarget
+RootClass
+String
+
+Doing DFS from root class on nodes (skipping root):

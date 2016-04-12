@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -526,6 +526,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
+  u->m_useStrictTypes = m_useStrictTypes;
   {
     const std::string& dirname = FileUtil::safe_dirname(m_filepath->data(),
                                                         m_filepath->size());
@@ -710,6 +711,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_mergeOnly)
     (m_isHHFile)
     (m_typeAliases)
+    (m_useStrictTypes)
     ;
 }
 
@@ -822,6 +824,33 @@ std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
   if (!loadHelper(ue, name, md5)) return nullptr;
+
+#ifdef USE_JEMALLOC
+  if (RuntimeOption::TrackPerUnitMemory) {
+    size_t len = sizeof(uint64_t*);
+    uint64_t* alloc;
+    uint64_t* del;
+    mallctl("thread.allocatedp", static_cast<void*>(&alloc), &len, nullptr, 0);
+    mallctl("thread.deallocatedp", static_cast<void*>(&del), &len, nullptr, 0);
+    auto before = *alloc;
+    auto debefore = *del;
+    std::unique_ptr<Unit> result = ue.create();
+    auto after = *alloc;
+    auto deafter = *del;
+
+    auto path = folly::sformat("/tmp/units-{}.map", getpid());
+    auto change = (after - deafter) - (before - debefore);
+    auto str = folly::sformat("{} {}\n", name, change);
+    auto out = std::fopen(path.c_str(), "a");
+    if (out) {
+      std::fwrite(str.data(), str.size(), 1, out);
+      std::fclose(out);
+    }
+
+    return result;
+  }
+#endif
+
   return ue.create();
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -52,7 +52,7 @@ void HHVM_FUNCTION(var_dump,
 void HHVM_FUNCTION(debug_zval_dump, const Variant& variable);
 String HHVM_FUNCTION(serialize, const Variant& value);
 Variant HHVM_FUNCTION(unserialize, const String& str,
-                      const Array& class_whitelist = empty_array_ref);
+                      const Array& options = empty_array_ref);
 
 ///////////////////////////////////////////////////////////////////////////////
 // variable table

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,16 +23,17 @@
 
 #include <folly/String.h>
 
-#include "hphp/util/match.h"
-#include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/base/builtin-functions.h" // f_serialize
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/builtin-functions.h" // f_serialize
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/util/match.h"
 
 namespace HPHP {
 
@@ -158,16 +159,16 @@ FuncInfo find_func_info(const Func* func) {
   };
 
   auto find_jump_targets = [&] {
-    auto it           = func->unit()->at(func->base());
+    auto pc           = func->unit()->at(func->base());
     auto const stop   = func->unit()->at(func->past());
-    auto const bcBase = reinterpret_cast<const Op*>(func->unit()->at(0));
+    auto const bcBase = func->unit()->at(0);
 
-    for (; it != stop; it += instrLen(reinterpret_cast<const Op*>(it))) {
-      auto const pop = reinterpret_cast<const Op*>(it);
-      auto const off = func->unit()->offsetOf(it);
-      if (isSwitch(*pop)) {
-        foreachSwitchTarget(pop, [&] (Offset off) {
-          add_target("L", pop - bcBase + off);
+    for (; pc != stop; pc += instrLen(pc)) {
+      auto const op = peek_op(pc);
+      auto const off = func->unit()->offsetOf(pc);
+      if (isSwitch(op)) {
+        foreachSwitchTarget(pc, [&] (Offset off) {
+          add_target("L", pc - bcBase + off);
         });
         continue;
       }
@@ -246,41 +247,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     return jmp_label(finfo, tgt);
   };
 
-  auto print_minstr = [&] {
-    auto const immVec = ImmVector::createFromStream(pc);
-    pc += immVec.size() + sizeof(int32_t) + sizeof(int32_t);
-    auto vec = immVec.vec();
-    auto const lcode = static_cast<LocationCode>(*vec++);
-
-    out.fmt(" <{}", locationCodeString(lcode));
-    if (numLocationCodeImms(lcode)) {
-      always_assert(numLocationCodeImms(lcode) == 1);
-      out.fmt(":{}", loc_name(finfo, decodeVariableSizeImm(&vec)));
-    }
-
-    while (vec < pc) {
-      auto const mcode = static_cast<MemberCode>(*vec++);
-      out.fmt(" {}", memberCodeString(mcode));
-      auto const imm = [&] { return decodeMemberCodeImm(&vec, mcode); };
-      switch (memberCodeImmType(mcode)) {
-      case MCodeImm::None:
-        break;
-      case MCodeImm::Local:
-        out.fmt(":{}", loc_name(finfo, imm()));
-        break;
-      case MCodeImm::String:
-        out.fmt(":{}", escaped(finfo.unit->lookupLitstrId(imm())));
-        break;
-      case MCodeImm::Int:
-        out.fmt(":{}", imm());
-        break;
-      }
-    }
-    assert(vec == pc);
-
-    out.fmt(">");
-  };
-
   auto print_switch = [&] {
     auto const vecLen = decode<int32_t>(pc);
     out.fmt(" <");
@@ -336,14 +302,13 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
-#define IMM_MA     print_minstr();
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
 #define IMM_ILA    print_itertab();
-#define IMM_IVA    out.fmt(" {}", decodeVariableSizeImm(&pc));
+#define IMM_IVA    out.fmt(" {}", decode_iva(pc));
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
-#define IMM_LA     out.fmt(" {}", loc_name(finfo, decodeVariableSizeImm(&pc)));
-#define IMM_IA     out.fmt(" {}", decodeVariableSizeImm(&pc));
+#define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
+#define IMM_IA     out.fmt(" {}", decode_iva(pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
 #define IMM_SA     out.fmt(" {}", \
                            escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
@@ -353,6 +318,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_OA(ty) out.fmt(" {}", \
                      subopToName(static_cast<ty>(decode<uint8_t>(pc))));
 #define IMM_VSA    print_stringvec();
+#define IMM_KA     out.fmt(" {}", show(decode_member_key(pc, finfo.unit)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x
@@ -367,10 +333,10 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt("{}", #opcode);                               \
     IMM_##imms                                            \
     break;
-  switch (*reinterpret_cast<const Op*>(pc)) { OPCODES }
+  switch (peek_op(pc)) { OPCODES }
 #undef O
 
-  assert(pc == startPc + instrLen(reinterpret_cast<const Op*>(startPc)));
+  assert(pc == startPc + instrLen(startPc));
 
 #undef IMM_NA
 #undef IMM_ONE
@@ -378,7 +344,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_THREE
 #undef IMM_FOUR
 
-#undef IMM_MA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA
@@ -393,6 +358,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_BA
 #undef IMM_OA
 #undef IMM_VSA
+#undef IMM_KA
 
   out.nl();
 }
@@ -470,7 +436,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
 
     print_instr(out, finfo, bcIter);
 
-    bcIter += instrLen(reinterpret_cast<const Op*>(bcIter));
+    bcIter += instrLen(bcIter);
   }
 }
 

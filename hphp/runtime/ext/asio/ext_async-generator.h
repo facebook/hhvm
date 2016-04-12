@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,15 +25,14 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-class c_AsyncGeneratorWaitHandle;
-class c_StaticWaitHandle;
-class c_WaitableWaitHandle;
+struct c_AsyncGeneratorWaitHandle;
+struct c_StaticWaitHandle;
+struct c_WaitableWaitHandle;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator
 
-class AsyncGenerator final : public BaseGenerator {
-public:
+struct AsyncGenerator final : BaseGenerator {
    AsyncGenerator() : m_waitHandle(nullptr) {}
   ~AsyncGenerator();
 
@@ -63,12 +62,12 @@ public:
   }
 
   bool isEagerlyExecuted() const {
-    assert(getState() == State::Running);
+    assert(isRunning());
     return m_waitHandle == nullptr;
   }
 
   c_AsyncGeneratorWaitHandle* getWaitHandle() const {
-    assert(getState() == State::Running);
+    assert(isRunning());
     return m_waitHandle;
   }
 

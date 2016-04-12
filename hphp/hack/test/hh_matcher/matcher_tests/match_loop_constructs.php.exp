@@ -1,0 +1,6 @@
+4: class Foo {
+5:   public function bar(): void {
+6:     while (true) {
+7:       if (true) {
+8:         break;
+10:         continue;

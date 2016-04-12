@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,7 @@ const VarNR INF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NEGINF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
 const Variant empty_string_variant_ref(staticEmptyString(),
-                                       Variant::StaticStrInit{});
+                                       Variant::PersistentStrInit{});
 
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
@@ -67,8 +67,8 @@ const StaticString
 Variant::Variant(StringData *v) noexcept {
   if (v) {
     m_data.pstr = v;
-    if (v->isStatic()) {
-      m_type = KindOfStaticString;
+    if (!v->isRefCounted()) {
+      m_type = KindOfPersistentString;
     } else {
       m_type = KindOfString;
       v->incRefCount();
@@ -93,17 +93,18 @@ Variant::Variant(const Variant& v) noexcept {
  * ResourceHdr, and RefData classes.
  */
 
-static_assert(typeToDestrIdx(KindOfString) == 1, "String destruct index");
-static_assert(typeToDestrIdx(KindOfArray)  == 2,  "Array destruct index");
-static_assert(typeToDestrIdx(KindOfObject) == 3, "Object destruct index");
-static_assert(typeToDestrIdx(KindOfResource) == 4,
+static_assert(typeToDestrIdx(KindOfString) == 2, "String destruct index");
+static_assert(typeToDestrIdx(KindOfArray)  == 3,  "Array destruct index");
+static_assert(typeToDestrIdx(KindOfObject) == 4, "Object destruct index");
+static_assert(typeToDestrIdx(KindOfResource) == 5,
               "Resource destruct index");
-static_assert(typeToDestrIdx(KindOfRef)    == 5,    "Ref destruct index");
+static_assert(typeToDestrIdx(KindOfRef)    == 6,    "Ref destruct index");
 
-static_assert(kDestrTableSize == 6,
+static_assert(kDestrTableSize == 7,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
+  nullptr,
   nullptr,
   (RawDestructor)getMethodPtr(&StringData::release),
   (RawDestructor)getMethodPtr(&ArrayData::release),
@@ -116,25 +117,6 @@ void tweak_variant_dtors() {
   if (RuntimeOption::EnableObjDestructCall) return;
   g_destructors[typeToDestrIdx(KindOfObject)] =
     (RawDestructor)getMethodPtr(&ObjectData::releaseNoObjDestructCheck);
-}
-
-Variant::~Variant() noexcept {
-  tvRefcountedDecRef(asTypedValue());
-  if (debug) {
-    memset(this, kTVTrashFill2, sizeof(*this));
-  }
-}
-
-void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
-  assert(type == KindOfString || type == KindOfArray ||
-         type == KindOfObject || type == KindOfResource ||
-         type == KindOfRef);
-  TypedValue tmp;
-  tmp.m_type = type;
-  tmp.m_data.num = datum;
-  if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
-    g_destructors[typeToDestrIdx(type)]((void*)datum);
-  }
 }
 
 Variant &Variant::assign(const Variant& v) noexcept {
@@ -173,7 +155,7 @@ IMPLEMENT_SET(double, m_type = KindOfDouble; m_data.dbl = v)
 IMPLEMENT_SET(const StaticString&,
               StringData* s = v.get();
               assert(s);
-              m_type = KindOfStaticString;
+              m_type = KindOfPersistentString;
               m_data.pstr = s)
 
 #undef IMPLEMENT_SET
@@ -194,7 +176,7 @@ IMPLEMENT_SET(const StaticString&,
   }
 
 IMPLEMENT_PTR_SET(StringData, pstr,
-                           v->isStatic() ? KindOfStaticString : KindOfString);
+                  v->isRefCounted() ? KindOfString : KindOfPersistentString);
 IMPLEMENT_PTR_SET(ArrayData, parr, KindOfArray)
 IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
 IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
@@ -216,7 +198,7 @@ IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
   }
 
 IMPLEMENT_STEAL(StringData, pstr,
-                v->isStatic() ? KindOfStaticString : KindOfString)
+                v->isRefCounted() ? KindOfString : KindOfPersistentString)
 IMPLEMENT_STEAL(ArrayData, parr, KindOfArray)
 IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
 IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
@@ -224,17 +206,7 @@ IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
 #undef IMPLEMENT_STEAL
 
 int Variant::getRefCount() const noexcept {
-  switch (m_type) {
-    DT_UNCOUNTED_CASE:
-      return 1;
-    case KindOfString:    return m_data.pstr->getCount();
-    case KindOfArray:     return m_data.parr->getCount();
-    case KindOfObject:    return m_data.pobj->getCount();
-    case KindOfResource:  return m_data.pres->getCount();
-    case KindOfRef:       return m_data.pref->var()->getRefCount();
-    case KindOfClass:     break;
-  }
-  not_reached();
+  return isRefcountedType(m_type) ? tvGetCount(asTypedValue()) : 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,6 +225,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -266,7 +239,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
       dval = m_data.dbl;
       return KindOfDouble;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return checkString ? m_data.pstr->toNumeric(ival, dval) : m_type;
 
@@ -283,6 +256,7 @@ bool Variant::isScalar() const noexcept {
   switch (getType()) {
     case KindOfUninit:
     case KindOfNull:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -291,7 +265,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return true;
 
@@ -323,8 +297,9 @@ bool Variant::toBooleanHelper() const {
     case KindOfBoolean:
     case KindOfInt64:         return m_data.num;
     case KindOfDouble:        return m_data.dbl != 0;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return m_data.pstr->toBoolean();
+    case KindOfPersistentArray:
     case KindOfArray:         return !m_data.parr->empty();
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
@@ -342,8 +317,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfBoolean:
     case KindOfInt64:         return m_data.num;
     case KindOfDouble:        return HPHP::toInt64(m_data.dbl);
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return m_data.pstr->toInt64(base);
+    case KindOfPersistentArray:
     case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
@@ -360,8 +336,9 @@ double Variant::toDoubleHelper() const {
     case KindOfBoolean:
     case KindOfInt64:         return (double)toInt64();
     case KindOfDouble:        return m_data.dbl;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return m_data.pstr->toDouble();
+    case KindOfPersistentArray:
     case KindOfArray:         return (double)toInt64();
     case KindOfObject:        return m_data.pobj->toDouble();
     case KindOfResource:      return m_data.pres->data()->o_toDouble();
@@ -387,11 +364,12 @@ String Variant::toStringHelper() const {
     case KindOfDouble:
       return m_data.dbl;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       assert(false); // Should be done in caller
       return String{m_data.pstr};
 
+    case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
       return array_string;
@@ -418,8 +396,11 @@ Array Variant::toArrayHelper() const {
     case KindOfBoolean:       return Array::Create(*this);
     case KindOfInt64:         return Array::Create(m_data.num);
     case KindOfDouble:        return Array::Create(*this);
-    case KindOfStaticString:
-    case KindOfString:        return Array::Create(Variant{m_data.pstr});
+    case KindOfPersistentString:
+      return Array::Create(Variant{m_data.pstr, PersistentStrInit{}});
+    case KindOfString:
+      return Array::Create(Variant{m_data.pstr});
+    case KindOfPersistentArray:
     case KindOfArray:         return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
@@ -438,7 +419,7 @@ Object Variant::toObjectHelper() const {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
     case KindOfResource: {
       auto obj = SystemLib::AllocStdClassObject();
@@ -446,6 +427,8 @@ Object Variant::toObjectHelper() const {
       return obj;
     }
 
+
+    case KindOfPersistentArray:
     case KindOfArray:
       return ObjectData::FromArray(m_data.parr);
 
@@ -468,8 +451,9 @@ Resource Variant::toResourceHelper() const {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
       return Resource(req::make<DummyResource>());
@@ -486,44 +470,6 @@ Resource Variant::toResourceHelper() const {
   not_reached();
 }
 
-VarNR Variant::toKey() const {
-  if (m_type == KindOfString || m_type == KindOfStaticString) {
-    int64_t n;
-    if (m_data.pstr->isStrictlyInteger(n)) {
-      return VarNR(n);
-    } else {
-      return VarNR(m_data.pstr);
-    }
-  }
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return VarNR(staticEmptyString());
-
-    case KindOfBoolean:
-    case KindOfInt64:
-      return VarNR(m_data.num);
-
-    case KindOfDouble:
-    case KindOfResource:
-      return VarNR(toInt64());
-
-    case KindOfStaticString:
-    case KindOfString:
-    case KindOfArray:
-    case KindOfObject:
-      throw_bad_type_exception("Invalid type used as key");
-      return null_varNR;
-
-    case KindOfRef:
-      return m_data.pref->var()->toKey();
-
-    case KindOfClass:
-      break;
-  }
-  not_reached();
-}
-
 Variant& lvalBlackHole() {
   auto& bh = get_env_constants()->lvalProxy;
   bh = uninit_null();
@@ -532,28 +478,35 @@ Variant& lvalBlackHole() {
 
 void Variant::setEvalScalar() {
   switch (m_type) {
-    DT_UNCOUNTED_CASE:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
       return;
 
+    case KindOfPersistentString:
     case KindOfString: {
-      StringData *pstr = m_data.pstr;
+      auto pstr = m_data.pstr;
       if (!pstr->isStatic()) {
         StringData *sd = makeStaticString(pstr);
         decRefStr(pstr);
         m_data.pstr = sd;
         assert(m_data.pstr->isStatic());
-        m_type = KindOfStaticString;
+        m_type = KindOfPersistentString;
       }
       return;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray: {
-      ArrayData *parr = m_data.parr;
+      auto parr = m_data.parr;
       if (!parr->isStatic()) {
-        ArrayData *ad = ArrayData::GetScalarArray(parr);
-        decRefArr(parr);
+        auto ad = ArrayData::GetScalarArray(parr);
+        assert(ad->isStatic());
         m_data.parr = ad;
-        assert(m_data.parr->isStatic());
+        m_type = KindOfPersistentArray;
+        decRefArr(parr);
       }
       return;
     }

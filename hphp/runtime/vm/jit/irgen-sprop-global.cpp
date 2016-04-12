@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@ void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src) {
   auto const prevValue = gen(env, LdMem, ptr->type().deref(), ptr);
   pushIncRef(env, src);
   gen(env, StMem, ptr, src);
-  gen(env, DecRef, prevValue);
+  decRef(env, prevValue);
 }
 
 void destroyName(IRGS& env, SSATmp* name) {
@@ -91,7 +91,7 @@ SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCGetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(CGetS-PropNameNotString);
@@ -107,7 +107,7 @@ void emitCGetS(IRGS& env) {
 }
 
 void emitSetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPOffset{2});
+  auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(SetS-PropNameNotString);
@@ -123,7 +123,7 @@ void emitSetS(IRGS& env) {
 }
 
 void emitVGetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(VGetS-PropNameNotString);
@@ -143,7 +143,7 @@ void emitVGetS(IRGS& env) {
 }
 
 void emitBindS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPOffset{2});
+  auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(BindS-PropNameNotString);
@@ -158,7 +158,7 @@ void emitBindS(IRGS& env) {
 }
 
 void emitIssetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
   if (!ssaPropName->isA(TStr)) {
     PUNT(IssetS-PropNameNotString);
   }
@@ -183,7 +183,7 @@ void emitIssetS(IRGS& env) {
 }
 
 void emitEmptyS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
   if (!ssaPropName->isA(TStr)) {
     PUNT(EmptyS-PropNameNotString);
   }
@@ -222,6 +222,27 @@ void emitCGetG(IRGS& env) {
   );
 }
 
+void emitCGetQuietG(IRGS& env) {
+  auto const name = topC(env);
+  if (!name->isA(TStr)) PUNT(CGetQuietG-NonStrName);
+
+  auto ret = cond(
+    env,
+    [&] (Block* taken) { return gen(env, LdGblAddr, taken, name); },
+    [&] (SSATmp* ptr) {
+      auto tmp = gen(env, LdMem, TCell, gen(env, UnboxPtr, ptr));
+      gen(env, IncRef, tmp);
+      return tmp;
+    },
+    // Taken: LdGblAddr branched here because no global variable exists with
+    // that name.
+    [&] { return cns(env, TInitNull); }
+  );
+
+  destroyName(env, name);
+  push(env, ret);
+}
+
 void emitVGetG(IRGS& env) {
   auto const name = topC(env);
   if (!name->isA(TStr)) PUNT(VGetG-NonStrName);
@@ -234,7 +255,7 @@ void emitVGetG(IRGS& env) {
 }
 
 void emitBindG(IRGS& env) {
-  auto const name = topC(env, BCSPOffset{1});
+  auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(BindG-NameNotStr);
   auto const box = popV(env);
   auto const ptr = gen(env, LdGblAddrDef, name);
@@ -243,7 +264,7 @@ void emitBindG(IRGS& env) {
 }
 
 void emitSetG(IRGS& env) {
-  auto const name = topC(env, BCSPOffset{1});
+  auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
   auto const value   = popC(env, DataTypeCountness);
   auto const unboxed = gen(env, UnboxPtr, gen(env, LdGblAddrDef, name));
@@ -252,7 +273,7 @@ void emitSetG(IRGS& env) {
 }
 
 void emitIssetG(IRGS& env) {
-  auto const name = topC(env, BCSPOffset{0});
+  auto const name = topC(env, BCSPRelOffset{0});
   if (!name->isA(TStr)) PUNT(IssetG-NameNotStr);
 
   auto const ret = cond(

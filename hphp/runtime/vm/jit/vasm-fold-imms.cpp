@@ -81,6 +81,11 @@ struct ImmFolder {
     if (match_int(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
     else if (match_int(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
   }
+  void fold(testq& in, Vinstr& out) {
+    int val;
+    if (match_int(in.s0, val)) { out = testqi{val, in.s1, in.sf}; }
+    else if (match_int(in.s1, val)) { out = testqi{val, in.s0, in.sf}; }
+  }
   void fold(cmpb& in, Vinstr& out) {
     int val;
     if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
@@ -179,6 +184,34 @@ struct ImmFolder {
     int val;
     if (match_byte(in.s, val)) {
       out = copy{in.s, in.d};
+      if (in.d.isVirt()) {
+        valid.set(in.d);
+        vals[in.d] = val;
+      }
+    }
+  }
+  void fold(movtql& in, Vinstr& out) {
+    int val;
+    if (match_int(in.s, val)) {
+      out = copy{in.s, in.d};
+      if (in.d.isVirt()) {
+        valid.set(in.d);
+        vals[in.d] = val;
+      }
+    }
+  }
+  void fold(movtqb& in, Vinstr& out) {
+    int val;
+    if (match_byte(in.s, val)) {
+      out = copy{in.s, in.d};
+      if (in.d.isVirt()) {
+        valid.set(in.d);
+        vals[in.d] = val;
+      }
+    }
+  }
+  void fold(copy& in, Vinstr& out) {
+    if (in.d.isVirt() && valid.test(in.s)) {
       valid.set(in.d);
       vals[in.d] = vals[in.s];
     }

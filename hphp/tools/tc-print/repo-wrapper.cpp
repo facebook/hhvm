@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 
 #include "hphp/hhvm/process-init.h"
 #include "hphp/util/hdf.h"
-#include "hphp/util/repo-schema.h"
+#include "hphp/util/build-info.h"
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -31,14 +31,18 @@ namespace HPHP { namespace jit {
 
 RepoWrapper::RepoWrapper(const char* repoSchema,
                          const std::string& configFile) {
-  kRepoSchemaId = repoSchema;
+  if (setenv("HHVM_RUNTIME_REPO_SCHEMA", repoSchema, 1 /* overwrite */)) {
+    fprintf(stderr, "Could not set repo schema");
+    exit(EXIT_FAILURE);
+  }
 
   printf("# Config file: %s\n", configFile.c_str());
-  printf("# Repo schema: %s\n", kRepoSchemaId);
+  printf("# Repo schema: %s\n", repoSchemaId().begin());
 
   register_process_init();
   initialize_repo();
   hphp_thread_init();
+  g_context.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   if (!configFile.empty()) {

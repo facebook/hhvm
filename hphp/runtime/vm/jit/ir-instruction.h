@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -225,9 +225,11 @@ struct IRInstruction {
   folly::Range<SSATmp**> dsts();
 
   /*
-   * Set the ith src.
+   * Set a single src or all srcs.
    */
   void setSrc(uint32_t i, SSATmp* newSrc);
+  void setSrcs(uint32_t numSrcs, SSATmp** newSrcs);
+  void deleteSrc(uint32_t i);
 
   /*
    * Set the dsts, either as a single dst, or as `numDsts' dsts (if the
@@ -235,6 +237,7 @@ struct IRInstruction {
    */
   void setDst(SSATmp* newDst);
   void setDsts(uint32_t numDsts, SSATmp** newDsts);
+  void deleteDst(uint32_t i);
 
 
   /////////////////////////////////////////////////////////////////////////////

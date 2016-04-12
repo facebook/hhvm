@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -71,7 +71,7 @@ static bool mod_is_open();
 ///////////////////////////////////////////////////////////////////////////////
 // global data
 
-class SessionSerializer;
+struct SessionSerializer;
 struct Session {
   enum Status {
     Disabled,
@@ -124,9 +124,6 @@ struct Session {
   int64_t hash_bits_per_character{0};
 };
 
-const int64_t k_PHP_SESSION_DISABLED = Session::Disabled;
-const int64_t k_PHP_SESSION_NONE     = Session::None;
-const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
 struct SessionRequestData final : Session {
@@ -265,7 +262,9 @@ String SessionModule::create_sid() {
     }
   }
 
-  String hashed = HHVM_FN(hash_final)(context.toResource(), /* raw */ true);
+  auto const hashed = HHVM_FN(hash_final)(
+    context.toResource(), /* raw */ true
+  ).toString();
 
   if (s_session->hash_bits_per_character < 4 ||
       s_session->hash_bits_per_character > 6) {
@@ -489,20 +488,17 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
 //////////////////////////////////////////////////////////////////////////////
 // SystemlibSessionModule implementations
 
-static class RedisSessionModule : public SystemlibSessionModule {
- public:
+static struct RedisSessionModule : SystemlibSessionModule {
   RedisSessionModule() :
     SystemlibSessionModule("redis", "RedisSessionModule") { }
 } s_redis_session_module;
 
-static class MemcacheSessionModule : public SystemlibSessionModule {
- public:
+static struct MemcacheSessionModule : SystemlibSessionModule {
   MemcacheSessionModule() :
     SystemlibSessionModule("memcache", "MemcacheSessionModule") { }
 } s_memcache_session_module;
 
-static class MemcachedSessionModule : public SystemlibSessionModule {
- public:
+static struct MemcachedSessionModule : SystemlibSessionModule {
   MemcachedSessionModule() :
     SystemlibSessionModule("memcached", "MemcachedSessionModule") { }
 } s_memcached_session_module;
@@ -510,8 +506,7 @@ static class MemcachedSessionModule : public SystemlibSessionModule {
 //////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
-class FileSessionData {
-public:
+struct FileSessionData {
   FileSessionData() : m_fd(-1), m_dirdepth(0), m_st_size(0), m_filemode(0600) {
   }
 
@@ -846,8 +841,7 @@ private:
 };
 IMPLEMENT_THREAD_LOCAL(FileSessionData, s_file_session_data);
 
-class FileSessionModule : public SessionModule {
-public:
+struct FileSessionModule : SessionModule {
   FileSessionModule() : SessionModule("files") {
   }
   virtual bool open(const char *save_path, const char *session_name) {
@@ -874,8 +868,7 @@ static FileSessionModule s_file_session_module;
 ///////////////////////////////////////////////////////////////////////////////
 // UserSessionModule
 
-class UserSessionModule : public SessionModule {
- public:
+struct UserSessionModule : SessionModule {
   UserSessionModule() : SessionModule("user") {}
 
   bool open(const char *save_path, const char *session_name) override {
@@ -949,8 +942,7 @@ static UserSessionModule s_user_session_module;
 ///////////////////////////////////////////////////////////////////////////////
 // session serializers
 
-class SessionSerializer {
-public:
+struct SessionSerializer {
   explicit SessionSerializer(const char *name) : m_name(name) {
     RegisteredSerializers.push_back(this);
   }
@@ -982,8 +974,7 @@ std::vector<SessionSerializer*> SessionSerializer::RegisteredSerializers;
 #define PS_BIN_UNDEF (1<<(PS_BIN_NR_OF_BITS-1))
 #define PS_BIN_MAX (PS_BIN_UNDEF-1)
 
-class BinarySessionSerializer : public SessionSerializer {
-public:
+struct BinarySessionSerializer : SessionSerializer {
   BinarySessionSerializer() : SessionSerializer("php_binary") {}
 
   virtual String encode() {
@@ -1038,8 +1029,7 @@ static BinarySessionSerializer s_binary_session_serializer;
 #define PS_DELIMITER '|'
 #define PS_UNDEF_MARKER '!'
 
-class PhpSessionSerializer : public SessionSerializer {
-public:
+struct PhpSessionSerializer : SessionSerializer {
   PhpSessionSerializer() : SessionSerializer("php") {}
 
   virtual String encode() {
@@ -1100,8 +1090,7 @@ public:
 };
 static PhpSessionSerializer s_php_session_serializer;
 
-class PhpSerializeSessionSerializer : public SessionSerializer {
-public:
+struct PhpSerializeSessionSerializer : SessionSerializer {
   PhpSerializeSessionSerializer() : SessionSerializer("php_serialize") {}
 
   virtual String encode() {
@@ -1115,7 +1104,7 @@ public:
 
     try {
       auto sess = vu.unserialize();
-      php_global_set(s__SESSION, std::move(sess.toArray()));
+      php_global_set(s__SESSION, sess.toArray());
     } catch (const ResourceExceededException&) {
       throw;
     } catch (const Exception&) {}
@@ -1125,8 +1114,7 @@ public:
 };
 static PhpSerializeSessionSerializer s_php_serialize_session_serializer;
 
-class WddxSessionSerializer : public SessionSerializer {
-public:
+struct WddxSessionSerializer : SessionSerializer {
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
   virtual String encode() {
@@ -1617,7 +1605,7 @@ static String HHVM_FUNCTION(session_id,
   }
 
   if (!newid.isNull()) {
-    s_session->id = newid;
+    s_session->id = newid.toString();
   }
 
   return ret;
@@ -1862,23 +1850,12 @@ void ext_session_request_shutdown() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_PHP_SESSION_DISABLED("PHP_SESSION_DISABLED");
-const StaticString s_PHP_SESSION_NONE("PHP_SESSION_NONE");
-const StaticString s_PHP_SESSION_ACTIVE("PHP_SESSION_ACTIVE");
-
-static class SessionExtension final : public Extension {
- public:
+static struct SessionExtension final : Extension {
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_SESSION_DISABLED.get(), k_PHP_SESSION_DISABLED
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_SESSION_NONE.get(), k_PHP_SESSION_NONE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_SESSION_ACTIVE.get(), k_PHP_SESSION_ACTIVE
-    );
+    HHVM_RC_INT(PHP_SESSION_DISABLE, Session::Disabled);
+    HHVM_RC_INT(PHP_SESSION_NONE, Session::None);
+    HHVM_RC_INT(PHP_SESSION_ACTIVE, Session::Active);
 
     HHVM_FE(session_status);
     HHVM_FE(session_module_name);

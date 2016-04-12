@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -36,8 +36,10 @@ const int64_t k_JSON_UNESCAPED_SLASHES       = 1<<6;
 const int64_t k_JSON_PRETTY_PRINT            = 1<<7;
 const int64_t k_JSON_UNESCAPED_UNICODE       = 1<<8;
 const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
+const int64_t k_JSON_PRESERVE_ZERO_FRACTION  = 1<<10;
 
 // json_decode() options
+const int64_t k_JSON_OBJECT_AS_ARRAY   = 1<<0;
 const int64_t k_JSON_BIGINT_AS_STRING  = 1<<1;
 
 // FB json_decode() options
@@ -216,112 +218,36 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_JSON_HEX_TAG("JSON_HEX_TAG"),
-  s_JSON_HEX_AMP("JSON_HEX_AMP"),
-  s_JSON_HEX_APOS("JSON_HEX_APOS"),
-  s_JSON_HEX_QUOT("JSON_HEX_QUOT"),
-  s_JSON_FORCE_OBJECT("JSON_FORCE_OBJECT"),
-  s_JSON_NUMERIC_CHECK("JSON_NUMERIC_CHECK"),
-  s_JSON_UNESCAPED_SLASHES("JSON_UNESCAPED_SLASHES"),
-  s_JSON_PRETTY_PRINT("JSON_PRETTY_PRINT"),
-  s_JSON_UNESCAPED_UNICODE("JSON_UNESCAPED_UNICODE"),
-  s_JSON_PARTIAL_OUTPUT_ON_ERROR("JSON_PARTIAL_OUTPUT_ON_ERROR"),
-  s_JSON_BIGINT_AS_STRING("JSON_BIGINT_AS_STRING"),
-  s_JSON_FB_LOOSE("JSON_FB_LOOSE"),
-  s_JSON_FB_UNLIMITED("JSON_FB_UNLIMITED"),
-  s_JSON_FB_EXTRA_ESCAPES("JSON_FB_EXTRA_ESCAPES"),
-  s_JSON_FB_COLLECTIONS("JSON_FB_COLLECTIONS"),
-  s_JSON_FB_STABLE_MAPS("JSON_FB_STABLE_MAPS"),
-  s_JSON_ERROR_NONE("JSON_ERROR_NONE"),
-  s_JSON_ERROR_DEPTH("JSON_ERROR_DEPTH"),
-  s_JSON_ERROR_STATE_MISMATCH("JSON_ERROR_STATE_MISMATCH"),
-  s_JSON_ERROR_CTRL_CHAR("JSON_ERROR_CTRL_CHAR"),
-  s_JSON_ERROR_SYNTAX("JSON_ERROR_SYNTAX"),
-  s_JSON_ERROR_UTF8("JSON_ERROR_UTF8"),
-  s_JSON_ERROR_RECURSION("JSON_ERROR_RECURSION"),
-  s_JSON_ERROR_INF_OR_NAN("JSON_ERROR_INF_OR_NAN"),
-  s_JSON_ERROR_UNSUPPORTED_TYPE("JSON_ERROR_UNSUPPORTED_TYPE");
-
-class JsonExtension final : public Extension {
- public:
+struct JsonExtension final : Extension {
   JsonExtension() : Extension("json", "1.2.1") {}
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_HEX_TAG.get(), k_JSON_HEX_TAG
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_HEX_AMP.get(), k_JSON_HEX_AMP
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_HEX_APOS.get(), k_JSON_HEX_APOS
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_HEX_QUOT.get(), k_JSON_HEX_QUOT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_FORCE_OBJECT.get(), k_JSON_FORCE_OBJECT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_NUMERIC_CHECK.get(), k_JSON_NUMERIC_CHECK
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_UNESCAPED_SLASHES.get(), k_JSON_UNESCAPED_SLASHES
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_PRETTY_PRINT.get(), k_JSON_PRETTY_PRINT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_UNESCAPED_UNICODE.get(), k_JSON_UNESCAPED_UNICODE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_PARTIAL_OUTPUT_ON_ERROR.get(), k_JSON_PARTIAL_OUTPUT_ON_ERROR
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_BIGINT_AS_STRING.get(), k_JSON_BIGINT_AS_STRING
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_FB_LOOSE.get(), k_JSON_FB_LOOSE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_FB_UNLIMITED.get(), k_JSON_FB_UNLIMITED
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_FB_EXTRA_ESCAPES.get(), k_JSON_FB_EXTRA_ESCAPES
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_FB_COLLECTIONS.get(), k_JSON_FB_COLLECTIONS
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_FB_STABLE_MAPS.get(), k_JSON_FB_STABLE_MAPS
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_ERROR_NONE.get(), k_JSON_ERROR_NONE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_ERROR_DEPTH.get(), k_JSON_ERROR_DEPTH
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_ERROR_STATE_MISMATCH.get(), k_JSON_ERROR_STATE_MISMATCH
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_ERROR_CTRL_CHAR.get(), k_JSON_ERROR_CTRL_CHAR
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_ERROR_SYNTAX.get(), k_JSON_ERROR_SYNTAX
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_JSON_ERROR_UTF8.get(), k_JSON_ERROR_UTF8
-    );
-  Native::registerConstant<KindOfInt64>(
-    s_JSON_ERROR_RECURSION.get(), k_JSON_ERROR_RECURSION
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_JSON_ERROR_INF_OR_NAN.get(), k_JSON_ERROR_INF_OR_NAN
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_JSON_ERROR_UNSUPPORTED_TYPE.get(), k_JSON_ERROR_UNSUPPORTED_TYPE
-  );
+    HHVM_RC_INT(JSON_HEX_TAG, k_JSON_HEX_TAG);
+    HHVM_RC_INT(JSON_HEX_AMP, k_JSON_HEX_AMP);
+    HHVM_RC_INT(JSON_HEX_APOS, k_JSON_HEX_APOS);
+    HHVM_RC_INT(JSON_HEX_QUOT, k_JSON_HEX_QUOT);
+    HHVM_RC_INT(JSON_FORCE_OBJECT, k_JSON_FORCE_OBJECT);
+    HHVM_RC_INT(JSON_NUMERIC_CHECK, k_JSON_NUMERIC_CHECK);
+    HHVM_RC_INT(JSON_UNESCAPED_SLASHES, k_JSON_UNESCAPED_SLASHES);
+    HHVM_RC_INT(JSON_PRETTY_PRINT, k_JSON_PRETTY_PRINT);
+    HHVM_RC_INT(JSON_UNESCAPED_UNICODE, k_JSON_UNESCAPED_UNICODE);
+    HHVM_RC_INT(JSON_PARTIAL_OUTPUT_ON_ERROR, k_JSON_PARTIAL_OUTPUT_ON_ERROR);
+    HHVM_RC_INT(JSON_PRESERVE_ZERO_FRACTION, k_JSON_PRESERVE_ZERO_FRACTION);
+    HHVM_RC_INT(JSON_OBJECT_AS_ARRAY, k_JSON_OBJECT_AS_ARRAY);
+    HHVM_RC_INT(JSON_BIGINT_AS_STRING, k_JSON_BIGINT_AS_STRING);
+    HHVM_RC_INT(JSON_FB_LOOSE, k_JSON_FB_LOOSE);
+    HHVM_RC_INT(JSON_FB_UNLIMITED, k_JSON_FB_UNLIMITED);
+    HHVM_RC_INT(JSON_FB_EXTRA_ESCAPES, k_JSON_FB_EXTRA_ESCAPES);
+    HHVM_RC_INT(JSON_FB_COLLECTIONS, k_JSON_FB_COLLECTIONS);
+    HHVM_RC_INT(JSON_FB_STABLE_MAPS, k_JSON_FB_STABLE_MAPS);
+    HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);
+    HHVM_RC_INT(JSON_ERROR_DEPTH, k_JSON_ERROR_DEPTH);
+    HHVM_RC_INT(JSON_ERROR_STATE_MISMATCH, k_JSON_ERROR_STATE_MISMATCH);
+    HHVM_RC_INT(JSON_ERROR_CTRL_CHAR, k_JSON_ERROR_CTRL_CHAR);
+    HHVM_RC_INT(JSON_ERROR_SYNTAX, k_JSON_ERROR_SYNTAX);
+    HHVM_RC_INT(JSON_ERROR_UTF8, k_JSON_ERROR_UTF8);
+    HHVM_RC_INT(JSON_ERROR_RECURSION, k_JSON_ERROR_RECURSION);
+    HHVM_RC_INT(JSON_ERROR_INF_OR_NAN, k_JSON_ERROR_INF_OR_NAN);
+    HHVM_RC_INT(JSON_ERROR_UNSUPPORTED_TYPE, k_JSON_ERROR_UNSUPPORTED_TYPE);
 
     HHVM_FE(json_last_error);
     HHVM_FE(json_last_error_msg);
@@ -330,6 +256,15 @@ class JsonExtension final : public Extension {
 
     loadSystemlib();
   }
+
+  void requestInit() override {
+    json_parser_init();
+  }
+
+  void vscan(IMarker& mark) const override {
+    json_parser_scan(mark);
+  }
+
 } s_json_extension;
 
 }

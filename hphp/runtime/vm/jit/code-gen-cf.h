@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,6 +123,16 @@ void ifThen(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
             Then thenBlock, bool unlikely) {
   code_gen_detail::ifThen(vmain, unlikely ? vcold : vmain,
                           cc, sf, thenBlock);
+}
+
+/*
+ * Like the above flavors of ifThen(), except with a block label instead of a
+ * block-emitting lambda.
+ */
+inline void ifThen(Vout& v, ConditionCode cc, Vreg sf, Vlabel then) {
+  auto const done = v.makeBlock();
+  v << jcc{cc, sf, {done, then}};
+  v = done;
 }
 
 /*

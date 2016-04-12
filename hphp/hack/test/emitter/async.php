@@ -38,7 +38,7 @@ async function foo2_genva(): Awaitable<int> {
   return $x + $y;
 }
 
-async function foo3(): Awaitable<array<int>> {
+async function foo3(): Awaitable<array<int, int>> {
   $nus = array();
   $nus[f(0)] = await genNum2(f(1), f(2));
   return $nus;
@@ -59,16 +59,17 @@ function prep<T>(Awaitable<T> $aw): T {
   return $aw->getWaitHandle()->join();
 }
 
-function gena_<Tk, Tv>(
-  KeyedTraversable<Tk, Awaitable<Tv>> $awaitables
-  ): Awaitable<array<Tv>> {
+async function gena_<Tk, Tv>(
+  KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
+): Awaitable<array<Tv>> {
   $wait_handles = array();
   foreach ($awaitables as $index => $awaitable) {
     $wait_handles[$index] = $awaitable->getWaitHandle();
   }
   /* HH_FIXME[2049] */
   /* HH_FIXME[4026] */
-  return GenArrayWaitHandle::create($wait_handles);
+  await AwaitAllWaitHandle::fromArray($wait_handles);
+  return array_map($wh ==> \HH\Asio\result($wh), $wait_handles);
 }
 
 function wait(): Awaitable<void> {

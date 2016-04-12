@@ -7,6 +7,8 @@ list(APPEND HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/version.h")
 if(NOT LINUX)
   list(REMOVE_ITEM CXX_SOURCES
        ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
+  list(REMOVE_ITEM HEADER_SOURCES
+       ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.h)
 endif()
 
 if(NOT ENABLE_FASTCGI)
@@ -33,6 +35,12 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Generating HHIR opcode table"
   VERBATIM)
+
+add_precompiled_header(
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_static.h"
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_static.cpp"
+  CXX_SOURCES
+)
 
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}

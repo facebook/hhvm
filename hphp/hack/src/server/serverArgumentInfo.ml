@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -10,10 +10,10 @@
 
 type result = int * (string option * string) list
 
-let go genv env content line char =
+let go content line char =
   ArgumentInfoService.attach_hooks (line, char);
-  let funs, classes = ServerIdeUtils.declare Relative_path.default content in
-  ServerIdeUtils.fix_file_and_def Relative_path.default content;
+  let funs, classes =
+    ServerIdeUtils.declare_and_check Relative_path.default content in
   let pos, expected =
     match ArgumentInfoService.get_result() with
     | Some (pos, expected) -> pos, expected

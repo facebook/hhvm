@@ -16,8 +16,8 @@ if debug then {
   link += [ "-g" ]
 }
 
-if os_type = "linux" then {
-  cclib = [ "-lelf" ]
+if os_type = "Unix" then {
+  cclib += [ "-lrt" ]
 }
 
 if have_lz4 then {
@@ -58,6 +58,7 @@ end
 
 begin library "hh-fsnotify-darwin"
   if not (system = "macosx" && os_type = "Unix") then enabled = false
+  requires += [ "ROOTPROJECT" ]
   cclib = [
     "-sectcreate" "-__text" "hhi" "%{ROOTPROJECT_FULL_SRC_DIR}%/bin/hhi.tar.gz"
     "-framework" "CoreServices"
@@ -68,13 +69,16 @@ begin library "hh-fsnotify-darwin"
     "fsevents/fsevents.ml"
     "fsnotify_darwin/fsnotify.ml"
   ]
-  requires += [ "ROOTPROJECT" ]
+  requires += [ "hh-utils-core" ]
 end
 
 begin library "hh-fsnotify-win"
   if not (os_type = "Win32") then enabled = false
-  requires += [ "ROOTPROJECT" ]
-  files = [ "fsnotify_win/fsnotify.ml" ]
+  files = [
+    "fsnotify_win/fsnotify_stubs.c"
+    "fsnotify_win/fsnotify.ml"
+  ]
+  requires += [ "hh-utils-core" ]
 end
 
 begin library "hh-fsnotify"
@@ -92,28 +96,57 @@ begin library "hh-utils-core"
   files = [ "utils/core.ml" ]
 end
 
+begin library "hh-utils-json"
+  files = [
+    "utils/hh_json/hh_json.mli"
+    "utils/hh_json/hh_json.ml"
+  ]
+end
+
+begin library "hh-utils-collections"
+  files = [
+    "utils/collections/hashSet.mli"
+    "utils/collections/hashSet.ml"
+    "utils/collections/myMap.mli"
+    "utils/collections/myMap.ml"
+  ]
+end
+
 begin library "hh-utils-common"
-  requires += [ "hh-third-party" "hh-utils-core" "hh-fsnotify" ]
+  requires += [
+    "hh-third-party"
+    "hh-utils-core"
+    "hh-fsnotify"
+    "hh-utils-json"
+  ]
+  ccopt += "-DOSS_SMALL_HH_TABLE_POWS"
   files = [
     "heap/hh_shared.c"
 
-    "utils/get_build_id.gen.c"
+    "utils/files.c"
     "utils/get_build_id.c"
-    "utils/nproc.c"
-    "utils/realpath.c"
+    "utils/get_build_id.gen.c"
     "utils/handle_stubs.c"
+    "utils/nproc.c"
+    "utils/priorities.c"
+    "utils/realpath.c"
+    "utils/sysinfo.c"
+    "utils/win32_support.c"
+    "utils/findUtils.ml"
     "utils/ident.ml"
     "utils/utils.ml"
     "utils/hh_json.ml"
     "utils/sys_utils.ml"
     "utils/path.ml"
     "utils/relative_path.ml"
+    "utils/file_pos.ml"
     "utils/pos.ml"
     "utils/errors.ml"
     "utils/lint.ml"
-    "utils/config_file.ml"
     "utils/tail.ml"
     "utils/handle.ml"
+    "utils/random_id.ml"
+    "utils/timeout.ml"
   ]
 end
 
@@ -130,16 +163,18 @@ begin library "hh-utils"
     "utils/tty.ml"
     "utils/printSignal.ml"
     "utils/trie.ml"
-    "utils/find.ml"
+    "utils/stats.ml"
     "utils/hh_logger.ml"
     "utils/exit_status.ml"
+    "utils/config_file.ml"
     "utils/regexp_utils.ml"
     "utils/php_escaping.ml"
+    "utils/marshal_tools.ml"
   ]
 end
 
 begin library "hh-deps"
-  requires += [ "hh-third-party" "hh-utils" ]
+  requires += [ "hh-third-party" "hh-utils" "hh-utils-collections" ]
   files = [
     "deps/fileInfo.ml"
     "deps/typing_deps.ml"
@@ -157,6 +192,14 @@ begin library "hh-stubs"
     "stubs/buildMain.ml"
     "stubs/prolog.ml"
     "stubs/clientMessages.ml"
+  ]
+end
+
+begin library "hh-find"
+  requires += [ "hh-utils-common" "hh-stubs" "hh-third-party" ]
+  files = [
+    "find/find.mli"
+    "find/find.ml"
   ]
 end
 
@@ -204,11 +247,12 @@ begin library "hh-parsing"
     "parsing/parsing_hooks.ml"
     "parsing/ast_utils.ml"
     "parsing/parsing_service.ml"
+    "parsing/ast_visitor.ml"
   ]
 end
 
 begin library "hh-typing-base"
-  requires += [ "hh-utils" "hh-parsing" ]
+  requires += [ "hh-utils" "hh-parsing" "hh-utils-collections" ]
   files = [
     "naming/naming_special_names.ml"
     "typing/typing_reason.ml"
@@ -223,13 +267,21 @@ begin library "hh-typing-base"
 end
 
 begin library "hh-dfind"
-  requires += [ "hh-third-party" "hh-fsnotify" "hh-utils" ]
+  requires += [ "hh-third-party" "hh-fsnotify" "hh-utils" "hh-stubs" ]
   files = [
     "dfind/dfindEnv.ml"
     "dfind/dfindMaybe.ml"
     "dfind/dfindAddFile.ml"
     "dfind/dfindServer.ml"
     "dfind/dfindLib.ml"
+  ]
+end
+
+begin library "hh-watchman"
+  requires += [ "hh-third-party" "hh-procs" "hh-utils" "hh-stubs" ]
+  files = [
+    "watchman/watchman.mli"
+    "watchman/watchman.ml"
   ]
 end
 
@@ -240,7 +292,7 @@ begin library "hh-naming"
     "naming/naming_heap.ml"
     "naming/nast_eval.ml"
     "naming/attributes.ml"
-    "naming/nastVisitor.ml"
+    "naming/nast_visitor.ml"
   ]
 end
 
@@ -252,6 +304,7 @@ begin library "hh-typing"
     "typing/typing_print.ml"
     "typing/typeVisitor.ml"
     "typing/typing_dependent_type.ml"
+    "typing/type_mapper.ml"
     "typing/typing_expand.ml"
     "typing/typing_generic.ml"
     "typing/typing_utils.ml"
@@ -261,12 +314,13 @@ begin library "hh-typing"
     "typing/typing_taccess.ml"
     "typing/typing_structure.ml"
     "typing/typing_tdef.ml"
+    "typing/typing_arrays.ml"
     "typing/typing_unification_env.ml"
     "typing/typing_unify.ml"
     "typing/typing_subtype.ml"
     "typing/typing_ops.ml"
     "typing/typing_suggest.ml"
-    "typing/typingEqualityCheck.ml"
+    "typing/typing_equality_check.ml"
     "typing/typing_alias.ml"
     "typing/typing_async.ml"
     "typing/typing_enum.ml"
@@ -283,6 +337,7 @@ begin library "hh-typing"
     "typing/typing.ml"
     "typing/typing_dynamic_yield.ml"
     "typing/typing_inherit.ml"
+    "typing/typing_decl_deps.ml"
     "typing/typing_decl.ml"
     "typing/typing_decl_service.ml"
     "typing/typing_check_service.ml"
@@ -295,7 +350,7 @@ begin library "hh-typing"
 end
 
 begin library "hh-search"
-  requires += [ "hh-utils" "hh-heap"  "hh-parsing" ]
+  requires += [ "hh-utils" "hh-heap"  "hh-parsing" "hh-utils-collections" ]
   files = [
     "search/searchUtils.ml"
     "search/fuzzySearchService.ml"
@@ -309,6 +364,7 @@ begin library "hh-stubs-ai"
   requires += [ "hh-typing-base" ]
   files = [
     "stubs/ai.ml"
+    "stubs/ai_options.ml"
   ]
 end
 
@@ -319,149 +375,13 @@ begin library "hh-socket"
   ]
 end
 
-begin library "hh-hhi"
-  requires += [ "hh-globals" "hh-utils" ]
-  files = [
-    "hhi/hhi_elf.c"
-    "hhi/hhi.ml"
-  ]
-end
-
-begin library "hh-server-base"
-  requires += [ "hh-third-party" "hh-utils" "hh-typing"  "hh-search"
-                "hh-stubs" "hh-stubs-ai"  "hh-socket" "hh-dfind" "hh-hhi" ]
-  files = [
-    "server/serverFiles.ml"
-    "server/serverConfig.ml"
-    "server/serverArgs.ml"
-    "server/serverEnv.ml"
-    "server/serverUtils.ml"
-    "server/argumentInfoService.ml"
-    "server/autocompleteService.ml"
-    "server/fileOutline.ml"
-    "server/serverIdeUtils.ml"
-    "server/findRefsService.ml"
-    "server/findUtils.ml"
-    "server/identifySymbolService.ml"
-    "server/inferAtPosService.ml"
-    "server/methodJumps.ml"
-    "server/serverArgumentInfo.ml"
-    "server/serverAutoComplete.ml"
-    "server/serverBuild.ml"
-    "server/serverCheckpoint.ml"
-    "server/serverColorFile.ml"
-    "server/serverCoverageMetric.ml"
-    "server/serverError.ml"
-    "server/serverFindRefs.ml"
-    "server/serverIdentifyFunction.ml"
-    "server/serverInferType.ml"
-    "server/serverLint.ml"
-    "server/serverRefactor.ml"
-    "server/serverSearch.ml"
-    "server/symbolUtils.ml"
-    "server/symbolFunCallService.ml"
-    "server/symbolTypeService.ml"
-    "server/symbolInfoService.ml"
-    "server/serverRpc.ml"
-    "server/serverTypeCheck.ml"
-    "server/serverCommand.ml"
-    "server/serverConvert.ml"
-  ]
-end
-
-begin library "hh-server"
-  requires += [
-    "hh-third-party" "hh-utils" "hh-typing"
-    "hh-search"  "hh-stubs"  "hh-stubs-ai"
-    "hh-socket"  "hh-dfind" "hh-server-base"
-  ]
-  files = [
-    "server/serverEnvBuild.ml"
-    "server/serverIdle.ml"
-    "server/serverInit.ml"
-    "server/serverMain.ml"
-  ]
-end
-
-begin library "hh-client"
-  requires += [
-    "hh-deps"  "hh-heap"  "hh-parsing"
-    "hh-globals"  "hh-search"  "hh-stubs"
-    "hh-socket"  "hh-server-base"
-  ]
-  files = [
-    "client/clientConnectSimple.ml"
-    "client/clientStop.ml"
-    "client/clientStart.ml"
-    "client/clientConnect.ml"
-    "client/clientLogCommand.ml"
-    "client/clientBuild.ml"
-    "client/clientEnv.ml"
-    "client/clientCommand.ml"
-    "client/clientArgs.ml"
-    "client/clientArgumentInfo.ml"
-    "client/clientAutocomplete.ml"
-    "client/clientCheckStatus.ml"
-    "client/colorFile.ml"
-    "client/clientColorFile.ml"
-    "client/clientCoverageMetric.ml"
-    "client/clientFindRefs.ml"
-    "client/clientLint.ml"
-    "client/clientMethodJumps.ml"
-    "client/clientOutline.ml"
-    "client/clientRefactor.ml"
-    "client/clientSearch.ml"
-    "client/clientSymbolInfo.ml"
-    "client/clientTypeAtPos.ml"
-    "client/clientCheck.ml"
-    "client/clientLogCommandUtils.ml"
-    "client/clientRestart.ml"
-  ]
-end
-
-begin program "hh_client"
-  requires += [ "hh-client" ]
-  files = [ "hh_client.ml" ]
-end
-
-begin program "hh_server"
-  requires += [ "hh-server" ]
-  files = [ "hh_server.ml" ]
-end
-
-begin library "hh-emitter"
-  requires += [ "hh-naming" "hh-typing" ]
-
-  files = [
-    "emitter/emitter_core.ml"
-    "emitter/emitter_consts.ml"
-    "emitter/emitter_xhp.ml"
-    "emitter/emitter_expr.ml"
-    "emitter/emitter_lit.ml"
-    "emitter/emitter_stmt.ml"
-    "emitter/emitter_types.ml"
-    "emitter/emitter.ml"
-  ]
-end
-
-begin library "hh-format"
-  requires += [ "hh-typing-base" ]
-  files = [
-    "stubs/formatEventLogger.ml"
-    "format/format_hack.ml"
-    "format/format_diff.ml"
-    "format/format_mode.ml"
-  ]
-end
-
-begin program "hh_format"
-  requires += [ "hh-format" "hh-client" ]
-  files = [ "hh_format.ml" ]
-end
-
-begin program "hh_single_type_check"
-  requires += [ "hh-client"  "hh-emitter" ]
-  files = [
-    "hh_single_type_check.ml"
-  ]
+begin library "libancillary"
+  if not (os_type = "Win32") then {
+    files = [
+     "third-party/libancillary/fd_recv.c"
+     "third-party/libancillary/fd_send.c"
+     "libancillary/libancillary-stubs.c"
+     "libancillary/libancillary.ml"
+    ]
+  }
 end

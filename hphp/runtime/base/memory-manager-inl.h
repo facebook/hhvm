@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,53 +36,6 @@ static_assert(
 inline MemoryManager& MM() {
   return *MemoryManager::TlsWrapper::getNoCheck();
 }
-
-//////////////////////////////////////////////////////////////////////
-
-namespace req {
-
-template<class T, class... Args> T* make_raw(Args&&... args) {
-  auto const mem = req::malloc(sizeof(T));
-  try {
-    return new (mem) T(std::forward<Args>(args)...);
-  } catch (...) {
-    req::free(mem);
-    throw;
-  }
-}
-
-template<class T> void destroy_raw(T* t) {
-  t->~T();
-  req::free(t);
-}
-
-template<class T> T* make_raw_array(size_t count) {
-  T* ret = static_cast<T*>(req::malloc(count * sizeof(T)));
-  size_t i = 0;
-  try {
-    for (; i < count; ++i) {
-      new (&ret[i]) T();
-    }
-  } catch (...) {
-    size_t j = i;
-    while (j-- > 0) {
-      ret[j].~T();
-    }
-    req::free(ret);
-    throw;
-  }
-  return ret;
-}
-
-template<class T>
-void destroy_raw_array(T* t, size_t count) {
-  size_t i = count;
-  while (i-- > 0) {
-    t[i].~T();
-  }
-  req::free(t);
-}
-} // namespace req
 
 //////////////////////////////////////////////////////////////////////
 
@@ -238,7 +191,7 @@ inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
   assert(index < kNumSmallSizes);
   assert(bytes <= kSmallIndex2Size[index]);
 
-  if (debug) eagerGCCheck();
+  if (debug) checkEagerGC();
 
   m_stats.usage += bytes;
 
@@ -268,8 +221,6 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index,
     return freeBigSize(ptr, bytes);
   }
 
-  if (debug) eagerGCCheck();
-
   FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, index);
 
   m_freelists[index].push(ptr, bytes);
@@ -287,8 +238,6 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
     return freeBigSize(ptr, bytes);
   }
 
-  if (debug) eagerGCCheck();
-
   auto const i = smallSize2Index(bytes);
   FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, i);
 
@@ -301,7 +250,6 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
 
 ALWAYS_INLINE
 void MemoryManager::freeBigSize(void* vp, size_t bytes) {
-  if (debug) eagerGCCheck();
   m_stats.usage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
@@ -407,7 +355,8 @@ inline bool MemoryManager::contains(void *p) const {
 
 inline bool MemoryManager::checkContains(void* p) const {
   // Be conservative if the small-block allocator is disabled.
-  assert(RuntimeOption::DisableSmallAllocator || contains(p));
+  assert(RuntimeOption::DisableSmallAllocator || m_bypassSlabAlloc ||
+         contains(p));
   return true;
 }
 
@@ -415,6 +364,14 @@ inline bool MemoryManager::checkContains(void* p) const {
 
 inline bool MemoryManager::sweeping() {
   return !TlsWrapper::isNull() && MM().m_sweeping;
+}
+
+inline bool MemoryManager::exiting() {
+  return !TlsWrapper::isNull() && MM().m_exiting;
+}
+
+inline void MemoryManager::setExiting() {
+  if (!TlsWrapper::isNull()) MM().m_exiting = true;
 }
 
 inline StringDataNode& MemoryManager::getStringList() {
@@ -466,20 +423,6 @@ bool MemoryManager::removeRoot(const req::ptr<T>& ptr) {
 template <typename T>
 bool MemoryManager::removeRoot(const T* ptr) {
   return (bool)removeRoot<T>(ptr->getId());
-}
-
-template <typename F>
-void MemoryManager::scanRootMaps(F& m) const {
-  if (m_objectRoots) {
-    for(const auto& root : *m_objectRoots) {
-      scan(root.second, m);
-    }
-  }
-  if (m_resourceRoots) {
-    for(const auto& root : *m_resourceRoots) {
-      scan(root.second, m);
-    }
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

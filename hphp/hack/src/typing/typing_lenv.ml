@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Utils
 
 module Env = Typing_env
 module TUtils = Typing_utils
@@ -64,7 +63,7 @@ let intersect env parent_lenv (fake1, locals1) (fake2, locals2) =
             List.fold_left ~f:begin fun acc ty ->
               if List.mem acc ty then acc else ty::acc
             end ~init:all_large all_small in
-          let env, ty = Type.unify Pos.none Reason.URnone env ty1 ty2 in
+          let env, ty = Type.unify env.Env.pos Reason.URnone env ty1 ty2 in
           env, IMap.add local_id (all_types, ty, eid) locals
     end locals1 (env, parent_locals)
   in
@@ -168,14 +167,15 @@ let fully_integrate env (parent_fake_members, parent_locals) =
             env, IMap.add local_id lcl locals
       else
         let eid = if child_eid = parent_eid then child_eid else Ident.tmp() in
-        let env, child_all_types = lfold TUtils.unresolved env child_all_types in
+        let env, child_all_types =
+          List.map_env env child_all_types TUtils.unresolved in
         let env, ty =
           match child_all_types with
           | [] -> assert false
           | [first] -> env, first
           | first :: rest ->
               List.fold_left ~f:begin fun (env, ty_acc) ty ->
-                Type.unify Pos.none Reason.URnone env ty_acc ty
+                Type.unify env.Env.pos Reason.URnone env ty_acc ty
               end ~init:(env, first) rest
         in
         env, IMap.add local_id (ty :: parent_all_types, ty, eid) locals

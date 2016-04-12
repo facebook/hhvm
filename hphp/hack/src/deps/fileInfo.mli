@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -17,8 +17,6 @@
  * struct and only keep the names defined in the files we know about.
  *)
 (*****************************************************************************)
-
-open Utils
 
 (*****************************************************************************)
 (* Parsing modes *)
@@ -70,4 +68,4 @@ val empty_names: names
 
 val simplify: t -> names
 val merge_names: names -> names -> names
-val simplify_fast: t Relative_path.Map.t -> names Relative_path.Map.t
+val simplify_fast: t Relative_path.Map.t -> fast

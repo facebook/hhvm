@@ -1,0 +1,6 @@
+File "array_addidion_error.php", line 14, characters 18-19:
+Invalid argument (Typing[4110])
+File "array_addidion_error.php", line 17, characters 39-41:
+This is an int
+File "array_addidion_error.php", line 11, characters 15-18:
+It is incompatible with a float

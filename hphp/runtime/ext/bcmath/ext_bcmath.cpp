@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmath_data {
-public:
+struct bcmath_data {
   bcmath_data() {
     // we can't really call bc_init_numbers() that calls into this constructor
     data._zero_ = _bc_new_num_ex (1,0,1);
@@ -242,8 +241,7 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmathExtension final : public Extension {
- public:
+struct bcmathExtension final : Extension {
   bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(bcscale);

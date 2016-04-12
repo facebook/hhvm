@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,11 +67,6 @@ inline bool Func::ParamInfo::isVariadic() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Func.
-
-inline void Func::freeClone() const {
-  assert(isPreFunc());
-  m_cloned.flag.clear();
-}
 
 inline void Func::validate() const {
 #ifdef DEBUG
@@ -138,7 +133,11 @@ inline StrNR Func::fullNameStr() const {
 
 inline const NamedEntity* Func::getNamedEntity() const {
   assert(!shared()->m_preClass);
-  return m_namedEntity;
+  return *reinterpret_cast<const LowPtr<const NamedEntity>*>(&m_namedEntity);
+}
+
+inline void Func::setNamedEntity(const NamedEntity* e) {
+  *reinterpret_cast<LowPtr<const NamedEntity>*>(&m_namedEntity) = e;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,6 +216,10 @@ inline bool Func::contains(Offset offset) const {
 
 inline MaybeDataType Func::returnType() const {
   return shared()->m_returnType;
+}
+
+inline bool Func::isReturnByValue() const {
+  return shared()->m_returnByValue;
 }
 
 inline bool Func::isReturnRef() const {
@@ -524,7 +527,7 @@ inline void Func::setFuncBody(unsigned char* fb) {
   m_funcBody = fb;
 }
 
-inline unsigned char* Func::getPrologue(int index) const {
+inline uint8_t* Func::getPrologue(int index) const {
   return m_prologueTable[index];
 }
 
@@ -563,7 +566,7 @@ inline void Func::setBaseCls(Class* baseCls) {
   m_baseCls = baseCls;
 }
 
-inline void Func::setFuncHandle(rds::Link<Func*> l) {
+inline void Func::setFuncHandle(rds::Link<LowPtr<Func>> l) {
   // TODO(#2950356): This assertion fails for create_function with an existing
   // declared function named __lambda_func.
   //assert(!m_cachedFunc.valid());

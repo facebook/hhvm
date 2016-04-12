@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,9 +15,11 @@
 */
 
 #include "hphp/runtime/base/ssl-socket.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/server/server-stats.h"
 #include <folly/String.h>
 #include <poll.h>
 #include <sys/time.h>
@@ -32,7 +34,9 @@ bool SSLSocketData::closeImpl() {
   }
   if (m_handle) {
     SSL_free(m_handle);
+    SSL_CTX_free(m_ctx);
     m_handle = nullptr;
+    m_ctx = nullptr;
   }
   return SocketData::closeImpl();
 }
@@ -122,7 +126,13 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
     String cafile = m_context[s_cafile].toString();
     String capath = m_context[s_capath].toString();
 
-    if (!cafile.empty() || !capath.empty()) {
+    if (!FileUtil::isValidPath(cafile)) {
+      raise_warning("cafile expected to be a path, string given");
+      return nullptr;
+    } else if (!FileUtil::isValidPath(capath)) {
+      raise_warning("capath expected to be a path, string given");
+      return nullptr;
+    } else if (!cafile.empty() || !capath.empty()) {
       const char* cafileptr = cafile.empty() ? nullptr : cafile.data();
       const char* capathptr = capath.empty() ? nullptr : capath.data();
       if (!SSL_CTX_load_verify_locations(ctx, cafileptr, capathptr)) {
@@ -157,7 +167,10 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
   SSL_CTX_set_cipher_list(ctx, cipherlist.data());
 
   String certfile = m_context[s_local_cert].toString();
-  if (!certfile.empty()) {
+  if (!FileUtil::isValidPath(certfile)) {
+    raise_warning("local_cert expected to be a path, string given");
+    return nullptr;
+  } else if (!certfile.empty()) {
     String resolved_path_buff = File::TranslatePath(certfile);
     if (!resolved_path_buff.empty()) {
       /* a certificate to use for authentication */
@@ -203,6 +216,11 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
 
 SSLSocket::SSLSocket()
 : Socket(std::make_shared<SSLSocketData>()),
+  m_data(static_cast<SSLSocketData*>(getSocketData()))
+{}
+
+SSLSocket::SSLSocket(std::shared_ptr<SSLSocketData> data)
+: Socket(data),
   m_data(static_cast<SSLSocketData*>(getSocketData()))
 {}
 
@@ -362,7 +380,8 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 req::ptr<SSLSocket> SSLSocket::Create(
   int fd, int domain, const HostURL &hosturl, double timeout,
-  const req::ptr<StreamContext>& ctx) {
+  const req::ptr<StreamContext>& ctx
+) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 
@@ -383,8 +402,16 @@ req::ptr<SSLSocket> SSLSocket::Create(
     return nullptr;
   }
 
+  return Create(fd, domain, method, hosturl.getHost(), hosturl.getPort(),
+                timeout, ctx);
+}
+
+req::ptr<SSLSocket> SSLSocket::Create(
+  int fd, int domain, CryptoMethod method, std::string address, int port,
+  double timeout, const req::ptr<StreamContext>& ctx
+) {
   auto sock = req::make<SSLSocket>(
-    fd, domain, ctx, hosturl.getHost().c_str(), hosturl.getPort());
+    fd, domain, ctx, address.c_str(), port);
 
   sock->m_data->m_method = method;
   sock->m_data->m_connect_timeout = timeout;
@@ -404,6 +431,8 @@ bool SSLSocket::waitForData() {
 int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
   int64_t nr_bytes = 0;
   if (m_data->m_ssl_active) {
+    IOStatusHelper io("sslsocket::recv", getAddress().c_str(), getPort());
+
     bool retry = true;
     do {
       if (m_data->m_is_blocked) {
@@ -427,6 +456,8 @@ int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
 int64_t SSLSocket::writeImpl(const char *buffer, int64_t length) {
   int didwrite;
   if (m_data->m_ssl_active) {
+    IOStatusHelper io("sslsocket::send", getAddress().c_str(), getPort());
+
     bool retry = true;
     do {
       didwrite = SSL_write(m_data->m_handle, buffer, length);
@@ -461,10 +492,6 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     m_data->m_client = true;
     smethod = SSLv23_client_method();
     break;
-  case CryptoMethod::ClientSSLv3:
-    m_data->m_client = true;
-    smethod = SSLv3_client_method();
-    break;
   case CryptoMethod::ClientTLS:
     m_data->m_client = true;
     smethod = TLSv1_client_method();
@@ -473,10 +500,22 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     m_data->m_client = false;
     smethod = SSLv23_server_method();
     break;
+
+#ifndef OPENSSL_NO_SSL3
+  case CryptoMethod::ClientSSLv3:
+    m_data->m_client = true;
+    smethod = SSLv3_client_method();
+    break;
   case CryptoMethod::ServerSSLv3:
     m_data->m_client = false;
     smethod = SSLv3_server_method();
     break;
+#else
+  case CryptoMethod::ClientSSLv3:
+  case CryptoMethod::ServerSSLv3:
+    raise_warning("OpenSSL library does not support SSL3 protocol");
+    return false;
+#endif
 
   /* SSLv2 protocol might be disabled in the OpenSSL library */
 #ifndef OPENSSL_NO_SSL2
@@ -517,6 +556,8 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     SSL_CTX_free(ctx);
     return false;
   }
+
+  m_data->m_ctx = ctx;
 
   if (!SSL_set_fd(m_data->m_handle, getFd())) {
     handleError(0, true);
@@ -740,6 +781,10 @@ bool SSLSocket::checkLiveness() {
     }
   }
   return true;
+}
+
+SSLSocket::CryptoMethod SSLSocket::getCryptoMethod() {
+  return m_data->m_method;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

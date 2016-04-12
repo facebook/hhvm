@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
 
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -60,14 +61,15 @@ private:
   };
 
   int8_t m_type;
-  String m_symbol;
-  Array  m_info;
+  req::root<String> m_symbol;
+  req::root<Array>  m_info;
   std::shared_ptr<DebuggerClient::LiveLists> m_acLiveLists;
 
-  static String GetParams(const Array& params, bool varg, bool detailed = false);
+  static String GetParams(const Array& params, bool varg, bool detailed=false);
   static String GetParam(const Array& params, int index);
   static String GetModifier(const Array& info, const String&);
-  static String GetTypeProfilingInfo(const Array& profilingArray, const Array& params);
+  static String GetTypeProfilingInfo(const Array& profilingArray,
+                                     const Array& params);
 
   static bool TryConstant(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol);
@@ -77,7 +79,8 @@ private:
                         const Array& info, std::string subsymbol);
 
   static void PrintDocComments(StringBuffer &sb, const Array& info);
-  static void PrintInfo(DebuggerClient &client, StringBuffer &sb, const Array& info,
+  static void PrintInfo(DebuggerClient &client, StringBuffer &sb,
+                        const Array& info,
                         const std::string &subsymbol);
   static void PrintHeader(DebuggerClient &client, StringBuffer &sb,
                           const Array& info);

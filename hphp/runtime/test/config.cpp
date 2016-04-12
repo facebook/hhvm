@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,6 @@ namespace HPHP {
 
 TEST(Config, HdfToIni) {
   EXPECT_EQ("hhvm.jit", Config::IniName("Eval.Jit"));
-  EXPECT_EQ("hhvm.jit_llvm", Config::IniName("Eval.JitLLVM"));
 
   EXPECT_EQ("hhvm.server.ssl_port", Config::IniName("Server.SSLPort"));
   EXPECT_EQ("max_file_uploads",

@@ -4,6 +4,7 @@
 .DS_Store
 hphp.log
 /build
+/deps
 
 /hphp/test/test
 /hphp/test/test_fast.inc
@@ -86,7 +87,6 @@ CPackSourceConfig.cmake
 
 # windows files
 *.exe
-*.rc
 
 # python scripts
 *.pyc

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@ int64_t getCPUTimeNanos() {
 
 #ifdef RUSAGE_THREAD
   return HPHP::Timer::GetRusageMicros(HPHP::Timer::TotalCPU,
-                                      RUSAGE_THREAD) * 1000;
+                                      HPHP::Timer::Thread) * 1000;
 #else
   return -1;
 #endif
@@ -123,11 +123,16 @@ std::string Timer::Show() {
 
   std::array<TimerName,kNumTimers> names_copy;
   std::copy(s_names, s_names + kNumTimers, begin(names_copy));
+
+  auto totalSort = [] (const TimerName& a, const TimerName& b) {
+    return s_counters[a.name].total > s_counters[b.name].total;
+  };
+  auto nameSort = [] (const TimerName& a, const TimerName& b) {
+    return strcmp(a.str, b.str) < 0;
+  };
   std::sort(
     begin(names_copy), end(names_copy),
-    [&] (const TimerName& a, const TimerName& b) {
-      return s_counters[a.name].total > s_counters[b.name].total;
-    }
+    getenv("HHVM_JIT_TIMER_NAME_SORT") ? nameSort : totalSort
   );
 
   std::string rows;

@@ -19,6 +19,19 @@ dump_on_failure = False
 
 Failure = namedtuple('Failure', ['fname', 'expected', 'output'])
 
+"""
+Per-test flags passed to test executable. Expected to be in a file with
+same name as test, but with .flags extension.
+"""
+def get_test_flags(f):
+    prefix, _ext = os.path.splitext(f)
+    path = prefix + '.flags'
+
+    if not os.path.isfile(path):
+        return []
+    with open(path) as f:
+        return f.read().strip().split(' ')
+
 def run_test_program(files, program, expect_ext, get_flags):
     """
     Run the program and return a list of Failures.
@@ -26,7 +39,8 @@ def run_test_program(files, program, expect_ext, get_flags):
     def run(f):
         test_dir, test_name = os.path.split(f)
         flags = get_flags(test_dir)
-        cmd = [program, test_name] + flags
+        test_flags = get_test_flags(f)
+        cmd = [program, test_name] + flags + test_flags
         if verbose:
             print('Executing', ' '.join(cmd))
         try:

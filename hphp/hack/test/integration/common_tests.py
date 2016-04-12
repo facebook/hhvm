@@ -443,23 +443,72 @@ class CommonTests(object):
             'line 4, characters 3-4',
             'line 5, characters 5-6',
             'line 5, characters 11-12',
-            'line 6, characters 10-11',
-            '5 total results',
+            'line 5, characters 25-26',
+            'line 7, characters 21-22',
+            'line 10, characters 31-32',
+            'line 11, characters 12-13',
+            'line 12, characters 16-17',
+            '9 total results',
             ], [
             '{{"positions":[{{"filename":"","line":3,"char_start":15,'
             '"char_end":16}},{{"filename":"","line":4,"char_start":3,'
             '"char_end":4}},{{"filename":"","line":5,"char_start":5,'
             '"char_end":6}},{{"filename":"","line":5,"char_start":11,'
-            '"char_end":12}},{{"filename":"","line":6,"char_start":10,'
-            '"char_end":11}}],"internal_error":false}}'
+            '"char_end":12}},{{"filename":"","line":5,"char_start":25,'
+            '"char_end":26}},{{"filename":"","line":7,"char_start":21,'
+            '"char_end":22}},{{"filename":"","line":10,"char_start":31,'
+            '"char_end":32}},{{"filename":"","line":11,"char_start":12,'
+            '"char_end":13}},{{"filename":"","line":12,"char_start":16,'
+            '"char_end":17}}],"internal_error":false}}'
             ],
             options=['--find-lvar-refs', '4:4'],
             stdin='''<?hh
 
-function test($x) {
-  $x = 3;
-  g($x) + $x;
-  return $x;
+function test($x) {                 // Should match
+  $x = 3; // Looking for this $x.      Should match
+  g($x) + $x + h("\$x = $x");       // First three should match
+  $lambda1 = $x ==> $x + 1;         // Should not match
+  $lambda2 = $a ==> $x + $a;        // Should match
+  $lambda3 = function($x) {         // Should not match
+    return $x + 1; };               // Should not match
+  $lambda4 = function($b) use($x) { // Should match
+    return $x + $b; };              // Should match
+  return <div>{$x}</div>;           // Should match
+}
+''')
+
+    def test_find_lvar_refs_static_local(self):
+        """
+        Test --find-lvar-refs
+        """
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        self.write_load_config('foo_2.php')
+
+        """
+        This tests a broken feature; when the bug is fixed then the
+        test should be updated to match the correct behaviour.
+        """
+
+        self.check_cmd_and_json_cmd([
+            'line 3, characters 15-16',
+            'line 4, characters 8-9',
+            'line 5, characters 10-11',  # This is wrong
+            'line 6, characters 8-9',    # This is wrong
+            '4 total results',           # Should be 2
+            ], [
+            '{{"positions":[{{"filename":"","line":3,"char_start":15,'
+            '"char_end":16}},{{"filename":"","line":4,"char_start":8,'
+            '"char_end":9}},{{"filename":"","line":5,"char_start":10,'
+            '"char_end":11}},{{"filename":"","line":6,"char_start":8,'
+            '"char_end":9}}],"internal_error":false}}'
+            ],
+            options=['--find-lvar-refs', '4:8'],
+            stdin='''<?hh
+
+function test($x) {  // Should match
+  $y = $x;           // Should match
+  static $x = 123;   // Should not match, currently does!
+  $z = $x;           // Should not match, currently does!
 }
 ''')
 

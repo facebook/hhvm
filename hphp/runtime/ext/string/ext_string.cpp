@@ -864,7 +864,7 @@ Variant HHVM_FUNCTION(substr,
                       const String& str,
                       int start,
                       int length /* = 0x7FFFFFFF */) {
-  if (!string_substr_check(str.size(), start, length)) return false;
+  if (!string_substr_check(str.size(), start, length)) return "";
   return str.substr(start, length);
 }
 

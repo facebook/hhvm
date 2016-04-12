@@ -19,5 +19,6 @@ let parse_or_die file =
   let content = cat (Relative_path.to_absolute file) in
   let errors, res = Errors.do_
     (fun () -> Parser_hack.program file ~elaborate_namespaces:false content) in
-  if not (List.is_empty errors) then raise (CE.ParseErrors errors);
+  if not (Errors.is_empty errors)
+  then raise (CE.ParseErrors (Errors.get_error_list errors));
   res

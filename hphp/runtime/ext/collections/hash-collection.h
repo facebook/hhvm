@@ -652,7 +652,7 @@ struct HashCollection : ObjectData {
   template<class F> friend void scanHeader(const Header*, F& mark);
   template<typename F>
   void scan(F& mark) const {
-    m_arr->scan(mark);
+    mark(m_arr);
     mark(m_immCopy);
   }
 

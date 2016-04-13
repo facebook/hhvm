@@ -803,7 +803,9 @@ public:
   void addMemoizeProp(MethodStatementPtr meth);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName);
   void emitConstMethodCallNoParams(Emitter& e, const std::string& name);
-  bool emitInlineGenva(Emitter& e, const ExpressionPtr);
+  bool emitInlineGen(Emitter& e, const ExpressionPtr&);
+  bool emitInlineGena(Emitter& e, const SimpleFunctionCallPtr& call);
+  bool emitInlineGenva(Emitter& e, const SimpleFunctionCallPtr& call);
   bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,

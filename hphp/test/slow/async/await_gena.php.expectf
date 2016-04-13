@@ -1,0 +1,19 @@
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  NULL
+}
+oops
+
+Fatal error: Call to undefined function gena() in %s/async/await_gena.php on line %d

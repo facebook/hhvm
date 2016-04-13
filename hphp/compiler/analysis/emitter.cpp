@@ -4908,7 +4908,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     assert(m_evalStack.size() == 0);
 
     auto expression = await->getExpression();
-    if (emitInlineGenva(e, expression)) return true;
+    if (emitInlineGen(e, expression)) return true;
 
     Label resume;
 
@@ -4961,16 +4961,9 @@ const StaticString
 
 bool EmitterVisitor::emitInlineGenva(
   Emitter& e,
-  const ExpressionPtr expression
+  const SimpleFunctionCallPtr& call
 ) {
-  if (!m_ue.m_isHHFile || !Option::EnableHipHopSyntax ||
-      !expression->is(Expression::KindOfSimpleFunctionCall) ||
-      Option::JitEnableRenameFunction) {
-    return false;
-  }
-  const auto call = static_pointer_cast<SimpleFunctionCall>(expression);
-  assert(call);
-  if (!call->isCallToFunction("genva")) return false;
+  assert(call->isCallToFunction("genva"));
   const auto params = call->getParams();
   if (!params) {
     e.Array(staticEmptyArray());
@@ -5047,6 +5040,169 @@ bool EmitterVisitor::emitInlineGenva(
     new UnsetUnnamedLocalsThunklet(std::move(waithandles)));
 
   return true;
+}
+
+bool EmitterVisitor::emitInlineGena(
+  Emitter& e,
+  const SimpleFunctionCallPtr& call
+) {
+  assert(call->isCallToFunction("gena"));
+  const auto params = call->getParams();
+
+  if (params->getCount() != 1) return false;
+
+  //
+  // Convert input into an array of WH (inline this?)
+  // Two elements is the most common size.
+  //
+  e.NewArray(2);
+  const auto array = emitSetUnnamedL(e);
+  const auto arrayStart = m_ue.bcPos();
+
+  //
+  // Iterate over input and store wait handles for all elements in
+  // a new array.
+  //
+  const auto key = m_curFunc->allocUnnamedLocal();
+  const auto item = m_curFunc->allocUnnamedLocal();
+  {
+    emitVirtualLocal(key);
+    emitVirtualLocal(item);
+
+    visit((*params)[0]);
+    emitConvertToCell(e);
+
+    Label endloop;
+    const auto initItId = m_curFunc->allocIterator();
+    e.IterInitK(initItId, endloop, item, key);
+    const auto iterStart = m_ue.bcPos();
+    {
+      Label loop(e);
+
+      emitVirtualLocal(array); // for Set below
+      emitVirtualLocal(key); // for Set below
+      markElem(e);
+
+      emitVirtualLocal(item);
+      emitCGet(e);
+      emitConstMethodCallNoParams(e, "getWaitHandle");
+
+      emitSet(e);   // array[$key] = $item->getWaitHandle();
+      emitPop(e);
+
+      emitVirtualLocal(key);
+      emitVirtualLocal(item);
+      e.IterNextK(initItId, loop, item, key);
+      endloop.set(e);
+    }
+    // Clear item and key.  Free iterator.
+    emitVirtualLocal(item);
+    emitUnset(e);
+    emitVirtualLocal(key);
+    emitUnset(e);
+    m_curFunc->freeIterator(initItId);
+
+    newFaultRegionAndFunclet(iterStart, m_ue.bcPos(),
+                             new UnsetUnnamedLocalsThunklet({item, key}));
+    newFaultRegionAndFunclet(iterStart, m_ue.bcPos(),
+                             new IterFreeThunklet(initItId, false),
+                             { initItId, KindOfIter });
+  }
+
+  //
+  // Construct an AAWH from the array.
+  //
+  const auto fromArrayStart = m_ue.bcPos();
+  e.FPushClsMethodD(1, s_fromArray.get(), s_AwaitAllWaitHandle.get());
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromArrayStart);
+    emitVirtualLocal(array);
+    e.FPassL(0, array);
+  }
+  e.FCall(1);
+  e.UnboxR();
+
+  //
+  // Await on the AAWH.  Note: the result of Await does not matter.
+  //
+  e.Await();
+  emitPop(e);
+
+  //
+  // Iterate over results and store in array.  Reuse same temporary array.
+  //
+  {
+    emitVirtualLocal(key);
+    emitVirtualLocal(item);
+
+    emitVirtualLocal(array);
+    emitCGet(e);
+
+    Label endloop2;
+    const auto resultItId = m_curFunc->allocIterator();
+    e.IterInitK(resultItId, endloop2, item, key);
+    const auto iterStart2 = m_ue.bcPos();
+    {
+      Label loop2(e);
+
+      emitVirtualLocal(array); // for Set below
+      emitVirtualLocal(key); // for Set below
+      markElem(e);
+
+      emitVirtualLocal(item);
+      emitCGet(e);
+      e.WHResult();
+
+      emitSet(e);   // array[$key] = WHResult($item);
+      emitPop(e);
+
+      emitVirtualLocal(key);
+      emitVirtualLocal(item);
+      e.IterNextK(resultItId, loop2, item, key);
+      endloop2.set(e);
+    }
+    // Clear item and key.  Free iterator.
+    emitVirtualLocal(item);
+    emitUnset(e);
+    emitVirtualLocal(key);
+    emitUnset(e);
+    m_curFunc->freeIterator(resultItId);
+
+    newFaultRegionAndFunclet(iterStart2, m_ue.bcPos(),
+                             new UnsetUnnamedLocalsThunklet({item, key}));
+
+    newFaultRegionAndFunclet(iterStart2, m_ue.bcPos(),
+                             new IterFreeThunklet(resultItId, false),
+                             { resultItId, KindOfIter });
+  }
+
+  // clean up locals
+  m_curFunc->freeUnnamedLocal(item);
+  m_curFunc->freeUnnamedLocal(key);
+
+  // Leave result array on the stack.
+  emitPushAndFreeUnnamedL(e, array, arrayStart);
+
+  return true;
+}
+
+bool EmitterVisitor::emitInlineGen(
+  Emitter& e,
+  const ExpressionPtr& expression
+) {
+  if (!m_ue.m_isHHFile || !Option::EnableHipHopSyntax ||
+      !expression->is(Expression::KindOfSimpleFunctionCall) ||
+      Option::JitEnableRenameFunction) {
+    return false;
+  }
+
+  const auto call = static_pointer_cast<SimpleFunctionCall>(expression);
+  if (call->isCallToFunction("genva")) {
+    return emitInlineGenva(e, call);
+  } else if (call->isCallToFunction("gena")) {
+    return emitInlineGena(e, call);
+  }
+  return false;
 }
 
 bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {

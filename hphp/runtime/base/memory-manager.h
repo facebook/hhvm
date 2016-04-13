@@ -815,6 +815,7 @@ struct MemoryManager {
    * Run the experimental collector.
    */
   void collect(const char* phase);
+  void updateNextGc();
 
   /*
    * beginQuarantine() swaps out the normal freelists. endQuarantine()
@@ -964,6 +965,7 @@ private:
   std::array<FreeList,kNumSmallSizes> m_freelists;
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
+  int64_t m_nextGc; // request gc when heap usage reaches this size
   MemoryUsageStats m_stats;
 #if CONTIGUOUS_HEAP
   ContiguousHeap m_heap;

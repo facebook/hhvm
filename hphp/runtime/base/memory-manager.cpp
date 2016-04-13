@@ -193,7 +193,7 @@ MemoryManager::MemoryManager() {
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
   resetStatsImpl(true);
-  m_stats.maxBytes = std::numeric_limits<int64_t>::max();
+  setMemoryLimit(std::numeric_limits<int64_t>::max());
   // make the circular-lists empty.
   m_strings.next = m_strings.prev = &m_strings;
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
@@ -529,6 +529,7 @@ void MemoryManager::resetAllocator() {
   m_sweeping = false;
   m_exiting = false;
   resetStatsImpl(true);
+  updateNextGc();
   FTRACE(1, "reset: strings {}\n", nstrings);
   if (debug) resetEagerGC();
 }

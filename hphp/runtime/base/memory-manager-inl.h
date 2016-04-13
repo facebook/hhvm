@@ -292,10 +292,6 @@ inline int64_t MemoryManager::getDeallocated() const {
 #endif
 }
 
-inline void MemoryManager::setMemoryLimit(size_t limit) {
-  m_stats.maxBytes = limit;
-}
-
 inline MemoryUsageStats& MemoryManager::getStats() {
   refreshStats();
   return m_stats;

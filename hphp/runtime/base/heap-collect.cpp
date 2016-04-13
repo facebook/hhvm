@@ -645,13 +645,25 @@ void MemoryManager::requestEagerGC() {
 
 void MemoryManager::requestGC() {
   if (RuntimeOption::EvalEnableGC && rds::header()) {
-    setSurpriseFlag(PendingGCFlag);
+    if (m_stats.usage > m_nextGc) {
+      setSurpriseFlag(PendingGCFlag);
+    }
   }
+}
+
+void MemoryManager::updateNextGc() {
+  m_nextGc = m_stats.usage + (m_stats.maxBytes - m_stats.usage) / 2;
 }
 
 void MemoryManager::collect(const char* phase) {
   if (!RuntimeOption::EvalEnableGC || empty()) return;
   collectImpl(phase);
+  updateNextGc();
+}
+
+void MemoryManager::setMemoryLimit(size_t limit) {
+  m_stats.maxBytes = limit;
+  updateNextGc();
 }
 
 }

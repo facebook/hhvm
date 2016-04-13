@@ -216,6 +216,9 @@ bool Parser::parse() {
     }
     return true;
   } catch (const ParseTimeFatalException& e) {
+    Logger::Error("Error parsing %s:%d: %s", m_fileName, e.m_line,
+                  e.getMessage().c_str());
+
     m_file->cleanupForError(m_ar);
     if (e.m_parseFatal) {
       m_file->makeParseFatal(m_ar, e.getMessage(), e.m_line);

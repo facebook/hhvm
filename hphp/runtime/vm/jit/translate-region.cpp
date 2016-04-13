@@ -780,8 +780,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           inl.registerEndInlining(callee);
 
           if (result != TranslateResult::Success) {
+            // If we failed to generate the callee don't fail the caller,
+            // instead retry without the callee
+            if (result != TranslateResult::Retry) {
+              retry.inlineBlacklist.insert(psk);
+            }
             // Generating the inlined call failed, bailout
-            return result;
+            return TranslateResult::Retry;
           }
 
           // Native calls end inlining before CallBuiltin

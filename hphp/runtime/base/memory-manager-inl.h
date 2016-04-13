@@ -191,7 +191,7 @@ inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
   assert(index < kNumSmallSizes);
   assert(bytes <= kSmallIndex2Size[index]);
 
-  if (debug) checkEagerGC();
+  if (debug) requestEagerGC();
 
   m_stats.usage += bytes;
 
@@ -253,7 +253,7 @@ void MemoryManager::freeBigSize(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
-  m_stats.borrow(-bytes);
+  m_stats.repay(bytes);
   FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
   m_heap.freeBig(vp);
 }
@@ -292,7 +292,10 @@ inline int64_t MemoryManager::getDeallocated() const {
 #endif
 }
 
-inline MemoryUsageStats& MemoryManager::getStatsNoRefresh() { return m_stats; }
+inline void MemoryManager::setMemoryLimit(size_t limit) {
+  m_stats.maxBytes = limit;
+}
+
 inline MemoryUsageStats& MemoryManager::getStats() {
   refreshStats();
   return m_stats;

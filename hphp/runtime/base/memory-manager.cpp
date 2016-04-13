@@ -635,7 +635,7 @@ inline void* MemoryManager::realloc(void* ptr,
     return newmem;
   }
   // Ok, it's a big allocation.
-  if (debug) checkEagerGC();
+  if (debug) requestEagerGC();
   auto block = m_heap.resizeBig(ptr, nbytes);
   refreshStats();
   return block.ptr;
@@ -841,7 +841,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStats();
   }
-  checkGC();
+  requestGC();
   storeTail(m_front, (char*)m_limit - (char*)m_front);
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
@@ -956,7 +956,7 @@ MemBlock MemoryManager::mallocBigSize<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::mallocBigSize(size_t bytes) {
-  if (debug) checkEagerGC();
+  if (debug) requestEagerGC();
 
   auto block = m_heap.allocBig(bytes, HeaderKind::BigObj, 0);
   auto szOut = block.size;
@@ -978,7 +978,7 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes) {
 
 NEVER_INLINE
 void* MemoryManager::callocBig(size_t totalbytes, type_scan::Index tyindex) {
-  if (debug) checkEagerGC();
+  if (debug) requestEagerGC();
   assert(totalbytes > 0);
   auto block = m_heap.callocBig(totalbytes, tyindex);
   updateBigStats();

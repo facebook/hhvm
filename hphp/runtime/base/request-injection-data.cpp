@@ -663,16 +663,16 @@ void RequestInjectionData::setFlag(SurpriseFlag flag) {
 void RequestInjectionData::setMemoryLimit(std::string limit) {
   int64_t newInt = strtoll(limit.c_str(), nullptr, 10);
   if (newInt <= 0) {
-   newInt = std::numeric_limits<int64_t>::max();
-   m_maxMemory = std::to_string(newInt);
+    newInt = std::numeric_limits<int64_t>::max();
+    m_maxMemory = std::to_string(newInt);
   } else {
-   m_maxMemory = limit;
-   newInt = convert_bytes_to_long(limit);
-   if (newInt <= 0) {
-     newInt = std::numeric_limits<int64_t>::max();
-   }
+    m_maxMemory = limit;
+    newInt = convert_bytes_to_long(limit);
+    if (newInt <= 0) {
+      newInt = std::numeric_limits<int64_t>::max();
+    }
   }
-  MM().getStatsNoRefresh().maxBytes = newInt;
+  MM().setMemoryLimit(newInt);
   m_maxMemoryNumeric = newInt;
 }
 }

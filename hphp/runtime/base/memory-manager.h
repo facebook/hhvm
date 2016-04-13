@@ -636,10 +636,9 @@ struct MemoryManager {
   // Stats.
 
   /*
-   * Get access to the current memory allocation stats, without refreshing them
-   * first.
+   * Update the request-memory limit.
    */
-  MemoryUsageStats& getStatsNoRefresh();
+  void setMemoryLimit(size_t limit);
 
   /*
    * Get most recent stats, updating the tracked stats in the MemoryManager
@@ -907,9 +906,9 @@ private:
   void dropRootMaps();
   void deleteRootMaps();
 
-  void checkEagerGC();
+  void requestEagerGC();
   void resetEagerGC();
-  void checkGC();
+  void requestGC();
 
   template <typename T>
   typename std::enable_if<

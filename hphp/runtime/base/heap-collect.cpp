@@ -636,14 +636,14 @@ void MemoryManager::resetEagerGC() {
   }
 }
 
-void MemoryManager::checkEagerGC() {
+void MemoryManager::requestEagerGC() {
   if (RuntimeOption::EvalEagerGC && rds::header()) {
     t_eager_gc = true;
     setSurpriseFlag(PendingGCFlag);
   }
 }
 
-void MemoryManager::checkGC() {
+void MemoryManager::requestGC() {
   if (RuntimeOption::EvalEnableGC && rds::header()) {
     setSurpriseFlag(PendingGCFlag);
   }

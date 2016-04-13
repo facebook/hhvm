@@ -51,8 +51,10 @@ struct MemoryUsageStats {
 
 #ifdef USE_JEMALLOC
   void borrow(size_t amt) { jemallocDebt += amt; }
+  void repay(size_t amt) { jemallocDebt -= amt; }
 #else
   void borrow(size_t) {}
+  void repay(size_t) {}
 #endif
 };
 

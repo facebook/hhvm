@@ -2006,9 +2006,6 @@ void hphp_process_init() {
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
   BootStats::mark("xenon");
 
-  ClassInfo::Load();
-  BootStats::mark("ClassInfo::Load");
-
   // reinitialize pcre table
   pcre_reinit();
   BootStats::mark("pcre_reinit");

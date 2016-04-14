@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/type-string.h"
@@ -639,7 +638,7 @@ struct Func {
   bool isBuiltin() const;
 
   /*
-   * Is this function a C++ builtin?  Maybe IDL- or HNI-defined.
+   * Is this function a C++ builtin (ie HNI function)?.
    *
    * @implies: isBuiltin()
    */
@@ -662,10 +661,10 @@ struct Func {
    *
    * All C++ builtins have a builtinFuncPtr, with no exceptions.
    *
-   * IDL builtins all have distinct builtinFuncPtr's.  Most HNI functions share
-   * a single builtinFuncPtr, which performs unpacking and dispatch.  The
-   * exception is HNI functions declared with NeedsActRec, which do not have
-   * nativeFuncPtr's and have unique builtinFuncPtr's which do all their work.
+   * Most HNI functions share a single builtinFuncPtr, which performs
+   * unpacking and dispatch.  The exception is HNI functions declared
+   * with NeedsActRec, which do not have nativeFuncPtr's and have
+   * unique builtinFuncPtr's which do all their work.
    */
   BuiltinFunction builtinFuncPtr() const;
 
@@ -679,14 +678,6 @@ struct Func {
    * (i.e., "Native") functions declared with NeedsActRec.
    */
   BuiltinFunction nativeFuncPtr() const;
-
-  /*
-   * Get the MethodInfo object of a builtin.
-   *
-   * Return null if the function is not a builtin.
-   */
-  const ClassInfo::MethodInfo* methInfo() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Closures.                                                          [const]
@@ -1112,7 +1103,6 @@ private:
     ExtendedSharedData(const ExtendedSharedData&) = delete;
     ExtendedSharedData(ExtendedSharedData&&) = delete;
 
-    const ClassInfo::MethodInfo* m_info;
     BuiltinFunction m_builtinFuncPtr;
     BuiltinFunction m_nativeFuncPtr;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit

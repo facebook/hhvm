@@ -1379,16 +1379,6 @@ void emitNativeImpl(IRGS& env) {
     return;
   }
 
-  // CallBuiltin doesn't understand IDL instance methods that have variable
-  // arguments.
-  if (auto const info = callee->methInfo()) {
-    if (info->attribute & (ClassInfo::VariableArguments |
-                           ClassInfo::RefVariableArguments)) {
-      genericNativeImpl();
-      return;
-    }
-  }
-
   auto thiz = callee->isMethod() && (!callee->isStatic() || callee->isNative())
     ? gen(env, LdCtx, fp(env)) : nullptr;
   auto const numParams = gen(env, LdARNumParams, fp(env));

@@ -358,17 +358,9 @@ void FunctionScope::setNoEffect() {
 }
 
 bool FunctionScope::isFoldable() const {
-  if (m_attribute & FileScope::IsFoldable) {
-    // IDL based builtins
-    return true;
-  }
   // Systemlib (PHP&HNI) builtins
   auto f = Unit::lookupFunc(String(getScopeName()).get());
   return f && f->isFoldable();
-}
-
-void FunctionScope::setIsFoldable() {
-  m_attribute |= FileScope::IsFoldable;
 }
 
 void FunctionScope::setNoFCallBuiltin() {

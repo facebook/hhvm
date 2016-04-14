@@ -28,7 +28,6 @@
 #include "hphp/util/thread-local.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-buffer.h"

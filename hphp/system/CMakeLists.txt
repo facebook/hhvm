@@ -1,20 +1,4 @@
-foreach(def ${EXTENSION_IDL_DEFINES})
-  add_definitions(${def})
-endforeach()
-
-# This will be run after runtime/ext has, so we can use the output of
-# that.
-add_custom_command(
-  OUTPUT "class_map.cpp"
-  DEPENDS ${IDL_SRCS} gen-class-map
-  COMMAND gen-class-map
-  ARGS "--system"
-       "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
-       ${EXTENSION_IDL_SOURCES}
-  COMMENT "Generating class_map.cpp")
-
-set(CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
-                "systemlib.cpp")
+set(CXX_SOURCES "systemlib.cpp")
 
 add_library(hphp_system STATIC ${CXX_SOURCES})
 if (ENABLE_ASYNC_MYSQL)

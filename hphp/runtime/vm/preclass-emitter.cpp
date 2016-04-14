@@ -201,29 +201,6 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   }
 }
 
-void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
-                                          BuiltinCtorFunction ctorFunc,
-                                          BuiltinDtorFunction dtorFunc,
-                                          BuiltinObjExtents extents) {
-  if (info->getAttribute() & ClassInfo::IsFinal) {
-    m_attrs = m_attrs | AttrFinal;
-  }
-  if (info->getAttribute() & ClassInfo::IsAbstract) {
-    m_attrs = m_attrs | AttrAbstract;
-  }
-  if (info->getAttribute() & ClassInfo::IsTrait) {
-    m_attrs = m_attrs | AttrTrait;
-  }
-  m_attrs = m_attrs | AttrUnique;
-  m_instanceCtor = ctorFunc;
-  m_instanceDtor = dtorFunc;
-
-  assert(extents.totalSizeBytes <= std::numeric_limits<uint32_t>::max());
-  assert(extents.odOffsetBytes  <= std::numeric_limits<int32_t>::max());
-  m_builtinObjSize  = extents.totalSizeBytes - sizeof(ObjectData);
-  m_builtinODOffset = extents.odOffsetBytes;
-}
-
 const StaticString s_nativedata("__nativedata");
 
 PreClass* PreClassEmitter::create(Unit& unit) const {

@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP { namespace jit {
@@ -75,14 +74,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
                                  "systemlib.hhas");
   addUnit(hhasUnit);
-
-  ClassInfo::Load();
-  auto nativeFunc = build_native_func_unit(hhbc_ext_funcs,
-                                           hhbc_ext_funcs_count);
-  addUnit(nativeFunc);
-  auto nativeClass = build_native_class_unit(hhbc_ext_classes,
-                                             hhbc_ext_class_count);
-  addUnit(nativeClass);
 
   SystemLib::s_inited = true;
 

@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"

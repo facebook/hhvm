@@ -541,7 +541,6 @@ int process(const CompilerOptions &po) {
 
   // one time initialization
   BuiltinSymbols::LoadSuperGlobals();
-  ClassInfo::Load();
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {

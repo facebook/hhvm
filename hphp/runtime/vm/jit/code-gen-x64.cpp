@@ -2769,9 +2769,16 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   if (isNativeImplCall(callee, argc)) {
     // The assumption here is that for builtins, the generated func contains
     // only a single opcode (NativeImpl), and there are no non-argument locals.
-    assertx(argc == callee->numLocals() && callee->numIterators() == 0);
-    assertx(peek_op(callee->getEntry()) == Op::NativeImpl);
-    assertx(instrLen(callee->getEntry()) == callee->past() - callee->base());
+    if (do_assert) {
+      assertx(argc == callee->numLocals() && callee->numIterators() == 0);
+      PC addr = callee->getEntry();
+      while (peek_op(addr) == Op::AssertRATL) {
+        addr += instrLen(addr);
+      }
+      assertx(peek_op(addr) == Op::NativeImpl);
+      assertx(addr + instrLen(addr) ==
+              callee->unit()->entry() + callee->past());
+    }
     auto retAddr = (int64_t)mcg->ustubs().retHelper;
     v << store{v.cns(retAddr),
                sync_sp[cellsToBytes(argc) + AROFF(m_savedRip)]};

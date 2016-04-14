@@ -200,7 +200,6 @@ struct FunctionScope : BlockScope,
    * Whether this function can be constant folded
    */
   bool isFoldable() const;
-  void setIsFoldable();
 
   /*
    * If this is a builtin function and does not need an ActRec

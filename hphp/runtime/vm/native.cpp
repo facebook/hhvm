@@ -324,8 +324,7 @@ bool coerceFCallArgs(TypedValue* args,
       CASE(Resource)
 
       case KindOfObject: {
-        auto mpi = func->methInfo() ? func->methInfo()->parameters[i] : nullptr;
-        if (pi.hasDefaultValue() || (mpi && mpi->valueLen > 0)) {
+        if (pi.hasDefaultValue()) {
           COERCE_OR_CAST(NullableObject, Object);
         } else {
           COERCE_OR_CAST(Object, Object);

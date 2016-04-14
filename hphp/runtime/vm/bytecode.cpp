@@ -44,7 +44,6 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -859,7 +858,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
     }
   }
 
-  assert(!func->methInfo() || func->numIterators() == 0);
+  assert(func->numIterators() == 0);
   if (func->numIterators() > 0) {
     os << "|";
     Iter* it = &((Iter*)&tv[1])[-1];

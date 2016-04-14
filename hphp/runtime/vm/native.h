@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/tv-helpers.h"
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/abi-cxx.h"

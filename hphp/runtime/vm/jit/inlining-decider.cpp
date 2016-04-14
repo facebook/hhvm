@@ -236,17 +236,6 @@ bool isInlinableCPPBuiltin(const Func* f) {
     return false;
   }
 
-  if (auto const info = f->methInfo()) {
-    if (info->attribute & (ClassInfo::NoFCallBuiltin |
-                           ClassInfo::VariableArguments |
-                           ClassInfo::RefVariableArguments)) {
-      return false;
-    }
-    // Note: there is no need for a similar-to-the-above check for HNI
-    // builtins---they'll just have a nullptr nativeFuncPtr (if they were
-    // declared as needing an ActRec).
-  }
-
   // For now, don't inline when we'd need to adjust ObjectData pointers.
   if (f->cls() && f->cls()->preClass()->builtinODOffset() != 0) {
     return false;

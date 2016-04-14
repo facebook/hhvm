@@ -129,7 +129,6 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -7960,15 +7959,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   if ((f->returnType() == KindOfDouble) &&
        !Native::allowFCallBuiltinDoubles()) return nullptr;
 
-  if (f->methInfo()) {
-    // IDL style builtin
-    const ClassInfo::MethodInfo* info = f->methInfo();
-    if (info->attribute & (ClassInfo::NoFCallBuiltin |
-                           ClassInfo::VariableArguments |
-                           ClassInfo::RefVariableArguments)) {
-      return nullptr;
-    }
-  } else if (!(f->attrs() & AttrNative)) {
+  if (!(f->attrs() & AttrNative)) {
     // HNI only enables Variable args via ActRec which in turn
     // is captured by the f->nativeFuncPtr() == nullptr,
     // so there's nothing additional to check in the HNI case
@@ -7978,7 +7969,6 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
   auto concrete_params = f->numParams();
   if (variadic) {
-    assertx(!f->methInfo());
     assertx(concrete_params > 0);
     --concrete_params;
   }
@@ -7988,27 +7978,14 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       return nullptr;
     }
     if (i >= numParams) {
-      if (f->methInfo()) {
-        // IDL-style
-        auto pi = f->methInfo()->parameters[i];
-        if (!pi->valueLen) {
-          return nullptr;
-        }
-        // unserializable default values such as TimeStamp::Current()
-        // are serialized as kUnserializableString ("\x01")
-        if (!strcmp(f->methInfo()->parameters[i]->value,
-                    kUnserializableString)) return nullptr;
-      } else {
-        // HNI style
-        auto &pi = f->params()[i];
-        if (pi.isVariadic()) continue;
-        if (!pi.hasDefaultValue()) {
-          return nullptr;
-        }
-        if (pi.defaultValue.m_type == KindOfUninit) {
-          // TODO: Resolve persistent constants
-          return nullptr;
-        }
+      auto &pi = f->params()[i];
+      if (pi.isVariadic()) continue;
+      if (!pi.hasDefaultValue()) {
+        return nullptr;
+      }
+      if (pi.defaultValue.m_type == KindOfUninit) {
+        // TODO: Resolve persistent constants
+        return nullptr;
       }
     }
   }
@@ -8133,25 +8110,14 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       }
     }
 
-    if (fcallBuiltin->methInfo()) {
-      // IDL style
-      for (; i < concreteParams; i++) {
-        const ClassInfo::ParameterInfo* pi =
-          fcallBuiltin->methInfo()->parameters[i];
-        Variant v = unserialize_from_string(
-          String(pi->value, pi->valueLen, CopyString));
-        emitBuiltinDefaultArg(e, v, pi->argType, i);
-      }
-    } else {
-      // HNI style
-      for (; i < concreteParams; i++) {
-        auto &pi = fcallBuiltin->params()[i];
-        assert(pi.hasDefaultValue());
-        auto &def = pi.defaultValue;
-        emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
-                              pi.builtinType, i);
-      }
+    for (; i < concreteParams; i++) {
+      auto &pi = fcallBuiltin->params()[i];
+      assert(pi.hasDefaultValue());
+      auto &def = pi.defaultValue;
+      emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
+                            pi.builtinType, i);
     }
+
     if (variadic) {
       if (numParams <= concreteParams) {
         e.Array(staticEmptyArray());
@@ -9545,61 +9511,6 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
   return ue;
 }
 
-struct Entry {
-  StringData* name;
-  const HhbcExtClassInfo* info;
-  const ClassInfo* ci;
-};
-
-const StaticString s_systemlibNativeFunc("/:systemlib.nativefunc");
-const StaticString s_systemlibNativeCls("/:systemlib.nativecls");
-
-const MD5 s_nativeFuncMD5("11111111111111111111111111111111");
-const MD5 s_nativeClassMD5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-
-static std::unique_ptr<UnitEmitter>
-emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
-                       ssize_t numBuiltinFuncs) {
-  auto ue = folly::make_unique<UnitEmitter>(s_nativeFuncMD5);
-  ue->m_filepath = s_systemlibNativeFunc.get();
-  ue->addTrivialPseudoMain();
-
-  Attr attrs = AttrBuiltin | AttrUnique | AttrPersistent;
-
-  for (ssize_t i = 0; i < numBuiltinFuncs; ++i) {
-    const HhbcExtFuncInfo* info = &builtinFuncs[i];
-    StringData* name = makeStaticString(info->m_name);
-    BuiltinFunction bif = (BuiltinFunction)info->m_builtinFunc;
-    BuiltinFunction nif = (BuiltinFunction)info->m_nativeFunc;
-    const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(String{name});
-    assert(mi &&
-      "MethodInfo not found; may be a problem with the .idl.json files");
-
-    // We already provide array_map by the hhas systemlib.  Rename
-    // because that hhas implementation delegates back to the C++
-    // implementation for some edge cases.  This works for any
-    // similarly defined function (already defined not as a builtin),
-    // and requires that the hhas systemlib is already loaded.
-    if (auto const existing = Unit::lookupFunc(name)) {
-      if (!existing->isCPPBuiltin()) {
-        name = makeStaticString("__builtin_" + name->toCppString());
-      }
-    }
-
-    FuncEmitter* fe = ue->newFuncEmitter(name);
-    Offset base = ue->bcPos();
-    fe->setBuiltinFunc(mi, bif, nif, base);
-    ue->emitOp(OpNativeImpl);
-    assert(!fe->numIterators());
-    fe->maxStackCells = fe->numLocals();
-    fe->attrs |= attrs;
-    fe->finish(ue->bcPos(), false);
-    ue->recordFunction(fe);
-  }
-
-  return ue;
-}
-
 enum GeneratorMethod {
   METH_NEXT,
   METH_SEND,
@@ -9784,188 +9695,6 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
 
   throw IncludeTimeFatalException(meth,
     "OpCodeImpl attribute is not applicable to %s", funcName);
-}
-
-StaticString s_construct("__construct");
-static std::unique_ptr<UnitEmitter>
-emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
-                        ssize_t numBuiltinClasses) {
-  auto ue = folly::make_unique<UnitEmitter>(s_nativeClassMD5);
-  ue->m_filepath = s_systemlibNativeCls.get();
-  ue->addTrivialPseudoMain();
-
-  // Build up extClassHash, a hashtable that maps class names to structures
-  // containing C++ function pointers for the class's methods and constructors
-  if (!Class::s_extClassHash.empty()) {
-    Class::s_extClassHash.clear();
-  }
-  for (long long i = 0; i < numBuiltinClasses; ++i) {
-    const HhbcExtClassInfo* info = builtinClasses + i;
-    StringData *s = makeStaticString(info->m_name);
-    Class::s_extClassHash[s] = info;
-  }
-  // If a given class has a base class, then we can't load that class
-  // before we load the base class. Build up some structures so that
-  // we can load the C++ builtin classes in the right order.
-  std::vector<Entry> classEntries;
-  {
-    typedef hphp_hash_map<StringData*, std::vector<Entry>,
-                          string_data_hash, string_data_isame> PendingMap;
-    PendingMap pending;
-    hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
-                  string_data_hash, string_data_isame>::iterator it;
-    for (it = Class::s_extClassHash.begin();
-         it != Class::s_extClassHash.end(); ++it) {
-      Entry e;
-      e.name = const_cast<StringData*>(it->first);
-      e.info = it->second;
-      e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(String{e.name});
-      assert(e.ci);
-      StringData* parentName
-        = makeStaticString(e.ci->getParentClass().get());
-      if (parentName->empty()) {
-        // If this class doesn't have a base class, it's eligible to be
-        // loaded now
-        classEntries.push_back(e);
-      } else {
-        // If this class has a base class, we can't load it until its
-        // base class has been loaded
-        pending[parentName].push_back(e);
-      }
-    }
-    for (unsigned k = 0; k < classEntries.size(); ++k) {
-      Entry& e = classEntries[k];
-      // Any classes that derive from this class are now eligible to be
-      // loaded
-      PendingMap::iterator pendingIt = pending.find(e.name);
-      if (pendingIt != pending.end()) {
-        for (unsigned i = 0; i < pendingIt->second.size(); ++i) {
-          classEntries.push_back(pendingIt->second[i]);
-        }
-        pending.erase(pendingIt);
-      }
-    }
-    assert(pending.empty());
-  }
-
-  for (unsigned int i = 0; i < classEntries.size(); ++i) {
-    Entry& e = classEntries[i];
-    StringData* parentName = makeStaticString(e.ci->getParentClass().get());
-    PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
-                                                  PreClass::AlwaysHoistable);
-    pce->init(0, 0, ue->bcPos(), AttrBuiltin|AttrUnique|AttrPersistent,
-              parentName, nullptr);
-    pce->setBuiltinClassInfo(
-      e.ci,
-      e.info->m_instanceCtor,
-      e.info->m_instanceDtor,
-      BuiltinObjExtents { e.info->m_totalSize, e.info->m_objectDataOffset }
-    );
-    {
-      ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
-      for (unsigned i = 0; i < intfVec.size(); ++i) {
-        const StringData* intf = makeStaticString(intfVec[i].get());
-        pce->addInterface(intf);
-      }
-    }
-
-    bool hasCtor = false;
-    for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
-      const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
-      StringData* methName = makeStaticString(methodInfo->m_name);
-
-      FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
-      pce->addMethod(fe);
-      auto stackPad = int32_t{0};
-      if (e.name->isame(s_construct.get())) {
-        hasCtor = true;
-      }
-
-      // Build the function
-      BuiltinFunction bcf = (BuiltinFunction)methodInfo->m_pGenericMethod;
-      auto nativeFunc = methodInfo->m_nativeFunc;
-      const ClassInfo::MethodInfo* mi =
-        e.ci->getMethodInfo(std::string(methodInfo->m_name));
-      Offset base = ue->bcPos();
-      fe->setBuiltinFunc(mi,
-        bcf,
-        reinterpret_cast<BuiltinFunction>(nativeFunc),
-        base
-      );
-      ue->emitOp(OpNativeImpl);
-
-      Offset past = ue->bcPos();
-      assert(!fe->numIterators());
-      fe->maxStackCells = fe->numLocals() + stackPad;
-      fe->finish(past, false);
-      ue->recordFunction(fe);
-    }
-    if (!hasCtor) {
-      static const StringData* methName = makeStaticString("86ctor");
-      FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
-      bool added UNUSED = pce->addMethod(fe);
-      assert(added);
-      fe->init(0, 0, ue->bcPos(), AttrBuiltin|AttrPublic,
-               false, staticEmptyString());
-      ue->emitOp(OpNull);
-      ue->emitOp(OpRetC);
-      fe->maxStackCells = 1;
-      fe->finish(ue->bcPos(), false);
-      ue->recordFunction(fe);
-    }
-
-    {
-      ClassInfo::ConstantVec cnsVec = e.ci->getConstantsVec();
-      for (unsigned i = 0; i < cnsVec.size(); ++i) {
-        const ClassInfo::ConstantInfo* cnsInfo = cnsVec[i];
-        assert(cnsInfo);
-        Variant val;
-        try {
-          val = cnsInfo->getValue();
-        } catch (Exception& e) {
-          assert(false);
-        }
-        // We are not supporting type constants for native classes
-        // AFAIK emitHHBCNativeClassUnit is only used for legacy idl files
-        pce->addConstant(
-          cnsInfo->name.get(),
-          nullptr,
-          (TypedValue*)(&val),
-          staticEmptyString(),
-          /* typeconst = */ false);
-      }
-    }
-    {
-      ClassInfo::PropertyVec propVec = e.ci->getPropertiesVec();
-      for (unsigned i = 0; i < propVec.size(); ++i) {
-        const ClassInfo::PropertyInfo* propInfo = propVec[i];
-        assert(propInfo);
-        int attr = AttrNone;
-        if (propInfo->attribute & ClassInfo::IsProtected) {
-          attr |= AttrProtected;
-        } else if (propInfo->attribute & ClassInfo::IsPrivate) {
-          attr |= AttrPrivate;
-        } else {
-          attr |= AttrPublic;
-        }
-        if (propInfo->attribute & ClassInfo::IsStatic) attr |= AttrStatic;
-
-        TypedValue tvNull;
-        tvWriteNull(&tvNull);
-        pce->addProperty(
-          propInfo->name.get(),
-          Attr(attr),
-          nullptr,
-          propInfo->docComment ?
-          makeStaticString(propInfo->docComment) : nullptr,
-          &tvNull,
-          RepoAuthType{}
-        );
-      }
-    }
-  }
-
-  return ue;
 }
 
 static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
@@ -10183,14 +9912,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
   assert(Option::UseHHBBC || ues.empty());
 
-  // We need to put the native func units in the repo so hhbbc can
-  // find them.
-  auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
-  auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
-                                       hhbc_ext_class_count);
-  ues.push_back(std::move(nfunc));
-  ues.push_back(std::move(ncls));
-
   ar->finish();
   ar.reset();
 
@@ -10403,87 +10124,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // extern "C" function should not be throwing exceptions...
     return nullptr;
   }
-}
-
-Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
-                                  ssize_t numBuiltinFuncs) {
-  return emitHHBCNativeFuncUnit(builtinFuncs, numBuiltinFuncs)->create()
-    .release();
-}
-
-Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
-                                   ssize_t numBuiltinClasses) {
-  auto const ue = emitHHBCNativeClassUnit(builtinClasses, numBuiltinClasses);
-
-  /*
-   * In RepoAuthoritative mode, we may have serialized additional
-   * information in attr bits about the native units.  We still
-   * rebuild it, but we'll clobber attr bits with what static analysis
-   * thought.
-   *
-   * Note: this is a bit of a short-term hack that we won't need once
-   * HNI conversion is completed.  We only pull things out of the repo
-   * here that we've explicitly decided we want.
-   */
-  if (!RuntimeOption::RepoAuthoritative) return ue->create().release();
-  auto const staticAnalysisUnit = Repo::get().urp().loadEmitter(
-    "/:systemlib:static_analysis",
-    s_nativeClassMD5
-  );
-  if (!staticAnalysisUnit) return ue->create().release();
-
-  // Make a map of the preclasses in `ue', so we can find them.
-  std::map<const StringData*,PreClassEmitter*> uePreClasses;
-  for (auto id = Id{0}; id < ue->numPreClasses(); ++id) {
-    auto const pce = ue->pce(id);
-    always_assert_flog(
-      !uePreClasses.count(pce->name()),
-      "IDL-based native class unit is expected to only have unique "
-      "classes.  {} was non-unique.",
-      pce->name()->data()
-    );
-    uePreClasses[pce->name()] = pce;
-  }
-
-  always_assert_flog(
-    staticAnalysisUnit->numPreClasses() == uePreClasses.size(),
-    "Static analysis unit didn't have the same number of classes as "
-    "our native class unit; repo probably build with a different hhvm build."
-  );
-
-  // Right now, the only thing we do here is clobber all the Attr bits
-  // with the ones we found from static analysis.  (To get things like
-  // AttrNoOverride.)
-  for (auto id = Id{0}; id < staticAnalysisUnit->numPreClasses(); ++id) {
-    auto const staticAnalysisPce = staticAnalysisUnit->pce(id);
-    auto const uePce = uePreClasses[staticAnalysisPce->name()];
-    always_assert_flog(
-      uePce != nullptr,
-      "Static analysis unit had a PreClass we don't have at runtime ({}); "
-      "repo probably was built with a different hhvm build.",
-      staticAnalysisPce->name()->data()
-    );
-    uePce->setAttrs(staticAnalysisPce->attrs());
-
-    // Set all the method bits.
-    for (auto methID = uint32_t{0};
-         methID < staticAnalysisPce->methods().size();
-         ++methID) {
-      auto const& staticAnalysisMethod = staticAnalysisPce->methods()[methID];
-      auto const pceMethod = uePce->findMethod(staticAnalysisMethod->name);
-      always_assert_flog(
-        pceMethod != nullptr,
-        "Static analysis unit had a PreClass method that we don't have at "
-        "runtime ({}::{}); repo probably was built with a different hhvm "
-        "build.",
-        staticAnalysisPce->name()->data(),
-        staticAnalysisMethod->name->data()
-      );
-      pceMethod->attrs = staticAnalysisMethod->attrs;
-    }
-  }
-
-  return ue->create().release();
 }
 
 } // extern "C"

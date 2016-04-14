@@ -53,9 +53,6 @@ const StaticString s_86ctor("86ctor");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 
-hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
-              string_data_hash, string_data_isame> Class::s_extClassHash;
-
 void (*Class::MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
 
 Mutex g_classesMutex;
@@ -541,16 +538,7 @@ const Func* Class::getCachedInvoke() const {
 bool Class::isCppSerializable() const {
   assert(instanceCtor()); // Only call this on CPP classes
   auto* ndi = m_extra ? m_extra.raw()->m_nativeDataInfo : nullptr;
-  if (ndi != nullptr && ndi->isSerializable()) {
-    return true;
-  }
-  auto info = clsInfo();
-  auto p = this;
-  while ((!info) && (p = p->parent())) {
-    info = p->clsInfo();
-  }
-  return info &&
-    (info->getAttribute() & ClassInfo::IsCppSerializable);
+  return ndi != nullptr && ndi->isSerializable();
 }
 
 bool Class::isCollectionClass() const {
@@ -1160,8 +1148,6 @@ void Class::setParent() {
     m_extra.raw()->m_instanceDtor = m_preClass->instanceDtor();
     m_extra.raw()->m_builtinODTailSize = m_preClass->builtinObjSize() -
                                          m_preClass->builtinODOffset();
-    m_extra.raw()->m_clsInfo =
-      ClassInfo::FindSystemClassInterfaceOrTrait(nameStr());
   } else if (m_parent.get() && m_parent->m_extra->m_instanceCtor) {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_parent->m_extra->m_instanceCtor;

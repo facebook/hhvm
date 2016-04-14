@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -714,30 +713,6 @@ static Array get_function_param_info(const Func* func) {
       Variant v = default_arg_from_php_code(fpi, func);
       param.set(s_default, v);
       param.set(s_defaultText, VarNR(fpi.phpCode));
-    } else if (auto mi = func->methInfo()) {
-      auto p = mi->parameters[i];
-      auto defText = p->valueText;
-      auto defTextLen = p->valueTextLen;
-      if (defText == nullptr) {
-        defText = "";
-        defTextLen = 0;
-      }
-      if (p->value && *p->value) {
-        if (*p->value == '\x01') {
-          Variant v;
-          if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
-            param.set(s_default, v);
-          } else {
-            auto obj = SystemLib::AllocStdClassObject();
-            obj->o_set(s_msg, String("Unknown unserializable default value: ")
-                       + defText);
-            param.set(s_default, std::move(obj));
-          }
-        } else {
-          param.set(s_default, unserialize_from_string(p->value));
-        }
-        param.set(s_defaultText, defText);
-      }
     }
 
     if (func->byRef(i)) {

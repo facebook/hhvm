@@ -969,10 +969,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar);
 extern "C" {
   Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                             const char* filename);
-  Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
-                                    ssize_t numBuiltinFuncs);
-  Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
-                                     ssize_t numBuiltinClasses);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

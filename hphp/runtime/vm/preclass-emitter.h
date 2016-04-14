@@ -220,11 +220,6 @@ struct PreClassEmitter {
 
   void commit(RepoTxn& txn) const;
 
-  void setBuiltinClassInfo(const ClassInfo* info,
-                           BuiltinCtorFunction ctorFunc,
-                           BuiltinDtorFunction dtorFunc,
-                           BuiltinObjExtents extents);
-
   PreClass* create(Unit& unit) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);

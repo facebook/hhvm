@@ -60,31 +60,12 @@ struct BuiltinSymbols {
   static const char *const GlobalNames[];
   static int NumGlobalNames();
 private:
-  static const char *SystemClasses[];
-
   static hphp_string_set s_superGlobals;
 
   static std::set<std::string> s_declaredDynamic;
 
-  static FunctionScopePtr ImportFunctionScopePtr(AnalysisResultPtr ar,
-                                                 const ClassInfo* cls,
-                                                 const ClassInfo::MethodInfo* method);
-  static void ImportExtFunctions(AnalysisResultPtr ar,
-                                 const ClassInfo* cls);
-  static void ImportExtMethods(AnalysisResultPtr ar,
-                               std::vector<FunctionScopePtr>& vec,
-                               const ClassInfo* cls);
-  static void ImportExtProperties(AnalysisResultPtr ar,
-                                  VariableTablePtr dest,
-                                  const ClassInfo* cls);
-  static void ImportExtConstants(AnalysisResultPtr ar,
-                                 ConstantTablePtr dest,
-                                 const ClassInfo* cls);
   static void ImportNativeConstants(AnalysisResultPtr ar,
                                     ConstantTablePtr dest);
-  static ClassScopePtr ImportClassScopePtr(AnalysisResultPtr ar,
-                                           ClassInfo *cls);
-  static void ImportExtClasses(AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -34,9 +34,6 @@ hphp.log
 
 /hphp/hhvm/gen
 
-*.ext_hhvm.cpp
-*.ext_hhvm.h
-
 /hphp/tools/shmw/shmw
 /hphp/tools/version/version
 /hphp/tools/gdb/hhvm-gdb

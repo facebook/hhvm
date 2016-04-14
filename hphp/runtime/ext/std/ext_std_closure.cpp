@@ -70,10 +70,6 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
       );
 
       bool optional = func->params()[i].phpCode;
-      if (auto mi = func->methInfo()) {
-        optional = optional || mi->parameters[i]->valueText;
-      }
-
       params.set(str, optional ? s_optional : s_required);
     }
 

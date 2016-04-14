@@ -16,7 +16,6 @@
 #include "hphp/runtime/base/backtrace.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/bytecode.h"

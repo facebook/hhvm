@@ -2,8 +2,6 @@ set(CXX_SOURCES)
 set(C_SOURCES)
 set(ASM_SOURCES)
 set(HEADER_SOURCES)
-set(IDL_SOURCES)
-set(IDL_DEFINES)
 set(PHP_SOURCES)
 
 # Pick up all files in the base ext/ folder unconditionally
@@ -39,8 +37,6 @@ foreach (dir ${subdirs})
   endif()
 endforeach()
 HHVM_EXTENSION_RESOLVE_DEPENDENCIES()
-set(EXTENSION_IDL_SOURCES ${IDL_SOURCES} CACHE INTERNAL "" FORCE)
-set(EXTENSION_IDL_DEFINES ${IDL_DEFINES} CACHE INTERNAL "" FORCE)
 set(EXTENSION_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
 
 add_precompiled_header(

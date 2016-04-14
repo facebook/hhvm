@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -133,35 +132,15 @@ void ProcessInit() {
     SystemLib::s_hhas_unit->merge();
   }
 
-  if (hhbc_ext_funcs_count) {
-    SystemLib::s_nativeFuncUnit = build_native_func_unit(hhbc_ext_funcs,
-                                                         hhbc_ext_funcs_count);
-    SystemLib::s_nativeFuncUnit->merge();
-  }
-
   SystemLib::s_nullFunc =
     Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
 
-  // We call a special bytecode emitter function to build the native
-  // unit which will contain all of our cppext functions and classes.
-  // Each function and method will have a bytecode body that will thunk
-  // to the native implementation.
-  if (hhbc_ext_class_count) {
-    SystemLib::s_nativeClassUnit =
-      build_native_class_unit(hhbc_ext_classes, hhbc_ext_class_count);
-  }
-
   LitstrTable::get().setReading();
-
-  // Load the nativelib unit to build the Class objects
-  if (SystemLib::s_nativeClassUnit) {
-    SystemLib::s_nativeClassUnit->merge();
-  }
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
     Class *cls = NamedEntity::get(s_##cls.get())->clsList();            \
-    assert(!hhbc_ext_class_count || cls);                               \
+    assert(cls);                                                        \
     SystemLib::s_##cls##Class = cls;                                    \
   }
 
@@ -180,17 +159,6 @@ void ProcessInit() {
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 
-  // Retrieve all of the class pointers
-  for (long long i = 0; i < hhbc_ext_class_count; ++i) {
-    const HhbcExtClassInfo* info = hhbc_ext_classes + i;
-    const StringData* name = makeStaticString(info->m_name);
-    const NamedEntity* ne = NamedEntity::get(name);
-    Class* cls = Unit::lookupClass(ne);
-    assert(cls);
-    *(info->m_clsPtr) = cls;
-  }
-
-  ClassInfo::InitializeSystemConstants();
   Stack::ValidateStackSize();
   SystemLib::s_inited = true;
 

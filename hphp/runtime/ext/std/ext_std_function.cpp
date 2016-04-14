@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/vm/runtime.h"

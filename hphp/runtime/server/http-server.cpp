@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/server/http-server.h"
 
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"

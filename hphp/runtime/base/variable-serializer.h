@@ -26,8 +26,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ClassInfo;
-
 /**
  * Maintaining states during serialization of a variable. We use this single
  * class to uniformly serialize variables according to different formats.

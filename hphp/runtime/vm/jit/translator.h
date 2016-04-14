@@ -586,7 +586,10 @@ inline bool isReqPtrRef(MaybeDataType t) {
  * Is a call to `funcd' with `numArgs' arguments a NativeImpl call?
  */
 inline bool isNativeImplCall(const Func* funcd, int numArgs) {
-  return funcd && funcd->methInfo() && numArgs == funcd->numParams();
+  return funcd &&
+    funcd->builtinFuncPtr() &&
+    !funcd->nativeFuncPtr() &&
+    numArgs == funcd->numParams();
 }
 
 /*

@@ -378,13 +378,6 @@ inline BuiltinFunction Func::nativeFuncPtr() const {
   return nullptr;
 }
 
-inline const ClassInfo::MethodInfo* Func::methInfo() const {
-  if (auto const ex = extShared()) {
-    return ex->m_info;
-  }
-  return nullptr;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Closures.
 

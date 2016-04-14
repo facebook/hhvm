@@ -68,7 +68,6 @@ set(HHVM_LINK_LIBRARIES
   ${HHVM_ANCHOR_SYMS}
   ${HHVM_WRAP_SYMS}
   hphp_analysis
-  ext_hhvm_static
   hphp_system
   hphp_parser
   hphp_zend

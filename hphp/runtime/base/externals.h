@@ -56,11 +56,6 @@ extern Variant get_class_var_init(const String& s, const char *var);
 } // extern C++
 
 /**
- * Class/function meta info entirely encoded here as a const char * array.
- */
-extern const char *g_class_map[];
-
-/**
  * Returns a thread local global variable class pointer.
  */
 typedef GlobalsArray GlobalVariables;

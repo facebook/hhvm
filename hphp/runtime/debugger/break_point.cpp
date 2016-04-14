@@ -25,7 +25,6 @@
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/comparisons.h"

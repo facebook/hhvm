@@ -35,8 +35,6 @@ namespace HPHP {
 TRACE_SET_MOD(runtime);
 
 CompileStringFn g_hphp_compiler_parse;
-BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
-BuildNativeClassUnitFn g_hphp_build_native_class_unit;
 
 /**
  * print_string will decRef the string
@@ -155,16 +153,6 @@ StringData* concat_s4(StringData* v1, StringData* v2,
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);
-}
-
-Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
-                             ssize_t numBuiltinFuncs) {
-  return g_hphp_build_native_func_unit(builtinFuncs, numBuiltinFuncs);
-}
-
-Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
-                              ssize_t numBuiltinClasses) {
-  return g_hphp_build_native_class_unit(builtinClasses, numBuiltinClasses);
 }
 
 std::string mangleSystemMd5(const std::string& fileMd5) {

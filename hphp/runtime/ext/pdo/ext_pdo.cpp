@@ -26,7 +26,6 @@
 #include "hphp/util/string-vsnprintf.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"

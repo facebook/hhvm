@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_BYTECODE_H_
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/tv-arith.h"

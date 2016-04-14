@@ -153,10 +153,6 @@ inline bool Class::isBuiltin() const {
   return attrs() & AttrBuiltin;
 }
 
-inline const ClassInfo* Class::clsInfo() const {
-  return m_extra->m_clsInfo;
-}
-
 inline BuiltinCtorFunction Class::instanceCtor() const {
   return m_extra->m_instanceCtor;
 }

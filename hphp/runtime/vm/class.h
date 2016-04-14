@@ -49,7 +49,6 @@ namespace HPHP {
 struct Class;
 struct ClassInfo;
 struct Func;
-struct HhbcExtClassInfo;
 struct StringData;
 struct c_WaitHandle;
 
@@ -468,11 +467,6 @@ public:
    * Is the class a builtin, whether PHP or C++?
    */
   bool isBuiltin() const;
-
-  /*
-   * Return the ClassInfo for a C++ extension class.
-   */
-  const ClassInfo* clsInfo() const;
 
   /*
    * Custom initialization and destruction routines for C++ extension classes.
@@ -983,7 +977,6 @@ private:
      */
     BuiltinCtorFunction m_instanceCtor{nullptr};
     BuiltinDtorFunction m_instanceDtor{nullptr};
-    const ClassInfo* m_clsInfo{nullptr};
     uint32_t m_builtinODTailSize{0};
 
     /*
@@ -1166,15 +1159,6 @@ private:
   // Static data members.
 
 public:
-  /*
-   * A hashtable that maps class names to structures containing C++ function
-   * pointers for the class's methods and constructors.
-   */
-  static hphp_hash_map<const StringData*,
-                       const HhbcExtClassInfo*,
-                       string_data_hash,
-                       string_data_isame> s_extClassHash;
-
   /*
    * Callback which, if set, runs during setMethods().
    */

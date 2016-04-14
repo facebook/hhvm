@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/soap/packet.h"
 #include "hphp/runtime/base/string-util.h"

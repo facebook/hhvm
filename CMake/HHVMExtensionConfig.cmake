@@ -46,9 +46,6 @@
 # HHVM_EXTENSION_#_SYSTEMLIB: <list>
 # The list of php files that make up this extension's own systemlib.
 #
-# HHVM_EXTENSION_#_IDL_FILES: <list>
-# The list of .idl.json files that make up this extension's IDL interface.
-#
 # HHVM_EXTENSION_#_DEPENDENCIES: <list>
 # The list of dependencies of this extension. For details on the specifics
 # of values in this list, see the documentation of the DEPENDS parameter
@@ -116,9 +113,6 @@
 # [SYSTEMLIB ...]
 # The PHP API of the extension.
 #
-# [IDL ...]
-# The IDL files of the extension.
-#
 # [DEPENDS ...]
 # The dependencies of the extension. Extensions are prefixed
 # with "ext_", and external libaries with "lib".
@@ -170,7 +164,6 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
   set(extensionSources)
   set(extensionHeaders)
   set(extensionLibrary)
-  set(extensionIDL)
   set(extensionDependencies)
   set(extensionDependenciesOptional)
 
@@ -204,8 +197,6 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
       set(argumentState 4)
     elseif ("x${arg}" STREQUAL "xSYSTEMLIB")
       set(argumentState 5)
-    elseif ("x${arg}" STREQUAL "xIDL")
-      set(argumentState 6)
     elseif ("x${arg}" STREQUAL "xDEPENDS")
       set(argumentState 7)
     elseif ("x${arg}" STREQUAL "xREQUIRED")
@@ -269,13 +260,6 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
         message(FATAL_ERROR "The file '${arg}' was already specified as part of the library of '${extensionPrettyName}'!")
       endif()
       list(APPEND extensionLibrary ${arg})
-    elseif (${argumentState} EQUAL 6)
-      # IDL
-      list(FIND extensionIDL ${arg} listIDX)
-      if (NOT ${listIDX} EQUAL -1)
-        message(FATAL_ERROR "The file '${arg}' was already specified as an IDL file of '${extensionPrettyName}'!")
-      endif()
-      list(APPEND extensionIDL ${arg})
     elseif (${argumentState} EQUAL 7)
       # DEPENDS
       list(FIND extensionDependencies ${arg} listIDX)
@@ -320,7 +304,6 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
   set(HHVM_EXTENSION_${extensionID}_SOURCE_FILES ${extensionSources} CACHE INTERNAL "" FORCE)
   set(HHVM_EXTENSION_${extensionID}_HEADER_FILES ${extensionHeaders} CACHE INTERNAL "" FORCE)
   set(HHVM_EXTENSION_${extensionID}_SYSTEMLIB ${extensionLibrary} CACHE INTERNAL "" FORCE)
-  set(HHVM_EXTENSION_${extensionID}_IDL_FILES ${extensionIDL} CACHE INTERNAL "" FORCE)
   set(HHVM_EXTENSION_${extensionID}_DEPENDENCIES ${extensionDependencies} CACHE INTERNAL "" FORCE)
   set(HHVM_EXTENSION_${extensionID}_DEPENDENCIES_OPTIONAL ${extensionDependenciesOptional} CACHE INTERNAL "" FORCE)
 endfunction()
@@ -333,12 +316,6 @@ endfunction()
 # H_SOURCES: C/C++ Header Files
 # ASM_SOURCES: asm source files appropriate for the current compiler.
 # PHP_SOURCES: PHP files representing the various extensions' systemlib.
-# IDL_SOURCES: The .idl.json files for the various extensions.
-#
-# IDL_DEFINES: Defines necessary for IDL-based extensions
-#   Super hacky way to ensure that class_map.cpp and ext_hhvm stubs have access
-#   to IDL based extensions via runtime/ext.h
-#   "Die IDL-based extensions, die." -sgolemon
 #
 # This will also add the appropriate libraries, include directories, and
 # defines for the enabled extensions' dependencies.
@@ -367,12 +344,8 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
         ${HHVM_EXTENSION_${i}_SOURCE_FILES}
         ${HHVM_EXTENSION_${i}_HEADER_FILES}
         ${HHVM_EXTENSION_${i}_SYSTEMLIB}
-        ${HHVM_EXTENSION_${i}_IDL_FILES}
       )
       add_definitions("-DENABLE_EXTENSION_${upperExtName}")
-      if (HHVM_EXTENSION_${i}_IDL_FILES)
-        list(APPEND IDL_DEFINES "-DENABLE_EXTENSION_${upperExtName}")
-      endif()
 
       if (HHVM_EXTENSION_${i}_REQUIRED)
         set(ENABLE_EXTENSION_${upperExtName} ON CACHE INTERNAL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
@@ -395,8 +368,6 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
   set(HEADER_SOURCES ${HEADER_SOURCES} PARENT_SCOPE)
   set(ASM_SOURCES ${ASM_SOURCES} PARENT_SCOPE)
   set(PHP_SOURCES ${PHP_SOURCES} PARENT_SCOPE)
-  set(IDL_SOURCES ${IDL_SOURCES} PARENT_SCOPE)
-  set(IDL_DEFINES ${IDL_DEFINES} PARENT_SCOPE)
 endfunction()
 
 # Sort out all the files into their appropriate variable, as well as transform the paths
@@ -429,13 +400,6 @@ function (HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES rootDir)
       endif()
     elseif (${fileExtension} STREQUAL ".php")
       list(APPEND PHP_SOURCES "${rootDir}/${fileName}")
-    elseif (${fileExtension} STREQUAL ".json")
-      string(FIND ${fileName} ".idl.json" idlJsonIdx REVERSE)
-      math(EXPR expectedPos "${fileNameLength} - 9")
-      if (NOT ${idlJsonIdx} EQUAL ${expectedPos})
-        message(FATAL_ERROR "Unknown random .json file in the file list!")
-      endif()
-      list(APPEND IDL_SOURCES "${rootDir}/${fileName}")
     else()
       message(FATAL_ERROR "Unknown file extension '${fileExtension}'!")
     endif()
@@ -445,7 +409,6 @@ function (HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES rootDir)
   set(HEADER_SOURCES ${HEADER_SOURCES} PARENT_SCOPE)
   set(ASM_SOURCES ${ASM_SOURCES} PARENT_SCOPE)
   set(PHP_SOURCES ${PHP_SOURCES} PARENT_SCOPE)
-  set(IDL_SOURCES ${IDL_SOURCES} PARENT_SCOPE)
 endfunction()
 
 

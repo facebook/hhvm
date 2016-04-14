@@ -93,6 +93,21 @@ struct IRExtraData {};
  */
 
 /*
+ * Offset in bytes from a base pointer---e.g., to a object property from an
+ * ObjectData*.
+ */
+struct ByteOffsetData : IRExtraData {
+  explicit ByteOffsetData(ptrdiff_t offset) : offsetBytes(offset) {}
+
+  std::string show() const { return folly::to<std::string>(offsetBytes); }
+
+  bool equals(ByteOffsetData o) const { return offsetBytes == o.offsetBytes; }
+  size_t hash() const { return std::hash<ptrdiff_t>()(offsetBytes); }
+
+  ptrdiff_t offsetBytes;
+};
+
+/*
  * Class pointer.
  *
  * Required to be non-null.
@@ -514,26 +529,6 @@ struct ActRecInfo : IRExtraData {
                                   numArgs,
                                   invName ? " M" : "");
   }
-};
-
-struct PropOffset : IRExtraData {
-  explicit PropOffset(int32_t offset) : offsetBytes(offset) {}
-
-  std::string show() const { return folly::to<std::string>(offsetBytes); }
-  bool equals(PropOffset o) const { return offsetBytes == o.offsetBytes; }
-  size_t hash() const { return std::hash<int32_t>()(offsetBytes); }
-
-  int32_t offsetBytes;
-};
-
-/*
- * Offset to a TypedValue from some base pointer, in bytes.  (E.g. to
- * a object property slot.)
- */
-struct PropByteOffset : IRExtraData {
-  explicit PropByteOffset(size_t offsetBytes) : offsetBytes(offsetBytes) {}
-  std::string show() const { return folly::to<std::string>(offsetBytes); }
-  size_t offsetBytes;
 };
 
 /*
@@ -1196,7 +1191,7 @@ X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
-X(StClosureArg,                 PropByteOffset);
+X(StClosureArg,                 ByteOffsetData);
 X(RBTraceEntry,                 RBEntryData);
 X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
@@ -1231,7 +1226,7 @@ X(JmpSSwitchDest,               IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);
 X(DbgTrashFrame,                IRSPRelOffsetData);
 X(DbgTraceCall,                 IRSPRelOffsetData);
-X(LdPropAddr,                   PropOffset);
+X(LdPropAddr,                   ByteOffsetData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
 X(InitExtraArgs,                FuncEntryData);

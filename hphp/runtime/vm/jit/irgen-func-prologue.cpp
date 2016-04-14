@@ -123,14 +123,14 @@ void init_use_vars(IRGS& env, SSATmp* closure) {
   // (which are per-instance).
   auto const nuse = cls->numDeclProperties() - func->numStaticLocals();
 
-  int use_var_off = sizeof(ObjectData) + cls->builtinODTailSize();
+  ptrdiff_t use_var_off = sizeof(ObjectData) + cls->builtinODTailSize();
 
   for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
     auto const ty = typeFromRAT(cls->declPropRepoAuthType(i));
     auto const addr = gen(
       env,
       LdPropAddr,
-      PropOffset { use_var_off },
+      ByteOffsetData { use_var_off },
       ty.ptr(Ptr::Prop),
       closure
     );

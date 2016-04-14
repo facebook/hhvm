@@ -84,6 +84,19 @@ void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
 void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
 
 /*
+ * Store `loc', the registers representing `src', to `dst'.
+ */
+void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src);
+
+/*
+ * Load `src' into `loc', the registers representing `dst'.
+ *
+ * If `aux' is true, we also need to load the m_aux field of the TypedValue
+ * into the type reg.  This should only happen when loading a return value.
+ */
+void loadTV(Vout& v, const SSATmp* dst, Vloc loc, Vptr src, bool aux = false);
+
+/*
  * Copy the TV in `src' to `dst'.
  */
 void copyTV(Vout& v, Vloc src, Vloc dst, Type destType);

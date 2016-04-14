@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_JIT_IRLOWER_INTERNAL_H_
 #define incl_HPHP_JIT_IRLOWER_INTERNAL_H_
 
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 
 #include "hphp/util/asm-x64.h"
 
@@ -27,15 +29,12 @@ namespace HPHP { namespace jit {
 
 struct ArgGroup;
 struct Block;
+struct CallDest;
 struct IRInstruction;
 struct Vlabel;
 struct Vloc;
 struct Vout;
 struct Vreg;
-
-namespace irlower { struct IRLS; }
-
-///////////////////////////////////////////////////////////////////////////////
 
 namespace irlower {
 
@@ -70,6 +69,17 @@ ArgGroup argGroup(IRLS& env, const IRInstruction* inst);
  * the branch is not taken.
  */
 void fwdJcc(Vout& v, IRLS& env, ConditionCode cc, Vreg sf, Block* target);
+
+/*
+ * Make a Fixup at `marker' with `sync' options.
+ */
+Fixup makeFixup(const BCMarker& marker, SyncOptions sync = SyncOptions::Sync);
+
+/*
+ * Native call helper.
+ */
+void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
+                  SyncOptions sync, const ArgGroup& args);
 
 ///////////////////////////////////////////////////////////////////////////////
 

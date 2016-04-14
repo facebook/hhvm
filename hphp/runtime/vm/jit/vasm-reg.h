@@ -22,6 +22,8 @@
 
 #include "hphp/util/asm-x64.h"
 
+#include <vector>
+
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -110,6 +112,11 @@ struct Vreg {
 private:
   unsigned rn{kInvalidReg};
 };
+
+/*
+ * Vector of Vregs, for Vtuples and VcallArgs (see vasm-unit.h).
+ */
+using VregList = jit::vector<Vreg>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

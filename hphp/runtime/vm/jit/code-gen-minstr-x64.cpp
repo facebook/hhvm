@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-internal.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/util/trace.h"
 
@@ -28,7 +30,7 @@ namespace HPHP { namespace jit { namespace irlower {
 
 TRACE_SET_MOD(hhir);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgBaseG(IRInstruction* inst) {
   using namespace MInstrHelpers;
@@ -43,6 +45,8 @@ void CodeGenerator::cgBaseG(IRInstruction* inst) {
       .typedValue(0)
   );
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgPropImpl(IRInstruction* inst) {
   using namespace MInstrHelpers;
@@ -259,6 +263,32 @@ void CodeGenerator::cgIssetEmptyPropImpl(IRInstruction* inst) {
 void CodeGenerator::cgIssetProp(IRInstruction* i) { cgIssetEmptyPropImpl(i); }
 void CodeGenerator::cgEmptyProp(IRInstruction* i) { cgIssetEmptyPropImpl(i); }
 
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Make an ArgGroup for array elem instructions that take the ArrayData* (or
+ * pointer to a KindOfArray TV) as the first argument, and the index key as the
+ * second.
+ */
+ArgGroup elemArgs(IRLS& env, const IRInstruction* inst,
+                  const ArrayKeyInfo& keyInfo) {
+  auto args = argGroup(env, inst).ssa(0);
+  if (keyInfo.converted) {
+    args.imm(keyInfo.convertedInt);
+  } else {
+    args.ssa(1);
+  }
+  return args;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
 void CodeGenerator::cgElemImpl(IRInstruction* inst) {
   auto const flags = inst->extra<MOpFlagsData>()->flags;
   auto const key   = inst->src(1);
@@ -290,19 +320,12 @@ void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
               keyInfo.checkForInt,
               warn);
 
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
-
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
     callDest(inst),
     SyncOptions::Sync,
-    args
+    elemArgs(m_state, inst, keyInfo)
   );
 }
 
@@ -314,19 +337,12 @@ void CodeGenerator::cgElemArrayD(IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type);
 
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
-
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
     callDest(inst),
     SyncOptions::Sync,
-    args
+    elemArgs(m_state, inst, keyInfo)
   );
 }
 
@@ -335,19 +351,12 @@ void CodeGenerator::cgElemArrayU(IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type);
 
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
-
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
     callDest(inst),
     SyncOptions::Sync,
-    args
+    elemArgs(m_state, inst, keyInfo)
   );
 }
 
@@ -463,12 +472,7 @@ void CodeGenerator::cgArraySetImpl(IRInstruction* inst) {
               keyInfo.checkForInt,
               setRef);
 
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
+  auto args = elemArgs(m_state, inst, keyInfo);
   args.typedValue(2);
   if (setRef) {
     args.ssa(3);
@@ -509,19 +513,12 @@ void CodeGenerator::cgArrayIsset(IRInstruction* inst) {
               keyInfo.type,
               keyInfo.checkForInt);
 
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
-
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
     callDest(inst),
     SyncOptions::Sync,
-    args
+    elemArgs(m_state, inst, keyInfo)
   );
 }
 
@@ -557,7 +554,7 @@ void CodeGenerator::cgIssetEmptyElemImpl(IRInstruction* inst) {
 void CodeGenerator::cgIssetElem(IRInstruction* i) { cgIssetEmptyElemImpl(i); }
 void CodeGenerator::cgEmptyElem(IRInstruction* i) { cgIssetEmptyElemImpl(i); }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgArrayIdx(IRInstruction* inst) {
   auto const arr     = inst->src(0);
@@ -574,23 +571,15 @@ void CodeGenerator::cgArrayIdx(IRInstruction* inst) {
     return CallSpec::direct(arrayIdxS);
   }();
 
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
-  args.typedValue(2);
-
   cgCallHelper(
     vmain(),
     target,
     callDestTV(inst),
     SyncOptions::Sync,
-    args
+    elemArgs(m_state, inst, keyInfo).typedValue(2)
   );
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

@@ -168,6 +168,8 @@ private:
   TransKind const m_kind;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 struct ClassProfile {
   static const size_t kClassProfileSampleSize = 4;
 
@@ -368,6 +370,8 @@ std::vector<SwitchCaseCount> sortedSwitchProfile(
   TargetProfile<SwitchProfile>& profile,
   int32_t nCases
 );
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

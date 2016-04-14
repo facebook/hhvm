@@ -49,11 +49,6 @@ struct Vblock {
 };
 
 /*
- * Vector of Vregs, for Vtuples and VcallArgs.
- */
-using VregList = jit::vector<Vreg>;
-
-/*
  * Source operands for vcall/vinvoke instructions, packed into a struct for
  * convenience and to keep the instructions compact.
  */
@@ -174,10 +169,11 @@ struct Vunit {
   template<typename T> Vreg makeConst(T v) { return makeConst(Vconst{v}); }
 
   /*
-   * Allocate a block of data to hold n objects of type T. Any instructions
-   * with VdataPtr members that point inside the buffer returned by allocData()
-   * will automatically be fixed up during a relocation pass immediately before
-   * final code emission.
+   * Allocate a block of data to hold n objects of type T.
+   *
+   * Any instructions with VdataPtr members that point inside the buffer
+   * returned by allocData() will automatically be fixed up during a relocation
+   * pass immediately before final code emission.
    */
   template<typename T>
   T* allocData(size_t n = 1) {

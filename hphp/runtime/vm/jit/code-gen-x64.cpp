@@ -148,75 +148,6 @@ void ifRefCountedNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Emit code to store `loc', the registers representing `src', to `dst'.
- */
-void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src) {
-  auto const type = src->type();
-
-  if (loc.isFullSIMD()) {
-    // The whole TV is stored in a single SIMD reg.
-    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << storeups{loc.reg(), dst};
-    return;
-  }
-
-  if (type.needsReg()) {
-    assertx(loc.hasReg(1));
-    v << storeb{loc.reg(1), dst + TVOFF(m_type)};
-  } else {
-    v << storeb{v.cns(type.toDataType()), dst + TVOFF(m_type)};
-  }
-
-  // We ignore the values of statically nullish types.
-  if (src->isA(TNull) || src->isA(TNullptr)) return;
-
-  // Store the value.
-  if (src->hasConstVal()) {
-    // Skip potential zero-extend if we know the value.
-    v << store{v.cns(src->rawVal()), dst + TVOFF(m_data)};
-  } else {
-    assertx(loc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, src, loc.reg(0));
-    v << store{extended, dst + TVOFF(m_data)};
-  }
-}
-
-/*
- * Emit code to load `src' into `loc', the registers representing `dst'.
- *
- * If `aux' is true, we also need to load the m_aux field of the TypedValue
- * into the type reg.  This should only happen when loading a return value.
- */
-void loadTV(Vout& v, const SSATmp* dst, Vloc loc,
-            Vptr src, bool aux = false) {
-  auto const type = dst->type();
-
-  if (loc.isFullSIMD()) {
-    // The whole TV is loaded into a single SIMD reg.
-    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << loadups{src, loc.reg()};
-    return;
-  }
-
-  if (type.needsReg()) {
-    assertx(loc.hasReg(1));
-    if (aux) {
-      v << load{src + TVOFF(m_type), loc.reg(1)};
-    } else {
-      v << loadb{src + TVOFF(m_type), loc.reg(1)};
-    }
-  }
-
-  if (type <= TBool) {
-    v << loadtqb{src + TVOFF(m_data), loc.reg(0)};
-  } else {
-    v << load{src + TVOFF(m_data), loc.reg(0)};
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void debug_trashsp(Vout& v) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     v << syncvmsp{v.cns(0x42)};
@@ -748,119 +679,11 @@ CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
   return { DestType::Dbl, loc.reg(0) };
 }
 
-/*
- * Prepare the given ArgDest for a call by shifting or zero-extending as
- * appropriate, then append its Vreg to the given VregList.
- */
-static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
-  switch (arg.kind()) {
-    case ArgDesc::Kind::Reg: {
-      auto reg = arg.srcReg();
-      if (arg.isZeroExtend()) {
-        reg = v.makeReg();
-        v << movzbq{arg.srcReg(), reg};
-      }
-      vargs.push_back(reg);
-      break;
-    }
-
-    case ArgDesc::Kind::Imm: {
-      vargs.push_back(v.cns(arg.imm().q()));
-      break;
-    }
-
-    case ArgDesc::Kind::TypeImm: {
-      vargs.push_back(v.cns(arg.typeImm()));
-      break;
-    }
-
-    case ArgDesc::Kind::Addr: {
-      auto tmp = v.makeReg();
-      v << lea{arg.srcReg()[arg.disp().l()], tmp};
-      vargs.push_back(tmp);
-      break;
-    }
-
-    case ArgDesc::Kind::DataPtr: {
-      auto tmp = v.makeReg();
-      v << lead{reinterpret_cast<void*>(arg.imm().q()), tmp};
-      vargs.push_back(tmp);
-      break;
-    }
-  }
-}
-
-void
-CodeGenerator::cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,
-                            SyncOptions sync, const ArgGroup& args) {
-  auto const inst = args.inst();
-  jit::vector<Vreg> vargs, vSimdArgs, vStkArgs;
-  for (size_t i = 0; i < args.numGpArgs(); ++i) {
-    prepareArg(args.gpArg(i), v, vargs);
-  }
-  for (size_t i = 0; i < args.numSimdArgs(); ++i) {
-    prepareArg(args.simdArg(i), v, vSimdArgs);
-  }
-  for (size_t i = 0; i < args.numStackArgs(); ++i) {
-    prepareArg(args.stkArg(i), v, vStkArgs);
-  }
-
-  Fixup syncFixup;
-  if (RuntimeOption::HHProfEnabled || sync != SyncOptions::None) {
-    // If we are profiling the heap, we always need to sync because regs need
-    // to be correct during allocations no matter what
-    syncFixup = makeFixup(inst->marker(), sync);
-  }
-
-  Vlabel targets[2];
-  bool nothrow = false;
-  auto* taken = inst->taken();
-  auto const do_catch = taken && taken->isCatch();
-  if (do_catch) {
-    always_assert_flog(
-      inst->is(InterpOne) || sync != SyncOptions::None,
-      "cgCallHelper called with None but inst has a catch block: {}\n",
-      *inst
-    );
-    always_assert_flog(
-      taken->catchMarker() == inst->marker(),
-      "Catch trace doesn't match fixup:\n"
-      "Instruction: {}\n"
-      "Catch trace: {}\n"
-      "Fixup      : {}\n",
-      inst->toString(),
-      taken->catchMarker().show(),
-      inst->marker().show()
-    );
-
-    targets[0] = v.makeBlock();
-    targets[1] = m_state.labels[taken];
-  } else {
-    // The current instruction doesn't have a catch block so it'd better not
-    // throw. Register a null catch trace to indicate this to the
-    // unwinder.
-    nothrow = true;
-  }
-
-  VregList dstRegs;
-  if (dstInfo.reg0.isValid()) {
-    dstRegs.push_back(dstInfo.reg0);
-    if (dstInfo.reg1.isValid()) {
-      dstRegs.push_back(dstInfo.reg1);
-    }
-  }
-
-  auto argsId = v.makeVcallArgs(
-    {std::move(vargs), std::move(vSimdArgs), std::move(vStkArgs)});
-  auto dstId = v.makeTuple(std::move(dstRegs));
-  if (do_catch) {
-    v << vinvoke{call, argsId, dstId, {targets[0], targets[1]},
-                 syncFixup, dstInfo.type};
-    m_state.catch_calls[inst->taken()] = CatchCall::CPP;
-    v = targets[0];
-  } else {
-    v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow};
-  }
+void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,
+                                 const CallDest& dstInfo,
+                                 SyncOptions sync,
+                                 const ArgGroup& args) {
+  irlower::cgCallHelper(v, m_state, call, dstInfo, sync, args);
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
@@ -3546,26 +3369,6 @@ void CodeGenerator::cgStElem(IRInstruction* inst) {
   } else {
     storeTV(vmain(), baseReg[idxReg], srcLoc(inst, 2), val);
   }
-}
-
-Fixup CodeGenerator::makeFixup(const BCMarker& marker, SyncOptions sync) {
-  assertx(marker.valid());
-  auto stackOff = marker.spOff();
-  switch (sync) {
-  case SyncOptions::SyncAdjustOne:
-    stackOff -= 1;
-    break;
-  case SyncOptions::Sync:
-    break;
-  case SyncOptions::None:
-    // we can get here if we are memory profiling, since we override the
-    // normal sync settings and sync anyway
-    always_assert(RuntimeOption::HHProfEnabled);
-    break;
-  }
-
-  Offset pcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
-  return Fixup{pcOff, stackOff.offset};
 }
 
 void CodeGenerator::cgLdMIStateAddr(IRInstruction* inst) {

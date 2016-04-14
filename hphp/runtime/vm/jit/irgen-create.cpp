@@ -148,7 +148,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
     gen(
       env,
       StClosureArg,
-      PropByteOffset(cls->declPropOffset(propId)),
+      ByteOffsetData { safe_cast<ptrdiff_t>(cls->declPropOffset(propId)) },
       closure,
       args[propId]
     );
@@ -165,7 +165,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
     gen(
       env,
       StClosureArg,
-      PropByteOffset(cls->declPropOffset(propId)),
+      ByteOffsetData { safe_cast<ptrdiff_t>(cls->declPropOffset(propId)) },
       closure,
       cns(env, TUninit)
     );

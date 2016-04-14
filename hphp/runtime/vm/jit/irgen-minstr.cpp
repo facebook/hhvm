@@ -385,7 +385,7 @@ SSATmp* emitPropSpecialized(
     auto const propAddr = gen(
       env,
       LdPropAddr,
-      PropOffset { propInfo.offset },
+      ByteOffsetData { propInfo.offset },
       typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
       base
     );
@@ -413,7 +413,7 @@ SSATmp* emitPropSpecialized(
       auto const propAddr = gen(
         env,
         LdPropAddr,
-        PropOffset { propInfo.offset },
+        ByteOffsetData { propInfo.offset },
         typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
         obj
       );

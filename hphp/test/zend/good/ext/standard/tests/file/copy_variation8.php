@@ -4,7 +4,7 @@
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Trying to copy the links across dir paths given in various notations 
+/* Trying to copy the links across dir paths given in various notations
      and dirs having limited access */
 
 echo "*** Testing copy() function: copying links across different directories ***\n";
@@ -51,7 +51,7 @@ foreach($dests as $dest) {
   echo "- With hardlink -\n";
   var_dump( copy($hardlink, $dest) );
   var_dump( file_exists($dest) );
-  var_dump( is_link($dest) );  //expected: bool(flase)
+  var_dump( is_link($dest) );  //expected: bool(false)
   var_dump( is_file($dest) );  //expected: bool(true)
   clearstatcache();
   unlink("$dest");

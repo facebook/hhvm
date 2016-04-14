@@ -31,7 +31,7 @@ $non_existent_dir_name = $file_path."/non_existent_dir";
 $new_dir_name = "$file_path/rename_basic_dir2";
 var_dump( rename($non_existent_dir_name, $new_dir_name) );
 // ensure that $new_dir_name didn't get created
-var_dump( file_exists($non_existent_dir_name) );  // expecting flase
+var_dump( file_exists($non_existent_dir_name) );  // expecting false
 var_dump( file_exists($new_dir_name) );  // expecting false
 
 echo "Done\n";

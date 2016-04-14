@@ -89,7 +89,7 @@ class MultipleIterator implements Iterator {
   /**
   * @return whether all or one sub iterator is valid depending on flags.
   * In mode MIT_NEED_ALL we expect all sub iterators to be valid and
-  * return flase on the first non valid one. If that flag is not set we
+  * return false on the first non valid one. If that flag is not set we
   * return true on the first valid sub iterator found. If no Iterator
   * is attached, we always return false.
   */

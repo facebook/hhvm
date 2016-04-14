@@ -54,8 +54,8 @@ class Redis {
 
   /* Scan retry settings. We essentially always retry, so this is
      just for PHP 5 compatibility. */
- const SCAN_RETRY = 0;
- const SCAN_NORETRY = 1;
+  const SCAN_RETRY = 0;
+  const SCAN_NORETRY = 1;
 
   /* Connection ---------------------------------------------------------- */
 
@@ -526,22 +526,22 @@ class Redis {
 
       $args = [];
       if ($cmd !== 'SCAN') {
-	$args[] = $this->_prefix($key);
+        $args[] = $this->_prefix($key);
       }
       $args[] = (int)$cursor;
       if ($pattern !== null) {
-	$args[] = 'MATCH';
-	$args[] = (string)$pattern;
+        $args[] = 'MATCH';
+        $args[] = (string)$pattern;
       }
       if ($count !== null) {
-	$args[] = 'COUNT';
-	$args[] = (int)$count;
+        $args[] = 'COUNT';
+        $args[] = (int)$count;
       }
       $this->processArrayCommand($cmd, $args);
       $resp = $this->processVariantResponse();
       if (!is_array($resp) || count($resp) != 2 || !is_array($resp[1])) {
-	throw new RedisException(
-	  sprintf("Invalid %s response: %s", $cmd, print_r($resp, true)));
+        throw new RedisException(
+          sprintf("Invalid %s response: %s", $cmd, print_r($resp, true)));
       }
       $cursor = (int)$resp[0];
       $results = $resp[1];

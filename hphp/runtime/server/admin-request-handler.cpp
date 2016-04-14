@@ -376,7 +376,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "prepare-to-stop") {
-      transport->sendString("OK\n");
       Logger::Info("Got admin port prepare-to-stop request from %s",
                    transport->getRemoteHost());
       MemInfo info, newInfo;
@@ -393,6 +392,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       // std::thread t{sync};
       // t.detach();
 
+      transport->sendString("OK\n");
       Process::GetMemoryInfo(newInfo);
       Logger::FInfo("free/cached/buffer {}/{}/{} -> {}/{}/{}",
                     info.freeMb, info.cachedMb, info.buffersMb,

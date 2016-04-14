@@ -52,20 +52,18 @@ struct Array;
 struct Variant;
 
 struct pcre_cache_entry {
-private:
-  pcre_cache_entry(const pcre_cache_entry&);
-  pcre_cache_entry& operator=(const pcre_cache_entry&);
-
-public:
-  pcre_cache_entry() : subpat_names(nullptr) {}
+  pcre_cache_entry() = default;
   ~pcre_cache_entry();
 
-  pcre *re;
-  pcre_extra *extra; // Holds results of studying
+  pcre_cache_entry(const pcre_cache_entry&) = delete;
+  pcre_cache_entry& operator=(const pcre_cache_entry&) = delete;
+
+  pcre* re;
+  pcre_extra* extra; // Holds results of studying
   int preg_options:1;
   int compile_options:31;
   int num_subpats;
-  mutable std::atomic<char**> subpat_names;
+  mutable std::atomic<char**> subpat_names{nullptr};
 };
 
 struct PCREglobals {

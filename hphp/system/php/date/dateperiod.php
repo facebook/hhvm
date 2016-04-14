@@ -37,7 +37,7 @@ class DatePeriod implements Iterator {
       throw new Exception(
         "DatePeriod::__construct(): This constructor accepts either " .
         "(DateTimeInterface, DateInterval, int) OR (DateTimeInterface, ".
-        "DateInterval, DateTime)"
+        "DateInterval, DateTime) as arguments."
       );
     }
 

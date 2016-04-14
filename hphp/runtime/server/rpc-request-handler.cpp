@@ -32,6 +32,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/server/satellite-server.h"
@@ -294,6 +295,10 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     m_reset = true;
   }
   int output = transport->getIntParam("output");
+
+  // We don't debug RPC requests, so we need to detach XDebugHook if xdebug was
+  // enabled.
+  DEBUGGER_ATTACHED_ONLY(DebuggerHook::detach());
 
   int code;
   if (!error) {

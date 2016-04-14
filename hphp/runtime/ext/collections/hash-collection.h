@@ -637,6 +637,12 @@ struct HashCollection : ObjectData {
 
   static bool instanceof(const ObjectData*);
 
+  template<typename F>
+  void scan(F& mark) const {
+    mark(m_arr);
+    mark(m_immCopy);
+  }
+
  protected:
   // Replace the m_arr field with a new MixedArray
   // WARNING: does not update intLikeStrKeys
@@ -647,13 +653,6 @@ struct HashCollection : ObjectData {
     m_size = adata->size();
     decRefArr(oldAd);
     ++m_version;
-  }
-
-  template<class F> friend void scanHeader(const Header*, F& mark);
-  template<typename F>
-  void scan(F& mark) const {
-    mark(m_arr);
-    mark(m_immCopy);
   }
 
   union {

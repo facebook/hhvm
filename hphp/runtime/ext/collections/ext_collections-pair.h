@@ -127,6 +127,11 @@ struct c_Pair : ObjectData {
 
   static constexpr uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
 
+  template<class F> void scan(F& mark) const {
+    if (m_size >= 1) mark(elm0);
+    if (m_size >= 2) mark(elm1);
+  }
+
  private:
   Variant php_at(const Variant& key) const {
     assertx(isFullyConstructed());
@@ -157,12 +162,6 @@ struct c_Pair : ObjectData {
 
   TypedValue* getElms() { return &elm0; }
   const TypedValue* getElms() const { return &elm0; }
-
-  template<class F> friend void scanHeader(const Header*, F& mark);
-  template<class F> void scan(F& mark) const {
-    if (m_size >= 1) mark(elm0);
-    if (m_size >= 2) mark(elm1);
-  }
 
 #ifndef USE_LOWPTR
   // Add 4 bytes here to keep m_size aligned the same way as in BaseVector and

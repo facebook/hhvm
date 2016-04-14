@@ -561,6 +561,7 @@ struct RuntimeOption {
   /* only run eager-gc once at each surprise point (much faster) */     \
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  false)                           \
+  F(bool, EnableGCTypeScan,            false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \

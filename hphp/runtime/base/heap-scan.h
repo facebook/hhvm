@@ -49,9 +49,13 @@
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
 #endif
 
+#include "hphp/util/type-scan.h"
+
 namespace HPHP {
 
-template<class F> void scanHeader(const Header* h, F& mark) {
+template<class F> void scanHeader(const Header* h,
+                                  F& mark,
+                                  type_scan::Scanner* scanner = nullptr) {
   switch (h->kind()) {
     case HeaderKind::Proxy:
       return h->proxy_.scan(mark);
@@ -84,13 +88,37 @@ template<class F> void scanHeader(const Header* h, F& mark) {
     case HeaderKind::ImmSet:
       return h->hashcoll_.scan(mark);
     case HeaderKind::Resource:
-      return h->res_.data()->scan(mark);
+      if (scanner) {
+        return scanner->scanByIndex(
+          h->res_.typeIndex(),
+          h->res_.data(),
+          h->res_.heapSize() - sizeof(ResourceHdr)
+        );
+      } else {
+        return h->res_.data()->scan(mark);
+      }
     case HeaderKind::Ref:
       return h->ref_.scan(mark);
     case HeaderKind::SmallMalloc:
-      return mark((&h->small_)+1, h->small_.padbytes - sizeof(SmallNode));
+      if (scanner) {
+        return scanner->scanByIndex(
+          h->small_.typeIndex(),
+          (&h->small_)+1,
+          h->small_.padbytes - sizeof(SmallNode)
+        );
+      } else {
+        return mark((&h->small_)+1, h->small_.padbytes - sizeof(SmallNode));
+      }
     case HeaderKind::BigMalloc:
-      return mark((&h->big_)+1, h->big_.nbytes - sizeof(BigNode));
+      if (scanner) {
+        return scanner->scanByIndex(
+          h->big_.typeIndex(),
+          (&h->big_)+1,
+          h->big_.nbytes - sizeof(BigNode)
+        );
+      } else {
+        return mark((&h->big_)+1, h->big_.nbytes - sizeof(BigNode));
+      }
     case HeaderKind::NativeData:
       return h->nativeObj()->scan(mark);
     case HeaderKind::ResumableFrame:

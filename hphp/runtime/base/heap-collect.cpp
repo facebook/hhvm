@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/type-scan.h"
 
 #include <algorithm>
 #include <iterator>
@@ -147,6 +148,9 @@ private:
     auto p = reinterpret_cast<const char*>(vp);
     return p >= rds_.begin() && p < rds_.end();
   }
+
+  void checkedEnqueue(const void* p, GCBits bits);
+
   template<class T> void enqueue(const T* p) {
     auto h = reinterpret_cast<const Header*>(p);
     assert(h &&
@@ -156,10 +160,19 @@ private:
     work_.push_back(h);
   }
 
+  // Whether the object with the given type-index should be recorded as an
+  // "unknown" object.
+  bool typeIndexIsUnknown(type_scan::Index tyindex) const {
+    return RuntimeOption::EvalEnableGCTypeScan &&
+      type_scan::hasNonConservative() &&
+      tyindex == type_scan::kIndexUnknown;
+  }
 private:
   PtrMap ptrs_;
+  type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
   folly::Range<const char*> rds_; // full mmap'd rds section.
+  std::vector<const Header*> unknowns_; // objects with unknown type_scan type
   Counter total_;        // bytes allocated in heap
 };
 
@@ -305,6 +318,63 @@ void Marker::operator()(const TypedValue& tv) {
   }
 }
 
+void Marker::checkedEnqueue(const void* p, GCBits bits) {
+  auto h = ptrs_.header(p);
+  if (!h) return;
+  // mark p if it's an interesting kind. since we have metadata for it,
+  // it must have a valid header.
+  if (!mark(h, bits)) return; // skip if already marked.
+  switch (h->kind()) {
+    case HeaderKind::Apc:
+    case HeaderKind::Globals:
+    case HeaderKind::Proxy:
+    case HeaderKind::Ref:
+    case HeaderKind::Resource:
+    case HeaderKind::Packed:
+    case HeaderKind::Struct:
+    case HeaderKind::Mixed:
+    case HeaderKind::Dict:
+    case HeaderKind::Empty:
+    case HeaderKind::SmallMalloc:
+    case HeaderKind::BigMalloc:
+      enqueue(h);
+      break;
+    case HeaderKind::Object:
+    case HeaderKind::Vector:
+    case HeaderKind::Map:
+    case HeaderKind::Set:
+    case HeaderKind::Pair:
+    case HeaderKind::ImmVector:
+    case HeaderKind::ImmMap:
+    case HeaderKind::ImmSet:
+    case HeaderKind::WaitHandle:
+    case HeaderKind::AwaitAllWH:
+      // Object kinds. None of these should have native-data, because if they
+      // do, the mapped header should be for the NativeData prefix.
+      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
+      enqueue(h);
+      break;
+    case HeaderKind::ResumableFrame:
+      enqueue(h->resumableObj());
+      break;
+    case HeaderKind::NativeData:
+      enqueue(h->nativeObj());
+      break;
+    case HeaderKind::String:
+      // nothing to queue since strings don't have pointers
+      break;
+    case HeaderKind::ResumableObj:
+    case HeaderKind::BigObj:
+    case HeaderKind::Free:
+    case HeaderKind::Hole:
+      // None of these kinds should be encountered because they're either not
+      // interesting to begin with, or are mapped to different headers, so we
+      // shouldn't get these from the pointer map.
+      always_assert(false && "bad header kind");
+      break;
+  }
+}
+
 // mark ambigous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 void FOLLY_DISABLE_ADDRESS_SANITIZER
@@ -313,61 +383,12 @@ Marker::operator()(const void* start, size_t len) {
   auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   for (; s < e; s++) {
-    auto p = *s;
-    auto h = ptrs_.header(p);
-    if (!h) continue;
-    // mark p if it's an interesting kind. since we have metadata for it,
-    // it must have a valid header.
-    if (!mark(h, GCBits::CMark)) continue; // skip if already marked.
-    switch (h->kind()) {
-      case HeaderKind::Apc:
-      case HeaderKind::Globals:
-      case HeaderKind::Proxy:
-      case HeaderKind::Ref:
-      case HeaderKind::Resource:
-      case HeaderKind::Packed:
-      case HeaderKind::Struct:
-      case HeaderKind::Mixed:
-      case HeaderKind::Dict:
-      case HeaderKind::Empty:
-      case HeaderKind::SmallMalloc:
-      case HeaderKind::BigMalloc:
-        enqueue(h);
-        break;
-      case HeaderKind::Object:
-      case HeaderKind::Vector:
-      case HeaderKind::Map:
-      case HeaderKind::Set:
-      case HeaderKind::Pair:
-      case HeaderKind::ImmVector:
-      case HeaderKind::ImmMap:
-      case HeaderKind::ImmSet:
-      case HeaderKind::WaitHandle:
-      case HeaderKind::AwaitAllWH:
-        // Object kinds. None of these should have native-data, because if they
-        // do, the mapped header should be for the NativeData prefix.
-        assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
-        enqueue(h);
-        break;
-      case HeaderKind::ResumableFrame:
-        enqueue(h->resumableObj());
-        break;
-      case HeaderKind::NativeData:
-        enqueue(h->nativeObj());
-        break;
-      case HeaderKind::String:
-        // nothing to queue since strings don't have pointers
-        break;
-      case HeaderKind::ResumableObj:
-      case HeaderKind::BigObj:
-      case HeaderKind::Free:
-      case HeaderKind::Hole:
-        // None of these kinds should be encountered because they're either not
-        // interesting to begin with, or are mapped to different headers, so we
-        // shouldn't get these from the pointer map.
-        always_assert(false && "bad header kind");
-        break;
-    }
+    checkedEnqueue(
+      // Mask off the upper 16-bits to handle things like
+      // DiscriminatedPtr which stores things up there.
+      (void*)(uintptr_t(*s) & (-1ULL >> 16)),
+      GCBits::CMark
+    );
   }
 }
 
@@ -388,8 +409,13 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Empty:
       case HeaderKind::String:
       case HeaderKind::Ref:
+        ptrs_.insert(h);
+        break;
       case HeaderKind::Resource:
         ptrs_.insert(h);
+        if (typeIndexIsUnknown(h->res_.typeIndex())) {
+          unknowns_.emplace_back(h);
+        }
         break;
       case HeaderKind::Object:
       case HeaderKind::Vector:
@@ -421,8 +447,16 @@ NEVER_INLINE void Marker::init() {
         break;
       }
       case HeaderKind::SmallMalloc:
+        ptrs_.insert(h);
+        if (typeIndexIsUnknown(h->small_.typeIndex())) {
+          unknowns_.emplace_back(h);
+        }
+        break;
       case HeaderKind::BigMalloc:
         ptrs_.insert(h);
+        if (typeIndexIsUnknown(h->big_.typeIndex())) {
+          unknowns_.emplace_back(h);
+        }
         break;
       case HeaderKind::ResumableObj:
         // ResumableObj should not be encountered on their own, they should
@@ -440,10 +474,69 @@ NEVER_INLINE void Marker::init() {
 
 NEVER_INLINE void Marker::trace() {
   scanRoots(*this);
-  while (!work_.empty()) {
-    auto h = work_.back();
-    work_.pop_back();
-    scanHeader(h, *this);
+
+  const auto process_worklist = [this](){
+    while (!work_.empty()) {
+      auto h = work_.back();
+      work_.pop_back();
+      if (RuntimeOption::EvalEnableGCTypeScan) {
+        scanHeader(h, *this, &type_scanner_);
+        type_scanner_.finish(
+          [this](const void* p){ checkedEnqueue(p, GCBits::Mark); },
+          [this](const void* p, std::size_t size){ (*this)(p, size); }
+        );
+      } else {
+        scanHeader(h, *this);
+      }
+    }
+  };
+
+  process_worklist();
+
+  /*
+   * If the type-scanners has non-conservative scanners, we must treat all
+   * unknown type-index allocations in the heap as roots. Why? The auto
+   * generated scanners will only report a pointer if it knows the pointer can
+   * point to an object on the request heap. It does this by tracking all types
+   * which are allocated via the allocation functions via the type-index
+   * mechanism. If an allocation has an unknown type-index, then by definition
+   * we don't know which type it contains, and therefore the auto generated
+   * scanners will never report a pointer to such a type. So, if there's a
+   * countable object which is only reachable via one of these unknown
+   * type-index allocations, we'll garbage collect that countable object even if
+   * the unknown type-index allocation is reachable. The only good way to solve
+   * this is to treat such allocations as roots and always conservative scan
+   * them. If we're conservative scanning everything, we need to take no special
+   * action, as the above problem only applies to auto generated scanners.
+   *
+   * Do this after draining the worklist, as we want to prefer discovering
+   * things via non-conservative means.
+   */
+  if (RuntimeOption::EvalEnableGCTypeScan && type_scan::hasNonConservative()) {
+    for (const auto* h : unknowns_) {
+      if (!mark(h, GCBits::CMark)) continue;
+      switch (h->kind()) {
+        case HeaderKind::Resource:
+          assert(typeIndexIsUnknown(h->res_.typeIndex()));
+          (*this)(h->res_.data(), h->res_.heapSize() - sizeof(ResourceHdr));
+          break;
+        case HeaderKind::SmallMalloc:
+          assert(typeIndexIsUnknown(h->small_.typeIndex()));
+          (*this)((&h->small_)+1, h->small_.padbytes - sizeof(SmallNode));
+          break;
+        case HeaderKind::BigMalloc:
+          assert(typeIndexIsUnknown(h->big_.typeIndex()));
+          (*this)((&h->big_)+1, h->big_.nbytes - sizeof(BigNode));
+          break;
+        default:
+          assert(false && "unknown kind in unknown type list");
+          break;
+      }
+    }
+
+    // The conservative scans may have added more items to the
+    // worklist, so drain it again.
+    process_worklist();
   }
 }
 

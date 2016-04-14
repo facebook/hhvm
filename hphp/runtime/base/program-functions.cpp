@@ -87,6 +87,7 @@
 #include "hphp/util/shm-counter.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/type-scan.h"
 
 #include <folly/Range.h>
 #include <folly/Portability.h>
@@ -1666,6 +1667,17 @@ static int execute_program_impl(int argc, char** argv) {
                            RuntimeOption::EvalRecordSubprocessTimes,
                            inherited_fds);
 #endif
+
+  // We want to do this as early as possible because any allocations before-hand
+  // will get a generic unknown type type-index.
+  if (RuntimeOption::EvalEnableGC && RuntimeOption::EvalEnableGCTypeScan) {
+    try {
+      type_scan::init();
+    } catch (const type_scan::InitException& exn) {
+      Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
+      exit(HPHP_EXIT_FAILURE);
+    }
+  }
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
     exit(HPHP_EXIT_FAILURE);

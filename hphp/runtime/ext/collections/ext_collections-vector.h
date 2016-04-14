@@ -293,6 +293,11 @@ struct BaseVector : ObjectData {
 
   static bool instanceof(const ObjectData*);
 
+  template<class F> void scan(F& mark) const {
+    mark(m_arr);
+    mark(m_immCopy);
+  }
+
  protected:
   template<class TVector>
   typename std::enable_if<
@@ -391,11 +396,6 @@ struct BaseVector : ObjectData {
   }
 
  protected:
-  template<class F> friend void scanHeader(const Header*, F& mark);
-  template<class F> void scan(F& mark) const {
-    mark(m_arr);
-    mark(m_immCopy);
-  }
 
   // Fields
 #ifndef USE_LOWPTR

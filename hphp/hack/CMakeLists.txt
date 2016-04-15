@@ -69,6 +69,7 @@ if (OCAMLC_FOUND)
           EXTRA_LIB_PATHS="${extra_lib_paths}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
           EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
+          BYTECODE="${EMIT_OCAML_BYTECODE}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 
@@ -80,6 +81,7 @@ if (OCAMLC_FOUND)
           EXTRA_LIB_PATHS="${extra_lib_paths}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
           EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
+          BYTECODE="${EMIT_OCAML_BYTECODE}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 

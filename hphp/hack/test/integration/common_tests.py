@@ -431,6 +431,24 @@ class CommonTests(object):
             options=['--identify-function', '1:51'],
             stdin='<?hh class Foo { private function bar() { $this->bar() }}')
 
+    def test_nuclide_get_definition(self):
+        """
+        Test hh_client --ide-get-definition
+        """
+        self.write_load_config()
+
+        self.check_cmd_and_json_cmd([
+            'Name: \\bar, type: function, position: line 1, '
+            'characters 42-44, defined: line 1, characters 15-17'
+            ], [
+            '{{"name":"\\\\bar","result_type":"function","pos":{{"filename":"",'
+            '"line":1,"char_start":42,"char_end":44}},'
+            '"definition_pos":{{"filename":"","line":1,"char_start":15,'
+            '"char_end":17}}}}'
+            ],
+            options=['--ide-get-definition', '1:43'],
+            stdin='<?hh function bar() {} function test() { bar() }')
+
     def test_find_lvar_refs(self):
         """
         Test --find-lvar-refs

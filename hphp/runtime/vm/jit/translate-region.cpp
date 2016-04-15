@@ -502,14 +502,6 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
   not_reached();
 }
 
-uint32_t countRets(const RegionDesc& region) {
-  uint32_t count = 0;
-  for (auto const& block : region.blocks()) {
-    if (isReturnish(block->last().op())) count++;
-  }
-  return count;
-}
-
 /*
  * If `psk' is not an FCall{,D} with inlinable `callee', return nullptr.
  *
@@ -521,8 +513,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        TranslateRetryContext& retry,
                                        InliningDecider& inl,
                                        const irgen::IRGS& irgs,
-                                       int32_t maxBCInstrs,
-                                       bool& needsMerge) {
+                                       int32_t maxBCInstrs) {
   if (psk.srcKey.op() != Op::FCall &&
       psk.srcKey.op() != Op::FCallD) {
     return nullptr;
@@ -559,7 +550,6 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   }
 
   inl.accountForInlining(callee, *calleeRegion);
-  needsMerge = countRets(*calleeRegion) > 1;
   return calleeRegion;
 }
 
@@ -726,14 +716,12 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
 
-      bool calleeIsMerge = false;
       RegionDescPtr calleeRegion{nullptr};
       // See if we have a callee region we can inline---but only if the
       // singleton inliner isn't actively inlining.
       if (!skipTrans) {
         calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, retry, inl,
-                                                irgs, budgetBCInstrs,
-                                                calleeIsMerge);
+                                                irgs, budgetBCInstrs);
       }
 
       if (calleeRegion) {
@@ -757,7 +745,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         auto returnFuncOff = returnSk.offset() - block->func()->base();
 
         if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee, returnFuncOff,
-                                 returnBlock, calleeIsMerge)) {
+                                 irgen::ReturnTarget { returnBlock })) {
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
             { return show(*calleeRegion); };
 

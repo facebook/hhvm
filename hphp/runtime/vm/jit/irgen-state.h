@@ -38,12 +38,11 @@ namespace irgen {
 //////////////////////////////////////////////////////////////////////
 
 struct ReturnTarget {
-  // Block that will contain the InlineReturn and serve as a branch target for
-  // returning to the caller
+  /*
+   * Block that will contain the InlineReturn and serve as a branch target for
+   * returning to the caller.
+   */
   Block* target;
-  // If the inlined region has multiple returns and will require a merge into
-  // the returnStub and target blocks
-  bool needsMerge;
 };
 
 /*
@@ -76,9 +75,8 @@ struct IRGS {
   uint16_t inlineLevel{0};
 
   /*
-   * Tracks the branch target for all inlined blocks return to caller. The
-   * target block will Phi the return values in the case of multiple returns
-   * and contain the InlineReturn
+   * Return-to-caller block targets for inlined functions.  The last target is
+   * for the current inlining frame.
    */
   std::vector<ReturnTarget> inlineReturnTarget;
 

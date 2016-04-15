@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"

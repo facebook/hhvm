@@ -1260,20 +1260,11 @@ void nativeImplInlined(IRGS& env) {
     numNonDefault,
     nullptr,
     [&] (uint32_t i, const Type) {
-      auto ret = ldLoc(env, i, nullptr, DataTypeSpecific);
-      // These IncRefs must be 'inside' the callee: it may own the only
-      // reference to the parameters.  Normally they will cancel with the
-      // DecRefs that we'll do in endInlinedCommon.
-      gen(env, IncRef, ret);
-      return ret;
+      return ldLoc(env, i, nullptr, DataTypeSpecific);
     }
   );
 
-  // For the same reason that we have to IncRef the locals above, we
-  // need to grab one on the $this.
-  if (paramThis && paramThis->type() <= TObj) gen(env, IncRef, paramThis);
-
-  endInlinedCommon(env);
+  implInlineReturn(env);
 
   auto const catcher = CatchMaker {
     env,

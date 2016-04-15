@@ -55,10 +55,10 @@ struct BaseMap : HashCollection {
   void add(const TypedValue* val);
   void add(const Variant& val) { add(val.asCell()); }
 
-  void set(int64_t h, const TypedValue* data);
+  void set(int64_t k, const TypedValue* data);
   void set(StringData* key, const TypedValue* data);
-  void set(int64_t h, const Variant& data) {
-    set(h, data.asCell());
+  void set(int64_t k, const Variant& data) {
+    set(k, data.asCell());
   }
   void set(StringData* key, const Variant& data) {
     set(key, data.asCell());
@@ -118,11 +118,11 @@ struct BaseMap : HashCollection {
   Variant php_at(const Variant& key) const {
     if (key.isInteger()) {
       return tvAsCVarRef(atImpl<true>(key.toInt64()));
-    } else if (key.isString()) {
-      return tvAsCVarRef(atImpl<true>(key.getStringData()));
-    } else {
-      throwBadKeyType();
     }
+    if (key.isString()) {
+      return tvAsCVarRef(atImpl<true>(key.getStringData()));
+    }
+    throwBadKeyType();
   }
   bool php_containsKey(const Variant& key) const {
     DataType t = key.getType();
@@ -181,17 +181,17 @@ struct BaseMap : HashCollection {
   void setAllImpl(const Variant& iterable);
 
   template<bool raw>
-  void setImpl(int64_t h, const TypedValue* val);
+  void setImpl(int64_t k, const TypedValue* val);
   template<bool raw>
   void setImpl(StringData* key, const TypedValue* data);
 
   // setRaw() assigns a value to the specified key in this Map, but doesn't
   // check for an immutable buffer and doesn't increment m_version, so it's
   // only safe to use in some cases. If you're not sure, use set() instead.
-  void setRaw(int64_t h, const TypedValue* data);
+  void setRaw(int64_t k, const TypedValue* data);
   void setRaw(StringData* key, const TypedValue* data);
-  void setRaw(int64_t h, const Variant& data) {
-    setRaw(h, data.asCell());
+  void setRaw(int64_t k, const Variant& data) {
+    setRaw(k, data.asCell());
   }
   void setRaw(StringData* key, const Variant& data) {
     setRaw(key, data.asCell());

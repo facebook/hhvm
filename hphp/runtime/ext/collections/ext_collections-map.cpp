@@ -131,19 +131,18 @@ void BaseMap::addAllPairs(const Variant& iterable) {
 
 Variant BaseMap::firstKey() {
   if (!m_size) return null_variant;
-  auto* e = firstElm();
+  auto e = firstElm();
   assert(e != elmLimit());
   if (e->hasIntKey()) {
     return e->ikey;
-  } else {
-    assert(e->hasStrKey());
-    return Variant{e->skey};
   }
+  assert(e->hasStrKey());
+  return Variant{e->skey};
 }
 
 Variant BaseMap::firstValue() {
   if (!m_size) return null_variant;
-  auto* e = firstElm();
+  auto e = firstElm();
   assert(e != elmLimit());
   return tvAsCVarRef(&e->data);
 }
@@ -197,63 +196,59 @@ void BaseMap::add(const TypedValue* val) {
 }
 
 Variant BaseMap::pop() {
-  if (m_size) {
-    mutateAndBump();
-    auto* e = elmLimit() - 1;
-    for (;; --e) {
-      assert(e >= data());
-      if (!isTombstone(e)) break;
-    }
-    Variant ret = tvAsCVarRef(&e->data);
-    ssize_t ei;
-    if (e->hasIntKey()) {
-      ei = findForRemove(e->ikey);
-    } else {
-      assert(e->hasStrKey());
-      ei = findForRemove(e->skey, e->skey->hash());
-    }
-    erase(ei);
-    return ret;
-  } else {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Cannot pop empty Map");
+  if (UNLIKELY(m_size == 0)) {
+    SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Map");
   }
+  mutateAndBump();
+  auto e = elmLimit() - 1;
+  for (;; --e) {
+    assert(e >= data());
+    if (!isTombstone(e)) break;
+  }
+  Variant ret = tvAsCVarRef(&e->data);
+  ssize_t ei;
+  if (e->hasIntKey()) {
+    ei = findForRemove(e->ikey);
+  } else {
+    assert(e->hasStrKey());
+    ei = findForRemove(e->skey, e->skey->hash());
+  }
+  erase(ei);
+  return ret;
 }
 
 Variant BaseMap::popFront() {
-  if (m_size) {
-    mutateAndBump();
-    auto* e = data();
-    for (;; ++e) {
-      assert(e != elmLimit());
-      if (!isTombstone(e)) break;
-    }
-    Variant ret = tvAsCVarRef(&e->data);
-    ssize_t ei;
-    if (e->hasIntKey()) {
-      ei = findForRemove(e->ikey);
-    } else {
-      assert(e->hasStrKey());
-      ei = findForRemove(e->skey, e->skey->hash());
-    }
-    erase(ei);
-    return ret;
-  } else {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Cannot pop empty Map");
+  if (UNLIKELY(m_size == 0)) {
+    SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Map");
   }
+  mutateAndBump();
+  auto e = data();
+  for (;; ++e) {
+    assert(e != elmLimit());
+    if (!isTombstone(e)) break;
+  }
+  Variant ret = tvAsCVarRef(&e->data);
+  ssize_t ei;
+  if (e->hasIntKey()) {
+    ei = findForRemove(e->ikey);
+  } else {
+    assert(e->hasStrKey());
+    ei = findForRemove(e->skey, e->skey->hash());
+  }
+  erase(ei);
+  return ret;
 }
 
 template <bool raw>
 ALWAYS_INLINE
-void BaseMap::setImpl(int64_t h, const TypedValue* val) {
+void BaseMap::setImpl(int64_t k, const TypedValue* val) {
   if (!raw) {
     mutate();
   }
   assert(val->m_type != KindOfRef);
   assert(canMutateBuffer());
 retry:
-  auto p = findForInsert(h);
+  auto p = findForInsert(k);
   assert(p);
   if (validPos(*p)) {
     auto& e = data()[*p];
@@ -271,8 +266,8 @@ retry:
   }
   auto& e = allocElm(p);
   cellDup(*val, e.data);
-  e.setIntKey(h);
-  updateNextKI(h);
+  e.setIntKey(k);
+  updateNextKI(k);
 }
 
 template <bool raw>
@@ -285,7 +280,7 @@ void BaseMap::setImpl(StringData* key, const TypedValue* val) {
   assert(canMutateBuffer());
 retry:
   strhash_t h = key->hash();
-  auto* p = findForInsert(key, h);
+  auto p = findForInsert(key, h);
   assert(p);
   if (validPos(*p)) {
     auto& e = data()[*p];
@@ -307,16 +302,16 @@ retry:
   updateIntLikeStrKeys(key);
 }
 
-void BaseMap::setRaw(int64_t h, const TypedValue* val) {
-  setImpl<true>(h, val);
+void BaseMap::setRaw(int64_t k, const TypedValue* val) {
+  setImpl<true>(k, val);
 }
 
 void BaseMap::setRaw(StringData* key, const TypedValue* val) {
   setImpl<true>(key, val);
 }
 
-void BaseMap::set(int64_t h, const TypedValue* val) {
-  setImpl<false>(h, val);
+void BaseMap::set(int64_t k, const TypedValue* val) {
+  setImpl<false>(k, val);
 }
 
 void BaseMap::set(StringData* key, const TypedValue* val) {
@@ -374,12 +369,11 @@ bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto map = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {
     return map->contains(key->m_data.num);
-  } else if (isStringType(key->m_type)) {
-    return map->contains(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    return false;
   }
+  if (isStringType(key->m_type)) {
+    return map->contains(key->m_data.pstr);
+  }
+  throwBadKeyType();
 }
 
 void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
@@ -485,8 +479,8 @@ BaseMap::php_differenceByKey(const Variant& it) {
   if (obj->isCollection()) {
     if (isMapCollection(obj->collectionType())) {
       auto map = static_cast<BaseMap*>(obj);
-      auto* eLimit = map->elmLimit();
-      for (auto* e = map->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+      auto eLimit = map->elmLimit();
+      for (auto e = map->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
         if (e->hasIntKey()) {
           target->remove((int64_t)e->ikey);
         } else {
@@ -597,7 +591,7 @@ BaseMap::php_filter(const Variant& callback) const {
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto* e = iter_elm(pos);
+    auto e = iter_elm(pos);
     if (useKey) {
       if (e->hasIntKey()) {
         argv[0].m_type = KindOfInt64;
@@ -637,7 +631,7 @@ Object BaseMap::php_retain(const Variant& callback) {
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto* e = iter_elm(pos);
+    auto e = iter_elm(pos);
     if (useKey) {
       if (e->hasIntKey()) {
         argv[0].m_type = KindOfInt64;
@@ -767,7 +761,7 @@ BaseMap::php_takeWhile(const Variant& fn) {
     version = m_version;
   }
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto* e = iter_elm(pos);
+    auto e = iter_elm(pos);
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (std::is_same<c_Map, TMap>::value) {
       if (UNLIKELY(version != m_version)) {
@@ -849,7 +843,7 @@ BaseMap::php_skipWhile(const Variant& fn) {
   }
   ssize_t pos;
   for (pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto* e = iter_elm(pos);
+    auto e = iter_elm(pos);
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
     if (std::is_same<c_Map, TMap>::value) {
       if (UNLIKELY(version != m_version)) {
@@ -859,8 +853,8 @@ BaseMap::php_skipWhile(const Variant& fn) {
     if (!b) break;
   }
   if (iter_valid(pos)) {
-    auto* eLimit = elmLimit();
-    auto* e = iter_elm(pos);
+    auto eLimit = elmLimit();
+    auto e = iter_elm(pos);
     for (; e != eLimit; e = nextElm(e, eLimit)) {
       if (e->hasIntKey()) {
         map->set(e->ikey, &e->data);
@@ -979,7 +973,7 @@ BaseMap::FromArray(const Class*, const Variant& arr) {
   for (ssize_t pos = ad->iter_begin(), limit = ad->iter_end(); pos != limit;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
-    auto* tv = ad->getValueRef(pos).asCell();
+    auto tv = ad->getValueRef(pos).asCell();
     if (k.isInteger()) {
       map->setRaw(k.toInt64(), tv);
     } else {

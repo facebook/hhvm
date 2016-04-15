@@ -279,14 +279,15 @@ struct HashCollection : ObjectData {
     m_immCopy.reset();
   }
 
-  TypedValue* findForUnserialize(int64_t h) {
-    auto p = findForInsert(h);
+  TypedValue* findForUnserialize(int64_t k) {
+    auto p = findForInsert(k);
     if (UNLIKELY(validPos(*p))) return nullptr;
     auto e = &allocElm(p);
-    e->setIntKey(h);
-    updateNextKI(h);
+    e->setIntKey(k);
+    updateNextKI(k);
     return &e->data;
   }
+
   TypedValue* findForUnserialize(StringData* key) {
     auto h = key->hash();
     auto p = findForInsert(key, h);
@@ -344,12 +345,12 @@ struct HashCollection : ObjectData {
 
   template <class Hit>
   ssize_t findImpl(size_t h0, Hit) const;
-  ssize_t find(int64_t h) const;
+  ssize_t find(int64_t k) const;
   ssize_t find(const StringData* s, strhash_t h) const;
 
-  ssize_t findForRemove(int64_t h) {
+  ssize_t findForRemove(int64_t k) {
     assert(canMutateBuffer());
-    return arrayData()->findForRemove(h, false);
+    return arrayData()->findForRemove(k, false);
   }
 
   ssize_t findForRemove(const StringData* s, strhash_t h) {

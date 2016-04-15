@@ -31,11 +31,11 @@ struct BaseSet : HashCollection {
 
  protected:
   template <bool raw>
-  void addImpl(int64_t h);
+  void addImpl(int64_t k);
   template <bool raw>
   void addImpl(StringData* key);
 
-  void addRaw(int64_t h);
+  void addRaw(int64_t k);
   void addRaw(StringData* key);
   void addRaw(const TypedValue* val) {
     assert(val->m_type != KindOfRef);
@@ -52,7 +52,7 @@ struct BaseSet : HashCollection {
   }
 
  public:
-  void add(int64_t h);
+  void add(int64_t k);
   void add(StringData* key);
   void add(const TypedValue* val) {
     assert(val->m_type != KindOfRef);
@@ -68,7 +68,7 @@ struct BaseSet : HashCollection {
     add(val.asCell());
   }
 
-  void addFront(int64_t h);
+  void addFront(int64_t k);
   void addFront(StringData* key);
   void addFront(const TypedValue* val) {
     if (val->m_type == KindOfInt64) {

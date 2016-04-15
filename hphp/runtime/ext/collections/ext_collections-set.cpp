@@ -108,11 +108,11 @@ void BaseSet::addAll(const Variant& t) {
 
 template<bool raw>
 ALWAYS_INLINE
-void BaseSet::addImpl(int64_t h) {
+void BaseSet::addImpl(int64_t k) {
   if (!raw) {
     mutate();
   }
-  auto* p = findForInsert(h);
+  auto p = findForInsert(k);
   assert(p);
   if (validPos(*p)) {
     // When there is a conflict, the add() API is supposed to replace the
@@ -124,13 +124,13 @@ void BaseSet::addImpl(int64_t h) {
   }
   if (UNLIKELY(isFull())) {
     makeRoom();
-    p = findForInsert(h);
+    p = findForInsert(k);
   }
   auto& e = allocElm(p);
-  e.setIntKey(h);
+  e.setIntKey(k);
   e.data.m_type = KindOfInt64;
-  e.data.m_data.num = h;
-  updateNextKI(h);
+  e.data.m_data.num = k;
+  updateNextKI(k);
   if (!raw) {
     ++m_version;
   }
@@ -143,7 +143,7 @@ void BaseSet::addImpl(StringData *key) {
     mutate();
   }
   strhash_t h = key->hash();
-  auto* p = findForInsert(key, h);
+  auto p = findForInsert(key, h);
   assert(p);
   if (validPos(*p)) {
     return;
@@ -163,25 +163,25 @@ void BaseSet::addImpl(StringData *key) {
   }
 }
 
-void BaseSet::addRaw(int64_t h) {
-  addImpl<true>(h);
+void BaseSet::addRaw(int64_t k) {
+  addImpl<true>(k);
 }
 
 void BaseSet::addRaw(StringData *key) {
   addImpl<true>(key);
 }
 
-void BaseSet::add(int64_t h) {
-  addImpl<false>(h);
+void BaseSet::add(int64_t k) {
+  addImpl<false>(k);
 }
 
 void BaseSet::add(StringData *key) {
   addImpl<false>(key);
 }
 
-void BaseSet::addFront(int64_t h) {
+void BaseSet::addFront(int64_t k) {
   mutate();
-  auto* p = findForInsert(h);
+  auto p = findForInsert(k);
   assert(p);
   if (validPos(*p)) {
     // When there is a conflict, the addFront() API is supposed to replace
@@ -193,20 +193,20 @@ void BaseSet::addFront(int64_t h) {
   }
   if (UNLIKELY(isFull())) {
     makeRoom();
-    p = findForInsert(h);
+    p = findForInsert(k);
   }
   auto& e = allocElmFront(p);
-  e.setIntKey(h);
+  e.setIntKey(k);
   e.data.m_type = KindOfInt64;
-  e.data.m_data.num = h;
-  updateNextKI(h);
+  e.data.m_data.num = k;
+  updateNextKI(k);
   ++m_version;
 }
 
 void BaseSet::addFront(StringData *key) {
   mutate();
   strhash_t h = key->hash();
-  auto* p = findForInsert(key, h);
+  auto p = findForInsert(key, h);
   assert(p);
   if (validPos(*p)) {
     return;
@@ -225,58 +225,54 @@ void BaseSet::addFront(StringData *key) {
 }
 
 Variant BaseSet::pop() {
-  if (m_size) {
-    mutateAndBump();
-    auto* e = elmLimit() - 1;
-    for (;; --e) {
-      assert(e >= data());
-      if (!isTombstone(e)) break;
-    }
-    Variant ret = tvAsCVarRef(&e->data);
-    ssize_t ei;
-    if (e->hasIntKey()) {
-      ei = findForRemove(e->data.m_data.num);
-    } else {
-      assert(e->hasStrKey());
-      auto* key = e->data.m_data.pstr;
-      ei = findForRemove(key, key->hash());
-    }
-    erase(ei);
-    return ret;
-  } else {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Cannot pop empty Set");
+  if (UNLIKELY(m_size == 0)) {
+    SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Set");
   }
+  mutateAndBump();
+  auto e = elmLimit() - 1;
+  for (;; --e) {
+    assert(e >= data());
+    if (!isTombstone(e)) break;
+  }
+  Variant ret = tvAsCVarRef(&e->data);
+  ssize_t ei;
+  if (e->hasIntKey()) {
+    ei = findForRemove(e->data.m_data.num);
+  } else {
+    assert(e->hasStrKey());
+    auto key = e->data.m_data.pstr;
+    ei = findForRemove(key, key->hash());
+  }
+  erase(ei);
+  return ret;
 }
 
 Variant BaseSet::popFront() {
-  if (m_size) {
-    mutateAndBump();
-    auto* e = data();
-    for (;; ++e) {
-      assert(e != elmLimit());
-      if (!isTombstone(e)) break;
-    }
-    Variant ret = tvAsCVarRef(&e->data);
-    ssize_t ei;
-    if (e->hasIntKey()) {
-      ei = findForRemove(e->data.m_data.num);
-    } else {
-      assert(e->hasStrKey());
-      auto* key = e->data.m_data.pstr;
-      ei = findForRemove(key, key->hash());
-    }
-    erase(ei);
-    return ret;
-  } else {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Cannot pop empty Set");
+  if (UNLIKELY(m_size == 0)) {
+    SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Set");
   }
+  mutateAndBump();
+  auto e = data();
+  for (;; ++e) {
+    assert(e != elmLimit());
+    if (!isTombstone(e)) break;
+  }
+  Variant ret = tvAsCVarRef(&e->data);
+  ssize_t ei;
+  if (e->hasIntKey()) {
+    ei = findForRemove(e->data.m_data.num);
+  } else {
+    assert(e->hasStrKey());
+    auto key = e->data.m_data.pstr;
+    ei = findForRemove(key, key->hash());
+  }
+  erase(ei);
+  return ret;
 }
 
 Variant BaseSet::firstValue() {
   if (!m_size) return init_null();
-  auto* e = firstElm();
+  auto e = firstElm();
   assert(e != elmLimit());
   return tvAsCVarRef(&e->data);
 }
@@ -334,8 +330,8 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto st2 = static_cast<const BaseSet*>(obj2);
   if (st1->m_size != st2->m_size) return false;
 
-  auto* eLimit = st1->elmLimit();
-  for (auto* e = st1->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+  auto eLimit = st1->elmLimit();
+  for (auto e = st1->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     if (e->hasIntKey()) {
       if (!st2->contains(e->data.m_data.num)) return false;
     } else {
@@ -448,7 +444,7 @@ BaseSet::php_map(const Variant& callback) const {
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto* e = iter_elm(pos);
+    auto e = iter_elm(pos);
     TypedValue tvCbRet;
     int32_t pVer = m_version;
     if (useKey) {
@@ -485,7 +481,7 @@ BaseSet::php_filter(const Variant& callback) const {
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto* e = iter_elm(pos);
+    auto e = iter_elm(pos);
     if (useKey) {
       argv[0] = e->data;
     }
@@ -535,7 +531,7 @@ Object BaseSet::php_retain(const Variant& callback) {
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     int32_t version = m_version;
-    auto* e = iter_elm(pos);
+    auto e = iter_elm(pos);
     if (useKey) {
       argv[0] = e->data;
     }

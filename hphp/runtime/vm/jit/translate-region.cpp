@@ -571,9 +571,12 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 double profFactor,
                                 Annotations& annotations) {
   const Timer irGenTimer(Timer::irGenRegionAttempt);
-  double prevProfFactor = irgs.profFactor;
-  irgs.profFactor = profFactor;
-  SCOPE_EXIT { irgs.profFactor = prevProfFactor; };
+  auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
+  auto prevProfTransID = irgs.profTransID; irgs.profTransID = kInvalidTransID;
+  SCOPE_EXIT {
+    irgs.profFactor  = prevProfFactor;
+    irgs.profTransID = prevProfTransID;
+  };
 
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
          show(irgs.context.kind), profFactor, show(region));
@@ -631,7 +634,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
 
     const Func* topFunc = nullptr;
-    if (hasTransID(blockId)) irgs.profTransID = getTransID(blockId);
+    irgs.profTransID = hasTransID(blockId) ? getTransID(blockId)
+                                           : kInvalidTransID;
     irgs.inlineLevel = inl.depth();
     irgs.firstBcInst = inEntryRetransChain(blockId, region) && !inl.inlining();
     irgen::prepareForNextHHBC(irgs, nullptr, sk, false);

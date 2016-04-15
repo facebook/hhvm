@@ -44,7 +44,7 @@ std::string     configFile;
 std::string     profFileName;
 uint32_t        nTopTrans       = 0;
 uint32_t        nTopFuncs       = 0;
-bool            srcOrder        = false;
+bool            creationOrder   = false;
 bool            transCFG        = false;
 bool            collectBCStats  = false;
 bool            inclusiveStats  = false;
@@ -59,7 +59,7 @@ TCA             minAddr         = 0;
 TCA             maxAddr         = (TCA)-1;
 uint32_t        annotationsVerbosity = 2;
 
-std::vector<uint32_t>    transSortSrc;
+std::vector<uint32_t> transPrintOrder;
 
 RepoWrapper*      g_repo;
 OfflineTransData* g_transData;
@@ -108,8 +108,8 @@ void usage() {
          "    -g <FUNC_ID>    : prints the CFG among the translations for the "
          "given <FUNC_ID>\n"
          "    -p <FILE>       : uses raw profile data from <FILE>\n"
-         "    -s              : prints all translations sorted by source key "
-         "(md5, startOffset)\n"
+         "    -s              : prints all translations sorted by creation "
+         "order\n"
          "    -u <MD5>        : prints all translations from the specified "
          "unit\n"
          "    -t <NUMBER>     : prints top <NUMBER> translations according to "
@@ -184,7 +184,7 @@ void parseOptions(int argc, char *argv[]) {
         dumpDir = optarg;
         break;
       case 'f':
-        srcOrder = true;
+        creationOrder = true;
         if (sscanf(optarg, "%u", &selectedFuncId) != 1) {
           usage();
           exit(1);
@@ -201,7 +201,7 @@ void parseOptions(int argc, char *argv[]) {
         profFileName = optarg;
         break;
       case 's':
-        srcOrder = true;
+        creationOrder = true;
         break;
       case 't':
         if (sscanf(optarg, "%u", &nTopTrans) != 1) {
@@ -280,23 +280,13 @@ void parseOptions(int argc, char *argv[]) {
   }
 }
 
-int compTransSrc(int i, int j) {
-  int cmp = strcmp(TREC(i)->md5.toString().c_str(),
-                   TREC(j)->md5.toString().c_str());
-  if (cmp) return cmp < 0;
-  cmp = TREC(i)->src.offset() - TREC(j)->src.offset();
-  if (cmp) return cmp < 0;
-  return TREC(i)->id < TREC(j)->id;
-}
-
-void sortSrc() {
+void sortTrans() {
   for (uint32_t tid = 0; tid < NTRANS; tid++) {
     if (selectedFuncId == INVALID_ID ||
         (selectedFuncId == TREC(tid)->src.funcID())) {
-      transSortSrc.push_back(tid);
+      transPrintOrder.push_back(tid);
     }
   }
-  sort(transSortSrc.begin(), transSortSrc.end(), compTransSrc);
 }
 
 void loadPerfEvents() {
@@ -759,11 +749,12 @@ int main(int argc, char *argv[]) {
     printTopTrans();
   } else if (transCFG) {
     printCFG();
-  } else if (srcOrder) {
-    // Print translations (all or for a given funcId) in source order
-    sortSrc();
-    for (uint32_t i=0; i < transSortSrc.size(); i++) {
-      printTrans(transSortSrc[i]);
+  } else if (creationOrder) {
+    // Print translations (all or for a given funcId) in the order
+    // they were created.
+    sortTrans();
+    for (uint32_t i=0; i < transPrintOrder.size(); i++) {
+      printTrans(transPrintOrder[i]);
     }
   } else if (collectBCStats) {
     printBytecodeStats(g_transData, tcaPerfEvents, sortBy);

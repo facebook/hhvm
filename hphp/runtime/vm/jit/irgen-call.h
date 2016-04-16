@@ -48,5 +48,4 @@ SSATmp* implFCall(IRGS& env, int32_t numParams);
 
 }}}
 
-
 #endif

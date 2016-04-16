@@ -16,10 +16,18 @@
 
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/unit.h"
+
+#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-internal.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
+#include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
 
 #include "hphp/util/trace.h"
 
@@ -285,8 +293,114 @@ ArgGroup elemArgs(IRLS& env, const IRInstruction* inst,
   return args;
 }
 
+ptrdiff_t elmOff(uint32_t pos) {
+  return sizeof(MixedArray) + pos * sizeof(MixedArray::Elm);
+}
+
+/*
+ * JIT helper for profiling MixedArray offsets.
+ */
+template<bool checkForInt>
+void profileMixedArrayOffsetHelper(const ArrayData* ad, int64_t i,
+                                   MixedArrayOffsetProfile* prof) {
+  prof->update(ad, i);
+}
+template<bool checkForInt>
+void profileMixedArrayOffsetHelper(const ArrayData* ad, const StringData* sd,
+                                   MixedArrayOffsetProfile* prof) {
+  prof->update(ad, sd, checkForInt);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
+}}
+
+#define PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(m)          \
+  /* name                       keyType     checkForInt */  \
+  m(profileMixedArrayOffsetS,  KeyType::Str,   false)       \
+  m(profileMixedArrayOffsetSi, KeyType::Str,    true)       \
+  m(profileMixedArrayOffsetI,  KeyType::Int,   false)       \
+
+#define X(nm, keyType, checkForInt)                               \
+static inline void nm(const ArrayData* a, key_type<keyType> k,    \
+                      MixedArrayOffsetProfile* p) {               \
+  irlower::profileMixedArrayOffsetHelper<checkForInt>(a, k, p);   \
+}
+namespace MInstrHelpers {
+PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(X)
+}
+#undef X
+
+namespace irlower {
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgProfileMixedArrayOffset(IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
+
+  BUILD_OPTAB(PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE,
+              keyInfo.type,
+              keyInfo.checkForInt);
+  auto& v = vmain();
+
+  auto const rprof = v.makeReg();
+  v << lea{rvmtl()[inst->extra<ProfileMixedArrayOffset>()->handle], rprof};
+
+  cgCallHelper(v, CallSpec::direct(opFunc), kVoidDest, SyncOptions::Sync,
+               elemArgs(m_state, inst, keyInfo).reg(rprof));
+}
+
+void CodeGenerator::cgCheckMixedArrayOffset(IRInstruction* inst) {
+  auto const arr = srcLoc(inst, 0).reg();
+  auto const key = srcLoc(inst, 1).reg();
+  auto const branch = label(inst->taken());
+  auto const pos = inst->extra<CheckMixedArrayOffset>()->index;
+  auto& v = vmain();
+
+  { // Also fail if our predicted position exceeds bounds.
+    auto const sf = v.makeReg();
+    v << cmplim{safe_cast<int32_t>(pos), arr[MixedArray::usedOff()], sf};
+    ifThen(v, CC_LE, sf, branch);
+  }
+  { // Fail if the Elm key value doesn't match.
+    auto const sf = v.makeReg();
+    v << cmpqm{key, arr[elmOff(pos) + MixedArray::Elm::keyOff()], sf};
+    ifThen(v, CC_NE, sf, branch);
+  }
+  auto const dataOff = elmOff(pos) + MixedArray::Elm::dataOff();
+
+  { // Fail if the Elm key type doesn't match.
+    auto const sf = v.makeReg();
+    v << cmplim{0, arr[dataOff + TVOFF(m_aux)], sf};
+
+    auto const key_info = checkStrictlyInteger(
+      inst->src(0)->type(), // arr
+      inst->src(1)->type()  // key
+    );
+    assertx(key_info.type != KeyType::Any);
+
+    // Note that if `key' actually is an integer-ish string, we'd fail this
+    // check (and most likely would have failed the previous check also), but
+    // this false negative is allowed.
+    auto const is_str_key = key_info.type == KeyType::Str;
+    ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
+  }
+  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
+    auto const sf = v.makeReg();
+    v << cmpbim{KindOfUninit, arr[dataOff + TVOFF(m_type)], sf};
+    ifThen(v, CC_L, sf, branch);
+  }
+}
+
+void CodeGenerator::cgCheckArrayCOW(IRInstruction* inst) {
+  auto const arr = srcLoc(inst, 0).reg();
+  auto& v = vmain();
+
+  auto const sf = v.makeReg();
+  v << cmplim{1, arr[FAST_REFCOUNT_OFFSET], sf};
+  ifThen(v, CC_NE, sf, label(inst->taken()));
 }
 
 void CodeGenerator::cgElemImpl(IRInstruction* inst) {
@@ -311,22 +425,18 @@ void CodeGenerator::cgElemDX(IRInstruction* i)    { cgElemImpl(i); }
 void CodeGenerator::cgElemUX(IRInstruction* i)    { cgElemImpl(i); }
 
 void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
-  auto const arr     = inst->src(0);
-  auto const key     = inst->src(1);
-  bool const warn    = inst->op() == ElemArrayW;
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
+  bool const warn = inst->op() == ElemArrayW;
+
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
               warn);
 
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(opFunc),
-    callDest(inst),
-    SyncOptions::Sync,
-    elemArgs(m_state, inst, keyInfo)
-  );
+  cgCallHelper(vmain(), CallSpec::direct(opFunc), callDest(inst),
+               SyncOptions::Sync, elemArgs(m_state, inst, keyInfo));
 }
 
 void CodeGenerator::cgElemArray(IRInstruction* i)  { cgElemArrayImpl(i); }
@@ -360,28 +470,35 @@ void CodeGenerator::cgElemArrayU(IRInstruction* inst) {
   );
 }
 
+void CodeGenerator::cgElemMixedArrayK(IRInstruction* inst) {
+  auto const arr = srcLoc(inst, 0).reg();
+  auto const dst = dstLoc(inst, 0);
+  auto const pos = inst->extra<ElemMixedArrayK>()->index;
+  auto const off = elmOff(pos) + MixedArray::Elm::dataOff();
+
+  assertx(dst.numAllocated() == 1);
+  vmain() << lea{arr[off], dst.reg()};
+}
+
 void CodeGenerator::cgArrayGet(IRInstruction* inst) {
-  auto const arr         = inst->src(0);
-  auto const key         = inst->src(1);
-  auto const keyInfo     = checkStrictlyInteger(arr->type(), key->type());
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
+
   BUILD_OPTAB(ARRAYGET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt);
 
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
+  cgCallHelper(vmain(), CallSpec::direct(opFunc), callDestTV(inst),
+               SyncOptions::Sync, elemArgs(m_state, inst, keyInfo));
+}
 
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(opFunc),
-    callDestTV(inst),
-    SyncOptions::Sync,
-    args
-  );
+void CodeGenerator::cgMixedArrayGetK(IRInstruction* inst) {
+  auto const arr = srcLoc(inst, 0).reg();
+  auto const pos = inst->extra<MixedArrayGetK>()->index;
+  auto const off = elmOff(pos) + MixedArray::Elm::dataOff();
+
+  loadTV(vmain(), inst->dst(0), dstLoc(inst, 0), arr[off]);
 }
 
 void CodeGenerator::cgMapGet(IRInstruction* inst) {

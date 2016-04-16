@@ -14,12 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
+#include "hphp/runtime/vm/jit/irgen.h"
+
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/collections.h"
 
 #include "hphp/runtime/vm/native-prop-handler.h"
 
 #include "hphp/runtime/vm/jit/minstr-effects.h"
+#include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
@@ -537,9 +541,17 @@ SSATmp* emitStructArrayGet(IRGS& env, SSATmp* base, SSATmp* key) {
 }
 
 SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key) {
-  auto elem = unbox(env, gen(env, ArrayGet, base, key), nullptr);
-  gen(env, IncRef, elem);
-  return elem;
+  auto const elem = profiledArrayAccess(env, base, key,
+    [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
+      return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
+    },
+    [&] (SSATmp* key) {
+      return gen(env, ArrayGet, base, key);
+    }
+  );
+  auto const cell = unbox(env, elem, nullptr);
+  gen(env, IncRef, cell);
+  return cell;
 }
 
 SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key) {
@@ -1029,16 +1041,20 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
 
   if (base && base->isA(TArr) && key->type().subtypeOfAny(TInt, TStr)) {
     env.irb->constrainValue(base, DataTypeSpecific);
-    if (define || unset) {
-      return gen(
-        env,
-        unset ? ElemArrayU : ElemArrayD,
-        base->type(),
-        basePtr,
-        key
-      );
-    }
-    return gen(env, warn ? ElemArrayW : ElemArray, base, key);
+
+    return profiledArrayAccess(env, base, key,
+      [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
+        return gen(env, ElemMixedArrayK, IndexData { pos }, arr, key);
+      },
+      [&] (SSATmp* key) {
+        if (define || unset) {
+          return gen(env, unset ? ElemArrayU : ElemArrayD,
+                     base->type(), basePtr, key);
+        }
+        return gen(env, warn ? ElemArrayW : ElemArray, base, key);
+      },
+      true // cow_check
+    );
   }
 
   if (unset) {
@@ -1379,6 +1395,8 @@ MOpFlags fpassFlags(IRGS& env, int32_t idx) {
   }
   return MOpFlags::Warn;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }
 

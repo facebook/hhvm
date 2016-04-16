@@ -911,6 +911,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
+  case ProfileMixedArrayOffset:
+  case CheckMixedArrayOffset:
+  case CheckArrayCOW:
+    return may_load_store(AHeapAny, AEmpty);
+
+  case ElemMixedArrayK:
+  case MixedArrayGetK:
+    return may_load_store(AElemAny, AEmpty);
+
   case ArrayIdx:
     return may_load_store(AElemAny | ARefAny, AEmpty);
   case MapIdx:

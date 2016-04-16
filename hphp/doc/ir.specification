@@ -2317,6 +2317,21 @@ fields of that struct for holding intermediate values.
   Get intermediate element with key S1 from base S0. The base will not be
   modified.
 
+| ProfileMixedArrayOffset, ND, S(Arr) S(Int,Str), NF
+
+  Profile the offset of the element keyed by S1 in S0.
+
+| CheckMixedArrayOffset<pos>, ND, AK(Mixed) S(Int,Str), B
+
+  Check that `pos' is within the usage bounds of S0 (including tombstones), and
+  that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
+  fail, branch to B.  This check is allowed to have false negatives, in the
+  case of int-like strings.
+
+| CheckArrayCOW, ND, S(Arr), B
+
+  Check that S0 has a refcount of exactly 1; if not, branch to B.
+
 | ElemArray,  D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
 | ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
@@ -2327,10 +2342,14 @@ fields of that struct for holding intermediate values.
 
   Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
   ElemArrayW is for Warn member instrs, ElemArrayD is for Define member instrs,
-  and ElemArrayU is for Unset. T is the type of the base array.
+  and ElemArrayU is for Unset.
 
-  ElemArrayD takes a PtrToGen for its base operand, but it expects it to be a
-  PtrToArr or PtrToBoxedArr.
+  ElemArray{D,U} both take a PtrToGen for the base operand, but expect it to be
+  a PtrToArr or PtrToBoxedArr.  T is the type of the base array.
+
+| ElemMixedArrayK<pos>, D(PtrToMembGen), AK(Mixed) S(Int,Str), NF
+
+  Like ElemArray, but the element for S1 is at a known position `pos' in S0.
 
 | ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 
@@ -2345,6 +2364,10 @@ fields of that struct for holding intermediate values.
 | ArrayGet, DArrElem, S(Arr) S(Int,Str), Er
 
   Get element with key S1 from base S0.
+
+| MixedArrayGetK<pos>, DArrElem, AK(Mixed) S(Int,Str), NF
+
+  Like ArrayGet, but the element for S1 is at a known position `pos' in S0.
 
 | StringGet, D(StaticStr), S(Str) S(Int), PRc|Er
 

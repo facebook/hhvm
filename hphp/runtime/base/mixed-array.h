@@ -119,13 +119,19 @@ public:
       }
     }
 
-    static constexpr size_t dataOff() {
+    static constexpr ptrdiff_t keyOff() {
+      return offsetof(Elm, ikey);
+    }
+    static constexpr ptrdiff_t dataOff() {
       return offsetof(Elm, data);
     }
   };
 
-  static constexpr size_t dataOff() {
+  static constexpr ptrdiff_t dataOff() {
     return sizeof(MixedArray);
+  }
+  static constexpr ptrdiff_t usedOff() {
+    return offsetof(MixedArray, m_used);
   }
 
   struct ElmKey {
@@ -447,9 +453,12 @@ private:
 
   template <class Hit>
   ssize_t findImpl(size_t h0, Hit) const;
+
+public:
   ssize_t find(int64_t ki) const;
   ssize_t find(const StringData* s, strhash_t h) const;
 
+private:
   // The array should already be sized for the new insertion before
   // calling these methods.
   template <class Hit>

@@ -2168,6 +2168,22 @@ SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyMixedArrayGetK(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (inst->src(1)->type() <= TInt) {
+      if (auto result = arrIntKeyImpl(env, inst)) {
+        return result;
+      }
+    }
+    if (inst->src(1)->type() <= TStr) {
+      if (auto result = arrStrKeyImpl(env, inst)) {
+        return result;
+      }
+    }
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
     if (inst->src(1)->isA(TInt)) {
@@ -2584,6 +2600,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CmpRes)
   X(EqCls)
   X(ArrayGet)
+  X(MixedArrayGetK)
   X(ArrayIdx)
   X(AKExistsArr)
   X(OrdStr)

@@ -234,6 +234,16 @@ inline Vreg Vloc::reg(int i) const {
   return m_regs[i];
 }
 
+inline VregList Vloc::regs() const {
+  if (hasReg(1)) {
+    return { m_regs[0], m_regs[1] };
+  }
+  if (hasReg(0)) {
+    return { m_regs[0] };
+  }
+  return {};
+}
+
 inline int Vloc::numAllocated() const {
   return int(m_regs[0].isValid()) + int(m_regs[1].isValid());
 }

@@ -650,16 +650,26 @@ CallDest CodeGenerator::callDest(Vreg reg0, Vreg reg1) const {
 
 CallDest CodeGenerator::callDest(const IRInstruction* inst) const {
   if (!inst->numDsts()) return kVoidDest;
-  auto loc = dstLoc(inst, 0);
+  return callDest(inst, dstLoc(inst, 0));
+}
+
+CallDest CodeGenerator::callDest(const IRInstruction* inst,
+                                 const Vloc& loc) const {
   if (loc.numAllocated() == 0) return kVoidDest;
   assertx(loc.numAllocated() == 1);
-  return { inst->dst(0)->isA(TBool) ? DestType::Byte : DestType::SSA,
-           loc.reg(0) };
+  return {
+    inst->dst(0)->isA(TBool) ? DestType::Byte : DestType::SSA,
+    loc.reg(0)
+  };
 }
 
 CallDest CodeGenerator::callDestTV(const IRInstruction* inst) const {
   if (!inst->numDsts()) return kVoidDest;
-  auto loc = dstLoc(inst, 0);
+  return callDestTV(inst, dstLoc(inst, 0));
+}
+
+CallDest CodeGenerator::callDestTV(const IRInstruction* inst,
+                                   const Vloc& loc) const {
   if (loc.numAllocated() == 0) return kVoidDest;
   if (loc.isFullSIMD()) {
     assertx(loc.numAllocated() == 1);

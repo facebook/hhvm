@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/func-effects.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
@@ -27,10 +28,11 @@
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
-#include "hphp/runtime/base/file-util.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -1494,8 +1496,20 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
   auto const use_base = loaded_collection_array
     ? loaded_collection_array
     : stack_base;
-  auto const value = gen(env, ArrayIdx, use_base, key, def);
+
+  auto const value = profiledArrayAccess(env, use_base, key,
+    [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
+      auto const elem = gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
+      auto const cell = unbox(env, elem, nullptr);
+      gen(env, IncRef, cell);
+      return cell;
+    },
+    [&] (SSATmp* key) {
+      return gen(env, ArrayIdx, use_base, key, def);
+    }
+  );
   push(env, value);
+
   decRef(env, stack_base);
   decRef(env, key);
   decRef(env, def);

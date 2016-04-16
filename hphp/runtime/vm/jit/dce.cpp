@@ -477,13 +477,18 @@ bool canDCE(IRInstruction* inst) {
   case EmptyProp:
   case IssetProp:
   case ElemX:
+  case ProfileMixedArrayOffset:
+  case CheckMixedArrayOffset:
+  case CheckArrayCOW:
   case ElemArray:
   case ElemArrayD:
   case ElemArrayW:
   case ElemArrayU:
+  case ElemMixedArrayK:
   case ElemDX:
   case ElemUX:
   case ArrayGet:
+  case MixedArrayGetK:
   case StringGet:
   case OrdStrIdx:
   case MapGet:

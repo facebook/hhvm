@@ -337,6 +337,7 @@ struct Vloc {
    */
   bool hasReg(int i = 0) const;
   Vreg reg(int i = 0) const;
+  VregList regs() const;
   int numAllocated() const;
   int numWords() const;
   bool isFullSIMD() const;

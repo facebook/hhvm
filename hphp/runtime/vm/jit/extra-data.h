@@ -232,6 +232,17 @@ struct LocalId : IRExtraData {
 };
 
 /*
+ * Index into, e.g., an array.
+ */
+struct IndexData : IRExtraData {
+  explicit IndexData(uint32_t index) : index(index) {}
+
+  std::string show() const { return folly::format("{}", index).str(); }
+
+  uint32_t index;
+};
+
+/*
  * Iterator ID.
  */
 struct IterId : IRExtraData {
@@ -271,6 +282,9 @@ struct IterData : IRExtraData {
   uint32_t valId;
 };
 
+/*
+ * RDS handle.
+ */
 struct RDSHandleData : IRExtraData {
   explicit RDSHandleData(rds::Handle handle) : handle(handle) {}
 
@@ -987,12 +1001,6 @@ struct InitPackedArrayLoopData : IRExtraData {
   uint32_t size;
 };
 
-struct IndexData : IRExtraData {
-  explicit IndexData(uint32_t index) : index(index) {}
-  uint32_t index;
-  std::string show() const { return folly::format("{}", index).str(); }
-};
-
 struct MOpFlagsData : IRExtraData {
   explicit MOpFlagsData(MOpFlags flags) : flags{flags} {}
 
@@ -1199,6 +1207,10 @@ X(NewStructArray,               NewStructData);
 X(AllocPackedArray,             PackedArrayData);
 X(InitPackedArrayLoop,          InitPackedArrayLoopData);
 X(InitPackedArray,              IndexData);
+X(CheckMixedArrayOffset,        IndexData);
+X(ElemMixedArrayK,              IndexData);
+X(MixedArrayGetK,               IndexData);
+X(ProfileMixedArrayOffset,      RDSHandleData);
 X(ProfilePackedArray,           RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
 X(ProfileObjClass,              RDSHandleData);

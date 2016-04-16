@@ -248,7 +248,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    *
    * @return     mixed   The value at the specified index or NULL.
    */
-  public function offsetGet($index) {
+  public function &offsetGet($index) {
     if ($this->isArray()) {
       return $this->storage[$index];
     } else {

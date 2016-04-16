@@ -173,6 +173,7 @@ void Scale::computeBlockWeights() {
     auto a = unsigned(m_unit.blocks[b].area_idx);
     assertx(a < 3);
     m_blkWgts[b] = findProfCount(b) / areaWeightFactors[a];
+    if (m_blkWgts[b] < 0) m_blkWgts[b] = 0;
   }
 }
 
@@ -188,6 +189,7 @@ void Scale::computeArcWeights() {
       m_arcWgts[arcid] = succSet.size()    == 1 ? weight(b)
                        : m_preds[s].size() == 1 ? weight(s)
                        : std::min(weight(b), weight(s)) / 2;
+      if (m_arcWgts[arcid] < 0) m_arcWgts[arcid] = 0;
       FTRACE(3, "arc({} -> {}) => weight = {}  "
              "[|succs(b)| = {} ; |preds(s)| = {}] "
              "[weight(b) = {} ; weight(s) = {}]\n", b, s, m_arcWgts[arcid],

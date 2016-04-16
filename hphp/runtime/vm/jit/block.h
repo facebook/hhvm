@@ -73,7 +73,7 @@ struct Block {
   explicit Block(unsigned id, uint64_t profCount)
     : m_id(id)
     , m_hint(Hint::Neither)
-    , m_profCount(profCount)
+    , m_profCount(checkedProfCount(profCount))
   {}
 
   Block(const Block&) = delete;
@@ -84,7 +84,7 @@ struct Block {
   void        setHint(Hint hint)   { m_hint = hint; }
   uint64_t    profCount() const    { return m_profCount; }
 
-  void setProfCount(uint64_t count) { m_profCount = count; }
+  void setProfCount(uint64_t count) { m_profCount = checkedProfCount(count); }
 
   // Returns true if this block has no successors.
   bool isExit() const { return !empty() && !taken() && !next(); }
@@ -197,6 +197,8 @@ struct Block {
   std::string toString() const;
 
  private:
+  static uint64_t checkedProfCount(uint64_t profCount);
+
   InstructionList m_instrs; // instructions in this block
   const unsigned m_id;      // unit-assigned unique id of this block
   EdgeList m_preds;         // Edges that point to this block
@@ -346,6 +348,17 @@ inline bool Block::isCatch() const {
   auto it = skipHeader();
   if (it == begin()) return false;
   return (--it)->op() == BeginCatch;
+}
+
+inline uint64_t Block::checkedProfCount(uint64_t profCount) {
+  // If the profCount is too big, it typically means some issue.  So
+  // trigger an assert in debug builds, and cap it in opt builds.
+  constexpr auto profCountCap = std::numeric_limits<int64_t>::max();
+  assert_flog(profCount <= profCountCap,
+              "Trying to create IR block with suspicious profCount {}\n",
+              profCount);
+  if (profCount > profCountCap) profCount = profCountCap;
+  return profCount;
 }
 
 inline BCMarker Block::catchMarker() const {

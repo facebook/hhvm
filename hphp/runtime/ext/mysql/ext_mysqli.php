@@ -105,7 +105,7 @@ class mysqli {
    * @return bool -
    */
   <<__Native>>
-  public function autocommit(bool $mode): mixed;
+  public function autocommit(bool $mode): bool;
 
   /**
    * Starts a transaction
@@ -159,7 +159,7 @@ class mysqli {
    */
   <<__Native>>
   public function change_user(string $user, string $password,
-                              string $database): mixed;
+                              string $database): bool;
 
   /**
    * Returns the default character set for the database connection
@@ -168,7 +168,7 @@ class mysqli {
    *   connection
    */
   <<__Native>>
-  public function character_set_name(): mixed;
+  public function character_set_name(): string;
 
   /**
    * Closes a previously opened database connection
@@ -247,12 +247,12 @@ class mysqli {
    * @return bool -
    */
   <<__Native>>
-  public function dump_debug_info(): mixed;
+  public function dump_debug_info(): bool;
 
   /**
    * Alias for real_escape_string
    */
-  public function escape_string($escapestr): ?string {
+  public function escape_string(string $escapestr): ?string {
     return $this->real_escape_string($escapestr);
   }
 
@@ -271,7 +271,7 @@ class mysqli {
    *   - state Character set status (?)
    */
   <<__Native>>
-  public function get_charset(): mixed;
+  public function get_charset(): stdClass;
 
   /**
    * Get MySQL client info
@@ -297,7 +297,7 @@ class mysqli {
    *
    * @return mysqli_warning -
    */
-  public function get_warnings(): mixed {
+  public function get_warnings(): mysqli_warning {
     if (!$this->warning_count) {
       return false;
     }
@@ -334,7 +334,7 @@ class mysqli {
    * @return bool -
    */
   <<__Native>>
-  public function kill(int $processid): mixed;
+  public function kill(int $processid): bool;
 
   /**
    * Check if there are any more query results from a multi query
@@ -342,7 +342,7 @@ class mysqli {
    * @return bool - Returns TRUE if one or more result sets are available
    *   from a previous call to mysqli_multi_query(), otherwise FALSE.
    */
-  public function more_results(): mixed {
+  public function more_results(): bool {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -397,18 +397,18 @@ class mysqli {
    *   file used with the SHA-256 based authentication.
    * @param mixed $value - The value for the option.
    *
-   * @return bool -
+   * @return bool TRUE on success, FALSE on failure
    */
   <<__Native>>
-  public function options(int $option, mixed $value): mixed;
+  public function options(int $option, mixed $value): bool;
 
   /**
    * Pings a server connection, or tries to reconnect if the connection has
    * gone down
    *
-   * @return bool -
+   * @return bool TRUE if the connection to the server is active, FALSE otherwise.
    */
-  public function ping(): ?bool {
+  public function ping(): bool {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -501,7 +501,7 @@ class mysqli {
    *   will return TRUE.
    */
   public function query(string $query,
-                        int $resultmode = MYSQLI_STORE_RESULT): ?mixed {
+                        int $resultmode = MYSQLI_STORE_RESULT): mixed {
     if ($resultmode !== MYSQLI_STORE_RESULT &&
         $resultmode !== MYSQLI_USE_RESULT) {
       trigger_error("Invalid value for resultmode", E_WARNING);
@@ -621,7 +621,7 @@ class mysqli {
    *
    * @return string - Returns an escaped string.
    */
-  public function real_escape_string($escapestr): ?string {
+  public function real_escape_string(string $escapestr): ?string {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -667,7 +667,7 @@ class mysqli {
    * @return bool - TRUE if the refresh was a success, otherwise FALSE
    */
   <<__Native>>
-  public function refresh(int $options): mixed;
+  public function refresh(int $options): bool;
 
   /**
    * Rolls back a transaction to the named savepoint
@@ -725,7 +725,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function set_charset(string $charset) {
+  public function set_charset(string $charset): bool {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -751,7 +751,7 @@ class mysqli {
   /**
    * Alias of options()
    */
-  public function set_opt(int $option, mixed $value): mixed {
+  public function set_opt(int $option, mixed $value): bool {
     return $this->options($option, $value);
   }
 
@@ -775,7 +775,7 @@ class mysqli {
                           ?string $cert,
                           ?string $ca,
                           ?string $capath,
-                          ?string $cipher): mixed;
+                          ?string $cipher): bool;
 
   /**
    * Gets the current system status
@@ -802,7 +802,7 @@ class mysqli {
   }
 
   <<__Native>>
-  private function hh_get_result(bool $use_store): ?mixed;
+  private function hh_get_result(bool $use_store): mixed;
 
   /**
    * Transfers a result set from the last query
@@ -820,7 +820,7 @@ class mysqli {
    *   allocated). If mysqli_field_count() returns a non-zero value, the
    *   statement should have produced a non-empty result set.
    */
-  public function store_result(): ?mixed {
+  public function store_result(): mixed {
     $result = $this->hh_get_result(true);
     if ($result === null) {
       return null;
@@ -838,7 +838,7 @@ class mysqli {
    * @return mysqli_result - Returns an unbuffered result object or FALSE
    *   if an error occurred.
    */
-  public function use_result(): ?mixed {
+  public function use_result(): mixed {
     $result = $this->hh_get_result(false);
     if ($result === null) {
       return null;
@@ -1180,7 +1180,7 @@ class mysqli_stmt {
   private ?resource $__stmt = null;
   private ?mysqli $__link = null;
 
-  public function __construct(mysqli $link, string $query = null) {
+  public function __construct(mysqli $link, ?string $query = null) {
     $this->__link = $link;
     $this->hh_init($link);
     if ($query) {
@@ -1236,7 +1236,7 @@ class mysqli_stmt {
    * @return bool -
    */
   <<__Native>>
-  public function attr_set(int $attr, int $mode): mixed;
+  public function attr_set(int $attr, int $mode): bool;
 
   /**
    * Binds variables to a prepared statement as parameters
@@ -1254,7 +1254,7 @@ class mysqli_stmt {
    * @return bool -
    */
   <<__Native("ActRec", "VariadicByRef")>>
-  public function bind_param(string $types, ...): mixed;
+  public function bind_param(string $types, ...): bool;
 
   /**
    * Binds variables to a prepared statement for result storage
@@ -1265,7 +1265,7 @@ class mysqli_stmt {
    * @return bool -
    */
   <<__Native("ActRec", "VariadicByRef")>>
-  public function bind_result(...): mixed;
+  public function bind_result(...): bool;
 
   /**
    * Closes a prepared statement
@@ -1273,7 +1273,7 @@ class mysqli_stmt {
    * @return bool -
    */
   <<__Native>>
-  public function close(): mixed;
+  public function close(): bool;
 
   /**
    * Seeks to an arbitrary row in statement result set
@@ -1292,7 +1292,7 @@ class mysqli_stmt {
    * @return bool -
    */
   <<__Native>>
-  public function execute(): mixed;
+  public function execute(): bool;
 
   /**
    * Fetch results from a prepared statement into the bound variables
@@ -1302,7 +1302,7 @@ class mysqli_stmt {
    *   data truncation occurred
    */
   <<__Native>>
-  public function fetch(): mixed;
+  public function fetch(): ?bool;
 
   /**
    * Frees stored result memory for the given statement handle
@@ -1381,7 +1381,7 @@ class mysqli_stmt {
    * @return bool -
    */
   <<__Native>>
-  public function reset(): mixed;
+  public function reset(): bool;
 
   /**
    * Returns result set metadata from a prepared statement
@@ -1402,14 +1402,14 @@ class mysqli_stmt {
    * @return bool -
    */
   <<__Native>>
-  public function send_long_data(int $param_nr, string $data): mixed;
+  public function send_long_data(int $param_nr, string $data): bool;
 
   /**
    * Transfers a result set from a prepared statement
    *
    * @return bool -
    */
-  public function store_result(): mixed {
+  public function store_result(): bool {
     // First we need to set the MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH attribute in
     // some cases.
     if ($this->__link->field_count > 0) {
@@ -1432,7 +1432,7 @@ class mysqli_stmt {
   }
 
   <<__Native>>
-  public function hh_store_result(): mixed;
+  public function hh_store_result(): bool;
 
 }
 
@@ -1663,7 +1663,7 @@ function mysqli_connect_error(): ?string {
  *
  * @return bool -
  */
-function mysqli_dump_debug_info(mysqli $link): mixed {
+function mysqli_dump_debug_info(mysqli $link): bool {
   return $link->dump_debug_info();
 }
 
@@ -1731,7 +1731,7 @@ function mysqli_field_count(mysqli $link): ?int {
  *   - number Internal character set number
  *   - state Character set status (?)
  */
-function mysqli_get_charset(mysqli $link): mixed {
+function mysqli_get_charset(mysqli $link): stdClass {
   return $link->get_charset();
 }
 
@@ -1810,7 +1810,7 @@ function mysqli_get_server_version(mysqli $link): ?int {
  *
  * @return mysqli_warning -
  */
-function mysqli_get_warnings(mysqli $link): mixed {
+function mysqli_get_warnings(mysqli $link): mysqli_warning {
   return $link->get_warnings();
 }
 
@@ -1897,7 +1897,7 @@ function mysqli_multi_query(mysqli $link, string $query): bool {
  *
  * @return bool -
  */
-function mysqli_next_result(mysqli $link): bool {
+function mysqli_next_result(mysqli $link): ?bool {
   return $link->next_result();
 }
 
@@ -1916,11 +1916,12 @@ function mysqli_next_result(mysqli $link): bool {
  *   group from my.cnf or the file specified with MYSQL_READ_DEFAULT_FILE.
  *     MYSQLI_SERVER_PUBLIC_KEY  RSA public key file used with the SHA-256
  *   based authentication.
- * @param mixed $value - The value for the option.
+ * @param bool TRUE on success, FALSE on failure.
+ *
  *
  * @return bool -
  */
-function mysqli_options(mysqli $link, int $option, mixed $value): mixed {
+function mysqli_options(mysqli $link, int $option, mixed $value): bool {
   return $link->options($option, $value);
 }
 
@@ -1930,9 +1931,9 @@ function mysqli_options(mysqli $link, int $option, mixed $value): mixed {
  *
  * @param mysqli $link -
  *
- * @return bool -
+ * @return bool TRUE if the connection to the server is active, FALSE otherwise.
  */
-function mysqli_ping(mysqli $link): ?bool {
+function mysqli_ping(mysqli $link): bool {
   return $link->ping();
 }
 
@@ -2064,7 +2065,7 @@ function mysqli_real_connect(mysqli $link,
 /**
  * Alias of mysqli_real_escape_string
  */
-function mysqli_escape_string(mysqli $link, $escapestr): ?string {
+function mysqli_escape_string(mysqli $link, string $escapestr): ?string {
   return mysqli_real_escape_string($link, $escapestr);
 }
 
@@ -2078,7 +2079,7 @@ function mysqli_escape_string(mysqli $link, $escapestr): ?string {
  *
  * @return string - Returns an escaped string.
  */
-function mysqli_real_escape_string(mysqli $link, $escapestr): ?string {
+function mysqli_real_escape_string(mysqli $link, string $escapestr): ?string {
   return $link->real_escape_string($escapestr);
 }
 
@@ -2115,9 +2116,9 @@ function mysqli_real_query(mysqli $link, string $query): bool {
  *   MYSQLI_REFRESH_* constants as documented within the MySQLi constants
  *   documentation.   See also the official MySQL Refresh documentation.
  *
- * @return int - TRUE if the refresh was a success, otherwise FALSE
+ * @return bool - TRUE if the refresh was a success, otherwise FALSE
  */
-function mysqli_refresh(mysqli $link, int $options): int {
+function mysqli_refresh(mysqli $link, int $options): bool {
   return $link->refresh($options);
 }
 
@@ -2191,7 +2192,7 @@ function mysqli_select_db(mysqli $link, string $dbname): ?bool {
  *
  * @return bool -
  */
-function mysqli_set_charset(mysqli $link, string $charset): mixed {
+function mysqli_set_charset(mysqli $link, string $charset): bool {
   return $link->set_charset($charset);
 }
 
@@ -2303,7 +2304,7 @@ function mysqli_stmt_init(mysqli $link): mysqli_stmt {
  *   mysqli_field_count() returns a non-zero value, the statement should
  *   have produced a non-empty result set.
  */
-function mysqli_store_result(mysqli $link): mysqli_result {
+function mysqli_store_result(mysqli $link): mixed {
   return $link->store_result();
 }
 
@@ -2335,7 +2336,7 @@ function mysqli_thread_safe(): bool;
  * @return mysqli_result - Returns an unbuffered result object or FALSE
  *   if an error occurred.
  */
-function mysqli_use_result(mysqli $link): mysqli_result {
+function mysqli_use_result(mysqli $link): mixed {
   return $link->use_result();
 }
 
@@ -2370,7 +2371,7 @@ function mysqli_report(int $flags): bool {
 /**
  * Alias of mysqli_options
  */
-function mysqli_set_opt(mysqli $link, int $option, mixed $value): mixed {
+function mysqli_set_opt(mysqli $link, int $option, mixed $value): bool {
   return mysqli_options($link, $option, $value);
 }
 
@@ -2394,7 +2395,7 @@ function mysqli_field_tell(mysqli_result $result): int {
  *
  * @return bool -
  */
-function mysqli_data_seek(mysqli_result $result, int $offset): mixed {
+function mysqli_data_seek(mysqli_result $result, int $offset): bool {
   return $result->data_seek($offset);
 }
 
@@ -2553,11 +2554,11 @@ function mysqli_fetch_object(mysqli_result $result,
  *
  * @param mysqli_result $result -
  *
- * @return mixed - mysqli_fetch_row() returns an array of strings that
+ * @return array<string> - mysqli_fetch_row() returns an array of strings that
  *   corresponds to the fetched row or NULL if there are no more rows in
  *   result set.
  */
-function mysqli_fetch_row(mysqli_result $result): mixed {
+function mysqli_fetch_row(mysqli_result $result): ?array<string> {
   return $result->fetch_row();
 }
 
@@ -2594,7 +2595,7 @@ function mysqli_field_seek(mysqli_result $result,
  * @return void -
  */
 <<__Native>>
-function mysqli_free_result(mixed $result): void;
+function mysqli_free_result(mysqli_result $result): void;
 
 /**
  * Returns the lengths of the columns of the current row in the result set
@@ -2706,7 +2707,7 @@ function mysqli_stmt_attr_set(mysqli_stmt $stmt, int $attr, int $mode): bool {
  * @return bool -
  */
 <<__Native("ActRec", "VariadicByRef")>>
-function mysqli_stmt_bind_param(mysqli_stmt $stmt, string $types, ...): mixed;
+function mysqli_stmt_bind_param(mysqli_stmt $stmt, string $types, ...): bool;
 
 /**
  * Binds variables to a prepared statement for result storage
@@ -2718,7 +2719,7 @@ function mysqli_stmt_bind_param(mysqli_stmt $stmt, string $types, ...): mixed;
  * @return bool -
  */
 <<__Native("ActRec", "VariadicByRef")>>
-function mysqli_stmt_bind_result(mysqli_stmt $stmt, ...): mixed;
+function mysqli_stmt_bind_result(mysqli_stmt $stmt, ...): bool;
 
 /**
  * Closes a prepared statement
@@ -2799,7 +2800,7 @@ function mysqli_stmt_execute(mysqli_stmt $stmt): bool {
  *   fetched   FALSE Error occurred   NULL No more rows/data exists or data
  *   truncation occurred
  */
-function mysqli_stmt_fetch(mysqli_stmt $stmt): mixed {
+function mysqli_stmt_fetch(mysqli_stmt $stmt): ?bool {
   return $stmt->fetch();
 }
 
@@ -2888,7 +2889,7 @@ function mysqli_stmt_next_result(mysqli_stmt $stmt): bool {
  * @return int - An integer representing the number of rows in result
  *   set.
  */
-function mysqli_stmt_num_rows(mysqli_stmt $stmt): mixed {
+function mysqli_stmt_num_rows(mysqli_stmt $stmt): int {
   return $stmt->num_rows;
 }
 
@@ -2927,7 +2928,7 @@ function mysqli_stmt_param_count(mysqli_stmt $stmt): int {
  *
  * @return bool -
  */
-function mysqli_stmt_prepare(mysqli_stmt $stmt, string $query): mixed {
+function mysqli_stmt_prepare(mysqli_stmt $stmt, string $query): bool {
   return $stmt->prepare($query);
 }
 
@@ -2966,7 +2967,7 @@ function mysqli_stmt_result_metadata(mysqli_stmt $stmt): mixed {
  */
 function mysqli_stmt_send_long_data(mysqli_stmt $stmt,
                                     int $param_nr,
-                                    string $data): mixed {
+                                    string $data): bool {
   return $stmt->send_long_data($param_nr, $data);
 }
 

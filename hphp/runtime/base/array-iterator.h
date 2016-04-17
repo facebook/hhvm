@@ -751,7 +751,7 @@ bool IterateV(const TypedValue& it,
   return IterateV(it, preArrFn, arrFn, preCollFn, false);
 }
 
-template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
+template <typename PreArrFn, typename ArrFn>
 bool IterateV(const TypedValue& it,
               PreArrFn preArrFn,
               ArrFn arrFn) {
@@ -833,7 +833,7 @@ bool IterateKV(const TypedValue& it,
   return IterateKV(it, preArrFn, arrFn, preCollFn, false);
 }
 
-template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
+template <typename PreArrFn, typename ArrFn>
 bool IterateKV(const TypedValue& it,
                PreArrFn preArrFn,
                ArrFn arrFn) {

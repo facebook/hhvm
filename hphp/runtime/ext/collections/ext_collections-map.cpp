@@ -70,11 +70,32 @@ void BaseMap::addAllImpl(const Variant& iterable) {
       auto sz = adata->size();
       if (!sz) return true;
       if (!m_size) {
+
         if (adata->isMixed()) {
-          replaceArray(adata);
-          updateIntLikeStrKeys();
-          return true;
+          // Collections can't contain refs, so check for any refs in the input
+          // array and look for int-like string keys at the same time.
+          bool int_like_str_keys = intLikeStrKeys();
+          bool contains_ref = false;
+          MixedArray::IterateKV(
+            MixedArray::asMixed(adata),
+            [&](const TypedValue* key, const TypedValue* value) {
+              int64_t ignored;
+              if (!int_like_str_keys &&
+                  isStringType(key->m_type) &&
+                  key->m_data.pstr->isStrictlyInteger(ignored)) {
+                int_like_str_keys = true;
+              }
+              if (value->m_type == KindOfRef) contains_ref = true;
+              return int_like_str_keys && contains_ref;
+            }
+          );
+          if (!contains_ref) {
+            replaceArray(adata);
+            if (int_like_str_keys) setIntLikeStrKeys(true);
+            return true;
+          }
         }
+
       } else {
         oldCap = cap(); // assume minimal collisions
       }

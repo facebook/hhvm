@@ -316,20 +316,40 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
 void BaseVector::addAllImpl(const Variant& t) {
   if (t.isNull()) return;
 
+  bool skip_ref_check = false;
   auto ok = IterateV(
     *t.asTypedValue(),
-    [this](ArrayData* adata) {
+    [&, this](ArrayData* adata) {
       if (adata->empty()) return true;
       if (!m_size) {
+
         if (adata->isPacked()) {
-          auto* oldAd = arrayData();
-          m_arr = adata;
-          adata->incRefCount();
-          m_capacity = arrayData()->cap();
-          m_size = arrayData()->m_size;
-          decRefArr(oldAd);
-          ++m_version;
-          return true;
+          // Collections can't contains refs, so we need to check for their
+          // presence before taking ownership of this array.
+          bool contains_ref = false;
+          if (!skip_ref_check) {
+            PackedArray::IterateV(
+              adata,
+              [&](const TypedValue* value) {
+                if (value->m_type == KindOfRef) {
+                  contains_ref = true;
+                  return true;
+                }
+                return false;
+              }
+            );
+          }
+
+          if (!contains_ref) {
+            auto* oldAd = arrayData();
+            m_arr = adata;
+            adata->incRefCount();
+            m_capacity = arrayData()->cap();
+            m_size = arrayData()->m_size;
+            decRefArr(oldAd);
+            ++m_version;
+            return true;
+          }
         }
       }
       reserve(m_size + adata->size());
@@ -339,9 +359,13 @@ void BaseVector::addAllImpl(const Variant& t) {
     [this](const TypedValue* item) {
       addRaw(tvAsCVarRef(item));
     },
-    [this](ObjectData* coll) {
+    [&, this](ObjectData* coll) {
       if (coll->collectionType() == CollectionType::Pair) {
         mutateAndBump();
+      } else if (coll->collectionType() == CollectionType::Vector) {
+        // If its a vector collection we don't need to worry about refs in the
+        // above fast-path.
+        skip_ref_check = true;
       }
     },
     [this](const TypedValue* item) {

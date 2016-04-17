@@ -645,8 +645,9 @@ struct HashCollection : ObjectData {
   }
 
  protected:
-  // Replace the m_arr field with a new MixedArray
-  // WARNING: does not update intLikeStrKeys
+
+  // Replace the m_arr field with a new MixedArray. The array must be known to
+  // *not* contain any references.  WARNING: does not update intLikeStrKeys
   void replaceArray(ArrayData* adata) {
     auto* oldAd = m_arr;
     m_arr = MixedArray::asMixed(adata);

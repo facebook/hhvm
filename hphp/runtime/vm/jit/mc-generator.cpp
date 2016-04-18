@@ -227,6 +227,13 @@ bool shouldPGOFunc(const Func& func) {
   return func.attrs() & AttrHot;
 }
 
+bool dumpTCAnnotation(const Func& func, TransKind transKind) {
+  return RuntimeOption::EvalDumpTCAnnotationsForAllTrans ||
+    (transKind == TransKind::Optimize && (func.attrs() & AttrHot));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool MCGenerator::profileSrcKey(SrcKey sk) const {
   if (!shouldPGOFunc(*sk.func())) return false;
   if (m_tx.profData()->optimized(sk.funcID())) return false;
@@ -1607,7 +1614,10 @@ namespace {
 bool mcGenUnit(TransEnv& env, CodeCache::View code, CGMeta& fixups) {
   auto const& unit = *env.unit;
   try {
-    emitVunit(*env.vunit, unit, code, fixups, &env.annotations);
+    emitVunit(*env.vunit, unit, code, fixups,
+              dumpTCAnnotation(*env.args.sk.func(), env.args.kind)
+              ? &env.annotations
+              : nullptr);
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
       mcg->code().disableHot();

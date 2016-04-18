@@ -571,7 +571,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
          show(irgs.context.kind), profFactor, show(region));
 
-  if (RuntimeOption::EvalDumpRegion) {
+  if (RuntimeOption::EvalDumpRegion &&
+      dumpTCAnnotation(*irgs.context.srcKey().func(), irgs.context.kind)) {
     annotations.emplace_back("RegionDesc", show(region));
   }
 

@@ -434,6 +434,12 @@ TCA unstashDebuggerCatch(const ActRec* ar);
  */
 void codeEmittedThisRequest(size_t& requestEntry, size_t& now);
 
+/*
+ * Whether we should dump TC annotations for translations of `func' of
+ * `transKind'.
+ */
+bool dumpTCAnnotation(const Func& func, TransKind transKind);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

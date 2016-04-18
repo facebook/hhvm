@@ -549,6 +549,7 @@ struct RuntimeOption {
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpTCAnchors,               false)                           \
   F(uint32_t, DumpIR,                  0)                               \
+  F(bool, DumpTCAnnotationsForAllTrans,false)                           \
   F(bool, DumpRegion,                  false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \

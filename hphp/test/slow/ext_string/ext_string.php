@@ -342,8 +342,8 @@ var_dump(strncasecmp("a", "Ab", 1));
 
 var_dump(strnatcasecmp("a", "Ab"));
 
-var_dump(strcoll("a", "b"));
-var_dump(strcoll("a", "A"));
+var_dump(strcoll("a", "b") < 0);
+var_dump(strcoll("a", "A") > 0);
 
 var_dump(substr_compare("abcde", "bc", 1, 2));
 var_dump(substr_compare("abcde", "de", -2, 2));

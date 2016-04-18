@@ -22,9 +22,6 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 
-// This header does fun things with macros; keep it last.
-#include "hphp/runtime/vm/jit/minstr-translator-internal.h"
-
 namespace HPHP { namespace jit { namespace MInstrHelpers {
 
 //////////////////////////////////////////////////////////////////////

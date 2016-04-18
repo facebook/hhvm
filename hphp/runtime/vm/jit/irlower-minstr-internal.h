@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
 #define incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
 
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -60,21 +59,37 @@ inline unsigned buildBitmask(T c, Args... args) {
 }
 
 // FILL_ROW and BUILD_OPTAB* build up the static table of function pointers
-#define FILL_ROW(nm, ...) {                                     \
-    auto const dest = &optab[buildBitmask(__VA_ARGS__)];        \
+#define FILL_ROW(nm, ...) {                                      \
+    auto const dest = &optab[buildBitmask(__VA_ARGS__)];         \
     assertx(*dest == nullptr);                                   \
-    *dest = reinterpret_cast<OpFunc>(MInstrHelpers::nm);        \
+    *dest = reinterpret_cast<OpFunc>(MInstrHelpers::nm);         \
   }
 
-#define BUILD_OPTAB(TABLE, ...) BUILD_OPTAB_ARG(TABLE(FILL_ROW), __VA_ARGS__)
-#define BUILD_OPTAB_ARG(FILL_TABLE, ...)                                \
+template<typename... Args>
+std::tuple<typename std::remove_const<
+             typename std::remove_reference<Args>::type>::type...>
+make_type_tuple(Args...);
+
+template<typename A, typename B>
+struct assert_same {
+  static_assert(std::is_same<A, B>::value, "Optab type mismatch");
+};
+
+#define MAKE_TYPE_TUPLE(...) decltype(make_type_tuple(__VA_ARGS__))
+
+#define CHECK_TYPE_MATCH(nm, ...)                               \
+  (void)assert_same<columns, MAKE_TYPE_TUPLE(__VA_ARGS__)>{};
+
+#define BUILD_OPTAB(TABLE, ...)                                         \
+  using columns = MAKE_TYPE_TUPLE(__VA_ARGS__);                         \
+  TABLE(CHECK_TYPE_MATCH)                                               \
   using OpFunc = void (*)();                                            \
   static OpFunc* optab = nullptr;                                       \
   if (!optab) {                                                         \
     optab = static_cast<OpFunc*>(                                       \
       calloc(1 << multiBitWidth(__VA_ARGS__), sizeof(OpFunc))           \
     );                                                                  \
-    FILL_TABLE                                                          \
+    TABLE(FILL_ROW)                                                     \
   }                                                                     \
   unsigned idx = buildBitmask(__VA_ARGS__);                             \
   auto const opFunc = optab[idx];                                       \
@@ -96,20 +111,6 @@ inline KeyType getKeyType(const SSATmp* key) {
 inline KeyType getKeyTypeNoInt(const SSATmp* key) {
   auto kt = getKeyType(key);
   return kt == KeyType::Int ? KeyType::Any : kt;
-}
-
-// keyPtr is used by helper function implementations to convert a
-// TypedValue passed by value into a TypedValue* suitable for passing
-// to helpers from member_operations.h, which are prepared to handle
-// int64 and StringData* keys in their key argument. This should be
-// cleaned up to use the right types: #2174037
-template<KeyType kt>
-TypedValue* keyPtr(TypedValue& key) {
-  if (kt == KeyType::Any) {
-    assertx(tvIsPlausible(key));
-    return &key;
-  }
-  return reinterpret_cast<TypedValue*>(key.m_data.num);
 }
 
 }}}

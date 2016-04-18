@@ -27,12 +27,13 @@
 #include "hphp/runtime/vm/jit/code-gen-internal.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
+#include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
 
 #include "hphp/util/trace.h"
 
 // This file does ugly things with macros so include last.
-#include "hphp/runtime/vm/jit/minstr-helpers.h"
+#include "hphp/runtime/vm/jit/irlower-minstr-internal.h"
 
 namespace HPHP { namespace jit { namespace irlower {
 

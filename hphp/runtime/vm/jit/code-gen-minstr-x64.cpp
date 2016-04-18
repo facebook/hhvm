@@ -427,13 +427,15 @@ void CodeGenerator::cgElemUX(IRInstruction* i)    { cgElemImpl(i); }
 void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
+  auto const flags = inst->op() == ElemArrayW ? MOpFlags::Warn : MOpFlags::None;
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
-  bool const warn = inst->op() == ElemArrayW;
 
-  BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
-              keyInfo.type,
-              keyInfo.checkForInt,
-              warn);
+  BUILD_OPTAB(
+    ELEM_ARRAY_HELPER_TABLE,
+    keyInfo.type,
+    keyInfo.checkForInt,
+    flags
+  );
 
   cgCallHelper(vmain(), CallSpec::direct(opFunc), callDest(inst),
                SyncOptions::Sync, elemArgs(m_state, inst, keyInfo));

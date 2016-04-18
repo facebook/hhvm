@@ -4273,7 +4273,7 @@ void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   auto& v = vmain();
   auto const sf = v.makeReg();
-  v << decqm{v.cns(counterAddr)[0], sf};
+  v << decqmlock{v.cns(counterAddr)[0], sf};
   v << jcc{CC_LE, sf, {label(inst->next()), label(taken)}};
 }
 
@@ -5047,7 +5047,7 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   auto const transId = inst->extra<TransIDData>()->transId;
   auto const counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   auto& v = vmain();
-  v << decqm{v.cns(counterAddr)[0], v.makeReg()};
+  v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
 }
 
 void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {

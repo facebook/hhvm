@@ -70,6 +70,16 @@ struct ProfCounters {
 
   T getDefault() const { return m_initVal; }
 
+  void resetAllCounters(T value) {
+    // We need to set m_initVal so that method transCounter() works, and also so
+    // that newly created counters start with `value'.
+    m_initVal = value;
+    // Reset all counters already created.
+    for (auto& chunk : m_chunks) {
+      std::fill_n(chunk, kCountersPerChunk, value);
+    }
+  }
+
 private:
   static const uint32_t kCountersPerChunk = 2 * 1024 * 1024 / sizeof(T);
 
@@ -248,7 +258,12 @@ struct ProfData {
    */
   int64_t transCounter(TransID id) const {
     assertx(id < m_numTrans);
-    return m_counters.getDefault() - m_counters.get(id);
+    auto const counter = m_counters.get(id);
+    auto const initVal = m_counters.getDefault();
+    assert_flog(initVal >= counter,
+                "transCounter({}) = {}, initVal = {}\n",
+                id, counter, initVal);
+    return initVal - counter;
   }
 
   /*
@@ -343,6 +358,20 @@ struct ProfData {
    */
   bool anyBlockEndsAt(const Func*, Offset offset);
 
+  /*
+   * Check if the profile counters should be reset and, if so, do it.  This is
+   * used in server mode, and it triggers once the server executes
+   * RuntimeOption::EvalJitResetProfCountersRequest requests.  In the requests
+   * executed before reaching this limit, the profile counters are set very high
+   * so that no retranslation in optimized mode is triggered.  This allows more
+   * profile translations to be produced before the counters effectively start,
+   * which, in light of contention on the write lease, can both improve the
+   * accuracy of the counters and allow for more portions of a function and
+   * different combinations of types to be seen before retranslating the
+   * function in optimized mode.
+   */
+  void maybeResetCounters();
+
 private:
   // PrologueID: (funcId, nArgs)
   using PrologueID = std::tuple<FuncId, int>;
@@ -364,7 +393,8 @@ private:
   std::vector<std::unique_ptr<ProfTransRec>> m_transRecs;
   bool m_freed{false};
   std::unordered_map<FuncId, TransIDVec> m_funcProfTrans;
-  ProfCounters<int64_t>  m_counters;
+  ProfCounters<int64_t> m_counters;
+  std::atomic<bool> m_countersReset{false};
   SrcKeySet m_optimizedSKs;   // set of SrcKeys already optimized
   FuncIdSet m_optimizedFuncs; // set of funcs already optimized
   FuncIdSet m_profilingFuncs; // set of funcs being profiled

@@ -761,8 +761,12 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           auto const calleeEntryBID = calleeRegion->entry()->id();
           if (hasTransID(calleeEntryBID)) {
             auto const calleeTID = getTransID(calleeEntryBID);
-            calleeProfFactor = calleeProfFactor /
-                               mcg->tx().profData()->transCounter(calleeTID);
+            auto profData = mcg->tx().profData();
+            auto calleeProfCount = profData->transCounter(calleeTID);
+            if (calleeProfCount == 0) calleeProfCount = 1; // avoid div by zero
+            calleeProfFactor = calleeProfFactor / calleeProfCount;
+            assert_flog(calleeProfFactor >= 0, "calleeProfFactor = {:.5}\n",
+                        calleeProfFactor);
           }
 
           auto result = irGenRegionImpl(irgs, *calleeRegion, retry, inl,

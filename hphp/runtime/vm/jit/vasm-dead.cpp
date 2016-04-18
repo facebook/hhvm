@@ -191,6 +191,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::debugtrap:
     case Vinstr::declm:
     case Vinstr::decqm:
+    case Vinstr::decqmlock:
     case Vinstr::fallback:
     case Vinstr::fallbackcc:
     case Vinstr::fallthru:

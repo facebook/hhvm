@@ -145,6 +145,7 @@ struct Vunit;
   O(declm, Inone, U(m), D(sf))\
   O(decq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(decqm, Inone, U(m), D(sf))\
+  O(decqmlock, Inone, U(m), D(sf))\
   O(incw, Inone, UH(s,d), DH(d,s) D(sf))\
   O(incwm, Inone, U(m), D(sf))\
   O(incl, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -885,6 +886,7 @@ struct decl { Vreg32 s, d; VregSF sf; };
 struct declm { Vptr m; VregSF sf; };
 struct decq { Vreg64 s, d; VregSF sf; };
 struct decqm { Vptr m; VregSF sf; };
+struct decqmlock { Vptr m; VregSF sf; };
 // inc: {s|m} + 1 => {d|m}, sf
 struct incw { Vreg16 s, d; VregSF sf; };
 struct incwm { Vptr m; VregSF sf; };

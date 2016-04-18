@@ -1923,6 +1923,7 @@ void MCGenerator::requestExit() {
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();
+  if (m_tx.profData()) m_tx.profData()->maybeResetCounters();
 
   if (Trace::moduleEnabledRelease(Trace::mcgstats, 1)) {
     Trace::traceRelease("MCGenerator perf counters for %s:\n",

@@ -267,6 +267,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::andqi:
     case Vinstr::decq:
     case Vinstr::decqm:
+    case Vinstr::decqmlock:
     case Vinstr::incq:
     case Vinstr::incqm:
     case Vinstr::incqmlock:

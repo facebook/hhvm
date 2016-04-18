@@ -60,7 +60,11 @@ ProfTransRec::~ProfTransRec() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ProfData::ProfData() : m_counters(RuntimeOption::EvalJitPGOThreshold) {}
+ProfData::ProfData() :
+  m_counters(RuntimeOption::ServerExecutionMode()
+               ? std::numeric_limits<int64_t>::max()
+               : RuntimeOption::EvalJitPGOThreshold)
+{ }
 
 TransID ProfData::proflogueTransId(const Func* func, int nArgs) const {
   auto const numParams = func->numNonVariadicParams();
@@ -177,6 +181,17 @@ bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
   }
 
   return offsets.count(offset);
+}
+
+void ProfData::maybeResetCounters() {
+  if (m_countersReset) return;
+  if (requestCount() < RuntimeOption::EvalJitResetProfCountersRequest) return;
+
+  BlockingLeaseHolder writer(Translator::WriteLease());
+  assert(writer.canWrite());
+  if (m_countersReset) return;
+  m_counters.resetAllCounters(RuntimeOption::EvalJitPGOThreshold);
+  m_countersReset = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

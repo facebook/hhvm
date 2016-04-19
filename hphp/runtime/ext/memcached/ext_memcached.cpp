@@ -507,7 +507,7 @@ struct MemcachedData {
 
   Variant incDecOp(bool isInc,
                    const StringData* server_key, const StringData* key,
-                   int64_t offset, const Variant* initial_value, int64_t expiry) {
+                   int64_t offset, const Variant& initial_value, int64_t expiry) {
     m_impl->rescode = q_Memcached$$RES_SUCCESS;
     if (key->empty() || strchr(key->data(), ' ')) {
       m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;

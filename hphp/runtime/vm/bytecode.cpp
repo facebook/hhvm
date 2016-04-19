@@ -276,6 +276,19 @@ ALWAYS_INLINE MOpFlags decode_fpass_flags(PC& pc) {
   return ar->m_func->byRef(paramId) ? MOpFlags::DefineReffy : MOpFlags::Warn;
 }
 
+struct local_var {
+  TypedValue* ptr;
+  int32_t index;
+  TypedValue* operator->() const { return ptr; }
+  TypedValue& operator*() const { return *ptr; }
+};
+
+ALWAYS_INLINE local_var decode_local(PC& pc) {
+  auto la = decode_la(pc);
+  assert(la < vmfp()->m_func->numLocals());
+  return local_var{frame_local(vmfp(), la), la};
+}
+
 //=============================================================================
 // Miscellaneous helpers.
 
@@ -2875,11 +2888,9 @@ OPTBLD_INLINE void iopAGetC() {
   lookupClsRef(tv, tv, true);
 }
 
-OPTBLD_INLINE void iopAGetL(IOP_ARGS) {
-  auto local = decode_la(pc);
+OPTBLD_INLINE void iopAGetL(local_var fr) {
   vmStack().pushUninit();
-  TypedValue* fr = tvToCell(frame_local(vmfp(), local));
-  lookupClsRef(fr, vmStack().top());
+  lookupClsRef(tvToCell(fr.ptr), vmStack().top());
 }
 
 static void raise_undefined_local(ActRec* fp, Id pind) {
@@ -2908,54 +2919,41 @@ OPTBLD_INLINE void cgetl_body(ActRec* fp,
   }
 }
 
-OPTBLD_FLT_INLINE void iopCGetL(IOP_ARGS) {
-  auto local = decode_la(pc);
+OPTBLD_FLT_INLINE void iopCGetL(local_var fr) {
   Cell* to = vmStack().allocC();
-  TypedValue* fr = frame_local(vmfp(), local);
-  cgetl_body(vmfp(), fr, to, local, true);
+  cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
 
-OPTBLD_INLINE void iopCGetQuietL(IOP_ARGS) {
-  auto local = decode_la(pc);
+OPTBLD_INLINE void iopCGetQuietL(local_var fr) {
   Cell* to = vmStack().allocC();
-  TypedValue* fr = frame_local(vmfp(), local);
-  cgetl_body(vmfp(), fr, to, local, false);
+  cgetl_body(vmfp(), fr.ptr, to, fr.index, false);
 }
 
-OPTBLD_INLINE void iopCUGetL(IOP_ARGS) {
-  const auto local = decode_la(pc);
+OPTBLD_INLINE void iopCUGetL(local_var fr) {
   auto to = vmStack().allocTV();
-  auto fr = frame_local(vmfp(), local);
-  tvDup(*tvToCell(fr), *to);
+  tvDup(*tvToCell(fr.ptr), *to);
 }
 
-OPTBLD_INLINE void iopCGetL2(IOP_ARGS) {
-  auto local = decode_la(pc);
+OPTBLD_INLINE void iopCGetL2(local_var fr) {
   TypedValue* oldTop = vmStack().topTV();
   TypedValue* newTop = vmStack().allocTV();
   memcpy(newTop, oldTop, sizeof *newTop);
   Cell* to = oldTop;
-  TypedValue* fr = frame_local(vmfp(), local);
-  cgetl_body(vmfp(), fr, to, local, true);
+  cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
 
-OPTBLD_INLINE void iopCGetL3(IOP_ARGS) {
-  auto local = decode_la(pc);
+OPTBLD_INLINE void iopCGetL3(local_var fr) {
   TypedValue* oldTop = vmStack().topTV();
   TypedValue* oldSubTop = vmStack().indTV(1);
   TypedValue* newTop = vmStack().allocTV();
   memmove(newTop, oldTop, sizeof *oldTop * 2);
   Cell* to = oldSubTop;
-  TypedValue* fr = frame_local(vmfp(), local);
-  cgetl_body(vmfp(), fr, to, local, true);
+  cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
 
-OPTBLD_INLINE void iopPushL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  TypedValue* locVal = frame_local(vmfp(), local);
+OPTBLD_INLINE void iopPushL(local_var locVal) {
   assert(locVal->m_type != KindOfUninit);
   assert(locVal->m_type != KindOfRef);
-
   TypedValue* dest = vmStack().allocTV();
   *dest = *locVal;
   locVal->m_type = KindOfUninit;
@@ -3529,14 +3527,13 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   mFinal(mstate, 0, folly::none);
 }
 
-OPTBLD_INLINE void iopSetWithRefLML(IOP_ARGS) {
-  auto const key = *tvToCell(frame_local(vmfp(), decode_iva(pc)));
-  auto const valLoc = decode_la(pc);
-  setWithRefImpl(key, frame_local(vmfp(), valLoc));
+OPTBLD_INLINE void iopSetWithRefLML(local_var kloc, local_var vloc) {
+  auto const key = *tvToCell(kloc.ptr);
+  setWithRefImpl(key, vloc.ptr);
 }
 
-OPTBLD_INLINE void iopSetWithRefRML(IOP_ARGS) {
-  auto const key = *tvToCell(frame_local(vmfp(), decode_iva(pc)));
+OPTBLD_INLINE void iopSetWithRefRML(local_var local) {
+  auto const key = *tvToCell(local.ptr);
   setWithRefImpl(key, vmStack().topTV());
   vmStack().popTV();
 }
@@ -3548,11 +3545,9 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
   refDup(*fr, *to);
 }
 
-OPTBLD_INLINE void iopVGetL(IOP_ARGS) {
-  auto local = decode_la(pc);
+OPTBLD_INLINE void iopVGetL(local_var fr) {
   Ref* to = vmStack().allocV();
-  TypedValue* fr = frame_local(vmfp(), local);
-  vgetl_body(fr, to);
+  vgetl_body(fr.ptr, to);
 }
 
 OPTBLD_INLINE void iopVGetN() {
@@ -3624,10 +3619,8 @@ OPTBLD_INLINE void iopIssetS() {
   ss.output->m_type = KindOfBoolean;
 }
 
-OPTBLD_FLT_INLINE void iopIssetL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  TypedValue* tv = frame_local(vmfp(), local);
-  bool ret = is_not_null(tvAsCVarRef(tv));
+OPTBLD_FLT_INLINE void iopIssetL(local_var tv) {
+  bool ret = is_not_null(tvAsCVarRef(tv.ptr));
   TypedValue* topTv = vmStack().allocTV();
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
@@ -3715,10 +3708,8 @@ OPTBLD_INLINE void iopAssertRATStk(IOP_ARGS) {
 OPTBLD_INLINE void iopBreakTraceHint() {
 }
 
-OPTBLD_INLINE void iopEmptyL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  TypedValue* loc = frame_local(vmfp(), local);
-  bool e = !cellToBool(*tvToCell(loc));
+OPTBLD_INLINE void iopEmptyL(local_var loc) {
+  bool e = !cellToBool(*tvToCell(loc.ptr));
   vmStack().pushBool(e);
 }
 
@@ -3840,11 +3831,9 @@ OPTBLD_INLINE void iopArrayIdx() {
   tvAsVariant(arr) = result;
 }
 
-OPTBLD_INLINE void iopSetL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  assert(local < vmfp()->m_func->numLocals());
+OPTBLD_INLINE void iopSetL(local_var to) {
+  assert(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
-  TypedValue* to = frame_local(vmfp(), local);
   tvSet(*fr, *to);
 }
 
@@ -4019,11 +4008,9 @@ OPTBLD_INLINE void iopIncDecS(IOP_ARGS) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopBindL(IOP_ARGS) {
-  auto local = decode_la(pc);
+OPTBLD_INLINE void iopBindL(local_var to) {
   Ref* fr = vmStack().topV();
-  TypedValue* to = frame_local(vmfp(), local);
-  tvBind(fr, to);
+  tvBind(fr, to.ptr);
 }
 
 OPTBLD_INLINE void iopBindN() {
@@ -4073,11 +4060,8 @@ OPTBLD_INLINE void iopBindS() {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopUnsetL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  assert(local < vmfp()->m_func->numLocals());
-  TypedValue* tv = frame_local(vmfp(), local);
-  tvUnset(tv);
+OPTBLD_INLINE void iopUnsetL(local_var loc) {
+  tvUnset(loc.ptr);
 }
 
 OPTBLD_INLINE void iopUnsetN() {
@@ -5302,16 +5286,14 @@ OPTBLD_INLINE void iopCheckThis() {
   checkThis(vmfp());
 }
 
-OPTBLD_INLINE void iopInitThisLoc(IOP_ARGS) {
-  auto id = decode_la(pc);
-  TypedValue* thisLoc = frame_local(vmfp(), id);
-  tvRefcountedDecRef(thisLoc);
+OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
+  tvRefcountedDecRef(thisLoc.ptr);
   if (vmfp()->hasThis()) {
     thisLoc->m_data.pobj = vmfp()->getThis();
     thisLoc->m_type = KindOfObject;
-    tvIncRef(thisLoc);
+    tvIncRef(thisLoc.ptr);
   } else {
-    tvWriteUninit(thisLoc);
+    tvWriteUninit(thisLoc.ptr);
   }
 }
 
@@ -5384,18 +5366,17 @@ OPTBLD_INLINE void iopLateBoundCls() {
   vmStack().pushClass(cls);
 }
 
-OPTBLD_INLINE void iopVerifyParamType(IOP_ARGS) {
-  auto paramId = decode_la(pc);
+OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   const Func *func = vmfp()->m_func;
-  assert(paramId < func->numParams());
+  assert(param.index < func->numParams());
   assert(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[paramId].typeConstraint;
+  const TypeConstraint& tc = func->params()[param.index].typeConstraint;
   assert(tc.hasConstraint());
   bool useStrictTypes =
     func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
     !vmfp()->useWeakTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyParam(frame_local(vmfp(), paramId), func, paramId, useStrictTypes);
+    tc.verifyParam(param.ptr, func, param.index, useStrictTypes);
   }
 }
 
@@ -6279,6 +6260,19 @@ OPTBLD_INLINE static TCA iopWrapper(void(*fn)(), PC& pc) {
 OPTBLD_INLINE static TCA iopWrapper(void(*fn)(const StringData*), PC& pc) {
   auto s = decode_litstr(pc);
   fn(s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(void(*fn)(local_var), PC& pc) {
+  auto var = decode_local(pc);
+  fn(var);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(void(*fn)(local_var,local_var), PC& pc) {
+  auto var1 = decode_local(pc);
+  auto var2 = decode_local(pc);
+  fn(var1, var2);
   return nullptr;
 }
 

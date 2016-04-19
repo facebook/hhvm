@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 #define incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -161,6 +163,18 @@ void cellBitXorEq(Cell& c1, Cell);
  */
 void cellShlEq(Cell& c1, Cell);
 void cellShrEq(Cell& c1, Cell);
+
+/*
+ * PHP operator .=.
+ *
+ * Mutates the first argument in place, by concatenating the second argument
+ * onto its end.
+ *
+ * Post: lhs.m_type == KindOfString
+ */
+inline void cellConcatEq(Cell& lhs, Cell rhs) {
+  concat_assign(tvAsVariant(&lhs), cellAsCVarRef(rhs).toString());
+}
 
 //////////////////////////////////////////////////////////////////////
 

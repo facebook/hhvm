@@ -61,9 +61,7 @@ void setopBody(Cell* lhs, SetOpOp op, Cell* rhs) {
   case SetOpOp::DivEqual:       cellDivEq(*lhs, *rhs); return;
   case SetOpOp::PowEqual:       cellPowEq(*lhs, *rhs); return;
   case SetOpOp::ModEqual:       cellModEq(*lhs, *rhs); return;
-  case SetOpOp::ConcatEqual:
-    concat_assign(tvAsVariant(lhs), cellAsCVarRef(*rhs).toString());
-    return;
+  case SetOpOp::ConcatEqual:    cellConcatEq(*lhs, *rhs); return;
   case SetOpOp::AndEqual:       cellBitAndEq(*lhs, *rhs); return;
   case SetOpOp::OrEqual:        cellBitOrEq(*lhs, *rhs);  return;
   case SetOpOp::XorEqual:       cellBitXorEq(*lhs, *rhs); return;

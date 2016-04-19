@@ -1224,6 +1224,7 @@ X(ElemUX,                       MOpFlagsData);
 X(CGetProp,                     MOpFlagsData);
 X(CGetElem,                     MOpFlagsData);
 X(SetOpProp,                    SetOpData);
+X(SetOpCell,                    SetOpData);
 X(IncDecProp,                   IncDecData);
 X(SetOpElem,                    SetOpData);
 X(IncDecElem,                   IncDecData);

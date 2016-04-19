@@ -5518,6 +5518,35 @@ void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
                argGroup(inst).reg(profile).ssa(0));
 }
 
+void CodeGenerator::cgSetOpCell(IRInstruction* inst) {
+  auto const op = inst->extra<SetOpData>()->op;
+  auto const helper = [&] {
+    switch (op) {
+      case SetOpOp::PlusEqual:   return cellAddEq;
+      case SetOpOp::MinusEqual:  return cellSubEq;
+      case SetOpOp::MulEqual:    return cellMulEq;
+      case SetOpOp::ConcatEqual: return cellConcatEq;
+      case SetOpOp::DivEqual:    return cellDivEq;
+      case SetOpOp::PowEqual:    return cellPowEq;
+      case SetOpOp::ModEqual:    return cellModEq;
+      case SetOpOp::AndEqual:    return cellBitAndEq;
+      case SetOpOp::OrEqual:     return cellBitOrEq;
+      case SetOpOp::XorEqual:    return cellBitXorEq;
+      case SetOpOp::SlEqual:     return cellShlEq;
+      case SetOpOp::SrEqual:     return cellShrEq;
+      case SetOpOp::PlusEqualO:  return cellAddEqO;
+      case SetOpOp::MinusEqualO: return cellSubEqO;
+      case SetOpOp::MulEqualO:   return cellMulEqO;
+    }
+    not_reached();
+  }();
+
+  auto& v = vmain();
+  cgCallHelper(v, CallSpec::direct(helper),
+               kVoidDest, SyncOptions::Sync,
+               argGroup(inst).ssa(0).typedValue(1));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

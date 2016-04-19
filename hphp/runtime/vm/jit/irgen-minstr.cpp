@@ -301,12 +301,11 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 //////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
-PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base,
-                                  Type baseType, Type keyType) {
+PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType) {
   // We allow the use of clases from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
-  baseType = baseType.derefIfPtr();
+  auto const baseType = base->type().derefIfPtr();
   if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) return PropInfo{};
 
   auto const baseCls = baseType.clsSpec().cls();
@@ -367,7 +366,6 @@ SSATmp* checkInitProp(IRGS& env,
 SSATmp* emitPropSpecialized(
   IRGS& env,
   SSATmp* base,
-  Type baseType,
   SSATmp* key,
   bool nullsafe,
   MOpFlags flags,
@@ -378,6 +376,7 @@ SSATmp* emitPropSpecialized(
   auto const doDefine = (flags & MOpFlags::Define) || (flags & MOpFlags::Unset);
 
   auto const initNull = ptrToInitNull(env);
+  auto const baseType = base->type();
 
   /*
    * Normal case, where the base is an object (and not a pointer to
@@ -747,8 +746,7 @@ void emitVectorSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* value) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
-  auto const propInfo =
-    getCurrentPropertyOffset(env, base, base->type(), key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
@@ -758,7 +756,7 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
     // Special case for when the property is known to be an int.
     if (base->isA(TObj) &&
         propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
-      base = emitPropSpecialized(env, base, base->type(), key, false,
+      base = emitPropSpecialized(env, base, key, false,
                                  MOpFlags::Define, propInfo);
       auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
@@ -1016,16 +1014,13 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
 
   specializeObjBase(env, base);
 
-  auto const propInfo =
-    getCurrentPropertyOffset(env, base, base->type(), key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
   if (propInfo.offset == -1 || (flags & MOpFlags::Unset) ||
       mightCallMagicPropMethod(flags, propInfo)) {
     return propGenericImpl(env, flags, base, key, nullsafe);
   }
 
-  return emitPropSpecialized(
-    env, base, base->type(), key, nullsafe, flags, propInfo
-  );
+  return emitPropSpecialized(env, base, key, nullsafe, flags, propInfo);
 }
 
 SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
@@ -1090,13 +1085,12 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpFlags flags, bool nullsafe) {
   specializeObjBase(env, base);
-  auto const propInfo =
-    getCurrentPropertyOffset(env, base, base->type(), key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MOpFlags::None, propInfo)) {
     auto propAddr = emitPropSpecialized(
-      env, base, base->type(), key, nullsafe, flags, propInfo
+      env, base, key, nullsafe, flags, propInfo
     );
 
     if (!RuntimeOption::RepoAuthoritative) {
@@ -1182,12 +1176,10 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
   specializeObjBase(env, base);
 
   auto const flags = MOpFlags::Define;
-  auto const propInfo =
-    getCurrentPropertyOffset(env, base, base->type(), key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
 
   if (propInfo.offset != -1 && !mightCallMagicPropMethod(flags, propInfo)) {
-    auto propPtr =
-      emitPropSpecialized(env, base, base->type(), key, false, flags, propInfo);
+    auto propPtr = emitPropSpecialized(env, base, key, false, flags, propInfo);
     auto propTy = propPtr->type().deref();
 
     if (propTy.maybe(TBoxedCell)) {
@@ -1638,6 +1630,26 @@ void emitIncDecM(IRGS& env, int32_t nDiscard, IncDecOp incDec, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
+SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
+                      SSATmp* key, SSATmp* rhs) {
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
+
+  if (propInfo.offset != -1 &&
+      !mightCallMagicPropMethod(MOpFlags::Define, propInfo)) {
+    auto propPtr =
+      emitPropSpecialized(env, base, key, false, MOpFlags::Define, propInfo);
+    propPtr = gen(env, UnboxPtr, propPtr);
+    auto const propTy = propPtr->type().deref();
+
+    gen(env, SetOpCell, SetOpData{op}, propPtr, rhs);
+    auto newVal = gen(env, LdMem, propTy, propPtr);
+    gen(env, IncRef, newVal);
+    return newVal;
+  }
+
+  return gen(env, SetOpProp, SetOpData{op}, base, key, rhs);
+}
+
 void emitSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto basePtr = gen(env, LdMBase, TPtrToGen);
   auto base = env.irb->fs().memberBaseValue();
@@ -1646,9 +1658,7 @@ void emitSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto rhs = topC(env);
 
   auto const result = [&] {
-    if (mcodeIsProp(mk.mcode)) {
-      return gen(env, SetOpProp, SetOpData{op}, baseObj, key, rhs);
-    }
+    if (mcodeIsProp(mk.mcode)) return setOpPropImpl(env, op, baseObj, key, rhs);
     if (mcodeIsElem(mk.mcode)) {
       return gen(env, SetOpElem, SetOpData{op}, basePtr, key, rhs);
     }

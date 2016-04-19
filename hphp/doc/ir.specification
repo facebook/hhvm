@@ -1830,6 +1830,10 @@ To string conversions:
   Returns a bool indicating whether the class, interface, or trait named by S0
   exists. Invokes autoload if S1 is true.
 
+| SetOpCell<op>, ND, S(PtrToCell) S(Cell), Er
+
+  Performs S0 <op>= S1.
+
 
 15. Generators & Closures
 

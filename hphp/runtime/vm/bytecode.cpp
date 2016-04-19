@@ -1844,23 +1844,19 @@ OPTBLD_INLINE void iopNameA() {
   vmStack().pushStaticString(name);
 }
 
-OPTBLD_INLINE void iopInt(IOP_ARGS) {
-  auto i = decode<int64_t>(pc);
-  vmStack().pushInt(i);
+OPTBLD_INLINE void iopInt(int64_t imm) {
+  vmStack().pushInt(imm);
 }
 
-OPTBLD_INLINE void iopDouble(IOP_ARGS) {
-  auto d = decode<double>(pc);
-  vmStack().pushDouble(d);
+OPTBLD_INLINE void iopDouble(double imm) {
+  vmStack().pushDouble(imm);
 }
 
 OPTBLD_INLINE void iopString(const StringData* s) {
   vmStack().pushStaticString(s);
 }
 
-OPTBLD_INLINE void iopArray(IOP_ARGS) {
-  auto id = decode<Id>(pc);
-  ArrayData* a = vmfp()->m_func->unit()->lookupArrayId(id);
+OPTBLD_INLINE void iopArray(ArrayData* a) {
   vmStack().pushStaticArray(a);
 }
 
@@ -1880,22 +1876,17 @@ OPTBLD_INLINE void iopNewMixedArray(intva_t capacity) {
   }
 }
 
-OPTBLD_INLINE void iopNewDictArray(IOP_ARGS) {
-  auto capacity = decode_iva(pc);
+OPTBLD_INLINE void iopNewDictArray(intva_t capacity) {
   vmStack().pushArrayNoRc(MixedArray::MakeReserveDict(capacity));
 }
 
-OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  auto capacity = decode_iva(pc);
-
+OPTBLD_INLINE
+void iopNewLikeArrayL(local_var fr, intva_t capacity) {
   ArrayData* arr;
-  TypedValue* fr = frame_local(vmfp(), local);
-
   if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
   } else {
-    capacity = (capacity ? capacity : PackedArray::SmallSize);
+    if (!capacity) capacity = PackedArray::SmallSize;
     arr = PackedArray::MakeReserve(capacity);
   }
   vmStack().pushArrayNoRc(arr);
@@ -2044,9 +2035,7 @@ OPTBLD_INLINE void iopCnsE(const StringData* s) {
   cellDup(*cns, *c1);
 }
 
-OPTBLD_INLINE void iopCnsU(IOP_ARGS) {
-  auto name = decode_litstr(pc);
-  auto fallback = decode_litstr(pc);
+OPTBLD_INLINE void iopCnsU(const StringData* name, const StringData* fallback) {
   auto cns = Unit::loadCns(name);
   if (cns == nullptr) {
     cns = Unit::loadCns(fallback);
@@ -2428,10 +2417,9 @@ OPTBLD_INLINE void iopExit() {
   throw ExitException(exitCode);
 }
 
-OPTBLD_INLINE void iopFatal(IOP_ARGS) {
+OPTBLD_INLINE void iopFatal(FatalOp kind_char) {
   TypedValue* top = vmStack().topTV();
   std::string msg;
-  auto kind_char = decode_oa<FatalOp>(pc);
   if (isStringType(top->m_type)) {
     msg = top->m_data.pstr->data();
   } else {
@@ -3646,20 +3634,16 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   not_reached();
 }
 
-OPTBLD_INLINE void iopIsTypeL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  auto op = decode_oa<IsTypeOp>(pc);
-  TypedValue* tv = frame_local(vmfp(), local);
-  if (tv->m_type == KindOfUninit) {
-    raise_undefined_local(vmfp(), local);
+OPTBLD_INLINE void iopIsTypeL(local_var loc, IsTypeOp op) {
+  if (loc.ptr->m_type == KindOfUninit) {
+    raise_undefined_local(vmfp(), loc.index);
   }
   TypedValue* topTv = vmStack().allocTV();
-  topTv->m_data.num = isTypeHelper(tv, op);
+  topTv->m_data.num = isTypeHelper(loc.ptr, op);
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE void iopIsTypeC(IOP_ARGS) {
-  auto op = decode_oa<IsTypeOp>(pc);
+OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
   TypedValue* topTv = vmStack().topTV();
   assert(topTv->m_type != KindOfRef);
   bool ret = isTypeHelper(topTv, op);
@@ -3890,23 +3874,20 @@ OPTBLD_INLINE void iopSetS() {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopSetOpL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  auto op = decode_oa<SetOpOp>(pc);
+OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
   Cell* fr = vmStack().topC();
-  Cell* to = tvToCell(frame_local(vmfp(), local));
+  Cell* to = tvToCell(loc.ptr);
   setopBody(to, op, fr);
   tvRefcountedDecRef(fr);
   cellDup(*to, *fr);
 }
 
-OPTBLD_INLINE void iopSetOpN(IOP_ARGS) {
-  auto op = decode_oa<SetOpOp>(pc);
-  StringData* name;
+OPTBLD_INLINE void iopSetOpN(SetOpOp op) {
   Cell* fr = vmStack().topC();
   TypedValue* tv2 = vmStack().indTV(1);
   TypedValue* to = nullptr;
   // XXX We're probably not getting warnings totally correct here
+  StringData* name;
   lookupd_var(vmfp(), name, tv2, to);
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
@@ -3917,8 +3898,7 @@ OPTBLD_INLINE void iopSetOpN(IOP_ARGS) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetOpG(IOP_ARGS) {
-  auto op = decode_oa<SetOpOp>(pc);
+OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   StringData* name;
   Cell* fr = vmStack().topC();
   TypedValue* tv2 = vmStack().indTV(1);
@@ -3934,8 +3914,7 @@ OPTBLD_INLINE void iopSetOpG(IOP_ARGS) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetOpS(IOP_ARGS) {
-  auto op = decode_oa<SetOpOp>(pc);
+OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   Cell* fr = vmStack().topC();
   TypedValue* classref = vmStack().indTV(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -3957,23 +3936,19 @@ OPTBLD_INLINE void iopSetOpS(IOP_ARGS) {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopIncDecL(IOP_ARGS) {
-  auto local = decode_la(pc);
-  auto op = decode_oa<IncDecOp>(pc);
+OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
   TypedValue* to = vmStack().allocTV();
   tvWriteUninit(to);
-  TypedValue* fr = frame_local(vmfp(), local);
-  if (UNLIKELY(fr->m_type == KindOfUninit)) {
-    raise_undefined_local(vmfp(), local);
-    tvWriteNull(fr);
+  if (UNLIKELY(fr.ptr->m_type == KindOfUninit)) {
+    raise_undefined_local(vmfp(), fr.index);
+    tvWriteNull(fr.ptr);
   } else {
-    fr = tvToCell(fr);
+    fr.ptr = tvToCell(fr.ptr);
   }
-  IncDecBody(op, fr, to);
+  IncDecBody(op, fr.ptr, to);
 }
 
-OPTBLD_INLINE void iopIncDecN(IOP_ARGS) {
-  auto op = decode_oa<IncDecOp>(pc);
+OPTBLD_INLINE void iopIncDecN(IncDecOp op) {
   StringData* name;
   TypedValue* nameCell = vmStack().topTV();
   TypedValue* local = nullptr;
@@ -3987,8 +3962,7 @@ OPTBLD_INLINE void iopIncDecN(IOP_ARGS) {
   IncDecBody(op, tvToCell(local), nameCell);
 }
 
-OPTBLD_INLINE void iopIncDecG(IOP_ARGS) {
-  auto op = decode_oa<IncDecOp>(pc);
+OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
   StringData* name;
   TypedValue* nameCell = vmStack().topTV();
   TypedValue* gbl = nullptr;
@@ -4002,9 +3976,8 @@ OPTBLD_INLINE void iopIncDecG(IOP_ARGS) {
   IncDecBody(op, tvToCell(gbl), nameCell);
 }
 
-OPTBLD_INLINE void iopIncDecS(IOP_ARGS) {
+OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
   SpropState ss(vmStack());
-  auto op = decode_oa<IncDecOp>(pc);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 ss.clsref->m_data.pcls->name()->data(),
@@ -5249,8 +5222,7 @@ OPTBLD_INLINE void iopThis() {
   vmStack().pushObject(this_);
 }
 
-OPTBLD_INLINE void iopBareThis(IOP_ARGS) {
-  auto bto = decode_oa<BareThisOp>(pc);
+OPTBLD_INLINE void iopBareThis(BareThisOp bto) {
   if (vmfp()->hasThis()) {
     ObjectData* this_ = vmfp()->getThis();
     vmStack().pushObject(this_);
@@ -6079,9 +6051,7 @@ OPTBLD_INLINE void iopIncStat(IOP_ARGS) {
   Stats::inc(Stats::StatCounter(counter), value);
 }
 
-OPTBLD_INLINE void iopOODeclExists(IOP_ARGS) {
-  auto subop = decode<OODeclExistsOp>(pc);
-
+OPTBLD_INLINE void iopOODeclExists(OODeclExistsOp subop) {
   TypedValue* aloadTV = vmStack().topTV();
   tvCastToBooleanInPlace(aloadTV);
   assert(aloadTV->m_type == KindOfBoolean);
@@ -6101,24 +6071,16 @@ OPTBLD_INLINE void iopOODeclExists(IOP_ARGS) {
   tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, kind);
 }
 
-OPTBLD_INLINE void iopSilence(IOP_ARGS) {
-  auto localId = decode_la(pc);
-  auto subop = decode_oa<SilenceOp>(pc);
-
+OPTBLD_INLINE void iopSilence(local_var loc, SilenceOp subop) {
   switch (subop) {
-    case SilenceOp::Start: {
-      auto level = zero_error_level();
-      TypedValue* local = frame_local(vmfp(), localId);
-      local->m_type = KindOfInt64;
-      local->m_data.num = level;
+    case SilenceOp::Start:
+      loc.ptr->m_type = KindOfInt64;
+      loc.ptr->m_data.num = zero_error_level();
       break;
-    }
-    case SilenceOp::End: {
-      TypedValue* oldTV = frame_local(vmfp(), localId);
-      assert(oldTV->m_type == KindOfInt64);
-      restore_error_level(oldTV->m_data.num);
+    case SilenceOp::End:
+      assert(loc.ptr->m_type == KindOfInt64);
+      restore_error_level(loc.ptr->m_data.num);
       break;
-    }
   }
 }
 
@@ -6246,6 +6208,14 @@ OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(const StringData*), PC& pc) {
   return nullptr;
 }
 
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(const StringData*,const StringData*), PC& pc) {
+  auto s1 = decode_litstr(pc);
+  auto s2 = decode_litstr(pc);
+  fn(s1, s2);
+  return nullptr;
+}
+
 OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(local_var), PC& pc) {
   auto var = decode_local(pc);
   fn(var);
@@ -6286,6 +6256,98 @@ TCA iopWrapper(Op op, void(*fn)(intva_t,const StringData*,Id), PC& pc) {
   auto s = decode_litstr(pc);
   auto i = decode<Id>(pc);
   fn(n, s, i);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(int64_t), PC& pc) {
+  auto imm = decode<int64_t>(pc);
+  fn(imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(double), PC& pc) {
+  auto imm = decode<double>(pc);
+  fn(imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(FatalOp), PC& pc) {
+  auto imm = decode_oa<FatalOp>(pc);
+  fn(imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(IsTypeOp), PC& pc) {
+  auto subop = decode_oa<IsTypeOp>(pc);
+  fn(subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(local_var,IsTypeOp), PC& pc) {
+  auto var = decode_local(pc);
+  auto subop = decode_oa<IsTypeOp>(pc);
+  fn(var, subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(SetOpOp), PC& pc) {
+  auto subop = decode_oa<SetOpOp>(pc);
+  fn(subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(local_var,SetOpOp), PC& pc) {
+  auto var = decode_local(pc);
+  auto subop = decode_oa<SetOpOp>(pc);
+  fn(var, subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(IncDecOp), PC& pc) {
+  auto subop = decode_oa<IncDecOp>(pc);
+  fn(subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(local_var,IncDecOp), PC& pc) {
+  auto var = decode_local(pc);
+  auto subop = decode_oa<IncDecOp>(pc);
+  fn(var, subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(BareThisOp), PC& pc) {
+  auto subop = decode_oa<BareThisOp>(pc);
+  fn(subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(OODeclExistsOp), PC& pc) {
+  auto subop = decode_oa<OODeclExistsOp>(pc);
+  fn(subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(local_var,SilenceOp), PC& pc) {
+  auto var = decode_local(pc);
+  auto subop = decode_oa<SilenceOp>(pc);
+  fn(var, subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(ArrayData*), PC& pc) {
+  auto id = decode<Id>(pc);
+  auto a = vmfp()->m_func->unit()->lookupArrayId(id);
+  fn(a);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(local_var,intva_t), PC& pc) {
+  auto var1 = decode_local(pc);
+  auto imm2 = decode_intva(pc);
+  fn(var1, imm2);
   return nullptr;
 }
 

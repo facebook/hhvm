@@ -425,7 +425,15 @@ struct FPIReg {
  */
 struct StackDepth {
   int currentOffset;
+  /*
+   * Tracks the max depth of elem stack + desc stack offset inside a region
+   * where baseValue is unknown.
+   */
   int maxOffset;
+  /*
+   * Tracks the min depth of the elem stack inside a region where baseValue
+   * is unknown, and the line where the min occurred.
+   */
   int minOffset;
   int minOffsetLine;
   folly::Optional<int> baseValue;
@@ -522,7 +530,9 @@ struct AsmState {
   }
 
   void adjustStackHighwater(int depth) {
-    stackHighWater = std::max(stackHighWater, depth);
+    if (depth) {
+      fe->maxStackCells = std::max(fe->maxStackCells, depth);
+    }
   }
 
   std::string displayStackDepth() {
@@ -624,7 +634,7 @@ struct AsmState {
       currentStackDepth->currentOffset
     });
     fdescDepth += kNumActRecCells;
-    fdescHighWater = std::max(fdescDepth, fdescHighWater);
+    currentStackDepth->adjust(*this, 0);
   }
 
   void endFpi() {
@@ -707,10 +717,10 @@ struct AsmState {
       fe->allocUnnamedLocal();
     }
 
-    fe->maxStackCells = fe->numLocals() +
-                        fe->numIterators() * kNumIterCells +
-                        stackHighWater +
-                        fdescHighWater; // in units of cells already
+    fe->maxStackCells +=
+      fe->numLocals() +
+      fe->numIterators() * kNumIterCells;
+
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
 
@@ -721,9 +731,7 @@ struct AsmState {
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
-    stackHighWater = 0;
     fdescDepth = 0;
-    fdescHighWater = 0;
     maxUnnamed = -1;
     fpiToUpdate.clear();
   }
@@ -768,9 +776,7 @@ struct AsmState {
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
-  int stackHighWater{0};
   int fdescDepth{0};
-  int fdescHighWater{0};
   int maxUnnamed{-1};
   std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
   std::set<std::string,stdltistr> hoistables;
@@ -783,7 +789,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     // The absolute stack depth is unknown. We only store the min
     // and max offsets, and we will take a decision later, when the
     // base value will be known.
-    maxOffset = std::max(currentOffset, maxOffset);
+    maxOffset = std::max(currentOffset + as.fdescDepth, maxOffset);
     if (currentOffset < minOffset) {
       minOffsetLine = as.in.getLineNumber();
       minOffset = currentOffset;
@@ -795,7 +801,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     as.error("opcode sequence caused stack depth to go negative");
   }
 
-  as.adjustStackHighwater(*baseValue + currentOffset);
+  as.adjustStackHighwater(*baseValue + currentOffset + as.fdescDepth);
 }
 
 void StackDepth::addListener(AsmState& as, StackDepth* target) {
@@ -1984,7 +1990,7 @@ void parse_default_ctor(AsmState& as) {
               as.ue->bcPos(), AttrPublic, true, 0);
   as.ue->emitOp(OpNull);
   as.ue->emitOp(OpRetC);
-  as.stackHighWater = 1;
+  as.fe->maxStackCells = 1;
   as.finishFunction();
 
   as.in.expectWs(';');

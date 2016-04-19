@@ -225,12 +225,12 @@ private:
 
 public:
   int* m_actualStackHighWaterPtr;
-  int* m_fdescHighWaterPtr;
 
   SymbolicStack() : m_fdescCount(0) {}
 
   std::string pretty() const;
 
+  void updateHighWater();
   void push(char sym);
   void setInt(int64_t v);
   void setString(const StringData* s);
@@ -643,8 +643,6 @@ private:
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;
-  int m_actualStackHighWater;
-  int m_fdescHighWater;
   typedef tbb::concurrent_hash_map<const StringData*, int,
                                    StringDataHashICompare> EmittedClosures;
   static EmittedClosures s_emittedClosures;

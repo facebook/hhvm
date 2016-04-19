@@ -255,17 +255,31 @@ namespace StackSym {
   assertx(false);                                            \
 } while (0)
 
-// RAII guard for function creation.
+/*
+ * RAII guard for function creation.
+ *
+ * This ensures that the eval stack's high water pointer is pointing
+ * to the current function's maxStackCells (needed before we start
+ * emitting bytecodes that manipulate the stack), and also that we
+ * properly finish the function at the end of the scope.
+ */
 struct FuncFinisher {
   FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe,
                int32_t stackPad = 0)
     : m_ev(ev), m_e(e), m_fe(fe), m_stackPad(stackPad)
-  {}
+  {
+    assert(!ev->m_evalStack.m_actualStackHighWaterPtr ||
+           ev->m_evalStack.m_actualStackHighWaterPtr == &fe->maxStackCells);
+    ev->m_evalStack.m_actualStackHighWaterPtr = &fe->maxStackCells;
+  }
 
   ~FuncFinisher() {
     m_ev->finishFunc(m_e, m_fe, m_stackPad);
   }
 
+  void setStackPad(int32_t stackPad) {
+    m_stackPad = stackPad;
+  }
 private:
   EmitterVisitor* m_ev;
   Emitter&        m_e;
@@ -832,11 +846,16 @@ std::string SymbolicStack::pretty() const {
   return out.str();
 }
 
+void SymbolicStack::updateHighWater() {
+  *m_actualStackHighWaterPtr =
+    std::max(*m_actualStackHighWaterPtr,
+             static_cast<int>(m_actualStack.size() + m_fdescCount));
+}
+
 void SymbolicStack::push(char sym) {
   if (!StackSym::IsSymbolic(sym)) {
     m_actualStack.push_back(m_symStack.size());
-    *m_actualStackHighWaterPtr = std::max(*m_actualStackHighWaterPtr,
-                                          (int)m_actualStack.size());
+    updateHighWater();
   }
   m_symStack.push_back(SymEntry(sym));
   ITRACE(4, "push: {}\n", m_symStack.back().pretty());
@@ -1045,7 +1064,7 @@ int SymbolicStack::sizeActual() const {
 
 void SymbolicStack::pushFDesc() {
   m_fdescCount += kNumActRecCells;
-  *m_fdescHighWaterPtr = std::max(*m_fdescHighWaterPtr, m_fdescCount);
+  updateHighWater();
 }
 
 void SymbolicStack::popFDesc() {
@@ -1933,13 +1952,13 @@ void EmitterVisitor::unregisterControlTarget(ControlTarget* t) {
 EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
 
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
-  : m_ue(ue), m_curFunc(ue.getMain()),
+  : m_ue(ue),
+    m_curFunc(ue.getMain()),
     m_evalStackIsUnknown(false),
-    m_actualStackHighWater(0), m_fdescHighWater(0), m_stateLocal(-1),
+    m_stateLocal(-1),
     m_retLocal(-1) {
   m_prevOpcode = OpLowInvalid;
-  m_evalStack.m_actualStackHighWaterPtr = &m_actualStackHighWater;
-  m_evalStack.m_fdescHighWaterPtr = &m_fdescHighWater;
+  m_evalStack.m_actualStackHighWaterPtr = &m_curFunc->maxStackCells;
 }
 
 EmitterVisitor::~EmitterVisitor() {
@@ -6816,8 +6835,7 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
 void EmitterVisitor::emitPostponedMeths() {
   std::vector<FuncEmitter*> top_fes;
   while (!m_postponedMeths.empty()) {
-    assert(m_actualStackHighWater == 0);
-    assert(m_fdescHighWater == 0);
+    assert(m_evalStack.m_actualStackHighWaterPtr == nullptr);
     PostponedMeth& p = m_postponedMeths.front();
     MethodStatementPtr meth = p.m_meth;
     FuncEmitter* fe = p.m_fe;
@@ -7046,6 +7064,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   }
 
   Emitter e(meth, m_ue, *this);
+  FuncFinisher ff(this, e, fe, 0);
   Label topOfBody(e);
 
   Offset base = m_ue.bcPos();
@@ -7056,13 +7075,11 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   fe->setBuiltinFunc(bif, nif, attributes, base);
   fillFuncEmitterParams(fe, meth->getParams(), true);
-  int32_t stackPad = 0;
   if (nativeAttrs & Native::AttrOpCodeImpl) {
-    stackPad = emitNativeOpCodeImpl(meth, funcname, classname, fe);
+    ff.setStackPad(emitNativeOpCodeImpl(meth, funcname, classname, fe));
   } else {
     e.NativeImpl();
   }
-  FuncFinisher ff(this, e, fe, stackPad);
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
@@ -7307,6 +7324,7 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   SCOPE_EXIT { leaveRegion(region); };
 
   Emitter e(meth, m_ue, *this);
+  FuncFinisher ff(this, e, m_curFunc);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
 
@@ -7338,7 +7356,6 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
     e.setTempLocation(OptLocation());
   }
 
-  FuncFinisher ff(this, e, m_curFunc);
   if (!m_curFunc->isMemoizeImpl) {
     emitMethodDVInitializers(e, meth, topOfBody);
   }
@@ -7481,6 +7498,8 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   SCOPE_EXIT { leaveRegion(region); };
 
   Emitter e(meth, m_ue, *this);
+  FuncFinisher ff(this, e, m_curFunc);
+
   Label topOfBody(e);
   Label cacheMiss;
 
@@ -7615,7 +7634,6 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
   assert(m_evalStack.size() == 0);
 
-  FuncFinisher ff(this, e, m_curFunc);
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
@@ -9024,13 +9042,12 @@ void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
 }
 
 void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe, int32_t stackPad) {
-  fe->maxStackCells = m_actualStackHighWater +
-                      fe->numIterators() * kNumIterCells +
-                      fe->numLocals() +
-                      m_fdescHighWater +
-                      stackPad;
-  m_actualStackHighWater = 0;
-  m_fdescHighWater = 0;
+  fe->maxStackCells +=
+    fe->numIterators() * kNumIterCells +
+    fe->numLocals() +
+    stackPad;
+
+  m_evalStack.m_actualStackHighWaterPtr = nullptr;
 }
 
 // Are you sure you mean to be calling this directly? Would FuncFinisher

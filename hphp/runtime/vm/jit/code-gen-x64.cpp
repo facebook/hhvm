@@ -732,41 +732,40 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     !type.subtypeOfAny(TCls, TCountedStr, TPersistentArr),
     "Unsupported type in emitTypeTest: {}", type
   );
+
+  // Nothing to check.
+  if (type == TGen) return;
+
   auto& v = vmain();
-  ConditionCode cc;
-  if (type <= TPersistentStr) {
-    emitCmpTVType(v, sf, KindOfPersistentString, typeSrc);
-    cc = CC_E;
-  } else if (type <= TStr) {
-    emitTestTVType(v, sf, KindOfStringBit, typeSrc);
-    cc = CC_NZ;
-  } else if (type <= TArr) {
-    emitTestTVType(v, sf, KindOfArrayBit, typeSrc);
-    cc = CC_NZ;
-  } else if (type == TNull) {
-    emitCmpTVType(v, sf, KindOfNull, typeSrc);
-    cc = CC_LE;
-  } else if (type == TUncountedInit) {
-    emitTestTVType(v, sf, KindOfUncountedInitBit, typeSrc);
-    cc = CC_NZ;
-  } else if (type == TUncounted) {
-    emitCmpTVType(v, sf, KindOfRefCountThreshold, typeSrc);
-    cc = CC_LE;
-  } else if (type == TCell) {
-    emitCmpTVType(v, sf, KindOfRef, typeSrc);
-    cc = CC_L;
-  } else if (type == TGen) {
-    // nothing to check
-    return;
-  } else {
+
+  auto const cc = [&] {
+    auto const cmp = [&] (DataType kind, ConditionCode cc) {
+      emitCmpTVType(v, sf, kind, typeSrc);
+      return cc;
+    };
+
+    auto const test = [&] (int bits, ConditionCode cc) {
+      emitTestTVType(v, sf, bits, typeSrc);
+      return cc;
+    };
+
+    if (type <= TPersistentStr) return cmp(KindOfPersistentString, CC_E);
+    if (type <= TStr)           return test(KindOfStringBit, CC_NZ);
+    if (type <= TArr)           return test(KindOfArrayBit, CC_NZ);
+
+    // These are intentionally == and not <=.
+    if (type == TNull)          return cmp(KindOfNull, CC_LE);
+    if (type == TUncountedInit) return test(KindOfUncountedInitBit, CC_NZ);
+    if (type == TUncounted)     return cmp(KindOfRefCountThreshold, CC_LE);
+    if (type == TCell)          return cmp(KindOfRef, CC_L);
+
     always_assert(type.isKnownDataType());
     always_assert(!(type < TBoxedInitCell));
-    DataType dataType = type.toDataType();
-    assertx(dataType == KindOfRef ||
-           (dataType >= KindOfUninit && dataType <= KindOfResource));
-    emitCmpTVType(v, sf, dataType, typeSrc);
-    cc = CC_E;
-  }
+    auto const dt = type.toDataType();
+    assertx(dt == KindOfRef || (dt >= KindOfUninit && dt <= KindOfResource));
+    return cmp(dt, CC_E);
+  }();
+
   doJcc(cc, sf);
 
   if (type.isSpecialized()) {

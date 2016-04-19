@@ -18,7 +18,12 @@ function(HHVM_EXTENSION EXTNAME)
   add_library(${EXTNAME} SHARED ${ARGN})
   set_target_properties(${EXTNAME} PROPERTIES PREFIX "")
   set_target_properties(${EXTNAME} PROPERTIES SUFFIX ".so")
-  install(TARGETS ${EXTNAME} DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_API_VERSION}")
+  
+  get_target_property(LOC ${EXTNAME} LOCATION)
+  get_target_property(TY ${EXTNAME} TYPE)
+  # Don't install via target, because it triggers a re-link that doesn't
+  # run the POST_BUILD custom command that embeds the systemlib on Linux.
+  install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_API_VERSION}\" TYPE ${TY} FILES \"${LOC}\")")
 endfunction()
 
 # Add an extension that uses the Zend compatibility layer.

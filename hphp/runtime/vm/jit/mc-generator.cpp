@@ -332,11 +332,12 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   invalidateFuncProfSrcKeys(func);
 
   // Regenerate the prologues and DV funclets before the actual function body.
-  TCA start = regeneratePrologues(func, sk);
+  bool includedBody{false};
+  TCA start = regeneratePrologues(func, sk, includedBody);
 
   // Regionize func and translate all its regions.
   std::vector<RegionDescPtr> regions;
-  regionizeFunc(func, this, regions);
+  if (!includedBody) regionizeFunc(func, this, regions);
 
   for (auto region : regions) {
     always_assert(!region->empty());
@@ -929,10 +930,12 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
  * address for the translation corresponding to triggerSk, if such
  * translation is generated; otherwise returns nullptr.
  */
-TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
+TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
+                                    bool& emittedDVInit) {
   auto rec = m_tx.profData()->transRec(prologueTransId);
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
+  emittedDVInit = false;
 
   // Regenerate the prologue.
   func->resetPrologue(nArgs);
@@ -975,6 +978,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
         args.transId = funcletTransId;
         args.kind = TransKind::Optimize;
         auto dvStart = translate(args).tca();
+        emittedDVInit |= dvStart != nullptr;
         if (dvStart && !triggerSkStart && funcletSK == triggerSk) {
           triggerSkStart = dvStart;
         }
@@ -1001,7 +1005,8 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
  * triggerSk, if such translation is generated; otherwise returns
  * nullptr.
  */
-TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
+TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk,
+                                     bool& includedBody) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
 
@@ -1019,34 +1024,40 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
                    m_tx.profData()->transCounter(t1);
           });
 
-  // Next, we're going to regenerate each prologue along with its DV
-  // funclet.  We consider the option of either including the DV
-  // funclets in the same region as the function body or not.
-  // Including them in the same region enables some type information
-  // to flow and thus can eliminate some stores and type checks, but
-  // it can also increase the code size by duplicating the whole
-  // function body.  Therefore, we keep the DV inits separate if both
-  // (a) the function has multiple proflogues, and (b) the size of the
-  // function is above a certain threshold.
+  // Next, we're going to regenerate each prologue along with its DV funclet.
+  // We consider the option of either including the DV funclets in the same
+  // region as the function body or not.  Including them in the same region
+  // enables some type information to flow and thus can eliminate some stores
+  // and type checks, but it can also increase the code size by duplicating the
+  // whole function body.  Therefore, we only include the function body along
+  // with the DV init if both (a) the function has a single proflogue, and (b)
+  // the size of the function is within a certain threshold.
   //
   // The mechanism used to keep the function body separate from the DV
   // init is to temporarily mark the SrcKey for the function body as
   // already optimized.  (The region selectors break a region whenever
   // they hit a SrcKey that has already been optimized.)
   SrcKey funcBodySk(func, func->base(), false);
-  if (prologTransIDs.size() > 1 &&
-      func->past() - func->base() > RuntimeOption::EvalJitPGOMaxFuncSizeDupBody)
-  {
-    m_tx.profData()->setOptimized(funcBodySk);
-  }
+  includedBody = prologTransIDs.size() <= 1 &&
+    func->past() - func->base() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
+
+  if (!includedBody) m_tx.profData()->setOptimized(funcBodySk);
   SCOPE_EXIT{ m_tx.profData()->clearOptimized(funcBodySk); };
 
+  bool emittedAnyDVInit = false;
   for (TransID tid : prologTransIDs) {
-    TCA start = regeneratePrologue(tid, triggerSk);
+    bool emittedDVInit = false;
+    TCA start = regeneratePrologue(tid, triggerSk, emittedDVInit);
     if (triggerStart == nullptr && start != nullptr) {
       triggerStart = start;
     }
+    emittedAnyDVInit |= emittedDVInit;
   }
+
+  // If we tried to include the function body along with a DV init, but didn't
+  // end up generating any DV init, then flag that the function body was not
+  // included.
+  if (!emittedAnyDVInit) includedBody = false;
 
   return triggerStart;
 }

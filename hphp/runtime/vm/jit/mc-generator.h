@@ -355,8 +355,9 @@ private:
   /*
    * Prologue-generation helpers.
    */
-  TCA regeneratePrologues(Func* func, SrcKey triggerSk);
-  TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
+  TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody);
+  TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
+                         bool& emittedDVInit);
   TCA emitFuncPrologue(Func* func, int nPassed);
   bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 

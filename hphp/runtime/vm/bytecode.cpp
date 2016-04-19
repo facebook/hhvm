@@ -276,6 +276,7 @@ ALWAYS_INLINE MOpFlags decode_fpass_flags(PC& pc) {
   return ar->m_func->byRef(paramId) ? MOpFlags::DefineReffy : MOpFlags::Warn;
 }
 
+// wrapper for local variable LA operand
 struct local_var {
   TypedValue* ptr;
   int32_t index;
@@ -283,10 +284,21 @@ struct local_var {
   TypedValue& operator*() const { return *ptr; }
 };
 
+// wrapper for variable-size IVA operand
+struct intva_t {
+  int32_t n;
+  /* implicit */ operator int32_t() const { return n; }
+  intva_t& operator=(int32_t v) { n = v; return *this; }
+};
+
 ALWAYS_INLINE local_var decode_local(PC& pc) {
   auto la = decode_la(pc);
   assert(la < vmfp()->m_func->numLocals());
   return local_var{frame_local(vmfp(), la), la};
+}
+
+ALWAYS_INLINE intva_t decode_intva(PC& pc) {
+  return intva_t{decode_iva(pc)};
 }
 
 //=============================================================================
@@ -1852,8 +1864,7 @@ OPTBLD_INLINE void iopArray(IOP_ARGS) {
   vmStack().pushStaticArray(a);
 }
 
-OPTBLD_INLINE void iopNewArray(IOP_ARGS) {
-  auto capacity = decode_iva(pc);
+OPTBLD_INLINE void iopNewArray(intva_t capacity) {
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyArray());
   } else {
@@ -1861,8 +1872,7 @@ OPTBLD_INLINE void iopNewArray(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopNewMixedArray(IOP_ARGS) {
-  auto capacity = decode_iva(pc);
+OPTBLD_INLINE void iopNewMixedArray(intva_t capacity) {
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyArray());
   } else {
@@ -1891,8 +1901,7 @@ OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
   vmStack().pushArrayNoRc(arr);
 }
 
-OPTBLD_INLINE void iopNewPackedArray(IOP_ARGS) {
-  auto n = decode_iva(pc);
+OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = PackedArray::MakePacked(n, vmStack().topC());
   vmStack().ndiscard(n);
@@ -1979,15 +1988,15 @@ OPTBLD_INLINE void iopAddNewElemV() {
   vmStack().popV();
 }
 
-OPTBLD_INLINE void iopNewCol(IOP_ARGS) {
-  auto cType = static_cast<CollectionType>(decode_iva(pc));
+OPTBLD_INLINE void iopNewCol(intva_t type) {
+  auto cType = static_cast<CollectionType>(type.n);
   // Incref the collection object during construction.
   auto obj = collections::alloc(cType);
   vmStack().pushObjectNoRc(obj);
 }
 
-OPTBLD_INLINE void iopColFromArray(IOP_ARGS) {
-  auto const cType = static_cast<CollectionType>(decode_iva(pc));
+OPTBLD_INLINE void iopColFromArray(intva_t type) {
+  auto const cType = static_cast<CollectionType>(type.n);
   auto const c1 = vmStack().topC();
   // This constructor reassociates the ArrayData with the collection, so no
   // inc/decref is needed for the array. The collection object itself is
@@ -2094,9 +2103,7 @@ OPTBLD_FLT_INLINE void iopConcat() {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopConcatN(IOP_ARGS) {
-  auto n = decode_iva(pc);
-
+OPTBLD_INLINE void iopConcatN(intva_t n) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
 
@@ -3198,14 +3205,13 @@ OPTBLD_INLINE void iopFPassBaseL(IOP_ARGS) {
   baseLImpl(localId, flags);
 }
 
-OPTBLD_INLINE void iopBaseC(IOP_ARGS) {
-  auto const idx = decode_iva(pc);
+OPTBLD_INLINE void iopBaseC(intva_t idx) {
   auto& mstate = initMState();
   mstate.base = vmStack().indTV(idx);
 }
 
-OPTBLD_INLINE void iopBaseR(IOP_ARGS) {
-  iopBaseC(pc);
+OPTBLD_INLINE void iopBaseR(intva_t idx) {
+  iopBaseC(idx);
 }
 
 OPTBLD_INLINE void iopBaseH() {
@@ -4096,10 +4102,8 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
   return ar;
 }
 
-OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
+OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
   Cell* c1 = vmStack().topC();
-
   if (c1->m_type == KindOfObject) {
     // this covers both closures and functors
     static StringData* invokeName = makeStaticString("__invoke");
@@ -4358,8 +4362,7 @@ void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void iopFPushClsMethod(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
+OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs) {
   Cell* c1 = vmStack().indC(1); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4375,10 +4378,8 @@ OPTBLD_INLINE void iopFPushClsMethod(IOP_ARGS) {
   pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodD(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto name = decode_litstr(pc);
-  auto classId = decode<Id>(pc);
+OPTBLD_INLINE
+void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
@@ -4389,8 +4390,7 @@ OPTBLD_INLINE void iopFPushClsMethodD(IOP_ARGS) {
   pushClsMethodImpl<false>(cls, const_cast<StringData*>(name), obj, numArgs);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodF(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
+OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs) {
   Cell* c1 = vmStack().indC(1); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4406,8 +4406,7 @@ OPTBLD_INLINE void iopFPushClsMethodF(IOP_ARGS) {
   pushClsMethodImpl<true>(cls, name, obj, numArgs);
 }
 
-OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
+OPTBLD_INLINE void iopFPushCtor(intva_t numArgs) {
   TypedValue* tv = vmStack().topTV();
   assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
@@ -4564,27 +4563,25 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
   tvRefcountedDecRef(&func);
 }
 
-OPTBLD_INLINE void iopFPushCuf(IOP_ARGS) {
-  doFPushCuf(decode_iva(pc), false, false);
+OPTBLD_INLINE void iopFPushCuf(intva_t numArgs) {
+  doFPushCuf(numArgs, false, false);
 }
 
-OPTBLD_INLINE void iopFPushCufF(IOP_ARGS) {
-  doFPushCuf(decode_iva(pc), true, false);
+OPTBLD_INLINE void iopFPushCufF(intva_t numArgs) {
+  doFPushCuf(numArgs, true, false);
 }
 
-OPTBLD_INLINE void iopFPushCufSafe(IOP_ARGS) {
-  doFPushCuf(decode_iva(pc), false, true);
+OPTBLD_INLINE void iopFPushCufSafe(intva_t numArgs) {
+  doFPushCuf(numArgs, false, true);
 }
 
-OPTBLD_INLINE void iopFPassC(IOP_ARGS) {
-  DEBUG_ONLY auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassC));
-  UNUSED auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassC(PC origpc, intva_t paramId) {
+  DEBUG_ONLY auto const ar = arFromInstr(origpc);
   assert(paramId < ar->numArgs());
 }
 
-OPTBLD_INLINE void iopFPassCW(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassCW));
-  auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassCW(PC origpc, intva_t paramId) {
+  auto const ar = arFromInstr(origpc);
   assert(paramId < ar->numArgs());
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
@@ -4592,9 +4589,8 @@ OPTBLD_INLINE void iopFPassCW(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopFPassCE(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassCE));
-  auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassCE(PC origpc, intva_t paramId) {
+  auto const ar = arFromInstr(origpc);
   assert(paramId < ar->numArgs());
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
@@ -4602,9 +4598,8 @@ OPTBLD_INLINE void iopFPassCE(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopFPassV(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassV));
-  auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassV(PC origpc, intva_t paramId) {
+  auto const ar = arFromInstr(origpc);
   assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
   if (!func->byRef(paramId)) {
@@ -4612,16 +4607,14 @@ OPTBLD_INLINE void iopFPassV(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopFPassVNop(IOP_ARGS) {
-  DEBUG_ONLY auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassVNop));
-  UNUSED auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassVNop(PC origpc, intva_t paramId) {
+  DEBUG_ONLY auto const ar = arFromInstr(origpc);
   assert(paramId < ar->numArgs());
   assert(ar->m_func->byRef(paramId));
 }
 
-OPTBLD_INLINE void iopFPassR(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassR));
-  auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassR(PC origpc, intva_t paramId) {
+  auto const ar = arFromInstr(origpc);
   assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
   if (func->byRef(paramId)) {
@@ -4650,9 +4643,8 @@ OPTBLD_INLINE void iopFPassL(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopFPassN(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassN));
-  auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassN(PC orig_pc, intva_t paramId) {
+  auto const ar = arFromInstr(orig_pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     iopCGetN();
@@ -4661,9 +4653,8 @@ OPTBLD_INLINE void iopFPassN(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopFPassG(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassG));
-  auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassG(PC orig_pc, intva_t paramId) {
+  auto const ar = arFromInstr(orig_pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     iopCGetG();
@@ -4672,9 +4663,8 @@ OPTBLD_INLINE void iopFPassG(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopFPassS(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassS));
-  auto paramId = decode_iva(pc);
+OPTBLD_INLINE void iopFPassS(PC orig_pc, intva_t paramId) {
+  auto const ar = arFromInstr(orig_pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     iopCGetS();
@@ -4694,9 +4684,8 @@ bool doFCall(ActRec* ar, PC& pc) {
   return false;
 }
 
-OPTBLD_INLINE void iopFCall(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCall));
-  UNUSED auto numArgs = decode_iva(pc);
+OPTBLD_INLINE void iopFCall(PC origpc, PC& pc, intva_t numArgs) {
+  auto const ar = arFromInstr(origpc);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->ustubs().retHelper);
@@ -4864,9 +4853,8 @@ OPTBLD_INLINE void iopFCallArray(IOP_ARGS) {
   doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
 }
 
-OPTBLD_INLINE void iopFCallUnpack(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCallUnpack));
-  auto numArgs = decode_iva(pc);
+OPTBLD_INLINE void iopFCallUnpack(PC origpc, PC& pc, intva_t numArgs) {
+  auto const ar = arFromInstr(origpc);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   doFCallArray(pc, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
@@ -5232,24 +5220,20 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
   vm->evalUnit(unit, pc, EventHook::Eval);
 }
 
-OPTBLD_INLINE void iopDefFunc(IOP_ARGS) {
-  auto fid = decode_iva(pc);
+OPTBLD_INLINE void iopDefFunc(intva_t fid) {
   Func* f = vmfp()->m_func->unit()->lookupFuncId(fid);
   setCachedFunc(f, isDebuggerAttached());
 }
 
-OPTBLD_INLINE void iopDefCls(IOP_ARGS) {
-  auto cid = decode_iva(pc);
+OPTBLD_INLINE void iopDefCls(intva_t cid) {
   PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
 }
 
-OPTBLD_INLINE void iopDefClsNop(IOP_ARGS) {
-  decode_iva(pc); // cid
+OPTBLD_INLINE void iopDefClsNop(intva_t cid) {
 }
 
-OPTBLD_INLINE void iopDefTypeAlias(IOP_ARGS) {
-  auto tid = decode_iva(pc);
+OPTBLD_INLINE void iopDefTypeAlias(intva_t tid) {
   vmfp()->m_func->unit()->defTypeAlias(tid);
 }
 
@@ -5818,8 +5802,7 @@ OPTBLD_INLINE void iopContUnsetDelegate(IOP_ARGS) {
   cellSetNull(gen->m_delegate);
 }
 
-OPTBLD_INLINE void iopContCheck(IOP_ARGS) {
-  auto checkStarted = decode_iva(pc);
+OPTBLD_INLINE void iopContCheck(intva_t checkStarted) {
   this_base_generator(vmfp())->preNext(checkStarted);
 }
 
@@ -6243,36 +6226,66 @@ condStackTraceSep(Op opcode) {
  * functions, since some return void and some return TCA. Any functions that
  * return void are treated as though they returned nullptr.
  */
-OPTBLD_INLINE static TCA iopWrapper(void(*fn)(PC&), PC& pc) {
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(PC&), PC& pc) {
   fn(pc);
   return nullptr;
 }
 
-OPTBLD_INLINE static TCA iopWrapper(TCA(*fn)(PC& pc), PC& pc) {
+OPTBLD_INLINE static TCA iopWrapper(Op, TCA(*fn)(PC& pc), PC& pc) {
   return fn(pc);
 }
 
-OPTBLD_INLINE static TCA iopWrapper(void(*fn)(), PC& pc) {
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(), PC& pc) {
   fn();
   return nullptr;
 }
 
-OPTBLD_INLINE static TCA iopWrapper(void(*fn)(const StringData*), PC& pc) {
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(const StringData*), PC& pc) {
   auto s = decode_litstr(pc);
   fn(s);
   return nullptr;
 }
 
-OPTBLD_INLINE static TCA iopWrapper(void(*fn)(local_var), PC& pc) {
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(local_var), PC& pc) {
   auto var = decode_local(pc);
   fn(var);
   return nullptr;
 }
 
-OPTBLD_INLINE static TCA iopWrapper(void(*fn)(local_var,local_var), PC& pc) {
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(local_var,local_var), PC& pc) {
   auto var1 = decode_local(pc);
   auto var2 = decode_local(pc);
   fn(var1, var2);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(intva_t), PC& pc) {
+  auto n = decode_intva(pc);
+  fn(n);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op op, void(*fn)(PC,intva_t), PC& pc) {
+  auto origpc = pc - encoded_op_size(op);
+  auto n = decode_intva(pc);
+  fn(origpc, n);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA iopWrapper(Op op, void(*fn)(PC,PC&,intva_t), PC& pc) {
+  auto origpc = pc - encoded_op_size(op);
+  auto n = decode_intva(pc);
+  fn(origpc, pc, n);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,const StringData*,Id), PC& pc) {
+  auto n = decode_intva(pc);
+  auto s = decode_litstr(pc);
+  auto i = decode<Id>(pc);
+  fn(n, s, i);
   return nullptr;
 }
 
@@ -6308,7 +6321,7 @@ OPTBLD_INLINE static TCA iopWrapper(void(*fn)(local_var,local_var), PC& pc) {
           Trace::trace("op"#opcode" offset: %d\n", offset));            \
   assert(peek_op(pc) == Op::opcode);                                    \
   pc += encoded_op_size(Op::opcode);                                    \
-  auto const retAddr = iopWrapper(iop##opcode, pc);                     \
+  auto const retAddr = iopWrapper(Op::opcode, iop##opcode, pc);         \
   vmpc() = pc;                                                          \
   COND_STACKTRACE("op"#opcode" post: ");                                \
   condStackTraceSep(Op##opcode);                                        \
@@ -6406,7 +6419,7 @@ TCA dispatchImpl() {
     if (breakOnCtlFlow && Stats::enableInstrCount()) {        \
       Stats::inc(Stats::Instr_InterpBB##name);                \
     }                                                         \
-    retAddr = iopWrapper(iop##name, pc);                      \
+    retAddr = iopWrapper(Op::name, iop##name, pc);            \
     vmpc() = pc;                                              \
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \

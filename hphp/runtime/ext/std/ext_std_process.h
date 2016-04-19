@@ -43,7 +43,7 @@ Variant HHVM_FUNCTION(proc_open,
                       const String& cmd,
                       const Array& descriptorspec,
                       VRefParam pipes,
-                      const String& cwd = null_string,
+                      const Variant& cwd = null_variant,
                       const Variant& env = null_variant,
                       const Variant& other_options = null_variant);
 bool HHVM_FUNCTION(proc_terminate,

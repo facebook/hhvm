@@ -403,6 +403,7 @@ private:
 };
 
 int64_t convert_bytes_to_long(const std::string& value);
+std::string convert_long_to_bytes(int64_t value);
 
 void add_default_config_files_globbed(
   const char *default_config_file,

@@ -1826,9 +1826,8 @@ void RuntimeOption::Load(
                          value, RuntimeOption::UploadMaxFileSize);
                      },
                      []() {
-                       int uploadMaxFilesize =
-                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                       return std::to_string(uploadMaxFilesize) + "M";
+                       return convert_long_to_bytes(
+                         VirtualHost::GetUploadMaxFileSize());
                      }
                    ));
   // Filesystem and Streams Configuration Options

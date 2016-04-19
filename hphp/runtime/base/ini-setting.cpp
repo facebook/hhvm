@@ -85,6 +85,20 @@ int64_t convert_bytes_to_long(const std::string& value) {
   return newInt;
 }
 
+std::string convert_long_to_bytes(int64_t value) {
+  // Only return a larger value if it wouldn't
+  // be truncating the precision.
+  if ((value & ((1 << 30) - 1)) == 0) {
+    return std::to_string(value / (1 << 30)) + "G";
+  } else if ((value & ((1 << 20) - 1)) == 0) {
+    return std::to_string(value / (1 << 20)) + "M";
+  } else if ((value & ((1 << 10) - 1)) == 0) {
+    return std::to_string(value / (1 << 10)) + "K";
+  } else {
+    return std::to_string(value);
+  }
+}
+
 #define INI_ASSERT_STR(v) \
   if (!v.isScalar()) { \
     return false; \

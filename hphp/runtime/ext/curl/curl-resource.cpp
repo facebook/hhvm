@@ -360,6 +360,9 @@ bool CurlResource::isLongOption(long option) {
     case CURLOPT_TCP_NODELAY:
     case CURLOPT_IPRESOLVE:
     case CURLOPT_FOLLOWLOCATION:
+#if LIBCURL_VERSION_NUM >= 0x072500
+    case CURLOPT_HEADEROPT:
+#endif
       return true;
     default:
       return false;
@@ -605,13 +608,17 @@ bool CurlResource::isStringListOption(long option) {
          (option == CURLOPT_QUOTE) ||
          (option == CURLOPT_HTTP200ALIASES) ||
          (option == CURLOPT_POSTQUOTE) ||
-         (option == CURLOPT_RESOLVE);
+         (option == CURLOPT_RESOLVE)
+#if LIBCURL_VERSION_NUM >= 0x072500
+         || (option == CURLOPT_PROXYHEADER)
+#endif
+         ;
 }
 
 bool CurlResource::setStringListOption(long option, const Variant& value) {
   if (!value.isArray() && !value.is(KindOfObject)) {
     raise_warning("You must pass either an object or an array with "
-                  "the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, "
+                  "the CURLOPT_HTTPHEADER, CURLOPT_PROXYHEADER, CURLOPT_QUOTE, "
                   "CURLOPT_HTTP200ALIASES, CURLOPT_POSTQUOTE "
                   "and CURLOPT_RESOLVE arguments");
     return false;

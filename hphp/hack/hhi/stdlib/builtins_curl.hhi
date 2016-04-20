@@ -241,6 +241,11 @@ const int CURL_TIMECOND_IFMODSINCE = 0;
 const int CURL_TIMECOND_IFUNMODSINCE = 0;
 const int CURL_TIMECOND_LASTMOD = 0;
 
+const int CURLOPT_HEADEROPT = 0;
+const int CURLOPT_PROXYHEADER = 0;
+const int CURLHEADER_UNIFIED = 0;
+const int CURLHEADER_SEPARATE = 0;
+
 function curl_init($url = null);
 function curl_init_pooled($pool_name, $url = null);
 function curl_copy_handle($ch);

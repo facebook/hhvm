@@ -1181,6 +1181,13 @@ struct CurlExtension final : Extension {
     HHVM_RC_INT_SAME(CURLOPT_SAFE_UPLOAD);
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x072500  /* Available since 7.37.0,
+                                        PHP doesn't currently support these */
+    HHVM_RC_INT_SAME(CURLOPT_PROXYHEADER);
+    HHVM_RC_INT_SAME(CURLOPT_HEADEROPT);
+    HHVM_RC_INT_SAME(CURLHEADER_UNIFIED);
+    HHVM_RC_INT_SAME(CURLHEADER_SEPARATE);
+#endif
 
     HHVM_RC_INT(CURLOPT_FB_TLS_VER_MAX,
                 CurlResource::fb_specific_options::CURLOPT_FB_TLS_VER_MAX);

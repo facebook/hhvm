@@ -190,7 +190,7 @@ bool HHVM_FUNCTION(imagegd, const Resource& image,
                             const String& filename = null_string);
 bool HHVM_FUNCTION(imagegif, const Resource& image,
                              const String& filename = null_string);
-Variant HHVM_FUNCTION(imageinterlace, const Resource& image,
+Variant HHVM_FUNCTION(imageinterlace, int64_t argc, const Resource& image,
   int64_t interlace = 0);
 bool HHVM_FUNCTION(imageistruecolor, const Resource& image);
 #ifdef HAVE_GD_JPG

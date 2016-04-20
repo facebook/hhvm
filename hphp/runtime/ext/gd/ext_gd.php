@@ -3,7 +3,7 @@
 /* Gets information about the version and capabilities of the installed GD
  * library.
  */
-<<__Native>>
+<<__ParamCoerceModeFalse, __Native>>
 function gd_info(): array;
 
 /* The getimagesize() function will determine the size of any given image file
@@ -284,7 +284,7 @@ function imagecolortransparent(resource $image,
 /* Applies a convolution matrix on the image, using the given coefficient and
  * offset.
  */
-<<__Native>>
+<<__ParamCoerceModeFalse, __Native>>
 function imageconvolution(resource $image,
                           array $matrix,
                           float $div,
@@ -697,7 +697,7 @@ function imagegif(resource $image,
  * is set and the image is used as a JPEG image, the image is created as a
  * progressive JPEG.
  */
-<<__Native>>
+<<__Native("NumArgs")>>
 function imageinterlace(resource $image,
                         int $interlace = 0): mixed;
 

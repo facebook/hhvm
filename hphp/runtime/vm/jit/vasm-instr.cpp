@@ -84,8 +84,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::fallbackcc:
     case Vinstr::retransopt:
     // vasm intrinsics
-    case Vinstr::conjure:
-    case Vinstr::conjureuse:
     case Vinstr::copy:
     case Vinstr::copy2:
     case Vinstr::copyargs:
@@ -175,10 +173,24 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::sarq:
     case Vinstr::shlq:
     // arm instructions
-    case Vinstr::brk:
-    case Vinstr::cbcc:
-    case Vinstr::hostcall:
-    case Vinstr::tbcc:
+    case Vinstr::addxi:
+    case Vinstr::asrxi:
+    case Vinstr::asrxis:
+    case Vinstr::blrn:
+    case Vinstr::cmpsds:
+    case Vinstr::lslwi:
+    case Vinstr::lslwis:
+    case Vinstr::lslxi:
+    case Vinstr::lslxis:
+    case Vinstr::lsrwi:
+    case Vinstr::lsrwis:
+    case Vinstr::lsrxi:
+    case Vinstr::lsrxis:
+    case Vinstr::mrs:
+    case Vinstr::msr:
+    case Vinstr::orswi:
+    case Vinstr::popp:
+    case Vinstr::pushp:
     // ppc64 instructions
     case Vinstr::extsb:
     case Vinstr::extsw:

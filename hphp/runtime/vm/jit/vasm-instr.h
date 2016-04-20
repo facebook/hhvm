@@ -124,6 +124,9 @@ struct Vunit;
   O(absdbl, Inone, U(s), D(d))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(divint, Inone, U(s0) U(s1), D(d))\
+  /* nop and trap */\
+  O(nop, Inone, Un, Dn)\
+  O(ud2, Inone, Un, Dn)\
   /* arithmetic instructions */\
   O(addl, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -273,10 +276,24 @@ struct Vunit;
   O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(shlq, Inone, UH(s,d), DH(d,s) D(sf))\
   /* arm instructions */\
-  O(brk, I(code), Un, Dn)\
-  O(cbcc, I(cc), U(s), Dn)\
-  O(hostcall, I(argc), U(args), Dn)\
-  O(tbcc, I(cc) I(bit), U(s), Dn)\
+  O(addxi, I(s0), UH(s1,d), DH(d,s1))\
+  O(asrxi, I(s0), UH(s1,d), DH(d,s1))\
+  O(asrxis, I(s0), U(s1) U(d), D(df) D(sf))\
+  O(blrn, Inone, Un, Dn)\
+  O(cmpsds, I(pred), UA(s0) U(s1), D(d))\
+  O(lslwi, I(s0), UH(s1,d), DH(d,s1))\
+  O(lslwis, I(s0), U(s1) U(d), D(df) D(sf))\
+  O(lslxi, I(s0), UH(s1,d), DH(d,s1))\
+  O(lslxis, I(s0), U(s1) U(d), D(df) D(sf))\
+  O(lsrwi, I(s0), UH(s1,d), DH(d,s1))\
+  O(lsrwis, I(s0), U(s1) U(d), D(df) D(sf))\
+  O(lsrxi, I(s0), UH(s1,d), DH(d,s1))\
+  O(lsrxis, I(s0), U(s1) U(d), D(df) D(sf))\
+  O(mrs, I(s), Un, D(r))\
+  O(msr, I(s), U(r), Dn)\
+  O(orswi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(popp, Inone, U(s0) U(s1), Dn)\
+  O(pushp, Inone, U(s0) U(s1), Dn)\
   /* ppc64 instructions */\
   O(extsb, Inone, UH(s,d), DH(d,s) D(sf))\
   O(extsw, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -525,9 +542,9 @@ struct conjureuse { Vreg c; };
  * needed for lowering to different target architectures.
  */
 struct vcall { CallSpec call; VcallArgsId args; Vtuple d;
-               Fixup fixup; DestType destType; bool nothrow; };
+               Fixup fixup; DestType destType; bool nothrow; bool indResult; };
 struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
-                 Fixup fixup; DestType destType; };
+                 Fixup fixup; DestType destType; bool indResult; };
 
 /*
  * C++ function call using the native ABI.
@@ -749,7 +766,7 @@ struct callarray { TCA target; RegSet args; };
  * Has exception edges and additional integer args (used by the `target' stub).
  */
 struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
-                    Vlabel targets[2]; };
+                    Vlabel targets[2]; bool indResult; };
 
 /*
  * Enter a continuation (with exception edges).
@@ -855,6 +872,17 @@ struct srem { Vreg s0, s1, d; };
 struct divint { Vreg s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Unless specifically noted otherwise, instructions with Vreg{8,16,32} dsts
+ * can do whatever they please with the upper bits.
+ */
+
+/*
+ * Nop and trap.
+ */
+struct nop {};
+struct ud2 {};
 
 /*
  * Arithmetic instructions.
@@ -1065,13 +1093,26 @@ struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct shlq { Vreg64 s, d; VregSF sf; }; // uses rcx
 
 /*
- * ARM intrinsics.
+ * arm intrinsics.
  */
-struct brk { uint16_t code; };
-struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
-struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
-// ARM emulator native call intrinsic.
-struct hostcall { RegSet args; uint8_t argc; };
+struct addxi { Immed s0; Vreg64 s1, d; };
+struct asrxi { Immed s0; Vreg64 s1, d; };
+struct asrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
+struct blrn {};
+struct cmpsds { ComparisonPred pred; VregDbl s0, s1, d; VregSF sf; };
+struct lslwi { Immed s0; Vreg32 s1, d; };
+struct lslwis { Immed s0; Vreg32 s1, d, df; VregSF sf; };
+struct lslxi { Immed s0; Vreg64 s1, d; };
+struct lslxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
+struct lsrwi { Immed s0; Vreg32 s1, d; };
+struct lsrwis { Immed s0; Vreg32 s1, d, df; VregSF sf; };
+struct lsrxi { Immed s0; Vreg64 s1, d; };
+struct lsrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
+struct mrs { Immed s; Vreg64 r; };
+struct msr { Vreg64 r; Immed s; };
+struct orswi { Immed s0; Vreg32 s1, d; VregSF sf; };
+struct popp { Vreg64 s0, s1; };
+struct pushp { Vreg64 s0, s1; };
 
 /*
  * ppc64 intrinsics.

@@ -573,6 +573,13 @@ void unserializeRemainingProps(VariableUnserializer* uns,
   }
 }
 
+static const StaticString
+  s_Vector("Vector"), s_HH_Vector("HH\\Vector"),
+  s_Map("Map"), s_HH_Map("HH\\Map"),
+  s_Set("Set"), s_HH_Set("HH\\Set"),
+  s_Pair("Pair"), s_HH_Pair("HH\\Pair"),
+  s_StableMap("StableMap");
+
 /*
  * For namespaced collections, returns an "alternate" name, which is a
  * collection name with or without the namespace qualifier, depending on
@@ -589,10 +596,10 @@ const StringData* getAlternateCollectionName(const StringData* clsName) {
     static ClsNameMap m;
 
     static std::vector<SStringPair> mappings {
-      std::make_pair(StaticString("Vector"), StaticString("HH\\Vector")),
-      std::make_pair(StaticString("Map"), StaticString("HH\\Map")),
-      std::make_pair(StaticString("Set"), StaticString("HH\\Set")),
-      std::make_pair(StaticString("Pair"), StaticString("HH\\Pair"))
+      std::make_pair(s_Vector, s_HH_Vector),
+      std::make_pair(s_Map, s_HH_Map),
+      std::make_pair(s_Set, s_HH_Set),
+      std::make_pair(s_Pair, s_HH_Pair)
     };
 
     for (const auto& p : mappings) {
@@ -602,7 +609,7 @@ const StringData* getAlternateCollectionName(const StringData* clsName) {
 
     // As part of StableMap merging into Map, StableMap is an alias for HH\\Map,
     // but Map is the sole alias for HH\\Map
-    m[StaticString("StableMap").get()] = StaticString("HH\\Map").get();
+    m[s_StableMap.get()] = s_HH_Map.get();
     return &m;
   };
 

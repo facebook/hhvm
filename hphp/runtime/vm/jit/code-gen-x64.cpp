@@ -1344,12 +1344,14 @@ void CodeGenerator::cgOrdStrIdx(IRInstruction* inst) {
                });
 }
 
+static const StaticString s_1("1");
+
 void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto srcReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
-  auto f = v.cns(makeStaticString(""));
-  auto t = v.cns(makeStaticString("1"));
+  auto f = v.cns(staticEmptyString());
+  auto t = v.cns(s_1.get());
   auto const sf = v.makeReg();
   v << testb{srcReg, srcReg, sf};
   v << cmovq{CC_NZ, sf, f, t, dstReg};

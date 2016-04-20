@@ -1106,6 +1106,7 @@ void Class::setInstanceBitsImpl() {
 //
 // These are mostly for the class creation path.
 
+static const StaticString s___MockClass("__MockClass");
 void Class::setParent() {
   // Cache m_preClass->attrs()
   m_attrCopy = m_preClass->attrs();
@@ -1115,10 +1116,9 @@ void Class::setParent() {
     Attr parentAttrs = m_parent->attrs();
     if (UNLIKELY(parentAttrs &
                  (AttrFinal | AttrInterface | AttrTrait | AttrEnum))) {
-      static StringData* sd___MockClass = makeStaticString("__MockClass");
       if (!(parentAttrs & AttrFinal) ||
           (parentAttrs & AttrEnum) ||
-          m_preClass->userAttributes().find(sd___MockClass) ==
+          m_preClass->userAttributes().find(s___MockClass.get()) ==
           m_preClass->userAttributes().end() ||
           m_parent->isCollectionClass()) {
         raise_error("Class %s may not inherit from %s (%s)",
@@ -1134,7 +1134,7 @@ void Class::setParent() {
           "Class %s with %s inheriting 'abstract final' class %s"
           " must also be 'abstract final'",
           m_preClass->name()->data(),
-          sd___MockClass->data(),
+          s___MockClass.data(),
           m_parent->name()->data()
         );
       }
@@ -1429,9 +1429,7 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
   if (method->isGenerated()) return;
 
   if ((parentMethod->attrs() & AttrFinal)) {
-    static StringData* sd___MockClass =
-      makeStaticString("__MockClass");
-    if (m_preClass->userAttributes().find(sd___MockClass) ==
+    if (m_preClass->userAttributes().find(s___MockClass.get()) ==
         m_preClass->userAttributes().end()) {
       raise_error("Cannot override final method %s::%s()",
                   m_parent->name()->data(), parentMethod->name()->data());

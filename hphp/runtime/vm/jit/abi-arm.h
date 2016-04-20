@@ -53,9 +53,13 @@ inline PhysReg rret_type() { return vixl::x1; }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
+PhysReg rret_indirect();
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
+
+inline PhysReg rfp() { return vixl::x29; }
+inline PhysReg rlink() { return vixl::x30; }
 
 constexpr size_t num_arg_regs() { return 8; }
 constexpr size_t num_arg_regs_simd() { return 0; }
@@ -75,9 +79,14 @@ inline vixl::Register x2a(PhysReg x64reg) {
   return vixl::Register(vixl::CPURegister(x64reg));
 }
 
-inline vixl::FPRegister x2simd(PhysReg x64reg) {
+inline vixl::FPRegister x2f(PhysReg x64reg) {
   always_assert(x64reg.isSIMD());
   return vixl::FPRegister(vixl::CPURegister(x64reg));
+}
+
+inline vixl::VRegister x2v(PhysReg x64reg) {
+  always_assert(x64reg.isSIMD());
+  return vixl::VRegister(vixl::CPURegister(x64reg));
 }
 
 inline vixl::Condition convertCC(jit::ConditionCode cc) {
@@ -99,8 +108,8 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
     ne,  // not equal
     ls,  // unsigned lower or same
     hi,  // unsigned higher
-    pl,  // plus (sign set)
-    mi,  // minus (sign clear)
+    mi,  // minus (N set)
+    pl,  // plus (N clear)
     nv, nv,  // invalid. These are the parity flags.
     lt,  // signed less than
     ge,  // signed greater or equal
@@ -120,8 +129,8 @@ inline jit::ConditionCode convertCC(vixl::Condition cc) {
     jit::CC_NE,  // not equal
     jit::CC_AE,  // unsigned higher or same
     jit::CC_B,   // unsigned lower
-    jit::CC_NS,  // minus (sign clear)
-    jit::CC_S,   // plus (sign set)
+    jit::CC_NS,  // minus (N set)
+    jit::CC_S,   // plus (N clear)
     jit::CC_O,   // overflow set
     jit::CC_NO,  // overflow clear
     jit::CC_A,   // unsigned higher
@@ -144,9 +153,7 @@ inline vixl::Register svcReqArgReg(unsigned index) {
 }
 
 // vixl MacroAssembler uses ip0/ip1 (x16-17) for macro instructions
-const vixl::Register rAsm2(vixl::x15);
 const vixl::Register rAsm(vixl::x18);
-const vixl::Register rLinkReg(vixl::x30);
 const vixl::Register rHostCallReg(vixl::x16);
 
 ///////////////////////////////////////////////////////////////////////////////

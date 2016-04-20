@@ -205,4 +205,7 @@ class DatePeriod implements Iterator<DateTime> {
   public function key();
   public function next();
   public function valid(): bool;
+  public function getStartDate(): DateTime;
+  public function getEndDate(): DateTime;
+  public function getDateInterval(): DateInterval;
 }

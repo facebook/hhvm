@@ -507,6 +507,47 @@ DELEGATE_OPCODE(NSameObj)
 DELEGATE_OPCODE(EqRes)
 DELEGATE_OPCODE(NeqRes)
 
+DELEGATE_OPCODE(BaseG)
+DELEGATE_OPCODE(PropX)
+DELEGATE_OPCODE(PropDX)
+DELEGATE_OPCODE(PropQ)
+DELEGATE_OPCODE(CGetProp)
+DELEGATE_OPCODE(CGetPropQ)
+DELEGATE_OPCODE(VGetProp)
+DELEGATE_OPCODE(BindProp)
+DELEGATE_OPCODE(SetProp)
+DELEGATE_OPCODE(UnsetProp)
+DELEGATE_OPCODE(SetOpProp)
+DELEGATE_OPCODE(IncDecProp)
+DELEGATE_OPCODE(IssetProp)
+DELEGATE_OPCODE(EmptyProp)
+DELEGATE_OPCODE(ElemX)
+DELEGATE_OPCODE(ElemDX)
+DELEGATE_OPCODE(ElemUX)
+DELEGATE_OPCODE(CGetElem)
+DELEGATE_OPCODE(VGetElem)
+DELEGATE_OPCODE(SetElem)
+DELEGATE_OPCODE(UnsetElem)
+DELEGATE_OPCODE(IssetElem)
+DELEGATE_OPCODE(EmptyElem)
+DELEGATE_OPCODE(ProfileMixedArrayOffset)
+DELEGATE_OPCODE(CheckMixedArrayOffset)
+DELEGATE_OPCODE(CheckArrayCOW)
+DELEGATE_OPCODE(ElemArray)
+DELEGATE_OPCODE(ElemArrayW)
+DELEGATE_OPCODE(ElemArrayD)
+DELEGATE_OPCODE(ElemArrayU)
+DELEGATE_OPCODE(ElemMixedArrayK)
+DELEGATE_OPCODE(ArrayGet)
+DELEGATE_OPCODE(MixedArrayGetK)
+DELEGATE_OPCODE(ArraySet)
+DELEGATE_OPCODE(ArraySetRef)
+DELEGATE_OPCODE(ArrayIsset)
+DELEGATE_OPCODE(ArrayIdx)
+DELEGATE_OPCODE(MapGet)
+DELEGATE_OPCODE(MapSet)
+DELEGATE_OPCODE(MapIsset)
+
 #undef NOOP_OPCODE
 #undef DELEGATE_OPCODE
 
@@ -641,52 +682,23 @@ void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
 }
 
 CallDest CodeGenerator::callDest(Vreg reg0) const {
-  return { DestType::SSA, reg0 };
+  return irlower::callDest(reg0);
 }
 
 CallDest CodeGenerator::callDest(Vreg reg0, Vreg reg1) const {
-  return { DestType::TV, reg0, reg1 };
+  return irlower::callDest(reg0, reg1);
 }
 
 CallDest CodeGenerator::callDest(const IRInstruction* inst) const {
-  if (!inst->numDsts()) return kVoidDest;
-  return callDest(inst, dstLoc(inst, 0));
-}
-
-CallDest CodeGenerator::callDest(const IRInstruction* inst,
-                                 const Vloc& loc) const {
-  if (loc.numAllocated() == 0) return kVoidDest;
-  assertx(loc.numAllocated() == 1);
-  return {
-    inst->dst(0)->isA(TBool) ? DestType::Byte : DestType::SSA,
-    loc.reg(0)
-  };
+  return irlower::callDest(m_state, inst);
 }
 
 CallDest CodeGenerator::callDestTV(const IRInstruction* inst) const {
-  if (!inst->numDsts()) return kVoidDest;
-  return callDestTV(inst, dstLoc(inst, 0));
-}
-
-CallDest CodeGenerator::callDestTV(const IRInstruction* inst,
-                                   const Vloc& loc) const {
-  if (loc.numAllocated() == 0) return kVoidDest;
-  if (loc.isFullSIMD()) {
-    assertx(loc.numAllocated() == 1);
-    return { DestType::SIMD, loc.reg(0) };
-  }
-  if (loc.numAllocated() == 2) {
-    return { DestType::TV, loc.reg(0), loc.reg(1) };
-  }
-  assertx(loc.numAllocated() == 1);
-  // Sometimes we statically know the type and only need the value.
-  return { DestType::TV, loc.reg(0), InvalidReg };
+  return irlower::callDestTV(m_state, inst);
 }
 
 CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
-  if (!inst->numDsts()) return kVoidDest;
-  auto loc = dstLoc(inst, 0);
-  return { DestType::Dbl, loc.reg(0) };
+  return irlower::callDestDbl(m_state, inst);
 }
 
 void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,

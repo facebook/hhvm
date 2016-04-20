@@ -16,10 +16,13 @@
 #ifndef incl_HPHP_MINSTR_HELPERS_H_
 #define incl_HPHP_MINSTR_HELPERS_H_
 
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
+
+#include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
+
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 
 namespace HPHP { namespace jit { namespace MInstrHelpers {
@@ -362,6 +365,33 @@ inline uint64_t nm(Class* ctx, TypedValue* base, key_type<kt> key) {    \
   return issetEmptyPropImpl<kt, useEmpty, isObj>(ctx, base, key);       \
 }
 ISSET_EMPTY_PROP_HELPER_TABLE(X)
+#undef X
+
+//////////////////////////////////////////////////////////////////////
+
+template<bool checkForInt>
+void profileMixedArrayOffsetHelper(const ArrayData* ad, int64_t i,
+                                   MixedArrayOffsetProfile* prof) {
+  prof->update(ad, i);
+}
+template<bool checkForInt>
+void profileMixedArrayOffsetHelper(const ArrayData* ad, const StringData* sd,
+                                   MixedArrayOffsetProfile* prof) {
+  prof->update(ad, sd, checkForInt);
+}
+
+#define PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(m)          \
+  /* name                       keyType     checkForInt */  \
+  m(profileMixedArrayOffsetS,  KeyType::Str,   false)       \
+  m(profileMixedArrayOffsetSi, KeyType::Str,    true)       \
+  m(profileMixedArrayOffsetI,  KeyType::Int,   false)       \
+
+#define X(nm, keyType, checkForInt)                     \
+inline void nm(const ArrayData* a, key_type<keyType> k, \
+               MixedArrayOffsetProfile* p) {            \
+  profileMixedArrayOffsetHelper<checkForInt>(a, k, p);  \
+}
+PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

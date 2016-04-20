@@ -44,6 +44,52 @@ inline ArgGroup argGroup(IRLS& env, const IRInstruction* inst) {
   return ArgGroup(inst, env.locs);
 }
 
+inline CallDest callDest(Vreg reg0) {
+  return { DestType::SSA, reg0 };
+}
+
+inline CallDest callDest(Vreg reg0, Vreg reg1) {
+  return { DestType::TV, reg0, reg1 };
+}
+
+inline CallDest callDest(IRLS& env, const IRInstruction* inst) {
+  if (!inst->numDsts()) return kVoidDest;
+
+  auto const loc = dstLoc(env, inst, 0);
+  if (loc.numAllocated() == 0) return kVoidDest;
+  assertx(loc.numAllocated() == 1);
+
+  return {
+    inst->dst(0)->isA(TBool) ? DestType::Byte : DestType::SSA,
+    loc.reg(0)
+  };
+}
+
+inline CallDest callDestTV(IRLS& env, const IRInstruction* inst) {
+  if (!inst->numDsts()) return kVoidDest;
+
+  auto const loc = dstLoc(env, inst, 0);
+  if (loc.numAllocated() == 0) return kVoidDest;
+
+  if (loc.isFullSIMD()) {
+    assertx(loc.numAllocated() == 1);
+    return { DestType::SIMD, loc.reg(0) };
+  }
+  if (loc.numAllocated() == 2) {
+    return { DestType::TV, loc.reg(0), loc.reg(1) };
+  }
+  assertx(loc.numAllocated() == 1);
+
+  // Sometimes we statically know the type and only need the value.
+  return { DestType::TV, loc.reg(0), InvalidReg };
+}
+
+inline CallDest callDestDbl(IRLS& env, const IRInstruction* inst) {
+  if (!inst->numDsts()) return kVoidDest;
+  auto const loc = dstLoc(env, inst, 0);
+  return { DestType::Dbl, loc.reg(0) };
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void fwdJcc(Vout& v, IRLS& env, ConditionCode cc,

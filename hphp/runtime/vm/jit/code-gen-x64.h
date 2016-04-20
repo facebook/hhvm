@@ -59,9 +59,7 @@ private:
   CallDest callDest(Vreg reg0) const;
   CallDest callDest(Vreg reg0, Vreg reg1) const;
   CallDest callDest(const IRInstruction*) const;
-  CallDest callDest(const IRInstruction*, const Vloc& loc) const;
   CallDest callDestTV(const IRInstruction*) const;
-  CallDest callDestTV(const IRInstruction*, const Vloc& loc) const;
   CallDest callDestDbl(const IRInstruction*) const;
 
   void cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,

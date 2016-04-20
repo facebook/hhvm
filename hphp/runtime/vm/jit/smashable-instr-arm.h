@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-#include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit {
@@ -38,12 +37,17 @@ namespace arm {
 /*
  * Number of instructions (each of which is four bytes) in the sequence, plus
  * the size of the smashable immediate.
+ *
+ * For smashable call, only the load and branch+link instructions are acccounted
+ * in length. As the branch at the call return site jumps over the smashable
+ * immediate, they can be ignored. This is also helpful in call return address
+ * calculations (like in smashableCallFromRet() etc.)
  */
-constexpr size_t smashableMovqLen() { return 8 + 8; }
+constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 8; }  // From return address
-constexpr size_t smashableJmpLen()  { return 8 + 8; }
-constexpr size_t smashableJccLen()  { return 24 + 16; }
+constexpr size_t smashableCallLen() { return 2 * 4; }
+constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
+constexpr size_t smashableJccLen()  { return 4 + smashableJmpLen(); }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
@@ -69,6 +73,9 @@ TCA smashableCallTarget(TCA inst);
 TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
+
+constexpr size_t kSmashMovqImmOff = 0;
+constexpr size_t kSmashCmpqImmOff = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -42,6 +42,8 @@ FILE_RCSID("@(#)$File: readcdf.c,v 1.33 2012/06/20 21:52:36 christos Exp $")
 #include "cdf.h"
 #include "magic.h"
 
+#include "hphp/util/bstring.h"
+
 #define NOTMIME(ms) (((ms)->flags & MAGIC_MIME) == 0)
 
 static const struct nv {
@@ -95,7 +97,11 @@ cdf_app_to_mime(const char *vbuf, const struct nv *nv)
   assert(old_lc_ctype != nullptr);
 #endif
   for (i = 0; nv[i].pattern != nullptr; i++)
-    if (strcasestr(vbuf, nv[i].pattern) != nullptr) {
+    if (HPHP::bstrcasestr(
+        vbuf,
+        strlen(vbuf),
+        nv[i].pattern,
+        strlen(nv[i].pattern)) != nullptr) {
       rv = nv[i].mime;
       break;
     }

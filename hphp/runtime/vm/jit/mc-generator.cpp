@@ -133,6 +133,7 @@ MCGenerator* mcg;
 
 static __thread size_t s_initialTCSize;
 static ServiceData::ExportedCounter* s_jitMaturityCounter;
+static std::atomic<bool> s_loggedJitMature{false};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1702,20 +1703,26 @@ void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec,
  * emitted code.
  */
 void reportJitMaturity(const CodeCache& code) {
-  int32_t after = code.main().used() * 100 / CodeCache::AMaxUsage;
-  if (after > 100) after = 100;
   if (s_jitMaturityCounter) {
-    int32_t before = s_jitMaturityCounter->getValue();
-    if (after > before) {
-      s_jitMaturityCounter->setValue(after);
-      constexpr int32_t kThreshold = 15;
-      if (StructuredLog::enabled() &&
-          before < kThreshold && kThreshold <= after) {
-        std::map<std::string, int64_t> cols;
-        cols["jit_mature_sec"] = time(nullptr) - HttpServer::StartTime;
-        StructuredLog::log("hhvm_warmup", cols);
-      }
-    }
+    // EvalJitMatureSize is supposed to to be set to approximately 15% of the
+    // code that will give us full performance, so recover the "fully mature"
+    // size with some math.
+    auto const fullSize = RuntimeOption::EvalJitMatureSize * 100 / 15;
+
+    auto after = code.main().used() * 100 / fullSize;
+    if (after > 100) after = 100;
+    auto const before = s_jitMaturityCounter->getValue();
+    if (after > before) s_jitMaturityCounter->setValue(after);
+  }
+
+  if (!s_loggedJitMature.load(std::memory_order_relaxed) &&
+      StructuredLog::enabled() &&
+      code.main().used() >= RuntimeOption::EvalJitMatureSize &&
+      !s_loggedJitMature.exchange(true, std::memory_order_relaxed)) {
+    std::map<std::string, int64_t> cols{
+      {"jit_mature_sec", time(nullptr) - HttpServer::StartTime}
+    };
+    StructuredLog::log("hhvm_warmup", cols);
   }
 }
 }

@@ -431,6 +431,7 @@ struct RuntimeOption {
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
+  F(uint64_t, JitMatureSize,           20 << 20)                        \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(bool, JitConcurrently,             false)                           \
   F(bool, RecordSubprocessTimes,       false)                           \

@@ -1245,6 +1245,10 @@ class Phar extends RecursiveDirectoryIterator
   protected function getIteratorFromList(string $root, array $list) {
     $tree = array();
     foreach ($list as $filename => $info) {
+      if (substr($filename, -1) == '/') {
+        // Skip directories
+        continue;
+      }
       $dir = dirname($filename);
       $current = &$tree;
       if ($dir !== '') {

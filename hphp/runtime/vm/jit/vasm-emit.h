@@ -32,12 +32,24 @@ struct Vunit;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Optimize, lower for the specified architecture, register allocate, and
- * perform more optimizations on the given unit.
+ * Information about the expected cost of inlining a function  call.
  */
-void optimizeX64(Vunit&, const Abi&);
-void optimizeARM(Vunit&, const Abi&);
-void optimizePPC64(Vunit&, const Abi&);
+struct Vcost {
+  // The "cost" of inlining the callee is based on an estimate of the resulting
+  // increase in code size
+  int cost;
+  // If the callee region contains any bind* or fallback instructions track that
+  // separately as executing them will be disproportionately expensive
+  bool incomplete;
+};
+
+/*
+ * Optimize, lower for the specified architecture, register allocate (if
+ * desired), and perform more optimizations on the given unit.
+ */
+void optimizeX64(Vunit&, const Abi&, bool regalloc);
+void optimizeARM(Vunit&, const Abi&, bool regalloc);
+void optimizePPC64(Vunit&, const Abi&, bool regalloc);
 
 /*
  * Emit code for the given unit using the given code areas. The unit must have
@@ -54,6 +66,11 @@ void emitPPC64(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
 void emitVunit(Vunit& vunit, const IRUnit& unit,
                CodeCache::View code, CGMeta& fixups,
                Annotations* annotations = nullptr);
+
+/*
+ * Estimate the cost of a Vunit.
+ */
+Vcost computeVunitCost(const Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

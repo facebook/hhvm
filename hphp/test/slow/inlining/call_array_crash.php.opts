@@ -1,1 +1,1 @@
--vEval.JitPGOThreshold=2 -vEval.HHIRInliningMaxBindJmps=100 -vEval.HHIRInliningMaxReturns=100 -vEval.HHIRInliningMaxCost=100 -vEval.HHIRPGOInliningMaxCost=100 -vEval.HHIRPartialInlineFrameOpts=true -vEval.EnableIntrinsicsExtension=true 
+-vEval.JitPGOThreshold=2 -vEval.HHIRInliningMaxVasmCost=100000 -vEval.HHIRPartialInlineFrameOpts=true -vEval.EnableIntrinsicsExtension=true

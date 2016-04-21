@@ -963,6 +963,11 @@ To string conversions:
   Define a value of type T. This instruction aborts at runtime; it is meant to
   be used in tests or code that is known to be unreachable.
 
+| ConjureUse, ND, S(Gen), NF
+
+  Define a "use" of S0 effectively keeping the value alive. As with Conjure it
+  should not appear in reachable code.
+
 | LdCls, D(Cls), S(Str) C(Cls), Er
 
   Loads the class named S0 in the context of the class S1. Invokes autoload and

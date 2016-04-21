@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -94,11 +95,16 @@ struct IRLS {
 };
 
 /*
+ * Estimate the cost of unit.
+ */
+Vcost computeIRUnitCost(const IRUnit& unit);
+
+/*
  * Lower the given HHIR unit to a Vunit, then optimize, regalloc, and return
  * the Vunit. Returns nullptr on failure.
  */
-std::unique_ptr<Vunit> lowerUnit(const IRUnit&, CodeKind = CodeKind::Trace)
-  noexcept;
+std::unique_ptr<Vunit> lowerUnit(const IRUnit&, CodeKind = CodeKind::Trace,
+                                 bool regAlloc = true) noexcept;
 
 ///////////////////////////////////////////////////////////////////////////////
 

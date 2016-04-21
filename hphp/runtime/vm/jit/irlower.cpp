@@ -70,17 +70,17 @@ void genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
   }
 }
 
-void optimize(Vunit& unit, CodeKind kind) {
+void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
   auto const abi = jit::abi(kind);
   switch (arch()) {
     case Arch::X64:
-      optimizeX64(unit, abi);
+      optimizeX64(unit, abi, regAlloc);
       break;
     case Arch::ARM:
-      optimizeARM(unit, abi);
+      optimizeARM(unit, abi, regAlloc);
       break;
     case Arch::PPC64:
-      optimizePPC64(unit, abi);
+      optimizePPC64(unit, abi, regAlloc);
       break;
   }
 }
@@ -89,7 +89,8 @@ void optimize(Vunit& unit, CodeKind kind) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind) noexcept {
+std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
+                                 bool regAlloc /* = true */) noexcept {
   Timer timer(Timer::hhir_lower);
 
   auto vunit = folly::make_unique<Vunit>();
@@ -134,7 +135,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind) noexcept {
   timer.stop();
 
   try {
-    optimize(*vunit, kind);
+    optimize(*vunit, kind, regAlloc);
   } catch (const FailedTraceGen& e) {
     // vasm-xls can fail if it tries to allocate too many spill slots.
     FTRACE(1, "vasm-optimize failed with {}\n", e.what());
@@ -143,6 +144,12 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind) noexcept {
 
   return vunit;
 }
+
+Vcost computeIRUnitCost(const IRUnit& unit) {
+  auto const vunit = lowerUnit(unit, CodeKind::Trace, false /* regAlloc */);
+  return computeVunitCost(*vunit);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

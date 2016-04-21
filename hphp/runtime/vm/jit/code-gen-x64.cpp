@@ -5186,7 +5186,25 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgConjure(IRInstruction* inst) {
-  vmain() << ud2();
+  auto dst = dstLoc(inst, 0);
+  auto& v = vmain();
+  if (dst.hasReg(0)) {
+    v << conjure{dst.reg(0)};
+  }
+  if (dst.hasReg(1)) {
+    v << conjure{dst.reg(1)};
+  }
+}
+
+void CodeGenerator::cgConjureUse(IRInstruction* inst) {
+  auto src = srcLoc(inst, 0);
+  auto& v = vmain();
+  if (src.hasReg(0)) {
+    v << conjureuse{src.reg(0)};
+  }
+  if (src.hasReg(1)) {
+    v << conjureuse{src.reg(1)};
+  }
 }
 
 void CodeGenerator::cgCountArray(IRInstruction* inst) {

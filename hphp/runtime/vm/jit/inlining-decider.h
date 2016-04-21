@@ -125,13 +125,20 @@ struct InliningDecider {
    * If inlining is not performed when true is returned, registerEndInlining()
    * must be called immediately to correctly reset the internal inlining costs.
    */
-  bool shouldInline(const Func* callee, const RegionDesc& region,
-                    uint32_t maxTotalCost);
+  bool shouldInline(SrcKey callerSk, const Func* callee,
+                    const RegionDesc& region, uint32_t maxTotalCost);
 
   /*
    * Update our context to account for the beginning of an inlined call.
    */
-  void accountForInlining(const Func* callee, const RegionDesc& region);
+  void accountForInlining(SrcKey callerSk,
+                          const Func* callee,
+                          const RegionDesc& region);
+
+  /*
+   * Update context to begin inlining of callee with cost zero.
+   */
+  void initWithCallee(const Func* callee);
 
   /*
    * Update internal state for when an inlining event ends.

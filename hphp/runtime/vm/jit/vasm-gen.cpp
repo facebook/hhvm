@@ -85,15 +85,15 @@ Vauto::~Vauto() {
       auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:
-          optimizeX64(unit(), abi);
+          optimizeX64(unit(), abi, true /* regalloc */);
           emitX64(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::ARM:
-          optimizeARM(unit(), abi);
+          optimizeARM(unit(), abi, true /* regalloc */);
           emitARM(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::PPC64:
-          optimizePPC64(unit(), abi);
+          optimizePPC64(unit(), abi, true /* regalloc */);
           emitPPC64(unit(), m_text, m_fixups, nullptr);
           break;
       }

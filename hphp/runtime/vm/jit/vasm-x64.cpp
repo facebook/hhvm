@@ -250,6 +250,8 @@ struct Vgen {
   void emit(xorl i) { commuteSF(i); a.xorl(i.s0, i.d); }
   void emit(xorq i);
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
+  void emit(const conjure& i) { always_assert(false); }
+  void emit(const conjureuse& i) { always_assert(false); }
 
   void emit_nop() {
     emit(lea{rax[8], rax});
@@ -904,7 +906,7 @@ void lowerForX64(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void optimizeX64(Vunit& unit, const Abi& abi) {
+void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   Timer timer(Timer::vasm_optimize);
 
   removeTrivialNops(unit);
@@ -926,7 +928,7 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
 
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
-    allocateRegisters(unit, abi);
+    if (regalloc) allocateRegisters(unit, abi);
   }
   if (unit.blocks.size() > 1) {
     optimizeJmps(unit);

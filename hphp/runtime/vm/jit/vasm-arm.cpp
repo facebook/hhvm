@@ -168,6 +168,8 @@ struct Vgen {
   void emit(const ud2& i) { a->Brk(1); }
   void emit(const xorq& i) { a->Eor(X(i.d), X(i.s1), X(i.s0) /* flags? */); }
   void emit(const xorqi& i) { a->Eor(X(i.d), X(i.s1), i.s0.l() /* flags? */); }
+  void emit(const conjure& i) { always_assert(false); }
+  void emit(const conjureuse& i) { always_assert(false); }
 
   void emit_nop() { not_implemented(); }
 
@@ -463,7 +465,7 @@ void lowerForARM(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void optimizeARM(Vunit& unit, const Abi& abi) {
+void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   Timer timer(Timer::vasm_optimize);
 
   optimizeExits(unit);
@@ -475,7 +477,7 @@ void optimizeARM(Vunit& unit, const Abi& abi) {
   lowerForARM(unit);
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
-    allocateRegisters(unit, abi);
+    if (regalloc) allocateRegisters(unit, abi);
   }
   if (unit.blocks.size() > 1) {
     optimizeJmps(unit);

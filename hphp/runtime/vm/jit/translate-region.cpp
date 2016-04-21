@@ -549,7 +549,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  inl.accountForInlining(callee, *calleeRegion);
+  inl.accountForInlining(psk.srcKey, callee, *calleeRegion);
   return calleeRegion;
 }
 
@@ -559,7 +559,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 InliningDecider& inl,
                                 int32_t& budgetBCInstrs,
                                 double profFactor,
-                                Annotations& annotations) {
+                                Annotations* annotations) {
   const Timer irGenTimer(Timer::irGenRegionAttempt);
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
   auto prevProfTransID = irgs.profTransID; irgs.profTransID = kInvalidTransID;
@@ -573,7 +573,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
   if (RuntimeOption::EvalDumpRegion &&
       dumpTCAnnotation(*irgs.context.srcKey().func(), irgs.context.kind)) {
-    annotations.emplace_back("RegionDesc", show(region));
+    if (annotations) annotations->emplace_back("RegionDesc", show(region));
   }
 
   std::string errorMsg;
@@ -905,7 +905,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
     try {
       result = irGenRegionImpl(irgs, region, retry, inl,
-                               budgetBCInstrs, 1, annotations);
+                               budgetBCInstrs, 1, &annotations);
     } catch (const FailedTraceGen& e) {
       FTRACE(2, "irGenRegion failed with {}\n", e.what());
       result = TranslateResult::Failure;
@@ -947,4 +947,69 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   return unit;
 }
 
-} }
+std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
+                                          const RegionDesc& region) {
+  SCOPE_ASSERT_DETAIL("Inline-RegionDesc") { return show(region); };
+
+  std::unique_ptr<IRUnit> unit;
+  TranslateRetryContext retry;
+  auto result = TranslateResult::Retry;
+  auto caller = ctx.srcKey().func();
+
+  while (result == TranslateResult::Retry) {
+    unit = folly::make_unique<IRUnit>(ctx);
+    irgen::IRGS irgs{*unit};
+    auto& irb = *irgs.irb;
+    InliningDecider inl{caller};
+    auto const& argTypes = region.inlineInputTypes();
+    auto const ctxType = region.inlineCtxType();
+
+    auto const func = region.entry()->func();
+    inl.initWithCallee(func);
+    inl.disable();
+
+    auto const entry = irb.unit().entry();
+    auto returnBlock = irb.unit().defBlock();
+
+    SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
+    irb.startBlock(entry, false /* hasUnprocPred */);
+    irgen::conjureBeginInlining(irgs, func, ctxType, argTypes,
+                                irgen::ReturnTarget{returnBlock});
+
+    int32_t budgetBcInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
+    try {
+      result = irGenRegionImpl(
+        irgs,
+        region,
+        retry,
+        inl,
+        budgetBcInstrs,
+        1 /* profFactor */,
+        nullptr
+      );
+    } catch (const FailedTraceGen& e) {
+      FTRACE(2, "irGenInlineRegion failed with {}\n", e.what());
+      result = TranslateResult::Failure;
+    }
+
+    if (result == TranslateResult::Success) {
+      /*
+       * Builtin functions will implicitly start the return block during the
+       * inlined call. For everything else if we fail to start the return block
+       * it means the return was unreachable, and we cannot inline such regions.
+       */
+      if (!func->isCPPBuiltin() && !irb.startBlock(returnBlock, false)) {
+        return nullptr;
+      }
+
+      irgen::conjureEndInlining(irgs, func->isCPPBuiltin());
+      irgen::sealUnit(irgs);
+      optimize(*unit, TransKind::Optimize);
+    }
+  }
+
+  if (result != TranslateResult::Success) return nullptr;
+  return unit;
+}
+
+}}

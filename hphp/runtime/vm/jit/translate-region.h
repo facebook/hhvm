@@ -41,6 +41,16 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     PostConditions& pconds,
                                     Annotations& annotations) noexcept;
 
+/*
+ * Generate an IRUnit which simulates the inlining of region. This unit should
+ * not be used to emit machine code, but may be used to generate a Vunit.
+ *
+ * This function is currently only used to estimate the cost of inlining a
+ * function call.
+ */
+std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
+                                          const RegionDesc& region);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

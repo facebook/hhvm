@@ -253,6 +253,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::vcall:
     case Vinstr::vcallarray:
     case Vinstr::vinvoke:
+    case Vinstr::conjure:
+    case Vinstr::conjureuse:
       return true;
   }
   always_assert(false);

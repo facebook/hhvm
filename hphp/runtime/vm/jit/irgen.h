@@ -253,6 +253,27 @@ bool beginInlining(IRGS& env,
 void endInlining(IRGS& env);
 
 /*
+ * Begin inlining func into a dummy region used to measure the cost of
+ * inlining func. This will generate a region that cannot be executed.
+ *
+ * Simulating the inlining measures the cost of pushing a dummy frame (or not if
+ * we are able to elide it) and any effects that may have on alias analysis.
+ */
+void conjureBeginInlining(IRGS& env,
+                          const Func* func,
+                          Type thisType,
+                          const std::vector<Type>& args,
+                          ReturnTarget returnTarget);
+
+/*
+ * Close an inlined function inserted using conjureBeginInlining; returns false
+ * if the inlined region would have been invalid for inlining. As with
+ * conjureBeginInlining, this function should not be used in a region that will
+ * be executed.
+ */
+void conjureEndInlining(IRGS& env, bool builtin);
+
+/*
  * We do two special-case optimizations to partially inline 'singleton'
  * accessor functions (functions that just return a static local or static
  * property if it's not null).

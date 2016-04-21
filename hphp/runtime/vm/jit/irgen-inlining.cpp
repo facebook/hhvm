@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/jit/analysis.h"
 
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
@@ -38,7 +39,9 @@ bool beginInlining(IRGS& env,
   assertx(!fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
   assertx(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
-  assertx(curFunc(env)->base() + returnBcOffset < curFunc(env)->past() &&
+  // curFunc is null when called from conjureBeginInlining
+  assertx((!curFunc(env) ||
+          curFunc(env)->base() + returnBcOffset < curFunc(env)->past()) &&
          "returnBcOffset past end of caller");
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
@@ -142,6 +145,33 @@ bool beginInlining(IRGS& env,
   return true;
 }
 
+void conjureBeginInlining(IRGS& env,
+                          const Func* func,
+                          Type thisType,
+                          const std::vector<Type>& args,
+                          ReturnTarget returnTarget) {
+  auto const numParams = args.size();
+  fpushActRec(
+    env,
+    cns(env, func),
+    thisType != TBottom ? gen(env, Conjure, thisType) : nullptr,
+    numParams,
+    nullptr /* invName */
+  );
+
+  for (auto const argType : args) {
+    push(env, gen(env, Conjure, argType));
+  }
+
+  beginInlining(
+    env,
+    numParams,
+    func,
+    0 /* returnBcOffset */,
+    returnTarget
+  );
+}
+
 void implInlineReturn(IRGS& env) {
   assertx(!curFunc(env)->isPseudoMain());
   assertx(!resumed(env));
@@ -168,6 +198,14 @@ void endInlining(IRGS& env) {
   auto const retVal = pop(env, DataTypeGeneric);
   implInlineReturn(env);
   push(env, retVal);
+}
+
+void conjureEndInlining(IRGS& env, bool builtin) {
+  if (!builtin) {
+    endInlining(env);
+  }
+  gen(env, ConjureUse, pop(env));
+  gen(env, Halt);
 }
 
 void retFromInlined(IRGS& env) {

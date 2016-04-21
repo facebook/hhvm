@@ -187,6 +187,16 @@ struct TinyVector {
     m_impl.m_data.set(size(), newHeap);
   }
 
+  template<size_t isize, size_t minheap, typename origalloc>
+  bool operator==(const TinyVector<T, isize, minheap, origalloc>& tv) const {
+    if (size() != tv.size()) return false;
+
+    for (size_t i = 0; i < size(); ++i) {
+      if ((*this)[i] != tv[i]) return false;
+    }
+    return true;
+  }
+
 private:
   struct HeapData {
     uint32_t capacity; // numbers of vals---excludes this capacity field

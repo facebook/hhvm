@@ -240,14 +240,14 @@ struct Clusterizer {
 
   jit::vector<Vlabel> getBlockList() const;
 
+  std::string toString() const;
+
  private:
   using Cluster = jit::vector<Vlabel>;
 
   void initClusters();
   void clusterize();
   void sortClusters();
-
-  std::string toString() const;
 
   const Vunit&              m_unit;
   const Scale&              m_scale;

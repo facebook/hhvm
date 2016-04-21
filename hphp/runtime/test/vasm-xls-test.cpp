@@ -59,7 +59,7 @@ template<class T> uint64_t test_const(T val) {
   v << copy{v.cns(val), Vreg{xmm0}};
   v << ret{RegSet{xmm0}};
 
-  optimizeX64(vasm.unit(), test_abi);
+  optimizeX64(vasm.unit(), test_abi, true /* regalloc */);
   CGMeta fixups;
   LeaseHolder writer{Translator::WriteLease()};
   EXPECT_TRUE(writer.canWrite());

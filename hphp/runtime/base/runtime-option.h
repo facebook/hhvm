@@ -505,11 +505,7 @@ struct RuntimeOption {
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
-  F(uint32_t, HHIRInliningMaxBindJmps, 0)                               \
-  F(uint32_t, HHIRInliningMaxReturns,  3)                               \
-  F(uint32_t, HHIRInliningMaxCost,     13)                              \
-  F(uint32_t, HHIRPGOInliningMaxCost,  6)                               \
-  F(uint32_t, HHIRInliningMaxDepth,    4)                               \
+  F(uint32_t, HHIRInliningMaxVasmCost, 400)                             \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 6)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \

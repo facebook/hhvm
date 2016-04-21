@@ -137,6 +137,16 @@ struct RegionDesc {
   uint32_t          instrSize() const;
   std::string       toString() const;
 
+  const std::vector<Type>& inlineInputTypes() const {
+    return m_inlineInputTypes;
+  }
+  Type inlineCtxType() const { return m_inlineCtxType; }
+
+  void setInlineContext(Type ctx, const std::vector<Type>& args) {
+    m_inlineCtxType = ctx;
+    m_inlineInputTypes = args;
+  }
+
   template<class Work>
   void              forEachArc(Work w) const;
 
@@ -162,6 +172,10 @@ private:
 
   std::vector<BlockPtr>             m_blocks;
   hphp_hash_map<BlockId, BlockData> m_data;
+
+  // For regions selected for inlining, track the types of input arguments
+  std::vector<Type> m_inlineInputTypes;
+  Type m_inlineCtxType;
 };
 
 using RegionDescPtr = std::shared_ptr<RegionDesc>;

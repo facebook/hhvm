@@ -88,6 +88,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::fallbackcc:
     case Vinstr::retransopt:
     // vasm intrinsics
+    case Vinstr::conjure:
+    case Vinstr::conjureuse:
     case Vinstr::copy:
     case Vinstr::copy2:
     case Vinstr::copyargs:

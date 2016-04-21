@@ -81,6 +81,8 @@ struct Vunit;
   O(phidef, Inone, Un, D(defs))\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(phijmp, Inone, U(uses), Dn)\
+  O(conjure, Inone, Un, D(c))\
+  O(conjureuse, Inone, U(c), Dn)\
   /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -508,6 +510,13 @@ struct mcprep { Vreg64 d; };
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
+
+/*
+ * These marker instructions are used to model dataflow in pseudo-translations.
+ * They should not be used in any translations that will eventually be emitted.
+ */
+struct conjure { Vreg c; };
+struct conjureuse { Vreg c; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Native function ABI.

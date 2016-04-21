@@ -1047,6 +1047,7 @@ bool dontGuardAnyInputs(Op op) {
 bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
   if (instrIsNonCallControlFlow(inst->op()) ||
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
+      inst->op() == OpFCallAwait || // similar to Await
       inst->op() == OpClsCnsD) { // side exits if misses in the RDS
     return true;
   }

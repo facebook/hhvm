@@ -29,9 +29,10 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(mcg);
 
-// This value should be enough bytes to emit the "main" part of a minimal
-// translation, which consists of a move and a jump.
-static const int kMinTranslationBytes = 16;
+// This value should be enough bytes to emit a REQ_RETRANSLATE: lea (4 or 7
+// bytes), movq (10 bytes), and jmp (5 bytes). We then add some extra slack for
+// safety.
+static const int kMinTranslationBytes = 32;
 
 /* Initialized by RuntimeOption. */
 uint64_t CodeCache::AHotSize = 0;

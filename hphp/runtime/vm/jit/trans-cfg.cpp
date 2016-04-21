@@ -222,8 +222,7 @@ bool TransCFG::hasArc(TransID srcId, TransID dstId) const {
 }
 
 void TransCFG::print(std::string fileName, FuncId funcId,
-                     const ProfData* profData,
-                     const TransIDSet* selected) const {
+                     const ProfData* profData) const {
   FILE* file = fopen(fileName.c_str(), "wt");
   if (!file) return;
 
@@ -246,7 +245,7 @@ void TransCFG::print(std::string fileName, FuncId funcId,
     auto const rec = profData->transRec(tid);
     auto const bcStart = rec->startBcOff();
     auto const bcStop  = rec->lastBcOff();
-    auto const shape = selected && selected->count(tid) ? "oval" : "box";
+    auto const shape = "box";
     fprintf(file,
             "t%u [shape=%s,label=\"T: %u\\np: %" PRId64 "\\n"
             "bc: [%" PRIu32 "-%" PRIu32 ")\","

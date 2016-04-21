@@ -606,7 +606,6 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
     return nullptr;
   }
 
-  TransIDSet selectedTIDs;
   TransCFG cfg(callee->getFuncId(), profData, mcg->tx().getSrcDB(),
                mcg->jmpToTransIDMap(), true /* inlining */);
 
@@ -618,7 +617,7 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
   ctx.inlining = true;
   ctx.inputTypes = &argTypes;
 
-  auto r = selectHotCFG(ctx, selectedTIDs, nullptr /* selectedVec */);
+  auto r = selectHotCFG(ctx);
   if (r) {
     r->setInlineContext(ctxType, argTypes);
   }

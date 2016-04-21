@@ -47,10 +47,15 @@ using RegionToTransIDsMap = hphp_hash_map<
  */
 TransIDSet findRetransSet(const RegionDesc& region, RegionDesc::BlockId bid) {
   TransIDSet set;
-  set.insert(bid);
+  auto insert = [&](RegionDesc::BlockId id) {
+    set.insert(id);
+    auto& merged = region.merged(id);
+    set.insert(merged.begin(), merged.end());
+  };
+  insert(bid);
   while (auto next = region.nextRetrans(bid)) {
     bid = next.value();
-    set.insert(bid);
+    insert(bid);
   }
   return set;
 }
@@ -66,66 +71,65 @@ void markCoveredArc(TransID src,
                     TransCFG::ArcPtrSet& coveredArcs) {
   auto dstRetransSet = findRetransSet(dstRegion, dst);
   for (auto outArc : cfg.outArcs(src)) {
-    if (hasTransID(outArc->dst())) {
-      auto dstTid = getTransID(outArc->dst());
-      if (dstRetransSet.count(dstTid)) {
-        coveredArcs.insert(outArc);
-      }
+    if (dstRetransSet.count(outArc->dst())) {
+      coveredArcs.insert(outArc);
     }
   }
 }
 
 /**
  * Add to sets coveredNodes and coveredArcs the cfg arcs that are now
- * covered given the new region containing the translations in
- * selectedVec.
+ * covered given the new region containing the translations in `region'.
  */
 void markCovered(const TransCFG& cfg, const RegionDescPtr region,
-                 const TransIDVec& selectedVec, const TransIDSet heads,
-                 TransIDToRegionMap headToRegion,
+                 TransIDSet& heads,
+                 TransIDToRegionMap& headToRegion,
                  TransIDSet& coveredNodes,
                  TransCFG::ArcPtrSet& coveredArcs) {
-  assertx(selectedVec.size() > 0);
-  auto newHead = selectedVec[0];
   assertx(!region->empty());
-  assertx(newHead == getTransID(region->entry()->id()));
+  const auto entryId = region->entry()->id();
 
   // Mark all region's nodes as covered.
-  coveredNodes.insert(selectedVec.begin(), selectedVec.end());
+  for (auto& b : region->blocks()) {
+    coveredNodes.insert(b->id());
+    const auto& merged = region->merged(b->id());
+    coveredNodes.insert(merged.begin(), merged.end());
+  }
 
-  // Mark all incoming arcs into newHead from covered nodes as covered.
-  for (auto arc : cfg.inArcs(newHead)) {
-    auto const src = arc->src();
-    if (coveredNodes.count(src)) {
-      markCoveredArc(src, arc->dst(), cfg, *region, coveredArcs);
+  // Mark as covered all incoming arcs from already covered nodes into the entry
+  // of the region or one of its retranslations/merged blocks.
+  for (auto newHead : findRetransSet(*region, entryId)) {
+    heads.insert(newHead);
+    headToRegion[newHead] = region;
+    for (auto arc : cfg.inArcs(newHead)) {
+      const auto src = arc->src();
+      if (coveredNodes.count(src)) {
+        markCoveredArc(src, entryId, cfg, *region, coveredArcs);
+      }
     }
   }
 
   // Mark all CFG arcs within the region as covered.
   region->forEachArc([&](RegionDesc::BlockId src, RegionDesc::BlockId dst) {
-    if (!hasTransID(dst)) return;
-    auto const dstTid = region->block(dst)->profTransID();
-    auto markOutgoing = [&](TransID srcTid) {
-      for (auto arc : cfg.outArcs(srcTid)) {
-        if (arc->dst() == dstTid) {
-          markCoveredArc(srcTid, arc->dst(), cfg, *region, coveredArcs);
+    auto const srcIds = findRetransSet(*region, src);
+    auto const dstIds = findRetransSet(*region, dst);
+
+    for (auto srcId : srcIds) {
+      for (auto arc : cfg.outArcs(srcId)) {
+        if (dstIds.count(arc->dst())) {
+          coveredArcs.insert(arc);
         }
       }
-    };
-    TransID srcTid = region->block(src)->profTransID();
-    markOutgoing(srcTid);
-    for (auto mergedSrcId : region->merged(src)) {
-      if (!hasTransID(mergedSrcId)) continue;
-      markOutgoing(getTransID(mergedSrcId));
     }
   });
 
   // Mark all outgoing arcs from the region to a head node as covered.
-  for (auto node : selectedVec) {
-    for (auto arc : cfg.outArcs(node)) {
+  for (auto& b : region->blocks()) {
+    for (auto arc : cfg.outArcs(b->id())) {
       if (heads.count(arc->dst())) {
-        markCoveredArc(arc->src(), arc->dst(), cfg, *headToRegion[arc->dst()],
-                       coveredArcs);
+        auto dstRegionEntryId = headToRegion[arc->dst()]->entry()->id();
+        markCoveredArc(arc->src(), dstRegionEntryId, cfg,
+                       *headToRegion[arc->dst()], coveredArcs);
       }
     }
   }
@@ -281,7 +285,7 @@ void regionizeFunc(const Func* func,
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     auto dotFileName = folly::to<std::string>(
       "/tmp/func-cfg-", funcId, ".dot");
-    cfg.print(dotFileName, funcId, profData, nullptr);
+    cfg.print(dotFileName, funcId, profData);
     FTRACE(5, "regionizeFunc: initial CFG for func {} saved to file {}\n",
            funcId, dotFileName);
   }
@@ -320,8 +324,6 @@ void regionizeFunc(const Func* func,
         !allArcsCovered(cfg.inArcs(node),  coveredArcs)) {
       auto newHead = node;
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);
-      TransIDSet selectedSet;
-      TransIDVec selectedVec;
       RegionDescPtr region;
       HotTransContext ctx;
       ctx.cfg = &cfg;
@@ -330,12 +332,12 @@ void regionizeFunc(const Func* func,
       ctx.maxBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
       switch (regionMode) {
         case PGORegionMode::Hottrace:
-          region = selectHotTrace(ctx, selectedSet, &selectedVec);
+          region = selectHotTrace(ctx);
           break;
 
         case PGORegionMode::WholeCFG:
         case PGORegionMode::HotCFG:
-          region = selectHotCFG(ctx, selectedSet, &selectedVec);
+          region = selectHotCFG(ctx);
           break;
 
         case PGORegionMode::Hotblock:
@@ -344,16 +346,17 @@ void regionizeFunc(const Func* func,
       FTRACE(6, "regionizeFunc: selected region to cover node {}\n{}\n",
              newHead, show(*region));
       profData->setOptimized(profData->transRec(newHead)->srcKey());
-      assertx(selectedVec.size() > 0 && selectedVec[0] == newHead);
-      regions.push_back(region);
-      heads.insert(newHead);
-      regionToTransIds[region] = selectedVec;
-      headToRegion[newHead] = region;
-      markCovered(cfg, region, selectedVec, heads, headToRegion,
-                  coveredNodes, coveredArcs);
 
-      FTRACE(6, "regionizeFunc: selected trace: {}\n",
-             folly::join(", ", selectedVec));
+      for (auto& b : region->blocks()) {
+        const auto bid = b->id();
+        assertx(hasTransID(bid) &&
+                bid == getTransID(bid) &&
+                bid == b->profTransID());
+        regionToTransIds[region].push_back(bid);
+      }
+
+      regions.push_back(region);
+      markCovered(cfg, region, heads, headToRegion, coveredNodes, coveredArcs);
     }
   }
 

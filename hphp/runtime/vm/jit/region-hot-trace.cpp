@@ -59,15 +59,11 @@ static void mergePostConds(TypedLocations& dst,
   }
 }
 
-RegionDescPtr selectHotTrace(HotTransContext& ctx,
-                             TransIDSet& selectedSet,
-                             TransIDVec* selectedVec /* = nullptr */) {
+RegionDescPtr selectHotTrace(HotTransContext& ctx) {
   auto region = std::make_shared<RegionDesc>();
   TransID tid    = ctx.tid;
   TransID prevId = kInvalidTransID;
-  selectedSet.clear();
-  if (selectedVec) selectedVec->clear();
-
+  TransIDSet selectedSet;
   TypedLocations accumPostConds;
 
   // Maps from BlockIds to accumulated post conditions for that block.
@@ -136,7 +132,6 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
       region->addArc(predBlockId, newFirstBlockId);
     }
     selectedSet.insert(tid);
-    if (selectedVec) selectedVec->push_back(tid);
 
     const auto lastSk = rec->lastSrcKey();
     if (breaksRegion(lastSk)) {

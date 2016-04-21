@@ -95,8 +95,7 @@ struct TransCFG {
   bool                        hasArc(TransID srcId, TransID dstId) const;
   void                        print(std::string fileName,
                                     FuncId funcId,
-                                    const ProfData* profData,
-                                    const TransIDSet* selected = nullptr) const;
+                                    const ProfData* profData) const;
 
  private:
   std::vector<TransID>           m_transIds;  // vector of TransIDs in the graph

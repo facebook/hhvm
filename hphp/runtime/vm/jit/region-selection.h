@@ -507,20 +507,16 @@ struct HotTransContext {
 };
 
 /*
- * Select the hottest trace beginning with triggerId.
+ * Select the hottest trace with the given context (starting at ctx.tid).
  */
-RegionDescPtr selectHotTrace(HotTransContext& ctx,
-                             TransIDSet& selectedSet,
-                             TransIDVec* selectedVec = nullptr);
+RegionDescPtr selectHotTrace(HotTransContext& ctx);
 
 /*
- * Create a region, beginning with headId, that includes as much of
- * the TransCFG as possible (in "wholecfg" mode), but that can be
- * pruned to eliminate cold/unlikely code as well (in "hotcfg" mode).
+ * Create a region with the given context ctx (starting at ctx.tid) that
+ * includes as much of the TransCFG as possible (in "wholecfg" mode), but that
+ * can be pruned to eliminate cold/unlikely code as well (in "hotcfg" mode).
  */
-RegionDescPtr selectHotCFG(HotTransContext& ctx,
-                           TransIDSet& selectedSet,
-                           TransIDVec* selectedVec = nullptr);
+RegionDescPtr selectHotCFG(HotTransContext& ctx);
 
 /*
  * Checks whether the type predictions at the beginning of block

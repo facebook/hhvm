@@ -47,21 +47,15 @@ const StaticString s_switchProfile("SwitchProfile");
 //////////////////////////////////////////////////////////////////////
 
 struct DFS {
-  DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv,
-      int32_t maxBCInstrs,
-      bool inlining)
+  DFS(const ProfData* p, const TransCFG& c, int32_t maxBCInstrs, bool inlining)
     : m_profData(p)
     , m_cfg(c)
-    , m_selectedSet(ts)
-    , m_selectedVec(tv)
     , m_numBCInstrs(maxBCInstrs)
     , m_inlining(inlining)
   {}
 
   RegionDescPtr formRegion(TransID head) {
     m_region = std::make_shared<RegionDesc>();
-    m_selectedSet.clear();
-    if (m_selectedVec) m_selectedVec->clear();
     if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
       m_minBlockWeight = 0;
       m_minArcProb = 0;
@@ -76,9 +70,6 @@ struct DFS {
            head, m_cfg.weight(head), m_minBlockWeight, m_minArcProb);
     Trace::Indent indent;
     visit(head);
-    if (m_selectedVec) {
-      std::reverse(m_selectedVec->begin(), m_selectedVec->end());
-    }
     for (auto& arc : m_arcs) {
       m_region->addArc(arc.src, arc.dst);
     }
@@ -245,8 +236,6 @@ private:
     // this last so that the region ends up in (quasi-)topological order
     // (it'll be in topological order for acyclic regions).
     m_region->prepend(*tidRegion);
-    m_selectedSet.insert(tid);
-    if (m_selectedVec) m_selectedVec->push_back(tid);
     always_assert(m_numBCInstrs >= 0);
 
     m_visiting.erase(tid);
@@ -255,8 +244,6 @@ private:
 private:
   const ProfData*              m_profData;
   const TransCFG&              m_cfg;
-  TransIDSet&                  m_selectedSet;
-  TransIDVec*                  m_selectedVec;
   RegionDescPtr                m_region;
   int32_t                      m_numBCInstrs;
   jit::hash_set<TransID>       m_visiting;
@@ -271,13 +258,10 @@ private:
 
 }
 
-RegionDescPtr selectHotCFG(HotTransContext& ctx,
-                           TransIDSet& selectedSet,
-                           TransIDVec* selectedVec /* = nullptr */) {
+RegionDescPtr selectHotCFG(HotTransContext& ctx) {
   ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", ctx.maxBCInstrs);
   auto const region =
-    DFS(ctx.profData, *ctx.cfg, selectedSet, selectedVec, ctx.maxBCInstrs,
-        ctx.inlining)
+    DFS(ctx.profData, *ctx.cfg, ctx.maxBCInstrs, ctx.inlining)
       .formRegion(ctx.tid);
 
   if (region->empty()) return nullptr;

@@ -77,10 +77,10 @@ class Phar extends RecursiveDirectoryIterator
     }
     $data = file_get_contents($fname);
 
-    $halt_token = "__HALT_COMPILER();";
+    $halt_token = '__HALT_COMPILER();';
     $pos = strpos($data, $halt_token);
     if ($pos === false && !self::$preventHaltTokenCheck) {
-      throw new PharException("__HALT_COMPILER(); must be declared in a phar");
+      throw new PharException('__HALT_COMPILER(); must be declared in a phar');
     }
     $this->stub = substr($data, 0, $pos);
 
@@ -532,7 +532,8 @@ class Phar extends RecursiveDirectoryIterator
    * @param int $format Either Phar::PHAR, Phar::TAR, or
    *                    Phar::ZIP to test for the format of the archive.
    *
-   * @return bool <b>TRUE</b> if the phar archive matches the file format requested by the parameter
+   * @return bool <b>TRUE</b> if the phar archive matches the file format
+   *              requested by the parameter
    */
   public function isFileFormat($fileformat) {
     return $fileformat === self::PHAR;
@@ -982,10 +983,10 @@ class Phar extends RecursiveDirectoryIterator
     }
 
     // Try to see if there is a signature
-    if (($this->archiveFlags & self::SIGNATURE)) {
-      if (strlen($data) < 8 || substr($data, -4) !== "GBMB") {
+    if ($this->archiveFlags & self::SIGNATURE) {
+      if (strlen($data) < 8 || substr($data, -4) !== 'GBMB') {
         // Not even the GBMB and the flags?
-        throw new PharException("phar has a broken signature");
+        throw new PharException('phar has a broken signature');
       }
 
       $pos = strlen($data) - 8;
@@ -993,26 +994,26 @@ class Phar extends RecursiveDirectoryIterator
       switch ($this->signatureFlags) {
         case self::MD5:
           $digestSize = 16;
-          $digestName = "md5";
+          $digestName = 'md5';
           break;
         case self::SHA1:
           $digestSize = 20;
-          $digestName = "sha1";
+          $digestName = 'sha1';
           break;
         case self::SHA256:
           $digestSize = 32;
-          $digestName = "sha256";
+          $digestName = 'sha256';
           break;
         case self::SHA512:
           $digestSize = 64;
-          $digestName = "sha512";
+          $digestName = 'sha512';
           break;
         default:
-          throw new PharException("phar has a broken or unsupported signature");
+          throw new PharException('phar has a broken or unsupported signature');
       }
 
       if (strlen($data) < 8 + $digestSize) {
-        throw new PharException("phar has a broken signature");
+        throw new PharException('phar has a broken signature');
       }
 
       $pos -= 4;
@@ -1021,7 +1022,7 @@ class Phar extends RecursiveDirectoryIterator
       $actualHash = self::verifyHash($data, $digestName, $signatureStart);
 
       if ($actualHash !== $this->signature) {
-        throw new PharException("phar has a broken signature");
+        throw new PharException('phar has a broken signature');
       }
     }
   }

@@ -46,6 +46,7 @@ namespace irgen {
 struct FPIInfo {
   SSATmp* returnSP;
   FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
+  Type ctxType; // tracked separately as a union of observed ctx types
   SSATmp* ctx;
   Op fpushOpc; // bytecode for FPush*
   const Func* func;

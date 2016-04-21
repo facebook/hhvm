@@ -65,14 +65,26 @@ bool beginInlining(IRGS& env,
   // point.
   IRSPRelOffset calleeAROff = bcSPOffset(env);
 
-  auto ctx = [&] {
-    if (info.ctx || isFPushFunc(info.fpushOpc)) {
+  auto ctx = [&] () -> SSATmp* {
+    if (info.ctx) {
+      if (info.ctxType <= info.ctx->type() &&
+          info.ctxType <= TStkElem && // AssertType can't handle TNullptr
+          info.ctx->type() <= TStkElem) {
+        return gen(env, AssertType, info.ctxType, info.ctx);
+      }
       return info.ctx;
+    }
+    if (isFPushFunc(info.fpushOpc)) {
+      return nullptr;
     }
     constexpr int32_t adjust = AROFF(m_this) / sizeof(Cell);
     IRSPRelOffset ctxOff = calleeAROff + adjust;
     return gen(env, LdStk, TCtx, IRSPRelOffsetData{ctxOff}, sp(env));
   }();
+
+  // If the ctx was extracted from SpillFrame it may be a TCls, otherwise it
+  // will be a TCtx (= TObj | TCctx | TNullptr) read from the stack
+  assertx(!ctx || ctx->type() <= (TCtx | TCls));
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     auto arFunc = gen(env, LdARFuncPtr,

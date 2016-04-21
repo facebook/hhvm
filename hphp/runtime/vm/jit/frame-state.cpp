@@ -182,6 +182,11 @@ bool merge_into(FrameState& dst, const FrameState& src) {
       changed = true;
     }
 
+    if (dstInfo.ctxType != srcInfo.ctxType) {
+      dstInfo.ctxType |= srcInfo.ctxType;
+      changed = true;
+    }
+
     // Merge the Funcs
     if (dstInfo.func != nullptr && dstInfo.func != srcInfo.func) {
       dstInfo.func = nullptr;
@@ -596,6 +601,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     if (isFPush(extra.opcode)) {
       cur().fpiStack.push_front(FPIInfo { cur().spValue,
                                           cur().irSPOff,
+                                          TCtx,
                                           nullptr,
                                           extra.opcode,
                                           nullptr,
@@ -1439,8 +1445,16 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
   m_fpushOverride.clear();
 
   cur().bcSPOff += kNumActRecCells;
-  cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, opc, func,
-                                      false /* interp */, false /* spans */ });
+  cur().fpiStack.push_front(FPIInfo {
+    cur().spValue,
+    retOffset,
+    ctx ? ctx->type() : TCtx,
+    ctx,
+    opc,
+    func,
+    false /* interp */,
+    false /* spans */
+  });
 }
 
 void FrameStateMgr::clearStackForCall() {

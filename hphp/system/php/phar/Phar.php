@@ -65,10 +65,6 @@ class Phar extends RecursiveDirectoryIterator
 
   protected $iteratorRoot;
   protected $iterator;
-  /**
-   * @var null|resource
-   */
-  private $fp;
 
   /**
    * ( excerpt from http://php.net/manual/en/phar.construct.php )
@@ -96,11 +92,12 @@ class Phar extends RecursiveDirectoryIterator
       throw new UnexpectedValueException("$fname is not a file");
     }
     $this->iteratorRoot = 'phar://'.realpath($fname).'/';
-    $this->fp = fopen($fname, 'rb');
+    $fp = fopen($fname, 'rb');
 
-    $magic_number = fread($this->fp, 4);
+    $magic_number = fread($fp, 4);
     // This is not a bullet-proof check, but should be good enough to catch ZIP
     if (strcmp($magic_number, "PK\x03\x04") === 0) {
+      fclose($fp);
       $this->construct_zip($fname, $flags, $alias);
       return;
     }
@@ -112,8 +109,9 @@ class Phar extends RecursiveDirectoryIterator
     if (strpos($magic_number, "\x1F\x8B") === 0) {
       $this->compressed = self::GZ;
     }
-    fseek($this->fp, 127);
-    $magic_number = fread($this->fp, 8);
+    fseek($fp, 127);
+    $magic_number = fread($fp, 8);
+    fclose($fp);
     // Compressed or just Tar
     if (
       $this->compressed ||
@@ -988,8 +986,7 @@ class Phar extends RecursiveDirectoryIterator
    * @throws PharException
    */
   private function construct_phar ($fname, $flags, $alias) {
-    fseek($this->fp, 0);
-    $data = stream_get_contents($this->fp);
+    $data = file_get_contents($fname);
 
     $pos = strpos($data, self::HALT_TOKEN);
     if ($pos === false && !self::$preventHaltTokenCheck) {
@@ -1377,11 +1374,5 @@ class Phar extends RecursiveDirectoryIterator
 
   public function getChildren() {
     return $this->getIterator()->getChildren();
-  }
-
-  private function __destruct() {
-    if ($this->fp !== null) {
-      fclose($this->fp);
-    }
   }
 }

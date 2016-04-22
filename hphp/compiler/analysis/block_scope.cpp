@@ -38,7 +38,7 @@ Mutex BlockScope::s_constMutex;
 
 BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
-  : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
+  : m_docComment(docComment), m_stmt(stmt),
     m_kind(kind), m_loopNestedLevel(0),
     m_pass(0), m_updated(0), m_runId(0), m_mark(MarkWaitingInQueue),
     m_effectsTag(1), m_numDepsToWaitFor(0),

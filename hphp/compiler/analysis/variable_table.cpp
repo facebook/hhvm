@@ -31,7 +31,6 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/static_member_expression.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/parser/location.h"
 #include "hphp/parser/parser.h"
 

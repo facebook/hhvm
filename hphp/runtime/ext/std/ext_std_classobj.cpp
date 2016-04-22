@@ -16,13 +16,13 @@
 */
 
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
+
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
 
@@ -50,15 +50,15 @@ static const Class* get_cls(const Variant& class_or_object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array HHVM_FUNCTION(get_declared_classes) {
-  return ClassInfo::GetClasses();
+  return Unit::getClassesInfo();
 }
 
 Array HHVM_FUNCTION(get_declared_interfaces) {
-  return ClassInfo::GetInterfaces();
+  return Unit::getInterfacesInfo();
 }
 
 Array HHVM_FUNCTION(get_declared_traits) {
-  return ClassInfo::GetTraits();
+  return Unit::getTraitsInfo();
 }
 
 bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,

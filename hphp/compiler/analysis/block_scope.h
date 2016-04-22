@@ -137,9 +137,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
   void decLoopNestedLevel();
   int getLoopNestedLevel() const { return m_loopNestedLevel;}
 
-  void setClassInfoAttribute(int flag) {
-    m_attributeClassInfo |= flag;
-  }
   const std::string &getDocComment() const { return m_docComment;}
   void setDocComment(const std::string &doc) { m_docComment = doc;}
 
@@ -215,7 +212,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
 
 protected:
   std::string m_scopeName;
-  int m_attributeClassInfo;
   std::string m_docComment;
   StatementPtr m_stmt;
   KindOf m_kind;

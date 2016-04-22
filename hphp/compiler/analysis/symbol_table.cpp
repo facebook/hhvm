@@ -27,7 +27,6 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/util/logger.h"
@@ -139,10 +138,10 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
   ms.add("line", m_declaration ? m_declaration->line0() : 0);
 
   int mods = 0;
-  if (isPublic())    mods |= ClassInfo::IsPublic;
-  if (isProtected()) mods |= ClassInfo::IsProtected;
-  if (isPrivate())   mods |= ClassInfo::IsPrivate;
-  if (isStatic())    mods |= ClassInfo::IsStatic;
+  if (isPublic())    mods |= AttrPublic;
+  if (isProtected()) mods |= AttrProtected;
+  if (isPrivate())   mods |= AttrPrivate;
+  if (isStatic())    mods |= AttrStatic;
   ms.add("modifiers", mods);
 
   ms.add("initializer");

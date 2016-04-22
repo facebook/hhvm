@@ -22,8 +22,6 @@
 
 #include "hphp/compiler/hphp.h"
 
-#include "hphp/runtime/base/class-info.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

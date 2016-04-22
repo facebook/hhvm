@@ -43,7 +43,6 @@
 #include "hphp/compiler/statement/use_trait_statement.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 
@@ -1048,14 +1047,22 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
 
   int mods = 0;
   switch (m_kindOf) {
-    case KindOf::AbstractClass: mods |= ClassInfo::IsAbstract; break;
+    case KindOf::AbstractClass:
+      mods |= AttrAbstract;
+      break;
     case KindOf::Enum:
     case KindOf::FinalClass:
-      mods |= ClassInfo::IsFinal; break;
+      mods |= AttrFinal;
+      break;
     case KindOf::UtilClass:
-      mods |= ClassInfo::IsFinal | ClassInfo::IsAbstract; break;
-    case KindOf::Interface:     mods |= ClassInfo::IsInterface; break;
-    case KindOf::Trait:         mods |= ClassInfo::IsTrait; break;
+      mods |= AttrFinal | AttrAbstract;
+      break;
+    case KindOf::Interface:
+      mods |= AttrInterface;
+      break;
+    case KindOf::Trait:
+      mods |= AttrTrait;
+      break;
     case KindOf::ObjectClass:
       break;
   }

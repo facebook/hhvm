@@ -364,6 +364,7 @@ private:
 
   static StringToFunctionInfoPtrMap s_refParamInfo;
 
+  int m_coerceMode{0};
   int m_minParam;
   int m_numDeclParams;
   int m_attribute;

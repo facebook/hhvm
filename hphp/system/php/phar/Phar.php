@@ -30,6 +30,8 @@ class Phar extends RecursiveDirectoryIterator
   const PHP = 1;
   const PHPS = 2;
 
+  const HALT_TOKEN = '__HALT_COMPILER();';
+
   /**
    * A map from filename_or_alias => Phar object
    */
@@ -50,6 +52,10 @@ class Phar extends RecursiveDirectoryIterator
   private $manifest;
   private $contents;
   private $signature;
+  /**
+   * @var bool|int
+   */
+  private $compressed = false;
 
   private $count;
   private $apiVersion;
@@ -60,6 +66,8 @@ class Phar extends RecursiveDirectoryIterator
   private $iteratorRoot;
   private $iterator;
 
+  private $fp;
+
   /**
    * ( excerpt from http://php.net/manual/en/phar.construct.php )
    *
@@ -67,7 +75,7 @@ class Phar extends RecursiveDirectoryIterator
    * @param string $fname Path to an existing Phar archive or to-be-created
    *                      archive. The file name's extension must contain
    *                      .phar.
-   * @param string $flags Flags to pass to parent class
+   * @param int $flags    Flags to pass to parent class
    *                      RecursiveDirectoryIterator.
    * @param string $alias Alias with which this Phar archive should be referred
    *                      to in calls to stream functionality.
@@ -85,45 +93,35 @@ class Phar extends RecursiveDirectoryIterator
     if (!is_file($fname)) {
       throw new UnexpectedValueException("$fname is not a file");
     }
-    $data = file_get_contents($fname);
+    $this->fp = fopen($fname, 'rb');
 
-    $halt_token = '__HALT_COMPILER();';
-    $pos = strpos($data, $halt_token);
-    if ($pos === false && !self::$preventHaltTokenCheck) {
-      throw new PharException('__HALT_COMPILER(); must be declared in a phar');
+    $magic_number = fread($this->fp, 4);
+    // This is not a bullet-proof check, but should be good enough to catch ZIP
+    if (strcmp($magic_number, "PK\x03\x04") === 0) {
+      $this->construct_zip($fname, $flags, $alias);
+      return;
     }
-    $this->stub = substr($data, 0, $pos);
-
-    $pos += strlen($halt_token);
-    // *sigh*. We have to allow whitespace then ending the file
-    // before we start the manifest
-    while ($data[$pos] == ' ') {
-      $pos += 1;
+    // Tar + BZ2
+    if (strpos($magic_number, 'BZ') === 0) {
+      $this->compressed = self::BZ2;
     }
-    if ($data[$pos] == '?' && $data[$pos+1] == '>') {
-      $pos += 2;
+    // Tar + GZ
+    if (strpos($magic_number, "\x1F\x8B") === 0) {
+      $this->compressed = self::GZ;
     }
-    while ($data[$pos] == "\r") {
-      $pos += 1;
+    fseek($this->fp, 127);
+    $magic_number = fread($this->fp, 8);
+    // Compressed or just Tar
+    if (
+      $this->compressed ||
+      strpos($magic_number, "ustar\x0") === 0 ||
+      strpos($magic_number, "ustar\x40\x40\x0") === 0
+    ) {
+      $this->construct_tar($fname, $flags, $alias);
+      return;
     }
-    while ($data[$pos] == "\n") {
-      $pos += 1;
-    }
-
-    $this->contents = substr($data, $pos);
-    $this->parsePhar($data, $pos);
-
-    if ($alias) {
-      self::$aliases[$alias] = $this;
-    }
-    // From the manifest
-    if ($this->alias) {
-      self::$aliases[$this->alias] = $this;
-    }
-    // We also do filename lookups
-    self::$aliases[$fname] = $this;
-
-    $this->iteratorRoot = 'phar://'.realpath($fname).'/';
+    // Otherwise Phar
+    $this->construct_phar($fname, $flags, $alias);
   }
 
   /**
@@ -532,7 +530,7 @@ class Phar extends RecursiveDirectoryIterator
    * @return mixed Phar::GZ, Phar::BZ2 or <b>FALSE</b>
    */
   public function isCompressed() {
-    return false;
+    return $this->compressed;
   }
 
   /**
@@ -977,6 +975,77 @@ class Phar extends RecursiveDirectoryIterator
     // This is in the default stub, but lets ignore it for now
   }
 
+  /**
+   * @param string $fname
+   * @param int $flags
+   * @param string $alias
+   *
+   * @throws PharException
+   */
+  private function construct_phar ($fname, $flags, $alias) {
+    fseek($this->fp, 0);
+    $data = stream_get_contents($this->fp);
+
+    $pos = strpos($data, self::HALT_TOKEN);
+    if ($pos === false && !self::$preventHaltTokenCheck) {
+      throw new PharException(self::HALT_TOKEN.' must be declared in a phar');
+    }
+    $this->stub = substr($data, 0, $pos);
+
+    $pos += strlen(self::HALT_TOKEN);
+    // *sigh*. We have to allow whitespace then ending the file
+    // before we start the manifest
+    while ($data[$pos] == ' ') {
+      $pos += 1;
+    }
+    if ($data[$pos] == '?' && $data[$pos+1] == '>') {
+      $pos += 2;
+    }
+    while ($data[$pos] == "\r") {
+      $pos += 1;
+    }
+    while ($data[$pos] == "\n") {
+      $pos += 1;
+    }
+
+    $this->contents = substr($data, $pos);
+    $this->parsePhar($data, $pos);
+
+    if ($alias) {
+      self::$aliases[$alias] = $this;
+    }
+    // From the manifest
+    if ($this->alias) {
+      self::$aliases[$this->alias] = $this;
+    }
+    // We also do filename lookups
+    self::$aliases[$fname] = $this;
+
+    $this->iteratorRoot = 'phar://'.realpath($fname).'/';
+  }
+
+  /**
+   * @param string $fname
+   * @param int $flags
+   * @param string $alias
+   *
+   * @throws PharException
+   */
+  private function construct_zip ($fname, $flags, $alias) {
+    // TODO: ZIP support
+  }
+
+  /**
+   * @param string $fname
+   * @param int $flags
+   * @param string $alias
+   *
+   * @throws PharException
+   */
+  private function construct_tar ($fname, $flags, $alias) {
+    // TODO: Tar support
+  }
+
   private static function bytesToInt($str, &$pos, $len) {
     if (strlen($str) < $pos + $len) {
       throw new PharException(
@@ -1301,5 +1370,11 @@ class Phar extends RecursiveDirectoryIterator
 
   public function getChildren() {
     return $this->getIterator()->getChildren();
+  }
+
+  private function __destruct() {
+    if ($this->fp !== null) {
+      fclose($this->fp);
+    }
   }
 }

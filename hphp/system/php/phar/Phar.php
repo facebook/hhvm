@@ -38,6 +38,10 @@ class Phar extends RecursiveDirectoryIterator
    * Prevent the check for __HALT_COMPILER()
    */
   private static $preventHaltTokenCheck = false;
+  /**
+   * Prevent the check for file extension
+   */
+  private static $preventExtCheck = false;
 
   private $alias;
   private $fileInfo = array();
@@ -72,6 +76,12 @@ class Phar extends RecursiveDirectoryIterator
    * @throws UnexpectedValueException
    */
   public function __construct($fname, $flags = null, $alias = null) {
+    if (!self::$preventExtCheck && !in_array('phar', explode('.', $fname))) {
+      throw new UnexpectedValueException(
+        "Cannot create phar '$fname', file extension (or combination) not".
+        ' recognised or the directory does not exist'
+      );
+    }
     if (!is_file($fname)) {
       throw new UnexpectedValueException("$fname is not a file");
     }
@@ -852,7 +862,11 @@ class Phar extends RecursiveDirectoryIterator
    * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
    */
   final public static function loadPhar($filename, $alias = null) {
+    // We need this hack because the stream wrapper should work
+    // even without the __HALT_COMPILER token
+    self::$preventHaltTokenCheck = true;
     new self($filename, null, $alias);
+    self::$preventHaltTokenCheck = false;
     return true;
   }
 
@@ -871,7 +885,10 @@ class Phar extends RecursiveDirectoryIterator
    * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
    */
   public static function mapPhar($alias = null, $dataoffset = 0) {
+    // We need this hack because extension check during mapping is not needed
+    self::$preventExtCheck = true;
     new self(debug_backtrace()[0]['file'], null, $alias);
+    self::$preventExtCheck = false;
     return true;
   }
 
@@ -1189,11 +1206,7 @@ class Phar extends RecursiveDirectoryIterator
       if (is_file($filename)) {
 
         if (!isset(self::$aliases[$filename])) {
-          // We need this hack because the stream wrapper should work
-          // even without the __HALT_COMPILER token
-          self::$preventHaltTokenCheck = true;
           self::loadPhar($filename);
-          self::$preventHaltTokenCheck = false;
         }
 
         return array(

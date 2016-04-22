@@ -1,0 +1,4 @@
+Fatal error: Uncaught exception 'UnexpectedValueException' with message 'Cannot create phar '%s', file extension (or combination) not recognised or the directory does not exist' in %s:3
+Stack trace:
+#0 %s(3): Phar->__construct()
+#1 {main}

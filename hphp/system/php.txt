@@ -71,6 +71,7 @@ hphp/system/php/redis/RedisException.php
 
 hphp/system/php/archive_handler/ArchiveHandler.ns.php
 hphp/system/php/archive_handler/TarArchiveHandler.ns.php
+hphp/system/php/archive_handler/PharArchiveHandler.ns.php
 hphp/system/php/archive_handler/ZipArchiveHandler.ns.php
 
 hphp/system/php/phar/PharException.php

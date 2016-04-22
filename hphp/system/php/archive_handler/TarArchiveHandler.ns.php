@@ -1,16 +1,17 @@
 <?php
 
 namespace __SystemLib {
+  use Exception;
+  use Phar;
+  use PharException;
+
   final class TarArchiveHandler extends ArchiveHandler {
-    private Map<string, ArchiveEntryData> $entries = Map { };
     private Map<string, string> $contents = Map { };
     private Map<string, string> $symlinks = Map { };
     private string $path = '';
-    private $fp = null;
 
     public function __construct(string $path) {
       $this->path = $path;
-      $this->entries = Map { };
 
       if (file_exists($path)) {
         $this->readTar();
@@ -32,8 +33,10 @@ namespace __SystemLib {
       if ($data === "\37\213") {
         $fp = gzopen($path, 'rb');
       } else if ($data === 'BZ') {
+        $this->compressed = Phar::BZ2;
         $fp = bzopen($path, 'r');
       } else {
+        $this->compressed = Phar::GZ;
         $fp = fopen($path, 'rb');
       }
 
@@ -57,7 +60,7 @@ namespace __SystemLib {
         $this->entries[$filename] = new ArchiveEntryStat(
           /* crc = */ null,
           $len,
-          /* compressed size = */ null,
+          /* compressed size = */ $len,
           $timestamp
         );
         $data = "";
@@ -89,21 +92,17 @@ namespace __SystemLib {
             break;
 
           default:
-            throw new \Exception("type $type is not implemented yet");
+            throw new Exception("type $type is not implemented yet");
         }
 
         if ($len % 512 !== 0) {
           $leftover = 512 - ($len % 512);
           $zeros = fread($fp, $leftover);
           if (strlen(trim($zeros)) != 0) {
-            throw new \Exception("Malformed tar. Padding isn't zeros. $zeros");
+            throw new Exception("Malformed tar. Padding isn't zeros. $zeros");
           }
         }
       }
-    }
-
-    public function getContentsList(): Map<string, ArchiveEntryStat> {
-      return $this->entries;
     }
 
     public function read(string $path): ?string {
@@ -203,6 +202,15 @@ namespace __SystemLib {
         fclose($this->fp);
         $this->fp = null;
       }
+    }
+
+    // Custom methods used by Phar class internally
+
+    public function getFileContents(string $filename): string {
+      if (!isset($this->contents[$filename])) {
+        throw new PharException("No $filename in phar");
+      }
+      return $this->contents[$filename];
     }
   }
 }

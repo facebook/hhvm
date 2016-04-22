@@ -1,47 +1,40 @@
 <?php
 
 namespace __SystemLib {
+  use PharException;
+  use ZipArchive;
+
   final class ZipArchiveHandler extends ArchiveHandler {
-    private \ZipArchive $za;
-    private ?Map<string, ArchiveEntryData> $contents;
-    private string $path = '';
+    private ZipArchive $za;
 
     public function __construct(string $path) {
-      $this->path = $path;
-      $this->za = new \ZipArchive();
+      $this->za = new ZipArchive();
       if (file_exists($path)) {
         $this->za->open($path);
+        $this->fillEntries();
       } else {
-        $this->za->open($path, \ZipArchive::CREATE);
+        $this->za->open($path, ZipArchive::CREATE);
       }
     }
 
-    public function close(): void {
-      $this->za->close();
-    }
-
-    public function getContentsList(): Map<string, ArchiveEntryStat> {
-      $contents = $this->contents;
-      if ($contents !== null) {
-        return $contents;
-      }
-
-      $contents = Map { };
+    private function fillEntries() {
       for ($i = 0; $i < $this->za->numFiles; ++$i) {
         $fname = $this->za->getNameIndex($i);
         if (substr($fname, -1) === '/') {
           continue;
         }
         $stat = $this->za->statIndex($i);
-        $contents[$fname] = new ArchiveEntryStat(
+        $this->entries[$fname] = new ArchiveEntryStat(
           $stat['crc'],
           $stat['size'],
-          $stat['comp_size'],
+          $stat['comp_size'] ?: $stat['size'],
           $stat['mtime'],
         );
       }
-      $this->contents = $contents;
-      return $contents;
+    }
+
+    public function close(): void {
+      $this->za->close();
     }
 
     public function read(string $path): ?string {
@@ -58,6 +51,15 @@ namespace __SystemLib {
 
     public function addFile(string $path, string $archive_path): bool {
       return $this->za->addFile($path, $archive_path);
+    }
+
+    // Custom methods used by Phar class internally
+
+    public function getFileContents(string $filename): string {
+      if ($this->za->locateName($filename) === false) {
+        throw new PharException("No $filename in phar");
+      }
+      return $this->getFromName($filename);
     }
   }
 }

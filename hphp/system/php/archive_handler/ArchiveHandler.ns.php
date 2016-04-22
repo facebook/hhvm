@@ -22,7 +22,7 @@ namespace __SystemLib {
     protected ?string $signature;
     protected $compressed = false;
 
-    abstract public function read(string $path): ?string;
+    abstract public function read(string $path): string;
     abstract public function extractAllTo(string $path);
     abstract public function addFile(string $path, string $archivePath): bool;
     abstract public function close(): void;
@@ -77,8 +77,6 @@ namespace __SystemLib {
     }
 
     // Custom methods used by Phar class internally
-
-    abstract public function getFileContents(string $filename): string;
 
     public function getEntriesMap(): Map<string, ArchiveEntryStat> {
       return $this->entries;

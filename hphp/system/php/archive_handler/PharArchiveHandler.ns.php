@@ -162,12 +162,16 @@ namespace __SystemLib {
       //TODO
     }
 
-    public function read(string $path): ?string {
-      $data = $this->za->getFromName($path);
-      if ($data === false) {
-        return null;
+    public function read(string $path): string {
+      if (!isset($this->fileOffsets[$path])) {
+        throw new PharException("No $path in phar");
       }
-      return $data;
+      list($offset, $size) = $this->fileOffsets[$path];
+      if ($size == 0) {
+        return '';
+      }
+      fseek($this->fp, $offset);
+      return fread($this->fp, $size);
     }
 
     public function extractAllTo(string $path) {
@@ -176,20 +180,6 @@ namespace __SystemLib {
 
     public function addFile(string $path, string $archive_path): bool {
       //TODO
-    }
-
-    // Custom methods used by Phar class internally
-
-    public function getFileContents(string $filename): string {
-      if (!isset($this->fileOffsets[$filename])) {
-        throw new PharException("No $filename in phar");
-      }
-      list($offset, $size) = $this->fileOffsets[$filename];
-      if ($size == 0) {
-        return '';
-      }
-      fseek($this->fp, $offset);
-      return fread($this->fp, $size);
     }
   }
 }

@@ -127,10 +127,11 @@ namespace __SystemLib {
       }
     }
 
-    public function read(string $path): ?string {
-      if ($this->contents->contains($path)) {
-        return $this->contents[$path];
+    public function read(string $path): string {
+      if (!$this->contents->contains($path)) {
+        throw new PharException("No $path in phar");
       }
+      return $this->contents[$path];
     }
 
     private function createFullPath(
@@ -224,15 +225,6 @@ namespace __SystemLib {
         fclose($this->fp);
         $this->fp = null;
       }
-    }
-
-    // Custom methods used by Phar class internally
-
-    public function getFileContents(string $filename): string {
-      if (!isset($this->contents[$filename])) {
-        throw new PharException("No $filename in phar");
-      }
-      return $this->contents[$filename];
     }
   }
 }

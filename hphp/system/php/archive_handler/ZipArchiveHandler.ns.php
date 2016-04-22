@@ -58,10 +58,10 @@ namespace __SystemLib {
       $this->za->close();
     }
 
-    public function read(string $path): ?string {
+    public function read(string $path): string {
       $data = $this->za->getFromName($path);
       if ($data === false) {
-        return null;
+        throw new PharException("No $path in phar");
       }
       return $data;
     }
@@ -72,15 +72,6 @@ namespace __SystemLib {
 
     public function addFile(string $path, string $archive_path): bool {
       return $this->za->addFile($path, $archive_path);
-    }
-
-    // Custom methods used by Phar class internally
-
-    public function getFileContents(string $filename): string {
-      if ($this->za->locateName($filename) === false) {
-        throw new PharException("No $filename in phar");
-      }
-      return $this->getFromName($filename);
     }
   }
 }

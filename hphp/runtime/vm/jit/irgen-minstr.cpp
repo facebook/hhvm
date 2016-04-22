@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/vm/jit/irgen-arith.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -1630,6 +1631,50 @@ void emitIncDecM(IRGS& env, int32_t nDiscard, IncDecOp incDec, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
+/*
+ * If the op and operand types are a supported combination, return the modified
+ * value. Otherwise, return nullptr.
+ *
+ * If the resulting value is a refcounted type, it will have one unconsumed
+ * reference.
+ */
+SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
+  auto const maybeOp = [&]() -> folly::Optional<Op> {
+    switch (op) {
+    case SetOpOp::PlusEqual:   return Op::Add;
+    case SetOpOp::MinusEqual:  return Op::Sub;
+    case SetOpOp::MulEqual:    return Op::Mul;
+    case SetOpOp::PlusEqualO:  return folly::none;
+    case SetOpOp::MinusEqualO: return folly::none;
+    case SetOpOp::MulEqualO:   return folly::none;
+    case SetOpOp::DivEqual:    return folly::none;
+    case SetOpOp::ConcatEqual: return folly::none;
+    case SetOpOp::ModEqual:    return folly::none;
+    case SetOpOp::PowEqual:    return folly::none;
+    case SetOpOp::AndEqual:    return Op::BitAnd;
+    case SetOpOp::OrEqual:     return Op::BitOr;
+    case SetOpOp::XorEqual:    return Op::BitXor;
+    case SetOpOp::SlEqual:     return folly::none;
+    case SetOpOp::SrEqual:     return folly::none;
+    }
+    not_reached();
+  }();
+
+  if (!maybeOp) return nullptr;
+
+  auto const bcOp = *maybeOp;
+  if (!areBinaryArithTypesSupported(bcOp, lhs->type(), rhs->type())) {
+    return nullptr;
+  }
+
+  lhs = promoteBool(env, lhs);
+  rhs = promoteBool(env, rhs);
+
+  auto const hhirOp = isBitOp(bcOp) ? bitOp(bcOp)
+                                    : promoteBinaryDoubles(env, bcOp, lhs, rhs);
+  return gen(env, hhirOp, lhs, rhs);
+}
+
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
                       SSATmp* key, SSATmp* rhs) {
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
@@ -1639,10 +1684,17 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     auto propPtr =
       emitPropSpecialized(env, base, key, false, MOpFlags::Define, propInfo);
     propPtr = gen(env, UnboxPtr, propPtr);
-    auto const propTy = propPtr->type().deref();
+
+    auto const lhs = gen(env, LdMem, propPtr->type().deref(), propPtr);
+    if (auto const result = inlineSetOp(env, op, lhs, rhs)) {
+      gen(env, StMem, propPtr, result);
+      gen(env, DecRef, DecRefData{}, lhs);
+      gen(env, IncRef, result);
+      return result;
+    }
 
     gen(env, SetOpCell, SetOpData{op}, propPtr, rhs);
-    auto newVal = gen(env, LdMem, propTy, propPtr);
+    auto newVal = gen(env, LdMem, propPtr->type().deref(), propPtr);
     gen(env, IncRef, newVal);
     return newVal;
   }

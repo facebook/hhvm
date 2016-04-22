@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/irgen-arith.h"
+
 #include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -24,11 +26,7 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-const StaticString s_emptyString("");
+static const StaticString s_emptyString("");
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
@@ -127,6 +125,8 @@ Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
   return opc;
 }
 
+namespace {
+
 void binaryBitOp(IRGS& env, Op op) {
   auto const type2 = topC(env, BCSPRelOffset{0})->type();
   auto const type1 = topC(env, BCSPRelOffset{1})->type();
@@ -146,7 +146,6 @@ void binaryArith(IRGS& env, Op op) {
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     // either an int or a dbl, but can't tell
     PUNT(BinaryArith-Unsupported);
-    return;
   }
 
   auto const exitSlow = makeExitSlow(env);

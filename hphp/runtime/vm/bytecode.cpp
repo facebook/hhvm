@@ -1856,7 +1856,7 @@ OPTBLD_INLINE void iopString(const StringData* s) {
   vmStack().pushStaticString(s);
 }
 
-OPTBLD_INLINE void iopArray(ArrayData* a) {
+OPTBLD_INLINE void iopArray(const ArrayData* a) {
   vmStack().pushStaticArray(a);
 }
 
@@ -6336,7 +6336,7 @@ TCA iopWrapper(Op, void(*fn)(local_var,SilenceOp), PC& pc) {
   return nullptr;
 }
 
-OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(ArrayData*), PC& pc) {
+OPTBLD_INLINE static TCA iopWrapper(Op, void(*fn)(const ArrayData*), PC& pc) {
   auto id = decode<Id>(pc);
   auto a = vmfp()->m_func->unit()->lookupArrayId(id);
   fn(a);

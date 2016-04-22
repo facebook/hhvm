@@ -441,7 +441,7 @@ public:
   /*
    * Look up a scalar array by ID.
    */
-  ArrayData* lookupArrayId(Id id) const;
+  const ArrayData* lookupArrayId(Id id) const;
 
 
   /////////////////////////////////////////////////////////////////////////////

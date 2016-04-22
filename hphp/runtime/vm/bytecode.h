@@ -606,7 +606,7 @@ public:
   }
 
   ALWAYS_INLINE
-  void pushStaticArray(ArrayData* a) {
+  void pushStaticArray(const ArrayData* a) {
     assert(a->isStatic()); // No need to call a->incRefCount().
     assert(m_top != m_elms);
     m_top--;

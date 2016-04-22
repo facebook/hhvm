@@ -90,8 +90,8 @@ void ProfData::setProfiling(FuncId funcId) {
   }
 }
 
-TransID ProfData::addTransProfile(const RegionDescPtr& region,
-                                  const PostConditions& pconds) {
+void ProfData::addTransProfile(const RegionDescPtr& region,
+                               const PostConditions& pconds) {
   TransID transId = m_numTrans++;
   auto const lastBcOff = region->lastSrcKey().offset();
 
@@ -122,7 +122,13 @@ TransID ProfData::addTransProfile(const RegionDescPtr& region,
   }
 
   m_funcProfTrans[funcId].push_back(transId);
-  return transId;
+}
+
+void ProfData::addTransNonProf() {
+  if (Translator::isTransDBEnabled()) {
+    m_numTrans++;
+    m_transRecs.emplace_back(nullptr);
+  }
 }
 
 TransID ProfData::addTransProflogue(SrcKey sk, int nArgs) {

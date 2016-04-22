@@ -303,8 +303,17 @@ struct ProfData {
    * Record a profiling translation: creates a ProfTransRec and returns the
    * associated TransID.
    */
-  TransID addTransProfile(const RegionDescPtr&, const PostConditions&);
   TransID addTransProflogue(SrcKey, int);
+  void addTransProfile(const RegionDescPtr&, const PostConditions&);
+
+  /*
+   * This method only has effect when the Translator's TransDB is enabled, in
+   * which case this method just adds an empty record and increments the current
+   * TransID.  This has the purpose of keeping the TransIDs in ProfData aligned
+   * with those in Translator's TransDB, which is convenient when looking at
+   * TC dumps.
+   */
+  void addTransNonProf();
 
   /*
    * Check if a (function|SrcKey) has been marked as optimized.

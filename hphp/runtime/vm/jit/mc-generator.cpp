@@ -1816,9 +1816,13 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
                        false, false);
-  if (RuntimeOption::EvalJitPGO && args.kind == TransKind::Profile) {
-    always_assert(args.region);
-    m_tx.profData()->addTransProfile(args.region, env.pconds);
+  if (RuntimeOption::EvalJitPGO) {
+    if (args.kind == TransKind::Profile) {
+      always_assert(args.region);
+      m_tx.profData()->addTransProfile(args.region, env.pconds);
+    } else {
+      m_tx.profData()->addTransNonProf();
+    }
   }
 
   auto tr = maker.rec(sk, args.kind, args.region, fixups.bcMap,

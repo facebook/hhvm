@@ -51,7 +51,7 @@
 
 #define IS_LABEL_START(c) \
   (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || \
-   (c) == '_' || (c) >= 0x7F)
+   (c) == '_' || ((unsigned char) c) >= 0x7F)
 
 /**
  * "Next token types" tell us how to interpret the next characters in the

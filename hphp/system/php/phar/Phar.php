@@ -99,30 +99,35 @@ class Phar extends RecursiveDirectoryIterator
     if (strcmp($magic_number, "PK\x03\x04") === 0) {
       fclose($fp);
       $this->construct_zip($fname, $flags, $alias);
-      return;
+    } else {
+      // Tar + BZ2
+      if (strpos($magic_number, 'BZ') === 0) {
+        $this->compressed = self::BZ2;
+      }
+      // Tar + GZ
+      if (strpos($magic_number, "\x1F\x8B") === 0) {
+        $this->compressed = self::GZ;
+      }
+      fseek($fp, 127);
+      $magic_number = fread($fp, 8);
+      fclose($fp);
+      // Compressed or just Tar
+      if (
+        $this->compressed ||
+        strpos($magic_number, "ustar\x0") === 0 ||
+        strpos($magic_number, "ustar\x40\x40\x0") === 0
+      ) {
+        $this->construct_tar($fname, $flags, $alias);
+      } {
+        // Otherwise Phar
+        $this->construct_phar($fname, $flags, $alias);
+      }
     }
-    // Tar + BZ2
-    if (strpos($magic_number, 'BZ') === 0) {
-      $this->compressed = self::BZ2;
+    if ($alias) {
+      self::$aliases[$alias] = $this;
     }
-    // Tar + GZ
-    if (strpos($magic_number, "\x1F\x8B") === 0) {
-      $this->compressed = self::GZ;
-    }
-    fseek($fp, 127);
-    $magic_number = fread($fp, 8);
-    fclose($fp);
-    // Compressed or just Tar
-    if (
-      $this->compressed ||
-      strpos($magic_number, "ustar\x0") === 0 ||
-      strpos($magic_number, "ustar\x40\x40\x0") === 0
-    ) {
-      $this->construct_tar($fname, $flags, $alias);
-      return;
-    }
-    // Otherwise Phar
-    $this->construct_phar($fname, $flags, $alias);
+    // We also do filename lookups
+    self::$aliases[$fname] = $this;
   }
 
   /**
@@ -1013,15 +1018,10 @@ class Phar extends RecursiveDirectoryIterator
     $this->contents = substr($data, $pos);
     $this->parsePhar($data, $pos);
 
-    if ($alias) {
-      self::$aliases[$alias] = $this;
-    }
     // From the manifest
     if ($this->alias) {
       self::$aliases[$this->alias] = $this;
     }
-    // We also do filename lookups
-    self::$aliases[$fname] = $this;
   }
 
   /**

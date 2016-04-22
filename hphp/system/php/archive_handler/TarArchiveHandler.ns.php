@@ -10,11 +10,22 @@ namespace __SystemLib {
     private Map<string, string> $symlinks = Map { };
     private string $path = '';
 
-    public function __construct(string $path) {
+    public function __construct(
+      string $path,
+      bool $preventHaltTokenCheck = true
+    ) {
       $this->path = $path;
 
       if (file_exists($path)) {
         $this->readTar();
+        if (
+          !$preventHaltTokenCheck &&
+          strpos($this->stub, Phar::HALT_TOKEN) === false
+        ) {
+          throw new PharException(
+            Phar::HALT_TOKEN.' must be declared in a phar'
+          );
+        }
       }
     }
 
@@ -56,14 +67,9 @@ namespace __SystemLib {
 
         $len = octdec(substr($header, 124, 12));
         $timestamp = octdec(trim(substr($header, 136, 12)));
-        $type = substr($header, 156, 1);
-        $this->entries[$filename] = new ArchiveEntryStat(
-          /* crc = */ null,
-          $len,
-          /* compressed size = */ $len,
-          $timestamp
-        );
-        $data = "";
+        $type = $header[156];
+
+        $data = '';
         $read_len = 0;
         while ($read_len != $len) {
           $read_data = fread($fp, $len - $read_len);
@@ -71,28 +77,44 @@ namespace __SystemLib {
           $read_len += strlen($read_data);
         }
 
-        switch ($type) {
-          case 'L':
-            $next_file_name = trim($data);
-            break;
+        // Hidden .phar directory should not appear in files listing
+        if (strpos($filename, '.phar') === 0) {
+          if ($filename == '.phar/stub.php') {
+            $this->stub = $data;
+          } else if ($filename == '.phar/alias.txt') {
+            $this->alias = $data;
+          }
+        } else if (substr($filename, -1) !== '/') {
+          $this->entries[$filename] = new ArchiveEntryStat(
+            /* crc = */ null,
+            $len,
+            /* compressed size = */ $len,
+            $timestamp
+          );
 
-          case '0':
-          case "\0":
-            $this->contents[$filename] = $data;
-            break;
+          switch ($type) {
+            case 'L':
+              $next_file_name = trim($data);
+              break;
 
-          case '2':
-            // Assuming this is from GNU Tar
-            $target = trim(substr($header, 157, 100), "\0");
-            $this->symlinks[$filename] = $target;
-            break;
+            case '0':
+            case "\0":
+              $this->contents[$filename] = $data;
+              break;
 
-          case '5':
-            // Directory, ignore
-            break;
+            case '2':
+              // Assuming this is from GNU Tar
+              $target = trim(substr($header, 157, 100), "\0");
+              $this->symlinks[$filename] = $target;
+              break;
 
-          default:
-            throw new Exception("type $type is not implemented yet");
+            case '5':
+              // Directory, ignore
+              break;
+
+            default:
+              throw new Exception("type $type is not implemented yet");
+          }
         }
 
         if ($len % 512 !== 0) {

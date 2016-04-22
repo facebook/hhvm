@@ -7,7 +7,10 @@ namespace __SystemLib {
   final class PharArchiveHandler extends ArchiveHandler {
     private array<string, array> $fileInfo = array();
     private int $archiveFlags;
-    public function __construct(string $path, $preventHaltTokenCheck) {
+    public function __construct(
+      string $path,
+      bool $preventHaltTokenCheck = true
+    ) {
       $this->fp = fopen($path, 'rb');
       $data = file_get_contents($path);
 

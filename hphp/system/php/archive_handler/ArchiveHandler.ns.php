@@ -27,6 +27,11 @@ namespace __SystemLib {
     abstract public function addFile(string $path, string $archivePath): bool;
     abstract public function close(): void;
 
+    abstract public function __construct(
+      string $path,
+      bool $preventHaltTokenCheck = true
+    );
+
     public function stat(string $path): ?ArchiveEntryStat {
       return $this->getEntriesMap()->get($path);
     }

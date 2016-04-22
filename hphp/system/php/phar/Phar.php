@@ -86,7 +86,10 @@ class Phar extends RecursiveDirectoryIterator
     // This is not a bullet-proof check, but should be good enough to catch ZIP
     if (strcmp($magic_number, "PK\x03\x04") === 0) {
       fclose($fp);
-      $this->construct_zip($fname);
+      $this->archiveHandler = new __SystemLib\ZipArchiveHandler(
+        $fname,
+        self::$preventHaltTokenCheck
+      );
     } else {
       $compressed = false;
       // Tar + BZ2
@@ -97,27 +100,33 @@ class Phar extends RecursiveDirectoryIterator
       if (strpos($magic_number, "\x1F\x8B") === 0) {
         $compressed = true;
       }
-      fseek($fp, 127);
+      fseek($fp, 257);
       $magic_number = fread($fp, 8);
       fclose($fp);
-      // Compressed or just Tar
+      // Compressed or just plain Tar
       if (
         $compressed ||
         strpos($magic_number, "ustar\x0") === 0 ||
         strpos($magic_number, "ustar\x40\x40\x0") === 0
       ) {
-        $this->construct_tar($fname);
-      } {
+        $this->archiveHandler = new __SystemLib\TarArchiveHandler(
+          $fname,
+          self::$preventHaltTokenCheck
+        );
+      } else {
         // Otherwise Phar
-        $this->construct_phar($fname);
+        $this->archiveHandler = new __SystemLib\PharArchiveHandler(
+          $fname,
+          self::$preventHaltTokenCheck
+        );
       }
-    }
-    if ($alias) {
-      self::$aliases[$alias] = $this;
     }
     // From the manifest
     if ($this->getAlias()) {
       self::$aliases[$this->getAlias()] = $this;
+    }
+    if ($alias) {
+      self::$aliases[$alias] = $this;
     }
     // We also do filename lookups
     self::$aliases[$fname] = $this;
@@ -652,14 +661,12 @@ class Phar extends RecursiveDirectoryIterator
    * @return bool
    */
   public function setAlias($alias) {
-    // TODO: Remove following line when write support implemented
-    throw new UnexpectedValueException('phar is read-only');
+
     if (preg_match('#[\\/:;]#', $alias)) {
       throw new UnexpectedValueException(
         "Invalid alias \"$alias\" specified for phar \"$this->fname\""
       );
     }
-    self::assertWriteSupport();
     if (isset(self::$aliases[$alias])) {
       $path = self::$aliases[$alias]->fname;
       throw new PharException(
@@ -667,7 +674,13 @@ class Phar extends RecursiveDirectoryIterator
         ' be used for other archives'
       );
     }
-    $this->archiveHandler->setAlias($alias);
+    // Do not execute following when called from constructor
+    if (!debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[0]['object'] === $this) {
+      // TODO: Remove following line when write support implemented
+      throw new UnexpectedValueException('phar is read-only');
+      self::assertWriteSupport();
+      $this->archiveHandler->setAlias($alias);
+    }
   }
 
   /**
@@ -959,7 +972,7 @@ class Phar extends RecursiveDirectoryIterator
    * @return string the filename if valid, empty string otherwise.
    */
   final public static function running(bool $retphar = true) {
-    $filename = debug_backtrace()[0]['file'];
+    $filename = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[0]['file'];
     $pharScheme = "phar://";
     $pharExt = ".phar";
     if(substr($filename, 0, strlen($pharScheme)) == $pharScheme) {
@@ -975,52 +988,16 @@ class Phar extends RecursiveDirectoryIterator
         }
       }
     }
-    return "";
+    return '';
   }
 
   final public static function webPhar(
       $alias,
-      $index = "index.php",
+      $index = 'index.php',
       $f404 = null,
       $mimetypes = null,
       $rewrites = null) {
     // This is in the default stub, but lets ignore it for now
-  }
-
-  /**
-   * Constructor for Phar
-   *
-   * @param string $fname
-   *
-   * @throws PharException
-   */
-  private function construct_phar($fname) {
-    $this->archiveHandler = new __SystemLib\PharArchiveHandler(
-      $fname,
-      self::$preventHaltTokenCheck
-    );
-  }
-
-  /**
-   * Constructor for Zip
-   *
-   * @param string $fname
-   *
-   * @throws PharException
-   */
-  private function construct_zip($fname) {
-    // TODO: ZIP support
-  }
-
-  /**
-   * Constructor for Tar
-   *
-   * @param string $fname
-   *
-   * @throws PharException
-   */
-  private function construct_tar($fname) {
-    // TODO: Tar support
   }
 
   /**

@@ -63,9 +63,11 @@ class Phar extends RecursiveDirectoryIterator
   private $metadata;
   private $signatureFlags;
 
-  private $iteratorRoot;
-  private $iterator;
-
+  protected $iteratorRoot;
+  protected $iterator;
+  /**
+   * @var null|resource
+   */
   private $fp;
 
   /**
@@ -93,6 +95,7 @@ class Phar extends RecursiveDirectoryIterator
     if (!is_file($fname)) {
       throw new UnexpectedValueException("$fname is not a file");
     }
+    $this->iteratorRoot = 'phar://'.realpath($fname).'/';
     $this->fp = fopen($fname, 'rb');
 
     $magic_number = fread($this->fp, 4);
@@ -976,6 +979,8 @@ class Phar extends RecursiveDirectoryIterator
   }
 
   /**
+   * Constructor for Phar
+   *
    * @param string $fname
    * @param int $flags
    * @param string $alias
@@ -1020,11 +1025,11 @@ class Phar extends RecursiveDirectoryIterator
     }
     // We also do filename lookups
     self::$aliases[$fname] = $this;
-
-    $this->iteratorRoot = 'phar://'.realpath($fname).'/';
   }
 
   /**
+   * Constructor for Zip
+   *
    * @param string $fname
    * @param int $flags
    * @param string $alias
@@ -1036,6 +1041,8 @@ class Phar extends RecursiveDirectoryIterator
   }
 
   /**
+   * Constructor for Tar
+   *
    * @param string $fname
    * @param int $flags
    * @param string $alias

@@ -248,6 +248,7 @@ public:
   void set(int index, char sym);
   size_t size() const;
   size_t actualSize() const;
+  size_t fdescSize() const { return m_fdescCount; }
   bool empty() const;
   void clear();
 
@@ -804,6 +805,7 @@ public:
   bool emitInlineGen(Emitter& e, const ExpressionPtr&);
   bool emitInlineGena(Emitter& e, const SimpleFunctionCallPtr& call);
   bool emitInlineGenva(Emitter& e, const SimpleFunctionCallPtr& call);
+  bool emitInlineHHAS(Emitter& e, SimpleFunctionCallPtr);
   bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,

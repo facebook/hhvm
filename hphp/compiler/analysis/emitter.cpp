@@ -145,9 +145,7 @@ const StaticString
   s_is_deprecated("deprecated function"),
   s_trigger_error("trigger_error"),
   s_trigger_sampled_error("trigger_sampled_error"),
-  s_zend_assertions("zend.assertions"),
-  s_HH_WaitHandle("HH\\WaitHandle"),
-  s_result("result");
+  s_zend_assertions("zend.assertions");
 
 using uchar = unsigned char;
 
@@ -4113,6 +4111,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.AKExists();
         return true;
       }
+    } else if (call->isCallToFunction("hh\\asm")) {
+      if (emitInlineHHAS(e, call)) return true;
     } else if (call->isCallToFunction("hh\\invariant")) {
       if (emitHHInvariant(e, call)) return true;
     } else if (call->isCallToFunction("hh\\idx") &&
@@ -5221,6 +5221,45 @@ bool EmitterVisitor::emitInlineGen(
     return emitInlineGena(e, call);
   }
   return false;
+}
+
+// Compile a static string as HHAS
+//
+// The hhas bytecodes should either leave the stack untouched, in
+// which case the result of the hh\asm() expression will be null; or
+// they should push exactly one cell, which will be the result of the
+// hh\asm() expression.
+bool EmitterVisitor::emitInlineHHAS(Emitter& e, SimpleFunctionCallPtr func) {
+  if (SystemLib::s_inited &&
+      !func->getFunctionScope()->isSystem() &&
+      !RuntimeOption::EvalAllowHhas) {
+    throw IncludeTimeFatalException(func,
+      "Inline hhas only allowed in systemlib");
+  }
+  auto const params = func->getParams();
+  if (!params || params->getCount() != 1) {
+    throw IncludeTimeFatalException(func,
+      "Inline hhas expects exactly one argument");
+  }
+  Variant v;
+  if (!((*params)[0]->getScalarValue(v)) || !v.isString()) {
+    throw IncludeTimeFatalException(func,
+      "Inline hhas must be string literal");
+  }
+
+  try {
+    if (assemble_expression(m_ue, m_curFunc,
+                            m_evalStack.size() + m_evalStack.fdescSize(),
+                            v.toString().toCppString())) {
+      pushEvalStack(StackSym::C);
+    } else {
+      e.Null();
+    }
+  } catch (const std::exception& ex) {
+    throw IncludeTimeFatalException(func, ex.what());
+  }
+
+  return true;
 }
 
 bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
@@ -9679,17 +9718,6 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
   return 1;  // Above cases push at most one stack cell.
 }
 
-// HH\WaitHandle::result()
-static int32_t emitWaitHandleResult(UnitEmitter& ue,
-                                    FuncEmitter* fe) {
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
-  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
-  ue.emitOp(OpThis);
-  ue.emitOp(OpWHResult);
-  ue.emitOp(OpRetC);
-  return 1;
-}
-
 // Emit byte codes to implement methods. Return the maximum stack cell count.
 int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
                                              const char* funcName,
@@ -9705,9 +9733,6 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
   } else if (asyncGenCls.same(s_class) &&
       (cmeth = folly::get_ptr(s_asyncGenMethods, s_func))) {
     return emitGeneratorMethod(m_ue, fe, *cmeth, true);
-  } else if (s_HH_WaitHandle.same(s_class) &&
-             s_result.same(s_func)) {
-    return emitWaitHandleResult(m_ue, fe);
   }
 
   throw IncludeTimeFatalException(meth,

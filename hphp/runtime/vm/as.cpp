@@ -459,6 +459,10 @@ struct StackDepth {
   void adjust(AsmState& as, int delta);
   void addListener(AsmState& as, StackDepth* target);
   void setBase(AsmState& as, int stackDepth);
+  int absoluteDepth() {
+    assert(baseValue.hasValue());
+    return baseValue.value() + currentOffset;
+  }
 
   /*
    * Sets the baseValue such as the current stack depth matches the
@@ -638,7 +642,9 @@ struct AsmState {
   }
 
   void endFpi() {
-    assert(!fpiRegs.empty());
+    if (fpiRegs.empty()) {
+      error("endFpi called with no active fpi region");
+    }
 
     auto& ent = fe->addFPIEnt();
     const auto& reg = fpiRegs.back();
@@ -656,6 +662,7 @@ struct AsmState {
     }
 
     fpiRegs.pop_back();
+    always_assert(fdescDepth >= kNumActRecCells);
     fdescDepth -= kNumActRecCells;
   }
 
@@ -687,7 +694,7 @@ struct AsmState {
     }
   }
 
-  void finishFunction() {
+  void finishSection() {
     for (auto const& label : labelMap) {
       if (!label.second.bound) {
         error("Undefined label " + label.first);
@@ -707,6 +714,10 @@ struct AsmState {
 
       fe->fpitab[kv.first].m_fpOff += *kv.second->baseValue;
     }
+  }
+
+  void finishFunction() {
+    finishSection();
 
     // Stack depth should be 0 at the end of a function body
     enforceStackDepth(0);
@@ -777,6 +788,7 @@ struct AsmState {
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
   int fdescDepth{0};
+  int minStackDepth{0};
   int maxUnnamed{-1};
   std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
   std::set<std::string,stdltistr> hoistables;
@@ -2401,6 +2413,39 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   }
 
   return ue.release();
+}
+
+bool assemble_expression(UnitEmitter& ue, FuncEmitter* fe,
+                         int incomingStackDepth,
+                         const std::string& expr) {
+  std::stringstream sstr(expr + '}');
+  AsmState as(sstr);
+  as.ue = &ue;
+  as.fe = fe;
+  as.initStackDepth.adjust(as, incomingStackDepth);
+  parse_function_body(as, 1);
+  as.finishSection();
+  if (as.maxUnnamed >= 0) {
+    as.error("Unnamed locals are not allowed in inline assembly");
+  }
+  if (as.currentStackDepth) {
+    // If we fall off the end of the inline assembly, we're
+    // expected to leave a single value on the stack.
+    if (!as.currentStackDepth->baseValue) {
+      as.error("Unknown stack offset on exit from inline assembly");
+    }
+    auto curStackDepth = as.currentStackDepth->absoluteDepth();
+    if (curStackDepth == incomingStackDepth + 1) {
+      return true;
+    }
+    if (curStackDepth != incomingStackDepth) {
+      as.error("Inline assembly expressions should leave the stack unchanged, "
+               "or push exactly one cell onto the stack.");
+    }
+  }
+
+  // indicate that we didn't push a value onto the stack
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

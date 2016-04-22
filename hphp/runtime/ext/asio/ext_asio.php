@@ -53,8 +53,12 @@ abstract class WaitHandle implements Awaitable {
    * throw an exception otherwise
    * @return mixed - A result of the operation represented by given wait handle
    */
-  <<__Native("OpCodeImpl")>>
-  final public function result(): mixed;
+  final public function result(): mixed {
+    return \hh\asm('
+      This
+      WHResult
+    ');
+  }
 
   /* Check if this wait handle finished (succeeded or failed)
    * @return bool - A boolean indicating whether this wait handle finished

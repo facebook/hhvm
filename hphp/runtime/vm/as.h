@@ -17,9 +17,12 @@
 #ifndef incl_HPHP_HHVM_AS_H_
 #define incl_HPHP_HHVM_AS_H_
 
+#include <string>
+
 namespace HPHP {
 
 struct UnitEmitter;
+struct FuncEmitter;
 struct MD5;
 
 //////////////////////////////////////////////////////////////////////
@@ -31,6 +34,8 @@ struct MD5;
  */
 UnitEmitter* assemble_string(const char* code, int codeLen,
                              const char* filename, const MD5&);
+
+bool assemble_expression(UnitEmitter&, FuncEmitter*, int, const std::string&);
 
 //////////////////////////////////////////////////////////////////////
 

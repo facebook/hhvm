@@ -68,10 +68,6 @@ void freeLocalsAndThis(IRGS& env) {
     // We don't want to specialize on arg types for builtins
     if (curFunc(env)->builtinFuncPtr()) return false;
 
-    auto const count = mcg->numTranslations(
-      env.irb->unit().context().srcKey());
-    constexpr int kTooPolyRet = 6;
-    if (localCount > 0 && count > kTooPolyRet) return false;
     auto numRefCounted = int{0};
     for (auto i = uint32_t{0}; i < localCount; ++i) {
       if (env.irb->local(i, DataTypeGeneric).type.maybe(TCounted)) {

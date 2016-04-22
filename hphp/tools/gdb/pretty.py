@@ -97,7 +97,7 @@ class TypedValuePrinter(object):
 
         else:
             t = 'Invalid(%d)' % t.cast(T('int8_t'))
-            val = "0x%x" % data['num']
+            val = "0x%x" % int(data['num'])
 
         if val is None:
             out = '{ %s }' % t

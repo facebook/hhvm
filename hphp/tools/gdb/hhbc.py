@@ -35,7 +35,7 @@ def iva_imm_types():
 
 @memoized
 def vec_imm_types():
-    return [V('HPHP::' + t) for t in ['MA', 'BLA', 'ILA', 'VSA', 'SLA']]
+    return [V('HPHP::' + t) for t in ['BLA', 'ILA', 'VSA', 'SLA']]
 
 @memoized
 def vec_elm_sizes():
@@ -138,13 +138,11 @@ class HHBC(object):
             info['value'] = imm >> 1
 
         elif immtype in vec_imm_types():
-            prefixes = 2 if immtype == V('HPHP::MA') else 1
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]
 
             num_elms = ptr.cast(T('int32_t').pointer()).dereference()
 
-            info['size'] = prefixes * T('int32_t').sizeof + \
-                           elm_size * num_elms
+            info['size'] = T('int32_t').sizeof + elm_size * num_elms
             info['value'] = '<vector>'
 
         elif immtype == V('HPHP::RATA'):
@@ -179,7 +177,7 @@ class HHBC(object):
                 # Try to print out literal strings.
                 if immtype == V('HPHP::SA') and unit.curunit is not None:
                     litstr = lookup_litstr(info['value'], unit.curunit)
-                    info['value'] = litstr['m_data']
+                    info['value'] = rawptr(litstr)['m_data']
             else:
                 info['size'] = 0
                 info['value'] = None
@@ -261,7 +259,9 @@ remains where it left off after the previous call.
             instr = HHBC.instr_info(self.bcpos)
             name = HHBC.op_name(instr['op']).string()
 
-            out = "%s+%d: %s" % (str(bcstart), self.bcoff, name)
+            start_addr = bcstart.cast(T('void').pointer())
+
+            out = "%s+%d: %s" % (str(start_addr), self.bcoff, name)
             for imm in instr['imms']:
                 if type(imm) is str:
                     pass

@@ -50,9 +50,9 @@ def invalidate_all_memoizers():
 
 def errorwrap(func):
     @functools.wraps(func)
-    def wrapped(*args):
+    def wrapped(*args, **kwds):
         try:
-            func(*args)
+            return func(*args, **kwds)
         except:
             print('')
             traceback.print_exc()

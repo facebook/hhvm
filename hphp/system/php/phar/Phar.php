@@ -76,7 +76,7 @@ class Phar extends RecursiveDirectoryIterator
    * @throws UnexpectedValueException
    */
   public function __construct($fname, $flags = null, $alias = null) {
-    if (!self::$preventExtCheck && !in_array('phar', explode('.', $fname))) {
+    if (!self::$preventExtCheck && !self::isValidPharFilename($fname)) {
       throw new UnexpectedValueException(
         "Cannot create phar '$fname', file extension (or combination) not".
         ' recognised or the directory does not exist'
@@ -547,6 +547,26 @@ class Phar extends RecursiveDirectoryIterator
    */
   public function isFileFormat($fileformat) {
     return $fileformat === self::PHAR;
+  }
+
+  /**
+   * ( excerpt from http://php.net/manual/en/phar.isvalidpharfilename.php )
+   *
+   *
+   * @param string $filename The name or full path to a phar archive not yet
+   *                         created.
+   * @param bool $executable This parameter determines whether the filename
+   *                         should be treated as a phar executable archive, or
+   *                         a data non-executable archive.
+   *
+   * @return bool <b>TRUE</b> if the filename is valid, <b>FALSE</b> if not.
+   */
+  public static function isValidPharFilename (
+    $filename,
+    $executable = true
+  ) {
+    $parts = explode('.', $filename);
+    return $executable ? in_array('phar', $parts) : count($parts) > 1;
   }
 
   /**

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/member-operations.h"
 
@@ -49,7 +50,8 @@ MixedArrayOffsetProfile::choose() const {
   }
   total += m_untracked;
 
-  return hottest.count * 10 >= total * 8
+  auto const bound = total * RuntimeOption::EvalHHIRMixedArrayProfileThreshold;
+  return hottest.count >= bound
     ? folly::make_optional(safe_cast<uint32_t>(hottest.pos))
     : folly::none;
 }

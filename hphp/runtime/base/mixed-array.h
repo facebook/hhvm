@@ -513,7 +513,7 @@ private:
   void eraseNoCompact(ssize_t pos);
   void erase(ssize_t pos) {
     eraseNoCompact(pos);
-    if (m_size < m_used / 2) {
+    if (m_size <= m_used / 2) {
       // Compact in order to keep elms from being overly sparse.
       compact(false);
     }

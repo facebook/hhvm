@@ -36,20 +36,22 @@ namespace HPHP {
 bool IsCrashing = false;
 
 static void bt_handler(int sig) {
-  if (RuntimeOption::StackTraceTimeout > 0) {
-    if (IsCrashing && sig == SIGALRM) {
-      // Raising the previous signal does not terminate the program.
-      signal(SIGABRT, SIG_DFL);
-      abort();
-    } else {
-      signal(SIGALRM, bt_handler);
-      alarm(RuntimeOption::StackTraceTimeout);
-    }
+  if (IsCrashing) {
+    // If we re-enter bt_handler while already crashing, just abort. This
+    // includes if we hit the timeout set below.
+    signal(SIGABRT, SIG_DFL);
+    abort();
   }
 
-  // In case we crash again in the signal handler or something
-  signal(sig, SIG_DFL);
+  // In case we crash again in the signal handler or something. Do this before
+  // setting up the timeout to avoid potential races.
   IsCrashing = true;
+  signal(sig, SIG_DFL);
+
+  if (RuntimeOption::StackTraceTimeout > 0) {
+    signal(SIGALRM, bt_handler);
+    alarm(RuntimeOption::StackTraceTimeout);
+  }
 
   // Make a stacktrace file to prove we were crashing. Do this before anything
   // else has a chance to deadlock us.
@@ -92,9 +94,14 @@ static void bt_handler(int sig) {
   ::fsync(fd);
 
   if (fd >= 0) {
+    // Don't attempt to determine function arguments in the PHP backtrace, as
+    // that might involve re-entering the VM.
     if (!g_context.isNull()) {
       dprintf(fd, "\nPHP Stacktrace:\n\n%s",
-              debug_string_backtrace(false).data());
+              debug_string_backtrace(
+                /*skip*/false,
+                /*ignore_args*/true
+              ).data());
     }
     ::close(fd);
   }

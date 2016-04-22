@@ -59,9 +59,11 @@ static struct PharStreamWrapper : Stream::Wrapper {
       nullptr,
       SystemLib::s_PharClass
     );
-    String contents = ret.toString();
 
-    return req::make<MemFile>(contents.data(), contents.size());
+    if (!ret.isResource()) {
+      return nullptr;
+    }
+    return dyn_cast_or_null<File>(ret.asResRef());
   }
 
   virtual int access(const String& path, int mode) {

@@ -1,5 +1,5 @@
 <?hh
 
-function test() {
+function test($foo) {
   $foo = 3;
 }

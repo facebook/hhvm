@@ -1454,8 +1454,8 @@ To string conversions:
 
 | DbgTrashRetVal, ND, S(FramePtr), NF
 
-  Writes trash to the return value slot on the activation record pointed to by
-  S0.
+  For debugging purposes.  Store kTVTrashJITRetVal to the return value slot on
+  the activation record pointed to by S0.
 
 | ReleaseVVAndSkip, ND, S(FramePtr), B
 
@@ -1508,18 +1508,18 @@ To string conversions:
 
 | DbgTrashStk<offset>, ND, S(StkPtr), NF
 
-  For debugging purposes.  Store kTVTrashFillStk to the stack slot pointed to
+  For debugging purposes.  Store kTVTrashJITStk to the stack slot pointed to
   by S0, at a given offset (in cells).
 
 | DbgTrashFrame<offset>, ND, S(StkPtr), NF
 
-  For debugging purposes.  Store kTVTrashFillFrame to kNumActRecCells stack
+  For debugging purposes.  Store kTVTrashJITFrame to kNumActRecCells stack
   slots starting at the offset (in cells), and going toward higher memory
   addresses.
 
 | DbgTrashMem, ND, S(PtrToGen), NF
 
-  For debugging purposes.  Store kTVTrashFillHeap to a heap slot pointed to by
+  For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
   S0.
 
 

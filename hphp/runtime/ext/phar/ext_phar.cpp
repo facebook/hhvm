@@ -22,7 +22,6 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/directory.h"
 
 namespace HPHP {

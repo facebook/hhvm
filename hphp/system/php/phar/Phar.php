@@ -1098,13 +1098,15 @@ class Phar extends RecursiveDirectoryIterator
    * Used by the stream wrapper to open phar:// files.
    * Called from C++.
    */
-  private static function openPhar($full_filename): string {
+  private static function openPhar(string $full_filename): resource {
     list($phar, $filename) = self::getPharAndFile($full_filename);
     return $phar->getFileData($filename);
   }
 
-  private function getFileData($filename): string {
-    return $this->archiveHandler->read($filename);
+  private function getFileData(string $filename): resource {
+    $stream = $this->archiveHandler->getStream($filename);
+    fseek($stream, 0);
+    return $stream;
   }
 
   /**
@@ -1117,7 +1119,7 @@ class Phar extends RecursiveDirectoryIterator
    *   array([Phar object for alias], 'rest/of/path.php')
    */
   private static function getPharAndFile(string $filename_or_alias) {
-    if (strncmp($filename_or_alias, 'phar://', 7)) {
+    if (strpos($filename_or_alias, 'phar://') !== 0) {
       throw new PharException("Not a phar: $filename_or_alias");
     }
 

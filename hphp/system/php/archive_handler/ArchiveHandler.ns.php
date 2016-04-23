@@ -22,7 +22,7 @@ namespace __SystemLib {
     protected ?string $signature;
     protected $compressed = false;
 
-    abstract public function read(string $path): string;
+    abstract public function getStream(string $path): resource;
     abstract public function extractAllTo(string $path);
     abstract public function addFile(string $path, string $archivePath): bool;
     abstract public function close(): void;

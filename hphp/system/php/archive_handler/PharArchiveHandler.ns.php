@@ -162,16 +162,18 @@ namespace __SystemLib {
       //TODO
     }
 
-    public function read(string $path): string {
+    public function getStream(string $path): resource {
       if (!isset($this->fileOffsets[$path])) {
         throw new PharException("No $path in phar");
       }
       list($offset, $size) = $this->fileOffsets[$path];
       if ($size == 0) {
-        return '';
+        return fopen('php://temp', 'w+b');
       }
+      $stream = fopen('php://temp', 'w+b');//TODO stream slice needed here
       fseek($this->fp, $offset);
-      return fread($this->fp, $size);
+      fwrite($stream, fread($this->fp, $size));
+      return $stream;
     }
 
     public function extractAllTo(string $path) {

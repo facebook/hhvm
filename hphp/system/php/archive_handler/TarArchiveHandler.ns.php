@@ -127,11 +127,13 @@ namespace __SystemLib {
       }
     }
 
-    public function read(string $path): string {
+    public function getStream(string $path): resource {
       if (!$this->contents->contains($path)) {
         throw new PharException("No $path in phar");
       }
-      return $this->contents[$path];
+      $stream = fopen('php://temp', 'w+b');//TODO stream slice needed here
+      fwrite($stream, $this->contents[$path]);
+      return $stream;
     }
 
     private function createFullPath(

@@ -58,12 +58,12 @@ namespace __SystemLib {
       $this->za->close();
     }
 
-    public function read(string $path): string {
-      $data = $this->za->getFromName($path);
-      if ($data === false) {
+    public function getStream(string $path): resource {
+      $stream = $this->za->getStream($path);
+      if (!is_resource($stream)) {
         throw new PharException("No $path in phar");
       }
-      return $data;
+      return $stream;
     }
 
     public function extractAllTo(string $path) {

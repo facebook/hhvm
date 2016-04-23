@@ -281,6 +281,7 @@ struct Vunit;
   O(asrxis, I(s0), U(s1) U(d), D(df) D(sf))\
   O(blrn, Inone, Un, Dn)\
   O(cmpsds, I(pred), UA(s0) U(s1), D(d))\
+  O(fabs, Inone, U(s), D(d))\
   O(lslwi, I(s0), UH(s1,d), DH(d,s1))\
   O(lslwis, I(s0), U(s1) U(d), D(df) D(sf))\
   O(lslxi, I(s0), UH(s1,d), DH(d,s1))\
@@ -292,8 +293,10 @@ struct Vunit;
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
   O(orswi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(orsw, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(popp, Inone, U(s0) U(s1), Dn)\
   O(pushp, Inone, U(s0) U(s1), Dn)\
+  O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
   /* ppc64 instructions */\
   O(extsb, Inone, UH(s,d), DH(d,s) D(sf))\
   O(extsw, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -1100,6 +1103,7 @@ struct asrxi { Immed s0; Vreg64 s1, d; };
 struct asrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct blrn {};
 struct cmpsds { ComparisonPred pred; VregDbl s0, s1, d; VregSF sf; };
+struct fabs { VregDbl s, d; };
 struct lslwi { Immed s0; Vreg32 s1, d; };
 struct lslwis { Immed s0; Vreg32 s1, d, df; VregSF sf; };
 struct lslxi { Immed s0; Vreg64 s1, d; };
@@ -1111,8 +1115,10 @@ struct lsrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
 struct orswi { Immed s0; Vreg32 s1, d; VregSF sf; };
+struct orsw { Vreg32 s0, s1, d; VregSF sf; };
 struct popp { Vreg64 s0, s1; };
 struct pushp { Vreg64 s0, s1; };
+struct subsb { Vreg8 s0, s1, d; VregSF sf; };
 
 /*
  * ppc64 intrinsics.

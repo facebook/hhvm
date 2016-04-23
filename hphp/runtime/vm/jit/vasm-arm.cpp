@@ -182,16 +182,15 @@ struct Vgen {
   void emit(const unwind& i);
 
   // instructions
-  void emit(const absdbl& i) { a->Fabs(D(i.d), D(i.s)); }
   void emit(const addl& i) { a->Add(W(i.d), W(i.s1), W(i.s0), SetFlags); }
   void emit(const addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
   void emit(const addq& i) { a->Add(X(i.d), X(i.s1), X(i.s0), SetFlags); }
   void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), SetFlags); }
-  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), i.s0.l(), SetFlags); };
+  void emit(const andbi& i);
   void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), SetFlags); }
-  void emit(const andli& i) { a->And(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
+  void emit(const andli& i);
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), SetFlags); }
   void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
   void emit(const cloadq& i);
@@ -205,6 +204,7 @@ struct Vgen {
   void emit(const cvttsd2siq& i) { a->Fcvtzs(X(i.d), D(i.s)); }
   void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, SetFlags); }
   void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, SetFlags); }
+  void emit(const decqmlock& i);
   void emit(const divint& i) { a->Sdiv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const divsd& i) { a->Fdiv(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const imul& i);
@@ -257,24 +257,18 @@ struct Vgen {
   void emit(const sqrtsd& i) { a->Fsqrt(D(i.d), D(i.s)); }
   void emit(const srem& i);
   void emit(const storeb& i) { a->Strb(W(i.s), M(i.m)); }
-  void emit(const storebi& i);
   void emit(const storel& i) { a->Str(W(i.s), M(i.m)); }
-  void emit(const storeli& i);
-  void emit(const storeqi& i);
-  void emit(const storesd& i);
+  void emit(const storesd& i) { emit(store{i.s, i.m}); }
   void emit(const storeups& i);
   void emit(const storew& i) { a->Strh(W(i.s), M(i.m)); }
-  void emit(const storewi& i);
   void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
   void emit(const subl& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), SetFlags); }
   void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
   void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), SetFlags); }
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
-  void emit(const testb& i) { a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testbi& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
+  void emit(const testli& i);
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
   void emit(const testqi& i) { a->Tst(X(i.s1), i.s0.q()); }
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
@@ -292,6 +286,7 @@ struct Vgen {
   void emit(const asrxis& i);
   void emit(const blrn& i);
   void emit(const cmpsds& i);
+  void emit(const fabs& i) { a->Fabs(D(i.d), D(i.s)); }
   void emit(const lslwi& i);
   void emit(const lslwis& i);
   void emit(const lslxi& i);
@@ -302,9 +297,11 @@ struct Vgen {
   void emit(const lsrxis& i);
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
+  void emit(const orsw& i);
   void emit(const orswi& i);
   void emit(const popp& i);
   void emit(const pushp& i);
+  void emit(const subsb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), SetFlags); }
 
   void emit_nop() { a->Nop(); }
 
@@ -389,20 +386,20 @@ void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
   }
 }
 
-#define Y(vasm_opc, simd_w, vr, gpr_w, imm_w) \
-void Vgen::emit(const vasm_opc& i) {          \
-  if (i.d.isSIMD()) {                         \
-    emitSimdImmInt(a, i.s.simd_w(), i.d);     \
-  } else {                                    \
-    vr d = i.d;                               \
-    a->Mov(gpr_w(d), i.s.imm_w());            \
-  }                                           \
+#define Y(vasm_opc, simd_w, vr_w, gpr_w, imm_w) \
+void Vgen::emit(const vasm_opc& i) {            \
+  if (i.d.isSIMD()) {                           \
+    emitSimdImmInt(a, i.s.simd_w(), i.d);       \
+  } else {                                      \
+    Vreg##vr_w d = i.d;                         \
+    a->Mov(gpr_w(d), i.s.imm_w());              \
+  }                                             \
 }
 
-Y(ldimmb, ub, Vreg8, W, l)
-Y(ldimmw, w, Vreg16, W, l)
-Y(ldimml, l, Vreg32, W, l)
-Y(ldimmq, q, Vreg64, X, q)
+Y(ldimmb, ub, 8, W, l)
+Y(ldimmw, w, 16, W, l)
+Y(ldimml, l, 32, W, l)
+Y(ldimmq, q, 64, X, q)
 
 #undef Y
 
@@ -560,6 +557,18 @@ void Vgen::emit(const unwind& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Vgen::emit(const andbi& i) {
+  a->And(W(i.d), W(i.s1), i.s0.l() & ~0u, SetFlags);
+}
+
+void Vgen::emit(const andli& i) {
+  a->And(W(i.d), W(i.s1), i.s0.l() & ~0u, SetFlags);
+}
+
+void Vgen::emit(const testli& i) {
+  a->Tst(W(i.s1), i.s0.l() & ~0u);
+}
+
 void Vgen::emit(const cloadq& i) {
   a->Ldr(rAsm, M(i.t));
   a->Csel(X(i.d), rAsm, X(i.f), C(i.cc));
@@ -581,15 +590,21 @@ void Vgen::emit(const imul& i) {
   a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
 }
 
-void Vgen::emit(const incqmlock& i) {
-  auto adr = M(i.m);
-  vixl::Label again;
-  a->bind(&again);
-  a->ldxr(rAsm, adr);
-  a->Add(rAsm, rAsm, 1, SetFlags);
-  a->stxr(rAsm.W(), rAsm, adr);
-  a->Cbnz(rAsm.W(), &again);
+#define Y(vasm_opc, arm_opc)           \
+void Vgen::emit(const vasm_opc& i) {   \
+  auto adr = M(i.m);                   \
+  vixl::Label again;                   \
+  a->bind(&again);                     \
+  a->ldxr(rAsm, adr);                  \
+  a->arm_opc(rAsm, rAsm, 1, SetFlags); \
+  a->stxr(rAsm.W(), rAsm, adr);        \
+  a->Cbnz(rAsm.W(), &again);           \
 }
+
+Y(incqmlock, Add)
+Y(decqmlock, Sub)
+
+#undef Y
 
 void Vgen::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {
@@ -702,11 +717,12 @@ void Vgen::emit(const vasm_opc& i) {                \
   a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags); \
 }
 
-Y(orswi, Orr, W, i.s0.l(), wzr);
-Y(orqi, Orr, X, i.s0.l(), xzr);
+Y(orqi, Orr, X, i.s0.q(), xzr);
 Y(orq, Orr, X, X(i.s0), xzr);
+Y(orswi, Orr, W, i.s0.l() & ~0u, wzr);
+Y(orsw, Orr, W, W(i.s0), wzr);
 Y(xorb, Eor, W, W(i.s0), wzr);
-Y(xorbi, Eor, W, i.s0.l(), wzr);
+Y(xorbi, Eor, W, i.s0.l() & ~0u, wzr);
 Y(xorl, Eor, W, W(i.s0), wzr);
 Y(xorq, Eor, X, X(i.s0), xzr);
 Y(xorqi, Eor, X, i.s0.q(), xzr);
@@ -786,20 +802,6 @@ void Vgen::emit(const srem& i) {
   a->Msub(X(i.d), rAsm, X(i.s1), X(i.s0));
 }
 
-#define Y(vasm_opc, arm_mov, arm_str, gpr_w, src) \
-void Vgen::emit(const vasm_opc& i) {              \
-  a->arm_mov(rAsm.gpr_w(), src);                  \
-  a->arm_str(rAsm.gpr_w(), M(i.m));               \
-}
-
-Y(storebi, Mov, Strb, W, i.s.l())
-Y(storeli, Mov, Str, W, i.s.l())
-Y(storeqi, Mov, Str, X, i.s.q())
-Y(storesd, Fmov, Str, X, D(i.s))
-Y(storewi, Mov, Strh, W, i.s.l())
-
-#undef Y
-
 void Vgen::emit(const unpcklpd& i) {
   a->fmov(D(i.d), D(i.s0));
   a->fmov(rAsm, D(i.s1));
@@ -862,7 +864,8 @@ Y(lsrxi, Lsr, X)
  *
  * In the following implementation,
  *   N, Z are updated according to result
- *   C is updated with the shifted out bit
+ *   C is updated with the shifted out bit flipped
+ *     Note: Flipping is needed to make jcc{CC_BE} and jcc{CC_A} work
  *   V is cleared (FIXME)
  *   PF, AF are not available
  */
@@ -875,6 +878,7 @@ void Vgen::emit(const vasm_opc& i) {                    \
     a->arm_opc(gpr_w(i.df), gpr_w(i.s1), i.s0.l() - 1); \
     d = i.df;                                           \
   }                                                     \
+  a->mvn(W(d).X(), W(d).X());                           \
   a->bfm(rAsm, W(d).X(), 35, 0);                        \
   a->Msr(NZCV, rAsm);                                   \
 }
@@ -890,6 +894,7 @@ void Vgen::emit(const vasm_opc& i) {                \
   a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags); \
   a->Mrs(rAsm, NZCV);                               \
   a->Lsr(gpr_w(i.df), gpr_w(i.s1), sz - i.s0.l());  \
+  a->mvn(W(i.df).X(), W(i.df).X());                 \
   a->bfm(rAsm, W(i.df).X(), 35, 0);                 \
   a->Msr(NZCV, rAsm);                               \
 }
@@ -1037,6 +1042,7 @@ void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
 
 Y(callm, target)
 Y(cloadq, t)
+Y(decqmlock, m)
 Y(incqmlock, m)
 Y(jmpm, target)
 Y(lea, s)
@@ -1050,28 +1056,74 @@ Y(loadw, s)
 Y(loadzbl, s)
 Y(loadzbq, s)
 Y(loadzlq, s)
-Y(storebi, m)
 Y(storeb, m)
 Y(store, d)
-Y(storeli, m)
 Y(storel, m)
-Y(storeqi, m)
 Y(storesd, m)
 Y(storeups, m)
-Y(storewi, m)
 Y(storew, m)
 
 #undef Y
 
-#define Y(vasm_opc, lower_opc, load_op, store_op, s0, m) \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) {  \
-  lower_impl(u, b, z, [&] (Vout& v) {                    \
-    lowerVptr(i.m, v);                                   \
-    auto r0 = v.makeReg(), r1 = v.makeReg();             \
-    v << load_op{i.m, r0};                               \
-    v << lower_opc{i.s0, r0, r1, i.sf};                  \
-    v << store_op{r1, i.m};                              \
-  });                                                    \
+void lower(Vunit& u, absdbl& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto s = v.makeReg(), d = v.makeReg();
+    v << copy{i.s, s};
+    v << fabs{s, d};
+    v << copy{d, i.d};
+  });
+}
+
+#define ISAR vixl::Assembler::IsImmArithmetic(value)
+#define ISLG(w) vixl::Assembler::IsImmLogical(value, w)
+#define U2(v0, v1) v0, v1
+
+#define Y(vasm_opc, lower_opc, load_opc, chk, imm, use) \
+void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(u, b, z, [&] (Vout& v) {                   \
+    auto value = safe_cast<int64_t>(i.s0.q());          \
+    if (chk) {                                          \
+      v << i;                                           \
+    } else {                                            \
+      auto s0 = v.makeReg();                            \
+      v << load_opc{imm, s0};                           \
+      v << lower_opc{s0, use, i.sf};                    \
+    }                                                   \
+  });                                                   \
+}
+
+Y(addli, addl, ldimml, ISAR, i.s0, U2(i.s1, i.d))
+Y(addqi, addq, ldimmq, ISAR, Immed64(value), U2(i.s1, i.d))
+Y(andbi, andb, ldimmb, ISLG(32), i.s0, U2(i.s1, i.d))
+Y(andli, andl, ldimml, ISLG(32), i.s0, U2(i.s1, i.d))
+Y(andqi, andq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
+Y(cmpli, cmpl, ldimml, ISAR, i.s0, i.s1)
+Y(cmpqi, cmpq, ldimmq, ISAR, Immed64(value), i.s1)
+Y(orqi, orq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
+Y(orswi, orsw, ldimml, ISLG(32), i.s0, U2(i.s1, i.d))
+Y(subbi, subsb, ldimmb, ISAR, i.s0, U2(i.s1, i.d))
+Y(subli, subl, ldimml, ISAR, i.s0, U2(i.s1, i.d))
+Y(subqi, subq, ldimmq, ISAR, Immed64(value), U2(i.s1, i.d))
+Y(testli, testl, ldimml, ISLG(32), i.s0, i.s1)
+Y(testqi, testq, ldimmq, ISLG(64), Immed64(value), i.s1)
+Y(xorbi, xorb, ldimmb, ISLG(32), i.s0, U2(i.s1, i.d))
+Y(xorqi, xorq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
+
+#undef Y
+
+#undef U2
+#undef ISLG
+#undef ISAR
+
+#define Y(vasm_opc, lower_opc, load_opc, store_opc, s0, m) \
+void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) {    \
+  lower_impl(u, b, z, [&] (Vout& v) {                      \
+    lowerVptr(i.m, v);                                     \
+    auto r0 = v.makeReg(), r1 = v.makeReg();               \
+    v << load_opc{i.m, r0};                                \
+    v << lower_opc{i.s0, r0, r1, i.sf};                    \
+    v << store_opc{r1, i.m};                               \
+  });                                                      \
 }
 
 Y(addlim, addli, loadl, storel, s0, m)
@@ -1084,26 +1136,27 @@ Y(orwim, orswi, loadw, storew, s0, m)
 
 #undef Y
 
-#define Y(vasm_opc, lower_opc, load_op, s0, m)          \
+#define Y(vasm_opc, lower_opc, load_opc)                \
 void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(u, b, z, [&] (Vout& v) {                   \
-    lowerVptr(i.m, v);                                  \
+    lowerVptr(i.s1, v);                                 \
     auto r = v.makeReg();                               \
-    v << load_op{i.m, r};                               \
+    v << load_opc{i.s1, r};                             \
     v << lower_opc{i.s0, r, i.sf};                      \
   });                                                   \
 }
 
-Y(cmplim, cmpli, loadl, s0, s1)
-Y(cmplm, cmpl, loadl, s0, s1)
-Y(cmpqim, cmpqi, load, s0, s1)
-Y(cmpqm, cmpq, load, s0, s1)
-Y(cmpwim, cmpli, loadw, s0, s1)
-Y(testbim, testbi, loadb, s0, s1)
-Y(testlim, testli, loadl, s0, s1)
-Y(testqim, testqi, load, s0, s1)
-Y(testqm, testq, load, s0, s1)
-Y(testwim, testli, loadw, s0, s1)
+Y(cmpbim, cmpli, loadb)
+Y(cmplim, cmpli, loadl)
+Y(cmplm, cmpl, loadl)
+Y(cmpqim, cmpqi, load)
+Y(cmpqm, cmpq, load)
+Y(cmpwim, cmpli, loadw)
+Y(testbim, testli, loadb)
+Y(testlim, testli, loadl)
+Y(testqim, testqi, load)
+Y(testqm, testq, load)
+Y(testwim, testli, loadw)
 
 #undef Y
 
@@ -1126,14 +1179,14 @@ void lower(Vunit& u, cvtsi2sdm& i, Vlabel b, size_t z) {
   });
 }
 
-#define Y(vasm_opc, lower_opc, load_op, store_op, m)    \
+#define Y(vasm_opc, lower_opc, load_opc, store_opc, m)  \
 void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(u, b, z, [&] (Vout& v) {                   \
     lowerVptr(i.m, v);                                  \
     auto r0 = v.makeReg(), r1 = v.makeReg();            \
-    v << load_op{i.m, r0};                              \
+    v << load_opc{i.m, r0};                             \
     v << lower_opc{r0, r1, i.sf};                       \
-    v << store_op{r1, i.m};                             \
+    v << store_opc{r1, i.m};                            \
   });                                                   \
 }
 
@@ -1224,12 +1277,21 @@ void lower(Vunit& u, cmpbi& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, cmpbim& i, Vlabel b, size_t z) {
+void lower(Vunit& u, testb& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
-    lowerVptr(i.s1, v);
-    auto r = v.makeReg();
-    v << loadzbl{i.s1, r};
-    v << cmpli{i.s0, r, i.sf};
+    auto s0 = v.makeReg();
+    auto s1 = v.makeReg();
+    v << movzbl{i.s0, s0};
+    v << movzbl{i.s1, s1};
+    v << testl{s0, s1, i.sf};
+  });
+}
+
+void lower(Vunit& u, testbi& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto s1 = v.makeReg();
+    v << movzbl{i.s1, s1};
+    v << testli{i.s0, s1, i.sf};
   });
 }
 
@@ -1255,6 +1317,23 @@ Y(shlli, lslwi, lslwis)
 Y(shlqi, lslxi, lslxis)
 Y(shrli, lsrwi, lsrwis)
 Y(shrqi, lsrxi, lsrxis)
+
+#undef Y
+
+#define Y(vasm_opc, lower_opc, load_opc, imm)           \
+void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(u, b, z, [&] (Vout& v) {                   \
+    lowerVptr(i.m, v);                                  \
+    auto r = v.makeReg();                               \
+    v << load_opc{imm, r};                              \
+    v << lower_opc{r, i.m};                             \
+  });                                                   \
+}
+
+Y(storebi, storeb, ldimmb, i.s)
+Y(storeli, storel, ldimml, i.s)
+Y(storeqi, store, ldimmq, Immed64(i.s.q()))
+Y(storewi, storew, ldimmw, i.s)
 
 #undef Y
 
@@ -1323,7 +1402,7 @@ void lowerForARM(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void optimizeARM(Vunit& unit, const Abi& abi) {
+void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   Timer timer(Timer::vasm_optimize);
 
   removeTrivialNops(unit);

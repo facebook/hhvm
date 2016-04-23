@@ -90,10 +90,6 @@ inline vixl::VRegister x2v(PhysReg x64reg) {
 }
 
 inline vixl::Condition convertCC(jit::ConditionCode cc) {
-  if (cc == jit::CC_P || cc == jit::CC_NP) {
-    // ARM has no parity flag
-    always_assert(false);
-  }
   assertx(cc >= 0 && cc <= 0xF);
 
   using namespace vixl;
@@ -110,7 +106,8 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
     hi,  // unsigned higher
     mi,  // minus (N set)
     pl,  // plus (N clear)
-    nv, nv,  // invalid. These are the parity flags.
+    vs,  // FIXME: parity = 1, valid for 'ucomisd' based jumps only
+    vc,  // FIXME: parity = 0
     lt,  // signed less than
     ge,  // signed greater or equal
     le,  // signed less or equal
@@ -129,8 +126,8 @@ inline jit::ConditionCode convertCC(vixl::Condition cc) {
     jit::CC_NE,  // not equal
     jit::CC_AE,  // unsigned higher or same
     jit::CC_B,   // unsigned lower
-    jit::CC_NS,  // minus (N set)
-    jit::CC_S,   // plus (N clear)
+    jit::CC_S,   // minus (N set)
+    jit::CC_NS,  // plus (N clear)
     jit::CC_O,   // overflow set
     jit::CC_NO,  // overflow clear
     jit::CC_A,   // unsigned higher

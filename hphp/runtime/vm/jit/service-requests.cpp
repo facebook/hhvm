@@ -223,8 +223,9 @@ namespace x64 {
 }
 
 namespace arm {
-  static constexpr int kMovLen = 16; // FIXME
-  static constexpr int kLeaVmSpLen = 16; // FIXME
+  // 'lea' results in atmost 4 instructions (see vasm-arm.cpp)
+  static constexpr int kMovLen = 4 * 4;
+  static constexpr int kLeaVmSpLen = 4 * 4;
 }
 
 size_t stub_size() {
@@ -262,6 +263,7 @@ FPInvOffset extract_spoff(TCA stub) {
       {
         struct Decoder : public vixl::Decoder {
           void VisitAddSubImmediate(vixl::Instruction* inst) {
+            // For immediate operands, shift can be '0' or '12'
             int64_t immed =
               inst->ImmAddSub() << ((inst->ShiftAddSub() == 1) ? 12 : 0);
             switch (inst->Mask(vixl::AddSubOpMask)) {
@@ -270,10 +272,29 @@ FPInvOffset extract_spoff(TCA stub) {
               default: break;
             }
           }
+          void VisitMoveWideImmediate(vixl::Instruction* inst) {
+            // For wide moves, shift can be 0, 16, 32 or 64
+            int64_t immed = safe_cast<int64_t>(
+              inst->ImmMoveWide() << (inst->ShiftMoveWide() << 4));
+            switch (inst->Mask(vixl::MoveWideImmediateMask)) {
+              case vixl::MOVN_w:
+              case vixl::MOVN_x:
+                immed = safe_cast<int64_t>(~immed);
+                break;
+            }
+            offset = immed;
+          }
           folly::Optional<int32_t> offset;
         };
         Decoder decoder;
         decoder.Decode((vixl::Instruction*)(stub));
+
+        // 'lea' becomes
+        //   a. 'add dst, base, #imm' or
+        //   b. 'mov r, #imm'
+        //      'add dst, base, r'
+        // FIXME: Return '0' if vasm optimizes 'lea' to 'mov'
+        if (!decoder.offset.hasValue()) return FPInvOffset{0};
         always_assert(decoder.offset && (*decoder.offset % sizeof(Cell)) == 0);
         return FPInvOffset{-(*decoder.offset / int32_t{sizeof(Cell)})};
       }

@@ -46,9 +46,9 @@ namespace __SystemLib {
         $this->compressed = Phar::BZ2;
         $fp = bzopen($path, 'r');
       } else if ($data === "\x1F\x8B") {
+        $this->compressed = Phar::GZ;
         $fp = gzopen($path, 'rb');
       } else {
-        $this->compressed = Phar::GZ;
         $fp = fopen($path, 'rb');
       }
 

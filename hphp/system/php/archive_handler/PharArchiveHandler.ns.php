@@ -98,8 +98,8 @@ namespace __SystemLib {
         }
 
         $pos = $signatureStart + $signatureSize - 8;
-        $signatureFlags = $this->bytesToInt($pos, 4);
-        switch ($signatureFlags) {
+        $this->signatureType = $this->bytesToInt($pos, 4);
+        switch ($this->signatureType) {
           case Phar::MD5:
             $digestSize = 16;
             $digestName = 'md5';

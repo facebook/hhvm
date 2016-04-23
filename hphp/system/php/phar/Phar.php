@@ -52,6 +52,7 @@ class Phar extends RecursiveDirectoryIterator
   protected $archiveHandler;
   protected $iteratorRoot;
   protected $iterator;
+  protected int $format = self::PHAR;
 
   /**
    * ( excerpt from http://php.net/manual/en/phar.construct.php )
@@ -86,6 +87,7 @@ class Phar extends RecursiveDirectoryIterator
     // This is not a bullet-proof check, but should be good enough to catch ZIP
     if (strcmp($magic_number, "PK\x03\x04") === 0) {
       fclose($fp);
+      $this->format = self::ZIP;
       $this->archiveHandler = new __SystemLib\ZipArchiveHandler(
         $fname,
         self::$preventHaltTokenCheck
@@ -108,11 +110,13 @@ class Phar extends RecursiveDirectoryIterator
         strpos($magic_number, "ustar\x0") === 0 ||
         strpos($magic_number, "ustar\x40\x40\x0") === 0
       ) {
+        $this->format = self::TAR;
         $this->archiveHandler = new __SystemLib\TarArchiveHandler(
           $fname,
           self::$preventHaltTokenCheck
         );
       } else {
+        $this->format = self::PHAR;
         $this->archiveHandler = new __SystemLib\PharArchiveHandler(
           $fname,
           self::$preventHaltTokenCheck
@@ -550,7 +554,7 @@ class Phar extends RecursiveDirectoryIterator
    *              requested by the parameter
    */
   public function isFileFormat($fileformat) {
-    return $fileformat === self::PHAR;
+    return $fileformat === $this->format;
   }
 
   /**
@@ -866,7 +870,7 @@ class Phar extends RecursiveDirectoryIterator
    *               extension.
    */
   final public static function getSupportedCompression() {
-    return array();
+    return [self::GZ, self::BZ2];
   }
 
   /**
@@ -880,7 +884,7 @@ class Phar extends RecursiveDirectoryIterator
    *               OpenSSL.
    */
   final public static function getSupportedSignatures () {
-    return array();
+    return ['MD5', 'SHA-1', 'SHA-256', 'SHA-512'];
   }
 
   /**

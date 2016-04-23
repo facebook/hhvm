@@ -14,6 +14,8 @@ Hello World
 Hello World
 .phar.zip with phar:// prefix:
 Hello World
+.phar (which is .phar.tar) with phar:// prefix:
+Hello World
 .phar (which is .phar.tar.gz) with phar:// prefix:
 Hello World
 .phar (which is .phar.tar.bz2) with phar:// prefix:

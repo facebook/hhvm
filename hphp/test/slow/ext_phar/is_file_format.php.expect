@@ -1,0 +1,95 @@
+.phar:
+string(7) "is phar"
+bool(true)
+string(6) "is tar"
+bool(false)
+string(6) "is zip"
+bool(false)
+
+.phar:
+string(7) "is phar"
+bool(true)
+string(6) "is tar"
+bool(false)
+string(6) "is zip"
+bool(false)
+
+.phar.gz:
+string(7) "is phar"
+bool(true)
+string(6) "is tar"
+bool(false)
+string(6) "is zip"
+bool(false)
+
+.phar.bz2:
+string(7) "is phar"
+bool(true)
+string(6) "is tar"
+bool(false)
+string(6) "is zip"
+bool(false)
+
+.phar.tar:
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(true)
+string(6) "is zip"
+bool(false)
+
+.phar.tar.gz:
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(true)
+string(6) "is zip"
+bool(false)
+
+.phar.tar.bz2:
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(true)
+string(6) "is zip"
+bool(false)
+
+.phar.zip:
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(false)
+string(6) "is zip"
+bool(true)
+
+.phar (which is .phar.tar):
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(true)
+string(6) "is zip"
+bool(false)
+
+.phar (which is .phar.tar.gz):
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(true)
+string(6) "is zip"
+bool(false)
+
+.phar (which is .phar.tar.bz2):
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(true)
+string(6) "is zip"
+bool(false)
+
+.phar (which is .phar.zip):
+string(7) "is phar"
+bool(false)
+string(6) "is tar"
+bool(false)
+string(6) "is zip"
+bool(true)

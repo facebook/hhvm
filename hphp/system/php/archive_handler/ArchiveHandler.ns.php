@@ -21,6 +21,7 @@ namespace __SystemLib {
     protected string $apiVersion = '1.0.0';
     protected $metadata;
     protected ?string $signature;
+    protected int $signatureType = Phar::NONE;
     protected $compressed = false;
 
     abstract public function getStream(string $path): resource;
@@ -68,12 +69,31 @@ namespace __SystemLib {
       return $this->metadata !== null;
     }
 
-    public function getSignature(): string {
-      return $this->signature;
+    public function getSignature(): ?array {
+      switch ($this->signatureType) {
+        case Phar::MD5:
+          $hash_type = 'MD5';
+          break;
+        case Phar::SHA1:
+          $hash_type = 'SHA-1';
+          break;
+        case Phar::SHA256:
+          $hash_type = 'SHA-256';
+          break;
+        case Phar::SHA512:
+          $hash_type = 'SHA-512';
+          break;
+        default:
+          return null;
+      }
+      return [
+        'hash' => bin2hex($this->signature),
+        'hash_type' => $hash_type
+      ];
     }
 
     public function isCompressed() {
-      return $this->compressed();
+      return $this->compressed;
     }
 
     // Custom methods used by Phar class internally
@@ -101,8 +121,8 @@ namespace __SystemLib {
         $this->stream = bzopen($path, 'r');
       } else if ($data === "\x1F\x8B") {
         $this->stream = gzopen($path, 'rb');
-      } else  {
         $this->compressed = Phar::GZ;
+      } else  {
         $this->stream = fopen($path, 'rb');
       }
     }

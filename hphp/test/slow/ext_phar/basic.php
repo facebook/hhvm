@@ -57,6 +57,16 @@ echo "\n.phar.zip with phar:// prefix:\n";
 include 'phar://'.__DIR__."/basic.phar.zip";
 
 /**
+ * Tar with extension of regular Phar
+ */
+// TODO: not working somewhere deep inside HHVM; if you know how to fix - do it
+//echo ".phar (which is .phar.tar):\n";
+//include __DIR__."/basic-tar.phar";
+
+echo "\n.phar (which is .phar.tar) with phar:// prefix:\n";
+include 'phar://'.__DIR__."/basic-tar.phar";
+
+/**
  * Tar GZ with extension of regular Phar
  */
 // TODO: not working somewhere deep inside HHVM; if you know how to fix - do it

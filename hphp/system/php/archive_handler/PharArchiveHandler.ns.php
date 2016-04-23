@@ -7,51 +7,71 @@ namespace __SystemLib {
   final class PharArchiveHandler extends ArchiveHandler {
     private array<string, array> $fileInfo = array();
     private int $archiveFlags;
+    private ?resource $stream;
     public function __construct(
       string $path,
       bool $preventHaltTokenCheck = true
     ) {
-      $this->fp = fopen($path, 'rb');
-      $data = file_get_contents($path);
-
-      $pos = strpos($data, Phar::HALT_TOKEN);
-      if ($pos === false && !$preventHaltTokenCheck) {
+      $stream = fopen($path, 'rb');
+      $this->stream = $stream;
+      // We'll not get 0 as position because of `<?php` at the beginning
+      $pos = self::findToken($stream, Phar::HALT_TOKEN) ?: 0;
+      if ($pos) {
+        $this->stub = stream_get_contents($stream, $pos, 0);
+        $pos += strlen(Phar::HALT_TOKEN);
+        // *sigh*. We have to allow whitespace then ending the file
+        // before we start the manifest
+        while (stream_get_contents($stream, 1, $pos) == ' ') {
+          $pos += 1;
+        }
+        if (
+          stream_get_contents($stream, 1, $pos) == '?' &&
+          stream_get_contents($stream, 1, $pos + 1) == '>'
+        ) {
+          $pos += 2;
+        }
+        while (stream_get_contents($stream, 1, $pos) == "\r") {
+          $pos += 1;
+        }
+        while (stream_get_contents($stream, 1, $pos) == "\n") {
+          $pos += 1;
+        }
+      } else if (!$preventHaltTokenCheck) {
         throw new PharException(Phar::HALT_TOKEN.' must be declared in a phar');
       }
-      $this->stub = substr($data, 0, $pos);
 
-      $pos += strlen(Phar::HALT_TOKEN);
-      // *sigh*. We have to allow whitespace then ending the file
-      // before we start the manifest
-      while ($data[$pos] == ' ') {
-        $pos += 1;
-      }
-      if ($data[$pos] == '?' && $data[$pos+1] == '>') {
-        $pos += 2;
-      }
-      while ($data[$pos] == "\r") {
-        $pos += 1;
-      }
-      while ($data[$pos] == "\n") {
-        $pos += 1;
-      }
-
-      $this->parsePhar($data, $pos);
+      $this->parsePhar($stream, $pos);
     }
 
-    private function parsePhar($data, &$pos) {
+    private static function findToken(resource $stream, string $token): ?int {
+      $offset = 0;
+      $prev_data = '';
+      $next_data = '';
+      do {
+        $offset += strlen($prev_data);
+        $prev_data = $next_data;
+        $next_data = fread($stream, 1024);
+        $pos = strpos($prev_data.$next_data, $token);
+        if ($pos !== false) {
+          return $offset + $pos;
+        }
+      } while (!feof($stream));
+      return null;
+    }
+
+    private function parsePhar(resource $stream, &$pos) {
       $start = $pos;
-      $len = self::bytesToInt($data, $pos, 4);
-      $count = self::bytesToInt($data, $pos, 4);
-      $this->apiVersion = self::bytesToInt($data, $pos, 2);
-      $this->archiveFlags = self::bytesToInt($data, $pos, 4);
-      $alias_len = self::bytesToInt($data, $pos, 4);
-      $this->alias = self::substr($data, $pos, $alias_len);
-      $metadata_len = self::bytesToInt($data, $pos, 4);
+      $len = self::bytesToInt($stream, $pos, 4);
+      $count = self::bytesToInt($stream, $pos, 4);
+      $this->apiVersion = self::bytesToInt($stream, $pos, 2);
+      $this->archiveFlags = self::bytesToInt($stream, $pos, 4);
+      $alias_len = self::bytesToInt($stream, $pos, 4);
+      $this->alias = self::substr($stream, $pos, $alias_len);
+      $metadata_len = self::bytesToInt($stream, $pos, 4);
       $this->metadata = unserialize(
-        self::substr($data, $pos, $metadata_len)
+        self::substr($stream, $pos, $metadata_len)
       );
-      $this->parseFileInfo($data, $count, $pos);
+      $this->parseFileInfo($stream, $count, $pos);
       if ($pos != $start + $len + 4) {
         throw new PharException(
           "Malformed manifest. Expected $len bytes, got $pos"
@@ -68,15 +88,19 @@ namespace __SystemLib {
         );
       }
 
+      $signatureStart = $pos;
+      $signature = stream_get_contents($stream, -1, $pos);
+      $signatureSize = strlen($signature);
+
       // Try to see if there is a signature
       if ($this->archiveFlags & Phar::SIGNATURE) {
-        if (strlen($data) < 8 || substr($data, -4) !== 'GBMB') {
+        if (substr($signature, -4) !== 'GBMB') {
           // Not even the GBMB and the flags?
           throw new PharException('phar has a broken signature');
         }
 
-        $pos = strlen($data) - 8;
-        $signatureFlags = self::bytesToInt($data, $pos, 4);
+        $pos = $signatureStart + $signatureSize - 8;
+        $signatureFlags = self::bytesToInt($stream, $pos, 4);
         switch ($signatureFlags) {
           case Phar::MD5:
             $digestSize = 16;
@@ -95,35 +119,39 @@ namespace __SystemLib {
             $digestName = 'sha512';
             break;
           default:
-            throw new PharException('phar has a broken or unsupported signature');
+            throw new PharException(
+              'phar has a broken or unsupported signature'
+            );
         }
 
-        if (strlen($data) < 8 + $digestSize) {
+        if ($signatureSize < 8 + $digestSize) {
           throw new PharException('phar has a broken signature');
         }
 
-        $pos -= 4;
-        $signatureStart = $pos - $digestSize;
-        $this->signature = substr($data, $signatureStart, $digestSize);
-        $actualHash = self::verifyHash($data, $digestName, $signatureStart);
+        $this->signature = substr($signature, 0, $digestSize);
+        $computedSignature = self::computeSignature(
+          $stream,
+          $digestName,
+          $signatureSize
+        );
 
-        if ($actualHash !== $this->signature) {
+        if (strcmp($computedSignature, $this->signature) !== 0) {
           throw new PharException('phar has a broken signature');
         }
       }
     }
 
-    private function parseFileInfo(string $str, int $count, &$pos) {
+    private function parseFileInfo(resource $stream, int $count, &$pos) {
       for ($i = 0; $i < $count; $i++) {
-        $filename_len = self::bytesToInt($str, $pos, 4);
-        $filename = self::substr($str, $pos, $filename_len);
-        $filesize = self::bytesToInt($str, $pos, 4);
-        $timestamp = self::bytesToInt($str, $pos, 4);
-        $compressed_filesize = self::bytesToInt($str, $pos, 4);
-        $crc32 = self::bytesToInt($str, $pos, 4);
-        $flags = self::bytesToInt($str, $pos, 4);
-        $metadata_len = self::bytesToInt($str, $pos, 4);
-        $metadata = self::bytesToInt($str, $pos, $metadata_len);
+        $filename_len = self::bytesToInt($stream, $pos, 4);
+        $filename = self::substr($stream, $pos, $filename_len);
+        $filesize = self::bytesToInt($stream, $pos, 4);
+        $timestamp = self::bytesToInt($stream, $pos, 4);
+        $compressed_filesize = self::bytesToInt($stream, $pos, 4);
+        $crc32 = self::bytesToInt($stream, $pos, 4);
+        $flags = self::bytesToInt($stream, $pos, 4);
+        $metadata_len = self::bytesToInt($stream, $pos, 4);
+        $metadata = self::bytesToInt($stream, $pos, $metadata_len);
         $this->fileInfo[$filename] = array(
           $filesize,
           $timestamp,
@@ -135,31 +163,50 @@ namespace __SystemLib {
       }
     }
 
-    private static function verifyHash($str, $algorithm, $signatureOffset) {
-      return hash($algorithm, substr($str, 0, $signatureOffset), true);
+    private static function computeSignature(
+      resource $stream,
+      string $algorithm,
+      int $signatureSize
+    ) {
+      rewind($stream);
+      $context = hash_init($algorithm);
+      $data = '';
+
+      while (!feof($stream)) {
+        $data .= fread($stream, 1024 * 1024);
+        hash_update($context, substr($data, 0, -$signatureSize));
+        $data = substr($data, -$signatureSize);
+      }
+
+      return hash_final($context, true);
     }
 
-    private static function bytesToInt($str, &$pos, $len) {
-      if (strlen($str) < $pos + $len) {
+    private static function bytesToInt(resource $stream, &$pos, int $len) {
+      $str = stream_get_contents($stream, $len, $pos);
+      if (strlen($str) < $len) {
         throw new PharException(
           "Corrupt phar, can't read $len bytes starting at offset $pos"
         );
       }
       $int = 0;
       for ($i = 0; $i < $len; ++$i) {
-        $int |= ord($str[$pos++]) << (8*$i);
+        $int |= ord($str[$i]) << (8*$i);
       }
+      $pos += $len;
       return $int;
     }
 
-    private static function substr($str, &$pos, $len) {
-      $ret = substr($str, $pos, $len);
+    private static function substr(resource $stream, &$pos, int $len) {
+      $ret = stream_get_contents($stream, $len, $pos);
       $pos += $len;
       return $ret;
     }
 
     public function close(): void {
-      //TODO
+      if ($this->stream) {
+        fclose($this->stream);
+        $this->stream = null;
+      }
     }
 
     public function getStream(string $path): resource {
@@ -171,8 +218,7 @@ namespace __SystemLib {
         return fopen('php://temp', 'w+b');
       }
       $stream = fopen('php://temp', 'w+b');//TODO stream slice needed here
-      fseek($this->fp, $offset);
-      fwrite($stream, fread($this->fp, $size));
+      fwrite($stream, stream_get_contents($this->stream, $size, $offset));
       return $stream;
     }
 

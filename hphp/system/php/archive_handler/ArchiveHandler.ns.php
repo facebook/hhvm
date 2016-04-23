@@ -15,7 +15,6 @@ namespace __SystemLib {
     protected Map<string, ArchiveEntryData> $entries = Map { };
     protected ?string $alias;
     protected ?string $stub;
-    protected ?resource $fp;
     protected array<string, array<int, int>> $fileOffsets = [];
     protected string $apiVersion = '1.0.0';
     protected $metadata;

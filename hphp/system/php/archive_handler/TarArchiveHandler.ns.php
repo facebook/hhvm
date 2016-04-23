@@ -9,6 +9,7 @@ namespace __SystemLib {
     private Map<string, string> $contents = Map { };
     private Map<string, string> $symlinks = Map { };
     private string $path = '';
+    private ?resource $fp;
 
     public function __construct(
       string $path,

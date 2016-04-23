@@ -131,6 +131,7 @@ bool isDictScalar(ExpressionPtr exp) {
     Variant val;
     if (!name || !name->getScalarValue(val)) return false;
     if (!val.isString() && !val.isInteger()) return false;
+    if (pair->getValue() && !pair->getValue()->isScalar()) return false;
   }
   return true;
 }

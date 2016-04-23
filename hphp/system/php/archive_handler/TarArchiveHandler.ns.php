@@ -134,6 +134,7 @@ namespace __SystemLib {
       }
       $stream = fopen('php://temp', 'w+b');//TODO stream slice needed here
       fwrite($stream, $this->contents[$path]);
+      rewind($stream);
       return $stream;
     }
 

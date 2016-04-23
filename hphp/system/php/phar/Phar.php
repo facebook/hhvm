@@ -94,11 +94,14 @@ class Phar extends RecursiveDirectoryIterator
       if (strpos($magic_number, 'BZ') === 0) {
         fclose($fp);
         $fp = bzopen($fname, 'r');
+        fseek($fp, 257, SEEK_CUR); // Bzip2 only knows how to use SEEK_CUR
       } else if (strpos($magic_number, "\x1F\x8B") === 0) {
         fclose($fp);
         $fp = gzopen($fname, 'rb');
+        fseek($fp, 257);
+      } else {
+        fseek($fp, 257);
       }
-      fseek($fp, 257, SEEK_CUR); // Bzip2 only knows how to use SEEK_CUR
       $magic_number = fread($fp, 8);
       fclose($fp);
       if (
@@ -1103,10 +1106,10 @@ class Phar extends RecursiveDirectoryIterator
     } else if ($stub = $this->getStub()) {
       $stream = fopen('php://temp', 'w+b');
       fwrite($stream, $stub);
+      rewind($stream);
     } else {
       throw new PharException("No $filename in phar");
     }
-    rewind($stream);
     return $stream;
   }
 

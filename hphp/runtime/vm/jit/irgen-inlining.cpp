@@ -70,19 +70,15 @@ bool beginInlining(IRGS& env,
 
   auto ctx = [&] () -> SSATmp* {
     if (info.ctx) {
-      if (info.ctxType <= info.ctx->type() &&
-          info.ctxType <= TStkElem && // AssertType can't handle TNullptr
-          info.ctx->type() <= TStkElem) {
-        return gen(env, AssertType, info.ctxType, info.ctx);
-      }
-      return info.ctx;
+      return gen(env, AssertType, info.ctxType, info.ctx);
     }
     if (isFPushFunc(info.fpushOpc)) {
       return nullptr;
     }
     constexpr int32_t adjust = AROFF(m_this) / sizeof(Cell);
     IRSPRelOffset ctxOff = calleeAROff + adjust;
-    return gen(env, LdStk, TCtx, IRSPRelOffsetData{ctxOff}, sp(env));
+    auto const ret = gen(env, LdStk, TCtx, IRSPRelOffsetData{ctxOff}, sp(env));
+    return gen(env, AssertType, info.ctxType, ret);
   }();
 
   // If the ctx was extracted from SpillFrame it may be a TCls, otherwise it

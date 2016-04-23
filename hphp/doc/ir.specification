@@ -200,7 +200,7 @@ loaded, using a separate CheckRefInner instruction.
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType, DRefineS(0), S(Gen,Cls), P
+| AssertType, DRefineS(0), S(Gen,Cls,Ctx), P
 
   Assert that the type of S0 is T, copying it to D.
 

@@ -42,11 +42,11 @@ namespace __SystemLib {
       $data = fread($fp, 2);
       fclose($fp);
 
-      if ($data === "\37\213") {
-        $fp = gzopen($path, 'rb');
-      } else if ($data === 'BZ') {
+      if ($data === 'BZ') {
         $this->compressed = Phar::BZ2;
         $fp = bzopen($path, 'r');
+      } else if ($data === "\x1F\x8B") {
+        $fp = gzopen($path, 'rb');
       } else {
         $this->compressed = Phar::GZ;
         $fp = fopen($path, 'rb');

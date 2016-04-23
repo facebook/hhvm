@@ -1,1 +1,8 @@
+.phar:
+Hello World
+.phar with phar:// prefix:
+Hello World
+.phar.gz with phar:// prefix:
+Hello World
+.phar.bz2 with phar:// prefix:
 Hello World

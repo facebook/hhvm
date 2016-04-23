@@ -91,21 +91,17 @@ class Phar extends RecursiveDirectoryIterator
         self::$preventHaltTokenCheck
       );
     } else {
-      $compressed = false;
-      // Tar + BZ2
       if (strpos($magic_number, 'BZ') === 0) {
-        $compressed = true;
+        fclose($fp);
+        $fp = bzopen($fname, 'r');
+      } else if (strpos($magic_number, "\x1F\x8B") === 0) {
+        fclose($fp);
+        $fp = gzopen($fname, 'rb');
       }
-      // Tar + GZ
-      if (strpos($magic_number, "\x1F\x8B") === 0) {
-        $compressed = true;
-      }
-      fseek($fp, 257);
+      fseek($fp, 257, SEEK_CUR); // Bzip2 only knows how to use SEEK_CUR
       $magic_number = fread($fp, 8);
       fclose($fp);
-      // Compressed or just plain Tar
       if (
-        $compressed ||
         strpos($magic_number, "ustar\x0") === 0 ||
         strpos($magic_number, "ustar\x40\x40\x0") === 0
       ) {
@@ -114,7 +110,6 @@ class Phar extends RecursiveDirectoryIterator
           self::$preventHaltTokenCheck
         );
       } else {
-        // Otherwise Phar
         $this->archiveHandler = new __SystemLib\PharArchiveHandler(
           $fname,
           self::$preventHaltTokenCheck
@@ -973,16 +968,15 @@ class Phar extends RecursiveDirectoryIterator
    */
   final public static function running(bool $retphar = true) {
     $filename = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[0]['file'];
-    $pharScheme = "phar://";
-    $pharExt = ".phar";
-    if(substr($filename, 0, strlen($pharScheme)) == $pharScheme) {
+    $pharScheme = 'phar://';
+    $pharExt = '.phar';
+    if (strpos($filename, $pharScheme) === 0) {
       $pharExtPos = strrpos($filename, $pharExt);
-      if($pharExtPos) {
+      if ($pharExtPos) {
         $endPos = $pharExtPos + strlen($pharExt);
-        if($retphar) {
+        if ($retphar) {
           return substr($filename, 0, $endPos);
-        }
-        else {
+        } else {
           return substr($filename, strlen($pharScheme),
             $endPos - strlen($pharScheme));
         }
@@ -1104,8 +1098,15 @@ class Phar extends RecursiveDirectoryIterator
   }
 
   private function getFileData(string $filename): resource {
-    $stream = $this->archiveHandler->getStream($filename);
-    fseek($stream, 0);
+    if ($filename !== '') {
+      $stream = $this->archiveHandler->getStream($filename);
+    } else if ($stub = $this->getStub()) {
+      $stream = fopen('php://temp', 'w+b');
+      fwrite($stream, $stub);
+    } else {
+      throw new PharException("No $filename in phar");
+    }
+    rewind($stream);
     return $stream;
   }
 
@@ -1119,6 +1120,15 @@ class Phar extends RecursiveDirectoryIterator
    *   array([Phar object for alias], 'rest/of/path.php')
    */
   private static function getPharAndFile(string $filename_or_alias) {
+    /**
+     * TODO: This is a hack, during `include 'phar:///path/to.phar';`
+     * `self::stat()` calls this method with `$filename_or_alias` that have
+     * double `phar://phar://` prefix; I have no idea why, but we can fix it
+     * here for now
+     */
+    if (strpos($filename_or_alias, 'phar://phar://') === 0) {
+      $filename_or_alias = substr($filename_or_alias, 7);
+    }
     if (strpos($filename_or_alias, 'phar://') !== 0) {
       throw new PharException("Not a phar: $filename_or_alias");
     }

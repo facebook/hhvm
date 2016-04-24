@@ -433,7 +433,6 @@ void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpS(IRGS& env, SetOpOp)           { INTERP }
 void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
-void emitIncDecS(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }

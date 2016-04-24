@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -206,6 +207,32 @@ void emitEmptyS(IRGS& env) {
 
   destroyName(env, ssaPropName);
   push(env, ret);
+}
+
+void emitIncDecS(IRGS& env, IncDecOp subop) {
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+
+  if (!ssaPropName->isA(TStr)) {
+    PUNT(IncDecS-PropNameNotString);
+  }
+
+  auto const ssaCls   = popA(env);
+  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
+  auto const unboxed  = gen(env, UnboxPtr, propAddr);
+  auto const oldVal   = gen(env, LdMem, unboxed->type().deref(), unboxed);
+
+  auto const result = incDec(env, subop, oldVal);
+  if (!result) PUNT(IncDecS);
+
+  destroyName(env, ssaPropName);
+  pushIncRef(env, isPre(subop) ? result : oldVal);
+
+  // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
+  updateMarker(env);
+
+  gen(env, StMem, unboxed, result);
+  gen(env, IncRef, result);
+  decRef(env, oldVal);
 }
 
 //////////////////////////////////////////////////////////////////////

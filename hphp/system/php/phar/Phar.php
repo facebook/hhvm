@@ -569,12 +569,14 @@ class Phar extends RecursiveDirectoryIterator
    *
    * @return bool <b>TRUE</b> if the filename is valid, <b>FALSE</b> if not.
    */
-  public static function isValidPharFilename (
-    $filename,
-    $executable = true
-  ) {
-    $parts = explode('.', $filename);
-    return $executable ? in_array('phar', $parts) : count($parts) > 1;
+  public static function isValidPharFilename(
+    string $filename,
+    bool $executable = true
+  ): bool {
+    $filename = basename($filename);
+    $pharExt = preg_match('/.+\.phar(\..+|$)/i', $filename) === 1;
+    return $executable ? $pharExt
+                       : !$pharExt && strpos($filename, '.') !== false;
   }
 
   /**

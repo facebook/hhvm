@@ -507,7 +507,7 @@ struct MemcachedData {
 
   Variant incDecOp(bool isInc,
                    const StringData* server_key, const StringData* key,
-                   int64_t offset, int64_t initial_value, int64_t expiry) {
+                   int64_t offset, const Variant& initial_value, int64_t expiry) {
     m_impl->rescode = q_Memcached$$RES_SUCCESS;
     if (key->empty() || strchr(key->data(), ' ')) {
       m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
@@ -523,9 +523,7 @@ struct MemcachedData {
     uint64_t value;
     memcached_return_t status;
 
-    // XXX(#3862): use_initial should really depend on the number of arguments
-    // passed to the function but this isn't currently supported by HNI.
-    bool use_initial = isBinaryProtocol();
+    bool use_initial = initial_value.isInteger();
     auto mc = &m_impl->memcached;
     if (use_initial) {
       if (!isBinaryProtocol()) {
@@ -538,22 +536,22 @@ struct MemcachedData {
           status = memcached_increment_with_initial_by_key(
             mc,
             server_key->data(), server_key->size(), key->data(), key->size(),
-            offset, initial_value, expiry, &value);
+            offset, initial_value.asInt64Val(), expiry, &value);
         } else {
           status = memcached_decrement_with_initial_by_key(
             mc,
             server_key->data(), server_key->size(), key->data(), key->size(),
-            offset, initial_value, expiry, &value);
+            offset, initial_value.asInt64Val(), expiry, &value);
         }
       } else {
         if (isInc) {
           status = memcached_increment_with_initial(
             mc, key->data(), key->size(),
-            offset, initial_value, expiry, &value);
+            offset, initial_value.asInt64Val(), expiry, &value);
         } else {
           status = memcached_decrement_with_initial(
             mc, key->data(), key->size(),
-            offset, initial_value, expiry, &value);
+            offset, initial_value.asInt64Val(), expiry, &value);
         }
       }
     } else {
@@ -888,7 +886,7 @@ Variant HHVM_METHOD(Memcached, deletemultibykey, const String& server_key,
 Variant HHVM_METHOD(Memcached, increment,
                     const String& key,
                     int64_t offset /* = 1 */,
-                    int64_t initial_value /* = 0 */,
+                    const Variant& initial_value /* = false */,
                     int64_t expiry /* = 0 */) {
   return Native::data<MemcachedData>(this_)->incDecOp(
     true, nullptr, key.get(), offset, initial_value, expiry);
@@ -898,7 +896,7 @@ Variant HHVM_METHOD(Memcached, incrementbykey,
                     const String& server_key,
                     const String& key,
                     int64_t offset /* = 1 */,
-                    int64_t initial_value /* = 0 */,
+                    const Variant& initial_value /* = false */,
                     int64_t expiry /* = 0 */) {
   return Native::data<MemcachedData>(this_)->incDecOp(
     true, server_key.get(), key.get(), offset, initial_value, expiry);
@@ -907,7 +905,7 @@ Variant HHVM_METHOD(Memcached, incrementbykey,
 Variant HHVM_METHOD(Memcached, decrement,
                     const String& key,
                     int64_t offset /* = 1 */,
-                    int64_t initial_value /* = 0 */,
+                    const Variant& initial_value /* = false */,
                     int64_t expiry /* = 0 */) {
   return Native::data<MemcachedData>(this_)->incDecOp(
     false, nullptr, key.get(), offset, initial_value, expiry);
@@ -917,7 +915,7 @@ Variant HHVM_METHOD(Memcached, decrementbykey,
                     const String& server_key,
                     const String& key,
                     int64_t offset /* = 1 */,
-                    int64_t initial_value /* = 0 */,
+                    const Variant& initial_value /* = false */,
                     int64_t expiry /* = 0 */) {
   return Native::data<MemcachedData>(this_)->incDecOp(
     false, server_key.get(), key.get(), offset, initial_value, expiry);

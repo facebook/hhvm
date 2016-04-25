@@ -200,16 +200,17 @@ class Memcached {
    * @param string $key - The key of the item to decrement.
    * @param int $offset - The amount by which to decrement the item's
    *   value.
-   * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   * @param mixed $initial_value - The value to set the item to if it
+   *   doesn't currently exist. False to fail if the key does not exist
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns item's new value on success.
+   * @return mixed - Returns item's new value on success. False if the key
+   *   doesn't exist and no initial_value was provided.
    */
   <<__Native>>
   public function decrement(string $key,
                             int $offset = 1,
-                            int $initial_value = 0,
+                            mixed $initial_value = false,
                             int $expiry = 0): mixed;
 
   /**
@@ -220,16 +221,17 @@ class Memcached {
    * @param int $offset - The amount by which to decrement the item's
    *   value.
    * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   *   doesn't currently exist. False to fail if the key does not exist.
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns item's new value on success.
+   * @return int - Returns item's new value on success. False if the key
+   *   doesn't exist and no initial_value was provided.
    */
   <<__Native>>
   public function decrementByKey(string $server_key,
                                  string $key,
                                  int $offset = 1,
-                                 int $initial_value = 0,
+                                 mixed $initial_value = false,
                                  int $expiry = 0): mixed;
 
   /**
@@ -506,16 +508,17 @@ class Memcached {
    * @param string $key - The key of the item to increment.
    * @param int $offset - The amount by which to increment the item's
    *   value.
-   * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   * @param mixed $initial_value - The value to set the item to if it
+   *   doesn't currently exist. False to fail if the key does not exist.
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns new item's value on success.
+   * @return mixed - Returns new item's value on success. False if the key
+   * doesn't exist.
    */
   <<__Native>>
   public function increment(string $key,
                             int $offset = 1,
-                            int $initial_value = 0,
+                            mixed $initial_value = false,
                             int $expiry = 0): mixed;
 
   /**
@@ -525,17 +528,18 @@ class Memcached {
    * @param string $key - The key of the item to increment.
    * @param int $offset - The amount by which to increment the item's
    *   value.
-   * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   * @param mixed $initial_value - The value to set the item to if it
+   *   doesn't currently exist. False to fail if the key does not exist.
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns new item's value on success.
+   * @return mixed - Returns new item's value on success. False if the key
+   *   doesn't exist and no initial_value was provided.
    */
   <<__Native>>
   public function incrementByKey(string $server_key,
                                  string $key,
                                  int $offset = 1,
-                                 int $initial_value = 0,
+                                 mixed $initial_value = false,
                                  int $expiry = 0): mixed;
 
   /**

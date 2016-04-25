@@ -51,13 +51,14 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckLoc, TBoxedInitCell, LocalId(locId), exit, fp(env));
-  env.irb->constrainLocal(locId, DataTypeSpecific, "HintLocInner");
   gen(env, HintLocInner, type, LocalId { locId }, fp(env));
 
-  if (!outerOnly && type.inner() < TInitCell) {
+  auto const innerType = env.irb->predictedLocalInnerType(locId);
+  if (!outerOnly && innerType < TInitCell) {
+    env.irb->constrainLocal(locId, DataTypeSpecific, "HintLocInner");
     auto const ldPMExit = makePseudoMainExit(env);
     auto const val = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
-    gen(env, CheckRefInner, env.irb->predictedLocalInnerType(locId), exit, val);
+    gen(env, CheckRefInner, innerType, exit, val);
   }
 }
 
@@ -75,15 +76,14 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckStk, TBoxedInitCell, soff, exit, sp(env));
-  env.irb->constrainStack(soff.offset, DataTypeSpecific);
   gen(env, HintStkInner, type, soff, sp(env));
 
-  if (!outerOnly && type.inner() < TInitCell) {
+  auto const innerType = env.irb->predictedStackInnerType(soff.offset);
+  if (!outerOnly && innerType < TInitCell) {
+    env.irb->constrainStack(soff.offset, DataTypeSpecific);
     auto stk = gen(env, LdStk, TBoxedInitCell,
                    IRSPRelOffsetData{soff.offset}, sp(env));
-    gen(env, CheckRefInner,
-        env.irb->predictedStackInnerType(soff.offset),
-        exit, stk);
+    gen(env, CheckRefInner, innerType, exit, stk);
   }
 }
 

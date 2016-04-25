@@ -390,6 +390,7 @@ OTHER_UNPARSEABLE_FILES = [
     # TODO: task 10395133
     'dict/dict_literal.php',
     'dict/dict_literal_empty.php',
+    'dict/supports_unset_on_alias.php',
     'dict/dict_literal_wrong_brace.php',
     'dict/dict_literal_mixed_brace.php',
     'dict/dict_literal_mixed_brace2.php',

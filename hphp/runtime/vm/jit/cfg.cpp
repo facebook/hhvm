@@ -33,16 +33,23 @@ namespace {
 
 // If edge is critical, split it by inserting an intermediate block.
 // A critical edge is an edge from a block with multiple successors to
-// a block with multiple predecessors.
-void splitCriticalEdge(IRUnit& unit, Edge* edge) {
-  if (!edge) return;
+// a block with multiple predecessors. Returns the new intermediate block if
+// one was inserted, and nullptr otherwise.
+Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
+  if (!edge) return nullptr;
 
   auto* to = edge->to();
   auto* branch = edge->inst();
   auto* from = branch->block();
-  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
 
-  splitEdge(unit, from, to);
+  // While not necessarily critical, if we had to split any of the edges into
+  // the catch we need to split all of them as we will be hoisting the
+  // BeginCatch instructions and we cannot hoist them into the preds
+  if (to->numPreds() <= 1 || (!to->isCatch() && from->numSuccs() <= 1)) {
+    return nullptr;
+  }
+
+  return splitEdge(unit, from, to);
 }
 
 /*
@@ -113,6 +120,7 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   if (from->hint() == unlikely || to->hint() == unlikely) {
     middle->setHint(unlikely);
   }
+
   return middle;
 }
 
@@ -122,12 +130,33 @@ bool splitCriticalEdges(IRUnit& unit) {
   if (modified) reflowTypes(unit);
   auto const startBlocks = unit.numBlocks();
 
+  std::unordered_set<Block*> newCatches;
+  std::unordered_set<Block*> oldCatches;
+
   // Try to split outgoing edges of each reachable block.  This is safe in
   // a postorder walk since we visit blocks after visiting successors.
   postorderWalk(unit, [&](Block* b) {
-    splitCriticalEdge(unit, b->takenEdge());
+    auto bnew = splitCriticalEdge(unit, b->takenEdge());
     splitCriticalEdge(unit, b->nextEdge());
+
+    assertx(!b->next() || !b->next()->isCatch());
+    if (bnew && b->taken()->isCatch()) {
+      newCatches.emplace(bnew);
+      oldCatches.emplace(b->taken());
+    }
   });
+
+  for (auto b : newCatches) {
+    auto bc = b->next()->begin();
+    assertx(bc->is(BeginCatch));
+    b->prepend(unit.gen(BeginCatch, bc->marker()));
+  }
+
+  for (auto b : oldCatches) {
+    auto bc = b->begin();
+    assertx(bc->is(BeginCatch));
+    b->erase(bc);
+  }
 
   return modified || unit.numBlocks() != startBlocks;
 }

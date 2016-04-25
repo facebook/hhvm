@@ -512,7 +512,7 @@ bool isCallCatch(Block* block) {
   while (!workQ.empty()) {
     block = workQ.front();
     workQ.pop_front();
-    if (block->front().is(BeginCatch)) break;
+    if (block->isCatch()) break;
     for (auto& pred : block->preds()) {
       workQ.emplace_back(pred.inst()->block());
     }
@@ -638,20 +638,27 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ) {
     return false;
   }
 
-  if (curFp->inst()->block() == succ) {
-    assertx(curFp->inst()->is(DefLabel));
-    ITRACE(4, "succ has DefLabel: {}\n", *curFp->inst());
-  } else if (succ->front().is(DefLabel)) {
-    // succ already has a label but it cannot contain an inlined fp because
-    // if it did we would have stored it in the fpMap
-    ctx.unit->expandLabel(&succ->front(), 1);
-    ITRACE(4, "Expanding succ DefLabel: {}\n", succ->front());
-  } else {
-    succ->prepend(ctx.unit->defLabel(1, succ->front().marker()));
+  auto const label = [&] {
+    if (curFp->inst()->block() == succ) {
+      assertx(curFp->inst()->is(DefLabel));
+      ITRACE(4, "succ has DefLabel: {}\n", *curFp->inst());
+      return &succ->front();
+    } else if (succ->front().is(DefLabel)) {
+      // succ already has a label but it cannot contain an inlined fp because
+      // if it did we would have stored it in the fpMap
+      ctx.unit->expandLabel(&succ->front(), 1);
+      ITRACE(4, "Expanding succ DefLabel: {}\n", succ->front());
+      return &succ->front();
+    }
+    // Don't put DefLabel in a block with a BeginCatch. Splitting critical
+    // edges should hoist BeginCatch for us.
+    assertx(!succ->isCatch());
+    auto ret = ctx.unit->defLabel(1, succ->front().marker());
+    succ->insert(succ->begin(), ret);
     ITRACE(4, "Creating succ DefLabel: {}\n", succ->front());
-  }
+    return ret;
+  }();
 
-  auto const label = &succ->front();
   auto newFp = label->dst(label->numDsts() - 1);
   ctx.fpMap[succ] = newFp;
 

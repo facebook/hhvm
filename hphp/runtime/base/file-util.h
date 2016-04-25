@@ -90,14 +90,7 @@ std::string normalizeDir(const std::string &dirname);
 /**
  * Thread-safe dirname().
  */
-std::string safe_dirname(const char *path, int len);
-std::string safe_dirname(const char *path);
-std::string safe_dirname(const std::string& path);
-
-/**
- * Helper function for safe_dirname.
- */
-size_t dirname_helper(char *path, int len);
+String dirname(const String& path);
 
 /**
  * Search for PHP or non-PHP files under a directory.

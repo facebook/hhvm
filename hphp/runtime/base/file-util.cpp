@@ -321,7 +321,9 @@ int FileUtil::ssystem(const char* command) {
   return ret;
 }
 
-size_t FileUtil::dirname_helper(char *path, int len) {
+namespace {
+
+size_t dirname_impl(char *path, int len) {
   if (len == 0) {
     /* Illegal use of this function */
     return 0;
@@ -329,18 +331,18 @@ size_t FileUtil::dirname_helper(char *path, int len) {
 
   /* Strip trailing slashes */
   register char *end = path + len - 1;
-  while (end >= path && isDirSeparator(*end)) {
+  while (end >= path && FileUtil::isDirSeparator(*end)) {
     end--;
   }
   if (end < path) {
     /* The path only contained slashes */
-    path[0] = getDirSeparator();
+    path[0] = FileUtil::getDirSeparator();
     path[1] = '\0';
     return 1;
   }
 
   /* Strip filename */
-  while (end >= path && !isDirSeparator(*end)) {
+  while (end >= path && !FileUtil::isDirSeparator(*end)) {
     end--;
   }
   if (end < path) {
@@ -351,11 +353,11 @@ size_t FileUtil::dirname_helper(char *path, int len) {
   }
 
   /* Strip slashes which came before the file name */
-  while (end >= path && isDirSeparator(*end)) {
+  while (end >= path && FileUtil::isDirSeparator(*end)) {
     end--;
   }
   if (end < path) {
-    path[0] = getDirSeparator();
+    path[0] = FileUtil::getDirSeparator();
     path[1] = '\0';
     return 1;
   }
@@ -364,24 +366,13 @@ size_t FileUtil::dirname_helper(char *path, int len) {
   return end + 1 - path;
 }
 
-std::string FileUtil::safe_dirname(const char *path, int len) {
-  char* tmp_path = (char*)malloc(len+1);
-  memcpy(tmp_path, path, len);
-  tmp_path[len] = '\0';
-  size_t newLen = dirname_helper(tmp_path, len);
-  std::string ret;
-  ret.assign(tmp_path, newLen);
-  free((void *) tmp_path);
-  return ret;
 }
 
-std::string FileUtil::safe_dirname(const char *path) {
-  int len = strlen(path);
-  return safe_dirname(path, len);
-}
-
-std::string FileUtil::safe_dirname(const std::string& path) {
-  return safe_dirname(path.c_str(), path.size());
+String FileUtil::dirname(const String& path) {
+  String str{path, CopyString};
+  auto new_length = dirname_impl(str.mutableData(), str.length());
+  str.setSize(new_length);
+  return str;
 }
 
 String FileUtil::relativePath(const std::string& fromDir,

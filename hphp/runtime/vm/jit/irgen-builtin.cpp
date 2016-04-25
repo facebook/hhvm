@@ -261,13 +261,7 @@ SSATmp* opt_dirname(IRGS& env, uint32_t numArgs) {
 
   // Return the directory portion of the path
   auto path = top(env, BCSPRelOffset{0})->strVal();
-  auto psize = path->size();
-  // Make a mutable copy for dirname_helper to modify
-  char *buf = strndup(path->data(), psize);
-  int len = FileUtil::dirname_helper(buf, psize);
-  SSATmp *ret = cns(env, makeStaticString(buf, len));
-  free(buf);
-  return ret;
+  return cns(env, makeStaticString(FileUtil::dirname(StrNR{path})));
 }
 
 /*

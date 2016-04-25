@@ -527,11 +527,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
   u->m_useStrictTypes = m_useStrictTypes;
-  {
-    const std::string& dirname = FileUtil::safe_dirname(m_filepath->data(),
-                                                        m_filepath->size());
-    u->m_dirpath = makeStaticString(dirname);
-  }
+  u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_md5 = m_md5;
   for (unsigned i = 0; i < m_litstrs.size(); ++i) {
     NamedEntityPair np;

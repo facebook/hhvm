@@ -596,6 +596,9 @@ void RegionDesc::Block::addPredicted(TypedLocation locType) {
   FTRACE(2, "Block::addPredicted({})\n", show(locType));
   assertx(locType.type != TBottom);
   assertx(locType.type <= TStkElem);
+  // type predictions should be added in order of location
+  assertx(m_typePredictions.size() == 0 ||
+          (m_typePredictions.back().location < locType.location));
   m_typePredictions.push_back(locType);
 }
 

@@ -185,8 +185,9 @@ void relaxGuards(BlockDataVec& blockData) {
  * Determine whether two blocks are equivalent, which entails:
  *
  *  1) Their type guards are identical after relaxation;
- *  2) Their reffiness guards are identical;
- *  3) Their sets of successor region blocks are identical.
+ *  2) Their type predictions are identical;
+ *  3) Their reffiness guards are identical;
+ *  4) Their sets of successor region blocks are identical.
  */
 bool equivalent(const BlockData&  bd1,
                 const BlockData&  bd2,
@@ -197,12 +198,20 @@ bool equivalent(const BlockData&  bd1,
   const auto& guards2 = bd2.guards;
   if (guards1 != guards2) return false;
 
-  // 2) Compare the reffiness guards
-  const auto& reffys1 = region.block(bd1.blockId)->reffinessPreds();
-  const auto& reffys2 = region.block(bd2.blockId)->reffinessPreds();
+  auto const block1 = region.block(bd1.blockId);
+  auto const block2 = region.block(bd2.blockId);
+
+  // 2) Compare input type predictions
+  const auto& predictedTypes1 = block1->typePredictions();
+  const auto& predictedTypes2 = block2->typePredictions();
+  if (predictedTypes1 != predictedTypes2) return false;
+
+  // 3) Compare the reffiness guards
+  const auto& reffys1 = block1->reffinessPreds();
+  const auto& reffys2 = block2->reffinessPreds();
   if (reffys1 != reffys2) return false;
 
-  // 3) Compare the sets of successor blocks
+  // 4) Compare the sets of successor blocks
   if (region.succs(bd1.blockId) != region.succs(bd2.blockId)) return false;
 
   return true;

@@ -419,6 +419,7 @@ void recordDependencies(Env& env) {
     }
   });
 
+  std::vector<RegionDesc::TypedLocation> typePreds;
   for (auto& kv : guardMap) {
     auto const hint_it = hintMap.find(kv.first);
     // If we have a hinted type that's better than the guarded type, we want to
@@ -431,7 +432,7 @@ void recordDependencies(Env& env) {
         hint_it->second
       };
       FTRACE(1, "selectTracelet adding prediction {}\n", show(pred));
-      firstBlock.addPredicted(pred);
+      typePreds.push_back(pred);
     }
     if (kv.second == TGen) {
       // Guard was relaxed to Gen---don't record it.  But if there's a hint, we
@@ -444,6 +445,18 @@ void recordDependencies(Env& env) {
     };
     ITRACE(1, "selectTracelet adding guard {}\n", show(preCond));
     firstBlock.addPreCondition(preCond);
+  }
+
+  // Sort the predictions by location, so that we can simply compare
+  // the type-prediction vectors for different blocks later.
+  std::sort(typePreds.begin(), typePreds.end(),
+            [&](const RegionDesc::TypedLocation& tl1,
+                const RegionDesc::TypedLocation& tl2) {
+              return tl1.location < tl2.location;
+            });
+
+  for (auto& pred : typePreds) {
+    firstBlock.addPredicted(pred);
   }
 }
 

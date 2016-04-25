@@ -325,7 +325,8 @@ struct RegionDesc::Block {
   void truncateAfter(SrcKey sk);
 
   /*
-   * Add a predicted type to this block.
+   * Add a predicted type to this block.  Multiple calls to this method should
+   * be made in sorted order of the TypeLocation parameter.
    */
   void addPredicted(TypedLocation);
 

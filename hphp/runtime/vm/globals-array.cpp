@@ -168,7 +168,7 @@ GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k,
  */
 
 ArrayData*
-GlobalsArray::Append(ArrayData*, const Variant& v, bool copy) {
+GlobalsArray::Append(ArrayData*, Cell v, bool copy) {
   throw_not_implemented("append on $GLOBALS");
 }
 

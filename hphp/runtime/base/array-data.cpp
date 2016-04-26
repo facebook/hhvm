@@ -510,11 +510,12 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(CopyStatic)
 
   /*
-   * ArrayData* Append(ArrayData*, const Variant& v, bool copy)
+   * ArrayData* Append(ArrayData*, Cell v, bool copy)
    *
    *   Append a new value to the array, with the next available
    *   integer key.  If there is no next available integer key, no
-   *   value is appended.  This function has copy/grow semantics.
+   *   value is appended.  This function has copy/grow semantics.  The
+   *   value must not be KindOfUninit.
    */
   DISPATCH(Append)
 

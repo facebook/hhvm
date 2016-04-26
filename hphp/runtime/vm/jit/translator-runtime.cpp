@@ -90,7 +90,7 @@ namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
-  ArrayData* r = a->append(tvAsCVarRef(&value), a->hasMultipleRefs());
+  auto r = a->append(*tvAssertCell(&value), a->hasMultipleRefs());
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }

@@ -155,7 +155,8 @@ inline void ArrayData::release() noexcept {
   return g_array_funcs.release[kind()](this);
 }
 
-inline ArrayData* ArrayData::append(const Variant& v, bool copy) {
+inline ArrayData* ArrayData::append(Cell v, bool copy) {
+  assertx(v.m_type != KindOfUninit);
   return g_array_funcs.append[kind()](this, v, copy);
 }
 

@@ -279,6 +279,8 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   } else if (ar->hasClass()) {
     // For static methods, give handler the name of called class
     called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
+  } else {
+    called_on = init_null();
   }
   Variant intArgs =
     PackedArrayInit(5)

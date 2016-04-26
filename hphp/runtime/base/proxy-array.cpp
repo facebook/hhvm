@@ -236,7 +236,7 @@ ProxyArray::Copy(const ArrayData* ad) {
 }
 
 ArrayData*
-ProxyArray::Append(ArrayData* ad, const Variant& v, bool copy) {
+ProxyArray::Append(ArrayData* ad, Cell v, bool copy) {
   if (copy) {
     return innerArr(ad)->append(v, true);
   } else {
@@ -432,8 +432,8 @@ void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {
       *dest = (void*)(&r->nvGet(k)->m_data.pref);
     }
   } else {
-    auto elt = makeElementResource(data, data_size, dest);
-    r = innerArr(this)->append(Variant(std::move(elt)), false);
+    auto v = Variant(makeElementResource(data, data_size, dest));
+    r = innerArr(this)->append(*v.asTypedValue(), false);
   }
   reseatable(this, r);
 }

@@ -348,11 +348,11 @@ public:
   ArrayData* copyStatic() const;
 
   /**
-   * Append a value to the array. If "copy" is true, make a copy first
-   * then append the value. Return NULL if escalation is not needed, or an
+   * Append a value to the array.  If "copy" is true, make a copy first and then
+   * append the value.  Return nullptr if escalation is not needed, or an
    * escalated array data.
    */
-  ArrayData* append(const Variant& v, bool copy);
+  ArrayData* append(Cell v, bool copy);
   ArrayData* appendRef(Variant& v, bool copy);
 
   /**
@@ -577,7 +577,7 @@ struct ArrayFunctions {
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
-  ArrayData* (*append[NK])(ArrayData*, const Variant& v, bool copy);
+  ArrayData* (*append[NK])(ArrayData*, Cell v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, Variant& v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, const Variant& v, bool copy);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);

@@ -273,12 +273,9 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*,
   return EmptyArray::MakeMixed(k, ref).first;
 }
 
-ArrayData* EmptyArray::Append(ArrayData*, const Variant& vin, bool copy) {
-  auto cell = *vin.asCell();
-  tvRefcountedIncRef(&cell);
-  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
-  if (cell.m_type == KindOfUninit) cell.m_type = KindOfNull;
-  return EmptyArray::MakePackedInl(cell).first;
+ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool copy) {
+  tvRefcountedIncRef(&v);
+  return EmptyArray::MakePackedInl(v).first;
 }
 
 ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool copy) {

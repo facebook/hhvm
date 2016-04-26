@@ -85,9 +85,10 @@ struct ArrayInit {
   ArrayInit& set(const Variant& v) = delete;
 
   ArrayInit& append(const Variant& v) {
-    performOp([&]{
-      return MixedArray::Append(m_data, v, false);
-    });
+    auto const cell = LIKELY(v.getType() != KindOfUninit)
+      ? *v.asCell()
+      : make_tv<KindOfNull>();
+    performOp([&]{ return MixedArray::Append(m_data, cell, false); });
     return *this;
   }
 
@@ -329,7 +330,10 @@ struct DictInit {
   }
 
   DictInit& append(const Variant& v) {
-    performOp([&]{ return MixedArray::Append(m_data, v, false); });
+    auto const cell = LIKELY(v.getType() != KindOfUninit)
+      ? *v.asCell()
+      : make_tv<KindOfNull>();
+    performOp([&]{ return MixedArray::Append(m_data, cell, false); });
     return *this;
   }
 
@@ -492,7 +496,10 @@ struct PackedArrayInit {
    * Append a new element to the packed array.
    */
   PackedArrayInit& append(const Variant& v) {
-    performOp([&]{ return PackedArray::Append(m_vec, v, false); });
+    auto const cell = LIKELY(v.getType() != KindOfUninit)
+      ? *v.asCell()
+      : make_tv<KindOfNull>();
+    performOp([&]{ return PackedArray::Append(m_vec, cell, false); });
     return *this;
   }
 

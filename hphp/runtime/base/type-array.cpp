@@ -708,7 +708,7 @@ const Variant& Array::append(const Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::Create(v));
   } else {
-    ArrayData *escalated = m_arr->append(v, m_arr->cowCheck());
+    auto escalated = m_arr->append(*v.asCell(), m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
   return v;

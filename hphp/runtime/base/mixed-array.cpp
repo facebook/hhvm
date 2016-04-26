@@ -1046,7 +1046,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   m_used = m_size;
 }
 
-bool MixedArray::nextInsert(const Variant& data) {
+bool MixedArray::nextInsert(Cell v) {
   assert(m_nextKI >= 0);
   assert(!isFull());
 
@@ -1061,9 +1061,7 @@ bool MixedArray::nextInsert(const Variant& data) {
   auto& e = allocElm(ei);
   e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
-  // TODO(#3888164): we should restructure things so we don't have to
-  // check KindOfUninit here.
-  initVal(e.data, *data.asCell());
+  cellDup(v, e.data);
   return true;
 }
 
@@ -1172,7 +1170,7 @@ ArrayData* MixedArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
-  if (UNLIKELY(!a->nextInsert(uninit_null()))) {
+  if (UNLIKELY(!a->nextInsert(make_tv<KindOfNull>()))) {
     ret = &lvalBlackHole();
     return a;
   }
@@ -1363,7 +1361,7 @@ void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   getElmKey(a->data()[pos], out);
 }
 
-ArrayData* MixedArray::Append(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "

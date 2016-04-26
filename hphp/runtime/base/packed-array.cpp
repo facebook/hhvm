@@ -638,7 +638,7 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
 
   // Setting the int at the size of the array can keep it in packed
   // mode---it's the same as an append.
-  if (size_t(k) == adIn->m_size) return Append(adIn, tvAsCVarRef(&v), copy);
+  if (size_t(k) == adIn->m_size) return Append(adIn, v, copy);
 
   // On the promote-to-mixed path, we can use addVal since we know the
   // key can't exist.
@@ -752,13 +752,13 @@ bool PackedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return true;
 }
 
-ArrayData* PackedArray::Append(ArrayData* adIn, const Variant& v, bool copy) {
+ArrayData* PackedArray::Append(ArrayData* adIn, Cell v, bool copy) {
   assert(checkInvariants(adIn));
-  auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
-                       : ResizeIfNeeded(adIn);
-  // TODO(#3888164): we should restructure things so we don't have to
-  // check KindOfUninit here.
-  initVal(packedData(ad)[ad->m_size++], *v.asCell());
+  assertx(v.m_type != KindOfUninit);
+  auto const ad = copy
+    ? CopyAndResizeIfNeeded(adIn)
+    : ResizeIfNeeded(adIn);
+  cellDup(v, packedData(ad)[ad->m_size++]);
   return ad;
 }
 

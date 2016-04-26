@@ -249,7 +249,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
           auto const argname = func->localVarName(i);
           auto const tv = varEnv->lookup(argname);
 
-          Variant val;
+          auto val = init_null();
           if (tv != nullptr) { // the variable hasn't been unset
             val = withValues ? tvAsVariant(tv) : "";
           }
@@ -277,7 +277,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       if (UNLIKELY(mayUseVV) && nargs > nparams && fp->hasExtraArgs()) {
         for (int i = nparams; i < nargs; i++) {
           auto arg = fp->getExtraArg(i - nparams);
-          args.append(tvAsVariant(arg));
+          if (arg->m_type == KindOfUninit) {
+            args.append(init_null());
+          } else {
+            args.append(tvAsVariant(arg));
+          }
         }
       }
       frame.set(s_args, args);

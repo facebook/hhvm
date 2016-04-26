@@ -1441,7 +1441,7 @@ static Array HHVM_METHOD(PDO, errorinfo) {
   if (error_expected_count > error_count) {
     int error_count_diff = error_expected_count - error_count;
     for (int i = 0; i < error_count_diff; i++) {
-      ret.append(uninit_null());
+      ret.append(init_null_variant);
     }
   }
   return ret;

@@ -1041,10 +1041,10 @@ inline void SetNewElemString(TypedValue* base, Cell* value) {
 inline void SetNewElemArray(TypedValue* base, Cell* value) {
   base = tvToCell(base);
   assert(isArrayType(base->m_type));
-  ArrayData* a = base->m_data.parr;
-  bool copy = a->cowCheck() ||
-              (isArrayType(value->m_type) && value->m_data.parr == a);
-  ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
+  auto a = base->m_data.parr;
+  auto const copy = a->cowCheck() ||
+    (isArrayType(value->m_type) && value->m_data.parr == a);
+  auto a2 = a->append(*value, copy);
   if (a2 != a) {
     auto old = base->m_data.parr;
     base->m_data.parr = a2;

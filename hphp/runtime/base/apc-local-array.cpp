@@ -222,8 +222,8 @@ ArrayData* APCLocalArray::CopyWithStrongIterators(const ArrayData*) {
     "Unimplemented ArrayData::copyWithStrongIterators");
 }
 
-ArrayData* APCLocalArray::Append(ArrayData* ad, const Variant& v, bool copy) {
-  ArrayData* escalated = Escalate(ad);
+ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool copy) {
+  auto escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->append(v, false));
 }
 

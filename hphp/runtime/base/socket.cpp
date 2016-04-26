@@ -249,7 +249,7 @@ const StaticString
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();
   ret.set(s_timed_out, m_data->m_timedOut);
-  ret.set(s_blocked, (bool)(fcntl(getFd(), F_GETFL, 0) & O_NONBLOCK));
+  ret.set(s_blocked, (fcntl(getFd(), F_GETFL, 0) & O_NONBLOCK) == 0);
   return ret;
 }
 

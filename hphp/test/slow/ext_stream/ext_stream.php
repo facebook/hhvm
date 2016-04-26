@@ -114,7 +114,7 @@ function test_stream_get_meta_data() {
   $line = fgets($client);
   $meta = stream_get_meta_data($client);
   VS($meta['timed_out'], true);
-  VS($meta['blocked'], false);
+  VS($meta['blocked'], true);
 }
 
 function test_stream_misc() {

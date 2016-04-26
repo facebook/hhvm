@@ -68,8 +68,8 @@ struct Writer {
     endObject(name);
   }
 
-  static folly::fbstring escape_for_json(const char* s) {
-    auto ret = folly::fbstring{};
+  static std::string escape_for_json(const char* s) {
+    auto ret = std::string{};
     auto opts = folly::json::serialization_opts{};
     opts.skip_invalid_utf8 = true;
     opts.encode_non_ascii = true;

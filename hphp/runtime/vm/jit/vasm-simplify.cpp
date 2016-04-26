@@ -114,19 +114,29 @@ bool simplify(Env&, const Inst& inst, Vlabel b, size_t i) { return false; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool simplify(Env& env, const andq& vandq, Vlabel b, size_t i) {
+template<typename Test, typename And>
+bool simplify_and(Env& env, const And& vandq, Vlabel b, size_t i) {
   return if_inst<Vinstr::testq>(env, b, i + 1, [&] (const testq& vtestq) {
-    // andq{s0, s1, tmp, _}; testq{tmp, tmp, sf} --> testq{s0, s1, sf}
+    // And{s0, s1, tmp, _}; testq{tmp, tmp, sf} --> Test{s0, s1, sf}
+    // where And/Test is either andq/testq, or andqi/testqi.
     if (!(env.use_counts[vandq.d] == 2 &&
           env.use_counts[vandq.sf] == 0 &&
           vtestq.s0 == vandq.d &&
           vtestq.s1 == vandq.d)) return false;
 
     return simplify_impl(env, b, i, [&] (Vout& v) {
-      v << testq{vandq.s0, vandq.s1, vtestq.sf};
+      v << Test{vandq.s0, vandq.s1, vtestq.sf};
       return 2;
     });
   });
+}
+
+bool simplify(Env& env, const andq& vandq, Vlabel b, size_t i) {
+  return simplify_and<testq>(env, vandq, b, i);
+}
+
+bool simplify(Env& env, const andqi& vandqi, Vlabel b, size_t i) {
+  return simplify_and<testqi>(env, vandqi, b, i);
 }
 
 bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {

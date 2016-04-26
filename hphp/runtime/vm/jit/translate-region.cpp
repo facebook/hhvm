@@ -199,7 +199,8 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
 void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
                                      const RegionDesc& region,
                                      const RegionDesc::BlockPtr block,
-                                     bool isEntry) {
+                                     bool isEntry,
+                                     bool checkOuterTypeOnly) {
   auto const sk = block->start();
   auto const bcOff = sk.offset();
   auto& typePredictions = block->typePredictions();
@@ -227,10 +228,6 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
       assertx(loc.tag() == LTag::Stack);
       irgen::assertTypeLocation(irgs, loc, type);
     } else {
-      // Check inner type eagerly if it is the first block during profiling.
-      // Otherwise only check for BoxedInitCell.
-      bool checkOuterTypeOnly =
-        !isEntry || irgs.context.kind != TransKind::Profile;
       irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
     }
   }
@@ -665,9 +662,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // `EndGuards` after the checks, and generate profiling code in profiling
     // translations.
     auto const isEntry = block == region.entry() && !inl.inlining();
-    auto const checkOuterTypeOnly =
-      !isEntry || irgs.context.kind != TransKind::Profile;
-    emitPredictionsAndPreConditions(irgs, region, block, isEntry);
+    auto const checkOuterTypeOnly = !irb.guardFailBlock() &&
+      (!isEntry || irgs.context.kind != TransKind::Profile);
+    emitPredictionsAndPreConditions(irgs, region, block, isEntry,
+                                    checkOuterTypeOnly);
     irb.resetGuardFailBlock();
 
     // Generate IR for each bytecode instruction in this block.

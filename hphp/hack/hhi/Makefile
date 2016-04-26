@@ -1,10 +1,3 @@
 .PHONY: hhi.tar.gz
 hhi.tar.gz:
-	# equivalent to tar -czf, but deterministic output
-	find . -print0 | LC_ALL=C sort -z | tar --null \
-		--mtime='1970-01-01 00:00Z' \
-		--owner=root --group=root \
-		--numeric-owner \
-		--mode="u=rwX,go=rX" \
-		-T - --no-recursion \
-		-c | gzip -n > ../bin/hhi.tar.gz
+	tar czf ../bin/hhi.tar.gz .

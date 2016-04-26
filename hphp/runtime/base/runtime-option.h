@@ -80,6 +80,7 @@ struct RuntimeOption {
 
 #ifdef FACEBOOK
   static bool UseThriftLogger;
+  static size_t LoggerBatchSize;
 #endif
   static std::map<std::string, ErrorLogFileData> ErrorLogs;
   static std::string LogFile;

@@ -129,6 +129,13 @@ void Logger::FlushAll() {
   }
 }
 
+void Logger::SetBatchSize(size_t bsize) {
+  for (auto& l : s_loggers) {
+    auto& logger = l.second;
+    logger->setBatchSize(bsize);
+  }
+}
+
 int Logger::GetSyslogLevel(LogLevelType level) {
   switch (level) {
   case LogError:   return LOG_ERR;

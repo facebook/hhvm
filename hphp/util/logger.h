@@ -116,6 +116,7 @@ struct Logger {
   static void ResetPid();
 
   static void FlushAll();
+  static void SetBatchSize(size_t bsize);
 
   virtual FILE* fileForStackTrace() { return output(); }
 
@@ -153,6 +154,7 @@ protected:
                    bool escape = false, bool escapeMore = false);
   // mainly intended for subclass of loggers that batch
   virtual void flush() {}
+  virtual void setBatchSize(size_t bsize) {}
 
   // deduce where to write log
   virtual FILE* output();

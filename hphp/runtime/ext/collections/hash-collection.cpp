@@ -183,7 +183,7 @@ Array HashCollection::toValuesArray() {
 
 void HashCollection::remove(int64_t key) {
   mutateAndBump();
-  auto p = findForRemove(key);
+  auto p = findForRemove(key, hashint(key));
   if (validPos(p)) {
     erase(p);
   }
@@ -411,7 +411,7 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
 
 template <class Hit>
 ALWAYS_INLINE
-ssize_t HashCollection::findImpl(size_t h0, Hit hit) const {
+ssize_t HashCollection::findImpl(hash_t h0, Hit hit) const {
   uint32_t mask = tableMask();
   auto elms = data();
   auto hashtable = hashTab();
@@ -429,8 +429,8 @@ ssize_t HashCollection::findImpl(size_t h0, Hit hit) const {
   }
 }
 
-ssize_t HashCollection::find(int64_t ki) const {
-  return findImpl(ki, [ki] (const Elm& e) {
+ssize_t HashCollection::find(int64_t ki, inthash_t h) const {
+  return findImpl(h, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }

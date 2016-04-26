@@ -628,7 +628,7 @@ static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
 // table elements exactly once.
 
 template <class Hit> ALWAYS_INLINE
-ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
+ssize_t MixedArray::findImpl(hash_t h0, Hit hit) const {
   uint32_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
@@ -646,8 +646,8 @@ ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
   }
 }
 
-ssize_t MixedArray::find(int64_t ki) const {
-  return findImpl(ki, [ki] (const Elm& e) {
+ssize_t MixedArray::find(int64_t ki, inthash_t h) const {
+  return findImpl(h, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }
@@ -668,7 +668,7 @@ int32_t* warnUnbalanced(MixedArray* a, size_t n, int32_t* ei) {
 }
 
 template <class Hit> ALWAYS_INLINE
-int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
+int32_t* MixedArray::findForInsertImpl(hash_t h0, Hit hit) const {
   size_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
@@ -689,8 +689,8 @@ int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
   }
 }
 
-int32_t* MixedArray::findForInsert(int64_t ki) const {
-  return findForInsertImpl(ki, [ki] (const Elm& e) {
+int32_t* MixedArray::findForInsert(int64_t ki, inthash_t h) const {
+  return findForInsertImpl(h, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }
@@ -703,13 +703,14 @@ int32_t* MixedArray::findForInsert(const StringData* s, strhash_t h) const {
 
 MixedArray::InsertPos MixedArray::insert(int64_t k) {
   assert(!isFull());
-  auto ei = findForInsert(k);
+  auto h = hashint(k);
+  auto ei = findForInsert(k, h);
   if (validPos(*ei)) {
     return InsertPos(true, data()[*ei].data);
   }
   if (k >= m_nextKI && m_nextKI >= 0) m_nextKI = k + 1;
   auto& e = allocElm(ei);
-  e.setIntKey(k);
+  e.setIntKey(k, h);
   return InsertPos(false, e.data);
 }
 
@@ -726,7 +727,7 @@ MixedArray::InsertPos MixedArray::insert(StringData* k) {
 }
 
 template <class Hit, class Remove> ALWAYS_INLINE
-ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
+ssize_t MixedArray::findForRemoveImpl(hash_t h0, Hit hit, Remove remove) const {
   size_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
@@ -750,9 +751,9 @@ ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
 }
 
 NEVER_INLINE
-ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
+ssize_t MixedArray::findForRemove(int64_t ki, inthash_t h, bool updateNext) {
   // all vector methods should work w/out touching the hashtable
-  return findForRemoveImpl(ki,
+  return findForRemoveImpl(h,
       [&] (const Elm& e) {
         return hitIntKey(e, ki);
       },
@@ -779,14 +780,14 @@ MixedArray::findForRemove(const StringData* s, strhash_t h) {
       },
       [] (Elm& e) {
         decRefStr(e.skey);
-        e.setIntKey(0);
+        e.setIntKey(0, hashint(0));
       }
     );
 }
 
 bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
   auto a = asMixed(ad);
-  return validPos(a->find(k));
+  return validPos(a->find(k, hashint(k)));
 }
 
 bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
@@ -997,7 +998,8 @@ void MixedArray::compact(bool renumber /* = false */) {
       toE = elms[frPos];
     }
     if (UNLIKELY(renumber && toE.hasIntKey())) {
-      toE.setIntKey(m_nextKI++);
+      toE.setIntKey(m_nextKI, hashint(m_nextKI));
+      m_nextKI++;
     }
     *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
@@ -1005,7 +1007,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   if (updatePosAfterCompact) {
     // Update m_pos, now that compaction is complete
     m_pos = mPos.hash >= 0 ? ssize_t(find(mPos.skey, mPos.hash))
-                           : ssize_t(find(mPos.ikey));
+                           : ssize_t(find(mPos.ikey, mPos.hash));
     assert(m_pos >= 0 && m_pos < m_size);
   }
 
@@ -1036,7 +1038,7 @@ void MixedArray::compact(bool renumber /* = false */) {
       auto& k = siKeys[key];
       key++;
       iter->m_pos = k.hash >= 0 ? ssize_t(find(k.skey, k.hash))
-                                : ssize_t(find(k.ikey));
+                                : ssize_t(find(k.ikey, k.hash));
       assert(iter->m_pos >= 0 && iter->m_pos < m_size);
     }
   );
@@ -1049,14 +1051,15 @@ bool MixedArray::nextInsert(const Variant& data) {
   assert(!isFull());
 
   int64_t ki = m_nextKI;
+  auto h = hashint(ki);
   // The check above enforces an invariant that allows us to always
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
-  auto ei = findForNewInsert(ki);
+  auto ei = findForNewInsert(h);
   assert(!validPos(*ei));
   // Allocate and initialize a new element.
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
   // TODO(#3888164): we should restructure things so we don't have to
   // check KindOfUninit here.
@@ -1069,12 +1072,13 @@ ArrayData* MixedArray::nextInsertRef(Variant& data) {
   assert(m_nextKI >= 0);
 
   int64_t ki = m_nextKI;
+  auto h = hashint(ki);
   // The check above enforces an invariant that allows us to always
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
-  auto ei = findForNewInsert(ki);
+  auto ei = findForNewInsert(h);
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
   return initRef(e.data, data);
 }
@@ -1083,12 +1087,13 @@ ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
   assert(!isFull());
 
   int64_t ki = m_nextKI;
-  auto ei = findForNewInsert(ki);
+  auto h = hashint(ki);
+  auto ei = findForNewInsert(h);
   assert(!validPos(*ei));
 
   // Allocate a new element.
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
   return initWithRef(e.data, data);
 }
@@ -1126,10 +1131,11 @@ ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
     return this;
   }
   int64_t ki = m_nextKI;
-  auto ei = findForNewInsert(ki);
+  auto h = hashint(ki);
+  auto ei = findForNewInsert(h);
   assert(!validPos(*ei));
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1;
   *key_ptr = ki;
   return zInitVal(e.data, data);
@@ -1301,7 +1307,7 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
 ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
-  auto pos = a->findForRemove(k, false);
+  auto pos = a->findForRemove(k, hashint(k), false);
   if (validPos(pos)) a->erase(pos);
   return a;
 }
@@ -1333,7 +1339,7 @@ ArrayData* MixedArray::CopyWithStrongIterators(const ArrayData* ad) {
 
 const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   auto a = asMixed(ad);
-  auto i = a->find(ki);
+  auto i = a->find(ki, hashint(ki));
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
@@ -1440,7 +1446,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
     tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
     auto const hash = srcElm->probe();
     if (hash < 0) {
-      dstElm->setIntKey(srcElm->ikey);
+      dstElm->setIntKey(srcElm->ikey, hash);
     } else {
       dstElm->setStrKey(srcElm->skey, hash);
     }
@@ -1452,7 +1458,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   // Now that we have finished copying the elements, update ad->m_pos
   if (updatePosAfterCopy) {
     ad->m_pos = mPos.hash >= 0 ? ssize_t(ad->find(mPos.skey, mPos.hash))
-      : ssize_t(ad->find(mPos.ikey));
+      : ssize_t(ad->find(mPos.ikey, mPos.hash));
     assert(ad->m_pos >=0 && ad->m_pos < ad->m_size);
   } else {
     // If src->m_pos is equal to src's canonical invalid position, then
@@ -1537,10 +1543,10 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
       continue;
     }
 
-    auto const ei = ret->findForInsert(srcElem->ikey);
+    auto const ei = ret->findForInsert(srcElem->ikey, hash);
     if (validPos(*ei)) continue;
     auto& e = ret->allocElm(ei);
-    e.setIntKey(srcElem->ikey);
+    e.setIntKey(srcElem->ikey, hash);
     ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
   }
 
@@ -1615,7 +1621,7 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
     auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, true);
+                              : a->findForRemove(e.ikey, e.hash(), true);
     assert(pos2 == pos);
     a->erase(pos2);
   } else {
@@ -1638,7 +1644,7 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
     auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, false);
+                              : a->findForRemove(e.ikey, e.hash(), false);
     assert(pos2 == pos);
     a->erase(pos2);
   } else {
@@ -1670,7 +1676,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
   // Prepend.
   ++a->m_size;
   auto& e = elms[0];
-  e.setIntKey(0);
+  e.setIntKey(0, hashint(0));
   // TODO(#3888164): we should restructure things so we don't have to
   // check KindOfUninit here.
   initVal(e.data, *v.asCell());

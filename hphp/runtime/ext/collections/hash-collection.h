@@ -40,6 +40,7 @@ struct HashCollection : ObjectData {
   explicit HashCollection(Class* cls, HeaderKind kind, uint32_t cap);
 
   using Elm = MixedArray::Elm;
+  using hash_t = MixedArray::hash_t;
 
   static const int32_t Empty           = MixedArray::Empty;
   static const int32_t Tombstone       = MixedArray::Tombstone;
@@ -64,7 +65,7 @@ struct HashCollection : ObjectData {
   Array toValuesArray();
 
   bool contains(int64_t key) const {
-    return find(key) != Empty;
+    return find(key, hashint(key)) != Empty;
   }
   bool contains(StringData* key) const {
     return find(key, key->hash()) != Empty;
@@ -280,10 +281,11 @@ struct HashCollection : ObjectData {
   }
 
   TypedValue* findForUnserialize(int64_t k) {
-    auto p = findForInsert(k);
+    auto h = hashint(k);
+    auto p = findForInsert(k, h);
     if (UNLIKELY(validPos(*p))) return nullptr;
     auto e = &allocElm(p);
-    e->setIntKey(k);
+    e->setIntKey(k, h);
     updateNextKI(k);
     return &e->data;
   }
@@ -344,13 +346,13 @@ struct HashCollection : ObjectData {
   }
 
   template <class Hit>
-  ssize_t findImpl(size_t h0, Hit) const;
-  ssize_t find(int64_t k) const;
+  ssize_t findImpl(hash_t h0, Hit) const;
+  ssize_t find(int64_t k, inthash_t h) const;
   ssize_t find(const StringData* s, strhash_t h) const;
 
-  ssize_t findForRemove(int64_t k) {
+  ssize_t findForRemove(int64_t k, inthash_t h) {
     assert(canMutateBuffer());
-    return arrayData()->findForRemove(k, false);
+    return arrayData()->findForRemove(k, h, false);
   }
 
   ssize_t findForRemove(const StringData* s, strhash_t h) {
@@ -360,7 +362,7 @@ struct HashCollection : ObjectData {
 
   template <class Hit>
   ALWAYS_INLINE
-  int32_t* findForInsertImpl(size_t h0, Hit hit) const {
+  int32_t* findForInsertImpl(hash_t h0, Hit hit) const {
     uint32_t mask = tableMask();
     auto elms = data();
     auto hashtable = hashTab();
@@ -408,8 +410,8 @@ struct HashCollection : ObjectData {
     return e.ikey == ki && e.hasIntKey();
   }
 
-  int32_t* findForInsert(int64_t ki) const {
-    return findForInsertImpl(ki, [ki] (const Elm& e) {
+  int32_t* findForInsert(int64_t ki, inthash_t h) const {
+    return findForInsertImpl(h, [ki] (const Elm& e) {
         return hitIntKey(e, ki);
       });
   }
@@ -423,7 +425,7 @@ struct HashCollection : ObjectData {
   // findForNewInsert() is only safe to use if you know for sure that the
   // key is not already present in the HashCollection.
   ALWAYS_INLINE int32_t* findForNewInsert(
-    int32_t* table, size_t mask, size_t h0) const {
+    int32_t* table, size_t mask, hash_t h0) const {
     for (uint32_t i = 1, probe = h0;; ++i) {
       auto ei = &table[probe & mask];
       if (!validPos(*ei)) {
@@ -435,7 +437,7 @@ struct HashCollection : ObjectData {
     }
   }
 
-  ALWAYS_INLINE int32_t* findForNewInsert(size_t h0) const {
+  ALWAYS_INLINE int32_t* findForNewInsert(hash_t h0) const {
     return findForNewInsert(hashTab(), tableMask(), h0);
   }
 

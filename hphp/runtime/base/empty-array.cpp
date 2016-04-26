@@ -192,8 +192,9 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
 
   auto const mask = MixedArray::SmallMask;
-  hash[key & mask] = 0;
-  data[0].setIntKey(key);
+  auto h = hashint(key);
+  hash[h & mask] = 0;
+  data[0].setIntKey(key, h);
 
   auto& lval  = data[0].data;
   lval.m_data = val.m_data;

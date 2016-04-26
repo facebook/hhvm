@@ -84,7 +84,7 @@ bool MixedArrayOffsetProfile::update(int32_t pos, uint32_t count) {
 
 void MixedArrayOffsetProfile::update(const ArrayData* ad, int64_t i) {
   auto const pos = ad->isMixed()
-    ? MixedArray::asMixed(ad)->find(i)
+    ? MixedArray::asMixed(ad)->find(i, hashint(i))
     : -1;
   update(pos, 1);
 }
@@ -98,7 +98,7 @@ void MixedArrayOffsetProfile::update(const ArrayData* ad,
 
     int64_t i;
     return checkForInt && ad->convertKey(sd, i)
-      ? a->find(i)
+      ? a->find(i, hashint(i))
       : a->find(sd, sd->hash());
   }();
   update(pos, 1);

@@ -145,9 +145,15 @@ MixedArray::copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
 
 extern int32_t* warnUnbalanced(MixedArray*, size_t n, int32_t* ei);
 
+// int64->int32 hash function to use for MixedArrays
+ALWAYS_INLINE inthash_t hashint(int64_t k) {
+  static_assert(sizeof(inthash_t) == sizeof(strhash_t), "");
+  return k;
+}
+
 ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
-                                            size_t h0) {
+                                            hash_t h0) {
   uint32_t balanceLimit = RuntimeOption::MaxArrayChain;
   for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
@@ -161,7 +167,7 @@ MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
 }
 
 ALWAYS_INLINE int32_t*
-MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
+MixedArray::findForNewInsert(int32_t* table, size_t mask, hash_t h0) const {
   for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) return ei;
@@ -172,7 +178,7 @@ MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
 }
 
 ALWAYS_INLINE
-int32_t* MixedArray::findForNewInsert(size_t h0) const {
+int32_t* MixedArray::findForNewInsert(hash_t h0) const {
   return findForNewInsert(hashTab(), mask(), h0);
 }
 
@@ -254,9 +260,10 @@ inline size_t MixedArray::hashSize() const {
 inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   assert(!exists(ki));
   assert(!isFull());
-  auto ei = findForNewInsert(ki);
+  auto h = hashint(ki);
+  auto ei = findForNewInsert(h);
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
   cellDup(data, e.data);
   // TODO(#3888164): should avoid needing these KindOfUninit checks.

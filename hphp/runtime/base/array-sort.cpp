@@ -82,9 +82,8 @@ done:
   assert(m_size == m_used);
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
-  } else {
-    return GenericSort;
   }
+  return GenericSort;
 }
 
 /**
@@ -96,16 +95,17 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
   assert(m_size > 0);
   auto const ht = hashTab();
   initHash(ht, m_scale);
+  auto mask = this->mask();
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.skey);
-      e.setIntKey(pos);
-      ht[pos] = pos;
+      auto h = hashint(pos);
+      e.setIntKey(pos, h);
+      *findForNewInsert(ht, mask, h) = pos;
     }
     m_nextKI = m_size;
   } else {
-    auto mask = this->mask();
     auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data[pos];
@@ -124,9 +124,8 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     auto ret = a->copyMixed();
     assert(ret->hasExactlyOneRef());
     return ret;
-  } else {
-    return a;
   }
+  return a;
 }
 
 ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
@@ -141,9 +140,8 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
       auto ret = PackedArray::Copy(ad);
       assert(ret->hasExactlyOneRef());
       return ret;
-    } else {
-      return ad;
     }
+    return ad;
   }
   assert(checkInvariants(ad));
   auto ret = ToMixedCopy(ad);

@@ -112,7 +112,8 @@ void BaseSet::addImpl(int64_t k) {
   if (!raw) {
     mutate();
   }
-  auto p = findForInsert(k);
+  auto h = hashint(k);
+  auto p = findForInsert(k, h);
   assert(p);
   if (validPos(*p)) {
     // When there is a conflict, the add() API is supposed to replace the
@@ -124,10 +125,10 @@ void BaseSet::addImpl(int64_t k) {
   }
   if (UNLIKELY(isFull())) {
     makeRoom();
-    p = findForInsert(k);
+    p = findForInsert(k, h);
   }
   auto& e = allocElm(p);
-  e.setIntKey(k);
+  e.setIntKey(k, h);
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
@@ -181,7 +182,8 @@ void BaseSet::add(StringData *key) {
 
 void BaseSet::addFront(int64_t k) {
   mutate();
-  auto p = findForInsert(k);
+  auto h = hashint(k);
+  auto p = findForInsert(k, h);
   assert(p);
   if (validPos(*p)) {
     // When there is a conflict, the addFront() API is supposed to replace
@@ -193,10 +195,10 @@ void BaseSet::addFront(int64_t k) {
   }
   if (UNLIKELY(isFull())) {
     makeRoom();
-    p = findForInsert(k);
+    p = findForInsert(k, h);
   }
   auto& e = allocElmFront(p);
-  e.setIntKey(k);
+  e.setIntKey(k, h);
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
@@ -235,14 +237,9 @@ Variant BaseSet::pop() {
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
-  ssize_t ei;
-  if (e->hasIntKey()) {
-    ei = findForRemove(e->data.m_data.num);
-  } else {
-    assert(e->hasStrKey());
-    auto key = e->data.m_data.pstr;
-    ei = findForRemove(key, key->hash());
-  }
+  auto h = e->hash();
+  auto ei = e->hasIntKey() ? findForRemove(e->ikey, h) :
+            findForRemove(e->skey, h);
   erase(ei);
   return ret;
 }
@@ -258,14 +255,9 @@ Variant BaseSet::popFront() {
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
-  ssize_t ei;
-  if (e->hasIntKey()) {
-    ei = findForRemove(e->data.m_data.num);
-  } else {
-    assert(e->hasStrKey());
-    auto key = e->data.m_data.pstr;
-    ei = findForRemove(key, key->hash());
-  }
+  auto h = e->hash();
+  auto ei = e->hasIntKey() ? findForRemove(e->ikey, h) :
+            findForRemove(e->skey, h);
   erase(ei);
   return ret;
 }
@@ -544,9 +536,9 @@ Object BaseSet::php_retain(const Variant& callback) {
     mutateAndBump();
     version = m_version;
     e = iter_elm(pos);
-    ssize_t pp = (e->hasIntKey()
-                   ? findForRemove(e->ikey)
-                   : findForRemove(e->skey, e->skey->hash()));
+    auto h = e->hash();
+    auto pp = e->hasIntKey() ? findForRemove(e->ikey, h) :
+              findForRemove(e->skey, h);
     eraseNoCompact(pp);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();

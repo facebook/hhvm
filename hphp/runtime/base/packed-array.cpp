@@ -97,16 +97,13 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
   auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);
 
-  auto i = uint32_t{0};
-  for (; i < oldSize; ++i) {
-    dstData->setIntKey(i);
+  ad->initHash(dstHash, ad->scale());
+  for (uint32_t i = 0; i < oldSize; ++i) {
+    auto h = hashint(i);
+    *ad->findForNewInsert(dstHash, mask, h) = i;
+    dstData->setIntKey(i, h);
     tvCopy(srcData[i], dstData->data);
-    *dstHash = i;
     ++dstData;
-    ++dstHash;
-  }
-  for (; i <= mask; ++i) {
-    *dstHash++ = MixedArray::Empty;
   }
   old->m_sizeAndPos = 0;
 
@@ -127,21 +124,18 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
 
   auto const oldSize = old->m_size;
   auto const ad      = ToMixedHeader(old, oldSize + 1);
+  auto const mask    = ad->mask();
   auto dstData       = ad->data();
   auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);
 
-  auto i = uint32_t{0};
-  for (; i < oldSize; ++i) {
-    dstData->setIntKey(i);
+  ad->initHash(dstHash, ad->scale());
+  for (uint32_t i = 0; i < oldSize; ++i) {
+    auto h = hashint(i);
+    *ad->findForNewInsert(dstHash, mask, h) = i;
+    dstData->setIntKey(i, h);
     tvDupFlattenVars(&srcData[i], &dstData->data, old);
-    *dstHash = i;
     ++dstData;
-    ++dstHash;
-  }
-  auto const n = ad->hashSize();
-  for (; i < n; ++i) {
-    *dstHash++ = MixedArray::Empty;
   }
 
   assert(ad->checkInvariants());
@@ -165,16 +159,13 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
   auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);
 
-  auto i = uint32_t{0};
-  for (; i < oldSize; ++i) {
-    dstData->setIntKey(i);
+  ad->initHash(dstHash, ad->scale());
+  for (uint32_t i = 0; i < oldSize; ++i) {
+    auto h = hashint(i);
+    *ad->findForNewInsert(dstHash, mask, h) = i;
+    dstData->setIntKey(i, h);
     tvDupFlattenVars(&srcData[i], &dstData->data, old);
-    *dstHash = i;
     ++dstData;
-    ++dstHash;
-  }
-  for (; i <= mask; ++i) {
-    *dstHash++ = MixedArray::Empty;
   }
 
   assert(ad->checkInvariants());
@@ -697,7 +688,7 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
     // TODO(#2606310): if we're removing the /last/ element, we
     // probably could stay packed, but this needs to be verified.
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    auto pos = mixed->findForRemove(k, false);
+    auto pos = mixed->findForRemove(k, hashint(k), false);
     if (validPos(pos)) mixed->erase(pos);
     return mixed;
   }

@@ -227,13 +227,9 @@ Variant BaseMap::pop() {
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
-  ssize_t ei;
-  if (e->hasIntKey()) {
-    ei = findForRemove(e->ikey);
-  } else {
-    assert(e->hasStrKey());
-    ei = findForRemove(e->skey, e->skey->hash());
-  }
+  auto h = e->hash();
+  auto ei = e->hasIntKey() ? findForRemove(e->ikey, h) :
+            findForRemove(e->skey, h);
   erase(ei);
   return ret;
 }
@@ -249,13 +245,9 @@ Variant BaseMap::popFront() {
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
-  ssize_t ei;
-  if (e->hasIntKey()) {
-    ei = findForRemove(e->ikey);
-  } else {
-    assert(e->hasStrKey());
-    ei = findForRemove(e->skey, e->skey->hash());
-  }
+  auto h = e->hash();
+  auto ei = e->hasIntKey() ? findForRemove(e->ikey, h) :
+            findForRemove(e->skey, h);
   erase(ei);
   return ret;
 }
@@ -268,8 +260,9 @@ void BaseMap::setImpl(int64_t k, const TypedValue* val) {
   }
   assert(val->m_type != KindOfRef);
   assert(canMutateBuffer());
+  auto h = hashint(k);
 retry:
-  auto p = findForInsert(k);
+  auto p = findForInsert(k, h);
   assert(p);
   if (validPos(*p)) {
     auto& e = data()[*p];
@@ -287,7 +280,7 @@ retry:
   }
   auto& e = allocElm(p);
   cellDup(*val, e.data);
-  e.setIntKey(k);
+  e.setIntKey(k, h);
   updateNextKI(k);
 }
 
@@ -674,9 +667,9 @@ Object BaseMap::php_retain(const Variant& callback) {
     mutateAndBump();
     version = m_version;
     e = iter_elm(pos);
-    ssize_t pp = (e->hasIntKey()
-                   ? findForRemove(e->ikey)
-                   : findForRemove(e->skey, e->skey->hash()));
+    auto h = e->hash();
+    auto pp = e->hasIntKey() ? findForRemove(e->ikey, h) :
+              findForRemove(e->skey, h);
     eraseNoCompact(pp);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();

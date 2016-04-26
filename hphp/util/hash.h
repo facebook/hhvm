@@ -41,7 +41,8 @@ bool IsSSEHashSupported();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef int32_t strhash_t;
+using strhash_t = int32_t;
+using inthash_t = int32_t;
 const strhash_t STRHASH_MASK = 0x7fffffff;
 const strhash_t STRHASH_MSB  = 0x80000000;
 

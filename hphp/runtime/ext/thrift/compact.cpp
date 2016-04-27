@@ -393,14 +393,12 @@ struct CompactWriter {
 
     void writeMap(Array arr, const Array& spec) {
       TType keyType = (TType)spec
-        .rvalAt(s_ktype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_ktype, AccessFlags::ErrorKey).toByte();
       TType valueType = (TType)spec
-        .rvalAt(s_vtype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_vtype, AccessFlags::ErrorKey).toByte();
 
-      Array keySpec = spec.rvalAt(s_key, AccessFlags::Error_Key)
-        .toArray();
-      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error_Key)
-        .toArray();
+      Array keySpec = spec.rvalAt(s_key, AccessFlags::ErrorKey).toArray();
+      Array valueSpec = spec.rvalAt(s_val, AccessFlags::ErrorKey).toArray();
 
       writeMapBegin(keyType, valueType, arr.size());
 
@@ -414,9 +412,9 @@ struct CompactWriter {
 
     void writeList(Array arr, const Array& spec, CListType listType) {
       TType valueType = (TType)spec
-        .rvalAt(s_etype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_etype, AccessFlags::ErrorKey).toByte();
       Array valueSpec = spec
-        .rvalAt(s_elem, AccessFlags::Error_Key).toArray();
+        .rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
 
       writeListBegin(valueType, arr.size());
 
@@ -897,10 +895,8 @@ struct CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      Array valueSpec = spec.rvalAt(s_elem,
-                                    AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(s_format,
-        AccessFlags::None).toString();
+      Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
+      String format = spec.rvalAt(s_format, AccessFlags::None).toString();
       if (format.equal(s_collection)) {
         auto const pvec(req::make<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
@@ -923,10 +919,8 @@ struct CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      Array valueSpec = spec.rvalAt(s_elem,
-                                    AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(s_format,
-        AccessFlags::None).toString();
+      Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
+      String format = spec.rvalAt(s_format, AccessFlags::None).toString();
       if (format.equal(s_collection)) {
         auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {

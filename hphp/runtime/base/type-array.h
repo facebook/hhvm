@@ -27,11 +27,27 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// forward declaration
 struct ArrayIter;
 struct VariableUnserializer;
 
-#define ACCESSPARAMS_DECL AccessFlags::Type flags = AccessFlags::None
+////////////////////////////////////////////////////////////////////////////////
+
+enum class AccessFlags {
+  None     = 0,
+  Error    = 1,
+  Key      = 2,
+  ErrorKey = Error | Key,
+};
+
+inline AccessFlags operator&(AccessFlags a, AccessFlags b) {
+  return static_cast<AccessFlags>(static_cast<int>(a) & static_cast<int>(b));
+}
+
+constexpr bool any(AccessFlags a) {
+  return a != AccessFlags::None;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 /*
  * Array type wrapping around ArrayData to implement reference
@@ -47,6 +63,8 @@ private:
   using Ptr = req::ptr<ArrayData>;
   using NoIncRef = Ptr::NoIncRef;
   using NonNull = Ptr::NonNull;
+
+  using Flags = AccessFlags;
 
   Ptr m_arr;
 
@@ -304,6 +322,7 @@ public:
   bool equal(const Object& v2) const;
   bool less (const Array& v2, bool flip = false) const;
   bool less (const Object& v2) const;
+
   bool less (const Variant& v2) const;
   bool more (const Array& v2, bool flip = true) const;
   bool more (const Object& v2) const;
@@ -313,20 +332,20 @@ public:
   /*
    * Offset
    */
-  Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(int64_t key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(double  key, ACCESSPARAMS_DECL) const = delete;
-  Variant rvalAt(const String& key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(const Variant& key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(int     key, Flags = Flags::None) const;
+  Variant rvalAt(int64_t key, Flags = Flags::None) const;
+  Variant rvalAt(double  key, Flags = Flags::None) const = delete;
+  Variant rvalAt(const String& key, Flags = Flags::None) const;
+  Variant rvalAt(const Variant& key, Flags = Flags::None) const;
 
   /*
    * To get offset for temporary usage
    */
-  const Variant& rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
-  const Variant& rvalAtRef(int64_t key, ACCESSPARAMS_DECL) const;
-  const Variant& rvalAtRef(double  key, ACCESSPARAMS_DECL) const = delete;
-  const Variant& rvalAtRef(const Variant& key, ACCESSPARAMS_DECL) const;
-  const Variant& rvalAtRef(const String& key, ACCESSPARAMS_DECL) const;
+  const Variant& rvalAtRef(int     key, Flags = Flags::None) const;
+  const Variant& rvalAtRef(int64_t key, Flags = Flags::None) const;
+  const Variant& rvalAtRef(double  key, Flags = Flags::None) const = delete;
+  const Variant& rvalAtRef(const Variant& key, Flags = Flags::None) const;
+  const Variant& rvalAtRef(const String& key, Flags = Flags::None) const;
 
   const Variant operator[](int     key) const;
   const Variant operator[](int64_t key) const;
@@ -350,15 +369,15 @@ public:
   /*
    * Get an lval reference to an element.
    */
-  Variant& lvalAt(int key, ACCESSPARAMS_DECL) {
+  Variant& lvalAt(int key, Flags flags = Flags::None) {
     return lvalAtImpl(key, flags);
   }
-  Variant& lvalAt(int64_t key, ACCESSPARAMS_DECL) {
+  Variant& lvalAt(int64_t key, Flags flags = Flags::None) {
     return lvalAtImpl(key, flags);
   }
-  Variant& lvalAt(double key, ACCESSPARAMS_DECL) = delete;
-  Variant& lvalAt(const String& key, ACCESSPARAMS_DECL);
-  Variant& lvalAt(const Variant& key, ACCESSPARAMS_DECL);
+  Variant& lvalAt(double key, Flags = Flags::None) = delete;
+  Variant& lvalAt(const String& key, Flags = Flags::None);
+  Variant& lvalAt(const Variant& key, Flags = Flags::None);
 
   /*
    * Set an element to a value.
@@ -458,7 +477,7 @@ public:
   }
 
   template<typename T>
-  Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
+  Variant& lvalAtImpl(const T& key, Flags flags = Flags::None) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
     Variant* ret = nullptr;
     ArrayData* escalated = m_arr->lval(key, ret, m_arr->cowCheck());
@@ -538,7 +557,5 @@ ALWAYS_INLINE Array empty_array() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-// nobody else needs this outside the Array decl
-#undef ACCESSPARAMS_DECL
 
-#endif // incl_HPHP_ARRAY_H_
+#endif

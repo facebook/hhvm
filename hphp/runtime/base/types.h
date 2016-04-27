@@ -81,17 +81,6 @@ inline RefResult ref(Variant& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct AccessFlags {
-  enum Type {
-    None = 0,
-    Error = 1,
-    Key = 2,
-    Error_Key = Error | Key,
-  };
-  static Type IsKey(bool s) { return s ? Key : None; }
-  static Type IsError(bool e) { return e ? Error : None; }
-};
-
 /*
  * Program counters in the bytecode interpreter.
  *

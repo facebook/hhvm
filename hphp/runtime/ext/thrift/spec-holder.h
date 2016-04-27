@@ -89,9 +89,9 @@ struct SpecHolder {
       Array fieldSpec = specIt.second().toArray();
       field.spec = fieldSpec.get();
       field.type =
-        (TType)fieldSpec.rvalAt(s_type, AccessFlags::Error_Key).toInt64();
+        (TType)fieldSpec.rvalAt(s_type, AccessFlags::ErrorKey).toInt64();
       field.name =
-        fieldSpec.rvalAt(s_var, AccessFlags::Error_Key).toString().get();
+        fieldSpec.rvalAt(s_var, AccessFlags::ErrorKey).toString().get();
       field.isUnion =
         fieldSpec.rvalAt(s_union, AccessFlags::Key).toBoolean();
     }

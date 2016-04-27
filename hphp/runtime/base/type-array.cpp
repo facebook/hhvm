@@ -434,32 +434,31 @@ void Array::escalate() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
-#define ACCESSPARAMS_IMPL AccessFlags::Type flags
 
-Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
-  if (m_arr) return m_arr->get((int64_t)key, flags & AccessFlags::Error);
+Variant Array::rvalAt(int key, AccessFlags flags) const {
+  if (m_arr) return m_arr->get((int64_t)key, any(flags & AccessFlags::Error));
   return init_null();
 }
 
-const Variant& Array::rvalAtRef(int key, ACCESSPARAMS_IMPL) const {
-  if (m_arr) return m_arr->get((int64_t)key, flags & AccessFlags::Error);
+const Variant& Array::rvalAtRef(int key, AccessFlags flags) const {
+  if (m_arr) return m_arr->get((int64_t)key, any(flags & AccessFlags::Error));
   return null_variant;
 }
 
-Variant Array::rvalAt(int64_t key, ACCESSPARAMS_IMPL) const {
-  if (m_arr) return m_arr->get(key, flags & AccessFlags::Error);
+Variant Array::rvalAt(int64_t key, AccessFlags flags) const {
+  if (m_arr) return m_arr->get(key, any(flags & AccessFlags::Error));
   return init_null();
 }
 
-const Variant& Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
-  if (m_arr) return m_arr->get(key, flags & AccessFlags::Error);
+const Variant& Array::rvalAtRef(int64_t key, AccessFlags flags) const {
+  if (m_arr) return m_arr->get(key, any(flags & AccessFlags::Error));
   return null_variant;
 }
 
-const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
+const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
   if (m_arr) {
-    bool error = flags & AccessFlags::Error;
-    if (flags & AccessFlags::Key) return m_arr->get(key, error);
+    auto const error = any(flags & AccessFlags::Error);
+    if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
     if (key.isNull()) {
       if (!useWeakKeys()) {
         throwInvalidArrayKeyException(null_variant.asTypedValue());
@@ -476,11 +475,11 @@ const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Array::rvalAt(const String& key, ACCESSPARAMS_IMPL) const {
+Variant Array::rvalAt(const String& key, AccessFlags flags) const {
   return Array::rvalAtRef(key, flags);
 }
 
-const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
+const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
   if (!m_arr) return null_variant;
   auto bad_key = [&] {
     if (!useWeakKeys()) {
@@ -491,29 +490,29 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
     case KindOfUninit:
     case KindOfNull:
       bad_key();
-      return m_arr->get(staticEmptyString(), flags & AccessFlags::Error);
+      return m_arr->get(staticEmptyString(), any(flags & AccessFlags::Error));
 
     case KindOfBoolean:
       bad_key();
     case KindOfInt64:
       return m_arr->get(key.asTypedValue()->m_data.num,
-                       flags & AccessFlags::Error);
+                        any(flags & AccessFlags::Error));
 
     case KindOfDouble:
       bad_key();
       return m_arr->get((int64_t)key.asTypedValue()->m_data.dbl,
-                       flags & AccessFlags::Error);
+                        any(flags & AccessFlags::Error));
 
     case KindOfPersistentString:
     case KindOfString:
       {
         int64_t n;
-        if (!(flags & AccessFlags::Key) &&
+        if (!any(flags & AccessFlags::Key) &&
             m_arr->convertKey(key.asTypedValue()->m_data.pstr, n)) {
-          return m_arr->get(n, flags & AccessFlags::Error);
+          return m_arr->get(n, any(flags & AccessFlags::Error));
         }
       }
-      return m_arr->get(key.asCStrRef(), flags & AccessFlags::Error);
+      return m_arr->get(key.asCStrRef(), any(flags & AccessFlags::Error));
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -524,7 +523,7 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
 
     case KindOfResource:
       bad_key();
-      return m_arr->get(key.toInt64(), flags & AccessFlags::Error);
+      return m_arr->get(key.toInt64(), any(flags & AccessFlags::Error));
 
     case KindOfRef:
       return rvalAtRef(*(key.asTypedValue()->m_data.pref->var()), flags);
@@ -535,7 +534,7 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   not_reached();
 }
 
-Variant Array::rvalAt(const Variant& key, ACCESSPARAMS_IMPL) const {
+Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {
   return Array::rvalAtRef(key, flags);
 }
 
@@ -559,13 +558,13 @@ Variant &Array::lvalAtRef() {
   return *ret;
 }
 
-Variant &Array::lvalAt(const String& key, ACCESSPARAMS_IMPL) {
-  if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
+Variant &Array::lvalAt(const String& key, AccessFlags flags) {
+  if (any(flags & AccessFlags::Key)) return lvalAtImpl(key, flags);
   return lvalAtImpl(convertKey(key), flags);
 }
 
-Variant &Array::lvalAt(const Variant& key, ACCESSPARAMS_IMPL) {
-  if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
+Variant &Array::lvalAt(const Variant& key, AccessFlags flags) {
+  if (any(flags & AccessFlags::Key)) return lvalAtImpl(key, flags);
   VarNR k(convertKey(key));
   if (!k.isNull()) {
     return lvalAtImpl(k, flags);

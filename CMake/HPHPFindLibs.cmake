@@ -286,6 +286,7 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 # LibreSSL explicitly refuses to support RAND_egd()
+SET(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
 SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("#include <openssl/rand.h>
@@ -295,6 +296,8 @@ int main() {
 if (NOT OPENSSL_HAVE_RAND_EGD)
   add_definitions("-DOPENSSL_NO_RAND_EGD")
 endif()
+SET(CMAKE_REQUIRED_INCLUDES)
+SET(CMAKE_REQUIRED_LIBRARIES)
 
 
 # ZLIB

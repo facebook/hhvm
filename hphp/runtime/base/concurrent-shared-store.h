@@ -81,6 +81,7 @@ struct StoreValue {
   mutable Either<APCHandle*,char*,either_policy::high_bit> data;
   union { uint32_t expire; mutable SmallLock lock; };
   int32_t dataSize{0};  // For file storage, negative means serialized object
+  char padding[24];  // Make APCMap nodes cache-line sized (it static_asserts).
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -303,6 +304,9 @@ private:
     // Append a random entry to 'entries'. The map must be non-empty and not
     // concurrently accessed. Returns false if this operation is not supported.
     bool getRandomAPCEntry(std::vector<EntryInfo>& entries);
+
+    using node = typename tbb::concurrent_hash_map<Key,T,HashCompare>::node;
+    static_assert(sizeof(node) == 64, "Node should be cache-line sized");
   };
 
   using Map = APCMap<const char*,StoreValue,CharHashCompare>;

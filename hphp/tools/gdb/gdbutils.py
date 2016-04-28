@@ -64,8 +64,12 @@ def errorwrap(func):
 #------------------------------------------------------------------------------
 # General-purpose helpers.
 
-def parse_argv(args):
-    return [gdb.parse_and_eval(arg) for arg in gdb.string_to_argv(args)]
+def parse_argv(args, limit=None):
+    """Explode a gdb argument string, then eval all args up to `limit'."""
+    if limit is None:
+        limit = len(args)
+    return [gdb.parse_and_eval(arg) if i < limit else arg
+            for i, arg in enumerate(gdb.string_to_argv(args))]
 
 
 def gdbprint(val, ty=None):

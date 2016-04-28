@@ -221,15 +221,10 @@ bool TransCFG::hasArc(TransID srcId, TransID dstId) const {
   return false;
 }
 
-void TransCFG::print(std::string fileName, FuncId funcId,
+void TransCFG::print(std::ostream& out, FuncId funcId,
                      const ProfData* profData) const {
-  FILE* file = fopen(fileName.c_str(), "wt");
-  if (!file) return;
-
-  fprintf(file, "digraph CFG {\n");
-
-  fprintf(file, "# function: %s\n",
-          Func::fromFuncId(funcId)->fullName()->data());
+  out << "digraph TransCFG { // function: "
+      << Func::fromFuncId(funcId)->fullName()->data() << "\n";
 
   // find max node weight
   int64_t maxWeight = 1; // 1 to avoid div by 0
@@ -246,27 +241,25 @@ void TransCFG::print(std::string fileName, FuncId funcId,
     auto const bcStart = rec->startBcOff();
     auto const bcStop  = rec->lastBcOff();
     auto const shape = "box";
-    fprintf(file,
-            "t%u [shape=%s,label=\"T: %u\\np: %" PRId64 "\\n"
-            "bc: [%" PRIu32 "-%" PRIu32 ")\","
-            "style=filled,fillcolor=\"#ff%02x%02x\"];\n", tid, shape, tid, w,
-            bcStart, bcStop, coldness, coldness);
+    out << folly::sformat(
+      "t{} [shape={},label=\"T: {}\\np: {}\\n"
+      "bc: [{}-{})\",style=filled,fillcolor=\"#ff{:02x}{:02x}\"];\n",
+      tid, shape, tid, w, bcStart, bcStop, coldness, coldness);
   }
 
   // print arcs
   for (auto srcId : nodes()) {
     for (auto arc : outArcs(srcId)) {
       auto const w = arc->weight();
-      fprintf(file, "t%u -> t%u [color=\"%s\",label=\"%" PRId64 "\"] ;\n",
-              srcId,
-              arc->dst(),
-              arc->guessed() ? "red" : "green4",
-              w);
+      out << folly::sformat("t{} -> t{} [color=\"{}\",label=\"{}\"] ;\n",
+                            srcId,
+                            arc->dst(),
+                            arc->guessed() ? "red" : "green4",
+                            w);
     }
   }
 
-  fprintf(file, "}\n");
-  fclose(file);
+  out << "}\n";
 }
 
 }}

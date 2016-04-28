@@ -271,7 +271,8 @@ bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  */
 void regionizeFunc(const Func* func,
                    MCGenerator* mcg,
-                   RegionVec& regions) {
+                   RegionVec& regions,
+                   std::string& transCFGAnnot) {
   const Timer rf_timer(Timer::regionizeFunc);
   assertx(RuntimeOption::EvalJitPGO);
 
@@ -285,9 +286,19 @@ void regionizeFunc(const Func* func,
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     auto dotFileName = folly::to<std::string>(
       "/tmp/func-cfg-", funcId, ".dot");
-    cfg.print(dotFileName, funcId, profData);
-    FTRACE(5, "regionizeFunc: initial CFG for func {} saved to file {}\n",
-           funcId, dotFileName);
+    std::ofstream outFile(dotFileName);
+    if (outFile.is_open()) {
+      cfg.print(outFile, funcId, profData);
+      FTRACE(5, "regionizeFunc: initial CFG for func {} saved to file {}\n",
+             funcId, dotFileName);
+      outFile.close();
+    }
+  }
+  if (dumpTCAnnotation(*func, TransKind::Optimize) &&
+      RuntimeOption::EvalDumpRegion >= 2) {
+    std::ostringstream cfgStream;
+    cfg.print(cfgStream, funcId, profData);
+    transCFGAnnot = cfgStream.str();
   }
 
   auto arcs = cfg.arcs();

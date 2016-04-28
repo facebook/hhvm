@@ -142,6 +142,7 @@ struct TransArgs {
 
   SrcKey sk;
   bool align;
+  Annotations annotations;
   bool allowPartial{false};
   TransFlags flags{0};
   TransID transId{kInvalidTransID};

@@ -807,7 +807,12 @@ RegionDescPtr selectHotRegion(TransID transId,
     std::string dotFileName = std::string("/tmp/trans-cfg-") +
                               folly::to<std::string>(transId) + ".dot";
 
-    cfg.print(dotFileName, funcId, profData);
+    std::ofstream outFile(dotFileName);
+    if (outFile.is_open()) {
+      cfg.print(outFile, funcId, profData);
+      outFile.close();
+    }
+
     FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",
            mcg->tx().profData()->curTransID(), dotFileName,
            region ? show(*region) : std::string("empty region"));

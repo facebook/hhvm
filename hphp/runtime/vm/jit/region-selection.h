@@ -538,7 +538,8 @@ bool breaksRegion(SrcKey sk);
  */
 void regionizeFunc(const Func*  func,
                    MCGenerator* mcg,
-                   RegionVec&   regions);
+                   RegionVec&   regions,
+                   std::string& transCFGAnnot);
 
 /*
  * Optimize the guards of `region' based on profiling data.

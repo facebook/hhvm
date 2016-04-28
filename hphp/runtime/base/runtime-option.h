@@ -549,8 +549,8 @@ struct RuntimeOption {
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpTCAnchors,               false)                           \
   F(uint32_t, DumpIR,                  0)                               \
-  F(bool, DumpTCAnnotationsForAllTrans,false)                           \
-  F(bool, DumpRegion,                  false)                           \
+  F(bool, DumpTCAnnotationsForAllTrans,debug)                           \
+  F(uint32_t, DumpRegion,              0)                               \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \

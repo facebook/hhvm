@@ -875,7 +875,6 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     Annotations& annotations) noexcept {
   Timer irGenTimer(Timer::irGenRegion);
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
-  assertx(annotations.empty());
 
   std::unique_ptr<IRUnit> unit;
   TranslateRetryContext retry;

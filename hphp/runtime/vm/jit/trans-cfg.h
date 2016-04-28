@@ -93,7 +93,7 @@ struct TransCFG {
   void                        addArc(TransID srcId, TransID dstId,
                                      int64_t weight=0);
   bool                        hasArc(TransID srcId, TransID dstId) const;
-  void                        print(std::string fileName,
+  void                        print(std::ostream& out,
                                     FuncId funcId,
                                     const ProfData* profData) const;
 

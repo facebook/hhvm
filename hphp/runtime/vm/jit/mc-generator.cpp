@@ -338,12 +338,16 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   // Regionize func and translate all its regions.
   std::vector<RegionDescPtr> regions;
-  if (!includedBody) regionizeFunc(func, this, regions);
+  std::string transCFGAnnot;
+  if (!includedBody) regionizeFunc(func, this, regions, transCFGAnnot);
 
   for (auto region : regions) {
     always_assert(!region->empty());
     auto regionSk = region->start();
     auto transArgs = TransArgs{regionSk, align};
+    if (transCFGAnnot.size() > 0) {
+      transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
+    }
     transArgs.region = region;
     transArgs.kind = TransKind::Optimize;
 
@@ -357,6 +361,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     if (start == nullptr && regionSk == sk) {
       start = regionStart;
     }
+    transCFGAnnot = ""; // so we don't annotate it again
   }
 
   // In PGO mode, we free all the profiling data once the TC is full.
@@ -687,6 +692,8 @@ TransResult MCGenerator::translate(TransArgs args) {
   TransEnv env{args};
   env.initSpOffset = args.region ? args.region->entry()->initialSpOffset()
                                  : liveSpOff();
+  env.annotations.insert(env.annotations.end(),
+                         args.annotations.begin(), args.annotations.end());
 
   // Lower the RegionDesc to an IRUnit, then lower that to a Vunit.
   if (args.region) {

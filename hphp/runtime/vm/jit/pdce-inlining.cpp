@@ -617,31 +617,45 @@ void insertDefInlineFPs(OptimizeContext& ctx, BlockList& heads) {
  * FPs of other predecessors, or define a new FP. This function ensures that if
  * two exit heads have a common successor we will phi their frame pointers.
  */
-bool process(OptimizeContext& ctx, Block* pred, Block* succ) {
+bool process(OptimizeContext& ctx, Block* pred, Block* succ,
+             SSATmp* predOldFp) {
   ITRACE(3, "process(): pred = {}, succ = {}\n", pred->id(), succ->id());
   Trace::Indent _i;
 
   assertx(ctx.fpMap.count(pred));
-  auto fp = ctx.fpMap[pred];
+  auto predCurFp = ctx.fpMap[pred];
+  always_assert(predCurFp->type() == TFramePtr);
 
   // The map does not contain succ, we have not processed it before
   if (!ctx.fpMap.count(succ)) {
-    ctx.fpMap[succ] = fp;
-    replace(succ, ctx.deadFp, fp, *ctx.fpUses);
+    ctx.fpMap[succ] = predCurFp;
+    replace(succ, ctx.deadFp, predCurFp, *ctx.fpUses);
     return true;
   }
 
   // We processed this succ and its fp is already the same as pred
   auto curFp = ctx.fpMap[succ];
-  if (curFp == fp) {
-    ITRACE(3, "succ fp matches pred fp, bailing (fp = {})\n", *fp);
+  always_assert(curFp->type() == TFramePtr);
+  if (curFp == predCurFp) {
+    ITRACE(3, "succ fp matches pred fp, bailing (fp = {})\n", *predCurFp);
     return false;
   }
 
+  // The FP in succ came directly from pred, but pred now has a new FP, simply
+  // update all instances of predOldFp with predCurFp
+  if (curFp == predOldFp) {
+    ctx.fpMap[succ] = predCurFp;
+    replace(succ, curFp, predCurFp, *ctx.fpUses);
+    return true;
+  }
+
+  // Multiple preds define different FPs which will require a DefLabel to phi
+  // them in succ
   auto const label = [&] {
     if (curFp->inst()->block() == succ) {
       assertx(curFp->inst()->is(DefLabel));
       ITRACE(4, "succ has DefLabel: {}\n", *curFp->inst());
+      always_assert(succ->front().dst(succ->front().numDsts() - 1) == curFp);
       return &succ->front();
     } else if (succ->front().is(DefLabel)) {
       // succ already has a label but it cannot contain an inlined fp because
@@ -659,11 +673,12 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ) {
     return ret;
   }();
 
-  auto newFp = label->dst(label->numDsts() - 1);
+  auto const phiIdx = label->numDsts() - 1;
+  auto newFp = label->dst(phiIdx);
   ctx.fpMap[succ] = newFp;
 
   ITRACE(3, "pred fp: {}, succ old fp: {}, succ new fp: {}\n",
-         *fp, *curFp, *newFp);
+         *predCurFp, *curFp, *newFp);
 
   replace(succ, curFp, newFp, *ctx.fpUses);
 
@@ -671,21 +686,18 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ) {
   {
     Trace::Indent _i;
     succ->forEachPred([&] (Block* p) {
-      if (!ctx.fpMap.count(p)) {
-        ITRACE(4, "Skipping unprocessed pred: {}\n", p->id());
-        return;
-      }
-      assertx(p->back().is(Jmp));
+      auto& jmp = p->back();
+      auto updateFp = ctx.fpMap.count(p) ? ctx.fpMap[p] : ctx.deadFp;
 
-      if (p->back().numSrcs() == label->numDsts()) {
-        assertx(p->back().src(label->numDsts() - 1) == ctx.fpMap[p]);
-        ITRACE(4, "Pred does not need updating (block id: {}): {}\n",
-               p->id(), p->back());
+      if (jmp.numSrcs() > phiIdx) {
+        always_assert(jmp.src(phiIdx) == updateFp);
         return;
       }
+
       ITRACE(4, "Found pred to update (block id: {}): {}\n",
              p->id(), p->back());
-      ctx.unit->expandJmp(&p->back(), ctx.fpMap[p]);
+      ctx.unit->expandJmp(&jmp, updateFp);
+      always_assert(jmp.numSrcs() == phiIdx + 1);
     });
   }
 
@@ -871,12 +883,21 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
   insertDefInlineFPs(ctx, heads);
 
   // Update FP's in all blocks reachable from the exit heads
-  std::deque<Block*> workQ(heads.begin(), heads.end());
+  std::deque<std::pair<Block*,SSATmp*>> workQ;
+  for (auto h : heads) {
+    workQ.push_back(std::make_pair(h, ctx.deadFp));
+  }
+
   while (!workQ.empty()) {
-    auto block = workQ.front();
+    auto info = workQ.front();
+    auto block = info.first;
+    auto oldFp = info.second;
     workQ.pop_front();
     block->forEachSucc([&] (Block* succ) {
-      if (process(ctx, block, succ)) workQ.push_back(succ);
+      auto prev = ctx.fpMap.count(succ) ? ctx.fpMap[succ] : ctx.deadFp;
+      if (process(ctx, block, succ, oldFp)) {
+        workQ.push_back(std::make_pair(succ, prev));
+      }
     });
   }
 

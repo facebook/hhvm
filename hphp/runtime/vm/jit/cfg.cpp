@@ -121,6 +121,15 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
     middle->setHint(unlikely);
   }
 
+  // The branch may not be a Jmp, in which case there won't be a label
+  if (branch.numSrcs() > 0 && to->front().is(DefLabel)) {
+    auto& jmp = middle->back();
+    for (auto src : branch.srcs()) {
+      unit.expandJmp(&jmp, src);
+    }
+    branch.setSrcs(0, nullptr);
+  }
+
   return middle;
 }
 

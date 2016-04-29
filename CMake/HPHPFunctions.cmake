@@ -396,3 +396,79 @@ function(parse_version PREFIX VERSION)
   set(${PREFIX}PATCH ${PATCH} PARENT_SCOPE)
   set(${PREFIX}SUFFIX ${SUFFIX} PARENT_SCOPE)
 endfunction()
+
+# MSVC doesn't support a --whole-archive flag, but newer versions
+# of CMake do support object libraries, which give the same result.
+# As we can't easily upgrade the normal builds to CMake 3.0, we
+# will just require CMake 3.0+ for MSVC builds only.
+function(add_object_library libraryName)
+  if (MSVC)
+    add_library(${libraryName} OBJECT ${ARGN})
+  else()
+    add_library(${libraryName} STATIC ${ARGN})
+  endif()
+endfunction()
+
+# Get what might be the objects of the object libraries, if needed.
+function(get_object_libraries_objects targetVariable)
+  set(OBJECTS)
+  if (MSVC)
+    foreach (fil ${ARGN})
+      list(APPEND OBJECTS $<TARGET_OBJECTS:${fil}>)
+    endforeach()
+  endif()
+
+  set(${targetVariable} ${OBJECTS} PARENT_SCOPE)
+endfunction()
+
+# Add the additional link targets for a set of object libraries,
+# if needed.
+function(link_object_libraries target)
+  if (MSVC)
+    return()
+  endif()
+
+  set(WHOLE_ARCHIVE_LIBS)
+  foreach (fil ${ARGN})
+    list(APPEND WHOLE_ARCHIVE_LIBS ${fil})
+  endforeach()
+
+  set(ANCHOR_SYMS)
+  if (APPLE)
+    set(ANCHOR_SYMS
+      -Wl,-pagezero_size,0x00001000
+      # Set the .text.keep section to be executable.
+      -Wl,-segprot,.text,rx,rx)
+    foreach(lib ${WHOLE_ARCHIVE_LIBS})
+      # It's important to use -Xlinker and not -Wl here: ${lib} needs to be its
+      # own option on the command line, since target_link_libraries will expand it
+      # from its logical name here into the full .a path. (Eww.)
+      list(APPEND ANCHOR_SYMS -Xlinker -force_load -Xlinker ${lib})
+    endforeach()
+  else()
+    set(ANCHOR_SYMS -Wl,--whole-archive ${WHOLE_ARCHIVE_LIBS} -Wl,--no-whole-archive)
+  endif()
+
+  target_link_libraries(${target} ${ANCHOR_SYMS})
+endfunction()
+
+# This should be called for object libraries, rather than calling
+# hphp_link directly.
+function(object_library_hphp_link target)
+  # Gold doesn't need this, and MSVC can't have it. (see below)
+  if (NOT ENABLE_LD_GOLD AND NOT MSVC)
+    hphp_link(${target})
+  endif()
+endfunction()
+
+# If a library needs to be linked in to make GNU ld happy,
+# it should be done by calling this.
+function(object_library_ld_link_libraries target)
+  if (${ARGC})
+    # CMake doesn't allow calls to target_link_libraries if the target
+    # is an OBJECT library, so MSVC can't have this.
+    if (NOT MSVC)
+      target_link_libraries(${target} ${ARGN})
+    endif()
+  endif()
+endfunction()

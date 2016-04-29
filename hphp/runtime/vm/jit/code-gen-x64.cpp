@@ -1159,11 +1159,8 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
   auto srcReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  auto size = v.makeReg();
-  v << loadl{srcReg[ArrayData::offsetofSize()], size};
   auto const sf = v.makeReg();
-  v << testl{size, size, sf};
-
+  v << cmplim{0, srcReg[ArrayData::offsetofSize()], sf};
   unlikelyCond(v, vcold(), CC_S, sf, dstReg,
     [&](Vout& v) {
       auto vsize = v.makeReg();

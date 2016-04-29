@@ -76,7 +76,7 @@ namespace __SystemLib {
         );
       }
       foreach ($this->fileInfo as $filename => $info) {
-        $this->fileOffsets[$filename] = array($pos, $info[2]);
+        $this->fileOffsets[$filename] = [$pos, $info[2]];
         $pos += $info[2];
         $this->entries[$filename] = new ArchiveEntryStat(
           $info[3],
@@ -196,26 +196,6 @@ namespace __SystemLib {
       $ret = $this->stream_get_contents($len, $pos);
       $pos += $len;
       return $ret;
-    }
-
-    public function getStream(string $path): resource {
-      if (!isset($this->fileOffsets[$path])) {
-        throw new PharException("No $path in phar");
-      }
-      list($offset, $size) = $this->fileOffsets[$path];
-      if ($size == 0) {
-        return fopen('php://temp', 'w+b');
-      }
-      $stream = fopen('php://temp', 'w+b');
-      //TODO stream slice needed here
-      while ($size) {
-        $data = $this->stream_get_contents(min(1024, $size), $offset);
-        fwrite($stream, $data);
-        $size -= strlen($data);
-        $offset += strlen($data);
-      }
-      rewind($stream);
-      return $stream;
     }
 
     public function extractAllTo(string $path) {

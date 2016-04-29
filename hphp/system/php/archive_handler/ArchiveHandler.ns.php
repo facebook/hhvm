@@ -24,7 +24,27 @@ namespace __SystemLib {
     protected int $signatureType = Phar::NONE;
     protected $compressed = false;
 
-    abstract public function getStream(string $path): resource;
+    // Default implementation, used by Phar- and Tar-based archives
+    public function getStream(string $path): resource {
+      if (!isset($this->fileOffsets[$path])) {
+        throw new PharException("No $path in phar");
+      }
+      list($offset, $size) = $this->fileOffsets[$path];
+      if ($size == 0) {
+        return fopen('php://temp', 'w+b');
+      }
+      $stream = fopen('php://temp', 'w+b');
+      //TODO stream slice needed here
+      while ($size) {
+        $data = $this->stream_get_contents(min(1024, $size), $offset);
+        fwrite($stream, $data);
+        $size -= strlen($data);
+        $offset += strlen($data);
+      }
+      rewind($stream);
+      return $stream;
+    }
+
     abstract public function extractAllTo(string $path);
     abstract public function addFile(string $path, string $archivePath): bool;
 
@@ -107,7 +127,7 @@ namespace __SystemLib {
 
     private int $pos = 0;
     private ?resource $stream;
-    private ?string $path;
+    protected ?string $path;
 
     protected function open(string $path) {
       $this->path = $path;

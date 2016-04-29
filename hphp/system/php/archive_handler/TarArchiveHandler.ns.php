@@ -8,7 +8,6 @@ namespace __SystemLib {
   final class TarArchiveHandler extends ArchiveHandler {
     private Map<string, string> $contents = Map { };
     private Map<string, string> $symlinks = Map { };
-    private string $path = '';
     private ?resource $fp;
 
     public function __construct(
@@ -16,9 +15,9 @@ namespace __SystemLib {
       bool $preventHaltTokenCheck = true
     ) {
       $this->path = $path;
-
       if (file_exists($path)) {
-        $this->readTar();
+        $this->open($path);
+        $this->parseTar();
         if (
           !$preventHaltTokenCheck &&
           strpos($this->stub, Phar::HALT_TOKEN) === false
@@ -30,31 +29,18 @@ namespace __SystemLib {
       }
     }
 
-    private function readTar() {
+    private function parseTar() {
       /* If you have GNU Tar installed, you should be able to find
        * the file format documentation (including header byte offsets) at:
        * - /usr/include/tar.h
        * - the tar info page (Top/Tar Internals/Standard)
        */
 
-      $path = $this->path;
-      $fp = fopen($path, 'rb');
-      $data = fread($fp, 2);
-      fclose($fp);
-
-      if ($data === 'BZ') {
-        $this->compressed = Phar::BZ2;
-        $fp = bzopen($path, 'r');
-      } else if ($data === "\x1F\x8B") {
-        $this->compressed = Phar::GZ;
-        $fp = gzopen($path, 'rb');
-      } else {
-        $fp = fopen($path, 'rb');
-      }
-
+      $pos = 0;
       $next_file_name = null;
-      while (!feof($fp)) {
-        $header = fread($fp, 512);
+      while (!$this->eof()) {
+        $header = $this->stream_get_contents(512);
+        $pos += 512;
         // skip empty blocks
         if (!trim($header)) {
           continue;
@@ -66,41 +52,33 @@ namespace __SystemLib {
           $next_file_name = null;
         }
 
-        $len = octdec(substr($header, 124, 12));
+        $size = octdec(substr($header, 124, 12));
         $timestamp = octdec(trim(substr($header, 136, 12)));
         $type = $header[156];
-
-        $data = '';
-        $read_len = 0;
-        while ($read_len != $len) {
-          $read_data = fread($fp, $len - $read_len);
-          $data .= $read_data;
-          $read_len += strlen($read_data);
-        }
 
         // Hidden .phar directory should not appear in files listing
         if (strpos($filename, '.phar') === 0) {
           if ($filename == '.phar/stub.php') {
-            $this->stub = $data;
+            $this->stub = $this->stream_get_contents($size);
           } else if ($filename == '.phar/alias.txt') {
-            $this->alias = $data;
+            $this->alias = $this->stream_get_contents($size);
           }
         } else if (substr($filename, -1) !== '/') {
           $this->entries[$filename] = new ArchiveEntryStat(
             /* crc = */ null,
-            $len,
-            /* compressed size = */ $len,
+            $size,
+            /* compressed size = */ $size,
             $timestamp
           );
 
           switch ($type) {
             case 'L':
-              $next_file_name = trim($data);
+              $next_file_name = trim($this->stream_get_contents($size));
               break;
 
             case '0':
             case "\0":
-              $this->contents[$filename] = $data;
+              $this->fileOffsets[$filename] = [$pos, $size];
               break;
 
             case '2':
@@ -117,25 +95,17 @@ namespace __SystemLib {
               throw new Exception("type $type is not implemented yet");
           }
         }
-
-        if ($len % 512 !== 0) {
-          $leftover = 512 - ($len % 512);
-          $zeros = fread($fp, $leftover);
+        $pos += $size;
+        $this->seek($pos);
+        if ($size % 512 !== 0) {
+          $leftover = 512 - ($size % 512);
+          $zeros = $this->stream_get_contents($leftover);
           if (strlen(trim($zeros)) != 0) {
             throw new Exception("Malformed tar. Padding isn't zeros. $zeros");
           }
+          $pos += $leftover;
         }
       }
-    }
-
-    public function getStream(string $path): resource {
-      if (!$this->contents->contains($path)) {
-        throw new PharException("No $path in phar");
-      }
-      $stream = fopen('php://temp', 'w+b');//TODO stream slice needed here
-      fwrite($stream, $this->contents[$path]);
-      rewind($stream);
-      return $stream;
     }
 
     private function createFullPath(
@@ -151,8 +121,15 @@ namespace __SystemLib {
     }
 
     public function extractAllTo(string $root) {
-      foreach ($this->contents as $path => $data) {
-        file_put_contents($this->createFullPath($root, $path), $data);
+      foreach ($this->fileOffsets as $path => list($offset, $size)) {
+        $fp = fopen($this->createFullPath($root, $path), 'wb');
+        while ($size) {
+          $data = $this->stream_get_contents(min(1024, $size), $offset);
+          fwrite($fp, $data);
+          $size -= strlen($data);
+          $offset += strlen($data);
+        }
+        fclose($fp);
       }
 
       // Intentional difference to PHP5: PHP5 just creates an empty

@@ -94,6 +94,10 @@ struct ImmFolder {
     int val;
     if (match_int(in.s0, val)) { out = cmpqi{val, in.s1, in.sf}; }
   }
+  void fold(cmpl& in, Vinstr& out) {
+    int val;
+    if (match_int(in.s0, val)) { out = cmpli{val, in.s1, in.sf}; }
+  }
   void fold(cmpqm& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) { out = cmpqim{val, in.s1, in.sf}; }

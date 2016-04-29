@@ -41,9 +41,6 @@ In gen2
 ** enter HH\Asio\join
 ** enter HH\WaitHandle::join
 ** enter Exception::__init__
-** enter Exception::initTrace
-** enter Exception::getTraceOptions
-** exit Exception::getTraceOptions
 ** enter debug_backtrace
 ** exit debug_backtrace
 ** enter array_shift
@@ -54,13 +51,6 @@ In gen2
 ** exit strcasecmp
 ** enter array_shift
 ** exit array_shift
-** enter strcasecmp
-** exit strcasecmp
-** enter strcasecmp
-** exit strcasecmp
-** enter array_shift
-** exit array_shift
-** exit Exception::initTrace
 ** exit Exception::__init__
 ** enter Exception::__construct
 ** exit Exception::__construct

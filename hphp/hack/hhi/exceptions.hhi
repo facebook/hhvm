@@ -39,8 +39,8 @@ class Exception {
   public function __toString(): string;
   final private function __clone(): void;
 
-  public static function getTraceOptions();
-  public static function setTraceOptions($opts);
+  final public static function getTraceOptions();
+  final public static function setTraceOptions($opts);
 }
 
 class ErrorException extends Exception {

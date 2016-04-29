@@ -36,15 +36,34 @@ trait BaseException {
     if (isset($this->trace)) {
       return;
     }
-    $this->initTrace();
-  }
-
-  private function __check_init($context) {
-    if (!isset($this->trace)) {
-      \trigger_error($context.': exception object not initialized', E_WARNING);
-      return false;
-    } else {
-      return true;
+    $this->trace = \debug_backtrace(self::$traceOpts);
+    // Remove top stack frames up to and including Exception::__init__,
+    // set the 'file' and 'line' properties appropriately
+    while (!empty($this->trace)) {
+      $top = \array_shift($this->trace);
+      if (isset($top['class']) && isset($top['function']) &&
+          (\strcasecmp($top['class'], 'exception') === 0 ||
+           \strcasecmp($top['class'], '__systemlib\error') === 0) &&
+          \strcasecmp($top['function'], '__init__') === 0) {
+        if (isset($top['file'])) $this->file = $top['file'];
+        if (isset($top['line'])) $this->line = $top['line'];
+        break;
+      }
+    }
+    // Remove systemlib stack frames until we hit the user code.
+    // Assume user code will contain the elements for file and line.
+    if (($this->file === null) && ($this->line === null)) {
+      while (!empty($this->trace)
+        && !isset($this->trace[0]['file']) && !isset($this->trace[0]['line'])
+      ) {
+        \array_shift($this->trace);
+      }
+      if (isset($this->trace[0]['file'])) {
+        $this->file = $this->trace[0]['file'];
+      }
+      if (isset($this->trace[0]['line'])) {
+        $this->line = $this->trace[0]['line'];
+      }
     }
   }
 
@@ -112,9 +131,6 @@ trait BaseException {
    *                     created.
    */
   final public function getFile() {
-    if (!$this->__check_init(__METHOD__)) {
-      return null;
-    }
     return $this->file;
   }
 
@@ -128,9 +144,6 @@ trait BaseException {
    *                     created.
    */
   final public function getLine() {
-    if (!$this->__check_init(__METHOD__)) {
-      return null;
-    }
     return $this->line;
   }
 
@@ -143,9 +156,6 @@ trait BaseException {
    * @return     mixed   Returns the Exception stack trace as an array.
    */
   final public function getTrace() {
-    if (!$this->__check_init(__METHOD__)) {
-      return null;
-    }
     return $this->trace;
   }
 
@@ -158,9 +168,6 @@ trait BaseException {
    * @return     mixed   Returns the Exception stack trace as a string.
    */
   final public function getTraceAsString() {
-    if (!$this->__check_init(__METHOD__)) {
-      return null;
-    }
     $i = 0;
     $s = "";
     foreach ($this->getTrace() as $frame) {
@@ -212,47 +219,11 @@ trait BaseException {
     return $res;
   }
 
-  /**
-   * Derived classes may override the methods below if different behavior
-   * for initializing the trace is desired
-   */
-  protected function initTrace() {
-    $this->trace = \debug_backtrace(static::getTraceOptions());
-    // Remove top stack frames up to and including Exception::__init__,
-    // set the 'file' and 'line' properties appropriately
-    while (!empty($this->trace)) {
-      $top = \array_shift($this->trace);
-      if (isset($top['class']) && isset($top['function']) &&
-          (\strcasecmp($top['class'], 'exception') === 0 ||
-           \strcasecmp($top['class'], '__systemlib\error') === 0) &&
-          \strcasecmp($top['function'], '__init__') === 0) {
-        if (isset($top['file'])) $this->file = $top['file'];
-        if (isset($top['line'])) $this->line = $top['line'];
-        break;
-      }
-    }
-    // Remove systemlib stack frames until we hit the user code.
-    // Assume user code will contain the elements for file and line.
-    if (($this->file === null) && ($this->line === null)) {
-      while (!empty($this->trace)
-        && !isset($this->trace[0]['file']) && !isset($this->trace[0]['line'])
-      ) {
-        \array_shift($this->trace);
-      }
-      if (isset($this->trace[0]['file'])) {
-        $this->file = $this->trace[0]['file'];
-      }
-      if (isset($this->trace[0]['line'])) {
-        $this->line = $this->trace[0]['line'];
-      }
-    }
-  }
-
-  public static function getTraceOptions() {
+  final public static function getTraceOptions() {
     return self::$traceOpts;
   }
 
-  public static function setTraceOptions($opts) {
+  final public static function setTraceOptions($opts) {
     self::$traceOpts = (int)$opts;
   }
 

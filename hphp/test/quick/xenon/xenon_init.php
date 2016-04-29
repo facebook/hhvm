@@ -50,8 +50,6 @@ $required_functions = array(
   'HH\Asio\v',
   Exception::class.'::__construct',
   Exception::class.'::__init__',
-  Exception::class.'::getTraceOptions',
-  Exception::class.'::initTrace',
   WaitHandle::class.'::join',
   WaitHandle::class.'::result',
 

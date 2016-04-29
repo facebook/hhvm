@@ -823,7 +823,7 @@ void apc_load_impl_compressed
         if (UNLIKELY(snap != nullptr)) snap->addInt(v[-1], item);
         k += int_lens[i + 2] + 1; // skip \0
       }
-      s.prime(vars);
+      s.prime(std::move(vars));
       assert((k - keys) == len);
     }
   }
@@ -858,7 +858,7 @@ void apc_load_impl_compressed
         }
         k += char_lens[i + 2] + 1; // skip \0
       }
-      s.prime(vars);
+      s.prime(std::move(vars));
       assert((k - keys) == len);
     }
   }
@@ -882,7 +882,7 @@ void apc_load_impl_compressed
         if (UNLIKELY(snap != nullptr)) snap->addString(value, item);
         p += string_lens[i + i + 3] + 1; // skip \0
       }
-      s.prime(vars);
+      s.prime(std::move(vars));
       assert((p - decoded) == len);
     }
   }
@@ -904,7 +904,7 @@ void apc_load_impl_compressed
         if (UNLIKELY(snap != nullptr)) snap->addObject(value, item);
         p += object_lens[i + i + 3] + 1; // skip \0
       }
-      s.prime(vars);
+      s.prime(std::move(vars));
       assert((p - decoded) == len);
     }
   }
@@ -931,7 +931,7 @@ void apc_load_impl_compressed
         if (UNLIKELY(snap != nullptr)) snap->addThrift(value, item);
         p += thrift_lens[i + i + 3] + 1; // skip \0
       }
-      s.prime(vars);
+      s.prime(std::move(vars));
       assert((p - decoded) == len);
     }
   }
@@ -959,7 +959,7 @@ void apc_load_impl_compressed
         if (UNLIKELY(snap != nullptr)) snap->addOther(value, item);
         p += other_lens[i + i + 3] + 1; // skip \0
       }
-      s.prime(vars);
+      s.prime(std::move(vars));
       assert((p - decoded) == len);
     }
   }

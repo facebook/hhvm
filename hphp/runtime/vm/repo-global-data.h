@@ -92,6 +92,8 @@ struct Repo::GlobalData {
    */
   bool AutoprimeGenerators = true;
 
+  std::vector<const StringData*> APCProfile;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (HardTypeHints)
@@ -102,6 +104,7 @@ struct Repo::GlobalData {
       (PHP7_IntSemantics)
       (PHP7_ScalarTypes)
       (AutoprimeGenerators)
+      (APCProfile)
       ;
   }
 };

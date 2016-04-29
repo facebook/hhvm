@@ -221,7 +221,7 @@ struct ConcurrentTableSharedStore {
   /*
    * The API for priming APC.  Poorly documented.
    */
-  void prime(const std::vector<KeyValuePair>& vars);
+  void prime(std::vector<KeyValuePair>&& vars);
   bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
   bool constructPrime(const Variant& v, KeyValuePair& item);
   void primeDone();

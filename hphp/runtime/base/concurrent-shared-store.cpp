@@ -559,7 +559,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   return true;
 }
 
-void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair>& vars) {
+void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
   ReadLock l(m_lock);
   // we are priming, so we are not checking existence or expiration
   for (unsigned int i = 0; i < vars.size(); i++) {

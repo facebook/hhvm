@@ -145,6 +145,8 @@ struct Option {
   static std::string RepoCentralPath;
   static bool RepoDebugInfo;
 
+  static std::vector<std::string> APCProfile;
+
   /**
    * Names of hot and cold functions to be marked in sources.
    */

@@ -30,6 +30,8 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/fb/ext_fb.h" // fb_unserialize
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
@@ -117,13 +119,17 @@ typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   // This could share code with apc_load_impl_compressed, but that function
   // should go away together with the shared object format.
+  std::vector<KeyValuePair> all;
+  // TODO: Add total count to snapshot header.
+  auto const keyCountEstimate = m_size / 1024;
+  all.reserve(keyCountEstimate);
   {
     std::vector<KeyValuePair> ints(read32());
     for (auto& item : ints) {
       item.key = readString().begin();
       s.constructPrime(read64(), item);
     }
-    s.prime(ints);
+    all.insert(all.end(), ints.begin(), ints.end());
   }
   {
     std::vector<KeyValuePair> chars(read32());
@@ -144,7 +150,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
           break;
       }
     }
-    s.prime(chars);
+    all.insert(all.end(), chars.begin(), chars.end());
   }
   auto numStringBased = read32();
   CHECK(numStringBased == SnapshotBuilder::kNumStringBased);
@@ -184,7 +190,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
           break;
       }
     }
-    s.prime(items);
+    all.insert(all.end(), items.begin(), items.end());
   }
   {
     const char* disk = m_begin + header().diskOffset;
@@ -196,8 +202,30 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
       disk += abs(item.sSize) + 1;  // \0
     }
     assert(disk == m_begin + m_size);
-    s.prime(items);
+    all.insert(all.end(), items.begin(), items.end());
   }
+  // Sort entries by increasing hotness before priming.
+  // O(n + m log m) for n keys total and m in the hotlist.
+  auto const hotList = Repo::global().APCProfile;
+  auto const hotCount = hotList.size();
+  hphp_const_char_map<int> hotness;
+  hotness.reserve(hotCount);
+  for (size_t i = 0; i < hotCount; ++i) {
+    hotness[hotList[i]->data()] = hotCount - i;
+  }
+  // Move items with non-zero hotness to the end...
+  auto const hotBegin =
+    std::stable_partition(all.begin(), all.end(),
+                          [&hotness](const KeyValuePair& a) {
+                            return hotness.count(a.key) == 0;
+                          });
+  Logger::FInfo("Found {} hot APC keys", std::distance(hotBegin, all.end()));
+  // ...and sort them.
+  std::stable_sort(hotBegin, all.end(),
+                   [&hotness](const KeyValuePair& a, const KeyValuePair& b) {
+                     return hotness[a.key] < hotness[b.key];
+                   });
+  s.prime(std::move(all));
   assert(m_cur == m_begin + header().diskOffset);
   // Keys have been copied, so don't need that part any more.
   madvise(const_cast<char*>(m_begin), header().diskOffset, MADV_DONTNEED);

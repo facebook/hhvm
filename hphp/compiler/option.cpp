@@ -75,6 +75,8 @@ std::map<std::string,std::string,stdltistr> Option::AutoloadFuncMap;
 std::map<std::string,std::string> Option::AutoloadConstMap;
 std::string Option::AutoloadRoot;
 
+std::vector<std::string> Option::APCProfile;
+
 std::map<std::string, std::string> Option::FunctionSections;
 
 bool Option::GenerateTextHHBC = false;
@@ -239,6 +241,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(HardTypeHints, ini, config, "HardTypeHints", true);
   Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", false);
   Config::Bind(HardConstProp, ini, config, "HardConstProp", true);
+
+  Config::Bind(APCProfile, ini, config, "APCProfile");
 
   Config::Bind(EnableHipHopSyntax, ini, config, "EnableHipHopSyntax");
   Config::Bind(EnableZendCompat, ini, config, "EnableZendCompat");

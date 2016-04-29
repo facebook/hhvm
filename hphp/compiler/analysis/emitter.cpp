@@ -9855,7 +9855,9 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
   gd.HardPrivatePropInference = true;
-
+  for (auto a : Option::APCProfile) {
+    gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));
+  }
   if (arrTable) gd.arrayTypeTable.repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);
 }

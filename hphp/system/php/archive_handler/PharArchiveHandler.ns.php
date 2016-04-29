@@ -206,8 +206,14 @@ namespace __SystemLib {
       if ($size == 0) {
         return fopen('php://temp', 'w+b');
       }
-      $stream = fopen('php://temp', 'w+b');//TODO stream slice needed here
-      fwrite($stream, $this->stream_get_contents($size, $offset));
+      $stream = fopen('php://temp', 'w+b');
+      //TODO stream slice needed here
+      while ($size) {
+        $data = $this->stream_get_contents(min(1024, $size), $offset);
+        fwrite($stream, $data);
+        $size -= strlen($data);
+        $offset += strlen($data);
+      }
       rewind($stream);
       return $stream;
     }

@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -212,6 +213,24 @@ AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
     }
   }
   return nullptr;
+}
+
+void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
+                                          TypedValue* sp,
+                                          AsioBlockableChain chain) {
+  assert(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
+  SCOPE_EXIT { tl_regState = VMRegState::DIRTY; };
+
+  auto prevAr = g_context->getOuterVMFrame(ar);
+  const Func* prevF = prevAr->m_func;
+  auto& regs = vmRegs();
+  regs.stack.top() = sp;
+  assert(vmStack().isValidAddress((uintptr_t)vmsp()));
+  regs.pc = prevF->unit()->at(prevF->base() + ar->m_soff);
+  regs.fp = prevAr;
+
+  chain.unblock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

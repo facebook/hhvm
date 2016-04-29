@@ -89,6 +89,9 @@ struct AsioBlockableChain final {
   }
 
   static void Unblock(AsioBlockableChain chain) { chain.unblock(); }
+  static void UnblockJitHelper(ActRec* ar,
+                               TypedValue* sp,
+                               AsioBlockableChain chain);
   void unblock();
   void exitContext(context_idx_t ctx_idx);
   void removeFromChain(AsioBlockable* parent);

@@ -477,8 +477,8 @@ void unblockParents(Vout& v, Vout& vcold, Vreg parent) {
   v << testq{parent, parent, sf};
 
   unlikelyIfThen(v, vcold, CC_NZ, sf, [&] (Vout& v) {
-    v << vcall{CallSpec::direct(AsioBlockableChain::Unblock),
-               v.makeVcallArgs({{parent}}), v.makeTuple({})};
+    v << vcall{CallSpec::direct(AsioBlockableChain::UnblockJitHelper),
+        v.makeVcallArgs({{rvmfp(), rvmsp(), parent}}), v.makeTuple({})};
   });
 }
 

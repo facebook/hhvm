@@ -193,7 +193,7 @@ int RuntimeOption::CacheFreeFactor = 50;
 int64_t RuntimeOption::ServerRSSNeededMb = 4096;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 bool RuntimeOption::ServerEnableH2C = false;
-int RuntimeOption::BrotliCompressionEnabled = 1;
+int RuntimeOption::BrotliCompressionEnabled = -1;
 int RuntimeOption::BrotliChunkedCompressionEnabled = -1;
 int RuntimeOption::BrotliCompressionMode = 0;
 int RuntimeOption::BrotliCompressionQuality = 11;
@@ -1336,7 +1336,7 @@ void RuntimeOption::Load(
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
     Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");
     Config::Bind(BrotliCompressionEnabled, ini, config,
-                 "Server.BrotliCompressionEnabled", 1);
+                 "Server.BrotliCompressionEnabled", -1);
     Config::Bind(BrotliChunkedCompressionEnabled, ini, config,
                  "Server.BrotliChunkedCompressionEnabled", -1);
     Config::Bind(BrotliCompressionLgWindowSize, ini, config,

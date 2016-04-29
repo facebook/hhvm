@@ -858,6 +858,13 @@ StringHolder Transport::prepareResponse(const void* data,
           compression.size() == 2 && bstrcaseeq(compression.data(), "on", 2);
     }
 
+    if (m_compressionEnabled[CompressionType::Brotli] == -1) {
+      String compression;
+      IniSetting::Get("brotli.compression", compression);
+      m_compressionEnabled[CompressionType::Brotli] =
+          compression.size() == 2 && bstrcaseeq(compression.data(), "on", 2);
+    }
+
     // If PHP disables a particular compression, then it is the same as if
     // encoding is not accepted.
     for (int i = 0; i < CompressionType::Max; i++) {

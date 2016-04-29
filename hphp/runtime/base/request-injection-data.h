@@ -304,6 +304,7 @@ private:
   std::string m_requestOrder;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
+  std::string m_brotliEnabled;
   std::string m_brotliChunkedEnabled;
   std::string m_gzipCompressionLevel = "-1";
   std::string m_gzipCompression;

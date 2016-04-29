@@ -499,6 +499,8 @@ void RequestInjectionData::threadInit() {
 
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "brotli.chunked_compression", &m_brotliChunkedEnabled);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "brotli.compression", &m_brotliEnabled);
   IniSetting::Bind(
       IniSetting::CORE,
       IniSetting::PHP_INI_ALL,

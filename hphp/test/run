@@ -1645,8 +1645,7 @@ function run_test($options, $test) {
   }
 
   if (isset($options['repo'])) {
-    if ($test_ext === 'hhas' ||
-        strpos($hhvm, '-m debug') !== false ||
+    if (strpos($hhvm, '-m debug') !== false ||
         file_exists($test.'.norepo')) {
       return 'skip-norepo';
     }

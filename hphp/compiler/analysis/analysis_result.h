@@ -47,6 +47,8 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
 
+struct UnitEmitter;
+
 struct AnalysisResult : BlockScope, FunctionContainer {
   /**
    * There are multiple passes over our syntax trees. This lists all of them.
@@ -257,6 +259,8 @@ public:
   StringToClassScopePtrVecMap getExtensionClasses();
   void addInteger(int64_t n);
 
+  void addHhasFile(std::unique_ptr<UnitEmitter>&& ue);
+  std::vector<std::unique_ptr<UnitEmitter>> getHhasFiles();
 private:
   std::function<void(AnalysisResultPtr)> m_finish;
   Package *m_package;
@@ -266,6 +270,7 @@ private:
   Phase m_phase;
   StringToFileScopePtrMap m_files;
   std::vector<FileScopePtr> m_fileScopes;
+  std::vector<std::unique_ptr<UnitEmitter>> m_hhasFiles;
 
   StringBag m_extraCodeFileNames;
   std::map<std::string, std::string> m_extraCodes;

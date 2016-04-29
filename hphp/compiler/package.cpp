@@ -39,6 +39,9 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/zend/zend-string.h"
 
 using namespace HPHP;
 using std::set;
@@ -243,6 +246,9 @@ bool Package::parse(bool check) {
     return true;
   }
 
+  LitstrTable::get().setWriting();
+  SCOPE_EXIT { LitstrTable::get().setReading(); };
+
   unsigned int threadCount = Option::ParserThreadCount;
   if (threadCount > m_filesToParse.size()) {
     threadCount = m_filesToParse.size();
@@ -300,6 +306,25 @@ bool Package::parseImpl(const char *fileName) {
   if ((sb.st_mode & S_IFMT) == S_IFDIR) {
     Logger::Error("Unable to parse directory: %s", fullPath.c_str());
     return false;
+  }
+
+  if (RuntimeOption::EvalAllowHhas) {
+    if (const char* dot = strrchr(fileName, '.')) {
+      if (!strcmp(dot + 1, "hhas")) {
+        std::ifstream s(fileName);
+        std::string content {
+          std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
+        };
+        MD5 md5{string_md5(content.data(), content.size()).c_str()};
+
+        std::unique_ptr<UnitEmitter> ue{
+          assemble_string(content.data(), content.size(), fileName, md5)
+        };
+        Lock lock(m_ar->getMutex());
+        m_ar->addHhasFile(std::move(ue));
+        return true;
+      }
+    }
   }
 
   int lines = 0;

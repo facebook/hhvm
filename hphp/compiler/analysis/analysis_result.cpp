@@ -52,6 +52,7 @@
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/job-queue.h"
@@ -123,6 +124,14 @@ void AnalysisResult::addFileScope(FileScopePtr fileScope) {
   assert(!res);
   res = fileScope;
   m_fileScopes.push_back(fileScope);
+}
+
+void AnalysisResult::addHhasFile(std::unique_ptr<UnitEmitter>&& ue) {
+  m_hhasFiles.emplace_back(std::move(ue));
+}
+
+std::vector<std::unique_ptr<UnitEmitter>> AnalysisResult::getHhasFiles() {
+  return std::move(m_hhasFiles);
 }
 
 bool AnalysisResult::inParseOnDemandDirs(const std::string &filename) const {

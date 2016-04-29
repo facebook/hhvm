@@ -1654,9 +1654,7 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   return a;
 }
 
-ArrayData* MixedArray::Prepend(ArrayData* adInput,
-                              const Variant& v,
-                              bool copy) {
+ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v, bool copy) {
   auto a = asMixed(adInput);
   if (a->cowCheck()) a = a->copyMixedAndResizeIfNeeded();
 
@@ -1675,9 +1673,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
   ++a->m_size;
   auto& e = elms[0];
   e.setIntKey(0, hashint(0));
-  // TODO(#3888164): we should restructure things so we don't have to
-  // check KindOfUninit here.
-  initVal(e.data, *v.asCell());
+  cellDup(v, e.data);
 
   // Renumber.
   a->compact(true);

@@ -541,7 +541,7 @@ ArrayData* StructArray::Dequeue(ArrayData* ad, Variant& value) {
   return MixedArray::Dequeue(ToMixed(asStructArray(ad))->asArrayData(), value);
 }
 
-ArrayData* StructArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* StructArray::Prepend(ArrayData* ad, Cell v, bool copy) {
   return MixedArray::Prepend(ToMixed(asStructArray(ad)), v, copy);
 }
 

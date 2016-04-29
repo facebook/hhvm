@@ -753,7 +753,9 @@ Variant Array::dequeue() {
 void Array::prepend(const Variant& v) {
   if (!m_arr) operator=(Create());
   assert(m_arr);
-  ArrayData *newarr = m_arr->prepend(v, m_arr->cowCheck());
+  auto cell = *v.asCell();
+  if (UNLIKELY(cell.m_type == KindOfUninit)) cell = make_tv<KindOfNull>();
+  auto newarr = m_arr->prepend(cell, m_arr->cowCheck());
   if (newarr != m_arr) m_arr = Ptr::attach(newarr);
 }
 

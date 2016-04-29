@@ -376,7 +376,7 @@ public:
   /**
    * Array function: prepend a new item.
    */
-  ArrayData* prepend(const Variant& v, bool copy);
+  ArrayData* prepend(Cell v, bool copy);
 
   /**
    * Convert array to dictionary type
@@ -584,7 +584,7 @@ struct ArrayFunctions {
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
-  ArrayData* (*prepend[NK])(ArrayData*, const Variant& value, bool copy);
+  ArrayData* (*prepend[NK])(ArrayData*, Cell v, bool copy);
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);

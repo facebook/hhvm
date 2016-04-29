@@ -321,12 +321,9 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
   return ad;
 }
 
-ArrayData* EmptyArray::Prepend(ArrayData*, const Variant& vin, bool) {
-  auto cell = *vin.asCell();
-  tvRefcountedIncRef(&cell);
-  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
-  if (cell.m_type == KindOfUninit) cell.m_type = KindOfNull;
-  return EmptyArray::MakePacked(cell).first;
+ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
+  tvRefcountedIncRef(&v);
+  return EmptyArray::MakePacked(v).first;
 }
 
 ArrayData* EmptyArray::ToDict(ArrayData*) {

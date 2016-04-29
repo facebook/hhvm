@@ -167,33 +167,27 @@ GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k,
  * is currently $GLOBALS.
  */
 
-ArrayData*
-GlobalsArray::Append(ArrayData*, Cell v, bool copy) {
+ArrayData* GlobalsArray::Append(ArrayData*, Cell v, bool copy) {
   throw_not_implemented("append on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::AppendRef(ArrayData*, Variant& v, bool copy) {
+ArrayData* GlobalsArray::AppendRef(ArrayData*, Variant&, bool) {
   throw_not_implemented("appendRef on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
+ArrayData* GlobalsArray::AppendWithRef(ArrayData*, const Variant&, bool) {
   throw_not_implemented("appendWithRef on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::PlusEq(ArrayData*, const ArrayData* elems) {
+ArrayData* GlobalsArray::PlusEq(ArrayData*, const ArrayData*) {
   throw_not_implemented("plus on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::Merge(ArrayData*, const ArrayData* elems) {
+ArrayData* GlobalsArray::Merge(ArrayData*, const ArrayData*) {
   throw_not_implemented("merge on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::Prepend(ArrayData*, const Variant& v, bool copy) {
+ArrayData* GlobalsArray::Prepend(ArrayData*, Cell, bool) {
   throw_not_implemented("prepend on $GLOBALS");
 }
 

@@ -294,7 +294,7 @@ ArrayData* ProxyArray::Dequeue(ArrayData* ad, Variant &value) {
   return ad;
 }
 
-ArrayData* ProxyArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* ProxyArray::Prepend(ArrayData* ad, Cell v, bool copy) {
   if (copy) {
     return innerArr(ad)->prepend(v, true);
   } else {

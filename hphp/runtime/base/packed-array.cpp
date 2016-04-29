@@ -877,9 +877,7 @@ ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   return ad;
 }
 
-ArrayData* PackedArray::Prepend(ArrayData* adIn,
-                                const Variant& v,
-                                bool copy) {
+ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v, bool copy) {
   assert(checkInvariants(adIn));
 
   auto const ad = adIn->cowCheck() ? CopyAndResizeIfNeeded(adIn)
@@ -893,8 +891,7 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn,
   auto const size = ad->m_size;
   auto const data = packedData(ad);
   std::memmove(data + 1, data, sizeof *data * size);
-  // TODO(#3888164): constructValHelper is making KindOfUninit checks.
-  tvAsUninitializedVariant(&data[0]).constructValHelper(v);
+  cellDup(v, data[0]);
   ad->m_size = size + 1;
   ad->m_pos = 0;
   return ad;

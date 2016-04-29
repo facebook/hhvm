@@ -249,8 +249,8 @@ ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
   return escalated->merge(elems);
 }
 
-ArrayData *APCLocalArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
+ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v, bool copy) {
+  auto escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->prepend(v, false));
 }
 

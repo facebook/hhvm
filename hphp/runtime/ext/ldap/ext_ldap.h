@@ -53,6 +53,10 @@ bool HHVM_FUNCTION(ldap_modify,
                    const Resource& link,
                    const String& dn,
                    const Array& entry);
+bool HHVM_FUNCTION(ldap_modify_batch,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& modifs);
 bool HHVM_FUNCTION(ldap_bind,
                    const Resource& link,
                    const Variant& bind_rdn = null_variant,

@@ -1,0 +1,22 @@
+resource(%d) of type (ldap result)
+array(2) {
+  ["count"]=>
+  int(1)
+  [0]=>
+  array(4) {
+    ["o"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(4) "test"
+    }
+    [0]=>
+    string(1) "o"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(%d) "o=test,%s"
+  }
+}
+===DONE===

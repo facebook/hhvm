@@ -1,0 +1,6 @@
+bool(true)
+array(1) {
+  [0]=>
+  string(%d) "cn=userA,%s"
+}
+===DONE===

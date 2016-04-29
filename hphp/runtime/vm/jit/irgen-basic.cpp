@@ -35,6 +35,7 @@ void implAGet(IRGS& env, SSATmp* classSrc) {
   push(env, gen(env, LdObjClass, classSrc));
 }
 
+const StaticString s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
 void checkThis(IRGS& env, SSATmp* ctx) {
   ifThen(
     env,
@@ -43,7 +44,7 @@ void checkThis(IRGS& env, SSATmp* ctx) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const err = cns(env, makeStaticString(Strings::FATAL_NULL_THIS));
+      auto const err = cns(env, s_FATAL_NULL_THIS.get());
       gen(env, RaiseError, err);
     }
   );

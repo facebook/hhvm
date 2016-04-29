@@ -1039,6 +1039,8 @@ void emitXor(IRGS& env) {
   decRef(env, btr);
 }
 
+const StaticString s_NEGATIVE_SHIFT(Strings::NEGATIVE_SHIFT);
+
 void implShift(IRGS& env, Opcode op) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
@@ -1076,7 +1078,7 @@ void implShift(IRGS& env, Opcode op) {
             hint(env, Block::Hint::Unlikely);
 
             gen(env, ThrowArithmeticError,
-                cns(env, makeStaticString(Strings::NEGATIVE_SHIFT)));
+                cns(env, s_NEGATIVE_SHIFT.get()));
 
             // Dead-code, but needed to satisfy cond().
             return cns(env, false);
@@ -1150,6 +1152,7 @@ void emitNot(IRGS& env) {
   decRef(env, src);
 }
 
+const StaticString s_DIVISION_BY_ZERO(Strings::DIVISION_BY_ZERO);
 void emitDiv(IRGS& env) {
   auto const divisorType  = topC(env, BCSPRelOffset{0})->type();
   auto const dividendType = topC(env, BCSPRelOffset{1})->type();
@@ -1189,7 +1192,7 @@ void emitDiv(IRGS& env) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+      auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
       gen(env, RaiseWarning, msg);
 
       // PHP5 results in false; we side exit since the type of the result
@@ -1253,6 +1256,7 @@ void emitDiv(IRGS& env) {
   push(env, result);
 }
 
+const StaticString s_MODULO_BY_ZERO(Strings::MODULO_BY_ZERO);
 void emitMod(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
@@ -1269,12 +1273,12 @@ void emitMod(IRGS& env) {
       hint(env, Block::Hint::Unlikely);
 
       if (RuntimeOption::PHP7_IntSemantics) {
-        auto const msg = cns(env, makeStaticString(Strings::MODULO_BY_ZERO));
+        auto const msg = cns(env, s_MODULO_BY_ZERO.get());
         gen(env, ThrowDivisionByZeroError, msg);
       } else {
         // Make progress before side-exiting to the next instruction: raise a
         // warning and push false.
-        auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+        auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
         gen(env, RaiseWarning, msg);
         decRef(env, btr);
         decRef(env, btl);

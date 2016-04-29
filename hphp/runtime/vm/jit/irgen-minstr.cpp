@@ -979,13 +979,14 @@ void simpleBaseImpl(IRGS& env, SSATmp* base, Type innerTy) {
   env.irb->constrainValue(base, DataTypeSpecific);
 }
 
+const StaticString
+  s_NULLSAFE_PROP_WRITE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
 SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
                         bool nullsafe) {
   auto const define = flags & MOpFlags::Define;
 
   if (define && nullsafe) {
-    auto const msg = makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR);
-    gen(env, RaiseError, cns(env, msg));
+    gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
     return ptrToInitNull(env);
   }
 
@@ -1024,6 +1025,7 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
   return emitPropSpecialized(env, base, key, nullsafe, flags, propInfo);
 }
 
+const StaticString s_OP_NOT_SUPPORTED_STRING(Strings::OP_NOT_SUPPORTED_STRING);
 SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
   auto const warn = flags & MOpFlags::Warn;
   auto const unset = flags & MOpFlags::Unset;
@@ -1056,8 +1058,7 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
   if (unset) {
     env.irb->constrainValue(base, DataTypeSpecific);
     if (baseType <= TStr) {
-      gen(env, RaiseError,
-          cns(env, makeStaticString(Strings::OP_NOT_SUPPORTED_STRING)));
+      gen(env, RaiseError, cns(env, s_OP_NOT_SUPPORTED_STRING.get()));
       return ptrToUninit(env);
     }
 
@@ -1580,8 +1581,7 @@ void emitVGetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   auto const result = [&] {
     if (mcodeIsProp(mk.mcode)) {
       if (mk.mcode == MQT) {
-        gen(env, RaiseError,
-            cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
+        gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
       }
       return gen(env, VGetProp, baseObj, key);
     }

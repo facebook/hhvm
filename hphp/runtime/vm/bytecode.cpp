@@ -3786,9 +3786,9 @@ OPTBLD_INLINE void iopIdx() {
 
   TypedValue result;
   if (isArrayType(arr->m_type)) {
-    new (&result) Variant(HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
-                                                  tvAsCVarRef(key),
-                                                  tvAsCVarRef(def)));
+    result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
+                                     tvAsCVarRef(key),
+                                     tvAsCVarRef(def));
     vmStack().popTV();
   } else if (isNullType(key->m_type)) {
     tvRefcountedDecRef(arr);
@@ -3813,12 +3813,12 @@ OPTBLD_INLINE void iopArrayIdx() {
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
 
-  Variant result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
-                                  tvAsCVarRef(key),
-                                  tvAsCVarRef(def));
+  auto const result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
+                                              tvAsCVarRef(key),
+                                              tvAsCVarRef(def));
   vmStack().popTV();
   vmStack().popTV();
-  tvAsVariant(arr) = result;
+  *arr = result;
 }
 
 OPTBLD_INLINE void iopSetL(local_var to) {

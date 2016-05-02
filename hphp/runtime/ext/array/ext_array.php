@@ -1286,7 +1286,7 @@ function uksort(mixed &$array, mixed $cmp_function): bool;
  *
  */
 <<__Native>>
-function natsort(mixed &$array): mixed;
+function natsort(mixed &$array): bool;
 
 /**
  * natcasesort() is a case insensitive version of natsort(). This function
@@ -1300,7 +1300,7 @@ function natsort(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function natcasesort(mixed &$array): mixed;
+function natcasesort(mixed &$array): bool;
 
 <<__Native>>
 function i18n_loc_get_default(): string;

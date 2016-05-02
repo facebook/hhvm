@@ -73,7 +73,10 @@ bool TestBase::VerifyClose(const char *exp1, const char *exp2,
 }
 
 bool TestBase::array_value_exists(const Variant& var, const Variant& value) {
-  bool found = !same(HHVM_FN(array_search)(value, var.toArray()), false);
+  bool found = !same(
+    Variant::attach(HHVM_FN(array_search)(value, var.toArray())),
+    false
+  );
   if (!found) {
     HHVM_FN(var_dump)(var);
   }

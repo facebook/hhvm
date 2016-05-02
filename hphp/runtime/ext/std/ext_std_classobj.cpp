@@ -112,7 +112,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
     arGetContextClassFromBuiltin(vmfp()),
     retVal
   );
-  return HHVM_FN(array_values)(retVal).toArray();
+  return Variant::attach(HHVM_FN(array_values)(retVal)).toArray();
 }
 
 Array HHVM_FUNCTION(get_class_constants, const String& className) {

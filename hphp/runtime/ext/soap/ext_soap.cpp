@@ -2100,7 +2100,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   Class* cls = Unit::lookupClass(class_name.get());
   auto ret = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
   Class::getMethodNames(cls, nullptr, ret);
-  return f_array_values(ret);
+  return Variant::attach(HHVM_FN(array_values)(ret));
 }
 
 static bool valid_function(SoapServer *server, Object &soap_obj,

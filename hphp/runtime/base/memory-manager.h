@@ -984,7 +984,6 @@ private:
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
-  bool m_needInitFree{false}; // true after free(), false after initFree()
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;

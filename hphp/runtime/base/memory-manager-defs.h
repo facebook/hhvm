@@ -229,7 +229,6 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
 // based on its size, and it can prefix almost any other header kind.  Clients
 // can call this directly to avoid unnecessary initFree()s.
 template<class Fn> void MemoryManager::iterate(Fn fn) {
-  assert(!m_needInitFree);
   m_heap.iterate([&](Header* h) {
     if (h->kind() == HeaderKind::BigObj) {
       // skip BigNode
@@ -239,7 +238,6 @@ template<class Fn> void MemoryManager::iterate(Fn fn) {
       return; // continue iterating
     }
     fn(h);
-    assert(!m_needInitFree); // otherwise the heap is unparsable.
   });
 }
 

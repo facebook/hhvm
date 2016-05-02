@@ -525,7 +525,6 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
-  m_needInitFree = false;
   m_sweeping = false;
   m_exiting = false;
   resetStatsImpl(true);
@@ -673,7 +672,6 @@ void MemoryManager::initFree() {
       n->hdr.init(HeaderKind::Free, smallIndex2Size(i));
     }
   }
-  m_needInitFree = false;
 }
 
 void MemoryManager::beginQuarantine() {

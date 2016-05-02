@@ -242,7 +242,6 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
   FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, i);
 
   m_freelists[i].push(ptr, bytes);
-  assert(m_needInitFree = true); // intentional debug-only side-effect.
   m_stats.usage -= bytes;
 
   FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);

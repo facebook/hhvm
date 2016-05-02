@@ -263,7 +263,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   Array params;
   std::string sparams = transport->getParam("params");
   if (!sparams.empty()) {
-    Variant jparams = HHVM_FN(json_decode)(String(sparams), true);
+    Variant jparams = Variant::attach(
+      HHVM_FN(json_decode)(String(sparams), true)
+    );
     if (jparams.isArray()) {
       params = jparams.toArray();
     } else {
@@ -274,7 +276,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     transport->getArrayParam("p", sparams);
     if (!sparams.empty()) {
       for (unsigned int i = 0; i < sparams.size(); i++) {
-        Variant jparams = HHVM_FN(json_decode)(String(sparams[i]), true);
+        Variant jparams = Variant::attach(
+          HHVM_FN(json_decode)(String(sparams[i]), true)
+        );
         if (same(jparams, false)) {
           error = true;
           break;
@@ -367,9 +371,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
           assert(returnEncodeType == ReturnEncodeType::Json ||
                  returnEncodeType == ReturnEncodeType::Serialize);
           try {
-            response = (returnEncodeType == ReturnEncodeType::Json) ?
-                       HHVM_FN(json_encode)(funcRet).toString() :
-                       f_serialize(funcRet);
+            response = (returnEncodeType == ReturnEncodeType::Json)
+              ? Variant::attach(HHVM_FN(json_encode)(funcRet)).toString()
+              : f_serialize(funcRet);
           } catch (...) {
             serializeFailed = true;
           }
@@ -377,11 +381,14 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         }
         case 1: response = m_context->obDetachContents(); break;
         case 2:
-          response =
-            HHVM_FN(json_encode)(
-              make_map_array(s_output, m_context->obDetachContents(),
-                             s_return, HHVM_FN(json_encode)(funcRet))
-            ).toString();
+          response = Variant::attach(HHVM_FN(json_encode)(
+            make_map_array(
+              s_output,
+              m_context->obDetachContents(),
+              s_return,
+              Variant::attach(HHVM_FN(json_encode)(funcRet))
+            )
+          )).toString();
           break;
         case 3: response = f_serialize(funcRet); break;
       }

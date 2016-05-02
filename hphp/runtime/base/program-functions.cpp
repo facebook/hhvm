@@ -699,7 +699,9 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (xhprof) {
     Variant profileData = HHVM_FN(xhprof_disable)();
     if (!profileData.isNull()) {
-      HHVM_FN(var_dump)(HHVM_FN(json_encode)(HHVM_FN(xhprof_disable)()));
+      HHVM_FN(var_dump)(Variant::attach(
+        HHVM_FN(json_encode)(HHVM_FN(xhprof_disable)())
+      ));
     }
   }
   g_context->onShutdownPostSend(); // runs more php

@@ -106,14 +106,18 @@ Array TestLogger::postData(Array arr) {
   HttpClient client;
   StringBuffer response;
 
-  Array data = make_map_array("method", "recordTestResults", "args",
-                              HHVM_FN(json_encode)(make_packed_array(arr)));
+  Array data = make_map_array(
+    "method", "recordTestResults", "args",
+    Variant::attach(HHVM_FN(json_encode)(make_packed_array(arr)))
+  );
 
   auto const str = HHVM_FN(http_build_query)(data, "", "").toString();
 
   client.post(log_url, str.c_str(), str.length(), response);
 
-  return HHVM_FN(json_decode)(response.detach(), true).toArray();
+  return Variant::attach(
+    HHVM_FN(json_decode)(response.detach(), true)
+  ).toArray();
 }
 
 std::string TestLogger::getRepoRoot() {

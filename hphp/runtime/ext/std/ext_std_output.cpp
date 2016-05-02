@@ -155,7 +155,7 @@ int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
 Array HHVM_FUNCTION(hphp_get_status) {
   std::string out;
   ServerStats::ReportStatus(out, Writer::Format::JSON);
-  return HHVM_FN(json_decode)(String(out)).toArray();
+  return Variant::attach(HHVM_FN(json_decode)(String(out))).toArray();
 }
 Array HHVM_FUNCTION(hphp_get_iostatus) {
   return ServerStats::GetThreadIOStatuses();

@@ -17,10 +17,13 @@
 
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/vm/bytecode.h"
+
+#include "hphp/runtime/ext/string/ext_string.h"
 
 namespace HPHP {
 
@@ -101,13 +104,12 @@ Variant json_guard_error_result(const String& partial_error_output,
   return false;
 }
 
-Variant HHVM_FUNCTION(json_encode, const Variant& value,
-                                   int64_t options /* = 0 */,
-                                   int64_t depth /* = 512 */) {
+TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
+                         int64_t options, int64_t depth) {
   // Special case for resource since VariableSerializer does not take care of it
   if (value.isResource()) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE);
-    return json_guard_error_result("null", options);
+    return tvReturn(json_guard_error_result("null", options));
   }
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
@@ -115,21 +117,21 @@ Variant HHVM_FUNCTION(json_encode, const Variant& value,
   vs.setDepthLimit(depth);
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
+  assertx(json.get() != nullptr);
 
   if (json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE) {
-    return json_guard_error_result(json, options);
+    return tvReturn(json_guard_error_result(json, options));
   }
 
-  return json;
+  return tvReturn(std::move(json));
 }
 
-Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
-                      int64_t depth /* = 512 */, int64_t options /* = 0 */) {
-
+TypedValue HHVM_FUNCTION(json_decode, const String& json,
+                         bool assoc, int64_t depth, int64_t options) {
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
   if (json.empty()) {
-    return init_null();
+    return make_tv<KindOfNull>();
   }
 
   const int64_t supported_options =
@@ -140,7 +142,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
   int64_t parser_options = options & supported_options;
   Variant z;
   if (JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options)) {
-    return z;
+    return tvReturn(std::move(z));
   }
 
   String trimmed = HHVM_FN(trim)(json, "\t\n\r ");
@@ -148,15 +150,15 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
   if (trimmed.size() == 4) {
     if (!strcasecmp(trimmed.data(), "null")) {
       json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
-      return init_null();
+      return make_tv<KindOfNull>();
     }
     if (!strcasecmp(trimmed.data(), "true")) {
       json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
-      return true;
+      return make_tv<KindOfBoolean>(true);
     }
   } else if (trimmed.size() == 5 && !strcasecmp(trimmed.data(), "false")) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
-    return false;
+    return make_tv<KindOfBoolean>(false);
   }
 
   int64_t p;
@@ -164,7 +166,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
   DataType type = json.get()->isNumericWithVal(p, d, 0);
   if (type == KindOfInt64) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
-    return p;
+    return make_tv<KindOfInt64>(p);
   } else if (type == KindOfDouble) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     if ((options & k_JSON_BIGINT_AS_STRING) &&
@@ -178,10 +180,10 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
         }
       }
       if (!is_float) {
-        return trimmed;
+        return tvReturn(trimmed);
       }
     }
-    return d;
+    return make_tv<KindOfDouble>(d);
   }
 
   char ch0 = json.charAt(0);
@@ -198,7 +200,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
                     parser_options & mask) && z.isArray()) {
       Array arr = z.toArray();
       if ((arr.size() == 1) && arr.exists(0)) {
-        return arr[0];
+        return tvReturn(arr[0]);
       }
       // The input string could be something like: "foo","bar"
       // Which will parse inside the [] wrapper, but be invalid
@@ -209,11 +211,11 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
   if ((options & k_JSON_FB_LOOSE) && json.size() > 1 &&
       ch0 == '\'' && json.charAt(json.size() - 1) == '\'') {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
-    return json.substr(1, json.size() - 2);
+    return tvReturn(json.substr(1, json.size() - 2));
   }
 
   assert(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
-  return init_null();
+  return make_tv<KindOfNull>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

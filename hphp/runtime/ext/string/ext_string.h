@@ -115,31 +115,31 @@ String HHVM_FUNCTION(implode,
 String HHVM_FUNCTION(join,
                      const Variant& arg1,
                      const Variant& arg2 = null_variant);
-Variant HHVM_FUNCTION(str_split,
-                      const String& str,
-                      int64_t split_length = 1);
-Variant HHVM_FUNCTION(chunk_split,
-                      const String& body,
-                      int chunklen = 76,
-                      const String& end = "\r\n");
-Variant HHVM_FUNCTION(strtok,
-                      const String& str,
-                      const Variant& token = null_variant);
-Variant HHVM_FUNCTION(str_replace,
-                      const Variant& search,
-                      const Variant& replace,
-                      const Variant& subject,
-                      VRefParam count = uninit_null());
-Variant HHVM_FUNCTION(str_ireplace,
-                      const Variant& search,
-                      const Variant& replace,
-                      const Variant& subject,
-                      VRefParam count = uninit_null());
-Variant HHVM_FUNCTION(substr_replace,
-                      const Variant& str,
-                      const Variant& replacement,
-                      const Variant& start,
-                      const Variant& length = 0x7FFFFFFF);
+TypedValue HHVM_FUNCTION(str_split,
+                         const String& str,
+                         int64_t split_length = 1);
+TypedValue HHVM_FUNCTION(chunk_split,
+                         const String& body,
+                         int chunklen = 76,
+                         const String& end = "\r\n");
+TypedValue HHVM_FUNCTION(strtok,
+                         const String& str,
+                         const Variant& token = null_variant);
+TypedValue HHVM_FUNCTION(str_replace,
+                         const Variant& search,
+                         const Variant& replace,
+                         const Variant& subject,
+                         VRefParam count = uninit_null());
+TypedValue HHVM_FUNCTION(str_ireplace,
+                         const Variant& search,
+                         const Variant& replace,
+                         const Variant& subject,
+                         VRefParam count = uninit_null());
+TypedValue HHVM_FUNCTION(substr_replace,
+                         const Variant& str,
+                         const Variant& replacement,
+                         const Variant& start,
+                         const Variant& length = 0x7FFFFFFF);
 String HHVM_FUNCTION(str_pad,
                      const String& input,
                      int pad_length,
@@ -260,82 +260,82 @@ bool str_contains_any_of(const String& haystack, const String& char_list);
 int64_t HHVM_FUNCTION(strcmp,
                       const String& str1,
                       const String& str2);
-Variant HHVM_FUNCTION(strncmp,
-                      const String& str1,
-                      const String& str2,
-                      int len);
+TypedValue HHVM_FUNCTION(strncmp,
+                         const String& str1,
+                         const String& str2,
+                         int len);
 int64_t HHVM_FUNCTION(strnatcmp,
                       const String& str1,
                       const String& str2);
 int64_t HHVM_FUNCTION(strcasecmp,
                       const String& str1,
                       const String& str2);
-Variant HHVM_FUNCTION(strncasecmp,
-                      const String& str1,
-                      const String& str2,
-                      int len);
+TypedValue HHVM_FUNCTION(strncasecmp,
+                         const String& str1,
+                         const String& str2,
+                         int len);
 int64_t HHVM_FUNCTION(strnatcasecmp,
                       const String& str1,
                       const String& str2);
 int64_t HHVM_FUNCTION(strcoll,
                       const String& str1,
                       const String& str2);
-Variant HHVM_FUNCTION(substr_compare,
-                      const String& main_str,
-                      const String& str,
-                      int offset,
-                      int length = INT_MAX,
-                      bool case_insensitivity = false);
-Variant HHVM_FUNCTION(strchr,
-                      const String& haystack,
-                      const Variant& needle);
-Variant HHVM_FUNCTION(strrchr,
-                      const String& haystack,
-                      const Variant& needle);
-Variant HHVM_FUNCTION(strstr,
-                      const String& haystack,
-                      const Variant& needle,
-                      bool before_needle = false);
-Variant HHVM_FUNCTION(stristr,
-                      const String& haystack,
-                      const Variant& needle,
-                      bool before_needle = false);
-Variant HHVM_FUNCTION(strpbrk,
-                      const String& haystack,
-                      const String& char_list);
-Variant HHVM_FUNCTION(strpos,
-                      const String& haystack,
-                      const Variant& needle,
-                      int offset = 0);
-Variant HHVM_FUNCTION(stripos,
-                      const String& haystack,
-                      const Variant& needle,
-                      int offset = 0);
-Variant HHVM_FUNCTION(strrpos,
-                      const String& haystack,
-                      const Variant& needle,
-                      int offset = 0);
-Variant HHVM_FUNCTION(strripos,
-                      const String& haystack,
-                      const Variant& needle,
-                      int offset = 0);
-Variant HHVM_FUNCTION(substr_count,
-                      const String& haystack,
-                      const String& needle,
-                      int offset = 0,
-                      int length = 0x7FFFFFFF);
-Variant HHVM_FUNCTION(strspn,
-                      const String& str1,
-                      const String& str2,
-                      int start = 0,
-                      int length = 0x7FFFFFFF);
-Variant HHVM_FUNCTION(strcspn,
-                      const String& str1,
-                      const String& str2,
-                      int start = 0,
-                      int length = 0x7FFFFFFF);
-Variant HHVM_FUNCTION(strlen,
-                      const Variant& vstr);
+TypedValue HHVM_FUNCTION(substr_compare,
+                         const String& main_str,
+                         const String& str,
+                         int offset,
+                         int length = INT_MAX,
+                         bool case_insensitivity = false);
+TypedValue HHVM_FUNCTION(strchr,
+                         const String& haystack,
+                         const Variant& needle);
+TypedValue HHVM_FUNCTION(strrchr,
+                         const String& haystack,
+                         const Variant& needle);
+TypedValue HHVM_FUNCTION(strstr,
+                         const String& haystack,
+                         const Variant& needle,
+                         bool before_needle = false);
+TypedValue HHVM_FUNCTION(stristr,
+                         const String& haystack,
+                         const Variant& needle,
+                         bool before_needle = false);
+TypedValue HHVM_FUNCTION(strpbrk,
+                         const String& haystack,
+                         const String& char_list);
+TypedValue HHVM_FUNCTION(strpos,
+                         const String& haystack,
+                         const Variant& needle,
+                         int offset = 0);
+TypedValue HHVM_FUNCTION(stripos,
+                         const String& haystack,
+                         const Variant& needle,
+                         int offset = 0);
+TypedValue HHVM_FUNCTION(strrpos,
+                        const String& haystack,
+                        const Variant& needle,
+                        int offset = 0);
+TypedValue HHVM_FUNCTION(strripos,
+                        const String& haystack,
+                        const Variant& needle,
+                        int offset = 0);
+TypedValue HHVM_FUNCTION(substr_count,
+                         const String& haystack,
+                         const String& needle,
+                         int offset = 0,
+                         int length = 0x7FFFFFFF);
+TypedValue HHVM_FUNCTION(strspn,
+                         const String& str1,
+                         const String& str2,
+                         int start = 0,
+                         int length = 0x7FFFFFFF);
+TypedValue HHVM_FUNCTION(strcspn,
+                         const String& str1,
+                         const String& str2,
+                         int start = 0,
+                         int length = 0x7FFFFFFF);
+TypedValue HHVM_FUNCTION(strlen,
+                         const Variant& vstr);
 Array HHVM_FUNCTION(str_getcsv,
                     const String& str,
                     const String& delimiter = ",",

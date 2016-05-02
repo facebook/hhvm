@@ -342,11 +342,11 @@ void write_tc_cie(EHFrameWriter& ehfw) {
 
   // The following calculation is related to the "top" of the record. There is
   // an implicit -8 factor as defined by EHFrameWriter::m_cie.data_align
-  ehfw.offset_extended_sf(dw_reg::IP,  (record_size - AROFF(m_savedRip))/8);
-  ehfw.offset_extended_sf(dw_reg::FP,  (record_size - AROFF(m_sfp)     )/8);
+  ehfw.offset_extended_sf(dw_reg::IP, (record_size - AROFF(m_savedRip)) / 8);
+  ehfw.offset_extended_sf(dw_reg::FP, (record_size - AROFF(m_sfp)) / 8);
 
 #if defined(__powerpc64__)
-  ehfw.offset_extended_sf(dw_reg::TOC, (record_size - AROFF(m_savedToc))/8);
+  ehfw.offset_extended_sf(dw_reg::TOC, (record_size - AROFF(m_savedToc)) / 8);
 #endif
 
   // This is an artifact of a time when we did not spill registers onto the

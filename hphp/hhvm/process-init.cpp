@@ -88,7 +88,8 @@ void ProcessInit() {
 
   if (slib.empty()) {
     // Die a horrible death.
-    Logger::Error("Unable to find/load systemlib.php");
+    Logger::Error("Unable to find/load systemlib.php, check /proc is mounted"
+                  " or export HHVM_SYSTEMLIB to your ENV");
     _exit(1);
   }
 

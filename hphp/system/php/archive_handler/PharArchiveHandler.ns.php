@@ -199,11 +199,11 @@ namespace __SystemLib {
     }
 
     public function extractAllTo(string $path) {
-      //TODO
+      throw new Exception('Not implemented yet');
     }
 
     public function addFile(string $path, string $archive_path): bool {
-      //TODO
+      throw new Exception('Not implemented yet');
     }
   }
 }

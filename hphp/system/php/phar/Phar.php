@@ -123,11 +123,13 @@ class Phar extends RecursiveDirectoryIterator
         );
       }
     }
-    // From the manifest
-    if ($this->getAlias()) {
-      self::$aliases[$this->getAlias()] = $this;
+    $aliasFromManifest = $this->getAlias();
+    if ($aliasFromManifest) {
+      $this->assertCorrectAlias($aliasFromManifest);
+      self::$aliases[$aliasFromManifest] = $this;
     }
     if ($alias) {
+      $this->assertCorrectAlias($alias);
       self::$aliases[$alias] = $this;
     }
     // We also do filename lookups
@@ -665,12 +667,7 @@ class Phar extends RecursiveDirectoryIterator
    * @return bool
    */
   public function setAlias($alias) {
-
-    if (preg_match('#[\\/:;]#', $alias)) {
-      throw new UnexpectedValueException(
-        "Invalid alias \"$alias\" specified for phar \"$this->fname\""
-      );
-    }
+    $this->assertCorrectAlias($alias);
     if (isset(self::$aliases[$alias])) {
       $path = self::$aliases[$alias]->fname;
       throw new PharException(
@@ -678,12 +675,17 @@ class Phar extends RecursiveDirectoryIterator
         ' be used for other archives'
       );
     }
-    // Do not execute following when called from constructor
-    if (!debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[0]['object'] === $this) {
-      // TODO: Remove following line when write support implemented
-      throw new UnexpectedValueException('phar is read-only');
-      self::assertWriteSupport();
-      $this->archiveHandler->setAlias($alias);
+    // TODO: Remove following line when write support implemented
+    throw new UnexpectedValueException('phar is read-only');
+    self::assertWriteSupport();
+    $this->archiveHandler->setAlias($alias);
+  }
+
+  private function assertCorrectAlias(string $alias) {
+    if (preg_match('#[\\/:;]#', $alias)) {
+      throw new UnexpectedValueException(
+        "Invalid alias \"$alias\" specified for phar \"$this->fname\""
+      );
     }
   }
 

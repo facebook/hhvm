@@ -61,8 +61,8 @@ namespace __SystemLib {
       return $this->alias;
     }
 
-    public function setAlias(string $alias) {
-      //TODO
+    public function setAlias(string $alias, int $len) {
+      throw new Exception('Not implemented yet');
     }
 
     public function getStub(): ?string {
@@ -70,7 +70,7 @@ namespace __SystemLib {
     }
 
     public function setStub(string $stub, int $len = -1) {
-      //TODO
+      throw new Exception('Not implemented yet');
     }
 
     public function count(): int {

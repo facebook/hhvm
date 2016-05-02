@@ -15,6 +15,9 @@ class PharFileInfo extends SplFileInfo {
   /**
    * ( excerpt from http://php.net/manual/en/pharfileinfo.construct.php )
    *
+   * This should not be called directly. Instead, a PharFileInfo object is
+   * initialized by calling Phar::offsetGet() through array access.
+   *
    * @param string $entry The full url to retrieve a file. If you wish to
    *                      retrieve the information for the file my/file.php
    *                      from the phar boo.phar, the entry should be

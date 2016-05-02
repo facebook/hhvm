@@ -2000,12 +2000,21 @@ void hphp_process_init() {
   pthread_attr_t attr;
 // Linux+GNU extension
 #if defined(_GNU_SOURCE) && (defined(__linux__) || defined(__CYGWIN__))
-  pthread_getattr_np(pthread_self(), &attr);
+  if (pthread_getattr_np(pthread_self(), &attr) != 0 ) {
+    Logger::Error("pthread_getattr_np failed before checking stack limits");
+    _exit(1);
+  }
 #else
-  pthread_attr_init(&attr);
+  if (pthread_attr_init(&attr) != 0 ) {
+    Logger::Error("pthread_attr_init failed before checking stack limits");
+    _exit(1);
+  }
 #endif
   init_stack_limits(&attr);
-  pthread_attr_destroy(&attr);
+  if (pthread_attr_destroy(&attr) != 0 ) {
+    Logger::Error("pthread_attr_destroy failed after checking stack limits");
+    _exit(1);
+  } 
   BootStats::mark("pthread_init");
 
   Process::InitProcessStatics();

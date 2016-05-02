@@ -323,10 +323,8 @@ Variant HHVM_FUNCTION(apc_add,
   return apc_store().add(strKey, var, ttl);
 }
 
-Variant HHVM_FUNCTION(apc_fetch,
-                      const Variant& key,
-                      VRefParam success /* = null */) {
-  if (!apcExtension::Enable) return false;
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, VRefParam success) {
+  if (!apcExtension::Enable) return make_tv<KindOfBoolean>(false);
 
   Variant v;
 
@@ -338,7 +336,7 @@ Variant HHVM_FUNCTION(apc_fetch,
       Variant k = iter.second();
       if (!k.isString()) {
         throw_invalid_argument("apc key: (not a string)");
-        return false;
+        return make_tv<KindOfBoolean>(false);
       }
       String strKey = k.toString();
       if (apc_store().get(strKey, v)) {
@@ -347,7 +345,7 @@ Variant HHVM_FUNCTION(apc_fetch,
       }
     }
     success.assignIfRef(tmp);
-    return init.toVariant();
+    return tvReturn(init.toVariant());
   }
 
   if (apc_store().get(key.toString(), v)) {
@@ -356,7 +354,7 @@ Variant HHVM_FUNCTION(apc_fetch,
     success.assignIfRef(false);
     v = false;
   }
-  return v;
+  return tvReturn(std::move(v));
 }
 
 Variant HHVM_FUNCTION(apc_delete,

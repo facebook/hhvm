@@ -377,6 +377,9 @@ struct Variant : private TypedValue {
    */
   Variant& setWithRef(const Variant& v) noexcept;
 
+  static Variant attach(TypedValue tv) noexcept {
+    return Variant{tv, Attach{}};
+  }
   static Variant attach(StringData* var) noexcept {
     return Variant{var, Attach{}};
   }
@@ -1064,6 +1067,7 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
     }
   }
+  Variant(TypedValue tv, Attach) noexcept : TypedValue(tv) {}
 
   bool isPrimitive() const { return !isRefcountedType(m_type); }
   bool isObjectConvertable() {

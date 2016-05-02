@@ -67,6 +67,7 @@ struct apcExtension final : Extension {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
 Variant HHVM_FUNCTION(apc_add,
                       const Variant& key_or_array,
                       const Variant& var = null_variant,
@@ -78,9 +79,9 @@ Variant HHVM_FUNCTION(apc_store,
 bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
                    const String& key,
                    const Variant& var);
-Variant HHVM_FUNCTION(apc_fetch,
-                      const Variant& key,
-                      VRefParam success = uninit_null());
+TypedValue HHVM_FUNCTION(apc_fetch,
+                         const Variant& key,
+                         VRefParam success = uninit_null());
 Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key);
 bool HHVM_FUNCTION(apc_clear_cache,

@@ -337,7 +337,8 @@ let mk_mapper = fun m_in ->
                   m_user_attributes = v_m_user_attributes;
                   m_ret = v_m_ret;
                   m_ret_by_ref = v_m_ret_by_ref;
-                  m_fun_kind = v_m_fun_kind
+                  m_fun_kind = v_m_fun_kind;
+                  m_extents = v_m_extents;
                 } =
       let v_m_kind = map_of_list map_kind v_m_kind in
       let v_m_tparams = map_of_list map_tparam v_m_tparams in
@@ -348,7 +349,8 @@ let mk_mapper = fun m_in ->
         map_smap map_user_attribute v_m_user_attributes in
       let v_m_ret = map_hint_option v_m_ret in
       let v_m_ret_by_ref = map_of_bool v_m_ret_by_ref in
-      let v_m_fun_kind = map_fun_kind v_m_fun_kind
+      let v_m_fun_kind = map_fun_kind v_m_fun_kind in
+      let v_m_extents = map_pos_t v_m_extents
       in
         {
           m_kind = v_m_kind;
@@ -360,6 +362,7 @@ let mk_mapper = fun m_in ->
           m_ret = v_m_ret;
           m_ret_by_ref = v_m_ret_by_ref;
           m_fun_kind = v_m_fun_kind;
+          m_extents = v_m_extents;
         }
     in m_in.k_method_ (k, all_mappers) c_kind method_
   and map_is_reference v = map_of_bool v

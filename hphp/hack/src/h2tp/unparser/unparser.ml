@@ -442,7 +442,8 @@ let rec u_program v = u_of_list_spc u_def v
       m_user_attributes;
       m_ret;
       m_ret_by_ref;
-      m_fun_kind
+      m_fun_kind;
+      m_extents = _;
     } =
       let str_m_kind = u_of_list_spc u_kind m_kind
       and v_f_common = {

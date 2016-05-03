@@ -2274,8 +2274,13 @@ void hphp_context_shutdown() {
   context->destructObjects();
   context->onRequestShutdown();
 
-  // Shutdown the debugger
-  DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestShutdownHook());
+  try {
+    // Shutdown the debugger.  This can throw, but we don't care about what the
+    // error is.
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestShutdownHook());
+  } catch (...) {
+    // Gotta catch 'em all!
+  }
 
   // Extensions could have shutdown handlers
   ExtensionRegistry::requestShutdown();

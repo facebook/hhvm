@@ -521,7 +521,7 @@ struct StopCmd : XDebugCommand {
     // We need to throw an exception, so this needs to be sent manually
     m_server.addStatus(xml);
     m_server.sendMessage(xml);
-    throw ExitException(0);
+    throw XDebugExitExn();
   }
 };
 

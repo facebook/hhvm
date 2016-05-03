@@ -26,6 +26,10 @@ const char* XDebugExn::what() const noexcept {
   return xdebug_error_str(error);
 }
 
+const char* XDebugExitExn::what() const noexcept {
+  return "XDebug ended request";
+}
+
 const char* xdebug_error_str(XDebugError error) {
   switch (error) {
     case XDebugError::Ok:

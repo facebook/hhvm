@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_XDEBUG_STATUS_H_
 #define incl_HPHP_XDEBUG_STATUS_H_
 
-#include <exception>
+#include "hphp/util/exception.h"
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +80,16 @@ struct XDebugExn : std::exception {
   const char* what() const noexcept override;
 
   XDebugError error;
+};
+
+/*
+ * Separate from XDebugExn, as this is used specifically to exit the request
+ * when a 'stop' command is issued.
+ */
+struct XDebugExitExn : Exception {
+  EXCEPTION_COMMON_IMPL(XDebugExitExn)
+
+  const char* what() const noexcept override;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

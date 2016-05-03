@@ -444,7 +444,7 @@ class CommonTests(object):
             '{{"name":"\\\\bar","result_type":"function","pos":{{"filename":"",'
             '"line":1,"char_start":42,"char_end":44}},'
             '"definition_pos":{{"filename":"","line":1,"char_start":15,'
-            '"char_end":17}}}}'
+            '"char_end":17}},"definition_extents":null}}'
             ],
             options=['--ide-get-definition', '1:43'],
             stdin='<?hh function bar() {} function test() { bar() }')

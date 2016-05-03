@@ -1,4 +1,5 @@
 \Foo::bar
 Method
-line 8, characters 9-11
+line 10, characters 9-11
 defined: line 4, characters 19-21
+definition extents: line 4, character 3 - line 6, character 3

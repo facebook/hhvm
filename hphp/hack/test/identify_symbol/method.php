@@ -1,7 +1,9 @@
 <?hh
 
 class Foo {
-  public function bar() {}
+  public function bar() {
+    // blah blah multiline method
+  }
 }
 
 function test(Foo $foo) {

@@ -15,6 +15,8 @@
 */
 #include "hphp/util/safe-cast.h"
 
+#include "hphp/util/assertions.h"
+
 #include <iostream>
 #include <cstdlib>
 
@@ -25,9 +27,11 @@ namespace HPHP {
 void safe_cast_failure(const std::string& valStr,
                        const char* fn,
                        const char* what) {
-  std::cerr << "conversion of " << valStr << " failed in "
-            << fn << " : " << what << '\n';
-  std::abort();
+  always_assert_flog(
+    false,
+    "conversion of {} failed in {} : {}\n",
+    valStr, fn, what
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

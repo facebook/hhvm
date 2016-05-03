@@ -16,7 +16,7 @@ else
   INFILE=hphp.ll
   OUTFILE=${INSTALL_DIR}/lex.yy.cpp
 
-  FLEX=$(readlink -f $(ls -t ${FBCODE_DIR}/third-party2/flex/2.5.35/centos5.2-native/*/bin/flex | head -1))
+  FLEX=$(readlink -f $(ls -t ${FBCODE_DIR}/third-party2/flex/2.5.39/centos6-native/*/bin/flex | head -1))
 fi
 
 $FLEX -i -f -Phphp -R -8 --bison-locations -o${OUTFILE} ${INFILE}

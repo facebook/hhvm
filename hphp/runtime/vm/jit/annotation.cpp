@@ -35,12 +35,21 @@ const StaticString s_empty("");
 const Func* lookupDirectFunc(SrcKey const sk,
                              const StringData* fname,
                              const StringData* clsName,
-                             bool staticCall) {
+                             Op pushOp) {
   if (clsName && !clsName->empty()) {
     auto const cls = Unit::lookupClassOrUniqueClass(clsName);
     bool magic = false;
+    auto const isStatic =
+      pushOp == Op::FPushClsMethodD ||
+      pushOp == Op::FPushClsMethodF ||
+      pushOp == Op::FPushClsMethod;
     auto const ctx = sk.func()->cls();
-    return lookupImmutableMethod(cls, fname, magic, staticCall, ctx);
+    if (auto func = lookupImmutableMethod(cls, fname, magic, isStatic, ctx)) {
+      if (pushOp != Op::FPushClsMethod || func->isImmutableFrom(cls)) {
+        return func;
+      }
+    }
+    return nullptr;
   }
   auto const func = Unit::lookupFunc(fname);
   if (func && func->isNameBindingImmutable(sk.unit())) {
@@ -64,9 +73,6 @@ const void annotate(NormalizedInstruction* i,
   auto const fpi      = i->func()->findFPI(i->source.offset());
   auto pc             = i->m_unit->at(fpi->m_fpushOff);
   auto const pushOp   = decode_op(pc);
-  auto const isStatic = pushOp == Op::FPushClsMethodD ||
-    pushOp == Op::FPushClsMethodF ||
-    pushOp == Op::FPushClsMethod;
 
   auto decode_litstr = [&] {
     Id id;
@@ -96,17 +102,10 @@ const void annotate(NormalizedInstruction* i,
     }
   }
 
-  /*
-   * Currently we don't attempt any of this for FPushClsMethod
-   * because lookupImmutableMethod is only for situations that
-   * don't involve LSB.
-   */
   auto const func =
-    pushOp == Op::FPushClsMethod
-    ? nullptr
-    : pushOp == Op::FPushCtorD
-    ? lookupDirectCtor(i->source, clsName)
-    : lookupDirectFunc(i->source, funcName, clsName, isStatic);
+    pushOp == Op::FPushCtorD ?
+    lookupDirectCtor(i->source, clsName) :
+    lookupDirectFunc(i->source, funcName, clsName, pushOp);
 
   if (func) {
     FTRACE(1, "found direct func ({}) for FCallD\n",

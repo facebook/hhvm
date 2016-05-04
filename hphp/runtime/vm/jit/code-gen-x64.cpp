@@ -3691,7 +3691,10 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto clsReg = srcLoc(inst, 0).reg();
   int32_t mSlotVal = inst->src(1)->rawVal();
-  auto methOff = int32_t(mSlotVal * sizeof(LowPtr<Func>));
+  // We could have a Cls or a Cctx. The Cctx has the low bit set, so
+  // we need to subtract one in that case.
+  auto methOff = int32_t(mSlotVal * sizeof(LowPtr<Func>)) -
+    (inst->src(0)->isA(TCctx) ? 1 : 0);
   auto& v = vmain();
   emitLdLowPtr(v, clsReg[methOff], dstReg, sizeof(LowPtr<Func>));
 }

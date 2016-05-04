@@ -818,6 +818,12 @@ struct Func {
    */
   bool isNameBindingImmutable(const Unit* fromUnit) const;
 
+  /*
+   * Given that func would be called when func->name() is invoked on cls,
+   * determine if it would also be called when invoked on any descendant
+   * of cls.
+   */
+  bool isImmutableFrom(const Class* cls) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Other attributes.                                                  [const]

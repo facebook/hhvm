@@ -904,15 +904,16 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
       const Func* func;
       auto res =
         g_context->lookupClsMethod(func,
-                                     cls,
-                                     methVal->strVal(),
-                                     nullptr,
-                                     cls,
-                                     false);
+                                   cls,
+                                   methVal->strVal(),
+                                   nullptr,
+                                   cls,
+                                   false);
       if (res == LookupResult::MethodFoundNoThis && func->isStatic()) {
-        auto funcTmp = clsVal->hasConstVal()
-          ? cns(env, func)
-          : gen(env, LdClsMethod, clsVal, cns(env, -(func->methodSlot() + 1)));
+        auto funcTmp = clsVal->hasConstVal() || func->isImmutableFrom(cls) ?
+          cns(env, func) :
+          gen(env, LdClsMethod, clsVal, cns(env, -(func->methodSlot() + 1)));
+
         fpushActRec(env, funcTmp, clsVal, numParams, nullptr);
         return;
       }

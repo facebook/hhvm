@@ -522,6 +522,19 @@ bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
   return top() && (fromUnit == m_unit);
 }
 
+bool Func::isImmutableFrom(const Class* cls) const {
+  if (!RuntimeOption::RepoAuthoritative) return false;
+  assert(cls && cls->lookupMethod(name()) == this);
+  if (attrs() & AttrNoOverride) {
+    // Even if the func isn't overridden, we clone it into
+    // any derived classes if it has static locals
+    if (!hasStaticLocals()) return true;
+  }
+  if (cls->preClass()->attrs() & AttrNoOverride) {
+    return true;
+  }
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Unit table entries.

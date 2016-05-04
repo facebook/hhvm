@@ -1347,19 +1347,15 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
        *       - Could deal with this by checking for AttrNoOverride on the
        *         class
        */
-      func = nullptr;
+      return nullptr;
     }
   } else if (!(func->attrs() & AttrPrivate)) {
     if (magicCall || func->attrs() & AttrStatic) {
       if (!(cls->preClass()->attrs() & AttrNoOverride)) {
-        func = nullptr;
+        return nullptr;
       }
-    } else if (!(func->attrs() & AttrNoOverride && !func->hasStaticLocals()) &&
-               !(cls->preClass()->attrs() & AttrNoOverride)) {
-      // Even if a func has AttrNoOverride, if it has static locals it
-      // is cloned into subclasses (to give them different copies of
-      // the static locals), so we need to skip this.
-      func = nullptr;
+    } else if (!func->isImmutableFrom(cls)) {
+      return nullptr;
     }
   }
   return func;

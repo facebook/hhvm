@@ -1076,7 +1076,7 @@ To string conversions:
 
   Load the Func* at methodIdx from the vtable at vtableIdx in S0.
 
-| LdClsMethod, D(Func), S(Cls) C(Int), NF
+| LdClsMethod, D(Func), S(Cls,Cctx) C(Int), NF
 
   Load a Func* off of the class method table for S0, at offset S1 (in method
   slots).

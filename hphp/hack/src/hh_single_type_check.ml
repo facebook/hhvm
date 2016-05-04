@@ -412,7 +412,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
               SymbolInfoService.helper [] [(filename, fileinfo)] in
             let result = SymbolInfoService.format_result raw_result in
             let result_json = ClientSymbolInfo.to_json result in
-            print_endline (Hh_json.json_to_string result_json)
+            print_endline (Hh_json.json_to_multiline result_json)
         | None -> ()
       end
   | Lint ->

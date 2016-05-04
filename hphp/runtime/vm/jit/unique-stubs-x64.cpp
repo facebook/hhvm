@@ -176,6 +176,48 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   });
 }
 
+TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
+  CGMeta meta;
+
+  auto const start = vwrap(cb, data, meta, [] (Vout& v) {
+    v << stublogue{};
+
+    auto const rdata = rarg(0);
+    auto const rtype = rarg(1);
+
+    auto const destroy = [&] (Vout& v) {
+      // decRefGeneric is called via callfaststub, whose ABI claims that all
+      // registers are preserved.  This is true in the fast path, but in the
+      // slow path we need to manually save caller-saved registers.
+      auto const callerSaved = abi().gpUnreserved - abi().calleeSaved;
+      PhysRegSaver prs{v, callerSaved};
+
+      // As a consequence of being called via callfaststub, we can't safely use
+      // any Vregs here except for status flags registers, at least not with
+      // the default vwrap() ABI.  Just use the argument registers instead.
+      assertx(callerSaved.contains(rdata));
+      assertx(callerSaved.contains(rtype));
+
+      v << movzbq{rtype, rtype};
+      v << shrli{kShiftDataTypeToDestrIndex, rtype, rtype, v.makeReg()};
+
+      auto const dtor_table =
+        safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
+      v << callm{baseless(rtype * 8 + dtor_table), arg_regs(1)};
+
+      // The stub frame's saved RIP is at %rsp[8] before we saved the
+      // caller-saved registers.
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed() + 1)};
+    };
+
+    emitDecRefWork(v, v, rdata, destroy, false);
+    v << stubret{};
+  });
+
+  meta.process(nullptr);
+  return start;
+}
+
 TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   // The address of the first local is passed in the second argument register.
   // We use the third and fourth as scratch registers.

@@ -41,6 +41,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us);
 TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us);
 TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us);
 TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us);
+TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data);
 
 void enterTCImpl(TCA start, ActRec* stashedAR);
 

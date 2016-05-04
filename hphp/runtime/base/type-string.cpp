@@ -425,13 +425,13 @@ void String::dump() const {
 // StaticString
 
 StaticString::StaticString(const char* s)
-: String(makeStaticString(s), NoIncRef{}) { }
+: String(makeStaticStringSafe(s), NoIncRef{}) { }
 
 StaticString::StaticString(const char* s, int length)
-: String(makeStaticString(s, length), NoIncRef{}) { }
+: String(makeStaticStringSafe(s, length), NoIncRef{}) { }
 
 StaticString::StaticString(std::string s)
-: String(makeStaticString(s.c_str(), s.size()), NoIncRef{}) { }
+: String(makeStaticStringSafe(s.c_str(), s.size()), NoIncRef{}) { }
 
 StaticString& StaticString::operator=(const StaticString &str) {
   // Assignment to a StaticString is ignored. Generated code

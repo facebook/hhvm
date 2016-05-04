@@ -90,13 +90,37 @@ struct strintern_hash {
 };
 
 // The uint32_t is used to hold RDS offsets for constants
-typedef folly::AtomicHashMap<
+using StringDataMap = folly::AtomicHashMap<
   StrInternKey,
   rds::Link<TypedValue>,
   strintern_hash,
   strintern_eq
-> StringDataMap;
-StringDataMap* s_stringDataMap;
+>;
+
+struct EmbeddedStringMap {
+  EmbeddedStringMap() {}
+  ~EmbeddedStringMap() {}
+
+  explicit operator bool() const { return inited; }
+  StringDataMap& operator*() { assert(inited); return value; }
+  StringDataMap* operator->() { assert(inited); return &value; }
+  void emplace(uint32_t size, const StringDataMap::Config& config) {
+    assert(!inited);
+    new (&value) StringDataMap(size, config);
+    inited = true;
+  }
+  void clear() {
+    if (inited) {
+      value.~StringDataMap();
+      inited = false;
+    }
+  }
+ private:
+  union { StringDataMap value; };
+  bool inited;
+};
+
+EmbeddedStringMap s_stringDataMap;
 
 // If a string is static it better be the one in the table.
 DEBUG_ONLY bool checkStaticStr(const StringData* s) {
@@ -113,7 +137,7 @@ StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
   for (int i = 0; i < 256; i++) {
     char s[2] = { (char)i, 0 };
-    raw[i] = makeStaticString(&s[0], 1);
+    raw[i] = makeStaticStringSafe(&s[0], 1);
   }
   return raw;
 }
@@ -143,13 +167,13 @@ inline StringData* insertStaticStringSlice(folly::StringPiece slice) {
 }
 
 void create_string_data_map() {
+  always_assert(!s_stringDataMap);
   StringDataMap::Config config;
   config.growthFactor = 1;
   MemoryStats::GetInstance()->ResetStaticStringSize();
 
-  s_stringDataMap =
-    new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
-                      config);
+  s_stringDataMap.emplace(RuntimeOption::EvalInitialStaticStringTableSize,
+                          config);
   insertStaticString(StringData::MakeEmpty());
 }
 
@@ -167,9 +191,6 @@ StringData* makeStaticString(const StringData* str) {
     assert(checkStaticStr(str));
     return const_cast<StringData*>(str);
   }
-  if (UNLIKELY(!s_stringDataMap)) {
-    create_string_data_map();
-  }
   auto const it = s_stringDataMap->find(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
@@ -178,9 +199,6 @@ StringData* makeStaticString(const StringData* str) {
 }
 
 StringData* makeStaticString(folly::StringPiece slice) {
-  if (UNLIKELY(!s_stringDataMap)) {
-    create_string_data_map();
-  }
   auto const it = s_stringDataMap->find(slice);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
@@ -219,6 +237,21 @@ StringData* makeStaticString(const char* str) {
 StringData* makeStaticString(char c) {
   // TODO(#2880477): should this be inlined?
   return precomputed_chars[(uint8_t)c];
+}
+
+StringData* makeStaticStringSafe(const char* str, size_t len) {
+  assert(len <= StringData::MaxSize);
+  if (UNLIKELY(!s_stringDataMap)) {
+    create_string_data_map();
+  }
+  return makeStaticString(str, len);
+}
+
+StringData* makeStaticStringSafe(const char* str) {
+  if (UNLIKELY(!s_stringDataMap)) {
+    create_string_data_map();
+  }
+  return makeStaticString(str);
 }
 
 rds::Handle lookupCnsHandle(const StringData* cnsName) {
@@ -318,17 +351,18 @@ size_t countStaticStringConstants() {
 
 void refineStaticStringTableSize() {
   if (RuntimeOption::EvalInitialStaticStringTableSize ==
-      kDefaultInitialStaticStringTableSize) {
+      kDefaultInitialStaticStringTableSize ||
+     !s_stringDataMap) {
     return;
   }
-  auto oldStringTable = s_stringDataMap;
-  if (!oldStringTable) return;
 
-  s_stringDataMap = nullptr;
+  std::vector<StringDataMap::value_type>
+    oldStringTable(s_stringDataMap->begin(), s_stringDataMap->end());
+
+  s_stringDataMap.clear();
   create_string_data_map();
-  SCOPE_EXIT { delete oldStringTable; };
 
-  for (auto& kv : *oldStringTable) {
+  for (auto& kv : oldStringTable) {
     s_stringDataMap->insert(kv.first, kv.second);
   }
 }

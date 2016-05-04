@@ -9,7 +9,7 @@
  */
 class PharFileInfo extends SplFileInfo {
 
-  private ?string $name;
+  private $name;
   private ?__SystemLib\ArchiveEntryStat $stat;
 
   /**

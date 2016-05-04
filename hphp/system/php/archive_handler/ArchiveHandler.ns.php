@@ -125,8 +125,8 @@ namespace __SystemLib {
     // Things used by Phar and Tar to overcome Bzip2 extension's limitation to
     // seek in other way than SEEK_CUR, we need to maintain position manually:(
 
-    private int $pos = 0;
-    private ?resource $stream;
+    private $pos = 0;
+    private $stream;
     protected ?string $path;
 
     protected function open(string $path) {

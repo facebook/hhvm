@@ -6,7 +6,7 @@ namespace __SystemLib {
 
   final class PharArchiveHandler extends ArchiveHandler {
     private array<string, array> $fileInfo = array();
-    private int $archiveFlags;
+    private $archiveFlags;
     public function __construct(
       string $path,
       bool $preventHaltTokenCheck = true
@@ -177,7 +177,7 @@ namespace __SystemLib {
       return hash_final($context, true);
     }
 
-    private function bytesToInt(&$pos, int $len) {
+    private function bytesToInt(&$pos, int $len): int {
       $str = $this->stream_get_contents($len, $pos);
       if (strlen($str) < $len) {
         throw new PharException(

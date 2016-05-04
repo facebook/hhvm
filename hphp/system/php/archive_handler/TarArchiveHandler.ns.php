@@ -8,7 +8,7 @@ namespace __SystemLib {
   final class TarArchiveHandler extends ArchiveHandler {
     private Map<string, string> $contents = Map { };
     private Map<string, string> $symlinks = Map { };
-    private ?resource $fp;
+    private $fp;
 
     public function __construct(
       string $path,

@@ -137,7 +137,7 @@ struct ArrayInit {
    * yourself.
    */
   ArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
-    VarNR k(name.toKey(true /* convert */));
+    VarNR k(name.toKey(m_data));
     if (UNLIKELY(k.isNull())) return *this;
     performOp([&]{ return m_data->set(k, v, false); });
     return *this;
@@ -177,7 +177,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else {
-      VarNR k(name.toKey(true /* convert */));
+      VarNR k(name.toKey(m_data));
       if (!k.isNull()) {
         performOp([&]{ return m_data->add(k, v, false); });
       }
@@ -190,7 +190,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else {
-      VarNR k(Variant(name).toKey(true /* convert */));
+      VarNR k(Variant(name).toKey(m_data));
       if (!k.isNull()) {
         performOp([&]{ return m_data->add(k, v, false); });
       }
@@ -224,7 +224,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
-      Variant key(name.toKey(true /* convert */));
+      Variant key(name.toKey(m_data));
       if (!key.isNull()) {
         performOp([&]{ return m_data->setRef(key, v, false); });
       }
@@ -239,7 +239,7 @@ struct ArrayInit {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
-      VarNR key(Variant(name).toKey(true /* convert */));
+      VarNR key(Variant(name).toKey(m_data));
       if (!key.isNull()) {
         performOp([&]{ return m_data->setRef(key, v, false); });
       }

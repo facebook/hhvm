@@ -1,18 +1,18 @@
-Caught Invalid array key: expected a key of type int or string, null given
-Caught Invalid array key: expected a key of type int or string, array given
-Caught Invalid array key: expected a key of type int or string, stdClass given
-Caught Invalid array key: expected a key of type int or string, double given
-Caught Invalid array key: expected a key of type int or string, array given
-Caught Invalid array key: expected a key of type int or string, bool given
+Caught Invalid dict key: expected a key of type int or string, null given
+Caught Invalid dict key: expected a key of type int or string, array given
+Caught Invalid dict key: expected a key of type int or string, stdClass given
+Caught Invalid dict key: expected a key of type int or string, double given
+Caught Invalid dict key: expected a key of type int or string, array given
+Caught Invalid dict key: expected a key of type int or string, bool given
 string(7) "goodbye"
 string(5) "hello"
-Caught Invalid array key: expected a key of type int or string, null given
-Caught Invalid array key: expected a key of type int or string, array given
-Caught Invalid array key: expected a key of type int or string, stdClass given
-Caught Invalid array key: expected a key of type int or string, double given
+Caught Invalid dict key: expected a key of type int or string, null given
+Caught Invalid dict key: expected a key of type int or string, array given
+Caught Invalid dict key: expected a key of type int or string, stdClass given
+Caught Invalid dict key: expected a key of type int or string, double given
 string(7) "num-ref"
-Caught Invalid array key: expected a key of type int or string, array given
-Caught Invalid array key: expected a key of type int or string, bool given
+Caught Invalid dict key: expected a key of type int or string, array given
+Caught Invalid dict key: expected a key of type int or string, bool given
 dict(3) {
   ["1"]=>
   string(5) "hello"

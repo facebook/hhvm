@@ -613,7 +613,10 @@ void decRefArr(ArrayData* arr) {
   arr->decRefAndRelease();
 }
 
-[[noreturn]] void throwInvalidArrayKeyException(const TypedValue* key);
+[[noreturn]] void throwInvalidArrayKeyException(const TypedValue* key,
+                                                const ArrayData* ad);
+[[noreturn]] void throwInvalidArrayKeyException(const StringData* key,
+                                                const ArrayData* ad);
 [[noreturn]] void throwOOBArrayKeyException(TypedValue key);
 [[noreturn]] void throwOOBArrayKeyException(int64_t key);
 [[noreturn]] void throwOOBArrayKeyException(const StringData* key);

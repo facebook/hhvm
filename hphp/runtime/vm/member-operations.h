@@ -909,7 +909,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
     return SetElemArrayPre<setResult>(a, key.m_data.num, value, copy);
   }
   if (!a->useWeakKeys()) {
-    throwInvalidArrayKeyException(&key);
+    throwInvalidArrayKeyException(&key, a);
   }
   if (isNullType(key.m_type)) {
     return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);

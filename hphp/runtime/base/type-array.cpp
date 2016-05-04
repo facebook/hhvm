@@ -68,7 +68,10 @@ void ArrNR::compileTimeAssertions() {
 
 Array Array::Create(const Variant& name, const Variant& var) {
   return Array{
-    ArrayData::Create(name.isString() ? name.toKey(true) : name, var),
+    ArrayData::Create(
+      name.isString() ? name.toKey(staticEmptyArray()) : name,
+      var
+    ),
     NoIncRef{}
   };
 }
@@ -461,7 +464,7 @@ const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
     if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
     if (key.isNull()) {
       if (!useWeakKeys()) {
-        throwInvalidArrayKeyException(null_variant.asTypedValue());
+        throwInvalidArrayKeyException(null_variant.asTypedValue(), m_arr.get());
       }
       return m_arr->get(staticEmptyString(), error);
     }
@@ -483,7 +486,7 @@ const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
   if (!m_arr) return null_variant;
   auto bad_key = [&] {
     if (!useWeakKeys()) {
-      throwInvalidArrayKeyException(key.asTypedValue());
+      throwInvalidArrayKeyException(key.asTypedValue(), m_arr.get());
     }
   };
   switch (key.getRawType()) {

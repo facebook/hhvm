@@ -819,7 +819,7 @@ struct Variant : private TypedValue {
    * Convert to a valid key or throw an exception. If convertStrKeys is true
    * int-like string keys will be converted to int keys.
    */
-  VarNR toKey(bool convertStrKeys) const;
+  VarNR toKey(const ArrayData*) const;
 
   /* Creating a temporary Array, String, or Object with no ref-counting and
    * no type checking, use it only when we have checked the variant type and
@@ -1516,26 +1516,24 @@ inline bool isa_non_null(const Variant& v) {
 // Defined here to avoid introducing a dependency cycle between type-variant
 // and type-array
 ALWAYS_INLINE VarNR Array::convertKey(const Variant& k) const {
-  return k.toKey(useWeakKeys());
+  return k.toKey(m_arr ? m_arr.get() : staticEmptyArray());
 }
 
-inline VarNR Variant::toKey(bool convertKeys) const {
+inline VarNR Variant::toKey(const ArrayData* ad) const {
   if (isStringType(m_type)) {
     int64_t n;
-    if (m_data.pstr->isStrictlyInteger(n) && convertKeys) {
-      return VarNR(n);
-    }
+    if (ad->convertKey(m_data.pstr, n)) return VarNR(n);
     return VarNR(m_data.pstr);
   }
   if (LIKELY(m_type == KindOfInt64)) {
     return VarNR(m_data.num);
   }
   if (m_type == KindOfRef) {
-    return m_data.pref->var()->toKey(convertKeys);
+    return m_data.pref->var()->toKey(ad);
   }
 
-  if (!convertKeys) {
-    throwInvalidArrayKeyException(this);
+  if (!ad->useWeakKeys()) {
+    throwInvalidArrayKeyException(this, ad);
   }
 
   switch (m_type) {

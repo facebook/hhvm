@@ -911,5 +911,111 @@ const char* ArrayData::kindToString(ArrayKind kind) {
   return names[kind];
 }
 
+namespace {
+
+////////////////////////////////////////////////////////////////////////////////
+
+const char* describeKeyType(const TypedValue* tv) {
+  switch (tv->m_type) {
+  case KindOfUninit:
+  case KindOfNull:             return "null";
+  case KindOfBoolean:          return "bool";
+  case KindOfInt64:            return "int";
+  case KindOfDouble:           return "double";
+  case KindOfPersistentString:
+  case KindOfString:           return "string";
+  case KindOfPersistentArray:
+  case KindOfArray: {
+    if (tv->m_data.parr->isDict()) return "dict";
+    return "array";
+  }
+  case KindOfResource:
+    return tv->m_data.pres->data()->o_getClassName().c_str();
+
+  case KindOfObject:
+    return tv->m_data.pobj->getClassName().c_str();
+
+  case KindOfRef:
+    return describeKeyType(tv->m_data.pref->var()->asTypedValue());
+
+  case KindOfClass:
+    break;
+  }
+  not_reached();
+}
+
+std::string describeKeyValue(TypedValue tv) {
+  switch (tv.m_type) {
+  case KindOfPersistentString:
+  case KindOfString:
+    return folly::sformat("\"{}\"", tv.m_data.pstr->data());
+  case KindOfInt64:
+    return folly::to<std::string>(tv.m_data.num);
+  case KindOfRef:
+    return describeKeyValue(*tv.m_data.pref->var()->asTypedValue());
+  case KindOfUninit:
+  case KindOfNull:
+  case KindOfBoolean:
+  case KindOfDouble:
+  case KindOfPersistentArray:
+  case KindOfArray:
+  case KindOfResource:
+  case KindOfObject:
+  case KindOfClass:
+    return "<invalid key type>";
+  }
+  not_reached();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+
+void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
+  const char* msg = [&]{
+    if (ad->isDict()) {
+      return "Invalid dict key: expected a key of type int or string, {} given";
+    }
+    return "Invalid array key: expected a key of type int or string, {} given";
+  }();
+  SystemLib::throwInvalidArgumentExceptionObject(
+    folly::sformat(msg, describeKeyType(key))
+  );
+}
+
+void throwInvalidArrayKeyException(const StringData* key, const ArrayData* ad) {
+  auto const tv = key->isRefCounted() ?
+    make_tv<KindOfString>(const_cast<StringData*>(key)) :
+    make_tv<KindOfPersistentString>(key);
+  throwInvalidArrayKeyException(&tv, ad);
+}
+
+void throwOOBArrayKeyException(TypedValue key) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat(
+      "Out of bounds array access: invalid index {}",
+      describeKeyValue(key)
+    )
+  );
+}
+
+void throwOOBArrayKeyException(int64_t key) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat(
+      "Out of bounds array access: invalid index {}",
+      folly::to<std::string>(key)
+    )
+  );
+}
+
+void throwOOBArrayKeyException(const StringData* key) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat(
+      "Out of bounds array access: invalid index \"{}\"",
+      key->data()
+    )
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

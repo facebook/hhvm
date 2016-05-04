@@ -30,6 +30,7 @@ type mode =
   | Dump_deps
   | Identify_symbol of int * int
   | Find_local of int * int
+  | Outline
 
 type options = {
   filename : string;
@@ -260,6 +261,9 @@ let parse_options () =
         Arg.Int (fun column -> set_mode (Find_local (!line, column)) ());
       ]),
       "Find all usages of local at given line and column";
+    "--outline",
+      Arg.Unit (set_mode Outline),
+      "Print file outline";
   ] in
   let options = Arg.align options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -472,6 +476,12 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     let result = ServerFindLocals.go file line column in
     let print pos = Printf.printf "%s\n" (Pos.string_no_file pos) in
     List.iter result print
+  | Outline ->
+    let file = cat (Relative_path.to_absolute filename) in
+    let results = FileOutline.outline file in
+    List.iter results begin fun (pos, name, type_) ->
+      Printf.printf "%s %s (%s)\n" (Pos.string pos) name type_
+    end
   | Suggest
   | Errors ->
       let errors =

@@ -197,7 +197,8 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
       out = folly::to<T>(b.c_str());
     }
     break;
-  case 'u':
+  case 'w':
+    // server uptime
     out = folly::to<T>(TimeStamp::Current() - HttpServer::StartTime);
     break;
   case 'v':

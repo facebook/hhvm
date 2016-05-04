@@ -1016,7 +1016,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
 
   {
     /* for each modification */
-    for (ssize_t i = 0; i < num_mods; ++i) {
+    for (int64_t i = 0; i < num_mods; ++i) {
       /* allocate the modification struct */
       ldap_mods[i] = req::make_raw<LDAPMod>();
 
@@ -1059,7 +1059,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
                                         sizeof(struct berval *));
 
         /* for each value */
-        for (ssize_t j = 0; j < num_modvals; ++j) {
+        for (int64_t j = 0; j < num_modvals; ++j) {
           /* fetch it */
           const String& modval = vals[j].asCStrRef();
 

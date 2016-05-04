@@ -1354,6 +1354,19 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
 
 #endif
 
+const TypedValue* MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t ki) {
+  auto const tv = MixedArray::NvGetInt(ad, ki);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki);
+  return tv;
+}
+
+const TypedValue* MixedArray::NvTryGetStrDict(const ArrayData* ad,
+                                              const StringData* k) {
+  auto const tv = MixedArray::NvGetStr(ad, k);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(k);
+  return tv;
+}
+
 void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   auto a = asMixed(ad);
   assert(pos != a->m_used);

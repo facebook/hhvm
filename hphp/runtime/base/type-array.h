@@ -379,6 +379,16 @@ public:
   Variant& lvalAt(const String& key, Flags = Flags::None);
   Variant& lvalAt(const Variant& key, Flags = Flags::None);
 
+  Variant& lvalAtRef(int key, Flags flags = Flags::None) {
+    return lvalAtRefImpl(key, flags);
+  }
+  Variant& lvalAtRef(int64_t key, Flags flags = Flags::None) {
+    return lvalAtRefImpl(key, flags);
+  }
+  Variant& lvalAtRef(double key, Flags = Flags::None) = delete;
+  Variant& lvalAtRef(const String& key, Flags = Flags::None);
+  Variant& lvalAtRef(const Variant& key, Flags = Flags::None);
+
   /*
    * Set an element to a value.
    */
@@ -477,10 +487,20 @@ public:
   }
 
   template<typename T>
-  Variant& lvalAtImpl(const T& key, Flags flags = Flags::None) {
+  Variant& lvalAtImpl(const T& key, Flags = Flags::None) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
     Variant* ret = nullptr;
     ArrayData* escalated = m_arr->lval(key, ret, m_arr->cowCheck());
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+    assert(ret);
+    return *ret;
+  }
+
+  template<typename T>
+  Variant& lvalAtRefImpl(const T& key, Flags = Flags::None) {
+    if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
+    Variant* ret = nullptr;
+    ArrayData* escalated = m_arr->lvalRef(key, ret, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
     assert(ret);
     return *ret;

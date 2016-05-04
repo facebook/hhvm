@@ -120,12 +120,32 @@ const TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return innerArr(ad)->nvGet(k);
 }
 
+const TypedValue*
+ProxyArray::NvTryGetStr(const ArrayData* ad, const StringData* k) {
+  return innerArr(ad)->nvTryGet(k);
+}
+
+const TypedValue* ProxyArray::NvTryGetInt(const ArrayData* ad, int64_t k) {
+  return innerArr(ad)->nvTryGet(k);
+}
+
 ArrayData*
 ProxyArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
   if (copy) {
     return innerArr(ad)->lval(k, ret, true);
   } else {
     auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->cowCheck());
+    reseatable(ad, r);
+    return ad;
+  }
+}
+
+ArrayData*
+ProxyArray::LvalIntRef(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lvalRef(k, ret, true);
+  } else {
+    auto r = innerArr(ad)->lvalRef(k, ret, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
   }
@@ -143,11 +163,33 @@ ProxyArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
 }
 
 ArrayData*
+ProxyArray::LvalStrRef(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lvalRef(k, ret, true);
+  } else {
+    auto r = innerArr(ad)->lvalRef(k, ret, innerArr(ad)->cowCheck());
+    reseatable(ad, r);
+    return ad;
+  }
+}
+
+ArrayData*
 ProxyArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalNew(ret, true);
   } else {
     auto r = innerArr(ad)->lvalNew(ret, innerArr(ad)->cowCheck());
+    reseatable(ad, r);
+    return ad;
+  }
+}
+
+ArrayData*
+ProxyArray::LvalNewRef(ArrayData* ad, Variant*& ret, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lvalNewRef(ret, true);
+  } else {
+    auto r = innerArr(ad)->lvalNewRef(ret, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
   }

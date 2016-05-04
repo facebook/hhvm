@@ -252,7 +252,9 @@ public:
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static constexpr auto NvTryGetStr = &NvGetStr;
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
@@ -263,9 +265,12 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                             bool copy);
+  static constexpr auto LvalIntRef = &LvalInt;
   static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
                             bool copy);
+  static constexpr auto LvalStrRef = &LvalStr;
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static constexpr auto LvalNewRef = &LvalNew;
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
@@ -309,6 +314,60 @@ public:
   static bool Uksort(ArrayData*, const Variant& cmp_function);
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
+
+  static const TypedValue* NvTryGetIntDict(const ArrayData*, int64_t ki);
+  static constexpr auto NvGetIntDict = &NvGetInt;
+  static const TypedValue* NvTryGetStrDict(const ArrayData*, const StringData*);
+  static constexpr auto NvGetStrDict = &NvGetStr;
+  static constexpr auto ReleaseDict = &Release;
+  static constexpr auto NvGetKeyDict = &NvGetKey;
+  static constexpr auto SetIntDict = &SetInt;
+  static constexpr auto SetStrDict = &SetStr;
+  static constexpr auto AddIntDict = &AddInt;
+  static constexpr auto AddStrDict = &AddStr;
+  static constexpr auto VsizeDict = &Vsize;
+  static constexpr auto GetValueRefDict = &GetValueRef;
+  static constexpr auto IsVectorDataDict = &IsVectorData;
+  static constexpr auto ExistsIntDict = &ExistsInt;
+  static constexpr auto ExistsStrDict = &ExistsStr;
+  static constexpr auto LvalIntDict = &LvalInt;
+  static constexpr auto LvalIntRefDict = LvalIntRef;
+  static constexpr auto LvalStrDict = &LvalStr;
+  static constexpr auto LvalStrRefDict = LvalStrRef;
+  static constexpr auto LvalNewDict = &LvalNew;
+  static constexpr auto LvalNewRefDict = LvalNewRef;
+  static constexpr auto SetRefIntDict = &SetRefInt;
+  static constexpr auto SetRefStrDict = &SetRefStr;
+  static constexpr auto RemoveIntDict = &RemoveInt;
+  static constexpr auto RemoveStrDict = &RemoveStr;
+  static constexpr auto IterBeginDict = &IterBegin;
+  static constexpr auto IterLastDict = &IterLast;
+  static constexpr auto IterEndDict = &IterEnd;
+  static constexpr auto IterAdvanceDict = &IterAdvance;
+  static constexpr auto IterRewindDict = &IterRewind;
+  static constexpr auto ValidMArrayIterDict = ValidMArrayIter;
+  static constexpr auto AdvanceMArrayIterDict = &AdvanceMArrayIter;
+  static constexpr auto EscalateForSortDict = &EscalateForSort;
+  static constexpr auto KsortDict = &Ksort;
+  static constexpr auto SortDict = &Sort;
+  static constexpr auto AsortDict = &Asort;
+  static constexpr auto UksortDict = &Uksort;
+  static constexpr auto UsortDict = &Usort;
+  static constexpr auto UasortDict = &Uasort;
+  static constexpr auto CopyDict = &Copy;
+  static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
+  static constexpr auto CopyStaticDict = &CopyStatic;
+  static constexpr auto AppendDict = &Append;
+  static constexpr auto AppendRefDict = &AppendRef;
+  static constexpr auto AppendWithRefDict = &AppendWithRef;
+  static constexpr auto PlusEqDict = &PlusEq;
+  static constexpr auto MergeDict = &Merge;
+  static constexpr auto PopDict = &Pop;
+  static constexpr auto DequeueDict = &Dequeue;
+  static constexpr auto PrependDict = &Prepend;
+  static constexpr auto RenumberDict = &Renumber;
+  static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
+  static constexpr auto EscalateDict = &Escalate;
 
 private:
   MixedArray* copyMixed() const;

@@ -159,23 +159,26 @@ void objOffsetUnset(ObjectData* base, TypedValue offset);
 
 [[noreturn]] void unknownBaseType(const TypedValue*);
 
+template <bool warn>
 inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
-  auto const result = base->nvGet(key);
+  auto const result = warn ? base->nvTryGet(key) : base->nvGet(key);
   return result ? result : null_variant.asTypedValue();
 }
 
+template <bool warn>
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
   auto const result = !base->convertKey(key, n)
-    ? base->nvGet(key)
-    : base->nvGet(n);
+    ? (warn ? base->nvTryGet(key) : base->nvGet(key))
+    : (warn ? base->nvTryGet(n) : base->nvGet(n));
   return result ? result : null_variant.asTypedValue();
 }
 
+template <bool warn>
 inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
   auto dt = key.m_type;
-  if (dt == KindOfInt64)  return ElemArrayPre(base, key.m_data.num);
-  if (isStringType(dt)) return ElemArrayPre(base, key.m_data.pstr);
+  if (dt == KindOfInt64)  return ElemArrayPre<warn>(base, key.m_data.num);
+  if (isStringType(dt)) return ElemArrayPre<warn>(base, key.m_data.pstr);
   return ArrNR(base).asArray().rvalAtRef(cellAsCVarRef(key)).asTypedValue();
 }
 
@@ -184,15 +187,13 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
  */
 template <MOpFlags flags, KeyType keyType>
 inline const TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
-  auto result = ElemArrayPre(base, key);
+  auto constexpr warn = flags & MOpFlags::Warn;
+  auto result = ElemArrayPre<warn>(base, key);
 
   // TODO(#3888164): this KindOfUninit check should not be necessary
   if (UNLIKELY(result->m_type == KindOfUninit)) {
     result = init_null_variant.asTypedValue();
-    if (flags & MOpFlags::Warn) {
-      if (!base->useWeakKeys()) {
-        throwOOBArrayKeyException(key);
-      }
+    if (warn) {
       auto scratch = initScratchKey(key);
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(&scratch).toString().data());
@@ -343,19 +344,33 @@ inline const TypedValue* Elem(TypedValue& tvRef,
   return ElemSlow<flags, keyType>(tvRef, base, key);
 }
 
-template<KeyType kt>
+template<bool reffy, KeyType kt>
 inline TypedValue* ElemDArrayPre(Array& base, key_type<kt> key) {
-  return const_cast<TypedValue*>(
-    base.lvalAt(keyAsValue(key)).asTypedValue());
+  return reffy ?
+    const_cast<TypedValue*>(base.lvalAtRef(keyAsValue(key)).asTypedValue()) :
+    const_cast<TypedValue*>(base.lvalAt(keyAsValue(key)).asTypedValue());
 }
 
 template<>
-inline TypedValue* ElemDArrayPre<KeyType::Any>(Array& base, TypedValue key) {
+inline TypedValue*
+ElemDArrayPre<true, KeyType::Any>(Array& base, TypedValue key) {
   if (key.m_type == KindOfInt64) {
-    return ElemDArrayPre<KeyType::Int>(base, key.m_data.num);
+    return ElemDArrayPre<true, KeyType::Int>(base, key.m_data.num);
   }
+  return const_cast<TypedValue*>(
+    base.lvalAtRef(tvAsCVarRef(&key)).asTypedValue()
+  );
+}
 
-  return const_cast<TypedValue*>(base.lvalAt(tvAsCVarRef(&key)).asTypedValue());
+template<>
+inline TypedValue*
+ElemDArrayPre<false, KeyType::Any>(Array& base, TypedValue key) {
+  if (key.m_type == KindOfInt64) {
+    return ElemDArrayPre<false, KeyType::Int>(base, key.m_data.num);
+  }
+  return const_cast<TypedValue*>(
+    base.lvalAt(tvAsCVarRef(&key)).asTypedValue()
+  );
 }
 
 /**
@@ -365,18 +380,14 @@ template <MOpFlags flags, KeyType keyType>
 inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
   auto constexpr warn = flags & MOpFlags::Warn;
+  auto constexpr reffy = flags == MOpFlags::DefineReffy;
   auto const defined = !warn || baseArr.exists(keyAsValue(key));
 
-  auto result = ElemDArrayPre<keyType>(baseArr, key);
-  if (warn) {
-    if (!defined) {
-      if (!baseArr.useWeakKeys()) {
-        throwOOBArrayKeyException(key);
-      }
-      auto scratchKey = initScratchKey(key);
-      raise_notice(Strings::UNDEFINED_INDEX,
-                   tvAsCVarRef(&scratchKey).toString().data());
-    }
+  auto* result = ElemDArrayPre<reffy, keyType>(baseArr, key);
+  if (!defined) {
+    auto scratchKey = initScratchKey(key);
+    raise_notice(Strings::UNDEFINED_INDEX,
+                 tvAsCVarRef(&scratchKey).toString().data());
   }
 
   return result;
@@ -618,12 +629,9 @@ inline TypedValue* NewElemString(TypedValue& tvRef, TypedValue* base) {
  */
 template <bool reffy>
 inline TypedValue* NewElemArray(TypedValue* base) {
-  if (reffy) {
-    return const_cast<TypedValue*>(tvAsVariant(base).asArrRef().lvalAtRef()
-                                   .asTypedValue());
-  }
-  return const_cast<TypedValue*>(tvAsVariant(base).asArrRef().lvalAt()
-                                 .asTypedValue());
+  return reffy ?
+    tvAsVariant(base).asArrRef().lvalAtRef().asTypedValue() :
+    tvAsVariant(base).asArrRef().lvalAt().asTypedValue();
 }
 
 /**

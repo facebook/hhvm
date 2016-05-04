@@ -541,9 +541,8 @@ Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {
 Variant &Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   Variant *ret = nullptr;
-  auto arr = m_arr;
-  ArrayData *escalated = arr->lvalNew(ret, arr->cowCheck());
-  if (escalated != arr) m_arr = Ptr::attach(escalated);
+  ArrayData *escalated = m_arr->lvalNew(ret, m_arr->cowCheck());
+  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   assert(ret);
   return *ret;
 }
@@ -551,9 +550,8 @@ Variant &Array::lvalAt() {
 Variant &Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   Variant *ret = nullptr;
-  auto arr = m_arr;
-  ArrayData *escalated = arr->lvalNewRef(ret, arr->cowCheck());
-  if (escalated != arr) m_arr = Ptr::attach(escalated);
+  ArrayData *escalated = m_arr->lvalNewRef(ret, m_arr->cowCheck());
+  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   assert(ret);
   return *ret;
 }
@@ -568,6 +566,20 @@ Variant &Array::lvalAt(const Variant& key, AccessFlags flags) {
   VarNR k(convertKey(key));
   if (!k.isNull()) {
     return lvalAtImpl(k, flags);
+  }
+  return lvalBlackHole();
+}
+
+Variant &Array::lvalAtRef(const String& key, AccessFlags flags) {
+  if (any(flags & AccessFlags::Key)) return lvalAtRefImpl(key, flags);
+  return lvalAtRefImpl(convertKey(key), flags);
+}
+
+Variant &Array::lvalAtRef(const Variant& key, AccessFlags flags) {
+  if (any(flags & AccessFlags::Key)) return lvalAtRefImpl(key, flags);
+  VarNR k(convertKey(key));
+  if (!k.isNull()) {
+    return lvalAtRefImpl(k, flags);
   }
   return lvalBlackHole();
 }

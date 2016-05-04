@@ -611,16 +611,6 @@ ArrayData* PackedArray::LvalNew(ArrayData* adIn, Variant*& ret, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::LvalNewRef(ArrayData* adIn, Variant*& ret, bool copy) {
-  assert(checkInvariants(adIn));
-  auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
-                       : ResizeIfNeeded(adIn);
-  auto& tv = packedData(ad)[ad->m_size++];
-  tv.m_type = KindOfNull;
-  ret = &tvAsVariant(&tv);
-  return ad;
-}
-
 ArrayData*
 PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   assert(checkInvariants(adIn));

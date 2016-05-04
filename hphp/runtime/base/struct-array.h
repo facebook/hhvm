@@ -53,7 +53,9 @@ struct StructArray final : public ArrayData,
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
+  static constexpr auto NvTryGetStr = &NvGetStr;
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
@@ -63,9 +65,12 @@ struct StructArray final : public ArrayData,
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
   static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
+  static constexpr auto LvalIntRef = &LvalInt;
   static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
+  static constexpr auto LvalStrRef = &LvalStr;
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static constexpr auto LvalNewRef = &LvalNew;
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);

@@ -440,12 +440,15 @@ ELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
+template<bool warn>
 inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ? a->nvGet(i) :
-         a->nvGet(key);
+  return UNLIKELY(a->convertKey(key, i)) ?
+    (warn ? a->nvTryGet(i) : a->nvGet(i)) :
+    (warn ? a->nvTryGet(key) : a->nvGet(key));
 }
 
+template<bool warn>
 inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
   not_reached();
 }
@@ -472,13 +475,11 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
 
 template<KeyType keyType, bool checkForInt, MOpFlags flags>
 inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
-  auto const ret = checkForInt ? checkedGet(ad, key) : ad->nvGet(key);
-  if (!ret) {
-    if ((flags & MOpFlags::Warn) && !ad->useWeakKeys()) {
-      throwOOBArrayKeyException(key);
-    }
-    return elemArrayNotFound<flags>(key);
-  }
+  auto constexpr warn = flags & MOpFlags::Warn;
+  auto const ret = checkForInt ?
+    checkedGet<warn>(ad, key) :
+    (warn ? ad->nvTryGet(key) : ad->nvGet(key));
+  if (!ret) return elemArrayNotFound<flags>(key);
   return ret;
 }
 
@@ -534,11 +535,8 @@ TypedValue arrayGetNotFound(const StringData* k);
 
 template<KeyType keyType, bool checkForInt>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
-  auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
+  auto ret = checkForInt ? checkedGet<true>(a, key) : a->nvTryGet(key);
   if (ret) return *ret;
-  if (!a->useWeakKeys()) {
-    throwOOBArrayKeyException(key);
-  }
   return arrayGetNotFound(key);
 }
 
@@ -673,7 +671,7 @@ SETELEM_HELPER_TABLE(X)
 
 template<KeyType keyType, bool checkForInt>
 uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
-  auto const value = checkForInt ? checkedGet(a, key) : a->nvGet(key);
+  auto const value = checkForInt ? checkedGet<false>(a, key) : a->nvGet(key);
   return !value ? 0 :
          !tvAsCVarRef(value).isNull();
 }

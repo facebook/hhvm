@@ -50,9 +50,12 @@ struct APCLocalArray final : private ArrayData,
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
   static ArrayData* LvalInt(ArrayData*, int64_t k, Variant *&ret,
                             bool copy);
+  static constexpr auto LvalIntRef = &LvalInt;
   static ArrayData* LvalStr(ArrayData*, StringData* k, Variant *&ret,
                             bool copy);
+  static constexpr auto LvalStrRef = &LvalStr;
   static ArrayData* LvalNew(ArrayData*, Variant *&ret, bool copy);
+  static constexpr auto LvalNewRef = &LvalNew;
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
@@ -71,7 +74,9 @@ struct APCLocalArray final : private ArrayData,
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static constexpr auto NvTryGetStr = &NvGetStr;
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);
   static ssize_t IterBegin(const ArrayData*);

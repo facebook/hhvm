@@ -44,10 +44,7 @@ inline StringData* getStringKey(const Cell* cell) {
 }
 
 inline bool ArrayData::convertKey(const StringData* key, int64_t& i) const {
-  if (key->isStrictlyInteger(i)) {
-    return useWeakKeys();
-  }
-  return false;
+  return key->isStrictlyInteger(i) && useWeakKeys();
 }
 
 inline bool ArrayData::exists(const String& k) const {
@@ -87,6 +84,20 @@ inline ArrayData* ArrayData::lval(const Variant& k, Variant *&ret, bool copy) {
   auto const cell = k.asCell();
   return isIntKey(cell) ? lval(getIntKey(cell), ret, copy)
                         : lval(getStringKey(cell), ret, copy);
+}
+
+inline ArrayData*
+ArrayData::lvalRef(const String& k, Variant *&ret, bool copy) {
+  assert(IsValidKey(k));
+  return lvalRef(k.get(), ret, copy);
+}
+
+inline ArrayData*
+ArrayData::lvalRef(const Variant& k, Variant *&ret, bool copy) {
+  assert(IsValidKey(k));
+  auto const cell = k.asCell();
+  return isIntKey(cell) ? lvalRef(getIntKey(cell), ret, copy)
+                        : lvalRef(getStringKey(cell), ret, copy);
 }
 
 inline ArrayData* ArrayData::set(const String& k, const Variant& v,
@@ -172,8 +183,16 @@ inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {
   return g_array_funcs.nvGetInt[kind()](this, ikey);
 }
 
+inline const TypedValue* ArrayData::nvTryGet(int64_t ikey) const {
+  return g_array_funcs.nvTryGetInt[kind()](this, ikey);
+}
+
 inline const TypedValue* ArrayData::nvGet(const StringData* skey) const {
   return g_array_funcs.nvGetStr[kind()](this, skey);
+}
+
+inline const TypedValue* ArrayData::nvTryGet(const StringData* skey) const {
+  return g_array_funcs.nvTryGetStr[kind()](this, skey);
 }
 
 inline void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) const {
@@ -237,8 +256,16 @@ inline ArrayData* ArrayData::lval(int64_t k, Variant*& ret, bool copy) {
   return g_array_funcs.lvalInt[kind()](this, k, ret, copy);
 }
 
+inline ArrayData* ArrayData::lvalRef(int64_t k, Variant*& ret, bool copy) {
+  return g_array_funcs.lvalIntRef[kind()](this, k, ret, copy);
+}
+
 inline ArrayData* ArrayData::lval(StringData* k, Variant*& ret, bool copy) {
   return g_array_funcs.lvalStr[kind()](this, k, ret, copy);
+}
+
+inline ArrayData* ArrayData::lvalRef(StringData* k, Variant*& ret, bool copy) {
+  return g_array_funcs.lvalStrRef[kind()](this, k, ret, copy);
 }
 
 inline ArrayData* ArrayData::lvalNew(Variant*& ret, bool copy) {

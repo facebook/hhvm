@@ -124,7 +124,7 @@ static ArrayData* ToDictNoop(ArrayData* ad) {
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
     ProxyArray::entry,                          \
-    MixedArray::entry /* Dict */                \
+    MixedArray::entry##Dict, /* Dict */         \
   },
 
 /*
@@ -170,10 +170,18 @@ const ArrayFunctions g_array_funcs = {
   /*
    * const TypedValue* NvGetInt(const ArrayData*, int64_t key)
    *
-   *   Lookup a value in an array using an integer key.  Returns
-   *   nullptr if the key is not in the array.
+   *   Lookup a value in an array using an integer key.  Returns nullptr if the
+   *   key is not in the array. Must not throw if key isn't present.
    */
   DISPATCH(NvGetInt)
+
+  /*
+   * const TypedValue* NvTryGetInt(const ArrayData*, int64_t key)
+   *
+   *   Lookup a value in an array using an integer key. Either throws, or
+   *   returns nullptr if the key is not in the array.
+   */
+  DISPATCH(NvTryGetInt)
 
   /*
    * const TypedValue* NvGetStr(const ArrayData*, const StringData*)
@@ -183,6 +191,14 @@ const ArrayFunctions g_array_funcs = {
    *   is not in the array.
    */
   DISPATCH(NvGetStr)
+
+  /*
+   * const TypedValue* NvTryGetStr(const ArrayData*, const StringData*)
+   *
+   *   Lookup a value in an array using a string key. Either throws, or
+   *   returns nullptr if the key is not in the array.
+   */
+  DISPATCH(NvTryGetStr)
 
   /*
    * void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos)
@@ -260,47 +276,40 @@ const ArrayFunctions g_array_funcs = {
 
   /*
    * ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& out, bool copy)
+   * ArrayData* LvalIntRef(ArrayData*, int64_t k, Variant*& out, bool copy)
    *
-   *   Looks up a value in the array by the supplied integer key,
-   *   creating it as a KindOfNull if it doesn't exist, and sets `out'
-   *   to point to it.  This function has copy/grow semantics.
+   *   Looks up a value in the array by the supplied integer key, creating it as
+   *   a KindOfNull if it doesn't exist, and sets `out' to point to it. Use the
+   *   ref variant if the retrieved value will be boxed. This function has
+   *   copy/grow semantics.
    */
   DISPATCH(LvalInt)
+  DISPATCH(LvalIntRef)
 
   /*
    * ArrayData* LvalStr(ArrayData*, StringData* key, Variant*& out, bool copy)
+   * ArrayData* LvalStrRef(ArrayData*, StringData* key, Variant*& out, bool copy)
    *
-   *   Looks up a value in the array by the supplied string key,
-   *   creating it as a KindOfNull if it doesn't exist, and sets `out'
-   *   to point to it.  The string `key' may not be an integer-like
-   *   string.  This function has copy/grow semantics.
+   *   Looks up a value in the array by the supplied string key, creating it as
+   *   a KindOfNull if it doesn't exist, and sets `out' to point to it.  The
+   *   string `key' may not be an integer-like string. Use the ref variant if
+   *   the retrieved value will be boxed. This function has copy/grow semantics.
    */
   DISPATCH(LvalStr)
+  DISPATCH(LvalStrRef)
 
   /*
    * ArrayData* LvalNew(ArrayData*, Variant*& out, bool copy)
+   * ArrayData* LvalNewRef(ArrayData*, Variant*& out, bool copy)
    *
-   *   This function inserts a new null value in the array at the next
-   *   available integer key, and then sets `out' to point to it.  In
-   *   the case that there is no next available integer key, this
-   *   function sets out to point to the lvalBlackHole.  This function
-   *   has copy/grow semantics.
+   *   This function inserts a new null value in the array at the next available
+   *   integer key, and then sets `out' to point to it.  In the case that there
+   *   is no next available integer key, this function sets out to point to the
+   *   lvalBlackHole. Use the ref variant if the retrieved value will be
+   *   boxed. This function has copy/grow semantics.
    */
   DISPATCH(LvalNew)
-
-  /*
-   * ArrayData* LvalNewRef(ArrayData*, Variant*& out, bool copy)
-   */
-  {
-    PackedArray::LvalNewRef,
-    StructArray::LvalNew,
-    MixedArray::LvalNew,
-    EmptyArray::LvalNew,
-    APCLocalArray::LvalNew,
-    GlobalsArray::LvalNew,
-    ProxyArray::LvalNew,
-    MixedArray::LvalNew,
-  },
+  DISPATCH(LvalNewRef)
 
   /*
    * ArrayData* SetRefInt(ArrayData*, int64_t key, Variant& v, bool copy)

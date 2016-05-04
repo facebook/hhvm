@@ -224,6 +224,8 @@ public:
    */
   const TypedValue* nvGet(int64_t k) const;
   const TypedValue* nvGet(const StringData* k) const;
+  const TypedValue* nvTryGet(int64_t k) const;
+  const TypedValue* nvTryGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
   // wrappers that call getValueRef()
@@ -236,6 +238,8 @@ public:
    */
   ArrayData *lval(int64_t k, Variant *&ret, bool copy);
   ArrayData *lval(StringData* k, Variant *&ret, bool copy);
+  ArrayData *lvalRef(int64_t k, Variant *&ret, bool copy);
+  ArrayData *lvalRef(StringData* k, Variant *&ret, bool copy);
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
@@ -293,6 +297,8 @@ public:
   const Variant& get(const Variant& k, bool error = false) const;
   ArrayData *lval(const String& k, Variant *&ret, bool copy);
   ArrayData *lval(const Variant& k, Variant *&ret, bool copy);
+  ArrayData *lvalRef(const String& k, Variant *&ret, bool copy);
+  ArrayData *lvalRef(const Variant& k, Variant *&ret, bool copy);
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
@@ -538,7 +544,9 @@ struct ArrayFunctions {
   static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
   void (*release[NK])(ArrayData*);
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  const TypedValue* (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
+  const TypedValue* (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
@@ -550,8 +558,12 @@ struct ArrayFunctions {
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
   ArrayData* (*lvalInt[NK])(ArrayData*, int64_t k, Variant*& ret,
                             bool copy);
+  ArrayData* (*lvalIntRef[NK])(ArrayData*, int64_t k, Variant*& ret,
+                               bool copy);
   ArrayData* (*lvalStr[NK])(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
+  ArrayData* (*lvalStrRef[NK])(ArrayData*, StringData* k, Variant*& ret,
+                               bool copy);
   ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
   ArrayData* (*lvalNewRef[NK])(ArrayData*, Variant *&ret, bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);

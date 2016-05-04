@@ -398,7 +398,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       cur().bcSPOff -= extra->numParams + kNumActRecCells;
 
       if (!cur().fpiStack.empty()) {
-        cur().fpiStack.pop_front();
+        cur().fpiStack.pop_back();
       }
       for (auto& st : m_stack) {
         for (auto& fpi : st.fpiStack) fpi.spansCall = true;
@@ -424,7 +424,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       cur().bcSPOff -= numCells;
 
       if (!cur().fpiStack.empty()) {
-        cur().fpiStack.pop_front();
+        cur().fpiStack.pop_back();
       }
       for (auto& st : m_stack) {
         for (auto& fpi : st.fpiStack) fpi.spansCall = true;
@@ -599,16 +599,16 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
     if (isFPush(extra.opcode)) {
-      cur().fpiStack.push_front(FPIInfo { cur().spValue,
-                                          cur().irSPOff,
-                                          TCtx,
-                                          nullptr,
-                                          extra.opcode,
-                                          nullptr,
-                                          true /* interp */,
-                                          false /* spansCall */});
+      cur().fpiStack.push_back(FPIInfo { cur().spValue,
+                                         cur().irSPOff,
+                                         TCtx,
+                                         nullptr,
+                                         extra.opcode,
+                                         nullptr,
+                                         true /* interp */,
+                                         false /* spansCall */});
     } else if (isFCallStar(extra.opcode) && !cur().fpiStack.empty()) {
-      cur().fpiStack.pop_front();
+      cur().fpiStack.pop_back();
     }
 
     assertx(!extra.smashesAllLocals || extra.nChangedLocals == 0);
@@ -1026,7 +1026,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   /*
    * Remove the callee from the FPI Stack.
    */
-  cur().fpiStack.pop_front();
+  cur().fpiStack.pop_back();
 
   /*
    * Push a new state for the inlined callee; saving the state we'll need to
@@ -1445,7 +1445,7 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
   m_fpushOverride.clear();
 
   cur().bcSPOff += kNumActRecCells;
-  cur().fpiStack.push_front(FPIInfo {
+  cur().fpiStack.push_back(FPIInfo {
     cur().spValue,
     retOffset,
     ctx ? ctx->type() : TCtx,

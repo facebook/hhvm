@@ -526,7 +526,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
 
   // Make sure the FPushOp wasn't interpreted, based on an FPushCuf, or spanned
   // another call
-  auto const info = fpiStack.front();
+  auto const info = fpiStack.back();
   if (isFPushCuf(info.fpushOpc) || info.interp || info.spansCall) {
     return nullptr;
   }
@@ -684,7 +684,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // HHIR may have figured the topFunc even though the RegionDesc
       // didn't know it.  When that happens, update topFunc.
       if (!topFunc && !irb.fs().fpiStack().empty()) {
-        auto& fpiInfo = irb.fs().fpiStack().front();
+        auto& fpiInfo = irb.fs().fpiStack().back();
         auto func = fpiInfo.func;
         if (func && func->isNameBindingImmutable(block->unit())) {
           topFunc = func;

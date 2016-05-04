@@ -190,7 +190,7 @@ struct FrameState {
    * we look in here to find a definition of the StkPtr,offset that can be used
    * after the inlined callee "returns".
    */
-  jit::deque<FPIInfo> fpiStack;
+  jit::vector<FPIInfo> fpiStack;
 
   /*
    * The values in the eval stack in memory, either above or below the current
@@ -318,7 +318,7 @@ struct FrameStateMgr final {
   bool        thisAvailable()     const { return cur().thisAvailable; }
   bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
   bool        stackModified()     const { return cur().stackModified; }
-  const jit::deque<FPIInfo>& fpiStack() const { return cur().fpiStack; }
+  const jit::vector<FPIInfo>& fpiStack() const { return cur().fpiStack; }
 
   /*
    * FrameState modifiers.

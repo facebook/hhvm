@@ -51,8 +51,8 @@ bool beginInlining(IRGS& env,
     params[numParams - i - 1] = popF(env);
   }
 
-  auto const prevSP    = fpiStack.front().returnSP;
-  auto const prevSPOff = fpiStack.front().returnSPOff;
+  auto const prevSP    = fpiStack.back().returnSP;
+  auto const prevSPOff = fpiStack.back().returnSPOff;
   auto const calleeSP  = sp(env);
 
   always_assert_flog(
@@ -60,7 +60,7 @@ bool beginInlining(IRGS& env,
     "FPI stack pointer and callee stack pointer didn't match in beginInlining"
   );
 
-  auto const& info = fpiStack.front();
+  auto const& info = fpiStack.back();
   always_assert(!isFPushCuf(info.fpushOpc) && !info.interp);
 
   // NB: the arguments were just popped from the VM stack above, so the VM
@@ -91,7 +91,7 @@ bool beginInlining(IRGS& env,
     gen(env, DbgAssertFunc, arFunc, cns(env, target));
   }
 
-  auto fpiFunc = fpiStack.front().func;
+  auto fpiFunc = fpiStack.back().func;
   always_assert_flog(fpiFunc == nullptr || fpiFunc == target,
                      "fpiFunc = {}  ;  target = {}",
                      fpiFunc ? fpiFunc->fullName()->data() : "null",

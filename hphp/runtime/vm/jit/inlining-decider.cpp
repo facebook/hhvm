@@ -635,7 +635,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
 
   auto const& fpi = irgs.irb->fs().fpiStack();
   assertx(!fpi.empty());
-  auto const ctx = fpi.front().ctxType;
+  auto const ctx = fpi.back().ctxType;
 
   std::vector<Type> argTypes;
   for (int i = numArgs - 1; i >= 0; --i) {

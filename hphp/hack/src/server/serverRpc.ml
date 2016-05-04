@@ -113,3 +113,31 @@ let to_string : type a. a t -> _ = function
   | KILL -> "KILL"
   | FIND_LVAR_REFS _ -> "FIND_LVAR_REFS"
   | FORMAT _ -> "FORMAT"
+
+let to_string_with_details : type a. a t -> _ = function
+  | AUTOCOMPLETE content -> content
+  | INFER_TYPE (fn, line, char) ->
+    let content = match fn with
+      | ServerUtils.FileContent content -> content
+      | ServerUtils.FileName f -> f
+    in
+    Printf.sprintf "%d\n%d\n%s" line char content
+  | IDENTIFY_FUNCTION (content, line, char) ->
+    Printf.sprintf "%d\n%d\n%s" line char content
+  | SEARCH (query, type_) -> Printf.sprintf "%s\n%s" query type_
+  | FIND_LVAR_REFS (content, line, char) ->
+    Printf.sprintf "%d\n%d\n%s" line char content
+  | OUTLINE content -> content
+  | FORMAT (content, from, to_) ->
+    Printf.sprintf "%d\n%d\n%s" from to_ content
+  | FIND_REFS action -> begin match action with
+    | FindRefsService.Class c -> Printf.sprintf "Class\n%s" c
+    | FindRefsService.Method (c, m) -> Printf.sprintf "Method\n%s\n%s" c m
+    | FindRefsService.Function f -> Printf.sprintf "Function\n%s" f
+    end
+  | COVERAGE_LEVELS fn ->
+    begin match fn with
+    | ServerUtils.FileContent content -> content
+    | ServerUtils.FileName f -> f
+    end
+  | _ -> ""

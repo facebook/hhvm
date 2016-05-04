@@ -1504,7 +1504,7 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
   if (key.m_type == KindOfInt64) {
     return UnsetElemArrayPre(a, key.m_data.num, copy);
   }
-  VarNR varKey = tvAsCVarRef(&key).toKey(a->useWeakKeys());
+  VarNR varKey = tvAsCVarRef(&key).toKey(a);
   if (varKey.isNull()) {
     return a;
   }

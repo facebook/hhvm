@@ -380,20 +380,6 @@ and class_decl tcopt c =
   let m = if DynamicYield.is_dynamic_yield (snd c.c_name)
     then DynamicYield.clean_dynamic_yield m
     else m in
-  let dy_check = match c.c_kind with
-    | Ast.Cenum -> false
-    | Ast.Cabstract
-    | Ast.Cnormal -> DynamicYield.contains_dynamic_yield extends
-    | Ast.Cinterface
-    | Ast.Ctrait ->
-      (* NOTE: Only the DynamicYield trait should provide
-       * IUseDynamicYield via implementation; all other traits should
-       * use 'require implements IUseDynamicYield' *)
-      (DynamicYield.implements_dynamic_yield_interface impl
-       || DynamicYield.contains_dynamic_yield_interface req_ancestors_extends
-       || DynamicYield.contains_dynamic_yield req_ancestors_extends)
-  in
-  let m = if dy_check then DynamicYield.decl m else m in
   let ext_strict = List.fold_left c.c_uses
     ~f:(trait_exists env) ~init:ext_strict in
   let unsafe_xhp = TypecheckerOptions.unsafe_xhp tcopt in

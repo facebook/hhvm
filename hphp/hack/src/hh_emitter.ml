@@ -88,7 +88,7 @@ let main_hack options =
 
   (* The emitter needs to track the names of identifiers in order to
    * preserve the names in the output bytecode. *)
-  Ident.track_names := true;
+  Local_id.track_names := true;
 
   (* Wrap everything with error ignoring; we have "strict mode hack"
    * as a precondition for the emitter but there will likely be naming

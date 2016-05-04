@@ -18,7 +18,6 @@ module IMap = Map.Make (struct
 end)
 
 let debug = ref false
-let foo = 0
 let counter = ref 1
 let trace = ref IMap.empty
 let origin = ref IMap.empty

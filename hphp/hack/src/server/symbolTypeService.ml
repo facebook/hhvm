@@ -10,7 +10,7 @@
 
 open Core
 
-module IdentMap = Map.Make(Ident)
+module IdentMap = Map.Make(Local_id)
 
 type result = {
   pos: string Pos.pos;

@@ -30,12 +30,13 @@ type fake_members = {
  *)
 type expression_id = Ident.t
 type local = locl ty list * locl ty * expression_id
-type local_env = fake_members * local IMap.t
+type local_env = fake_members * local Local_id.Map.t
 type tparam_info = {
   lower_bounds : locl ty list;
   upper_bounds : locl ty list;
 }
 type tpenv = tparam_info SMap.t
+
 type env = {
   pos     : Pos.t      ;
   tenv    : locl ty IMap.t ;
@@ -341,7 +342,7 @@ let empty_fake_members = {
   valid     = SSet.empty;
 }
 
-let empty_local = empty_fake_members, IMap.empty
+let empty_local = empty_fake_members, Local_id.Map.empty
 
 let empty tcopt file ~droot = {
   pos     = Pos.none;
@@ -645,7 +646,7 @@ module FakeMembers = struct
       | _, Lvar (_, x) -> x
       | _ -> assert false
     in
-    string_of_int obj_name^"->"^member_name
+    Local_id.to_string obj_name^"->"^member_name
 
   let make_static_id cid member_name =
     let class_name = class_id_to_str cid in
@@ -686,12 +687,12 @@ module FakeMembers = struct
   let make _ env obj_name member_name =
     let my_fake_local_id = make_id obj_name member_name in
     let env = add_member env my_fake_local_id in
-    env, Hashtbl.hash my_fake_local_id
+    env, Local_id.make_fake my_fake_local_id
 
  let make_static _ env class_name member_name =
    let my_fake_local_id = make_static_id class_name member_name in
    let env = add_member env my_fake_local_id in
-   env, Hashtbl.hash my_fake_local_id
+   env, Local_id.make_fake my_fake_local_id
 
 end
 
@@ -728,7 +729,7 @@ let set_local env x new_type =
   let fake_members, locals = env.lenv in
   let env, new_type = unbind env new_type in
   let all_types, expr_id =
-    match IMap.get x locals with
+    match Local_id.Map.get x locals with
     | None -> [], Ident.tmp()
     | Some (x, _, y) -> x, y
   in
@@ -738,28 +739,28 @@ let set_local env x new_type =
     else new_type :: all_types
   in
   let local = all_types, new_type, expr_id in
-  let locals = IMap.add x local locals in
+  let locals = Local_id.Map.add x local locals in
   let env = { env with lenv = fake_members, locals } in
   env
 
 let get_local env x =
-  let lcl = IMap.get x (snd env.lenv) in
+  let lcl = Local_id.Map.get x (snd env.lenv) in
   match lcl with
   | None -> env, (Reason.Rnone, Tany)
   | Some (_, x, _) -> env, x
 
 let set_local_expr_id env x new_eid =
   let fake_members, locals = env.lenv in
-  match IMap.get x locals with
+  match Local_id.Map.get x locals with
   | Some (all_types, type_, eid) when eid <> new_eid ->
       let local = all_types, type_, new_eid in
-      let locals = IMap.add x local locals in
+      let locals = Local_id.Map.add x local locals in
       let env = { env with lenv = fake_members, locals } in
       env
   | _ -> env
 
 let get_local_expr_id env x =
-  let lcl = IMap.get x (snd env.lenv) in
+  let lcl = Local_id.Map.get x (snd env.lenv) in
   Option.map lcl ~f:(fun (_, _, x) -> x)
 
 (*****************************************************************************)
@@ -794,7 +795,9 @@ let get_local_expr_id env x =
 
 let freeze_local_env env =
   let (members, locals) = env.lenv in
-  let locals = IMap.map (fun (_, type_, eid) -> [type_], type_, eid) locals in
+  let locals = Local_id.Map.map begin fun (_, type_, eid) ->
+    [type_], type_, eid
+  end locals in
   let lenv = members, locals in
   { env with lenv = lenv }
 

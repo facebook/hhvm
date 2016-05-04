@@ -10,7 +10,7 @@
 
 module SN = Naming_special_names
 
-type id = Pos.t * Ident.t
+type id = Pos.t * Local_id.t
 type sid = Pos.t * string
 type pstring = Pos.t * string
 
@@ -383,7 +383,7 @@ let class_id_to_str = function
   | CIself -> SN.Classes.cSelf
   | CIstatic -> SN.Classes.cStatic
   | CIexpr (_, This) -> SN.SpecialIdents.this
-  | CIexpr (_, Lvar (_, x)) -> "$"^string_of_int(x)
+  | CIexpr (_, Lvar (_, x)) -> "$"^Local_id.to_string x
   | CIexpr _ -> assert false
   | CI (_, x) -> x
 

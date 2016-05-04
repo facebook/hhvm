@@ -20,19 +20,21 @@ let handle_lvar target_ident ident_refs line char_pos ident id _ =
   if l = line && start <= char_pos && char_pos <= end_
   then target_ident := Some ident;
   let current_set =
-    match IMap.get ident !ident_refs with
+    match Local_id.Map.get ident !ident_refs with
     | Some refs -> refs
     | None -> PosSet.empty
   in
-  ident_refs := IMap.add ident (PosSet.add (fst id) current_set) !ident_refs
+  ident_refs :=
+    Local_id.Map.add ident (PosSet.add (fst id) current_set) !ident_refs
 
 
 let attach_hooks line char =
   let target_ident = ref None in
-  let ident_refs = ref IMap.empty in
+  let ident_refs = ref Local_id.Map.empty in
   let get_result () =
     match !target_ident with
-    | Some ident -> PosSet.elements (IMap.find_unsafe ident !ident_refs)
+    | Some ident ->
+      PosSet.elements (Local_id.Map.find_unsafe ident !ident_refs)
     | None -> []
   in
   Naming_hooks.attach_lvar_hook (handle_lvar target_ident ident_refs line char);

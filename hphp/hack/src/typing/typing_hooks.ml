@@ -40,7 +40,7 @@ let (cmethod_hooks: (Typing_defs.class_type -> Pos.t * string ->
 let (taccess_hooks: (Typing_defs.class_type -> Typing_defs.typeconst_type ->
                      Pos.t -> unit) list ref) = ref []
 
-let (lvar_hooks: (Pos.t * Ident.t -> Typing_env.env ->
+let (lvar_hooks: (Pos.t * Local_id.t -> Typing_env.env ->
                   unit) list ref) = ref []
 
 let (fun_call_hooks: ((string option * Typing_defs.locl Typing_defs.ty) list ->

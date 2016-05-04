@@ -65,7 +65,7 @@ module Dep = struct
       method! on_expr acc (_, e_ as e) =
         match e_ with
         | Lvar (_, x) ->
-            add local (Ident.to_string x) acc
+            add local (Local_id.to_string x) acc
         | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
             add local (Env.FakeMembers.make_id x y) acc
         | Class_get (x, (_, y)) ->
@@ -92,7 +92,7 @@ end = struct
 
   let local_to_string = function
     | Lvar (_, x) ->
-        Some (Ident.to_string x)
+        Some (Local_id.to_string x)
     | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
         Some (Env.FakeMembers.make_id x y)
     | Class_get (x, (_, y)) ->

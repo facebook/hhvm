@@ -31,7 +31,7 @@ module GEnv = NamingGlobal.GEnv
 (* We want to keep the positions of names that have been
  * replaced by identifiers.
  *)
-type positioned_ident = (Pos.t * Ident.t)
+type positioned_ident = (Pos.t * Local_id.t)
 
 (* <T as A>, A is a type constraint *)
 type type_constraint = (Ast.constraint_kind * Ast.hint) option
@@ -122,7 +122,7 @@ module Env : sig
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
   val scope_all : genv * lenv -> (genv * lenv -> 'a) -> all_locals * 'a
   val extend_all_locals : genv * lenv -> all_locals -> unit
-  val pipe_scope : genv * lenv -> (genv * lenv -> N.expr) -> Ident.t * N.expr
+  val pipe_scope : genv * lenv -> (genv * lenv -> N.expr) -> Local_id.t * N.expr
 
 end = struct
 
@@ -332,7 +332,7 @@ end = struct
       | None ->
           let ident = match SMap.get x !(lenv.pending_locals) with
             | Some (_, ident) -> ident
-            | None -> Ident.make x in
+            | None -> Local_id.make x in
           lenv.all_locals := SMap.add x p !(lenv.all_locals);
           lenv.locals := SMap.add x (p, ident) !(lenv.locals);
           ident
@@ -353,7 +353,7 @@ end = struct
   let new_pending_lvar (_, lenv) (p, x) =
     match SMap.get x !(lenv.locals), SMap.get x !(lenv.pending_locals) with
     | None, None ->
-        let y = p, Ident.make x in
+        let y = p, Local_id.make x in
         lenv.pending_locals := SMap.add x y !(lenv.pending_locals)
     | _ -> ()
 
@@ -365,14 +365,14 @@ end = struct
 
   let handle_undefined_variable (_genv, env) (p, x) =
     match env.unbound_mode with
-    | UBMErr -> Errors.undefined p x; p, Ident.make x
+    | UBMErr -> Errors.undefined p x; p, Local_id.make x
     | UBMFunc f -> f (p, x)
 
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     let p, ident =
       if SN.Superglobals.is_superglobal x && genv.in_mode = FileInfo.Mpartial
-      then p, Ident.make x
+      then p, Local_id.make x
       else
         let lcl = SMap.get x !(env.locals) in
         match lcl with
@@ -380,7 +380,7 @@ end = struct
         | None when not !Autocomplete.auto_complete ->
             check_variable_scoping env (p, x);
             handle_undefined_variable (genv, env) (p, x)
-        | None -> p, Ident.tmp()
+        | None -> p, Local_id.tmp()
     in
     Naming_hooks.dispatch_lvar_hook ident (p, x) !(env.locals);
     p, ident
@@ -556,13 +556,12 @@ end = struct
     let e2 = name_e2 env in
     let pipe_var_ident =
       match SMap.get SN.SpecialIdents.dollardollar !(lenv.locals) with
-      | None -> begin
+      | None ->
         Errors.dollardollar_unused (fst e2);
         (** The $$ lvar should be named when it is encountered inside e2,
          * but we've now discovered it wasn't used at all.
          * Create an ID here so we can keep going. *)
-        Ident.make SN.SpecialIdents.dollardollar
-      end
+        Local_id.make SN.SpecialIdents.dollardollar
       | Some (_, x) -> x
     in
     let restored_locals = SMap.remove SN.SpecialIdents.dollardollar
@@ -2304,7 +2303,7 @@ module Make (GetLocals : GetLocals) = struct
     let to_capture = ref [] in
     let handle_unbound (p, x) =
       to_capture := x :: !to_capture;
-      p, Ident.tmp()
+      p, Local_id.tmp()
     in
     let tcopt = TypecheckerOptions.permissive in
     let genv = Env.make_fun_decl_genv tcopt SMap.empty f in

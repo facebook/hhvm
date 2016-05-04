@@ -18,7 +18,7 @@ type fake_members = {
 }
 type expression_id = Ident.t
 type local = locl ty list * locl ty * expression_id
-type local_env = fake_members * local IMap.t
+type local_env = fake_members * local Local_id.Map.t
 type tpenv
 type env = {
   pos : Pos.t;
@@ -117,14 +117,15 @@ module FakeMembers :
     val is_invalid : env -> Nast.expr -> string -> bool
     val get_static : env -> Nast.class_id -> string -> int option
     val is_static_invalid : env -> Nast.class_id -> string -> bool
-    val make : Pos.t -> env -> Nast.expr -> string -> env * int
-    val make_static : Pos.t -> env -> Nast.class_id -> string -> env * int
+    val make : Pos.t -> env -> Nast.expr -> string -> env * Local_id.t
+    val make_static : Pos.t -> env -> Nast.class_id -> string ->
+      env * Local_id.t
   end
 val unbind : env -> locl ty -> env * locl ty
-val set_local : env -> Ident.t -> locl ty -> env
-val get_local : env -> Ident.t -> env * locl ty
-val set_local_expr_id : env -> Ident.t -> expression_id -> env
-val get_local_expr_id : env -> Ident.t -> expression_id option
+val set_local : env -> Local_id.t -> locl ty -> env
+val get_local : env -> Local_id.t -> env * locl ty
+val set_local_expr_id : env -> Local_id.t -> expression_id -> env
+val get_local_expr_id : env -> Local_id.t -> expression_id option
 val get_lower_bounds : env -> string -> locl ty list
 val get_upper_bounds : env -> string -> locl ty list
 val add_upper_bound : env -> string -> locl ty -> env

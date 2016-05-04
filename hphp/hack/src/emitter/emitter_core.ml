@@ -93,7 +93,7 @@ let fix_xhp_name s =
 
 (* *)
 let fmt_name s = fix_xhp_name (get_aliased_name (strip_ns s))
-let get_lid_name (_, id) = Ident.get_name id
+let get_lid_name (_, id) = Local_id.get_name id
 (* Whenever we need to emit a quoted string, we escape it.
  * Places that deal with String/String2 literals need to unescape the
  * literals before passing them to core emitting functions. This seems

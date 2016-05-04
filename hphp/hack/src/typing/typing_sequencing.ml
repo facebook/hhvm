@@ -48,8 +48,8 @@ type env = {
    * that requires us to be tracking variable accesses *)
   tracking : bool;
   (* We should maybe use a better data structure than lists. *)
-  used : (Pos.t * Ident.t) list;
-  assigned : (Pos.t * Ident.t) list;
+  used : (Pos.t * Local_id.t) list;
+  assigned : (Pos.t * Local_id.t) list;
 }
 
 let empty_env = {
@@ -88,9 +88,9 @@ let get_lvar = function
  * when doing our sequencing checks. *)
 let used_variables_visitor =
   object(this)
-  inherit [ISet.t] Nast_visitor.nast_visitor as parent
+  inherit [Local_id.Set.t] Nast_visitor.nast_visitor as parent
 
-  method! on_lvar acc (_, id) = ISet.add id acc
+  method! on_lvar acc (_, id) = Local_id.Set.add id acc
   (* We have to handle expressions just enough to avoid counting
    * assignments as uses of variables.
    * (We do still count operator-assignments) *)
@@ -134,7 +134,7 @@ let sequence_visitor ~require_used used_vars =
          * assignments are used as documentation. *)
         let conflicting_writes =
           if not require_used then conflicting_writes else
-          List.filter conflicting_writes (fun (_, x) -> ISet.mem x used_vars) in
+          List.filter conflicting_writes (fun (_, x) -> Local_id.Set.mem x used_vars) in
 
         let cleanup = List.map ~f:fst in
         if conflicting_reads <> [] then
@@ -258,11 +258,11 @@ let sequence_visitor ~require_used used_vars =
   end
 
 let sequence_check_block block =
-  let used_vars = used_variables_visitor#on_block ISet.empty block in
+  let used_vars = used_variables_visitor#on_block Local_id.Set.empty block in
   let visitor = sequence_visitor ~require_used:true used_vars in
   let _ = visitor#on_block empty_env block in
   ()
 let sequence_check_expr expr =
-  let visitor = sequence_visitor ~require_used:false ISet.empty in
+  let visitor = sequence_visitor ~require_used:false Local_id.Set.empty in
   let _ = visitor#on_expr empty_env expr in
   ()

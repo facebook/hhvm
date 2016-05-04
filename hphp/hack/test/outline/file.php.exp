@@ -1,5 +1,23 @@
-File "", line 10, characters 26-28: C::bar (static method)
-File "", line 8, characters 19-21: C::foo (method)
-File "", line 7, characters 7-7: C (class)
-File "", line 5, characters 10-12: bar (function)
-File "", line 3, characters 10-12: foo (function)
+foo
+  type: function
+  position: File "", line 3, characters 10-12:
+
+bar
+  type: function
+  position: File "", line 5, characters 10-12:
+
+C
+  type: class
+  position: File "", line 7, characters 7-7:
+
+  foo
+    type: method
+    position: File "", line 8, characters 19-21:
+    static: false
+
+  bar
+    type: method
+    position: File "", line 10, characters 26-28:
+    static: true
+
+

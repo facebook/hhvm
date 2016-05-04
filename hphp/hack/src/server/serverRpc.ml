@@ -20,7 +20,7 @@ type _ t =
   | AUTOCOMPLETE : string -> AutocompleteService.result t
   | IDENTIFY_FUNCTION : string * int * int ->
       (string IdentifySymbolService.find_symbol_result) option t
-  | OUTLINE : string -> (Pos.absolute * string * string) list t
+  | OUTLINE : string -> FileOutline.outline t
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t

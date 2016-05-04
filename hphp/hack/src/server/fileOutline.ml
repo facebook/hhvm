@@ -99,4 +99,39 @@ let outline content =
   let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->
     Parser_hack.program Relative_path.default content
   end in
-  to_legacy (outline_ast ast)
+  outline_ast ast
+
+let outline_legacy content =
+  to_legacy @@ outline content
+
+let print_function pos name =
+  Printf.printf "%s\n" name;
+  Printf.printf "  type: function\n";
+  Printf.printf "  position: %s\n" (Pos.string pos);
+  Printf.printf "\n"
+
+let print_method pos name m =
+  Printf.printf "  %s\n" name;
+  Printf.printf "    type: method\n";
+  Printf.printf "    position: %s\n" (Pos.string pos);
+  Printf.printf "    static: %b\n" m.static;
+  Printf.printf "\n"
+
+let print_class_member ((pos, name), member) =
+  match member with
+  | Method m -> print_method pos name m
+
+let print_class pos name c =
+  Printf.printf "%s\n" name;
+  Printf.printf "  type: class\n";
+  Printf.printf "  position: %s\n" (Pos.string pos);
+  Printf.printf "\n";
+  List.iter c.class_members print_class_member;
+  Printf.printf "\n"
+
+let print (outline : outline) =
+  List.iter outline begin fun ((pos, name), def) ->
+    match def with
+    | Function -> print_function pos name
+    | Class c -> print_class pos name c
+  end

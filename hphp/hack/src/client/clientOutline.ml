@@ -21,6 +21,7 @@ let print_readable res =
   ()
 
 let go res output_json =
+  let res = FileOutline.to_legacy res in
   if output_json then
     print_json res
   else

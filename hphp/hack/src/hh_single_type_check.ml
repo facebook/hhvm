@@ -479,9 +479,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
   | Outline ->
     let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline file in
-    List.iter results begin fun (pos, name, type_) ->
-      Printf.printf "%s %s (%s)\n" (Pos.string pos) name type_
-    end
+    FileOutline.print results;
   | Suggest
   | Errors ->
       let errors =

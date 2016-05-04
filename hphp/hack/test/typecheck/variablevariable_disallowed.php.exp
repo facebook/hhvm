@@ -1,0 +1,2 @@
+File "variablevariable_disallowed.php", line 6, characters 10-12:
+A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])

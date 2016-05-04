@@ -2691,13 +2691,15 @@ and expr_atomic ~allow_class ~class_const env =
   | Tdquote ->
       expr_encapsed env pos
   | Tlvar ->
-      (** We store the variable-variable $$foo as $foo. Hackhackhack.
-       * TODO: t10209852*)
       let tok_value = Lexing.lexeme env.lb in
-      let var_id = (pos, strip_variablevariable tok_value) in
+      let var_id, stripped = strip_variablevariable tok_value 0 in
+      if (stripped > 0) && (not (env.mode = FileInfo.Mdecl)) then
+        error_at env pos ("A valid variable name starts with a " ^
+          "letter or underscore, followed by any number of letters, " ^
+          "numbers, or underscores");
       pos, if peek env = Tlambda
-        then lambda_single_arg ~sync:FDeclSync env var_id
-        else Lvar var_id
+        then lambda_single_arg ~sync:FDeclSync env (pos, var_id)
+        else Lvar (pos, var_id)
   | Tcolon ->
       L.back env.lb;
       let name = identifier env in
@@ -2799,12 +2801,14 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
   | x ->
       pos, Id (pos, x)
 
-and strip_variablevariable token =
+(** Retuns the identifier with leading $'s stripped and the number of $'s
+  * stripped. *)
+and strip_variablevariable token (dollars: int) =
   if (token.[0] = '$') && (token.[1] = '$') then
     strip_variablevariable (String.sub token 1 ((String.length token) - 1))
+      (dollars + 1)
   else
-    token
-
+    token, dollars
 
 (*****************************************************************************)
 (* Expressions in parens. *)

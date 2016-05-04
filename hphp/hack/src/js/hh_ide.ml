@@ -379,7 +379,7 @@ let hh_file_summary fn =
   let fn = Relative_path.create Relative_path.Root fn in
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
-    let outline = FileOutline.outline_ast ast in
+    let outline = FileOutline.(to_legacy (outline_ast ast)) in
     let res_list = List.map outline begin fun (pos, name, type_) ->
       JSON_Object [ "name", JSON_String name;
                "type", JSON_String type_;

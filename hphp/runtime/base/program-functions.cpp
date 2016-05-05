@@ -1196,20 +1196,6 @@ static bool open_server_log_files() {
   return openedLog;
 }
 
-static void close_server_log_files() {
-  for (const auto& el : RuntimeOption::ErrorLogs) {
-    const auto& logNameAndPipe = Logger::GetOutput(el.first);
-    const auto& errlog = el.second;
-    if (logNameAndPipe.second) {
-      pclose(logNameAndPipe.first);
-    } else if (Logger::UseCronolog && errlog.hasTemplate()) {
-      always_assert(!logNameAndPipe.first);
-    } else {
-      fclose(logNameAndPipe.first);
-    }
-  }
-}
-
 static int compute_hhvm_argc(const options_description& desc,
                              int argc, char** argv) {
   enum ArgCode {
@@ -1650,15 +1636,14 @@ static int execute_program_impl(int argc, char** argv) {
   IniSetting::s_system_settings_are_set = true;
   MM().resetRuntimeOptions();
 
+  auto opened_logs = open_server_log_files();
   if (po.mode == "daemon") {
-    if (!open_server_log_files()) {
+    if (!opened_logs) {
       Logger::Error("Log file not specified under daemon mode.\n\n");
     }
     Process::Daemonize();
-    close_server_log_files();
   }
 
-  open_server_log_files();
   if (RuntimeOption::ServerExecutionMode()) {
     for (auto const& m : messages) {
       Logger::Info(m);

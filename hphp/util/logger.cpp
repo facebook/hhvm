@@ -346,8 +346,9 @@ FILE* Logger::output() {
   if (threadData->log && threadData->threadLogOnly) {
     return threadData->log;
   }
-  auto* out = (UseCronolog ? m_cronOutput.getOutputFile() : m_output);
-  return (out != nullptr ? out : m_standardOut);
+  FILE* cronOut = m_cronOutput.getOutputFile();
+  return cronOut != nullptr ? cronOut :
+         m_output != nullptr ? m_output : m_standardOut;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

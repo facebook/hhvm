@@ -69,8 +69,9 @@ public:
   bool readsLocals() const;
   bool writesLocals() const;
   void updateVtFlags();
-  void setLocalThis(const std::string &name) { m_localThis = name; }
-  bool isCallToFunction(const char *name) const;
+  void setLocalThis(const std::string& name) { m_localThis = name; }
+  bool isCallToFunction(folly::StringPiece name) const;
+  std::string getFullName() const;
   void resolveNSFallbackFunc(AnalysisResultConstPtr ar, FileScopePtr fs);
 
   void changeToBytecode() {

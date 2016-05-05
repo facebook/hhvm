@@ -834,10 +834,12 @@ public:
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
+  bool emitConstantFuncCall(Emitter& e, SimpleFunctionCallPtr call);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                        bool isUnpack);
   bool emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                           bool byRef, bool mustBeRef);
+  bool emitScalarValue(Emitter& e, const Variant& value);
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);
   void emitBuiltinDefaultArg(Emitter& e, Variant& v,
                              MaybeDataType t, int paramId);

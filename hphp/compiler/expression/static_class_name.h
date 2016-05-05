@@ -41,7 +41,7 @@ struct StaticClassName : IParseHandler {
   ExpressionPtr getClass() const { return m_class; }
 
   ClassScopePtr resolveClass();
-  bool isNamed(const std::string& clsName) const;
+  bool isNamed(folly::StringPiece clsName) const;
   bool hasStaticClass() const { return !m_origClassName.empty(); }
 protected:
   ExpressionPtr m_class;

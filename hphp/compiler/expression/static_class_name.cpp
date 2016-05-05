@@ -53,8 +53,8 @@ void StaticClassName::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   }
 }
 
-bool StaticClassName::isNamed(const std::string& clsName) const {
-  return !strcasecmp(m_origClassName.c_str(), clsName.c_str());
+bool StaticClassName::isNamed(folly::StringPiece clsName) const {
+  return bstrcasecmp(m_origClassName, clsName) == 0;
 }
 
 void StaticClassName::updateClassName() {

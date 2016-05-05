@@ -95,9 +95,10 @@ struct Option {
   static std::string DefaultIncludeRoot;
 
   /**
-   * PHP functions that will take a function name and make a dynamic call.
+   * PHP functions that can be assumed to always return a certain constant
+   * value.
    */
-  static std::map<std::string, int> DynamicFunctionCalls;
+  static hphp_string_imap<std::string> ConstantFunctions;
 
   /**
    * Optimization flags

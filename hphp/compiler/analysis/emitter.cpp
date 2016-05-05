@@ -4261,6 +4261,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
       emitFuncCall(e, call, "__SystemLib\\dict", params);
       return true;
+    } else if (emitConstantFuncCall(e, call)) {
+      return true;
     }
 #define TYPE_CONVERT_INSTR(what, What)                             \
     else if (call->isCallToFunction(#what"val") &&                 \
@@ -4597,34 +4599,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     auto ex = static_pointer_cast<Expression>(node);
     Variant v;
     ex->getScalarValue(v);
-    switch (v.getType()) {
-      case KindOfInt64:
-        e.Int(v.getInt64());
-        return true;
-
-      case KindOfDouble:
-        e.Double(v.getDouble());
-        return true;
-
-      case KindOfPersistentString:
-      case KindOfString: {
-        StringData* nValue = makeStaticString(v.getStringData());
-        e.String(nValue);
-        return true;
-      }
-
-      case KindOfUninit:
-      case KindOfNull:
-      case KindOfBoolean:
-      case KindOfPersistentArray:
-      case KindOfArray:
-      case KindOfObject:
-      case KindOfResource:
-      case KindOfRef:
-      case KindOfClass:
-        break;
-    }
-    not_reached();
+    auto const emitted = emitScalarValue(e, v);
+    always_assert(emitted);
+    return true;
   }
 
   case Construct::KindOfPipeVariable: {
@@ -4952,6 +4929,47 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
   }
 
+  not_reached();
+}
+
+bool EmitterVisitor::emitScalarValue(Emitter& e, const Variant& v) {
+  switch (v.getRawType()) {
+    case KindOfUninit:
+      e.NullUninit();
+      return true;
+
+    case KindOfNull:
+      e.Null();
+      return true;
+
+    case KindOfBoolean:
+      v.asBooleanVal() ? e.True() : e.False();
+      return true;
+
+    case KindOfInt64:
+      e.Int(v.getInt64());
+      return true;
+
+    case KindOfDouble:
+      e.Double(v.getDouble());
+      return true;
+
+    case KindOfPersistentString:
+    case KindOfString:
+      e.String(makeStaticString(v.getStringData()));
+      return true;
+
+    case KindOfPersistentArray:
+    case KindOfArray:
+      e.Array(ArrayData::GetScalarArray(v.getArrayData()));
+      return true;
+
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      return false;
+  }
   not_reached();
 }
 
@@ -8190,6 +8208,34 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   }
   if (fcallBuiltin) {
     fixReturnType(e, node, fcallBuiltin);
+  }
+}
+
+bool EmitterVisitor::emitConstantFuncCall(Emitter& e,
+                                          SimpleFunctionCallPtr call) {
+  if (!Option::WholeProgram || Option::ConstantFunctions.empty()) return false;
+
+  if (call->getClass()) {
+    // The class expression was either non-scalar or static, neither of which
+    // we want to optimize.
+    return false;
+  }
+
+  auto const name = call->getFullName();
+  auto const it = Option::ConstantFunctions.find(name);
+  if (it == Option::ConstantFunctions.end()) return false;
+
+  VariableUnserializer uns{
+    it->second.data(), it->second.size(), VariableUnserializer::Type::Serialize,
+    false, empty_array()
+  };
+
+  try {
+    return emitScalarValue(e, uns.unserialize());
+  } catch (const Exception& e) {
+    throw IncludeTimeFatalException(call,
+                                    "Bad ConstantValue for %s: '%s'",
+                                    name.c_str(), it->second.c_str());
   }
 }
 

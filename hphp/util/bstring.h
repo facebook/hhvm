@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_BSTRING_H_
 #define incl_HPHP_BSTRING_H_
 
+#include <folly/Range.h>
+
 #include <stdlib.h>
 
 namespace HPHP {
@@ -51,6 +53,9 @@ bool bstrcaseeq(const char* left, const char* right, size_t n);
 // right, > 0 if left is greater than right, and 0 if the strings are equal
 int bstrcasecmp(const char* left, size_t leftSize,
                 const char* right, size_t rightSize);
+inline int bstrcasecmp(folly::StringPiece left, folly::StringPiece right) {
+  return bstrcasecmp(left.begin(), left.size(), right.begin(), right.size());
+}
 
 // Given a binary string haystack and a character needle, bstrcasechr performs
 // a case insensitive search and returns a pointer to the first occurrence of

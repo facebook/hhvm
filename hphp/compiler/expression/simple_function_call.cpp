@@ -589,8 +589,20 @@ void SimpleFunctionCall::updateVtFlags() {
   }
 }
 
-bool SimpleFunctionCall::isCallToFunction(const char *name) const {
+bool SimpleFunctionCall::isCallToFunction(folly::StringPiece name) const {
   return isNamed(name) && !getClass() && !hasStaticClass();
+}
+
+std::string SimpleFunctionCall::getFullName() const {
+  std::string name;
+  if (isStatic()) {
+    name = "static::";
+  } else if (hasStaticClass()) {
+    name += getOriginalClassName() + "::";
+  }
+  name += getOriginalName();
+
+  return name;
 }
 
 bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
@@ -1024,42 +1036,7 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     StaticClassName::outputPHP(cg, ar);
     cg_printf("::%s(", m_origName.c_str());
   } else {
-
-    if (cg.getOutput() == CodeGenerator::InlinedPHP ||
-        cg.getOutput() == CodeGenerator::TrimmedPHP) {
-
-      if (cg.getOutput() == CodeGenerator::TrimmedPHP &&
-          cg.usingStream(CodeGenerator::PrimaryStream) &&
-          Option::DynamicFunctionCalls.find(m_origName) !=
-          Option::DynamicFunctionCalls.end()) {
-        int funcNamePos = Option::DynamicFunctionCalls[m_origName];
-        if (m_params && m_params->getCount() &&
-            m_params->getCount() >= funcNamePos + 1) {
-          if (funcNamePos == -1) funcNamePos = m_params->getCount() - 1;
-          ExpressionPtr funcName = (*m_params)[funcNamePos];
-          if (!funcName->is(Expression::KindOfScalarExpression)) {
-
-            cg_printf("%s(", m_origName.c_str());
-            for (int i = 0; i < m_params->getCount(); i++) {
-              if (i > 0) cg_printf(", ");
-              if (i == funcNamePos) {
-                cg_printf("%sdynamic_load(", Option::IdPrefix.c_str());
-                funcName->outputPHP(cg, ar);
-                cg_printf(")");
-              } else {
-                ExpressionPtr param = (*m_params)[i];
-                if (param) param->outputPHP(cg, ar);
-              }
-            }
-            cg_printf(")");
-            return;
-          }
-        }
-      }
-      cg_printf("%s(", m_origName.c_str());
-    } else {
-      cg_printf("%s(", m_origName.c_str());
-    }
+    cg_printf("%s(", m_origName.c_str());
   }
 
   if (m_params) m_params->outputPHP(cg, ar);

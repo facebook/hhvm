@@ -59,7 +59,7 @@ std::map<std::string, std::string> Option::IncludeRoots;
 std::map<std::string, std::string> Option::AutoloadRoots;
 std::vector<std::string> Option::IncludeSearchPaths;
 std::string Option::DefaultIncludeRoot;
-std::map<std::string, int> Option::DynamicFunctionCalls;
+hphp_string_imap<std::string> Option::ConstantFunctions;
 
 bool Option::GeneratePickledPHP = false;
 bool Option::GenerateInlinedPHP = false;
@@ -206,6 +206,16 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions");
   Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
+
+  for (auto& str : Config::GetVector(ini, config, "ConstantFunctions")) {
+    std::string func;
+    std::string value;
+    if (folly::split('|', str, func, value)) {
+      ConstantFunctions[func] = value;
+    } else {
+      std::cerr << folly::format("Invalid ConstantFunction: '{}'\n", str);
+    }
+  }
 
   // build map from function names to sections
   auto function_sections_callback = [&] (const IniSetting::Map &ini_fs,

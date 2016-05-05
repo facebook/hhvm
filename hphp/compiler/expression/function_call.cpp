@@ -73,8 +73,8 @@ void FunctionCall::reset() {
   m_variableArgument = false;
 }
 
-bool FunctionCall::isNamed(const char* name) const {
-  return !strcasecmp(m_origName.c_str(), name);
+bool FunctionCall::isNamed(folly::StringPiece name) const {
+  return bstrcasecmp(m_origName, name) == 0;
 }
 
 void FunctionCall::deepCopy(FunctionCallPtr exp) {

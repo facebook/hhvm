@@ -477,6 +477,7 @@ Variant& lvalBlackHole() {
 }
 
 void Variant::setEvalScalar() {
+  assertx(cellIsPlausible(*this));
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -485,27 +486,27 @@ void Variant::setEvalScalar() {
     case KindOfDouble:
       return;
 
-    case KindOfPersistentString:
-    case KindOfString: {
+    case KindOfString:
+      m_type = KindOfPersistentString;
+    case KindOfPersistentString: {
       auto pstr = m_data.pstr;
       if (!pstr->isStatic()) {
         StringData *sd = makeStaticString(pstr);
         decRefStr(pstr);
         m_data.pstr = sd;
         assert(m_data.pstr->isStatic());
-        m_type = KindOfPersistentString;
       }
       return;
     }
 
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfArray:
+      m_type = KindOfPersistentArray;
+    case KindOfPersistentArray: {
       auto parr = m_data.parr;
       if (!parr->isStatic()) {
         auto ad = ArrayData::GetScalarArray(parr);
         assert(ad->isStatic());
         m_data.parr = ad;
-        m_type = KindOfPersistentArray;
         decRefArr(parr);
       }
       return;

@@ -87,11 +87,10 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
-                               RefCount initial_count);
+                               RefCount initial_count, HeaderKind dest_hk);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* CopyStaticHelper(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*, SortFunction);
   static void Ksort(ArrayData*, int, bool);
   static void Sort(ArrayData*, int, bool);
@@ -135,7 +134,6 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   template<class Marker> static void scan(const ArrayData*, Marker&);
 
   static ArrayData* MakeReserve(uint32_t capacity);
-  static ArrayData* MakeReserveSlow(uint32_t capacity);
 
   /*
    * Allocate a PackedArray containing `size' values, in the reverse order of
@@ -144,7 +142,6 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
    * This function takes ownership of the TypedValues in `values'.
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
-  static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
   static ArrayData* MakeUninitialized(uint32_t size);
 
   static ArrayData* MakeUncounted(ArrayData* array);
@@ -165,6 +162,15 @@ private:
   static ArrayData* CopyAndResizeIfNeeded(const ArrayData*);
   static ArrayData* ResizeIfNeeded(ArrayData*);
   static SortFlavor preSort(ArrayData*);
+
+  static ArrayData* MakeReserveImpl(uint32_t, HeaderKind);
+  static ArrayData* MakeReserveSlow(uint32_t, HeaderKind);
+
+  static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
+
+  static ArrayData* MakeUninitializedImpl(uint32_t, HeaderKind);
+
+  static ArrayData* CopyStaticHelper(const ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////

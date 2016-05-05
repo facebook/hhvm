@@ -91,47 +91,6 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
   return MixedArray::MakeReserveMixed(capacity);
 }
 
-ArrayData* PackedArray::MakePacked(uint32_t size, const TypedValue* values) {
-  assert(size > 0);
-  ArrayData* ad;
-  if (LIKELY(size <= CapCode::Threshold)) {
-    auto cap = size;
-    if (auto const newCap = getMaxCapInPlaceFast(cap)) {
-      cap = newCap;
-    }
-    assert(cap > 0);
-    static_assert(sizeof(TypedValue) * CapCode::Threshold + sizeof(ArrayData)
-                  <= kMaxSmallSize, "should fit in a small size class");
-    ad = static_cast<ArrayData*>(
-      MM().mallocSmallSize(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-    );
-    assert(cap == CapCode::ceil(cap).code);
-    ad->m_sizeAndPos = size; // pos=0
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
-    assert(ad->m_size == size);
-    assert(ad->isPacked());
-    assert(ad->cap() == cap);
-  } else {
-    ad = MakeReserveSlow(size);
-  }
-
-  // Append values by moving -- Caller assumes we update refcount.
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
-  auto ptr = reinterpret_cast<TypedValue*>(ad + 1);
-  for (auto i = uint32_t{0}; i < size; ++i) {
-    auto const& src = values[size - i - 1];
-    ptr->m_type = src.m_type;
-    ptr->m_data = src.m_data;
-    ++ptr;
-  }
-
-  assert(ad->m_pos == 0);
-  assert(ad->hasExactlyOneRef());
-  assert(checkInvariants(ad));
-  return ad;
-}
-
 MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
                                    const TypedValue* values) {
   assert(size > 0);

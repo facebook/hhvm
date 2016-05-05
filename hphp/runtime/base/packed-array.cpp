@@ -195,7 +195,7 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = old->m_sizeAndPos;
     ad->m_hdr.init(CapCode::exact(cap), old->m_hdr.kind, 1);
-    assert(ad->isPacked());
+    assert(ad->kind() == old->kind());
     assert(ad->m_size == old->m_size);
     assert(ad->cap() == cap);
   } else {
@@ -209,8 +209,10 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
   auto const oldSize = old->m_size;
   old->m_sizeAndPos = 0;                // zombie
 
-  memcpy16_inline(packedData(ad), packedData(old),
-                  oldSize * sizeof(TypedValue));
+  if (oldSize > 0) {
+    memcpy16_inline(packedData(ad), packedData(old),
+                    oldSize * sizeof(TypedValue));
+  }
 
   assert(ad->m_pos == oldPos);
   assert(ad->hasExactlyOneRef());
@@ -224,11 +226,11 @@ ArrayData* PackedArray::GrowHelper(ArrayData* old) {
   static_assert(CapCode::Max >= MixedArray::MaxSize, "");
   if (UNLIKELY(oldCap > MixedArray::MaxSize / 2)) return nullptr;
   assert(CapCode::ceil(oldCap*2).decode() > CapCode::Threshold);
-  auto ad = MakeReserveSlow(oldCap*2); // pos=size=kind=0
+  auto ad = MakeReserveSlow(oldCap * 2, old->m_hdr.kind); // pos=size=kind=0
   if (UNLIKELY(ad == nullptr)) return nullptr;
   // ad->m_hdr is already set correctly in MakeReserveSlow
   ad->m_sizeAndPos = old->m_sizeAndPos;
-  assert(ad->isPacked());
+  assert(ad->kind() == old->kind());
   assert(ad->m_size == old->m_size);
   assert(ad->cap() >= oldCap*2);
   assert(ad->hasExactlyOneRef());
@@ -289,12 +291,12 @@ ArrayData* PackedArray::ResizeIfNeeded(ArrayData* adIn) {
 //////////////////////////////////////////////////////////////////////
 ALWAYS_INLINE
 void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
-                                   RefCount initial_count) {
+                                   RefCount initial_count, HeaderKind dest_hk) {
   // Copy everything from `adIn' to `ad', including refcount, etc.
   auto const size = adIn->m_size;
   static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
   memcpy16_inline(ad, adIn, (size + 1) * 16);
-  ad->m_hdr.init(adIn->m_hdr, initial_count);
+  ad->m_hdr.init(adIn->m_hdr.aux, dest_hk, initial_count);
 
   // Copy counted types correctly, especially RefData.
   auto data = packedData(ad);
@@ -321,9 +323,9 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
     MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
 
-  CopyPackedHelper(adIn, ad, 1);
+  CopyPackedHelper(adIn, ad, 1, adIn->m_hdr.kind);
 
-  assert(ad->isPacked());
+  assert(ad->kind() == adIn->kind());
   assert(ad->cap() == adIn->cap());
   assert(ad->m_size == adIn->m_size);
   assert(ad->m_pos == adIn->m_pos);
@@ -339,6 +341,21 @@ ArrayData* PackedArray::CopyWithStrongIterators(const ArrayData* ad) {
     return move_strong_iterators(cpy, const_cast<ArrayData*>(ad));
   }
   return cpy;
+}
+
+NEVER_INLINE
+ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
+  auto const fpcap = CapCode::ceil(adIn->m_size);
+  auto const cap = fpcap.decode();
+  auto const ad = static_cast<ArrayData*>(
+    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  );
+  ad->m_sizeAndPos = adIn->m_sizeAndPos;
+  ad->m_hdr.init(fpcap, adIn->m_hdr.kind, StaticValue);
+  assert(ad->cap() == cap);
+  assert(ad->m_size == adIn->m_size);
+  assert(ad->isStatic());
+  return ad;
 }
 
 NEVER_INLINE
@@ -358,30 +375,14 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   } else {
     ad = CopyStaticHelper(adIn);
   }
-  CopyPackedHelper(adIn, ad, StaticValue);
+  CopyPackedHelper(adIn, ad, StaticValue, adIn->m_hdr.kind);
 
-  assert(ad->isPacked());
+  assert(ad->kind() == adIn->kind());
   assert(ad->cap() == adIn->cap());
   assert(ad->m_size == adIn->m_size);
   assert(ad->m_pos == adIn->m_pos);
   assert(ad->isStatic());
   assert(checkInvariants(ad));
-  return ad;
-}
-
-NEVER_INLINE
-ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
-  auto const fpcap = CapCode::ceil(adIn->m_size);
-  auto const cap = fpcap.decode();
-  auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
-  ad->m_sizeAndPos = adIn->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticValue);
-  assert(ad->isPacked());
-  assert(ad->cap() == cap);
-  assert(ad->m_size == adIn->m_size);
-  assert(ad->isStatic());
   return ad;
 }
 
@@ -431,7 +432,23 @@ ArrayData* PackedArray::ConvertStaticHelper(const ArrayData* arr) {
   return ad;
 }
 
-ArrayData* PackedArray::MakeReserve(uint32_t capacity) {
+NEVER_INLINE
+ArrayData* PackedArray::MakeReserveSlow(uint32_t capacity, HeaderKind hk) {
+  auto const fpcap = CapCode::ceil(capacity);
+  auto const cap = fpcap.decode();
+  auto const requestSize = sizeof(ArrayData) + sizeof(TypedValue) * cap;
+  auto const ad = static_cast<ArrayData*>(MM().objMalloc(requestSize));
+  ad->m_sizeAndPos = 0;
+  ad->m_hdr.init(fpcap, hk, 1);
+  assert(ad->cap() == cap);
+  assert(ad->m_size == 0);
+  assert(ad->hasExactlyOneRef());
+  assert(checkInvariants(ad));
+  return ad;
+}
+
+ALWAYS_INLINE
+ArrayData* PackedArray::MakeReserveImpl(uint32_t capacity, HeaderKind hk) {
   ArrayData* ad;
   if (LIKELY(capacity <= CapCode::Threshold)) {
     auto const smallSize = SmallSize;
@@ -443,37 +460,78 @@ ArrayData* PackedArray::MakeReserve(uint32_t capacity) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = 0; // size=0, pos=0
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
-    assert(ad->isPacked());
+    ad->m_hdr.init(CapCode::exact(cap), hk, 1);
     assert(ad->cap() == cap);
     assert(ad->m_size == 0);
   } else {
-    ad = MakeReserveSlow(capacity); // size=pos=kind=0
+    ad = MakeReserveSlow(capacity, hk); // size=pos=kind=0
   }
 
+  assert(ad->m_hdr.kind == hk);
   assert(ad->hasExactlyOneRef());
   assert(ad->m_pos == 0);
   assert(checkInvariants(ad));
   return ad;
 }
 
-NEVER_INLINE
-ArrayData* PackedArray::MakeReserveSlow(uint32_t capacity) {
-  auto const fpcap = CapCode::ceil(capacity);
-  auto const cap = fpcap.decode();
-  auto const requestSize = sizeof(ArrayData) + sizeof(TypedValue) * cap;
-  auto const ad = static_cast<ArrayData*>(MM().objMalloc(requestSize));
-  ad->m_sizeAndPos = 0;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, 1);
+ArrayData* PackedArray::MakeReserve(uint32_t capacity) {
+  auto ad = MakeReserveImpl(capacity, HeaderKind::Packed);
   assert(ad->isPacked());
-  assert(ad->cap() == cap);
-  assert(ad->m_size == 0);
+  return ad;
+}
+
+ALWAYS_INLINE
+ArrayData* PackedArray::MakePackedImpl(uint32_t size,
+                                       const TypedValue* values,
+                                       HeaderKind hk) {
+  assert(size > 0);
+  ArrayData* ad;
+  if (LIKELY(size <= CapCode::Threshold)) {
+    auto cap = size;
+    if (auto const newCap = getMaxCapInPlaceFast(cap)) {
+      cap = newCap;
+    }
+    assert(cap > 0);
+    static_assert(sizeof(TypedValue) * CapCode::Threshold + sizeof(ArrayData)
+                  <= kMaxSmallSize, "should fit in a small size class");
+    ad = static_cast<ArrayData*>(
+      MM().mallocSmallSize(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+    );
+    assert(cap == CapCode::ceil(cap).code);
+    ad->m_sizeAndPos = size; // pos=0
+    ad->m_hdr.init(CapCode::exact(cap), hk, 1);
+    assert(ad->m_size == size);
+    assert(ad->m_hdr.kind == hk);
+    assert(ad->cap() == cap);
+  } else {
+    ad = MakeReserveSlow(size, hk);
+  }
+
+  // Append values by moving -- Caller assumes we update refcount.
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  auto ptr = reinterpret_cast<TypedValue*>(ad + 1);
+  for (auto i = uint32_t{0}; i < size; ++i) {
+    auto const& src = values[size - i - 1];
+    ptr->m_type = src.m_type;
+    ptr->m_data = src.m_data;
+    ++ptr;
+  }
+
+  assert(ad->m_pos == 0);
   assert(ad->hasExactlyOneRef());
   assert(checkInvariants(ad));
   return ad;
 }
 
-ArrayData* PackedArray::MakeUninitialized(uint32_t size) {
+ArrayData* PackedArray::MakePacked(uint32_t size, const TypedValue* values) {
+  auto ad = MakePackedImpl(size, values, HeaderKind::Packed);
+  assert(ad->isPacked());
+  return ad;
+}
+
+ALWAYS_INLINE
+ArrayData* PackedArray::MakeUninitializedImpl(uint32_t size, HeaderKind hk) {
   assert(size > 0);
   ArrayData* ad;
   assert(size <= CapCode::Threshold);
@@ -483,13 +541,19 @@ ArrayData* PackedArray::MakeUninitialized(uint32_t size) {
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = size; // pos=0
-  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+  ad->m_hdr.init(CapCode::exact(cap), hk, 1);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
-  assert(ad->isPacked());
+  assert(ad->m_hdr.kind == hk);
   assert(ad->cap() == cap);
   assert(ad->hasExactlyOneRef());
   assert(checkInvariants(ad));
+  return ad;
+}
+
+ArrayData* PackedArray::MakeUninitialized(uint32_t size) {
+  auto ad = MakeUninitializedImpl(size, HeaderKind::Packed);
+  assert(ad->isPacked());
   return ad;
 }
 
@@ -533,12 +597,14 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
 }
 
 const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
+  assert(checkInvariants(ad));
   auto const data = packedData(ad);
   return LIKELY(size_t(ki) < ad->m_size) ? &data[ki] : nullptr;
 }
 
 const TypedValue*
 PackedArray::NvGetStr(const ArrayData* ad, const StringData* s) {
+  assert(checkInvariants(ad));
   return nullptr;
 }
 
@@ -566,6 +632,7 @@ bool PackedArray::ExistsInt(const ArrayData* ad, int64_t k) {
 }
 
 bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* s) {
+  assert(checkInvariants(ad));
   return false;
 }
 
@@ -597,6 +664,7 @@ ArrayData* PackedArray::LvalStr(ArrayData* adIn,
                                 bool copy) {
   // We have to promote.  We know the key doesn't exist, but aren't
   // making use of that fact yet.  TODO(#2606310).
+  assert(checkInvariants(adIn));
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   return mixed->addLvalImpl(key, ret);
 }
@@ -640,6 +708,7 @@ ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, Cell v,
                                bool copy) {
   // We must convert to mixed, but can call addVal since the key must
   // not exist.
+  assert(checkInvariants(adIn));
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   return mixed->addVal(k, v);
 }
@@ -665,6 +734,7 @@ ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
                                   StringData* k,
                                   Variant& v,
                                   bool copy) {
+  assert(checkInvariants(adIn));
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   // todo t2606310: key can't exist.  use add/findForNewInsert
   return mixed->updateRef(k, v);
@@ -948,8 +1018,8 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = array->m_sizeAndPos;
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UncountedValue);
-    assert(ad->kind() == ArrayData::kPackedKind);
+    ad->m_hdr.init(CapCode::exact(cap), array->m_hdr.kind, UncountedValue);
+    assert(ad->kind() == array->kind());
     assert(ad->cap() == cap);
     assert(ad->m_size == size);
   } else {
@@ -978,8 +1048,8 @@ ArrayData* PackedArray::MakeUncountedHelper(ArrayData* array) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = array->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, UncountedValue);
-  assert(ad->kind() == ArrayData::kPackedKind);
+  ad->m_hdr.init(fpcap, array->m_hdr.kind, UncountedValue);
+  assert(ad->kind() == array->kind());
   assert(ad->cap() == cap);
   assert(ad->m_size == array->m_size);
   assert(ad->m_pos == array->m_pos);

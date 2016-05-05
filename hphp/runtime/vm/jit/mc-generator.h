@@ -55,7 +55,7 @@ struct MCGenerator;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C" MCGenerator* mcg;
+extern MCGenerator* mcg;
 
 const TCA kInvalidCatchTrace = TCA(-1);
 

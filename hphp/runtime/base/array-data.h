@@ -32,6 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Array;
 struct String;
 struct TypedValue;
 struct MArrayIter;
@@ -60,7 +61,8 @@ struct ArrayData {
     kProxyKind = 6,   // ProxyArray
     kDictKind = 7,    // MixedArray without implicit conversion of integer-like
                       // string keys
-    kNumKinds = 8     // insert new values before kNumKinds.
+    kVecKind = 8,     // Vector array (more restrictive PackedArray)
+    kNumKinds = 9     // insert new values before kNumKinds.
   };
 
 protected:
@@ -99,6 +101,8 @@ public:
   static ArrayData *CreateRef(Variant& value);
   static ArrayData *CreateRef(const Variant& name, Variant& value);
 
+  static ArrayData *CreateVec();
+
   /*
    * Called to return an ArrayData to the request heap.  This is
    * normally called when the reference count goes to zero (e.g. via a
@@ -126,7 +130,7 @@ public:
    * are inserted?
    */
   bool useWeakKeys() const {
-    return !isDict();
+    return !isDict() && !isVecArray();
   }
 
   bool convertKey(const StringData* key, int64_t& i) const;
@@ -178,6 +182,9 @@ public:
   bool isProxyArray() const { return kind() == kProxyKind; }
   bool isEmptyArray() const { return kind() == kEmptyKind; }
   bool isDict() const { return kind() == kDictKind; }
+  bool isVecArray() const { return kind() == kVecKind; }
+
+  bool isPackedLayout() const { return isPacked() || isVecArray(); }
 
   bool isMixedLayout() const { return isMixed() || isDict(); }
 
@@ -513,6 +520,7 @@ static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
+static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -521,6 +529,11 @@ extern std::aligned_storage<
   alignof(ArrayData)
 >::type s_theEmptyArray;
 
+extern std::aligned_storage<
+  sizeof(ArrayData),
+  alignof(ArrayData)
+>::type s_theEmptyVecArray;
+
 /*
  * Return the "static empty array".  This is a singleton static array
  * that can be used whenever an empty array is needed.  It has
@@ -528,6 +541,11 @@ extern std::aligned_storage<
  */
 ALWAYS_INLINE ArrayData* staticEmptyArray() {
   void* vp = &s_theEmptyArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
+  void* vp = &s_theEmptyVecArray;
   return static_cast<ArrayData*>(vp);
 }
 
@@ -620,6 +638,8 @@ void decRefArr(ArrayData* arr) {
 [[noreturn]] void throwOOBArrayKeyException(TypedValue key);
 [[noreturn]] void throwOOBArrayKeyException(int64_t key);
 [[noreturn]] void throwOOBArrayKeyException(const StringData* key);
+[[noreturn]] void throwRefInvalidArrayValueException(const ArrayData* ad);
+[[noreturn]] void throwRefInvalidArrayValueException(const Array& arr);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

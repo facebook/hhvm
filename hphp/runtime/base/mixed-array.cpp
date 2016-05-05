@@ -84,6 +84,10 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
     return PackedArray::MakeReserve(capacity);
   }
 
+  if (other->kind() == kVecKind) {
+    return PackedArray::MakeReserveVec(capacity);
+  }
+
   if (other->kind() == kDictKind) {
     return MixedArray::MakeReserveDict(capacity);
   }
@@ -281,8 +285,11 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
 
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      if (ad->empty())    return Variant{staticEmptyArray()};
-      if (ad->isPacked()) return Variant{PackedArray::MakeUncounted(ad)};
+      if (ad->empty()) {
+        return ad->isVecArray() ?
+          Variant{staticEmptyVecArray()} : Variant{staticEmptyArray()};
+      }
+      if (ad->isPackedLayout()) return Variant{PackedArray::MakeUncounted(ad)};
       if (ad->isStruct()) return Variant{StructArray::MakeUncounted(ad)};
       return Variant{MixedArray::MakeUncounted(ad)};
     }
@@ -1562,7 +1569,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ret;
   }
 
-  if (UNLIKELY(!elems->isPacked())) {
+  if (UNLIKELY(!elems->isPackedLayout())) {
     return ArrayMergeGeneric(ret, elems);
   }
 
@@ -1652,7 +1659,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v, bool copy) {
   return a;
 }
 
-ArrayData* MixedArray::ToDictInPlace(ArrayData* ad) {
+MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
   auto a = asMixed(ad);
   assert(!a->cowCheck());
   a->m_hdr.init(HeaderKind::Dict, 1);

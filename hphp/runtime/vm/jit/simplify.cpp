@@ -122,6 +122,7 @@ bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
     case ArrayData::kStructKind:
     case ArrayData::kMixedKind:
     case ArrayData::kEmptyKind:
+    case ArrayData::kVecKind:
     case ArrayData::kApcKind:
     case ArrayData::kDictKind:
       return false;

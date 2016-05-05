@@ -84,6 +84,10 @@ public:
     return Array(ArrayData::Create(), NoIncRef{});
   }
 
+  static Array CreateVec() {
+    return Array(ArrayData::CreateVec(), NoIncRef{});
+  }
+
   static Array Create(const Variant& value) {
     return Array(ArrayData::Create(value), NoIncRef{});
   }
@@ -168,7 +172,7 @@ public:
 
   bool useWeakKeys() const {
     // If array isn't set we may implicitly create a mixed array. We never
-    // implicitly create a dict array
+    // implicitly create a dict array or vec.
     return !m_arr || m_arr->useWeakKeys();
   }
 

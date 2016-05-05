@@ -120,6 +120,7 @@ struct Header {
 inline size_t Header::size() const {
   switch (kind()) {
     case HeaderKind::Packed:
+    case HeaderKind::VecArray:
       return PackedArray::heapSize(&arr_);
     case HeaderKind::Struct:
       return StructArray::heapSize(&arr_);
@@ -278,6 +279,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:
+      case HeaderKind::VecArray:
       case HeaderKind::Apc:
       case HeaderKind::Globals:
       case HeaderKind::Proxy:

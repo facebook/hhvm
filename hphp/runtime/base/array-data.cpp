@@ -63,21 +63,26 @@ ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
-  if (arr->empty() && !arr->isDict()) return staticEmptyArray();
+  if (arr->empty()) {
+    if (arr->isVecArray()) return staticEmptyVecArray();
+    if (!arr->isDict()) return staticEmptyArray();
+  }
   auto key = GetScalarArrayKey(arr);
   return GetScalarArray(arr, key);
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
                                      const ScalarArrayKey& key) {
-  if (arr->empty() && !arr->isDict()) return staticEmptyArray();
+  if (arr->empty()) {
+    if (arr->isVecArray()) return staticEmptyVecArray();
+    if (!arr->isDict()) return staticEmptyArray();
+  }
   assert(key == GetScalarArrayKey(arr));
 
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData* ad;
-
-    if (arr->isVectorData() && !arr->isPacked() && !arr->isDict()) {
+    if (arr->isVectorData() && !arr->isPackedLayout() && !arr->isDict()) {
       ad = PackedArray::ConvertStatic(arr);
     } else {
       ad = arr->copyStatic();
@@ -125,6 +130,7 @@ static ArrayData* ToDictNoop(ArrayData* ad) {
     GlobalsArray::entry,                        \
     ProxyArray::entry,                          \
     MixedArray::entry##Dict, /* Dict */         \
+    PackedArray::entry##Vec, /* Vec */          \
   },
 
 /*
@@ -638,6 +644,7 @@ const ArrayFunctions g_array_funcs = {
     &ZSetIntThrow,
     &ProxyArray::ZSetInt,
     &MixedArray::ZSetInt,
+    &ZSetIntThrow,
   },
 
   {
@@ -649,6 +656,7 @@ const ArrayFunctions g_array_funcs = {
     &ZSetStrThrow,
     &ProxyArray::ZSetStr,
     &MixedArray::ZSetStr,
+    &ZSetStrThrow,
   },
 
   {
@@ -659,6 +667,7 @@ const ArrayFunctions g_array_funcs = {
     &ZAppendThrow,
     &ZAppendThrow,
     &ProxyArray::ZAppend,
+    &MixedArray::ZAppend,
     &ZAppendThrow,
   },
 
@@ -671,6 +680,7 @@ const ArrayFunctions g_array_funcs = {
     ToDictThrow,
     ProxyArray::ToDict,
     ToDictNoop,
+    PackedArray::ToDictVec,
   },
 };
 
@@ -693,6 +703,10 @@ bool ArrayData::IsValidKey(const Variant& k) {
 
 ArrayData *ArrayData::Create() {
   return staticEmptyArray();
+}
+
+ArrayData* ArrayData::CreateVec() {
+  return staticEmptyVecArray();
 }
 
 ArrayData *ArrayData::Create(const Variant& value) {
@@ -897,7 +911,7 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,8> names = {{
+  std::array<const char*,9> names = {{
     "PackedKind",
     "StructKind",
     "MixedKind",
@@ -906,6 +920,7 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "GlobalsKind",
     "ProxyKind",
     "DictKind",
+    "VecKind"
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];
@@ -926,6 +941,7 @@ const char* describeKeyType(const TypedValue* tv) {
   case KindOfString:           return "string";
   case KindOfPersistentArray:
   case KindOfArray: {
+    if (tv->m_data.parr->isVecArray()) return "vec";
     if (tv->m_data.parr->isDict()) return "dict";
     return "array";
   }
@@ -973,6 +989,9 @@ std::string describeKeyValue(TypedValue tv) {
 
 void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
   const char* msg = [&]{
+    if (ad->isVecArray()) {
+      return "Invalid vec key: expected a key of type int, {} given";
+    }
     if (ad->isDict()) {
       return "Invalid dict key: expected a key of type int or string, {} given";
     }
@@ -1015,6 +1034,20 @@ void throwOOBArrayKeyException(const StringData* key) {
       key->data()
     )
   );
+}
+
+void throwRefInvalidArrayValueException(const ArrayData* ad) {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    folly::sformat(
+      ad->isVecArray() ?
+      "Vecs cannot contain references" :
+      "Dicts cannot contain references"
+    )
+  );
+}
+
+void throwRefInvalidArrayValueException(const Array& arr) {
+  throwRefInvalidArrayValueException(arr.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

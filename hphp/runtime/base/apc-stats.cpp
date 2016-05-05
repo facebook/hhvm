@@ -138,7 +138,8 @@ size_t getMemSize(const APCObject* obj) {
 
 size_t getMemSize(const ArrayData* arr) {
   switch (arr->kind()) {
-  case ArrayData::ArrayKind::kPackedKind: {
+  case ArrayData::ArrayKind::kPackedKind:
+  case ArrayData::ArrayKind::kVecKind: {
     auto size = sizeof(ArrayData) +
                 sizeof(TypedValue) * (arr->cap() - arr->m_size);
     auto const values = reinterpret_cast<const TypedValue*>(arr + 1);

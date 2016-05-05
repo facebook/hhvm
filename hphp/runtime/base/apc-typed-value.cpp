@@ -76,7 +76,7 @@ void APCTypedValue::deleteUncounted() {
   if (kind == APCKind::UncountedString) {
     m_data.str->destructUncounted();
   } else if (kind == APCKind::UncountedArray) {
-    if (m_data.arr->isPacked()) {
+    if (m_data.arr->isPackedLayout()) {
       PackedArray::ReleaseUncounted(m_data.arr);
     } else if (m_data.arr->isStruct()) {
       StructArray::ReleaseUncounted(m_data.arr);

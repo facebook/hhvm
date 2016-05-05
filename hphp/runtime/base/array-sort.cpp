@@ -129,11 +129,16 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
 }
 
 ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  if (ad->m_size <= 1) {
-    return ad;
-  }
   if (sf == SORTFUNC_KSORT) {
     return ad;                          // trivial for packed arrays.
+  }
+  if (ad->m_size <= 1) {
+    if (ad->isVecArray()) {
+      auto ret = MixedArray::ToDictInPlace(ToMixedCopy(ad));
+      assert(ret->hasExactlyOneRef());
+      return ret;
+    }
+    return ad;
   }
   if (isSortFamily(sf)) {               // sort/rsort/usort
     if (UNLIKELY(ad->cowCheck())) {
@@ -145,6 +150,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   }
   assert(checkInvariants(ad));
   auto ret = ToMixedCopy(ad);
+  if (ad->isVecArray()) ret = MixedArray::ToDictInPlace(ret);
   assert(ret->hasExactlyOneRef());
   return ret;
 }
@@ -226,7 +232,7 @@ void MixedArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
 }
 
 void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
-  assert(ad->isPacked());
+  assert(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return;
   }
@@ -291,7 +297,7 @@ bool MixedArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
 }
 
 SortFlavor PackedArray::preSort(ArrayData* ad) {
-  assert(ad->isPacked());
+  assert(checkInvariants(ad));
   auto const data = packedData(ad);
   TVAccessor acc;
   uint32_t sz = ad->m_size;
@@ -305,7 +311,7 @@ SortFlavor PackedArray::preSort(ArrayData* ad) {
 }
 
 bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
-  assert(ad->isPacked());
+  assert(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return true;
   }

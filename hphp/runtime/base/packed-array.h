@@ -116,6 +116,60 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
     return const_cast<ArrayData*>(ad);
   }
 
+  static const TypedValue* NvTryGetIntVec(const ArrayData*, int64_t);
+  static const TypedValue* NvTryGetStrVec(const ArrayData*, const StringData*);
+  static ArrayData* SetIntVec(ArrayData*, int64_t, Cell, bool);
+  static ArrayData* SetStrVec(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* RemoveIntVec(ArrayData*, int64_t, bool);
+  static ArrayData* LvalIntVec(ArrayData*, int64_t, Variant*&, bool);
+  static ArrayData* LvalStrVec(ArrayData*, StringData*, Variant*&, bool);
+  static ArrayData* LvalIntRefVec(ArrayData*, int64_t, Variant*&, bool);
+  static ArrayData* LvalStrRefVec(ArrayData*, StringData*, Variant*&, bool);
+  static ArrayData* LvalNewRefVec(ArrayData*, Variant*&, bool);
+  static ArrayData* SetRefIntVec(ArrayData*, int64_t, Variant&, bool);
+  static ArrayData* SetRefStrVec(ArrayData*, StringData*, Variant&, bool);
+  static ArrayData* AppendRefVec(ArrayData*, Variant&, bool);
+  static ArrayData* AppendWithRefVec(ArrayData*, const Variant&, bool);
+  static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
+  static ArrayData* MergeVec(ArrayData*, const ArrayData*);
+
+  static constexpr auto ReleaseVec = &Release;
+  static constexpr auto NvGetIntVec = &NvGetInt;
+  static constexpr auto NvGetStrVec = &NvGetStr;
+  static constexpr auto NvGetKeyVec = &NvGetKey;
+  static constexpr auto VsizeVec = &Vsize;
+  static constexpr auto GetValueRefVec = &GetValueRef;
+  static constexpr auto IsVectorDataVec = &IsVectorData;
+  static constexpr auto ExistsIntVec = &ExistsInt;
+  static constexpr auto ExistsStrVec = &ExistsStr;
+  static constexpr auto LvalNewVec = &LvalNew;
+  static constexpr auto RemoveStrVec = &RemoveStr;
+  static constexpr auto IterBeginVec = &IterBegin;
+  static constexpr auto IterLastVec = &IterLast;
+  static constexpr auto IterEndVec = &IterEnd;
+  static constexpr auto IterAdvanceVec = &IterAdvance;
+  static constexpr auto IterRewindVec = &IterRewind;
+  static constexpr auto ValidMArrayIterVec = ValidMArrayIter;
+  static constexpr auto AdvanceMArrayIterVec = &AdvanceMArrayIter;
+  static constexpr auto EscalateForSortVec = &EscalateForSort;
+  static constexpr auto KsortVec = &Ksort;
+  static constexpr auto SortVec = &Sort;
+  static constexpr auto AsortVec = &Asort;
+  static constexpr auto UksortVec = &Uksort;
+  static constexpr auto UsortVec = &Usort;
+  static constexpr auto UasortVec = &Uasort;
+  static constexpr auto CopyVec = &Copy;
+  static constexpr auto CopyStaticVec = &CopyStatic;
+  static constexpr auto CopyWithStrongIteratorsVec = &CopyWithStrongIterators;
+  static constexpr auto AppendVec = &Append;
+  static constexpr auto PopVec = &Pop;
+  static constexpr auto DequeueVec = &Dequeue;
+  static constexpr auto PrependVec = &Prepend;
+  static constexpr auto RenumberVec = &Renumber;
+  static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
+  static constexpr auto EscalateVec = &Escalate;
+  static constexpr auto ToDictVec = &ToDict;
+
   //////////////////////////////////////////////////////////////////////
 
   static bool checkInvariants(const ArrayData*);
@@ -134,6 +188,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   template<class Marker> static void scan(const ArrayData*, Marker&);
 
   static ArrayData* MakeReserve(uint32_t capacity);
+  static ArrayData* MakeReserveVec(uint32_t capacity);
 
   /*
    * Allocate a PackedArray containing `size' values, in the reverse order of
@@ -142,10 +197,15 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
    * This function takes ownership of the TypedValues in `values'.
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
+  static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
+
   static ArrayData* MakeUninitialized(uint32_t size);
+  static ArrayData* MakeUninitializedVec(uint32_t size);
 
   static ArrayData* MakeUncounted(ArrayData* array);
   static ArrayData* MakeUncountedHelper(ArrayData* array);
+
+  static ArrayData* MakeFromVec(ArrayData* adIn, bool copy);
 
   // Fast iteration
   template <class F> static void IterateV(ArrayData* arr, F fn);
@@ -171,6 +231,9 @@ private:
   static ArrayData* MakeUninitializedImpl(uint32_t, HeaderKind);
 
   static ArrayData* CopyStaticHelper(const ArrayData*);
+
+  struct VecInitializer;
+  static VecInitializer s_initializer;
 };
 
 //////////////////////////////////////////////////////////////////////

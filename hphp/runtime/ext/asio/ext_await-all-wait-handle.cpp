@@ -121,6 +121,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
 retry:
   switch (ad->kind()) {
     case ArrayData::kPackedKind:
+    case ArrayData::kVecKind:
       return c_AwaitAllWaitHandle::FromPackedArray(ad);
 
     case ArrayData::kStructKind:

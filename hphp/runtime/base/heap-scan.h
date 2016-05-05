@@ -62,6 +62,7 @@ template<class F> void scanHeader(const Header* h,
     case HeaderKind::Empty:
       return;
     case HeaderKind::Packed:
+    case HeaderKind::VecArray:
       return PackedArray::scan(&h->arr_, mark);
     case HeaderKind::Struct:
       return h->struct_.scan(mark);

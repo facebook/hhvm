@@ -172,7 +172,7 @@ std::string getObjectConnectionName(
   }
 
   auto arr = obj->toArray();
-  bool is_packed = arr->isPacked();
+  bool is_packed = arr->isPackedLayout();
   for (ArrayIter iter(arr); iter; ++iter) {
     auto first = iter.first();
     auto key = first.toString();
@@ -259,6 +259,7 @@ std::string getNodesConnectionName(
       case HeaderKind::Vector:
       case HeaderKind::ImmVector:
       case HeaderKind::Packed:
+      case HeaderKind::VecArray:
         return "";
 
       // Explicit cases that have explicit pointer name

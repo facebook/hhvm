@@ -135,7 +135,6 @@ String pathString(ObjprofStack* stack, const char* sep) {
  * kSharedKind  // SharedArray
  * kGlobalsKind // GlobalsArray
  * kProxyKind   // ProxyArray
- * kNumKinds    // insert new values before kNumKinds.
  */
 std::pair<int, double> sizeOfArray(
   const ArrayData* props,
@@ -148,7 +147,8 @@ std::pair<int, double> sizeOfArray(
     arrKind != ArrayData::ArrayKind::kPackedKind &&
     arrKind != ArrayData::ArrayKind::kStructKind &&
     arrKind != ArrayData::ArrayKind::kMixedKind &&
-    arrKind != ArrayData::ArrayKind::kEmptyKind
+    arrKind != ArrayData::ArrayKind::kEmptyKind &&
+    arrKind != ArrayData::ArrayKind::kVecKind
   ) {
     return std::make_pair(0, 0);
   }
@@ -221,7 +221,7 @@ std::pair<int, double> sizeOfArray(
       iter = MixedArray::IterAdvance(props, iter);
       if (stack) stack->pop_back();
     }
-  } else if (props->isPacked()) {
+  } else if (props->isPackedLayout()) {
     FTRACE(2, "Iterating packed array\n");
     while (iter != pos_limit) {
       if (stack) stack->push_back("ArrayIndex");
@@ -292,7 +292,7 @@ void stringsOfArray(
       path->pop_back();
       iter = MixedArray::IterAdvance(props, iter);
     }
-  } else if (props->isPacked()) {
+  } else if (props->isPackedLayout()) {
     path->push_back(std::string("[]"));
     while (iter != pos_limit) {
       handle_dense_array_item();
@@ -320,7 +320,6 @@ void stringsOfArray(
  * kSharedKind  // SharedArray
  * kGlobalsKind // GlobalsArray
  * kProxyKind   // ProxyArray
- * kNumKinds    // insert new values before kNumKinds.
  */
 std::pair<int, double> tvGetSize(
   const TypedValue* tv,
@@ -592,7 +591,7 @@ std::pair<int, double> getObjSize(
 
   // We're increasing ref count by calling toArray, need to adjust it later
   auto arr = obj->toArray();
-  bool is_packed = arr->isPacked();
+  bool is_packed = arr->isPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {
     TypedValue key_tv = *iter.first().asTypedValue();
@@ -669,7 +668,7 @@ void getObjStrings(
 
   path->push_back(std::string(cls->name()->data()));
   auto arr = obj->toArray();
-  bool is_packed = arr->isPacked();
+  bool is_packed = arr->isPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {
     auto first = iter.first();

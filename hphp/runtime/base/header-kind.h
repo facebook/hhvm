@@ -23,10 +23,13 @@ namespace HPHP {
 
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
-  Packed, Struct, Mixed, Empty, Apc, Globals, Proxy, Dict,
+  Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
+  // Hack arrays
+  Dict, VecArray,
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
   Object, WaitHandle, ResumableObj, AwaitAllWH,
+  // Collections
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
   ResumableFrame, // ResumableNode followed by Frame, Resumable, ObjectData
   NativeData, // a NativeData header preceding an HNI ObjectData
@@ -130,7 +133,7 @@ inline bool isObjectKind(HeaderKind k) {
 }
 
 inline bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Packed && k <= HeaderKind::Dict;
+  return k >= HeaderKind::Packed && k <= HeaderKind::VecArray;
 }
 
 enum class CollectionType : uint8_t { // Subset of possible HeaderKind values

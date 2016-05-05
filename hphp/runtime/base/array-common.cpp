@@ -16,13 +16,14 @@
 
 #include "hphp/runtime/base/array-common.h"
 
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/struct-array-defs.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
@@ -35,7 +36,7 @@ ssize_t ArrayCommon::ReturnInvalidIndex(const ArrayData*) {
 bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   assert(fp.getContainer() == ad);
   if (fp.getResetFlag()) return false;
-  if (ad->isPacked()) {
+  if (ad->isPackedLayout()) {
     assert(PackedArray::checkInvariants(ad));
     return fp.m_pos != ad->getSize();
   } else if (ad->isStruct()) {

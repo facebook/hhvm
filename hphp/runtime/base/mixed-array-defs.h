@@ -332,7 +332,8 @@ struct MixedArray::ValIter {
     : m_arr(arr)
     , m_kind(arr->kind())
   {
-    assert(isMixed(m_kind) || m_kind == kPackedKind || m_kind == kStructKind);
+    assert(isMixed(m_kind) || m_kind == kPackedKind ||
+           m_kind == kVecKind || m_kind == kStructKind);
     if (isMixed(m_kind)) {
       m_iterMixed = asMixed(arr)->data();
       m_stopMixed = m_iterMixed + asMixed(arr)->m_used;
@@ -350,7 +351,8 @@ struct MixedArray::ValIter {
     : m_arr(arr)
     , m_kind(arr->kind())
   {
-    assert(isMixed(m_kind) || m_kind == kPackedKind || m_kind == kStructKind);
+    assert(isMixed(m_kind) || m_kind == kPackedKind ||
+           m_kind == kVecKind || m_kind == kStructKind);
     if (isMixed(m_kind)) {
       m_iterMixed = asMixed(arr)->data() + start_pos;
       m_stopMixed = asMixed(arr)->data() + asMixed(arr)->m_used;
@@ -473,7 +475,7 @@ void ConvertTvToUncounted(TypedValue* source) {
       assertx(type == KindOfArray || type == KindOfPersistentArray);
       auto& ad = source->m_data.parr;
       if (ad->empty()) ad = staticEmptyArray();
-      else if (ad->isPacked()) ad = PackedArray::MakeUncounted(ad);
+      else if (ad->isPackedLayout()) ad = PackedArray::MakeUncounted(ad);
       else if (ad->isStruct()) ad = StructArray::MakeUncounted(ad);
       else ad = MixedArray::MakeUncounted(ad);
     }
@@ -495,7 +497,7 @@ void ReleaseUncountedTv(TypedValue& tv) {
     auto arr = tv.m_data.parr;
     assert(!arr->isRefCounted());
     if (!arr->isStatic()) {
-      if (arr->isPacked()) PackedArray::ReleaseUncounted(arr);
+      if (arr->isPackedLayout()) PackedArray::ReleaseUncounted(arr);
       else if (arr->isStruct()) StructArray::ReleaseUncounted(arr);
       else MixedArray::ReleaseUncounted(arr);
     }

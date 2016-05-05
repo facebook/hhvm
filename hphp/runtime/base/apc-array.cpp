@@ -91,7 +91,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, bool unserializeObj) {
 APCHandle* APCArray::MakeUncountedArray(ArrayData* array) {
   assert(apcExtension::UseUncounted);
   APCTypedValue* value;
-  if (array->isPacked()) {
+  if (array->isPackedLayout()) {
     value = new APCTypedValue(APCTypedValue::UncountedArr{},
                               PackedArray::MakeUncounted(array));
   } else if (array->isStruct()) {

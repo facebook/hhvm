@@ -1095,7 +1095,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
 static NEVER_INLINE
 int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
   assert(arr->decWillRelease());
-  assert(arr->isPacked());
+  assert(arr->isPackedLayout());
   // Use non-specialized release call so ArrayTracer can track its destruction
   arr->release();
   if (debug) {
@@ -1174,7 +1174,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   if (UNLIKELY(ad->getSize() == 0)) {
     if (UNLIKELY(ad->decWillRelease())) {
-      if (ad->isPacked()) return iter_next_free_packed(dest, ad);
+      if (ad->isPackedLayout()) return iter_next_free_packed(dest, ad);
       if (ad->isMixedLayout()) return iter_next_free_mixed(dest, ad);
       if (ad->isStruct()) return iter_next_free_struct(dest, ad);
     }
@@ -1191,7 +1191,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   aiter.m_data = ad;
   auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
 
-  if (LIKELY(ad->isPacked())) {
+  if (LIKELY(ad->isPackedLayout())) {
     aiter.m_pos = 0;
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
@@ -1232,7 +1232,7 @@ int64_t new_iter_array_key(Iter*       dest,
                            TypedValue* keyOut) {
   if (UNLIKELY(ad->getSize() == 0)) {
     if (UNLIKELY(ad->decWillRelease())) {
-      if (ad->isPacked()) return iter_next_free_packed(dest, ad);
+      if (ad->isPackedLayout()) return iter_next_free_packed(dest, ad);
       if (ad->isMixedLayout()) return iter_next_free_mixed(dest, ad);
       if (ad->isStruct()) return iter_next_free_struct(dest, ad);
     }
@@ -1252,7 +1252,7 @@ int64_t new_iter_array_key(Iter*       dest,
   aiter.m_data = ad;
   auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
 
-  if (ad->isPacked()) {
+  if (ad->isPackedLayout()) {
     aiter.m_pos = 0;
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
@@ -1555,7 +1555,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
   {
     auto const ad       = const_cast<ArrayData*>(arrIter->getArrayData());
-    auto const isPacked = ad->isPacked();
+    auto const isPacked = ad->isPackedLayout();
     auto const isMixed  = ad->isMixedLayout();
     auto const isStruct = ad->isStruct();
 
@@ -1811,7 +1811,7 @@ int64_t iter_next_packed_impl(Iter* it,
                               TypedValue* keyOut) {
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isPacked());
+         it->arr().getArrayData()->isPackedLayout());
   auto& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
   assert(PackedArray::checkInvariants(ad));
@@ -1902,7 +1902,7 @@ int64_t iterNextArrayPacked(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayPacked: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isPacked());
+         it->arr().getArrayData()->isPackedLayout());
   return iter_next_packed_impl<false>(it, valOut, nullptr);
 }
 
@@ -1920,7 +1920,7 @@ int64_t iterNextKArrayPacked(Iter* it,
   TRACE(2, "iterNextKArrayPacked: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isPacked());
+         it->arr().getArrayData()->isPackedLayout());
   return iter_next_packed_impl<true>(it, valOut, keyOut);
 }
 
@@ -1956,7 +1956,7 @@ int64_t iterNextArray(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData());
-  assert(!it->arr().getArrayData()->isPacked());
+  assert(!it->arr().getArrayData()->isPackedLayout());
   assert(!it->arr().getArrayData()->isMixedLayout());
 
   ArrayIter& iter = it->arr();
@@ -1974,7 +1974,7 @@ int64_t iterNextKArray(Iter* it,
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData());
   assert(!it->arr().getArrayData()->isMixedLayout());
-  assert(!it->arr().getArrayData()->isPacked());
+  assert(!it->arr().getArrayData()->isPackedLayout());
 
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());

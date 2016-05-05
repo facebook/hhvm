@@ -334,6 +334,7 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
     case HeaderKind::Struct:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
+    case HeaderKind::VecArray:
     case HeaderKind::Empty:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
@@ -407,6 +408,7 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Dict:
       case HeaderKind::Struct:
       case HeaderKind::Empty:
+      case HeaderKind::VecArray:
       case HeaderKind::String:
       case HeaderKind::Ref:
         ptrs_.insert(h);
@@ -548,6 +550,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::Empty:
+    case HeaderKind::VecArray:
     case HeaderKind::Apc:
     case HeaderKind::Globals:
     case HeaderKind::Proxy:
@@ -619,6 +622,7 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:
+      case HeaderKind::VecArray:
       case HeaderKind::Globals:
       case HeaderKind::Proxy:
       case HeaderKind::Resource:

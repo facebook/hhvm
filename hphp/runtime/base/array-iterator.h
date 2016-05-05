@@ -321,7 +321,7 @@ private:
     m_data = ad;
     m_nextHelperIdx = IterNextIndex::ArrayMixed;
     if (ad != nullptr) {
-      if (ad->isPacked()) {
+      if (ad->isPackedLayout()) {
         m_nextHelperIdx = IterNextIndex::ArrayPacked;
       } else if (!ad->isMixedLayout()) {
         m_nextHelperIdx = IterNextIndex::Array;

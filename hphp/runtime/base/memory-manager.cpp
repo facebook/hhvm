@@ -643,9 +643,9 @@ inline void* MemoryManager::realloc(void* ptr,
 
 const char* header_names[] = {
   "PackedArray", "StructArray", "MixedArray", "EmptyArray", "ApcArray",
-  "GlobalsArray", "ProxyArray", "DictArray", "String", "Resource", "Ref",
-  "Object", "WaitHandle", "ResumableObj", "AwaitAllWH",
-  "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
+  "GlobalsArray", "ProxyArray", "DictArray", "VecArray",
+  "String", "Resource", "Ref", "Object", "WaitHandle", "ResumableObj",
+  "AwaitAllWH", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "ResumableFrame", "NativeData", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole"
 };
@@ -718,6 +718,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:
+      case HeaderKind::VecArray:
       case HeaderKind::Globals:
       case HeaderKind::Proxy:
       case HeaderKind::Object:

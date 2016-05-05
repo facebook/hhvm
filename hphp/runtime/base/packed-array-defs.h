@@ -28,7 +28,7 @@ constexpr uint32_t kPackedSmallSize = 3; // same as mixed-array for now
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Return the payload from a ArrayData* that is kPackedKind.
+ * Return the payload from a ArrayData* that is kPacked/VecKind.
  */
 ALWAYS_INLINE
 TypedValue* packedData(const ArrayData* arr) {

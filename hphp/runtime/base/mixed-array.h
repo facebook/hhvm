@@ -175,6 +175,8 @@ struct MixedArray final : private ArrayData,
 
   static ArrayData* ConvertToDict(ArrayData* ad);
 
+  static MixedArray* ToDictInPlace(ArrayData*);
+
   /*
    * Allocate a new, empty, request-local array with the same mode as
    * `other' and with enough space reserved for `capacity' members, or
@@ -296,7 +298,6 @@ public:
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToDict(ArrayData*);
-  static ArrayData* ToDictInPlace(ArrayData*);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);

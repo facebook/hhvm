@@ -26,13 +26,16 @@
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
+    if (!IsEnabled()) return;                                           \
+    std::string msg;                                                    \
     va_list ap; va_start(ap, fmt);                                      \
-    Log(Log ## LOGLEVEL, fmt, ap);                                      \
+    string_vsnprintf(msg, fmt, ap);                                     \
     va_end(ap);                                                         \
+    LogImpl(Log ## LOGLEVEL, msg, nullptr);                             \
   }                                                                     \
   void Logger::LOGLEVEL(const std::string &msg) {                       \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
-    Log(Log ## LOGLEVEL, msg, nullptr);                                 \
+    LogImpl(Log ## LOGLEVEL, msg, nullptr);                             \
   }
 
 namespace HPHP {
@@ -60,28 +63,16 @@ std::string Logger::ExtraHeader;
 int Logger::MaxMessagesPerRequest = -1;
 bool Logger::Escape = true;
 pid_t Logger::s_pid;
+ServiceData::ExportedCounter* Logger::s_errorLines =
+    ServiceData::createCounter("errorlog_lines");
+ServiceData::ExportedCounter* Logger::s_errorBytes =
+    ServiceData::createCounter("errorlog_bytes");
 
 IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 std::map<std::string, Logger*> Logger::s_loggers = {
   {Logger::DEFAULT, new Logger()},
 };
-
-void Logger::Log(LogLevelType level, const char *fmt, va_list ap) {
-  if (!IsEnabled()) return;
-
-  std::string msg;
-  string_vsnprintf(msg, fmt, ap);
-  Log(level, msg, nullptr);
-}
-
-void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
-  if (!IsEnabled()) return;
-
-  std::string msg;
-  string_vsnprintf(msg, fmt, ap);
-  Log(level, msg, nullptr, true, true);
-}
 
 void Logger::Log(LogLevelType level, const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
@@ -90,7 +81,7 @@ void Logger::Log(LogLevelType level, const char *type, const Exception &e,
   if (file && file[0]) {
     msg += folly::sformat(" in {} on line {}", file, line);
   }
-  Log(level, msg, nullptr);
+  LogImpl(level, msg, nullptr);
 }
 
 void Logger::OnNewRequest() {
@@ -105,12 +96,23 @@ void Logger::ResetRequestCount() {
   threadData->message = 0;
 }
 
-void Logger::Log(LogLevelType level, const std::string &msg,
-                 const StackTrace *stackTrace,
-                 bool escape /* = false */, bool escapeMore /* = false */) {
+void Logger::LogImpl(LogLevelType level, const std::string &msg,
+                     const StackTrace *stackTrace,
+                     bool escape /* = false */, bool escapeMore /* = false */) {
+
+  ThreadData *threadData = s_threadData.get();
+  if (threadData->message != -1 &&
+      ++threadData->message > MaxMessagesPerRequest &&
+      MaxMessagesPerRequest >= 0) {
+    return;
+  }
   for (auto& l : s_loggers) {
     auto& logger = l.second;
-    if (logger) logger->log(level, msg, stackTrace, escape, escapeMore);
+    if (logger) {
+      auto growth = logger->log(level, msg, stackTrace, escape, escapeMore);
+      s_errorLines->addValue(growth.first);
+      s_errorBytes->addValue(growth.second);
+    }
   }
 }
 
@@ -125,7 +127,11 @@ void Logger::SetStandardOut(const std::string &name, FILE *file) {
 void Logger::FlushAll() {
   for (auto& l : s_loggers) {
     auto& logger = l.second;
-    logger->flush();
+    if (logger) {
+      auto growth = logger->flush();
+      s_errorLines->addValue(growth.first);
+      s_errorBytes->addValue(growth.second);
+    }
   }
 }
 
@@ -146,21 +152,14 @@ int Logger::GetSyslogLevel(LogLevelType level) {
   }
 }
 
-void Logger::log(LogLevelType level, const std::string &msg,
-                 const StackTrace *stackTrace,
-                 bool escape /* = false */, bool escapeMore /* = false */) {
-
+std::pair<int, int> Logger::log(LogLevelType level, const std::string &msg,
+                                const StackTrace *stackTrace,
+                                bool escape /* = false */,
+                                bool escapeMore /* = false */) {
   if (Logger::AlwaysEscapeLog && Logger::Escape) {
     escape = true;
   }
-  assert(!escapeMore || escape);
-
-  ThreadData *threadData = s_threadData.get();
-  if (threadData->message != -1 &&
-      ++threadData->message > MaxMessagesPerRequest &&
-      MaxMessagesPerRequest >= 0) {
-    return;
-  }
+  assertx(!escapeMore || escape); // escape must be enabled to escapeMore
 
   std::unique_ptr<StackTrace> deleter;
   if (LogNativeStackTrace && stackTrace == nullptr) {
@@ -171,7 +170,9 @@ void Logger::log(LogLevelType level, const std::string &msg,
   if (UseSyslog) {
     syslog(GetSyslogLevel(level), "%s", msg.c_str());
   }
+  int bytes = 0;
   if (UseLogFile) {
+    ThreadData *threadData = s_threadData.get();
     FILE* tf = threadData->log;
     FILE* f = output();
     std::string header, sheader;
@@ -185,7 +186,6 @@ void Logger::log(LogLevelType level, const std::string &msg,
     }
     const char *escaped = escape ? EscapeString(msg) : msg.c_str();
     const char *ending = escapeMore ? "\\n" : "\n";
-    int bytes;
     if (f == m_standardOut && s_stderr_color) {
       bytes =
         fprintf(f, "%s%s%s%s%s",
@@ -194,7 +194,6 @@ void Logger::log(LogLevelType level, const std::string &msg,
     } else {
       bytes = fprintf(f, "%s%s%s", sheader.c_str(), escaped, ending);
     }
-
     if (tf && tf != f) {
       int threadBytes =
         fprintf(tf, "%s%s%s", header.c_str(), escaped, ending);
@@ -208,12 +207,12 @@ void Logger::log(LogLevelType level, const std::string &msg,
     if (escape) {
       free((void*)escaped);
     }
-
     fflush(f);
     if (UseCronolog || (m_output && !m_isPipeOutput)) {
       m_flusher.recordWriteAndMaybeDropCaches(f, bytes);
     }
   }
+  return std::make_pair(1, bytes);
 }
 
 void Logger::ResetPid() {

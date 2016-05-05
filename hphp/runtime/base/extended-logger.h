@@ -27,7 +27,6 @@ struct Array;
 
 struct ExtendedLogger : Logger {
   static bool EnabledByDefault;
-
   // These logging functions will also print stacktrace at end of each message.
   static void Error(const std::string &msg);
   static void Warning(const std::string &msg);
@@ -47,17 +46,15 @@ struct ExtendedLogger : Logger {
   static std::string StringOfStackTrace(const Array& stackTrace);
 
 private:
-  // Log additional injected stacktrace.
-  static void Log(LogLevelType level, const Array& stackTrace, bool escape = true,
-                  bool escapeMore = false);
+  static void LogImpl(LogLevelType level, const std::string &msg);
 
-  static std::string StringOfFrame(const Array& frame, int i, bool escape = false);
-
-  virtual void log(LogLevelType level, const std::string &msg,
-                   const StackTrace *stackTrace,
-                   bool escape = true, bool escapeMore = false);
-  static void PrintStackTrace(FILE *f, const Array& stackTrace,
-                              bool escape = false, bool escapeMore = false);
+  static std::string StringOfFrame(const Array& frame, int i,
+                                   bool escape = false);
+  std::pair<int, int> log(LogLevelType level, const std::string &msg,
+                          const StackTrace *stackTrace,
+                          bool escape = true, bool escapeMore = false) override;
+  static int PrintStackTrace(FILE *f, const Array& stackTrace,
+                             bool escape = false);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

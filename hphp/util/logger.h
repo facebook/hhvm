@@ -21,9 +21,10 @@
 #include <string>
 #include <stdarg.h>
 
-#include "hphp/util/thread-local.h"
 #include "hphp/util/cronolog.h"
 #include "hphp/util/log-file-flusher.h"
+#include "hphp/util/service-data.h"
+#include "hphp/util/thread-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,13 +133,9 @@ protected:
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
-  static void Log(LogLevelType level,
-    ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
-  static void LogEscapeMore(LogLevelType level,
-    ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
-  static void Log(LogLevelType level, const std::string &msg,
-                  const StackTrace *stackTrace,
-                  bool escape = false, bool escapeMore = false);
+  static void LogImpl(LogLevelType level, const std::string &msg,
+                      const StackTrace *stackTrace,
+                      bool escape = false, bool escapeMore = false);
 
   static inline bool IsEnabled() {
     return Logger::UseLogFile || Logger::UseSyslog;
@@ -146,14 +143,17 @@ protected:
 
   static int GetSyslogLevel(LogLevelType level);
 
-  /**
-   * For subclasses to override, e.g., to support injected stack trace.
-   */
-  virtual void log(LogLevelType level, const std::string &msg,
-                   const StackTrace *stackTrace,
-                   bool escape = false, bool escapeMore = false);
-  // mainly intended for subclass of loggers that batch
-  virtual void flush() {}
+  friend struct ExtendedLogger;
+
+  // For subclasses to override, e.g., to support injected stack trace.
+  // Returns (lines, bytes) it's going to output. Used for monitoring growth.
+  virtual std::pair<int, int> log(LogLevelType level, const std::string& msg,
+                                  const StackTrace* stackTrace,
+                                  bool escape = false, bool escapeMore = false);
+  // Intended for subclass of loggers that batch.
+  // Returns (lines, bytes) it's going to output. Used for monitoring growth.
+  virtual std::pair<int, int> flush() { return std::make_pair(0, 0); }
+
   virtual void setBatchSize(size_t bsize) {}
 
   // deduce where to write log
@@ -172,6 +172,9 @@ protected:
   Cronolog m_cronOutput;
   LogFileFlusher m_flusher;
   static std::map<std::string, Logger*> s_loggers;
+  // bytes and lines the DEFAULT logger has written
+  static ServiceData::ExportedCounter* s_errorLines;
+  static ServiceData::ExportedCounter* s_errorBytes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

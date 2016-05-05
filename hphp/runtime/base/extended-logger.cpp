@@ -19,37 +19,29 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/util/string-vsnprintf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
   void ExtendedLogger::LOGLEVEL(const char *fmt, ...) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    if (!ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = createBacktrace(BacktraceArgs());                     \
-      if (!bt.empty()) {                                               \
-        va_list ap; va_start(ap, fmt);                                 \
-        Logger::LogEscapeMore(Log ## LOGLEVEL, fmt, ap);               \
-        va_end(ap);                                                    \
-        Log(Log ## LOGLEVEL, bt);                                      \
-        return;                                                        \
-      }                                                                \
-    }                                                                  \
+    std::string msg;                                                   \
     va_list ap; va_start(ap, fmt);                                     \
-    Logger::Log(Log ## LOGLEVEL, fmt, ap);                             \
+    string_vsnprintf(msg, fmt, ap);                                    \
     va_end(ap);                                                        \
+    if (!ExtendedLogger::EnabledByDefault) {                           \
+      LogImpl(Log ## LOGLEVEL, msg);                                   \
+    } else {                                                           \
+      Logger::LogImpl(Log ## LOGLEVEL, msg, nullptr, true, true);      \
+    }                                                                  \
   }                                                                    \
   void ExtendedLogger::LOGLEVEL(const std::string &msg) {              \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (!ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = createBacktrace(BacktraceArgs());                     \
-      if (!bt.empty()) {                                               \
-        Logger::Log(Log ## LOGLEVEL, msg, nullptr, true, true);        \
-        Log(Log ## LOGLEVEL, bt);                                      \
-        return;                                                        \
-      }                                                                \
+      LogImpl(Log ## LOGLEVEL, msg);                                   \
+    } else {                                                           \
+      Logger::LogImpl(Log ## LOGLEVEL, msg, nullptr, true, true);      \
     }                                                                  \
-    Logger::Log(Log ## LOGLEVEL, msg, nullptr, true);                  \
   }
 
 namespace HPHP {
@@ -67,45 +59,64 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ExtendedLogger::log(LogLevelType level, const std::string &msg,
-                         const StackTrace *stackTrace,
-                         bool escape /* = true */,
-                         bool escapeMore /* = false */) {
-  Array bt = createBacktrace(BacktraceArgs());
-  if (!bt.empty()) {
-    Logger::log(level, msg, stackTrace, escape, escape);
-    Log(level, bt, escape, escapeMore);
-    return;
-  }
-  Logger::log(level, msg, stackTrace, escape, escapeMore);
-}
-
-void ExtendedLogger::Log(LogLevelType level, const Array& stackTrace,
-                         bool escape /* = true */,
-                         bool escapeMore /* = false */) {
-  assert(!escapeMore || escape);
+void ExtendedLogger::LogImpl(LogLevelType level, const std::string &msg) {
+  assertx(!EnabledByDefault);
   ThreadData *threadData = s_threadData.get();
   if (threadData->message != -1 &&
       ++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {
     return;
   }
-
-  if (stackTrace.isNull()) return;
-
-  if (UseLogFile) {
-    FILE* tf = threadData->log;
-    for (const auto& l : s_loggers) {
-      const auto& logger = l.second;
-      if (auto* f = (logger ? logger->fileForStackTrace() : nullptr)) {
-          PrintStackTrace(f, stackTrace, escape, escapeMore);
-          if (tf == f) tf = nullptr; // only print to thread local log once
+  for (auto& l : s_loggers) {
+    auto& logger = l.second;
+    if (logger) {
+      // we can only get here if ther's no extended loggers (see assertion)
+      // if this isn't enough of assurance we could check type at runtime,
+      // but probably good enough for now
+      Array bt;
+      bool writeBt = false;
+      auto* stFile = logger->fileForStackTrace();
+      if (stFile) {
+        bt = createBacktrace(BacktraceArgs());
+        writeBt = !bt.empty();
       }
-    }
-    if (tf) {
-      PrintStackTrace(tf, stackTrace, escape, escapeMore);
+      // only escape more (the final new line) if we're writing the backtrace
+      auto growth = logger->log(level, msg, nullptr, true, writeBt);
+      if (writeBt) {
+        // escape the BT too as well as the log
+        growth.second += PrintStackTrace(stFile, bt, true);
+        FILE* tf = s_threadData.get()->log;
+        if (tf && tf != stFile) {
+          PrintStackTrace(tf, bt, true);
+        }
+      }
+      s_errorLines->addValue(growth.first);
+      s_errorBytes->addValue(growth.second);
     }
   }
+}
+
+std::pair<int, int> ExtendedLogger::log(LogLevelType level,
+                                        const std::string &msg,
+                                        const StackTrace *stackTrace,
+                                        bool escape /* = true */,
+                                        bool escapeMore /* = false */) {
+  assertx(!escapeMore || escape); // escape must be enabled to escapeMore
+  Array bt = createBacktrace(BacktraceArgs());
+  if (bt.empty()) {
+    return Logger::log(level, msg, stackTrace, escape, escapeMore);
+  }
+  // If we've got a BT and escaping, then we've got to escape more to fit BT.
+  auto growth = Logger::log(level, msg, stackTrace, escape, escape);
+  FILE* out = output();
+  FILE* tf = s_threadData.get()->log;
+  if (out) {
+    growth.second += PrintStackTrace(out, bt, escape);
+  }
+  if (tf && tf != out) {
+    PrintStackTrace(tf, bt, escape);
+  }
+  return std::make_pair(growth.first, growth.second);
 }
 
 const StaticString
@@ -115,30 +126,35 @@ const StaticString
   s_type("type"),
   s_line("line");
 
-void ExtendedLogger::PrintStackTrace(FILE *f, const Array& stackTrace,
-                                     bool escape /* = false */,
-                                     bool escapeMore /* = false */) {
+int ExtendedLogger::PrintStackTrace(FILE *f, const Array& stackTrace,
+                                    bool escape /* = false */) {
+  if (stackTrace.isNull() || !f) return 0;
   int i = 0;
+  int bytes = 0;
   for (ArrayIter it(stackTrace); it; ++it, ++i) {
     if (i > 0) {
-      fprintf(f, "%s", escape ? "\\n" : "\n");
+      bytes += fprintf(f, "%s", escape ? "\\n" : "\n");
     }
     Array frame = it.second().toArray();
-    fprintf(f, "    #%d ", i);
+    bytes += fprintf(f, "    #%d ", i);
     if (frame.exists(s_function)) {
       if (frame.exists(s_class)) {
-        fprintf(f, "%s%s%s(), called ", frame[s_class].toString().c_str(),
-                frame[s_type].toString().c_str(),
-                frame[s_function].toString().c_str());
+        bytes += fprintf(f, "%s%s%s(), called ",
+                         frame[s_class].toString().c_str(),
+                         frame[s_type].toString().c_str(),
+                         frame[s_function].toString().c_str());
       } else {
-        fprintf(f, "%s(), called ", frame[s_function].toString().c_str());
+        bytes += fprintf(f, "%s(), called ",
+                         frame[s_function].toString().c_str());
       }
     }
-    fprintf(f, "at [%s:%" PRId64 "]", frame[s_file].toString().c_str(),
-            frame[s_line].toInt64());
+   bytes +=  fprintf(f, "at [%s:%" PRId64 "]",
+                     frame[s_file].toString().c_str(),
+                     frame[s_line].toInt64());
   }
-  fprintf(f, escapeMore ? "\\n" : "\n");
+  bytes += fprintf(f, "\n");
   fflush(f);
+  return bytes;
 }
 
 std::string ExtendedLogger::StringOfFrame(const Array& frame, int i, bool escape) {

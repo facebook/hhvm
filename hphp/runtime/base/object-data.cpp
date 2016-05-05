@@ -1178,10 +1178,10 @@ bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
 
 //////////////////////////////////////////////////////////////////////
 
-template <bool warn, bool define>
+template <MOpFlags flags>
 TypedValue* ObjectData::propImpl(
   TypedValue* tvRef,
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
   auto const lookup = getProp(ctx, key);
@@ -1195,9 +1195,9 @@ TypedValue* ObjectData::propImpl(
       // Property is unset, try __get.
       if (getAttribute(UseGet) && invokeGet(tvRef, key)) return tvRef;
 
-      if (warn) raiseUndefProp(key);
+      if (flags & MOpFlags::Warn) raiseUndefProp(key);
 
-      if (define) return prop;
+      if (flags & MOpFlags::Define) return prop;
       return const_cast<TypedValue*>(init_null_variant.asTypedValue());
     }
 
@@ -1234,9 +1234,9 @@ TypedValue* ObjectData::propImpl(
     throw_invalid_property_name(StrNR(key));
   }
 
-  if (warn) raiseUndefProp(key);
+  if (flags & MOpFlags::Warn) raiseUndefProp(key);
 
-  if (define) {
+  if (flags & MOpFlags::Define) {
     auto& var = reserveProperties().lvalAt(StrNR(key), AccessFlags::Key);
     return var.asTypedValue();
   }
@@ -1246,34 +1246,26 @@ TypedValue* ObjectData::propImpl(
 
 TypedValue* ObjectData::prop(
   TypedValue* tvRef,
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<false, false>(tvRef, ctx, key);
+  return propImpl<MOpFlags::None>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propD(
   TypedValue* tvRef,
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<false, true>(tvRef, ctx, key);
+  return propImpl<MOpFlags::Define>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propW(
   TypedValue* tvRef,
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<true, false>(tvRef, ctx, key);
-}
-
-TypedValue* ObjectData::propWD(
-  TypedValue* tvRef,
-  Class* ctx,
-  const StringData* key
-) {
-  return propImpl<true, true>(tvRef, ctx, key);
+  return propImpl<MOpFlags::Warn>(tvRef, ctx, key);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

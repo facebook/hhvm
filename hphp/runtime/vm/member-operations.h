@@ -1812,7 +1812,7 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
  */
 template <MOpFlags flags, bool isObj = false, KeyType keyType = KeyType::Any>
 inline TypedValue* Prop(TypedValue& tvRef,
-                        Class* ctx,
+                        const Class* ctx,
                         TypedValue* base,
                         key_type<keyType> key) {
   auto constexpr warn   = flags & MOpFlags::Warn;
@@ -1839,9 +1839,8 @@ inline TypedValue* Prop(TypedValue& tvRef,
   // Get property.
 
   if (warn) {
-    return define ?
-      instance->propWD(&tvRef, ctx, keySD) :
-      instance->propW(&tvRef, ctx, keySD);
+    assertx(!define);
+    return instance->propW(&tvRef, ctx, keySD);
   }
 
   if (define || unset) return instance->propD(&tvRef, ctx, keySD);

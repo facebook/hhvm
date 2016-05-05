@@ -366,10 +366,10 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   };
 
  private:
-  template <bool warn, bool define>
+  template <MOpFlags flags>
   TypedValue* propImpl(
     TypedValue* tvRef,
-    Class* ctx,
+    const Class* ctx,
     const StringData* key
   );
 
@@ -394,25 +394,19 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
  public:
   TypedValue* prop(
     TypedValue* tvRef,
-    Class* ctx,
+    const Class* ctx,
     const StringData* key
   );
 
   TypedValue* propD(
     TypedValue* tvRef,
-    Class* ctx,
+    const Class* ctx,
     const StringData* key
   );
 
   TypedValue* propW(
     TypedValue* tvRef,
-    Class* ctx,
-    const StringData* key
-  );
-
-  TypedValue* propWD(
-    TypedValue* tvRef,
-    Class* ctx,
+    const Class* ctx,
     const StringData* key
   );
 

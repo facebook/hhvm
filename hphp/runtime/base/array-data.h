@@ -396,6 +396,8 @@ public:
    */
   ArrayData* toDict();
 
+  ArrayData* toVec() const;
+
   /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
    */
@@ -622,6 +624,7 @@ struct ArrayFunctions {
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
   ArrayData* (*toDict[NK])(ArrayData*);
+  ArrayData* (*toVec[NK])(const ArrayData*);
 };
 
 extern const ArrayFunctions g_array_funcs;

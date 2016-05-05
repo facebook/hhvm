@@ -100,6 +100,7 @@ struct APCLocalArray final : private ArrayData,
   static bool Uksort(ArrayData*, const Variant&);
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
+  static constexpr auto ToVec = &ArrayCommon::ToVec;
 
 public:
   using ArrayData::decRefCount;

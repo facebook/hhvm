@@ -1140,6 +1140,26 @@ ArrayData* PackedArray::ToDict(ArrayData* ad) {
   return MixedArray::ToDictInPlace(mixed);
 }
 
+ArrayData* PackedArray::ToVec(const ArrayData* adIn) {
+  assert(checkInvariants(adIn));
+  assert(adIn->isPacked());
+
+  auto const cap = adIn->cap();
+  auto const ad = static_cast<ArrayData*>(
+    MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  );
+
+  CopyPackedHelper(adIn, ad, 1, HeaderKind::VecArray);
+
+  assert(ad->isVecArray());
+  assert(ad->cap() == adIn->cap());
+  assert(ad->m_size == adIn->m_size);
+  assert(ad->m_pos == adIn->m_pos);
+  assert(ad->hasExactlyOneRef());
+  assert(checkInvariants(ad));
+  return ad;
+}
+
 void PackedArray::OnSetEvalScalar(ArrayData* ad) {
   assert(checkInvariants(ad));
   auto ptr = packedData(ad);

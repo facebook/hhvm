@@ -352,6 +352,12 @@ ArrayData* ProxyArray::ToDict(ArrayData* ad) {
   return ad;
 }
 
+ArrayData* ProxyArray::ToVec(const ArrayData* ad) {
+  auto r = innerArr(ad)->toVec();
+  reseatable(ad, r);
+  return const_cast<ArrayData*>(ad);
+}
+
 void ProxyArray::Renumber(ArrayData* ad) {
   innerArr(ad)->renumber();
 }

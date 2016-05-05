@@ -127,6 +127,12 @@ public:
       Array{new_arr, NoIncRef{}} : Array{*this};
   }
 
+  Array toVec() const {
+    if (!m_arr) return CreateVec();
+    auto new_arr = m_arr->toVec();
+    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
+  }
+
   /*
    * Constructors. Those that take "arr" or "var" are copy constructors, taking
    * array value from the parameter, and they are NOT constructing an array

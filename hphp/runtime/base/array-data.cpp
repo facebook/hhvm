@@ -682,6 +682,15 @@ const ArrayFunctions g_array_funcs = {
     ToDictNoop,
     PackedArray::ToDictVec,
   },
+
+  /*
+   * ArrayData* ToVec(ArrayData*)
+   *
+   *   Convert array to a new vector array. Keys will be discarded and the
+   *   vector array will contain the values in iteration order. If the array is
+   *   already a vector array, it will be returned unchanged (without copying).
+   */
+  DISPATCH(ToVec)
 };
 
 #undef DISPATCH

@@ -110,6 +110,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToDict(ArrayData*);
+  static ArrayData* ToVec(const ArrayData*);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad) {
@@ -132,6 +133,9 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* AppendWithRefVec(ArrayData*, const Variant&, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* MergeVec(ArrayData*, const ArrayData*);
+  static ArrayData* ToVecVec(const ArrayData* ad) {
+    return const_cast<ArrayData*>(ad);
+  }
 
   static constexpr auto ReleaseVec = &Release;
   static constexpr auto NvGetIntVec = &NvGetInt;

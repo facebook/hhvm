@@ -330,6 +330,10 @@ ArrayData* EmptyArray::ToDict(ArrayData*) {
   return MixedArray::MakeReserveDict(0);
 }
 
+ArrayData* EmptyArray::ToVec(const ArrayData*) {
+  return staticEmptyVecArray();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {

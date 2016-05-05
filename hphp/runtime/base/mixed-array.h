@@ -298,6 +298,7 @@ public:
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToDict(ArrayData*);
+  static constexpr auto ToVec = &ArrayCommon::ToVec;
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
@@ -369,6 +370,7 @@ public:
   static constexpr auto RenumberDict = &Renumber;
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
   static constexpr auto EscalateDict = &Escalate;
+  static constexpr auto ToVecDict = ToVec;
 
 private:
   MixedArray* copyMixed() const;

@@ -54,6 +54,8 @@ struct ArrayCommon {
    */
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
+
+  static ArrayData* ToVec(const ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////

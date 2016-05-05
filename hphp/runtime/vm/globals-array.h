@@ -133,6 +133,8 @@ public:
     return const_cast<ArrayData*>(ad);
   }
 
+  static constexpr auto ToVec = &ArrayCommon::ToVec;
+
 private:
   static GlobalsArray* asGlobals(ArrayData* ad);
   static const GlobalsArray* asGlobals(const ArrayData* ad);

@@ -71,6 +71,20 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
   return a;
 }
 
+ArrayData* ArrayCommon::ToVec(const ArrayData* a) {
+  auto const size = a->size();
+  if (!size) return staticEmptyVecArray();
+  VecArrayInit init{size};
+  for (ArrayIter it{a}; it; ++it) {
+    auto const& value = it.secondRef();
+    if (UNLIKELY(value.isReferenced())) {
+      throwRefInvalidArrayValueException(init.toArray());
+    }
+    init.append(value);
+  }
+  return init.create();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

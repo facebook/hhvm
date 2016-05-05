@@ -51,9 +51,9 @@ const StaticString
   s_debugInfo("__debugInfo");
 
 static VariableSerializer::ArrayKind getKind(const ArrayData* arr) {
-  return arr->isDict()
-    ? VariableSerializer::ArrayKind::Dict
-    : VariableSerializer::ArrayKind::PHP;
+  if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
+  if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
+  return VariableSerializer::ArrayKind::PHP;
 }
 
 /*
@@ -808,6 +808,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Dict:
         m_buf->append("Dict\n");
         break;
+      case ArrayKind::Vec:
+        m_buf->append("Vec\n");
+        break;
       case ArrayKind::PHP:
         m_buf->append("Array\n");
         break;
@@ -841,6 +844,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Dict:
         m_buf->append("dict (\n");
         break;
+      case ArrayKind::Vec:
+        m_buf->append("vec (\n");
+        break;
       case ArrayKind::PHP:
         m_buf->append("array (\n");
         break;
@@ -868,6 +874,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       switch (kind) {
       case ArrayKind::Dict:
         m_buf->append("dict");
+        break;
+      case ArrayKind::Vec:
+        m_buf->append("vec");
         break;
       case ArrayKind::PHP:
         m_buf->append("array");
@@ -912,6 +921,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       switch (kind) {
       case ArrayKind::Dict:
         m_buf->append("D:");
+        break;
+      case ArrayKind::Vec:
+        m_buf->append("v:");
         break;
       case ArrayKind::PHP:
         m_buf->append("a:");
@@ -1402,10 +1414,25 @@ static void serializeString(const String& str, VariableSerializer* serializer) {
 
 static void serializeArrayImpl(const ArrayData* arr,
                                VariableSerializer* serializer) {
-  serializer->writeArrayHeader(arr->size(), arr->isVectorData(), getKind(arr));
-  for (ArrayIter iter(arr); iter; ++iter) {
-    serializer->writeArrayKey(iter.first());
-    serializer->writeArrayValue(iter.secondRef());
+  if (arr->isVecArray()) {
+    serializer->writeArrayHeader(
+      arr->size(),
+      true,
+      VariableSerializer::ArrayKind::Vec
+    );
+    for (ArrayIter iter(arr); iter; ++iter) {
+      serializer->writeArrayValue(iter.secondRef());
+    }
+  } else {
+    serializer->writeArrayHeader(
+      arr->size(),
+      arr->isVectorData(),
+      getKind(arr)
+    );
+    for (ArrayIter iter(arr); iter; ++iter) {
+      serializer->writeArrayKey(iter.first());
+      serializer->writeArrayValue(iter.secondRef());
+    }
   }
   serializer->writeArrayFooter();
 }

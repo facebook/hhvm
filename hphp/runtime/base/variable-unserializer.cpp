@@ -44,11 +44,12 @@ namespace HPHP {
 
 namespace {
 
-enum class ArrayKind { PHP, Dict };
+enum class ArrayKind { PHP, Dict, Vec };
 
 void unserializeVariant(Variant&, VariableUnserializer* unserializer,
                         UnserializeMode mode = UnserializeMode::Value);
 Array unserializeArray(VariableUnserializer*, ArrayKind);
+Array unserializeVec(VariableUnserializer*);
 String unserializeString(VariableUnserializer*, char delimiter0 = '"',
                          char delimiter1 = '"');
 void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
@@ -185,6 +186,11 @@ void throwColRefKey() {
 [[noreturn]] NEVER_INLINE
 void throwUnexpectedEOB() {
   throw Exception("Unexpected end of buffer during unserialization");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwVecRefValue() {
+  throw Exception("Vecs cannot contain references");
 }
 }
 
@@ -733,8 +739,17 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
-      auto const kind = type == 'D' ? ArrayKind::Dict : ArrayKind::PHP;
+      auto const kind = (type == 'D') ?
+        ArrayKind::Dict : ArrayKind::PHP;
       auto a = unserializeArray(uns, kind);
+      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+    }
+    return; // array has '}' terminating
+  case 'v':
+    {
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
+      auto a = unserializeVec(uns);
       tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
@@ -964,6 +979,8 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
 }
 
 Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
+  assert(kind != ArrayKind::Vec);
+
   int64_t size = uns->readInt();
   uns->expectChar(':');
   uns->expectChar('{');
@@ -972,8 +989,8 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
     switch (kind) {
     case ArrayKind::Dict: return DictInit(0).toArray();
     case ArrayKind::PHP:  return Array::Create(); // static empty array
+    case ArrayKind::Vec: not_reached();
     }
-    not_reached();
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -992,6 +1009,7 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
     switch (kind) {
     case ArrayKind::Dict: return DictInit(size).toArray();
     case ArrayKind::PHP:  return ArrayInit(size, ArrayInit::Mixed{}).toArray();
+    case ArrayKind::Vec: not_reached();
     }
     not_reached();
   }();
@@ -1010,6 +1028,49 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
     if (UNLIKELY(isRefcountedType(value.getRawType()))) {
       uns->putInOverwrittenList(value);
     }
+    unserializeVariant(value, uns);
+
+    if (i < (size - 1)) {
+      auto lastChar = uns->peekBack();
+      if ((lastChar != ';' && lastChar != '}')) {
+        throwUnterminatedElement();
+      }
+    }
+  }
+
+  check_request_surprise_unlikely();
+  uns->expectChar('}');
+  return arr;
+}
+
+Array unserializeVec(VariableUnserializer* uns) {
+  int64_t size = uns->readInt();
+  uns->expectChar(':');
+  uns->expectChar('{');
+  if (size == 0) {
+    uns->expectChar('}');
+    return Array::CreateVec();
+  }
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+  auto const scale = computeScaleFromSize(size);
+  auto const allocsz = computeAllocBytes(scale);
+
+  // For large arrays, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+
+  // Pre-allocate an ArrayData of the given size, to avoid escalation in the
+  // middle, which breaks references.
+  auto arr = VecArrayInit(size).toArray();
+  for (int64_t i = 0; i < size; i++) {
+    if (UNLIKELY(uns->peek() == 'R')) {
+      throwVecRefValue();
+    }
+
+    Variant& value = arr.lvalAt();
     unserializeVariant(value, uns);
 
     if (i < (size - 1)) {

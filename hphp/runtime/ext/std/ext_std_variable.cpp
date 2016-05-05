@@ -212,7 +212,8 @@ const StaticString
   s_True("b:1;"),
   s_False("b:0;"),
   s_Res("i:0;"),
-  s_EmptyArray("a:0:{}");
+  s_EmptyArray("a:0:{}"),
+  s_EmptyVecArray("v:0:{}");
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
   switch (value.getType()) {
@@ -244,7 +245,10 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
-      if (arr->empty()) return s_EmptyArray;
+      if (arr->empty()) {
+        if (arr->isVecArray()) return s_EmptyVecArray;
+        return s_EmptyArray;
+      }
       // fall-through
     }
     case KindOfDouble:

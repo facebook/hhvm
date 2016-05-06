@@ -132,17 +132,17 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (sf == SORTFUNC_KSORT) {
     return ad;                          // trivial for packed arrays.
   }
-  if (ad->m_size <= 1) {
-    if (ad->isVecArray()) {
-      auto ret = MixedArray::ToDictInPlace(ToMixedCopy(ad));
+  if (isSortFamily(sf)) {               // sort/rsort/usort
+    if (UNLIKELY(ad->cowCheck())) {
+      auto ret = PackedArray::Copy(ad);
       assert(ret->hasExactlyOneRef());
       return ret;
     }
     return ad;
   }
-  if (isSortFamily(sf)) {               // sort/rsort/usort
-    if (UNLIKELY(ad->cowCheck())) {
-      auto ret = PackedArray::Copy(ad);
+  if (ad->m_size <= 1) {
+    if (ad->isVecArray()) {
+      auto ret = MixedArray::ToDictInPlace(ToMixedCopy(ad));
       assert(ret->hasExactlyOneRef());
       return ret;
     }

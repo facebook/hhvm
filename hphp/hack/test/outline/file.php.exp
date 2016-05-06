@@ -14,10 +14,12 @@ C
     type: method
     position: File "", line 8, characters 19-21:
     static: false
+    extents: File "", line 8, character 3 - line 8, character 26:
 
   bar
     type: method
     position: File "", line 10, characters 26-28:
     static: true
+    extents: File "", line 10, character 3 - line 10, character 33:
 
 

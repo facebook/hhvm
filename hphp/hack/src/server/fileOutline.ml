@@ -30,7 +30,8 @@ and class_member_ =
   | Method of method_
 
 and method_ = {
-  static : bool
+  static : bool;
+  extents : Pos.absolute;
 }
 
 let summarize_class class_ acc =
@@ -41,7 +42,8 @@ let summarize_class class_ acc =
     match method_ with
       | Ast.Method m ->
           let method_ = {
-            static = List.mem m.Ast.m_kind (Ast.Static)
+            static = List.mem m.Ast.m_kind (Ast.Static);
+            extents = (Pos.to_absolute m.Ast.m_extents);
           } in
           ((Pos.to_absolute (fst m.Ast.m_name), snd m.Ast.m_name),
           Method method_) :: acc
@@ -115,6 +117,7 @@ let print_method pos name m =
   Printf.printf "    type: method\n";
   Printf.printf "    position: %s\n" (Pos.string pos);
   Printf.printf "    static: %b\n" m.static;
+  Printf.printf "    extents: %s\n" (Pos.multiline_string m.extents);
   Printf.printf "\n"
 
 let print_class_member ((pos, name), member) =

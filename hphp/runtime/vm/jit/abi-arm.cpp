@@ -30,32 +30,30 @@ namespace {
 const RegSet kGPCallerSaved =
   vixl::x0 | vixl::x1 | vixl::x2 | vixl::x3 |
   vixl::x4 | vixl::x5 | vixl::x6 | vixl::x7 |
-  vixl::x8 |
-  // x9  = rAsm
-  vixl::x10 | vixl::x11 | vixl::x12 | vixl::x13 | vixl::x14 | vixl::x15 |
+  vixl::x8 | vixl::x9 | vixl::x10 | vixl::x11 |
+  vixl::x12 | vixl::x13 | vixl::x14 | vixl::x15;
   // x16 = rHostCallReg, used as ip0/tmp0 by MacroAssembler
   // x17 = used as ip1/tmp1 by MacroAssembler
-  vixl::x18;
+  // x18  = rAsm
 
 const RegSet kGPCalleeSaved =
-  // x19 = rvmsp()
-  // x20 = rvmtl()
-  vixl::x21 | vixl::x22 | vixl::x23 | vixl::x24 |
-  vixl::x25 | vixl::x26 | vixl::x27 | vixl::x28;
-  // x29 = rvmfp()
-  // x30 = rLinkReg
+  vixl::x19 | vixl::x20 | vixl::x21 | vixl::x22 |
+  vixl::x23 | vixl::x24 | vixl::x25 | vixl::x26 |
+  vixl::x27 | vixl::x28;
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
 const RegSet kGPReserved =
-  rAsm | rHostCallReg | vixl::x17 | rvmsp() | rvmtl() | rvmfp() | rLinkReg |
+  rHostCallReg | vixl::x17 | rAsm | rvmtl() |
+  rvmfp() | rlr() | vixl::xzr | rsp();
   // ARM machines really only have 32 GP regs.  However, vixl has 33 separate
   // register codes, because it treats the zero register and stack pointer
   // (which are really both register 31) separately.  Rather than lose this
   // distinction in vixl (it's really helpful for avoiding stupid mistakes), we
   // sacrifice the ability to represent all 32 SIMD regs, and pretend there are
   // 33 GP regs.
-  vixl::xzr | vixl::sp; // 31 is the encoded register number for zr and sp
+
+const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kSIMDCallerSaved =
   vixl::d0 | vixl::d1 | vixl::d2 | vixl::d3 |
@@ -73,15 +71,26 @@ const RegSet kSIMDCalleeSaved =
 
 const RegSet kSIMDUnreserved = kSIMDCallerSaved | kSIMDCalleeSaved;
 const RegSet kSIMDReserved;
+const RegSet kSIMDRegs = kSIMDUnreserved | kSIMDReserved;
 
+const RegSet kCallerSaved = kGPCallerSaved | kSIMDCallerSaved;
 const RegSet kCalleeSaved = kGPCalleeSaved | kSIMDCalleeSaved;
 
 const RegSet kSF = RegSet(RegSF{0});
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Registers that can safely be used for scratch purposes in-between traces.
+ */
 const RegSet kScratchCrossTraceRegs =
   kSIMDCallerSaved | (kGPUnreserved - arm::vm_regs_with_sp());
+
+/*
+ * Helper code ABI registers.
+ */
+const RegSet kGPHelperRegs = rAsm | vixl::x14;
+const RegSet kSIMDHelperRegs = vixl::d5 | vixl::d6 | vixl::d7;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -91,7 +100,8 @@ const Abi trace_abi {
   kSIMDUnreserved,
   kSIMDReserved,
   kCalleeSaved,
-  kSF
+  kSF,
+  true
 };
 
 const Abi cross_trace_abi {
@@ -100,6 +110,16 @@ const Abi cross_trace_abi {
   trace_abi.simd() & kScratchCrossTraceRegs,
   trace_abi.simd() - kScratchCrossTraceRegs,
   trace_abi.calleeSaved & kScratchCrossTraceRegs,
+  trace_abi.sf,
+  false
+};
+
+const Abi helper_abi {
+  kGPHelperRegs,
+  trace_abi.gp() - kGPHelperRegs,
+  kSIMDHelperRegs,
+  trace_abi.simd() - kSIMDHelperRegs,
+  trace_abi.calleeSaved,
   trace_abi.sf,
   false
 };
@@ -115,8 +135,9 @@ const Abi& abi(CodeKind kind) {
     case CodeKind::Trace:
       return trace_abi;
     case CodeKind::CrossTrace:
-    case CodeKind::Helper:
       return cross_trace_abi;
+    case CodeKind::Helper:
+      return helper_abi;
   }
   not_reached();
 }
@@ -131,13 +152,17 @@ PhysReg rret_simd(size_t i) {
   assertx(i == 0);
   return vixl::d0;
 }
+PhysReg rret_indirect() {
+  return vixl::x8;
+}
 
 PhysReg rarg(size_t i) {
   assertx(i < num_arg_regs());
   return vixl::Register::XRegFromCode(i);
 }
 PhysReg rarg_simd(size_t i) {
-  not_implemented();
+  assertx(i < num_arg_regs_simd());
+  return vixl::FPRegister::DRegFromCode(i);
 }
 
 RegSet arg_regs(size_t n) {

@@ -82,6 +82,7 @@ inline void UnaryOpExpression::ctorInit() {
     break;
   case T_ARRAY:
   case T_DICT:
+  case T_VEC:
   default:
     break;
   }
@@ -145,6 +146,7 @@ bool UnaryOpExpression::isScalar() const {
   case '@':
     return m_exp->isScalar();
   case T_ARRAY:
+  case T_VEC:
     return (!m_exp || m_exp->isScalar());
   case T_DICT:
     return isDictScalar(m_exp);
@@ -185,6 +187,7 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
   case '-':
   case T_ARRAY:
   case T_DICT:
+  case T_VEC:
     return m_exp && m_exp->containsDynamicConstant(ar);
   default:
     break;
@@ -204,6 +207,13 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
       }
       return false;
     }
+    if (m_op == T_VEC) {
+      if (m_exp->getScalarValue(value)) {
+        value = value.toArray().toVec();
+        return true;
+      }
+      return false;
+    }
     Variant t;
     return m_exp->getScalarValue(t) &&
       preCompute(t, value);
@@ -211,6 +221,11 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
 
   if (m_op == T_DICT) {
     value = DictInit(0).toArray();
+    return true;
+  }
+
+  if (m_op == T_VEC) {
+    value = Array::CreateVec();
     return true;
   }
 
@@ -454,6 +469,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case '@':             cg_printf("@");             break;
     case T_ARRAY:         cg_printf("array(");        break;
     case T_DICT:          cg_printf("dict[");         break;
+    case T_VEC:           cg_printf("vec[");          break;
     case T_PRINT:         cg_printf("print ");        break;
     case T_ISSET:         cg_printf("isset(");        break;
     case T_EMPTY:         cg_printf("empty(");        break;
@@ -482,6 +498,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_EMPTY:
     case T_EVAL:          cg_printf(")");  break;
     case T_DICT:          cg_printf("]");  break;
+    case T_VEC:           cg_printf("]");  break;
     default:
       break;
     }

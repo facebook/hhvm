@@ -665,6 +665,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_LIST
 %token T_ARRAY
 %token T_DICT
+%token T_VEC
 %token T_CALLABLE
 %token T_CLASS_C
 %token T_METHOD_C
@@ -859,6 +860,7 @@ ident_for_class_const:
     * but not PHP. */
   | T_UNSET
   | T_DICT
+  | T_VEC
 ;
 
 ident:
@@ -1980,6 +1982,7 @@ expr_no_variable:
   | scalar                             { $$ = $1; }
   | array_literal                      { $$ = $1; }
   | dict_literal                       { $$ = $1; }
+  | vec_literal                        { $$ = $1; }
   | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
@@ -2221,6 +2224,36 @@ static_dict_literal_ae:
     T_DICT '[' static_dict_pair_list_ae ']' { _p->onDict($$, $3); }
 ;
 
+vec_literal:
+    T_VEC '[' vec_expr_list ']' { _p->onVec($$, $3); }
+;
+
+static_vec_literal:
+    T_VEC '[' static_vec_expr_list ']' { _p->onVec($$, $3); }
+;
+
+static_vec_literal_ae:
+    T_VEC '[' static_vec_expr_list_ae ']' { _p->onVec($$, $3); }
+;
+
+vec_expr_list:
+    expr_list
+    possible_comma                     { $$ = $1;}
+  |                                    { $$.reset();}
+;
+
+static_vec_expr_list:
+    static_expr_list
+    possible_comma                     { $$ = $1;}
+  |                                    { $$.reset();}
+;
+
+static_vec_expr_list_ae:
+    static_scalar_ae_list
+    possible_comma                     { $$ = $1;}
+  |                                    { $$.reset();}
+;
+
 collection_literal:
     fully_qualified_class_name
     '{' collection_init '}'            { Token t;
@@ -2245,6 +2278,7 @@ dim_expr:
 dim_expr_base:
     array_literal                      { $$ = $1;}
   | dict_literal                       { $$ = $1;}
+  | vec_literal                        { $$ = $1;}
   | class_constant                     { $$ = $1;}
   | lambda_or_closure_with_parens      { $$ = $1;}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
@@ -2330,6 +2364,7 @@ xhp_label_ws:
   | xhp_label_ws '-'
     xhp_bareword                       { $$ = $1 + "-" + $3;}
 ;
+
 xhp_bareword:
     ident_no_semireserved              { $$ = $1;}
   | T_EXIT                             { $$ = $1;}
@@ -2413,6 +2448,7 @@ xhp_bareword:
   | T_NEWTYPE                          { $$ = $1;}
   | T_SHAPE                            { $$ = $1;}
   | T_DICT                             { $$ = $1;}
+  | T_VEC                              { $$ = $1;}
 ;
 
 simple_function_call:
@@ -2420,6 +2456,9 @@ simple_function_call:
     function_call_parameter_list ')'   { _p->onCall($$,0,$1,$3,NULL);}
   | T_DICT '('
     function_call_parameter_list ')'   { $1.setText("dict");
+                                         _p->onCall($$,0,$1,$3,NULL);}
+  | T_VEC '('
+    function_call_parameter_list ')'   { $1.setText("vec");
                                          _p->onCall($$,0,$1,$3,NULL);}
 ;
 
@@ -2518,6 +2557,7 @@ static_expr:
   | T_SHAPE '('
     static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_dict_literal                { $$ = $1;}
+  | static_vec_literal                 { $$ = $1;}
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
   | '(' static_expr ')'                { $$ = $2;}
@@ -2571,6 +2611,11 @@ static_expr:
   | static_expr '?' static_expr ':'
     static_expr                        { _p->onQOp($$, $1, &$3, $5);}
   | static_expr '?' ':' static_expr    { _p->onQOp($$, $1,   0, $4);}
+;
+
+static_expr_list:
+    static_expr_list ',' static_expr   { _p->onExprListElem($$, &$1, $3);}
+  | static_expr                        { _p->onExprListElem($$, NULL, $1);}
 ;
 
 static_class_constant:
@@ -2660,6 +2705,13 @@ static_scalar_ae:
   | T_SHAPE '('
     static_shape_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY); }
   | static_dict_literal_ae             { $$ = $1;}
+  | static_vec_literal_ae              { $$ = $1;}
+;
+
+static_scalar_ae_list:
+    static_scalar_ae_list ','
+    static_scalar_ae                   { _p->onExprListElem($$, &$1, $3);}
+  | static_scalar_ae                   { _p->onExprListElem($$, NULL, $1);}
 ;
 
 static_array_pair_list_ae:
@@ -3348,6 +3400,9 @@ hh_type:
   | T_DICT                             { Token t; t.reset();
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, t); }
+  | T_VEC                              { Token t; t.reset();
+                                         $1.setText("array");
+                                         _p->onTypeAnnotation($$, $1, t); }
   | T_CALLABLE                         { Token t; t.reset();
                                          $1.setText("callable");
                                          _p->onTypeAnnotation($$, $1, t); }
@@ -3360,6 +3415,8 @@ hh_type:
   | T_ARRAY array_typelist             { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $2); }
   | T_DICT array_typelist              { $1.setText("array");
+                                         _p->onTypeAnnotation($$, $1, $2); }
+  | T_VEC array_typelist               { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $2); }
   | T_XHP_LABEL                        { $1.xhpLabel();
                                          Token t; t.reset();

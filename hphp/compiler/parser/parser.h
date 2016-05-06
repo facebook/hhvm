@@ -203,6 +203,7 @@ public:
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);
   void onDict(Token &out, Token &pairs);
+  void onVec(Token& out, Token& exprs);
   void onEmptyCollection(Token &out);
   void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);

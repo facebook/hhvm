@@ -3589,6 +3589,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       return true;
     }
 
+    if (op == T_VEC) {
+      auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+      emitArrayInit(e, el, HeaderKind::VecArray);
+      return true;
+    }
+
     if (op == T_ISSET) {
       auto list = dynamic_pointer_cast<ExpressionList>(u->getExpression());
       if (list) {
@@ -4261,6 +4267,14 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
       emitFuncCall(e, call, "HH\\dict", params);
       return true;
+    } else if (call->isCallToFunction("vec") &&
+               (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
+      emitFuncCall(e, call, "HH\\vec", params);
+      return true;
+    } else if (call->isCallToFunction("is_vec") &&
+               (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
+      emitFuncCall(e, call, "HH\\is_vec", params);
+      return true;
     } else if (emitConstantFuncCall(e, call)) {
       return true;
     }
@@ -4725,22 +4739,34 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
   case Construct::KindOfExpressionList: {
     auto el = static_pointer_cast<ExpressionList>(node);
-    int nelem = el->getCount(), i;
-    bool pop = el->getListKind() != ExpressionList::ListKindParam;
-    int keep = el->getListKind() == ExpressionList::ListKindLeft ?
-      0 : nelem - 1;
-    int cnt = 0;
-    for (i = 0; i < nelem; i++) {
-      ExpressionPtr p((*el)[i]);
-      if (visit(p)) {
-        if (pop && i != keep) {
-          emitPop(e);
-        } else {
-          cnt++;
+    if (!m_staticArrays.empty() && m_staticColType.back() == HeaderKind::VecArray) {
+      auto const nelem = el->getCount();
+      for (int i = 0; i < nelem; ++i) {
+        auto const expr = (*el)[i];
+        assert(expr->isScalar());
+        TypedValue tvVal;
+        initScalar(tvVal, expr);
+        m_staticArrays.back().append(tvAsCVarRef(&tvVal));
+      }
+      return true;
+    } else {
+      int nelem = el->getCount(), i;
+      bool pop = el->getListKind() != ExpressionList::ListKindParam;
+      int keep = el->getListKind() == ExpressionList::ListKindLeft ?
+        0 : nelem - 1;
+      int cnt = 0;
+      for (i = 0; i < nelem; i++) {
+        ExpressionPtr p((*el)[i]);
+        if (visit(p)) {
+          if (pop && i != keep) {
+            emitPop(e);
+          } else {
+            cnt++;
+          }
         }
       }
+      return cnt != 0;
     }
-    return cnt != 0;
   }
   case Construct::KindOfParameterExpression: {
     not_implemented();
@@ -9162,6 +9188,8 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
   auto initArray = [&](ExpressionPtr el, folly::Optional<HeaderKind> k) {
     if (k == HeaderKind::Dict) {
       m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveDict(0)));
+    } else if (k == HeaderKind::VecArray) {
+      m_staticArrays.push_back(Array::attach(PackedArray::MakeReserveVec(0)));
     } else {
       m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
     }
@@ -9224,6 +9252,10 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         initArray(u->getExpression(), HeaderKind::Dict);
         break;
       }
+      if (u->getOp() == T_VEC) {
+        initArray(u->getExpression(), HeaderKind::VecArray);
+        break;
+      }
       // Fall through
     }
     default: {
@@ -9242,10 +9274,15 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
                                    folly::Optional<HeaderKind> kind) {
   assert(m_staticArrays.empty());
   auto const isDict = kind == HeaderKind::Dict;
+  auto const isVec = kind == HeaderKind::VecArray;
 
   if (el == nullptr) {
     if (isDict) {
       e.Array(ArrayData::GetScalarArray(MixedArray::MakeReserveDict(0)));
+      return;
+    }
+    if (isVec) {
+      e.Array(staticEmptyVecArray());
       return;
     }
     e.Array(staticEmptyArray());
@@ -9258,6 +9295,17 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     tvWriteUninit(&tv);
     initScalar(tv, el, kind);
     e.Array(tv.m_data.parr);
+    return;
+  }
+
+  if (isVec) {
+    auto const count = el->getCount();
+    for (int i = 0; i < count; i++) {
+      auto expr = static_pointer_cast<Expression>((*el)[i]);
+      visit(expr);
+      emitConvertToCell(e);
+    }
+    e.NewVecArray(count);
     return;
   }
 
@@ -9527,6 +9575,16 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
                 (key && requiresDeepInit(key))) {
               return true;
             }
+          }
+        }
+        return false;
+      } else if (u->getOp() == T_VEC) {
+        auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+        if (el) {
+          int n = el->getCount();
+          for (int i = 0; i < n; i++) {
+            auto expr = static_pointer_cast<Expression>((*el)[i]);
+            if (requiresDeepInit(expr)) return true;
           }
         }
         return false;

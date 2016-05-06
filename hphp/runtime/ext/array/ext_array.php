@@ -1394,6 +1394,5 @@ namespace HH {
   function dict(array $arr): dict;
 
   <<__Native>>
-  /* Return value will be vec once parser support is added. */
-  function vec(array $arr): array;
+  function vec(array $arr): vec;
 }

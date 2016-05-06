@@ -978,6 +978,10 @@ void Parser::onDict(Token &out, Token &pairs) {
   onUnaryOpExp(out, pairs, T_DICT, true);
 }
 
+void Parser::onVec(Token& out, Token& exprs) {
+  onUnaryOpExp(out, exprs, T_VEC, true);
+}
+
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                          bool ref) {
   if (!value->exp) return;

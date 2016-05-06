@@ -128,6 +128,10 @@ bool HHVM_FUNCTION(is_array, const Variant& v) {
   return is_array(v);
 }
 
+bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
+  return is_vec(v);
+}
+
 bool HHVM_FUNCTION(is_object, const Variant& v) {
   return is_object(v);
 }
@@ -501,6 +505,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(is_string);
   HHVM_FE(is_scalar);
   HHVM_FE(is_array);
+  HHVM_FALIAS(HH\\is_vec, HH_is_vec);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

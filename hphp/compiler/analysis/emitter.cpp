@@ -4259,7 +4259,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       return true;
     } else if (call->isCallToFunction("dict") &&
                (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
-      emitFuncCall(e, call, "__SystemLib\\dict", params);
+      emitFuncCall(e, call, "HH\\dict", params);
       return true;
     } else if (emitConstantFuncCall(e, call)) {
       return true;

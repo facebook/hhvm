@@ -503,7 +503,7 @@ TypedValue HHVM_FUNCTION(array_merge,
                          ArrayArg array1,
                          const Variant& array2 /* = null_variant */,
                          const Array& args /* = null array */) {
-  Array ret = Array::Create();
+  Array ret = array1->isVecArray() ? Array::CreateVec() : Array::Create();
   php_array_merge(ret, ArrNR(array1.get()));
 
   if (UNLIKELY(numArgs < 2)) return tvReturn(std::move(ret));
@@ -529,7 +529,8 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
                          const Variant& array2 /* = null_variant */,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
-  Array ret = Array::Create();
+  Array ret = array1.asCArrRef()->isVecArray() ?
+    Array::CreateVec() : Array::Create();
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assert(seen.empty());
@@ -1120,6 +1121,10 @@ TypedValue HHVM_FUNCTION(array_unshift,
 }
 
 Variant array_values(const Variant& input) {
+  if (input.isArray() && input.asCArrRef()->isVecArray()) {
+    return input;
+  }
+
   folly::Optional<PackedArrayInit> ai;
   auto ok = IterateV(*input.asCell(),
                      [&](ArrayData* adata) {
@@ -1139,6 +1144,7 @@ Variant array_values(const Variant& input) {
                   "or collection");
     return init_null();
   }
+
   assert(ai.hasValue());
   return ai->toVariant();
 }
@@ -2783,9 +2789,14 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
   return arReturn(ar, Array::MultiSort(data, true));
 }
 
-// __SystemLib\\dict
-Array HHVM_FUNCTION(__SystemLib_dict, const Array& arr) {
+// HH\\dict
+Array HHVM_FUNCTION(HH_dict, const Array& arr) {
   return Array::ConvertToDict(arr);
+}
+
+// HH\\vec
+Array HHVM_FUNCTION(HH_vec, const Array& arr) {
+  return arr.toVec();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2919,7 +2930,8 @@ struct ArrayExtension final : Extension {
     HHVM_FE(i18n_loc_get_error_code);
     HHVM_FE(hphp_array_idx);
     HHVM_FE(array_multisort);
-    HHVM_FALIAS(__SystemLib\\dict, __SystemLib_dict);
+    HHVM_FALIAS(HH\\dict, HH_dict);
+    HHVM_FALIAS(HH\\vec, HH_vec);
 
     loadSystemlib();
   }

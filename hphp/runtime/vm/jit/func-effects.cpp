@@ -211,6 +211,7 @@ FuncSet ignoresCallerFrame = {
   "is_string",
   "is_scalar",
   "is_array",
+  "HH\\is_vec",
   "is_object",
   "is_resource",
   "boolval",

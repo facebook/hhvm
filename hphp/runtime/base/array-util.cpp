@@ -107,13 +107,14 @@ Variant ArrayUtil::Pad(const Array& input, const Variant& pad_value, int pad_siz
     return input;
   }
 
-  Array ret = Array::Create();
   if (pad_right) {
-    ret = input;
+    Array ret = input;
     for (int i = input_size; i < pad_size; i++) {
       ret.append(pad_value);
     }
+    return ret;
   } else {
+    Array ret = input->isVecArray() ? Array::CreateVec() : Array::Create();
     for (int i = input_size; i < pad_size; i++) {
       ret.append(pad_value);
     }
@@ -125,8 +126,8 @@ Variant ArrayUtil::Pad(const Array& input, const Variant& pad_value, int pad_siz
         ret.setWithRef(key, iter.secondRef(), true);
       }
     }
+    return ret;
   }
-  return ret;
 }
 
 Variant ArrayUtil::Range(unsigned char low, unsigned char high,
@@ -274,7 +275,7 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
     return input;
   }
 
-  Array ret = Array::Create();
+  Array ret = input->isVecArray() ? Array::CreateVec() : Array::Create();
   auto pos_limit = input->iter_end();
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
        pos = input->iter_rewind(pos)) {
@@ -318,12 +319,21 @@ Variant ArrayUtil::Shuffle(const Array& input) {
   }
   php_array_data_shuffle(indices);
 
-  PackedArrayInit ret(count);
-  for (int i = 0; i < count; i++) {
-    ssize_t pos = indices[i];
-    ret.appendWithRef(input->getValueRef(pos));
+  if (input->isVecArray()) {
+    VecArrayInit ret(count);
+    for (int i = 0; i < count; i++) {
+      ssize_t pos = indices[i];
+      ret.append(input->getValueRef(pos));
+    }
+    return ret.toVariant();
+  } else {
+    PackedArrayInit ret(count);
+    for (int i = 0; i < count; i++) {
+      ssize_t pos = indices[i];
+      ret.appendWithRef(input->getValueRef(pos));
+    }
+    return ret.toVariant();
   }
-  return ret.toVariant();
 }
 
 Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {

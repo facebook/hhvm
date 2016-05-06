@@ -227,3 +227,11 @@ namespace __SystemLib {
   <<__Native>>
   function parse_str(string $str, mixed &$arr = null): void;
 }
+
+namespace HH {
+
+  /* Finds whether the given variable is a vec.
+   */
+  <<__Native, __ParamCoerceModeFalse>>
+  function is_vec(mixed $var): bool;
+}

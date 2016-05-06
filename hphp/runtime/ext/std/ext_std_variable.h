@@ -31,6 +31,8 @@ bool HHVM_FUNCTION(is_numeric, const Variant& v);
 bool HHVM_FUNCTION(is_string, const Variant& v);
 bool HHVM_FUNCTION(is_scalar, const Variant& v);
 bool HHVM_FUNCTION(is_array, const Variant& v);
+// HH\\is_vec
+bool HHVM_FUNCTION(HH_is_vec, const Variant& v);
 bool HHVM_FUNCTION(is_object, const Variant& v);
 bool HHVM_FUNCTION(is_resource, const Variant& v);
 

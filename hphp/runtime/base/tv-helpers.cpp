@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/tv-helpers.h"
 
 #include "hphp/runtime/base/dummy-resource.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -472,8 +473,14 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         continue;
 
       case KindOfPersistentArray:
-      case KindOfArray:
+      case KindOfArray: {
+        ArrayData* adIn = tv->m_data.parr;
+        if (adIn->isVecArray()) {
+          tv->m_data.parr = PackedArray::MakeFromVec(adIn, adIn->cowCheck());
+          tv->m_type = KindOfArray;
+        }
         return;
+      }
 
       case KindOfObject:
         // For objects, we fall back on the Variant machinery

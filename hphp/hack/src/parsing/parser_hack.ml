@@ -453,7 +453,7 @@ and header env =
   | _, Some FileInfo.Mdecl ->
       let env = { env with mode = FileInfo.Mdecl } in
       let attr = [] in
-      let result = ignore_toplevel ~attr [] env (fun x -> x = Teof) in
+      let result = ignore_toplevel None ~attr [] env (fun x -> x = Teof) in
       expect env Teof;
       result, head
   | _, Some mode ->
@@ -487,67 +487,73 @@ and get_header env =
 (* Decl mode *)
 (*****************************************************************************)
 
-and ignore_toplevel ~attr acc env terminate =
+and ignore_toplevel attr_start ~attr acc env terminate =
   match L.token env.file env.lb with
   | x when terminate x || x = Teof ->
       L.back env.lb;
       acc
   | Tltlt ->
       (* Parsing attribute << .. >> *)
+      (* TODO: error for repeated attribute list *)
+      let attr_start = Some (Pos.make env.file env.lb) in
       let attr = attribute_remain env in
-      ignore_toplevel ~attr acc env terminate
+      ignore_toplevel attr_start ~attr acc env terminate
   | Tlcb ->
-      let acc = ignore_toplevel ~attr acc env terminate in
-      ignore_toplevel ~attr acc env terminate
+      let acc = ignore_toplevel attr_start ~attr acc env terminate in
+      ignore_toplevel attr_start ~attr acc env terminate
   | Tquote ->
       let pos = Pos.make env.file env.lb in
       let abs_pos = env.lb.Lexing.lex_curr_pos in
       ignore (expr_string env pos abs_pos);
-      ignore_toplevel ~attr acc env terminate
+      ignore_toplevel attr_start ~attr acc env terminate
   | Tdquote ->
       let pos = Pos.make env.file env.lb in
       ignore (expr_encapsed env pos);
-      ignore_toplevel ~attr acc env terminate
+      ignore_toplevel attr_start ~attr acc env terminate
   | Theredoc ->
       ignore (expr_heredoc env);
-      ignore_toplevel ~attr acc env terminate
+      ignore_toplevel attr_start ~attr acc env terminate
   | Tlt when is_xhp env ->
       ignore (xhp env);
-      ignore_toplevel ~attr acc env terminate
+      ignore_toplevel attr_start ~attr acc env terminate
   | Tword ->
       (match Lexing.lexeme env.lb with
       | "function" ->
+          let def_start = Option.value attr_start
+            ~default:(Pos.make env.file env.lb) in
           (match L.token env.file env.lb with
           | Tword ->
               L.back env.lb;
-              let def = toplevel_word ~attr env "function" in
-              ignore_toplevel ~attr:[] (def @ acc) env terminate
+              let def = toplevel_word def_start ~attr env "function" in
+              ignore_toplevel None ~attr:[] (def @ acc) env terminate
           (* function &foo(...), we still want them in decl mode *)
           | Tamp ->
             (match L.token env.file env.lb with
             | Tword ->
                 L.back env.lb;
-                let def = toplevel_word ~attr env "function" in
-                ignore_toplevel ~attr:[] (def @ acc) env terminate
+                let def = toplevel_word def_start ~attr env "function" in
+                ignore_toplevel None ~attr:[] (def @ acc) env terminate
             | _ ->
-              ignore_toplevel ~attr acc env terminate
+              ignore_toplevel attr_start ~attr acc env terminate
             )
           | _ ->
-              ignore_toplevel ~attr acc env terminate
+              ignore_toplevel attr_start ~attr acc env terminate
           )
       | "abstract" | "final"
       | "class"| "trait" | "interface"
       | "namespace"
       | "async" | "newtype"| "type"| "const" ->
           (* Parsing toplevel declarations (class, function etc ...) *)
-          let def = toplevel_word ~attr env (Lexing.lexeme env.lb) in
-          ignore_toplevel ~attr:[] (def @ acc) env terminate
-      | _ -> ignore_toplevel ~attr acc env terminate
+          let def_start = Option.value attr_start
+            ~default:(Pos.make env.file env.lb) in
+          let def = toplevel_word def_start ~attr env (Lexing.lexeme env.lb) in
+          ignore_toplevel None ~attr:[] (def @ acc) env terminate
+      | _ -> ignore_toplevel attr_start ~attr acc env terminate
       )
   | Tclose_php ->
       error env "Hack does not allow the closing ?> tag";
       acc
-  | _ -> ignore_toplevel ~attr acc env terminate
+  | _ -> ignore_toplevel attr_start ~attr acc env terminate
 
 (*****************************************************************************)
 (* Toplevel statements. *)
@@ -564,13 +570,15 @@ and toplevel acc env terminate =
       toplevel acc env terminate
   | Tltlt ->
       (* Parsing attribute << .. >> *)
+      let attr_start = Pos.make env.file env.lb in
       let attr = attribute_remain env in
       let _ = L.token env.file env.lb in
-      let def = toplevel_word ~attr env (Lexing.lexeme env.lb) in
+      let def = toplevel_word attr_start ~attr env (Lexing.lexeme env.lb) in
       toplevel (def @ acc) env terminate
   | Tword ->
       (* Parsing toplevel declarations (class, function etc ...) *)
-      let def = toplevel_word ~attr:[] env (Lexing.lexeme env.lb) in
+      let def_start = Pos.make env.file env.lb in
+      let def = toplevel_word def_start ~attr:[] env (Lexing.lexeme env.lb) in
       toplevel (def @ acc) env terminate
   | Tclose_php ->
       error env "Hack does not allow the closing ?> tag";
@@ -583,33 +591,33 @@ and toplevel acc env terminate =
       let stmt = Stmt (statement env) in
       check_toplevel env pos;
       if error_state != !(env.errors)
-      then ignore_toplevel ~attr:[] (stmt :: acc) env terminate
+      then ignore_toplevel None ~attr:[] (stmt :: acc) env terminate
       else toplevel (stmt :: acc) env terminate
 
-and toplevel_word ~attr env = function
+and toplevel_word def_start ~attr env = function
   | "abstract" ->
     let final = (match L.token env.file env.lb with
       | Tword when Lexing.lexeme env.lb = "final" -> true
       | _ -> begin L.back env.lb; false end
     ) in
     expect_word env "class";
-    let class_ = class_ ~attr ~final ~kind:Cabstract env in
+    let class_ = class_ def_start ~attr ~final ~kind:Cabstract env in
     [Class class_]
   | "final" ->
       expect_word env "class";
-      let class_ = class_ ~attr ~final:true ~kind:Cnormal env in
+      let class_ = class_ def_start ~attr ~final:true ~kind:Cnormal env in
       [Class class_]
   | "class" ->
-      let class_ = class_ ~attr ~final:false ~kind:Cnormal env in
+      let class_ = class_ def_start ~attr ~final:false ~kind:Cnormal env in
       [Class class_]
   | "trait" ->
-      let class_ = class_ ~attr ~final:false ~kind:Ctrait env in
+      let class_ = class_ def_start ~attr ~final:false ~kind:Ctrait env in
       [Class class_]
   | "interface" ->
-      let class_ = class_ ~attr ~final:false ~kind:Cinterface env in
+      let class_ = class_ def_start ~attr ~final:false ~kind:Cinterface env in
       [Class class_]
   | "enum" ->
-      let class_ = enum_ ~attr env in
+      let class_ = enum_ def_start ~attr env in
       [Class class_]
   | "async" ->
       expect_word env "function";
@@ -738,7 +746,7 @@ and fun_ ~attr ~(sync:fun_decl_kind) env =
 (* Classes *)
 (*****************************************************************************)
 
-and class_ ~attr ~final ~kind env =
+and class_ class_start ~attr ~final ~kind env =
   let cname       = identifier env in
   let is_xhp      = (snd cname).[0] = ':' in
   let tparams     = class_params env in
@@ -747,6 +755,8 @@ and class_ ~attr ~final ~kind env =
     else class_extends ~single:(kind <> Cinterface) env in
   let cimplements = class_implements kind env in
   let cbody       = class_body env in
+  let class_end   = Pos.make env.file env.lb in
+  let extents     = Pos.btw class_start class_end in
   let result =
     { c_mode            = env.mode;
       c_final           = final;
@@ -760,6 +770,7 @@ and class_ ~attr ~final ~kind env =
       c_body            = cbody;
       c_namespace       = Namespace_env.empty;
       c_enum            = None;
+      c_extents         = extents;
     }
   in
   class_implicit_fields result
@@ -773,11 +784,13 @@ and enum_base_ty env =
   let h = hint env in
   h
 
-and enum_ ~attr env =
+and enum_ class_start ~attr env =
   let cname       = identifier env in
   let basety      = enum_base_ty env in
   let constraint_ = typedef_constraint env in
   let cbody       = enum_body env in
+  let class_end   = Pos.make env.file env.lb in
+  let extents     = Pos.btw class_start class_end in
   let result =
     { c_mode            = env.mode;
       c_final           = false;
@@ -793,7 +806,8 @@ and enum_ ~attr env =
       c_enum            = Some
         { e_base       = basety;
           e_constraint = constraint_;
-        }
+        };
+      c_extents         = extents;
     }
   in
   result
@@ -1942,7 +1956,7 @@ and statement_word env = function
   | "async" | "abstract" | "final" ->
       error env
           "Parse error: declarations are not supported outside global scope";
-      ignore (ignore_toplevel ~attr:[] [] env (fun _ -> true));
+      ignore (ignore_toplevel None ~attr:[] [] env (fun _ -> true));
       Noop
   | x ->
       L.back env.lb;
@@ -3891,7 +3905,7 @@ and namespace env =
    * that we like. So every time we recurse we'll consume at least one token,
    * so we can't get stuck in an infinite loop. *)
   let tl = match env.mode with
-    | FileInfo.Mdecl -> ignore_toplevel ~attr:[]
+    | FileInfo.Mdecl -> ignore_toplevel None ~attr:[]
     | _ -> toplevel in
   (* The name for a namespace is actually optional, so we need to check for
    * the name first. Setting the name to an empty string if there's no

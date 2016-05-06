@@ -175,7 +175,8 @@ let mk_mapper = fun m_in ->
             c_implements = v_c_implements;
             c_body = v_c_body;
             c_namespace = v_c_namespace;
-            c_enum = v_c_enum
+            c_enum = v_c_enum;
+            c_extents = v_c_extents;
         } =
       let v_c_mode = map_mode v_c_mode in
       let v_c_user_attributes =
@@ -189,8 +190,8 @@ let mk_mapper = fun m_in ->
       let v_c_implements = map_of_list map_hint v_c_implements in
       let v_c_body = map_c_body v_c_kind v_c_body in
       let v_c_namespace = map_namespace_env v_c_namespace in
-      let v_c_enum = map_of_option map_enum_ v_c_enum
-      in
+      let v_c_enum = map_of_option map_enum_ v_c_enum in
+      let v_c_extents = map_pos_t v_c_extents in
         {
           c_mode = v_c_mode;
           c_user_attributes = v_c_user_attributes;
@@ -204,6 +205,7 @@ let mk_mapper = fun m_in ->
           c_body = v_c_body;
           c_namespace = v_c_namespace;
           c_enum = v_c_enum;
+          c_extents = v_c_extents;
         }
     in m_in.k_class_ (k, all_mappers) class_
   and map_enum_ { e_base = v_e_base; e_constraint = v_e_constraint } =

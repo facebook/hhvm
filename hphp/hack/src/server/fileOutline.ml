@@ -22,6 +22,7 @@ and def_ =
 
 and class_ = {
   class_members : class_member list;
+  c_extents : Pos.absolute;
 }
 
 and class_member = def_common * class_member_
@@ -31,19 +32,20 @@ and class_member_ =
 
 and method_ = {
   static : bool;
-  extents : Pos.absolute;
+  m_extents : Pos.absolute;
 }
 
 let summarize_class class_ acc =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
   let class_name_pos = Pos.to_absolute (fst class_.Ast.c_name) in
+  let c_extents = Pos.to_absolute class_.Ast.c_extents in
   let class_members =
     List.fold_right class_.Ast.c_body ~init:[] ~f:begin fun method_ acc ->
     match method_ with
       | Ast.Method m ->
           let method_ = {
             static = List.mem m.Ast.m_kind (Ast.Static);
-            extents = (Pos.to_absolute m.Ast.m_extents);
+            m_extents = (Pos.to_absolute m.Ast.m_extents);
           } in
           ((Pos.to_absolute (fst m.Ast.m_name), snd m.Ast.m_name),
           Method method_) :: acc
@@ -52,6 +54,7 @@ let summarize_class class_ acc =
   in
   let class_ = {
     class_members;
+    c_extents;
   } in
   ((class_name_pos, class_name), Class class_) :: acc
 
@@ -117,7 +120,7 @@ let print_method pos name m =
   Printf.printf "    type: method\n";
   Printf.printf "    position: %s\n" (Pos.string pos);
   Printf.printf "    static: %b\n" m.static;
-  Printf.printf "    extents: %s\n" (Pos.multiline_string m.extents);
+  Printf.printf "    extents: %s\n" (Pos.multiline_string m.m_extents);
   Printf.printf "\n"
 
 let print_class_member ((pos, name), member) =
@@ -128,6 +131,7 @@ let print_class pos name c =
   Printf.printf "%s\n" name;
   Printf.printf "  type: class\n";
   Printf.printf "  position: %s\n" (Pos.string pos);
+  Printf.printf "  extents: %s\n" (Pos.multiline_string c.c_extents);
   Printf.printf "\n";
   List.iter c.class_members print_class_member;
   Printf.printf "\n"

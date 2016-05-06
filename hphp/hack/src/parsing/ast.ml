@@ -90,6 +90,7 @@ and class_ = {
   c_body: class_elt list;
   c_namespace: Namespace_env.env;
   c_enum: enum_ option;
+  c_extents: Pos.t;
 }
 
 and enum_ = {

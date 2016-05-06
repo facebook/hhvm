@@ -9,6 +9,7 @@ bar
 C
   type: class
   position: File "", line 7, characters 7-7:
+  extents: File "", line 7, character 1 - line 11, character 1:
 
   foo
     type: method

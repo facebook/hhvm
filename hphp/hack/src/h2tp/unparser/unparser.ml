@@ -288,7 +288,8 @@ let rec u_program v = u_of_list_spc u_def v
                c_implements = v_c_implements;
                c_body = v_c_body;
                c_namespace = v_c_namespace;
-               c_enum = v_c_enum
+               c_enum = v_c_enum;
+               c_extents = _;
              } =
       u_in_mode v_c_mode (fun () ->
           invariant (List.length v_c_extends <= 1 || v_c_kind = Cinterface)

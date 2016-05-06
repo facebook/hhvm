@@ -1205,6 +1205,7 @@ X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(AllocPackedArray,             PackedArrayData);
+X(AllocVecArray,                PackedArrayData);
 X(InitPackedArrayLoop,          InitPackedArrayLoopData);
 X(InitPackedArray,              IndexData);
 X(CheckMixedArrayOffset,        IndexData);

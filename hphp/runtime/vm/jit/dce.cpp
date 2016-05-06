@@ -61,6 +61,8 @@ bool canDCE(IRInstruction* inst) {
   case ConvDblToArr:
   case ConvIntToArr:
   case ConvStrToArr:
+  case ConvVecToArr:
+  case ConvDictToArr:
   case ConvArrToBool:
   case ConvDblToBool:
   case ConvIntToBool:
@@ -344,6 +346,7 @@ bool canDCE(IRInstruction* inst) {
   case InitObjProps:
   case ConstructInstance:
   case AllocPackedArray:
+  case AllocVecArray:
   case InitPackedArray:
   case InitPackedArrayLoop:
   case NewStructArray:

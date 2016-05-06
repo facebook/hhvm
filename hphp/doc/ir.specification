@@ -426,6 +426,10 @@ To array conversions:
 
 | ConvStrToArr,                 D(Arr), S(Str),                      PRc|CRc
 
+| ConvVecToArr,                 D(Arr), S(Arr),                      PRc|CRc
+
+| ConvDictToArr,                D(Arr), S(Arr),                      PRc|CRc
+
 | ConvCellToArr,                D(Arr), S(Cell),                  Er|PRc|CRc
 
 
@@ -1261,6 +1265,12 @@ To string conversions:
 | AllocPackedArray<size>, DArrPacked, NA, PRc
 
   Allocate a new uninitialized packed array with space for size elements in it.
+  The array will be initialized with values using either InitPackedArray or
+  InitPackedArrayLoop.
+
+| AllocVecArray<size>, DArrVec, NA, PRc
+
+  Allocate a new uninitialized vector array with space for size elements in it.
   The array will be initialized with values using either InitPackedArray or
   InitPackedArrayLoop.
 

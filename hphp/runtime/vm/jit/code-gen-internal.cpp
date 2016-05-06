@@ -37,14 +37,15 @@ ArrayKeyInfo checkStrictlyInteger(Type arr, Type key) {
   ret.type = KeyType::Str;
 
   auto const dictType = Type::Array(ArrayData::kDictKind);
-  if (arr <= dictType) {
+  auto const vecType = Type::Array(ArrayData::kVecKind);
+  if (arr <= dictType || arr <= vecType) {
     return ret;
   }
 
   if (key.hasConstVal()) {
     int64_t i;
     if (key.strVal()->isStrictlyInteger(i)) {
-      if (arr.maybe(dictType)) {
+      if (arr.maybe(dictType) || arr.maybe(vecType)) {
         ret.checkForInt = true;
       } else {
         ret.converted    = true;

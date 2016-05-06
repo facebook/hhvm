@@ -177,6 +177,7 @@ bool hasObviousStackOutput(Op op) {
   case Op::NewArray:
   case Op::NewPackedArray:
   case Op::NewStructArray:
+  case Op::NewVecArray:
   case Op::AddElemC:
   case Op::AddElemV:
   case Op::AddNewElemC:

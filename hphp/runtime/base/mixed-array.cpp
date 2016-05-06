@@ -334,6 +334,14 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   return ad;
 }
 
+ArrayData* MixedArray::MakeFromDict(ArrayData* adIn, bool copy) {
+  assert(adIn->isDict());
+  assert(asMixed(adIn)->checkInvariants());
+  ArrayData* ad = copy ? Copy(adIn) : adIn;
+  ad->m_hdr.kind = HeaderKind::Dict;
+  return ad;
+}
+
 //=============================================================================
 // Destruction
 

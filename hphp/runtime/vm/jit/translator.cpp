@@ -121,6 +121,7 @@ static const struct {
   { OpNewLikeArrayL,  {Local,         Stack1,       OutArray        }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
+  { OpNewVecArray,    {StackN,        Stack1,       OutArray        }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray        }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutArray        }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutArray        }},
@@ -527,6 +528,7 @@ int64_t getStackPopped(PC pc) {
     case Op::IncDecM:
     case Op::UnsetM:
     case Op::NewPackedArray:
+    case Op::NewVecArray:
     case Op::ConcatN:
     case Op::FCallBuiltin:
     case Op::CreateCl:
@@ -699,6 +701,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   }
   if (flags & StackN) {
     int numArgs = (ni.op() == Op::NewPackedArray ||
+                   ni.op() == Op::NewVecArray ||
                    ni.op() == Op::ConcatN)
       ? ni.imm[0].u_IVA
       : ni.immVec.numStackValues();
@@ -922,6 +925,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::NewMixedArray:
   case Op::NewDictArray:
   case Op::NewPackedArray:
+  case Op::NewVecArray:
   case Op::Not:
   case Op::Null:
   case Op::NullUninit:

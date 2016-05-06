@@ -189,6 +189,15 @@ void in(ISS& env, const bc::NewStructArray& op) {
   push(env, carr_struct(std::move(map)));
 }
 
+void in(ISS& env, const bc::NewVecArray& op) {
+  auto elems = std::vector<Type>{};
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
+    elems.push_back(popC(env));
+  }
+  std::reverse(begin(elems), end(elems));
+  push(env, carr_packed(std::move(elems)));
+}
+
 void in(ISS& env, const bc::NewLikeArrayL&) {
   push(env, counted_aempty());
 }

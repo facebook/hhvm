@@ -1063,6 +1063,12 @@ NewStructArray <litstr id vector>    [C..C]  ->  [C]
 
     NewStructArray < "a" "b" >  [ 1 2 ]  ->  [ array("a"=>1, "b"=>2) ]
 
+NewVecArray <num elems>   [C..C]  ->  [C:Arr]
+
+  New vector array. Creates a new vector array from the top %1 cells on the
+  stack, pops those cells, then pushes the new array onto the stack. Elements
+  are pushed on the stack in array insertion order.
+
 AddElemC    [C C C]  ->  [C:Arr]
 
   Add element. If $3 is an array, this instruction executes $3[$2] = $1 and

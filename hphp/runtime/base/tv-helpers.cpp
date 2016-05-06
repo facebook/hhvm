@@ -478,6 +478,9 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         if (adIn->isVecArray()) {
           tv->m_data.parr = PackedArray::MakeFromVec(adIn, adIn->cowCheck());
           tv->m_type = KindOfArray;
+        } else if (adIn->isDict()) {
+          tv->m_data.parr = MixedArray::MakeFromDict(adIn, adIn->cowCheck());
+          tv->m_type = KindOfArray;
         }
         return;
       }

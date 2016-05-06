@@ -507,6 +507,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DAllocObj
 #define DArrElem
 #define DArrPacked
+#define DArrVec
 #define DCol
 #define DThis
 #define DCtx
@@ -545,6 +546,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
+#undef DArrVec
 #undef DArrPacked
 #undef DCol
 #undef DThis

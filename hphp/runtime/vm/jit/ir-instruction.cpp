@@ -363,6 +363,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Array(ArrayData::kPackedKind);
+#define DArrVec         return Type::Array(ArrayData::kVecKind);
 #define DCol            return newColReturn(inst);
 #define DThis           return thisReturn(inst);
 #define DCtx            return ctxReturn(inst);
@@ -395,6 +396,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
+#undef DArrVec
 #undef DCol
 #undef DThis
 #undef DCtx

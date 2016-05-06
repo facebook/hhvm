@@ -1927,6 +1927,13 @@ OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   vmStack().pushArrayNoRc(a);
 }
 
+OPTBLD_INLINE void iopNewVecArray(intva_t n) {
+  // This constructor moves values, no inc/decref is necessary.
+  auto* a = PackedArray::MakeVec(n, vmStack().topC());
+  vmStack().ndiscard(n);
+  vmStack().pushArrayNoRc(a);
+}
+
 OPTBLD_INLINE void iopAddElemC() {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);

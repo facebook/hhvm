@@ -1602,6 +1602,32 @@ SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
   return convToArrImpl(env, inst);
 }
 
+SSATmp* simplifyConvVecToArr(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (!src->hasConstVal()) return nullptr;
+  auto const* array = src->arrVal();
+  assertx(array->isVecArray());
+  return cns(
+    env,
+    ArrayData::GetScalarArray(
+      PackedArray::MakeFromVec(const_cast<ArrayData*>(array), true)
+    )
+  );
+}
+
+SSATmp* simplifyConvDictToArr(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (!src->hasConstVal()) return nullptr;
+  auto const* array = src->arrVal();
+  assertx(array->isDict());
+  return cns(
+    env,
+    ArrayData::GetScalarArray(
+      MixedArray::MakeFromDict(const_cast<ArrayData*>(array), true)
+    )
+  );
+}
+
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   auto const kind = src->type().arrSpec().kind();
@@ -2518,6 +2544,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvIntToStr)
   X(ConvObjToBool)
   X(ConvStrToArr)
+  X(ConvVecToArr)
+  X(ConvDictToArr)
   X(ConvStrToBool)
   X(ConvStrToDbl)
   X(ConvStrToInt)

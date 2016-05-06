@@ -344,7 +344,37 @@ void emitCastArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(TArr))  return src;
+      if (src->isA(TArr)) {
+        return cond(
+          env,
+          [&](Block* taken) {
+            return gen(
+              env,
+              CheckType,
+              Type::Array(ArrayData::kVecKind),
+              taken,
+              src
+            );
+          },
+          [&](SSATmp* vec) { return gen(env, ConvVecToArr, vec); },
+          [&] {
+            return cond(
+              env,
+              [&](Block* taken) {
+                return gen(
+                  env,
+                  CheckType,
+                  Type::Array(ArrayData::kDictKind),
+                  taken,
+                  src
+                );
+              },
+              [&](SSATmp* dict) { return gen(env, ConvDictToArr, dict); },
+              [&] { return src; }
+            );
+          }
+        );
+      }
       if (src->isA(TNull)) return cns(env, staticEmptyArray());
       if (src->isA(TBool)) return gen(env, ConvBoolToArr, src);
       if (src->isA(TDbl))  return gen(env, ConvDblToArr, src);

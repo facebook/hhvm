@@ -213,14 +213,17 @@ void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
   push(env, arr);
 }
 
-void emitNewPackedArray(IRGS& env, int32_t numArgs) {
+namespace {
+
+ALWAYS_INLINE
+void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
   if (numArgs > CapCode::Threshold) {
-    PUNT(NewPackedArray-UnrealisticallyHuge);
+    PUNT(NewPackedLayoutArray-UnrealisticallyHuge);
   }
 
   auto const array = gen(
     env,
-    AllocPackedArray,
+    op,
     PackedArrayData { static_cast<uint32_t>(numArgs) }
   );
   static constexpr auto kMaxUnrolledInitArray = 8;
@@ -250,6 +253,16 @@ void emitNewPackedArray(IRGS& env, int32_t numArgs) {
     );
   }
   push(env, array);
+}
+
+}
+
+void emitNewPackedArray(IRGS& env, int32_t numArgs) {
+  emitNewPackedLayoutArray(env, numArgs, AllocPackedArray);
+}
+
+void emitNewVecArray(IRGS& env, int32_t numArgs) {
+  emitNewPackedLayoutArray(env, numArgs, AllocVecArray);
 }
 
 void emitNewStructArray(IRGS& env, const ImmVector& immVec) {

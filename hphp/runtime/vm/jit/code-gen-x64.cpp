@@ -306,6 +306,8 @@ CALL_OPCODE(ConvDblToArr);
 CALL_OPCODE(ConvIntToArr);
 CALL_OPCODE(ConvObjToArr);
 CALL_OPCODE(ConvStrToArr);
+CALL_OPCODE(ConvVecToArr);
+CALL_OPCODE(ConvDictToArr);
 CALL_OPCODE(ConvCellToArr);
 
 CALL_OPCODE(ConvCellToBool);
@@ -388,6 +390,7 @@ CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewDictArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(AllocPackedArray)
+CALL_OPCODE(AllocVecArray)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(InitProps)
@@ -2103,10 +2106,14 @@ static CallSpec getDtorCallSpec(DataType type) {
 
 static CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
   static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
+  static auto const TVecArr = Type::Array(ArrayData::kVecKind);
+  static auto const TDictArr = Type::Array(ArrayData::kDictKind);
   static auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
   static auto const TApcArr = Type::Array(ArrayData::kApcKind);
 
   if (ty <= TPackedArr) return CallSpec::direct(PackedArray::Release);
+  if (ty <= TVecArr) return CallSpec::direct(PackedArray::Release);
+  if (ty <= TDictArr) return CallSpec::direct(MixedArray::Release);
   if (ty <= TMixedArr) return CallSpec::direct(MixedArray::Release);
   if (ty <= TApcArr) return CallSpec::direct(APCLocalArray::Release);
   if (ty <= TArr) return  CallSpec::array(&g_array_funcs.release);

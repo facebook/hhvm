@@ -186,7 +186,7 @@ build-hhi-archive:
 
 copy-hack-files: build-hack
 	mkdir -p ../bin
-ifeq ($(OS), Linux)
+ifeq ($(OS)$(BYTECODE), Linux)
 	objcopy --add-section hhi=../bin/hhi.tar.gz _build/hh_server.$(TARGET_EXT) ../bin/hh_server
 else
 	cp _build/hh_server.$(TARGET_EXT) ../bin/hh_server

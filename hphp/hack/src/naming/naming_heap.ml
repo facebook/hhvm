@@ -8,27 +8,6 @@
  *
  *)
 
-
-module ClassHeap = SharedMem.NoCache (StringKey) (struct
-  type t = Nast.class_
-  let prefix = Prefix.make()
-end)
-
-module FunHeap = SharedMem.NoCache (StringKey) (struct
-  type t = Nast.fun_
-  let prefix = Prefix.make()
-end)
-
-module TypedefHeap = SharedMem.NoCache (StringKey) (struct
-  type t = Nast.typedef
-  let prefix = Prefix.make()
-end)
-
-module ConstHeap = SharedMem.NoCache (StringKey) (struct
-  type t = Nast.gconst
-  let prefix = Prefix.make()
-end)
-
 (* Mapping the canonical name (lower case form) to the actual name *)
 module type CanonHeap =
   SharedMem.NoCache with type t = string

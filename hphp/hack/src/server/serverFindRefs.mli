@@ -13,6 +13,6 @@ open FindRefsService
 val to_json: result -> Hh_json.json
 
 val get_refs_with_defs : action -> ServerEnv.genv ->
-  ServerEnv.env -> (Naming_heap.FunHeap.key * Pos.t) list
+  ServerEnv.env -> (string * Pos.t) list
 
 val go : action -> ServerEnv.genv -> ServerEnv.env -> result

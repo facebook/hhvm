@@ -64,18 +64,18 @@ let error el =
 (*****************************************************************************)
 
 let type_fun tcopt x fn =
-  try
-    let fun_ = Naming_heap.FunHeap.find_unsafe x in
-    Typing.fun_def tcopt fun_;
-  with Not_found ->
-    ()
+  match Parser_heap.find_fun_in_file fn x with
+  | Some f ->
+    let fun_ = Naming.fun_ tcopt f in
+    Typing.fun_def tcopt fun_
+  | None -> ()
 
 let type_class tcopt x fn =
-  try
-    let class_ = Naming_heap.ClassHeap.find_unsafe x in
+  match Parser_heap.find_class_in_file fn x with
+  | Some cls ->
+    let class_ = Naming.class_ tcopt cls in
     Typing.class_def tcopt class_
-  with Not_found ->
-    ()
+  | None -> ()
 
 let make_funs_classes ast =
   List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
@@ -111,13 +111,11 @@ let declare_file fn content =
   List.iter old_funs begin fun (_, fname) ->
     Naming_heap.FunPosHeap.remove fname;
     Naming_heap.FunCanonHeap.remove (NamingGlobal.canon_key fname);
-    Naming_heap.FunHeap.remove fname;
     Typing_heap.Funs.remove fname;
   end;
   List.iter old_classes begin fun (_, cname) ->
     Naming_heap.TypeIdHeap.remove cname;
     Naming_heap.TypeCanonHeap.remove (NamingGlobal.canon_key cname);
-    Naming_heap.ClassHeap.remove cname;
     Typing_heap.Classes.remove cname;
   end;
   try
@@ -139,9 +137,11 @@ let declare_file fn content =
       Decl.make_env tcopt fn;
       let sub_classes = get_sub_classes all_classes in
       SSet.iter begin fun cname ->
-        match Naming_heap.ClassHeap.get cname with
-        | None -> ()
-        | Some c -> Decl.class_decl tcopt c
+        match Naming_heap.TypeIdHeap.get cname with
+        | Some (p, `Class) ->
+          let filename = Pos.filename p in
+          Decl.declare_class_in_file tcopt filename cname
+        | _ -> ()
       end sub_classes
     end
     else Hashtbl.replace globals fn (false, [], [])
@@ -439,14 +439,21 @@ let hh_arg_info fn line char =
   ArgumentInfoService.attach_hooks (line, char);
   let fn = Relative_path.create Relative_path.Root fn in
   let _, funs, classes = Hashtbl.find globals fn in
+  let tcopt = TypecheckerOptions.permissive in
   Errors.ignore_ begin fun () ->
     List.iter funs begin fun (_, f_name) ->
-      let f = Naming_heap.FunHeap.find_unsafe f_name in
-      Typing.fun_def TypecheckerOptions.permissive f
+      match Parser_heap.find_fun_in_file fn f_name with
+      | Some f ->
+        let fun_ = Naming.fun_ tcopt f in
+        Typing.fun_def tcopt fun_
+      | None -> ()
     end;
     List.iter classes begin fun (_, c_name) ->
-      let c = Naming_heap.ClassHeap.find_unsafe c_name in
-      Typing.class_def TypecheckerOptions.permissive c
+      match Parser_heap.find_class_in_file fn c_name with
+      | Some cls ->
+        let class_ = Naming.class_ tcopt cls in
+        Typing.class_def tcopt class_
+      | None -> ()
     end;
   end;
   let result = ArgumentInfoService.get_result() in

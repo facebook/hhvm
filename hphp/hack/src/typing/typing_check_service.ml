@@ -28,50 +28,48 @@ let neutral = Errors.empty, Relative_path.Set.empty
 (*****************************************************************************)
 
 let type_fun tcopt fn x =
-  try
-    if not @@ Naming_heap.FunHeap.mem x then
-      Decl.declare_fun_in_file tcopt fn x;
-    let fun_ = Naming_heap.FunHeap.find_unsafe x in
+  match Parser_heap.find_fun_in_file fn x with
+  | Some f ->
+    let fun_ = Naming.fun_ tcopt f in
     Typing.fun_def tcopt fun_
-  with Not_found -> ()
+  | None -> ()
 
 let type_class tcopt fn x =
-  try
-    if not @@ Naming_heap.ClassHeap.mem x then
-      Decl.declare_class_in_file tcopt fn x;
-    let class_ = Naming_heap.ClassHeap.find_unsafe x in
+  match Parser_heap.find_class_in_file fn x with
+  | Some cls ->
+    let class_ = Naming.class_ tcopt cls in
     Typing.class_def tcopt class_
-  with Not_found -> ()
+  | None -> ()
 
 let check_typedef tcopt fn x =
-  try
-    if not @@ Naming_heap.TypedefHeap.mem x then
-      Decl.declare_typedef_in_file tcopt fn x;
-    let typedef = Naming_heap.TypedefHeap.find_unsafe x in
+  match Parser_heap.find_typedef_in_file fn x with
+  | Some t ->
+    let typedef = Naming.typedef tcopt t in
     Typing.typedef_def typedef;
     Typing_variance.typedef tcopt x
-  with Not_found -> ()
+  | None -> ()
 
-let check_const tcopt _fn x =
-  try
-    match TLazyHeap.get_gconst tcopt x with
+let check_const tcopt fn x =
+  match Parser_heap.find_const_in_file fn x with
+  | None -> ()
+  | Some cst ->
+    let cst = Naming.global_const tcopt cst in
+    match cst.Nast.cst_value with
     | None -> ()
-    | Some declared_type ->
-        let cst = Naming_heap.ConstHeap.find_unsafe x in
-        match cst.Nast.cst_value with
-        | Some v ->
-          let filename = Pos.filename (fst cst.Nast.cst_name) in
-          let dep = Typing_deps.Dep.GConst (snd cst.Nast.cst_name) in
-          let env =
-            Typing_env.empty TypecheckerOptions.default filename (Some dep) in
-          let env = Typing_env.set_mode env cst.Nast.cst_mode in
-          let env, value_type = Typing.expr env v in
-          let env, dty = Typing_phase.localize_with_self env declared_type in
-          let _env = Typing_utils.sub_type env dty value_type in
-          ()
-        | None -> ()
-  with Not_found ->
-    ()
+    | Some v ->
+      let filename = Pos.filename (fst cst.Nast.cst_name) in
+      let dep = Typing_deps.Dep.GConst (snd cst.Nast.cst_name) in
+      let env =
+        Typing_env.empty TypecheckerOptions.default filename (Some dep) in
+      let env = Typing_env.set_mode env cst.Nast.cst_mode in
+      let env, value_type = Typing.expr env v in
+      match cst.Nast.cst_type with
+      | Some h ->
+        let declared_type = Decl_hint.hint env.Typing_env.decl_env h in
+        let env, dty = Typing_phase.localize_with_self env declared_type in
+        let _env = Typing_utils.sub_type env dty value_type in
+        ()
+      | None -> ()
 
 let check_file tcopt (errors, failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in

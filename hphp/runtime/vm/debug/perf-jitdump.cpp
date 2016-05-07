@@ -26,6 +26,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/oprof-jitdump.h"
 
+#include <folly/portability/Syscall.h>
+#include <folly/portability/Time.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
@@ -80,9 +82,16 @@ static inline uint64_t getArchTimestamp(void)  {
 #endif
 }
 
-#define CLOCK_MONOTONIC 1 
-#define NSEC_PER_SEC    1000000000
+/*On Win32 and linux CLOCK_MONOTONIC is available */
+#if !defined(CLOCK_MONOTONIC) && !defined(__APPLE__)
+#define CLOCK_MONOTONIC 1
 static int perf_clk_id = CLOCK_MONOTONIC;
+#elif defined(_WIN32)
+static int perf_clk_id = CLOCK_MONOTONIC;
+#else
+static int perf_clk_id = CLOCK_REALTIME;
+#endif
+#define NSEC_PER_SEC    1000000000
 
 static inline uint64_t timespec_to_ns(const struct timespec *ts)  {
   return ((uint64_t) ts->tv_sec * NSEC_PER_SEC) + ts->tv_nsec;
@@ -253,7 +262,7 @@ int DebugInfo::perfJitDumpTrace(const void* startAddr,
   rec.vma           = vma;
   rec.code_addr     = vma;
   rec.pid           = getpid();
-  rec.tid           = (pid_t)syscall(__NR_gettid);
+  rec.tid           = (pid_t)syscall(FOLLY_SYS_gettid);
   rec.p.total_size += size;
 
   rec.code_index = code_generation++;

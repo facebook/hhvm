@@ -121,7 +121,7 @@ let rec wfold_left_default f (env, def1) l1 l2 =
 
 let rec check_memoizable env param (pname, ty) =
   let env, ty = Env.expand_type env ty in
-  let p, _ = param.param_id in
+  let p = param.param_pos in
   match ty with
   | _, Tprim (Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
   | _, Tmixed
@@ -261,13 +261,12 @@ let rec check_memoizable env param (pname, ty) =
 let make_param_local_ty env param =
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
-  let param_pos = (fst param.param_id) in
   let env, ty =
     match param.param_hint with
     | None ->
       (* if the type is missing, use an unbound type variable *)
       let _r, ty = Env.fresh_type () in
-      let r = Reason.Rwitness param_pos in
+      let r = Reason.Rwitness param.param_pos in
       env, (r, ty)
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
@@ -277,12 +276,12 @@ let make_param_local_ty env param =
     | _, t when param.param_is_variadic ->
       (* when checking the body of a function with a variadic
        * argument, "f(C ...$args)", $args is an array<C> *)
-      let r = Reason.Rvar_param param_pos in
+      let r = Reason.Rvar_param param.param_pos in
       let arr_values = r, t in
       r, Tarraykind (AKvec arr_values)
     | x -> x
   in
-  Typing_hooks.dispatch_infer_ty_hook ty param_pos env;
+  Typing_hooks.dispatch_infer_ty_hook ty param.param_pos env;
   env, (Some param.param_name, ty)
 
 let rec bind_param env (_, ty1) param =
@@ -293,14 +292,14 @@ let rec bind_param env (_, ty1) param =
     | Some ty -> ty
   in
   Typing_suggest.save_param (param.param_name) env ty1 ty2;
-  let env = Type.sub_type (fst param.param_id) Reason.URhint env ty1 ty2 in
-  Env.set_local env (snd param.param_id) ty1
+  let env = Type.sub_type param.param_pos Reason.URhint env ty1 ty2 in
+  Env.set_local env (Local_id.get param.param_name) ty1
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
 (* But the type checker is nice: it makes a suggestion :-) *)
 and check_param env param (_, ty) =
   match (param.param_hint) with
-  | None -> suggest env (fst param.param_id) ty
+  | None -> suggest env param.param_pos ty
   | Some _ -> ()
 
 (*****************************************************************************)
@@ -1421,7 +1420,7 @@ and anon_check_param env param =
   | None -> env
   | Some hty ->
       let env, hty = Phase.hint_locl env hty in
-      let env, paramty = Env.get_local env (snd param.param_id) in
+      let env, paramty = Env.get_local env (Local_id.get param.param_name) in
       let hint_pos = Reason.to_pos (fst hty) in
       let env = Type.sub_type hint_pos Reason.URhint env hty paramty in
       env

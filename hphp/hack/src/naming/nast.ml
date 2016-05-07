@@ -182,7 +182,7 @@ and fun_param = {
   param_hint : hint option;
   param_is_reference : is_reference;
   param_is_variadic : is_variadic;
-  param_id : id;
+  param_pos : Pos.t;
   param_name : string;
   param_expr : expr option;
 }

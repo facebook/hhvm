@@ -15,10 +15,11 @@ end
 
 include S
 
-let counter = ref 1
+let ctr = ref 1
+
 let next () =
-  incr counter;
-  !counter
+  incr ctr;
+  !ctr
 
 let track_names = ref false
 let trace = ref IMap.empty
@@ -36,7 +37,10 @@ let make x =
   if !track_names then trace := IMap.add res x !trace;
   res
 
-let make_fake = Hashtbl.hash
+(* `make` always returns a positive value. By multiplying the hash by -1 we
+ * ensure that the value returned by `get` never overlaps with those returned
+ * by `make` *)
+let get x = -(Hashtbl.hash x)
 
 let tmp () =
   let res = next () in

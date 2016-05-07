@@ -139,10 +139,9 @@ let rec ifun_decl tcopt (f: Ast.fun_) =
   ()
 
 and make_param_ty env param =
-  let param_pos = (fst param.param_id) in
   let ty = match param.param_hint with
     | None ->
-      let r = Reason.Rwitness param_pos in
+      let r = Reason.Rwitness param.param_pos in
       (r, Tany)
       (* if the code is strict, use the type-hint *)
     | Some x ->
@@ -152,7 +151,7 @@ and make_param_ty env param =
     | _, t when param.param_is_variadic ->
       (* When checking a call f($a, $b) to a function f(C ...$args),
        * both $a and $b must be of type C *)
-      Reason.Rvar_param param_pos, t
+      Reason.Rvar_param param.param_pos, t
     | x -> x
   in
   Some param.param_name, ty
@@ -227,7 +226,7 @@ and make_param env mandatory arity param =
       assert(param.param_expr = None);
       false
     end else begin
-      check_default (fst param.param_id) mandatory param.param_expr;
+      check_default param.param_pos mandatory param.param_expr;
       mandatory && param.param_expr = None
     end
   in

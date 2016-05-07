@@ -107,6 +107,7 @@ module Env : sig
   val set_unsafe : genv * lenv -> bool -> unit
 
   val add_lvar : genv * lenv -> Ast.id -> positioned_ident -> unit
+  val add_param : genv * lenv -> N.fun_param -> genv * lenv
   val new_lvar : genv * lenv -> Ast.id -> positioned_ident
   val found_dollardollar : genv * lenv -> Pos.t -> positioned_ident
   val inside_pipe : genv * lenv -> bool
@@ -317,7 +318,16 @@ end = struct
 
   (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
-    lenv.locals := SMap.add name (p, x) !(lenv.locals)
+    lenv.locals := SMap.add name (p, x) !(lenv.locals);
+    Naming_hooks.dispatch_lvar_hook x (p, name) !(lenv.locals);
+    ()
+
+  let add_param env param =
+    let p_name = param.N.param_name in
+    let id = Local_id.get p_name in
+    let p_pos = param.N.param_pos in
+    let () = add_lvar env (p_pos, p_name) (p_pos, id) in
+    env
 
   (* Defines a new local variable.
      Side effects:
@@ -1438,13 +1448,15 @@ module Make (GetLocals : GetLocals) = struct
         variadicity, x :: rl
 
   and fun_param env param =
-    let x = Env.new_lvar env param.param_id in
-    let eopt = Option.map param.param_expr (expr env) in
+    let p, x = param.param_id in
+    let ident = Local_id.get x in
+    Env.add_lvar env param.param_id (p, ident);
     let ty = Option.map param.param_hint (hint env) in
+    let eopt = Option.map param.param_expr (expr env) in
     { N.param_hint = ty;
       param_is_reference = param.param_is_reference;
       param_is_variadic = param.param_is_variadic;
-      param_id = x;
+      param_pos = fst param.param_id;
       param_name = snd param.param_id;
       param_expr = eopt;
     }
@@ -2167,19 +2179,11 @@ module Make (GetLocals : GetLocals) = struct
         let genv = extend_params genv fub_tparams in
         let lenv = Env.empty_local UBMErr in
         let env = genv, lenv in
-        (* Reuse the ids issued by the naming pass over the params
-         * in the declaration *)
-        let add_param_as_local param env =
-          let p_name = param.N.param_name in
-          let p_pos, _ = param.N.param_id in
-          let () = Env.add_lvar env (p_pos, p_name) param.N.param_id in
-          env
-        in
         let env =
-          List.fold_right ~f:add_param_as_local f.N.f_params ~init:env in
+          List.fold_left ~f:Env.add_param f.N.f_params ~init:env in
         let env = match f.N.f_variadic with
           | N.FVellipsis | N.FVnonVariadic -> env
-          | N.FVvariadicArg param -> add_param_as_local param env
+          | N.FVvariadicArg param -> Env.add_param env param
         in
         let body = block env fub_ast in
         let unsafe = func_body_had_unsafe env in {
@@ -2194,20 +2198,11 @@ module Make (GetLocals : GetLocals) = struct
         let genv = {genv with namespace = fub_namespace} in
         let genv = extend_params genv fub_tparams in
         let env = genv, Env.empty_local UBMErr in
-
-        (* Reuse the ids issued by the naming pass over the params
-         * in the declaration *)
-        let add_param_as_local = begin fun param env ->
-          let p_name = param.N.param_name in
-          let p_pos, _ = param.N.param_id in
-          let () = Env.add_lvar env (p_pos, p_name) param.N.param_id in
-          env
-        end in
         let env =
-          List.fold_right ~f:add_param_as_local m.N.m_params ~init:env in
+          List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
         let env = match m.N.m_variadic with
           | N.FVellipsis | N.FVnonVariadic -> env
-          | N.FVvariadicArg param -> add_param_as_local param env
+          | N.FVvariadicArg param -> Env.add_param env param
         in
         let body = block env fub_ast in
         let unsafe = func_body_had_unsafe env in

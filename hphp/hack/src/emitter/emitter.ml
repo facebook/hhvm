@@ -56,7 +56,7 @@ let emit_param ~tparams i p =
   let type_info =
     Emitter_types.fmt_hint_info ~tparams ~always_extended:false p.param_hint in
 
-  let name = get_lid_name p.param_id in
+  let name = p.param_name in
   match p.param_expr with
   | None -> type_info ^ name, None
   | Some default ->

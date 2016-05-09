@@ -39,7 +39,7 @@ bool is_aligned(TCA frontier, Alignment alignment);
 void align(CodeBlock& cb, CGMeta* meta,
            Alignment alignment, AlignContext context);
 
-constexpr size_t cache_line_size() { return 1; }
+constexpr size_t cache_line_size() { return 128; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

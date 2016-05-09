@@ -1,12 +1,12 @@
 C
-  type: class
+  kind: class
   position: File "", line 3, characters 7-7:
   span: File "", line 3, character 1 - line 9, character 1:
+  modifiers: 
 
   methodWithAttribute
-    type: method
+    kind: method
     position: File "", line 5, characters 19-37:
-    static: false
     span: File "", line 4, character 3 - line 8, character 3:
-
+    modifiers: 
 

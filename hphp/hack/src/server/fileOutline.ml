@@ -12,73 +12,89 @@ open Core
 
 type outline = def list
 
-and def = def_common * def_
+and kind =
+  | Function
+  | Class
+  | Method
+  | Property
+  | Const
 
-and def_common = (Pos.absolute * string)
+and modifier =
+  | Static
 
-and def_ =
-  | Function of function_
-  | Class of class_
-
-and function_ = {
-  f_span : Pos.absolute;
-}
-and class_ = {
-  class_members : class_member list;
-  c_span : Pos.absolute;
-}
-
-and class_member = def_common * class_member_
-
-and class_member_ =
-  | Method of method_
-  | Property of property
-  | Const of class_const
-
-and method_ = {
-  static : bool;
-  m_span : Pos.absolute;
+and def = {
+  kind : kind;
+  name : string;
+  pos : Pos.absolute;
+  span : Pos.absolute;
+  modifiers : modifier list;
+  children : def list;
 }
 
-and property = {
-  p_span : Pos.absolute;
-}
+let string_of_kind = function
+  | Function -> "function"
+  | Class -> "class"
+  | Method -> "method"
+  | Property -> "property"
+  | Const -> "const"
 
-and class_const = {
-  cc_span : Pos.absolute;
-}
+let string_of_modifier = function
+  | Static -> "static"
 
 let summarize_property var =
-  let p_span, (pos, name), expr_opt = var in
-  let prop = {
-    p_span = Pos.to_absolute p_span;
-  } in
-  ((Pos.to_absolute pos, name), Property prop)
+  let span, (pos, name), expr_opt = var in
+  {
+    kind = Property;
+    name;
+    pos = Pos.to_absolute pos;
+    span = Pos.to_absolute span;
+    modifiers = [];
+    children = [];
+  }
 
 let summarize_const ((pos, name), (expr_pos, _)) =
-  let cc_span = Pos.to_absolute (Pos.btw pos expr_pos) in
-  let const = {
-    cc_span;
-  } in
-  ((Pos.to_absolute pos, name), Const const)
+  let span = Pos.to_absolute (Pos.btw pos expr_pos) in
+  {
+    kind = Const;
+    name;
+    pos = Pos.to_absolute pos;
+    span;
+    modifiers = [];
+    children = [];
+  }
 
 let summarize_abs_const (pos, name) =
-  let const = {cc_span = Pos.to_absolute pos; } in
-  ((Pos.to_absolute pos, name), Const const)
+  let pos = Pos.to_absolute pos in
+  {
+    kind = Const;
+    name;
+    pos = pos;
+    span = pos;
+    modifiers = [];
+    children = [];
+  }
 
-let summarize_class class_ acc =
+let summarize_class acc class_  =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
   let class_name_pos = Pos.to_absolute (fst class_.Ast.c_name) in
   let c_span = Pos.to_absolute class_.Ast.c_span in
-  let class_members = List.concat
+  let children = List.concat
     (List.map class_.Ast.c_body ~f:begin function
     | Ast.Method m ->
+        let modifiers = [] in
+        let modifiers =
+          if List.mem m.Ast.m_kind (Ast.Static)
+          then Static :: modifiers else modifiers
+        in
         let method_ = {
-          static = List.mem m.Ast.m_kind (Ast.Static);
-          m_span = (Pos.to_absolute m.Ast.m_span);
+          kind = Method;
+          name = snd m.Ast.m_name;
+          pos = Pos.to_absolute (fst m.Ast.m_name);
+          span = Pos.to_absolute m.Ast.m_span;
+          modifiers;
+          children = [];
         } in
-        [(Pos.to_absolute (fst m.Ast.m_name), snd m.Ast.m_name),
-         Method method_ ]
+        [method_]
     | Ast.ClassVars (_, _, vars) -> List.map vars ~f:summarize_property
     | Ast.XhpAttr (_, var, _, _) -> [summarize_property var]
     | Ast.Const (_, cl) -> List.map cl ~f:summarize_const
@@ -87,23 +103,31 @@ let summarize_class class_ acc =
     end)
   in
   let class_ = {
-    class_members;
-    c_span;
+    kind = Class;
+    name = class_name;
+    pos = class_name_pos;
+    span = c_span;
+    modifiers = [];
+    children;
   } in
-  ((class_name_pos, class_name), Class class_) :: acc
+  class_ :: acc
 
-let summarize_fun f acc =
+let summarize_fun acc f =
   let fun_ = {
-    f_span = (Pos.to_absolute f.Ast.f_span);
+    kind = Function;
+    name = Utils.strip_ns (snd f.Ast.f_name);
+    pos = Pos.to_absolute (fst f.Ast.f_name);
+    span = (Pos.to_absolute f.Ast.f_span);
+    modifiers = [];
+    children = []
   } in
-  ((Pos.to_absolute (fst f.Ast.f_name),
-   Utils.strip_ns (snd f.Ast.f_name)), (Function fun_)) :: acc
+  fun_ :: acc
 
 let outline_ast ast =
   List.fold_right ast ~init:[] ~f:begin fun def acc ->
     match def with
-    | Ast.Fun f -> summarize_fun f acc
-    | Ast.Class c -> summarize_class c acc
+    | Ast.Fun f -> summarize_fun acc f
+    | Ast.Class c -> summarize_class acc c
     | _ -> acc
   end
 
@@ -122,125 +146,59 @@ let to_json_legacy input =
 
 (* Transforms the outline type to format that existing --outline command
  * expects *)
-let to_legacy outline =
-  List.fold_left outline ~init:[] ~f:begin fun acc ((pos, name), def) ->
-  match def with
-  | Function _ -> (pos, name, "function")::acc
-  | Class c ->
-      let acc = (pos, name, "class")::acc in
-      List.fold_left c.class_members ~init:acc
-        ~f:begin fun acc ((pos, member_name), member) ->
-          match member with
-          | Method m ->
-            let desc = if m.static then "static method" else "method" in
-            (pos, name ^ "::" ^ member_name, desc)::acc
-          | Property _
-          | Const _ -> acc
-        end
-  end
+ let rec to_legacy prefix acc defs =
+   List.fold_left defs ~init:acc ~f:begin fun acc def ->
+     match def.kind with
+     | Function -> (def.pos, def.name, "function") :: acc
+     | Class ->
+         let acc = (def.pos, def.name, "class") :: acc in
+         to_legacy (prefix ^ def.name ^ "::") acc def.children
+     | Method ->
+       let desc =
+         if List.mem def.modifiers Static
+         then "static method" else "method"
+       in
+       (def.pos, prefix ^ def.name, desc) :: acc
+     | Property
+     | Const -> acc
+   end
 
-let outline content =
-  let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->
-    Parser_hack.program Relative_path.default content
-  end in
-  outline_ast ast
+ let to_legacy outline = to_legacy "" [] outline
 
-let outline_legacy content =
-  to_legacy @@ outline content
+ let outline content =
+   let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->
+     Parser_hack.program Relative_path.default content
+   end in
+   outline_ast ast
 
-let print_function pos name f =
-  Printf.printf "%s\n" name;
-  Printf.printf "  type: function\n";
-  Printf.printf "  position: %s\n" (Pos.string pos);
-  Printf.printf "  span: %s\n" (Pos.multiline_string f.f_span);
-  Printf.printf "\n"
+ let outline_legacy content =
+   to_legacy @@ outline content
 
-let print_method pos name m =
-  Printf.printf "  %s\n" name;
-  Printf.printf "    type: method\n";
-  Printf.printf "    position: %s\n" (Pos.string pos);
-  Printf.printf "    static: %b\n" m.static;
-  Printf.printf "    span: %s\n" (Pos.multiline_string m.m_span);
-  Printf.printf "\n"
+ let rec to_json outline =
+   Hh_json.JSON_Array begin
+     List.map outline ~f:begin fun def -> Hh_json.JSON_Object [
+       "kind", Hh_json.JSON_String (string_of_kind def.kind);
+       "name", Hh_json.JSON_String def.name;
+       "position", Pos.json def.pos;
+       "span", Pos.multiline_json def.span;
+       "modifiers", Hh_json.JSON_Array
+         (List.map def.modifiers
+           (fun x -> Hh_json.JSON_String (string_of_modifier x)));
+       "children", (to_json def.children)
+     ] end
+   end
 
-let print_property pos name p =
-  Printf.printf "  %s\n" name;
-  Printf.printf "    type: property\n";
-  Printf.printf "    position: %s\n" (Pos.string pos);
-  Printf.printf "    span: %s\n" (Pos.multiline_string p.p_span);
-  Printf.printf "\n"
+ let rec print indent defs  =
+   List.iter defs ~f:begin fun def ->
+     Printf.printf "%s%s\n" indent def.name;
+     Printf.printf "%s  kind: %s\n" indent (string_of_kind def.kind);
+     Printf.printf "%s  position: %s\n" indent (Pos.string def.pos);
+     Printf.printf "%s  span: %s\n" indent (Pos.multiline_string def.span);
+     Printf.printf "%s  modifiers: " indent;
+     List.iter def.modifiers
+       (fun x -> Printf.printf "%s " (string_of_modifier x));
+       Printf.printf "\n\n";
+     print (indent ^ "  ") def.children
+   end
 
-let print_const pos name c =
-  Printf.printf "  %s\n" name;
-  Printf.printf "    type: const\n";
-  Printf.printf "    position: %s\n" (Pos.string pos);
-  Printf.printf "    span: %s\n" (Pos.multiline_string c.cc_span);
-  Printf.printf "\n"
-
-let print_class_member ((pos, name), member) =
-  match member with
-  | Method m -> print_method pos name m
-  | Property p -> print_property pos name p
-  | Const c -> print_const pos name c
-
-let print_class pos name c =
-  Printf.printf "%s\n" name;
-  Printf.printf "  type: class\n";
-  Printf.printf "  position: %s\n" (Pos.string pos);
-  Printf.printf "  span: %s\n" (Pos.multiline_string c.c_span);
-  Printf.printf "\n";
-  List.iter c.class_members print_class_member;
-  Printf.printf "\n"
-
-let print (outline : outline) =
-  List.iter outline begin fun ((pos, name), def) ->
-    match def with
-    | Function f -> print_function pos name f
-    | Class c -> print_class pos name c
-  end
-
-let json_of_member ((pos, name), def) =
-  match def with
-  | Method m ->
-      Hh_json.JSON_Object [
-        "type", Hh_json.JSON_String "method";
-        "name", Hh_json.JSON_String name;
-        "position", (Pos.json pos);
-        "span", (Pos.multiline_json m.m_span);
-        "static", Hh_json.JSON_Bool m.static;
-      ]
-  | Property p ->
-      Hh_json.JSON_Object [
-        "type", Hh_json.JSON_String "property";
-        "name", Hh_json.JSON_String name;
-        "position", (Pos.json pos);
-        "span", (Pos.multiline_json p.p_span);
-      ]
-  | Const c ->
-    Hh_json.JSON_Object [
-      "type", Hh_json.JSON_String "class_const";
-      "name", Hh_json.JSON_String name;
-      "position", (Pos.json pos);
-      "span", (Pos.multiline_json c.cc_span);
-    ]
-
-let json_of_def ((pos, name), def) =
-  match def with
-  | Function f ->
-      Hh_json.JSON_Object [
-        "type", Hh_json.JSON_String "function";
-        "name", Hh_json.JSON_String name;
-        "position", (Pos.json pos);
-        "span", (Pos.multiline_json f.f_span);
-      ]
-  | Class c ->
-      Hh_json.JSON_Object [
-        "type", Hh_json.JSON_String "class";
-        "name", Hh_json.JSON_String name;
-        "position", (Pos.json pos);
-        "span", (Pos.multiline_json c.c_span);
-        "members", Hh_json.JSON_Array (List.map c.class_members json_of_member)
-      ]
-
-let to_json outline =
-  Hh_json.JSON_Array (List.map outline json_of_def)
+ let print  = print ""

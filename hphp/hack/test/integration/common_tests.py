@@ -457,15 +457,16 @@ class CommonTests(object):
 
         self.check_cmd_and_json_cmd([
             'bar',
-            '  type: function',
+            '  kind: function',
             '  position: File "", line 1, characters 15-17:',
             '  span: File "", line 1, character 6 - line 1, character 22:',
+            '  modifiers: ',
             '',
             ], [
-            '[{{"type":"function","name":"bar","position":{{"filename":"",'
+            '[{{"kind":"function","name":"bar","position":{{"filename":"",'
             '"line":1,"char_start":15,"char_end":17}},"span":'
             '{{"filename":"","line_start":1,"char_start":6,"line_end":1,'
-            '"char_end":22}}}}]',
+            '"char_end":22}},"modifiers":[],"children":[]}}]',
             ],
             options=['--ide-outline'],
             stdin='<?hh function bar() {}')

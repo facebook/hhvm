@@ -1,42 +1,48 @@
 C
-  type: class
+  kind: class
   position: File "", line 3, characters 7-7:
   span: File "", line 3, character 1 - line 18, character 1:
+  modifiers: 
 
   foo
-    type: property
+    kind: property
     position: File "", line 5, characters 5-8:
     span: File "", line 5, character 5 - line 5, character 8:
+    modifiers: 
 
   bar
-    type: property
+    kind: property
     position: File "", line 6, characters 5-8:
     span: File "", line 6, character 5 - line 6, character 16:
+    modifiers: 
 
   :xhp_property
-    type: property
+    kind: property
     position: File "", line 9, characters 12-23:
     span: File "", line 9, character 12 - line 9, character 23:
+    modifiers: 
 
   :xhp_enum_property
-    type: property
+    kind: property
     position: File "", line 10, characters 25-41:
     span: File "", line 10, character 25 - line 10, character 48:
+    modifiers: 
 
   implicit_property
-    type: property
+    kind: property
     position: File "", line 14, characters 19-36:
     span: File "", line 14, character 19 - line 14, character 36:
+    modifiers: 
 
   implicit_property_with_init
-    type: property
+    kind: property
     position: File "", line 15, characters 16-43:
     span: File "", line 15, character 16 - line 15, character 47:
+    modifiers: 
 
   __construct
-    type: method
+    kind: method
     position: File "", line 12, characters 19-29:
-    static: false
     span: File "", line 12, character 3 - line 17, character 3:
-
+    modifiers: 
 

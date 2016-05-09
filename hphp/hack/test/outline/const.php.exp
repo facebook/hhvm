@@ -2,7 +2,7 @@ C
   kind: class
   position: File "", line 3, characters 16-16:
   span: File "", line 3, character 1 - line 9, character 1:
-  modifiers: 
+  modifiers: abstract 
 
   FOO
     kind: const
@@ -20,5 +20,5 @@ C
     kind: const
     position: File "", line 8, characters 22-24:
     span: File "", line 8, character 22 - line 8, character 24:
-    modifiers: 
+    modifiers: abstract 
 

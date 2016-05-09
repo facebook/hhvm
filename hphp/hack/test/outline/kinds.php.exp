@@ -1,0 +1,18 @@
+foo
+  kind: enum
+  position: File "", line 3, characters 6-8:
+  span: File "", line 3, character 1 - line 3, character 20:
+  modifiers: 
+
+I
+  kind: interface
+  position: File "", line 5, characters 11-11:
+  span: File "", line 5, character 1 - line 5, character 14:
+  modifiers: 
+
+T
+  kind: trait
+  position: File "", line 7, characters 7-7:
+  span: File "", line 7, character 1 - line 7, character 10:
+  modifiers: 
+

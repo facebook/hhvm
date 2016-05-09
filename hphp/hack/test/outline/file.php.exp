@@ -20,11 +20,11 @@ C
     kind: method
     position: File "", line 8, characters 19-21:
     span: File "", line 8, character 3 - line 8, character 26:
-    modifiers: 
+    modifiers: public 
 
   bar
     kind: method
     position: File "", line 10, characters 26-28:
     span: File "", line 10, character 3 - line 10, character 33:
-    modifiers: static 
+    modifiers: public static 
 

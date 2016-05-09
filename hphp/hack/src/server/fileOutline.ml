@@ -18,9 +18,18 @@ and kind =
   | Method
   | Property
   | Const
+  | Enum
+  | Interface
+  | Trait
 
 and modifier =
+  | Final
   | Static
+  | Abstract
+  | Private
+  | Public
+  | Protected
+  | Async
 
 and def = {
   kind : kind;
@@ -31,24 +40,44 @@ and def = {
   children : def list;
 }
 
+let modifiers_of_ast_kinds l =
+  List.map l begin function
+    | Ast.Final -> Final
+    | Ast.Static -> Static
+    | Ast.Abstract -> Abstract
+    | Ast.Private -> Private
+    | Ast.Public -> Public
+    | Ast.Protected -> Protected
+  end
+
 let string_of_kind = function
   | Function -> "function"
   | Class -> "class"
   | Method -> "method"
   | Property -> "property"
   | Const -> "const"
+  | Enum -> "enum"
+  | Interface -> "interface"
+  | Trait -> "trait"
 
 let string_of_modifier = function
+  | Final -> "final"
   | Static -> "static"
+  | Abstract -> "abstract"
+  | Private -> "private"
+  | Public -> "public"
+  | Protected -> "protected"
+  | Async -> "async"
 
-let summarize_property var =
+let summarize_property kinds var =
+  let modifiers = modifiers_of_ast_kinds kinds in
   let span, (pos, name), expr_opt = var in
   {
     kind = Property;
     name;
     pos = Pos.to_absolute pos;
     span = Pos.to_absolute span;
-    modifiers = [];
+    modifiers;
     children = [];
   }
 
@@ -70,22 +99,30 @@ let summarize_abs_const (pos, name) =
     name;
     pos = pos;
     span = pos;
-    modifiers = [];
+    modifiers = [Abstract];
     children = [];
   }
+
+let modifier_of_fun_kind acc = function
+  | Ast.FAsync | Ast.FAsyncGenerator -> Async :: acc
+  | _ -> acc
 
 let summarize_class acc class_  =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
   let class_name_pos = Pos.to_absolute (fst class_.Ast.c_name) in
   let c_span = Pos.to_absolute class_.Ast.c_span in
+  let modifiers =
+    if class_.Ast.c_final then [Final] else []
+  in
+  let modifiers = match class_.Ast.c_kind with
+    | Ast.Cabstract -> Abstract :: modifiers
+    | _ -> modifiers
+  in
   let children = List.concat
     (List.map class_.Ast.c_body ~f:begin function
     | Ast.Method m ->
-        let modifiers = [] in
-        let modifiers =
-          if List.mem m.Ast.m_kind (Ast.Static)
-          then Static :: modifiers else modifiers
-        in
+        let modifiers = modifier_of_fun_kind [] m.Ast.m_fun_kind in
+        let modifiers = (modifiers_of_ast_kinds m.Ast.m_kind) @ modifiers in
         let method_ = {
           kind = Method;
           name = snd m.Ast.m_name;
@@ -95,30 +132,38 @@ let summarize_class acc class_  =
           children = [];
         } in
         [method_]
-    | Ast.ClassVars (_, _, vars) -> List.map vars ~f:summarize_property
-    | Ast.XhpAttr (_, var, _, _) -> [summarize_property var]
+    | Ast.ClassVars (kinds, _, vars) ->
+        List.map vars ~f:(summarize_property kinds)
+    | Ast.XhpAttr (_, var, _, _) -> [summarize_property [] var]
     | Ast.Const (_, cl) -> List.map cl ~f:summarize_const
     | Ast.AbsConst (_, id) -> [summarize_abs_const id]
     | _ -> []
     end)
   in
+  let kind = match class_.Ast.c_kind with
+    | Ast.Cinterface -> Interface
+    | Ast.Ctrait -> Trait
+    | Ast.Cenum -> Enum
+    | _ -> Class
+  in
   let class_ = {
-    kind = Class;
+    kind;
     name = class_name;
     pos = class_name_pos;
     span = c_span;
-    modifiers = [];
+    modifiers;
     children;
   } in
   class_ :: acc
 
 let summarize_fun acc f =
+  let modifiers = modifier_of_fun_kind [] f.Ast.f_fun_kind in
   let fun_ = {
     kind = Function;
     name = Utils.strip_ns (snd f.Ast.f_name);
     pos = Pos.to_absolute (fst f.Ast.f_name);
     span = (Pos.to_absolute f.Ast.f_span);
-    modifiers = [];
+    modifiers;
     children = []
   } in
   fun_ :: acc
@@ -150,7 +195,7 @@ let to_json_legacy input =
    List.fold_left defs ~init:acc ~f:begin fun acc def ->
      match def.kind with
      | Function -> (def.pos, def.name, "function") :: acc
-     | Class ->
+     | Class | Enum | Interface | Trait ->
          let acc = (def.pos, def.name, "class") :: acc in
          to_legacy (prefix ^ def.name ^ "::") acc def.children
      | Method ->

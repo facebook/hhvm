@@ -8,5 +8,5 @@ C
     kind: method
     position: File "", line 5, characters 19-37:
     span: File "", line 4, character 3 - line 8, character 3:
-    modifiers: 
+    modifiers: public 
 

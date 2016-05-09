@@ -88,7 +88,8 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync = SyncOptions::Sync);
  * Native call helper.
  */
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
-                  SyncOptions sync, const ArgGroup& args);
+                  SyncOptions sync, const ArgGroup& args,
+                  bool indResult = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 

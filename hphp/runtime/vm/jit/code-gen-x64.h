@@ -63,7 +63,8 @@ private:
   CallDest callDestDbl(const IRInstruction*) const;
 
   void cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,
-                    SyncOptions sync, const ArgGroup& args);
+                    SyncOptions sync, const ArgGroup& args,
+                    bool indResult = false);
   void cgInterpOneCommon(IRInstruction* inst);
 
   void emitTrashTV(Vreg, int32_t, char fillByte);

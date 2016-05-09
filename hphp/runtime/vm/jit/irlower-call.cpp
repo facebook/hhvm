@@ -104,7 +104,7 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
 }
 
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
-                  SyncOptions sync, const ArgGroup& args) {
+                  SyncOptions sync, const ArgGroup& args, bool indResult) {
   auto const inst = args.inst();
   jit::vector<Vreg> vargs, vSimdArgs, vStkArgs;
 
@@ -174,11 +174,12 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
 
   if (do_catch) {
     v << vinvoke{call, argsId, dstId, {targets[0], targets[1]},
-                 syncFixup, dstInfo.type};
+                 syncFixup, dstInfo.type, indResult};
     env.catch_calls[inst->taken()] = CatchCall::CPP;
     v = targets[0];
   } else {
-    v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow};
+    v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow,
+               indResult};
   }
 }
 

@@ -443,6 +443,9 @@ void handlePrimeCacheInit(Entry* mce,
 #if defined(__x86_64__)
   ActRec* framePtr;
   asm volatile("mov %%rbp, %0" : "=r" (framePtr) ::);
+#elif defined(__aarch64__)
+  ActRec* framePtr;
+  asm volatile("mov %0, x29" : "=r" (framePtr) ::);
 #else
   ActRec* framePtr = ar;
   always_assert(false);

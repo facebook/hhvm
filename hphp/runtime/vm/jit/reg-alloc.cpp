@@ -65,7 +65,7 @@ bool loadsCell(Opcode op) {
   case ArrayIdx:
     switch (arch()) {
     case Arch::X64: return true;
-    case Arch::ARM: return false;
+    case Arch::ARM: return true;
     case Arch::PPC64: not_implemented(); break;
     }
     not_reached();
@@ -83,7 +83,7 @@ bool loadsCell(Opcode op) {
 bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   switch (arch()) {
   case Arch::X64: break;
-  case Arch::ARM: return false;
+  case Arch::ARM: break;
   case Arch::PPC64: not_implemented(); break;
   }
 
@@ -118,7 +118,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   auto const forceStkPtrs = [&] {
     switch (arch()) {
     case Arch::X64: return false;
-    case Arch::ARM: return true;
+    case Arch::ARM: return false;
     case Arch::PPC64: not_implemented(); break;
     }
     not_reached();
@@ -220,7 +220,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       defs = abi.all() - (abi.calleeSaved | rvmfp());
 
       switch (arch()) {
-        case Arch::ARM: defs |= PhysReg(arm::rLinkReg); break;
+        case Arch::ARM: break;
         case Arch::X64: break;
         case Arch::PPC64: not_implemented(); break;
       }
@@ -233,7 +233,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::callphp:
       defs = abi.all();
       switch (arch()) {
-        case Arch::ARM: break;
+        case Arch::ARM: defs -= rvmtl(); break;
         case Arch::X64: defs -= rvmtl(); break;
         case Arch::PPC64: not_implemented(); break;
       }
@@ -243,7 +243,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::contenter:
       defs = abi.all() - RegSet(rvmfp());
       switch (arch()) {
-        case Arch::ARM: break;
+        case Arch::ARM: defs -= rvmtl(); break;
         case Arch::X64: defs -= rvmtl(); break;
         case Arch::PPC64: not_implemented(); break;
       }
@@ -259,12 +259,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::shlq:
     case Vinstr::sarq:
       across = RegSet(reg::rcx);
-      break;
-
-    // arm instrs
-    case Vinstr::hostcall:
-      defs = (abi.all() - abi.calleeSaved) |
-             RegSet(PhysReg(arm::rHostCallReg));
       break;
 
     case Vinstr::vcall:

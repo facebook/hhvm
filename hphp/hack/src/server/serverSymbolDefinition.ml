@@ -34,13 +34,37 @@ let get_member_extents (x: class_element) =
   Naming_heap.TypeIdHeap.get member_origin >>= fun (p, _) ->
   Parser_heap.find_class_in_file (Pos.filename p) member_origin >>= fun c ->
   match type_ with
-  | Method ->
+  | Constructor
+  | Method
+  | Static_method ->
     let methods = List.filter_map c.Ast.c_body begin function
       | Ast.Method m -> Some m
       | _ -> None
     end in
     List.find methods (fun m -> (snd m.Ast.m_name) = member_name) >>= fun m ->
     Some (m.Ast.m_extents)
+  | Property
+  | Static_property ->
+    let props = List.concat_map c.Ast.c_body begin function
+      | Ast.ClassVars (_, _, vars) ->
+        List.map vars (fun (extents, (_, name), _) -> (extents, name))
+      | Ast.XhpAttr (_, (extents, (_, name), _), _, _) -> [(extents, name)]
+      | _ -> []
+    end in
+    List.find props (fun p -> snd p = member_name) >>= fun p ->
+    Some (fst p)
+  | Class_const ->
+    let consts = List.concat_map c.Ast.c_body begin function
+      | Ast.Const (_, consts) ->
+        List.map consts begin fun ((pos_start, name), (pos_end, _)) ->
+          let extents = Pos.btw pos_start pos_end in
+          (extents, name)
+        end
+      | Ast.AbsConst (_, (pos, name)) -> [(pos, name)]
+      | _ -> []
+    end in
+    List.find consts (fun p -> snd p = member_name) >>= fun p ->
+    Some (fst p)
   | _ -> None
 
 (* We have the method element from typing phase, but it doesn't have positional

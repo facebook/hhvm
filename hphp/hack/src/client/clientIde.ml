@@ -44,7 +44,7 @@ let read_server_message fd : string =
   Marshal_tools.from_fd_with_preamble fd
 
 let server_disconnected () =
-  raise Exit_status.(Exit_with Ok)
+  raise Exit_status.(Exit_with No_error)
 
 let read_request () =
   try read_line () with End_of_file ->
@@ -79,4 +79,4 @@ let main env =
       in
       write_response res;
   done;
-  Exit_status.exit Exit_status.Ok
+  Exit_status.exit Exit_status.No_error

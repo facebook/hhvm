@@ -23,7 +23,7 @@ type env = {
 
 let handle_response env ic =
   let finished = ref false in
-  let exit_code = ref Exit_status.Ok in
+  let exit_code = ref Exit_status.No_error in
   HackEventLogger.client_build_begin_work
     (ServerBuild.build_type_of env.build_opts)
     env.build_opts.ServerBuild.id;
@@ -36,7 +36,7 @@ let handle_response env ic =
           exit_code := Exit_status.Build_error; print_endline s
       | ServerBuild.BUILD_FINISHED -> finished := true
     done;
-    Exit_status.Ok
+    Exit_status.No_error
   with
   | End_of_file ->
     if not !finished then begin

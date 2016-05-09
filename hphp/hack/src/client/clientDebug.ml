@@ -28,4 +28,4 @@ let main env =
   while true do
     print_endline (Timeout.input_line ic);
   done;
-  Exit_status.Ok
+  Exit_status.No_error

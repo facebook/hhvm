@@ -94,6 +94,6 @@ let do_kill env =
 let main env =
   HackEventLogger.client_stop ();
   do_kill env;
-  Exit_status.Ok
+  Exit_status.No_error
 
 let kill_server root = do_kill {root}

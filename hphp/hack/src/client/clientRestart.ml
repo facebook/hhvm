@@ -16,4 +16,4 @@ let main env =
   else Printf.eprintf "Warning: no server to restart for %s\n%!"
     (Path.to_string env.ClientStart.root);
   ClientStart.start_server env;
-  Exit_status.Ok
+  Exit_status.No_error

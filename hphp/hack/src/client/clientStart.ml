@@ -97,7 +97,7 @@ let main env =
   if should_start env
   then begin
     start_server env;
-    Exit_status.Ok
+    Exit_status.No_error
   end else begin
     Printf.eprintf
       "Error: Server already exists for %s\n\

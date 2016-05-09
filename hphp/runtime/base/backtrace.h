@@ -22,6 +22,7 @@ namespace HPHP {
 
 struct Array;
 struct VMParserFrame;
+struct c_WaitableWaitHandle;
 
 struct BacktraceArgs {
 
@@ -114,6 +115,14 @@ struct BacktraceArgs {
     return *this;
   }
 
+  /**
+   * Backtrace from wait handle, instead of current frame.
+   */
+  BacktraceArgs& fromWaitHandle(c_WaitableWaitHandle* handle) {
+    m_fromWaitHandle = handle;
+    return *this;
+  }
+
 private:
   bool m_skipTop{false};
   bool m_withSelf{false};
@@ -124,6 +133,7 @@ private:
   bool m_withArgNames{false};
   int m_limit{0};
   VMParserFrame* m_parserFrame{nullptr};
+  c_WaitableWaitHandle* m_fromWaitHandle{nullptr};
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);

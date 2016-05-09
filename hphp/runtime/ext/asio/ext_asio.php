@@ -384,4 +384,29 @@ function has_finished<T>(Awaitable<T> $awaitable): bool {
 <<__Native>>
 function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
 
+/**
+ * Generates a backtrace for $awaitable.
+ * Following conditions must be met to produce non-empty backtrace:
+ * - $awaitable has not finished yet (i.e. has_finished($awaitable) === false)
+ * - $awaitable is part of valid scheduler context
+ *     (i.e. $awaitable->getContextIdx() > 0)
+ * If either condition is not met, backtrace() returns empty array.
+ *
+ * @param $awaitable - Awaitable, to take backtrace from.
+ * @param int $options - bitmask of the following options:
+ *   DEBUG_BACKTRACE_PROVIDE_OBJECT
+ *   DEBUG_BACKTRACE_PROVIDE_METADATA
+ *   DEBUG_BACKTRACE_IGNORE_ARGS
+ * @param int $limit - the maximum number of stack frames returned.
+ *   By default (limit=0) it returns all stack frames.
+ *
+ * @return array - Returns an array of associative arrays.
+ *   See debug_backtrace() for detailed format description.
+ */
+<<__Native>>
+function backtrace<T>(Awaitable<T> $awaitable,
+                      int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
+                      int $limit = 0): array<array>;
+
+
 } // namespace

@@ -17,11 +17,13 @@
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/systemlib.h"
 
@@ -82,6 +84,36 @@ bool HHVM_FUNCTION(cancel, const Object& obj, const Object& exception) {
   }
 }
 
+Array HHVM_FUNCTION(backtrace,
+                    const Object& obj,
+                    int64_t options,
+                    int64_t limit) {
+  bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
+  bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
+  bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
+
+  if (!obj->instanceof(c_WaitHandle::classof())) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Backtrace unsupported for user-land Awaitable");
+  }
+
+  // it's not possible to backtrace finished wait handle,
+  // because it doesn't keep parent chain
+  if (wait_handle<c_WaitHandle>(obj.get())->isFinished()) {
+    return Array();
+  }
+
+  // only descendants of c_WaitableWaitHandle can be in non-finished state
+  auto handle = wait_handle<c_WaitableWaitHandle>(obj.get());
+
+  return createBacktrace(BacktraceArgs()
+                         .fromWaitHandle(handle)
+                         .withThis(provide_object)
+                         .withMetadata(provide_metadata)
+                         .ignoreArgs(ignore_args)
+                         .setLimit(limit));
+}
+
 static AsioExtension s_asio_extension;
 
 void AsioExtension::initFunctions() {
@@ -91,6 +123,7 @@ void AsioExtension::initFunctions() {
   HHVM_FALIAS(HH\\asio_get_running_in_context, asio_get_running_in_context);
   HHVM_FALIAS(HH\\asio_get_running, asio_get_running);
   HHVM_FALIAS(HH\\Asio\\cancel, cancel);
+  HHVM_FALIAS(HH\\Asio\\backtrace, backtrace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

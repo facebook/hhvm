@@ -84,6 +84,47 @@ static ActRec* getPrevActRec(
   return g_context->getPrevVMState(fp, prevPc);
 }
 
+// walks up the wait handle dependency chain, until it finds activation record
+static ActRec* getActRecFromWaitHandle(
+    c_WaitableWaitHandle* currentWaitHandle, Offset* prevPc,
+    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
+
+  if (currentWaitHandle->isFinished()) {
+    return nullptr;
+  }
+
+  auto const contextIdx = currentWaitHandle->getContextIdx();
+  if (contextIdx <= 0) {
+    return nullptr;
+  }
+
+  while (currentWaitHandle != nullptr &&
+         currentWaitHandle->getKind() != c_WaitHandle::Kind::AsyncFunction) {
+    auto p = currentWaitHandle->getParentChain().firstInContext(contextIdx);
+    if (p == nullptr ||
+        UNLIKELY(std::find(visitedWHs.begin(), visitedWHs.end(), p)
+                 != visitedWHs.end())) {
+      // If the parent exists in our backtrace, it means we have detected a
+      // cycle. Fall back to savedFP in that case.
+      currentWaitHandle = nullptr;
+      break;
+    }
+
+    visitedWHs.push_back(p);
+    currentWaitHandle = p;
+  }
+
+  if (currentWaitHandle != nullptr &&
+      currentWaitHandle->getKind() == c_WaitHandle::Kind::AsyncFunction) {
+    auto wh = currentWaitHandle->asAsyncFunction();
+    *prevPc = wh->resumable()->resumeOffset();
+    return wh->actRec();
+  }
+
+  *prevPc = 0;
+  return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
+}
+
 Array createBacktrace(const BacktraceArgs& btArgs) {
   auto bt = Array::Create();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
@@ -98,29 +139,35 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     );
   }
 
-  VMRegAnchor _;
-  // If there are no VM frames, we're done.
-  if (!rds::header() || !vmfp()) return bt;
-
   int depth = 0;
   ActRec* fp = nullptr;
   Offset pc = 0;
 
-  // Get the fp and pc of the top frame (possibly skipping one frame).
-
-  if (btArgs.m_skipTop) {
-    fp = getPrevActRec(vmfp(), &pc, visitedWHs);
-    // We skipped over the only VM frame, we're done.
+  if (btArgs.m_fromWaitHandle) {
+    fp = getActRecFromWaitHandle(btArgs.m_fromWaitHandle, &pc, visitedWHs);
+    // no frames found, we are done
     if (!fp) return bt;
   } else {
-    fp = vmfp();
-    auto const unit = fp->func()->unit();
-    assert(unit);
-    pc = unit->offsetOf(vmpc());
+    VMRegAnchor _;
+    // If there are no VM frames, we're done.
+    if (!rds::header() || !vmfp()) return bt;
+
+    // Get the fp and pc of the top frame (possibly skipping one frame).
+
+    if (btArgs.m_skipTop) {
+      fp = getPrevActRec(vmfp(), &pc, visitedWHs);
+      // We skipped over the only VM frame, we're done.
+      if (!fp) return bt;
+    } else {
+      fp = vmfp();
+      auto const unit = fp->func()->unit();
+      assert(unit);
+      pc = unit->offsetOf(vmpc());
+    }
   }
 
   // Handle the top frame.
-  if (btArgs.m_withSelf) {
+  if (btArgs.m_withSelf || btArgs.m_fromWaitHandle) {
     // Builtins don't have a file and line number.
     if (!fp->func()->isBuiltin()) {
       auto const unit = fp->func()->unit();

@@ -17,4 +17,7 @@ namespace HH\Asio {
   function result<T>(Awaitable<T> $awaitable): T;
   function has_finished<T>(Awaitable<T> $awaitable): bool;
   function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
+  function backtrace<T>(Awaitable<T> $awaitable,
+                        int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
+                        int $limit = 0): array<array>;
 }

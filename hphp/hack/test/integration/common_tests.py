@@ -449,6 +449,27 @@ class CommonTests(object):
             options=['--ide-get-definition', '1:43'],
             stdin='<?hh function bar() {} function test() { bar() }')
 
+    def test_ide_outline(self):
+        """
+        Test hh_client --ide-outline
+        """
+        self.write_load_config()
+
+        self.check_cmd_and_json_cmd([
+            'bar',
+            '  type: function',
+            '  position: File "", line 1, characters 15-17:',
+            '  extents: File "", line 1, character 6 - line 1, character 22:',
+            '',
+            ], [
+            '[{{"type":"function","name":"bar","position":{{"filename":"",'
+            '"line":1,"char_start":15,"char_end":17}},"extents":'
+            '{{"filename":"","line_start":1,"char_start":6,"line_end":1,'
+            '"char_end":22}}}}]',
+            ],
+            options=['--ide-outline'],
+            stdin='<?hh function bar() {}')
+            
     def test_get_method_name(self):
         """
         Test --get-method-name

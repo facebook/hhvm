@@ -226,7 +226,7 @@ let json_string_of_response id response =
       | _ -> JSON_Object []
       end
     | Outline_response result ->
-      FileOutline.to_json result
+      FileOutline.to_json_legacy result
   in
   json_to_string (build_response_json id result_field)
 

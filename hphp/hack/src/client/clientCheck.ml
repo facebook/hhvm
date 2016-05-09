@@ -202,6 +202,11 @@ let main args =
     | MODE_OUTLINE ->
       let content = Sys_utils.read_stdin_to_string () in
       let results = Cmd.rpc conn @@ Rpc.OUTLINE content in
+      ClientOutline.go_legacy results args.output_json;
+      Exit_status.No_error
+    | MODE_OUTLINE2 ->
+      let content = Sys_utils.read_stdin_to_string () in
+      let results = Cmd.rpc conn @@ Rpc.OUTLINE content in
       ClientOutline.go results args.output_json;
       Exit_status.No_error
     | MODE_METHOD_JUMP_CHILDREN class_ ->

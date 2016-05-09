@@ -107,7 +107,7 @@ let outline_ast ast =
     | _ -> acc
   end
 
-let to_json input =
+let to_json_legacy input =
   let entries = List.map input begin fun (pos, name, type_) ->
     let line, start, end_ = Pos.info_pos pos in
     Hh_json.JSON_Object [
@@ -198,3 +198,49 @@ let print (outline : outline) =
     | Function f -> print_function pos name f
     | Class c -> print_class pos name c
   end
+
+let json_of_member ((pos, name), def) =
+  match def with
+  | Method m ->
+      Hh_json.JSON_Object [
+        "type", Hh_json.JSON_String "method";
+        "name", Hh_json.JSON_String name;
+        "position", (Pos.json pos);
+        "extents", (Pos.multiline_json m.m_extents);
+        "static", Hh_json.JSON_Bool m.static;
+      ]
+  | Property p ->
+      Hh_json.JSON_Object [
+        "type", Hh_json.JSON_String "property";
+        "name", Hh_json.JSON_String name;
+        "position", (Pos.json pos);
+        "extents", (Pos.multiline_json p.p_extents);
+      ]
+  | Const c ->
+    Hh_json.JSON_Object [
+      "type", Hh_json.JSON_String "class_const";
+      "name", Hh_json.JSON_String name;
+      "position", (Pos.json pos);
+      "extents", (Pos.multiline_json c.cc_extents);
+    ]
+
+let json_of_def ((pos, name), def) =
+  match def with
+  | Function f ->
+      Hh_json.JSON_Object [
+        "type", Hh_json.JSON_String "function";
+        "name", Hh_json.JSON_String name;
+        "position", (Pos.json pos);
+        "extents", (Pos.multiline_json f.f_extents);
+      ]
+  | Class c ->
+      Hh_json.JSON_Object [
+        "type", Hh_json.JSON_String "class";
+        "name", Hh_json.JSON_String name;
+        "position", (Pos.json pos);
+        "extents", (Pos.multiline_json c.c_extents);
+        "members", Hh_json.JSON_Array (List.map c.class_members json_of_member)
+      ]
+      
+let to_json outline =
+  Hh_json.JSON_Array (List.map outline json_of_def)

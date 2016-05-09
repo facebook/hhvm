@@ -428,7 +428,7 @@ let rec u_program v = u_of_list_spc u_def v
       | Public -> "public"
       | Protected -> "protected" in
     Str s
-  and u_class_var (id, exprOpt) =
+  and u_class_var (_, id, exprOpt) =
     let exprStr = match exprOpt with
       | None -> StrEmpty
       | Some expr -> StrWords [Str "=" ; u_expr expr] in

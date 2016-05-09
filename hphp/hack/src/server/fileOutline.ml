@@ -32,29 +32,41 @@ and class_member = def_common * class_member_
 
 and class_member_ =
   | Method of method_
+  | Property of property
 
 and method_ = {
   static : bool;
   m_extents : Pos.absolute;
 }
 
+and property = {
+  p_extents : Pos.absolute;
+}
+
+let summarize_property var =
+  let p_extents, (pos, name), expr_opt = var in
+  let prop = {
+    p_extents = Pos.to_absolute p_extents;
+  } in
+  ((Pos.to_absolute pos, name), Property prop)
+
 let summarize_class class_ acc =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
   let class_name_pos = Pos.to_absolute (fst class_.Ast.c_name) in
   let c_extents = Pos.to_absolute class_.Ast.c_extents in
-  let class_members =
-    List.filter_map class_.Ast.c_body ~f:begin function
+  let class_members = List.concat
+    (List.map class_.Ast.c_body ~f:begin function
     | Ast.Method m ->
         let method_ = {
           static = List.mem m.Ast.m_kind (Ast.Static);
           m_extents = (Pos.to_absolute m.Ast.m_extents);
         } in
-        Some (
-          (Pos.to_absolute (fst m.Ast.m_name), snd m.Ast.m_name),
-          Method method_
-        )
-    | _ -> None
-    end
+        [(Pos.to_absolute (fst m.Ast.m_name), snd m.Ast.m_name),
+         Method method_ ]
+    | Ast.ClassVars (_, _, vars) -> List.map vars ~f:summarize_property
+    | Ast.XhpAttr (_, var, _, _) -> [summarize_property var]
+    | _ -> []
+    end)
   in
   let class_ = {
     class_members;
@@ -104,6 +116,7 @@ let to_legacy outline =
           | Method m ->
             let desc = if m.static then "static method" else "method" in
             (pos, name ^ "::" ^ member_name, desc)::acc
+          | Property p -> acc
         end
   end
 
@@ -131,9 +144,17 @@ let print_method pos name m =
   Printf.printf "    extents: %s\n" (Pos.multiline_string m.m_extents);
   Printf.printf "\n"
 
+let print_property pos name p =
+  Printf.printf "  %s\n" name;
+  Printf.printf "    type: property\n";
+  Printf.printf "    position: %s\n" (Pos.string pos);
+  Printf.printf "    extents: %s\n" (Pos.multiline_string p.p_extents);
+  Printf.printf "\n"
+
 let print_class_member ((pos, name), member) =
   match member with
   | Method m -> print_method pos name m
+  | Property p -> print_property pos name p
 
 let print_class pos name c =
   Printf.printf "%s\n" name;

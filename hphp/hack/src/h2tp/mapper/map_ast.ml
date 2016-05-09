@@ -305,8 +305,11 @@ let mk_mapper = fun m_in ->
     function
     | OG_nullthrows -> OG_nullthrows
     | OG_nullsafe -> OG_nullsafe
-  and map_class_var (v1, v2) =
-    let v1 = map_id v1 and v2 = map_of_option map_expr v2 in (v1, v2)
+  and map_class_var (v1, v2, v3) =
+    let v1 = map_pos_t v1
+    and v2 = map_id v2
+    and v3 = map_of_option map_expr v3
+    in (v1, v2, v3)
   and
     map_typeconst c_kind typeconst =
       let k {

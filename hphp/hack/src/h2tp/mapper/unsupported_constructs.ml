@@ -64,7 +64,7 @@ let map program =
     | _ -> () in
 
   let detect_invalid_class_var = function
-    | ((p, _), Some (_, Collection _)) ->
+    | (_, (p, _), Some (_, Collection _)) ->
         let m = "Collection initializers in instance variables are currently" ^
           " not supported." in
         unsupported (p, m)

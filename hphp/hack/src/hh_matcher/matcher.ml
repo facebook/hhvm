@@ -1206,12 +1206,12 @@ and match_trait_req_kind
   else NoMatch, env
 
 and match_class_var
-      (t_cv : class_var)
-      (p_cv : class_var)
+      (_, t_cv_id, t_cv_expr : class_var)
+      (_, p_cv_od, p_cv_expr : class_var)
       (env : matcher_env) : (match_result * matcher_env) =
   LM.match_attributes
-    [match_id_res (fst t_cv) (fst p_cv);
-     LM.match_option match_expr (snd t_cv) (snd p_cv)]
+    [match_id_res t_cv_id p_cv_od;
+     LM.match_option match_expr t_cv_expr p_cv_expr]
     env
 
 and match_class_elt

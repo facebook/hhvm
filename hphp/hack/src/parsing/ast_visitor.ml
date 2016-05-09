@@ -590,7 +590,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = match h_opt with
       | Some h -> this#on_hint acc h
       | None -> acc in
-    let acc = List.fold_left (fun acc (id, opt_expr) ->
+    let acc = List.fold_left (fun acc (_, id, opt_expr) ->
       let acc = this#on_id acc id in
       match opt_expr with
       | Some expr -> this#on_expr acc expr

@@ -1609,7 +1609,12 @@ and class_var env =
   let pos, name = variable env in
   let name = class_var_name name in
   let default = parameter_default env in
-  (pos, name), default
+  let end_pos = match default with
+    | Some (p, _) -> p
+    | None -> pos
+  in
+  let extent = Pos.btw pos end_pos in
+  extent, (pos, name), default
 
 and class_var_name name =
     String.sub name 1 (String.length name - 1)
@@ -1629,12 +1634,17 @@ and xhp_attr env =
           let h = (match maybe_enum with
             | Some x -> None
             | None -> Some (hint env)) in
-          let ident = xhp_identifier env in
+          let (pos_start, _) as ident = xhp_identifier env in
           let default = parameter_default env in
+          let pos_end = match default with
+            | Some (p, _) -> p
+            | None -> pos_start
+          in
+          let extent = Pos.btw pos_start pos_end in
           let is_required = (match L.token env.file env.lb with
             | Trequired -> true
             | _ -> L.back env.lb; false) in
-          XhpAttr (h, (ident, default), is_required, maybe_enum)
+          XhpAttr (h, (extent, ident, default), is_required, maybe_enum)
         end
 
 and xhp_attr_list env =
@@ -1808,7 +1818,11 @@ and param_implicit_field vis p =
   (* Building the implicit field (for example: private int $x;) *)
   let pos, name = p.param_id in
   let cvname = pos, class_var_name name in
-  let member = ClassVars ([vis], p.param_hint, [cvname, None]) in
+  let extent = match p.param_expr with
+    | Some (pos_end, _) -> Pos.btw pos pos_end
+    | None -> pos
+  in
+  let member = ClassVars ([vis], p.param_hint, [extent, cvname, None]) in
   (* Building the implicit assignment (for example: $this->x = $x;) *)
   let this = pos, "$this" in
   let stmt =

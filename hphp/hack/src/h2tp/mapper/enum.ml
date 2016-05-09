@@ -28,6 +28,7 @@ let create_class_vars p elts =
     [Private; Static;],
     None,
     ([
+      p,
       (p, "hacklib_values"),
       Some (p, Array afields)]))
 

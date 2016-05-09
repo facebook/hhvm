@@ -1195,7 +1195,7 @@ module Make (GetLocals : GetLocals) = struct
       cvl @ acc
     | ClassVars _ -> acc
     | XhpAttr (h, cv, is_required, maybe_enum) ->
-      let default = snd cv in
+      let _, _, default = cv in
       let h = (match maybe_enum with
         | Some (pos, items) ->
           let contains_int = List.exists items begin function
@@ -1319,7 +1319,7 @@ module Make (GetLocals : GetLocals) = struct
     let h = Option.map h (hint env) in
     h, x, None
 
-  and class_prop_ env (x, e) =
+  and class_prop_ env (_, x, e) =
     Env.bind_prop env x;
     let e = Option.map e (expr env) in
     (* If the user has not provided a value, we initialize the member variable

@@ -97,7 +97,7 @@ let convert_method c_kind m =
 
 
 let extract_var_initializer var = match var with
-  | (id, Some ((_, Collection _) as e)) -> ((id, None), Some (id, e))
+  | (p, id, Some ((_, Collection _) as e)) -> ((p, id, None), Some (id, e))
   | _ -> (var, None)
 
 let extract_class_initializer = function

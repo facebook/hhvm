@@ -123,7 +123,7 @@ and class_elt =
   | XhpAttrUse of hint
   | ClassTraitRequire of trait_req_kind * hint
   | ClassVars of kind list * hint option * class_var list
-  | XhpAttr of kind list * hint option * class_var list * bool *
+  | XhpAttr of hint option * class_var * bool *
                ((Pos.t * expr list) option)
   | Method of method_
   | XhpCategory of pstring list

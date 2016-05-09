@@ -1255,13 +1255,12 @@ and match_class_elt
         LM.match_option match_hint t_hopt p_hopt;
         LM.match_list is_star_class_var match_class_var t_cvl p_cvl]
        env
-  | XhpAttr (t_kl, t_hopt, t_cvl, t_b, t_pelopt),
-    XhpAttr (p_kl, p_hopt, p_cvl, p_b, p_pelopt) ->
+  | XhpAttr (t_hopt, t_cv, t_b, t_pelopt),
+    XhpAttr (p_hopt, p_cv, p_b, p_pelopt) ->
      LM.match_attributes
-       [LM.match_list (fun _ -> false) match_kind t_kl p_kl;
-        LM.match_option match_hint t_hopt p_hopt;
+       [LM.match_option match_hint t_hopt p_hopt;
         match_bool t_b p_b;
-        LM.match_list is_star_class_var match_class_var t_cvl p_cvl;
+        match_class_var t_cv p_cv;
         LM.match_option
           (LM.match_pair_fn
              (* we don't care about the position *)

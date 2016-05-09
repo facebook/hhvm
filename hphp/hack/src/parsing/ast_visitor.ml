@@ -102,7 +102,7 @@ class type ['a] ast_visitor_type = object
   method on_class_elt: 'a -> class_elt -> 'a
   method on_classTraitRequire: 'a -> trait_req_kind -> hint -> 'a
   method on_classUse: 'a -> hint -> 'a
-  method on_classVars: 'a-> kind list -> hint option -> class_var list -> 'a
+  method on_classVars: 'a -> kind list -> hint option -> class_var list -> 'a
   method on_const: 'a -> hint option -> (id * expr) list -> 'a
   method on_constant: 'a -> gconst -> 'a
   method on_def: 'a -> def -> 'a
@@ -117,7 +117,7 @@ class type ['a] ast_visitor_type = object
   method on_typeConst: 'a -> typeconst -> 'a
   method on_typedef: 'a -> typedef -> 'a
   method on_user_attribute: 'a -> user_attribute -> 'a
-  method on_xhpAttr: 'a-> kind list -> hint option -> class_var list -> bool ->
+  method on_xhpAttr: 'a -> hint option -> class_var -> bool ->
                      ((Pos.t * expr list) option) -> 'a
   method on_xhpAttrUse: 'a -> hint -> 'a
   method on_xhpCategory: 'a -> pstring list -> 'a
@@ -548,7 +548,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | XhpCategory cs -> this#on_xhpCategory acc cs
     | ClassTraitRequire (t, h) -> this#on_classTraitRequire acc t h
     | ClassVars (c,v,l) -> this#on_classVars acc c v l
-    | XhpAttr (t,h,i,n,g) -> this#on_xhpAttr acc t h i n g
+    | XhpAttr (t,h,i,n) -> this#on_xhpAttr acc t h i n
     | Method m -> this#on_method_ acc m
 
   method on_const acc h_opt consts =
@@ -597,7 +597,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       | None -> acc
     ) acc vars in
     acc
-  method on_xhpAttr acc _ h_opt _ _ _ =
+  method on_xhpAttr acc h_opt _ _ _ =
     let acc = match h_opt with
       | Some h -> this#on_hint acc h
       | None -> acc in

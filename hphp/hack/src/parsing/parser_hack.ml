@@ -1632,7 +1632,7 @@ and xhp_attr env =
           let is_required = (match L.token env.file env.lb with
             | Trequired -> true
             | _ -> L.back env.lb; false) in
-          XhpAttr ([], h, [ident, default], is_required, maybe_enum)
+          XhpAttr (h, (ident, default), is_required, maybe_enum)
         end
 
 and xhp_attr_list env =

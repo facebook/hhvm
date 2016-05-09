@@ -253,16 +253,15 @@ let mk_mapper = fun m_in ->
           and v2 = map_hint_option v2
           and v3 = map_of_list map_class_var v3
           in ClassVars ((v1, v2, v3))
-      | XhpAttr ((v1, v2, v3, v4, v5)) ->
-          let v1 = map_of_list map_kind v1
-          and v2 = map_hint_option v2
-          and v3 = map_of_list map_class_var v3
-          and v4 = map_of_bool v4
-          and v5 = (match v5 with
+      | XhpAttr ((v1, v2, v3, v4)) ->
+          let v1 = map_hint_option v1
+          and v2 = map_class_var v2
+          and v3 = map_of_bool v3
+          and v4 = (match v4 with
             | Some (pos, items) ->
                 Some (map_pos_t pos, (map_of_list map_expr items))
             | None -> None)
-          in XhpAttr ((v1, v2, v3, v4, v5))
+          in XhpAttr ((v1, v2, v3, v4))
       | XhpCategory v1 ->
         let v1 = map_of_list map_pstring v1 in XhpCategory ((v1))
       | Method v1 -> let v1 = map_method_ c_kind v1 in Method ((v1))

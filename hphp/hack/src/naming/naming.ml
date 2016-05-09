@@ -1194,10 +1194,8 @@ module Make (GetLocals : GetLocals) = struct
       let cvl = List.map cvl (fill_prop kl h) in
       cvl @ acc
     | ClassVars _ -> acc
-    | XhpAttr (kl, h, cvl, is_required, maybe_enum) ->
-      let default = (match cvl with
-        | [(_, v)] -> v
-        | _ -> None) in
+    | XhpAttr (h, cv, is_required, maybe_enum) ->
+      let default = snd cv in
       let h = (match maybe_enum with
         | Some (pos, items) ->
           let contains_int = List.exists items begin function
@@ -1233,9 +1231,9 @@ module Make (GetLocals : GetLocals) = struct
             else Some (p, Hoption (p, h))
         | None -> None) in
       let h = Option.map h (hint env) in
-      let cvl = List.map cvl (class_prop_ env) in
-      let cvl = List.map cvl (fill_prop kl h) in
-      cvl @ acc
+      let cv = class_prop_ env cv in
+      let cv = fill_prop [] h cv in
+      cv :: acc
     | XhpCategory _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc

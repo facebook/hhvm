@@ -1,0 +1,21 @@
+C
+  type: class
+  position: File "", line 3, characters 16-16:
+  extents: File "", line 3, character 1 - line 9, character 1:
+
+  FOO
+    type: const
+    position: File "", line 5, characters 5-7:
+    extents: File "", line 5, character 5 - line 5, character 16:
+
+  FOO2
+    type: const
+    position: File "", line 6, characters 5-8:
+    extents: File "", line 6, character 5 - line 6, character 17:
+
+  BAR
+    type: const
+    position: File "", line 8, characters 22-24:
+    extents: File "", line 8, character 22 - line 8, character 24:
+
+

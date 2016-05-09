@@ -33,6 +33,7 @@ and class_member = def_common * class_member_
 and class_member_ =
   | Method of method_
   | Property of property
+  | Const of class_const
 
 and method_ = {
   static : bool;
@@ -43,12 +44,27 @@ and property = {
   p_extents : Pos.absolute;
 }
 
+and class_const = {
+  cc_extents : Pos.absolute;
+}
+
 let summarize_property var =
   let p_extents, (pos, name), expr_opt = var in
   let prop = {
     p_extents = Pos.to_absolute p_extents;
   } in
   ((Pos.to_absolute pos, name), Property prop)
+
+let summarize_const ((pos, name), (expr_pos, _)) =
+  let cc_extents = Pos.to_absolute (Pos.btw pos expr_pos) in
+  let const = {
+    cc_extents;
+  } in
+  ((Pos.to_absolute pos, name), Const const)
+
+let summarize_abs_const (pos, name) =
+  let const = {cc_extents = Pos.to_absolute pos; } in
+  ((Pos.to_absolute pos, name), Const const)
 
 let summarize_class class_ acc =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
@@ -65,6 +81,8 @@ let summarize_class class_ acc =
          Method method_ ]
     | Ast.ClassVars (_, _, vars) -> List.map vars ~f:summarize_property
     | Ast.XhpAttr (_, var, _, _) -> [summarize_property var]
+    | Ast.Const (_, cl) -> List.map cl ~f:summarize_const
+    | Ast.AbsConst (_, id) -> [summarize_abs_const id]
     | _ -> []
     end)
   in
@@ -116,7 +134,8 @@ let to_legacy outline =
           | Method m ->
             let desc = if m.static then "static method" else "method" in
             (pos, name ^ "::" ^ member_name, desc)::acc
-          | Property p -> acc
+          | Property _
+          | Const _ -> acc
         end
   end
 
@@ -151,10 +170,18 @@ let print_property pos name p =
   Printf.printf "    extents: %s\n" (Pos.multiline_string p.p_extents);
   Printf.printf "\n"
 
+let print_const pos name c =
+  Printf.printf "  %s\n" name;
+  Printf.printf "    type: const\n";
+  Printf.printf "    position: %s\n" (Pos.string pos);
+  Printf.printf "    extents: %s\n" (Pos.multiline_string c.cc_extents);
+  Printf.printf "\n"
+
 let print_class_member ((pos, name), member) =
   match member with
   | Method m -> print_method pos name m
   | Property p -> print_property pos name p
+  | Const c -> print_const pos name c
 
 let print_class pos name c =
   Printf.printf "%s\n" name;

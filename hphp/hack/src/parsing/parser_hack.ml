@@ -621,10 +621,10 @@ and toplevel_word def_start ~attr env = function
       [Class class_]
   | "async" ->
       expect_word env "function";
-      let fun_ = fun_ ~attr ~sync:FDeclAsync env in
+      let fun_ = fun_ def_start ~attr ~sync:FDeclAsync env in
       [Fun fun_]
   | "function" ->
-      let fun_ = fun_ ~attr ~sync:FDeclSync env in
+      let fun_ = fun_ def_start ~attr ~sync:FDeclSync env in
       [Fun fun_]
   | "newtype" ->
       let typedef_ = typedef ~attr ~is_abstract:true env in
@@ -721,7 +721,7 @@ and attribute_list_remain env =
 (* Functions *)
 (*****************************************************************************)
 
-and fun_ ~attr ~(sync:fun_decl_kind) env =
+and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
   let is_ref = ref_opt env in
   if is_ref && sync = FDeclAsync
     then error env ("Asynchronous function cannot return reference");
@@ -730,6 +730,7 @@ and fun_ ~attr ~(sync:fun_decl_kind) env =
   let params = parameter_list env in
   let ret = hint_return_opt env in
   let is_generator, body_stmts = function_body env in
+  let fun_end = Pos.make env.file env.lb in
   { f_name = name;
     f_tparams = tparams;
     f_params = params;
@@ -740,6 +741,7 @@ and fun_ ~attr ~(sync:fun_decl_kind) env =
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty;
+    f_extents = Pos.btw fun_start fun_end;
   }
 
 (*****************************************************************************)
@@ -2617,6 +2619,7 @@ and lambda_body ~sync env params ret =
     f_fun_kind;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty;
+    f_extents = Pos.none; (* We only care about extents of "real" functions *)
   }
   in Lfun f
 
@@ -3123,6 +3126,7 @@ and expr_anon_fun env pos ~(sync:fun_decl_kind) =
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty;
+    f_extents = Pos.none; (* We only care about extents of "real" functions *)
   }
   in
   pos, Efun (f, use)

@@ -413,7 +413,8 @@ let mk_mapper = fun m_in ->
                f_body = v_f_body;
                f_user_attributes = v_f_user_attributes;
                f_fun_kind = v_f_fun_kind;
-               f_namespace = v_f_namespace
+               f_namespace = v_f_namespace;
+               f_extents = v_f_extents;
              } =
       let v_f_mode = map_mode v_f_mode in
       let v_f_tparams = map_of_list map_tparam v_f_tparams in
@@ -425,8 +426,8 @@ let mk_mapper = fun m_in ->
       let v_f_user_attributes =
         map_smap map_user_attribute v_f_user_attributes in
       let v_f_fun_kind = map_fun_kind v_f_fun_kind in
-      let v_f_namespace = map_namespace_env v_f_namespace
-      in
+      let v_f_namespace = map_namespace_env v_f_namespace in
+      let v_f_extents = map_pos_t v_f_extents in
         {
           f_mode = v_f_mode;
           f_tparams = v_f_tparams;
@@ -438,6 +439,7 @@ let mk_mapper = fun m_in ->
           f_user_attributes = v_f_user_attributes;
           f_fun_kind = v_f_fun_kind;
           f_namespace = v_f_namespace;
+          f_extents = v_f_extents;
         }
     in m_in.k_fun_ (k, all_mappers) fun_
   and map_fun_kind = function

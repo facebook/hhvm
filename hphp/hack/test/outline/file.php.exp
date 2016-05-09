@@ -1,10 +1,12 @@
 foo
   type: function
   position: File "", line 3, characters 10-12:
+  extents: File "", line 3, character 1 - line 3, character 17:
 
 bar
   type: function
   position: File "", line 5, characters 10-12:
+  extents: File "", line 5, character 1 - line 5, character 17:
 
 C
   type: class

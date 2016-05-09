@@ -545,7 +545,8 @@ let rec u_program v = u_of_list_spc u_def v
     f_body;
     f_user_attributes;
     f_fun_kind;
-    f_namespace
+    f_namespace;
+    f_extents = _;
   } useStr =
     u_in_mode f_mode begin fun () ->
       invariant (is_empty_ns f_namespace)

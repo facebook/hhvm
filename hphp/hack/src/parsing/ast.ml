@@ -206,6 +206,7 @@ and fun_ = {
   f_user_attributes : user_attribute list;
   f_fun_kind        : fun_kind;
   f_namespace       : Namespace_env.env;
+  f_extents         : Pos.t;
 }
 
 and fun_decl_kind =

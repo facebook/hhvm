@@ -16,8 +16,8 @@ let to_json = function
       Option.value_map res.IdentifySymbolService.name_pos
         ~f:Pos.json ~default:JSON_Null
     in
-    let definition_extents =
-      Option.value_map res.IdentifySymbolService.name_extents
+    let definition_span =
+      Option.value_map res.IdentifySymbolService.name_span
         ~f:Pos.multiline_json ~default:JSON_Null
     in
     JSON_Object [
@@ -25,7 +25,7 @@ let to_json = function
       "result_type",    JSON_String (ClientGetMethodName.get_result_type res);
       "pos",            Pos.json (res.IdentifySymbolService.pos);
       "definition_pos", definition_pos;
-      "definition_extents", definition_extents;
+      "definition_span", definition_span;
     ]
   | None -> JSON_Null
 
@@ -41,8 +41,8 @@ let print_readable = function
     Option.iter res.IdentifySymbolService.name_pos begin fun pos ->
       Printf.printf ", defined: %s" (Pos.string_no_file pos)
     end;
-    Option.iter res.IdentifySymbolService.name_extents begin fun pos ->
-      Printf.printf ", definition extents: %s"
+    Option.iter res.IdentifySymbolService.name_span begin fun pos ->
+      Printf.printf ", definition span: %s"
         (Pos.multiline_string_no_file pos)
     end;
     print_newline ()

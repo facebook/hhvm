@@ -120,7 +120,7 @@ let default_method = {
   m_ret = None;
   m_ret_by_ref = false;
   m_fun_kind = FSync;
-  m_extents = Pos.none;
+  m_span = Pos.none;
 }
 
 let negate (p, expr_) =

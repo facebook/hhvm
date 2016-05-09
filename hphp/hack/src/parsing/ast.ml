@@ -90,7 +90,7 @@ and class_ = {
   c_body: class_elt list;
   c_namespace: Namespace_env.env;
   c_enum: enum_ option;
-  c_extents: Pos.t;
+  c_span: Pos.t;
 }
 
 and enum_ = {
@@ -210,7 +210,7 @@ and method_ = {
   m_ret: hint option;
   m_ret_by_ref: bool;
   m_fun_kind: fun_kind;
-  m_extents: Pos.t
+  m_span: Pos.t
 }
 
 and typeconst = {
@@ -248,7 +248,7 @@ and fun_ = {
   f_user_attributes : user_attribute list;
   f_fun_kind        : fun_kind;
   f_namespace       : Namespace_env.env;
-  f_extents         : Pos.t;
+  f_span         : Pos.t;
 }
 
 and fun_decl_kind =

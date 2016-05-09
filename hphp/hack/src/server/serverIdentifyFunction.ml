@@ -15,9 +15,9 @@ let go content line char tcopt =
   let (funs, classes, typedefs), ast =
     ServerIdeUtils.declare_and_check_get_ast path content in
   let result = Option.map !result begin fun x ->
-    let name_pos, name_extents = ServerSymbolDefinition.go tcopt ast x in
+    let name_pos, name_span = ServerSymbolDefinition.go tcopt ast x in
     { x with IdentifySymbolService.name_pos = name_pos;
-             IdentifySymbolService.name_extents = name_extents; }
+             IdentifySymbolService.name_span = name_span; }
   end in
   ServerIdeUtils.revive funs classes typedefs path;
   IdentifySymbolService.detach_hooks ();

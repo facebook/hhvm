@@ -176,7 +176,7 @@ let mk_mapper = fun m_in ->
             c_body = v_c_body;
             c_namespace = v_c_namespace;
             c_enum = v_c_enum;
-            c_extents = v_c_extents;
+            c_span = v_c_span;
         } =
       let v_c_mode = map_mode v_c_mode in
       let v_c_user_attributes =
@@ -191,7 +191,7 @@ let mk_mapper = fun m_in ->
       let v_c_body = map_c_body v_c_kind v_c_body in
       let v_c_namespace = map_namespace_env v_c_namespace in
       let v_c_enum = map_of_option map_enum_ v_c_enum in
-      let v_c_extents = map_pos_t v_c_extents in
+      let v_c_span = map_pos_t v_c_span in
         {
           c_mode = v_c_mode;
           c_user_attributes = v_c_user_attributes;
@@ -205,7 +205,7 @@ let mk_mapper = fun m_in ->
           c_body = v_c_body;
           c_namespace = v_c_namespace;
           c_enum = v_c_enum;
-          c_extents = v_c_extents;
+          c_span = v_c_span;
         }
     in m_in.k_class_ (k, all_mappers) class_
   and map_enum_ { e_base = v_e_base; e_constraint = v_e_constraint } =
@@ -342,7 +342,7 @@ let mk_mapper = fun m_in ->
                   m_ret = v_m_ret;
                   m_ret_by_ref = v_m_ret_by_ref;
                   m_fun_kind = v_m_fun_kind;
-                  m_extents = v_m_extents;
+                  m_span = v_m_span;
                 } =
       let v_m_kind = map_of_list map_kind v_m_kind in
       let v_m_tparams = map_of_list map_tparam v_m_tparams in
@@ -354,7 +354,7 @@ let mk_mapper = fun m_in ->
       let v_m_ret = map_hint_option v_m_ret in
       let v_m_ret_by_ref = map_of_bool v_m_ret_by_ref in
       let v_m_fun_kind = map_fun_kind v_m_fun_kind in
-      let v_m_extents = map_pos_t v_m_extents
+      let v_m_span = map_pos_t v_m_span
       in
         {
           m_kind = v_m_kind;
@@ -366,7 +366,7 @@ let mk_mapper = fun m_in ->
           m_ret = v_m_ret;
           m_ret_by_ref = v_m_ret_by_ref;
           m_fun_kind = v_m_fun_kind;
-          m_extents = v_m_extents;
+          m_span = v_m_span;
         }
     in m_in.k_method_ (k, all_mappers) c_kind method_
   and map_is_reference v = map_of_bool v
@@ -417,7 +417,7 @@ let mk_mapper = fun m_in ->
                f_user_attributes = v_f_user_attributes;
                f_fun_kind = v_f_fun_kind;
                f_namespace = v_f_namespace;
-               f_extents = v_f_extents;
+               f_span = v_f_span;
              } =
       let v_f_mode = map_mode v_f_mode in
       let v_f_tparams = map_of_list map_tparam v_f_tparams in
@@ -430,7 +430,7 @@ let mk_mapper = fun m_in ->
         map_smap map_user_attribute v_f_user_attributes in
       let v_f_fun_kind = map_fun_kind v_f_fun_kind in
       let v_f_namespace = map_namespace_env v_f_namespace in
-      let v_f_extents = map_pos_t v_f_extents in
+      let v_f_span = map_pos_t v_f_span in
         {
           f_mode = v_f_mode;
           f_tparams = v_f_tparams;
@@ -442,7 +442,7 @@ let mk_mapper = fun m_in ->
           f_user_attributes = v_f_user_attributes;
           f_fun_kind = v_f_fun_kind;
           f_namespace = v_f_namespace;
-          f_extents = v_f_extents;
+          f_span = v_f_span;
         }
     in m_in.k_fun_ (k, all_mappers) fun_
   and map_fun_kind = function

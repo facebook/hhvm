@@ -1,42 +1,42 @@
 C
   type: class
   position: File "", line 3, characters 7-7:
-  extents: File "", line 3, character 1 - line 18, character 1:
+  span: File "", line 3, character 1 - line 18, character 1:
 
   foo
     type: property
     position: File "", line 5, characters 5-8:
-    extents: File "", line 5, character 5 - line 5, character 8:
+    span: File "", line 5, character 5 - line 5, character 8:
 
   bar
     type: property
     position: File "", line 6, characters 5-8:
-    extents: File "", line 6, character 5 - line 6, character 16:
+    span: File "", line 6, character 5 - line 6, character 16:
 
   :xhp_property
     type: property
     position: File "", line 9, characters 12-23:
-    extents: File "", line 9, character 12 - line 9, character 23:
+    span: File "", line 9, character 12 - line 9, character 23:
 
   :xhp_enum_property
     type: property
     position: File "", line 10, characters 25-41:
-    extents: File "", line 10, character 25 - line 10, character 48:
+    span: File "", line 10, character 25 - line 10, character 48:
 
   implicit_property
     type: property
     position: File "", line 14, characters 19-36:
-    extents: File "", line 14, character 19 - line 14, character 36:
+    span: File "", line 14, character 19 - line 14, character 36:
 
   implicit_property_with_init
     type: property
     position: File "", line 15, characters 16-43:
-    extents: File "", line 15, character 16 - line 15, character 47:
+    span: File "", line 15, character 16 - line 15, character 47:
 
   __construct
     type: method
     position: File "", line 12, characters 19-29:
     static: false
-    extents: File "", line 12, character 3 - line 17, character 3:
+    span: File "", line 12, character 3 - line 17, character 3:
 
 

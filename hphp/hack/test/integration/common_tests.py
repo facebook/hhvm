@@ -444,7 +444,7 @@ class CommonTests(object):
             '{{"name":"\\\\bar","result_type":"function","pos":{{"filename":"",'
             '"line":1,"char_start":42,"char_end":44}},'
             '"definition_pos":{{"filename":"","line":1,"char_start":15,'
-            '"char_end":17}},"definition_extents":null}}'
+            '"char_end":17}},"definition_span":null}}'
             ],
             options=['--ide-get-definition', '1:43'],
             stdin='<?hh function bar() {} function test() { bar() }')
@@ -459,11 +459,11 @@ class CommonTests(object):
             'bar',
             '  type: function',
             '  position: File "", line 1, characters 15-17:',
-            '  extents: File "", line 1, character 6 - line 1, character 22:',
+            '  span: File "", line 1, character 6 - line 1, character 22:',
             '',
             ], [
             '[{{"type":"function","name":"bar","position":{{"filename":"",'
-            '"line":1,"char_start":15,"char_end":17}},"extents":'
+            '"line":1,"char_start":15,"char_end":17}},"span":'
             '{{"filename":"","line_start":1,"char_start":6,"line_end":1,'
             '"char_end":22}}}}]',
             ],

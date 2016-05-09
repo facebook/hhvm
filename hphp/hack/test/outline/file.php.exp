@@ -1,28 +1,28 @@
 foo
   type: function
   position: File "", line 3, characters 10-12:
-  extents: File "", line 3, character 1 - line 3, character 17:
+  span: File "", line 3, character 1 - line 3, character 17:
 
 bar
   type: function
   position: File "", line 5, characters 10-12:
-  extents: File "", line 5, character 1 - line 5, character 17:
+  span: File "", line 5, character 1 - line 5, character 17:
 
 C
   type: class
   position: File "", line 7, characters 7-7:
-  extents: File "", line 7, character 1 - line 11, character 1:
+  span: File "", line 7, character 1 - line 11, character 1:
 
   foo
     type: method
     position: File "", line 8, characters 19-21:
     static: false
-    extents: File "", line 8, character 3 - line 8, character 26:
+    span: File "", line 8, character 3 - line 8, character 26:
 
   bar
     type: method
     position: File "", line 10, characters 26-28:
     static: true
-    extents: File "", line 10, character 3 - line 10, character 33:
+    span: File "", line 10, character 3 - line 10, character 33:
 
 

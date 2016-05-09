@@ -21,11 +21,11 @@ and def_ =
   | Class of class_
 
 and function_ = {
-  f_extents : Pos.absolute;
+  f_span : Pos.absolute;
 }
 and class_ = {
   class_members : class_member list;
-  c_extents : Pos.absolute;
+  c_span : Pos.absolute;
 }
 
 and class_member = def_common * class_member_
@@ -37,45 +37,45 @@ and class_member_ =
 
 and method_ = {
   static : bool;
-  m_extents : Pos.absolute;
+  m_span : Pos.absolute;
 }
 
 and property = {
-  p_extents : Pos.absolute;
+  p_span : Pos.absolute;
 }
 
 and class_const = {
-  cc_extents : Pos.absolute;
+  cc_span : Pos.absolute;
 }
 
 let summarize_property var =
-  let p_extents, (pos, name), expr_opt = var in
+  let p_span, (pos, name), expr_opt = var in
   let prop = {
-    p_extents = Pos.to_absolute p_extents;
+    p_span = Pos.to_absolute p_span;
   } in
   ((Pos.to_absolute pos, name), Property prop)
 
 let summarize_const ((pos, name), (expr_pos, _)) =
-  let cc_extents = Pos.to_absolute (Pos.btw pos expr_pos) in
+  let cc_span = Pos.to_absolute (Pos.btw pos expr_pos) in
   let const = {
-    cc_extents;
+    cc_span;
   } in
   ((Pos.to_absolute pos, name), Const const)
 
 let summarize_abs_const (pos, name) =
-  let const = {cc_extents = Pos.to_absolute pos; } in
+  let const = {cc_span = Pos.to_absolute pos; } in
   ((Pos.to_absolute pos, name), Const const)
 
 let summarize_class class_ acc =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
   let class_name_pos = Pos.to_absolute (fst class_.Ast.c_name) in
-  let c_extents = Pos.to_absolute class_.Ast.c_extents in
+  let c_span = Pos.to_absolute class_.Ast.c_span in
   let class_members = List.concat
     (List.map class_.Ast.c_body ~f:begin function
     | Ast.Method m ->
         let method_ = {
           static = List.mem m.Ast.m_kind (Ast.Static);
-          m_extents = (Pos.to_absolute m.Ast.m_extents);
+          m_span = (Pos.to_absolute m.Ast.m_span);
         } in
         [(Pos.to_absolute (fst m.Ast.m_name), snd m.Ast.m_name),
          Method method_ ]
@@ -88,13 +88,13 @@ let summarize_class class_ acc =
   in
   let class_ = {
     class_members;
-    c_extents;
+    c_span;
   } in
   ((class_name_pos, class_name), Class class_) :: acc
 
 let summarize_fun f acc =
   let fun_ = {
-    f_extents = (Pos.to_absolute f.Ast.f_extents);
+    f_span = (Pos.to_absolute f.Ast.f_span);
   } in
   ((Pos.to_absolute (fst f.Ast.f_name),
    Utils.strip_ns (snd f.Ast.f_name)), (Function fun_)) :: acc
@@ -152,7 +152,7 @@ let print_function pos name f =
   Printf.printf "%s\n" name;
   Printf.printf "  type: function\n";
   Printf.printf "  position: %s\n" (Pos.string pos);
-  Printf.printf "  extents: %s\n" (Pos.multiline_string f.f_extents);
+  Printf.printf "  span: %s\n" (Pos.multiline_string f.f_span);
   Printf.printf "\n"
 
 let print_method pos name m =
@@ -160,21 +160,21 @@ let print_method pos name m =
   Printf.printf "    type: method\n";
   Printf.printf "    position: %s\n" (Pos.string pos);
   Printf.printf "    static: %b\n" m.static;
-  Printf.printf "    extents: %s\n" (Pos.multiline_string m.m_extents);
+  Printf.printf "    span: %s\n" (Pos.multiline_string m.m_span);
   Printf.printf "\n"
 
 let print_property pos name p =
   Printf.printf "  %s\n" name;
   Printf.printf "    type: property\n";
   Printf.printf "    position: %s\n" (Pos.string pos);
-  Printf.printf "    extents: %s\n" (Pos.multiline_string p.p_extents);
+  Printf.printf "    span: %s\n" (Pos.multiline_string p.p_span);
   Printf.printf "\n"
 
 let print_const pos name c =
   Printf.printf "  %s\n" name;
   Printf.printf "    type: const\n";
   Printf.printf "    position: %s\n" (Pos.string pos);
-  Printf.printf "    extents: %s\n" (Pos.multiline_string c.cc_extents);
+  Printf.printf "    span: %s\n" (Pos.multiline_string c.cc_span);
   Printf.printf "\n"
 
 let print_class_member ((pos, name), member) =
@@ -187,7 +187,7 @@ let print_class pos name c =
   Printf.printf "%s\n" name;
   Printf.printf "  type: class\n";
   Printf.printf "  position: %s\n" (Pos.string pos);
-  Printf.printf "  extents: %s\n" (Pos.multiline_string c.c_extents);
+  Printf.printf "  span: %s\n" (Pos.multiline_string c.c_span);
   Printf.printf "\n";
   List.iter c.class_members print_class_member;
   Printf.printf "\n"
@@ -206,7 +206,7 @@ let json_of_member ((pos, name), def) =
         "type", Hh_json.JSON_String "method";
         "name", Hh_json.JSON_String name;
         "position", (Pos.json pos);
-        "extents", (Pos.multiline_json m.m_extents);
+        "span", (Pos.multiline_json m.m_span);
         "static", Hh_json.JSON_Bool m.static;
       ]
   | Property p ->
@@ -214,14 +214,14 @@ let json_of_member ((pos, name), def) =
         "type", Hh_json.JSON_String "property";
         "name", Hh_json.JSON_String name;
         "position", (Pos.json pos);
-        "extents", (Pos.multiline_json p.p_extents);
+        "span", (Pos.multiline_json p.p_span);
       ]
   | Const c ->
     Hh_json.JSON_Object [
       "type", Hh_json.JSON_String "class_const";
       "name", Hh_json.JSON_String name;
       "position", (Pos.json pos);
-      "extents", (Pos.multiline_json c.cc_extents);
+      "span", (Pos.multiline_json c.cc_span);
     ]
 
 let json_of_def ((pos, name), def) =
@@ -231,16 +231,16 @@ let json_of_def ((pos, name), def) =
         "type", Hh_json.JSON_String "function";
         "name", Hh_json.JSON_String name;
         "position", (Pos.json pos);
-        "extents", (Pos.multiline_json f.f_extents);
+        "span", (Pos.multiline_json f.f_span);
       ]
   | Class c ->
       Hh_json.JSON_Object [
         "type", Hh_json.JSON_String "class";
         "name", Hh_json.JSON_String name;
         "position", (Pos.json pos);
-        "extents", (Pos.multiline_json c.c_extents);
+        "span", (Pos.multiline_json c.c_span);
         "members", Hh_json.JSON_Array (List.map c.class_members json_of_member)
       ]
-      
+
 let to_json outline =
   Hh_json.JSON_Array (List.map outline json_of_def)

@@ -289,7 +289,7 @@ let rec u_program v = u_of_list_spc u_def v
                c_body = v_c_body;
                c_namespace = v_c_namespace;
                c_enum = v_c_enum;
-               c_extents = _;
+               c_span = _;
              } =
       u_in_mode v_c_mode (fun () ->
           invariant (List.length v_c_extends <= 1 || v_c_kind = Cinterface)
@@ -444,7 +444,7 @@ let rec u_program v = u_of_list_spc u_def v
       m_ret;
       m_ret_by_ref;
       m_fun_kind;
-      m_extents = _;
+      m_span = _;
     } =
       let str_m_kind = u_of_list_spc u_kind m_kind
       and v_f_common = {
@@ -546,7 +546,7 @@ let rec u_program v = u_of_list_spc u_def v
     f_user_attributes;
     f_fun_kind;
     f_namespace;
-    f_extents = _;
+    f_span = _;
   } useStr =
     u_in_mode f_mode begin fun () ->
       invariant (is_empty_ns f_namespace)

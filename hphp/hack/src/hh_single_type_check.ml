@@ -377,8 +377,8 @@ let print_symbol symbol =
     (Pos.string_no_file symbol.pos);
   Printf.printf "defined: %s\n"
     (Option.value_map symbol.name_pos ~f:Pos.string_no_file ~default:"None");
-  Printf.printf "definition extents: %s\n"
-    (Option.value_map symbol.name_extents
+  Printf.printf "definition span: %s\n"
+    (Option.value_map symbol.name_span
       ~f:Pos.multiline_string_no_file ~default:"None")
 
 let handle_mode mode filename tcopt files_contents files_info errors =

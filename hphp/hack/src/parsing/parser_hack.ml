@@ -741,7 +741,7 @@ and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty;
-    f_extents = Pos.btw fun_start fun_end;
+    f_span = Pos.btw fun_start fun_end;
   }
 
 (*****************************************************************************)
@@ -758,7 +758,7 @@ and class_ class_start ~attr ~final ~kind env =
   let cimplements = class_implements kind env in
   let cbody       = class_body env in
   let class_end   = Pos.make env.file env.lb in
-  let extents     = Pos.btw class_start class_end in
+  let span     = Pos.btw class_start class_end in
   let result =
     { c_mode            = env.mode;
       c_final           = final;
@@ -772,7 +772,7 @@ and class_ class_start ~attr ~final ~kind env =
       c_body            = cbody;
       c_namespace       = Namespace_env.empty;
       c_enum            = None;
-      c_extents         = extents;
+      c_span         = span;
     }
   in
   class_implicit_fields result
@@ -792,7 +792,7 @@ and enum_ class_start ~attr env =
   let constraint_ = typedef_constraint env in
   let cbody       = enum_body env in
   let class_end   = Pos.make env.file env.lb in
-  let extents     = Pos.btw class_start class_end in
+  let span     = Pos.btw class_start class_end in
   let result =
     { c_mode            = env.mode;
       c_final           = false;
@@ -809,7 +809,7 @@ and enum_ class_start ~attr env =
         { e_base       = basety;
           e_constraint = constraint_;
         };
-      c_extents         = extents;
+      c_span         = span;
     }
   in
   result
@@ -1613,8 +1613,8 @@ and class_var env =
     | Some (p, _) -> p
     | None -> pos
   in
-  let extent = Pos.btw pos end_pos in
-  extent, (pos, name), default
+  let span = Pos.btw pos end_pos in
+  span, (pos, name), default
 
 and class_var_name name =
     String.sub name 1 (String.length name - 1)
@@ -1640,11 +1640,11 @@ and xhp_attr env =
             | Some (p, _) -> p
             | None -> pos_start
           in
-          let extent = Pos.btw pos_start pos_end in
+          let span = Pos.btw pos_start pos_end in
           let is_required = (match L.token env.file env.lb with
             | Trequired -> true
             | _ -> L.back env.lb; false) in
-          XhpAttr (h, (extent, ident, default), is_required, maybe_enum)
+          XhpAttr (h, (span, ident, default), is_required, maybe_enum)
         end
 
 and xhp_attr_list env =
@@ -1767,7 +1767,7 @@ and method_ env method_start ~modifiers ~attrs ~(sync:fun_decl_kind)
     m_kind = modifiers;
     m_user_attributes = attrs;
     m_fun_kind = fun_kind sync is_generator;
-    m_extents = Pos.btw method_start method_end;
+    m_span = Pos.btw method_start method_end;
   }
 
 (*****************************************************************************)
@@ -1818,11 +1818,11 @@ and param_implicit_field vis p =
   (* Building the implicit field (for example: private int $x;) *)
   let pos, name = p.param_id in
   let cvname = pos, class_var_name name in
-  let extent = match p.param_expr with
+  let span = match p.param_expr with
     | Some (pos_end, _) -> Pos.btw pos pos_end
     | None -> pos
   in
-  let member = ClassVars ([vis], p.param_hint, [extent, cvname, None]) in
+  let member = ClassVars ([vis], p.param_hint, [span, cvname, None]) in
   (* Building the implicit assignment (for example: $this->x = $x;) *)
   let this = pos, "$this" in
   let stmt =
@@ -2633,7 +2633,7 @@ and lambda_body ~sync env params ret =
     f_fun_kind;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty;
-    f_extents = Pos.none; (* We only care about extents of "real" functions *)
+    f_span = Pos.none; (* We only care about span of "real" functions *)
   }
   in Lfun f
 
@@ -3140,7 +3140,7 @@ and expr_anon_fun env pos ~(sync:fun_decl_kind) =
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
     f_namespace = Namespace_env.empty;
-    f_extents = Pos.none; (* We only care about extents of "real" functions *)
+    f_span = Pos.none; (* We only care about span of "real" functions *)
   }
   in
   pos, Efun (f, use)

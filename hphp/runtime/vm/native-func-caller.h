@@ -4,7 +4,17 @@ static_assert(kMaxBuiltinArgs == 32,"Regenerate native-func-caller.h for updated
 
 static_assert(kNumSIMDRegs == 8,"Regenerate native-func-caller.h for updated kNumSIMDRegs");
 
-double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count, bool indResult) {
+#if defined(__aarch64__)
+  if (indResult) {
+    auto byRef = GP[0];
+    for(int i = 1; i < GP_count; i++) {
+      GP[i-1] = GP[i];
+    }
+    GP_count--;
+    asm("mov x8, %0\n" : : "r"(byRef));
+  }
+#endif
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {
@@ -736,7 +746,17 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
-int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count, bool indResult) {
+#if defined(__aarch64__)
+  if (indResult) {
+    auto byRef = GP[0];
+    for(int i = 1; i < GP_count; i++) {
+      GP[i-1] = GP[i];
+    }
+    GP_count--;
+    asm("mov x8, %0\n" : : "r"(byRef));
+  }
+#endif
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {
@@ -1468,7 +1488,17 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
-TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count, bool indResult) {
+#if defined(__aarch64__)
+  if (indResult) {
+    auto byRef = GP[0];
+    for(int i = 1; i < GP_count; i++) {
+      GP[i-1] = GP[i];
+    }
+    GP_count--;
+    asm("mov x8, %0\n" : : "r"(byRef));
+  }
+#endif
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {

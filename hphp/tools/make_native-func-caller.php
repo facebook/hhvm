@@ -45,10 +45,20 @@ fwrite($fp, "static_assert(kNumSIMDRegs == " . NUM_SIMD_ARGS.
             "kNumSIMDRegs\");\n\n");
 
 $callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
-              'double* SIMD, int SIMD_count';
+              'double* SIMD, int SIMD_count, bool indResult';
 foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV'] as
         $ret => $name) {
   fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");
+  fwrite($fp, "#if defined(__aarch64__)\n");
+  fwrite($fp, "  if (indResult) {\n");
+  fwrite($fp, "    auto byRef = GP[0];\n");
+  fwrite($fp, "    for(int i = 1; i < GP_count; i++) {\n");
+  fwrite($fp, "      GP[i-1] = GP[i];\n");
+  fwrite($fp, "    }\n");
+  fwrite($fp, "    GP_count--;\n");
+  fwrite($fp, "    asm(\"mov x8, %0\\n\" : : \"r\"(byRef));\n");
+  fwrite($fp, "  }\n");
+  fwrite($fp, "#endif\n");
   fwrite($fp, "  switch (GP_count) {\n");
   $gpargs = [];
   for($gp = 0; $gp <= NUM_GP_ARGS; ++$gp) {

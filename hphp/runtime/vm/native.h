@@ -199,20 +199,15 @@ const int kMaxBuiltinArgs = 32;
 constexpr int kMaxFCallBuiltinArgsARM = 5;
 
 inline int maxFCallBuiltinArgs() {
-#ifdef __AARCH64EL__
-  return kMaxFCallBuiltinArgsARM;
+#ifdef __aarch64__
+  return kMaxBuiltinArgs;
 #else
   return kMaxBuiltinArgs;
 #endif
 }
 
-// t#3982283 - Our ARM code gen doesn't support FP args/returns yet.
 inline bool allowFCallBuiltinDoubles() {
-#ifdef __AARCH64EL__
-  return false;
-#else
   return true;
-#endif
 }
 
 enum Attr {

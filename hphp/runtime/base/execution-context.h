@@ -59,6 +59,11 @@ struct VMState {
   TypedValue* sp;
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
+
+  template<class F> void scan(F& mark) const {
+    mInstrState.scan(mark);
+    mark(&jitCalledFrame, sizeof(jitCalledFrame));
+  }
 };
 
 enum class CallType {
@@ -559,7 +564,7 @@ public:
     mark(m_createdFuncs);
     //for (auto& f : m_faults) mark(f);
     mark(m_lambdaCounter);
-    //mark(m_nestedVMs);
+    for (auto& vmstate : m_nestedVMs) vmstate.scan(mark);
     mark(m_nesting);
     mark(m_dbgNoBreak);
     mark(m_evaledArgs);

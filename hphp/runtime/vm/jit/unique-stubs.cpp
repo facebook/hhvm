@@ -138,23 +138,19 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitFunctionEnterHelper(cb, data, us);
+  return ARCH_SWITCH_CALL(emitFunctionEnterHelper, cb, data, us);
 }
 
 TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitFreeLocalsHelpers(cb, data, us);
+  return ARCH_SWITCH_CALL(emitFreeLocalsHelpers, cb, data, us);
 }
 
 TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitCallToExit(cb, data, us);
+  return ARCH_SWITCH_CALL(emitCallToExit, cb, data, us);
 }
 
 TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitEndCatchHelper(cb, data, us);
+  return ARCH_SWITCH_CALL(emitEndCatchHelper, cb, data, us);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -930,7 +926,18 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   us.enterTCExit = vwrap(cb, data, [&] (Vout& v) {
     // Eagerly save VM regs and realign the native stack.
     storeVMRegs(v);
-    v << lea{rsp()[8], rsp()};
+
+    // Realign the native stack, if it was unaligned
+    switch (arch()) {
+      case Arch::X64:
+        v << lea{rsp()[8], rsp()};
+        break;
+      case Arch::ARM:
+        break;
+      case Arch::PPC64:
+        not_implemented();
+        break;
+    }
 
     // Store the return value on the top of the eval stack.  Whenever we get to
     // enterTCExit, we're semantically executing some PHP construct that sends
@@ -979,8 +986,17 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << copy{sp, rvmsp()};
     v << copy{tl, rvmtl()};
 
-    // Unalign the native stack.
-    v << lea{rsp()[-8], rsp()};
+    // Unalign the native stack, if needed
+    switch (arch()) {
+      case Arch::X64:
+        v << lea{rsp()[-8], rsp()};
+        break;
+      case Arch::ARM:
+        break;
+      case Arch::PPC64:
+        not_implemented();
+        break;
+    }
 
     // Check if `calleeAR' was set.
     auto const sf = v.makeReg();

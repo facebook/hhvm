@@ -79,7 +79,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
     let lock_file = ServerFiles.lock_file www_root in
     if not (Lock.grab lock_file) then
       (Hh_logger.log "Monitor daemon already running. Killing";
-       Exit_status.exit Exit_status.Ok);
+       Exit_status.exit Exit_status.No_error);
   end;
 
   ignore @@ Sys_utils.setsid ();
@@ -138,7 +138,7 @@ let daemon_starter options =
   Printf.eprintf "Spawned %s (child pid=%d)\n" Program.hh_server pid;
   Printf.eprintf "Logs will go to %s\n%!"
     (if Sys.win32 then log_file_path else log_link);
-  Exit_status.Ok
+  Exit_status.No_error
 
 (** Either starts a monitor daemon (which will spawn a typechecker daemon),
  * or just runs the typechecker if detachment not enabled. *)

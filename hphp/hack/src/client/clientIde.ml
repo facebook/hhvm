@@ -39,7 +39,7 @@ let malformed_input () =
   raise Exit_status.(Exit_with IDE_malformed_request)
 
 let server_disconnected () =
-  raise Exit_status.(Exit_with Ok)
+  raise Exit_status.(Exit_with No_error)
 
 let read_request () =
   try read_line () with End_of_file ->
@@ -73,4 +73,4 @@ let main env =
       in
       write_response res;
   done;
-  Exit_status.exit Exit_status.Ok
+  Exit_status.exit Exit_status.No_error

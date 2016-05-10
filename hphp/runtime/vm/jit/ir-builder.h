@@ -115,8 +115,7 @@ struct IRBuilder {
   /*
    * Helper for unboxing predicted types.
    *
-   * @returns: ldRefReturn(fs().local(id).predictedType.unbox())
-   *           ldRefReturn(fs().stack(id).predictedType.unbox())
+   * @returns: ldRefReturn(fs().predictedTypeOf(location).unbox())
    */
   Type predictedLocalInnerType(uint32_t id) const;
   Type predictedStackInnerType(IRSPRelOffset) const;
@@ -157,6 +156,7 @@ struct IRBuilder {
   /*
    * Constrain the type sources of the given bytecode location.
    */
+  bool constrainLocation(Location l, TypeConstraint tc);
   bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
   bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
 

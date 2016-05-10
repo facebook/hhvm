@@ -81,8 +81,7 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
   auto const innerType = env.irb->predictedStackInnerType(soff.offset);
   if (!outerOnly && innerType < TInitCell) {
     env.irb->constrainStack(soff.offset, DataTypeSpecific);
-    auto stk = gen(env, LdStk, TBoxedInitCell,
-                   IRSPRelOffsetData{soff.offset}, sp(env));
+    auto stk = gen(env, LdStk, TBoxedInitCell, soff, sp(env));
     gen(env, CheckRefInner, innerType, exit, stk);
   }
 }

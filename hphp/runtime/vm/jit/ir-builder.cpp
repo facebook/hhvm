@@ -706,14 +706,17 @@ bool IRBuilder::constrainLocation(Location l, TypeConstraint tc,
   return changed;
 }
 
+bool IRBuilder::constrainLocation(Location l, TypeConstraint tc) {
+  return constrainLocation(l, tc, "");
+}
+
 bool IRBuilder::constrainLocal(uint32_t locID, TypeConstraint tc,
                                const std::string& why) {
-  return constrainLocation(Location::Local { locID }, tc, why);
+  return constrainLocation(loc(locID), tc, why);
 }
 
 bool IRBuilder::constrainStack(IRSPRelOffset offset, TypeConstraint tc) {
-  auto const fpRel = offset.to<FPInvOffset>(m_state.irSPOff());
-  return constrainLocation(Location::Stack { fpRel }, tc, "");
+  return constrainLocation(stk(offset), tc);
 }
 
 bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc) {

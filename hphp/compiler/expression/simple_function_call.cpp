@@ -855,9 +855,9 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
     return ExpressionPtr();
   }
 
-    if (ExpressionPtr rep = optimize(ar)) {
-      return rep;
-    }
+  if (ExpressionPtr rep = optimize(ar)) {
+    return rep;
+  }
 
   if (!m_class && !hasStaticClass() &&
       (m_type == FunType::Define ||

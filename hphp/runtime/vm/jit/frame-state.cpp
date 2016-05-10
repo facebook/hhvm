@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/location.h"
+#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -30,6 +31,7 @@
 #include "hphp/util/trace.h"
 
 #include <boost/range/adaptor/reversed.hpp>
+#include <folly/Optional.h>
 
 #include <algorithm>
 
@@ -144,12 +146,12 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     dst.mbase.value = nullptr;
     changed = true;
   }
-  if (dst.mbase.ptr != src.mbase.ptr) {
-    dst.mbase.ptr = nullptr;
+
+  if (dst.mbr.ptr != src.mbr.ptr) {
+    dst.mbr.ptr = nullptr;
     changed = true;
   }
-  changed |= merge_util(dst.mbase.ptrType,
-                        dst.mbase.ptrType | src.mbase.ptrType);
+  changed |= merge_util(dst.mbr.ptrType, dst.mbr.ptrType | src.mbr.ptrType);
 
   // The tracked FPI state must always be the same, notice that the size of the
   // FPI stacks may differ as the FPush associated with one of the merged blocks
@@ -662,7 +664,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
     if (isMemberBaseOp(extra.opcode) || isMemberDimOp(extra.opcode) ||
         isMemberFinalOp(extra.opcode)) {
-      cur().mbase.reset();
+      cur().mbr = MBRState{};
+      cur().mbase = MBaseState{};
     }
     break;
   }
@@ -697,14 +700,16 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     killIterLocals({inst->extra<IterData>()->valId});
     break;
 
-  case StMBase:
-    cur().mbase.ptr = inst->src(0);
-    cur().mbase.ptrType = inst->src(0)->type();
+  case StMBase: {
+    auto const mbr = inst->src(0);
+    cur().mbr.ptr = mbr;
+    cur().mbr.ptrType = mbr->type();
     cur().mbase.value = nullptr;
-    break;
+  } break;
 
   case FinishMemberOp:
-    cur().mbase.reset();
+    cur().mbr = MBRState{};
+    cur().mbase = MBaseState{};
     break;
 
   case VerifyRetFail:
@@ -742,68 +747,75 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   auto const isPM = cur().curFunc->isPseudoMain();
   auto const base = inst->src(minstrBaseIdx(inst->op()));
 
+  auto const effect_on = [&] (Type ty) -> folly::Optional<Type> {
+    auto const effects = MInstrEffects(inst->op(), ty);
+    if (effects.baseTypeChanged || effects.baseValChanged) {
+      return effects.baseType;
+    }
+    return folly::none;
+  };
+
+  // When the member base register refers to a single known memory location `l'
+  // (with corresponding Ptr type `kind'), we apply the effect of `inst' only
+  // to `l'.  Returns the member base value type if `inst' had an effect.
+  auto const apply_one = [&] (Location l, Ptr kind) -> folly::Optional<Type> {
+    if (auto const ptrTy = effect_on(typeOf(l).ptr(kind))) {
+      auto const baseTy = ptrTy->derefIfPtr();
+      setType(l, baseTy <= TBoxedCell ? TBoxedInitCell : baseTy);
+      return baseTy;
+    }
+    return folly::none;
+  };
+
+  // If we don't know exactly where the base is, we have to be conservative and
+  // apply the operation to all locals/stack slots that could be affected.
+  auto const apply = [&] (Location l) {
+    auto const oldType = typeOf(l);
+    auto const maxType = [&] {
+      switch (l.tag()) {
+        case LTag::Local: return LocationState<LTag::Local>::default_type();
+        case LTag::Stack: return LocationState<LTag::Stack>::default_type();
+      }
+      not_reached();
+    }();
+
+    if (maxType <= oldType) {
+      // Drop the value and don't bother with precise effects.
+      return setType(l, oldType);
+    }
+    if (oldType <= TBoxedCell) return;
+
+    if (auto const baseType = effect_on(oldType)) {
+      widenType(l, oldType | *baseType);
+    }
+  };
+
   if (base->inst()->is(LdStkAddr)) {
     auto const offset = base->inst()->extra<LdStkAddr>()->offset;
-    auto const prevTy = stack(offset).type;
-    MInstrEffects effects(inst->op(), prevTy.ptr(Ptr::Stk));
-
-    if (effects.baseTypeChanged || effects.baseValChanged) {
-      auto const ty = effects.baseType.derefIfPtr();
-      setType(
-        stk(offset),
-        ty <= TBoxedCell ? TBoxedInitCell : ty
-      );
-    }
+    apply_one(stk(offset), Ptr::Stk);
   } else if (base->inst()->is(LdLocAddr)) {
     if (isPM) return;
-    auto const locId = base->inst()->extra<LdLocAddr>()->locId;
-    auto const baseType = local(locId).type;
+    auto const locID = base->inst()->extra<LdLocAddr>()->locId;
+    auto const l = loc(locID);
 
-    MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
-    if (effects.baseTypeChanged || effects.baseValChanged) {
-      auto const ty = effects.baseType.derefIfPtr();
-      if (ty <= TBoxedCell) {
-        setType(loc(locId), TBoxedInitCell);
-        setBoxedPrediction(loc(locId), ty);
-      } else {
-        setType(loc(locId), ty);
+    if (auto const ty = apply_one(l, Ptr::Frame)) {
+      if (*ty <= TBoxedCell) {
+        setBoxedPrediction(l, *ty);
       }
     }
   } else {
     Trace::Indent indent;
-    // If we don't know exactly where the base is, we have to be conservative
-    // and apply the operation to all locals/stack slots that could be
-    // affected.
+
     if (base->type().maybe(TPtrToFrameGen) && !isPM) {
-      for (size_t i = 0, n = cur().locals.size(); i < n; ++i) {
-        auto const oldType = local(i).type;
-        if (TGen <= oldType) {
-          // Drop the value and don't bother with precise effects.
-          setType(loc(i), oldType);
-          continue;
-        }
-        if (oldType <= TBoxedCell) continue;
-        MInstrEffects e(inst->op(), oldType);
-        if (!e.baseValChanged && !e.baseTypeChanged) continue;
-        widenType(loc(i), oldType | e.baseType);
+      for (auto i = 0; i < cur().locals.size(); ++i) {
+        apply(loc(i));
       }
     }
     if (base->type().maybe(TPtrToStkGen)) {
       for (auto i = 0; i < cur().stack.size(); ++i) {
         // The FPInvOffset of the stack slot is just its 1-indexed slot.
         auto const spRel = FPInvOffset{i + 1}.to<IRSPRelOffset>(cur().irSPOff);
-
-        auto const oldType = stack(spRel).type;
-        if (TStkElem <= oldType) {
-          // Drop the value and don't bother with precise effects.
-          setType(stk(spRel), oldType);
-          continue;
-        }
-        if (oldType <= TBoxedCell) continue;
-
-        MInstrEffects e(inst->op(), oldType);
-        if (!e.baseValChanged && !e.baseTypeChanged) continue;
-        widenType(stk(spRel), oldType | e.baseType);
+        apply(stk(spRel));
       }
     }
   }
@@ -1006,7 +1018,8 @@ void FrameStateMgr::clearForUnprocessedPred() {
   // These values must go toward their conservative state.
   cur().thisAvailable    = false;
   cur().frameMaySpanCall = true;
-  cur().mbase.reset();
+  cur().mbr = MBRState{};
+  cur().mbase = MBaseState{};
 
   cur().fpiStack.clear();
   clearLocals();
@@ -1541,6 +1554,6 @@ std::string show(const FrameStateMgr& state) {
   ).str();
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

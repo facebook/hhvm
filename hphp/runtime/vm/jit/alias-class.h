@@ -241,6 +241,7 @@ struct AliasClass {
    * Guaranteed to be commutative.
    */
   AliasClass operator|(AliasClass o) const;
+  AliasClass& operator|=(AliasClass o) { return *this = *this | o; }
 
   /*
    * Returns whether this alias class is a non-strict-subset of another one.

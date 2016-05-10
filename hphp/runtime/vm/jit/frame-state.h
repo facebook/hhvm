@@ -114,6 +114,21 @@ struct LocationState {
 using LocalState = LocationState<LTag::Local>;
 using StackState = LocationState<LTag::Stack>;
 
+struct MBaseState {
+  SSATmp* value{nullptr};
+};
+
+/*
+ * MBRState tracks the value and type of the member base register pointer.
+ *
+ * These are used for some gen-time load elimination to preserve important
+ * information about the base.
+ */
+struct MBRState {
+  SSATmp* ptr{nullptr};
+  Type ptrType{TPtrToGen};
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -138,25 +153,6 @@ struct FrameState {
    * Depth of the in-memory eval stack.
    */
   FPInvOffset bcSPOff{0};
-
-  /*
-   * Here we keep track of the raw pointer value of the member base register,
-   * the type of the pointer, as well as the value it points to, which we often
-   * know after simple base operations like BaseH or BaseL. These are used for
-   * some gen-time load elimination to preserve important information about the
-   * base.
-   */
-  struct {
-    SSATmp* ptr{nullptr};
-    Type ptrType{TPtrToGen};
-    SSATmp* value{nullptr};
-
-    void reset() {
-      ptr = nullptr;
-      ptrType = TPtrToGen;
-      value = nullptr;
-    }
-  } mbase;
 
   /*
    * Tracks whether we will need to ratchet tvRef and tvRef2 after emitting an
@@ -204,6 +200,12 @@ struct FrameState {
    * (if the state is initialized).
    */
   jit::vector<LocalState> locals;
+
+  /*
+   * Values and types of the member base register and its pointee.
+   */
+  MBRState mbr;
+  MBaseState mbase;
 
   /*
    * Predicted types for values that lived in a local or stack slot at one
@@ -311,8 +313,6 @@ struct FrameStateMgr final {
   SSATmp*     sp()                const { return cur().spValue; }
   FPInvOffset irSPOff()           const { return cur().irSPOff; }
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
-  SSATmp*     memberBasePtr()     const { return cur().mbase.ptr; }
-  Type        memberBasePtrType() const { return cur().mbase.ptrType; }
   SSATmp*     memberBaseValue()   const { return cur().mbase.value; }
   bool        needRatchet()       const { return cur().needRatchet; }
   bool        thisAvailable()     const { return cur().thisAvailable; }
@@ -354,6 +354,11 @@ struct FrameStateMgr final {
   Type typeOf(Location l) const;
   Type predictedTypeOf(Location l) const;
   const TypeSourceSet& typeSrcsOf(Location l) const;
+
+  /*
+   * Return tracked state for the member base register.
+   */
+  const MBRState& mbr()     const { return cur().mbr; }
 
   /*
    * Update the predicted type for `l'.

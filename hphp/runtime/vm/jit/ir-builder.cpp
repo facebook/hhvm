@@ -460,9 +460,9 @@ SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
-  if (auto ptr = m_state.memberBasePtr()) return ptr;
+  if (auto ptr = m_state.mbr().ptr) return ptr;
 
-  inst->setTypeParam(inst->typeParam() & m_state.memberBasePtrType());
+  inst->setTypeParam(inst->typeParam() & m_state.mbr().ptrType);
   return nullptr;
 }
 

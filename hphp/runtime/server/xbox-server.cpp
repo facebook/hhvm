@@ -34,8 +34,8 @@ namespace HPHP {
 
 using std::string;
 
-XboxTransport::XboxTransport(const String& message,
-                             const String& reqInitDoc /* = "" */)
+XboxTransport::XboxTransport(const folly::StringPiece message,
+                             const folly::StringPiece reqInitDoc /* = "" */)
     : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
   Timer::GetMonotonicTime(m_queueTime);
 
@@ -224,7 +224,7 @@ bool XboxServer::SendMessage(const String& message,
         return false;
       }
 
-      job = new XboxTransport(message);
+      job = new XboxTransport(message.toCppString());
       job->incRefCount(); // paired with worker's decRefCount()
       job->incRefCount(); // paired with decRefCount() at below
       assert(s_dispatcher);
@@ -297,7 +297,7 @@ bool XboxServer::PostMessage(const String& message,
       return false;
     }
 
-    XboxTransport *job = new XboxTransport(message);
+    XboxTransport *job = new XboxTransport(message.toCppString());
     job->incRefCount(); // paired with worker's decRefCount()
     assert(s_dispatcher);
     s_dispatcher->enqueue(job);
@@ -335,7 +335,7 @@ struct XboxTask : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XboxTask)
 
   XboxTask(const String& message, const String& reqInitDoc = "") {
-    m_job = new XboxTransport(message, reqInitDoc);
+    m_job = new XboxTransport(message.toCppString(), reqInitDoc.toCppString());
     m_job->incRefCount();
   }
 
@@ -394,6 +394,33 @@ Resource XboxServer::TaskStart(const String& msg,
 
   throw_exception(SystemLib::AllocExceptionObject(errMsg));
   return Resource();
+}
+
+void XboxServer::TaskStartFromNonRequest(
+  const folly::StringPiece msg,
+  const folly::StringPiece reqInitDoc /* ="" */
+) {
+    {
+      Lock l(s_dispatchMutex);
+      if (s_dispatcher &&
+          (s_dispatcher->getActiveWorker() <
+           RuntimeOption::XboxServerThreadCount ||
+           s_dispatcher->getQueuedJobs() <
+           RuntimeOption::XboxServerMaxQueueLength)) {
+        XboxTransport *job = new XboxTransport(msg, reqInitDoc);
+        job->incRefCount(); // paired with worker's decRefCount()
+
+        assert(s_dispatcher);
+        s_dispatcher->enqueue(job);
+      }
+  }
+  const char* errMsg =
+    (RuntimeOption::XboxServerThreadCount > 0 ?
+     "Cannot create new Xbox task because the Xbox queue has "
+     "reached maximum capacity" :
+     "Cannot create new Xbox task because the Xbox is not enabled");
+
+  throw std::runtime_error(errMsg);
 }
 
 bool XboxServer::TaskStatus(const Resource& task) {

@@ -531,12 +531,10 @@ SSATmp* opt_foldable(IRGS& env,
 
     try {
       Cell retVal;
-      bool savedThrowAllErrors = g_context->getThrowAllErrors();
       // We don't know if notices would be enabled or not when this
       // function would normally get called, so be safe and don't
       // optimize any calls that COULD generate notices.
-      g_context->setThrowAllErrors(true);
-      SCOPE_EXIT { g_context->setThrowAllErrors(savedThrowAllErrors); };
+      ThrowAllErrorsSetter taes;
 
 #ifdef DEBUG
       const Func* stackFunc = vmfp()->m_func;

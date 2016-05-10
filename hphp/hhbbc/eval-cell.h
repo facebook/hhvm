@@ -45,8 +45,7 @@ namespace HPHP { namespace HHBBC {
 template<class Pred>
 folly::Optional<Type> eval_cell(Pred p) {
   try {
-    g_context->setThrowAllErrors(true);
-    SCOPE_EXIT { g_context->setThrowAllErrors(false); };
+    ThrowAllErrorsSetter taes;
 
     Cell c = p();
     if (isRefcountedType(c.m_type)) {

@@ -263,16 +263,26 @@ struct FrameStateMgr final {
    *
    * `hasUnprocessedPred' is set to indicate that the given block has a
    * predecessor in the region that might not yet be linked into the IR CFG.
+   *
+   * `pred' is the logical predecessor of `b' to be used in the event that `b'
+   * is unreachable.
    */
-  void startBlock(Block* b, bool hasUnprocessedPred);
+  void startBlock(Block* b, bool hasUnprocessedPred,
+                  Block* pred = nullptr);
 
   /*
-   * Finish tracking state for a block and save the current state to any
-   * successors.
+   * Finish tracking state for `b' and save the current state to b->next()
+   * (b->taken() is handled in update()).  Also save the out-state if
+   * setSaveOutState() was called on `b'.
    *
-   * Returns true iff the out-state for the block has changed.
+   * Returns true iff the in-state for the next block has changed.
    */
-  bool finishBlock(Block*);
+  bool finishBlock(Block* b);
+
+  /*
+   * Mark that `b' should save its out-state when finishBlock() is called.
+   */
+  void setSaveOutState(Block* b);
 
   /*
    * Save current state of a block so we can resume processing it after working
@@ -398,7 +408,7 @@ private:
   /*
    * Per-block state helpers.
    */
-  bool save(Block*);
+  bool save(Block* b, Block* pred = nullptr);
   void clearForUnprocessedPred();
   void collectPostConds(Block* exitBlock);
 
@@ -440,7 +450,12 @@ private:
 
 private:
   struct BlockState {
+    // Mandatory in-state computed from predecessors.
     jit::vector<FrameState> in;
+    // Optionally-saved out-state.  Non-none but empty indicates that out-state
+    // should be saved.
+    folly::Optional<jit::vector<FrameState>> out;
+    // Paused state, used by IRBuilder::{push,pop}Block().
     folly::Optional<jit::vector<FrameState>> paused;
   };
 

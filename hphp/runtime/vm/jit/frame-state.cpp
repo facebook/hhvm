@@ -916,7 +916,8 @@ bool FrameStateMgr::hasStateFor(Block* block) const {
   return m_states.count(block);
 }
 
-void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
+void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred,
+                               Block* pred) {
   ITRACE(3, "FrameStateMgr::startBlock: {}\n", block->id());
   auto const it = m_states.find(block);
   auto const end = m_states.end();
@@ -931,8 +932,12 @@ void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
     if (m_stack.empty()) {
       always_assert_flog(0, "invalid startBlock for B{}", block->id());
     }
-  } else {
-    if (debug) save(block);
+  } else if (debug || pred) {
+    save(block, pred);
+    if (pred) {
+      assertx(hasStateFor(block));
+      m_stack = m_states[block].in;
+    }
   }
   assertx(!m_stack.empty());
 
@@ -953,9 +958,21 @@ bool FrameStateMgr::finishBlock(Block* block) {
            block->id(), show(m_exitPostConds[block]));
   }
 
+  assertx(hasStateFor(block));
+  if (m_states[block].out) {
+    assertx(m_states[block].out->empty());
+    m_states[block].out = m_stack;
+  }
+
   auto changed = false;
   if (!block->back().isTerminal()) changed |= save(block->next());
   return changed;
+}
+
+void FrameStateMgr::setSaveOutState(Block* block) {
+  assertx(hasStateFor(block));
+  assertx(!m_states[block].out || m_states[block].out->empty());
+  m_states[block].out.emplace();
 }
 
 void FrameStateMgr::pauseBlock(Block* block) {
@@ -977,11 +994,13 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
 }
 
 /*
- * Save current state for block.  If this is the first time saving state for
- * block, create a new snapshot.  Otherwise merge the current state into the
- * existing snapshot.
+ * Save the current state as the in-state for `block'.
+ *
+ * If this is the first time saving state for `block', create a new snapshot
+ * using either the current state or the out-state of `pred' if we are given
+ * one.  Otherwise merge the current state into the existing snapshot.
  */
-bool FrameStateMgr::save(Block* block) {
+bool FrameStateMgr::save(Block* block, Block* pred) {
   ITRACE(4, "Saving current state to B{}: {}\n", block->id(), show(*this));
 
   auto const it = m_states.find(block);
@@ -991,8 +1010,16 @@ bool FrameStateMgr::save(Block* block) {
     changed = merge_into(it->second.in, m_stack);
     ITRACE(4, "Merged state: {}\n", show(*this));
   } else {
-    assertx(!m_stack.empty());
-    m_states[block].in = m_stack;
+    if (pred) {
+      assertx(hasStateFor(pred));
+      assertx(m_states[pred].out);
+      assertx(!m_states[pred].out->empty());
+
+      m_states[block].in = *m_states[pred].out;
+    } else {
+      assertx(!m_stack.empty());
+      m_states[block].in = m_stack;
+    }
   }
 
   return changed;

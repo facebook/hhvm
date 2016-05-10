@@ -159,18 +159,24 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
 }
 
 /*
- * ifThenElse() generates if-then-else blocks within a trace that do not
- * produce values. Code emitted in the {next,taken} lambda will be executed iff
- * the branch emitted in the branch lambda is {not,} taken.
+ * Generate an if-then-else block construct.
+ *
+ * Code emitted in the {next,taken} lambda will be executed iff the branch
+ * emitted in the branch lambda is {not,} taken.
+ *
+ * TODO(#11019533): Fix undefined behavior if any of the blocks ends up
+ * unreachable as a result of simplification (or funky irgen).
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
   auto const taken_block = defBlock(env);
   auto const done_block  = defBlock(env);
+
   branch(taken_block);
+
   next();
-  // patch the last block added by the Next lambda to jump to
-  // the done block.  Note that last might not be taken_block.
+  // Patch the last block added by the Next lambda to jump to the done block.
+  // Note that last might not be taken_block.
   auto const cur = env.irb->curBlock();
   if (cur->empty() || !cur->back().isBlockEnd()) {
     gen(env, Jmp, done_block);
@@ -178,9 +184,10 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
     cur->back().setNext(done_block);
   }
   env.irb->appendBlock(taken_block);
+
   taken();
-  // patch the last block added by the Taken lambda to jump to
-  // the done block.  Note that last might not be taken_block.
+  // Patch the last block added by the Taken lambda to jump to the done block.
+  // Note that last might not be taken_block.
   auto const last = env.irb->curBlock();
   if (last->empty() || !last->back().isBlockEnd()) {
     gen(env, Jmp, done_block);
@@ -191,54 +198,68 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
 }
 
 /*
- * ifThen generates if-then blocks within a trace that do not produce
- * values. Code emitted in the taken lambda will be executed iff the branch
- * emitted in the branch lambda is taken.
+ * Generate an if-then block construct.
+ *
+ * Code emitted in the `taken' lambda will be executed iff the branch emitted
+ * in the `branch' lambda is taken.
+ *
+ * TODO(#11019533): Fix undefined behavior if any of the blocks ends up
+ * unreachable as a result of simplification (or funky irgen).
  */
 template<class Branch, class Taken>
 void ifThen(IRGS& env, Branch branch, Taken taken) {
   auto const taken_block = defBlock(env);
   auto const done_block  = defBlock(env);
+
   branch(taken_block);
   auto const cur = env.irb->curBlock();
+
   if (cur->empty() || !cur->back().isBlockEnd()) {
     gen(env, Jmp, done_block);
   } else if (!cur->back().isTerminal()) {
     cur->back().setNext(done_block);
   }
+  env.irb->fs().setSaveOutState(cur);
   env.irb->appendBlock(taken_block);
+
   taken();
-  // patch the last block added by the Taken lambda to jump to
-  // the done block.  Note that last might not be taken_block.
+  // Patch the last block added by the Taken lambda to jump to the done block.
+  // Note that last might not be taken_block.
   auto const last = env.irb->curBlock();
   if (last->empty() || !last->back().isBlockEnd()) {
     gen(env, Jmp, done_block);
   } else if (!last->back().isTerminal()) {
     last->back().setNext(done_block);
   }
-  env.irb->appendBlock(done_block);
+  env.irb->appendBlock(done_block, cur);
 }
 
 /*
- * ifElse generates if-then-else blocks with an empty 'then' block
- * that do not produce values. Code emitted in the next lambda will
- * be executed iff the branch emitted in the branch lambda is not
- * taken.
+ * Generate an if-then-else block construct with an empty `then' block.
+ *
+ * Code emitted in the `next' lambda will be executed iff the branch emitted in
+ * the branch lambda is not taken.
+ *
+ * TODO(#11019533): Fix undefined behavior if any of the blocks ends up
+ * unreachable as a result of simplification (or funky irgen).
  */
 template<class Branch, class Next>
 void ifElse(IRGS& env, Branch branch, Next next) {
   auto const done_block = defBlock(env);
+
   branch(done_block);
+  auto const cur = env.irb->curBlock();
+  env.irb->fs().setSaveOutState(cur);
+
   next();
-  // patch the last block added by the Next lambda to jump to
-  // the done block.
+  // Patch the last block added by the Next lambda to jump to the done block.
   auto last = env.irb->curBlock();
   if (last->empty() || !last->back().isBlockEnd()) {
     gen(env, Jmp, done_block);
   } else if (!last->back().isTerminal()) {
     last->back().setNext(done_block);
   }
-  env.irb->appendBlock(done_block);
+  env.irb->appendBlock(done_block, cur);
 }
 
 //////////////////////////////////////////////////////////////////////

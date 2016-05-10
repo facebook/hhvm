@@ -501,7 +501,7 @@ RegionDescPtr form_region(Env& env) {
       env.curBlock->addPreCondition({lt.location, t, DataTypeGeneric});
     } else {
       irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
-                               true /* outerOnly */);
+                       true /* outerOnly */);
     }
   }
 

@@ -121,6 +121,7 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
+  m_state.startBlock(m_curBlock, false);
 }
 
 bool IRBuilder::shouldConstrainGuards() const {
@@ -908,12 +909,12 @@ void IRBuilder::setBlock(SrcKey sk, Block* block) {
   m_skToBlockMap[sk] = block;
 }
 
-void IRBuilder::appendBlock(Block* block) {
+void IRBuilder::appendBlock(Block* block, Block* pred) {
   m_state.finishBlock(m_curBlock);
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block, false);
+  m_state.startBlock(block, false, pred);
   m_curBlock = block;
 }
 

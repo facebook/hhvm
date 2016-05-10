@@ -218,6 +218,7 @@ and typeconst = {
   tconst_name: id;
   tconst_constraint: hint option;
   tconst_type: hint option;
+  tconst_span: Pos.t;
 }
 
 and is_reference = bool

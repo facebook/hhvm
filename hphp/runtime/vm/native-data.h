@@ -52,6 +52,8 @@ struct NativeDataInfo {
 };
 
 NativeDataInfo* getNativeDataInfo(const StringData* name);
+NativeNode* getNativeNode(ObjectData*, const NativeDataInfo*);
+const NativeNode* getNativeNode(const ObjectData*, const NativeDataInfo*);
 
 template<class T>
 T* data(ObjectData *obj) {
@@ -218,7 +220,9 @@ void>::type nativeDataInfoScan(const ObjectData* obj, IMarker& mark) {
 template<class T>
 typename std::enable_if<!hasScan<T,ScanSig>::value,
 void>::type nativeDataInfoScan(const ObjectData* obj, IMarker& mark) {
-  conservativeScan(obj, mark);
+  // Conservative scan from header to start of ObjectData
+  auto node = getNativeNode(obj, obj->getVMClass()->getNativeDataInfo());
+  mark(node, uintptr_t(obj) - uintptr_t(node));
 }
 
 enum NDIFlags {
@@ -241,7 +245,6 @@ typename std::enable_if<
   auto ndisw = getNativeDataInfoSweep<T>();
   auto ndisl = &nativeDataInfoSleep<T>;
   auto ndiw = &nativeDataInfoWakeup<T>;
-  auto ndis = &nativeDataInfoScan<T>;
 
   registerNativeDataInfo(
     name, sizeof(T),
@@ -251,7 +254,7 @@ typename std::enable_if<
     (flags & NDIFlags::NO_SWEEP) ? nullptr : ndisw,
     hasSleep<T, Variant() const>::value ? ndisl : nullptr,
     hasWakeup<T, void(const Variant&, ObjectData*)>::value ? ndiw : nullptr,
-    hasScan<T,ScanSig>::value ? ndis : nullptr);
+    &nativeDataInfoScan<T>);
 }
 
 // Return the ObjectData payload allocated after this NativeNode header
@@ -277,10 +280,8 @@ void nativeDataWakeup(ObjectData* obj, const Variant& data);
 
 template <typename F>
 void nativeDataScan(const ObjectData* obj, F& mark) {
-  auto ndi = obj->getVMClass()->getNativeDataInfo();
-  assert(ndi);
-  assert(ndi->scan);
   ExtMarker<F> bridge(mark);
+  auto ndi = obj->getVMClass()->getNativeDataInfo();
   ndi->scan(obj, bridge);
 }
 

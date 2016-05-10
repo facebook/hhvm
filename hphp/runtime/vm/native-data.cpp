@@ -42,15 +42,6 @@ size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
   return ndsize(ndi->sz);
 }
 
-void conservativeScan(const ObjectData* obj, IMarker& mark) {
-  // Conservative scan.
-  auto h = reinterpret_cast<const Header*>(
-    Native::getNativeNode(obj, obj->getVMClass()->getNativeDataInfo())
-  );
-  assert(h->kind() == HeaderKind::NativeData);
-  mark(h, h->size() - sizeof(ObjectData));
-}
-
 void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,
@@ -72,7 +63,7 @@ void registerNativeDataInfo(const StringData* name,
   info.sweep = sweep;
   info.sleep = sleep;
   info.wakeup = wakeup;
-  info.scan = scan ? scan : conservativeScan;
+  info.scan = scan;
   s_nativedatainfo[name] = info;
 }
 

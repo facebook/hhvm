@@ -1114,6 +1114,7 @@ struct ContextGetCmd : XDebugCommand {
       }
       case XDebugContext::LOCAL: {
         VMRegAnchor regAnchor;
+
         auto const fp = g_context->getFrameAtDepth(m_depth);
         auto const vars = getDefinedVariables(fp);
 

@@ -291,14 +291,10 @@ c_AsyncFunctionWaitHandle *getWaitHandleAtAsyncStackPosition(int position) {
 
 bool CmdVariable::onServer(DebuggerProxy &proxy) {
   if (m_type == KindOfVariableAsync) {
-    //we only do variable inspection on continuation wait handles
+    // We only do variable inspection on continuation wait handles.
     auto frame = getWaitHandleAtAsyncStackPosition(m_frame);
-
     if (frame != nullptr) {
-      auto fp = frame->actRec();
-      if (fp != nullptr) {
-        m_variables = getDefinedVariables(fp);
-      }
+      m_variables = getDefinedVariables(frame->actRec());
     }
   } else if (m_frame < 0) {
     m_variables = g_context->m_globalVarEnv->getDefinedVariables();

@@ -999,6 +999,8 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
 }
 
 Array getDefinedVariables(const ActRec* fp) {
+  if (UNLIKELY(fp == nullptr)) return empty_array();
+
   if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
     return fp->m_varEnv->getDefinedVariables();
   }

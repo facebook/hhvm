@@ -845,7 +845,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       auto const ar = g_context->getFrameAtDepth(0);
-      auto const context = ar ? getDefinedVariables(ar) : empty_array();
+      auto const context = getDefinedVariables(ar);
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()),
@@ -1451,9 +1451,6 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   for (; frame > 0; --frame) {
     if (!fp) break;
     fp = getPrevVMState(fp);
-  }
-  if (!fp) {
-    return empty_array();
   }
   return getDefinedVariables(fp);
 }

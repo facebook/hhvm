@@ -22,7 +22,6 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/directory.h"
 
 namespace HPHP {
@@ -59,9 +58,11 @@ static struct PharStreamWrapper : Stream::Wrapper {
       nullptr,
       SystemLib::s_PharClass
     );
-    String contents = ret.toString();
 
-    return req::make<MemFile>(contents.data(), contents.size());
+    if (!ret.isResource()) {
+      return nullptr;
+    }
+    return dyn_cast_or_null<File>(ret.asResRef());
   }
 
   virtual int access(const String& path, int mode) {

@@ -30,6 +30,8 @@ class Phar extends RecursiveDirectoryIterator
   const PHP = 1;
   const PHPS = 2;
 
+  const HALT_TOKEN = '__HALT_COMPILER();';
+
   /**
    * A map from filename_or_alias => Phar object
    */
@@ -38,23 +40,19 @@ class Phar extends RecursiveDirectoryIterator
    * Prevent the check for __HALT_COMPILER()
    */
   private static $preventHaltTokenCheck = false;
+  /**
+   * Prevent the check for file extension
+   */
+  private static $preventExtCheck = false;
 
-  private $alias;
-  private $fileInfo = array();
-  private $fileOffsets = array();
-  private $stub;
-  private $manifest;
-  private $contents;
-  private $signature;
-
-  private $count;
-  private $apiVersion;
-  private $archiveFlags;
-  private $metadata;
-  private $signatureFlags;
-
-  private $iteratorRoot;
-  private $iterator;
+  protected $fname;
+  /**
+   * @var __SystemLib\ArchiveHandler
+   */
+  protected $archiveHandler;
+  protected $iteratorRoot;
+  protected $iterator;
+  protected int $format = self::PHAR;
 
   /**
    * ( excerpt from http://php.net/manual/en/phar.construct.php )
@@ -63,7 +61,7 @@ class Phar extends RecursiveDirectoryIterator
    * @param string $fname Path to an existing Phar archive or to-be-created
    *                      archive. The file name's extension must contain
    *                      .phar.
-   * @param string $flags Flags to pass to parent class
+   * @param int $flags    Flags to pass to parent class
    *                      RecursiveDirectoryIterator.
    * @param string $alias Alias with which this Phar archive should be referred
    *                      to in calls to stream functionality.
@@ -72,48 +70,70 @@ class Phar extends RecursiveDirectoryIterator
    * @throws UnexpectedValueException
    */
   public function __construct($fname, $flags = null, $alias = null) {
+    if (!self::$preventExtCheck && !self::isValidPharFilename($fname)) {
+      throw new UnexpectedValueException(
+        "Cannot create phar '$fname', file extension (or combination) not".
+        ' recognised or the directory does not exist'
+      );
+    }
     if (!is_file($fname)) {
       throw new UnexpectedValueException("$fname is not a file");
     }
-    $data = file_get_contents($fname);
+    $this->fname = $fname;
+    $fp = fopen($fname, 'rb');
+    $this->iteratorRoot = 'phar://'.realpath($fname).'/';
 
-    $halt_token = '__HALT_COMPILER();';
-    $pos = strpos($data, $halt_token);
-    if ($pos === false && !self::$preventHaltTokenCheck) {
-      throw new PharException('__HALT_COMPILER(); must be declared in a phar');
+    $magic_number = fread($fp, 4);
+    // This is not a bullet-proof check, but should be good enough to catch ZIP
+    if (strcmp($magic_number, "PK\x03\x04") === 0) {
+      fclose($fp);
+      $this->format = self::ZIP;
+      $this->archiveHandler = new __SystemLib\ZipArchiveHandler(
+        $fname,
+        self::$preventHaltTokenCheck
+      );
+    } else {
+      if (strpos($magic_number, 'BZ') === 0) {
+        fclose($fp);
+        $fp = bzopen($fname, 'r');
+        fseek($fp, 257, SEEK_CUR); // Bzip2 only knows how to use SEEK_CUR
+      } else if (strpos($magic_number, "\x1F\x8B") === 0) {
+        fclose($fp);
+        $fp = gzopen($fname, 'rb');
+        fseek($fp, 257);
+      } else {
+        fseek($fp, 257);
+      }
+      $magic_number = fread($fp, 8);
+      fclose($fp);
+      if (
+        strpos($magic_number, "ustar\x0") === 0 ||
+        strpos($magic_number, "ustar\x40\x40\x0") === 0
+      ) {
+        $this->format = self::TAR;
+        $this->archiveHandler = new __SystemLib\TarArchiveHandler(
+          $fname,
+          self::$preventHaltTokenCheck
+        );
+      } else {
+        $this->format = self::PHAR;
+        $this->archiveHandler = new __SystemLib\PharArchiveHandler(
+          $fname,
+          self::$preventHaltTokenCheck
+        );
+      }
     }
-    $this->stub = substr($data, 0, $pos);
-
-    $pos += strlen($halt_token);
-    // *sigh*. We have to allow whitespace then ending the file
-    // before we start the manifest
-    while ($data[$pos] == ' ') {
-      $pos += 1;
+    $aliasFromManifest = $this->getAlias();
+    if ($aliasFromManifest) {
+      $this->assertCorrectAlias($aliasFromManifest);
+      self::$aliases[$aliasFromManifest] = $this;
     }
-    if ($data[$pos] == '?' && $data[$pos+1] == '>') {
-      $pos += 2;
-    }
-    while ($data[$pos] == "\r") {
-      $pos += 1;
-    }
-    while ($data[$pos] == "\n") {
-      $pos += 1;
-    }
-
-    $this->contents = substr($data, $pos);
-    $this->parsePhar($data, $pos);
-
     if ($alias) {
+      $this->assertCorrectAlias($alias);
       self::$aliases[$alias] = $this;
-    }
-    // From the manifest
-    if ($this->alias) {
-      self::$aliases[$this->alias] = $this;
     }
     // We also do filename lookups
     self::$aliases[$fname] = $this;
-
-    $this->iteratorRoot = 'phar://'.realpath($fname).'/';
   }
 
   /**
@@ -354,7 +374,7 @@ class Phar extends RecursiveDirectoryIterator
    *             number zero) if none.
    */
   public function count() {
-    return $this->count;
+    return $this->archiveHandler->count();
   }
 
   /**
@@ -399,7 +419,7 @@ class Phar extends RecursiveDirectoryIterator
   }
 
   public function getAlias() {
-    return $this->alias;
+    return $this->archiveHandler->getAlias();
   }
 
   public function getPath() {
@@ -418,7 +438,7 @@ class Phar extends RecursiveDirectoryIterator
    *               meta-data is stored.
    */
   public function getMetadata() {
-    return $this->metadata;
+    return $this->archiveHandler->getMetadata();
   }
 
   /**
@@ -450,7 +470,7 @@ class Phar extends RecursiveDirectoryIterator
    *               variable is set to true.
    */
   public function getSignature() {
-    return null;
+    return $this->archiveHandler->getSignature();
   }
 
   /**
@@ -465,7 +485,7 @@ class Phar extends RecursiveDirectoryIterator
    *                (stub) of the current Phar archive.
    */
   public function getStub() {
-    return $this->stub;
+    return $this->archiveHandler->getStub();
   }
 
   /**
@@ -480,7 +500,7 @@ class Phar extends RecursiveDirectoryIterator
    *                file format documentation for more information.
    */
   public function getVersion() {
-    return $this->apiVersion;
+    return $this->archiveHandler->apiVersion();
   }
 
   /**
@@ -493,7 +513,7 @@ class Phar extends RecursiveDirectoryIterator
    *              not.
    */
   public function hasMetadata() {
-    return $this->metadata !== null;
+    return $this->archiveHandler->hasMetadata();
   }
 
   /**
@@ -522,7 +542,7 @@ class Phar extends RecursiveDirectoryIterator
    * @return mixed Phar::GZ, Phar::BZ2 or <b>FALSE</b>
    */
   public function isCompressed() {
-    return false;
+    return $this->archiveHandler->isCompressed();
   }
 
   /**
@@ -536,7 +556,29 @@ class Phar extends RecursiveDirectoryIterator
    *              requested by the parameter
    */
   public function isFileFormat($fileformat) {
-    return $fileformat === self::PHAR;
+    return $fileformat === $this->format;
+  }
+
+  /**
+   * ( excerpt from http://php.net/manual/en/phar.isvalidpharfilename.php )
+   *
+   *
+   * @param string $filename The name or full path to a phar archive not yet
+   *                         created.
+   * @param bool $executable This parameter determines whether the filename
+   *                         should be treated as a phar executable archive, or
+   *                         a data non-executable archive.
+   *
+   * @return bool <b>TRUE</b> if the filename is valid, <b>FALSE</b> if not.
+   */
+  public static function isValidPharFilename(
+    string $filename,
+    bool $executable = true
+  ): bool {
+    $filename = basename($filename);
+    $pharExt = preg_match('/.+\.phar(\..+|$)/i', $filename) === 1;
+    return $executable ? $pharExt
+                       : !$pharExt && strpos($filename, '.') !== false;
   }
 
   /**
@@ -565,7 +607,7 @@ class Phar extends RecursiveDirectoryIterator
    *              <b>FALSE</b> if not.
    */
   public function offsetExists($offset) {
-    return isset($this->fileInfo[$offset]);
+    return $this->archiveHandler->getEntriesMap()->containsKey($offset);
   }
 
   /**
@@ -583,19 +625,11 @@ class Phar extends RecursiveDirectoryIterator
    *                       information about the current file.
    */
   public function offsetGet($offset) {
-    if (!$this->offsetExists($offset)) {
+    $entry = $this->archiveHandler->getEntriesMap()->get($offset);
+    if (!$entry) {
       return null;
     }
-    $fi = $this->fileInfo[$offset];
-    return new PharFileInfo(
-      $this->iteratorRoot.$offset,
-      new __SystemLib\ArchiveEntryStat(
-        $fi[3], // crc32
-        $fi[0], // size
-        $fi[2], // compressed size
-        $fi[1], // timestamp
-      )
-    );
+    return new PharFileInfo($this->iteratorRoot.$offset, $entry);
   }
 
   /**
@@ -608,7 +642,7 @@ class Phar extends RecursiveDirectoryIterator
    * @return void No return values.
    */
   public function offsetSet($offset, $value) {
-    throw new UnexpectedValueException('phar is read-only');
+    throw new Exception('Not implemented yet');
   }
 
   /**
@@ -633,7 +667,26 @@ class Phar extends RecursiveDirectoryIterator
    * @return bool
    */
   public function setAlias($alias) {
-    $this->alias = $alias;
+    $this->assertCorrectAlias($alias);
+    if (isset(self::$aliases[$alias])) {
+      $path = self::$aliases[$alias]->fname;
+      throw new PharException(
+        "alias \"$alias\" is already used for archive \"$path\" and cannot".
+        ' be used for other archives'
+      );
+    }
+    // TODO: Remove following line when write support implemented
+    throw new UnexpectedValueException('phar is read-only');
+    self::assertWriteSupport();
+    $this->archiveHandler->setAlias($alias);
+  }
+
+  private function assertCorrectAlias(string $alias) {
+    if (preg_match('#[\\/:;]#', $alias)) {
+      throw new UnexpectedValueException(
+        "Invalid alias \"$alias\" specified for phar \"$this->fname\""
+      );
+    }
   }
 
   /**
@@ -694,14 +747,20 @@ class Phar extends RecursiveDirectoryIterator
    * ( excerpt from http://php.net/manual/en/phar.setstub.php )
    *
    *
-   * @param string $stub A string or an open stream handle to use as the
-   *                     executable stub for this phar archive.
+   * @param resource|string $stub A string or an open stream handle to use as
+   *                              the executable stub for this phar archive.
    * @param int $len
    *
    * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
    */
   public function setStub($stub, $len = -1) {
+    // TODO: Remove following line when write support implemented
     throw new UnexpectedValueException('phar is read-only');
+    self::assertWriteSupport();
+    if (is_resource($stub)) {
+      $stub = stream_get_contents($stub);
+    }
+    $this->archiveHandler->setStub($stub, $len);
   }
 
   /**
@@ -815,7 +874,7 @@ class Phar extends RecursiveDirectoryIterator
    *               extension.
    */
   final public static function getSupportedCompression() {
-    return array();
+    return [self::GZ, self::BZ2];
   }
 
   /**
@@ -829,7 +888,7 @@ class Phar extends RecursiveDirectoryIterator
    *               OpenSSL.
    */
   final public static function getSupportedSignatures () {
-    return array();
+    return ['MD5', 'SHA-1', 'SHA-256', 'SHA-512'];
   }
 
   /**
@@ -852,7 +911,11 @@ class Phar extends RecursiveDirectoryIterator
    * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
    */
   final public static function loadPhar($filename, $alias = null) {
+    // We need this hack because the stream wrapper should work
+    // even without the __HALT_COMPILER token
+    self::$preventHaltTokenCheck = true;
     new self($filename, null, $alias);
+    self::$preventHaltTokenCheck = false;
     return true;
   }
 
@@ -871,7 +934,10 @@ class Phar extends RecursiveDirectoryIterator
    * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
    */
   public static function mapPhar($alias = null, $dataoffset = 0) {
+    // We need this hack because extension check during mapping is not needed
+    self::$preventExtCheck = true;
     new self(debug_backtrace()[0]['file'], null, $alias);
+    self::$preventExtCheck = false;
     return true;
   }
 
@@ -912,140 +978,31 @@ class Phar extends RecursiveDirectoryIterator
    * @return string the filename if valid, empty string otherwise.
    */
   final public static function running(bool $retphar = true) {
-    $filename = debug_backtrace()[0]['file'];
-    $pharScheme = "phar://";
-    $pharExt = ".phar";
-    if(substr($filename, 0, strlen($pharScheme)) == $pharScheme) {
+    $filename = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[0]['file'];
+    $pharScheme = 'phar://';
+    $pharExt = '.phar';
+    if (strpos($filename, $pharScheme) === 0) {
       $pharExtPos = strrpos($filename, $pharExt);
-      if($pharExtPos) {
+      if ($pharExtPos) {
         $endPos = $pharExtPos + strlen($pharExt);
-        if($retphar) {
+        if ($retphar) {
           return substr($filename, 0, $endPos);
-        }
-        else {
+        } else {
           return substr($filename, strlen($pharScheme),
             $endPos - strlen($pharScheme));
         }
       }
     }
-    return "";
+    return '';
   }
 
   final public static function webPhar(
       $alias,
-      $index = "index.php",
+      $index = 'index.php',
       $f404 = null,
       $mimetypes = null,
       $rewrites = null) {
     // This is in the default stub, but lets ignore it for now
-  }
-
-  private static function bytesToInt($str, &$pos, $len) {
-    if (strlen($str) < $pos + $len) {
-      throw new PharException(
-        "Corrupt phar, can't read $len bytes starting at offset $pos"
-      );
-    }
-    $int = 0;
-    for ($i = 0; $i < $len; ++$i) {
-      $int |= ord($str[$pos++]) << (8*$i);
-    }
-    return $int;
-  }
-
-  private static function substr($str, &$pos, $len) {
-    $ret = substr($str, $pos, $len);
-    $pos += $len;
-    return $ret;
-  }
-
-  private function parsePhar($data, &$pos) {
-    $start = $pos;
-    $len = self::bytesToInt($data, $pos, 4);
-    $this->count = self::bytesToInt($data, $pos, 4);
-    $this->apiVersion = self::bytesToInt($data, $pos, 2);
-    $this->archiveFlags = self::bytesToInt($data, $pos, 4);
-    $alias_len = self::bytesToInt($data, $pos, 4);
-    $this->alias = self::substr($data, $pos, $alias_len);
-    $metadata_len = self::bytesToInt($data, $pos, 4);
-    $this->metadata = unserialize(
-      self::substr($data, $pos, $metadata_len)
-    );
-    $this->parseFileInfo($data, $pos);
-    if ($pos != $start + $len + 4) {
-      throw new PharException(
-        "Malformed manifest. Expected $len bytes, got $pos"
-      );
-    }
-    foreach ($this->fileInfo as $key => $info) {
-      $this->fileOffsets[$key] = array($pos - $start, $info[2]);
-      $pos += $info[2];
-    }
-
-    // Try to see if there is a signature
-    if ($this->archiveFlags & self::SIGNATURE) {
-      if (strlen($data) < 8 || substr($data, -4) !== 'GBMB') {
-        // Not even the GBMB and the flags?
-        throw new PharException('phar has a broken signature');
-      }
-
-      $pos = strlen($data) - 8;
-      $this->signatureFlags = self::bytesToInt($data, $pos, 4);
-      switch ($this->signatureFlags) {
-        case self::MD5:
-          $digestSize = 16;
-          $digestName = 'md5';
-          break;
-        case self::SHA1:
-          $digestSize = 20;
-          $digestName = 'sha1';
-          break;
-        case self::SHA256:
-          $digestSize = 32;
-          $digestName = 'sha256';
-          break;
-        case self::SHA512:
-          $digestSize = 64;
-          $digestName = 'sha512';
-          break;
-        default:
-          throw new PharException('phar has a broken or unsupported signature');
-      }
-
-      if (strlen($data) < 8 + $digestSize) {
-        throw new PharException('phar has a broken signature');
-      }
-
-      $pos -= 4;
-      $signatureStart = $pos - $digestSize;
-      $this->signature = substr($data, $signatureStart, $digestSize);
-      $actualHash = self::verifyHash($data, $digestName, $signatureStart);
-
-      if ($actualHash !== $this->signature) {
-        throw new PharException('phar has a broken signature');
-      }
-    }
-  }
-
-  private function parseFileInfo($str, &$pos) {
-    for ($i = 0; $i < $this->count; $i++) {
-      $filename_len = self::bytesToInt($str, $pos, 4);
-      $filename = self::substr($str, $pos, $filename_len);
-      $filesize = self::bytesToInt($str, $pos, 4);
-      $timestamp = self::bytesToInt($str, $pos, 4);
-      $compressed_filesize = self::bytesToInt($str, $pos, 4);
-      $crc32 = self::bytesToInt($str, $pos, 4);
-      $flags = self::bytesToInt($str, $pos, 4);
-      $metadata_len = self::bytesToInt($str, $pos, 4);
-      $metadata = self::bytesToInt($str, $pos, $metadata_len);
-      $this->fileInfo[$filename] = array(
-        $filesize, $timestamp, $compressed_filesize, $crc32, $flags, $metadata
-      );
-    }
-  }
-
-  private static function verifyHash($str, $algorithm, $signatureOffset) {
-    return hash($algorithm, substr($str, 0, $signatureOffset), true);
   }
 
   /**
@@ -1083,7 +1040,7 @@ class Phar extends RecursiveDirectoryIterator
    */
   private static function stat($full_filename) {
     list($phar, $filename) = self::getPharAndFile($full_filename);
-    if (!isset($phar->fileInfo[$filename])) {
+    if (!$phar->offsetExists($filename)) {
       $dir = self::opendir($full_filename);
       if (!$dir) {
         return false;
@@ -1098,12 +1055,12 @@ class Phar extends RecursiveDirectoryIterator
       );
     }
 
-    $info = $phar->fileInfo[$filename];
+    $info = $phar->offsetGet($filename);
     return array(
-      'size' => $info[0],
-      'atime' => $info[1],
-      'mtime' => $info[1],
-      'ctime' => $info[1],
+      'size' => $info->getSize(),
+      'atime' => $info->getTimestamp(),
+      'mtime' => $info->getTimestamp(),
+      'ctime' => $info->getTimestamp(),
       'mode' => POSIX_S_IFREG,
     );
   }
@@ -1118,7 +1075,7 @@ class Phar extends RecursiveDirectoryIterator
     $prefix = rtrim($prefix, '/');
 
     $ret = array();
-    foreach ($phar->fileInfo as $filename => $_) {
+    foreach ($phar->archiveHandler->getEntriesMap()->keys() as $filename) {
       if (!$prefix) {
         if (strpos($filename, '/') === false) {
           $ret[$filename] = true;
@@ -1146,17 +1103,22 @@ class Phar extends RecursiveDirectoryIterator
    * Used by the stream wrapper to open phar:// files.
    * Called from C++.
    */
-  private static function openPhar($full_filename) {
+  private static function openPhar(string $full_filename): resource {
     list($phar, $filename) = self::getPharAndFile($full_filename);
     return $phar->getFileData($filename);
   }
 
-  private function getFileData($filename) {
-    if (!isset($this->fileOffsets[$filename])) {
+  private function getFileData(string $filename): resource {
+    if ($filename !== '') {
+      $stream = $this->archiveHandler->getStream($filename);
+    } else if ($stub = $this->getStub()) {
+      $stream = fopen('php://temp', 'w+b');
+      fwrite($stream, $stub);
+      rewind($stream);
+    } else {
       throw new PharException("No $filename in phar");
     }
-    $offsets = $this->fileOffsets[$filename];
-    return substr($this->contents, $offsets[0], $offsets[1]);
+    return $stream;
   }
 
   /**
@@ -1168,8 +1130,17 @@ class Phar extends RecursiveDirectoryIterator
    *
    *   array([Phar object for alias], 'rest/of/path.php')
    */
-  private static function getPharAndFile($filename_or_alias) {
-    if (strncmp($filename_or_alias, 'phar://', 7)) {
+  private static function getPharAndFile(string $filename_or_alias) {
+    /**
+     * TODO: This is a hack, during `include 'phar:///path/to.phar';`
+     * `self::stat()` calls this method with `$filename_or_alias` that have
+     * double `phar://phar://` prefix; I have no idea why, but we can fix it
+     * here for now
+     */
+    if (strpos($filename_or_alias, 'phar://phar://') === 0) {
+      $filename_or_alias = substr($filename_or_alias, 7);
+    }
+    if (strpos($filename_or_alias, 'phar://') !== 0) {
       throw new PharException("Not a phar: $filename_or_alias");
     }
 
@@ -1189,11 +1160,7 @@ class Phar extends RecursiveDirectoryIterator
       if (is_file($filename)) {
 
         if (!isset(self::$aliases[$filename])) {
-          // We need this hack because the stream wrapper should work
-          // even without the __HALT_COMPILER token
-          self::$preventHaltTokenCheck = true;
           self::loadPhar($filename);
-          self::$preventHaltTokenCheck = false;
         }
 
         return array(
@@ -1206,7 +1173,10 @@ class Phar extends RecursiveDirectoryIterator
     throw new PharException("Not a phar: $filename_or_alias");
   }
 
-  protected function getIteratorFromList(string $root, array $list) {
+  protected function getIteratorFromList(
+    string $root,
+    array<string, PharFileInfo> $list,
+  ) {
     $tree = array();
     foreach ($list as $filename => $info) {
       $dir = dirname($filename);
@@ -1233,10 +1203,12 @@ class Phar extends RecursiveDirectoryIterator
     if ($this->iterator !== null) {
       return $this->iterator;
     }
-    $filenames = array_keys($this->fileInfo);
-    $info = array();
-    foreach ($filenames as $filename) {
-      $info[$filename] = $this->offsetGet($filename);
+    $info = [];
+    foreach ($this->archiveHandler->getEntriesMap() as $filename => $entry) {
+      $info[$filename] = new PharFileInfo(
+        $this->iteratorRoot.$filename,
+        $entry
+      );
     }
     $this->iterator = $this->getIteratorFromList($this->iteratorRoot, $info);
     return $this->iterator;
@@ -1268,5 +1240,13 @@ class Phar extends RecursiveDirectoryIterator
 
   public function getChildren() {
     return $this->getIterator()->getChildren();
+  }
+
+  protected static function assertWriteSupport() {
+    if (ini_get('phar.readonly') != 0) {
+      throw new UnexpectedValueException(
+        'Cannot write out phar archive, phar is read-only'
+      );
+    }
   }
 }

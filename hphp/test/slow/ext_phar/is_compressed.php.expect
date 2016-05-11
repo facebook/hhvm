@@ -1,0 +1,35 @@
+.phar:
+bool(false)
+
+.phar:
+bool(false)
+
+.phar.gz:
+int(4096)
+
+.phar.bz2:
+int(8192)
+
+.phar.tar:
+bool(false)
+
+.phar.tar.gz:
+int(4096)
+
+.phar.tar.bz2:
+int(8192)
+
+.phar.zip:
+bool(false)
+
+.phar (which is .phar.tar):
+bool(false)
+
+.phar (which is .phar.tar.gz):
+int(4096)
+
+.phar (which is .phar.tar.bz2):
+int(8192)
+
+.phar (which is .phar.zip):
+bool(false)

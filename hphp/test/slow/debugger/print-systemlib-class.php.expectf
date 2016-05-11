@@ -7,9 +7,9 @@ stdClass Object
 =new __SystemLib\TarArchiveHandler('/dev/null');
 __SystemLib\TarArchiveHandler Object
 (
-    [entries":"__SystemLib\TarArchiveHandler":private] => HH\Map Object
+    [contents":"__SystemLib\TarArchiveHandler":private] => HH\Map Object
         (
         )
 
-    [contents":"__SystemLib\TarArchiveHandler":private] => HH\Map Ob
+    [symlinks":"__SystemLib\TarArchiveHandler":private] => HH\Map O
 There are more characters. Continue? [y/N]quit

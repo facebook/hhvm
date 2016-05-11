@@ -1,1 +1,24 @@
+.phar:
+Hello World
+.phar with phar:// prefix:
+Hello World
+.phar.gz with phar:// prefix:
+Hello World
+.phar.bz2 with phar:// prefix:
+Hello World
+.phar.tar with phar:// prefix:
+Hello World
+.phar.tar.gz with phar:// prefix:
+Hello World
+.phar.tar.bz2 with phar:// prefix:
+Hello World
+.phar.zip with phar:// prefix:
+Hello World
+.phar (which is .phar.tar) with phar:// prefix:
+Hello World
+.phar (which is .phar.tar.gz) with phar:// prefix:
+Hello World
+.phar (which is .phar.tar.bz2) with phar:// prefix:
+Hello World
+.phar (which is .phar.zip) with phar:// prefix:
 Hello World

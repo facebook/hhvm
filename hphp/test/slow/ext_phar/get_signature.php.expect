@@ -1,0 +1,55 @@
+.phar:
+array(2) {
+  ["hash"]=>
+  string(40) "b9232afb6428fbfc2856cc74d35b84a1a37b960a"
+  ["hash_type"]=>
+  string(5) "SHA-1"
+}
+
+.phar:
+array(2) {
+  ["hash"]=>
+  string(40) "b9232afb6428fbfc2856cc74d35b84a1a37b960a"
+  ["hash_type"]=>
+  string(5) "SHA-1"
+}
+
+.phar.gz:
+array(2) {
+  ["hash"]=>
+  string(40) "c1e20e0b4f1aab244f7455b39025a09e01c919cc"
+  ["hash_type"]=>
+  string(5) "SHA-1"
+}
+
+.phar.bz2:
+array(2) {
+  ["hash"]=>
+  string(40) "b946f87e2d2fd37eabf53d78978111dc70cba212"
+  ["hash_type"]=>
+  string(5) "SHA-1"
+}
+
+.phar.tar:
+NULL
+
+.phar.tar.gz:
+NULL
+
+.phar.tar.bz2:
+NULL
+
+.phar.zip:
+NULL
+
+.phar (which is .phar.tar):
+NULL
+
+.phar (which is .phar.tar.gz):
+NULL
+
+.phar (which is .phar.tar.bz2):
+NULL
+
+.phar (which is .phar.zip):
+NULL

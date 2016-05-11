@@ -469,7 +469,7 @@ class CommonTests(object):
             '[{{"kind":"function","name":"bar","position":{{"filename":"",'
             '"line":1,"char_start":15,"char_end":17}},"span":'
             '{{"filename":"","line_start":1,"char_start":6,"line_end":1,'
-            '"char_end":22}},"modifiers":[],"children":[],"params":[]}}]',
+            '"char_end":22}},"modifiers":[],"params":[]}}]',
             ],
             options=['--ide-outline'],
             stdin='<?hh function bar() {}')

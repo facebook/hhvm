@@ -96,7 +96,7 @@ let get_local_var_def ast name p =
       pos = span;
       span;
       modifiers = [];
-      children = [];
+      children = None;
       params = None;
     }
   end

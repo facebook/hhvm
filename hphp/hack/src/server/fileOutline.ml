@@ -32,7 +32,7 @@ let summarize_property kinds var =
     pos;
     span;
     modifiers;
-    children = [];
+    children = None;
     params = None;
   }
 
@@ -44,7 +44,7 @@ let summarize_const ((pos, name), (expr_pos, _)) =
     pos;
     span;
     modifiers = [];
-    children = [];
+    children = None;
     params = None;
   }
 
@@ -55,7 +55,7 @@ let summarize_abs_const (pos, name) =
     pos = pos;
     span = pos;
     modifiers = [Abstract];
-    children = [];
+    children = None;
     params = None;
   }
 
@@ -71,7 +71,7 @@ let summarize_typeconst t =
     pos;
     span = t.Ast.tconst_span;
     modifiers = if t.Ast.tconst_abstract then [Abstract] else [];
-    children = [];
+    children = None;
     params = None;
   }
 
@@ -86,7 +86,7 @@ let summarize_param param =
     name;
     pos;
     span = Pos.btw param_start param_end;
-    children = [];
+    children = None;
     modifiers;
     params = None;
   }
@@ -101,7 +101,7 @@ let summarize_method m =
     pos = (fst m.Ast.m_name);
     span = m.Ast.m_span;
     modifiers;
-    children = [];
+    children = None;
     params;
   }
 
@@ -116,7 +116,7 @@ let summarize_class class_ ~no_children =
     | Ast.Cabstract -> Abstract :: modifiers
     | _ -> modifiers
   in
-  let children = if no_children then [] else List.concat
+  let children = if no_children then None else Some (List.concat
     (List.map class_.Ast.c_body ~f:begin function
     | Ast.Method m -> [summarize_method m]
     | Ast.ClassVars (kinds, _, vars) ->
@@ -126,7 +126,7 @@ let summarize_class class_ ~no_children =
     | Ast.AbsConst (_, id) -> [summarize_abs_const id]
     | Ast.TypeConst t -> [summarize_typeconst t]
     | _ -> []
-    end)
+    end))
   in
   let kind = match class_.Ast.c_kind with
     | Ast.Cinterface -> Interface
@@ -153,7 +153,7 @@ let summarize_fun f =
     pos = fst f.Ast.f_name;
     span = f.Ast.f_span;
     modifiers;
-    children = [];
+    children = None;
     params;
   }
 
@@ -186,7 +186,9 @@ let to_json_legacy input =
      | Function -> (def.pos, def.name, "function") :: acc
      | Class | Enum | Interface | Trait ->
          let acc = (def.pos, def.name, "class") :: acc in
-         to_legacy (prefix ^ def.name ^ "::") acc def.children
+         Option.value_map def.children
+          ~f:(to_legacy (prefix ^ def.name ^ "::") acc)
+          ~default:acc
      | Method ->
        let desc =
          if List.mem def.modifiers Static
@@ -221,8 +223,10 @@ let to_json_legacy input =
        "modifiers", Hh_json.JSON_Array
          (List.map def.modifiers
            (fun x -> Hh_json.JSON_String (string_of_modifier x)));
-       "children", (to_json def.children)
      ] @
+     (Option.value_map def.children
+       ~f:(fun x -> [("children", to_json x)]) ~default:[])
+       @
      (Option.value_map def.params
        ~f:(fun x -> [("params", to_json x)]) ~default:[]))
      end
@@ -243,7 +247,9 @@ let to_json_legacy input =
        print (indent ^ "    ") x;
      );
      Printf.printf "\n";
-     print (indent ^ "  ") def.children
+     Option.iter def.children (fun x ->
+       print (indent ^ "  ") x
+     );
    end
 
  let print  = print ""

@@ -33,6 +33,7 @@ let summarize_property kinds var =
     span;
     modifiers;
     children = [];
+    params = None;
   }
 
 let summarize_const ((pos, name), (expr_pos, _)) =
@@ -44,6 +45,7 @@ let summarize_const ((pos, name), (expr_pos, _)) =
     span;
     modifiers = [];
     children = [];
+    params = None;
   }
 
 let summarize_abs_const (pos, name) =
@@ -54,6 +56,7 @@ let summarize_abs_const (pos, name) =
     span = pos;
     modifiers = [Abstract];
     children = [];
+    params = None;
   }
 
 let modifier_of_fun_kind acc = function
@@ -69,11 +72,29 @@ let summarize_typeconst t =
     span = t.Ast.tconst_span;
     modifiers = if t.Ast.tconst_abstract then [Abstract] else [];
     children = [];
+    params = None;
+  }
+
+let summarize_param param =
+  let pos, name = param.Ast.param_id in
+  let param_start = Option.value_map param.Ast.param_hint ~f:fst ~default:pos in
+  let param_end = Option.value_map param.Ast.param_expr ~f:fst ~default:pos in
+  let modifiers =
+    modifiers_of_ast_kinds (Option.to_list param.Ast.param_modifier) in
+  {
+    kind = Param;
+    name;
+    pos;
+    span = Pos.btw param_start param_end;
+    children = [];
+    modifiers;
+    params = None;
   }
 
 let summarize_method m =
   let modifiers = modifier_of_fun_kind [] m.Ast.m_fun_kind in
   let modifiers = (modifiers_of_ast_kinds m.Ast.m_kind) @ modifiers in
+  let params = Some (List.map m.Ast.m_params summarize_param) in
   {
     kind = Method;
     name = snd m.Ast.m_name;
@@ -81,6 +102,7 @@ let summarize_method m =
     span = m.Ast.m_span;
     modifiers;
     children = [];
+    params;
   }
 
 let summarize_class class_ ~no_children =
@@ -119,17 +141,20 @@ let summarize_class class_ ~no_children =
     span = c_span;
     modifiers;
     children;
+    params = None;
   }
 
 let summarize_fun f =
   let modifiers = modifier_of_fun_kind [] f.Ast.f_fun_kind in
+  let params = Some (List.map f.Ast.f_params summarize_param) in
   {
     kind = Function;
     name = Utils.strip_ns (snd f.Ast.f_name);
     pos = fst f.Ast.f_name;
     span = f.Ast.f_span;
     modifiers;
-    children = []
+    children = [];
+    params;
   }
 
 let outline_ast ast =
@@ -168,6 +193,7 @@ let to_json_legacy input =
          then "static method" else "method"
        in
        (def.pos, prefix ^ def.name, desc) :: acc
+     | Param
      | Typeconst
      | LocalVar
      | Property
@@ -187,7 +213,7 @@ let to_json_legacy input =
 
  let rec to_json outline =
    Hh_json.JSON_Array begin
-     List.map outline ~f:begin fun def -> Hh_json.JSON_Object [
+     List.map outline ~f:begin fun def -> Hh_json.JSON_Object ([
        "kind", Hh_json.JSON_String (string_of_kind def.kind);
        "name", Hh_json.JSON_String def.name;
        "position", Pos.json def.pos;
@@ -196,7 +222,10 @@ let to_json_legacy input =
          (List.map def.modifiers
            (fun x -> Hh_json.JSON_String (string_of_modifier x)));
        "children", (to_json def.children)
-     ] end
+     ] @
+     (Option.value_map def.params
+       ~f:(fun x -> [("params", to_json x)]) ~default:[]))
+     end
    end
 
  let rec print indent defs  =
@@ -208,7 +237,12 @@ let to_json_legacy input =
      Printf.printf "%s  modifiers: " indent;
      List.iter def.modifiers
        (fun x -> Printf.printf "%s " (string_of_modifier x));
-       Printf.printf "\n\n";
+       Printf.printf "\n";
+     Option.iter def.params (fun x ->
+       Printf.printf "%s  params:\n" indent;
+       print (indent ^ "    ") x;
+     );
+     Printf.printf "\n";
      print (indent ^ "  ") def.children
    end
 

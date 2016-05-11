@@ -21,6 +21,7 @@ type kind =
   | Trait
   | LocalVar
   | Typeconst
+  | Param
 
 and modifier =
   | Final
@@ -38,6 +39,7 @@ and 'a t = {
   span : 'a Pos.pos;
   modifiers : modifier list;
   children : 'a t list;
+  params : 'a t list option;
 }
 
 let rec to_absolute x = {
@@ -47,6 +49,7 @@ let rec to_absolute x = {
   span = Pos.to_absolute x.span;
   modifiers = x.modifiers;
   children = List.map x.children to_absolute;
+  params = Option.map x.params (fun x -> List.map x to_absolute);
 }
 
 let string_of_kind = function
@@ -60,6 +63,7 @@ let string_of_kind = function
   | Trait -> "trait"
   | Typeconst -> "typeconst"
   | LocalVar -> "local"
+  | Param -> "param"
 
 let string_of_modifier = function
   | Final -> "final"

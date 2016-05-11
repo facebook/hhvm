@@ -3,4 +3,5 @@ foo
   position: File "", line 4, characters 10-12:
   span: File "", line 3, character 1 - line 7, character 1:
   modifiers: 
+  params:
 

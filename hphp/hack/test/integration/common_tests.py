@@ -431,7 +431,7 @@ class CommonTests(object):
             options=['--identify-function', '1:51'],
             stdin='<?hh class Foo { private function bar() { $this->bar() }}')
 
-    def test_nuclide_get_definition(self):
+    def test_ide_get_definition(self):
         """
         Test hh_client --ide-get-definition
         """
@@ -472,6 +472,30 @@ class CommonTests(object):
             ],
             options=['--ide-outline'],
             stdin='<?hh function bar() {}')
+
+    def test_ide_get_definition_multi_file(self):
+        """
+        Test hh_client --ide-get-definition when definition we look for is
+        in file different from input file
+        """
+        self.write_load_config()
+
+        self.check_cmd_and_json_cmd([
+            'Name: \\ClassToBeIdentified::methodToBeIdentified, type: method, '
+            'position: line 1, characters 45-64, defined: line 4, '
+            'characters 26-45, definition span: line 4, character 26 - line 4, '
+            'character 45'
+            ], [
+            '{{"name":"\\\\ClassToBeIdentified::methodToBeIdentified",'
+            '"result_type":"method","pos":{{"filename":"","line":1,'
+            '"char_start":45,"char_end":64}},"definition_pos":'
+            '{{"filename":"{root}foo_5.php","line":4,"char_start":26,'
+            '"char_end":45}},"definition_span":{{"filename":"{root}foo_5.php",'
+            '"line_start":4,"char_start":3,"line_end":4,"char_end":50}}}}'
+            ],
+            options=['--ide-get-definition', '1:50'],
+            stdin='<?hh function test() { '
+                  'ClassToBeIdentified::methodToBeIdentified () }')
 
     def test_get_method_name(self):
         """

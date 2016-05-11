@@ -84,11 +84,9 @@ void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
 void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
 
 /*
- * Store `loc', the registers representing `src', to `dst'. `dstType` will be
- * used to determine if the type tag store can be skipped.
+ * Store `loc', the registers representing `src', to `dst'.
  */
-void storeTV(Vout& v, Vloc loc, const SSATmp* src,
-             Vptr dst, Type dstType = TStkElem);
+void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src);
 
 /*
  * Load `src' into `loc', the registers representing `dst'.

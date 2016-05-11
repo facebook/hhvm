@@ -1844,16 +1844,14 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
 
 void CodeGenerator::cgStMem(IRInstruction* inst) {
   auto const ptr = srcLoc(inst, 0).reg();
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1),
-          ptr[0], inst->src(0)->type().deref());
+  storeTV(vmain(), ptr[0], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgStRef(IRInstruction* inst) {
   always_assert(!srcLoc(inst, 1).isFullSIMD());
   auto ptr = srcLoc(inst, 0).reg();
   auto off = RefData::tvOffset();
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1),
-          ptr[off], inst->src(0)->type().inner());
+  storeTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
 }
 
 int CodeGenerator::iterOffset(const BCMarker& marker, uint32_t id) {
@@ -1864,7 +1862,7 @@ int CodeGenerator::iterOffset(const BCMarker& marker, uint32_t id) {
 void CodeGenerator::cgStLoc(IRInstruction* inst) {
   auto ptr = srcLoc(inst, 0).reg();
   auto off = localOffset(inst->extra<StLoc>()->locId);
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), ptr[off]);
+  storeTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgStLocRange(IRInstruction* inst) {
@@ -1889,7 +1887,7 @@ void CodeGenerator::cgStLocRange(IRInstruction* inst) {
       auto const res = out[0];
       auto const sf = v.makeReg();
 
-      storeTV(v, loc, val, i[0]);
+      storeTV(v, i[0], loc, val);
       v << subqi{int32_t{sizeof(Cell)}, i, res, v.makeReg()};
       v << cmpq{res, nreg, sf};
       return sf;
@@ -2414,7 +2412,7 @@ void CodeGenerator::cgSyncReturnBC(IRInstruction* inst) {
 void CodeGenerator::cgStClosureArg(IRInstruction* inst) {
   auto const ptr = srcLoc(inst, 0).reg();
   auto const off = inst->extra<StClosureArg>()->offsetBytes;
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), ptr[off]);
+  storeTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgLdClosureCtx(IRInstruction* inst) {
@@ -2954,7 +2952,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 void CodeGenerator::cgStStk(IRInstruction* inst) {
   auto const spReg = srcLoc(inst, 0).reg();
   auto const offset = cellsToBytes(inst->extra<StStk>()->offset.offset);
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), spReg[offset]);
+  storeTV(vmain(), spReg[offset], srcLoc(inst, 1), inst->src(1));
 }
 
 // Fill the entire 16-byte space for a TypedValue with trash.  Note: it will
@@ -3123,7 +3121,7 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   // We are storing the rdSrc value into the static, but we don't need
   // to inc ref it because it's a bytecode invariant that it's not a
   // reference counted type.
-  storeTV(v, srcLoc(inst, 1), inst->src(1), rdSrc[RefData::tvOffset()]);
+  storeTV(v, rdSrc[RefData::tvOffset()], srcLoc(inst, 1), inst->src(1));
   v << inclm{rdSrc[FAST_REFCOUNT_OFFSET], v.makeReg()};
   v << storebi{uint8_t(HeaderKind::Ref), rdSrc[HeaderKindOffset]};
   static_assert(sizeof(HeaderKind) == 1, "");
@@ -3394,9 +3392,9 @@ void CodeGenerator::cgStElem(IRInstruction* inst) {
   auto val = inst->src(2);
 
   if (idx->hasConstVal() && deltaFits(idx->intVal(), sz::dword)) {
-    storeTV(vmain(), srcLoc(inst, 2), val, baseReg[idx->intVal()]);
+    storeTV(vmain(), baseReg[idx->intVal()], srcLoc(inst, 2), val);
   } else {
-    storeTV(vmain(), srcLoc(inst, 2), val, baseReg[idxReg]);
+    storeTV(vmain(), baseReg[idxReg], srcLoc(inst, 2), val);
   }
 }
 
@@ -3434,7 +3432,7 @@ void CodeGenerator::cgLdLocPseudoMain(IRInstruction* inst) {
 void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
   auto ptr = srcLoc(inst, 0).reg();
   auto off = localOffset(inst->extra<StLocPseudoMain>()->locId);
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), ptr[off]);
+  storeTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgLdStkAddr(IRInstruction* inst) {
@@ -4554,7 +4552,7 @@ void CodeGenerator::cgStContArValue(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   const int64_t valueOff = GENDATAOFF(m_value);
   const int64_t off = valueOff - Generator::arOff();
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), contArReg[off]);
+  storeTV(vmain(), contArReg[off], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgLdContArKey(IRInstruction* inst) {
@@ -4568,7 +4566,7 @@ void CodeGenerator::cgStContArKey(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   const int64_t keyOff = GENDATAOFF(m_key);
   const int64_t off = keyOff - Generator::arOff();
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), contArReg[off]);
+  storeTV(vmain(), contArReg[off], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgStAsyncArSucceeded(IRInstruction* inst) {
@@ -4646,7 +4644,7 @@ void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
   auto asyncArReg = srcLoc(inst, 0).reg();
   const int64_t off = c_AsyncFunctionWaitHandle::resultOff()
                     - c_AsyncFunctionWaitHandle::arOff();
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), asyncArReg[off]);
+  storeTV(vmain(), asyncArReg[off], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgLdAsyncArParentChain(IRInstruction* inst) {
@@ -5276,7 +5274,7 @@ void CodeGenerator::cgInitPackedArray(IRInstruction* inst) {
   auto const index = inst->extra<InitPackedArray>()->index;
 
   auto slotOffset = PackedArray::entriesOffset() + index * sizeof(TypedValue);
-  storeTV(vmain(), srcLoc(inst, 1), inst->src(1), arrReg[slotOffset]);
+  storeTV(vmain(), arrReg[slotOffset], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {

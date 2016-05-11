@@ -104,8 +104,8 @@ Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src) {
-  auto const type = src->type();
+void storeTV(Vout& v, Vloc loc, const SSATmp* src, Vptr dst, Type dstType) {
+  auto const srcType = src->type();
 
   if (loc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
@@ -114,11 +114,51 @@ void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src) {
     return;
   }
 
-  if (type.needsReg()) {
-    assertx(loc.hasReg(1));
-    v << storeb{loc.reg(1), dst + TVOFF(m_type)};
-  } else {
-    v << storeb{v.cns(type.toDataType()), dst + TVOFF(m_type)};
+  auto const typePtr = dst + TVOFF(m_type);
+  auto const dataPtr = dst + TVOFF(m_data);
+
+  always_assert_flog(
+    srcType.maybe(dstType) &&
+    (!dstType.isKnownDataType() || !srcType.isKnownDataType() ||
+     Type{srcType.toDataType()} <= Type{dstType.toDataType()}),
+    "Tried to store {} over {}", srcType, dstType
+  );
+
+  // This decision is more complicated than you might expect when dstType is a
+  // string or array type. If we're storing a TStr to a TPtrToStr, we always
+  // have to store the type in case the in-memory type tag is
+  // KindOfPersistentString and the value we're storing is refcounted. It's
+  // only ok to skip the type store if we're storing TPersistentStr (because
+  // it's legal to have that with either String DataType), or if we're storing
+  // a TCountedStr to a TPtrToCountedStr, because the in-memory type has to be
+  // the more permissive KindOfString already.
+  auto const storeType = [&] {
+    if (!dstType.isKnownDataType()) return true;
+    if (!(dstType <= TStr) && !(dstType <= TArr)) return false;
+    return !(srcType <= TPersistent) &&
+      !(srcType <= TCounted && dstType <= TCounted);
+  }();
+
+  if (storeType) {
+    if (srcType.needsReg()) {
+      assertx(loc.hasReg(1));
+      v << storeb{loc.reg(1), typePtr};
+    } else {
+      v << storeb{v.cns(srcType.toDataType()), typePtr};
+    }
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    auto const dt = dstType.toDataType();
+    auto const sf = v.makeReg();
+    auto cc = CC_Z;
+    if (isStringType(dt)) {
+      emitTestTVType(v, sf, KindOfStringBit, typePtr);
+    } else if (isArrayType(dt)) {
+      emitTestTVType(v, sf, KindOfArrayBit, typePtr);
+    } else {
+      emitCmpTVType(v, sf, dt, typePtr);
+      cc = CC_NE;
+    }
+    ifThen(v, cc, sf, [&](Vout& v) { v << ud2{}; });
   }
 
   // We ignore the values of statically nullish types.
@@ -127,11 +167,11 @@ void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src) {
   // Store the value.
   if (src->hasConstVal()) {
     // Skip potential zero-extend if we know the value.
-    v << store{v.cns(src->rawVal()), dst + TVOFF(m_data)};
+    v << store{v.cns(src->rawVal()), dataPtr};
   } else {
     assertx(loc.hasReg(0));
     auto const extended = zeroExtendIfBool(v, src, loc.reg(0));
-    v << store{extended, dst + TVOFF(m_data)};
+    v << store{extended, dataPtr};
   }
 }
 

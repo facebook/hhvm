@@ -293,6 +293,22 @@ let main args =
         Cmd.rpc conn @@ Rpc.FORMAT (content, from, to_) in
       ClientFormat.go result args.output_json;
       Exit_status.No_error
+    | MODE_TRACE_AI name ->
+      let pieces = Str.split (Str.regexp "::") name in
+      let action =
+        try
+          match pieces with
+          | class_name :: method_name :: _ ->
+              Ai.TraceService.Method (class_name, method_name)
+          | method_name :: _ -> Ai.TraceService.Function method_name
+          | _ -> raise Exit
+        with _ ->
+          Printf.eprintf "Invalid input\n";
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let results = Cmd.rpc conn @@ Rpc.TRACE_AI action in
+      ClientTraceAi.go results args.output_json;
+      Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   exit_status

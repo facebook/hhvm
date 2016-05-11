@@ -38,6 +38,7 @@ type _ t =
   | KILL : unit t
   | FIND_LVAR_REFS : string * int * int -> ServerFindLocals.result t
   | FORMAT : string * int * int -> string Format_hack.return t
+  | TRACE_AI : Ai.TraceService.action -> string t
 
 let handle : type a. genv -> env -> a t -> a =
   fun genv env -> function
@@ -86,6 +87,9 @@ let handle : type a. genv -> env -> a t -> a =
         ServerFindLocals.go content line char
     | FORMAT (content, from, to_) ->
         ServerFormat.go content from to_
+    | TRACE_AI action ->
+        Ai.TraceService.go action Typing_check_utils.check_defs
+           (ServerArgs.ai_mode genv.options) env.tcopt
 
 let to_string : type a. a t -> _ = function
   | STATUS -> "STATUS"
@@ -112,6 +116,7 @@ let to_string : type a. a t -> _ = function
   | KILL -> "KILL"
   | FIND_LVAR_REFS _ -> "FIND_LVAR_REFS"
   | FORMAT _ -> "FORMAT"
+  | TRACE_AI _ -> "TRACE_AI"
 
 let to_string_with_details : type a. a t -> _ = function
   | AUTOCOMPLETE content -> content

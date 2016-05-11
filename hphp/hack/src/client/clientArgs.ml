@@ -133,6 +133,8 @@ let parse_check_args cmd =
       " (mode) list all files that make any use of the provided list of files";
     "--find-refs", Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
       " (mode) finds references of the provided method name";
+    "--trace_ai", Arg.String (fun x -> set_mode (MODE_TRACE_AI x) ()),
+       "";
     "--find-class-refs", Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
       " (mode) finds references of the provided class name";
     "--dump-symbol-info", Arg.String (fun files ->

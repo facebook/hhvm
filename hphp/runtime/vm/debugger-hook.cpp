@@ -173,7 +173,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   int active_line = req_data.getActiveLineBreak();
   int line = unit->getLineNumber(unit->offsetOf(pc));
   if (UNLIKELY(active_line != -1 && active_line != line)) {
-    req_data.setActiveLineBreak(-1);
+    req_data.clearActiveLineBreak();
   }
 
   // Check if the step in command is active. Special case builtins because they
@@ -204,10 +204,10 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   // If the current state is OUT and we are still at a stack level less than the
   // original, then we skip over the PopR opcode if it exists and then break
   // (matching hphpd).
-  if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::OUT &&
+  if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::Out &&
       req_data.getDebuggerStackDepth() < req_data.getDebuggerFlowDepth() &&
       peek_op(pc) != OpPopR)) {
-    req_data.setDebuggerStepOut(StepOutState::NONE);
+    req_data.setDebuggerStepOut(StepOutState::None);
     if (!req_data.getDebuggerNext()) {
       // Next command not active, break
       hook->onStepOutBreak(unit, line);
@@ -252,7 +252,7 @@ void phpDebuggerRequestShutdownHook() {
 // Hook called on function entry. Since function entry breakpoints are handled
 // by onOpcode, this just handles pushing the active line breakpoint
 void phpDebuggerFuncEntryHook(const ActRec* ar) {
-  RID().pushActiveLineBreak(-1);
+  RID().pushActiveLineBreak();
 }
 
 // Hook called on function exit. onOpcode handles function exit breakpoints,
@@ -264,16 +264,16 @@ void phpDebuggerFuncExitHook(const ActRec* ar) {
 
   // If the step out command is active and if our stack depth has decreased,
   // we are out of the function being stepped out of
-  if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::STEPPING &&
+  if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::Stepping &&
       req_data.getDebuggerStackDepth() < req_data.getDebuggerFlowDepth())) {
-      req_data.setDebuggerStepOut(StepOutState::OUT);
+      req_data.setDebuggerStepOut(StepOutState::Out);
   }
 }
 
 // Hook called from iopThrow to signal that we are about to throw an exception.
 void phpDebuggerExceptionThrownHook(ObjectData* exception) {
-TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
-if (UNLIKELY(g_context->m_dbgNoBreak)) {
+  TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
+  if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
@@ -339,7 +339,7 @@ void phpDebuggerContinue() {
   // Short-circuit other commands
   auto& req_data = RID();
   req_data.setDebuggerStepIn(false);
-  req_data.setDebuggerStepOut(StepOutState::NONE);
+  req_data.setDebuggerStepOut(StepOutState::None);
   req_data.setDebuggerNext(false);
 
   // Clear the flow filter
@@ -352,7 +352,7 @@ void phpDebuggerStepIn() {
   // other commands
   auto& req_data = RID();
   req_data.setDebuggerStepIn(true);
-  req_data.setDebuggerStepOut(StepOutState::NONE);
+  req_data.setDebuggerStepOut(StepOutState::None);
   req_data.setDebuggerNext(false);
 
   // Ensure the flow filter is fresh
@@ -404,7 +404,7 @@ void phpDebuggerStepOut() {
   // other commands
   auto& req_data = RID();
   req_data.setDebuggerStepIn(false);
-  req_data.setDebuggerStepOut(StepOutState::STEPPING);
+  req_data.setDebuggerStepOut(StepOutState::Stepping);
   req_data.setDebuggerNext(false);
 
   // Clear the flow filter

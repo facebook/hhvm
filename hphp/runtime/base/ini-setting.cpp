@@ -69,12 +69,12 @@ std::vector<std::string> split_brackets(const std::string& s) {
   return split_value;
 }
 
-int64_t convert_bytes_to_long(const std::string& value) {
-  if (value.size() == 0) {
+int64_t convert_bytes_to_long(folly::StringPiece value) {
+  if (value.empty()) {
     return 0;
   }
-  int64_t newInt = strtoll(value.data(), nullptr, 10);
-  char lastChar = value.data()[value.size() - 1];
+  int64_t newInt = strtoll(value.begin(), nullptr, 10);
+  auto const lastChar = value[value.size() - 1];
   if (lastChar == 'K' || lastChar == 'k') {
     newInt <<= 10;
   } else if (lastChar == 'M' || lastChar == 'm') {

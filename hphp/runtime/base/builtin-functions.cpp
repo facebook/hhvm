@@ -931,8 +931,7 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    auto const& includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.getIncludePaths();
+    auto const& includePaths = RID().getIncludePaths();
 
     for (auto const& includePath : includePaths) {
       String path("");

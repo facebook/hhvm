@@ -834,8 +834,7 @@ static String resolve_parse_ini_filename(const String& filename) {
   }
 
   // Next, see if include path was set in the ini settings.
-  auto const& includePaths =
-    ThreadInfo::s_threadInfo->m_reqInjectionData.getIncludePaths();
+  auto const& includePaths = RID().getIncludePaths();
 
   for (auto const& path : includePaths) {
     resolved = path + '/' + filename;

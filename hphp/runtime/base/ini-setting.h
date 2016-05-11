@@ -19,6 +19,8 @@
 
 #include "hphp/runtime/base/type-variant.h"
 
+#include <folly/Range.h>
+
 #include <cstdint>
 #include <functional>
 #include <set>
@@ -402,7 +404,7 @@ private:
                        bool& use_defaults, const String& array_key);
 };
 
-int64_t convert_bytes_to_long(const std::string& value);
+int64_t convert_bytes_to_long(folly::StringPiece value);
 std::string convert_long_to_bytes(int64_t value);
 
 void add_default_config_files_globbed(

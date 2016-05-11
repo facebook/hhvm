@@ -54,6 +54,7 @@ void registerNativeDataInfo(const StringData* name,
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   assert((sleep == nullptr && wakeup == nullptr) ||
          (sleep != nullptr && wakeup != nullptr));
+  assert(scan);
   NativeDataInfo info;
   info.sz = sz;
   info.odattrs = ObjectData::Attribute::HasNativeData;

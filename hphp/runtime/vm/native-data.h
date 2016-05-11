@@ -282,6 +282,7 @@ template <typename F>
 void nativeDataScan(const ObjectData* obj, F& mark) {
   ExtMarker<F> bridge(mark);
   auto ndi = obj->getVMClass()->getNativeDataInfo();
+  assert(ndi->scan);
   ndi->scan(obj, bridge);
 }
 

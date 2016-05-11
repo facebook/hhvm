@@ -517,121 +517,6 @@ BaseMap::php_differenceByKey(const Variant& it) {
   return ret;
 }
 
-template<typename TMap, bool useKey>
-ALWAYS_INLINE
-typename std::enable_if<
-  std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_map(const Variant& callback) const {
-  VMRegGuard _;
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto map = req::make<TMap>();
-  if (!m_size) return Object{std::move(map)};
-  assert(posLimit() != 0);
-  assert(hashSize() > 0);
-  assert(map->arrayData() == staticEmptyMixedArray());
-  map->m_arr = MixedArray::asMixed(MixedArray::MakeReserveMixed(cap()));
-  map->setIntLikeStrKeys(intLikeStrKeys());
-  wordcpy(map->hashTab(), hashTab(), hashSize());
-  {
-    uint32_t used = posLimit();
-    int32_t version = m_version;
-    uint32_t i = 0;
-    // When the loop below finishes or when an exception is thrown,
-    // make sure that posLimit() get set to the correct value and
-    // that m_pos gets set to point to the first element.
-    SCOPE_EXIT {
-      map->setPosLimit(i);
-      map->arrayData()->m_pos = map->nthElmPos(0);
-    };
-    constexpr int64_t argc = useKey ? 2 : 1;
-    TypedValue argv[argc];
-    for (; i < used; ++i) {
-      const Elm& e = data()[i];
-      Elm& ne = map->data()[i];
-      if (isTombstone(i)) {
-        ne.data.m_type = e.data.m_type;
-        continue;
-      }
-      TypedValue* tv = &ne.data;
-      if (useKey) {
-        if (e.hasIntKey()) {
-          argv[0].m_type = KindOfInt64;
-          argv[0].m_data.num = e.ikey;
-        } else {
-          argv[0].m_type = KindOfString;
-          argv[0].m_data.pstr = e.skey;
-        }
-      }
-      argv[argc-1] = e.data;
-      g_context->invokeFuncFew(tv, ctx, argc, argv);
-      if (UNLIKELY(version != m_version)) {
-        tvRefcountedDecRef(tv);
-        throw_collection_modified();
-      }
-      if (e.hasStrKey()) {
-        e.skey->incRefCount();
-      }
-      ne.ikey = e.ikey;
-      ne.data.hash() = e.data.hash();
-      map->incSize();
-      // Needed so that the new elements are accounted for when GC scanning.
-      map->incPosLimit();
-    }
-  }
-  return Object{std::move(map)};
-}
-
-template<typename TMap, bool useKey>
-ALWAYS_INLINE
-typename std::enable_if<
-  std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_filter(const Variant& callback) const {
-  VMRegGuard _;
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto map = req::make<TMap>();
-  if (!m_size) return Object(std::move(map));
-  map->mutate();
-  int32_t version = m_version;
-  constexpr int64_t argc = useKey ? 2 : 1;
-  TypedValue argv[argc];
-  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto e = iter_elm(pos);
-    if (useKey) {
-      if (e->hasIntKey()) {
-        argv[0].m_type = KindOfInt64;
-        argv[0].m_data.num = e->ikey;
-      } else {
-        argv[0].m_type = KindOfString;
-        argv[0].m_data.pstr = e->skey;
-      }
-    }
-    argv[argc-1] = e->data;
-    bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    if (!b) continue;
-    e = iter_elm(pos);
-    if (e->hasIntKey()) {
-      map->set(e->ikey, &e->data);
-    } else {
-      assert(e->hasStrKey());
-      map->set(e->skey, &e->data);
-    }
-  }
-  return Object(std::move(map));
-}
-
 template<bool useKey>
 Object BaseMap::php_retain(const Variant& callback) {
   CallCtx ctx;
@@ -752,43 +637,6 @@ BaseMap::php_take(const Variant& n) {
     } else {
       assert(toE.hasStrKey());
       map->updateIntLikeStrKeys(toE.skey);
-    }
-  }
-  return Object{std::move(map)};
-}
-
-template<class TMap>
-ALWAYS_INLINE
-typename std::enable_if<
-  std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_takeWhile(const Variant& fn) {
-  CallCtx ctx;
-  vm_decode_function(fn, nullptr, false, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto map = req::make<TMap>();
-  if (!m_size) return Object{std::move(map)};
-  int32_t version UNUSED;
-  if (std::is_same<c_Map, TMap>::value) {
-    version = m_version;
-  }
-  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto e = iter_elm(pos);
-    bool b = invokeAndCastToBool(ctx, 1, &e->data);
-    if (std::is_same<c_Map, TMap>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
-    if (!b) break;
-    e = iter_elm(pos);
-    if (e->hasIntKey()) {
-      map->set(e->ikey, &e->data);
-    } else {
-      assert(e->hasStrKey());
-      map->set(e->skey, &e->data);
     }
   }
   return Object{std::move(map)};
@@ -1108,24 +956,6 @@ void CollectionsExtension::initMap() {
 
 #undef BASE_ME
 
-  auto const m     = &BaseMap::php_map<c_Map,    false>;
-  auto const mk    = &BaseMap::php_map<c_Map,    true>;
-  auto const immm  = &BaseMap::php_map<c_ImmMap, false>;
-  auto const immmk = &BaseMap::php_map<c_ImmMap, true>;
-  HHVM_NAMED_ME(HH\\Map,    map,        m);
-  HHVM_NAMED_ME(HH\\Map,    mapWithKey, mk);
-  HHVM_NAMED_ME(HH\\ImmMap, map,        immm);
-  HHVM_NAMED_ME(HH\\ImmMap, mapWithKey, immmk);
-
-  auto const f     = &BaseMap::php_filter<c_Map,    false>;
-  auto const fk    = &BaseMap::php_filter<c_Map,    true>;
-  auto const immf  = &BaseMap::php_filter<c_ImmMap, false>;
-  auto const immfk = &BaseMap::php_filter<c_ImmMap, true>;
-  HHVM_NAMED_ME(HH\\Map,    filter,        f);
-  HHVM_NAMED_ME(HH\\Map,    filterWithKey, fk);
-  HHVM_NAMED_ME(HH\\ImmMap, filter,        immf);
-  HHVM_NAMED_ME(HH\\ImmMap, filterWithKey, immfk);
-
 #define TMPL_ME(mn, col) \
   HHVM_NAMED_ME(HH\\Map,    mn, &BaseMap::php_##mn<c_##col>); \
   HHVM_NAMED_ME(HH\\ImmMap, mn, &BaseMap::php_##mn<c_Imm##col>);
@@ -1134,7 +964,6 @@ void CollectionsExtension::initMap() {
   TMPL_ME(skip,            Map);
   TMPL_ME(skipWhile,       Map);
   TMPL_ME(take,            Map);
-  TMPL_ME(takeWhile,       Map);
   TMPL_ME(zip,             Map);
   TMPL_ME(keys,            Vector);
   TMPL_ME(values,          Vector);

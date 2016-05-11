@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -x
+
+self=$(which $0)
+dir=$(dirname $self)
+
+php "$dir/ext_collections-map.tmpl" > "$dir/ext_collections-map.php"

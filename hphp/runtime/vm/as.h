@@ -35,7 +35,14 @@ struct MD5;
 UnitEmitter* assemble_string(const char* code, int codeLen,
                              const char* filename, const MD5&);
 
-bool assemble_expression(UnitEmitter&, FuncEmitter*, int, const std::string&);
+enum class AsmResult {
+  NoResult,
+  ValuePushed,
+  Unreachable
+};
+
+AsmResult assemble_expression(UnitEmitter&, FuncEmitter*, int,
+                              const std::string&);
 
 //////////////////////////////////////////////////////////////////////
 

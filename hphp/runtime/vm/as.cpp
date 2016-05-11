@@ -2415,7 +2415,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   return ue.release();
 }
 
-bool assemble_expression(UnitEmitter& ue, FuncEmitter* fe,
+AsmResult assemble_expression(UnitEmitter& ue, FuncEmitter* fe,
                          int incomingStackDepth,
                          const std::string& expr) {
   std::stringstream sstr(expr + '}');
@@ -2428,24 +2428,24 @@ bool assemble_expression(UnitEmitter& ue, FuncEmitter* fe,
   if (as.maxUnnamed >= 0) {
     as.error("Unnamed locals are not allowed in inline assembly");
   }
-  if (as.currentStackDepth) {
-    // If we fall off the end of the inline assembly, we're
-    // expected to leave a single value on the stack.
-    if (!as.currentStackDepth->baseValue) {
-      as.error("Unknown stack offset on exit from inline assembly");
-    }
-    auto curStackDepth = as.currentStackDepth->absoluteDepth();
-    if (curStackDepth == incomingStackDepth + 1) {
-      return true;
-    }
-    if (curStackDepth != incomingStackDepth) {
-      as.error("Inline assembly expressions should leave the stack unchanged, "
-               "or push exactly one cell onto the stack.");
-    }
+
+  if (!as.currentStackDepth) return AsmResult::Unreachable;
+
+  // If we fall off the end of the inline assembly, we're expected to
+  // leave a single value on the stack, or leave the stack unchanged.
+  if (!as.currentStackDepth->baseValue) {
+    as.error("Unknown stack offset on exit from inline assembly");
+  }
+  auto curStackDepth = as.currentStackDepth->absoluteDepth();
+  if (curStackDepth == incomingStackDepth + 1) {
+    return AsmResult::ValuePushed;
+  }
+  if (curStackDepth != incomingStackDepth) {
+    as.error("Inline assembly expressions should leave the stack unchanged, "
+             "or push exactly one cell onto the stack.");
   }
 
-  // indicate that we didn't push a value onto the stack
-  return false;
+  return AsmResult::NoResult;
 }
 
 //////////////////////////////////////////////////////////////////////

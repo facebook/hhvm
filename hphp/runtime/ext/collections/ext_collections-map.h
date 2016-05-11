@@ -215,16 +215,6 @@ struct BaseMap : HashCollection {
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_differenceByKey(const Variant& it);
 
-  template<class TMap, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_map(const Variant& callback) const;
-
-  template<class TMap, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_filter(const Variant& callback) const;
-
   template<bool useKey>
   Object php_retain(const Variant& callback);
 
@@ -237,11 +227,6 @@ struct BaseMap : HashCollection {
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_take(const Variant& n);
-
-  template<class TMap>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_takeWhile(const Variant& fn);
 
   template<class TMap>
   typename std::enable_if<

@@ -3047,7 +3047,17 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     auto s = static_pointer_cast<Statement>(node);
     auto es = static_pointer_cast<ExpStatement>(s);
     if (visit(es->getExpression())) {
-      emitPop(e);
+      // reachability tracking isn't very sophisticated; emitting a pop
+      // when we're unreachable will make the emitter think the next
+      // position is reachable.
+      // In that case, it will spit out Null;RetC at the end of the
+      // function, which can cause issues if an asm expression has
+      // already output fault funclets.
+      if (currentPositionIsReachable()) {
+        emitPop(e);
+      } else {
+        popEvalStack(StackSym::C);
+      }
     }
     return false;
   }
@@ -5292,12 +5302,24 @@ bool EmitterVisitor::emitInlineHHAS(Emitter& e, SimpleFunctionCallPtr func) {
   }
 
   try {
-    if (assemble_expression(m_ue, m_curFunc,
-                            m_evalStack.size() + m_evalStack.fdescSize(),
-                            v.toString().toCppString())) {
-      pushEvalStack(StackSym::C);
-    } else {
-      e.Null();
+    auto result =
+      assemble_expression(m_ue, m_curFunc,
+                          m_evalStack.size() + m_evalStack.fdescSize(),
+                          v.toString().toCppString());
+    switch (result) {
+      case AsmResult::NoResult:
+        e.Null();
+        break;
+      case AsmResult::ValuePushed:
+        pushEvalStack(StackSym::C);
+        break;
+      case AsmResult::Unreachable:
+        // PrevOpcode is only used to determine whether the current position
+        // is reachable. Arbitrarily set it to Jmp to ensure that the emitter
+        // knows the current position is not reachable
+        setPrevOpcode(Op::Jmp);
+        pushEvalStack(StackSym::C);
+        break;
     }
   } catch (const std::exception& ex) {
     throw IncludeTimeFatalException(func, ex.what());

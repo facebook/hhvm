@@ -1,2 +1,0 @@
-Warning: Attempting to use connection pooling without specifying an existent connection pool! %s
-string(7) "foo.com"

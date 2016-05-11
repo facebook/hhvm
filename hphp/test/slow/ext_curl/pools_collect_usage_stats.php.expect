@@ -1,0 +1,17 @@
+array(3) {
+  ["fetches"]=>
+  int(1)
+  ["empty"]=>
+  int(0)
+  ["fetchMs"]=>
+  int(0)
+}
+Timeout reached waiting for an available pooled curl connection!
+array(3) {
+  ["fetches"]=>
+  int(2)
+  ["empty"]=>
+  int(1)
+  ["fetchMs"]=>
+  int(10)
+}

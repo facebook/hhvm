@@ -43,12 +43,14 @@ void PooledCurlHandle::resetHandle() {
 /////////////////////////////////////////////////////////////////////////////
 // CurlHandlePool
 
-CurlHandlePool::CurlHandlePool(int poolSize,
-                               int waitTimeout,
-                               int numConnReuses)
-: m_waitTimeout(waitTimeout) {
-  for (int i = 0; i < poolSize; i++) {
-    m_handleStack.push(new PooledCurlHandle(numConnReuses));
+CurlHandlePool::CurlHandlePool(int size,
+                               int connGetTimeout,
+                               int reuseLimit)
+: m_size(size),
+  m_connGetTimeout(connGetTimeout),
+  m_reuseLimit(reuseLimit) {
+  for (int i = 0; i < size; i++) {
+    m_handleStack.push(new PooledCurlHandle(reuseLimit));
   }
   pthread_cond_init(&m_cond, nullptr);
 }
@@ -63,23 +65,35 @@ CurlHandlePool::~CurlHandlePool() {
 }
 
 PooledCurlHandle* CurlHandlePool::fetch() {
-  Lock lock(m_mutex);
-
-  // wait until the user-specified timeout for an available handle
   struct timespec ts;
   gettime(CLOCK_REALTIME, &ts);
-  ts.tv_sec += m_waitTimeout / 1000;
-  ts.tv_nsec += 1000000 * (m_waitTimeout % 1000);
-  while (m_handleStack.empty()) {
-    if (ETIMEDOUT == pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(), &ts)) {
-      SystemLib::throwRuntimeExceptionObject(
-        "Timeout reached waiting for an available pooled curl connection!");
-    }
+  ts.tv_sec += m_connGetTimeout / 1000;
+  ts.tv_nsec += 1000000 * (m_connGetTimeout % 1000);
+
+  Lock lock(m_mutex);
+  m_statsFetches += 1;
+  // wait until the user-specified timeout for an available handle
+  if (m_handleStack.empty()) {
+    m_statsEmpty += 1;
+    do {
+      if (ETIMEDOUT == pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(),
+                                              &ts)
+      ) {
+        m_statsFetchUs += m_connGetTimeout * 1000;
+        SystemLib::throwRuntimeExceptionObject(
+          "Timeout reached waiting for an available pooled curl connection!");
+      }
+    } while (m_handleStack.empty());
   }
 
   PooledCurlHandle* ret = m_handleStack.top();
   assertx(ret);
   m_handleStack.pop();
+
+  struct timespec after;
+  gettime(CLOCK_REALTIME, &after);
+  m_statsFetchUs += m_connGetTimeout * 1000 - gettime_diff_us(after, ts);
+
   return ret;
 }
 
@@ -90,7 +104,8 @@ void CurlHandlePool::store(PooledCurlHandle* handle) {
   pthread_cond_signal(&m_cond);
 }
 
-std::map<std::string, CurlHandlePool*> CurlHandlePool::namedPools;
+ReadWriteMutex CurlHandlePool::namedPoolsMutex;
+std::map<std::string, CurlHandlePoolPtr> CurlHandlePool::namedPools;
 
 /////////////////////////////////////////////////////////////////////////////
 }

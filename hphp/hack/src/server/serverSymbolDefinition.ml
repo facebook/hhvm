@@ -8,8 +8,6 @@
  *
  *)
 
-module IDS = IdentifySymbolService
-
 open Core
 open IdentifySymbolService
 open Option.Monad_infix
@@ -27,12 +25,18 @@ and class_element_ =
 | Class_const
 | Typeconst
 
-(* Span information is stored only in parsing AST *)
-let get_member_span (x: class_element) =
-  let type_, member_origin, member_name = x in
+let get_class_by_name x =
+  Naming_heap.TypeIdHeap.get x >>= fun (p, _) ->
+  Parser_heap.find_class_in_file (Pos.filename p) x
 
-  Naming_heap.TypeIdHeap.get member_origin >>= fun (p, _) ->
-  Parser_heap.find_class_in_file (Pos.filename p) member_origin >>= fun c ->
+let get_function_by_name x =
+  Naming_heap.FunPosHeap.get x >>= fun p ->
+  Parser_heap.find_fun_in_file (Pos.filename p) x
+
+(* Span information is stored only in parsing AST *)
+let get_member_def ast (x : class_element) =
+  let type_, member_origin, member_name = x in
+  get_class_by_name member_origin >>= fun c ->
   match type_ with
   | Constructor
   | Method
@@ -42,67 +46,63 @@ let get_member_span (x: class_element) =
       | _ -> None
     end in
     List.find methods (fun m -> (snd m.Ast.m_name) = member_name) >>= fun m ->
-    Some (m.Ast.m_span)
+    Some (FileOutline.summarize_method m)
   | Property
   | Static_property ->
     let props = List.concat_map c.Ast.c_body begin function
-      | Ast.ClassVars (_, _, vars) ->
-        List.map vars (fun (span, (_, name), _) -> (span, name))
-      | Ast.XhpAttr (_, (span, (_, name), _), _, _) -> [(span, name)]
+      | Ast.ClassVars (kinds, _, vars) ->
+        List.map vars (fun var -> (kinds, var))
+      | Ast.XhpAttr (_, var, _, _) -> [([], var)]
       | _ -> []
     end in
-    List.find props (fun p -> snd p = member_name) >>= fun p ->
-    Some (fst p)
+    let get_prop_name (_, (_, x), _) = x in
+    List.find props (fun p -> get_prop_name (snd p) = member_name) >>=
+      fun (kinds, p) ->
+    Some (FileOutline.summarize_property kinds p)
   | Class_const ->
     let consts = List.concat_map c.Ast.c_body begin function
       | Ast.Const (_, consts) ->
-        List.map consts begin fun ((pos_start, name), (pos_end, _)) ->
-          let span = Pos.btw pos_start pos_end in
-          (span, name)
+        List.map consts begin fun (((_, name), _) as const) ->
+          (const, name)
         end
-      | Ast.AbsConst (_, (pos, name)) -> [(pos, name)]
       | _ -> []
     end in
-    List.find consts (fun p -> snd p = member_name) >>= fun p ->
-    Some (fst p)
-  | _ -> None
+    let res = List.find consts (fun c -> snd c = member_name) >>= fun c ->
+      Some (FileOutline.summarize_const (fst c))
+    in
+    if Option.is_some res then res else
+    let abs_consts = List.concat_map c.Ast.c_body begin function
+      | Ast.AbsConst (_, id) -> [id]
+      | _ -> []
+    end in
+    List.find abs_consts (fun c -> snd c = member_name) >>= fun c ->
+      Some (FileOutline.summarize_abs_const c)
+  | Typeconst ->
+    let tconsts = List.filter_map c.Ast.c_body begin function
+      | Ast.TypeConst t -> Some t
+      | _ -> None
+    end in
+    List.find tconsts (fun m -> (snd m.Ast.tconst_name) = member_name)
+      >>= fun t ->
+    Some (FileOutline.summarize_typeconst t)
 
-(* We have the method element from typing phase, but it doesn't have positional
- * information - we need to go back and fetch relevant named AST *)
-let get_member_id_pos ast (x: class_element) =
-  let type_, member_origin, member_name = x in
-
-  let method_pos m = m.Nast.m_name in
-  let prop_pos m = m.Nast.cv_id in
-  let const_pos (_, sid, _) = sid in
-  let typeconst_pos m = m.Nast.c_tconst_name in
-
-  let class_ = List.fold_left ast ~init:None ~f:begin fun acc def ->
-    match def with
-    | Ast.Class c when snd c.Ast.c_name = member_origin -> Some c
-    | _ -> acc
-  end in
-  class_ >>| Naming.class_ TypecheckerOptions.permissive >>= fun class_ ->
-  let members = match type_ with
-    | Constructor -> Option.to_list
-      (class_.Nast.c_constructor >>= fun m ->
-      Some (method_pos m))
-    | Method -> List.map class_.Nast.c_methods method_pos
-    | Static_method -> List.map class_.Nast.c_static_methods method_pos
-    | Property -> List.map class_.Nast.c_vars prop_pos
-    | Static_property -> List.map class_.Nast.c_static_vars prop_pos
-    | Class_const -> List.map class_.Nast.c_consts const_pos
-    | Typeconst -> List.map class_.Nast.c_typeconsts typeconst_pos
-  in
-  List.find members (fun m -> (snd m) = member_name) >>= fun m ->
-  Some (fst m)
-
-let get_member_pos ast x =
-  Some (get_member_id_pos ast x, get_member_span x)
+let get_local_var_def ast name p =
+  let line, char, _ = Pos.info_pos p in
+  let def = List.hd (ServerFindLocals.go_from_ast ast line char) in
+  Option.map def ~f:begin fun span ->
+    {
+      SymbolDefinition.kind = SymbolDefinition.LocalVar;
+      name;
+      pos = span;
+      span;
+      modifiers = [];
+      children = [];
+    }
+  end
 
 let go tcopt ast result =
-  let res = match result.type_ with
-    | IDS.Method (c_name, method_name) ->
+  match result.SymbolOccurrence.type_ with
+    | SymbolOccurrence.Method (c_name, method_name) ->
       (* Classes on typing heap have all the methods from inheritance hierarchy
        * folded together, so we will correctly identify them even if method_name
        * is not defined directly in class c_name *)
@@ -110,38 +110,40 @@ let go tcopt ast result =
       if method_name = Naming_special_names.Members.__construct then begin
         match fst class_.tc_construct with
           | Some m ->
-            get_member_pos ast (Constructor, m.ce_origin, method_name)
-          | None -> Some (Some class_.tc_pos, None)
+            get_member_def ast (Constructor, m.ce_origin, method_name)
+          | None ->
+            get_class_by_name c_name >>= fun c ->
+            Some (FileOutline.summarize_class c ~no_children:true)
       end else begin
         match SMap.get method_name class_.tc_methods with
-        | Some m -> get_member_pos ast (Method, m.ce_origin, method_name)
+        | Some m -> get_member_def ast (Method, m.ce_origin, method_name)
         | None ->
           SMap.get method_name class_.tc_smethods >>= fun m ->
-          get_member_pos ast (Static_method, m.ce_origin, method_name)
+          get_member_def ast (Static_method, m.ce_origin, method_name)
       end
-    | IDS.Property (c_name, property_name) ->
+    | SymbolOccurrence.Property (c_name, property_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       begin match SMap.get property_name class_.tc_props with
-      | Some m -> get_member_pos ast (Property, m.ce_origin, property_name)
+      | Some m -> get_member_def ast (Property, m.ce_origin, property_name)
       | None ->
         SMap.get property_name class_.tc_sprops >>= fun m ->
-        get_member_pos ast
+        get_member_def ast
           (Static_property, m.ce_origin, clean_member_name property_name)
       end
-    | IDS.ClassConst (c_name, const_name) ->
+    | SymbolOccurrence.ClassConst (c_name, const_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       SMap.get const_name class_.tc_consts >>= fun m ->
-      get_member_pos ast (Class_const, m.cc_origin, const_name)
-    | IDS.Function ->
-      Some (Naming_heap.FunPosHeap.get result.name, None)
-    | IDS.Class ->
-      Some (Option.map (Naming_heap.TypeIdHeap.get result.name) fst, None)
-    | IDS.Typeconst (c_name, typeconst_name) ->
+      get_member_def ast (Class_const, m.cc_origin, const_name)
+    | SymbolOccurrence.Function ->
+      get_function_by_name result.SymbolOccurrence.name >>= fun f ->
+      Some (FileOutline.summarize_fun f)
+    | SymbolOccurrence.Class ->
+      get_class_by_name result.SymbolOccurrence.name >>= fun c ->
+      Some (FileOutline.summarize_class c ~no_children:true)
+    | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       SMap.get typeconst_name class_.tc_typeconsts >>= fun m ->
-      get_member_pos ast (Typeconst, m.ttc_origin, typeconst_name)
-    | IDS.LocalVar ->
-      let line, char, _ = Pos.info_pos result.pos in
-      Some (List.hd (ServerFindLocals.go_from_ast ast line char), None)
-  in
-  Option.value res ~default:(None, None)
+      get_member_def ast (Typeconst, m.ttc_origin, typeconst_name)
+    | SymbolOccurrence.LocalVar ->
+      get_local_var_def
+        ast result.SymbolOccurrence.name result.SymbolOccurrence.pos

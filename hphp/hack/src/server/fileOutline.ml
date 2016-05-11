@@ -9,37 +9,9 @@
  *)
 
 open Core
+open SymbolDefinition
 
-type outline = def list
-
-and kind =
-  | Function
-  | Class
-  | Method
-  | Property
-  | Const
-  | Enum
-  | Interface
-  | Trait
-  | Typeconst
-
-and modifier =
-  | Final
-  | Static
-  | Abstract
-  | Private
-  | Public
-  | Protected
-  | Async
-
-and def = {
-  kind : kind;
-  name : string;
-  pos : Pos.absolute;
-  span : Pos.absolute;
-  modifiers : modifier list;
-  children : def list;
-}
+type outline = string SymbolDefinition.t list
 
 let modifiers_of_ast_kinds l =
   List.map l begin function
@@ -51,51 +23,30 @@ let modifiers_of_ast_kinds l =
     | Ast.Protected -> Protected
   end
 
-let string_of_kind = function
-  | Function -> "function"
-  | Class -> "class"
-  | Method -> "method"
-  | Property -> "property"
-  | Const -> "const"
-  | Enum -> "enum"
-  | Interface -> "interface"
-  | Trait -> "trait"
-  | Typeconst -> "typeconst"
-
-let string_of_modifier = function
-  | Final -> "final"
-  | Static -> "static"
-  | Abstract -> "abstract"
-  | Private -> "private"
-  | Public -> "public"
-  | Protected -> "protected"
-  | Async -> "async"
-
 let summarize_property kinds var =
   let modifiers = modifiers_of_ast_kinds kinds in
   let span, (pos, name), expr_opt = var in
   {
     kind = Property;
     name;
-    pos = Pos.to_absolute pos;
-    span = Pos.to_absolute span;
+    pos;
+    span;
     modifiers;
     children = [];
   }
 
 let summarize_const ((pos, name), (expr_pos, _)) =
-  let span = Pos.to_absolute (Pos.btw pos expr_pos) in
+  let span = (Pos.btw pos expr_pos) in
   {
     kind = Const;
     name;
-    pos = Pos.to_absolute pos;
+    pos;
     span;
     modifiers = [];
     children = [];
   }
 
 let summarize_abs_const (pos, name) =
-  let pos = Pos.to_absolute pos in
   {
     kind = Const;
     name;
@@ -114,16 +65,28 @@ let summarize_typeconst t =
   {
     kind = Typeconst;
     name;
-    pos = Pos.to_absolute pos;
-    span = Pos.to_absolute t.Ast.tconst_span;
+    pos;
+    span = t.Ast.tconst_span;
     modifiers = if t.Ast.tconst_abstract then [Abstract] else [];
     children = [];
   }
 
-let summarize_class acc class_  =
+let summarize_method m =
+  let modifiers = modifier_of_fun_kind [] m.Ast.m_fun_kind in
+  let modifiers = (modifiers_of_ast_kinds m.Ast.m_kind) @ modifiers in
+  {
+    kind = Method;
+    name = snd m.Ast.m_name;
+    pos = (fst m.Ast.m_name);
+    span = m.Ast.m_span;
+    modifiers;
+    children = [];
+  }
+
+let summarize_class class_ ~no_children =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
-  let class_name_pos = Pos.to_absolute (fst class_.Ast.c_name) in
-  let c_span = Pos.to_absolute class_.Ast.c_span in
+  let class_name_pos = fst class_.Ast.c_name in
+  let c_span = class_.Ast.c_span in
   let modifiers =
     if class_.Ast.c_final then [Final] else []
   in
@@ -131,20 +94,9 @@ let summarize_class acc class_  =
     | Ast.Cabstract -> Abstract :: modifiers
     | _ -> modifiers
   in
-  let children = List.concat
+  let children = if no_children then [] else List.concat
     (List.map class_.Ast.c_body ~f:begin function
-    | Ast.Method m ->
-        let modifiers = modifier_of_fun_kind [] m.Ast.m_fun_kind in
-        let modifiers = (modifiers_of_ast_kinds m.Ast.m_kind) @ modifiers in
-        let method_ = {
-          kind = Method;
-          name = snd m.Ast.m_name;
-          pos = Pos.to_absolute (fst m.Ast.m_name);
-          span = Pos.to_absolute m.Ast.m_span;
-          modifiers;
-          children = [];
-        } in
-        [method_]
+    | Ast.Method m -> [summarize_method m]
     | Ast.ClassVars (kinds, _, vars) ->
         List.map vars ~f:(summarize_property kinds)
     | Ast.XhpAttr (_, var, _, _) -> [summarize_property [] var]
@@ -160,35 +112,33 @@ let summarize_class acc class_  =
     | Ast.Cenum -> Enum
     | _ -> Class
   in
-  let class_ = {
+  {
     kind;
     name = class_name;
     pos = class_name_pos;
     span = c_span;
     modifiers;
     children;
-  } in
-  class_ :: acc
+  }
 
-let summarize_fun acc f =
+let summarize_fun f =
   let modifiers = modifier_of_fun_kind [] f.Ast.f_fun_kind in
-  let fun_ = {
+  {
     kind = Function;
     name = Utils.strip_ns (snd f.Ast.f_name);
-    pos = Pos.to_absolute (fst f.Ast.f_name);
-    span = (Pos.to_absolute f.Ast.f_span);
+    pos = fst f.Ast.f_name;
+    span = f.Ast.f_span;
     modifiers;
     children = []
-  } in
-  fun_ :: acc
+  }
 
 let outline_ast ast =
-  List.fold_right ast ~init:[] ~f:begin fun def acc ->
-    match def with
-    | Ast.Fun f -> summarize_fun acc f
-    | Ast.Class c -> summarize_class acc c
-    | _ -> acc
-  end
+  let outline = List.filter_map ast ~f:begin function
+    | Ast.Fun f -> Some (summarize_fun f)
+    | Ast.Class c -> Some (summarize_class c ~no_children:false)
+    | _ -> None
+  end in
+  List.map outline SymbolDefinition.to_absolute
 
 let to_json_legacy input =
   let entries = List.map input begin fun (pos, name, type_) ->
@@ -219,6 +169,7 @@ let to_json_legacy input =
        in
        (def.pos, prefix ^ def.name, desc) :: acc
      | Typeconst
+     | LocalVar
      | Property
      | Const -> acc
    end

@@ -11,5 +11,5 @@
  val go :
    TypecheckerOptions.t ->
    Ast.program ->
-   Relative_path.t IdentifySymbolService.find_symbol_result ->
-   (Pos.t option * Pos.t option)
+   Relative_path.t SymbolOccurrence.t ->
+   Relative_path.t SymbolDefinition.t option

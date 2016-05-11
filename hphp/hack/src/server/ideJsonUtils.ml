@@ -208,20 +208,19 @@ let json_string_of_response id response =
       begin match result with
       | Some res ->
         let result_type =
-          match res.IdentifySymbolService.type_ with
-          | IdentifySymbolService.Class -> "class"
-          | IdentifySymbolService.Method _ -> "method"
-          | IdentifySymbolService.Function -> "function"
-          | IdentifySymbolService.LocalVar -> "local"
-          | IdentifySymbolService.Property _ -> "property"
-          | IdentifySymbolService.ClassConst _ -> "class_const"
-          | IdentifySymbolService.Typeconst _ -> "typeconst"
+          match res.SymbolOccurrence.type_ with
+          | SymbolOccurrence.Class -> "class"
+          | SymbolOccurrence.Method _ -> "method"
+          | SymbolOccurrence.Function -> "function"
+          | SymbolOccurrence.LocalVar -> "local"
+          | SymbolOccurrence.Property _ -> "property"
+          | SymbolOccurrence.ClassConst _ -> "class_const"
+          | SymbolOccurrence.Typeconst _ -> "typeconst"
         in
         JSON_Object [
-          "name",        JSON_String res.IdentifySymbolService.name;
+          "name",        JSON_String res.SymbolOccurrence.name;
           "result_type", JSON_String result_type;
-          "pos",         Pos.json
-                           (Pos.to_absolute res.IdentifySymbolService.pos);
+          "pos",         Pos.json (Pos.to_absolute res.SymbolOccurrence.pos);
         ]
       | _ -> JSON_Object []
       end

@@ -2,4 +2,4 @@ $foo
 LocalVar
 line 4, characters 3-6
 defined: line 3, characters 15-18
-definition span: None
+definition span: line 3, character 15 - line 3, character 18

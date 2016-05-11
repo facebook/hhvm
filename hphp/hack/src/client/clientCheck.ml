@@ -144,7 +144,7 @@ let main args =
       let result =
         Cmd.rpc conn @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       let result = match result with
-        | Some result -> Utils.strip_ns result.IdentifySymbolService.name
+        | Some (result, _) -> Utils.strip_ns result.SymbolOccurrence.name
         | _ -> ""
       in
       print_endline result;

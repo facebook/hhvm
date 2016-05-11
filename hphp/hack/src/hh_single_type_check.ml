@@ -361,8 +361,8 @@ let print_coverage fn type_acc =
   let counts = ServerCoverageMetric.count_exprs fn type_acc in
   ClientCoverageMetric.go ~json:false (Some (Leaf counts))
 
-let print_symbol symbol =
-  let open IdentifySymbolService in
+let print_symbol (symbol, definition) =
+  let open SymbolOccurrence in
   Printf.printf "%s\n%s\n%s\n"
     symbol.name
     begin match symbol.type_ with
@@ -376,10 +376,13 @@ let print_symbol symbol =
     end
     (Pos.string_no_file symbol.pos);
   Printf.printf "defined: %s\n"
-    (Option.value_map symbol.name_pos ~f:Pos.string_no_file ~default:"None");
+    (Option.value_map definition
+      ~f:(fun x -> Pos.string_no_file x.SymbolDefinition.pos)
+      ~default:"None");
   Printf.printf "definition span: %s\n"
-    (Option.value_map symbol.name_span
-      ~f:Pos.multiline_string_no_file ~default:"None")
+    (Option.value_map definition
+      ~f:(fun x -> Pos.multiline_string_no_file x.SymbolDefinition.span)
+      ~default:"None")
 
 let handle_mode mode filename tcopt files_contents files_info errors =
   match mode with

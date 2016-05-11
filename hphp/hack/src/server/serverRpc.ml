@@ -18,8 +18,7 @@ type _ t =
   | INFER_TYPE : ServerUtils.file_input * int * int -> ServerInferType.result t
   | COVERAGE_LEVELS : ServerUtils.file_input -> ServerColorFile.result t
   | AUTOCOMPLETE : string -> AutocompleteService.result t
-  | IDENTIFY_FUNCTION : string * int * int ->
-      (string IdentifySymbolService.find_symbol_result) option t
+  | IDENTIFY_FUNCTION : string * int * int -> ServerIdentifyFunction.result t
   | OUTLINE : string -> FileOutline.outline t
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t

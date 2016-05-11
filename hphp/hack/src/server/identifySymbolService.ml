@@ -9,52 +9,19 @@
  *)
 
 open Core
+open SymbolOccurrence
 open Typing_defs
 open Utils
-
-type target_type =
-| Class
-| Function
-| Method of string * string
-| LocalVar
-| Property of string * string
-| ClassConst of string * string
-| Typeconst of string * string
-
-type 'a find_symbol_result = {
-  name:  string;
-  (* Where the name is defined, so click-to-definition can be implemented with
-   * only one roundtrip to the server. Optional, because user can identify
-   * undefined symbol.
-   *
-   * We cannot compute member position in process_member hook because
-   * it can be called from naming phase when the naming heap is not populated
-   * yet. We do it later in ServerSymbolDefinition module. *)
-  name_pos: 'a Pos.pos option;
-  name_span: 'a Pos.pos option;
-  type_: target_type;
-  (* Span of the symbol itself *)
-  pos: 'a Pos.pos;
-}
-
-let to_absolute x = { x with
-  name_pos = Option.map x.name_pos Pos.to_absolute;
-  name_span = Option.map x.name_span Pos.to_absolute;
-  pos = Pos.to_absolute x.pos;
-}
 
 let is_target target_line target_char pos =
   let l, start, end_ = Pos.info_pos pos in
   l = target_line && start <= target_char && target_char - 1 <= end_
-
 
 let process_class_id result_ref is_target_fun cid _ =
   if is_target_fun (fst cid)
   then begin
     let name = snd cid in
     result_ref := Some { name;
-                         name_pos = None;
-                         name_span = None;
                          type_ = Class;
                          pos   = fst cid
                        }
@@ -73,8 +40,6 @@ let process_member result_ref is_target_fun c_name id ~is_method ~is_const =
     in
     result_ref :=
       Some { name  = (c_name ^ "::" ^ (clean_member_name member_name));
-             name_pos = None;
-             name_span = None;
              type_;
              pos   = fst id
            }
@@ -97,8 +62,6 @@ let process_fun_id result_ref is_target_fun id =
     let name = snd id in
     result_ref :=
       Some { name;
-             name_pos = None;
-             name_span = None;
              type_ = Function;
              pos   = fst id
            }
@@ -108,8 +71,6 @@ let process_lvar_id result_ref is_target_fun _ id _ =
   if is_target_fun (fst id)
   then begin
     result_ref := Some { name  = snd id;
-                         name_pos = None;
-                         name_span = None;
                          type_ = LocalVar;
                          pos   = fst id
                        }
@@ -119,8 +80,6 @@ let process_typeconst result_ref is_target_fun class_name tconst_name pos =
   if (is_target_fun pos) then begin
     result_ref :=
       Some { name = class_name ^ "::" ^ tconst_name;
-             name_pos = None;
-             name_span = None;
              type_ = Typeconst (class_name, tconst_name);
              pos;
            }

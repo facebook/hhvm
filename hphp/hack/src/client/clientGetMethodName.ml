@@ -11,21 +11,21 @@
 open Hh_json
 
 let get_result_type res =
-  match res.IdentifySymbolService.type_ with
-  | IdentifySymbolService.Class -> "class"
-  | IdentifySymbolService.Method _ -> "method"
-  | IdentifySymbolService.Function -> "function"
-  | IdentifySymbolService.LocalVar -> "local"
-  | IdentifySymbolService.Property _ -> "property"
-  | IdentifySymbolService.ClassConst _ -> "class_const"
-  | IdentifySymbolService.Typeconst _ -> "typeconst"
+  match res.SymbolOccurrence.type_ with
+  | SymbolOccurrence.Class -> "class"
+  | SymbolOccurrence.Method _ -> "method"
+  | SymbolOccurrence.Function -> "function"
+  | SymbolOccurrence.LocalVar -> "local"
+  | SymbolOccurrence.Property _ -> "property"
+  | SymbolOccurrence.ClassConst _ -> "class_const"
+  | SymbolOccurrence.Typeconst _ -> "typeconst"
 
 let to_json = function
-  | Some res ->
+  | Some (res, _) ->
     JSON_Object [
-      "name",           JSON_String res.IdentifySymbolService.name;
+      "name",           JSON_String res.SymbolOccurrence.name;
       "result_type",    JSON_String (get_result_type res);
-      "pos",            Pos.json (res.IdentifySymbolService.pos);
+      "pos",            Pos.json (res.SymbolOccurrence.pos);
       "internal_error", JSON_Bool false;
     ]
   | None -> JSON_Object [ "internal_error", JSON_Bool false ]
@@ -34,10 +34,10 @@ let print_json res =
   print_endline (Hh_json.json_to_string (to_json res))
 
 let print_readable = function
-  | Some res ->
-    let line, start, end_ = Pos.info_pos res.IdentifySymbolService.pos in
+  | Some (res, _) ->
+    let line, start, end_ = Pos.info_pos res.SymbolOccurrence.pos in
     Printf.printf "Name: %s, type: %s, position: line %d, characters %d-%d\n"
-      res.IdentifySymbolService.name
+      res.SymbolOccurrence.name
       (get_result_type res)
       line start end_
   | None -> ()

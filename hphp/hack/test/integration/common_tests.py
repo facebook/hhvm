@@ -439,12 +439,14 @@ class CommonTests(object):
 
         self.check_cmd_and_json_cmd([
             'Name: \\bar, type: function, position: line 1, '
-            'characters 42-44, defined: line 1, characters 15-17'
+            'characters 42-44, defined: line 1, characters 15-17, '
+            'definition span: line 1, character 15 - line 1, character 17'
             ], [
             '{{"name":"\\\\bar","result_type":"function","pos":{{"filename":"",'
             '"line":1,"char_start":42,"char_end":44}},'
             '"definition_pos":{{"filename":"","line":1,"char_start":15,'
-            '"char_end":17}},"definition_span":null}}'
+            '"char_end":17}},"definition_span":{{"filename":"","line_start":1,'
+            '"char_start":6,"line_end":1,"char_end":22}}}}'
             ],
             options=['--ide-get-definition', '1:43'],
             stdin='<?hh function bar() {} function test() { bar() }')
@@ -470,7 +472,7 @@ class CommonTests(object):
             ],
             options=['--ide-outline'],
             stdin='<?hh function bar() {}')
-            
+
     def test_get_method_name(self):
         """
         Test --get-method-name

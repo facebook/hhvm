@@ -83,10 +83,7 @@ static inline uint64_t getArchTimestamp(void)  {
 }
 
 /*On Win32 and linux CLOCK_MONOTONIC is available */
-#if !defined(CLOCK_MONOTONIC) && !defined(__APPLE__)
-#define CLOCK_MONOTONIC 1
-static int perf_clk_id = CLOCK_MONOTONIC;
-#elif defined(_WIN32)
+#if defined(CLOCK_MONOTONIC) && !defined(__APPLE__)
 static int perf_clk_id = CLOCK_MONOTONIC;
 #else
 static int perf_clk_id = CLOCK_REALTIME;

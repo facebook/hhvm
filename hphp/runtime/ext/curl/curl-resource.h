@@ -4,6 +4,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/curl/curl-pool.h"
 
 #include "hphp/util/type-scan.h"
 
@@ -13,8 +14,6 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // CurlResource
 
-struct CurlHandlePool;
-struct PooledCurlHandle;
 
 struct CurlResource : SweepableResourceData {
   using ExceptionType = folly::Optional<boost::variant<Object,Exception*>>;
@@ -54,7 +53,7 @@ struct CurlResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(CurlResource)
   bool isInvalid() const override { return !m_cp; }
 
-  explicit CurlResource(const String& url, CurlHandlePool *pool = nullptr);
+  explicit CurlResource(const String& url, CurlHandlePoolPtr pool = nullptr);
   explicit CurlResource(req::ptr<CurlResource> src);
   ~CurlResource() { close(); }
 
@@ -143,7 +142,7 @@ struct CurlResource : SweepableResourceData {
   Variant      m_progress_callback;
 
   bool m_emptyPost;
-  CurlHandlePool* m_connPool;
+  CurlHandlePoolPtr m_connPool;
   PooledCurlHandle* m_pooledHandle;
 };
 

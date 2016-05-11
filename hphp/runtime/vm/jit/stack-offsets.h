@@ -236,8 +236,24 @@ struct FPInvOffset {
 struct FPRelOffset {
   int32_t offset;
 
+  /*
+   * Comparisons.
+   *
+   * A "lower" FPInvOffset means "farther from fp" (i.e., lower address).
+   */
+  bool operator==(FPRelOffset o) const { return offset == o.offset; }
+  bool operator< (FPRelOffset o) const { return offset <  o.offset; }
+  bool operator<=(FPRelOffset o) const { return offset <= o.offset; }
+  bool operator> (FPRelOffset o) const { return offset >  o.offset; }
+  bool operator>=(FPRelOffset o) const { return offset >= o.offset; }
+
+  /*
+   * Move up and down the stack space for the frame.
+   */
   FPRelOffset operator+(int32_t x) const { return FPRelOffset{offset + x}; }
   FPRelOffset operator-(int32_t x) const { return FPRelOffset{offset - x}; }
+  FPRelOffset& operator+=(int32_t d) { offset += d; return *this; }
+  FPRelOffset& operator-=(int32_t d) { offset -= d; return *this; }
 
   /*
    * Invert to an FPInvOffset.

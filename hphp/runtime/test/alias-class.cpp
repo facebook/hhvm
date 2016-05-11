@@ -59,14 +59,14 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
     AFrame { mainFP, 6 },
 
     // Some stack locations.
-    AStack { SP, -1, 1 },
-    AStack { SP, -2, 3 },
+    AStack { SP, IRSPRelOffset { -1 }, 1 },
+    AStack { SP, IRSPRelOffset { -2 }, 3 },
 
     // Frame-based 'canonicalized' stack locations.
-    AStack { mainFP, -12, std::numeric_limits<int32_t>::max() },
-    AStack { mainFP, -12, 4 },
-    AStack { mainFP, -11, 3 },
-    AStack { mainFP, -52, 10 },
+    AStack { mainFP, FPRelOffset { -12 }, std::numeric_limits<int32_t>::max() },
+    AStack { mainFP, FPRelOffset { -12 }, 4 },
+    AStack { mainFP, FPRelOffset { -11 }, 3 },
+    AStack { mainFP, FPRelOffset { -52 }, 10 },
   };
 }
 
@@ -219,8 +219,8 @@ TEST(AliasClass, StackBasics) {
 
   // Some basic canonicalization and maybe.
   {
-    AliasClass const stk1 = AStack { SP, 0, 1 };
-    AliasClass const stk2 = AStack { FP, -5, 1 };
+    AliasClass const stk1 = AStack { SP, IRSPRelOffset { 0 }, 1 };
+    AliasClass const stk2 = AStack { FP, FPRelOffset { -5 }, 1 };
 
     EXPECT_TRUE(stk1 <= AStackAny);
     EXPECT_TRUE(stk2 <= AStackAny);
@@ -234,16 +234,16 @@ TEST(AliasClass, StackBasics) {
 
   // Stack ranges, with subtype and maybe.
   {
-    AliasClass const stk1 = AStack { FP, -10, 1 };
-    AliasClass const stk2 = AStack { FP, -10, 2 };
+    AliasClass const stk1 = AStack { FP, FPRelOffset { -10 }, 1 };
+    AliasClass const stk2 = AStack { FP, FPRelOffset { -10 }, 2 };
     EXPECT_TRUE(stk1 <= stk2);
     EXPECT_TRUE(stk1.maybe(stk2));
 
-    AliasClass const stk3 = AStack { FP, -10, 5 };
+    AliasClass const stk3 = AStack { FP, FPRelOffset { -10 }, 5 };
     EXPECT_TRUE(stk1 <= stk3);
     EXPECT_TRUE(stk1.maybe(stk3));
-    AliasClass const stk4 = AStack { FP, -15, 1 };
-    AliasClass const stk5 = AStack { FP, -14, 1 };
+    AliasClass const stk4 = AStack { FP, FPRelOffset { -15 }, 1 };
+    AliasClass const stk5 = AStack { FP, FPRelOffset { -14 }, 1 };
     // stk4's slot is immediately below stk3's range, but stk5 is the last slot
     // of its range.
     EXPECT_FALSE(stk3.maybe(stk4));
@@ -260,9 +260,9 @@ TEST(AliasClass, SpecializedUnions) {
   auto const marker = BCMarker::Dummy();
   auto const FP = unit.gen(DefFP, marker)->dst();
 
-  AliasClass const stk = AStack { FP, -10, 3 };
-  AliasClass const unrelated_stk = AStack { FP, -14, 1 };
-  AliasClass const related_stk = AStack { FP, -11, 2 };
+  AliasClass const stk = AStack { FP, FPRelOffset { -10 }, 3 };
+  AliasClass const unrelated_stk = AStack { FP, FPRelOffset { -14 }, 1 };
+  AliasClass const related_stk = AStack { FP, FPRelOffset { -11 }, 2 };
 
   auto const stk_and_frame = stk | AFrameAny;
   EXPECT_TRUE(!stk_and_frame.is_stack());
@@ -338,12 +338,12 @@ TEST(AliasClass, StackUnions) {
     DefSP, marker, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
 
   {
-    AliasClass const stk1  = AStack { FP, -3, 1 };
-    AliasClass const stk2  = AStack { FP, -4, 1 };
-    AliasClass const stk3  = AStack { FP, -5, 1 };
-    AliasClass const stk12 = AStack { FP, -3, 2 };
-    AliasClass const stk23 = AStack { FP, -4, 2 };
-    AliasClass const stk13 = AStack { FP, -3, 3 };
+    AliasClass const stk1  = AStack { FP, FPRelOffset { -3 }, 1 };
+    AliasClass const stk2  = AStack { FP, FPRelOffset { -4 }, 1 };
+    AliasClass const stk3  = AStack { FP, FPRelOffset { -5 }, 1 };
+    AliasClass const stk12 = AStack { FP, FPRelOffset { -3 }, 2 };
+    AliasClass const stk23 = AStack { FP, FPRelOffset { -4 }, 2 };
+    AliasClass const stk13 = AStack { FP, FPRelOffset { -3 }, 3 };
     EXPECT_EQ(stk1 | stk2, stk12);
     EXPECT_EQ(stk2 | stk3, stk23);
     EXPECT_EQ(stk1 | stk3, stk13);
@@ -351,29 +351,29 @@ TEST(AliasClass, StackUnions) {
 
   // Same as above but with some other bits.
   {
-    AliasClass const stk1  = AHeapAny | AStack { FP, -3, 1 };
-    AliasClass const stk2  = AHeapAny | AStack { FP, -4, 1 };
-    AliasClass const stk3  = AHeapAny | AStack { FP, -5, 1 };
-    AliasClass const stk12 = AHeapAny | AStack { FP, -3, 2 };
-    AliasClass const stk23 = AHeapAny | AStack { FP, -4, 2 };
-    AliasClass const stk13 = AHeapAny | AStack { FP, -3, 3 };
+    AliasClass const stk1  = AHeapAny | AStack { FP, FPRelOffset { -3 }, 1 };
+    AliasClass const stk2  = AHeapAny | AStack { FP, FPRelOffset { -4 }, 1 };
+    AliasClass const stk3  = AHeapAny | AStack { FP, FPRelOffset { -5 }, 1 };
+    AliasClass const stk12 = AHeapAny | AStack { FP, FPRelOffset { -3 }, 2 };
+    AliasClass const stk23 = AHeapAny | AStack { FP, FPRelOffset { -4 }, 2 };
+    AliasClass const stk13 = AHeapAny | AStack { FP, FPRelOffset { -3 }, 3 };
     EXPECT_EQ(stk1 | stk2, stk12);
     EXPECT_EQ(stk2 | stk3, stk23);
     EXPECT_EQ(stk1 | stk3, stk13);
   }
 
   {
-    AliasClass const stk1 = AStack { FP, -1, 1 };
-    AliasClass const stk2 = AStack { SP, -2, 1 };
-    AliasClass const true_union = AStack { FP, -1, 3 };
+    AliasClass const stk1 = AStack { FP, FPRelOffset { -1 }, 1 };
+    AliasClass const stk2 = AStack { SP, IRSPRelOffset { -2 }, 1 };
+    AliasClass const true_union = AStack { FP, FPRelOffset { -1 }, 3 };
     EXPECT_NE(stk1 | stk2, AStackAny);
     EXPECT_EQ(stk1 | stk2, true_union);
   }
 
   {
     auto const imax = std::numeric_limits<int32_t>::max();
-    AliasClass const deep_stk1 = AStack { FP, -10, imax };
-    AliasClass const deep_stk2 = AStack { FP, -14, imax };
+    AliasClass const deep_stk1 = AStack { FP, FPRelOffset { -10 }, imax };
+    AliasClass const deep_stk2 = AStack { FP, FPRelOffset { -14 }, imax };
     EXPECT_EQ(deep_stk1 | deep_stk2, deep_stk1);
   }
 }

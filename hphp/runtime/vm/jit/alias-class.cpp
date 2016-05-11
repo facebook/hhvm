@@ -38,7 +38,7 @@ namespace {
 // Helper for returning the lowest index of an AStack range, non inclusive.
 // I.e. a AStack class affects stack slots in [sp+offset,lowest_offset).
 int32_t lowest_offset(AStack stk) {
-  auto const off    = int64_t{stk.offset};
+  auto const off    = int64_t{stk.offset.offset};
   auto const sz     = int64_t{stk.size};
   auto const low    = off - sz;
   auto const i32min = int64_t{std::numeric_limits<int32_t>::min()};
@@ -122,28 +122,40 @@ bool framelike_equal(T a, U b) {
 
 }
 
-AStack::AStack(SSATmp* base, int32_t o, int32_t s)
-  : offset(o), size(s)
+AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
+  : offset(o)
+  , size(s)
 {
-  // Always canonicalize to the outermost frame pointer.
-  if (base->isA(TStkPtr)) {
-    auto const defSP = base->inst();
-    always_assert_flog(defSP->is(DefSP),
-                       "unexpected StkPtr: {}\n", base->toString());
-    offset -= defSP->extra<DefSP>()->offset.offset;
-    return;
-  }
+  always_assert(fp->isA(TFramePtr));
 
-  assertx(base->isA(TFramePtr));
-  auto const defInlineFP = base->inst();
-  if (defInlineFP->is(DefInlineFP)) {
-    auto const sp = defInlineFP->src(0)->inst();
-    offset += defInlineFP->extra<DefInlineFP>()->spOffset.offset;
-    offset -= sp->extra<DefSP>()->offset.offset;
-    always_assert_flog(sp->src(0)->inst()->is(DefFP),
-                       "failed to canonicalize to outermost FramePtr: {}\n",
-                       sp->src(0)->toString());
-  }
+  auto const defInlineFP = fp->inst();
+  if (!defInlineFP->is(DefInlineFP)) return;
+  auto const sp = defInlineFP->src(0)->inst();
+
+  // FP-relative offset of the inlined frame.
+  auto const innerFPRel =
+    defInlineFP->extra<DefInlineFP>()->spOffset.to<FPRelOffset>(
+      sp->extra<DefSP>()->offset);
+
+  // Offset from the outermost FP is simply the sum of (inner frame relative to
+  // outer) and (offset relative to inner frame).
+  offset += innerFPRel.offset;
+
+  always_assert_flog(sp->src(0)->inst()->is(DefFP),
+                     "failed to canonicalize to outermost FramePtr: {}\n",
+                     sp->src(0)->toString());
+}
+
+AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s)
+  : offset()
+  , size(s)
+{
+  always_assert(sp->isA(TStkPtr));
+
+  auto const defSP = sp->inst();
+  always_assert_flog(defSP->is(DefSP),
+                     "unexpected StkPtr: {}\n", sp->toString());
+  offset = spRel.to<FPRelOffset>(defSP->extra<DefSP>()->offset);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -176,7 +188,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_elemS.key->hash());
   case STag::Stack:
     return folly::hash::hash_combine(hash,
-                                     acls.m_stack.offset,
+                                     acls.m_stack.offset.offset,
                                      acls.m_stack.size);
   case STag::Ref:
     return folly::hash::hash_combine(hash, acls.m_ref.boxed);
@@ -365,7 +377,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       // Make a stack range big enough to contain both of them.
       auto const highest = std::max(stkA.offset, stkB.offset);
       auto const lowest = std::min(lowest_offset(stkA), lowest_offset(stkB));
-      auto const newStack = AStack { highest, highest - lowest };
+      auto const newStack = AStack { highest, highest.offset - lowest };
       auto ret = AliasClass{newBits};
       new (&ret.m_stack) AStack(newStack);
       ret.m_stag = STag::Stack;
@@ -654,7 +666,7 @@ bool AliasClass::maybeData(AliasClass o) const {
         lowest_offset(m_stack),
         lowest_offset(o.m_stack)
       );
-      return lowest_upper > highest_lower;
+      return lowest_upper.offset > highest_lower;
     }
 
   /*
@@ -793,7 +805,7 @@ std::string show(AliasClass acls) {
     break;
   case A::STag::Stack:
     folly::format(&ret, "St {}{}",
-      acls.m_stack.offset,
+      acls.m_stack.offset.offset,
       acls.m_stack.size == std::numeric_limits<int32_t>::max()
         ? "<"
         : folly::sformat(";{}", acls.m_stack.size)

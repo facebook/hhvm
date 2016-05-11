@@ -99,8 +99,7 @@ AliasClass pointee(
     if (typeNR <= TPtrToStkGen) {
       if (sinst->is(LdStkAddr)) {
         return AliasClass {
-          AStack { sinst->src(0),
-                   sinst->extra<LdStkAddr>()->offset.offset, 1 }
+          AStack { sinst->src(0), sinst->extra<LdStkAddr>()->offset, 1 }
         };
       }
       return AStackAny;
@@ -224,7 +223,8 @@ AliasClass all_pointees(const IRInstruction& inst) {
 
 // Return an AliasClass representing a range of the eval stack that contains
 // everything below a logical depth.
-AliasClass stack_below(SSATmp* base, int32_t offset) {
+template<typename Off>
+AliasClass stack_below(SSATmp* base, Off offset) {
   return AStack { base, offset, std::numeric_limits<int32_t>::max() };
 }
 
@@ -290,7 +290,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
 
     auto const killed_stack = stack_below(
       inst.marker().fp(),
-      -inst.marker().spOff().offset - 1
+      -inst.marker().spOff() - 1
     );
     auto const kills_union = x.kills.precise_union(killed_stack);
     return kills_union ? *kills_union : killed_stack;
@@ -436,20 +436,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqBindJmp:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1)
+      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff - 1)
     };
   case JmpSwitchDest:
     return ExitEffects {
       AUnknown,
       *stack_below(inst.src(1),
-                   inst.extra<JmpSwitchDest>()->irSPOff.offset - 1).
+                   inst.extra<JmpSwitchDest>()->irSPOff - 1).
         precise_union(AMIStateAny)
     };
   case JmpSSwitchDest:
     return ExitEffects {
       AUnknown,
       *stack_below(inst.src(1),
-                   inst.extra<JmpSSwitchDest>()->offset.offset - 1).
+                   inst.extra<JmpSSwitchDest>()->offset - 1).
         precise_union(AMIStateAny)
     };
   case ReqRetranslate:
@@ -504,7 +504,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return ReturnEffects {
       *stack_below(
         inst.src(0),
-        inst.extra<RetCtrlData>()->spOffset.offset - 1
+        inst.extra<RetCtrlData>()->spOffset - 1
       ).precise_union(AMIStateAny)
     };
 
@@ -524,7 +524,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EndCatch: {
     auto const stack_kills = stack_below(
       inst.src(1),
-      inst.extra<EndCatch>()->offset.offset - 1
+      inst.extra<EndCatch>()->offset - 1
     );
     return ExitEffects {
       AUnknown,
@@ -570,8 +570,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * stores must not be sunk past DefInlineFP where they could clobber a
        * local.
        */
-      AFrameAny | inline_fp_frame(&inst) | stack_below(inst.dst(), 0),
-      AFrameAny | stack_below(inst.dst(), 0)
+      AFrameAny | stack_below(inst.dst(), FPRelOffset{0}) |
+                  inline_fp_frame(&inst),
+      AFrameAny | stack_below(inst.dst(), FPRelOffset{0})
     );
 
   /*
@@ -587,7 +588,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     /*
      * SP relative offset of the first non-frame cell within the inlined call.
      */
-    auto inlineStackOff = inst.extra<BeginInlining>()->offset.offset;
+    auto inlineStackOff = inst.extra<BeginInlining>()->offset;
     return may_load_store_kill(
       AEmpty,
       /*
@@ -606,14 +607,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   case InlineReturn: {
-    auto const callee = stack_below(inst.src(0), 2) | AMIStateAny | AFrameAny;
+    auto const callee = stack_below(inst.src(0), FPRelOffset{2}) |
+                        AMIStateAny | AFrameAny;
     return may_load_store_kill(AEmpty, callee, callee);
   }
 
   case InlineReturnNoFrame: {
     auto const callee = AliasClass(AStack {
-      inst.extra<InlineReturnNoFrame>()->frameOffset.offset,
-        std::numeric_limits<int32_t>::max()
+      inst.extra<InlineReturnNoFrame>()->frameOffset,
+      std::numeric_limits<int32_t>::max()
     }) | AMIStateAny;
     return may_load_store_kill(AEmpty, callee, callee);
   }
@@ -623,7 +625,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const arStack = AStack {
       inst.src(0),
       // Same as spillframe
-      spOffset.offset + int32_t{kNumActRecCells} - 1,
+      spOffset + int32_t{kNumActRecCells} - 1,
       int32_t{kNumActRecCells}
     };
     // This instruction doesn't actually load but SpillFrame cannot be pushed
@@ -636,7 +638,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterpOneCF:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1), -inst.marker().spOff().offset - 1) | AMIStateAny
+      stack_below(inst.src(1), -inst.marker().spOff() - 1) | AMIStateAny
     };
 
   case NativeImpl:
@@ -687,7 +689,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return CallEffects {
         extra->destroyLocals,
         // kill
-        stack_below(inst.src(0), extra->spOffset.offset - 1) | AMIStateAny,
+        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
         // We might side-exit inside the callee, and interpret a return.  So we
         // can read anything anywhere on the eval stack above the call's entry
         // depth here.
@@ -892,7 +894,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<InitPackedArrayLoop>();
       auto const stack_in = AStack {
         inst.src(1),
-        extra->offset.offset + static_cast<int32_t>(extra->size) - 1,
+        extra->offset + static_cast<int32_t>(extra->size) - 1,
         static_cast<int32_t>(extra->size)
       };
       return may_load_store_move(stack_in, AElemIAny, stack_in);
@@ -905,7 +907,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<NewStructArray>();
       auto const stack_in = AStack {
         inst.src(0),
-        extra->offset.offset + static_cast<int32_t>(extra->numKeys) - 1,
+        extra->offset + static_cast<int32_t>(extra->numKeys) - 1,
         static_cast<int32_t>(extra->numKeys)
       };
       return may_load_store_move(stack_in, AEmpty, stack_in);
@@ -1034,12 +1036,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LdStk:
     return PureLoad {
-      AStack { inst.src(0), inst.extra<LdStk>()->offset.offset, 1 }
+      AStack { inst.src(0), inst.extra<LdStk>()->offset, 1 }
     };
 
   case StStk:
     return PureStore {
-      AStack { inst.src(0), inst.extra<StStk>()->offset.offset, 1 },
+      AStack { inst.src(0), inst.extra<StStk>()->offset, 1 },
       inst.src(1)
     };
 
@@ -1052,13 +1054,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           // SpillFrame's spOffset is to the bottom of where it will store the
           // ActRec, but AliasClass needs an offset to the highest cell it will
           // store.
-          spOffset.offset + int32_t{kNumActRecCells} - 1,
+          spOffset + int32_t{kNumActRecCells} - 1,
           int32_t{kNumActRecCells}
         },
         AStack {
           inst.src(0),
           // The context is in the highest slot.
-          spOffset.offset + int32_t{kNumActRecCells} - 1,
+          spOffset + int32_t{kNumActRecCells} - 1,
           1
         }
       };
@@ -1066,7 +1068,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CheckStk:
     return may_load_store(
-      AStack { inst.src(0), inst.extra<CheckStk>()->offset.offset, 1 },
+      AStack { inst.src(0), inst.extra<CheckStk>()->offset, 1 },
       AEmpty
     );
   case CufIterSpillFrame:
@@ -1076,15 +1078,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CastStk:
     {
       auto const stk = AStack {
-        inst.src(0), inst.extra<CastStk>()->offset.offset, 1
+        inst.src(0), inst.extra<CastStk>()->offset, 1
       };
       return may_raise(inst, may_load_store(stk, stk));
     }
   case CoerceStk:
     {
       auto const stk = AStack {
-        inst.src(0),
-        inst.extra<CoerceStk>()->offset.offset, 1
+        inst.src(0), inst.extra<CoerceStk>()->offset, 1
       };
       return may_raise(inst, may_load_store(stk, stk));
     }
@@ -1107,7 +1108,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(
       AStack {
         inst.src(0),
-        inst.extra<LdARFuncPtr>()->offset.offset + int32_t{kNumActRecCells} - 1,
+        inst.extra<LdARFuncPtr>()->offset + int32_t{kNumActRecCells} - 1,
         int32_t{kNumActRecCells}
       },
       AEmpty
@@ -1430,7 +1431,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       AliasClass effects = AStack {
         inst.src(2),
-        inst.extra<LookupClsMethod>()->offset.offset,
+        inst.extra<LookupClsMethod>()->offset,
         int32_t{kNumActRecCells}
       };
       return may_raise(inst, may_load_store(effects, effects));
@@ -1550,7 +1551,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgTrashStk:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      AStack { inst.src(0), inst.extra<DbgTrashStk>()->offset.offset, 1 }
+      AStack { inst.src(0), inst.extra<DbgTrashStk>()->offset, 1 }
     };
   case DbgTrashFrame:
     return GeneralEffects {
@@ -1560,8 +1561,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // SpillFrame's spOffset is to the bottom of where it will store the
         // ActRec, but AliasClass needs an offset to the highest cell it will
         // store.
-        inst.extra<DbgTrashFrame>()->offset.offset +
-          int32_t{kNumActRecCells} - 1,
+        inst.extra<DbgTrashFrame>()->offset + int32_t{kNumActRecCells} - 1,
         int32_t{kNumActRecCells}
       }
     };
@@ -1742,7 +1742,7 @@ std::string show(MemEffects effects) {
 AliasClass inline_fp_frame(const IRInstruction* inst) {
   return AStack {
     inst->src(0),
-    inst->extra<DefInlineFP>()->spOffset.offset + int32_t{kNumActRecCells} - 1,
+    inst->extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
     int32_t{kNumActRecCells}
   };
 }

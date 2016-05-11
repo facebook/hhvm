@@ -442,7 +442,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
       };
     case AssertStk:
       return AliasClass {
-        AStack { inst.src(0), inst.extra<AssertStk>()->offset.offset, 1 }
+        AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 }
       };
     default: break;
     }

@@ -262,6 +262,7 @@ void deepCopy(TypedValue* tv) {
         default:
           assertx(false);
       }
+      assert(obj != tv->m_data.pobj || tv->m_data.pobj->hasMultipleRefs());
       decRefObj(tv->m_data.pobj);
       tv->m_data.pobj = obj;
       return;

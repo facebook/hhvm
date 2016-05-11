@@ -74,7 +74,6 @@ c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Pair*>(obj);
   auto pair = static_cast<c_Pair*>(obj->cloneImpl());
   assertx(thiz->isFullyConstructed());
-  pair->incRefCount();
   pair->m_size = 2;
   cellDup(thiz->elm0, pair->elm0);
   cellDup(thiz->elm1, pair->elm1);

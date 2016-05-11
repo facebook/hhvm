@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_FRAME_STATE_H_
 #define incl_HPHP_JIT_FRAME_STATE_H_
 
+#include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -126,6 +127,7 @@ struct MBaseState {
  */
 struct MBRState {
   SSATmp* ptr{nullptr};
+  AliasClass pointee{AUnknownTV};
   Type ptrType{TPtrToGen};
 };
 

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/frame-state.h"
 
+#include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -151,6 +152,7 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     dst.mbr.ptr = nullptr;
     changed = true;
   }
+  changed |= merge_util(dst.mbr.pointee, dst.mbr.pointee | src.mbr.pointee);
   changed |= merge_util(dst.mbr.ptrType, dst.mbr.ptrType | src.mbr.ptrType);
 
   // The tracked FPI state must always be the same, notice that the size of the
@@ -703,6 +705,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case StMBase: {
     auto const mbr = inst->src(0);
     cur().mbr.ptr = mbr;
+    cur().mbr.pointee = mbr ? pointee(mbr) : AUnknownTV;
     cur().mbr.ptrType = mbr->type();
     cur().mbase.value = nullptr;
   } break;
@@ -745,7 +748,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   // We don't update tracked local types for pseudomains, but we do care about
   // stack types.
   auto const isPM = cur().curFunc->isPseudoMain();
-  auto const base = inst->src(minstrBaseIdx(inst->op()));
+  auto const base = cur().mbr.pointee;
 
   auto const effect_on = [&] (Type ty) -> folly::Optional<Type> {
     auto const effects = MInstrEffects(inst->op(), ty);
@@ -755,17 +758,37 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     return folly::none;
   };
 
-  // When the member base register refers to a single known memory location `l'
-  // (with corresponding Ptr type `kind'), we apply the effect of `inst' only
-  // to `l'.  Returns the member base value type if `inst' had an effect.
-  auto const apply_one = [&] (Location l, Ptr kind) -> folly::Optional<Type> {
-    if (auto const ptrTy = effect_on(typeOf(l).ptr(kind))) {
-      auto const baseTy = ptrTy->derefIfPtr();
-      setType(l, baseTy <= TBoxedCell ? TBoxedInitCell : baseTy);
-      return baseTy;
+  if (base.isSingleLocation()) {
+    // When the member base register refers to a single known memory location
+    // `l' (with corresponding Ptr type `kind'), we apply the effect of `inst'
+    // only to `l'.  Returns the base value type if `inst' had an effect.
+    auto const apply_one = [&] (Location l, Ptr kind) -> folly::Optional<Type> {
+      auto const oldTy = typeOf(l) & TGen;  // exclude TCls from ptr()
+      if (auto const ptrTy = effect_on(oldTy.ptr(kind))) {
+        auto const baseTy = ptrTy->derefIfPtr();
+        setType(l, baseTy <= TBoxedCell ? TBoxedInitCell : baseTy);
+        return baseTy;
+      }
+      return folly::none;
+    };
+
+    if (auto const bframe = base.frame()) {
+      if (!isPM) {
+        auto const l = loc(bframe->ids.singleValue());
+        if (auto const ty = apply_one(l, Ptr::Frame)) {
+          if (*ty <= TBoxedCell) setBoxedPrediction(l, *ty);
+        }
+      }
     }
-    return folly::none;
-  };
+    if (auto const bstack = base.stack()) {
+      assertx(bstack->size == 1);
+      auto const l = stk(bstack->offset.to<IRSPRelOffset>(irSPOff()));
+      apply_one(l, Ptr::Stk);
+    }
+
+    // We don't track anything else.
+    return;
+  }
 
   // If we don't know exactly where the base is, we have to be conservative and
   // apply the operation to all locals/stack slots that could be affected.
@@ -790,32 +813,20 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     }
   };
 
-  if (base->inst()->is(LdStkAddr)) {
-    auto const offset = base->inst()->extra<LdStkAddr>()->offset;
-    apply_one(stk(offset), Ptr::Stk);
-  } else if (base->inst()->is(LdLocAddr)) {
-    if (isPM) return;
-    auto const locID = base->inst()->extra<LdLocAddr>()->locId;
-    auto const l = loc(locID);
-
-    if (auto const ty = apply_one(l, Ptr::Frame)) {
-      if (*ty <= TBoxedCell) {
-        setBoxedPrediction(l, *ty);
-      }
-    }
-  } else {
-    Trace::Indent indent;
-
-    if (base->type().maybe(TPtrToFrameGen) && !isPM) {
-      for (auto i = 0; i < cur().locals.size(); ++i) {
+  if (base.maybe(AFrameAny) && !isPM) {
+    for (auto i = 0; i < cur().locals.size(); ++i) {
+      if (base.maybe(AFrame { fp(), i })) {
         apply(loc(i));
       }
     }
-    if (base->type().maybe(TPtrToStkGen)) {
-      for (auto i = 0; i < cur().stack.size(); ++i) {
-        // The FPInvOffset of the stack slot is just its 1-indexed slot.
-        auto const spRel = FPInvOffset{i + 1}.to<IRSPRelOffset>(cur().irSPOff);
-        apply(stk(spRel));
+  }
+
+  if (base.maybe(AStackAny)) {
+    for (auto i = 0; i < cur().stack.size(); ++i) {
+      // The FPInvOffset of the stack slot is just its 1-indexed slot.
+      auto const fpRel = -FPInvOffset{i + 1};
+      if (base.maybe(AStack { fpRel, 1 })) {
+        apply(stk(fpRel.to<IRSPRelOffset>(irSPOff())));
       }
     }
   }

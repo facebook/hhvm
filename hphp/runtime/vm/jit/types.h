@@ -64,24 +64,26 @@ using LiteralMap = hphp_hash_map<uint64_t,const uint64_t*>;
 /**
  * The different kinds of translations that the JIT generates:
  *
- *   - Anchor   : a service request for retranslating
- *   - Prologue : function prologue
- *   - Interp   : a service request to interpret at least one instruction
- *   - Live     : translate one tracelet by inspecting live VM state
- *   - Profile  : translate one block by inspecting live VM state and
- *                inserting profiling counters
- *   - Optimize : translate one region performing optimizations that may
- *                leverage data collected by Profile translations
- *   - Proflogue: a profiling function prologue
+ *   - Anchor       : a service request for retranslating
+ *   - Interp       : a service request to interpret at least one instruction
+ *   - Live         : translate one tracelet by inspecting live VM state
+ *   - Profile      : translate one block by inspecting live VM state and
+ *                    inserting profiling counters
+ *   - Optimize     : translate one region performing optimizations that may
+ *                    leverage data collected by Profile translations
+ *   - LivePrologue : prologue for a function being JITed in Live mode
+ *   - ProfPrologue : prologue for a function being JITed in Profile mode
+ *   - OptPrologue  : prologue for a function being JITed in Optimize mode
  */
 #define TRANS_KINDS \
     DO(Anchor)      \
-    DO(Prologue)    \
     DO(Interp)      \
     DO(Live)        \
     DO(Profile)     \
     DO(Optimize)    \
-    DO(Proflogue)   \
+    DO(LivePrologue)\
+    DO(ProfPrologue)\
+    DO(OptPrologue) \
     DO(Invalid)     \
 
 enum class TransKind {

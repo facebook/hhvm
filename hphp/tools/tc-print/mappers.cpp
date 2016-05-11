@@ -109,8 +109,9 @@ ExtOpcode getExtOpcode(TCA addr,
 
   always_assert(trec);
 
-  if (trec->kind == TransKind::Prologue ||
-      trec->kind == TransKind::Proflogue) {
+  if (trec->kind == TransKind::LivePrologue ||
+      trec->kind == TransKind::ProfPrologue ||
+      trec->kind == TransKind::OptPrologue) {
     return ExtOpFuncPrologue;
   }
   if (isTraceletGuard(addr, trec)) return ExtOpTraceletGuard;
@@ -177,8 +178,9 @@ AddrToTransFragmentMapper::extractTransFragment(TCA addr, ExtOpcode opcode) {
       break;
 
     case ExtOpFuncPrologue:
-      always_assert(trec->kind == TransKind::Prologue ||
-                    trec->kind == TransKind::Proflogue);
+      always_assert(trec->kind == TransKind::LivePrologue ||
+                    trec->kind == TransKind::ProfPrologue ||
+                    trec->kind == TransKind::OptPrologue);
 
       tfragment.aStart       = trec->aStart;
       tfragment.aLen         = trec->aLen;

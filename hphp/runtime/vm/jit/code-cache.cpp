@@ -220,7 +220,7 @@ CodeCache::View CodeCache::view(bool hot, TransKind kind) {
   assertx(Translator::WriteLease().amOwner());
 
   // Profile takes precedence over hot.
-  if (kind == TransKind::Profile || kind == TransKind::Proflogue) {
+  if (kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
     return View{m_prof, m_frozen, m_frozen, m_data};
   }
 

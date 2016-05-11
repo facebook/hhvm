@@ -549,14 +549,17 @@ void printCFG() {
     uint32_t bcStart   = TREC(tid)->src.offset();
     uint32_t bcStop    = TREC(tid)->bcPast();
     uint32_t coldness  = 255 - (255 * profCount / maxProfCount);
-    bool isPrologue = TREC(tid)->kind == TransKind::Prologue;
+    const auto kind = TREC(tid)->kind;
+    bool isPrologue = kind == TransKind::LivePrologue ||
+                      kind == TransKind::OptPrologue;
     const char* shape = "box";
     switch (TREC(tid)->kind) {
-      case TransKind::Optimize: shape = "oval";         break;
-      case TransKind::Profile:  shape = "hexagon";      break;
-      case TransKind::Proflogue:
-      case TransKind::Prologue: shape = "invtrapezium"; break;
-      default:                  shape = "box";
+      case TransKind::Optimize:     shape = "oval";         break;
+      case TransKind::Profile:      shape = "hexagon";      break;
+      case TransKind::LivePrologue:
+      case TransKind::ProfPrologue:
+      case TransKind::OptPrologue : shape = "invtrapezium"; break;
+      default:                      shape = "box";
     }
     printf("t%u [shape=%s,label=\"T: %u\\np: %" PRIu64 "\\nbc: [0x%x-0x%x)\","
            "style=filled,fillcolor=\"#ff%02x%02x\"%s];\n", tid, shape, tid,

@@ -789,13 +789,15 @@ MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
   return false;
 }
 
-TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
+TCA MCGenerator::emitFuncPrologue(Func* func, int argc,
+                                  bool forRegeneratePrologue) {
   const int nparams = func->numNonVariadicParams();
   const int paramIndex = argc <= nparams ? argc : nparams + 1;
 
   auto const funcBody = SrcKey{func, func->getEntryForNumArgs(argc), false};
-  auto const kind = profileSrcKey(funcBody) ? TransKind::Proflogue
-                                            : TransKind::Prologue;
+  auto const kind = profileSrcKey(funcBody) ? TransKind::ProfPrologue :
+                    forRegeneratePrologue   ? TransKind::OptPrologue  :
+                                              TransKind::LivePrologue;
 
   profileSetHotFuncAttr();
   auto code = m_code.view(func->attrs() & AttrHot, kind);
@@ -867,7 +869,9 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
         this, func->fullName()->data(), argc, start);
   func->setPrologue(paramIndex, start);
 
-  assertx(kind == TransKind::Prologue || kind == TransKind::Proflogue);
+  assertx(kind == TransKind::LivePrologue ||
+          kind == TransKind::ProfPrologue ||
+          kind == TransKind::OptPrologue);
 
   auto tr = maker.rec(funcBody, kind);
   m_tx.addTranslation(tr);
@@ -905,7 +909,7 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   if (forRegeneratePrologue) {
     if (!shouldTranslateNoSizeLimit(func)) return nullptr;
   } else {
-    if (!shouldTranslate(func, TransKind::Prologue)) return nullptr;
+    if (!shouldTranslate(func, TransKind::LivePrologue)) return nullptr;
   }
 
   // Double check the prologue array now that we have the write lease
@@ -913,7 +917,7 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
   try {
-    return emitFuncPrologue(func, nPassed);
+    return emitFuncPrologue(func, nPassed, forRegeneratePrologue);
   } catch (const DataBlockFull& dbFull) {
 
     // Fail hard if the block isn't code.hot.
@@ -924,7 +928,7 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
     // Otherwise, fall back to code.main and retry.
     m_code.disableHot();
     try {
-      return emitFuncPrologue(func, nPassed);
+      return emitFuncPrologue(func, nPassed, forRegeneratePrologue);
     } catch (const DataBlockFull& dbFull) {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
                          dbFull.name, dbFull.what());

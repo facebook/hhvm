@@ -358,7 +358,7 @@ private:
   TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody);
   TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
                          bool& emittedDVInit);
-  TCA emitFuncPrologue(Func* func, int nPassed);
+  TCA emitFuncPrologue(Func* func, int nPassed, bool forRegeneratePrologue);
   bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
   bool profileSrcKey(SrcKey sk) const;

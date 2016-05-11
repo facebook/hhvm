@@ -154,10 +154,11 @@ private:
 
       // fallthrough
     case TransKind::Anchor:
-    case TransKind::Prologue:
     case TransKind::Interp:
     case TransKind::Live:
-    case TransKind::Proflogue:
+    case TransKind::LivePrologue:
+    case TransKind::ProfPrologue:
+    case TransKind::OptPrologue:
     case TransKind::Invalid:
       return rds::Link<T>(rds::kInvalidHandle);
     }

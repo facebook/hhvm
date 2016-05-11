@@ -98,7 +98,7 @@ struct ProfTransRec {
   ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region);
 
   /*
-   * Construct a ProfTransRec for a Proflogue.
+   * Construct a ProfTransRec for a ProfPrologue.
    */
   ProfTransRec(SrcKey sk, int nArgs);
   ~ProfTransRec();
@@ -108,7 +108,7 @@ struct ProfTransRec {
   FuncId funcId() const { return m_sk.funcID(); }
   Func* func() const { return const_cast<Func*>(m_sk.func()); }
   bool isProfile() const { return m_kind == TransKind::Profile; }
-  bool isProflogue() const { return m_kind == TransKind::Proflogue; }
+  bool isProflogue() const { return m_kind == TransKind::ProfPrologue; }
 
   /*
    * First BC offset in this translation.
@@ -148,24 +148,24 @@ struct ProfTransRec {
   /*
    * Number of arguments for this proflogue.
    *
-   * Precondition: kind() == TransKind::Proflogue
+   * Precondition: kind() == TransKind::ProfPrologue
    */
   int prologueArgs() const {
-    assertx(m_kind == TransKind::Proflogue);
+    assertx(m_kind == TransKind::ProfPrologue);
     return m_prologueArgs;
   }
 
   /*
    * All calls in the TC which target this proflogue (directly|via the guard).
    *
-   * Precondition: kind() == TransKind::Proflogue
+   * Precondition: kind() == TransKind::ProfPrologue
    */
   const std::vector<TCA>& mainCallers() const {
-    assertx(m_kind == TransKind::Proflogue);
+    assertx(m_kind == TransKind::ProfPrologue);
     return m_callers.main;
   }
   const std::vector<TCA>& guardCallers() const {
-    assertx(m_kind == TransKind::Proflogue);
+    assertx(m_kind == TransKind::ProfPrologue);
     return m_callers.guard;
   }
 
@@ -173,14 +173,14 @@ struct ProfTransRec {
    * (Record|Erase) a call at address caller (directly|via the guard) to this
    * proflogue.
    *
-   * Precondition: kind() == TransKind::Proflogue
+   * Precondition: kind() == TransKind::ProfPrologue
    */
   void addMainCaller(TCA caller) {
-    assertx(m_kind == TransKind::Proflogue);
+    assertx(m_kind == TransKind::ProfPrologue);
     m_callers.main.emplace_back(caller);
   }
   void addGuardCaller(TCA caller) {
-    assertx(m_kind == TransKind::Proflogue);
+    assertx(m_kind == TransKind::ProfPrologue);
     m_callers.guard.emplace_back(caller);
   }
   void removeMainCaller(TCA caller) { removeCaller(m_callers.main, caller); }
@@ -189,10 +189,10 @@ struct ProfTransRec {
   /*
    * Erase the record of all calls to this proflogue.
    *
-   * Precondition: kind() == TransKind::Proflogue
+   * Precondition: kind() == TransKind::ProfPrologue
    */
   void clearAllCallers() {
-    assertx(m_kind == TransKind::Proflogue);
+    assertx(m_kind == TransKind::ProfPrologue);
     m_callers.main.clear();
     m_callers.guard.clear();
   }
@@ -203,7 +203,7 @@ private:
   };
 
   void removeCaller(std::vector<TCA>& v, TCA caller) {
-    assertx(m_kind == TransKind::Proflogue);
+    assertx(m_kind == TransKind::ProfPrologue);
     auto pos = std::find(v.begin(), v.end(), caller);
     if (pos != v.end()) v.erase(pos);
   }
@@ -217,7 +217,7 @@ private:
   SrcKey m_sk;
   union {
     RegionDescPtr m_region; // for TransProfile translations
-    CallerRec m_callers; // for TransProflogue translations
+    CallerRec m_callers; // for TransProfPrologue translations
   };
 };
 

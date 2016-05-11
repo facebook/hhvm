@@ -43,7 +43,7 @@ ProfTransRec::ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region)
 }
 
 ProfTransRec::ProfTransRec(SrcKey sk, int nArgs)
-    : m_kind(TransKind::Proflogue)
+    : m_kind(TransKind::ProfPrologue)
     , m_prologueArgs(nArgs)
     , m_sk(sk)
     , m_callers()
@@ -54,7 +54,7 @@ ProfTransRec::~ProfTransRec() {
     m_region.~RegionDescPtr();
     return;
   }
-  assertx(m_kind == TransKind::Proflogue);
+  assertx(m_kind == TransKind::ProfPrologue);
   m_callers.~CallerRec();
 }
 

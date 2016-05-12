@@ -159,27 +159,30 @@ void objOffsetUnset(ObjectData* base, TypedValue offset);
 
 [[noreturn]] void unknownBaseType(const TypedValue*);
 
-template <bool warn>
+template <MOpFlags flags>
 inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
-  auto const result = warn ? base->nvTryGet(key) : base->nvGet(key);
-  return result ? result : null_variant.asTypedValue();
+  return (flags & MOpFlags::Warn) ? base->nvTryGet(key) : base->nvGet(key);
 }
 
-template <bool warn>
+template <MOpFlags flags>
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
+  auto constexpr warn = flags & MOpFlags::Warn;
   int64_t n;
-  auto const result = !base->convertKey(key, n)
-    ? (warn ? base->nvTryGet(key) : base->nvGet(key))
-    : (warn ? base->nvTryGet(n) : base->nvGet(n));
-  return result ? result : null_variant.asTypedValue();
+  return base->convertKey(key, n)
+    ? (warn ? base->nvTryGet(n) : base->nvGet(n))
+    : (warn ? base->nvTryGet(key) : base->nvGet(key));
 }
 
-template <bool warn>
+template <MOpFlags flags>
 inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
-  auto dt = key.m_type;
-  if (dt == KindOfInt64)  return ElemArrayPre<warn>(base, key.m_data.num);
-  if (isStringType(dt)) return ElemArrayPre<warn>(base, key.m_data.pstr);
-  return ArrNR(base).asArray().rvalAtRef(cellAsCVarRef(key)).asTypedValue();
+  auto const dt = key.m_type;
+  if (isIntType(dt))    return ElemArrayPre<flags>(base, key.m_data.num);
+  if (isStringType(dt)) return ElemArrayPre<flags>(base, key.m_data.pstr);
+
+  // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
+  // be changed.
+  auto tv = ArrNR(base).asArray().rvalAtRef(cellAsCVarRef(key)).asTypedValue();
+  return tv->m_type != KindOfUninit ? tv : nullptr;
 }
 
 /**
@@ -187,19 +190,18 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
  */
 template <MOpFlags flags, KeyType keyType>
 inline const TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
-  auto constexpr warn = flags & MOpFlags::Warn;
-  auto result = ElemArrayPre<warn>(base, key);
+  auto result = ElemArrayPre<flags>(base, key);
 
-  // TODO(#3888164): this KindOfUninit check should not be necessary
-  if (UNLIKELY(result->m_type == KindOfUninit)) {
-    result = init_null_variant.asTypedValue();
-    if (warn) {
-      auto scratch = initScratchKey(key);
+  if (UNLIKELY(result == nullptr)) {
+    if (flags & MOpFlags::Warn) {
+      auto const scratch = initScratchKey(key);
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(&scratch).toString().data());
     }
+    return init_null_variant.asTypedValue();
   }
 
+  assertx(result->m_type != KindOfUninit);
   return result;
 }
 

@@ -102,9 +102,9 @@ struct CodeCache {
 
   /*
    * Return a View of this CodeCache, selecting blocks approriately depending
-   * on Func hotness and whether or not this is a profiling translation.
+   * on the kind of translation to be emitted.
    */
-  View view(bool hot = false, TransKind kind = TransKind::Invalid);
+  View view(TransKind kind = TransKind::Invalid);
 
   /*
    * Return the block containing addr.

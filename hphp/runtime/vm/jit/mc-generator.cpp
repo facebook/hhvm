@@ -800,7 +800,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc,
                                               TransKind::LivePrologue;
 
   profileSetHotFuncAttr();
-  auto code = m_code.view(func->attrs() & AttrHot, kind);
+  auto code = m_code.view(kind);
   TCA mainOrig = code.main().frontier();
   CGMeta fixups;
 
@@ -1752,7 +1752,7 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   // the translation process without the write lease, and wants us to make sure
   // we emit code here rather than throwing away the work already done.
   BlockingLeaseHolder write{Translator::WriteLease()};
-  auto code = m_code.view(sk.func()->attrs() & AttrHot, args.kind);
+  auto code = m_code.view(args.kind);
   auto const preAlignMain = code.main().frontier();
 
   if (args.align) {

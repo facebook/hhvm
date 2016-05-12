@@ -216,15 +216,16 @@ void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
-CodeCache::View CodeCache::view(bool hot, TransKind kind) {
+CodeCache::View CodeCache::view(TransKind kind) {
   assertx(Translator::WriteLease().amOwner());
 
-  // Profile takes precedence over hot.
   if (kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
     return View{m_prof, m_frozen, m_frozen, m_data};
   }
 
-  if (hot && m_useHot && m_hot.available() > kMinTranslationBytes) {
+  const bool isOpt = kind == TransKind::Optimize ||
+                     kind == TransKind::OptPrologue;
+  if (isOpt && m_useHot && m_hot.available() > kMinTranslationBytes) {
     return View{m_hot, m_cold, m_frozen, m_data};
   }
 

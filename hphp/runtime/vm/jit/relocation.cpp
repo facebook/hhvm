@@ -368,7 +368,7 @@ void liveRelocate(int time) {
   }
 
   CGMeta fixups;
-  auto& hot = mcg->code().view(true /* hot */).main();
+  auto& hot = mcg->code().view(TransKind::Optimize).main();
   relocate(relocs, hot, fixups);
 
   // Nothing other than reusedStubs should have data, and those don't need any

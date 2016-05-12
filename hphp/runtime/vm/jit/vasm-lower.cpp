@@ -14,14 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/vasm-lower.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
@@ -67,6 +69,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
   // Get the arguments in the proper registers.
   RegSet argRegs;
+  bool needsCopy;
   auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
     VregList argDests;
     for (size_t i = 0, n = srcs.size(); i < n; ++i) {
@@ -79,7 +82,34 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
                     v.makeTuple(std::move(argDests))};
     }
   };
-  doArgs(vargs.args, rarg);
+  switch(arch()) {
+  case Arch::X64:
+    {
+      doArgs(vargs.args, rarg);
+    }
+    break;
+  case Arch::ARM:
+    {
+      if (inst.indResult) {
+        if (vargs.args.size() > 0) {
+          // First arg is pointer to storage for the return value
+          auto const rreg = rret_indirect();
+          v << copy{vargs.args[0], rreg};
+          VregList rem(vargs.args.begin() + 1, vargs.args.end());
+          doArgs(rem, rarg);
+          needsCopy = true;
+        } else {
+          needsCopy = false;
+        }
+      } else {
+        doArgs(vargs.args, rarg);
+        needsCopy = false;
+      }
+    }
+    break;
+  default:
+    always_assert(false);
+  }
   doArgs(vargs.simdArgs, rarg_simd);
 
   // Emit the appropriate call instruction sequence.
@@ -118,6 +148,12 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   } else if (vcall.nothrow) {
     v << nothrow{};
   }
+
+  // Copy back the indirect result pointer in case of ARM
+  if (arch() == Arch::ARM && needsCopy) {
+    v << copy{rret_indirect(), rarg(0)};
+  }
+
   // For vinvoke, `inst' is no longer valid after this point.
 
   // Copy the call result to the destination register(s).

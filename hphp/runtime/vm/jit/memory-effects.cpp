@@ -1212,6 +1212,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ExitPlaceholder:
   case CheckRange:
   case ProfileObjClass:
+  case ProfileType:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
   case CheckARMagicFlag:

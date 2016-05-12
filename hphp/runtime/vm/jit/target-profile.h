@@ -20,8 +20,9 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/rds.h"
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 #include <folly/Optional.h>
 
@@ -339,6 +340,24 @@ struct ReleaseVVProfile {
     // Racy but OK -- just used for profiling to trigger optimization.
     a.executed += b.executed;
     a.released += b.released;
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * TypeProfile keeps the union of all the types observed during profiling.
+ */
+struct TypeProfile {
+  Type type; // this gets initialized with 0, which is TBottom
+  static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
+
+  void report(Type newType) {
+    type |= newType;
+  }
+
+  static void reduce(TypeProfile& a, const TypeProfile& b) {
+    a.report(b.type);
   }
 };
 

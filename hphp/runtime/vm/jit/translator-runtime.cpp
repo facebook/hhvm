@@ -763,6 +763,11 @@ void profileObjClassHelper(ClassProfile* profile, ObjectData* obj) {
   profile->reportClass(obj->getVMClass());
 }
 
+void profileTypeHelper(TypeProfile* profile, TypedValue newTV) {
+  auto newType = typeFromTV(&newTV);
+  profile->report(newType);
+}
+
 Cell lookupCnsUHelper(const TypedValue* tv,
                       StringData* nm,
                       StringData* fallback) {

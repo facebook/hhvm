@@ -519,6 +519,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfilePackedArray:
   case ProfileStructArray:
   case ProfileObjClass:
+  case ProfileType:
   case CheckPackedArrayBounds:
   case LdStructArrayElem:
   case LdVectorSize:

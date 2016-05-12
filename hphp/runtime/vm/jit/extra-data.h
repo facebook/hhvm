@@ -1215,6 +1215,7 @@ X(ProfileMixedArrayOffset,      RDSHandleData);
 X(ProfilePackedArray,           RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
 X(ProfileObjClass,              RDSHandleData);
+X(ProfileType,                  RDSHandleData);
 X(LdRDSAddr,                    RDSHandleData);
 X(BaseG,                        MOpFlagsData);
 X(PropX,                        MOpFlagsData);

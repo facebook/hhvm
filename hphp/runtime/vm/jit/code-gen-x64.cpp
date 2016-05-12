@@ -5557,6 +5557,15 @@ void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
                argGroup(inst).reg(profile).ssa(0));
 }
 
+void CodeGenerator::cgProfileType(IRInstruction* inst) {
+  auto const extra = inst->extra<RDSHandleData>();
+  auto& v = vmain();
+  auto const profile = v.makeReg();
+  v << lea{rvmtl()[extra->handle], profile};
+  cgCallHelper(v, CallSpec::direct(profileTypeHelper), kVoidDest,
+               SyncOptions::None, argGroup(inst).reg(profile).typedValue(0));
+}
+
 void CodeGenerator::cgSetOpCell(IRInstruction* inst) {
   auto const op = inst->extra<SetOpData>()->op;
   auto const helper = [&] {

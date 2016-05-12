@@ -202,9 +202,6 @@ inline int maxFCallBuiltinArgs() {
 #ifdef __AARCH64EL__
   return kMaxFCallBuiltinArgsARM;
 #else
-  if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
-    return kMaxFCallBuiltinArgsARM;
-  }
   return kMaxBuiltinArgs;
 #endif
 }
@@ -214,9 +211,6 @@ inline bool allowFCallBuiltinDoubles() {
 #ifdef __AARCH64EL__
   return false;
 #else
-  if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
-    return false;
-  }
   return true;
 #endif
 }

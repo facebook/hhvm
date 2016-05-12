@@ -148,20 +148,14 @@ void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
 }
 
 void FixupMap::fixup(ExecutionContext* ec) const {
-  if (RuntimeOption::EvalSimulateARM) {
-    // Walking the C++ stack doesn't work in simulation mode. Fortunately, the
-    // execution context has a stack of simulators, which we consult instead.
-    fixupWorkSimulated(ec);
-  } else {
-    // Start looking for fixup entries at the current (C++) frame.  This
-    // will walk the frames upward until we find a TC frame.
-    DECLARE_FRAME_POINTER(framePtr);
-    // In order to avoid tail call elimination optimization issues, grab the
-    // parent frame pointer in order make sure this pointer is valid. The
-    // fixupWork() looks for a TC frame, and we never call fixup() directly
-    // from the TC, so skipping this frame isn't a problem.
-    fixupWork(ec, framePtr->m_sfp);
-  }
+  // Start looking for fixup entries at the current (C++) frame.  This
+  // will walk the frames upward until we find a TC frame.
+  DECLARE_FRAME_POINTER(framePtr);
+  // In order to avoid tail call elimination optimization issues, grab the
+  // parent frame pointer in order make sure this pointer is valid. The
+  // fixupWork() looks for a TC frame, and we never call fixup() directly
+  // from the TC, so skipping this frame isn't a problem.
+  fixupWork(ec, framePtr->m_sfp);
 }
 
 /* This is somewhat hacky. It decides which helpers/builtins should

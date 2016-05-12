@@ -33,9 +33,6 @@ static size_t numGPRegArgs() {
 #elif defined(__powerpc64__)
   return 31;
 #else // amd64
-  if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
-    return 8;
-  }
   return 6; // rdi, rsi, rdx, rcx, r8, r9
 #endif
 }

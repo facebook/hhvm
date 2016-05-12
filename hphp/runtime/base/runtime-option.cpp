@@ -435,8 +435,7 @@ static inline bool pgoDefault() {
 #ifdef HHVM_NO_DEFAULT_PGO
   return false;
 #else
-  // TODO(3496304)
-  return !RuntimeOption::EvalSimulateARM;
+  return true;
 #endif
 }
 
@@ -463,19 +462,6 @@ static inline bool evalJitDefault() {
 #else
   return true;
 #endif
-}
-
-static inline bool simulateARMDefault() {
-#ifdef HHVM_SIMULATE_ARM_BY_DEFAULT
-  return true;
-#else
-  return false;
-#endif
-}
-
-static inline bool jitPseudomainDefault() {
-  // TODO(#4238120)
-  return !RuntimeOption::EvalSimulateARM;
 }
 
 static inline bool reuseTCDefault() {

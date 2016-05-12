@@ -750,6 +750,9 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   auto const isPM = cur().curFunc->isPseudoMain();
   auto const base = cur().mbr.pointee;
 
+  auto const baseTmp = inst->src(minstrBaseIdx(inst->op()));
+  if (!baseTmp->type().maybe(TPtrToGen)) return;
+
   auto const effect_on = [&] (Type ty) -> folly::Optional<Type> {
     auto const effects = MInstrEffects(inst->op(), ty);
     if (effects.baseTypeChanged || effects.baseValChanged) {

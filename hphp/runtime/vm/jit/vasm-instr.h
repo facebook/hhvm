@@ -212,8 +212,10 @@ struct Vunit;
   O(testqim, I(s0), U(s1), D(sf))\
   /* conditional operations */\
   O(cloadq, I(cc), U(sf) U(f) U(t), D(d))\
-  O(cmovb, I(cc), U(sf) U(f) U(t), D(d))\
-  O(cmovq, I(cc), U(sf) U(f) U(t), D(d))\
+  O(cmovb, I(cc), U(sf) UH(f,d) U(t), DH(d,f))\
+  O(cmovw, I(cc), U(sf) UH(f,d) U(t), DH(d,f))\
+  O(cmovl, I(cc), U(sf) UH(f,d) U(t), DH(d,f))\
+  O(cmovq, I(cc), U(sf) UH(f,d) U(t), DH(d,f))\
   O(setcc, I(cc), U(sf), D(d))\
   /* load effective address */\
   O(lea, Inone, U(s), D(d))\
@@ -222,6 +224,7 @@ struct Vunit;
   /* copies */\
   O(movb, Inone, UH(s,d), DH(d,s))\
   O(movl, Inone, UH(s,d), DH(d,s))\
+  O(movzbw, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(movzbq, Inone, UH(s,d), DH(d,s))\
   O(movzlq, Inone, UH(s,d), DH(d,s))\
@@ -979,6 +982,8 @@ struct testqim { Immed s0; Vptr s1; VregSF sf; };
 struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
 // d = condition ? t : f
 struct cmovb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
+struct cmovw { ConditionCode cc; VregSF sf; Vreg16 f, t, d; };
+struct cmovl { ConditionCode cc; VregSF sf; Vreg32 f, t, d; };
 struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
 // d = condition ? 1 : 0
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
@@ -997,6 +1002,7 @@ struct lead { VdataPtr<void> s; Vreg64 d; };
 struct movb { Vreg8 s, d; };
 struct movl { Vreg32 s, d; };
 // zero-extended s to d
+struct movzbw { Vreg8 s; Vreg16 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct movzbq { Vreg8 s; Vreg64 d; };
 struct movzlq { Vreg32 s; Vreg64 d; };
@@ -1221,9 +1227,10 @@ bool isBlockEnd(const Vinstr& inst);
  * The register width specification of `op'.
  *
  * If `op' is an instruction whose non-flags register arguments are all a
- * certain width, return that width; otherwise, return Width::Any.
+ * certain width, return that width; otherwise, return Width::AnyNF (anything
+ * but a flags reg).
  *
- * In particular, Width::Any is returned for intrinsics, architecture-specific
+ * In particular, Width::AnyNF is returned for intrinsics, architecture-specific
  * instructions, zero-extending or truncating reg moves, branches, pushes/pops,
  * and floating-point conversions.  All other instructions have operands of
  * fixed and uniform width.

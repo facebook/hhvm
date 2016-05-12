@@ -119,6 +119,7 @@ inline Reg Vr<Reg>::asReg() const {
 
 inline std::string show(Width w) {
   switch (w) {
+    case Width::None:  return "Vreg{-}";
     case Width::Byte:  return "Vreg8";
     case Width::Word:  return "Vreg16";
     case Width::Long:  return "Vreg32";
@@ -126,10 +127,12 @@ inline std::string show(Width w) {
     case Width::Octa:  return "Vreg128";
     case Width::Dbl:   return "VregDbl";
     case Width::Flags: return "VregSF";
+    case Width::Wide:  return "Vreg{128,Dbl}";
     case Width::WordN: return "Vreg{8,16}";
     case Width::LongN: return "Vreg{8,16,32}";
     case Width::QuadN: return "Vreg{8,16,32,64}";
-    case Width::Any:   return "Vreg";
+    case Width::AnyNF: return "Vreg{8,16,32,64,128,Dbl}";
+    case Width::Any:   return "Vreg{8,16,32,64,128,Dbl,SF}";
   }
   not_reached();
 }

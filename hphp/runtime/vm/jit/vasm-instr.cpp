@@ -151,6 +151,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::nop:
     case Vinstr::ud2:
     // zero-extending/truncating copies
+    case Vinstr::movzbw:
     case Vinstr::movzbl:
     case Vinstr::movzbq:
     case Vinstr::movzlq:
@@ -198,7 +199,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::xscvsxddp:
     case Vinstr::xxlxor:
     case Vinstr::xxpermdi:
-      return Width::Any;
+      return Width::AnyNF;
 
     case Vinstr::andb:
     case Vinstr::andbi:
@@ -226,6 +227,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::incw:
     case Vinstr::incwm:
     case Vinstr::orwim:
+    case Vinstr::cmovw:
     case Vinstr::cmpwim:
     case Vinstr::testwim:
     case Vinstr::loadw:
@@ -248,6 +250,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::subl:
     case Vinstr::subli:
     case Vinstr::xorl:
+    case Vinstr::cmovl:
     case Vinstr::cmpl:
     case Vinstr::cmpli:
     case Vinstr::cmplm:

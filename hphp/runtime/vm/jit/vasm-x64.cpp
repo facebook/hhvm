@@ -134,6 +134,8 @@ struct Vgen {
   void emit(const cloadq& i);
   template<class cmov> void emit_cmov(const cmov& i);
   void emit(const cmovb& i) { emit_cmov(i); }
+  void emit(const cmovw& i) { emit_cmov(i); }
+  void emit(const cmovl& i) { emit_cmov(i); }
   void emit(const cmovq& i) { emit_cmov(i); }
   void emit(const cmpb& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
@@ -187,6 +189,7 @@ struct Vgen {
   void emit(const loadzlq& i) { a.loadl(i.s, Reg32(i.d)); }
   void emit(const movb& i) { a.movb(i.s, i.d); }
   void emit(const movl& i) { a.movl(i.s, i.d); }
+  void emit(const movzbw& i) { a.movzbl(i.s, Reg32(i.d)); }
   void emit(const movzbl& i) { a.movzbl(i.s, i.d); }
   void emit(const movzbq& i) { a.movzbl(i.s, Reg32(i.d)); }
   void emit(const movzlq& i) { a.movl(i.s, Reg32(i.d)); }
@@ -261,6 +264,7 @@ struct Vgen {
 private:
   // helpers
   void prep(Reg8 s, Reg8 d) { if (s != d) a.movb(s, d); }
+  void prep(Reg16 s, Reg16 d) { if (s != d) a.movw(s, d); }
   void prep(Reg32 s, Reg32 d) { if (s != d) a.movl(s, d); }
   void prep(Reg64 s, Reg64 d) { if (s != d) a.movq(s, d); }
   void prep(RegXMM s, RegXMM d) { if (s != d) a.movdqa(s, d); }

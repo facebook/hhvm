@@ -91,10 +91,15 @@ bool simplify_impl(Env& env, Vlabel b, size_t i, Simplify simplify) {
     // Update use counts and def instructions for to-be-added instructions.
     for (auto const& inst : blocks[Vlabel(v)].code) {
       visitUses(unit, inst, [&] (Vreg r) {
-        assertx(r < env.use_counts.size());
+        if (r >= env.use_counts.size()) {
+          env.use_counts.resize(size_t{r}+1);
+        }
         ++env.use_counts[r];
       });
       visitDefs(unit, inst, [&] (Vreg r) {
+        if (r >= env.def_insts.size()) {
+          env.def_insts.resize(size_t{r}+1, Vinstr::nop);
+        }
         env.def_insts[r] = inst.op;
       });
     }
@@ -152,6 +157,85 @@ bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
       return 2;
     });
   });
+}
+
+// Turn a cmov of a certain width into a matching setcc instruction if the
+// conditions are correct (both sources are constants of value 0 or 1).
+template <typename Inst, typename Extend>
+bool cmov_impl(Env& env, const Inst& inst, Vlabel b, size_t i, Extend extend) {
+  auto const t_it = env.unit.regToConst.find(inst.t);
+  if (t_it == env.unit.regToConst.end()) return false;
+  auto const f_it = env.unit.regToConst.find(inst.f);
+  if (f_it == env.unit.regToConst.end()) return false;
+
+  auto const check_const = [](Vconst c, bool& val) {
+    if (c.isUndef) return false;
+    switch (c.kind) {
+      case Vconst::Quad:
+      case Vconst::Long:
+      case Vconst::Byte:
+        if (c.val == 0) {
+          val = false;
+          return true;
+        } else if (c.val == 1) {
+          val = true;
+          return true;
+        } else {
+          return false;
+        }
+      case Vconst::Double:
+        return false;
+    }
+    not_reached();
+  };
+
+  bool t_val;
+  if (!check_const(t_it->second, t_val)) return false;
+  bool f_val;
+  if (!check_const(f_it->second, f_val)) return false;
+
+  return simplify_impl(
+    env, b, i, [&] (Vout& v) {
+      auto const d = env.unit.makeReg();
+      if (t_val == f_val) {
+        v << copy{env.unit.makeConst(t_val), d};
+      } else if (t_val) {
+        v << setcc{inst.cc, inst.sf, d};
+      } else {
+        v << setcc{ccNegate(inst.cc), inst.sf, d};
+      }
+      extend(v, d, inst.d);
+      return 1;
+    }
+  );
+}
+
+bool simplify(Env& env, const cmovb& inst, Vlabel b, size_t i) {
+  return cmov_impl(
+    env, inst, b, i,
+    [](Vout& v, Vreg8 src, Vreg dest) { v << copy{src, dest}; }
+  );
+}
+
+bool simplify(Env& env, const cmovw& inst, Vlabel b, size_t i) {
+  return cmov_impl(
+    env, inst, b, i,
+    [](Vout& v, Vreg8 src, Vreg dest) { v << movzbw{src, dest}; }
+  );
+}
+
+bool simplify(Env& env, const cmovl& inst, Vlabel b, size_t i) {
+  return cmov_impl(
+    env, inst, b, i,
+    [](Vout& v, Vreg8 src, Vreg dest) { v << movzbl{src, dest}; }
+  );
+}
+
+bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
+  return cmov_impl(
+    env, inst, b, i,
+    [](Vout& v, Vreg8 src, Vreg dest) { v << movzbq{src, dest}; }
+  );
 }
 
 bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {

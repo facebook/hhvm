@@ -39,6 +39,18 @@ struct ImmFolder {
   explicit ImmFolder(jit::vector<bool>&& used_in)
   : used(std::move(used_in)) { }
 
+  template <typename T, typename M>
+  void extend_truncate_impl(T& in, Vinstr& out, M match) {
+    int val;
+    if (match(in.s, val)) {
+      out = copy{in.s, in.d};
+      if (in.d.isVirt()) {
+        valid.set(in.d);
+        vals[in.d] = val;
+      }
+    }
+  }
+
   // helpers
   bool match_byte(Vreg r, int& val) {
     if (!valid.test(r)) return false;
@@ -184,35 +196,25 @@ struct ImmFolder {
       }
     }
   }
+  void fold(movzbw& in, Vinstr& out) {
+    extend_truncate_impl(
+      in, out, [this](Vreg reg, int& val) { return match_byte(reg, val); }
+    );
+  }
   void fold(movzbl& in, Vinstr& out) {
-    int val;
-    if (match_byte(in.s, val)) {
-      out = copy{in.s, in.d};
-      if (in.d.isVirt()) {
-        valid.set(in.d);
-        vals[in.d] = val;
-      }
-    }
+    extend_truncate_impl(
+      in, out, [this](Vreg reg, int& val) { return match_byte(reg, val); }
+    );
   }
   void fold(movtql& in, Vinstr& out) {
-    int val;
-    if (match_int(in.s, val)) {
-      out = copy{in.s, in.d};
-      if (in.d.isVirt()) {
-        valid.set(in.d);
-        vals[in.d] = val;
-      }
-    }
+    extend_truncate_impl(
+      in, out, [this](Vreg reg, int& val) { return match_int(reg, val); }
+    );
   }
   void fold(movtqb& in, Vinstr& out) {
-    int val;
-    if (match_byte(in.s, val)) {
-      out = copy{in.s, in.d};
-      if (in.d.isVirt()) {
-        valid.set(in.d);
-        vals[in.d] = val;
-      }
-    }
+    extend_truncate_impl(
+      in, out, [this](Vreg reg, int& val) { return match_byte(reg, val); }
+    );
   }
   void fold(copy& in, Vinstr& out) {
     if (in.d.isVirt() && valid.test(in.s)) {

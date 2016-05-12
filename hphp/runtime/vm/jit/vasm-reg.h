@@ -213,6 +213,7 @@ inline Reg64 r64(Vreg64 r) { return r; }
  * please.
  */
 enum class Width : uint8_t {
+  None  = 0,
   Byte  = 1,
   Word  = 1 << 1,
   Long  = 1 << 2,
@@ -220,15 +221,26 @@ enum class Width : uint8_t {
   Octa  = 1 << 4,
   Dbl   = 1 << 5,
   Flags = 1 << 6,
+  Wide  = Octa | Dbl,
   // X-or-narrower widths.
   WordN = Byte | Word,
   LongN = Byte | Word | Long,
   QuadN = Byte | Word | Long | Quad,
   // Any non-flags register.
-  Any   = Byte | Word | Long | Quad | Octa | Dbl
+  AnyNF = Byte | Word | Long | Quad | Octa | Dbl,
+  Any   = Byte | Word | Long | Quad | Octa | Dbl | Flags,
 };
 
-inline Width width(Vreg)    { return Width::Any; }
+inline Width operator&(Width w1, Width w2) {
+  return static_cast<Width>(
+    static_cast<uint8_t>(w1) & static_cast<uint8_t>(w2)
+  );
+}
+inline Width& operator&=(Width& w1, Width w2) {
+  return w1 = w1 & w2;
+}
+
+inline Width width(Vreg)    { return Width::AnyNF; }
 inline Width width(Vreg8)   { return Width::Byte; }
 inline Width width(Vreg16)  { return Width::Word; }
 inline Width width(Vreg32)  { return Width::Long; }

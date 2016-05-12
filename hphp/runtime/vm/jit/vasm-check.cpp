@@ -256,12 +256,9 @@ checkSF(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
 
 /*
  * Check if two width constraints have any overlap.
- *
- * This is sufficient for our purposes because at a use, the width will always
- * be a single-bit constraint or Any (i.e., no constraint).
  */
 DEBUG_ONLY bool compatible(Width w1, Width w2) {
-  return static_cast<uint8_t>(w1) & static_cast<uint8_t>(w2);
+  return (w1 & w2) != Width::None;
 }
 
 struct WidthChecker {
@@ -282,11 +279,10 @@ struct WidthChecker {
   }
   // We don't check doubles yet.
   void def(VregDbl) {}
-  // We can skip the rest, since their contained Vregs are untyped.
-  void def(RegSet) {}
-  void def(Vptr) {}
-  void def(Vtuple) {}
-  void def(VcallArgsId) {}
+  void def(Vptr) = delete;
+  void def(VcallArgsId) = delete;
+  void def(const RegSet& s) { s.forEach([this](Vreg r){ def(r); }); }
+  void def(Vtuple t) { for (auto r : m_unit.tuples[t]) def(r); }
 
   template<class T> void use(T r) {
     if (r.isPhys()) return;
@@ -298,16 +294,20 @@ struct WidthChecker {
                 "width mismatch for %{}: def {}, use {}\n{}",
                 size_t(r), show(dw), show(uw), show(m_unit));
   }
+  // We don't check doubles yet.
+  void use(VregDbl) {}
   void use(Vptr m) {
     if (m.base.isValid())  use(m.base);
     if (m.index.isValid()) use(m.index);
   }
-  // We don't check doubles yet.
-  void use(VregDbl) {}
-  // We can skip the rest, since their contained Vregs are untyped.
-  void use(RegSet) {}
-  void use(Vtuple) {}
-  void use(VcallArgsId) {}
+  void use(const RegSet& s) { s.forEach([this](Vreg r){ use(r); }); }
+  void use(Vtuple t) { for (auto r : m_unit.tuples[t]) use(r); }
+  void use(VcallArgsId a) {
+    const auto& args = m_unit.vcallArgs[a];
+    for (auto r : args.args) use(r);
+    for (auto r : args.simdArgs) use(r);
+    for (auto r : args.stkArgs) use(r);
+  }
 
 private:
   DEBUG_ONLY const Vunit& m_unit;

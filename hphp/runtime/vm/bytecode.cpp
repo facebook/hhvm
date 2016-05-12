@@ -3360,11 +3360,8 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopQueryM(IOP_ARGS) {
-  auto const nDiscard = decode_iva(pc);
-  auto const op = decode_oa<QueryMOp>(pc);
-  auto const mk = decode_member_key(pc, liveUnit());
-  queryMImpl(mk, nDiscard, op);
+OPTBLD_INLINE void iopQueryM(intva_t nDiscard, QueryMOp subop, MemberKey mk) {
+  queryMImpl(mk, nDiscard, subop);
 }
 
 static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
@@ -3376,31 +3373,22 @@ static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopVGetM(IOP_ARGS) {
-  auto const nDiscard = decode_iva(pc);
-  auto const mk = decode_member_key(pc, liveUnit());
+OPTBLD_INLINE void iopVGetM(intva_t nDiscard, MemberKey mk) {
   vGetMImpl(mk, nDiscard);
 }
 
-OPTBLD_INLINE void iopFPassM(IOP_ARGS) {
-  auto ar = arFromInstr(pc - encoded_op_size(Op::FPassM));
-  auto const paramId = decode_iva(pc);
+OPTBLD_INLINE
+void iopFPassM(PC origpc, intva_t paramId, intva_t nDiscard, MemberKey mk) {
+  auto ar = arFromInstr(origpc);
   auto const flags = fpass_flags(ar, paramId);
-  auto const nDiscard = decode_iva(pc);
-
   if (flags == MOpFlags::Warn) {
-    auto const mk = decode_member_key(pc, liveUnit());
     return queryMImpl(mk, nDiscard, QueryMOp::CGet);
   }
   assert(flags == MOpFlags::DefineReffy);
-  auto const mk = decode_member_key(pc, liveUnit());
   vGetMImpl(mk, nDiscard);
 }
 
-OPTBLD_FLT_INLINE void iopSetM(IOP_ARGS) {
-  auto const nDiscard = decode_iva(pc);
-  auto const mk = decode_member_key(pc, liveUnit());
-
+OPTBLD_FLT_INLINE void iopSetM(intva_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const topC = vmStack().topC();
 
@@ -3426,41 +3414,35 @@ OPTBLD_FLT_INLINE void iopSetM(IOP_ARGS) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
-  auto const nDiscard = decode_iva(pc);
-  auto const op = decode_oa<IncDecOp>(pc);
-  auto const mk = decode_member_key(pc, liveUnit());
+OPTBLD_INLINE void iopIncDecM(intva_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
 
   auto& mstate = vmMInstrState();
   TypedValue result;
   if (mcodeIsProp(mk.mcode)) {
-    IncDecProp(arGetContextClass(vmfp()), op, mstate.base, key, result);
+    IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key, result);
   } else if (mcodeIsElem(mk.mcode)) {
-    IncDecElem(op, mstate.base, key, result);
+    IncDecElem(subop, mstate.base, key, result);
   } else {
-    IncDecNewElem(mstate.tvRef, op, mstate.base, result);
+    IncDecNewElem(mstate.tvRef, subop, mstate.base, result);
   }
 
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
-  auto const nDiscard = decode_iva(pc);
-  auto const op = decode_oa<SetOpOp>(pc);
-  auto const mk = decode_member_key(pc, liveUnit());
+OPTBLD_INLINE void iopSetOpM(intva_t nDiscard, SetOpOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
   auto const rhs = vmStack().topC();
 
   auto& mstate = vmMInstrState();
   TypedValue* result;
   if (mcodeIsProp(mk.mcode)) {
-    result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), op,
+    result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), subop,
                        mstate.base, key, rhs);
   } else if (mcodeIsElem(mk.mcode)) {
-    result = SetOpElem(mstate.tvRef, op, mstate.base, key, rhs);
+    result = SetOpElem(mstate.tvRef, subop, mstate.base, key, rhs);
   } else {
-    result = SetOpNewElem(mstate.tvRef, op, mstate.base, rhs);
+    result = SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs);
   }
 
   vmStack().popC();
@@ -3469,10 +3451,7 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
   mFinal(mstate, nDiscard, *result);
 }
 
-OPTBLD_INLINE void iopBindM(IOP_ARGS) {
-  auto const nDiscard = decode_iva(pc);
-  auto const mk = decode_member_key(pc, liveUnit());
-
+OPTBLD_INLINE void iopBindM(intva_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const rhs = *vmStack().topV();
 
@@ -3483,9 +3462,7 @@ OPTBLD_INLINE void iopBindM(IOP_ARGS) {
   mFinal(mstate, nDiscard, rhs);
 }
 
-OPTBLD_INLINE void iopUnsetM(IOP_ARGS) {
-  auto const nDiscard = decode_iva(pc);
-  auto const mk = decode_member_key(pc, liveUnit());
+OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
   auto const key = key_tv(mk);
 
   auto& mstate = vmMInstrState();
@@ -3638,47 +3615,39 @@ OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_FLT_INLINE void iopAssertRATL(IOP_ARGS) {
-  auto localId = decode_la(pc);
+OPTBLD_FLT_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
   if (debug) {
-    auto const rat = decodeRAT(vmfp()->m_func->unit(), pc);
-    auto const tv = *frame_local(vmfp(), localId);
+    auto const tv = *loc.ptr;
     auto const func = vmfp()->func();
     auto vm = &*g_context;
     always_assert_flog(
       tvMatchesRepoAuthType(tv, rat),
       "failed assert RATL on local {}: ${} in {}:{}, expected {}, got {}",
-      localId,
-      localId < func->numNamedLocals() ? func->localNames()[localId]->data()
-                                       : "<unnamed>",
+      loc.index,
+      loc.index < func->numNamedLocals() ?
+        func->localNames()[loc.index]->data() : "<unnamed>",
       vm->getContainingFileName()->data(),
       vm->getLine(),
       show(rat),
       toStringElm(&tv)
     );
-    return;
   }
-  pc += encodedRATSize(pc);
 }
 
-OPTBLD_INLINE void iopAssertRATStk(IOP_ARGS) {
-  auto stkSlot = decode_iva(pc);
+OPTBLD_INLINE void iopAssertRATStk(intva_t stkSlot, RepoAuthType rat) {
   if (debug) {
-    auto const rat = decodeRAT(vmfp()->m_func->unit(), pc);
     auto const tv = *vmStack().indTV(stkSlot);
     auto vm = &*g_context;
     always_assert_flog(
       tvMatchesRepoAuthType(tv, rat),
       "failed assert RATStk {} in {}:{}, expected {}, got {}",
-      stkSlot,
+      stkSlot.n,
       vm->getContainingFileName()->data(),
       vm->getLine(),
       show(rat),
       toStringElm(&tv)
     );
-    return;
   }
-  pc += encodedRATSize(pc);
 }
 
 OPTBLD_INLINE void iopBreakTraceHint() {
@@ -4142,9 +4111,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_FLT_INLINE void iopFPushFuncD(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto id = decode<Id>(pc);
+OPTBLD_FLT_INLINE void iopFPushFuncD(intva_t numArgs, Id id) {
   const NamedEntityPair nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
@@ -4156,10 +4123,7 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(IOP_ARGS) {
   ar->setThis(nullptr);
 }
 
-OPTBLD_INLINE void iopFPushFuncU(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto nsFunc = decode<Id>(pc);
-  auto globalFunc = decode<Id>(pc);
+OPTBLD_INLINE void iopFPushFuncU(intva_t numArgs, Id nsFunc, Id globalFunc) {
   Unit* unit = vmfp()->m_func->unit();
   const NamedEntityPair nep = unit->lookupNamedEntityPairId(nsFunc);
   Func* func = Unit::loadFunc(nep.second, nep.first);
@@ -4229,9 +4193,7 @@ static void throw_call_non_object(const char* methodName,
   raise_fatal_error(msg.c_str());
 }
 
-OPTBLD_INLINE void iopFPushObjMethod(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto op = decode_oa<ObjMethodOp>(pc);
+OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op) {
   Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
@@ -4255,10 +4217,8 @@ OPTBLD_INLINE void iopFPushObjMethod(IOP_ARGS) {
   fPushObjMethodImpl(cls, name, obj, numArgs);
 }
 
-OPTBLD_INLINE void iopFPushObjMethodD(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto name = decode_litstr(pc);
-  auto op = decode_oa<ObjMethodOp>(pc);
+OPTBLD_INLINE void
+iopFPushObjMethodD(intva_t numArgs, const StringData* name, ObjMethodOp op) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject) {
     if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(c1->m_type))) {
@@ -4390,9 +4350,7 @@ OPTBLD_INLINE void iopFPushCtor(intva_t numArgs) {
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto id = decode<Id>(pc);
+OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   Class* cls = Unit::loadClass(nep.second, nep.first);
@@ -4579,15 +4537,13 @@ OPTBLD_INLINE void iopFPassR(PC origpc, intva_t paramId) {
   }
 }
 
-OPTBLD_INLINE void iopFPassL(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassL));
-  auto paramId = decode_iva(pc);
-  auto local = decode_la(pc);
+OPTBLD_INLINE void iopFPassL(PC origpc, intva_t paramId, local_var loc) {
+  auto const ar = arFromInstr(origpc);
   assert(paramId < ar->numArgs());
-  TypedValue* fr = frame_local(vmfp(), local);
+  TypedValue* fr = loc.ptr;
   TypedValue* to = vmStack().allocTV();
   if (!ar->m_func->byRef(paramId)) {
-    cgetl_body(vmfp(), fr, to, local, true);
+    cgetl_body(vmfp(), fr, to, loc.index, true);
   } else {
     vgetl_body(fr, to);
   }
@@ -4642,11 +4598,10 @@ OPTBLD_INLINE void iopFCall(PC origpc, PC& pc, intva_t numArgs) {
   doFCall(ar, pc);
 }
 
-OPTBLD_FLT_INLINE void iopFCallD(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCallD));
-  UNUSED auto numArgs = decode_iva(pc);
-  UNUSED auto clsName = decode_litstr(pc);
-  UNUSED auto funcName = decode_litstr(pc);
+OPTBLD_FLT_INLINE
+void iopFCallD(PC origpc, PC& pc, intva_t numArgs, const StringData* clsName,
+               const StringData* funcName) {
+  auto const ar = arFromInstr(origpc);
   if (!RuntimeOption::EvalJitEnableRenameFunction &&
       !(ar->m_func->attrs() & AttrInterceptable)) {
     assert(ar->m_func->name()->isame(funcName));
@@ -4657,12 +4612,10 @@ OPTBLD_FLT_INLINE void iopFCallD(IOP_ARGS) {
   doFCall(ar, pc);
 }
 
-OPTBLD_INLINE void iopFCallAwait(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCallAwait));
-  UNUSED auto numArgs = decode_iva(pc);
-  UNUSED auto clsName = decode_litstr(pc);
-  UNUSED auto funcName = decode_litstr(pc);
-
+OPTBLD_INLINE
+void iopFCallAwait(PC origpc, PC& pc, intva_t numArgs,
+                   const StringData* clsName, const StringData* funcName) {
+  auto const ar = arFromInstr(origpc);
   if (!RuntimeOption::EvalJitEnableRenameFunction &&
       !(ar->m_func->attrs() & AttrInterceptable)) {
     assert(ar->m_func->name()->isame(funcName));
@@ -4674,10 +4627,8 @@ OPTBLD_INLINE void iopFCallAwait(IOP_ARGS) {
   doFCall(ar, pc);
 }
 
-OPTBLD_FLT_INLINE void iopFCallBuiltin(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto numNonDefault = decode_iva(pc);
-  auto id = decode<Id>(pc);
+OPTBLD_FLT_INLINE
+void iopFCallBuiltin(intva_t numArgs, intva_t numNonDefault, Id id) {
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
   auto unit = vmfp()->func()->unit();
   auto strict = builtinCallUsesStrictTypes(unit);
@@ -4799,7 +4750,7 @@ bool doFCallArrayTC(PC pc, int32_t numArgs, void* retAddr) {
   return ret;
 }
 
-OPTBLD_INLINE void iopFCallArray(IOP_ARGS) {
+OPTBLD_INLINE void iopFCallArray(PC& pc) {
   doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
 }
 
@@ -5159,26 +5110,18 @@ static inline RefData* lookupStatic(const StringData* name,
   return refData.get();
 }
 
-OPTBLD_INLINE void iopStaticLoc(IOP_ARGS) {
-  auto localId = decode_la(pc);
-  auto var = decode_litstr(pc);
-
+OPTBLD_INLINE void iopStaticLoc(local_var loc, const StringData* var) {
   bool inited;
   auto const refData = lookupStatic(var, vmfp(), inited);
   if (!inited) {
     refData->tv()->m_type = KindOfNull;
   }
-
-  auto const tvLocal = frame_local(vmfp(), localId);
   auto const tmpTV = make_tv<KindOfRef>(refData);
-  tvBind(&tmpTV, tvLocal);
+  tvBind(&tmpTV, loc.ptr);
   vmStack().pushBool(inited);
 }
 
-OPTBLD_INLINE void iopStaticLocInit(IOP_ARGS) {
-  auto localId = decode_la(pc);
-  auto var = decode_litstr(pc);
-
+OPTBLD_INLINE void iopStaticLocInit(local_var loc, const StringData* var) {
   bool inited;
   auto const refData = lookupStatic(var, vmfp(), inited);
 
@@ -5187,9 +5130,8 @@ OPTBLD_INLINE void iopStaticLocInit(IOP_ARGS) {
     cellDup(*initVal, *refData->tv());
   }
 
-  auto const tvLocal = frame_local(vmfp(), localId);
   auto const tmpTV = make_tv<KindOfRef>(refData);
-  tvBind(&tmpTV, tvLocal);
+  tvBind(&tmpTV, loc.ptr);
   vmStack().discard();
 }
 
@@ -5238,15 +5180,15 @@ OPTBLD_INLINE void implVerifyRetType() {
   }
 }
 
-OPTBLD_INLINE void iopVerifyRetTypeC(IOP_ARGS) {
+OPTBLD_INLINE void iopVerifyRetTypeC() {
   implVerifyRetType();
 }
 
-OPTBLD_INLINE void iopVerifyRetTypeV(IOP_ARGS) {
+OPTBLD_INLINE void iopVerifyRetTypeV() {
   implVerifyRetType();
 }
 
-OPTBLD_INLINE TCA iopNativeImpl(IOP_ARGS) {
+OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   BuiltinFunction func = vmfp()->func()->builtinFuncPtr();
@@ -5292,9 +5234,7 @@ OPTBLD_INLINE void iopParent() {
   vmStack().pushClass(parent);
 }
 
-OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
-  auto numArgs = decode_iva(pc);
-  auto clsName = decode_litstr(pc);
+OPTBLD_INLINE void iopCreateCl(intva_t numArgs, const StringData* clsName) {
   auto const cls = Unit::loadClass(clsName)->rescope(
     const_cast<Class*>(vmfp()->m_func->cls())
   );
@@ -5320,7 +5260,7 @@ static inline Generator* this_generator(const ActRec* fp) {
 
 const StaticString s_this("this");
 
-OPTBLD_INLINE TCA iopCreateCont(IOP_ARGS) {
+OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   auto const fp = vmfp();
@@ -5407,11 +5347,11 @@ OPTBLD_INLINE void contEnterImpl(PC& pc) {
   EventHook::FunctionResumeYield(vmfp());
 }
 
-OPTBLD_INLINE void iopContEnter(IOP_ARGS) {
+OPTBLD_INLINE void iopContEnter(PC& pc) {
   contEnterImpl<false>(pc);
 }
 
-OPTBLD_INLINE void iopContRaise(IOP_ARGS) {
+OPTBLD_INLINE void iopContRaise(PC& pc) {
   contEnterImpl<true>(pc);
   iopThrow();
 }
@@ -5464,13 +5404,13 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE TCA iopYield(IOP_ARGS) {
+OPTBLD_INLINE TCA iopYield(PC& pc) {
   auto const value = *vmStack().topC();
   vmStack().discard();
   return yield(pc, nullptr, value);
 }
 
-OPTBLD_INLINE TCA iopYieldK(IOP_ARGS) {
+OPTBLD_INLINE TCA iopYieldK(PC& pc) {
   auto const key = *vmStack().indC(1);
   auto const value = *vmStack().topC();
   vmStack().ndiscard(2);
@@ -5513,7 +5453,7 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   cellSetNull(gen->m_value);
 }
 
-OPTBLD_INLINE void iopContEnterDelegate(IOP_ARGS) {
+OPTBLD_INLINE void iopContEnterDelegate(PC& pc) {
   // Make sure we have a delegate
   auto gen = frame_generator(vmfp());
 
@@ -5790,7 +5730,7 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
   pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
 
-OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
+OPTBLD_INLINE TCA iopAwait(PC& pc) {
   auto const awaitable = vmStack().topC();
   auto wh = c_WaitHandle::fromCell(awaitable);
   if (UNLIKELY(wh == nullptr)) {
@@ -5886,10 +5826,7 @@ OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
   vmStack().pushBool(tv.m_type != KindOfUninit);
 }
 
-OPTBLD_INLINE void iopInitProp(IOP_ARGS) {
-  auto propName = decode_litstr(pc);
-  auto propOp = decode_oa<InitPropOp>(pc);
-
+OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
   auto* cls = vmfp()->getClass();
   TypedValue* tv;
 
@@ -5913,10 +5850,8 @@ OPTBLD_INLINE void iopInitProp(IOP_ARGS) {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopIncStat(IOP_ARGS) {
-  auto counter = decode_iva(pc);
-  auto value = decode_iva(pc);
-  Stats::inc(Stats::StatCounter(counter), value);
+OPTBLD_INLINE void iopIncStat(intva_t counter, intva_t value) {
+  Stats::inc(Stats::StatCounter(counter.n), value);
 }
 
 OPTBLD_INLINE void iopOODeclExists(OODeclExistsOp subop) {
@@ -6160,6 +6095,14 @@ TCA iopWrapper(Op op, void(*fn)(PC,PC&,intva_t), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,const StringData*), PC& pc) {
+  auto n = intva_t{decode_iva(pc)};
+  auto s = decode_litstr(pc);
+  fn(n, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op op, void(*fn)(intva_t,const StringData*,Id), PC& pc) {
   auto n = decode_intva(pc);
   auto s = decode_litstr(pc);
@@ -6374,11 +6317,152 @@ TCA iopWrapper(Op op, void(*fn)(MOpFlags,MemberKey), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,MemberKey), PC& pc) {
+  auto n = decode_iva(pc);
+  auto mk = decode_member_key(pc, liveUnit());
+  fn(intva_t{n}, mk);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op op, void(*fn)(PC,intva_t,MemberKey), PC& pc) {
   auto origpc = pc - encoded_op_size(op);
   auto n = decode_intva(pc);
   auto mk = decode_member_key(pc, liveUnit());
   fn(origpc, n, mk);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(PC,intva_t,intva_t,MemberKey), PC& pc) {
+  auto origpc = pc - encoded_op_size(op);
+  auto n1 = decode_iva(pc);
+  auto n2 = decode_iva(pc);
+  auto mk = decode_member_key(pc, liveUnit());
+  fn(origpc, intva_t{n1}, intva_t{n2}, mk);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,QueryMOp,MemberKey), PC& pc) {
+  auto n = decode_iva(pc);
+  auto subop = decode_oa<QueryMOp>(pc);
+  auto mk = decode_member_key(pc, liveUnit());
+  fn(intva_t{n}, subop, mk);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,IncDecOp,MemberKey), PC& pc) {
+  auto n = decode_iva(pc);
+  auto subop = decode_oa<IncDecOp>(pc);
+  auto mk = decode_member_key(pc, liveUnit());
+  fn(intva_t{n}, subop, mk);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,SetOpOp,MemberKey), PC& pc) {
+  auto n = decode_iva(pc);
+  auto subop = decode_oa<SetOpOp>(pc);
+  auto mk = decode_member_key(pc, liveUnit());
+  fn(intva_t{n}, subop, mk);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(local_var,RepoAuthType), PC& pc) {
+  auto var = decode_local(pc);
+  if (debug) {
+    auto rat = decodeRAT(vmfp()->m_func->unit(), pc);
+    fn(var, rat);
+  } else {
+    RepoAuthType rat; pc += encodedRATSize(pc);
+    fn(var, rat);
+  }
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,RepoAuthType), PC& pc) {
+  auto n = decode_iva(pc);
+  if (debug) {
+    auto rat = decodeRAT(vmfp()->m_func->unit(), pc);
+    fn(intva_t{n}, rat);
+  } else {
+    RepoAuthType rat; pc += encodedRATSize(pc);
+    fn(intva_t{n}, rat);
+  }
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,int), PC& pc) {
+  auto n = decode_iva(pc);
+  auto sa = decode<int>(pc);
+  fn(intva_t{n}, sa);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,intva_t,int), PC& pc) {
+  auto n1 = decode_iva(pc);
+  auto n2 = decode_iva(pc);
+  auto sa = decode<int>(pc);
+  fn(intva_t{n1}, intva_t{n2}, sa);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,int,int), PC& pc) {
+  auto n = decode_iva(pc);
+  auto sa1 = decode<int>(pc);
+  auto sa2 = decode<int>(pc);
+  fn(intva_t{n}, sa1, sa2);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(intva_t,ObjMethodOp), PC& pc) {
+  auto n = decode_iva(pc);
+  auto subop = decode_oa<ObjMethodOp>(pc);
+  fn(intva_t{n}, subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA
+iopWrapper(Op op, void(*fn)(intva_t,const StringData*,ObjMethodOp), PC& pc) {
+  auto n = decode_iva(pc);
+  auto s = decode_litstr(pc);
+  auto subop = decode_oa<ObjMethodOp>(pc);
+  fn(intva_t{n}, s, subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op,
+  void(*fn)(PC,PC&,intva_t,const StringData*,const StringData*), PC& pc) {
+  auto origpc = pc - encoded_op_size(op);
+  auto n = decode_iva(pc);
+  auto s1 = decode_litstr(pc);
+  auto s2 = decode_litstr(pc);
+  fn(origpc, pc, intva_t{n}, s1, s2);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(local_var,const StringData*), PC& pc) {
+  auto loc = decode_local(pc);
+  auto s = decode_litstr(pc);
+  fn(loc, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(const StringData*,InitPropOp), PC& pc) {
+  auto s = decode_litstr(pc);
+  auto subop = decode_oa<InitPropOp>(pc);
+  fn(s, subop);
   return nullptr;
 }
 

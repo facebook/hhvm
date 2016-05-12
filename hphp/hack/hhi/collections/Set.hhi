@@ -65,7 +65,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an `array` containing the values from the current `Set`, where
    *           each key of the `array` are the same as each value.
    */
-  public function toArray(): array;
+  public function toArray(): array<Tv, Tv>;
 
   /**
    * Returns an `array` containing the values from the current `Set`.

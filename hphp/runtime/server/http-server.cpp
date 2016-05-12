@@ -544,7 +544,6 @@ bool HttpServer::ReduceOldServerLoad() {
 }
 
 bool HttpServer::StopOldServer() {
-  if (!RuntimeOption::StopOldServer) return false;
   if (OldServerStopTime > 0) return true;
   SCOPE_EXIT { OldServerStopTime = time(nullptr); };
   Logger::Info("trying to shut down old HPHP server by /stop command");

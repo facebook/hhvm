@@ -7,6 +7,7 @@ if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
                           "repo-wrapper.cpp"  "tc-print.cpp"
                           "../../hhvm/global-variables.cpp"
                           "../../hhvm/process-init.cpp")
+  link_object_libraries(tc-print ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
   target_link_libraries(tc-print ${HHVM_LINK_LIBRARIES})
   embed_all_systemlibs(tc-print "${CMAKE_CURRENT_BINARY_DIR}/../.."
                                 "${CMAKE_CURRENT_BINARY_DIR}/tc-print")

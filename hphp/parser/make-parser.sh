@@ -81,7 +81,7 @@ $SED -i "s#${TMP}#${INFILE}#g" "${OUTFILE7}"
 
 $SED -i \
      -e 's@int Compiler[57]parse.*@@' \
-     -e 's@int Compiler[57]debug.*@@' \
+     -e 's@.*int Compiler[57]debug.*@@' \
      -e "s@#ifndef YY_COMPILER[57]_.*@@g" \
      -e "s@# define YY_COMPILER[57]_.*@@g" \
      -e "s@#endif /\* !YY_COMPILER[57]_.*@@g" \

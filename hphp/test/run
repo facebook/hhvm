@@ -146,40 +146,73 @@ function check_executable($path, $typechecker) {
   }
 }
 
+function hhvm_binary_routes() {
+  $routes = array(
+    "fbbuild" => "/_bin/hphp/hhvm",
+    "buck"    => "/buck-out/gen/hphp/hhvm/hhvm",
+    "cmake"   => "/hphp/hhvm"
+  );
+
+  $env_root = getenv("FBMAKE_BIN_ROOT");
+  if ($env_root !== false) {
+    $routes["fbbuild"] = "/" . $env_root . "/hphp/hhvm";
+  }
+  return $routes;
+}
+
+function hh_server_binary_routes() {
+  return array(
+    "fbbuild" => "/_bin/hphp/hack/src",
+    "buck"    => "/buck-out/gen/hphp/hack/src/hh_server",
+    "cmake"   => "/hphp/hack/bin"
+  );
+  $env_root = getenv("FBMAKE_BIN_ROOT");
+  if ($env_root !== false) {
+    $routes["fbbuild"] = "/" . $env_root . "/hphp/hack/src";
+  }
+  return $routes;
+}
+
+// For Facebook: We have several build systems, and we can use any of them in
+// the same code repo.  If multiple binaries exist, we want the onus to be on
+// the user to specify a particular one because before we chose the fbmake one
+// by default and that could cause unexpected results.
 function check_for_multiple_default_binaries($typechecker) {
-  $dir = hphp_home() . "/";
-  if (getenv("FBMAKE_BIN_ROOT")) {
-    $dir .= getenv("FBMAKE_BIN_ROOT");
-  } else {
-    $dir .= "_bin";
+  // Env var we use in testing that'll pick which build system to use.
+  if (getenv("FBCODE_BUILD_TOOL") !== false) {
+    return;
   }
 
-  $append_path = '/hphp/hhvm/hhvm';
-  $path_option = '--hhvm-binary-path';
-  if ($typechecker) {
-    $append_path = '/hphp/hack/src/hh_server';
-    $path_option = '--hhserver-binary-path';
-  }
+  $home = hphp_home();
+  $routes = $typechecker ? hh_server_binary_routes() : hhvm_binary_routes();
+  $binary = $typechecker ? "hh_server" : "hhvm";
 
-  // For Facebook: We have two make systems fbmake and cmake, and we
-  // can use both in the same code repo. If two binaries exist, we
-  // want the onus to be on the user to specify a particular one because
-  // before we chose the fbmake one by default and that can cause unexpected
-  // results.
-  if (file_exists($dir.$append_path) &&
-      file_exists(hphp_home().$append_path)) {
-    $msg = "Two binaries exist in this repo. \n"
-         . " - " . $dir . $append_path . "\n"
-         . " - " . hphp_home() . $append_path . "\n"
-         . "Are you in fbcode? If so, remove a binary \n"
-         . "or use the " . $path_option . " option to the test runner. \n"
-         . "e.g., test/run " . $path_option . " /path/to/binary ";
-    if ($typechecker) {
-      $msg .= "--typechecker ";
+  $found = array();
+  foreach ($routes as $_ => $path) {
+    $abs_path = $home . $path . "/" . $binary;
+    if (file_exists($abs_path)) {
+      $found[] = $abs_path;
     }
-    $msg .= "slow\n";
-    error($msg);
   }
+
+  if (count($found) <= 1) {
+    return;
+  }
+
+  $path_option = $typechecker ? "--hhserver-binary-path" : "--hhvm-binary-path";
+
+  $msg = "Multiple binaries exist in this repo. \n";
+  foreach ($found as $bin) {
+    $msg .= " - " . $bin . "\n";
+  }
+  $msg .= "Are you in fbcode?  If so, remove a binary \n"
+    . "or use the " . $path_option . " option to the test runner. \n"
+    . "e.g., test/run ";
+  if ($typechecker) {
+    $msg .= "--typechecker";
+  }
+  $msg .= " " . $path_option . " /path/to/binary slow\n";
+  error($msg);
 }
 
 function hphp_home() {
@@ -220,16 +253,22 @@ function bin_root() {
     return dirname(realpath(getenv("HHVM_BIN")));
   }
 
-  $dir = hphp_home() . "/";
-  if (getenv("FBMAKE_BIN_ROOT") !== false) {
-    $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hhvm';
-  } else {
-    $dir .= "_bin/hphp/hhvm";
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  $routes = hhvm_binary_routes();
+
+  if ($env_tool !== false) {
+    return $home . $routes[$env_tool];
   }
-  return is_dir($dir) ?
-    $dir :      # fbmake
-    hphp_home() . "/hphp/hhvm" # github / cmake
-  ;
+
+  foreach ($routes as $_ => $path) {
+    $dir = $home . $path;
+    if (is_dir($dir)) {
+      return $dir;
+    }
+  }
+
+  return $home . $routes["cmake"];
 }
 
 function hh_server_path() {
@@ -249,16 +288,23 @@ function hh_server_bin_root() {
   if (getenv("HH_SERVER_BIN") !== false) {
     return dirname(realpath(getenv("HH_SERVER_BIN")));
   }
-  $dir = hphp_home() . "/";
-  if (getenv("FBMAKE_BIN_ROOT") !== false) {
-    $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hack/src';
-  } else {
-    $dir .= "_bin/hphp/hack/src";
+
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  $routes = hh_server_binary_routes();
+
+  if ($env_tool !== false) {
+    return $home . $routes[$env_tool];
   }
-  return is_dir($dir) ?
-    $dir :      # fbmake
-    hphp_home() . "/hphp/hack/bin" # github / cmake
-  ;
+
+  foreach ($routes as $_ => $path) {
+    $dir = $home . $path;
+    if (is_dir($dir)) {
+      return $dir;
+    }
+  }
+
+  return $home . $routes["cmake"];
 }
 
 function verify_hhbc() {

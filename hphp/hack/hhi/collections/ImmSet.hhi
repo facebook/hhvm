@@ -83,7 +83,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `array` containing the values from the current `ImmSet`,
    *           where each key of the `array` are the same as each value.
    */
-  public function toArray(): array;
+  public function toArray(): array<Tv, Tv>;
 
   /**
    * Returns an `array` containing the values from the current `ImmSet`.

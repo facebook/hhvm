@@ -163,9 +163,6 @@ PhysReg rret_simd(size_t i) {
   assertx(i == 0);
   return reg::xmm0;
 }
-PhysReg rret_indirect() {
-  return reg::rax;
-}
 
 
 PhysReg rarg(size_t i) {

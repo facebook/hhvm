@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
+#include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit {

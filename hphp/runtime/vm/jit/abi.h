@@ -78,7 +78,6 @@ PhysReg rret_type();
  */
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
-PhysReg rret_indirect();
 
 /*
  * Native argument registers.

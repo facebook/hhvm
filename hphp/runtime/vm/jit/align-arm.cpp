@@ -46,8 +46,9 @@ struct AlignImpl {
     switch (context) {
       case AlignContext::Live:
         assert(((bytes & 3) == 0) && "alignment must be multiple of 4");
-        for(; bytes > 0; bytes -= 4)
+        for (; bytes > 0; bytes -= 4) {
           a.Nop();
+        }
         return;
 
       case AlignContext::Dead:

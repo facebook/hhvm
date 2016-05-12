@@ -125,12 +125,16 @@ struct Vgen {
     : env(env)
     , assem(*env.cb)
     , a(&assem)
+    , base(a->frontier())
     , current(env.current)
     , next(env.next)
     , jmps(env.jmps)
     , jccs(env.jccs)
     , catches(env.catches)
   {}
+  ~Vgen() {
+    __clear_cache(base, a->frontier());
+  }
 
   static void patch(Venv& env);
   static void pad(CodeBlock& cb) {}
@@ -318,6 +322,7 @@ private:
   Venv& env;
   vixl::MacroAssembler assem;
   vixl::MacroAssembler* a;
+  Address base;
 
   const Vlabel current;
   const Vlabel next;
@@ -339,7 +344,6 @@ void Vgen::patch(Venv& env) {
     // 'jcc' is 3 instructions, b.!cc + load followed by branch
     *reinterpret_cast<TCA*>(p.instr + 3 * 4) = env.addrs[p.target];
   }
-  assertx(env.bccs.empty());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -820,8 +824,9 @@ void Vgen::emit(const srem& i) {
 }
 
 void Vgen::emit(const unpcklpd& i) {
-  a->fmov(D(i.d), D(i.s0));
-  a->fmov(rAsm, D(i.s1));
+  // i.d and i.s1 can be same, i.s0 is unique
+  if(i.d != i.s1) a->fmov(D(i.d), D(i.s1));
+  a->fmov(rAsm, D(i.s0));
   a->fmov(D(i.d), 1, rAsm);
 }
 
@@ -965,12 +970,11 @@ void lowerVptr(Vptr& p, Vout& v) {
                   (((p.disp != 0)     & 0x1) << 2));
   switch(mode) {
     case BASE:
-    case BASE | INDEX: {
+    case BASE | INDEX:
       // ldr/str allow [base] and [base, index], nothing to lower
       break;
-    }
 
-    case INDEX: {
+    case INDEX:
       // Not supported, convert to [base]
       if (p.scale > 1) {
         auto t = v.makeReg();
@@ -982,7 +986,6 @@ void lowerVptr(Vptr& p, Vout& v) {
       p.index = Vreg{};
       p.scale = 1;
       break;
-    }
 
     case BASE | DISP: {
       // ldr/str allow [base, #imm], where #imm is [-256 .. 255]
@@ -1009,7 +1012,7 @@ void lowerVptr(Vptr& p, Vout& v) {
       break;
     }
 
-    case INDEX | DISP: {
+    case INDEX | DISP:
       // Not supported, convert to [base, #imm] or [base, index]
       if (p.scale > 1) {
         auto t = v.makeReg();
@@ -1029,7 +1032,6 @@ void lowerVptr(Vptr& p, Vout& v) {
         p.disp = 0;
       }
       break;
-    }
 
     case BASE | INDEX | DISP: {
       // Not supported, convert to [base, index]

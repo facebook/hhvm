@@ -592,7 +592,6 @@ void Vgen::patch(Venv& env) {
     assertx(env.addrs[p.target]);
     ppc64_asm::Assembler::patchBctr(p.instr, env.addrs[p.target]);
   }
-  assertx(env.bccs.empty());
 }
 
 void Vgen::pad(CodeBlock& cb) {

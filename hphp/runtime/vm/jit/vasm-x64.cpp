@@ -341,7 +341,6 @@ void Vgen::patch(Venv& env) {
     assertx(env.addrs[p.target]);
     X64Assembler::patchJcc(p.instr, env.addrs[p.target]);
   }
-  assertx(env.bccs.empty());
 }
 
 void Vgen::pad(CodeBlock& cb) {

@@ -545,9 +545,9 @@ struct conjureuse { Vreg c; };
  * needed for lowering to different target architectures.
  */
 struct vcall { CallSpec call; VcallArgsId args; Vtuple d;
-               Fixup fixup; DestType destType; bool nothrow; bool indResult; };
+               Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
-                 Fixup fixup; DestType destType; bool indResult; };
+                 Fixup fixup; DestType destType; };
 
 /*
  * C++ function call using the native ABI.
@@ -769,7 +769,7 @@ struct callarray { TCA target; RegSet args; };
  * Has exception edges and additional integer args (used by the `target' stub).
  */
 struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
-                    Vlabel targets[2]; bool indResult; };
+                    Vlabel targets[2]; };
 
 /*
  * Enter a continuation (with exception edges).

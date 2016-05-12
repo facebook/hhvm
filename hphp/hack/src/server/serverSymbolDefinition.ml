@@ -89,17 +89,7 @@ let get_member_def ast (x : class_element) =
 let get_local_var_def ast name p =
   let line, char, _ = Pos.info_pos p in
   let def = List.hd (ServerFindLocals.go_from_ast ast line char) in
-  Option.map def ~f:begin fun span ->
-    {
-      SymbolDefinition.kind = SymbolDefinition.LocalVar;
-      name;
-      pos = span;
-      span;
-      modifiers = [];
-      children = None;
-      params = None;
-    }
-  end
+  Option.map def ~f:(FileOutline.summarize_local name)
 
 let go tcopt ast result =
   match result.SymbolOccurrence.type_ with

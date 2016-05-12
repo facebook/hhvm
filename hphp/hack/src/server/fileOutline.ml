@@ -34,6 +34,7 @@ let summarize_property kinds var =
     modifiers;
     children = None;
     params = None;
+    docblock = None;
   }
 
 let summarize_const ((pos, name), (expr_pos, _)) =
@@ -46,6 +47,7 @@ let summarize_const ((pos, name), (expr_pos, _)) =
     modifiers = [];
     children = None;
     params = None;
+    docblock = None;
   }
 
 let summarize_abs_const (pos, name) =
@@ -57,6 +59,7 @@ let summarize_abs_const (pos, name) =
     modifiers = [Abstract];
     children = None;
     params = None;
+    docblock = None;
   }
 
 let modifier_of_fun_kind acc = function
@@ -73,6 +76,7 @@ let summarize_typeconst t =
     modifiers = if t.Ast.tconst_abstract then [Abstract] else [];
     children = None;
     params = None;
+    docblock = None;
   }
 
 let summarize_param param =
@@ -89,6 +93,7 @@ let summarize_param param =
     children = None;
     modifiers;
     params = None;
+    docblock = None;
   }
 
 let summarize_method m =
@@ -103,6 +108,7 @@ let summarize_method m =
     modifiers;
     children = None;
     params;
+    docblock = None;
   }
 
 let summarize_class class_ ~no_children =
@@ -142,6 +148,7 @@ let summarize_class class_ ~no_children =
     modifiers;
     children;
     params = None;
+    docblock = None;
   }
 
 let summarize_fun f =
@@ -155,6 +162,19 @@ let summarize_fun f =
     modifiers;
     children = None;
     params;
+    docblock = None;
+  }
+
+let summarize_local name span =
+  {
+    kind = LocalVar;
+    name;
+    pos = span;
+    span;
+    modifiers = [];
+    children = None;
+    params = None;
+    docblock = None;
   }
 
 let outline_ast ast =
@@ -202,13 +222,52 @@ let to_json_legacy input =
      | Const -> acc
    end
 
- let to_legacy outline = to_legacy "" [] outline
+let to_legacy outline = to_legacy "" [] outline
+
+let should_add_docblock = function
+  | Function| Class | Method | Property | Const | Enum
+  | Interface | Trait | Typeconst -> true
+  | LocalVar | Param -> false
+
+let add_def_docblock finder previous_def_line def =
+  let line = Pos.line def.pos in
+  let docblock = if should_add_docblock def.kind
+    then Docblock_finder.find_docblock finder previous_def_line line
+    else None
+  in
+  line, { def with docblock }
+
+let add_docblocks defs comments =
+  let finder = Docblock_finder.make_docblock_finder comments in
+
+  let rec map_def f acc def =
+    let acc, def = f acc def in
+    let acc, children = Option.value_map def.children
+      ~f:(fun defs ->
+        let acc, defs = map_def_list f acc defs in
+        acc, Some defs)
+      ~default:(acc, None)
+    in
+    acc, { def with children }
+
+  and map_def_list f acc defs =
+    let acc, defs = List.fold_left defs
+      ~f:(fun (acc, defs) def ->
+        let acc, def = map_def f acc def in
+        acc, def :: defs)
+      ~init:(acc, []) in
+    acc, List.rev defs
+
+  in
+  snd (map_def_list (add_def_docblock finder) 0 defs)
 
  let outline content =
-   let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->
+   let {Parser_hack.ast; comments; _} = Errors.ignore_ begin fun () ->
      Parser_hack.program Relative_path.default content
+       ~include_line_comments:true
    end in
-   outline_ast ast
+   let result = outline_ast ast in
+   add_docblocks result comments
 
  let outline_legacy content =
    to_legacy @@ outline content
@@ -228,7 +287,10 @@ let to_json_legacy input =
        ~f:(fun x -> [("children", to_json x)]) ~default:[])
        @
      (Option.value_map def.params
-       ~f:(fun x -> [("params", to_json x)]) ~default:[]))
+       ~f:(fun x -> [("params", to_json x)]) ~default:[])
+       @
+     (Option.value_map def.docblock
+       ~f:(fun x -> [("docblock", Hh_json.JSON_String x)]) ~default:[]))
      end
    end
 
@@ -245,6 +307,10 @@ let to_json_legacy input =
      Option.iter def.params (fun x ->
        Printf.printf "%s  params:\n" indent;
        print (indent ^ "    ") x;
+     );
+     Option.iter def.docblock (fun x ->
+       Printf.printf "%s  docblock:\n" indent;
+       Printf.printf "%s\n" x;
      );
      Printf.printf "\n";
      Option.iter def.children (fun x ->

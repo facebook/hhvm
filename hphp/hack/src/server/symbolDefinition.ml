@@ -40,6 +40,7 @@ and 'a t = {
   modifiers : modifier list;
   children : 'a t list option;
   params : 'a t list option;
+  docblock : string option;
 }
 
 let rec to_absolute x = {
@@ -50,6 +51,7 @@ let rec to_absolute x = {
   modifiers = x.modifiers;
   children = Option.map x.children (fun x -> List.map x to_absolute);
   params = Option.map x.params (fun x -> List.map x to_absolute);
+  docblock = x.docblock;
 }
 
 let string_of_kind = function

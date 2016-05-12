@@ -135,12 +135,13 @@ struct ArgGroup {
 
   explicit ArgGroup(const IRInstruction* inst,
                     const StateVector<SSATmp,Vloc>& locs)
-    : m_inst(inst), m_locs(locs), m_override(nullptr)
+    : m_inst(inst), m_locs(locs), m_override(nullptr), m_indirect(false)
   {}
 
   size_t numGpArgs() const { return m_gpArgs.size(); }
   size_t numSimdArgs() const { return m_simdArgs.size(); }
   size_t numStackArgs() const { return m_stkArgs.size(); }
+  bool isIndirect() const { return m_indirect; }
 
   ArgDesc& gpArg(size_t i) {
     assertx(i < m_gpArgs.size());
@@ -196,6 +197,11 @@ struct ArgGroup {
     return *this;
   }
 
+  ArgGroup& indirect(bool i) {
+    m_indirect = i;
+    return *this;
+  }
+
   /*
    * Pass tmp as a TypedValue passed by value.
    */
@@ -241,6 +247,7 @@ private:
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
+  bool m_indirect; // Indirect result
 };
 
 ArgGroup toArgGroup(const NativeCalls::CallInfo&,

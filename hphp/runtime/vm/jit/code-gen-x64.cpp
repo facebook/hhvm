@@ -2921,6 +2921,8 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     }
   }
 
+  callArgs.indirect(!returnByValue && isBuiltinByRef(funcReturnType));
+
   auto dest = [&] () -> CallDest {
     if (isBuiltinByRef(funcReturnType)) {
       if (returnByValue) {

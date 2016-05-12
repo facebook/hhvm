@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
-#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+#include "hphp/runtime/ext/xdebug/util.h"
 
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -70,7 +70,7 @@ XDebugServer::XDebugServer(Mode mode)
                     XDEBUG_GLOBAL(RemoteLog).c_str());
     } else {
       log("Log opened at");
-      XDebugUtils::fprintTimestamp(m_logFile);
+      xdebug_print_timestamp(m_logFile);
       log("\n");
       logFlush();
     }
@@ -336,7 +336,7 @@ void XDebugServer::closeLog() {
   }
 
   log("Log closed at ");
-  XDebugUtils::fprintTimestamp(m_logFile);
+  xdebug_print_timestamp(m_logFile);
   log("\n\n");
   logFlush();
 
@@ -538,7 +538,7 @@ bool XDebugServer::initDbgp() {
   Variant scriptname_var = globals->get(s_SERVER).toArray()[s_SCRIPT_FILENAME];
   assert(scriptname_var.isString());
   auto scriptname = scriptname_var.toString().get()->mutableData();
-  auto fileuri = XDebugUtils::pathToUrl(scriptname);
+  auto fileuri = xdebug_path_to_url(scriptname);
 
   // Add attributes to the root init node
   xdebug_xml_add_attribute_ex(response, "fileuri", fileuri, 0, 1);
@@ -645,7 +645,7 @@ bool XDebugServer::breakpoint(const Variant& filename,
   auto msg = xdebug_xml_node_init("xdebug:message");
   xdebug_xml_add_attribute_ex(msg, "lineno", line_str, 0, 1);
   if (filename_str != nullptr) {
-    filename_str = XDebugUtils::pathToUrl(filename_str); // output file format
+    filename_str = xdebug_path_to_url(filename_str); // output file format
     xdebug_xml_add_attribute_ex(
       msg,
       "filename",

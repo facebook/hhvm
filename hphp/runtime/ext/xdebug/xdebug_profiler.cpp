@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+#include "hphp/runtime/ext/xdebug/util.h"
 
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -254,7 +254,7 @@ void XDebugProfiler::writeTracingResultsHeader() {
       /* fall through */
     case TraceOutputType::NORMAL:
       fprintf(m_tracingFile, "TRACE START ");
-      XDebugUtils::fprintTimestamp(m_tracingFile);
+      xdebug_print_timestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
     case TraceOutputType::HTML:
@@ -277,7 +277,7 @@ void XDebugProfiler::writeTracingResultsFooter() {
     case TraceOutputType::NORMAL:
     case TraceOutputType::COMPUTERIZED:
       fprintf(m_tracingFile, "TRACE END   ");
-      XDebugUtils::fprintTimestamp(m_tracingFile);
+      xdebug_print_timestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
     case TraceOutputType::HTML:

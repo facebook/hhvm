@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
@@ -28,8 +29,8 @@
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 #include "hphp/runtime/ext/xdebug/hook.h"
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -538,7 +539,7 @@ Variant HHVM_FUNCTION(xdebug_get_profiler_filename) {
 
 const StaticString s_xdebug_get_stack_depth("xdebug_get_stack_depth");
 static int64_t HHVM_FUNCTION(xdebug_get_stack_depth) {
-  int64_t depth = XDebugUtils::stackDepth();
+  auto depth = xdebug_stack_depth();
   if (auto ar = g_context->getStackFrame()) {
     // If the call to xdebug_get_stack_depth was NOT
     // done via CallBuiltin, then it will be included

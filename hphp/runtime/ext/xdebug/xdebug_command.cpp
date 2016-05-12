@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
 #include "hphp/runtime/ext/xdebug/hook.h"
-#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+#include "hphp/runtime/ext/xdebug/util.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
 #include "hphp/compiler/builtin_symbols.h"
@@ -192,7 +192,7 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
     case XDebugBreakpoint::Type::LINE:
       xdebug_xml_add_attribute(xml, "type", "line");
       xdebug_xml_add_attribute_dup(xml, "filename",
-                                   XDebugUtils::pathToUrl(bp.fileName).data());
+                                   xdebug_path_to_url(bp.fileName).data());
       xdebug_xml_add_attribute(xml, "lineno", bp.line);
 
       // Add the condition. cast is due to xml api
@@ -658,7 +658,7 @@ struct BreakpointSetCmd : XDebugCommand {
         }
         bp.fileName = String(filename);
       } else {
-        bp.fileName = XDebugUtils::pathFromUrl(args['f'].toString());
+        bp.fileName = xdebug_path_from_url(args['f'].toString());
       }
 
       // Ensure consistency between filenames
@@ -921,8 +921,7 @@ struct StackDepthCmd : XDebugCommand {
   ~StackDepthCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    auto const depth = XDebugUtils::stackDepth();
-    xdebug_xml_add_attribute(&xml, "depth", depth);
+    xdebug_xml_add_attribute(&xml, "depth", xdebug_stack_depth());
   }
 };
 
@@ -939,7 +938,7 @@ struct StackGetCmd : XDebugCommand {
     // Grab the optional depth argument
     if (!args['d'].isNull()) {
       m_clientDepth = strtol(args['d'].toString().data(), nullptr, 10);
-      if (m_clientDepth < 0 || m_clientDepth > XDebugUtils::stackDepth()) {
+      if (m_clientDepth < 0 || m_clientDepth > xdebug_stack_depth()) {
         throw_exn(Error::StackDepthInvalid);
       }
     }
@@ -988,7 +987,7 @@ private:
     // Grab the file/line for the frame. For level 0, this is the current
     // file/line, for all other frames this is the stored file/line #
     auto file =
-      XDebugUtils::pathToUrl(String(const_cast<StringData*>(unit->filepath())));
+      xdebug_path_to_url(String(const_cast<StringData*>(unit->filepath())));
     auto line = level == 0 ? g_context->getLine() : unit->getLineNumber(offset);
 
     // Add the call file/line. Duplication is necessary due to xml api
@@ -1329,7 +1328,7 @@ struct PropertySetCmd : XDebugCommand {
     m_type = args['t'];
     if (!args['d'].isNull()) {
       m_depth = strtol(args['d'].toString().data(), nullptr, 10);
-      if (m_depth < 0 || m_depth > XDebugUtils::stackDepth()) {
+      if (m_depth < 0 || m_depth > xdebug_stack_depth()) {
         throw_exn(Error::StackDepthInvalid);
       }
     }
@@ -1394,9 +1393,9 @@ struct SourceCmd : XDebugCommand {
       }
       m_filename = String(filename_data);
     } else {
-      m_filename = XDebugUtils::pathFromUrl(args['f'].toString());
+      m_filename = xdebug_path_from_url(args['f'].toString());
     }
-    m_filename = File::TranslatePath(m_filename); // canonicolize path
+    m_filename = File::TranslatePath(m_filename); // canonicalize path
 
 
     // Grab and 0-index the begin line

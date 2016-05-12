@@ -950,6 +950,14 @@ StringHolder Transport::compressBrotli(const void *data, int size,
     Variant lgWindowSize;
     IniSetting::Get("brotli.compression_lgwin", lgWindowSize);
     params.lgwin = lgWindowSize.asInt64Val();
+    if (size && !m_chunkedEncoding) {
+      // If there is only one block (i.e. non-chunked content) set a maximum
+      // brotli window of ceil(log2(size)). This way the reader doesn't have
+      // to waste memory constructing a larger window which will never be used.
+      params.lgwin = std::min(
+          static_cast<unsigned int>(params.lgwin),
+          folly::findLastSet(static_cast<unsigned int>(size) - 1));
+    }
 
     m_brotliCompressor = folly::make_unique<brotli::BrotliCompressor>(params);
   }

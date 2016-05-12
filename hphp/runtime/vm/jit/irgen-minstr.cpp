@@ -54,7 +54,6 @@ namespace {
 
 const StaticString s_PackedArray("PackedArray");
 const StaticString s_StructArray("StructArray");
-const StaticString s_TypeProfile("TypeProfile");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -461,48 +460,6 @@ SSATmp* emitPropSpecialized(
       return initNull;
     }
   );
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Use TypeProfile to profile the type of `tmp' (typically loaded from
- * the heap) and emit a type check in optimizing translations to
- * refine some properties of the types observed during profiling.
- * Such refinements include checking a specific type in case it's
- * monomorphic, or checking that it's uncounted or unboxed.  In case
- * the check fails dynamically, a side exit is taken.  The `finish'
- * lambda is invoked to emit code before exiting the region at the
- * next bytecode-instruction boundary.
- */
-template<class Finish>
-SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
-  TargetProfile<TypeProfile> prof(env.context, env.irb->curMarker(),
-                                  s_TypeProfile.get());
-
-  if (prof.profiling()) {
-    gen(env, ProfileType, RDSHandleData{ prof.handle() }, tmp);
-  }
-
-  if (!prof.optimizing()) return tmp;
-
-  Type typeToCheck = relaxToGuardable(prof.data(TypeProfile::reduce).type);
-
-  if (typeToCheck == TGen) return tmp;
-
-  SSATmp* ptmp{nullptr};
-
-  ifThen(env,
-         [&](Block* taken) {
-           ptmp = gen(env, CheckType, typeToCheck, taken, tmp);
-         },
-         [&] {
-           hint(env, Block::Hint::Unlikely);
-           finish();
-           gen(env, Jmp, makeExit(env, nextBcOff(env)));
-         });
-
-  return ptmp;
 }
 
 //////////////////////////////////////////////////////////////////////

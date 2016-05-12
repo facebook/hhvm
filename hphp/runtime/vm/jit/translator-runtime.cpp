@@ -544,16 +544,7 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
 namespace {
 ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
-  if (UNLIKELY(nullptr == tv)) {
-    // DecRef of def is done unconditionally by the IR, since there's
-    // a good chance it will be paired with an IncRef and optimized
-    // away.  So we need to IncRef here if it is being returned.
-    tvRefcountedIncRef(&def);
-    return def;
-  }
-  auto const ret = tvToCell(tv);
-  tvRefcountedIncRef(ret);
-  return *ret;
+  return UNLIKELY(tv == nullptr) ? def : *tv;
 }
 }
 

@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -89,6 +91,48 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
     }
   }
   return generic(key);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Use TypeProfile to profile the type of `tmp' (typically loaded from
+ * the heap) and emit a type check in optimizing translations to
+ * refine some properties of the types observed during profiling.
+ * Such refinements include checking a specific type in case it's
+ * monomorphic, or checking that it's uncounted or unboxed.  In case
+ * the check fails dynamically, a side exit is taken.  The `finish'
+ * lambda is invoked to emit code before exiting the region at the
+ * next bytecode-instruction boundary.
+ */
+template<class Finish>
+SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
+  TargetProfile<TypeProfile> prof(env.context, env.irb->curMarker(),
+                                  makeStaticString("TypeProfile"));
+
+  if (prof.profiling()) {
+    gen(env, ProfileType, RDSHandleData{ prof.handle() }, tmp);
+  }
+
+  if (!prof.optimizing()) return tmp;
+
+  Type typeToCheck = relaxToGuardable(prof.data(TypeProfile::reduce).type);
+
+  if (typeToCheck == TGen) return tmp;
+
+  SSATmp* ptmp{nullptr};
+
+  ifThen(env,
+         [&](Block* taken) {
+           ptmp = gen(env, CheckType, typeToCheck, taken, tmp);
+         },
+         [&] {
+           hint(env, Block::Hint::Unlikely);
+           finish();
+           gen(env, Jmp, makeExit(env, nextBcOff(env)));
+         });
+
+  return ptmp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

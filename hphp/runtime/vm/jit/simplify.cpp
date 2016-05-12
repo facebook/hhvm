@@ -2240,14 +2240,12 @@ SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
       if (auto result = arrIntKeyImpl(env, inst)) {
         return result;
       }
-      gen(env, IncRef, inst->src(2));
       return inst->src(2);
     }
     if (inst->src(1)->isA(TStr)) {
       if (auto result = arrStrKeyImpl(env, inst)) {
         return result;
       }
-      gen(env, IncRef, inst->src(2));
       return inst->src(2);
     }
   }

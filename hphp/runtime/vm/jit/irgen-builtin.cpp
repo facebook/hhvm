@@ -1491,33 +1491,43 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
     ? loaded_collection_array
     : stack_base;
 
-  auto const value = profiledArrayAccess(env, use_base, key,
+  auto const elem = profiledArrayAccess(env, use_base, key,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
-      auto const elem = gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
-      auto const cell = unbox(env, elem, nullptr);
-      gen(env, IncRef, cell);
-      return cell;
+      return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
     [&] (SSATmp* key) {
       return gen(env, ArrayIdx, use_base, key, def);
     }
   );
-  push(env, value);
 
-  decRef(env, stack_base);
-  decRef(env, key);
-  decRef(env, def);
+  auto finish = [&](SSATmp* tmp) {
+    auto const value = unbox(env, tmp, nullptr);
+    pushIncRef(env, value);
+    decRef(env, stack_base);
+    decRef(env, key);
+    decRef(env, def);
+  };
+
+  auto const pelem = profiledType(env, elem, [&] { finish(elem); });
+  finish(pelem);
 }
 
 void implMapIdx(IRGS& env) {
   auto const def = popC(env);
   auto const key = popC(env);
   auto const map = popC(env);
-  auto const val = gen(env, MapIdx, map, key, def);
-  push(env, val);
-  decRef(env, map);
-  decRef(env, key);
-  decRef(env, def);
+
+  auto finish = [&](SSATmp* elem) {
+    auto const val = unbox(env, elem, nullptr);
+    pushIncRef(env, val);
+    decRef(env, map);
+    decRef(env, key);
+    decRef(env, def);
+  };
+
+  auto const elem = gen(env, MapIdx, map, key, def);
+  auto const pelem = profiledType(env, elem, [&] { finish(elem); } );
+  finish(pelem);
 }
 
 const StaticString s_idx("hh\\idx");

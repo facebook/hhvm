@@ -33,7 +33,6 @@ namespace HPHP { namespace jit {
 
 template<typename T>
 inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
-  if (arch() != Arch::X64) not_implemented();
   return x64::detail::emitTLSAddr(v, datum);
 }
 

@@ -346,7 +346,7 @@ ArrayData* MixedArray::MakeFromDict(ArrayData* adIn, bool copy) {
   assert(adIn->isDict());
   assert(asMixed(adIn)->checkInvariants());
   ArrayData* ad = copy ? Copy(adIn) : adIn;
-  ad->m_hdr.kind = HeaderKind::Dict;
+  ad->m_hdr.kind = HeaderKind::Mixed;
   return ad;
 }
 

@@ -440,19 +440,7 @@ static inline bool pgoDefault() {
 }
 
 static inline uint64_t pgoThresholdDefault() {
-#ifdef HHVM_WHOLE_CFG
-  return 100;
-#else
   return debug ? 2 : 5000;
-#endif
-}
-
-static inline std::string pgoRegionSelectorDefault() {
-#ifdef HHVM_WHOLE_CFG
-  return "wholecfg";
-#else
-  return "hotcfg";
-#endif
 }
 
 static inline bool evalJitDefault() {

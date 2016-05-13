@@ -70,6 +70,15 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
   // ObjectData::newInstance()
   assert(!cls->callsCustomInstanceInit());
 
+  // Make sure our property init vectors are all set up.
+  const bool props = cls->pinitVec().size() > 0;
+  const bool sprops = cls->numStaticProperties() > 0;
+  assertx((props || sprops) == cls->needInitialization());
+  if (cls->needInitialization()) {
+    if (props) initProps(env, cls);
+    if (sprops) initSProps(env, cls);
+  }
+
   auto registerObj = [&] (SSATmp* obj) {
     if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
       gen(env, RegisterLiveObj, obj);
@@ -82,15 +91,6 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
   if (cls->instanceCtor()) {
     auto const obj = gen(env, ConstructInstance, ClassData(cls));
     return registerObj(obj);
-  }
-
-  // Make sure our property init vectors are all set up.
-  const bool props = cls->pinitVec().size() > 0;
-  const bool sprops = cls->numStaticProperties() > 0;
-  assertx((props || sprops) == cls->needInitialization());
-  if (cls->needInitialization()) {
-    if (props) initProps(env, cls);
-    if (sprops) initSProps(env, cls);
   }
 
   /*

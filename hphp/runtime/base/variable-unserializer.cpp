@@ -192,6 +192,11 @@ void throwUnexpectedEOB() {
 void throwVecRefValue() {
   throw Exception("Vecs cannot contain references");
 }
+
+[[noreturn]] NEVER_INLINE
+void throwDictRefValue() {
+  throw Exception("Dicts cannot contain references");
+}
 }
 
 const StaticString
@@ -1019,6 +1024,9 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
     unserializeVariant(key, uns, UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) {
       throwInvalidKey();
+    }
+    if (UNLIKELY(kind == ArrayKind::Dict && uns->peek() == 'R')) {
+      throwDictRefValue();
     }
     // for apc, we know the key can't exist, but ignore that optimization
     assert(uns->type() != VariableUnserializer::Type::APCSerialize ||

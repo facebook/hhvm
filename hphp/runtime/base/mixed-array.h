@@ -335,13 +335,8 @@ public:
   static constexpr auto ExistsIntDict = &ExistsInt;
   static constexpr auto ExistsStrDict = &ExistsStr;
   static constexpr auto LvalIntDict = &LvalInt;
-  static constexpr auto LvalIntRefDict = LvalIntRef;
   static constexpr auto LvalStrDict = &LvalStr;
-  static constexpr auto LvalStrRefDict = LvalStrRef;
   static constexpr auto LvalNewDict = &LvalNew;
-  static constexpr auto LvalNewRefDict = LvalNewRef;
-  static constexpr auto SetRefIntDict = &SetRefInt;
-  static constexpr auto SetRefStrDict = &SetRefStr;
   static constexpr auto RemoveIntDict = &RemoveInt;
   static constexpr auto RemoveStrDict = &RemoveStr;
   static constexpr auto IterBeginDict = &IterBegin;
@@ -362,8 +357,6 @@ public:
   static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static constexpr auto AppendRefDict = &AppendRef;
-  static constexpr auto AppendWithRefDict = &AppendWithRef;
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
@@ -374,11 +367,20 @@ public:
   static constexpr auto EscalateDict = &Escalate;
   static constexpr auto ToVecDict = ToVec;
 
+  static ArrayData* LvalIntRefDict(ArrayData*, int64_t, Variant*&, bool);
+  static ArrayData* LvalStrRefDict(ArrayData*, StringData*, Variant*&, bool);
+  static ArrayData* LvalNewRefDict(ArrayData*, Variant*&, bool);
+  static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
+  static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
+  static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
+  static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
+
 private:
   MixedArray* copyMixed() const;
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
   static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
+  static void CheckRefsForDict(const MixedArray*);
 
 public:
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -476,7 +478,7 @@ private:
 private:
   enum class AllocMode : bool { Request, Static };
 
-  static MixedArray* CopyMixed(const MixedArray& other, AllocMode);
+  static MixedArray* CopyMixed(const MixedArray& other, AllocMode, HeaderKind);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
   MixedArray() = delete;

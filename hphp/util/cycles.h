@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_TSC_H_
 #define incl_HPHP_TSC_H_
 
+#include <folly/portability/Asm.h>
+
 #include "hphp/util/assertions.h"
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -41,17 +43,19 @@ inline uint64_t cpuCycles() {
   return tb;
 #elif _MSC_VER
   return (uint64_t)__rdtsc();
+#elif __aarch64__
+  // FIXME: This returns the virtual timer which is not exactly
+  // the core cycles but has a different frequency.
+  uint64_t tb;
+  asm volatile("mrs %0, cntvct_el0" : "=r" (tb));
+  return tb;
 #else
   not_implemented();
 #endif
 }
 
 inline void cpuRelax() {
-#ifdef __x86_64__
-  asm volatile("pause");
-#elif __powerpc64__
-  asm volatile("or 31,31,31");
-#endif
+  folly::asm_volatile_pause();
 }
 
 inline void cycleDelay(uint32_t numCycles) {

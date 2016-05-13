@@ -86,7 +86,7 @@ struct LocationState {
    * However, whenever we have a value, the type of the SSATmp must match this
    * `type' field.
    */
-  Type type{default_type()};
+  Type type{LocationState::default_type()};
 
   /*
    * Prediction for the type at the location, if it's boxed or if we're in a
@@ -94,7 +94,7 @@ struct LocationState {
    *
    * @requires: predictedType <= type
    */
-  Type predictedType{default_type()};
+  Type predictedType{LocationState::default_type()};
 
   /*
    * The sources of the currently known type, which may be values.

@@ -12,7 +12,7 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
       GP[i-1] = GP[i];
     }
     GP_count--;
-    asm("mov x8, %0\n" : : "r"(byRef));
+    asm volatile ("mov x8, %0\n"::"r"(byRef):"x8");
   }
 #endif
   switch (GP_count) {
@@ -754,7 +754,7 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
       GP[i-1] = GP[i];
     }
     GP_count--;
-    asm("mov x8, %0\n" : : "r"(byRef));
+    asm volatile ("mov x8, %0\n"::"r"(byRef):"x8");
   }
 #endif
   switch (GP_count) {
@@ -1496,7 +1496,7 @@ TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
       GP[i-1] = GP[i];
     }
     GP_count--;
-    asm("mov x8, %0\n" : : "r"(byRef));
+    asm volatile ("mov x8, %0\n"::"r"(byRef):"x8");
   }
 #endif
   switch (GP_count) {

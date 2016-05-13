@@ -56,7 +56,7 @@ foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV'] as
   fwrite($fp, "      GP[i-1] = GP[i];\n");
   fwrite($fp, "    }\n");
   fwrite($fp, "    GP_count--;\n");
-  fwrite($fp, "    asm(\"mov x8, %0\\n\" : : \"r\"(byRef));\n");
+  fwrite($fp, "    asm volatile (\"mov x8, %0\\n\"::\"r\"(byRef):\"x8\");\n");
   fwrite($fp, "  }\n");
   fwrite($fp, "#endif\n");
   fwrite($fp, "  switch (GP_count) {\n");

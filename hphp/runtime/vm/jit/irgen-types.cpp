@@ -151,23 +151,42 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     return;
   }
 
-  auto retFail = [&] {
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
-    gen(env, VerifyRetFail, ldStkAddr(env, BCSPRelOffset{0}));
+  auto genFail = [&] {
+    if (isReturnType) {
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+      gen(env, VerifyRetFail, ldStkAddr(env, BCSPRelOffset{0}));
+    } else {
+      gen(env, VerifyParamFail, cns(env, id));
+    }
+  };
+
+  auto checkSpecializedArray = [&] (const Type arrTy) {
+    if (valType <= arrTy) {
+      env.irb->constrainValue(
+        val,
+        TypeConstraint(DataTypeSpecialized).setWantArrayKind()
+      );
+    } else if (valType.maybe(arrTy)) {
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, CheckType, Type::Array(ArrayData::kDictKind), taken, val);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          genFail();
+        }
+      );
+    } else {
+      genFail();
+    }
   };
 
   auto result = annotCompat(valType.toDataType(), tc.type(), tc.typeName());
   switch (result) {
-    case AnnotAction::Pass:
-      return;
-    case AnnotAction::Fail:
-      if (isReturnType) {
-        retFail();
-      } else {
-        gen(env, VerifyParamFail, cns(env, id));
-      }
-      return;
+    case AnnotAction::Pass: return;
+    case AnnotAction::Fail: return genFail();
     case AnnotAction::CallableCheck:
       if (isReturnType) {
         gen(env, VerifyRetCallable, val);
@@ -175,6 +194,14 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
         gen(env, VerifyParamCallable, val, cns(env, id));
       }
       return;
+    case AnnotAction::DictCheck: {
+      checkSpecializedArray(Type::Array(ArrayData::kDictKind));
+      return;
+    }
+    case AnnotAction::VecCheck: {
+      checkSpecializedArray(Type::Array(ArrayData::kVecKind));
+      return;
+    }
     case AnnotAction::ObjectCheck:
       break;
   }
@@ -231,12 +258,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     if (!knownConstraint) {
       // The hint was self or parent and there's no corresponding
       // class for the current func. This typehint will always fail.
-      if (isReturnType) {
-        retFail();
-      } else {
-        gen(env, VerifyParamFail, cns(env, id));
-      }
-      return;
+      return genFail();
     }
     clsName = knownConstraint->preClass()->name();
   }
@@ -256,8 +278,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       },
       [&] { // taken: the param type does not match
         hint(env, Block::Hint::Unlikely);
-        if (isReturnType) retFail();
-        else              gen(env, VerifyParamFail, cns(env, id));
+        genFail();
       }
     );
     return;

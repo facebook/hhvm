@@ -53,6 +53,10 @@ enum class Kind : uint8_t {
   T_trait = 17,
   T_enum = 18,
 
+  // Hack array types
+  T_dict = 19,
+  T_vec = 20,
+
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */
   T_unresolved = 101,

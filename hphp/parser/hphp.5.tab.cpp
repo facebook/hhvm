@@ -14390,7 +14390,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 3400 "hphp.y"
     { Token t; t.reset();
-                                         (yyvsp[(1) - (1)]).setText("array");
+                                         (yyvsp[(1) - (1)]).setText("HH\\dict");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); ;}
     break;
 
@@ -14399,7 +14399,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 3403 "hphp.y"
     { Token t; t.reset();
-                                         (yyvsp[(1) - (1)]).setText("array");
+                                         (yyvsp[(1) - (1)]).setText("HH\\vec");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); ;}
     break;
 
@@ -14440,7 +14440,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 3417 "hphp.y"
-    { (yyvsp[(1) - (2)]).setText("array");
+    { (yyvsp[(1) - (2)]).setText("HH\\dict");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)])); ;}
     break;
 
@@ -14448,7 +14448,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 3419 "hphp.y"
-    { (yyvsp[(1) - (2)]).setText("array");
+    { (yyvsp[(1) - (2)]).setText("HH\\vec");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)])); ;}
     break;
 

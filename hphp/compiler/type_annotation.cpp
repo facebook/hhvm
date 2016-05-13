@@ -103,6 +103,8 @@ MaybeDataType TypeAnnotation::dataType() const {
   if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\dict"))     return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\vec"))      return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
 
@@ -290,6 +292,12 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
       ? TypeStructure::Kind::T_shape
       : TypeStructure::Kind::T_array;
   }
+  if (!strcasecmp(m_name.c_str(), "HH\\dict")) {
+    return TypeStructure::Kind::T_dict;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\vec")) {
+    return TypeStructure::Kind::T_vec;
+  }
   if (m_typevar) {
     return TypeStructure::Kind::T_typevar;
   }
@@ -375,6 +383,8 @@ Array TypeAnnotation::getScalarArrayRep() const {
             Variant(argsListToScalarArray(m_typeArgs->m_typeList)));
     break;
   case TypeStructure::Kind::T_array:
+  case TypeStructure::Kind::T_dict:
+  case TypeStructure::Kind::T_vec:
     if (m_typeArgs) {
       rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
     }

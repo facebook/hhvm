@@ -43,6 +43,8 @@ const StaticString
   s_string("string"),
   s_object("object"),
   s_array("array"),
+  s_dict("dict"),
+  s_vec("vec"),
   s_NULL("NULL"),
   s_null("null");
 
@@ -55,6 +57,10 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
    * gettype(). So we make an exception here. */
   if (v.isNull()) {
     return s_NULL;
+  }
+  if (v.isArray()) {
+    if (v.toArray()->isDict()) return s_dict;
+    if (v.toArray()->isVecArray()) return s_vec;
   }
   return getDataTypeString(v.getType());
 }

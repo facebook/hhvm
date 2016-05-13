@@ -181,9 +181,11 @@ struct TypeConstraint {
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
 
   bool isArray()    const { return m_type == Type::Array; }
-  bool isObject()  const { return m_type == Type::Object; }
+  bool isObject()   const { return m_type == Type::Object; }
+  bool isDict()     const { return m_type == Type::Dict; }
+  bool isVec()      const { return m_type == Type::Vec; }
 
-  AnnotType type() const { return m_type; }
+  AnnotType type()  const { return m_type; }
 
   /*
    * A string representation of this type constraint.

@@ -165,7 +165,7 @@ void in(ISS& env, const bc::NewArray& op) {
 }
 
 void in(ISS& env, const bc::NewDictArray& op) {
-  push(env, counted_aempty());
+  push(env, Type { BArr });
 }
 
 void in(ISS& env, const bc::NewMixedArray& op) {

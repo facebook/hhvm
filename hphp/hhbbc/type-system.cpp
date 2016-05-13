@@ -1319,7 +1319,10 @@ Type dval(double val) {
 
 Type aval(SArray val) {
   assert(val->isStatic());
-  if (val->empty()) return aempty();
+  if (val->empty()) {
+    if (val->isDict() || val->isVecArray()) return Type { BArr };
+    return aempty();
+  }
   auto r        = Type { BSArrN };
   r.m_data.aval = val;
   r.m_dataTag   = DataTag::ArrVal;

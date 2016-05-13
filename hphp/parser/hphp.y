@@ -3398,10 +3398,10 @@ hh_type:
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, t); }
   | T_DICT                             { Token t; t.reset();
-                                         $1.setText("array");
+                                         $1.setText("HH\\dict");
                                          _p->onTypeAnnotation($$, $1, t); }
   | T_VEC                              { Token t; t.reset();
-                                         $1.setText("array");
+                                         $1.setText("HH\\vec");
                                          _p->onTypeAnnotation($$, $1, t); }
   | T_CALLABLE                         { Token t; t.reset();
                                          $1.setText("callable");
@@ -3414,9 +3414,9 @@ hh_type:
                                          _p->onTypeSpecialization($$, 'a'); }
   | T_ARRAY array_typelist             { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $2); }
-  | T_DICT array_typelist              { $1.setText("array");
+  | T_DICT array_typelist              { $1.setText("HH\\dict");
                                          _p->onTypeAnnotation($$, $1, $2); }
-  | T_VEC array_typelist               { $1.setText("array");
+  | T_VEC array_typelist               { $1.setText("HH\\vec");
                                          _p->onTypeAnnotation($$, $1, $2); }
   | T_XHP_LABEL                        { $1.xhpLabel();
                                          Token t; t.reset();

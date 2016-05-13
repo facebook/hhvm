@@ -1423,6 +1423,8 @@ void Parser::checkClassDeclName(const std::string& name) {
       case AnnotType::Mixed:
       case AnnotType::Number:
       case AnnotType::ArrayKey:
+      case AnnotType::Dict:
+      case AnnotType::Vec:
         if (!RuntimeOption::PHP7_ScalarTypes &&
             !m_scanner.isHHSyntaxEnabled() && !isHHNamespace) {
           // If HH syntax is not enabled and we're not in the HH namespace,

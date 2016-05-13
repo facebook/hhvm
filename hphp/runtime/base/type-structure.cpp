@@ -75,7 +75,9 @@ const std::string
   s_noreturn("HH\\noreturn"),
   s_mixed("HH\\mixed"),
   s_array("array"),
-  s_shape("HH\\shape")
+  s_shape("HH\\shape"),
+  s_dict("HH\\dict"),
+  s_vec("HH\\vec")
 ;
 
 std::string fullName(const Array& arr);
@@ -249,6 +251,18 @@ std::string fullName(const Array& arr) {
     case TypeStructure::Kind::T_shape:
       name += s_shape;
       shapeTypeName(arr, name);
+      break;
+    case TypeStructure::Kind::T_dict:
+      name += s_dict;
+      if (arr.exists(s_generic_types)) {
+        genericTypeName(arr, name);
+      }
+      break;
+    case TypeStructure::Kind::T_vec:
+      name += s_vec;
+      if (arr.exists(s_generic_types)) {
+        genericTypeName(arr, name);
+      }
       break;
     case TypeStructure::Kind::T_typevar:
       assert(arr.exists(s_name));

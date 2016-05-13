@@ -40,6 +40,8 @@ enum class AnnotMetaType : uint8_t {
   Callable = 4,
   Number = 5,
   ArrayKey = 6,
+  Dict = 7,
+  Vec = 8,
 };
 
 enum class AnnotType : uint16_t {
@@ -59,6 +61,8 @@ enum class AnnotType : uint16_t {
   Callable = (uint16_t)AnnotMetaType::Callable << 8 | (uint8_t)KindOfUninit,
   Number   = (uint16_t)AnnotMetaType::Number << 8   | (uint8_t)KindOfUninit,
   ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8 | (uint8_t)KindOfUninit,
+  Dict     = (uint16_t)AnnotMetaType::Dict << 8     | (uint8_t)KindOfUninit,
+  Vec      = (uint16_t)AnnotMetaType::Vec << 8      | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -98,7 +102,14 @@ bool interface_supports_double(std::string const&);
 bool interface_supports_string(std::string const&);
 bool interface_supports_array(std::string const&);
 
-enum class AnnotAction { Pass, Fail, ObjectCheck, CallableCheck };
+enum class AnnotAction {
+  Pass,
+  Fail,
+  ObjectCheck,
+  CallableCheck,
+  DictCheck,
+  VecCheck
+};
 
 /*
  * annotCompat() takes a DataType (`dt') and tries to determine if a value
@@ -160,6 +171,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       return (isStringType(dt) || isArrayType(KindOfArray) ||
               dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
+    case AnnotMetaType::Dict:
+      // Requires an array specialization check
+      return isArrayType(dt) ? AnnotAction::DictCheck : AnnotAction::Fail;
+    case AnnotMetaType::Vec:
+      // Requires an array specialization check
+      return isArrayType(dt) ? AnnotAction::VecCheck : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       break;
   }

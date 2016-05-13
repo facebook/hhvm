@@ -254,6 +254,10 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
       case AnnotAction::Fail: return false;
       case AnnotAction::CallableCheck:
         return is_callable(tvAsCVarRef(tv));
+      case AnnotAction::DictCheck:
+        return tv->m_data.parr->isDict();
+      case AnnotAction::VecCheck:
+        return tv->m_data.parr->isVecArray();
       case AnnotAction::ObjectCheck: break;
     }
     assert(result == AnnotAction::ObjectCheck);
@@ -302,6 +306,8 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
     case AnnotMetaType::Parent:
     case AnnotMetaType::Number:
     case AnnotMetaType::ArrayKey:
+    case AnnotMetaType::Dict:
+    case AnnotMetaType::Vec:
       // Self and Parent should never happen, because type
       // aliases are not allowed to use those MetaTypes
       return false;
@@ -347,6 +353,8 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         case MetaType::Precise:
         case MetaType::Number:
         case MetaType::ArrayKey:
+        case MetaType::Dict:
+        case MetaType::Vec:
           return false;
         case MetaType::Mixed:
           // We assert'd at the top of this function that the
@@ -369,6 +377,10 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     case AnnotAction::Fail: return false;
     case AnnotAction::CallableCheck:
       return is_callable(tvAsCVarRef(tv));
+    case AnnotAction::DictCheck:
+      return tv->m_data.parr->isDict();
+    case AnnotAction::VecCheck:
+      return tv->m_data.parr->isVecArray();
     case AnnotAction::ObjectCheck:
       assert(isObject());
       return checkTypeAliasNonObj(tv);

@@ -524,7 +524,7 @@ SSATmp* opt_foldable(IRGS& env,
       ArrayData *variadicArgs = tmp.m_data.parr;
       uint32_t numVariadicArgs = variadicArgs->size();
       for (int i = 0; i < numVariadicArgs; i++) {
-    	Variant arg = variadicArgs->get(i);
+        Variant arg = variadicArgs->get(i);
         arr.set(numNonVariadicArgs + i, arg);
       }
     }

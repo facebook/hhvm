@@ -361,7 +361,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v = done1;
 
     // Normal end catch situation: call back to tc_unwind_resume, which returns
-    // the catch trace (or null) in $r3, and the new vmfp in $r4.
+    // the catch trace (or null) in r3, and the new vmfp in r4.
     v << copy{rvmfp(), rarg(0)};
     v << call{TCA(tc_unwind_resume)};
     v << copy{ppc64_asm::reg::r4, rvmfp()};
@@ -388,7 +388,7 @@ void enterTCImpl(TCA start, ActRec* stashedAR) {
                 "enterTCHelper needs to be modified to use the correct ABI");
 
   // We have to force C++ to spill anything that might be in a callee-saved
-  // register (aside from %rbp), since enterTCHelper does not save them.
+  // register (aside from vmfp), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();
   auto& regs = vmRegsUnsafe();
   mcg->ustubs().enterTCHelper(regs.stack.top(), regs.fp, start,

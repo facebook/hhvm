@@ -44,6 +44,11 @@ constexpr PhysReg rsp()        { return ppc64_asm::reg::r27; }
 constexpr PhysReg rfuncln()    { return ppc64_asm::reg::r0;  }
 // optional in function linkage/function entry address at global entry point
 constexpr PhysReg rfuncentry() { return ppc64_asm::reg::r12; }
+// TOC ("Table of Contents")
+// Section that combines the functions of the GOT and the small data section.
+// GOT ("Global Offset Table")
+// Section used to hold addresses for position independent code.
+// The TOC section is accessed via the dedicated TOC pointer register, r2.
 constexpr PhysReg rtoc()       { return ppc64_asm::reg::r2;  }
 
 /*

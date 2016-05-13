@@ -508,7 +508,6 @@ bool canDCE(IRInstruction* inst) {
   case IncDecElem:
   case SetNewElem:
   case SetNewElemArray:
-  case SetWithRefNewElem:
   case BindNewElem:
   case ArrayIsset:
   case VectorIsset:

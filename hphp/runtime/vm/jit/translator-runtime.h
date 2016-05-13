@@ -232,8 +232,7 @@ StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
 void bindElemC(TypedValue*, TypedValue, RefData*);
-void setWithRefElemC(TypedValue*, TypedValue, TypedValue);
-void setWithRefNewElem(TypedValue*, TypedValue);
+void setWithRefElem(TypedValue*, TypedValue, TypedValue);
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
 void bindNewElem(TypedValue* base, RefData* val);
 }

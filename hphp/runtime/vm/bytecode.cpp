@@ -3478,7 +3478,9 @@ OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
 
 static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   auto& mstate = vmMInstrState();
-  mstate.base = ElemD<MOpFlags::DefineReffy>(mstate.tvRef, mstate.base, key);
+  mstate.base = UNLIKELY(value->m_type == KindOfRef)
+    ? ElemD<MOpFlags::DefineReffy>(mstate.tvRef, mstate.base, key)
+    : ElemD<MOpFlags::Define>(mstate.tvRef, mstate.base, key);
   tvAsVariant(mstate.base).setWithRef(tvAsVariant(value));
 
   mFinal(mstate, 0, folly::none);

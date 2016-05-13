@@ -1303,18 +1303,12 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   tvBindRef(val, elem);
 }
 
-void setWithRefElemC(TypedValue* base, TypedValue keyTV, TypedValue val) {
+void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(&keyTV);
-  auto elem = HPHP::ElemD<MOpFlags::Define>(localTvRef, base, *keyC);
-  // Intentionally leak the old value pointed to by elem, including from magic
-  // methods.
-  tvDup(val, *elem);
-}
-
-void setWithRefNewElem(TypedValue* base, TypedValue val) {
-  TypedValue localTvRef;
-  auto elem = NewElem<false>(localTvRef, base);
+  auto elem = UNLIKELY(val.m_type == KindOfRef)
+    ? HPHP::ElemD<MOpFlags::DefineReffy>(localTvRef, base, *keyC)
+    : HPHP::ElemD<MOpFlags::Define>(localTvRef, base, *keyC);
   // Intentionally leak the old value pointed to by elem, including from magic
   // methods.
   tvDup(val, *elem);

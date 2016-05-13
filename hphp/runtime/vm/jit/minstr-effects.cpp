@@ -29,7 +29,7 @@ Opcode canonicalOp(Opcode op) {
   if (op == ElemUX || op == UnsetElem) {
     return UnsetElem;
   }
-  if (op == SetWithRefElem || op == SetWithRefNewElem) {
+  if (op == SetWithRefElem) {
     return SetWithRefElem;
   }
   return opcodeHasFlags(op, MInstrProp) ? SetProp

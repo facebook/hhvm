@@ -958,7 +958,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetNewElem:
   case SetOpElem:
   case SetWithRefElem:
-  case SetWithRefNewElem:
   case UnsetElem:
   case BindElem:
   case BindNewElem:

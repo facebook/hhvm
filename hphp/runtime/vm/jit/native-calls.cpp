@@ -420,10 +420,8 @@ static CallMap s_callMap {
                   {{SSA, 0}, {SSA, 1}}},
     {BindElem, MInstrHelpers::bindElemC, DNone, SSync,
                  {{SSA, 0}, {TV, 1}, {SSA, 2}}},
-    {SetWithRefElem, MInstrHelpers::setWithRefElemC, DNone, SSync,
+    {SetWithRefElem, MInstrHelpers::setWithRefElem, DNone, SSync,
                  {{SSA, 0}, {TV, 1}, {TV, 2}}},
-    {SetWithRefNewElem, MInstrHelpers::setWithRefNewElem, DNone, SSync,
-                 {{SSA, 0}, {TV, 1}}},
     {ThrowOutOfBounds, collections::throwOOB, DNone, SSync, {{SSA, 0}}},
 
     /* instanceof checks */

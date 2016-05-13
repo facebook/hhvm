@@ -1302,17 +1302,21 @@ module Make (GetLocals : GetLocals) = struct
           check_constant_expr e2)
     | Eif (e1, e2, e3) ->
       check_constant_expr e1;
-      ignore @@ Option.map e2 check_constant_expr;
+      Option.iter e2 check_constant_expr;
       check_constant_expr e3
-
     | _ -> Errors.illegal_constant pos
+
+  and constant_expr env e =
+    Errors.try_with_error begin fun () ->
+      check_constant_expr e;
+      expr env e
+    end (fun () -> fst e, N.Any)
 
   and const_defl h env l = List.map l (const_def h env)
   and const_def h env (x, e) =
-    check_constant_expr e;
     Env.bind_class_const env x;
     let h = Option.map h (hint env) in
-    h, x, Some (expr env e)
+    h, x, Some (constant_expr env e)
 
   and abs_const_def env h x =
     Env.bind_class_const env x;
@@ -2262,19 +2266,20 @@ module Make (GetLocals : GetLocals) = struct
   (* Global constants *)
   (**************************************************************************)
 
-  let check_constant cst =
-    (match cst.cst_type with
+  let check_constant_hint cst =
+    match cst.cst_type with
     | None when cst.cst_mode = FileInfo.Mstrict ->
         Errors.add_a_typehint (fst cst.cst_name)
     | None
-    | Some _ -> ());
-    check_constant_expr cst.cst_value
+    | Some _ -> ()
 
   let global_const genv cst =
     let env = Env.make_const_env genv cst in
     let hint = Option.map cst.cst_type (hint env) in
     let e = match cst.cst_kind with
-    | Ast.Cst_const -> check_constant cst; Some (expr env cst.cst_value)
+    | Ast.Cst_const ->
+      check_constant_hint cst;
+      Some (constant_expr env cst.cst_value)
     (* Define allows any expression, so don't call check_constant.
      * Furthermore it often appears at toplevel, which we don't track at
      * all, so don't type or even name that expression, it may refer to

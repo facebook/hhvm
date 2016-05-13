@@ -151,14 +151,31 @@ static void bt_handler(int sig) {
 }
 
 void install_crash_reporter() {
-#ifndef _MSC_VER
-  signal(SIGQUIT, bt_handler);
-  signal(SIGBUS,  bt_handler);
-#endif
+#ifdef _MSC_VER
   signal(SIGILL,  bt_handler);
   signal(SIGFPE,  bt_handler);
   signal(SIGSEGV, bt_handler);
   signal(SIGABRT, bt_handler);
+#else
+  struct sigaction sa{};
+  struct sigaction osa;
+  sigemptyset(&sa.sa_mask);
+  // By default signal handlers are run on the signaled thread's stack.
+  // In case of stack overflow running the SIGSEGV signal handler on
+  // the same stack leads to another SIGSEGV and crashes the program.
+  // Use SA_ONSTACK, so alternate stack is used (only if configured via
+  // sigaltstack).
+  sa.sa_flags |= SA_ONSTACK;
+  sa.sa_handler = &bt_handler;
+
+  CHECK_ERR(sigaction(SIGQUIT, &sa, &osa));
+  CHECK_ERR(sigaction(SIGBUS,  &sa, &osa));
+  CHECK_ERR(sigaction(SIGILL,  &sa, &osa));
+  CHECK_ERR(sigaction(SIGFPE,  &sa, &osa));
+  CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
+  CHECK_ERR(sigaction(SIGABRT, &sa, &osa));
+#endif
+
 
   register_assert_fail_logger(&StackTraceNoHeap::AddExtraLogging);
 }

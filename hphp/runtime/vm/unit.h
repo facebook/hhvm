@@ -178,6 +178,8 @@ int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 void stashLineTable(const Unit* unit, LineTable table);
 
+const SourceLocTable& getSourceLocTable(const Unit*);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

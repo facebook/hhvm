@@ -43,12 +43,39 @@ using BreakType = XDebugBreakpoint::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+/* Finds the SourceLoc that most tightly fits a line in a unit. */
+SourceLoc tightestLoc(const Unit* unit, int line) {
+  auto const contained = [&] (SourceLoc loc) {
+    return loc.line0 <= line && line <= loc.line1;
+  };
+
+  auto const size = [] (SourceLoc loc) -> size_t {
+    return loc.line1 - loc.line0 + 1;
+  };
+
+  // Will be a huge unsigned value under size().
+  SourceLoc best;
+  best.line0 = 1;
+  best.line1 = -1;
+
+  for (auto const& ent : getSourceLocTable(unit)) {
+    if (contained(ent.val()) && size(ent.val()) < size(best)) {
+      best = ent.val();
+
+      // If the Sourceloc neatly fits on a single line (hopefully the common
+      // case), then bail out early.
+      if (size(best) == 1) break;
+    }
+  }
+  return best;
+}
+
 // Helper that adds the given function breakpoint corresponding to the given
 // function and id as a breakpoint. If a duplicate breakpoint already exists,
 // it is overwritten.
-static void add_func_breakpoint(int id,
-                                XDebugBreakpoint& bp,
-                                const Func* func) {
+void add_func_breakpoint(int id, XDebugBreakpoint& bp, const Func* func) {
   // Function id is added to the breakpoint once matched
   auto const func_id = func->getFuncId();
   bp.funcId = func_id;
@@ -80,11 +107,14 @@ static void add_func_breakpoint(int id,
 
 // Helper that adds the given line breakpoint that has been matched to the given
 // unit as a breakpoint. The line number is assumed to be valid in the unit.
-static void add_line_breakpoint(int id,
-                                XDebugBreakpoint& bp,
-                                const Unit* unit) {
+void add_line_breakpoint(int id, XDebugBreakpoint& bp, const Unit* unit) {
   auto filepath = unit->filepath()->toCppString();
-  LINE_MAP[filepath].insert(std::make_pair(bp.line, id));
+
+  // Figure out the canonical line number for the breakpoint.
+  bp.line = tightestLoc(unit, bp.line).line1;
+  assertx(bp.line != -1);
+
+  LINE_MAP[filepath].emplace(bp.line, id);
   bp.unit = unit;
 }
 
@@ -93,9 +123,9 @@ static void add_line_breakpoint(int id,
 // removed from the unmatched set using the given iterator. The passed iterator
 // reference is then modified to be the correct "next" iterator. Returns true
 // if there was a match, false otherwise.
-static bool check_func_match(XDebugBreakpoint& bp,
-                             const Func* func,
-                             hphp_hash_set<int>::iterator& iter) {
+bool check_func_match(XDebugBreakpoint& bp,
+                      const Func* func,
+                      hphp_hash_set<int>::iterator& iter) {
   if (func->fullName()->equal(bp.fullFuncName.get())) {
     add_func_breakpoint(*iter, bp, func);
     iter = UNMATCHED.erase(iter);
@@ -106,7 +136,7 @@ static bool check_func_match(XDebugBreakpoint& bp,
 
 // Given a filename, finds the corresponding unit if it exists. Returns nullptr
 // otherwise.
-static const Unit* find_unit(String filename) {
+const Unit* find_unit(String filename) {
   // Search the given filename in the list of evaled files. We translate each
   // unit's filename to a canonical format, which is slow, but necessary.
   for (auto& kv : g_context->m_evaledFiles) {
@@ -117,6 +147,8 @@ static const Unit* find_unit(String filename) {
     }
   }
   return nullptr;
+}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,17 +277,19 @@ bool XDebugThreadBreakpoints::updateBreakpointLine(int id, int newLine) {
   if (iter == BREAKPOINT_MAP.end()) {
     return false;
   }
-  XDebugBreakpoint& bp = iter->second;
+  auto& bp = iter->second;
 
-  // Determine if we need to unregister the line
+  // Determine if we need to unregister the line.
   auto filepath = bp.unit->filepath()->toCppString();
   if (LINE_MAP[filepath].count(bp.line) == 1) {
     phpRemoveBreakPointLine(bp.unit, bp.line);
   }
 
-  // Register the new line
-  bp.line = newLine;
-  LINE_MAP[filepath].insert(std::make_pair(bp.line, id));
+  // Register the new line.
+  bp.line = tightestLoc(bp.unit, newLine).line1;
+  assertx(bp.line != -1);
+
+  LINE_MAP[filepath].emplace(bp.line, id);
   phpAddBreakPointLine(bp.unit, bp.line);
   return true;
 }

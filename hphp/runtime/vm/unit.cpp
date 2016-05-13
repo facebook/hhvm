@@ -277,6 +277,104 @@ const SourceLocTable& getSourceLocTable(const Unit* unit) {
   return acc->second.sourceLocTable;
 }
 
+/**
+ * Generate line->vector<OffsetRange> reverse map from SourceLocTable.
+ *
+ * Algorithm:
+ * We first generate the OffsetRange for each SourceLoc,
+ * then sort the pair<SourceLoc, OffsetRange> in most nested to outward order
+ * so that we can add vector<OffsetRange> for nested lines first.
+ * After merging continuous duplicate line ranges into one we build the final
+ * map by adding vector<OffsetRange> for each line in the LineRange only if
+ * it hasn't got any vector<OffsetRange> from inner LineRange yet.
+ * By doing this we ensure the outer LineRange's vector<OffsetRange> will not be
+ * added for inner lines.
+ */
+static void generateLineToOffsetRangesMap(
+  const Unit* unit,
+  LineToOffsetRangeVecMap& map
+) {
+  // First generate an OffsetRange for each SourceLoc.
+  auto const& srcLocTable = getSourceLocTable(unit);
+
+  struct LineRange {
+    LineRange(int start, int end)
+    : line0(start), line1(end)
+    {}
+    int line0;
+    int line1;
+
+    bool operator!=(const LineRange& other) const {
+      return this->line0 != other.line0 || this->line1 != other.line1;
+    }
+  };
+
+  using LineRangeOffsetRangePair = std::pair<LineRange, OffsetRange>;
+  std::vector<LineRangeOffsetRangePair> lineRangesTable;
+  Offset baseOff = 0;
+  for (const auto& sourceLoc: srcLocTable) {
+    Offset pastOff = sourceLoc.pastOffset();
+    OffsetRange offsetRange(baseOff, pastOff);
+    LineRange lineRange(sourceLoc.val().line0, sourceLoc.val().line1);
+    lineRangesTable.emplace_back(lineRange, offsetRange);
+    baseOff = pastOff;
+  }
+
+  // Sort the line ranges in most nested to outward order:
+  // First sort them in ascending order by line range end;
+  // if range end ties, sort in descending order by line range start.
+  std::sort(
+    lineRangesTable.begin(),
+    lineRangesTable.end(),
+    [](const LineRangeOffsetRangePair& a, const LineRangeOffsetRangePair& b) {
+      return a.first.line1 == b.first.line1 ?
+        a.first.line0 > b.first.line0 :
+        a.first.line1 < b.first.line1;
+    }
+  );
+
+  // Merge continuous duplicate line ranges into one.
+  using LineRangeToOffsetRangesTable =
+    std::vector<std::pair<LineRange, std::vector<OffsetRange>>>;
+  LineRangeToOffsetRangesTable lineRangeToOffsetRangesTable;
+  for (auto i = 0; i < lineRangesTable.size(); ++i) {
+    if (i == 0 || lineRangesTable[i].first != lineRangesTable[i-1].first) {
+      // New line range starts.
+      std::vector<OffsetRange> offsetRanges;
+      offsetRanges.emplace_back(lineRangesTable[i].second);
+      const auto& lineRange = lineRangesTable[i].first;
+      lineRangeToOffsetRangesTable.emplace_back(lineRange, offsetRanges);
+    } else {
+      // Duplicate LineRange.
+      assertx(lineRangeToOffsetRangesTable.size() > 0);
+      auto& offsetRanges = lineRangeToOffsetRangesTable.back().second;
+      offsetRanges.emplace_back(lineRangesTable[i].second);
+    }
+  }
+
+  // Generate the final line to offset ranges map.
+  for (auto& entry: lineRangeToOffsetRangesTable) {
+    // Sort the offset ranges of each line range.
+    std::sort(
+      entry.second.begin(),
+      entry.second.end(),
+      [](const OffsetRange& a, const OffsetRange& b) {
+        return a.base == b.base ? a.past < b.past : a.base < b.base;
+      }
+    );
+
+    const auto& offsetRanges = entry.second;
+    auto line0 = entry.first.line0;
+    auto line1 = entry.first.line1;
+    for (auto line = line0; line <= line1; ++line) {
+      // Only add if not added by inner LineRange yet.
+      if (map.find(line) == map.end()) {
+        map[line] = offsetRanges;
+      }
+    }
+  }
+}
+
 /*
  * Return a copy of the Unit's line to OffsetRangeVec table.
  */
@@ -290,27 +388,8 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
     }
   }
 
-  auto const& srcLoc = getSourceLocTable(unit);
-
   LineToOffsetRangeVecMap map;
-  Offset baseOff = 0;
-  for (size_t i = 0; i < srcLoc.size(); ++i) {
-    Offset pastOff = srcLoc[i].pastOffset();
-    OffsetRange range(baseOff, pastOff);
-    auto line0 = srcLoc[i].val().line0;
-    auto line1 = srcLoc[i].val().line1;
-    for (int line = line0; line <= line1; line++) {
-      auto it = map.find(line);
-      if (it != map.end()) {
-        it->second.push_back(range);
-      } else {
-        OffsetRangeVec v(1);
-        v.push_back(range);
-        map[line] = v;
-      }
-    }
-    baseOff = pastOff;
-  }
+  generateLineToOffsetRangesMap(unit, map);
 
   ExtendedLineInfoCache::accessor acc;
   if (!s_extendedLineInfo.find(acc, unit)) {

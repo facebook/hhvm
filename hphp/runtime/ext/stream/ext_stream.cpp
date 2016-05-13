@@ -175,6 +175,7 @@ static struct StreamExtension final : Extension {
     HHVM_FE(stream_select);
     HHVM_FE(stream_await);
     HHVM_FE(stream_set_blocking);
+    HHVM_FE(stream_set_read_buffer);
     HHVM_FE(stream_set_timeout);
     HHVM_FE(stream_set_write_buffer);
     HHVM_FE(set_file_buffer);
@@ -442,6 +443,38 @@ bool HHVM_FUNCTION(stream_set_blocking,
     flags |= O_NONBLOCK;
   }
   return fcntl(file->fd(), F_SETFL, flags) != -1;
+}
+
+
+/*
+ * NOTE: The existing stream_set_write_buffer() is implemented
+ * differently from the PHP spec, rather than taking the submited buffer size
+ * in bytes, it uses k_STREAM_* constants values of 0, 1, and 2, to mean
+ * no buffer, line buffer, or full buffer.  The stream_set_read_buffer()
+ * implmentation below mimics that design.
+ */
+int64_t HHVM_FUNCTION(stream_set_read_buffer,
+                      const Resource& stream,
+                      int buffer) {
+  auto plain_file = dyn_cast<PlainFile>(stream);
+  if (!plain_file) {
+    return -1;
+  }
+  FILE* file = plain_file->getStream();
+  if (!file) {
+    return -1;
+  }
+
+  switch (buffer) {
+  case k_STREAM_BUFFER_NONE:
+    return setvbuf(file, nullptr, _IONBF, 0);
+  case k_STREAM_BUFFER_LINE:
+    return setvbuf(file, nullptr, _IOLBF, BUFSIZ);
+  case k_STREAM_BUFFER_FULL:
+    return setvbuf(file, nullptr, _IOFBF, BUFSIZ);
+  default:
+    return -1;
+  }
 }
 
 const StaticString

@@ -137,7 +137,6 @@ bool RuntimeOption::RepoAuthoritative = false;
 using jit::mcg;
 using jit::TCA;
 
-#define IOP_ARGS        PC& pc
 // GCC 4.8 has some real problems with all the inlining in this file, so don't
 // go overboard with that version.
 #if DEBUG || ((__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
@@ -286,6 +285,17 @@ struct intva_t {
   int32_t n;
   /* implicit */ operator int32_t() const { return n; }
   intva_t& operator=(int32_t v) { n = v; return *this; }
+};
+
+// wrapper to handle unaligned access to variadic immediates
+template<class T> struct imm_array {
+  explicit imm_array(PC pc) : ptr(pc) {}
+  PC const ptr;
+  T operator[](int32_t i) const {
+    T e;
+    memcpy(&e, ptr + i * sizeof(T), sizeof(T));
+    return e;
+  }
 };
 
 ALWAYS_INLINE local_var decode_local(PC& pc) {
@@ -1903,15 +1913,14 @@ OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
   vmStack().pushArrayNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
-  auto n = decode<uint32_t>(pc); // number of keys and elements
+OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
   assert(n > 0 && n <= StructArray::MaxMakeSize);
-
   req::vector<const StringData*> names;
   names.reserve(n);
-
+  auto unit = vmfp()->m_func->unit();
   for (size_t i = 0; i < n; ++i) {
-    names.push_back(decode_litstr(pc));
+    auto name = unit->lookupLitstrId(ids[i]);
+    names.push_back(name);
   }
 
   // This constructor moves values, no inc/decref is necessary.
@@ -2491,25 +2500,24 @@ OPTBLD_INLINE void iopJmpNZ(PC& pc, PC targetpc) {
   jmpOpImpl<OpJmpNZ>(pc, targetpc);
 }
 
-OPTBLD_INLINE void iopIterBreak(IOP_ARGS) {
-  PC savedPc = pc - encoded_op_size(Op::IterBreak);
-  auto offset = decode_ba(pc);
-  auto veclen = decode<int32_t>(pc);
-  assert(veclen > 0);
-  Id* iterTypeList = (Id*)pc;
-  Id* iterIdList   = (Id*)pc + 1;
-  pc += 2 * veclen * sizeof(Id);
-  for (auto i = 0; i < 2 * veclen; i += 2) {
-    Id iterType = iterTypeList[i];
-    Id iterId   = iterIdList[i];
-    Iter *iter = frame_iter(vmfp(), iterId);
-    switch (iterType) {
+struct IterBreakElem {
+  Id type, iter;
+};
+
+OPTBLD_INLINE
+void iopIterBreak(PC& pc, PC targetpc, int32_t n,
+                  imm_array<IterBreakElem> vec) {
+  assert(n > 0);
+  for (auto i = 0; i < n; ++i) {
+    auto e = vec[i];
+    auto iter = frame_iter(vmfp(), e.iter);
+    switch (e.type) {
       case KindOfIter:  iter->free();  break;
       case KindOfMIter: iter->mfree(); break;
       case KindOfCIter: iter->cfree(); break;
     }
   }
-  pc = savedPc + offset;
+  pc = targetpc;
 }
 
 enum class SwitchMatch {
@@ -2526,15 +2534,10 @@ static SwitchMatch doubleCheck(double d, int64_t& out) {
   return SwitchMatch::DEFAULT;
 }
 
-OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
-  auto const origPC = pc - encoded_op_size(Op::Switch);
-  auto const kind = decode_oa<SwitchKind>(pc);
-  auto base = decode<int64_t>(pc);
-  auto veclen = decode<int32_t>(pc);
+OPTBLD_INLINE
+void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
+               imm_array<Offset> jmptab) {
   assert(veclen > 0);
-  Offset* jmptab = (Offset*)pc;
-  pc += veclen * sizeof(*jmptab);
-
   TypedValue* val = vmStack().topTV();
   if (kind == SwitchKind::Unbounded) {
     assert(val->m_type == KindOfInt64);
@@ -2542,7 +2545,7 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
     int64_t label = val->m_data.num;
     vmStack().popX();
     assert(label >= 0 && label < veclen);
-    pc = origPC + jmptab[label];
+    pc = origpc + jmptab[label];
   } else {
     // Generic integer switch
     int64_t intval;
@@ -2631,41 +2634,38 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
       switch (match) {
         case SwitchMatch::NORMAL:
         case SwitchMatch::DEFAULT:
-          pc = origPC + jmptab[veclen - 1];
+          pc = origpc + jmptab[veclen - 1];
           break;
 
         case SwitchMatch::NONZERO:
-          pc = origPC + jmptab[veclen - 2];
+          pc = origpc + jmptab[veclen - 2];
           break;
       }
     } else {
-      pc = origPC + jmptab[intval - base];
+      pc = origpc + jmptab[intval - base];
     }
   }
 }
 
-OPTBLD_INLINE void iopSSwitch(IOP_ARGS) {
-  auto const origPC = pc - encoded_op_size(Op::SSwitch);
-  auto veclen = decode<int32_t>(pc);
+OPTBLD_INLINE
+void iopSSwitch(PC origpc, PC& pc, int32_t veclen,
+                imm_array<StrVecItem> jmptab) {
   assert(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
-  StrVecItem* jmptab = (StrVecItem*)pc;
-  pc += veclen * sizeof(*jmptab);
-
   Cell* val = tvToCell(vmStack().topTV());
   Unit* u = vmfp()->m_func->unit();
   unsigned i;
   for (i = 0; i < cases; ++i) {
-    auto& item = jmptab[i];
+    auto item = jmptab[i];
     const StringData* str = u->lookupLitstrId(item.str);
     if (cellEqual(*val, str)) {
-      pc = origPC + item.dest;
+      pc = origpc + item.dest;
       vmStack().popC();
       return;
     }
   }
   // default case
-  pc = origPC + jmptab[veclen-1].dest;
+  pc = origpc + jmptab[veclen - 1].dest;
   vmStack().popC();
 }
 
@@ -6061,6 +6061,15 @@ TCA iopWrapper(Op, void(*fn)(int32_t), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(int32_t,imm_array<int32_t>), PC& pc) {
+  auto n = decode<int32_t>(pc);
+  auto v = imm_array<int32_t>(pc);
+  pc += n * sizeof(int32_t);
+  fn(n, v);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op op, void(*fn)(PC,intva_t), PC& pc) {
   auto origpc = pc - encoded_op_size(op);
   auto n = decode_intva(pc);
@@ -6285,6 +6294,18 @@ OPTBLD_INLINE static TCA iopWrapper(Op op, void(*fn)(PC&,PC), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(PC&,PC,int,imm_array<IterBreakElem>),
+               PC& pc) {
+  auto origpc = pc - encoded_op_size(op);
+  auto targetpc = origpc + decode_ba(pc);
+  auto n = decode<int32_t>(pc);
+  auto v = imm_array<IterBreakElem>(pc);
+  pc += n * sizeof(IterBreakElem);
+  fn(pc, targetpc, n, v);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op op, void(*fn)(intva_t,MOpFlags), PC& pc) {
   auto n = decode_intva(pc);
   auto flags = decode<MOpFlags>(pc);
@@ -6463,6 +6484,31 @@ TCA iopWrapper(Op op, void(*fn)(const StringData*,InitPropOp), PC& pc) {
   auto s = decode_litstr(pc);
   auto subop = decode_oa<InitPropOp>(pc);
   fn(s, subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op,
+    void(*fn)(PC origpc,PC& pc,SwitchKind,int64_t,int,imm_array<Offset>),
+    PC& pc) {
+  auto origpc = pc - encoded_op_size(op);
+  auto kind = decode_oa<SwitchKind>(pc);
+  auto base = decode<int64_t>(pc);
+  auto n = decode<int32_t>(pc);
+  auto v = imm_array<Offset>(pc);
+  pc += n * sizeof(Offset);
+  fn(origpc, pc, kind, base, n, v);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op,
+    void(*fn)(PC origpc,PC& pc,int,imm_array<StrVecItem>), PC& pc) {
+  auto origpc = pc - encoded_op_size(op);
+  auto n = decode<int32_t>(pc);
+  auto v = imm_array<StrVecItem>(pc);
+  pc += n * sizeof(StrVecItem);
+  fn(origpc, pc, n, v);
   return nullptr;
 }
 

@@ -359,13 +359,14 @@ function stream_await(resource $fp,
 function stream_set_blocking(resource $stream, int $mode): bool;
 
 /**
- * Set the buffering for read operations.
+ * Set read file buffering on the given stream.
  *
  * @param resource $stream - The file pointer.
- * @param int $buffer 
+ * @param int $buffer - The number of bytes to buffer. If buffer is 0 then 
+ * read operations are unbuffered. 
  *
- * @return int - Returns 0 on success, or EOF if the request cannot be
- *   honored.
+ * @return int - Returns 0 on success, or another value if the request cannot 
+ * be honored.
  *
  */
 <<__Native>>

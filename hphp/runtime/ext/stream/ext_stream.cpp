@@ -445,34 +445,28 @@ bool HHVM_FUNCTION(stream_set_blocking,
   return fcntl(file->fd(), F_SETFL, flags) != -1;
 }
 
-
-/*
- * NOTE: The existing stream_set_write_buffer() is implemented
- * differently from the PHP spec, rather than taking the submited buffer size
- * in bytes, it uses k_STREAM_* constants values of 0, 1, and 2, to mean
- * no buffer, line buffer, or full buffer.  The stream_set_read_buffer()
- * implmentation below mimics that design.
- */
 int64_t HHVM_FUNCTION(stream_set_read_buffer,
                       const Resource& stream,
                       int buffer) {
-  auto plain_file = dyn_cast<PlainFile>(stream);
-  if (!plain_file) {
-    return -1;
-  }
-  FILE* file = plain_file->getStream();
-  if (!file) {
-    return -1;
-  }
-
-  switch (buffer) {
-  case k_STREAM_BUFFER_NONE:
-    return setvbuf(file, nullptr, _IONBF, 0);
-  case k_STREAM_BUFFER_LINE:
-    return setvbuf(file, nullptr, _IOLBF, BUFSIZ);
-  case k_STREAM_BUFFER_FULL:
-    return setvbuf(file, nullptr, _IOFBF, BUFSIZ);
-  default:
+  if (isa<File>(stream)) {
+    auto plain_file = dyn_cast<PlainFile>(stream);
+    if (!plain_file) {
+      return -1;
+    }
+    FILE* file = plain_file->getStream();
+    if (!file) {
+      return -1;
+    }
+    if (buffer == 0) {
+      // Use _IONBF (no buffer) macro to set no buffer
+      return setvbuf(file, nullptr, _IONBF, 0);
+    } else {
+      // Use _IOFBF (full buffer) macro
+      return setvbuf(file, nullptr, _IOFBF, buffer);
+    }
+  } else if (isa<Socket>(stream)) {
+    return HHVM_FN(socket_set_option)(stream, SOL_SOCKET, SO_RCVBUF, buffer);
+  } else {
     return -1;
   }
 }

@@ -3606,8 +3606,10 @@ and condition env tparamet =
   | _, Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
   | p, InstanceOf (ivar, cid) when tparamet && is_instance_var ivar ->
+      let env, x_ty = expr env ivar in
+      let env, x_ty = Env.expand_type env x_ty in
       let env, (ivar_pos, x) = get_instance_var env ivar in
-      let env, x_ty = Env.get_local env x in
+      let env = Env.set_local env x x_ty in
       (* XXX the position p here is not really correct... it's the position
        * of the instanceof expression, not the class id. But we don't store
        * position data for the latter. *)

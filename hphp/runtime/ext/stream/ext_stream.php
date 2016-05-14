@@ -373,6 +373,18 @@ function stream_set_blocking(resource $stream, int $mode): bool;
 function stream_set_read_buffer(resource $stream, int $buffer): int;
 
 /**
+ * Set the stream chunk size.
+ *
+ * @param resource $stream - The target stream.
+ * @param int $chunk_size - The desired new chunk size.
+ *
+ * @return int - Returns the pervious chunk size on success.
+ *
+ */
+<<__Native>>
+function stream_set_chunk_size(resource $stream, int $chunk_size): int;
+
+/**
  * Sets the timeout value on stream, expressed in the sum of seconds and
  *   microseconds.  When the stream times out, the 'timed_out' key of the array
  *   returned by stream_get_meta_data() is set to TRUE, although no

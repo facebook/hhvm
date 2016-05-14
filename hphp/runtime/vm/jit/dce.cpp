@@ -515,7 +515,7 @@ bool canDCE(IRInstruction* inst) {
   case MapIsset:
   case IssetElem:
   case EmptyElem:
-  case ProfilePackedArray:
+  case ProfileArrayKind:
   case ProfileStructArray:
   case ProfileObjClass:
   case ProfileType:

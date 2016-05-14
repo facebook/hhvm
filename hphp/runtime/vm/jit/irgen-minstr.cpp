@@ -52,7 +52,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_PackedArray("PackedArray");
+const StaticString s_ArrayKindProfile("ArrayKindProfile");
 const StaticString s_StructArray("StructArray");
 
 //////////////////////////////////////////////////////////////////////
@@ -569,21 +569,20 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 template<class Finish>
 SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
                                    Finish finish) {
-  TargetProfile<NonPackedArrayProfile> prof(env.context,
-                                            env.irb->curMarker(),
-                                            s_PackedArray.get());
+  TargetProfile<ArrayKindProfile> prof(env.context,
+                                       env.irb->curMarker(),
+                                       s_ArrayKindProfile.get());
   if (prof.profiling()) {
-    gen(env, ProfilePackedArray, RDSHandleData{prof.handle()}, base);
+    gen(env, ProfileArrayKind, RDSHandleData{prof.handle()}, base);
     return emitArrayGet(env, base, key, finish);
   }
 
   if (prof.optimizing()) {
-    auto const data = prof.data(NonPackedArrayProfile::reduce);
-    // NonPackedArrayProfile data counts how many times a non-packed array was
-    // observed.  Zero means it was monomorphic (or never executed).
+    auto const data = prof.data(ArrayKindProfile::reduce);
     auto const typePackedArr = Type::Array(ArrayData::kPackedKind);
     if (base->type().maybe(typePackedArr) &&
-        (data.count == 0 || RuntimeOption::EvalJitPGOArrayGetStress)) {
+        (data.fraction(ArrayData::kPackedKind) == 1.0 ||
+         RuntimeOption::EvalJitPGOArrayGetStress)) {
       // It's safe to side-exit still because we only do these profiled array
       // gets on the first element, with simple bases and single-element dims.
       // See computeSimpleCollectionOp.

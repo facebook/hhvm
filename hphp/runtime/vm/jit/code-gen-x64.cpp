@@ -3163,20 +3163,13 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   v << setcc{CC_NBE, sf, dstReg};
 }
 
-void CodeGenerator::cgProfilePackedArray(IRInstruction* inst) {
-  auto baseReg = srcLoc(inst, 0).reg();
-  auto handle  = inst->extra<ProfilePackedArray>()->handle;
+void CodeGenerator::cgProfileArrayKind(IRInstruction* inst) {
+  auto const extra = inst->extra<RDSHandleData>();
   auto& v = vmain();
-
-  // If kPackedKind changes to a value that is not 0, change
-  // this to a conditional add.
-  static_assert(ArrayData::ArrayKind::kPackedKind == 0, "kPackedKind changed");
-  static_assert(sizeof(HeaderKind) == 1, "");
-  auto tmp_kind = v.makeReg();
-  auto const sf = v.makeReg();
-  v << loadzbl{baseReg[HeaderKindOffset], tmp_kind};
-  v << addlm{tmp_kind, rvmtl()[handle + offsetof(NonPackedArrayProfile, count)],
-             sf};
+  auto const profile = v.makeReg();
+  v << lea{rvmtl()[extra->handle], profile};
+  cgCallHelper(v, CallSpec::direct(profileArrayKindHelper), kVoidDest,
+               SyncOptions::None, argGroup(inst).reg(profile).ssa(0));
 }
 
 void CodeGenerator::cgProfileStructArray(IRInstruction* inst) {

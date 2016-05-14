@@ -2514,9 +2514,9 @@ fields of that struct for holding intermediate values.
 
   Throws a DivisionByZeroError with a message indicating S0.
 
-| ProfilePackedArray, ND, S(Arr), NF
+| ProfileArrayKind, ND, S(Arr), NF
 
-  Profile type of array S0 (i.e. whether it is packed or ).
+  Profile the array kind of S0.
 
 | ProfileStructArray, ND, S(Arr), NF
 

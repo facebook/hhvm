@@ -18,6 +18,8 @@
 
 namespace HPHP { namespace jit {
 
+//////////////////////////////////////////////////////////////////////
+
 std::vector<SwitchCaseCount> sortedSwitchProfile(
   TargetProfile<SwitchProfile>& profile,
   int32_t nCases
@@ -36,5 +38,33 @@ std::vector<SwitchCaseCount> sortedSwitchProfile(
   std::sort(values.begin(), values.end());
   return values;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+uint32_t getKindIndex(ArrayData::ArrayKind kind) {
+  using AK = ArrayData::ArrayKind;
+  switch (kind) {
+    case AK::kEmptyKind : return 0;
+    case AK::kPackedKind: return 1;
+    case AK::kMixedKind : return 2;
+    default:              return 3;
+  }
+}
+
+}
+
+void ArrayKindProfile::report(ArrayData::ArrayKind kind) {
+  count[getKindIndex(kind)]++;
+}
+
+double ArrayKindProfile::fraction(ArrayData::ArrayKind kind) const {
+  const auto idx = getKindIndex(kind);
+  if (idx == kNumProfiledArrayKinds - 1) return 0; // untracked kinds
+  return (double)count[idx] / total();
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}

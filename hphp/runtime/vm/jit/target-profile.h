@@ -270,16 +270,42 @@ typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Record profiling information about non-packed arrays. This counts the
- * number of times a non-packed array was used as the base of a CGetElem
- * operation.
+ * ArrayKindProfile profiles the distribution of the array kinds
+ * observed for a given value.  The array kinds currently tracked are
+ * Empty, Packed, and Mixed.
  */
-struct NonPackedArrayProfile {
-  int32_t count;
-  static void reduce(NonPackedArrayProfile& a, const NonPackedArrayProfile& b) {
-    a.count += b.count;
+struct ArrayKindProfile {
+
+  static const uint32_t kNumProfiledArrayKinds = 4;
+
+  static void reduce(ArrayKindProfile& a, const ArrayKindProfile& b) {
+    for (uint32_t i = 0; i < kNumProfiledArrayKinds; i++) {
+      a.count[i] += b.count[i];
+    }
   }
+
+  void report(ArrayData::ArrayKind kind);
+
+  /*
+   * Returns what fraction of the total profiled arrays had the given `kind'.
+   */
+  double fraction(ArrayData::ArrayKind kind) const;
+
+  /*
+   * Returns the total number of samples profiled so far.
+   */
+  uint32_t total() const {
+    uint32_t sum = 0;
+    for (uint32_t i = 0; i < kNumProfiledArrayKinds; i++) {
+      sum += count[i];
+    }
+    return sum;
+  }
+
+  uint32_t count[kNumProfiledArrayKinds];
 };
+
+//////////////////////////////////////////////////////////////////////
 
 struct StructArrayProfile {
   int32_t nonStructCount;

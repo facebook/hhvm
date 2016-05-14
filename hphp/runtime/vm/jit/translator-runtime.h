@@ -39,6 +39,7 @@ namespace jit {
 
 struct ClassProfile;
 struct TypeProfile;
+struct ArrayKindProfile;
 struct TypeConstraint;
 
 //////////////////////////////////////////////////////////////////////
@@ -165,6 +166,8 @@ TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
 void profileObjClassHelper(ClassProfile*, ObjectData*);
 
 void profileTypeHelper(TypeProfile*, TypedValue);
+
+void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr);
 
 Cell lookupCnsHelper(const TypedValue* tv,
                      StringData* nm,

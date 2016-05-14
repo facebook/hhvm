@@ -759,6 +759,10 @@ void profileTypeHelper(TypeProfile* profile, TypedValue newTV) {
   profile->report(newType);
 }
 
+void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr) {
+  profile->report(arr->kind());
+}
+
 Cell lookupCnsUHelper(const TypedValue* tv,
                       StringData* nm,
                       StringData* fallback) {

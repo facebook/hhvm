@@ -76,8 +76,19 @@ fi
 rm "${TMP}"
 
 # Remove alpha variance in "#line" directives.
-$SED -i "s#${TMP}#${INFILE}#g" "${OUTFILE5}"
-$SED -i "s#${TMP}#${INFILE}#g" "${OUTFILE7}"
+if [ -z "${INSTALL_DIR}" ] ; then
+  $SED -i \
+       -e "s#${TMP}#${INFILE}#g" \
+       -e "s#${DIR}/##g" \
+       "${OUTFILE5}"
+  $SED -i \
+       -e "s#${TMP}#${INFILE}#g" \
+       -e "s#${DIR}/##g" \
+       "${OUTFILE7}"
+else
+  $SED -i "s#${TMP}#${INFILE}#g" "${OUTFILE5}"
+  $SED -i "s#${TMP}#${INFILE}#g" "${OUTFILE7}"
+fi
 
 $SED -i \
      -e 's@int Compiler[57]parse.*@@' \

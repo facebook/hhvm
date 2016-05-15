@@ -378,7 +378,7 @@ function stream_set_read_buffer(resource $stream, int $buffer): int;
  * @param resource $stream - The target stream.
  * @param int $chunk_size - The desired new chunk size.
  *
- * @return int - Returns the pervious chunk size on success.
+ * @return int - Returns 0 on sucess, -1 on error.
  *
  */
 <<__Native>>

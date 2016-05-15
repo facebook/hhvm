@@ -472,7 +472,12 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
 int64_t HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
                       int chunk_size) {
-
+  if (isa<Socket>(stream)) {
+    //NOTE: This only sets the *recive* requested min chunk size in bytes.
+    return HHVM_FN(socket_set_option)
+      (stream, SOL_SOCKET, SO_RCVLOWAT, chunk_size);
+  }
+  return -1;
 }
 
 const StaticString

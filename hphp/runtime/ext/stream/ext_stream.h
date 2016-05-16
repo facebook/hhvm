@@ -221,7 +221,7 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
                       const Resource& stream,
                       int buffer);
 
-int64_t HHVM_FUNCTION(stream_set_chunk_size,
+Variant HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
                       int chunk_size);
 

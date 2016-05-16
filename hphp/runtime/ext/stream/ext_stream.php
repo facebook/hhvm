@@ -378,11 +378,12 @@ function stream_set_read_buffer(resource $stream, int $buffer): int;
  * @param resource $stream - The target stream.
  * @param int $chunk_size - The desired new chunk size.
  *
- * @return int - Returns 0 on sucess, -1 on error.
+ * @return int - Returns the previous chunk size on success.  Will return FALSE
+ * if less than 1 or greater than PHP_INT_MAX.
  *
  */
 <<__Native>>
-function stream_set_chunk_size(resource $stream, int $chunk_size): int;
+function stream_set_chunk_size(resource $stream, int $chunk_size): mixed;
 
 /**
  * Sets the timeout value on stream, expressed in the sum of seconds and

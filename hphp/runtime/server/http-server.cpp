@@ -378,8 +378,24 @@ void HttpServer::stop(const char* stopReason) {
       RuntimeOption::ServerGracefulShutdownWait;
 
     if (totalWait > 0) {
-      signal(SIGALRM, exit_on_timeout);
-      alarm(totalWait);
+      // Use a killer thread to _Exit() after totalWait seconds.  If
+      // the main thread returns before that, the killer thread will
+      // exit.  So don't do join() on this thread.  Since we create a
+      // thread here, `HttpServer::stop()` cannot be called in signal
+      // handlers, use `stopOnSignal()` (which uses SIGALRM) in that
+      // case.
+      auto killer = std::thread([totalWait] {
+#ifdef __linux__
+          sched_param param;
+          param.sched_priority = 5;
+          pthread_setschedparam(pthread_self(), SCHED_RR, &param);
+          // It is OK if we fail to increase thread priority.
+#endif
+          /* sleep override */
+          std::this_thread::sleep_for(std::chrono::seconds{totalWait});
+          _Exit(1);
+        });
+      killer.detach();
     }
   }
 
@@ -390,6 +406,7 @@ void HttpServer::stop(const char* stopReason) {
 }
 
 void HttpServer::stopOnSignal(int sig) {
+  if (m_stopped) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();

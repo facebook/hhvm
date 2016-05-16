@@ -1658,7 +1658,7 @@ static int execute_program_impl(int argc, char** argv) {
   LightProcess::SetLostChildHandler([](pid_t child) {
     if (!HttpServer::Server) return;
     if (!HttpServer::Server->isStopped()) {
-      HttpServer::Server->stop("lost light process child");
+      HttpServer::Server->stopOnSignal(SIGCHLD);
     }
   });
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,

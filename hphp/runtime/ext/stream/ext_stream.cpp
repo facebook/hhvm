@@ -464,8 +464,6 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
       // Use _IOFBF (full buffer) macro
       return setvbuf(file, nullptr, _IOFBF, buffer);
     }
-  } else if (isa<Socket>(stream)) {
-    return HHVM_FN(socket_set_option)(stream, SOL_SOCKET, SO_RCVBUF, buffer);
   } else {
     return -1;
   }

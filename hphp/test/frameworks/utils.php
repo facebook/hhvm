@@ -271,12 +271,21 @@ function get_runtime_build(bool $use_php = false): string {
   } else {
     $fbcode_root_dir = __DIR__.'/../../..';
     $oss_root_dir = __DIR__.'/../..';
+    $buck_root_dir = __DIR__.'/../../..';
+
     // See if we are using an internal development build
     if ((file_exists($fbcode_root_dir."/_bin"))) {
       $executable = $fbcode_root_dir;
       $executable .= $use_php ? "/_bin/hphp/hhvm/php" : "/_bin/hphp/hhvm/hhvm";
-    // Maybe we are in OSS land trying this script
+    } else if (file_exists($buck_root_dir."/buck-out/gen")) {
+      // Maybe we're using a buck build.
+      $executable = $buck_root_dir;
+      $executable .= $use_php
+        ? "/buck-out/gen/hphp/hhvm/symlinks=php/php"
+        : "/buck-out/gen/hphp/hhvm/hhvm/hhvm";
     } else if (file_exists($oss_root_dir."/hhvm")) {
+      // Maybe we are in OSS land trying this script.
+
       // Pear won't run correctly unless a 'php' executable exists.
       // This may be a Pear thing, a PHPUnit running phpt thing, or
       // or something else. Until we know for sure, let's just create

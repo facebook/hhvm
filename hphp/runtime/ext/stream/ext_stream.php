@@ -359,6 +359,20 @@ function stream_await(resource $fp,
 function stream_set_blocking(resource $stream, int $mode): bool;
 
 /**
+ * Set read file buffering on the given stream.
+ *
+ * @param resource $stream - The file pointer.
+ * @param int $buffer - The number of bytes to buffer. If buffer is 0 then
+ * read operations are unbuffered.
+ *
+ * @return int - Returns 0 on success, or another value if the request cannot
+ * be honored.
+ *
+ */
+<<__Native>>
+function stream_set_read_buffer(resource $stream, int $buffer): int;
+
+/**
  * Sets the timeout value on stream, expressed in the sum of seconds and
  *   microseconds.  When the stream times out, the 'timed_out' key of the array
  *   returned by stream_get_meta_data() is set to TRUE, although no

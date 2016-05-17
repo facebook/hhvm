@@ -584,7 +584,7 @@ void visit(Local& env, IRInstruction& inst) {
 
 void block_visit(Local& env, Block* block) {
   FTRACE(2, "  visiting B{}\n", block->id());
-  if (block->instrs().empty()) return;
+  assertx(!block->instrs().empty());
 
   auto prev = std::prev(block->instrs().end());
   for (;;) {

@@ -471,10 +471,10 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
 
 int64_t HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
-                      int chunk_size) {
-  if (isa<File>(stream) && chunk_size > 0 && chunk_size < k_PHP_INT_MAX) {
-    //for File CHUNK_SIZE is currently a constant, returns current chunk size
-    return File::CHUNK_SIZE;
+                      int64_t chunk_size) {
+  if (isa<File>(stream) && chunk_size > 0) {
+    auto file = cast<File>(stream);
+    return file->setChunkSize(chunk_size);
   }
   return false;
 }

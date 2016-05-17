@@ -760,6 +760,19 @@ const String& File::o_getResourceName() const {
   return s_resource_name;
 }
 
+int64_t File::getChunkSize() const{
+  return CHUNK_SIZE;
+}
+
+Variant File::setChunkSize(int64_t chunk_size) {
+  if (chunk_size > 0) {
+    //no-op currently, return the current chunk size
+    return getChunkSize();
+  } else {
+    return false;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // csv functions
 

@@ -248,6 +248,16 @@ struct File : SweepableResourceData {
   int64_t printf(const String& format, const Array& args);
 
   /**
+   * Get the Chunk Size.
+   */
+  int64_t getChunkSize() const;
+
+  /**
+   * Set the Chunk Size.
+   */
+  Variant setChunkSize(int64_t chunk_size);
+
+  /**
    * Write one line of csv record.
    */
   int64_t writeCSV(const Array& fields, char delimiter = ',',

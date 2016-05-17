@@ -217,6 +217,10 @@ bool HHVM_FUNCTION(stream_set_blocking,
                    const Resource& stream,
                    int mode);
 
+int64_t HHVM_FUNCTION(stream_set_read_buffer,
+                      const Resource& stream,
+                      int buffer); 
+
 bool HHVM_FUNCTION(stream_set_timeout,
                    const Resource& stream,
                    int seconds,

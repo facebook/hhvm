@@ -155,6 +155,7 @@ if (FOLLY_HAVE_PWRITEV)
 else()
   add_definitions("-DFOLLY_HAVE_PWRITEV=0")
 endif()
+add_definitions(-DFOLLY_HAVE_LIBGFLAGS=0)
 
 add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
 

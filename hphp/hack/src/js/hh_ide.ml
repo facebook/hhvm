@@ -162,7 +162,7 @@ let hh_add_file fn content =
     let errors, _ = Errors.do_ begin fun () ->
       declare_file fn content
     end in
-    Hashtbl.replace parse_errors fn (last_error errors)
+    Hashtbl.replace parse_errors fn (last_error (Errors.get_error_list errors))
   with e ->
     ()
 
@@ -205,7 +205,7 @@ let hh_check_syntax fn content =
   let errors, _ = Errors.do_ begin fun () ->
     Parser_hack.program fn content
   end in
-  error errors
+  error (Errors.get_error_list errors)
 
 let hh_auto_complete fn =
   let tcopt = TypecheckerOptions.permissive in

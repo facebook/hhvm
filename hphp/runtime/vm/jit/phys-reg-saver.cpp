@@ -50,7 +50,7 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
   switch(arch()) {
     case Arch::ARM:
       gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
-        if(r1 == InvalidReg) {
+        if (r1 == InvalidReg) {
           v << push{r0};
         } else {
           v << pushp{r1, r0};
@@ -82,7 +82,7 @@ PhysRegSaver::~PhysRegSaver() {
   switch(arch()) {
     case Arch::ARM:
       gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
-        if(r1 == InvalidReg) {
+        if (r1 == InvalidReg) {
           v << pop{r0};
         } else {
           v << popp{r0, r1};

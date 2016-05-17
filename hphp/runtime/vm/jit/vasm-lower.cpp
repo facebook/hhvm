@@ -82,14 +82,12 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
                     v.makeTuple(std::move(argDests))};
     }
   };
-  switch(arch()) {
-  case Arch::X64:
-    {
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
       doArgs(vargs.args, rarg);
-    }
-    break;
-  case Arch::ARM:
-    {
+      break;
+    case Arch::ARM:
       if (vargs.indirect) {
         if (vargs.args.size() > 0) {
           // First arg is pointer to storage for the return value
@@ -105,10 +103,9 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
         doArgs(vargs.args, rarg);
         needsCopy = false;
       }
-    }
-    break;
-  default:
-    always_assert(false);
+      break;
+    default:
+      always_assert(false);
   }
   doArgs(vargs.simdArgs, rarg_simd);
 

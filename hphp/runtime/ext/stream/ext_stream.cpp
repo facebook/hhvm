@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/stream/ext_stream.h"
-
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/base/array-init.h"
@@ -472,8 +472,9 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
 int64_t HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
                       int chunk_size) {
-  if (isa<Resource>(stream) && chunk_size > 0 && chunk_size < sizeof(int64_t)) {
-    return chunk_size;
+  if (isa<File>(stream) && chunk_size > 0 && chunk_size < k_PHP_INT_MAX) {
+    //for File CHUNK_SIZE is currently a constant, returns current chunk size
+    return File::CHUNK_SIZE;
   }
   return false;
 }

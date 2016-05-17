@@ -438,6 +438,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AUnknown,
       stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff - 1)
     };
+  case ReqRetranslate:
+    return ExitEffects {
+      AUnknown,
+      stack_below(inst.src(0), inst.extra<ReqRetranslate>()->irSPOff - 1)
+    };
+  case ReqRetranslateOpt:
+    return ExitEffects {
+      AUnknown,
+      stack_below(inst.src(0), inst.extra<ReqRetranslateOpt>()->irSPOff - 1)
+    };
   case JmpSwitchDest:
     return ExitEffects {
       AUnknown,
@@ -452,9 +462,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
                    inst.extra<JmpSSwitchDest>()->offset - 1).
         precise_union(AMIStateAny)
     };
-  case ReqRetranslate:
-  case ReqRetranslateOpt:
-    return UnknownEffects {};
 
   //////////////////////////////////////////////////////////////////////
   // Unusual instructions

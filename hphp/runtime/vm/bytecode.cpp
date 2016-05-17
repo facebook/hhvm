@@ -5536,7 +5536,7 @@ OPTBLD_INLINE TCA iopYieldFromDelegate(PC& pc, Iter* it, PC resumePc) {
   return yieldFromIterator(pc, gen, it, resumeOffset);
 }
 
-OPTBLD_INLINE void iopContUnsetDelegate(Iter* iter, intva_t shouldFreeIter) {
+OPTBLD_INLINE void iopContUnsetDelegate(intva_t shouldFreeIter, Iter* iter) {
   auto gen = frame_generator(vmfp());
   // The `shouldFreeIter` immediate determines whether we need to call free
   // on our iterator or not. Normally if we finish executing our yield from
@@ -6205,15 +6205,6 @@ TCA iopWrapper(Op, void(*fn)(intva_t,Iter*), PC& pc) {
   auto n = decode_intva(pc);
   auto iter = decode_iter(pc);
   fn(n, iter);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(Iter*,intva_t), PC& pc) {
-  // XXX swap operand order to reuse wrapper
-  auto iter = decode_iter(pc);
-  auto n = decode_intva(pc);
-  fn(iter, n);
   return nullptr;
 }
 

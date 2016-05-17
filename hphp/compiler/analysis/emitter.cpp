@@ -2299,7 +2299,7 @@ struct UnsetGeneratorDelegateThunklet final : Thunklet {
   explicit UnsetGeneratorDelegateThunklet(Id iterId)
     : m_id(iterId) {}
   void emit(Emitter& e) override {
-    e.ContUnsetDelegate(m_id, true);
+    e.ContUnsetDelegate(true, m_id);
     e.Unwind();
   }
 private:
@@ -9033,7 +9033,7 @@ void EmitterVisitor::emitYieldFrom(Emitter& e, ExpressionPtr exp) {
 
   // Now that we're done with it, remove the delegate. This lets us enforce
   // the invariant that if we have a delegate set, we should be using it.
-  e.ContUnsetDelegate(itId, false);
+  e.ContUnsetDelegate(false, itId);
 }
 
 /**

@@ -286,7 +286,12 @@ struct Scanner {
   // callback. Afterwards, all the state is cleared. The Scanner can be re-used
   // after this.
   template <typename F1, typename F2> void finish(F1&& f1, F2&& f2) {
-    m_visited.clear();
+    if (m_visited.bucket_count() < 500) {
+      m_visited.clear();
+    } else {
+      // TODO: #11247510 tune this better
+      m_visited = std::unordered_set<const void*>();
+    }
     for (const auto& p : m_ptrs) if (p) { f1(p); }
     for (const auto& p : m_conservative) f2(p.first, p.second);
     m_ptrs.clear();

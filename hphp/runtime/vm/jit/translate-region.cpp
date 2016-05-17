@@ -876,12 +876,12 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
 
   std::unique_ptr<IRUnit> unit;
+  SCOPE_ASSERT_DETAIL("IRUnit") { return unit ? show(*unit) : "<null>"; };
   TranslateRetryContext retry;
   auto result = TranslateResult::Retry;
 
   while (result == TranslateResult::Retry) {
     unit = folly::make_unique<IRUnit>(context);
-    SCOPE_ASSERT_DETAIL("IRUnit") { return show(*unit); };
     irgen::IRGS irgs{*unit};
 
     // Set up inlining context, but disable it for profiling mode.

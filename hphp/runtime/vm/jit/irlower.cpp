@@ -92,6 +92,7 @@ void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
 std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
                                  bool regAlloc /* = true */) noexcept {
   Timer timer(Timer::hhir_lower);
+  SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
   auto vunit = folly::make_unique<Vunit>();
   vunit->transKind = unit.context().kind;

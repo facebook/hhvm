@@ -122,6 +122,11 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
   Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
+  Config::Bind(HotPrefix, ini, config, "Server.APC.HotPrefix");
+  Config::Bind(HotSize, ini, config, "Server.APC.HotSize", 30000);
+  Config::Bind(HotLoadFactor, ini, config, "Server.APC.HotLoadFactor", 0.5);
+  Config::Bind(HotKeyAllocLow, ini, config, "Server.APC.HotKeyAllocLow", false);
+  Config::Bind(HotMapAllocLow, ini, config, "Server.APC.HotMapAllocLow", false);
 
   // Loads .so PrimeLibrary, writes snapshot output to this file, then exits.
   Config::Bind(PrimeLibraryUpgradeDest, ini, config,
@@ -231,6 +236,11 @@ int apcExtension::PurgeFrequency = 4096;
 int apcExtension::PurgeRate = -1;
 bool apcExtension::AllowObj = false;
 int apcExtension::TTLLimit = -1;
+int apcExtension::HotSize = 30000;
+double apcExtension::HotLoadFactor = 0.5;
+std::vector<std::string> apcExtension::HotPrefix;
+bool apcExtension::HotKeyAllocLow = false;
+bool apcExtension::HotMapAllocLow = false;
 std::string apcExtension::PrimeLibraryUpgradeDest;
 bool apcExtension::UseFileStorage = false;
 int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);

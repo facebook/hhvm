@@ -45,13 +45,21 @@ namespace HPHP {
  * This is the in-APC representation of a value, in ConcurrentTableSharedStore.
  */
 struct StoreValue {
+  /*
+   * Index into cache layer. Valid indices are >= 0 and never invalidated.
+   */
+  using HotCacheIdx = int32_t;
+
   StoreValue() = default;
   StoreValue(const StoreValue& o)
     : data{o.data}
     , expire{o.expire}
     , dataSize{o.dataSize}
     // Copy everything except the lock
-  {}
+  {
+    hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
+                   std::memory_order_relaxed);
+  }
 
   void set(APCHandle* v, int64_t ttl);
   bool expired() const;
@@ -66,8 +74,12 @@ struct StoreValue {
     return dataSize < 0;
   }
 
+  /* Special invalid indices; used to classify cache lookup misses. */
+  static constexpr HotCacheIdx kHotCacheUnknown = -1;
+  static constexpr HotCacheIdx kHotCacheKnownIneligible = -2;
+
   // Mutable fields here are so that we can deserialize the object from disk
-  // while holding a const pointer to the StoreValue.
+  // while holding a const pointer to the StoreValue, or remember a cache entry.
 
   /*
    * Each entry in APC is either an APCHandle or a pointer to serialized prime
@@ -81,7 +93,9 @@ struct StoreValue {
   mutable Either<APCHandle*,char*,either_policy::high_bit> data;
   union { uint32_t expire; mutable SmallLock lock; };
   int32_t dataSize{0};  // For file storage, negative means serialized object
-  char padding[24];  // Make APCMap nodes cache-line sized (it static_asserts).
+  // Reference to any HotCache entry to be cleared if the value is treadmilled.
+  mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
+  char padding[20];  // Make APCMap nodes cache-line sized (it static_asserts).
 };
 
 //////////////////////////////////////////////////////////////////////

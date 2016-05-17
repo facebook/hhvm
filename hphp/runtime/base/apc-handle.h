@@ -36,7 +36,8 @@ enum class APCHandleLevel {
 
 // handle kind, instead of overloading DataType
 enum class APCKind: uint8_t {
-  Uninit, Null, Bool, Int, Double,
+  Uninit, Null, Bool,  // see APCHandle::isSingletonKind before updating
+  Int, Double,
   StaticString, UncountedString,
   StaticArray, UncountedArray,
   SharedString, SharedArray, SharedPackedArray,
@@ -195,6 +196,13 @@ struct APCHandle {
   bool isUncounted() const {
     return m_kind == APCKind::UncountedString ||
            m_kind == APCKind::UncountedArray;
+  }
+
+  /*
+   * If true, this handle and value are allocated on startup and never deleted.
+   */
+  bool isSingletonKind() const {
+    return m_kind <= APCKind::Bool;
   }
 
   bool checkInvariants() const;

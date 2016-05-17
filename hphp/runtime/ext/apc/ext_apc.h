@@ -48,6 +48,11 @@ struct apcExtension final : Extension {
   static int PurgeRate;
   static bool AllowObj;
   static int TTLLimit;
+  static std::vector<std::string> HotPrefix;
+  static int HotSize;
+  static double HotLoadFactor;
+  static bool HotKeyAllocLow;
+  static bool HotMapAllocLow;
   static std::string PrimeLibraryUpgradeDest;
   static bool UseFileStorage;
   static int64_t FileStorageChunkSize;

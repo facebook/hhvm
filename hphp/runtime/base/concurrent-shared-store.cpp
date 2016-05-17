@@ -103,10 +103,256 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Read cache layer for frequently accessed but rarely updated APC entries.
+ * Doesn't support APC values that require refcounting, i.e., it supports
+ * the 'singletons' null, true, false and the uncounted array/string types.
+ * Designed to be used to replicate a subset of ConcurrentTableSharedStore.
+ * Keys can be filtered based on prefixes (apcExtension::HotKeyPrefix).
+ * Lock-free; if a stored entry is cleared, its value must be kept alive for
+ * duration of any requests in flight at that time (treadmill).
+ *
+ * Capacity is fixed at initialization. Does not check expiration on 'get',
+ * so best used with periodic purge enabled (apcExtension::ExpireOnSets).
+ *
+ * TODO(11228222): Upper-bound the time between periodic purges.
+ */
+struct HotCache {
+  /*
+   * Indices are never invalidated once assigned to a key (clearing an entry
+   * does not actually erase the key from underlying array, just hides it).
+   */
+  using Idx = StoreValue::HotCacheIdx;
+
+  void initialize();
+
+  /*
+   * If 'key' has an associated value in the cache, returns true and
+   * sets 'value' (but leaves 'idx' in an undefined state).
+   * Else, returns false, leaves 'value' unchanged, but fills 'idx' with
+   * information about the failure to be passed to 'store'.
+   */
+  bool get(const StringData* key, Variant& value, Idx& idx) const;
+
+  /*
+   * Try to add or update an entry (key, svar), if they both are eligible
+   * and there is still room. 'idx' must be the result of a failed call
+   * to 'get' for the same key. On success, updates sval->hotIndex to reference
+   * the added/updated entry and returns true.
+   */
+  bool store(Idx idx, const StringData* key,
+             APCHandle* svar, const StoreValue* sval);
+
+  /*
+   * Clear the entry referenced by 'sval' (set by a call to 'store') if any.
+   * Return false and do nothing if 'sval' does not reference any entry.
+   * Safe to call concurrently and repeatedly (idempotent). The caller must
+   * ensure the effects of any previous call to 'store' for this key are visible
+   * before this methods reads from 'sval' (e.g., by only calling these methods
+   * under read/write locks like ConcurrentTableSharedStore::get/store/erase).
+   */
+  bool clearValue(const StoreValue& sval) {
+    return clearValueIdx(sval.hotIndex.load(std::memory_order_relaxed));
+  }
+
+  /*
+   * Consistent with 'get', only less output.
+   */
+  bool hasValue(const StringData* key) const;
+
+ private:
+  // Uncounted ArrayData is stored 'unwrapped' to save one dereference.
+  using HotValue = Either<APCHandle*,ArrayData*,either_policy::high_bit>;
+  using HotValueRaw = HotValue::Opaque;
+
+  // Keys stored are char*, but lookup/insert always use StringData*.
+  struct EqualityTester {
+    bool operator()(const char* a, const StringData* b) const {
+      // AtomicHashArray magic keys are < 0; valid pointers are > 0 and aligned.
+      return reinterpret_cast<intptr_t>(a) > 0 &&
+        wordsame(a, b->data(), b->size() + 1);
+    }
+  };
+  struct Hasher {
+    size_t operator()(const StringData* a) const { return a->hash(); }
+  };
+
+  // Allocates keys on successful insertion. They are never erased/freed.
+  struct KeyConverter {
+    const char* operator()(const StringData* sd) const {
+      auto const nbytes = sd->size() + 1;
+      auto const dst = reinterpret_cast<char*>(apcExtension::HotKeyAllocLow ?
+                                               low_malloc(nbytes) :
+                                               malloc(nbytes));
+      assert((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
+      memcpy(dst, sd->data(), nbytes);
+      return dst;
+    }
+  };
+  // A char-allocator for HotMap's single array allocation.
+  struct HotMapAllocator {
+    char* allocate(size_t nbytes, const void* hint = nullptr) {
+      return reinterpret_cast<char*>(apcExtension::HotMapAllocLow ?
+                                     low_malloc(nbytes) :
+                                     malloc(nbytes));
+    }
+    void deallocate(char* p, size_t nbytes) {
+      apcExtension::HotMapAllocLow ? low_free(p) : free(p);
+    }
+  };
+
+  using HotMap = folly::AtomicHashArray<const char*, std::atomic<HotValueRaw>,
+                                        Hasher, EqualityTester,
+                                        HotMapAllocator,
+                                        folly::AtomicHashArrayLinearProbeFcn,
+                                        KeyConverter>;
+
+  static bool supportedKind(const APCHandle* h) {
+    return h->isSingletonKind() || h->isUncounted();
+  }
+
+  static HotValueRaw makeRawValue(APCHandle* h) {
+    assert(h != nullptr && supportedKind(h));
+    HotValue v = (h->kind() == APCKind::UncountedArray) ?
+      HotValue(APCTypedValue::fromHandle(h)->getArrayData()) :
+      HotValue(h);
+    return v.toOpaque();
+  }
+
+  static bool rawValueToLocal(HotValueRaw vraw, Variant& value) {
+    HotValue v = HotValue::fromOpaque(vraw);
+    if (ArrayData* ad = v.right()) {
+      value = Variant{ad, Variant::PersistentArrInit{}};
+      return true;
+    }
+    if (APCHandle* h = v.left()) {
+      value = h->toLocal();
+      return true;
+    }
+    return false;
+  }
+
+  bool clearValueIdx(Idx idx);
+
+  // True iff the given key string is eligible to be considered hot.
+  bool maybeHot(const char* key) const {
+    for (auto p : apcExtension::HotPrefix) {
+      if (strncmp(key, p.data(), p.size()) == 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // True if the key *might* be eligible (with false positives).
+  bool maybeHotFast(const StringData* sd) const {
+    // TODO(11227362): Avoid size check if we can assume zero-padding.
+    return sd->size() >= sizeof(uint64_t) &&
+      (readPrefix64(sd->data()) & m_hotPrefixMask) == 0;
+  }
+
+  // Return the bits that were *not* set in any of the prefixes' first 8 chars.
+  static uint64_t computeFastPrefixMask(std::vector<std::string> prefs) {
+    uint64_t any = 0;
+    for (auto& p : prefs) {
+      while (p.size() < sizeof(uint64_t)) p += '\xff';
+      any |= readPrefix64(p.data());
+    }
+    return ~any;
+  }
+
+  static uint64_t readPrefix64(const char* s) {
+    uint64_t result;
+    memcpy(&result, s, sizeof(result));
+    return result;
+  }
+
+  HotMap::SmartPtr m_hotMap;
+  uint64_t m_hotPrefixMask{~0ull};
+  std::atomic<bool> m_isFull{false};
+};
+HotCache s_hotCache;
+
+void HotCache::initialize() {
+  if (!m_hotMap) {
+    HotMap::Config config;
+    config.maxLoadFactor = apcExtension::HotLoadFactor;
+    /*
+     * Ensure we detect a fully loaded map in time. (AHA's default of
+     * 1000 * hundreds of homogeneous writers => O(100,000) entries before
+     * first real check.)
+     *
+     * TODO(11227990): Use maxSize/(actual thread count), or make AHA dynamic.
+     */
+    config.entryCountThreadCacheSize = 100;
+    auto const maxSize = apcExtension::HotSize;
+    m_hotMap = HotMap::create(maxSize, config);
+
+    auto const& prefs = apcExtension::HotPrefix;
+    m_hotPrefixMask = computeFastPrefixMask(prefs);
+  }
+}
+
+bool HotCache::hasValue(const StringData* key) const {
+  if (!maybeHotFast(key)) return false;
+  HotMap::const_iterator it = m_hotMap->find(key);
+  return it != m_hotMap->end() &&
+    !HotValue::fromOpaque(it->second.load(std::memory_order_relaxed)).isNull();
+}
+
+bool HotCache::get(const StringData* key, Variant& value, Idx& idx) const {
+  if (!maybeHotFast(key)) {
+    idx = StoreValue::kHotCacheKnownIneligible;
+    return false;
+  }
+  auto it = m_hotMap->find(key);
+  if (it == m_hotMap->end()) {
+    idx = StoreValue::kHotCacheUnknown;
+    return false;
+  }
+  if (rawValueToLocal(it->second.load(std::memory_order_relaxed), value)) {
+    return true;
+  }
+  idx = it.getIndex();
+  return false;
+}
+
+bool HotCache::store(Idx idx, const StringData* key,
+                     APCHandle* svar, const StoreValue* sval) {
+  if (idx == StoreValue::kHotCacheKnownIneligible) return false;
+  if (!svar || !supportedKind(svar)) return false;
+  auto raw = makeRawValue(svar);
+  if (idx == StoreValue::kHotCacheUnknown) {
+    if (!maybeHot(key->data())) return false;
+    if (m_isFull.load(std::memory_order_relaxed)) return false;
+    auto p = m_hotMap->emplace(key, raw);
+    if (p.first == m_hotMap->end()) {
+      m_isFull.store(true, std::memory_order_relaxed);
+      return false;
+    }
+    idx = p.first.getIndex();
+  }
+  assert(idx >= 0);
+  sval->hotIndex.store(idx, std::memory_order_relaxed);
+  m_hotMap->findAt(idx)->second.store(raw, std::memory_order_relaxed);
+  return true;
+}
+
+bool HotCache::clearValueIdx(Idx idx) {
+  if (idx == StoreValue::kHotCacheUnknown) return false;
+  assert(idx >= 0);
+  auto it = m_hotMap->findAt(idx);
+  it->second.store(HotValue(nullptr).toOpaque(), std::memory_order_relaxed);
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool ConcurrentTableSharedStore::clear() {
   WriteLock l(m_lock);
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
+    s_hotCache.clearValue(iter->second);
     iter->second.data.match(
       [&] (APCHandle* handle) {
         handle->unreferenceRoot(iter->second.dataSize);
@@ -149,11 +395,18 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
   }
 
   auto& storeVal = acc->second;
+  bool wasCached = s_hotCache.clearValue(storeVal);
 
   if (auto const var = storeVal.data.left()) {
     APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
                                            storeVal.expire == 0, expired);
-    if (expired && storeVal.expire < oldestLive && var->isUncounted()) {
+    /*
+     * As an optimization, we eagerly delete uncounted values that expired
+     * long ago. But HotCache does not check expiration on every 'get', so
+     * any values previously cached there must take the usual treadmill route.
+     */
+    if (expired && storeVal.expire < oldestLive &&
+        var->isUncounted() && !wasCached) {
       APCTypedValue::fromHandle(var)->deleteUncounted();
     } else {
       var->unreferenceRoot(storeVal.dataSize);
@@ -290,6 +543,8 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
 }
 
 bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
+  HotCache::Idx hotIdx;
+  if (s_hotCache.get(keyStr.get(), value, hotIdx)) return true;
   const StoreValue *sval;
   APCHandle *svar = nullptr;
   ReadLock l(m_lock);
@@ -337,6 +592,15 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
         promoteObj = true;
       }
       value = svar->toLocal();
+      if (!promoteObj) {
+        /*
+         * Successful slow-case lookup => add value to cache (if key and kind
+         * are eligible and there is still room for it). Another thread may be
+         * updating the same key concurrently, but ConcurrentTableSharedStore's
+         * per-entry lock ensures it will agree on the value.
+         */
+        s_hotCache.store(hotIdx, keyStr.get(), svar, sval);
+      }
     }
   }
   if (expired) {
@@ -365,7 +629,6 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   }
   auto& sval = acc->second;
   if (sval.expired()) return 0;
-
   /*
    * Inc only works on KindOfDouble or KindOfInt64, which are never kept in
    * file-backed storage from priming.  So we don't need to try to deserialize
@@ -377,6 +640,10 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
       oldHandle->kind() != APCKind::Double) {
     return 0;
   }
+
+  // Currently a no-op, since HotCache doesn't store int/double.
+  assert(sval.hotIndex == StoreValue::kHotCacheUnknown);
+  s_hotCache.clearValue(sval);
 
   auto const ret = oldHandle->toLocal().toInt64() + step;
   auto const pair = APCHandle::Create(Variant(ret), false,
@@ -402,7 +669,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
 
   auto& sval = acc->second;
   if (sval.expired()) return false;
-
+  s_hotCache.clearValue(sval);
   auto const oldHandle = sval.data.match(
     [&] (APCHandle* h) {
       return h;
@@ -427,6 +694,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
 }
 
 bool ConcurrentTableSharedStore::exists(const String& keyStr) {
+  if (s_hotCache.hasValue(keyStr.get())) return true;
   const StoreValue *sval;
   ReadLock l(m_lock);
   bool expired = false;
@@ -503,6 +771,11 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
         svar.handle->unreferenceRoot(svar.size);
         return false;
       }
+      /*
+       * Simply clear the entry --- if it's truly hot, a successful non-cache
+       * 'get' will soon update the entry with the new value.
+       */
+      s_hotCache.clearValue(*sval);
       sval->data.match(
         [&] (APCHandle* handle) {
           current = handle;
@@ -644,6 +917,7 @@ bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
 }
 
 void ConcurrentTableSharedStore::primeDone() {
+  s_hotCache.initialize();
   if (s_apc_file_storage.getState() !=
       APCFileStorage::StorageState::Invalid) {
     s_apc_file_storage.seal();

@@ -800,7 +800,8 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
   if (type < TObj) {
     // Emit the specific class test.
     assertx(type.clsSpec());
-    assertx(type.clsSpec().cls()->attrs() & AttrNoOverride);
+    assertx(type.clsSpec().exact() ||
+            type.clsSpec().cls()->attrs() & AttrNoOverride);
 
     auto reg = getDataPtrEnregistered(v, dataSrc);
     emitCmpClass(v, sf, type.clsSpec().cls(),
@@ -1018,32 +1019,45 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
 
   assertx(testClass != nullptr);
 
-  // Check whether rObjClass points to a strict subclass of rTestClass,
+  // Check whether rObjClass is a subclass of rTestClass,
+  // given that its classvec is at least as long as rTestClass's
+  auto check_clsvec = [&](Vout& v, Vreg dst) {
+    // If it's a subclass, rTestClass must be at the appropriate index.
+    auto const vecOffset = Class::classVecOff() +
+      sizeof(LowPtr<Class>) * (testClass->classVecLen() - 1);
+    auto const sf = v.makeReg();
+    emitCmpClass(v, sf, rTestClass, rObjClass[vecOffset]);
+    v << setcc{CC_E, sf, dst};
+    return dst;
+  };
+
+  // Check whether rObjClass points to a subclass of rTestClass,
   // set dst with the bool true/false result, and return dst.
-  auto check_strict_subclass = [&](Vreg dst) {
+  auto check_subclass = [&](Vreg dst) {
+    if (testClass->classVecLen() == 1) {
+      // every class has at least one entry in its class vec,
+      // so no need to check the length
+      return check_clsvec(v, dst);
+    }
+    assertx(testClass->classVecLen() > 1);
     // Check the length of the class vectors. If the candidate's is at
     // least as long as the potential base (testClass) it might be a
     // subclass.
     auto const sf = v.makeReg();
     emitCmpVecLen(v, sf, static_cast<int32_t>(testClass->classVecLen()),
                   rObjClass[Class::classVecLenOff()]);
-    return cond(v, CC_NB, sf, dst, [&](Vout& v) {
-      // If it's a subclass, rTestClass must be at the appropriate index.
-      auto const vecOffset = Class::classVecOff() +
-        sizeof(LowPtr<Class>) * (testClass->classVecLen() - 1);
-      auto const b = v.makeReg();
-      auto const sf = v.makeReg();
-      emitCmpClass(v, sf, rTestClass, rObjClass[vecOffset]);
-      v << setcc{CC_E, sf, b};
-      return b;
-    }, [&](Vout& v) {
-      return v.cns(false);
-    });
+    return cond(v, CC_NB, sf, dst,
+                [&](Vout& v) {
+                  return check_clsvec(v, v.makeReg());
+                },
+                [&](Vout& v) {
+                  return v.cns(false);
+                });
   };
 
   if (testClass->attrs() & AttrAbstract) {
     // If the test must be extended, don't check for the same class.
-    check_strict_subclass(rdst);
+    check_subclass(rdst);
     return;
   }
 
@@ -1053,7 +1067,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   emitCmpClass(v, sf, rTestClass, rObjClass);
   if (testClass->attrs() & AttrNoOverride) {
     // If the test class cannot be extended, we only need to do the
-    // same-class check, never the strict-subclass check.
+    // same-class check, never the subclass check.
     v << setcc{CC_E, sf, rdst};
     return;
   }
@@ -1061,7 +1075,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   cond(v, CC_E, sf, rdst, [&](Vout& v) {
     return v.cns(true);
   }, [&](Vout& v) {
-    return check_strict_subclass(v.makeReg());
+    return check_subclass(v.makeReg());
   });
 }
 

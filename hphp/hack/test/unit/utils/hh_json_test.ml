@@ -17,6 +17,7 @@ let test_escape_unescape_data = [
   "carriage return\r";
   "backslash\\";
   "magic char" ^ (String.make 1 (Char.chr 8));
+  "magic_char_with_hexadecimal_digit" ^ (String.make 1 (Char.chr 26));
 ]
 
 let test_escape_unescape () =

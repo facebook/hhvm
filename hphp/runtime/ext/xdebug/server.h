@@ -254,7 +254,7 @@ struct XDebugServer {
   ThreadInfo* m_requestThread{nullptr};
 
   /* Mutex that protects m_{pause,stop}PollingThread. */
-  std::mutex m_pollingMtx;
+  std::recursive_mutex m_pollingMtx;
 
   /* The "break" command that gets read by the polling thread is stored here. */
   std::atomic<XDebugCommand*> m_break{nullptr};

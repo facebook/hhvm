@@ -190,7 +190,7 @@ failure:
 
 XDebugServer::~XDebugServer() {
   {
-    std::lock_guard<std::mutex> lock(m_pollingMtx);
+    std::lock_guard<std::recursive_mutex> lock(m_pollingMtx);
 
     // Set flags to tell polling thread to end.
     m_pausePollingThread.store(false);
@@ -294,7 +294,7 @@ void XDebugServer::pollSocketLoop() {
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     // XXX: This can take the lock even when we want to pause the thread.
-    std::lock_guard<std::mutex> lock(m_pollingMtx);
+    std::lock_guard<std::recursive_mutex> lock(m_pollingMtx);
 
     // We're paused if the request thread is handling commands right now.
     if (m_pausePollingThread.load()) {
@@ -717,7 +717,7 @@ bool XDebugServer::doCommandLoop() {
     m_pausePollingThread.store(false);
   };
 
-  std::lock_guard<std::mutex> lock(m_pollingMtx);
+  std::lock_guard<std::recursive_mutex> lock(m_pollingMtx);
 
   do {
     // If we are detached, short circuit

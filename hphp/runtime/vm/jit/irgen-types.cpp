@@ -111,8 +111,8 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
 
   // If knownCls isn't a normal class, our caller may want to do something
   // different.
-  return isNormalClass(knownCls) ? gen(env, ExtendsClass, objClass, checkCls)
-                                 : nullptr;
+  return isNormalClass(knownCls) ?
+    gen(env, ExtendsClass, ExtendsClassData{ knownCls }, objClass) : nullptr;
 }
 
 void verifyTypeImpl(IRGS& env, int32_t const id) {

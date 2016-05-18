@@ -797,15 +797,19 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
   }
 
   auto& v = vmain();
-  if (type < TObj) {
+  if (type < TObj || type < TCls) {
     // Emit the specific class test.
     assertx(type.clsSpec());
     assertx(type.clsSpec().exact() ||
             type.clsSpec().cls()->attrs() & AttrNoOverride);
 
     auto reg = getDataPtrEnregistered(v, dataSrc);
-    emitCmpClass(v, sf, type.clsSpec().cls(),
-                 reg[ObjectData::getVMClassOffset()]);
+    if (type < TObj) {
+      emitCmpLowPtr(v, sf, type.clsSpec().cls(),
+                    reg[ObjectData::getVMClassOffset()]);
+    } else {
+      v << cmpq{v.cns(type.clsSpec().cls()), reg, sf};
+    }
     doJcc(CC_E, sf);
   } else {
     assertx(type < TArr && type.arrSpec() && type.arrSpec().kind());
@@ -1011,27 +1015,27 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
  * Class entry.
  */
 void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
+  auto const extra      = inst->extra<ExtendsClassData>();
   auto const rdst       = dstLoc(inst, 0).reg();
   auto const rObjClass  = srcLoc(inst, 0).reg();
-  auto const rTestClass = srcLoc(inst, 1).reg();
-  auto const testClass  = inst->src(1)->type().clsSpec().exactCls();
+  auto const testClass  = extra->cls;
   auto& v = vmain();
 
   assertx(testClass != nullptr);
 
-  // Check whether rObjClass is a subclass of rTestClass,
-  // given that its classvec is at least as long as rTestClass's
+  // Check whether rObjClass is a subclass of testClass,
+  // given that its classvec is at least as long as testClass's
   auto check_clsvec = [&](Vout& v, Vreg dst) {
-    // If it's a subclass, rTestClass must be at the appropriate index.
+    // If it's a subclass, testClass must be at the appropriate index.
     auto const vecOffset = Class::classVecOff() +
       sizeof(LowPtr<Class>) * (testClass->classVecLen() - 1);
     auto const sf = v.makeReg();
-    emitCmpClass(v, sf, rTestClass, rObjClass[vecOffset]);
+    emitCmpLowPtr(v, sf, testClass, rObjClass[vecOffset]);
     v << setcc{CC_E, sf, dst};
     return dst;
   };
 
-  // Check whether rObjClass points to a subclass of rTestClass,
+  // Check whether rObjClass points to a subclass of testClass,
   // set dst with the bool true/false result, and return dst.
   auto check_subclass = [&](Vreg dst) {
     if (testClass->classVecLen() == 1) {
@@ -1055,8 +1059,10 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
                 });
   };
 
-  if (testClass->attrs() & AttrAbstract) {
-    // If the test must be extended, don't check for the same class.
+  if (testClass->attrs() & AttrAbstract ||
+      (extra->strictLikely && !(testClass->attrs() & AttrNoOverride))) {
+    // If the test must be extended, or the hint says it's probably not an
+    // exact match, don't check for the same class.
     check_subclass(rdst);
     return;
   }
@@ -1064,7 +1070,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   // Test if it is the exact same class.  TODO(#2044801): we should be
   // doing this control flow at the IR level.
   auto const sf = v.makeReg();
-  emitCmpClass(v, sf, rTestClass, rObjClass);
+  emitCmpLowPtr<Class>(v, sf, v.cns(testClass), rObjClass);
   if (testClass->attrs() & AttrNoOverride) {
     // If the test class cannot be extended, we only need to do the
     // same-class check, never the subclass check.
@@ -1086,7 +1092,18 @@ void CodeGenerator::cgEqCls(IRInstruction* inst) {
 
   auto& v = vmain();
   auto const sf = v.makeReg();
-  emitCmpClass(v, sf, src2, src1);
+  emitCmpLowPtr<Class>(v, sf, src2, src1);
+  v << setcc{CC_E, sf, dst};
+}
+
+void CodeGenerator::cgEqFunc(IRInstruction* inst) {
+  auto const dst  = dstLoc(inst, 0).reg();
+  auto const src1 = srcLoc(inst, 0).reg();
+  auto const src2 = srcLoc(inst, 1).reg();
+
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  emitCmpLowPtr<Func>(v, sf, src2, src1);
   v << setcc{CC_E, sf, dst};
 }
 
@@ -3700,6 +3717,16 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   vmain() << lea{objReg[inst->extra<LdPropAddr>()->offsetBytes], dstReg};
 }
 
+void CodeGenerator::cgLdFuncVecLen(IRInstruction* inst) {
+  auto dstReg = dstLoc(inst, 0).reg();
+  auto clsReg = srcLoc(inst, 0).reg();
+
+  // A Cctx is a Cls with the bottom bit set; subtract one from the
+  // offset to handle that case
+  auto off = Class::funcVecLenOff() - (inst->src(0)->isA(TCctx) ? 1 : 0);
+  vmain() << loadzlq{clsReg[off], dstReg};
+}
+
 void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto clsReg = srcLoc(inst, 0).reg();
@@ -3748,7 +3775,7 @@ void CodeGenerator::cgInstanceOfIfaceVtable(IRInstruction* inst) {
       auto const ifaceOff = slot * sizeof(Class::VtableVecSlot) +
         offsetof(Class::VtableVecSlot, iface);
       auto const sf = v.makeReg();
-      emitCmpClass(v, sf, iface, vtableVecReg[ifaceOff]);
+      emitCmpLowPtr<Class>(v, sf, iface, vtableVecReg[ifaceOff]);
       auto dst = v.makeReg();
       v << setcc{CC_E, sf, dst};
       return dst;
@@ -5552,15 +5579,18 @@ void CodeGenerator::cgPackMagicArgs(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
-  auto const extra = inst->extra<RDSHandleData>();
+void CodeGenerator::cgProfileMethod(IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileMethodData>();
+  auto const sp = srcLoc(inst, 0).reg();
 
   auto& v = vmain();
   auto const profile = v.makeReg();
+  auto const ar = v.makeReg();
   v << lea{rvmtl()[extra->handle], profile};
-  cgCallHelper(v, CallSpec::direct(profileObjClassHelper),
+  v << lea{sp[cellsToBytes(extra->spOffset.offset)], ar};
+  cgCallHelper(v, CallSpec::direct(profileClassMethodHelper),
                kVoidDest, SyncOptions::None,
-               argGroup(inst).reg(profile).ssa(0));
+               argGroup(inst).reg(profile).reg(ar).ssa(1));
 }
 
 void CodeGenerator::cgProfileType(IRInstruction* inst) {

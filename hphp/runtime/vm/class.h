@@ -943,6 +943,7 @@ public:
   OFF(propDataCache)
   OFF(vtableVecLen)
   OFF(vtableVec)
+  OFF(funcVecLen)
 #undef OFF
 
 

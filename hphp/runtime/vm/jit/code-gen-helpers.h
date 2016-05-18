@@ -168,11 +168,29 @@ Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d);
 Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg d);
 
 /*
- * Compare two classes, setting the result in `sf'.
+ * Internal helpers for LowPtr comparisons.
  */
-void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem);
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem);
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
+void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size);
+void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size);
+void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size);
+
+/*
+ * Compare two LowPtrs, setting the result in `sf'.
+ */
+template<class T>
+void emitCmpLowPtr(Vout& v, Vreg sf, const T* c, Vptr mem) {
+  cmpLowPtrImpl(v, sf, c, mem, sizeof(LowPtr<T>));
+}
+
+template<class T>
+void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
+  cmpLowPtrImpl(v, sf, reg, mem, sizeof(LowPtr<T>));
+}
+
+template<class T>
+void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
+  cmpLowPtrImpl(v, sf, reg1, reg2, sizeof(LowPtr<T>));
+}
 
 /*
  * Compare `val' against the live Class::veclen_t at `mem'.

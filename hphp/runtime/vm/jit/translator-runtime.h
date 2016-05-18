@@ -37,7 +37,7 @@ struct c_Vector;
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
-struct ClassProfile;
+struct MethProfile;
 struct TypeProfile;
 struct ArrayKindProfile;
 struct TypeConstraint;
@@ -163,7 +163,7 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 typedef FixedStringMap<TCA,true> SSwitchMap;
 TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
 
-void profileObjClassHelper(ClassProfile*, ObjectData*);
+void profileClassMethodHelper(MethProfile*, const ActRec*, const Class*);
 
 void profileTypeHelper(TypeProfile*, TypedValue);
 

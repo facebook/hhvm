@@ -1137,6 +1137,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EndGuards:
   case EqBool:
   case EqCls:
+  case EqFunc:
   case EqDbl:
   case EqInt:
   case GteBool:
@@ -1217,7 +1218,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdRDSAddr:
   case ExitPlaceholder:
   case CheckRange:
-  case ProfileObjClass:
   case ProfileType:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
@@ -1355,6 +1355,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsInitData:
   case UnwindCheckSideExit:
   case LdCns:
+  case LdFuncVecLen:
   case LdClsMethod:
   case LdClsMethodCacheCls:
   case LdClsMethodCacheFunc:
@@ -1443,7 +1444,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       };
       return may_raise(inst, may_load_store(effects, effects));
     }
-
+  case ProfileMethod:
+    {
+      AliasClass effects = AStack {
+        inst.src(0),
+        inst.extra<ProfileMethod>()->spOffset,
+        int32_t{kNumActRecCells}
+      };
+      return may_load_store(effects, AEmpty);
+    }
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:

@@ -750,8 +750,10 @@ void lookupClsMethodHelper(Class* cls,
   }
 }
 
-void profileObjClassHelper(ClassProfile* profile, ObjectData* obj) {
-  profile->reportClass(obj->getVMClass());
+void profileClassMethodHelper(MethProfile* profile,
+                              const ActRec* ar,
+                              const Class* cls) {
+  profile->reportMeth(ar, cls);
 }
 
 void profileTypeHelper(TypeProfile* profile, TypedValue newTV) {

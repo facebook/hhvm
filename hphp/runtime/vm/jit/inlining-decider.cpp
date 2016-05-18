@@ -163,11 +163,13 @@ void InliningDecider::forbidInliningOf(const Func* callee) {
 }
 
 bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
-  if (!callee || !RuntimeOption::EvalHHIREnableGenTimeInlining) {
+  if (!callee ||
+      !RuntimeOption::EvalHHIREnableGenTimeInlining ||
+      RuntimeOption::EvalJitEnableRenameFunction ||
+      callee->attrs() & AttrInterceptable) {
     return false;
   }
 
-  assert(!RuntimeOption::EvalJitEnableRenameFunction);
   if (callee->cls()) {
     if (!rds::isPersistentHandle(callee->cls()->classHandle())) {
       // if the callee's class is not persistent, its still ok

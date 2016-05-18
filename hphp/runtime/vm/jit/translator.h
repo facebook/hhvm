@@ -550,21 +550,21 @@ bool builtinFuncDestroysLocals(const Func* callee);
 
 /*
  * This routine attempts to find the Func* that will be called for a given
- * target Class and function name, from a given context.  This function
+ * target Class and function name, when called from ctxFunc.  This function
  * determines if a given Func* will be called in a request-insensitive way
  * (i.e. suitable for burning into the TC as a pointer).  The class we are
- * targeting is assumed to be a subclass of `cls', not exactly `cls'.
+ * targeting is assumed to be a subclass of `cls', not exactly `cls', unless
+ * exactClass is true.
  *
- * This function should not be used in a context where the call may involve
- * late static binding (i.e. FPushClsMethod), since it assumes static functions
- * will be resolved as targeting on cls regardless of whether they are
- * overridden.
+ * This function should not be used in a context where the call may involve late
+ * static binding (i.e. FPushClsMethod), since it assumes static functions will
+ * be resolved as targeting on cls regardless of whether they are overridden.
  *
  * Returns nullptr if we can't be sure this would always call this function.
  */
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup,
-                                  const Class* ctx);
+                                  const Func* ctxFunc, bool exactClass);
 
 /*
  * If possible find the constructor for cls that would be run from the context

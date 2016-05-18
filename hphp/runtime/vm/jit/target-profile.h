@@ -173,50 +173,83 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-struct ClassProfile {
-  static const size_t kClassProfileSampleSize = 4;
+struct MethProfile {
+  using RawType = LowPtr<Class>::storage_type;
 
-  const Class* sampledClasses[kClassProfileSampleSize];
+  enum class Tag {
+    UniqueClass = 0,
+    UniqueMeth = 1,
+    BaseMeth = 2,
+    InterfaceMeth = 3,
+    Invalid = 4
+  };
 
-  bool isMonomorphic() const {
-    return size() == 1;
+  MethProfile() : m_curMeth(nullptr), m_curClass(nullptr) {}
+  MethProfile(const MethProfile& other) :
+      m_curMeth(other.m_curMeth),
+      m_curClass(other.m_curClass) {}
+
+  const Class* uniqueClass() const {
+    return curTag() == Tag::UniqueClass ? rawClass() : nullptr;
   }
 
-  const Class* getClass(size_t i) const {
-    if (i >= kClassProfileSampleSize) return nullptr;
-    return sampledClasses[i];
+  const Func* uniqueMeth() const {
+    return curTag() == Tag::UniqueMeth || curTag() == Tag::UniqueClass ?
+      rawMeth() : nullptr;
   }
 
-  size_t size() const {
-    for (auto i = 0; i < kClassProfileSampleSize; ++i) {
-      auto const cls = sampledClasses[i];
-      if (!cls) return i;
+  const Func* baseMeth() const {
+    return curTag() == Tag::BaseMeth ? rawMeth() : nullptr;
+  }
+
+  const Func* interfaceMeth() const {
+    return curTag() == Tag::InterfaceMeth ? rawMeth() : nullptr;
+  }
+
+  void reportMeth(const ActRec* ar, const Class* cls) {
+    if (!cls) {
+      cls = ar->hasThis() ?
+        ar->getThis()->getVMClass() : ar->getClass();
     }
-    return kClassProfileSampleSize;
+    auto const meth = ar->func();
+    reportMethHelper(cls, meth);
   }
 
-  void reportClass(const Class* cls) {
-    for (auto& myCls : sampledClasses) {
-      // If the current slot is empty, store the class here.
-      if (!myCls) {
-        myCls = cls;
-        break;
-      }
+  static void reduce(MethProfile& a, const MethProfile& b);
+ private:
+  void reportMethHelper(const Class* cls, const Func* meth);
 
-      // If the current slot matches the requested class, give up.
-      if (cls == myCls) {
-        break;
-      }
-    }
+  static Tag toTag(uintptr_t val) {
+    return static_cast<Tag>(val & 7);
   }
 
-  static void reduce(ClassProfile& a, const ClassProfile& b) {
-    // Racy, but who cares?
-    for (auto const cls : b.sampledClasses) {
-      if (!cls) return;
-      a.reportClass(cls);
-    }
+  static const Func* fromValue(uintptr_t value) {
+    return (Func*)(value & uintptr_t(-8));
   }
+
+  Tag curTag() const { return toTag(methValue()); }
+
+  const Class* rawClass() const {
+    return m_curClass;
+  }
+
+  const Func* rawMeth() const {
+    return fromValue(methValue());
+  }
+
+  const uintptr_t methValue() const {
+    return uintptr_t(m_curMeth.get());
+  }
+
+  void setMeth(const Func* meth, Tag tag) {
+    auto encoded_meth = (Func*)(uintptr_t(meth) | static_cast<uintptr_t>(tag));
+    m_curMeth = encoded_meth;
+  }
+
+  AtomicLowPtr<const Func,
+               std::memory_order_acquire, std::memory_order_release> m_curMeth;
+  AtomicLowPtr<const Class,
+               std::memory_order_acquire, std::memory_order_release> m_curClass;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -1499,7 +1499,7 @@ SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
 
   if (auto const cls = spec2.exactCls()) {
     if (isNormalClass(cls) && (cls->attrs() & AttrUnique)) {
-      return gen(env, ExtendsClass, src1, src2);
+      return gen(env, ExtendsClass, ExtendsClassData{ cls }, src1);
     }
     if (isInterface(cls) && (cls->attrs() & AttrUnique)) {
       return gen(env, InstanceOfIface, src1, cns(env, cls->name()));
@@ -1511,13 +1511,10 @@ SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
-  auto const src2 = inst->src(1);
+  auto const cls2 = inst->extra<ExtendsClassData>()->cls;
 
-  auto const spec2 = src2->type().clsSpec();
-
-  DEBUG_ONLY auto const cls2 = spec2.exactCls();
   assertx(cls2 && isNormalClass(cls2));
-
+  auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
   return instanceOfImpl(env, src1->type().clsSpec(), spec2);
 }
 

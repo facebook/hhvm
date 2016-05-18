@@ -301,6 +301,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case NeqRes:
   case CmpRes:
   case EqCls:
+  case EqFunc:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -329,6 +330,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsCached:
   case LdClsInitData:
   case LookupClsRDSHandle:
+  case LdFuncVecLen:
   case LdClsMethod:
   case LdIfaceMethod:
   case LdPropAddr:

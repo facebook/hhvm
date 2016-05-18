@@ -182,7 +182,7 @@ and they ignore the type of the value inside the box (the inner type). The
 inner type is normally checked when the value within the box is about to be
 loaded, using a separate CheckRefInner instruction.
 
-| CheckType<T>, DRefineS(0), S(Gen), B|P
+| CheckType<T>, DRefineS(0), S(Gen,Cls), B|P
 
   Check that the type of the src S0 is T, and if so copy it to D, and
   fallthrough. If S0 cannot be proven to be T, branch to block B. Note that
@@ -673,6 +673,10 @@ To string conversions:
 
   Checks if two Class values are equal.
 
+| EqFunc,                      D(Bool), S(Func) S(Func),                  NF
+
+  Checks if two Func values are equal.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait
@@ -690,11 +694,12 @@ To string conversions:
   Faster path for interface checks. Sets D based on whether S0 implements
   iface, which must be a unique interface with an assigned vtable slot.
 
-| ExtendsClass, D(Bool), S(Cls) C(Cls), NF
+| ExtendsClass<cls,strictLikely>, D(Bool), S(Cls), NF
 
   A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
-  of the class in S1, where S1 must be a unique class that is not an interface
-  or a trait.
+  of cls, where cls must be a unique class that is not an interface or a trait.
+
+  If strictLikely is true, optimize for the case where S0 is not equal to S1.
 
 | InstanceOfBitmask,           D(Bool), S(Cls) CStr,                      NF
 
@@ -1079,6 +1084,10 @@ To string conversions:
 | LdIfaceMethod<vtableIdx,methodIdx>, D(Func), S(Cls), NF
 
   Load the Func* at methodIdx from the vtable at vtableIdx in S0.
+
+| LdFuncVecLen, D(Int), S(Cls,Cctx), NF
+
+  Load the funcVecLen field from S0.
 
 | LdClsMethod, D(Func), S(Cls,Cctx) C(Int), NF
 
@@ -2527,7 +2536,9 @@ fields of that struct for holding intermediate values.
 
   Profile the type of S0.
 
-| ProfileObjClass, ND, S(Obj), NF
+| ProfileMethod<rdsHandle,spOff>, ND, S(StkPtr) S(Cls,Nullptr), NF
+
+  Profile the Func in the ActRec that was just pushed onto the stack.
 
 | LdStructArrayElem, DArrElem, AK(Struct) S(StaticStr), NF
 

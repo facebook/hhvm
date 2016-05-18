@@ -313,33 +313,30 @@ Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
   return dst;
 }
 
-void emitCmpClass(Vout& v, Vreg sf, const Class* cls, Vptr mem) {
-  auto size = sizeof(LowPtr<Class>);
+void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
   if (size == 8) {
-    v << cmpqm{v.cns(cls), mem, sf};
+    v << cmpqm{v.cns(ptr), mem, sf};
   } else if (size == 4) {
-    auto const clsImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(cls));
-    v << cmplm{v.cns(clsImm), mem, sf};
+    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
+    v << cmplm{v.cns(ptrImm), mem, sf};
   } else {
     not_implemented();
   }
 }
 
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
-  auto size = sizeof(LowPtr<Class>);
+void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
   if (size == 8) {
     v << cmpqm{reg, mem, sf};
   } else if (size == 4) {
-    auto lowCls = v.makeReg();
-    v << movtql{reg, lowCls};
-    v << cmplm{lowCls, mem, sf};
+    auto low = v.makeReg();
+    v << movtql{reg, low};
+    v << cmplm{low, mem, sf};
   } else {
     not_implemented();
   }
 }
 
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
-  auto size = sizeof(LowPtr<Class>);
+void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size) {
   if (size == 8) {
     v << cmpq{reg1, reg2, sf};
   } else if (size == 4) {

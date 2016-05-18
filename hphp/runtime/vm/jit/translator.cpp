@@ -1304,15 +1304,15 @@ uint64_t Translator::getTransCounter(TransID transId) const {
 
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup,
-                                  const Class* ctx) {
-  if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
+                                  const Func* ctxFunc,
+                                  bool exactClass) {
+  if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
-  bool privateOnly = false;
+  auto ctx = ctxFunc->cls();
   if (!(cls->attrs() & AttrUnique)) {
     if (!ctx || !ctx->classof(cls)) {
       return nullptr;
     }
-    if (!staticLookup) privateOnly = true;
   }
 
   const Func* func;
@@ -1322,40 +1322,35 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   if (res == LookupResult::MethodNotFound) return nullptr;
 
+  if (func->isAbstract()) return nullptr;
+
   assertx(res == LookupResult::MethodFoundWithThis ||
-         res == LookupResult::MethodFoundNoThis ||
-         (staticLookup ?
-          res == LookupResult::MagicCallStaticFound :
-          res == LookupResult::MagicCallFound));
+          res == LookupResult::MethodFoundNoThis ||
+          (staticLookup ?
+           res == LookupResult::MagicCallStaticFound :
+           res == LookupResult::MagicCallFound));
 
   magicCall =
     res == LookupResult::MagicCallStaticFound ||
     res == LookupResult::MagicCallFound;
 
-  if ((privateOnly && (!(func->attrs() & AttrPrivate) || magicCall)) ||
-      func->isAbstract() ||
-      func->attrs() & AttrInterceptable) {
-    return nullptr;
-  }
-
   if (staticLookup) {
     if (magicCall) {
-      /*
-       *  i) We cant tell if a magic call would go to __call or __callStatic
-       *       - Could deal with this by checking for the existence of __call
-       *
-       * ii) hphp semantics is that in the case of an object call, we look
-       *     for __call in the scope of the object (this is incompatible
-       *     with zend) which means we would have to know that there is no
-       *     __call higher up in the tree
-       *       - Could deal with this by checking for AttrNoOverride on the
-       *         class
-       */
-      return nullptr;
+      if (ctx && !ctxFunc->isStatic() &&
+          (ctx->classof(cls) || cls->classof(ctx))) {
+        // we might need to call __call instead
+        return nullptr;
+      }
+      if (!exactClass && !(cls->attrs() & AttrNoOverride)) {
+        // there might be a derived class which defines the method
+        return nullptr;
+      }
+    } else if (!exactClass) {
+      if (!func->isImmutableFrom(cls)) return nullptr;
     }
-  } else if (!(func->attrs() & AttrPrivate)) {
-    if (magicCall || func->attrs() & AttrStatic) {
-      if (!(cls->preClass()->attrs() & AttrNoOverride)) {
+  } else if (!exactClass && !(func->attrs() & AttrPrivate)) {
+    if (magicCall) {
+      if (!(cls->attrs() & AttrNoOverride)) {
         return nullptr;
       }
     } else if (!func->isImmutableFrom(cls)) {
@@ -1366,7 +1361,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 }
 
 const Func* lookupImmutableCtor(const Class* cls, const Class* ctx) {
-  if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
+  if (!cls) return nullptr;
   if (!(cls->attrs() & AttrUnique)) {
     if (!ctx || !ctx->classof(cls)) {
       return nullptr;

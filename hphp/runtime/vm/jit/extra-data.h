@@ -135,6 +135,33 @@ struct ClassData : IRExtraData {
 };
 
 /*
+ * ExtendsClass.
+ */
+struct ExtendsClassData : IRExtraData {
+  explicit ExtendsClassData(const Class* cls, bool strictLikely = false)
+      : cls(cls), strictLikely(strictLikely)
+  {
+    assert(cls != nullptr);
+  }
+
+  std::string show() const {
+    return folly::sformat("{}{}",
+                          cls->name(), strictLikely ? ":strictLikely" : "");
+  }
+
+  bool equals(const ExtendsClassData& o) const {
+    return cls == o.cls && strictLikely == o.strictLikely;
+  }
+
+  size_t hash() const {
+    return hash_int64(reinterpret_cast<intptr_t>(cls));
+  }
+
+  const Class* cls;
+  bool strictLikely;
+};
+
+/*
  * Class with method name.
  */
 struct ClsMethodData : IRExtraData {
@@ -293,6 +320,20 @@ struct RDSHandleData : IRExtraData {
   bool equals(RDSHandleData o) const { return handle == o.handle; }
   size_t hash() const { return std::hash<uint32_t>()(handle); }
 
+  rds::Handle handle;
+};
+
+/*
+ * ProfileMethod
+ */
+struct ProfileMethodData : IRExtraData {
+  explicit ProfileMethodData(
+    IRSPRelOffset spOffset, rds::Handle handle) :
+      spOffset(spOffset), handle(handle) {}
+
+  std::string show() const { return folly::to<std::string>(handle); }
+
+  IRSPRelOffset spOffset;
   rds::Handle handle;
 };
 
@@ -1147,6 +1188,7 @@ X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(InstanceOfIfaceVtable,        ClassData);
+X(ExtendsClass,                 ExtendsClassData);
 X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
 X(CheckStk,                     IRSPRelOffsetData);
@@ -1214,8 +1256,8 @@ X(MixedArrayGetK,               IndexData);
 X(ProfileArrayKind,             RDSHandleData);
 X(ProfileMixedArrayOffset,      RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
-X(ProfileObjClass,              RDSHandleData);
 X(ProfileType,                  RDSHandleData);
+X(ProfileMethod,                ProfileMethodData);
 X(LdRDSAddr,                    RDSHandleData);
 X(BaseG,                        MOpFlagsData);
 X(PropX,                        MOpFlagsData);

@@ -468,13 +468,15 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
   } else {
     return -1;
   }
+}
 
-int64_t HHVM_FUNCTION(stream_set_chunk_size,
+Variant HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
                       int64_t chunk_size) {
   if (isa<File>(stream) && chunk_size > 0) {
     auto file = cast<File>(stream);
-    return file->setChunkSize(chunk_size);
+    file->setChunkSize(chunk_size);
+    return file->getChunkSize();
   }
   return false;
 }

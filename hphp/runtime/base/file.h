@@ -255,7 +255,7 @@ struct File : SweepableResourceData {
   /**
    * Set the Chunk Size.
    */
-  Variant setChunkSize(int64_t chunk_size);
+  void setChunkSize(int64_t chunk_size);
 
   /**
    * Write one line of csv record.

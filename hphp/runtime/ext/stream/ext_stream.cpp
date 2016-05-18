@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/std/ext_std_misc.h"
+
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/base/array-init.h"

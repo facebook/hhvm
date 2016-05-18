@@ -677,6 +677,11 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
         // no break here, so we can continue to match more overwrites
       }
       hdf["overwrite"].setVisited(); // avoid lint complaining
+      if (hdf.exists("clear")) {
+        // when the tier does not match, "clear" is not accessed
+        // mark it visited, so the linter does not complain
+        hdf["clear"].setVisited();
+      }
     }
   }
   return messages;

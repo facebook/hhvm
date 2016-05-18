@@ -67,6 +67,10 @@ struct AsioContext final {
 
   void runUntil(c_WaitableWaitHandle* wait_handle);
 
+  // used for back-traces, when surprise flag is handled
+  // from inside Asio scheduler
+  c_WaitableWaitHandle* getBlamedWaitHandle();
+
   static constexpr uint32_t QUEUE_DEFAULT       = 0;
   static constexpr uint32_t QUEUE_NO_PENDING_IO = 1;
 

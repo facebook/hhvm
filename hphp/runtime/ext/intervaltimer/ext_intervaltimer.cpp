@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
@@ -72,7 +73,10 @@ static StaticString sample_type_string(IntervalTimer::SampleType type) {
 
 }
 
-void IntervalTimer::RunCallbacks(IntervalTimer::SampleType type) {
+void IntervalTimer::RunCallbacks(
+  IntervalTimer::SampleType type,
+  c_WaitableWaitHandle* wh
+) {
   clearSurpriseFlag(IntervalTimerFlag);
 
   auto const timers = s_timer_pool->timers;
@@ -91,7 +95,9 @@ void IntervalTimer::RunCallbacks(IntervalTimer::SampleType type) {
       }
     }
     try {
-      Array args = make_packed_array(sample_type_string(type), count);
+      Array args = make_packed_array(sample_type_string(type),
+                                     count,
+                                     Object{wh});
       vm_call_user_func(timer->m_callback, args);
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping IntervalTimer: %s",

@@ -64,18 +64,20 @@ namespace {
     }
   }
 
-  inline void onIOWaitExit(AsioSession* session) {
+  inline void onIOWaitExit(AsioSession* session, AsioContext* context) {
     // The web request may have timed out while we were waiting for I/O.  Fail
     // early to avoid further execution of PHP code.  We limit I/O waiting to
     // the time currently remaining in the request (see
     // AsioSession::getLatestWakeTime).
     if (UNLIKELY(checkSurpriseFlags())) {
-      auto const flags = handle_request_surprise();
+      c_WaitableWaitHandle* wait_handle = context->getBlamedWaitHandle();
+
+      auto const flags = handle_request_surprise(wait_handle);
       if (flags & XenonSignalFlag) {
-        Xenon::getInstance().log(Xenon::IOWaitSample);
+        Xenon::getInstance().log(Xenon::IOWaitSample, wait_handle);
       }
       if (flags & IntervalTimerFlag) {
-        IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample);
+        IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample, wait_handle);
       }
     }
 
@@ -185,7 +187,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
           auto waketime = session->sleepWakeTime();
           ete_queue->receiveSomeUntil(waketime);
         }
-        onIOWaitExit(session);
+        onIOWaitExit(session, this);
       }
 
       if (ete_queue->hasReceived()) {
@@ -211,7 +213,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
                  m_priorityQueueDefault.empty())) {
         std::this_thread::sleep_until(session->sleepWakeTime());
       }
-      onIOWaitExit(session);
+      onIOWaitExit(session, this);
 
       session->processSleepEvents();
       continue;
@@ -234,6 +236,18 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     raise_fatal_error(
       "Invariant violation: queues are empty, but wait handle did not finish");
   }
+}
+
+c_WaitableWaitHandle* AsioContext::getBlamedWaitHandle() {
+  if (!m_externalThreadEvents.empty()) {
+    return m_externalThreadEvents[0];
+  }
+
+  if (!m_sleepEvents.empty()) {
+    return m_sleepEvents[0];
+  }
+
+  return nullptr;
 }
 
 /**

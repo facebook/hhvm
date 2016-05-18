@@ -27,6 +27,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+struct c_WaitableWaitHandle;
 
 struct IntervalTimer final {
   enum SampleType {
@@ -39,7 +40,7 @@ struct IntervalTimer final {
   static Class* c_Class;
   static const StaticString c_ClassName;
 
-  static void RunCallbacks(SampleType);
+  static void RunCallbacks(SampleType t, c_WaitableWaitHandle* wh = nullptr);
 
   IntervalTimer() {}
   ~IntervalTimer();

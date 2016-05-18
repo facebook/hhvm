@@ -61,6 +61,9 @@
 */
 
 namespace HPHP {
+
+struct c_WaitableWaitHandle;
+
 struct Xenon final {
 
     enum SampleType {
@@ -94,7 +97,7 @@ struct Xenon final {
 
     void start(uint64_t msec);
     void stop();
-    void log(SampleType t) const;
+    void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
     void surpriseAll();
     void onTimer();
 

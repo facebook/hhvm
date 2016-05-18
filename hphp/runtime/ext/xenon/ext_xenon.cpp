@@ -70,7 +70,7 @@ namespace {
 struct XenonRequestLocalData final : RequestEventHandler  {
   XenonRequestLocalData();
   ~XenonRequestLocalData();
-  void log(Xenon::SampleType t);
+  void log(Xenon::SampleType t, c_WaitableWaitHandle* wh = nullptr);
   Array createResponse();
 
   // implement RequestEventHandler
@@ -223,13 +223,13 @@ void Xenon::stop() {
 // the Surprise flag.  The data is gathered in thread local storage.
 // If the sample is Enter, then do not record this function name because it
 // hasn't done anything.  The sample belongs to the previous function.
-void Xenon::log(SampleType t) const {
+void Xenon::log(SampleType t, c_WaitableWaitHandle* wh) const {
   if (getSurpriseFlag(XenonSignalFlag)) {
     if (!RuntimeOption::XenonForceAlwaysOn) {
       clearSurpriseFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", (t == IOWaitSample) ? "IOWait" : "Normal");
-    s_xenonData->log(t);
+    s_xenonData->log(t, wh);
   }
 }
 
@@ -276,11 +276,12 @@ Array XenonRequestLocalData::createResponse() {
   return stacks.toArray();
 }
 
-void XenonRequestLocalData::log(Xenon::SampleType t) {
+void XenonRequestLocalData::log(Xenon::SampleType t, c_WaitableWaitHandle* wh) {
   TRACE(1, "XenonRequestLocalData::log\n");
   time_t now = time(nullptr);
   auto bt = createBacktrace(BacktraceArgs()
                              .skipTop(t == Xenon::EnterSample)
+                             .fromWaitHandle(wh)
                              .withSelf()
                              .withMetadata()
                              .ignoreArgs());

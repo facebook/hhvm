@@ -141,39 +141,44 @@ void raise_infinite_recursion_error() {
   }
 }
 
-static Exception* generate_request_timeout_exception() {
+static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto exceptionMsg = folly::sformat(
     RuntimeOption::ClientExecutionMode()
       ? "Maximum execution time of {} seconds exceeded"
       : "entire web request took longer than {} seconds and timed out",
     RID().getTimeout());
   auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis());
   return new RequestTimeoutException(exceptionMsg, exceptionStack);
 }
 
-static Exception* generate_request_cpu_timeout_exception() {
+static Exception* generate_request_cpu_timeout_exception(
+  c_WaitableWaitHandle* wh
+) {
   auto exceptionMsg = folly::sformat(
     "Maximum CPU time of {} seconds exceeded",
     RID().getCPUTimeout()
   );
 
   auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis());
   return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
 }
 
-static Exception* generate_memory_exceeded_exception() {
+static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
   auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis());
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack);
 }
 
-size_t handle_request_surprise() {
+size_t handle_request_surprise(c_WaitableWaitHandle* wh) {
   auto& info = TI();
   auto& p = info.m_reqInjectionData;
 
@@ -194,7 +199,7 @@ size_t handle_request_surprise() {
     if (pendingException) {
       setSurpriseFlag(TimedOutFlag);
     } else {
-      pendingException = generate_request_timeout_exception();
+      pendingException = generate_request_timeout_exception(wh);
     }
   }
   // Don't bother with the CPU timeout if we're already handling a wall timeout.
@@ -203,14 +208,14 @@ size_t handle_request_surprise() {
     if (pendingException) {
       setSurpriseFlag(CPUTimedOutFlag);
     } else {
-      pendingException = generate_request_cpu_timeout_exception();
+      pendingException = generate_request_cpu_timeout_exception(wh);
     }
   }
   if (do_memExceeded) {
     if (pendingException) {
       setSurpriseFlag(MemExceededFlag);
     } else {
-      pendingException = generate_memory_exceeded_exception();
+      pendingException = generate_memory_exceeded_exception(wh);
     }
   }
   if (do_GC) {

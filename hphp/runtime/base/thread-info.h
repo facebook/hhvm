@@ -30,6 +30,7 @@ struct MemoryManager;
 struct Profiler;
 struct CodeCoverage;
 struct DebuggerHook;
+struct c_WaitableWaitHandle;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -146,7 +147,7 @@ inline void check_recursion_throw() {
   throw Exception("Maximum stack size reached");
 }
 
-size_t handle_request_surprise();
+size_t handle_request_surprise(c_WaitableWaitHandle* wh = nullptr);
 
 inline void check_request_surprise_unlikely() {
   if (UNLIKELY(checkSurpriseFlags())) handle_request_surprise();

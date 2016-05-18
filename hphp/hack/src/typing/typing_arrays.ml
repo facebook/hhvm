@@ -48,9 +48,9 @@ end
  * to just an array.*)
 class virtual downcast_tabstract_to_array_type_mapper = object(this)
   method on_tabstract env r ak cstr =
-    match cstr with
-    | Some ty -> this#on_type env ty
+    match TUtils.get_as_constraints (fst env) ak cstr with
     | None -> env, (r, Tabstract (ak, cstr))
+    | Some ty -> this#on_type env ty
 
   method virtual on_type : env -> locl ty -> result
 end

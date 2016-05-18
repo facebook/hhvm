@@ -40,10 +40,11 @@ let check_constraint env ck cstr_ty ty =
             TUtils.sub_type env ty ecstr_ty
       end
 
-let add_check_constraint_todo env reason generic ck cstr_ty ty =
-  Env.add_todo env begin fun env ->
+let add_check_constraint_todo (env_now:Env.env) reason generic ck cstr_ty ty =
+  Env.add_todo env_now begin fun (env:Env.env) ->
     Errors.try_
-      (fun () -> check_constraint env ck cstr_ty ty)
+      (fun () ->
+        check_constraint env ck cstr_ty ty)
       (fun l ->
        Reason.explain_generic_constraint env.Env.pos reason generic l;
        env

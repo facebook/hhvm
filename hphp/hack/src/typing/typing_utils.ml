@@ -62,13 +62,30 @@ let is_class ty = match snd ty with
   | _ -> false
 
 (*****************************************************************************)
+(* Get upper bounds of an abstract type *)
+(*****************************************************************************)
+
+let get_as_constraints env ak tyopt =
+    match tyopt with
+    | Some ty -> Some ty
+    | None ->
+      (match ak with
+       | AKgeneric n ->
+         (match Env.get_upper_bounds env n with ty::_ -> Some ty | _ -> None)
+       | _ -> None)
+
+(*****************************************************************************)
 (* Gets the base type of an abstract type *)
 (*****************************************************************************)
 
-let rec get_base_type ty = match snd ty with
+let rec get_base_type env ty = match snd ty with
   | Tabstract (AKnewtype (classname, _), _) when
       classname = SN.Classes.cClassname -> ty
-  | Tabstract (_, Some ty) -> get_base_type ty
+  | Tabstract (ak, tyopt) ->
+    begin match get_as_constraints env ak tyopt with
+    | None -> ty
+    | Some ty -> get_base_type env ty
+    end
   | _ -> ty
 
 (*****************************************************************************)
@@ -97,7 +114,8 @@ let simplified_uerror env ty1 ty2 =
    *)
   if simplify then
     Errors.must_error
-      (fun _ -> ignore @@ unify env (get_base_type ty1) (get_base_type ty2))
+      (fun _ -> ignore @@ unify env (get_base_type env ty1)
+                                    (get_base_type env ty2))
       (fun _ -> uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2))
   else
     uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2)

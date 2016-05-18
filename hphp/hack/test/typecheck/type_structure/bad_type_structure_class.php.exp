@@ -12,7 +12,7 @@ Tint
 Tint
 option(Tstring)
 option(Tstring)
-App \classname<generic T as <App \C<Tint, >>, >
+App \classname<generic T, > where T as App \C<Tint, >
 option(array)
 X
 X

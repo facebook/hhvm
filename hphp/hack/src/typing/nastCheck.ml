@@ -265,8 +265,11 @@ and func env f named_body =
   let p, fname = f.f_name in
   if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
   then Errors.illegal_function_name p fname;
+  (* Add type parameter constraints to typing environment *)
+  let tenv = Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
+               ~ety_env:(Phase.env_with_self env.tenv) in
   let env = { env with
-    tenv = Env.set_mode env.tenv f.f_mode;
+    tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
   } in
   maybe hint env f.f_ret;
@@ -348,9 +351,9 @@ and check_happly unchecked_tparams env h =
   match decl_ty with
   | _, Tapply (_, tyl) when tyl <> [] ->
       let env, locl_ty = Phase.localize_with_self env decl_ty in
-      begin match TUtils.get_base_type locl_ty with
+      begin match TUtils.get_base_type env locl_ty with
         | _, Tclass (cls, tyl) ->
-            (match Env.get_class env (snd cls) with
+          (match Env.get_class env (snd cls) with
             | Some { tc_tparams; _ } ->
                 (* We want to instantiate the class type parameters with the
                  * type list of the class we are localizing. We do not want to
@@ -369,7 +372,7 @@ and check_happly unchecked_tparams env h =
                       let env, cstr_ty = Phase.localize ~ety_env env cstr_ty in
                       ignore @@ Errors.try_
                         (fun () ->
-                          TGenConstraint.check_constraint env ck cstr_ty ty
+                           TGenConstraint.check_constraint env ck cstr_ty ty
                         )
                         (fun l ->
                           Reason.explain_generic_constraint env.Env.pos r x l;
@@ -392,7 +395,11 @@ and class_ tenv c =
               imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               tenv = tenv } in
-  let env = { env with tenv = Env.set_mode env.tenv c.c_mode } in
+  (* Add type parameter constraints to typing environment *)
+  let tenv = Phase.localize_generic_parameters_with_bounds
+               tenv (fst c.c_tparams)
+               ~ety_env:(Phase.env_with_self tenv) in
+  let env = { env with tenv = Env.set_mode tenv c.c_mode } in
   if c.c_kind = Ast.Cinterface then begin
     interface c;
   end
@@ -639,6 +646,10 @@ and check__toString m is_static =
 and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
+  (* Add method type parameters and their bounds to environment *)
+  let tenv = Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
+               ~ety_env:(Phase.env_with_self env.tenv) in
+  let env = { env with tenv = tenv } in
   List.iter m.m_params (fun_param env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;

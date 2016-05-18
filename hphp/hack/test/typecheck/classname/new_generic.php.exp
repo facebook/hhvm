@@ -1,4 +1,4 @@
-[<expr#1>]generic Tobj as <App \C<generic Targ, >>
+[<expr#1>]generic Tobj where Tobj as App \C<generic Targ, >
 [1]intersect(App \C<Tint, >)
 [2]intersect(App \C<Tint, >)
 File "new_generic.php", line 19, characters 29-36:

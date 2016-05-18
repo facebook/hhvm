@@ -46,16 +46,16 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
       transform_shapemap ~nullable:true env ty shape
   | _ ->
       (* If the abstract type is unbounded we do not specialize at all *)
-      let is_unbound = match ety |> TUtils.get_base_type |> snd with
+      let is_unbound = match ety |> TUtils.get_base_type env |> snd with
         (* An enum is considered a valid bound *)
         | Tabstract (AKenum _, _) -> false
         | Tabstract (_, None) -> true
         | _ -> false in
-      if is_unbound then env, shape else
+      if is_unbound then (env, shape) else
       let is_generic =
         match snd ety with Tabstract (AKgeneric _, _) -> true | _ -> false in
       ShapeMap.fold begin fun field field_ty (env, shape) ->
-        match field, field_ty, TUtils.get_base_type ety with
+        match field, field_ty, TUtils.get_base_type env ety with
         | Nast.SFlit (_, "nullable"), (_, Toption (fty)), _ when nullable ->
             env, ShapeMap.add field fty shape
         | Nast.SFlit (_, "nullable"), (_, Toption (fty)), (_, Toption _) ->

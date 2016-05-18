@@ -204,7 +204,7 @@ and unify_ env r1 ty1 r2 ty2 =
       env, Tabstract (ak1, tcstr)
   | Tabstract (AKdependent (expr_dep, _),
       Some (_, Tclass ((_, x) as id, _) as ty)), _ ->
-      let class_ = Env.get_class env x in
+    let class_ = Env.get_class env x in
       (* For final class C, there is no difference between abstract<X> and X.
        * The one exception is for new types, because it is considered a distinct
        * type from X.
@@ -345,6 +345,7 @@ and unify_ env r1 ty1 r2 ty2 =
         add env ty2;
         TUtils.simplified_uerror env (r1, ty1) (r2, ty2);
         env, Tany
+
 
 and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
   match anon_arity, func_arity with

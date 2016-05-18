@@ -31,9 +31,10 @@ type fake_members = {
 type expression_id = Ident.t
 type local = locl ty list * locl ty * expression_id
 type local_env = fake_members * local Local_id.Map.t
+type tparam_bounds = locl ty list
 type tparam_info = {
-  lower_bounds : locl ty list;
-  upper_bounds : locl ty list;
+  lower_bounds : tparam_bounds;
+  upper_bounds : tparam_bounds;
 }
 type tpenv = tparam_info SMap.t
 
@@ -62,7 +63,9 @@ and genv = {
   return  : locl ty;
   parent_id : string;
   parent  : decl ty;
+  (* Identifier of the enclosing class *)
   self_id : string;
+  (* Type of the enclosing class, instantiated at its generic parameters *)
   self    : locl ty;
   static  : bool;
   fun_kind : Ast.fun_kind;
@@ -158,33 +161,38 @@ let get_shape_field_name = function
   | SFlit (_, s) -> s
   | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
+let empty_bounds = []
+let singleton_bound ty = [ty]
+
 let get_lower_bounds env name =
   match SMap.get name env.tpenv with
-  | None -> []
+  | None -> empty_bounds
   | Some {lower_bounds; _} -> lower_bounds
 
 let get_upper_bounds env name =
   match SMap.get name env.tpenv with
-  | None -> []
+  | None -> empty_bounds
   | Some {upper_bounds; _} -> upper_bounds
 
 let add_upper_bound_ env name ty =
   match SMap.get name env.tpenv with
   | None -> { env with tpenv =
-      SMap.add name {lower_bounds=[]; upper_bounds=[ty]} env.tpenv }
+                SMap.add name {lower_bounds = empty_bounds;
+                               upper_bounds = singleton_bound ty} env.tpenv }
   | Some {lower_bounds; upper_bounds} ->
     { env with tpenv =
-        SMap.add name {lower_bounds=lower_bounds;
-                       upper_bounds=ty::upper_bounds} env.tpenv }
+        SMap.add name {lower_bounds = lower_bounds;
+                       upper_bounds = ty::upper_bounds} env.tpenv }
 
 let add_lower_bound_ env name ty =
   match SMap.get name env.tpenv with
   | None -> { env with tpenv =
-      SMap.add name {lower_bounds=[ty]; upper_bounds=[]} env.tpenv }
+                SMap.add name {lower_bounds = singleton_bound ty;
+                               upper_bounds = empty_bounds} env.tpenv }
   | Some {lower_bounds; upper_bounds} ->
     { env with tpenv =
-        SMap.add name {lower_bounds=ty::lower_bounds;
-                       upper_bounds=upper_bounds} env.tpenv }
+        SMap.add name {lower_bounds = ty::lower_bounds;
+                       upper_bounds = upper_bounds} env.tpenv }
 
 let add_upper_bound env name ty =
   match ty with
@@ -204,11 +212,24 @@ let add_lower_bound env name ty =
   | _ ->
     add_lower_bound_ env name ty
 
+(* Add type parameters to environment, initially with no bounds.
+ * Existing type parameters with the same name will be overridden. *)
+let add_generic_parameters env tparaml =
+  let add_empty_bounds tpenv (_, (_, name), _) =
+    SMap.add name {lower_bounds = empty_bounds;
+                   upper_bounds = empty_bounds} tpenv in
+  { env with tpenv =
+               List.fold_left tparaml ~f:add_empty_bounds ~init:env.tpenv }
+
+let is_generic_parameter env name =
+  SMap.mem name env.tpenv
+
 (* When printing out types (by hh_show()), TVars are printed with an
  * associated identifier. We reindex them (in the order of appearance) to be
  * consecutive integers starting from zero, because the internal identifier
  * can change due to unrelated reasons, which breaks tests. *)
 let printable_tvar_ids = ref IMap.empty
+let printable_tparams = ref SSet.empty
 
 let get_printable_tvar_id x =
   match IMap.get x !printable_tvar_ids with
@@ -283,6 +304,7 @@ let rec debug stack env (r, ty) =
   | Tabstract (AKgeneric s, cstr_opt) ->
       o "generic ";
       o s;
+      printable_tparams := SSet.add s !printable_tparams;
       (match cstr_opt with
        | None -> ()
        | Some x -> o " as <"; debug stack env x; o ">"
@@ -328,13 +350,27 @@ and debugl stack env x =
 (* For now, we only display lower bounds because upper bounds
  * are shown inline *)
 and debug_tpenv env =
-  let o = print_string in
-  SMap.iter (fun x {lower_bounds; _} ->
-    if not (List.is_empty lower_bounds)
-    then (o " where "; o x; o " super ";
-          debugl ISet.empty env lower_bounds)) env.tpenv
+  SMap.iter (fun x {lower_bounds; upper_bounds} ->
+    debug_constraint env x lower_bounds upper_bounds) env.tpenv
 
-let debug env ty = debug ISet.empty env ty; debug_tpenv env; print_newline()
+and debug_constraint env name lower_bounds upper_bounds =
+  let o = print_string in
+  begin
+    (match lower_bounds with
+     | [] -> ()
+     | tyl -> (o " where "; o name; o " super "; debugl ISet.empty env tyl));
+    (match upper_bounds with
+     | [] -> ()
+     | tyl -> (o " where "; o name; o " as "; debugl ISet.empty env tyl))
+  end
+
+let debug env ty =
+  printable_tparams := SSet.empty;
+  debug ISet.empty env ty;
+  SMap.iter (fun x {lower_bounds; upper_bounds} ->
+    if SSet.mem x (!printable_tparams)
+    then debug_constraint env x lower_bounds upper_bounds) env.tpenv;
+  print_newline()
 
 let empty_fake_members = {
   last_call = None;

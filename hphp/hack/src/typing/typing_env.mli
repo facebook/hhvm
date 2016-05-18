@@ -20,6 +20,7 @@ type expression_id = Ident.t
 type local = locl ty list * locl ty * expression_id
 type local_env = fake_members * local Local_id.Map.t
 type tpenv
+type tparam_bounds = locl ty list
 type env = {
   pos : Pos.t;
   tenv : locl ty IMap.t;
@@ -54,6 +55,7 @@ val make_ft : Pos.t -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
 val debugl : ISet.t -> env -> locl ty list -> unit
 val debug : env -> locl ty -> unit
+val debug_tpenv : env -> unit
 val empty_fake_members : fake_members
 val empty_local : local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->
@@ -126,10 +128,12 @@ val set_local : env -> Local_id.t -> locl ty -> env
 val get_local : env -> Local_id.t -> env * locl ty
 val set_local_expr_id : env -> Local_id.t -> expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> expression_id option
-val get_lower_bounds : env -> string -> locl ty list
-val get_upper_bounds : env -> string -> locl ty list
+val get_lower_bounds : env -> string -> tparam_bounds
+val get_upper_bounds : env -> string -> tparam_bounds
 val add_upper_bound : env -> string -> locl ty -> env
 val add_lower_bound : env -> string -> locl ty -> env
+val add_generic_parameters : env -> Nast.tparam list -> env
+val is_generic_parameter : env -> string -> bool
 val freeze_local_env : env -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
 val in_loop : env -> (env -> env) -> env

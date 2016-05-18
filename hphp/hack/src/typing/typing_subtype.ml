@@ -291,7 +291,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
         (fun () ->
           sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, sub))
         ~when_: begin fun () ->
-          match TUtils.get_base_type ty_super, sub with
+          match TUtils.get_base_type env ty_super, sub with
           | (_, Tclass ((_, x), _)), (_, Tclass ((_, y), _)) when x = y -> false
           | _, _ -> true
         end
@@ -530,40 +530,41 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   (* Subtype is generic parameter *)
   | _, (r_sub, Tabstract (AKgeneric name_sub, opt_sub_cstr)) ->
     begin match ety_super with
-    (* If supertype is the same generic parameter, we're done *)
-    | (_, Tabstract (AKgeneric name_super, _)) when name_sub = name_super -> env
+      (* If supertype is the same generic parameter, we're done *)
+      | (_, Tabstract (AKgeneric name_super, _)) when name_sub = name_super
+        -> env
 
-    (* Otherwise, we collect all the upper bounds ("as" constraints) on the
-     * generic parameter, and check each of these in turn against ty_super
-     * until one of them succeeds *)
-    | _ ->
-      let rec try_bounds tyl =
-        match tyl with
-        | [] ->
-          (* There are no bounds so force an error *)
-          fst (Unify.unify env ty_super ty_sub)
+      (* Otherwise, we collect all the upper bounds ("as" constraints) on the
+       * generic parameter, and check each of these in turn against ty_super
+       * until one of them succeeds *)
+      | _ ->
+        let rec try_bounds tyl =
+          match tyl with
+          | [] ->
+            (* There are no bounds so force an error *)
+            fst (Unify.unify env ty_super ty_sub)
 
-        | ty::tyl ->
-          Errors.try_
-            (fun () ->
-               sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty))
-            (fun l ->
+          | ty::tyl ->
+            Errors.try_
+              (fun () ->
+                 sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty))
+              (fun l ->
                (* Right now we report constraint failure based on the last
                 * error. This should change when we start supporting
                 * multiple constraints *)
-               if List.is_empty tyl
-               then (Reason.explain_generic_constraint
-                       env.Env.pos r_sub name_sub l; env)
-               else try_bounds tyl)
-      in try_bounds (Option.to_list opt_sub_cstr @
-                     Env.get_upper_bounds env name_sub)
+                 if List.is_empty tyl
+                 then (Reason.explain_generic_constraint
+                     env.Env.pos r_sub name_sub l; env)
+                 else try_bounds tyl)
+        in try_bounds (Option.to_list opt_sub_cstr @
+            Env.get_upper_bounds env name_sub)
     end
 
   (* Supertype is generic parameter *)
   | (r_super, Tabstract (AKgeneric name_super, _)), _ ->
-    (* Collect all the lower bounds ("super" constraints) on the
-     * generic parameter, and check ty_sub against each of them in turn
-     * until one of them succeeds *)
+        (* Collect all the lower bounds ("super" constraints) on the
+         * generic parameter, and check ty_sub against each of them in turn
+         * until one of them succeeds *)
     let rec try_bounds tyl =
       match tyl with
       | [] ->
@@ -572,15 +573,15 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
 
       | ty::tyl ->
         Errors.try_
-        (fun () -> sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
-        (fun l ->
+          (fun () -> sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
+          (fun l ->
            (* Right now we report constraint failure based on the last
             * error. This should change when we start supporting
               multiple constraints *)
-           if List.is_empty tyl
-           then (Reason.explain_generic_constraint
-                   env.Env.pos r_super name_super l; env)
-           else try_bounds tyl)
+             if List.is_empty tyl
+             then (Reason.explain_generic_constraint
+                 env.Env.pos r_super name_super l; env)
+             else try_bounds tyl)
     in try_bounds (Env.get_lower_bounds env name_super)
 
   | (_, (Tarraykind _ | Tprim _ | Tvar _
@@ -605,8 +606,13 @@ and sub_string ?(seen = ISet.empty) p env ty2 =
       (* Enums are either ints or strings, and so can always be used in a
        * stringish context *)
       env
-  | (_, Tabstract (_, Some ty)) ->
-      sub_string ~seen p env ty
+  | (_, Tabstract (ak, tyopt)) ->
+    begin match TUtils.get_as_constraints env ak tyopt with
+      | None ->
+        fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
+      | Some ty ->
+        sub_string ~seen p env ty
+    end
   | (r2, Tclass (x, _)) ->
       let class_ = Env.get_class env (snd x) in
       (match class_ with
@@ -624,7 +630,7 @@ and sub_string ?(seen = ISet.empty) p env ty2 =
   | _, Tany ->
     env (* Unifies with anything *)
   | _, Tobject -> env
-  | _, (Tmixed | Tarraykind _ | Tvar _ | Tabstract (_, _)
+  | _, (Tmixed | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
       fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 

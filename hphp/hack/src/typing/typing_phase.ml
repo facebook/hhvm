@@ -122,7 +122,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             failwith "Invalid array declaration type" in
       env, (ety_env, (r, ty))
   | r, Tgeneric (x, cstr_opt) ->
-      (match SMap.get x ety_env.substs with
+      begin match SMap.get x ety_env.substs with
       | Some x_ty ->
           let env =
             match cstr_opt with
@@ -132,16 +132,20 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             | None -> env in
           env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None ->
+        (* If parameter is registered for bounds in the environment
+         * then don't embed them in the type as well (unify doesn't
+         * deal with this situation). *)
+        if Env.is_generic_parameter env x
+        then env, (ety_env, (r, Tabstract (AKgeneric x, None)))
+        else
           (match cstr_opt with
           | None | Some (Ast.Constraint_super, _) ->
             env, (ety_env, (r, Tabstract (AKgeneric x, None)))
-            (* We retain the bound in Tabstract here despite env.bounds;
-               there remains lots of special casing in typing.ml *)
           | Some (Ast.Constraint_as, ty) ->
               let env, ty = localize ~ety_env env ty in
               env, (ety_env, (r, Tabstract (AKgeneric x, Some ty)))
             )
-      )
+    end
   | r, Toption ty ->
        let env, ty = localize ~ety_env env ty in
        let ty_ =
@@ -243,18 +247,21 @@ let env_with_self env =
 let localize_with_self env ty =
   localize env ty ~ety_env:(env_with_self env)
 
-let localize_bounds (env:Env.env) (tparams:Nast.tparam list) =
+let localize_generic_parameters_with_bounds
+    ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
+  let env = Env.add_generic_parameters env tparams in
   let add_bound env ((_, (_,id), cstr_opt): Nast.tparam) =
     match cstr_opt with
     | None ->
       env
+
     | Some (ck, h) ->
-      let env, ty = localize_with_self env
-                      (Decl_hint.hint env.Env.decl_env h) in
+      let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
       match ck with
       | Ast.Constraint_super -> Env.add_lower_bound env id ty
       | Ast.Constraint_as    -> Env.add_upper_bound env id ty in
   List.fold_left tparams ~f:add_bound ~init:env
+
 
 (* Helper functions *)
 

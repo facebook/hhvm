@@ -256,18 +256,7 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
 
     // In the entry block, hhbc-translator gets a chance to emit some code
     // immediately after the initial checks on the first instruction.
-    switch (arch()) {
-      case Arch::X64:
-        irgen::prepareEntry(irgs);
-        break;
-      case Arch::ARM:
-        // Don't do this for ARM, because it can lead to interpOne on the
-        // first SrcKey in a translation, which isn't allowed.
-        break;
-      case Arch::PPC64:
-        not_implemented();
-        break;
-    }
+    irgen::prepareEntry(irgs);
   }
 }
 

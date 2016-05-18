@@ -19,11 +19,11 @@
 #define incl_HPHP_XDEBUG_HOOK_H_
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
+#include "hphp/runtime/ext/xdebug/server.h"
 
-#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 
 #include <boost/variant.hpp>
 
@@ -178,7 +178,7 @@ struct XDebugHook : DebuggerHook {
   // Starting the server on request init
   void onRequestInit() override {
     if (XDebugServer::isNeeded()) {
-      XDebugServer::attach(XDebugServer::Mode::REQ);
+      XDebugServer::attach(XDebugServer::Mode::Req);
     }
   }
 
@@ -214,7 +214,7 @@ struct XDebugHook : DebuggerHook {
     if (XDEBUG_GLOBAL(RemoteEnable) &&
         !XDebugServer::isAttached() &&
         XDEBUG_GLOBAL(RemoteMode) == "jit") {
-      XDebugServer::attach(XDebugServer::Mode::JIT);
+      XDebugServer::attach(XDebugServer::Mode::Jit);
     }
 
     // Handle the exception.

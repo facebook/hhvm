@@ -82,6 +82,9 @@ static struct StreamExtension final : Extension {
     REGISTER_SAME_CONSTANT(STREAM_META_GROUP_NAME);
     REGISTER_SAME_CONSTANT(STREAM_META_GROUP);
     REGISTER_SAME_CONSTANT(STREAM_META_ACCESS);
+    REGISTER_SAME_CONSTANT(STREAM_BUFFER_NONE);
+    REGISTER_SAME_CONSTANT(STREAM_BUFFER_LINE);
+    REGISTER_SAME_CONSTANT(STREAM_BUFFER_FULL);
     REGISTER_SAME_CONSTANT(STREAM_SERVER_BIND);
     REGISTER_SAME_CONSTANT(STREAM_SERVER_LISTEN);
     REGISTER_SAME_CONSTANT(STREAM_CRYPTO_METHOD_SSLv23_CLIENT);
@@ -485,24 +488,20 @@ bool HHVM_FUNCTION(stream_set_timeout,
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
                       const Resource& stream,
                       int buffer) {
-  if (isa<File>(stream)) {
-    auto plain_file = dyn_cast<PlainFile>(stream);
-    if (!plain_file) {
-      return -1;
-    }
-    FILE* file = plain_file->getStream();
-    if (!file) {
-      return -1;
-    }
-    if (buffer ==0) {
-      // Use _IONBF (no buffer) macro to set no buffer
-      return setvbuf(file, nullptr, _IONBF, 0);
-    } else {
-    // Use _IOFBF (full buffer) macro
-      return setvbuf(file, nullptr, _IOFBF, buffer);
-    }
-  } else {
+  auto plain_file = dyn_cast<PlainFile>(stream);
+  if (!plain_file) {
     return -1;
+  }
+  FILE* file = plain_file->getStream();
+  if (!file) {
+    return -1;
+  }
+  if (buffer ==0) {
+    // Use _IONBF (no buffer) macro to set no buffer
+    return setvbuf(file, nullptr, _IONBF, 0);
+  } else {
+  // Use _IOFBF (full buffer) macro
+    return setvbuf(file, nullptr, _IOFBF, buffer);
   }
 }
 

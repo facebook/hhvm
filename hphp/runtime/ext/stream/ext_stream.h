@@ -38,6 +38,9 @@ namespace HPHP {
   const int64_t k_STREAM_META_GROUP_NAME = 4;
   const int64_t k_STREAM_META_GROUP = 5;
   const int64_t k_STREAM_META_ACCESS = 6;
+  const int64_t k_STREAM_BUFFER_NONE = 0;
+  const int64_t k_STREAM_BUFFER_LINE = 1;
+  const int64_t k_STREAM_BUFFER_FULL = 2;
   const int64_t k_STREAM_SERVER_BIND = 4;
   const int64_t k_STREAM_SERVER_LISTEN = 8;
   const int64_t k_STREAM_CRYPTO_METHOD_SSLv23_CLIENT = 7;

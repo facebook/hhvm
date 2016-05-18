@@ -14,7 +14,10 @@ type parser_return = {
     ast        : Ast.program;
   }
 
-val program : ?elaborate_namespaces:bool -> ?include_line_comments:bool ->
+val program :
+  ?elaborate_namespaces:bool ->
+  ?include_line_comments:bool ->
+  ?keep_errors:bool ->
   Relative_path.t ->
   string -> parser_return
 

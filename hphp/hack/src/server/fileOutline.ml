@@ -262,10 +262,11 @@ let add_docblocks defs comments =
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
  let outline content =
-   let {Parser_hack.ast; comments; _} = Errors.ignore_ begin fun () ->
+   let {Parser_hack.ast; comments; _} =
      Parser_hack.program Relative_path.default content
        ~include_line_comments:true
-   end in
+       ~keep_errors:false
+   in
    let result = outline_ast ast in
    add_docblocks result comments
 

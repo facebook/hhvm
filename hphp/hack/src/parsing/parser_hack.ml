@@ -424,6 +424,7 @@ let ref_param env =
 let rec program
     ?(elaborate_namespaces = true)
     ?(include_line_comments = false)
+    ?(keep_errors = true)
     file content =
   L.include_line_comments := include_line_comments;
   L.comment_list := [];
@@ -435,8 +436,10 @@ let rec program
   let fixmes = !L.fixmes in
   L.comment_list := [];
   L.fixmes := IMap.empty;
-  Parser_heap.HH_FIXMES.add env.file fixmes;
-  Option.iter (List.last !(env.errors)) Errors.parsing_error;
+  if keep_errors then  begin
+    Parser_heap.HH_FIXMES.add env.file fixmes;
+    Option.iter (List.last !(env.errors)) Errors.parsing_error
+  end;
   let ast = if elaborate_namespaces
     then Namespaces.elaborate_defs ast
     else ast in

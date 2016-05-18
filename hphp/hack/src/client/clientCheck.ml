@@ -58,14 +58,8 @@ let parse_position_string arg =
     Printf.eprintf "Invalid position\n";
     raise Exit_status.(Exit_with Input_error)
 
-let main args =
-  let mode_s = ClientEnv.mode_to_string args.mode in
-  HackEventLogger.client_set_from args.from;
-  HackEventLogger.client_set_mode mode_s;
-
-  HackEventLogger.client_check ();
-
-  let conn = ClientConnect.connect { ClientConnect.
+let connect args =
+  ClientConnect.connect { ClientConnect.
     root = args.root;
     autostart = args.autostart;
     retries = Some args.retries;
@@ -74,15 +68,28 @@ let main args =
     no_load = args.no_load;
     to_ide = false;
     ai_mode = args.ai_mode;
-  } in
+  }
+
+let rpc args command =
+  let conn = connect args in
+  Cmd.rpc conn @@ command
+
+let main args =
+  let mode_s = ClientEnv.mode_to_string args.mode in
+  HackEventLogger.client_set_from args.from;
+  HackEventLogger.client_set_mode mode_s;
+
+  HackEventLogger.client_check ();
+
   let exit_status =
     match args.mode with
     | MODE_LIST_FILES ->
+      let conn = connect args in
       let infol = get_list_files conn args in
       List.iter infol (Printf.printf "%s\n");
       Exit_status.No_error
     | MODE_LIST_MODES ->
-      let ic, oc = conn in
+      let ic, oc = connect args in
       Cmd.(stream_request oc LIST_MODES);
       begin try
         while true do print_endline (Timeout.input_line ic) done;
@@ -97,17 +104,17 @@ let main args =
           let file = expand_path file in
           ServerUtils.FileName file
       in
-      let pos_level_l = Cmd.rpc conn @@ Rpc.COVERAGE_LEVELS file_input in
+      let pos_level_l = rpc args @@ Rpc.COVERAGE_LEVELS file_input in
       ClientColorFile.go file_input args.output_json pos_level_l;
       Exit_status.No_error
     | MODE_COVERAGE file ->
       let counts_opt =
-        Cmd.rpc conn @@ Rpc.COVERAGE_COUNTS (expand_path file) in
+        rpc args @@ Rpc.COVERAGE_COUNTS (expand_path file) in
       ClientCoverageMetric.go ~json:args.output_json counts_opt;
       Exit_status.No_error
     | MODE_FIND_CLASS_REFS name ->
       let results =
-        Cmd.rpc conn @@ Rpc.FIND_REFS (FindRefsService.Class name) in
+        rpc args @@ Rpc.FIND_REFS (FindRefsService.Class name) in
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
     | MODE_FIND_REFS name ->
@@ -123,26 +130,30 @@ let main args =
           Printf.eprintf "Invalid input\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let results = Cmd.rpc conn @@ Rpc.FIND_REFS action in
+      let results = rpc args @@ Rpc.FIND_REFS action in
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
     | MODE_DUMP_SYMBOL_INFO files ->
+      let conn = connect args in
       ClientSymbolInfo.go conn files expand_path;
       Exit_status.No_error
     | MODE_DUMP_AI_INFO files ->
+      let conn = connect args in
       ClientAiInfo.go conn files expand_path;
       Exit_status.No_error
     | MODE_FIND_DEPENDENT_FILES files ->
+      let conn = connect args in
       ClientFindDependentFiles.go conn files expand_path;
       Exit_status.No_error
     | MODE_REFACTOR (ref_mode, before, after) ->
+      let conn = connect args in
       ClientRefactor.go conn args ref_mode before after;
       Exit_status.No_error
     | MODE_IDENTIFY_FUNCTION arg ->
       let line, char = parse_position_string arg in
       let content = Sys_utils.read_stdin_to_string () in
       let result =
-        Cmd.rpc conn @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
+        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       let result = match result with
         | Some (result, _) -> Utils.strip_ns result.SymbolOccurrence.name
         | _ -> ""
@@ -153,7 +164,7 @@ let main args =
       let line, char = parse_position_string arg in
       let content = Sys_utils.read_stdin_to_string () in
       let result =
-        Cmd.rpc conn @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
+        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       ClientGetDefinition.go result args.output_json;
       Exit_status.No_error
     | MODE_TYPE_AT_POS arg ->
@@ -174,7 +185,7 @@ let main args =
           Printf.eprintf "Invalid position\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let pos, ty = Cmd.rpc conn @@ Rpc.INFER_TYPE (fn, line, char) in
+      let pos, ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
       ClientTypeAtPos.go pos ty args.output_json;
       Exit_status.No_error
     | MODE_ARGUMENT_INFO arg ->
@@ -191,34 +202,34 @@ let main args =
       in
       let content = Sys_utils.read_stdin_to_string () in
       let results =
-        Cmd.rpc conn @@ Rpc.ARGUMENT_INFO (content, line, char) in
+        rpc args @@ Rpc.ARGUMENT_INFO (content, line, char) in
       ClientArgumentInfo.go results args.output_json;
       Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
-      let results = Cmd.rpc conn @@ Rpc.AUTOCOMPLETE content in
+      let results = rpc args @@ Rpc.AUTOCOMPLETE content in
       ClientAutocomplete.go results args.output_json;
       Exit_status.No_error
     | MODE_OUTLINE ->
       let content = Sys_utils.read_stdin_to_string () in
-      let results = Cmd.rpc conn @@ Rpc.OUTLINE content in
+      let results = FileOutline.outline content in
       ClientOutline.go_legacy results args.output_json;
       Exit_status.No_error
     | MODE_OUTLINE2 ->
       let content = Sys_utils.read_stdin_to_string () in
-      let results = Cmd.rpc conn @@ Rpc.OUTLINE content in
+      let results = FileOutline.outline content in
       ClientOutline.go results args.output_json;
       Exit_status.No_error
     | MODE_METHOD_JUMP_CHILDREN class_ ->
-      let results = Cmd.rpc conn @@ Rpc.METHOD_JUMP (class_, true) in
+      let results = rpc args @@ Rpc.METHOD_JUMP (class_, true) in
       ClientMethodJumps.go results true args.output_json;
       Exit_status.No_error
     | MODE_METHOD_JUMP_ANCESTORS class_ ->
-      let results = Cmd.rpc conn @@ Rpc.METHOD_JUMP (class_, false) in
+      let results = rpc args @@ Rpc.METHOD_JUMP (class_, false) in
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
     | MODE_STATUS ->
-      let error_list = Cmd.rpc conn Rpc.STATUS in
+      let error_list = rpc args Rpc.STATUS in
       if args.output_json || args.from <> "" || error_list = []
       then begin
         (* this should really go to stdout but we need to adapt the various
@@ -228,12 +239,12 @@ let main args =
       end else List.iter error_list ClientCheckStatus.print_error_color;
       if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_SHOW classname ->
-      let ic, oc = conn in
+      let ic, oc = connect args in
       Cmd.(stream_request oc (SHOW classname));
       print_all ic;
       Exit_status.No_error
     | MODE_SEARCH (query, type_) ->
-      let results = Cmd.rpc conn @@ Rpc.SEARCH (query, type_) in
+      let results = rpc args @@ Rpc.SEARCH (query, type_) in
       ClientSearch.go results args.output_json;
       Exit_status.No_error
     | MODE_LINT fnl ->
@@ -244,18 +255,18 @@ let main args =
             prerr_endlinef "Could not find file '%s'" fn;
             acc
       end ~init:[] in
-      let results = Cmd.rpc conn @@ Rpc.LINT fnl in
+      let results = rpc args @@ Rpc.LINT fnl in
       ClientLint.go results args.output_json;
       Exit_status.No_error
     | MODE_LINT_ALL code ->
-      let results = Cmd.rpc conn @@ Rpc.LINT_ALL code in
+      let results = rpc args @@ Rpc.LINT_ALL code in
       ClientLint.go results args.output_json;
       Exit_status.No_error
     | MODE_CREATE_CHECKPOINT x ->
-      Cmd.rpc conn @@ Rpc.CREATE_CHECKPOINT x;
+      rpc args @@ Rpc.CREATE_CHECKPOINT x;
       Exit_status.No_error
     | MODE_RETRIEVE_CHECKPOINT x ->
-      let results = Cmd.rpc conn @@ Rpc.RETRIEVE_CHECKPOINT x in
+      let results = rpc args @@ Rpc.RETRIEVE_CHECKPOINT x in
       begin
         match results with
         | Some results ->
@@ -265,32 +276,32 @@ let main args =
             Exit_status.Checkpoint_error
       end
     | MODE_DELETE_CHECKPOINT x ->
-      if Cmd.rpc conn @@ Rpc.DELETE_CHECKPOINT x then
+      if rpc args @@ Rpc.DELETE_CHECKPOINT x then
         Exit_status.No_error
       else
         Exit_status.Checkpoint_error
     | MODE_STATS ->
-      let stats = Cmd.rpc conn @@ Rpc.STATS in
+      let stats = rpc args @@ Rpc.STATS in
       print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);
       Exit_status.No_error
     | MODE_FIND_LVAR_REFS arg ->
       let line, char = parse_position_string arg in
       let content = Sys_utils.read_stdin_to_string () in
       let results =
-        Cmd.rpc conn @@ Rpc.FIND_LVAR_REFS (content, line, char) in
+        rpc args @@ Rpc.FIND_LVAR_REFS (content, line, char) in
       ClientFindLocals.go results args.output_json;
       Exit_status.No_error
     | MODE_GET_METHOD_NAME arg ->
       let line, char = parse_position_string arg in
       let content = Sys_utils.read_stdin_to_string () in
       let result =
-        Cmd.rpc conn @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
+        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       ClientGetMethodName.go result args.output_json;
       Exit_status.No_error
     | MODE_FORMAT (from, to_) ->
       let content = Sys_utils.read_stdin_to_string () in
       let result =
-        Cmd.rpc conn @@ Rpc.FORMAT (content, from, to_) in
+        rpc args @@ Rpc.FORMAT (content, from, to_) in
       ClientFormat.go result args.output_json;
       Exit_status.No_error
     | MODE_TRACE_AI name ->
@@ -306,7 +317,7 @@ let main args =
           Printf.eprintf "Invalid input\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let results = Cmd.rpc conn @@ Rpc.TRACE_AI action in
+      let results = rpc args @@ Rpc.TRACE_AI action in
       ClientTraceAi.go results args.output_json;
       Exit_status.No_error
   in

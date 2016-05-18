@@ -457,6 +457,13 @@ class CommonTests(object):
         """
         self.write_load_config()
 
+        """
+        This call is here to ensure that server is running. Outline command
+        doesn't require it to be, but integration test suite assumes it and
+        checks it's state after each test.
+        """
+        self.check_cmd(['No errors!'])
+
         self.check_cmd_and_json_cmd([
             'bar',
             '  kind: function',

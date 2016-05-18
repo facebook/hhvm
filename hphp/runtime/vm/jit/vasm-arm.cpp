@@ -94,7 +94,7 @@ uint8_t Log2(uint8_t value) {
     case 8:
       return 3;
     default:
-      assertx(false);
+      always_assert(false);
   }
 }
 
@@ -133,7 +133,7 @@ struct Vgen {
     , catches(env.catches)
   {}
   ~Vgen() {
-    __clear_cache(base, a->frontier());
+    __builtin___clear_cache(base, a->frontier());
   }
 
   static void patch(Venv& env);

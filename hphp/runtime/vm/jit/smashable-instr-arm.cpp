@@ -153,7 +153,7 @@ emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
 template<typename T>
 static void smashInstr(TCA inst, T target, size_t sz) {
   *reinterpret_cast<T*>(inst + sz - 8) = target;
-  __clear_cache(inst + sz - 8, inst + sz);
+  __builtin___clear_cache(inst + sz - 8, inst + sz);
 }
 
 void smashMovq(TCA inst, uint64_t target) {
@@ -167,7 +167,7 @@ void smashCmpq(TCA inst, uint32_t target) {
 void smashCall(TCA inst, TCA target) {
   // Skip over the initial branch instruction
   *reinterpret_cast<TCA*>(inst + 4) = target;
-  __clear_cache(inst + 4, inst + 4 + 8);
+  __builtin___clear_cache(inst + 4, inst + 4 + 8);
 }
 
 void smashJmp(TCA inst, TCA target) {
@@ -180,7 +180,7 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
     CodeBlock cb;
     cb.init(inst, smashableJccLen(), "smashJcc");
     emitSmashableJccImpl(cb, target, cc);
-    __clear_cache(cb.frontier(), cb.frontier() + smashableJccLen());
+    __builtin___clear_cache(cb.frontier(), cb.frontier() + smashableJccLen());
   } else {
     // Update the target address
     smashInstr(inst, target, smashableJccLen());

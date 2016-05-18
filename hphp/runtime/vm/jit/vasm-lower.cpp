@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/vasm-lower.h"
+
+#include "hphp/runtime/base/arch.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -69,7 +69,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
   // Get the arguments in the proper registers.
   RegSet argRegs;
-  bool needsCopy;
+  bool needsCopy = false;
   auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
     VregList argDests;
     for (size_t i = 0, n = srcs.size(); i < n; ++i) {
@@ -96,16 +96,10 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
           VregList rem(vargs.args.begin() + 1, vargs.args.end());
           doArgs(rem, rarg);
           needsCopy = true;
-        } else {
-          needsCopy = false;
         }
       } else {
         doArgs(vargs.args, rarg);
-        needsCopy = false;
       }
-      break;
-    default:
-      always_assert(false);
   }
   doArgs(vargs.simdArgs, rarg_simd);
 

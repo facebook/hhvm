@@ -135,7 +135,7 @@ struct ArgGroup {
 
   explicit ArgGroup(const IRInstruction* inst,
                     const StateVector<SSATmp,Vloc>& locs)
-    : m_inst(inst), m_locs(locs), m_override(nullptr), m_indirect(false)
+    : m_inst(inst), m_locs(locs)
   {}
 
   size_t numGpArgs() const { return m_gpArgs.size(); }
@@ -243,11 +243,11 @@ private:
 private:
   const IRInstruction* m_inst;
   const StateVector<SSATmp,Vloc>& m_locs;
-  ArgVec* m_override; // used to force args to go into a specific ArgVec
+  ArgVec* m_override{nullptr};// used to force args to go into a specific ArgVec
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
-  bool m_indirect; // Indirect result
+  bool m_indirect{false}; // Indirect result
 };
 
 ArgGroup toArgGroup(const NativeCalls::CallInfo&,

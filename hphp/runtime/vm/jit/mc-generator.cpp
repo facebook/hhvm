@@ -1112,32 +1112,32 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
     return tDest;
   }
 
-  bool isJcc;
-  switch (arch()) {
-    case Arch::X64: {
+  auto const isJcc = [&] {
+    switch (arch()) {
+      case Arch::X64: {
         x64::DecodedInstruction di(toSmash);
-        isJcc = (di.isBranch() && !di.isJmp());
-        break;
-    }
+        return (di.isBranch() && !di.isJmp());
+      }
 
-    case Arch::ARM: {
+      case Arch::ARM: {
         using namespace vixl;
         struct JccDecoder : public Decoder {
           void VisitConditionalBranch(Instruction* inst) override {
-            cc = (Condition)inst->ConditionBranch();
+            cc = true;
           }
-          folly::Optional<Condition> cc;
+          bool cc = false;
         };
         JccDecoder decoder;
         decoder.Decode(Instruction::Cast(toSmash));
-        isJcc = decoder.cc.hasValue();
+        return decoder.cc;
         break;
       }
 
-    default: {
-      always_assert(false);
+      default:
+        always_assert(false);
     }
-  }
+  }();
+
   if (isJcc) {
     auto const target = smashableJccTarget(toSmash);
     assertx(target);

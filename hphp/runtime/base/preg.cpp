@@ -1611,7 +1611,7 @@ int preg_filter(Variant& result,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant preg_split(const String& pattern, const String& subject,
-                   int limit /* = -1 */, int flags /* = 0 */) {
+                   int limit, int flags /* = 0 */) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;

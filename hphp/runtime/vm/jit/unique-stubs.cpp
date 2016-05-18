@@ -1021,14 +1021,11 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
     // FIXME: Save 'callee' saved registers (4 for now)
     switch (arch()) {
       case Arch::X64:
+      case Arch::PPC64:
         break;
       case Arch::ARM:
         v << pushp{PhysReg{vixl::x19}, PhysReg{vixl::x20}};
         v << pushp{PhysReg{vixl::x21}, PhysReg{vixl::x22}};
-        break;
-      case Arch::PPC64:
-        not_implemented();
-        break;
     }
 
     auto const rdata = rarg(0);
@@ -1064,14 +1061,11 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
     // FIXME: Restore 'callee' saved registers
     switch (arch()) {
       case Arch::X64:
+      case Arch::PPC64:
         break;
       case Arch::ARM:
         v << popp{PhysReg{vixl::x21}, PhysReg{vixl::x22}};
         v << popp{PhysReg{vixl::x19}, PhysReg{vixl::x20}};
-        break;
-      case Arch::PPC64:
-        not_implemented();
-        break;
     }
 
     v << stubret{};
@@ -1091,12 +1085,10 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Realign the native stack, if it was unaligned
     switch (arch()) {
       case Arch::X64:
+      case Arch::PPC64:
         v << lea{rsp()[8], rsp()};
         break;
       case Arch::ARM:
-        break;
-      case Arch::PPC64:
-        not_implemented();
         break;
     }
 
@@ -1150,12 +1142,10 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Unalign the native stack, if needed
     switch (arch()) {
       case Arch::X64:
+      case Arch::PPC64:
         v << lea{rsp()[-8], rsp()};
         break;
       case Arch::ARM:
-        break;
-      case Arch::PPC64:
-        not_implemented();
         break;
     }
 

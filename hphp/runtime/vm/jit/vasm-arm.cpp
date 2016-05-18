@@ -484,7 +484,7 @@ void Vgen::emit(const stublogue& i) {
 }
 
 void Vgen::emit(const stubret& i) {
-  if(i.saveframe) {
+  if (i.saveframe) {
     emit(popp{rfp(), rlr()});
   } else {
     emit(popp{PhysReg(rAsm), rlr()});
@@ -666,7 +666,7 @@ void Vgen::emit(const jmpi& i) {
   // If target can be addressed by pc relative offset (signed 26 bits), emit
   // PC relative jump. Else, emit target address into code and load from there
   auto diff = (i.target - a->frontier()) >> vixl::kInstructionSizeLog2;
-  if(vixl::is_int26(diff)) {
+  if (vixl::is_int26(diff)) {
     a->b(diff);
   } else {
     a->Ldr(rAsm, &data);
@@ -779,7 +779,7 @@ void Vgen::emit(const push& i) {
 }
 
 void Vgen::emit(const roundsd& i) {
-  switch(i.dir) {
+  switch (i.dir) {
     case RoundDirection::nearest: {
       a->frintn(D(i.d), D(i.s));
       break;
@@ -825,7 +825,7 @@ void Vgen::emit(const srem& i) {
 
 void Vgen::emit(const unpcklpd& i) {
   // i.d and i.s1 can be same, i.s0 is unique
-  if(i.d != i.s1) a->fmov(D(i.d), D(i.s1));
+  if (i.d != i.s1) a->fmov(D(i.d), D(i.s1));
   a->fmov(rAsm, D(i.s0));
   a->fmov(D(i.d), 1, rAsm);
 }
@@ -842,7 +842,7 @@ void Vgen::emit(const bln& i) {
 void Vgen::emit(const cmpsds& i) {
   // Updates flags
   a->Fcmp(D(i.s0), D(i.s1));
-  switch(i.pred) {
+  switch (i.pred) {
     case ComparisonPred::eq_ord: {
       a->Csetm(rAsm, C(jit::CC_E));
       break;
@@ -968,7 +968,7 @@ void lowerVptr(Vptr& p, Vout& v) {
   uint8_t mode = (((p.base.isValid()  & 0x1) << 0) |
                   ((p.index.isValid() & 0x1) << 1) |
                   (((p.disp != 0)     & 0x1) << 2));
-  switch(mode) {
+  switch (mode) {
     case BASE:
     case BASE | INDEX:
       // ldr/str allow [base] and [base, index], nothing to lower

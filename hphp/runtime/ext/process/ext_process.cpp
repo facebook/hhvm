@@ -507,44 +507,43 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
                    int how,
                    const Array& set,
                    VRefParam oldset) {
+  auto const invalid_argument = [&] {
+    raise_warning("pcntl_sigprocmask(): Invalid argument");
+    return false;
+  };
+
   if (how != SIG_BLOCK && how != SIG_UNBLOCK && how != SIG_SETMASK) {
-    goto invalid_argument;
+    return invalid_argument();
   }
 
-  { // Variable scope so that goto doesn't cross definitions
-    sigset_t cset;
-    sigset_t coldset;
+  sigset_t cset;
+  sigset_t coldset;
 
-    sigemptyset(&cset);
-    for (ArrayIter iter(set); iter; ++iter) {
-      auto value = iter.second().toInt64();
-      if (sigaddset(&cset, value) == -1) {
-        goto invalid_argument;
-      }
+  sigemptyset(&cset);
+  for (ArrayIter iter(set); iter; ++iter) {
+    auto value = iter.second().toInt64();
+    if (sigaddset(&cset, value) == -1) {
+      return invalid_argument();
     }
-
-    int result = pthread_sigmask(how, &cset, &coldset);
-    if (result != 0) {
-      return false;
-    }
-    Array aoldset;
-    for (int signum = 1; signum < NSIG; ++signum) {
-      result = sigismember(&coldset, signum);
-      if (result == 1) {
-        aoldset.append(signum);
-      } else if (result == -1) {
-        // invalid signal number
-        break;
-      }
-    }
-    oldset.assignIfRef(aoldset);
-
-    return true;
   }
 
-invalid_argument:
-  raise_warning("pcntl_sigprocmask(): Invalid argument");
-  return false;
+  if (pthread_sigmask(how, &cset, &coldset)) {
+    return false;
+  }
+
+  auto aoldset = Array::Create();
+  for (int signum = 1; signum < NSIG; ++signum) {
+    auto const result = sigismember(&coldset, signum);
+    if (result == 1) {
+      aoldset.append(signum);
+    } else if (result == -1) {
+      // Invalid signal number.
+      break;
+    }
+  }
+
+  oldset.assignIfRef(aoldset);
+  return true;
 }
 
 int64_t HHVM_FUNCTION(pcntl_wait,

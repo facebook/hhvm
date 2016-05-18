@@ -47,7 +47,13 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
     });
   }
 
-  switch(arch()) {
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      gpr.forEach([&] (PhysReg r) {
+        v << push{r};
+      });
+      break;
     case Arch::ARM:
       gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
         if (r1 == InvalidReg) {
@@ -58,9 +64,7 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
       });
       break;
     default:
-      gpr.forEach([&] (PhysReg r) {
-        v << push{r};
-      });
+      always_assert(false);
   }
 
   if (m_adjust) {
@@ -79,7 +83,13 @@ PhysRegSaver::~PhysRegSaver() {
   auto gpr = m_regs & abi().gp();
   auto xmm = m_regs & abi().simd();
 
-  switch(arch()) {
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      gpr.forEachR([&] (PhysReg r) {
+        v << pop{r};
+      });
+      break;
     case Arch::ARM:
       gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
         if (r1 == InvalidReg) {
@@ -90,9 +100,7 @@ PhysRegSaver::~PhysRegSaver() {
       });
       break;
     default:
-      gpr.forEachR([&] (PhysReg r) {
-        v << pop{r};
-      });
+      always_assert(false);
   }
 
   if (!xmm.empty()) {

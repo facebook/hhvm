@@ -760,6 +760,15 @@ const String& File::o_getResourceName() const {
   return s_resource_name;
 }
 
+int64_t File::getChunkSize() const{
+  return CHUNK_SIZE;
+}
+
+void File::setChunkSize(int64_t chunk_size) {
+  //no-op currently
+  assertx(chunk_size > 0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // csv functions
 

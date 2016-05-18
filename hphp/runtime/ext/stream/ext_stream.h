@@ -221,6 +221,10 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
                       const Resource& stream,
                       int buffer);
 
+Variant HHVM_FUNCTION(stream_set_chunk_size,
+                      const Resource& stream,
+                      int64_t chunk_size);
+
 bool HHVM_FUNCTION(stream_set_timeout,
                    const Resource& stream,
                    int seconds,

@@ -176,6 +176,7 @@ static struct StreamExtension final : Extension {
     HHVM_FE(stream_await);
     HHVM_FE(stream_set_blocking);
     HHVM_FE(stream_set_read_buffer);
+    HHVM_FE(stream_set_chunk_size);
     HHVM_FE(stream_set_timeout);
     HHVM_FE(stream_set_write_buffer);
     HHVM_FE(set_file_buffer);
@@ -467,6 +468,17 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
   } else {
     return -1;
   }
+}
+
+Variant HHVM_FUNCTION(stream_set_chunk_size,
+                      const Resource& stream,
+                      int64_t chunk_size) {
+  if (isa<File>(stream) && chunk_size > 0) {
+    auto file = cast<File>(stream);
+    file->setChunkSize(chunk_size);
+    return file->getChunkSize();
+  }
+  return false;
 }
 
 const StaticString

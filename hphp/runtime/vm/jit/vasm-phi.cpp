@@ -93,115 +93,173 @@ namespace HPHP { namespace jit {
  *          jcc        LE, %73, B7, else B8
  */
 void optimizePhis(Vunit& unit) {
-  auto changed = false;
-  VpassTracer t{&unit, TRACEMOD, "optimizePhis", &changed};
+  auto everChanged = false;
+  VpassTracer t{&unit, TRACEMOD, "optimizePhis", &everChanged};
 
   // Make sure constants for true and false exist before doing anything, so we
   // can use them without having to create more Vregs.
   unit.makeConst(true);
   unit.makeConst(false);
 
-  jit::vector<uint32_t> useCounts(unit.next_vr);
-  PostorderWalker{unit}.dfs([&](Vlabel label) {
-    for (auto const& inst : unit.blocks[label].code) {
-      visitUses(unit, inst, [&](Vreg src) { ++useCounts[src]; });
-    }
-  });
-
-  auto const preds = computePreds(unit);
-  PostorderWalker{unit}.dfs([&](Vlabel label) {
-    auto& block = unit.blocks[label].code;
-
-    auto it = block.begin();
-    if (it->op != Vinstr::phidef) return;
-    auto& phidef = it->phidef_;
-    auto& defs = unit.tuples[phidef.defs];
-    if (defs.size() != 1) {
-      // We could in theory support these if they come up but it'd be messy.
-      FTRACE(1, "Bailing on multi-def phi in {}: {}\n",
-             label, show(unit, phidef));
-      return;
-    }
-    if (useCounts[defs[0]] > 2) return;
-
-    ++it;
-    if (it->op != Vinstr::testb) return;
-    auto& testb = it->testb_;
-    if (testb.s0 != defs[0] || testb.s1 != defs[0]) return;
-    if (useCounts[testb.sf] > 1) return;
-
-    ++it;
-    ConditionCode phi_cc;
-    if (it->op == Vinstr::jcc) {
-      auto& jcc = it->jcc_;
-      if (jcc.sf != testb.sf) return;
-      phi_cc = jcc.cc;
-    } else if (it->op == Vinstr::setcc) {
-      auto& setcc = it->setcc_;
-      if (setcc.sf != testb.sf) return;
-      phi_cc = setcc.cc;
-    } else {
-      return;
-    }
-    if (phi_cc != CC_Z && phi_cc != CC_NZ) return;
-    auto const is_jcc = it->op == Vinstr::jcc;
-
-    FTRACE(2, "Inspecting preds of {}: {}\n", label, show(unit, phidef));
-    for (auto pred : preds[label]) {
-      auto it = unit.blocks[pred].code.end();
-      --it;
-      if (it->op != Vinstr::phijmp) return;
-      auto const use = unit.tuples[it->phijmp_.uses][0];
-      if (!unit.regToConst.count(use)) {
-        if (useCounts[use] > 1) return;
-        if (it == unit.blocks[pred].code.begin()) return;
-        --it;
-        if (it->op != Vinstr::setcc || use != it->setcc_.d) return;
-      }
-    }
-
-    // If we got here, we know that every pred of the current block is either
-    // providing a constant or the dest of a setcc.
-    FTRACE(1, "Optimizing preds of {}:\n", label);
-    for (auto pred : preds[label]) {
-      auto& predCode = unit.blocks[pred].code;
-      auto& term = predCode.back();
-      auto const use = unit.tuples[term.phijmp_.uses][0];
-      auto cIt = unit.regToConst.find(use);
-      if (cIt != unit.regToConst.end()) {
-        if (is_jcc) {
-          auto const taken = (phi_cc == CC_NZ) == bool(cIt->second.val);
-          auto& jcc = it->jcc_;
-          term = jmp{jcc.targets[taken]};
-        } else if (phi_cc == CC_Z) {
-          auto const newSrc = !cIt->second.val;
-          term.phijmp_.uses = unit.makeTuple({unit.makeConst(newSrc)});
+  while (true) {
+    auto changed = false;
+    jit::vector<uint32_t> useCounts(unit.next_vr);
+    PostorderWalker{unit}.dfs([&](Vlabel label) {
+        for (auto const& inst : unit.blocks[label].code) {
+          visitUses(unit, inst, [&](Vreg src) { ++useCounts[src]; });
         }
-      } else {
-        auto& setcc = predCode[predCode.size() - 2].setcc_;
-        auto const cc = phi_cc == CC_Z ? ccNegate(setcc.cc) : setcc.cc;
-        if (is_jcc) {
+      });
+
+    auto preds = computePreds(unit);
+    PostorderWalker{unit}.dfs([&](Vlabel label) {
+        auto& block = unit.blocks[label].code;
+
+        auto it = block.begin();
+        if (it->op != Vinstr::phidef) return;
+        auto& phidef = it->phidef_;
+        auto& defs = unit.tuples[phidef.defs];
+
+        ++it;
+        if (it->op == Vinstr::phijmp) {
+          // phidef followed by phijmp with corresponding defs/uses,
+          // and no other uses of the defs is a no-op.
+          // Just redirect the preds.
+          auto& phijmp = it->phijmp_;
+          auto& uses = unit.tuples[phijmp.uses];
+          if (uses.size() != defs.size()) return;
+          for (auto i = defs.size(); i--; ) {
+            if (defs[i] != uses[i] || useCounts[defs[i]] != 1) {
+              return;
+            }
+          }
+          for (auto pred : preds[label]) {
+            if (pred == label) continue;
+            auto i2 = unit.blocks[pred].code.end();
+            --i2;
+            if (i2->op == Vinstr::phijmp) {
+              assert(i2->phijmp_.target == label);
+              i2->phijmp_.target = phijmp.target;
+            } else {
+              assert(i2->op == Vinstr::phijcc);
+              int changes = 0;
+              if (i2->phijcc_.targets[0] == label) {
+                i2->phijcc_.targets[0] = phijmp.target;
+                changes++;
+              }
+              if (i2->phijcc_.targets[1] == label) {
+                i2->phijcc_.targets[1] = phijmp.target;
+                changes++;
+              }
+              assertx(changes > 0);
+            }
+            preds[phijmp.target].push_back(pred);
+          }
+          preds[label].clear();
+          changed = true;
+          return;
+        }
+
+        if (defs.size() != 1) {
+          // We could in theory support these if they come up but it'd
+          // be messy.
+          FTRACE(1, "Bailing on multi-def phi in {}: {}\n",
+                 label, show(unit, phidef));
+          return;
+        }
+        if (useCounts[defs[0]] > 2) return;
+
+        if (it->op != Vinstr::testb) return;
+        auto& testb = it->testb_;
+        if (testb.s0 != defs[0] || testb.s1 != defs[0]) return;
+        if (useCounts[testb.sf] > 1) return;
+
+        ++it;
+        ConditionCode phi_cc;
+        if (it->op == Vinstr::jcc) {
           auto& jcc = it->jcc_;
-          term = jit::jcc{cc, setcc.sf, {jcc.targets[0], jcc.targets[1]}};
-          // The setcc should now be dead and will be cleaned up by dce.
+          if (jcc.sf != testb.sf) return;
+          phi_cc = jcc.cc;
+        } else if (it->op == Vinstr::setcc) {
+          auto& setcc = it->setcc_;
+          if (setcc.sf != testb.sf) return;
+          phi_cc = setcc.cc;
         } else {
-          setcc.cc = cc;
+          return;
         }
-      }
-    }
+        if (phi_cc != CC_Z && phi_cc != CC_NZ) return;
+        auto const is_jcc = it->op == Vinstr::jcc;
 
-    if (!is_jcc) {
-      // Shuffle things around so the Vreg previously defined by the setcc is
-      // now defined by the phidef. We know the setcc was the only use of the
-      // phidef's old dest, so this is safe.
-      auto const setcc_def = block[2].setcc_.d;
-      block.erase(block.begin() + 1 /* testb */ ,
-                  block.begin() + 3 /* after setcc */);
-      block[0].phidef_.defs = unit.makeTuple({setcc_def});
-    }
+        using Iter = decltype(it);
+        auto predNeedsFixing = [&](Iter it, Iter begin) -> bool {
+          if (it->op != Vinstr::phijmp) return false;
+          auto const use = unit.tuples[it->phijmp_.uses][0];
+          if (!unit.regToConst.count(use)) {
+            if (useCounts[use] > 1) return false;
+            if (it == begin) return false;
+            --it;
+            if (it->op != Vinstr::setcc || use != it->setcc_.d) return false;
+          }
+          return true;
+        };
 
-    changed = true;
-  });
+        if (!is_jcc) {
+          // For setcc, the optimization is only possible/worthwhile
+          // if we can do it in every block
+          FTRACE(2, "Inspecting preds of {}: {}\n", label, show(unit, phidef));
+          for (auto pred : preds[label]) {
+            auto it = unit.blocks[pred].code.end();
+            if (!predNeedsFixing(--it, unit.blocks[pred].code.begin())) return;
+          }
+        }
+
+        FTRACE(1, "Optimizing preds of {}:\n", label);
+        for (auto pred : preds[label]) {
+          auto& predCode = unit.blocks[pred].code;
+          if (is_jcc &&
+              !predNeedsFixing(std::prev(predCode.end()), predCode.begin())) {
+            continue;
+          }
+          changed = true;
+          auto& term = predCode.back();
+          auto const use = unit.tuples[term.phijmp_.uses][0];
+          auto cIt = unit.regToConst.find(use);
+          if (cIt != unit.regToConst.end()) {
+            if (is_jcc) {
+              auto const taken = (phi_cc == CC_NZ) == bool(cIt->second.val);
+              auto& jcc = it->jcc_;
+              term = jmp{jcc.targets[taken]};
+            } else if (phi_cc == CC_Z) {
+              auto const newSrc = !cIt->second.val;
+              term.phijmp_.uses = unit.makeTuple({unit.makeConst(newSrc)});
+            }
+          } else {
+            auto& setcc = predCode[predCode.size() - 2].setcc_;
+            auto const cc = phi_cc == CC_Z ? ccNegate(setcc.cc) : setcc.cc;
+            if (is_jcc) {
+              auto& jcc = it->jcc_;
+              term = jit::jcc{cc, setcc.sf, {jcc.targets[0], jcc.targets[1]}};
+              // The setcc should now be dead and will be cleaned up by dce.
+            } else {
+              setcc.cc = cc;
+            }
+          }
+        }
+
+        if (!is_jcc) {
+          // Shuffle things around so the Vreg previously defined by
+          // the setcc is now defined by the phidef. We know the setcc
+          // was the only use of the phidef's old dest, so this is
+          // safe.
+          auto const setcc_def = block[2].setcc_.d;
+          block.erase(block.begin() + 1 /* testb */ ,
+                      block.begin() + 3 /* after setcc */);
+          block[0].phidef_.defs = unit.makeTuple({setcc_def});
+        }
+      });
+
+    if (!changed) return;
+    everChanged = true;
+  }
 }
 
 }}

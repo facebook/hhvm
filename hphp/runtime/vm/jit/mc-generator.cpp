@@ -1133,7 +1133,7 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
         break;
       }
 
-      default:
+      case Arch::PPC64:
         always_assert(false);
     }
   }();

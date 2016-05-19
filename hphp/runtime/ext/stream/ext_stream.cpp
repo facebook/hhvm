@@ -508,16 +508,12 @@ int64_t HHVM_FUNCTION(stream_set_write_buffer,
   if (!file) {
     return -1;
   }
-
-  switch (buffer) {
-  case k_STREAM_BUFFER_NONE:
+  if (buffer ==0) {
+    // Use _IONBF (no buffer) macro to set no buffer
     return setvbuf(file, nullptr, _IONBF, 0);
-  case k_STREAM_BUFFER_LINE:
-    return setvbuf(file, nullptr, _IOLBF, BUFSIZ);
-  case k_STREAM_BUFFER_FULL:
-    return setvbuf(file, nullptr, _IOFBF, BUFSIZ);
-  default:
-    return -1;
+  } else {
+  // Use _IOFBF (full buffer) macro
+    return setvbuf(file, nullptr, _IOFBF, buffer);
   }
 }
 

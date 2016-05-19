@@ -415,8 +415,7 @@ function stream_set_timeout(resource $stream,
  *   are completed before other processes are allowed to write to that output
  *   stream.
  *
- * @return int - Returns 0 on success, or EOF if the request cannot be
- *   honored.
+ * @return int - Returns 0 on success.
  *
  */
 <<__Native>>

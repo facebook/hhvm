@@ -28,10 +28,28 @@ void StructuredLog::enable(StructuredLogImpl impl) {
 }
 
 void StructuredLog::log(const std::string& tableName,
-                        const std::map<std::string, int64_t>& cols) {
+                        const StructuredLogEntry& cols) {
   if (enabled()) {
     s_impl(tableName, cols);
   }
+}
+
+StructuredLogEntry::StructuredLogEntry()
+  : ints(folly::dynamic::object()), strs(folly::dynamic::object())
+{}
+
+void StructuredLogEntry::setInt(folly::StringPiece key, int64_t value) {
+  ints[key] = value;
+}
+
+void StructuredLogEntry::setStr(folly::StringPiece key,
+                                folly::StringPiece value) {
+  strs[key] = value;
+}
+
+void StructuredLogEntry::clear() {
+  ints = folly::dynamic::object();
+  strs = folly::dynamic::object();
 }
 
 }

@@ -1765,9 +1765,8 @@ void reportJitMaturity(const CodeCache& code) {
       StructuredLog::enabled() &&
       code.main().used() >= RuntimeOption::EvalJitMatureSize &&
       !s_loggedJitMature.exchange(true, std::memory_order_relaxed)) {
-    std::map<std::string, int64_t> cols{
-      {"jit_mature_sec", time(nullptr) - HttpServer::StartTime}
-    };
+    StructuredLogEntry cols;
+    cols.setInt("jit_mature_sec", time(nullptr) - HttpServer::StartTime);
     StructuredLog::log("hhvm_warmup", cols);
   }
 }

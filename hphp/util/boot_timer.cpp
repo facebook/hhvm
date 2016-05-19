@@ -143,15 +143,15 @@ void BootStats::done() {
 
   if (StructuredLog::enabled()) {
     std::lock_guard<std::mutex> lock(s_instance->m_marks_guard_);
-    std::map<std::string, int64_t> cols;
+    StructuredLogEntry cols;
     for (auto sample : s_instance->m_marks) {
-      cols[sample.first] = sample.second.wall().count();
-      cols[sample.first + " CPU"] = sample.second.cpu().count();
+      cols.setInt(sample.first, sample.second.wall().count());
+      cols.setInt(sample.first + " CPU", sample.second.cpu().count());
     }
     StructuredLog::log("hhvm_boot_timer", cols);
     cols.clear();
     for (auto sample : s_instance->m_marks) {
-      cols[sample.first] = sample.second.rssMb() << 20; // To bytes.
+      cols.setInt(sample.first, sample.second.rssMb() << 20); // To bytes.
     }
     StructuredLog::log("hhvm_boot_memory", cols);
   }

@@ -16,20 +16,29 @@
 #ifndef incl_HPHP_UTIL_STRUCT_LOG_H_
 #define incl_HPHP_UTIL_STRUCT_LOG_H_
 
-#include <map>
 #include <string>
+#include <folly/json.h>
+#include <folly/Range.h>
 
 namespace HPHP {
 
+struct StructuredLogEntry {
+  StructuredLogEntry();
+  // Any previous value for the same key is silently overwritten.
+  void setInt(folly::StringPiece key, int64_t value);
+  void setStr(folly::StringPiece key, folly::StringPiece value);
+  void clear();
+  folly::dynamic ints, strs;
+};
+
 using StructuredLogImpl = void (*)(const std::string&,
-                                   const std::map<std::string, int64_t>&);
+                                   const StructuredLogEntry&);
 
 // Interface for recording structured data for relatively infrequent events.
 struct StructuredLog {
   static void enable(StructuredLogImpl impl);
   static bool enabled();
-  static void log(const std::string& tableName,
-                  const std::map<std::string, int64_t>& cols);
+  static void log(const std::string& tableName, const StructuredLogEntry&);
 
  private:
   static StructuredLogImpl s_impl;

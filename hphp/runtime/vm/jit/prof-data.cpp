@@ -161,7 +161,9 @@ void ProfData::freeFuncData(FuncId funcId) {
 void ProfData::free() {
   if (m_freed) return;
   m_freed = true;
-  Logger::Info("Freeing JIT profiling data");
+  if (RuntimeOption::ServerExecutionMode()) {
+    Logger::Info("Freeing JIT profiling data");
+  }
   for (auto& trec : m_transRecs) {
     trec.reset();
   }

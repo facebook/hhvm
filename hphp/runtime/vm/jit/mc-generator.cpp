@@ -241,9 +241,9 @@ bool MCGenerator::profileSrcKey(SrcKey sk) const {
   if (m_tx.profData()->profiling(sk.funcID())) return true;
 
   // Don't start profiling new functions if the size of either main or
-  // prof is already above Eval.JitAMaxUsage.
+  // prof is already above Eval.JitAMaxUsage and we already filled hot.
   auto tcUsage = std::max(m_code.main().used(), m_code.prof().used());
-  if (tcUsage >= CodeCache::AMaxUsage) {
+  if (tcUsage >= CodeCache::AMaxUsage && !m_code.hotEnabled()) {
     return false;
   }
 
@@ -364,10 +364,14 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     transCFGAnnot = ""; // so we don't annotate it again
   }
 
-  // In PGO mode, we free all the profiling data once the TC is full.
+  // In PGO mode, we free all the profiling data once the main area code reaches
+  // its maximum usage and either the hot area is also full or all the functions
+  // that were profiled have already been optimized.
   if (RuntimeOption::EvalJitPGO &&
       m_code.main().used() >= CodeCache::AMaxUsage) {
-    m_tx.profData()->free();
+    if (!m_code.hotEnabled() || m_tx.profData()->optimizedAllProfiledFuncs()) {
+      m_tx.profData()->free();
+    }
   }
 
   return start;
@@ -448,10 +452,21 @@ bool MCGenerator::shouldTranslateNoSizeLimit(const Func* func) const {
 
 bool MCGenerator::shouldTranslate(const Func* func, TransKind kind) const {
   if (!shouldTranslateNoSizeLimit(func)) return false;
-  // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do
-  // allow Optimize translations past that limit.
-  return m_code.main().used() < CodeCache::AMaxUsage ||
-    kind == TransKind::Optimize;
+
+  // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do allow PGO
+  // translations past that limit if there's still space in code.hot.
+  if (m_code.main().used() < CodeCache::AMaxUsage) return true;
+
+  switch (kind) {
+    case TransKind::ProfPrologue:
+    case TransKind::Profile:
+    case TransKind::OptPrologue:
+    case TransKind::Optimize:
+      return m_code.hotEnabled();
+
+    default:
+      return false;
+  }
 }
 
 

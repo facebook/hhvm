@@ -343,6 +343,14 @@ struct ProfData {
   void setProfiling(FuncId funcId);
 
   /*
+   * Returns whether or not all functions that were profiled have already been
+   * optimized.
+   */
+  bool optimizedAllProfiledFuncs() const {
+    return m_optimizedFuncs.size() == m_profilingFuncs.size();
+  }
+
+  /*
    * Erase all profiling data.
    */
   void free();

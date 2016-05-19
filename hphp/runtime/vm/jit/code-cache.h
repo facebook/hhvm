@@ -117,6 +117,11 @@ struct CodeCache {
    */
   void disableHot() { m_useHot = false; }
 
+  /*
+   * Returns whether or not the hot code area is enabled.
+   */
+  bool hotEnabled() const { return m_useHot; }
+
 private:
   CodeAddress m_base;
   size_t m_codeSize;

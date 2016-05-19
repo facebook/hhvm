@@ -628,7 +628,7 @@ void PackedArray::Release(ArrayData* ad) {
 }
 
 NEVER_INLINE
-void PackedArray::ReleaseUncounted(ArrayData* ad) {
+void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
   assert(checkInvariants(ad));
   assert(ad->isUncounted());
 
@@ -646,7 +646,7 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
     });
   }
 
-  std::free(ad);
+  std::free(reinterpret_cast<char*>(ad) - extra);
 }
 
 const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
@@ -1202,7 +1202,7 @@ ArrayData* PackedArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
   return MixedArray::ZAppend(ToMixedCopy(ad), v, key_ptr);
 }
 
-ArrayData* PackedArray::MakeUncounted(ArrayData* array) {
+ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
   assert(checkInvariants(array));
   assert(!array->empty());
   ArrayData* ad;
@@ -1211,9 +1211,10 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array) {
     // We don't need to copy the full capacity, since the array won't change
     // once it's uncounted.
     auto const cap = size;
-    ad = static_cast<ArrayData*>(
-      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    auto const mem = static_cast<char*>(
+      std::malloc(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
+    ad = reinterpret_cast<ArrayData*>(mem + extra);
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = array->m_sizeAndPos;
     ad->m_hdr.init(CapCode::exact(cap), array->m_hdr.kind, UncountedValue);
@@ -1221,7 +1222,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array) {
     assert(ad->cap() == cap);
     assert(ad->m_size == size);
   } else {
-    ad = MakeUncountedHelper(array);
+    ad = MakeUncountedHelper(array, extra);
   }
   auto const srcData = packedData(array);
   auto targetData = reinterpret_cast<TypedValue*>(ad + 1);
@@ -1239,12 +1240,13 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array) {
 }
 
 NEVER_INLINE
-ArrayData* PackedArray::MakeUncountedHelper(ArrayData* array) {
+ArrayData* PackedArray::MakeUncountedHelper(ArrayData* array, size_t extra) {
   auto const fpcap = CapCode::ceil(array->m_size);
   auto const cap = fpcap.decode();
-  auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  auto const mem = static_cast<char*>(
+    std::malloc(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
+  auto const ad = reinterpret_cast<ArrayData*>(mem + extra);
   ad->m_sizeAndPos = array->m_sizeAndPos;
   ad->m_hdr.init(fpcap, array->m_hdr.kind, UncountedValue);
   assert(ad->kind() == array->kind());

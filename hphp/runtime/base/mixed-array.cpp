@@ -311,17 +311,19 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
   not_reached();
 }
 
-ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
+ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
   auto a = asMixed(array);
   assertx(!a->empty());
   auto const scale = a->scale();
-  auto const ad = staticAllocArray(scale);
+  char* mem = static_cast<char*>(std::malloc(extra + computeAllocBytes(scale)));
+  auto const ad = reinterpret_cast<MixedArray*>(mem + extra);
   auto const used = a->m_used;
   // Do a raw copy first, without worrying about counted types or refcount
   // manipulation.  To copy in 32-byte chunks, we add 24 bytes to the length.
   // This might overwrite the hash table, but won't go beyond the space
   // allocated for the MixedArray, assuming `malloc()' always allocates
-  // multiple of 16 bytes.
+  // multiple of 16 bytes and extra is also a multiple of 16.
+  assert((extra & 0xf) == 0);
   bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
   ad->m_hdr.count = UncountedValue; // after bcopy, update count
   copyHash(ad->hashTab(), a->hashTab(), scale);
@@ -382,7 +384,7 @@ void MixedArray::Release(ArrayData* in) {
 }
 
 NEVER_INLINE
-void MixedArray::ReleaseUncounted(ArrayData* in) {
+void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
   auto const ad = asMixed(in);
   assert(ad->isUncounted());
 
@@ -410,7 +412,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
     }
   }
 
-  std::free(ad);
+  std::free(reinterpret_cast<char*>(ad) - extra);
 }
 
 //=============================================================================

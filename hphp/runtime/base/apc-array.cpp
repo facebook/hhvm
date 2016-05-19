@@ -92,14 +92,16 @@ APCHandle* APCArray::MakeUncountedArray(ArrayData* array) {
   assert(apcExtension::UseUncounted);
   APCTypedValue* value;
   if (array->isPackedLayout()) {
-    value = new APCTypedValue(APCTypedValue::UncountedArr{},
-                              PackedArray::MakeUncounted(array));
+    ArrayData* data = PackedArray::MakeUncounted(array, sizeof(APCTypedValue));
+    auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
+    value = new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
   } else if (array->isStruct()) {
     value = new APCTypedValue(APCTypedValue::UncountedArr{},
                               StructArray::MakeUncounted(array));
   } else {
-    value = new APCTypedValue(APCTypedValue::UncountedArr{},
-                              MixedArray::MakeUncounted(array));
+    ArrayData* data = MixedArray::MakeUncounted(array, sizeof(APCTypedValue));
+    auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
+    value = new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
   }
   return value->getHandle();
 }

@@ -50,7 +50,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr uint32_t SmallSize = 3;
 
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*);
+  static void ReleaseUncounted(ArrayData*, size_t extra = 0);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
   static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
@@ -206,8 +206,8 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
-  static ArrayData* MakeUncounted(ArrayData* array);
-  static ArrayData* MakeUncountedHelper(ArrayData* array);
+  static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
+  static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
 
   static ArrayData* MakeFromVec(ArrayData* adIn, bool copy);
 

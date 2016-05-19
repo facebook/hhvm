@@ -202,8 +202,12 @@ struct MixedArray final : private ArrayData,
    * values (primitive values, uncounted or static strings and
    * uncounted or static arrays).  The Packed version does the same
    * when the array has a kPackedKind.
+   *
+   * 'extra' bytes may be allocated in front of the returned pointer,
+   * must be a multiple of 16, and later be passed to ReleaseUncounted.
+   * (This is used to co-allocate a TypedValue with its array data.)
    */
-  static ArrayData* MakeUncounted(ArrayData* array);
+  static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
 
   static ArrayData* MakeFromDict(ArrayData* adIn, bool copy);
 
@@ -304,7 +308,7 @@ public:
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*);
+  static void ReleaseUncounted(ArrayData*, size_t extra = 0);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Escalate(const ArrayData* ad) {

@@ -77,11 +77,17 @@ void APCTypedValue::deleteUncounted() {
     m_data.str->destructUncounted();
   } else if (kind == APCKind::UncountedArray) {
     if (m_data.arr->isPackedLayout()) {
-      PackedArray::ReleaseUncounted(m_data.arr);
+      auto arr = m_data.arr;
+      this->~APCTypedValue();
+      PackedArray::ReleaseUncounted(arr, sizeof(APCTypedValue));
+      return;  // Uncounted PackedArray frees the joint allocation.
     } else if (m_data.arr->isStruct()) {
       StructArray::ReleaseUncounted(m_data.arr);
     } else {
-      MixedArray::ReleaseUncounted(m_data.arr);
+      auto arr = m_data.arr;
+      this->~APCTypedValue();
+      MixedArray::ReleaseUncounted(arr, sizeof(APCTypedValue));
+      return;  // Uncounted MixedArray frees the joint allocation.
     }
   }
   delete this;

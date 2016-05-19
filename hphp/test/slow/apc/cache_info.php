@@ -3,7 +3,7 @@
 echo "no key\n";
 $info = apc_cache_info('user');
 if (count($info) <= 1) echo "cache size error\n";
-if ($info['entries'] != 0) echo "entry count should be 0\n";
+if ($info['num_entries'] != 0) echo "entry count should be 0\n";
 
 apc_add('key', 1);
 echo "1 key\n";
@@ -57,8 +57,8 @@ function checkInfo($info, $valuesSize, $keysSize, $entriesCount, $checkList) {
            $info['values_size'], $valuesSize);
   }
   if ($info['keys_size'] < $keysSize) echo "keys size too small\n";
-  if ($info['entries'] != $entriesCount) echo "entries count wrong\n";
-  if ($checkList && count($info['cache_list']) != $info['entries']) {
+  if ($info['num_entries'] != $entriesCount) echo "entries count wrong\n";
+  if ($checkList && count($info['cache_list']) != $info['num_entries']) {
     echo "cache list wrong\n";
   }
   if (!$checkList && array_key_exists('cache_list')) {
@@ -69,6 +69,6 @@ function checkInfo($info, $valuesSize, $keysSize, $entriesCount, $checkList) {
 function dumpKeys($info) {
   $list = $info['cache_list'];
   foreach($list as $entry) {
-    var_dump($entry['entry_name']);
+    var_dump($entry['info']);
   }
 }

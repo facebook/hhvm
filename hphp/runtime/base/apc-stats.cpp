@@ -246,7 +246,7 @@ std::string APCStats::getStatsInfo() const {
   return info + "\n";
 }
 
-const StaticString s_entries("entries");
+const StaticString s_num_entries("num_entries");
 const StaticString s_primedEntries("primed_entries");
 const StaticString s_primedLiveEntries("primed_live_entries");
 const StaticString s_valuesSize("values_size");
@@ -257,7 +257,7 @@ const StaticString s_pendingDeleteSize("pending_delete_size");
 
 void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
-      std::pair<const StringData*, int64_t>(s_entries.get(),
+      std::pair<const StringData*, int64_t>(s_num_entries.get(),
                                             m_entries->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primedEntries.get(),

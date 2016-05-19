@@ -473,7 +473,7 @@ const StaticString s_user("user");
 const StaticString s_start_time("start_time");
 const StaticString s_ttl("ttl");
 const StaticString s_cache_list("cache_list");
-const StaticString s_entry_name("entry_name");
+const StaticString s_info("info");
 const StaticString s_in_memory("in_memory");
 const StaticString s_mem_size("mem_size");
 const StaticString s_type("type");
@@ -507,7 +507,7 @@ Variant HHVM_FUNCTION(apc_cache_info,
     PackedArrayInit ents(entries.size());
     for (auto& entry : entries) {
       ArrayInit ent(kEntryInfoSize, ArrayInit::Map{});
-      ent.add(s_entry_name,
+      ent.add(s_info,
               Variant::attach(StringData::Make(entry.key.c_str())));
       ent.add(s_in_memory, entry.inMem);
       ent.add(s_ttl, entry.ttl);

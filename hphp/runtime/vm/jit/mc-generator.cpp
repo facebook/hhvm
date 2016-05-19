@@ -1130,7 +1130,6 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
         JccDecoder decoder;
         decoder.Decode(Instruction::Cast(toSmash));
         return decoder.cc;
-        break;
       }
 
       case Arch::PPC64:

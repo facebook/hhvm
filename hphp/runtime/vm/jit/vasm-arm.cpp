@@ -133,7 +133,9 @@ struct Vgen {
     , catches(env.catches)
   {}
   ~Vgen() {
-    __builtin___clear_cache(base, a->frontier());
+    auto begin = reinterpret_cast<char*>(base);
+    auto end = reinterpret_cast<char*>(a->frontier());
+    __builtin___clear_cache(begin, end);
   }
 
   static void patch(Venv& env);

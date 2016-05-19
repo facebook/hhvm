@@ -27,10 +27,6 @@ inline void ObjectData::resetMaxId() {
   os_max_id = 0;
 }
 
-inline ObjectData::ObjectData(Class* cls)
-  : ObjectData(cls, 0, HeaderKind::Object)
-{}
-
 inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
 {
@@ -53,7 +49,7 @@ inline ObjectData::ObjectData(Class* cls, NoInit) noexcept
   : m_cls(cls)
 {
   m_hdr.init(0, HeaderKind::Object, 1);
-  assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && hasExactlyOneRef());
+  assert(m_hdr.aux == 0 && hasExactlyOneRef());
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }

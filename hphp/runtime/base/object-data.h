@@ -96,8 +96,8 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
  public:
   static void resetMaxId();
 
-  explicit ObjectData(Class*);
-  explicit ObjectData(Class*, uint16_t flags, HeaderKind = HeaderKind::Object);
+  explicit ObjectData(Class*, uint16_t flags = 0,
+                      HeaderKind = HeaderKind::Object);
   ~ObjectData();
 
   // Disallow copy construction and assignemt

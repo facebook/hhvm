@@ -44,6 +44,17 @@ struct XDebugServer {
     Jit,
   };
 
+  /* State to put the polling thread into. */
+  enum class PollingState : uint8_t {
+    Run,
+
+    /* Wait while the request thread parses and runs commands. */
+    Pause,
+
+    /* Stop running, exit the thread. */
+    Stop,
+  };
+
   /*
    * An XDebugServer is only valid if the constructor succeeds.  An exception is
    * thrown otherwise.  The constructor is responsible for establishing a valid
@@ -253,15 +264,14 @@ struct XDebugServer {
 
   ThreadInfo* m_requestThread{nullptr};
 
-  /* Mutex that protects m_{pause,stop}PollingThread. */
+  /* Mutex that protects the socket. */
   std::recursive_mutex m_pollingMtx;
 
   /* The "break" command that gets read by the polling thread is stored here. */
   std::atomic<XDebugCommand*> m_break{nullptr};
 
-  /* Whether to pause or stop the polling thread. */
-  std::atomic<bool> m_pausePollingThread{false};
-  std::atomic<bool> m_stopPollingThread{false};
+  /* The request thread sets this to tell the polling thread what to do. */
+  std::atomic<PollingState> m_pollingState{PollingState::Run};
 
   FILE* m_logFile{nullptr};
 

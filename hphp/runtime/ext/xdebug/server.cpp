@@ -158,14 +158,21 @@ XDebugServer::XDebugServer(Mode mode)
     log("I: Connecting to configured address/port: %s:%d.\n", hostname, port);
   }
 
+  auto const fail = [&] {
+    destroySocket();
+    closeLog();
+    // Allows the guarantee that any instance of an xdebug server is valid.
+    throw Exception("XDebug Server construction failed");
+  };
+
   // Create the socket.
   auto const status = createSocket(hostname, port);
   if (status == -1) {
     log("E: Could not connect to client. :-(\n");
-    goto failure;
+    fail();
   } else if (status == -2) {
     log("E: Time-out connecting to client. :-(\n");
-    goto failure;
+    fail();
   }
 
   assert(status == 0);
@@ -175,26 +182,16 @@ XDebugServer::XDebugServer(Mode mode)
   if (XDEBUG_GLOBAL(RemoteHandler) != "dbgp") {
     log("E: The remote debug handler '%s' is not supported. :-(\n",
         XDEBUG_GLOBAL(RemoteHandler).c_str());
-    goto failure;
+    fail();
   }
 
   m_pollingThread.start();
-  return;
-
-failure:
-  destroySocket();
-  closeLog();
-  // Allows the guarantee that any instance of an xdebug server is valid.
-  throw Exception("XDebug Server construction failed");
 }
 
 XDebugServer::~XDebugServer() {
   {
     std::lock_guard<std::recursive_mutex> lock(m_pollingMtx);
-
-    // Set flags to tell polling thread to end.
-    m_pausePollingThread.store(false);
-    m_stopPollingThread.store(true);
+    m_pollingState.store(PollingState::Stop);
   }
 
   // Wait until polling thread gets the memo and exits.
@@ -297,12 +294,11 @@ void XDebugServer::pollSocketLoop() {
     std::lock_guard<std::recursive_mutex> lock(m_pollingMtx);
 
     // We're paused if the request thread is handling commands right now.
-    if (m_pausePollingThread.load()) {
+    if (m_pollingState.load() == PollingState::Pause) {
       continue;
     }
 
-    // We've been told to exit.
-    if (m_stopPollingThread.load()) {
+    if (m_pollingState.load() == PollingState::Stop) {
       log("Polling thread stopping\n");
       break;
     }
@@ -337,7 +333,7 @@ void XDebugServer::pollSocketLoop() {
       // We're going to set the 'break' flag on our XDebugServer, and pause
       // ourselves.  The request thread will unpause us when it exits its
       // command loop.
-      m_pausePollingThread.store(true);
+      m_pollingState.store(PollingState::Pause);
 
       auto const old = m_break.exchange(cmd);
       always_assert(old == nullptr);
@@ -708,19 +704,19 @@ bool XDebugServer::doCommandLoop() {
 
   bool should_continue = false;
 
-  // Pause the polling thread if it isn't already. (It might have paused itself
+  // Pause the polling thread if it isn't already.  (It might have paused itself
   // if it read a "break" command)
-  m_pausePollingThread.store(true);
+  m_pollingState.store(PollingState::Pause);
 
   // Unpause the polling thread when we leave the command loop.
   SCOPE_EXIT {
-    m_pausePollingThread.store(false);
+    m_pollingState.store(PollingState::Run);
   };
 
   std::lock_guard<std::recursive_mutex> lock(m_pollingMtx);
 
   do {
-    // If we are detached, short circuit
+    // If we are detached, short circuit.
     if (m_status == Status::Detached) {
       return true;
     }

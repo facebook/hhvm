@@ -440,7 +440,7 @@ static inline bool pgoDefault() {
 }
 
 static inline uint64_t pgoThresholdDefault() {
-  return debug ? 2 : 5000;
+  return debug ? 2 : 2000;
 }
 
 static inline bool evalJitDefault() {
@@ -477,7 +477,7 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
-static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
+static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 2000;
 static const uint64_t kJitRelocationSizeDefault = 1 << 20;
 
 static const bool kJitTimerDefault =

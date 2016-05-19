@@ -486,7 +486,7 @@ struct RuntimeOption {
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
   F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
-  F(uint32_t, JitResetProfCountersRequest, 500)                         \
+  F(uint32_t, JitResetProfCountersRequest, 1000)                        \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \

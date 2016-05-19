@@ -17,17 +17,59 @@
 #ifndef incl_HPHP_PROF_TRANS_DATA_H_
 #define incl_HPHP_PROF_TRANS_DATA_H_
 
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/hash-map-typedefs.h"
+
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/srckey.h"
+
+#include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
+
+#include <folly/AtomicHashMap.h>
+
 #include <vector>
 #include <memory>
 #include <unordered_map>
 
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
-
 namespace HPHP { namespace jit {
+
+struct ProfData;
+
+extern __thread ProfData* tl_profData;
+
+/*
+ * Perform any process-global initialization required for ProfData.
+ */
+void processInitProfData();
+
+/*
+ * Perform any request init or exit work necessary to manage the lifetime of
+ * ProfData.
+ */
+void requestInitProfData();
+void requestExitProfData();
+
+/*
+ * Get the current ProfData*.
+ *
+ * The returned pointer may be nullptr, if PGO is off or if profiling data has
+ * been used and freed. If a non-nullptr value is returned, it's guaranteed to
+ * survive at least as long as the current request.
+ */
+inline ProfData* profData() {
+  return tl_profData;
+}
+
+/*
+ * Mark the current ProfData for deletion.
+ *
+ * Actual deletion will happen some time in the future, after all currently
+ * outstanding requests finish. This may be called repeatedly by multiple
+ * threads without synchronization.
+ */
+void discardProfData();
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,17 +80,14 @@ namespace HPHP { namespace jit {
 template<typename T>
 struct ProfCounters {
   explicit ProfCounters(T initVal)
-      : m_initVal(initVal)
-    {}
+    : m_initVal(initVal)
+  {}
+
+  ProfCounters(ProfCounters&&) = default;
+  ProfCounters& operator=(ProfCounters&&) = default;
 
   ProfCounters(const ProfCounters&) = delete;
   ProfCounters& operator=(const ProfCounters&) = delete;
-
-  ~ProfCounters() {
-    for (auto chunk : m_chunks) {
-      free(chunk);
-    }
-  }
 
   T get(uint32_t id) const {
     return id / kCountersPerChunk > m_chunks.size()
@@ -60,9 +99,9 @@ struct ProfCounters {
     // allocate a new chunk of counters if necessary
     while (id >= m_chunks.size() * kCountersPerChunk) {
       uint32_t size = sizeof(T) * kCountersPerChunk;
-      T* chunk = (T*)malloc(size);
+      auto const chunk = new T[size];
       std::fill_n(chunk, kCountersPerChunk, m_initVal);
-      m_chunks.push_back(chunk);
+      m_chunks.emplace_back(chunk);
     }
     assertx(id / kCountersPerChunk < m_chunks.size());
     return &(m_chunks[id / kCountersPerChunk][id % kCountersPerChunk]);
@@ -76,7 +115,7 @@ struct ProfCounters {
     m_initVal = value;
     // Reset all counters already created.
     for (auto& chunk : m_chunks) {
-      std::fill_n(chunk, kCountersPerChunk, value);
+      std::fill_n(chunk.get(), kCountersPerChunk, value);
     }
   }
 
@@ -84,7 +123,7 @@ private:
   static const uint32_t kCountersPerChunk = 2 * 1024 * 1024 / sizeof(T);
 
   T m_initVal;
-  std::vector<T*> m_chunks;
+  std::vector<std::unique_ptr<T[]>> m_chunks;
 };
 
 /**
@@ -225,39 +264,46 @@ private:
 
 /**
  * ProfData encapsulates the profiling data kept by the JIT.
+ *
+ * Thread safety: All of ProfData's member functions may be called with no
+ * external synchronization, with the caveat that care must be taken to not
+ * concurrently modify the same ProfTransRec in multiple threads.
  */
 struct ProfData {
   ProfData();
+
   ProfData(const ProfData&) = delete;
   ProfData& operator=(const ProfData&) = delete;
 
-  uint32_t numTrans() const { return m_numTrans; }
-  TransID curTransID() const { return static_cast<TransID>(m_numTrans); }
-  ProfTransRec* transRec(TransID id) { return m_transRecs.at(id).get(); }
-  const ProfTransRec* transRec(TransID id) const {
+  /*
+   * Allocate a new id for a translation. Depending on the kind of the
+   * translation, a TransRec for it may or may not be created later by calling
+   * addTransProfile() or addTransProfPrologue().
+   */
+  TransID allocTransID();
+
+  ProfTransRec* transRec(TransID id) {
+    ReadLock lock{m_transLock};
     return m_transRecs.at(id).get();
   }
-
-  const TransIDVec& funcProfTransIDs(FuncId funcId) const {
-    auto it = m_funcProfTrans.find(funcId);
-    assertx(it != m_funcProfTrans.end());
-    return it->second;
+  const ProfTransRec* transRec(TransID id) const {
+    return const_cast<ProfData*>(this)->transRec(id);
   }
 
-  /*
-   * The actual value of translation counter, which starts at JitPGOThreshold
-   * and goes down.
-   */
-  int64_t transCounterRaw(TransID id) const {
-    assertx(id < m_numTrans);
-    return m_counters.get(id);
+  TransIDVec funcProfTransIDs(FuncId funcId) const {
+    ReadLock lock{m_funcProfTransLock};
+    auto it = m_funcProfTrans.find(funcId);
+    if (it == m_funcProfTrans.end()) return TransIDVec{};
+
+    return it->second;
   }
 
   /*
    * The absolute number of times that a translation executed.
    */
   int64_t transCounter(TransID id) const {
-    assertx(id < m_numTrans);
+    ReadLock lock{m_transLock};
+    assertx(id < m_transRecs.size());
     auto const counter = m_counters.get(id);
     auto const initVal = m_counters.getDefault();
     assert_flog(initVal >= counter,
@@ -266,10 +312,18 @@ struct ProfData {
     return initVal - counter;
   }
 
+  ProfCounters<int64_t> takeCounters() {
+    return std::move(m_counters);
+  }
+
   /*
    * Address at which the counter for translation id is stored.
    */
-  int64_t* transCounterAddr(TransID id) { return m_counters.getAddr(id); }
+  int64_t* transCounterAddr(TransID id) {
+    // getAddr() can grow the slab list, so grab a write lock.
+    WriteLock lock{m_transLock};
+    return m_counters.getAddr(id);
+  }
 
   /*
    * (TransID|ProfTransRec*) for the prologue of func accepting nArgs
@@ -291,81 +345,76 @@ struct ProfData {
    * (kInvalidTransID|nullptr) is returned.
    */
   TransID dvFuncletTransId(const Func* func, int nArgs) const;
-  ProfTransRec* dvFuncletTransRec(const Func* func, int nArgs) {
+  const ProfTransRec* dvFuncletTransRec(const Func* func, int nArgs) const {
     auto tid = dvFuncletTransId(func, nArgs);
     return tid != kInvalidTransID ? transRec(tid) : nullptr;
-  }
-  const ProfTransRec* dvFuncletTransRec(const Func* func, int nArgs) const {
-    return const_cast<ProfData*>(this)->dvFuncletTransRec(func, nArgs);
   }
 
   /*
    * Record a profiling translation: creates a ProfTransRec and returns the
    * associated TransID.
    */
-  TransID addTransProflogue(SrcKey, int);
-  void addTransProfile(const RegionDescPtr&, const PostConditions&);
-
-  /*
-   * This method only has effect when the Translator's TransDB is enabled, in
-   * which case this method just adds an empty record and increments the current
-   * TransID.  This has the purpose of keeping the TransIDs in ProfData aligned
-   * with those in Translator's TransDB, which is convenient when looking at
-   * TC dumps.
-   */
-  void addTransNonProf();
+  void addTransProfile(TransID, const RegionDescPtr&, const PostConditions&);
+  void addTransProfPrologue(TransID, SrcKey, int);
 
   /*
    * Check if a (function|SrcKey) has been marked as optimized.
    */
-  bool optimized(FuncId funcId) const { return m_optimizedFuncs.count(funcId); }
-  bool optimized(SrcKey sk) const { return m_optimizedSKs.count(sk); }
+  bool optimized(FuncId funcId) const {
+    if (funcId >= m_optimizedFuncs.size()) return false;
+    return m_optimizedFuncs[funcId].load(std::memory_order_acquire);
+  }
+  bool optimized(SrcKey sk) const {
+    auto const it = m_optimizedSKs.find(sk.toAtomicInt());
+    return it != m_optimizedSKs.end() && it->second;
+  }
 
   /*
    * Indicate that an optimized translation was emitted for a (function|SrcKey).
    */
-  void setOptimized(FuncId funcId) { m_optimizedFuncs.emplace(funcId); }
-  void setOptimized(SrcKey sk) { m_optimizedSKs.emplace(sk); }
+  void setOptimized(FuncId funcId) {
+    m_optimizedFuncs.ensureSize(funcId + 1);
+    m_optimizedFuncs[funcId].store(true, std::memory_order_release);
+    m_currentlyProfilingFuncs.fetch_sub(1, std::memory_order_relaxed);
+  }
+  void setOptimized(SrcKey sk) {
+    m_optimizedSKs.emplace(sk.toAtomicInt(), true).first->second = true;
+  }
 
   /*
    * Forget that a SrcKey is optimized.
    */
-  void clearOptimized(SrcKey sk) { m_optimizedSKs.erase(sk); }
+  void clearOptimized(SrcKey sk) {
+    auto const it = m_optimizedSKs.find(sk.toAtomicInt());
+    if (it == m_optimizedSKs.end()) return;
+
+    it->second = false;
+  }
 
   /*
    * Check if a function is being profiled.
    */
-  bool profiling(FuncId funcId) const { return m_profilingFuncs.count(funcId); }
+  bool profiling(FuncId funcId) const {
+    if (funcId >= m_profilingFuncs.size()) return false;
+    return m_profilingFuncs[funcId].load(std::memory_order_acquire);
+  }
 
   /*
    * Indicate that a function is being profiled.
    */
-  void setProfiling(FuncId funcId);
+  void setProfiling(FuncId funcId) {
+    m_profilingFuncs.ensureSize(funcId + 1);
+    m_profilingFuncs[funcId].store(true, std::memory_order_release);
+    m_currentlyProfilingFuncs.fetch_add(1, std::memory_order_relaxed);
+  }
 
   /*
    * Returns whether or not all functions that were profiled have already been
    * optimized.
    */
   bool optimizedAllProfiledFuncs() const {
-    return m_optimizedFuncs.size() == m_profilingFuncs.size();
+    return m_currentlyProfilingFuncs.load(std::memory_order_relaxed) == 0;
   }
-
-  /*
-   * Erase all profiling data.
-   */
-  void free();
-
-  /*
-   * Check if profiling data has been cleared.
-   */
-  bool freed() const { return m_freed; }
-
-  /*
-   * Called when we've finished promoting all the profiling translations for
-   * `funcId' to optimized translations.  This means we can throw away any
-   * allocations we made that we won't need any more for this Func.
-   */
-  void freeFuncData(FuncId funcId);
 
   /*
    * Returns whether any block in the given func ends at the supplied offset.
@@ -390,37 +439,61 @@ struct ProfData {
   void maybeResetCounters();
 
 private:
-  // PrologueID: (funcId, nArgs)
-  using PrologueID = std::tuple<FuncId, int>;
+  struct PrologueID {
+    FuncId func;
+    int nArgs;
 
-  struct PrologueIDHash {
-    size_t operator()(PrologueID pid) const {
-      return hash_int64_pair(std::get<0>(pid), std::get<1>(pid));
+    /* implicit */ operator uint64_t() const {
+      assertx(nArgs >= 0);
+      return (uint64_t(func) << 32) | nArgs;
     }
   };
 
-  using FuncIdSet = std::unordered_set<FuncId>;
-  using PrologueToTransMap = std::unordered_map<
-    PrologueID,
-    TransID,
-    PrologueIDHash
-  >;
-
-  uint32_t m_numTrans{0};
+  /*
+   * m_transLock is used to protect m_transRecs, and m_counters, which are all
+   * involved in the process of creating a new translation. It must be held
+   * even by threads with the global write lease, to synchronize with threads
+   * that don't have the write lease.
+   */
+  mutable ReadWriteMutex m_transLock;
   std::vector<std::unique_ptr<ProfTransRec>> m_transRecs;
-  bool m_freed{false};
-  std::unordered_map<FuncId, TransIDVec> m_funcProfTrans;
   ProfCounters<int64_t> m_counters;
   std::atomic<bool> m_countersReset{false};
-  SrcKeySet m_optimizedSKs;   // set of SrcKeys already optimized
-  FuncIdSet m_optimizedFuncs; // set of funcs already optimized
-  FuncIdSet m_profilingFuncs; // set of funcs being profiled
-  PrologueToTransMap m_proflogueDB; // maps (Func,nArgs) => prolog TransID
-  PrologueToTransMap m_dvFuncletDB; // maps (Func,nArgs) => DV funclet
-                                    //                      TransID
 
-  // func -> block end offsets
-  std::unordered_map<FuncId,std::unordered_set<Offset>> m_blockEndOffsets;
+  /*
+   * Funcs that are being profiled or have already been optimized,
+   * respectively.
+   */
+  AtomicVector<bool> m_profilingFuncs;
+  AtomicVector<bool> m_optimizedFuncs;
+  std::atomic<int64_t> m_currentlyProfilingFuncs{0};
+
+  /*
+   * SrcKeys that have already been optimized. SrcKeys are marked as not
+   * optimized by setting their entry to false rather than erasing it from the
+   * map, since repeatedly erasing and inserting the same key in an
+   * AtomicHashMap can cause performance issues.
+   */
+  folly::AtomicHashMap<SrcKey::AtomicInt, bool> m_optimizedSKs;
+
+  /*
+   * Maps from (FuncId, nArgs) pairs to prologue TransID or DV funclet TransID,
+   * respectively.
+   */
+  folly::AtomicHashMap<uint64_t, TransID> m_proflogueDB;
+  folly::AtomicHashMap<uint64_t, TransID> m_dvFuncletDB;
+
+  /*
+   * Lists of profiling translations for each Func, and a lock to protect it.
+   */
+  mutable ReadWriteMutex m_funcProfTransLock;
+  std::unordered_map<FuncId, TransIDVec> m_funcProfTrans;
+
+  /*
+   * Cache for Func -> block end offsets. Values in this map are never modified
+   * after insertion so no locking is necessary for lookups.
+   */
+  folly::AtomicHashMap<FuncId, std::unordered_set<Offset>> m_blockEndOffsets;
 };
 
 //////////////////////////////////////////////////////////////////////

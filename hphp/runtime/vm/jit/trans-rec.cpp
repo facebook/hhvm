@@ -24,6 +24,7 @@
 namespace HPHP { namespace jit {
 
 TransRec::TransRec(SrcKey                      _src,
+                   TransID                     transID,
                    TransKind                   _kind,
                    TCA                         _aStart,
                    uint32_t                    _aLen,
@@ -47,7 +48,7 @@ TransRec::TransRec(SrcKey                      _src,
   , acoldLen(_acoldLen)
   , afrozenLen(_afrozenLen)
   , bcStart(_src.offset())
-  , id(0)
+  , id(transID)
   , kind(_kind)
   , hasLoop(_hasLoop)
 {
@@ -139,6 +140,8 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
 
 std::string
 TransRec::print(uint64_t profCount) const {
+  if (!isValid()) return "Translation -1 {\n}\n\n";
+
   std::string ret;
   std::string funcName = src.func()->fullName()->data();
 

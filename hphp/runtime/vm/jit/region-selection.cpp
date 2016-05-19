@@ -454,7 +454,7 @@ void RegionDesc::chainRetransBlocks() {
   //          B3  ->   B2"
   //        Note the cycle: B2" -R-> B2' -> B3 -> B2".
   //
-  auto profData = mcg->tx().profData();
+  auto profData = jit::profData();
 
   auto weight = [&](RegionDesc::BlockId bid) {
     return hasTransID(bid) ? profData->transCounter(getTransID(bid)) : 0;
@@ -772,10 +772,8 @@ RegionDescPtr selectRegion(const RegionContext& context,
 
 RegionDescPtr selectHotRegion(TransID transId,
                               MCGenerator* mcg) {
-
-  assertx(RuntimeOption::EvalJitPGO);
-
-  const ProfData* profData = mcg->tx().profData();
+  auto const profData = jit::profData();
+  assertx(profData);
   auto const& func = *profData->transRec(transId)->func();
   FuncId funcId = func.getFuncId();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
@@ -813,9 +811,8 @@ RegionDescPtr selectHotRegion(TransID transId,
       outFile.close();
     }
 
-    FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",
-           mcg->tx().profData()->curTransID(), dotFileName,
-           region ? show(*region) : std::string("empty region"));
+    FTRACE(5, "selectHotRegion: New Translation (file: {}) {}\n",
+           dotFileName, region ? show(*region) : std::string("empty region"));
   }
 
   always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
@@ -1229,7 +1226,7 @@ std::string show(const RegionDesc& region) {
   std::string ret{folly::sformat("Region ({} blocks):\n",
                                  region.blocks().size())};
 
-  auto profData = mcg->tx().profData();
+  auto profData = jit::profData();
 
   auto weight = [&] (RegionDesc::BlockPtr b) -> int64_t {
     if (!profData) return 0;

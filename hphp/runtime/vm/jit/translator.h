@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
@@ -31,6 +30,7 @@
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/hash-map-typedefs.h"
@@ -167,11 +167,6 @@ struct Translator {
   // Accessors.
 
   /*
-   * Get the Translator's ProfData.
-   */
-  ProfData* profData() const;
-
-  /*
    * Get the SrcDB.
    *
    * This is the one true SrcDB, since Translator is used as a singleton.
@@ -280,8 +275,6 @@ struct Translator {
 
 private:
   int64_t m_createdTime;
-
-  std::unique_ptr<ProfData> m_profData;
 
   SrcDB m_srcDB;
 

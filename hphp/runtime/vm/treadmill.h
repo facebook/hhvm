@@ -25,6 +25,12 @@ namespace HPHP { namespace Treadmill {
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Return the current thread's index.
+ */
+constexpr int64_t kInvalidThreadIdx = -1;
+int64_t threadIdx();
+
+/*
  * The Treadmill allows us to defer work until all currently
  * outstanding requests have finished.  We hook request start and
  * finish to know when these events happen.

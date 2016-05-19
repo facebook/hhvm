@@ -98,6 +98,7 @@ struct TransEnv {
    */
   TransArgs args;
   FPInvOffset initSpOffset;
+  TransID transID{kInvalidTransID};
 
   /*
    * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
@@ -351,6 +352,7 @@ private:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
+  void checkFreeProfData();
 
   /*
    * Prologue-generation helpers.

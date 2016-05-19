@@ -14,10 +14,14 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/util/process.h"
-#include "hphp/util/timer.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/treadmill.h"
+
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 
 #include <sys/mman.h>
 
@@ -27,8 +31,8 @@ TRACE_SET_MOD(txlease);
 namespace {
 __thread bool threadCanAcquire = true;
 
-using FuncMap = tbb::concurrent_hash_map<const Func*, pthread_t>;
-FuncMap s_funcOwners;
+AtomicVector<int64_t> s_funcOwners{kFuncCountHint,
+                                   Treadmill::kInvalidThreadIdx};
 }
 
 Lease::Lease() {
@@ -118,12 +122,30 @@ LeaseHolderBase::LeaseHolderBase(Lease& l,
   : m_lease(l)
   , m_func{RuntimeOption::EvalJitConcurrently ? func : nullptr}
 {
+  // Passing a Func* to BlockingLeaseHolder doesn't make sense.
+  assertx(func == nullptr || acquire == LeaseAcquire::ACQUIRE);
+
+  // Bail early if we have a Func and that Func has an entry in s_funcOwners
+  // that isn't this thread.
   if (m_func) {
-    FuncMap::const_accessor acc;
-    auto const self = pthread_self();
-    if (s_funcOwners.insert(acc, std::make_pair(m_func, self))) {
+    auto const funcId = m_func->getFuncId();
+    s_funcOwners.ensureSize(funcId + 1);
+    auto& owner = s_funcOwners[funcId];
+    auto oldOwner = owner.load(std::memory_order_acquire);
+    auto const self = Treadmill::threadIdx();
+
+    if (oldOwner == self) {
+      // We already have the lock on this Func.
+    } else if (oldOwner == Treadmill::kInvalidThreadIdx) {
+      // Unowned. Try to grab it.
+      if (!owner.compare_exchange_strong(oldOwner, self,
+                                         std::memory_order_relaxed)) {
+        return;
+      }
+
       m_acquiredFunc = true;
-    } else if (!pthread_equal(acc->second, self)) {
+    } else {
+      // Already owned by another thread.
       return;
     }
   }
@@ -149,8 +171,8 @@ LeaseHolderBase::~LeaseHolderBase() {
   }
 
   if (m_acquiredFunc) {
-    auto const removed = s_funcOwners.erase(m_func);
-    always_assert(removed);
+    auto& owner = s_funcOwners[m_func->getFuncId()];
+    owner.store(Treadmill::kInvalidThreadIdx, std::memory_order_release);
   }
 }
 

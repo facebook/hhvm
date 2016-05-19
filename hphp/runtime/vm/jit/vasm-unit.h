@@ -208,7 +208,7 @@ struct Vunit {
   jit::vector<VcallArgs> vcallArgs;
   jit::vector<VdataBlock> dataBlocks;
   bool padding{false};
-  TransKind transKind{TransKind::Invalid};
+  folly::Optional<TransContext> context;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

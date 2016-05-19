@@ -54,6 +54,7 @@ struct AtomicVector {
   void ensureSize(size_t size);
   Value exchange(size_t i, const Value& val);
   std::atomic<Value>& operator[](size_t i);
+  const std::atomic<Value>& operator[](size_t i) const;
 
   size_t size() const;
   Value get(size_t i) const;
@@ -141,6 +142,11 @@ std::atomic<Value>& AtomicVector<Value>::operator[](size_t i) {
   if (i < m_size) return m_vals[i];
 
   return (*m_next.load(std::memory_order_acquire))[i - m_size];
+}
+
+template<typename Value>
+const std::atomic<Value>& AtomicVector<Value>::operator[](size_t i) const {
+  return const_cast<AtomicVector&>(*this)[i];
 }
 
 template<typename Value>

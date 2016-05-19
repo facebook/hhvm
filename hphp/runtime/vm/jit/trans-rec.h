@@ -59,13 +59,14 @@ struct TransRec {
   uint32_t               acoldLen;
   uint32_t               afrozenLen;
   Offset                 bcStart;
-  TransID                id;
+  TransID                id{kInvalidTransID};
   TransKind              kind;
   bool                   hasLoop;
 
   TransRec() {}
 
   TransRec(SrcKey                      s,
+           TransID                     transID,
            TransKind                   _kind,
            TCA                         _aStart,
            uint32_t                    _aLen,
@@ -80,6 +81,7 @@ struct TransRec {
              Annotations(),
            bool                        _hasLoop = false);
 
+  bool isValid() const { return id != kInvalidTransID; }
   std::string print(uint64_t profCount) const;
   Offset bcPast() const;
   void optimizeForMemory();

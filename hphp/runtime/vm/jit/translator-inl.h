@@ -22,11 +22,6 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 // Translator accessors.
 
-inline ProfData* Translator::profData() const {
-  assertx(m_profData == nullptr || !RuntimeOption::EvalJitConcurrently);
-  return m_profData.get();
-}
-
 inline const SrcDB& Translator::getSrcDB() const {
   return m_srcDB;
 }

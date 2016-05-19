@@ -282,8 +282,9 @@ void parseOptions(int argc, char *argv[]) {
 
 void sortTrans() {
   for (uint32_t tid = 0; tid < NTRANS; tid++) {
-    if (selectedFuncId == INVALID_ID ||
-        (selectedFuncId == TREC(tid)->src.funcID())) {
+    if (TREC(tid)->isValid() &&
+        (selectedFuncId == INVALID_ID ||
+         selectedFuncId == TREC(tid)->src.funcID())) {
       transPrintOrder.push_back(tid);
     }
   }
@@ -442,6 +443,8 @@ void loadProfData() {
 
   // The prof-counters are collected independently.
   for (TransID tid = 0; tid < NTRANS; tid++) {
+    if (!TREC(tid)->isValid()) continue;
+
     PerfEvent profCounters;
     profCounters.type  = SPECIAL_PROF_COUNTERS;
     profCounters.count = g_transData->getTransCounter(tid);
@@ -457,6 +460,7 @@ void printTrans(TransID transId) {
   g_transData->printTransRec(transId, transPerfEvents);
 
   const TransRec* tRec = TREC(transId);
+  if (!tRec->isValid()) return;
 
   if (!tRec->blocks.empty()) {
     printf("----------\nbytecode:\n----------\n");
@@ -620,11 +624,10 @@ void printTopTrans() {
   std::vector<TransID> transIds;
 
   for (TransID t = 0; t < NTRANS; t++) {
-    if ((kindFilter == "all" || kindFilter == show(TREC(t)->kind).c_str())
-        &&
-        ((minAddr <= TREC(t)->aStart      && TREC(t)->aStart      <= maxAddr) ||
-         (minAddr <= TREC(t)->acoldStart && TREC(t)->acoldStart <= maxAddr)))
-    {
+    if (TREC(t)->isValid() &&
+        (kindFilter == "all" || kindFilter == show(TREC(t)->kind).c_str()) &&
+        ((minAddr <= TREC(t)->aStart     && TREC(t)->aStart      <= maxAddr) ||
+         (minAddr <= TREC(t)->acoldStart && TREC(t)->acoldStart <= maxAddr))) {
       transIds.push_back(t);
     }
   }
@@ -771,6 +774,7 @@ int main(int argc, char *argv[]) {
     // Print all translations in original order, filtered by unit if desired.
     for (uint32_t t = 0; t < NTRANS; t++) {
       auto tRec = TREC(t);
+      if (!tRec->isValid()) continue;
       if (tRec->kind == TransKind::Anchor) continue;
       if (md5Filter && tRec->md5 != *md5Filter) continue;
 

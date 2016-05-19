@@ -23,12 +23,11 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(mcg);
 
-void CGMeta::setJmpTransID(TCA jmp, TransKind kind) {
+void CGMeta::setJmpTransID(TCA jmp, TransID transID, TransKind kind) {
   if (kind != TransKind::Profile) return;
 
-  TransID transId = mcg->tx().profData()->curTransID();
-  FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
-  jmpTransIDs.emplace_back(jmp, transId);
+  FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transID);
+  jmpTransIDs.emplace_back(jmp, transID);
 }
 
 void CGMeta::process(

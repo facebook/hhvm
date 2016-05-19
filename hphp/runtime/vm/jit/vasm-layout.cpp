@@ -442,7 +442,7 @@ jit::vector<Vlabel> pgoLayout(const Vunit& unit, const Vtext& text) {
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit, const Vtext& text) {
   Timer timer(Timer::vasm_layout);
 
-  return unit.transKind == TransKind::Optimize
+  return unit.context && unit.context->kind == TransKind::Optimize
     ? pgoLayout(unit, text)
     : rpoLayout(unit, text);
 }

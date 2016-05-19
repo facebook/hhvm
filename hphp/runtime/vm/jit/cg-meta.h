@@ -44,7 +44,7 @@ struct CGMeta {
   bool empty() const;
   void clear();
 
-  void setJmpTransID(TCA jmp, TransKind kind);
+  void setJmpTransID(TCA jmp, TransID transID, TransKind kind);
 
   /*
    * Code addresses of interest to the code generator.

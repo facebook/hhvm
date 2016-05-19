@@ -194,12 +194,13 @@ struct TransLocMaker {
    */
   TransRec rec(
       SrcKey                      sk,
+      TransID                     transID,
       TransKind                   kind,
       RegionDescPtr               region  = RegionDescPtr(),
       std::vector<TransBCMapping> bcmap   = std::vector<TransBCMapping>(),
       Annotations&&               annot   = Annotations(),
       bool                        hasLoop = false) const {
-    return TransRec(sk, kind,
+    return TransRec(sk, transID, kind,
                     loc.mainStart(), loc.mainSize(),
                     loc.coldCodeStart(), loc.coldCodeSize(),
                     loc.frozenCodeStart(), loc.frozenCodeSize(),
@@ -217,7 +218,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 bool shouldPGOFunc(const Func& func) {
-  if (!RuntimeOption::EvalJitPGO) return false;
+  if (profData() == nullptr) return false;
 
   // JITing pseudo-mains requires extra checks that blow the IR.  PGO
   // can significantly increase the size of the regions, so disable it for
@@ -237,8 +238,8 @@ bool dumpTCAnnotation(const Func& func, TransKind transKind) {
 
 bool MCGenerator::profileSrcKey(SrcKey sk) const {
   if (!shouldPGOFunc(*sk.func())) return false;
-  if (m_tx.profData()->optimized(sk.funcID())) return false;
-  if (m_tx.profData()->profiling(sk.funcID())) return true;
+  if (profData()->optimized(sk.funcID())) return false;
+  if (profData()->profiling(sk.funcID())) return true;
 
   // Don't start profiling new functions if the size of either main or
   // prof is already above Eval.JitAMaxUsage and we already filled hot.
@@ -255,10 +256,10 @@ bool MCGenerator::profileSrcKey(SrcKey sk) const {
  * Profile translation.
  */
 void MCGenerator::invalidateFuncProfSrcKeys(const Func* func) {
-  assertx(RuntimeOption::EvalJitPGO);
+  assertx(profData());
   FuncId funcId = func->getFuncId();
-  for (auto tid : m_tx.profData()->funcProfTransIDs(funcId)) {
-    invalidateSrcKey(m_tx.profData()->transRec(tid)->srcKey());
+  for (auto tid : profData()->funcProfTransIDs(funcId)) {
+    invalidateSrcKey(profData()->transRec(tid)->srcKey());
   }
 }
 
@@ -299,33 +300,34 @@ TransResult MCGenerator::retranslate(const TransArgs& args) {
   newArgs.kind = profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
   auto result = translate(newArgs);
 
-  // In PGO mode, we free all the profiling data once the TC is full.
-  if (RuntimeOption::EvalJitPGO &&
-      m_code.main().used() >= CodeCache::AMaxUsage) {
-    m_tx.profData()->free();
-  }
-
+  checkFreeProfData();
   return result;
 }
 
 TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
-  LeaseHolder writer(Translator::WriteLease());
-  if (!writer.canWrite()) return nullptr;
+  if (profData() == nullptr) return nullptr;
   if (isDebuggerAttachedProcess()) return nullptr;
 
-  TRACE(1, "retranslateOpt: transId = %u\n", transId);
+  // Until the rest of this function is cleaned up enough to support concurrent
+  // retranslation of different functions, we grab both the global write lease
+  // and a Func-specific lease for the current Func.
+  LeaseHolder writer(Translator::WriteLease());
+  if (!writer.canWrite()) return nullptr;
 
-  auto rec = m_tx.profData()->transRec(transId);
-  if (!rec) return nullptr;
-
+  auto rec = profData()->transRec(transId);
+  always_assert(rec);
   always_assert(rec->region() != nullptr);
+  LeaseHolder funcWriter(Translator::WriteLease(), rec->func());
+  if (!funcWriter.canTranslate()) return nullptr;
+
+  TRACE(1, "retranslateOpt: transId = %u\n", transId);
 
   auto func   = rec->func();
   auto funcId = func->getFuncId();
   auto sk     = rec->srcKey();
 
-  if (m_tx.profData()->optimized(funcId)) return nullptr;
-  m_tx.profData()->setOptimized(funcId);
+  if (profData()->optimized(funcId)) return nullptr;
+  profData()->setOptimized(funcId);
 
   func->setFuncBody(ustubs().funcBodyHelperThunk);
 
@@ -337,9 +339,9 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   TCA start = regeneratePrologues(func, sk, includedBody);
 
   // Regionize func and translate all its regions.
-  std::vector<RegionDescPtr> regions;
   std::string transCFGAnnot;
-  if (!includedBody) regionizeFunc(func, this, regions, transCFGAnnot);
+  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
+                                    : regionizeFunc(func, this, transCFGAnnot);
 
   for (auto region : regions) {
     always_assert(!region->empty());
@@ -364,17 +366,20 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     transCFGAnnot = ""; // so we don't annotate it again
   }
 
+  checkFreeProfData();
+  return start;
+}
+
+void MCGenerator::checkFreeProfData() {
   // In PGO mode, we free all the profiling data once the main area code reaches
   // its maximum usage and either the hot area is also full or all the functions
   // that were profiled have already been optimized.
-  if (RuntimeOption::EvalJitPGO &&
-      m_code.main().used() >= CodeCache::AMaxUsage) {
-    if (!m_code.hotEnabled() || m_tx.profData()->optimizedAllProfiledFuncs()) {
-      m_tx.profData()->free();
-    }
+  if (profData() &&
+      !RuntimeOption::EvalEnableReusableTC &&
+      m_code.main().used() >= CodeCache::AMaxUsage &&
+      (!m_code.hotEnabled() || profData()->optimizedAllProfiledFuncs())) {
+    discardProfData();
   }
-
-  return start;
 }
 
 static bool liveFrameIsPseudoMain() {
@@ -600,8 +605,10 @@ bool MCGenerator::createSrcRec(SrcKey sk) {
   size_t frozenSize = code.frozen().frontier() - frozenStart;
   assertx(asize == 0);
   if (coldSize && RuntimeOption::EvalDumpTCAnchors) {
-    TransRec tr(sk,
-                TransKind::Anchor,
+    auto const transID =
+      profData() && Translator::isTransDBEnabled() ? profData()->allocTransID()
+                                                   : kInvalidTransID;
+    TransRec tr(sk, transID, TransKind::Anchor,
                 astart, asize, coldStart, coldSize,
                 frozenStart, frozenSize);
     m_tx.addTranslation(tr);
@@ -712,11 +719,12 @@ TransResult MCGenerator::translate(TransArgs args) {
 
   // Lower the RegionDesc to an IRUnit, then lower that to a Vunit.
   if (args.region) {
-    auto const profTransID = RuntimeOption::EvalJitPGO
-      ? m_tx.profData()->curTransID()
-      : kInvalidTransID;
+    if (args.kind == TransKind::Profile ||
+        (profData() && Translator::isTransDBEnabled())) {
+      env.transID = profData()->allocTransID();
+    }
     auto const transContext =
-      TransContext{profTransID, args.kind, args.flags, args.sk,
+      TransContext{env.transID, args.kind, args.flags, args.sk,
                    env.initSpOffset};
 
     env.unit = irGenRegion(*args.region, transContext,
@@ -831,9 +839,18 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc,
   TCA aStart = code.main().frontier();
 
   // Give the prologue a TransID if we have profiling data.
-  auto transID = m_tx.profData()
-    ? m_tx.profData()->addTransProflogue(funcBody, paramIndex)
-    : kInvalidTransID;
+  auto const transID = [&]{
+    if (kind == TransKind::ProfPrologue) {
+      auto const profData = jit::profData();
+      auto const id = profData->allocTransID();
+      profData->addTransProfPrologue(id, funcBody, paramIndex);
+      return id;
+    }
+    if (profData() && Translator::isTransDBEnabled()) {
+      return profData()->allocTransID();
+    }
+    return kInvalidTransID;
+  }();
 
   TCA start = genFuncPrologue(transID, kind, func, argc, code, fixups);
 
@@ -888,7 +905,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc,
           kind == TransKind::ProfPrologue ||
           kind == TransKind::OptPrologue);
 
-  auto tr = maker.rec(funcBody, kind);
+  auto tr = maker.rec(funcBody, transID, kind);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
@@ -952,14 +969,15 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
 }
 
 /**
- * Given the proflogueTransId for a TransProflogue translation,
- * regenerate the prologue (as a TransPrologue).  Returns the starting
- * address for the translation corresponding to triggerSk, if such
- * translation is generated; otherwise returns nullptr.
+ * Given the proflogueTransId for a TransProflogue translation, regenerate the
+ * prologue (as a TransPrologue).  Returns the starting address for the
+ * translation corresponding to triggerSk, if such translation is generated;
+ * otherwise returns nullptr.
  */
 TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
                                     bool& emittedDVInit) {
-  auto rec = m_tx.profData()->transRec(prologueTransId);
+  assertx(Translator::WriteLease().amOwner());
+  auto rec = profData()->transRec(prologueTransId);
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
   emittedDVInit = false;
@@ -998,7 +1016,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       SrcKey funcletSK(func, paramInfo.funcletOff, false);
-      auto funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
+      auto funcletTransId = profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);
         auto args = TransArgs{funcletSK, false};
@@ -1011,7 +1029,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
         }
         // Flag that this translation has been retranslated, so that
         // it's not retranslated again along with the function body.
-        m_tx.profData()->setOptimized(funcletSK);
+        profData()->setOptimized(funcletSK);
       }
     }
   }
@@ -1038,7 +1056,7 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk,
   std::vector<TransID> prologTransIDs;
 
   for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
-    TransID tid = m_tx.profData()->proflogueTransId(func, nArgs);
+    TransID tid = profData()->proflogueTransId(func, nArgs);
     if (tid != kInvalidTransID) {
       prologTransIDs.push_back(tid);
     }
@@ -1047,8 +1065,8 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk,
   std::sort(prologTransIDs.begin(), prologTransIDs.end(),
           [&](TransID t1, TransID t2) -> bool {
             // This will sort in ascending order.
-            return m_tx.profData()->transCounter(t2) >
-                   m_tx.profData()->transCounter(t1);
+            return profData()->transCounter(t2) >
+                   profData()->transCounter(t1);
           });
 
   // Next, we're going to regenerate each prologue along with its DV funclet.
@@ -1060,16 +1078,16 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk,
   // with the DV init if both (a) the function has a single proflogue, and (b)
   // the size of the function is within a certain threshold.
   //
-  // The mechanism used to keep the function body separate from the DV
-  // init is to temporarily mark the SrcKey for the function body as
-  // already optimized.  (The region selectors break a region whenever
-  // they hit a SrcKey that has already been optimized.)
+  // The mechanism used to keep the function body separate from the DV init is
+  // to temporarily mark the SrcKey for the function body as already optimized.
+  // (The region selectors break a region whenever they hit a SrcKey that has
+  // already been optimized.)
   SrcKey funcBodySk(func, func->base(), false);
   includedBody = prologTransIDs.size() <= 1 &&
     func->past() - func->base() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
 
-  if (!includedBody) m_tx.profData()->setOptimized(funcBodySk);
-  SCOPE_EXIT{ m_tx.profData()->clearOptimized(funcBodySk); };
+  if (!includedBody) profData()->setOptimized(funcBodySk);
+  SCOPE_EXIT{ profData()->clearOptimized(funcBodySk); };
 
   bool emittedAnyDVInit = false;
   for (TransID tid : prologTransIDs) {
@@ -1209,7 +1227,6 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
 
   if (!writer.canWrite()) writer.acquireBlocking();
 
-  // Can we just directly fall through?
   auto const tDest = [&] {
     if (result.finished()) return result.tca();
 
@@ -1255,7 +1272,9 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
    *     toSmash+11: newHotness
    */
   smashJcc(jccAddr, stub, cc);
-  m_tx.getSrcRec(dest)->chainFrom(IncomingBranch::jmpFrom(jmpAddr));
+  auto& destRec = *m_tx.getSrcRec(dest);
+  always_assert(destRec.getTopTranslation());
+  destRec.chainFrom(IncomingBranch::jmpFrom(jmpAddr));
 
   TRACE(5, "bindJccFirst: overwrote with cc%02x taken %d\n", cc, taken);
   return tDest;
@@ -1477,8 +1496,9 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
         int calleeNumParams = func->numNonVariadicParams();
         int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                    nArgs :  calleeNumParams + 1);
-        if (m_code.prof().contains(start) && !m_tx.profData()->freed()) {
-          auto rec = m_tx.profData()->prologueTransRec(
+        auto const profData = jit::profData();
+        if (profData != nullptr && m_code.prof().contains(start)) {
+          auto rec = profData->prologueTransRec(
             func,
             calledPrologNumArgs
           );
@@ -1668,7 +1688,7 @@ bool mcGenUnit(TransEnv& env, CodeCache::View code, CGMeta& fixups) {
 
   auto const startSk = unit.context().srcKey();
   if (unit.context().kind == TransKind::Profile) {
-    mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
+    profData()->setProfiling(startSk.func()->getFuncId());
   }
 
   return true;
@@ -1842,16 +1862,12 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
                        false, false);
-  if (RuntimeOption::EvalJitPGO) {
-    if (args.kind == TransKind::Profile) {
-      always_assert(args.region);
-      m_tx.profData()->addTransProfile(args.region, env.pconds);
-    } else {
-      m_tx.profData()->addTransNonProf();
-    }
+  if (args.kind == TransKind::Profile) {
+    always_assert(args.region);
+    profData()->addTransProfile(env.transID, args.region, env.pconds);
   }
 
-  auto tr = maker.rec(sk, args.kind, args.region, fixups.bcMap,
+  auto tr = maker.rec(sk, env.transID, args.kind, args.region, fixups.bcMap,
                       std::move(env.annotations),
                       env.unit && cfgHasLoop(*env.unit));
   m_tx.addTranslation(tr);
@@ -1959,6 +1975,7 @@ void MCGenerator::requestInit() {
   Timer::RequestInit();
   memset(&tl_perf_counters, 0, sizeof(tl_perf_counters));
   Stats::init();
+  requestInitProfData();
   s_initialTCSize = m_code.totalUsed();
 }
 
@@ -1971,7 +1988,8 @@ void MCGenerator::requestExit() {
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();
-  if (m_tx.profData()) m_tx.profData()->maybeResetCounters();
+  if (profData()) profData()->maybeResetCounters();
+  requestExitProfData();
 
   if (Trace::moduleEnabledRelease(Trace::mcgstats, 1)) {
     Trace::traceRelease("MCGenerator perf counters for %s:\n",

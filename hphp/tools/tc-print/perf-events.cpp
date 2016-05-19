@@ -49,6 +49,7 @@ PerfEventType perfScriptOutputToEventType(const char* eventId) {
     std::make_pair("L1-dcache-prefetch-misses", EVENT_DCACHE_MISSES),
 
     std::make_pair("cache-misses",              EVENT_LLC_MISSES),
+    std::make_pair("LLC-store-misses",          EVENT_LLC_STORE_MISSES),
 
     // fake event grouping all iTLB misses
     std::make_pair("iTLB-misses",               EVENT_ITLB_MISSES),
@@ -77,6 +78,7 @@ const char* validArguments[] = {
   "L1-icache-misses",
   "L1-dcache-misses",
   "cache-misses",
+  "LLC-store-misses",
   "iTLB-misses",
   "dTLB-misses",
   "prof-counters"

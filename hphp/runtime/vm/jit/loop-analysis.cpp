@@ -287,16 +287,16 @@ void findPredTransIDs(TransID headerTID, Block* b,
 
 /*
  * Computes the approximate number of times that `loop' was invoked
- * (i.e. entered) using profiling data.  This value is computed by
- * adding up the profiling weights of all the Profile translations
- * that may execute immediately before the Profile translation
- * containing the loop header.
+ * (i.e. entered) using profiling data.  This value is computed by adding up
+ * the profiling weights of all the Profile translations that may execute
+ * immediately before the Profile translation containing the loop header.
  */
 uint64_t countInvocations(const LoopInfo& loop, const IRUnit& unit) {
-  always_assert(mcg->tx().profData());
+  auto const profData = jit::profData();
+  if (profData == nullptr) return 0;
 
-  // Find the predecessor TransIDs along each non-back-edge
-  // predecessor of the loop header.
+  // Find the predecessor TransIDs along each non-back-edge predecessor of the
+  // loop header.
   boost::dynamic_bitset<> visited(unit.numBlocks());
   TransIDSet predTIDs;
   auto headerTID = loop.header->front().marker().profTransID();
@@ -305,7 +305,7 @@ uint64_t countInvocations(const LoopInfo& loop, const IRUnit& unit) {
       findPredTransIDs(headerTID, predEdge.from(), visited, predTIDs);
     }
   }
-  auto const profData = mcg->tx().profData();
+
   uint64_t count = 0;
   for (auto tid : predTIDs) {
     count += profData->transCounter(tid);

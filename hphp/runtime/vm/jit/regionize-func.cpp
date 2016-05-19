@@ -269,17 +269,15 @@ bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *      2.2) select a region starting at this node and mark nodes/arcs as
  *           covered appropriately
  */
-void regionizeFunc(const Func* func,
-                   MCGenerator* mcg,
-                   RegionVec& regions,
-                   std::string& transCFGAnnot) {
+RegionVec regionizeFunc(const Func* func, MCGenerator* mcg,
+                        std::string& transCFGAnnot) {
   const Timer rf_timer(Timer::regionizeFunc);
-  assertx(RuntimeOption::EvalJitPGO);
+  assertx(profData());
 
   auto regionMode = pgoRegionMode(*func);
 
   auto const funcId = func->getFuncId();
-  auto const profData = mcg->tx().profData();
+  auto const profData = jit::profData();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
                mcg->jmpToTransIDMap());
 
@@ -328,7 +326,7 @@ void regionizeFunc(const Func* func,
   TransIDSet heads;
   TransIDToRegionMap headToRegion;
   RegionToTransIDsMap regionToTransIds;
-  regions.clear();
+  RegionVec regions;
 
   for (auto node : nodes) {
     if (!coveredNodes.count(node) ||
@@ -366,7 +364,7 @@ void regionizeFunc(const Func* func,
         regionToTransIds[region].push_back(bid);
       }
 
-      regions.push_back(region);
+      regions.emplace_back(region);
       markCovered(cfg, region, heads, headToRegion, coveredNodes, coveredArcs);
     }
   }
@@ -383,6 +381,8 @@ void regionizeFunc(const Func* func,
       FTRACE(5, "{}\n\n", show(*region));
     }
   }
+
+  return regions;
 }
 
 }}

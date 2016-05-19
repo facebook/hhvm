@@ -533,13 +533,10 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 bool breaksRegion(SrcKey sk);
 
 /*
- * Creates regions covering all existing profile translations for
- * func, and returns them in the regions vector.
+ * Creates regions covering all existing profile translations for func.
  */
-void regionizeFunc(const Func*  func,
-                   MCGenerator* mcg,
-                   RegionVec&   regions,
-                   std::string& transCFGAnnot);
+RegionVec regionizeFunc(const Func*  func, MCGenerator* mcg,
+                        std::string& transCFGAnnot);
 
 /*
  * Optimize the guards of `region' based on profiling data.

@@ -68,8 +68,9 @@ std::unordered_map<const Func*, FuncInfo> s_funcTCData;
  * a call to an optimized translation isn't wrongly smashed later.
  */
 void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
-                            bool isGuard) {
-  auto data = mcg->tx().profData();
+                     bool isGuard) {
+  auto data = jit::profData();
+  assertx(data);
   auto const tid = data->proflogueTransId(func, numArgs);
   if (tid == kInvalidTransID) return;
 

@@ -63,7 +63,7 @@ struct OfflineTransData {
 
   const TransRec* getTransRec(TransID id) const {
     assert(id < translations.size());
-    return &(translations[id]);
+    return &translations[id];
   }
 
   uint64_t getTransCounter(TransID id) const {

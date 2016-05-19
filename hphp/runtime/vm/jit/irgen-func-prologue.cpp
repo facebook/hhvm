@@ -272,10 +272,8 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   // Increment profiling counter.
   if (env.context.kind == TransKind::ProfPrologue) {
     assertx(shouldPGOFunc(*func));
-    auto profData = mcg->tx().profData();
-
     gen(env, IncProfCounter, TransIDData{transID});
-    profData->setProfiling(func->getFuncId());
+    profData()->setProfiling(func->getFuncId());
   }
 
   // Initialize params, locals, and---if we have a closure---the closure's

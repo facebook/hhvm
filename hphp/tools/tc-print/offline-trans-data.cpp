@@ -77,6 +77,12 @@ void OfflineTransData::loadTCData(string dumpDir) {
     size_t    numGuards = 0;
 
     READ("Translation %u {", &tRec.id);
+    if (tRec.id == kInvalidTransID) {
+      addTrans(tRec, 0);
+      READ_EMPTY();
+      READ_EMPTY();
+      continue;
+    }
     READ(" src.md5 = %s", md5Str);
     tRec.md5 = MD5(md5Str);
     READ(" src.funcId = %u", &funcId);
@@ -192,7 +198,8 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ_EMPTY();
     tRec.src = SrcKey { funcId, tRec.bcStart, static_cast<bool>(resumed) };
     tRec.kind = (TransKind)kind;
-    always_assert(tid == tRec.id);
+    always_assert_flog(tid == tRec.id,
+                       "Translation {} has id {}", tid, tRec.id);
     addTrans(tRec, profCount);
 
     funcIds.insert(tRec.src.funcID());
@@ -255,16 +262,14 @@ uint64_t OfflineTransData::findFuncTrans(uint32_t selectedFuncId,
   uint64_t maxProfCount = 1; // Init w/ 1 to avoid div by 0 when all counts are 0
 
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
-    if (translations[tid].kind != TransKind::Anchor &&
-        translations[tid].src.funcID() == selectedFuncId) {
+    if (!translations[tid].isValid() ||
+        translations[tid].kind == TransKind::Anchor ||
+        translations[tid].src.funcID() != selectedFuncId) continue;
 
-      inodes->push_back(tid);
+    inodes->push_back(tid);
 
-      uint64_t profCount = transCounters[tid];
-      if (profCount > maxProfCount) {
-        maxProfCount = profCount;
-      }
-    }
+    uint64_t profCount = transCounters[tid];
+    if (profCount > maxProfCount) maxProfCount = profCount;
   }
 
   return maxProfCount;
@@ -299,8 +304,11 @@ void OfflineTransData::addControlArcs(uint32_t selectedFuncId,
 
 void OfflineTransData::printTransRec(TransID transId,
                                      const PerfEventsMap<TransID>& transStats) {
-
   const TransRec* tRec = getTransRec(transId);
+  if (!tRec->isValid()) {
+    std::cout << "Translation -1 {\n}\n";
+    return;
+  }
 
   std::cout << folly::format(
     "Translation {} {{\n"

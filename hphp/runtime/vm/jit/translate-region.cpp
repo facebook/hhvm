@@ -82,8 +82,9 @@ BlockIdToIRBlockMap createBlockMap(irgen::IRGS& irgs,
     // NB: This maps the region entry block to a new IR block, even though
     // we've already constructed an IR entry block. We'll make the IR entry
     // block jump to this block.
+    assertx(!hasTransID(id) || profData());
     auto transCount = hasTransID(id)
-      ? mcg->tx().profData()->transCounter(getTransID(id))
+      ? profData()->transCounter(getTransID(id))
       : 1;
     uint64_t profCount = transCount * irgs.profFactor;
     auto const iBlock = irb.unit().defBlock(profCount);
@@ -247,9 +248,9 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
 
     if (irgs.context.kind == TransKind::Profile) {
       if (block.func()->isEntry(bcOff)) {
-        irgen::checkCold(irgs, mcg->tx().profData()->curTransID());
+        irgen::checkCold(irgs, irgs.context.transID);
       } else {
-        irgen::incProfCounter(irgs, mcg->tx().profData()->curTransID());
+        irgen::incProfCounter(irgs, irgs.context.transID);
       }
     }
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletBody, sk);
@@ -746,11 +747,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           double calleeProfFactor = irgen::curProfCount(irgs);
           auto const calleeEntryBID = calleeRegion->entry()->id();
           if (hasTransID(calleeEntryBID)) {
+            assertx(profData());
             auto const calleeTID = getTransID(calleeEntryBID);
-            auto profData = mcg->tx().profData();
-            auto calleeProfCount = profData->transCounter(calleeTID);
+            auto calleeProfCount = profData()->transCounter(calleeTID);
             if (calleeProfCount == 0) calleeProfCount = 1; // avoid div by zero
-            calleeProfFactor = calleeProfFactor / calleeProfCount;
+            calleeProfFactor /= calleeProfCount;
             assert_flog(calleeProfFactor >= 0, "calleeProfFactor = {:.5}\n",
                         calleeProfFactor);
           }
@@ -880,10 +881,11 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     // Set the profCount of the IRUnit's entry block, which is created a
     // priori.
     if (context.kind == TransKind::Optimize) {
+      assertx(profData());
       auto entryBID = region.entry()->id();
       assertx(hasTransID(entryBID));
       auto entryTID = getTransID(entryBID);
-      auto entryProfCount = mcg->tx().profData()->transCounter(entryTID);
+      auto entryProfCount = profData()->transCounter(entryTID);
       irgs.unit.entry()->setProfCount(entryProfCount);
     }
 

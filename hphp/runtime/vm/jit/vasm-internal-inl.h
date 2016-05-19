@@ -162,9 +162,9 @@ void vasm_emit(const Vunit& unit, Vtext& text, CGMeta& fixups,
   };
 
   // We don't want to put nops in Vunits representing stubs, and those Vunits
-  // don't have transKind set.
-  auto const nop_interval = unit.transKind != TransKind::Invalid
-    ? RuntimeOption::EvalJitNopInterval : 0;
+  // don't have a context set.
+  auto const nop_interval =
+    unit.context ? RuntimeOption::EvalJitNopInterval : 0;
   auto nop_counter = nop_interval;
 
   for (int i = 0, n = labels.size(); i < n; ++i) {

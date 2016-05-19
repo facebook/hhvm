@@ -95,7 +95,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
   SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
   auto vunit = folly::make_unique<Vunit>();
-  vunit->transKind = unit.context().kind;
+  vunit->context = unit.context();
   Vasm vasm{*vunit};
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(*vunit); };
 

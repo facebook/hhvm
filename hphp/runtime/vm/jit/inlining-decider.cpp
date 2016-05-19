@@ -386,7 +386,7 @@ int computeTranslationCost(SrcKey at, const RegionDesc& region) {
   auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
   if (info.incomplete) {
     auto const fid = region.entry()->func()->getFuncId();
-    auto const profData = mcg->tx().profData();
+    auto const profData = jit::profData();
     auto const profiling = profData && profData->profiling(fid);
     cost = std::numeric_limits<int>::max();
     if (profiling && info.cost <= maxCost) return cost;
@@ -569,9 +569,9 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   return r;
 }
 
-TransID findTransIDForCallee(const Func* callee, const int numArgs,
+TransID findTransIDForCallee(const ProfData* profData,
+                             const Func* callee, const int numArgs,
                              std::vector<Type>& argTypes) {
-  auto const profData = mcg->tx().profData();
   auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
 
   auto const offset = callee->getEntryForNumArgs(numArgs);
@@ -600,10 +600,10 @@ TransID findTransIDForCallee(const Func* callee, const int numArgs,
 RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
                               Type ctxType, std::vector<Type>& argTypes,
                               int32_t maxBCInstrs) {
-  auto const profData = mcg->tx().profData();
+  auto const profData = jit::profData();
   if (!profData || !profData->profiling(callee->getFuncId())) return nullptr;
 
-  auto const dvID = findTransIDForCallee(callee, numArgs, argTypes);
+  auto const dvID = findTransIDForCallee(profData, callee, numArgs, argTypes);
   if (dvID == kInvalidTransID) {
     return nullptr;
   }
@@ -667,7 +667,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     if (mode == "tracelet") return nullptr;
   }
 
-  if (RuntimeOption::EvalJitPGO && !mcg->tx().profData()->freed()) {
+  if (profData()) {
     auto region = selectCalleeCFG(callee, numArgs, ctx, argTypes, maxBCInstrs);
     auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
     if (region && inl.shouldInline(sk, callee, *region, maxCost)) return region;

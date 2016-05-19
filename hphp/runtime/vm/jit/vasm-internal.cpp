@@ -155,10 +155,18 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static void setJmpTransID(Venv& env, TCA jmp) {
+  if (!env.unit.context) return;
+
+  env.meta.setJmpTransID(
+    jmp, env.unit.context->transID, env.unit.context->kind
+  );
+}
+
 bool emit(Venv& env, const bindjmp& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
-  env.meta.setJmpTransID(jmp, env.unit.transKind);
+  setJmpTransID(env, jmp);
   return true;
 }
 
@@ -166,7 +174,7 @@ bool emit(Venv& env, const bindjcc& i) {
   auto const jcc =
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
-  env.meta.setJmpTransID(jcc, env.unit.transKind);
+  setJmpTransID(env, jcc);
   return true;
 }
 
@@ -175,14 +183,14 @@ bool emit(Venv& env, const bindjcc1st& i) {
     emitSmashableJccAndJmp(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({jcc_jmp.second, jcc_jmp.first, i});
 
-  env.meta.setJmpTransID(jcc_jmp.first, env.unit.transKind);
-  env.meta.setJmpTransID(jcc_jmp.second, env.unit.transKind);
+  setJmpTransID(env, jcc_jmp.first);
+  setJmpTransID(env, jcc_jmp.second);
   return true;
 }
 
 bool emit(Venv& env, const bindaddr& i) {
   env.stubs.push_back({nullptr, nullptr, i});
-  env.meta.setJmpTransID(TCA(i.addr.get()), env.unit.transKind);
+  setJmpTransID(env, TCA(i.addr.get()));
   env.meta.codePointers.insert(i.addr.get());
   return true;
 }

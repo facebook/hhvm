@@ -1057,7 +1057,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
   }
   // In profiling mode, don't trace through a control flow merge point,
   // however, allow inlining of default parameter funclets
-  if (mcg->tx().profData()->anyBlockEndsAt(inst->func(), inst->offset()) &&
+  assertx(profData());
+  if (profData()->anyBlockEndsAt(inst->func(), inst->offset()) &&
       !inst->func()->isEntry(inst->nextSk().offset())) {
     return true;
   }
@@ -1066,12 +1067,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 
 Translator::Translator()
   : m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
-  , m_profData(nullptr)
 {
   initInstrInfo();
-  if (RuntimeOption::EvalJitPGO) {
-    m_profData.reset(new ProfData());
-  }
 }
 
 bool
@@ -1271,10 +1268,14 @@ void Translator::addTranslation(const TransRec& transRec) {
   }
 
   if (!isTransDBEnabled()) return;
-  uint32_t id = getCurrentTransID();
-  m_translations.emplace_back(transRec);
-  auto& newTransRec = m_translations[id];
-  newTransRec.id = id;
+  assertx(Translator::WriteLease().amOwner());
+  TransID id = transRec.id == kInvalidTransID ? m_translations.size()
+                                              : transRec.id;
+  if (id >= m_translations.size()) {
+    m_translations.resize(id + 1);
+  }
+  m_translations[id] = transRec;
+  m_translations[id].id = id;
 
   if (transRec.aLen > 0) {
     m_transDB[transRec.aStart] = id;
@@ -1284,7 +1285,7 @@ void Translator::addTranslation(const TransRec& transRec) {
   }
 
   // Optimize storage of the created TransRec.
-  newTransRec.optimizeForMemory();
+  m_translations[id].optimizeForMemory();
 }
 
 uint64_t Translator::getTransCounter(TransID transId) const {

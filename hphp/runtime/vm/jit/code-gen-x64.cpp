@@ -4323,7 +4323,7 @@ void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   Block*     taken = inst->taken();
   TransID  transId = inst->extra<CheckCold>()->transId;
-  auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
+  auto counterAddr = profData()->transCounterAddr(transId);
   auto& v = vmain();
   auto const sf = v.makeReg();
   v << decqmlock{v.cns(counterAddr)[0], sf};
@@ -5098,7 +5098,7 @@ void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
 
 void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   auto const transId = inst->extra<TransIDData>()->transId;
-  auto const counterAddr = mcg->tx().profData()->transCounterAddr(transId);
+  auto const counterAddr = profData()->transCounterAddr(transId);
   auto& v = vmain();
   v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
 }

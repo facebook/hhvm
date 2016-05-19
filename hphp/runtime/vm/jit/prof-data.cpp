@@ -24,8 +24,9 @@
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP { namespace jit {
@@ -60,147 +61,171 @@ ProfTransRec::~ProfTransRec() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ProfData::ProfData() :
-  m_counters(RuntimeOption::ServerExecutionMode()
-               ? std::numeric_limits<int64_t>::max()
-               : RuntimeOption::EvalJitPGOThreshold)
-{ }
+ProfData::ProfData()
+  : m_counters(RuntimeOption::ServerExecutionMode()
+                 ? std::numeric_limits<int64_t>::max()
+                 : RuntimeOption::EvalJitPGOThreshold)
+  , m_profilingFuncs(kFuncCountHint, false)
+  , m_optimizedFuncs(kFuncCountHint, false)
+  , m_optimizedSKs(kFuncCountHint)
+  , m_proflogueDB(kFuncCountHint)
+  , m_dvFuncletDB(kFuncCountHint)
+  , m_blockEndOffsets(kFuncCountHint)
+{}
+
+TransID ProfData::allocTransID() {
+  WriteLock lock{m_transLock};
+  m_transRecs.emplace_back();
+  return m_transRecs.size() - 1;
+}
 
 TransID ProfData::proflogueTransId(const Func* func, int nArgs) const {
   auto const numParams = func->numNonVariadicParams();
   if (nArgs > numParams) nArgs = numParams + 1;
-  auto const funcId = func->getFuncId();
+
   return folly::get_default(
     m_proflogueDB,
-    std::make_tuple(funcId, nArgs),
-    kInvalidTransID);
+    PrologueID{func->getFuncId(), nArgs},
+    kInvalidTransID
+  );
 }
 
 TransID ProfData::dvFuncletTransId(const Func* func, int nArgs) const {
   return folly::get_default(
     m_dvFuncletDB,
-    std::make_tuple(func->getFuncId(), nArgs),
-    kInvalidTransID);
+    PrologueID{func->getFuncId(), nArgs},
+    kInvalidTransID
+  );
 }
 
-void ProfData::setProfiling(FuncId funcId) {
-  m_profilingFuncs.insert(funcId);
-  if (m_funcProfTrans.find(funcId) == m_funcProfTrans.end()) {
-    m_funcProfTrans[funcId] = TransIDVec();
-  }
-}
-
-void ProfData::addTransProfile(const RegionDescPtr& region,
+void ProfData::addTransProfile(TransID transID,
+                               const RegionDescPtr& region,
                                const PostConditions& pconds) {
-  TransID transId = m_numTrans++;
   auto const lastBcOff = region->lastSrcKey().offset();
 
   assertx(region);
   DEBUG_ONLY auto const nBlocks = region->blocks().size();
   assertx(nBlocks == 1);
-  region->renumberBlock(region->entry()->id(), transId);
-  for (auto& b : region->blocks()) b->setProfTransID(transId);
+  region->renumberBlock(region->entry()->id(), transID);
+  for (auto& b : region->blocks()) b->setProfTransID(transID);
   region->blocks().back()->setPostConds(pconds);
   auto const startSk = region->start();
-  m_transRecs.emplace_back(new ProfTransRec(lastBcOff, startSk, region));
 
   // If the translation corresponds to a DV Funclet, then add an entry
   // into dvFuncletDB.
   auto const func = startSk.func();
   auto const funcId = func->getFuncId();
   auto const bcOffset = startSk.offset();
+
   if (func->isDVEntry(bcOffset)) {
     auto const nParams = func->getDVEntryNumParams(bcOffset);
-    // Normal DV funclets don't have type guards, and thus have a
-    // single translation.  However, some special functions written
-    // in hhas (e.g. array_map) have complex DV funclets that get
-    // retranslated for different types.  For those functions,
-    // m_dvFuncletDB keeps the TransID for their first translation.
-    if (!m_dvFuncletDB.count(std::make_tuple(funcId, nParams))) {
-      m_dvFuncletDB.emplace(std::make_tuple(funcId, nParams), transId);
-    }
+    // Normal DV funclets don't have type guards, and thus have a single
+    // translation.  However, some special functions written in hhas
+    // (e.g. array_map) have complex DV funclets that get retranslated for
+    // different types.  For those functions, m_dvFuncletDB keeps the TransID
+    // for their first translation.
+    m_dvFuncletDB.emplace(PrologueID{funcId, nParams}, transID);
   }
 
-  m_funcProfTrans[funcId].push_back(transId);
+  {
+    WriteLock lock{m_transLock};
+    m_transRecs[transID].reset(new ProfTransRec(lastBcOff, startSk, region));
+  }
+
+  // Putting transID in m_funcProfTrans makes it visible to other threads, so
+  // this has to happen after we've already put its metadata in m_transRecs.
+  WriteLock lock{m_funcProfTransLock};
+  m_funcProfTrans[funcId].push_back(transID);
 }
 
-void ProfData::addTransNonProf() {
-  if (Translator::isTransDBEnabled()) {
-    m_numTrans++;
-    m_transRecs.emplace_back(nullptr);
-  }
-}
+void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs) {
+  m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 
-TransID ProfData::addTransProflogue(SrcKey sk, int nArgs) {
-  auto transId = m_numTrans++;
-  m_transRecs.emplace_back(new ProfTransRec(sk, nArgs));
-  m_proflogueDB.emplace(std::make_tuple(sk.funcID(), nArgs), transId);
-  return transId;
-}
-
-void ProfData::freeFuncData(FuncId funcId) {
-  // Free ProfTransRecs for Profile translations.
-  for (auto tid : funcProfTransIDs(funcId)) {
-    m_transRecs[tid].reset();
-  }
-
-  // Free ProfTransRecs for Proflogue translations.
-  const Func* func = Func::fromFuncId(funcId);
-  for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
-    auto tid = proflogueTransId(func, nArgs);
-    if (tid != kInvalidTransID) {
-      m_transRecs[tid].reset();
-    }
-  }
-
-  // We don't need the cached block offsets anymore.  They are only used when
-  // generating profiling translations.
-  m_blockEndOffsets.erase(funcId);
-}
-
-void ProfData::free() {
-  if (m_freed) return;
-  m_freed = true;
-  if (RuntimeOption::ServerExecutionMode()) {
-    Logger::Info("Freeing JIT profiling data");
-  }
-  for (auto& trec : m_transRecs) {
-    trec.reset();
-  }
-  m_blockEndOffsets.clear();
+  WriteLock lock{m_transLock};
+  m_transRecs[transID].reset(new ProfTransRec(sk, nArgs));
 }
 
 bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
-  auto const mapIt = m_blockEndOffsets.find(func->getFuncId());
-  if (mapIt != end(m_blockEndOffsets)) {
-    return mapIt->second.count(offset);
+  auto it = m_blockEndOffsets.find(func->getFuncId());
+  if (it == m_blockEndOffsets.end()) {
+    Arena arena;
+    Verifier::GraphBuilder builder{arena, func};
+    auto cfg = builder.build();
+    std::unordered_set<Offset> offsets;
+
+    for (auto blocks = linearBlocks(cfg); !blocks.empty(); ) {
+      auto last = blocks.popFront()->last - func->unit()->entry();
+      offsets.insert(last);
+    }
+
+    it = m_blockEndOffsets.emplace(func->getFuncId(), std::move(offsets)).first;
   }
 
-  using namespace Verifier;
-
-  Arena arena;
-  GraphBuilder builder{arena, func};
-  auto cfg = builder.build();
-  auto& offsets = m_blockEndOffsets[func->getFuncId()];
-
-  for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
-    auto last = blocks.popFront()->last - func->unit()->entry();
-    offsets.insert(last);
-  }
-
-  return offsets.count(offset);
-}
-
-void ProfData::maybeResetCounters() {
-  if (m_countersReset) return;
-  if (requestCount() < RuntimeOption::EvalJitResetProfCountersRequest) return;
-
-  BlockingLeaseHolder writer(Translator::WriteLease());
-  assert(writer.canWrite());
-  if (m_countersReset) return;
-  m_counters.resetAllCounters(RuntimeOption::EvalJitPGOThreshold);
-  m_countersReset = true;
+  return it->second.count(offset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+std::atomic<ProfData*> s_profData{nullptr};
+struct ProfDataShutdownDeleter {
+  ~ProfDataShutdownDeleter() {
+    delete s_profData;
+  }
+} s_profDataShutdownDeleter;
+
+/*
+ * Used to free ProfData from the Treadmill. Since we currently do nothing to
+ * make Profile translations unreachable when we're otherwise done with
+ * ProfData, we move the profiling counters out of ProfData before deleting it.
+ */
+ProfCounters<int64_t> s_persistentCounters{0};
+struct ProfDataTreadmillDeleter {
+  void operator()() {
+    s_persistentCounters = data->takeCounters();
+  }
+
+  std::unique_ptr<ProfData> data;
+};
+}
+
+__thread ProfData* tl_profData{nullptr};
+
+void processInitProfData() {
+  if (!RuntimeOption::EvalJitPGO) return;
+
+  s_profData.store(new ProfData(), std::memory_order_relaxed);
+}
+
+void requestInitProfData() {
+  tl_profData = s_profData.load(std::memory_order_relaxed);
+}
+
+void requestExitProfData() {
+  tl_profData = nullptr;
+}
+
+void discardProfData() {
+  if (s_profData.load(std::memory_order_relaxed) == nullptr) return;
+
+  // Make sure s_profData is nullptr so any new requests won't try to use the
+  // object we're deleting, then send it to the Treadmill for deletion.
+  std::unique_ptr<ProfData> data{
+    s_profData.exchange(nullptr, std::memory_order_relaxed)
+  };
+  if (data != nullptr) {
+    Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(data)});
+  }
+}
+
+void ProfData::maybeResetCounters() {
+  if (m_countersReset.load(std::memory_order_acquire)) return;
+  if (requestCount() < RuntimeOption::EvalJitResetProfCountersRequest) return;
+
+  WriteLock lock{m_transLock};
+  if (m_countersReset.load(std::memory_order_relaxed)) return;
+  m_counters.resetAllCounters(RuntimeOption::EvalJitPGOThreshold);
+  m_countersReset.store(true, std::memory_order_release);
+}
+
 }}

@@ -528,7 +528,7 @@ bool may_have_side_effects(const IRInstruction& inst) {
 void find_invariant_code(LoopEnv& env) {
   auto may_still_hoist_checks = true;
   auto visited_block = boost::dynamic_bitset<>(env.global.unit.numBlocks());
-  auto profData = mcg->tx().profData();
+  auto profData = jit::profData();
   auto numInvocations = linfo(env).numInvocations;
   FTRACE(4, "numInvocations: {}\n", numInvocations);
   for (auto& b : rpo_sort_loop(env)) {
@@ -543,11 +543,11 @@ void find_invariant_code(LoopEnv& env) {
       });
     }
 
-    // Skip this block if its profile weight is less than the number
-    // of times the loop is invoked, since otherwise we're likely to
-    // executed the instruction more by hoisting it out of the loop.
+    // Skip this block if its profile weight is less than the number of times
+    // the loop is invoked, since otherwise we're likely to executed the
+    // instruction more by hoisting it out of the loop.
     auto tid = b->front().marker().profTransID();
-    auto profCount = profData->transCounter(tid);
+    auto profCount = profData ? profData->transCounter(tid) : 0;
     if (profCount < numInvocations) {
       FTRACE(4, "   skipping Block {} because of low profile weight ({})\n",
              b->id(), profCount);

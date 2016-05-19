@@ -84,6 +84,10 @@ enum class LeaseAcquire {
 struct LeaseHolderBase {
   ~LeaseHolderBase();
 
+  /*
+   * Perform a blocking acquire of the write lease. Will never fail, but may
+   * take a long time to return.
+   */
   void acquireBlocking();
 
   /*

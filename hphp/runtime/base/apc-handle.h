@@ -160,6 +160,17 @@ struct APCHandle {
    * the call.
    */
   Variant toLocal() const;
+  Variant toLocal(APCKind savedKind) const {
+    assert(savedKind == m_kind);
+    return savedKind == APCKind::UncountedArray ?
+      Variant{getUncountedArray(),
+              Variant::PersistentArrInit{}} :
+      toLocal();
+  }
+  ArrayData* getUncountedArray() const {
+    assert(m_kind == APCKind::UncountedArray);
+    return reinterpret_cast<ArrayData*>(const_cast<APCHandle*>(this) + 1);
+  }
 
   /*
    * Return the APCKind represented by this APCHandle.

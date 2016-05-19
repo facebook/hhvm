@@ -59,7 +59,7 @@ bool check_noTTL(const char* key, size_t keyLen) {
 //////////////////////////////////////////////////////////////////////
 
 void StoreValue::set(APCHandle* v, int64_t ttl) {
-  data = v;
+  setHandle(v);
   expire = ttl ? time(nullptr) + ttl : 0;
 }
 
@@ -502,7 +502,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   auto& sval = acc->second;
   auto const handle = sval.data.left();
   if (handle == svar && handle->kind() == APCKind::SerializedObject) {
-    sval.data = converted;
+    sval.setHandle(converted);
     APCStats::getAPCStats().updateAPCValue(
       converted, size, handle, sval.dataSize, sval.expire == 0, false);
     handle->unreferenceRoot(sval.dataSize);
@@ -529,7 +529,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     Variant v = vu.unserialize();
     auto const pair = APCHandle::Create(v, sval->isSerializedObj(),
       APCHandleLevel::Outer, false);
-    sval->data = pair.handle;
+    sval->setHandle(pair.handle);
     sval->dataSize = pair.size;
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
     return pair.handle;
@@ -581,17 +581,18 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
           if (!svar) return false;
         }
       }
-
+      assert(sval->data.left() == svar);
+      APCKind kind = sval->getKind();
       if (apcExtension::AllowObj &&
-          (svar->kind() == APCKind::SerializedObject ||
-           svar->kind() == APCKind::SharedObject ||
-           svar->kind() == APCKind::SharedCollection) &&
+          (kind == APCKind::SerializedObject ||
+           kind == APCKind::SharedObject ||
+           kind == APCKind::SharedCollection) &&
           !svar->objAttempted()) {
         // Hold ref here for later promoting the object
         svar->reference();
         promoteObj = true;
       }
-      value = svar->toLocal();
+      value = sval->toLocal();
       if (!promoteObj) {
         /*
          * Successful slow-case lookup => add value to cache (if key and kind
@@ -652,7 +653,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
                                          oldHandle, sval.dataSize,
                                          sval.expire == 0, false);
   oldHandle->unreferenceRoot(sval.dataSize);
-  sval.data = pair.handle;
+  sval.setHandle(pair.handle);
   sval.dataSize = pair.size;
   found = true;
   return ret;
@@ -688,7 +689,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
                                          oldHandle, sval.dataSize,
                                          sval.expire == 0, false);
   oldHandle->unreferenceRoot(sval.dataSize);
-  sval.data = pair.handle;
+  sval.setHandle(pair.handle);
   sval.dataSize = pair.size;
   return true;
 }

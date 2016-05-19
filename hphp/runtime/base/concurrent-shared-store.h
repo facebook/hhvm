@@ -55,12 +55,25 @@ struct StoreValue {
     : data{o.data}
     , expire{o.expire}
     , dataSize{o.dataSize}
+    , kind(o.kind)
     // Copy everything except the lock
   {
     hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
                    std::memory_order_relaxed);
   }
 
+  void setHandle(APCHandle* v) {
+    data = v;
+    kind = v->kind();
+  }
+  APCKind getKind() const {
+    assert(data.left());
+    assert(data.left()->kind() == kind);
+    return kind;
+  }
+  Variant toLocal() const {
+    return data.left()->toLocal(getKind());
+  }
   void set(APCHandle* v, int64_t ttl);
   bool expired() const;
 
@@ -95,7 +108,8 @@ struct StoreValue {
   int32_t dataSize{0};  // For file storage, negative means serialized object
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
-  char padding[20];  // Make APCMap nodes cache-line sized (it static_asserts).
+  APCKind kind;  // Only valid if data is an APCHandle*.
+  char padding[19];  // Make APCMap nodes cache-line sized (it static_asserts).
 };
 
 //////////////////////////////////////////////////////////////////////

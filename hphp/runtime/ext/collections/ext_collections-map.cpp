@@ -1,4 +1,6 @@
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
+
+#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
@@ -39,7 +41,7 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, TMap*>::type
 BaseMap::Clone(ObjectData* obj) {
   auto thiz = static_cast<TMap*>(obj);
-  auto target = static_cast<TMap*>(obj->cloneImpl());
+  auto target = static_cast<TMap*>(TMap::instanceCtor(TMap::classof()));
   if (!thiz->m_size) {
     return target;
   }

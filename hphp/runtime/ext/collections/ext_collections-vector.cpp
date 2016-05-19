@@ -1,4 +1,6 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
+
+#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -568,7 +570,8 @@ ALWAYS_INLINE typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, TVector*>::type
 BaseVector::Clone(ObjectData* obj) {
   auto thiz = static_cast<TVector*>(obj);
-  auto target = static_cast<TVector*>(obj->cloneImpl());
+  auto target = static_cast<TVector*>(
+    TVector::instanceCtor(TVector::classof()));
   if (!thiz->m_size) {
     return target;
   }

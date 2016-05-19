@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 
+#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
@@ -72,7 +73,7 @@ Array c_Pair::toArrayImpl() const {
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Pair*>(obj);
-  auto pair = static_cast<c_Pair*>(obj->cloneImpl());
+  auto pair = static_cast<c_Pair*>(c_Pair::instanceCtor(c_Pair::classof()));
   assertx(thiz->isFullyConstructed());
   pair->m_size = 2;
   cellDup(thiz->elm0, pair->elm0);

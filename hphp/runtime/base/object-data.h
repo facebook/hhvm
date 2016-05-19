@@ -312,7 +312,6 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
 
  public:
   ObjectData* callCustomInstanceInit();
-  ObjectData* cloneImpl();
   const Func* methodNamed(const StringData*) const;
   static size_t sizeForNProps(Slot);
 

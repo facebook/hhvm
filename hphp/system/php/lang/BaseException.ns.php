@@ -18,8 +18,6 @@ trait BaseException {
   private $trace;           // full stacktrace
   private $previous = null;
 
-  private static $traceOpts = 0;
-
   /*
    * There is no constructor in this trait-- It should be possible to extend
    * Exception and add a PHP4 constructor, traits play poorly with PHP4
@@ -36,7 +34,7 @@ trait BaseException {
     if (isset($this->trace)) {
       return;
     }
-    $this->trace = \debug_backtrace(self::$traceOpts);
+    $this->trace = \debug_backtrace(\Exception::getTraceOptions());
     // Remove top stack frames up to and including Exception::__init__,
     // set the 'file' and 'line' properties appropriately
     while (!empty($this->trace)) {
@@ -217,14 +215,6 @@ trait BaseException {
         $ex->getLine() . "\nStack trace:\n" . $ex->getTraceAsString();
     }
     return $res;
-  }
-
-  final public static function getTraceOptions() {
-    return self::$traceOpts;
-  }
-
-  final public static function setTraceOptions($opts) {
-    self::$traceOpts = (int)$opts;
   }
 
   final private function __clone() {

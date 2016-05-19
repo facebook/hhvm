@@ -68,6 +68,7 @@ $required_functions = array(
 $optional_functions = array(
   'array_shift',
   'strcasecmp',
+  Exception::class.'::getTraceOptions',
   AwaitAllWaitHandle::class.'::fromArray',
   RescheduleWaitHandle::class.'::create',
   WaitHandle::class.'::result',

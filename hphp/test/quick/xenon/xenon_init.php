@@ -65,6 +65,7 @@ $optional_functions = array(
   'array_shift',
   'count',
   'strcasecmp',
+  Exception::class.'::getTraceOptions',
   Vector::class.'::reserve',
   AwaitAllWaitHandle::class.'::fromVector',
   RescheduleWaitHandle::class.'::create',

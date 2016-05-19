@@ -139,6 +139,29 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
+  string(26) "Exception::getTraceOptions"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(26) "Exception::getTraceOptions"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    int(0)
+  }
+}
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
   string(15) "debug_backtrace"
   [2]=>
   array(1) {

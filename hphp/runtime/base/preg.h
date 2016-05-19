@@ -133,7 +133,7 @@ int preg_filter(Variant& result,
 
 Variant preg_split(const String& pattern,
                    const String& subject,
-                   int limit,
+                   int limit = -1,
                    int flags = 0);
 String preg_quote(const String& str, const String& delimiter = null_string);
 Variant php_split(const String& spliton, const String& str, int count,

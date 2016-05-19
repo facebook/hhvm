@@ -1136,6 +1136,7 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
       case Arch::PPC64:
         always_assert(false);
     }
+    not_reached();
   }();
 
   if (isJcc) {

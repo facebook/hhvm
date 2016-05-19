@@ -69,7 +69,7 @@ StaticString File::s_resource_name("stream");
 
 int __thread s_pcloseRet;
 
-const int File::CHUNK_SIZE = FileData::CHUNK_SIZE;
+int File::CHUNK_SIZE = FileData::CHUNK_SIZE;
 const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
@@ -765,8 +765,16 @@ int64_t File::getChunkSize() const{
 }
 
 void File::setChunkSize(int64_t chunk_size) {
-  //no-op currently
+
   assertx(chunk_size > 0);
+
+  CHUNK_SIZE = chunk_size;
+
+  if (m_data->m_buffer != nullptr) {
+    realloc(m_data->m_buffer, CHUNK_SIZE);
+    m_data->m_bufferSize = CHUNK_SIZE;
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

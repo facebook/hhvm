@@ -91,7 +91,7 @@ struct FileData {
  * so they can share some minimal functionalities.
  */
 struct File : SweepableResourceData {
-  static const int CHUNK_SIZE;
+  static int CHUNK_SIZE;
 
   static String TranslatePath(const String& filename);
   // Same as TranslatePath except doesn't make paths absolute

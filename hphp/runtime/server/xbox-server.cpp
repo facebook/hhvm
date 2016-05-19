@@ -412,6 +412,7 @@ void XboxServer::TaskStartFromNonRequest(
 
         assert(s_dispatcher);
         s_dispatcher->enqueue(job);
+        return;
       }
   }
   const char* errMsg =

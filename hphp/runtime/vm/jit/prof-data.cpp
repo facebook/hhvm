@@ -170,7 +170,7 @@ namespace {
 std::atomic<ProfData*> s_profData{nullptr};
 struct ProfDataShutdownDeleter {
   ~ProfDataShutdownDeleter() {
-    delete s_profData;
+    delete s_profData.load();
   }
 } s_profDataShutdownDeleter;
 

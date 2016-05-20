@@ -3756,6 +3756,7 @@ OPTBLD_INLINE void iopArrayIdx() {
                                               tvAsCVarRef(def));
   vmStack().popTV();
   vmStack().popTV();
+  tvRefcountedDecRef(arr);
   *arr = result;
 }
 

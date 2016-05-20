@@ -629,7 +629,6 @@ String File::readLine(int64_t maxlen /* = 0 */) {
         m_data->m_buffer = (char *)malloc(m_data->m_chunk_size);
         m_data->m_bufferSize = m_data->m_chunk_size;
       }
-
       m_data->m_writepos = filteredReadToBuffer();
       m_data->m_readpos = 0;
       if (bufferedLen() == 0) {

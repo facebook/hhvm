@@ -36,12 +36,6 @@ C
   span: File "", line 14, character 1 - line 21, character 1:
   modifiers: 
 
-  x
-    kind: property
-    position: File "", line 17, characters 19-20:
-    span: File "", line 17, character 19 - line 17, character 26:
-    modifiers: public 
-
   __construct
     kind: method
     position: File "", line 16, characters 19-29:

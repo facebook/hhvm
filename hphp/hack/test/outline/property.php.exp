@@ -28,18 +28,6 @@ C
     span: File "", line 10, character 25 - line 10, character 48:
     modifiers: 
 
-  implicit_property
-    kind: property
-    position: File "", line 14, characters 19-36:
-    span: File "", line 14, character 19 - line 14, character 36:
-    modifiers: public 
-
-  implicit_property_with_init
-    kind: property
-    position: File "", line 15, characters 16-43:
-    span: File "", line 15, character 16 - line 15, character 47:
-    modifiers: public 
-
   __construct
     kind: method
     position: File "", line 12, characters 19-29:

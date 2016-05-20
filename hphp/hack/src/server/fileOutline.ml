@@ -37,6 +37,10 @@ let summarize_property kinds var =
     docblock = None;
   }
 
+let maybe_summarize_property ~skip kinds var =
+  let _, (_, name), _ = var in
+  if SSet.mem name skip then [] else [summarize_property kinds var]
+
 let summarize_const ((pos, name), (expr_pos, _)) =
   let span = (Pos.btw pos expr_pos) in
   {
@@ -111,6 +115,22 @@ let summarize_method m =
     docblock = None;
   }
 
+(* Parser synthesizes AST nodes for implicit properties (defined in constructor
+ * parameter lists. We don't want them to show up in outline view *)
+let params_implicit_fields params =
+  List.filter_map params ~f:begin function
+    | { Ast.param_modifier = Some vis; param_id; _ } ->
+        Some (Utils.lstrip (snd param_id) "$" )
+    | _ -> None
+  end
+
+let class_implicit_fields class_ =
+  List.concat_map class_.Ast.c_body ~f:begin function
+    | Ast.Method { Ast.m_name = _, "__construct"; m_params; _ } ->
+        params_implicit_fields m_params
+    | _ -> []
+  end
+
 let summarize_class class_ ~no_children =
   let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
   let class_name_pos = fst class_.Ast.c_name in
@@ -122,18 +142,21 @@ let summarize_class class_ ~no_children =
     | Ast.Cabstract -> Abstract :: modifiers
     | _ -> modifiers
   in
-  let children = if no_children then None else Some (List.concat
-    (List.map class_.Ast.c_body ~f:begin function
-    | Ast.Method m -> [summarize_method m]
-    | Ast.ClassVars (kinds, _, vars) ->
-        List.map vars ~f:(summarize_property kinds)
-    | Ast.XhpAttr (_, var, _, _) -> [summarize_property [] var]
-    | Ast.Const (_, cl) -> List.map cl ~f:summarize_const
-    | Ast.AbsConst (_, id) -> [summarize_abs_const id]
-    | Ast.TypeConst t -> [summarize_typeconst t]
-    | _ -> []
-    end))
-  in
+  let children = if no_children then None else begin
+    let implicit_props = SSet.of_list (class_implicit_fields class_) in
+    Some (List.concat_map class_.Ast.c_body ~f:begin function
+      | Ast.Method m -> [summarize_method m]
+      | Ast.ClassVars (kinds, _, vars) ->
+          List.concat_map vars
+            ~f:(maybe_summarize_property ~skip:implicit_props kinds)
+      | Ast.XhpAttr (_, var, _, _) ->
+          maybe_summarize_property ~skip:implicit_props [] var
+      | Ast.Const (_, cl) -> List.map cl ~f:summarize_const
+      | Ast.AbsConst (_, id) -> [summarize_abs_const id]
+      | Ast.TypeConst t -> [summarize_typeconst t]
+      | _ -> []
+      end)
+  end in
   let kind = match class_.Ast.c_kind with
     | Ast.Cinterface -> Interface
     | Ast.Ctrait -> Trait

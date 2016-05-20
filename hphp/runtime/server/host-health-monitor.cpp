@@ -112,11 +112,14 @@ HealthLevel HostHealthMonitor::evaluate() {
 
 void HostHealthMonitor::notifyObservers(HealthLevel newStatus) {
   if (newStatus != m_status) {
-    m_status = newStatus;
+    Logger::Warning("Health level (lower is better) changes from %d to %d.",
+                    static_cast<int>(m_status), static_cast<int>(newStatus));
+
     std::lock_guard<std::mutex> g(m_lock);
     for (auto observer : m_observers) {
       observer->notifyNewStatus(newStatus);
     }
+    m_status = newStatus;
   }
 }
 

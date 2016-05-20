@@ -297,6 +297,13 @@ using ArrayArg    = Native::NativeArg<ArrayData>;
 using ResourceArg = Native::NativeArg<ResourceData>;
 using OutputArg   = Native::NativeArg<RefData>;
 
+struct IndirectReturn {
+  IndirectReturn() {}
+  // Make sure the indirect return value is never copied and RVO kicked in
+  IndirectReturn(const IndirectReturn&) { always_assert(false); }
+  ~IndirectReturn() {}
+};
+
 namespace Native {
 
 struct NativeSig {

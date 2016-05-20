@@ -30,3 +30,61 @@ let get_defs ast =
        (* toplevel statements are ignored *)
       | Ast.Stmt _ -> acc
     end
+
+let class_elt_type_to_string = function
+  | Ast.Const _ -> "const"
+  | Ast.AbsConst _ -> "absConst"
+  | Ast.Attributes _ -> "attributes"
+  | Ast.TypeConst _ -> "typeConst"
+  | Ast.ClassUse _ -> "classUse"
+  | Ast.XhpAttrUse _ -> "xhpAttrUse"
+  | Ast.ClassTraitRequire _ -> "classTraitRequire"
+  | Ast.ClassVars _ -> "classVars"
+  | Ast.XhpAttr _ -> "xhpAttr"
+  | Ast.Method _ -> "method"
+  | Ast.XhpCategory _ -> "xhpCategory"
+
+(* Utility functions for getting all nodes of a particular type *)
+class ast_get_defs_visitor = object (this)
+  inherit [Ast.def list] Ast_visitor.ast_visitor
+
+  method! on_def acc def =
+    def :: acc
+end
+
+let get_def_nodes ast =
+  List.rev ((new ast_get_defs_visitor)#on_program [] ast)
+
+let get_classes ast =
+  List.filter_map (get_def_nodes ast) ~f:(function
+    | Ast.Class c -> Some c
+    | _ -> None
+  )
+
+class ast_get_class_elts_visitor = object (this)
+  inherit [Ast.class_elt list] Ast_visitor.ast_visitor
+
+  method! on_class_elt acc elt =
+    elt :: acc
+end
+
+let get_class_elts ast =
+  List.rev ((new ast_get_class_elts_visitor)#on_program [] ast)
+
+let get_methods ast =
+  List.filter_map (get_class_elts ast) ~f:(function
+    | Ast.Method m -> Some m
+    | _ -> None
+  )
+
+let get_typeConsts ast =
+  List.filter_map (get_class_elts ast) ~f:(function
+    | Ast.TypeConst tc -> Some tc
+    | _ -> None
+  )
+
+let get_classUses ast =
+  List.filter_map (get_class_elts ast) ~f:(function
+    | Ast.ClassUse h -> Some h
+    | _ -> None
+  )

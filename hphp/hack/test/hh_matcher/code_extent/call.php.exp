@@ -2226,7 +2226,7 @@ $a
 
 on_method_:
 
-function my_generator (): Traversable<array<int>> {
+public function my_generator (): Traversable<array<int>> {
     for ($k = 1; $k < 10; $k++) {
       yield array($k);
     }
@@ -2354,7 +2354,7 @@ $k
 
 on_method_:
 
-function php_closure (string $who): void  {
+public function php_closure (string $who): void  {
     $var = function() use ($who) {
       // FIXME: AST changes broke handling interpolated strings
       //echo "Hello $who {$who + 1}";
@@ -2494,7 +2494,7 @@ class Bar
 
 on_def:
 
-function gen_foo(int $a): Awaitable<?Foo> {
+async function gen_foo(int $a): Awaitable<?Foo> {
   $bar = await gen_bar($a);
   return new Foo();
 }
@@ -2503,7 +2503,7 @@ function gen_foo(int $a): Awaitable<?Foo> {
 
 on_fun_:
 
-function gen_foo(int $a): Awaitable<?Foo> {
+async function gen_foo(int $a): Awaitable<?Foo> {
   $bar = await gen_bar($a);
   return new Foo();
 }
@@ -2584,7 +2584,7 @@ Awaitable<?Foo>
 
 on_def:
 
-function gen_bar(int $a): Awaitable<?Bar> {
+async function gen_bar(int $a): Awaitable<?Bar> {
   return new Bar();
 }
 
@@ -2592,7 +2592,7 @@ function gen_bar(int $a): Awaitable<?Bar> {
 
 on_fun_:
 
-function gen_bar(int $a): Awaitable<?Bar> {
+async function gen_bar(int $a): Awaitable<?Bar> {
   return new Bar();
 }
 

@@ -8,6 +8,15 @@
  *
  *)
 
+(**
+ * This module allows the fetching of location information for AST nodes.
+ * This is necessary because our current AST does not contain enough
+ * information on it's own to allow us to derive the position.
+ *
+ * This is implemented by using a lexer and an AST visitor to walk the file
+ * to the point of interest, and returns the positional information.
+ *)
+
 open Sys_utils
 
 let non_empty list = not (Core.List.is_empty list)
@@ -47,7 +56,7 @@ let hack_keywords =
    required keywords and modify them *)
 let hack_keyword_mods =
   ["abstract"; "final"; "global"; "private";
-   "protected"; "public"; "static"]
+   "protected"; "public"; "static"; "async";]
 
 (* words that cannot be class names *)
 let hack_not_cname =
@@ -366,6 +375,7 @@ let advance_lexbuf_to_pos
       ~(unmatched_lp : File_pos.t list)
       ~(last_ltlt : File_pos.t)
       ~(ignore_keywords : bool)
+      ~(custom_modifiers: string list)
       ~(lex_env : lex_env) :
       (File_pos.t *
          (File_pos.t list * File_pos.t list * File_pos.t) *
@@ -421,7 +431,13 @@ let advance_lexbuf_to_pos
       (* these are to make sure we include modifiers and keywords in the
          code extent we return for the AST node because the first identifier
          we see is often after these keywords and modifiers. *)
-      let cur_is_modifier =
+      let has_custom_modifiers = List.length custom_modifiers > 0 in
+      let cur_is_modifier = if has_custom_modifiers then
+        List.exists
+          (fun m -> cur_lexeme = m)
+          custom_modifiers &&
+          not ignore_keywords
+      else
         List.exists
           (fun modifier -> cur_lexeme = modifier)
           hack_keyword_mods &&
@@ -430,6 +446,7 @@ let advance_lexbuf_to_pos
         List.exists
           (fun keyword -> cur_lexeme = keyword)
           hack_keywords &&
+          not (has_custom_modifiers && cur_is_modifier)  &&
           not ignore_keywords in
       if seen_keyword
       (* a modifier or keyword will cause a reset *)
@@ -446,7 +463,9 @@ let advance_lexbuf_to_pos
         if cur_is_keyword
         then
           advance_until
-            (Pos.pos_start pos)
+            (if File_pos.is_dummy leftmost_modifier
+             then (Pos.pos_start pos)
+             else leftmost_modifier)
             true
             unmatched_lcb
             unmatched_lp
@@ -475,8 +494,19 @@ let advance_lexbuf_to_pos
   advance_until
     File_pos.dummy false unmatched_lcb unmatched_lp last_ltlt lex_env
 
-(* skips to necessary number of right curly braces
-   and any semicolons after that *)
+let rec skip_to_token
+    (lexbuf : Lexing.lexbuf)
+    (seek_token: Lexer_hack.token)
+    (file : Relative_path.t)
+    (lex_env : lex_env) :
+    File_pos.t =
+  let (token,pos), lex_env = token_from_lb file lexbuf lex_env in
+  if token = Lexer_hack.Teof || token = seek_token then
+    Pos.pos_end pos
+  else
+    skip_to_token lexbuf seek_token file lex_env
+
+(* moves lexbuf forward until paren and brace counts are balanced *)
 let skip_trailing_delims
       (lexbuf : Lexing.lexbuf)
       (lcb_stack : File_pos.t list)
@@ -549,7 +579,10 @@ let update_to_enclosing
   { accum with left = (position_min pos accum.left);
                right = (position_max pos accum.right); }
 
-class range_find_visitor rel_file content =
+class range_find_visitor
+  ?custom_modifiers:(custom_modifiers=[])
+  rel_file
+  content =
 object (this)
   inherit [range_accum] Ast_visitor.ast_visitor as super
 
@@ -569,6 +602,7 @@ object (this)
           ~unmatched_lp:acc.unmatched_lp
           ~last_ltlt:acc.last_ltlt
           ~ignore_keywords:acc.ignore_keywords
+          ~custom_modifiers:custom_modifiers
           ~lex_env:acc.lex_env in
       let acc = { acc with lex_env = new_env } in
       let old_left = acc.left in
@@ -628,6 +662,7 @@ object (this)
           ~unmatched_lp:acc.unmatched_lp
           ~last_ltlt:acc.last_ltlt
           ~ignore_keywords:acc.ignore_keywords
+          ~custom_modifiers:custom_modifiers
           ~lex_env:acc.lex_env in
       let acc =
         { acc with
@@ -824,7 +859,7 @@ let rec find_should_ignore_stmt (stmt : Ast.stmt) : bool =
      | hd :: _ -> find_should_ignore_stmt hd end
   | _ -> false
 
-let source_extent_stmt file source s =
+let rec source_extent_stmt file source s =
   let visitor = new range_find_visitor file source in
   let accum =
     visitor#on_stmt
@@ -837,7 +872,7 @@ let source_extent_stmt file source s =
                 file accum.lex_env in
   (accum.left, right)
 
-let source_extent_switch file source e cl =
+and source_extent_switch file source e cl =
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_switch default_range_accum e cl in
   let right = skip_trailing_delims
@@ -847,7 +882,7 @@ let source_extent_switch file source e cl =
                 file accum.lex_env in
   (accum.left, right)
 
-let source_extent_throw file source e =
+and source_extent_throw file source e =
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_throw default_range_accum e in
   let right = skip_trailing_delims
@@ -857,7 +892,7 @@ let source_extent_throw file source e =
                 file accum.lex_env in
   (accum.left, right)
 
-let source_extent_try file source b1 cl b2 =
+and source_extent_try file source b1 cl b2 =
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_try default_range_accum b1 cl b2 in
   let right = skip_trailing_delims
@@ -867,7 +902,7 @@ let source_extent_try file source b1 cl b2 =
                 file accum.lex_env in
   (accum.left, right)
 
-let source_extent_while file source e b =
+and source_extent_while file source e b =
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_while default_range_accum e b in
   let right = skip_trailing_delims
@@ -877,7 +912,7 @@ let source_extent_while file source e b =
                 file accum.lex_env in
   (accum.left, right)
 
-let source_extent_class_ file source c =
+and source_extent_class_ file source c =
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_class_
     { default_range_accum with
@@ -889,7 +924,7 @@ let source_extent_class_ file source c =
                 file accum.lex_env in
   (accum.left, right)
 
-let source_extent_fun_ file source f =
+and source_extent_fun_ file source f =
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_fun_
     { default_range_accum with
@@ -901,7 +936,7 @@ let source_extent_fun_ file source f =
                 file accum.lex_env in
   (accum.left, right)
 
-let source_extent_def
+and source_extent_def
       (file:Relative_path.t)
       (source:string)
       (def:Ast.def) :
@@ -920,19 +955,67 @@ let source_extent_def
                   file accum.lex_env in
     (accum.left, right)
 
-let source_extent_method_ file source m = begin
+and source_extent_class_header
+    (source: string)
+    (class_: Ast.class_):
+    (File_pos.t * File_pos.t) =
+  let file = Relative_path.default in
+  let class_ = {class_ with Ast.c_body = [] } in
+  let visitor = new range_find_visitor file source in
+  let accum = visitor#on_class_ default_range_accum class_ in
+  let right = skip_to_token
+    (visitor#get_lexbuf ()) Lexer_hack.Tlcb file accum.lex_env in
+  (accum.left, right)
+
+and source_extent_class_elt
+    (source: string)
+    (elt: Ast.class_elt):
+    (File_pos.t * File_pos.t) =
+  let file = Relative_path.default in
+  match elt with
+    | Ast.ClassUse h -> source_extent_classUse source h
+    | Ast.Method m -> source_extent_method_ file source m
+    | Ast.TypeConst tc -> source_extent_typeConst source tc
+    | _ -> raise (Failure "elt type not currently supported")
+
+and source_extent_method_ file source m = begin
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_method_
     { default_range_accum with
         ignore_keywords = non_empty m.Ast.m_user_attributes } m in
-  let right = skip_trailing_delims
-                (visitor#get_lexbuf ())
-                accum.unmatched_lcb
-                accum.unmatched_lp
-                file accum.lex_env in
+  let right = if m.Ast.m_body = [] || m.Ast.m_body = [Ast.Noop] then
+    skip_to_token (visitor#get_lexbuf ()) Lexer_hack.Trcb file accum.lex_env
+  else
+    skip_trailing_delims
+      (visitor#get_lexbuf ())
+      accum.unmatched_lcb
+      accum.unmatched_lp
+      file accum.lex_env in
   (accum.left, right) end
 
-let source_extent_program file source p =
+and source_extent_typeConst source tc =
+  let file = Relative_path.default in
+  let visitor = new range_find_visitor
+    ~custom_modifiers:["const";]
+    file
+    source in
+  let accum = visitor#on_typeConst default_range_accum tc in
+  let right = skip_to_token
+    (visitor#get_lexbuf ()) Lexer_hack.Tsc file accum.lex_env in
+  (accum.left, right)
+
+and source_extent_classUse source h =
+  let file = Relative_path.default in
+  let visitor = new range_find_visitor
+    ~custom_modifiers:["use";]
+    file
+    source in
+  let accum = visitor#on_hint default_range_accum h in
+  let right = skip_to_token
+    (visitor#get_lexbuf ()) Lexer_hack.Tsc file accum.lex_env in
+  (accum.left, right)
+
+and source_extent_program file source p =
   let visitor = new range_find_visitor file source in
   let accum = visitor#on_program default_range_accum p in
   let right = skip_trailing_delims

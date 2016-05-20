@@ -69,10 +69,18 @@ val source_extent_while : Relative_path.t -> string -> expr -> block ->
                           (File_pos.t * File_pos.t)
 val source_extent_class_ : Relative_path.t -> string -> class_ ->
                            (File_pos.t * File_pos.t)
+val source_extent_class_header : string -> class_ -> (File_pos.t * File_pos.t)
+
 val source_extent_def : Relative_path.t -> string -> def ->
                         (File_pos.t * File_pos.t)
+val source_extent_class_elt : string -> class_elt -> (File_pos.t * File_pos.t)
+
 val source_extent_fun_ : Relative_path.t -> string -> fun_ ->
                          (File_pos.t * File_pos.t)
+val source_extent_typeConst : string -> typeconst -> (File_pos.t * File_pos.t)
+
+val source_extent_classUse : string -> hint -> (File_pos.t * File_pos.t)
+
 val source_extent_method_ : Relative_path.t -> string -> method_ ->
                             (File_pos.t * File_pos.t)
 val source_extent_program : Relative_path.t -> string -> program ->

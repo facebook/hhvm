@@ -48,19 +48,14 @@ trait BaseException {
         break;
       }
     }
-    // Remove systemlib stack frames until we hit the user code.
-    // Assume user code will contain the elements for file and line.
-    if (($this->file === null) && ($this->line === null)) {
-      while (!empty($this->trace)
-        && !isset($this->trace[0]['file']) && !isset($this->trace[0]['line'])
-      ) {
-        \array_shift($this->trace);
-      }
-      if (isset($this->trace[0]['file'])) {
-        $this->file = $this->trace[0]['file'];
-      }
-      if (isset($this->trace[0]['line'])) {
-        $this->line = $this->trace[0]['line'];
+    // Set file and line to the first user frame.
+    if ($this->file === null && $this->line === null) {
+      foreach ($this->trace as $frame) {
+        if (isset($frame['file']) || isset($frame['line'])) {
+          $this->file = $frame['file'] ?? null;
+          $this->line = $frame['line'] ?? null;
+          break;
+        }
       }
     }
   }

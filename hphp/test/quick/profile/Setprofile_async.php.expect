@@ -51,8 +51,6 @@ In gen2
 ** exit strcasecmp
 ** enter strcasecmp
 ** exit strcasecmp
-** enter array_shift
-** exit array_shift
 ** exit Exception::__init__
 ** enter Exception::__construct
 ** exit Exception::__construct

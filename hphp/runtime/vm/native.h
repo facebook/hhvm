@@ -193,17 +193,8 @@ namespace HPHP { namespace Native {
 // using make_native-func-caller.php
 const int kMaxBuiltinArgs = 32;
 
-// t#3982283 - Our ARM code gen doesn't support stack args yet.
-// In fact, it only supports six of the eight register args.
-// Put a hard limit of five to account for the return register for now.
-constexpr int kMaxFCallBuiltinArgsARM = 5;
-
 inline int maxFCallBuiltinArgs() {
-#ifdef __aarch64__
   return kMaxBuiltinArgs;
-#else
-  return kMaxBuiltinArgs;
-#endif
 }
 
 inline bool allowFCallBuiltinDoubles() {

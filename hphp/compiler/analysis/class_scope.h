@@ -188,6 +188,9 @@ public:
   const std::vector<FunctionScopePtr>& getFunctionsVec() const {
     return m_functionsVec;
   }
+  KindOf getKind() {
+    return m_kindOf;
+  }
 
   /**
    * Called by ClassScope to prepare name => method/property map.

@@ -53,8 +53,10 @@ FileData::FileData(bool nonblocking)
 { }
 
 bool FileData::closeImpl() {
-  free(m_buffer);
-  m_buffer = nullptr;
+  if (m_buffer != nullptr) {
+    free(m_buffer);
+    m_buffer = nullptr;
+  }
   return true;
 }
 
@@ -260,8 +262,8 @@ String File::read() {
 
   while (!eof() || avail) {
     if (m_data->m_buffer == nullptr) {
-      m_data->m_buffer = (char *)malloc(m_data->m_chunk_size);
-      m_data->m_bufferSize = m_data->m_chunk_size;
+      m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
+      m_data->m_bufferSize = m_data->m_chunkSize;
     }
 
     if (avail > 0) {
@@ -299,8 +301,8 @@ String File::read(int64_t length) {
 
   while (avail < length && !eof()) {
     if (m_data->m_buffer == nullptr) {
-      m_data->m_buffer = (char *)malloc(m_data->m_chunk_size);
-      m_data->m_bufferSize = m_data->m_chunk_size;
+      m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
+      m_data->m_bufferSize = m_data->m_chunkSize;
     }
 
     if (avail > 0) {
@@ -335,7 +337,7 @@ String File::read(int64_t length) {
 }
 
 int64_t File::filteredReadToBuffer() {
-  int64_t bytes_read = readImpl(m_data->m_buffer, m_data->m_chunk_size);
+  int64_t bytes_read = readImpl(m_data->m_buffer, m_data->m_bufferSize);
   if (LIKELY(m_readFilters.empty())) {
     return bytes_read;
   }
@@ -626,8 +628,8 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       break;
     } else {
       if (m_data->m_buffer == nullptr) {
-        m_data->m_buffer = (char *)malloc(m_data->m_chunk_size);
-        m_data->m_bufferSize = m_data->m_chunk_size;
+        m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
+        m_data->m_bufferSize = m_data->m_chunkSize;
       }
       m_data->m_writepos = filteredReadToBuffer();
       m_data->m_readpos = 0;
@@ -651,29 +653,29 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
     return false;
   }
 
-  if (maxlen <= 0 || maxlen > m_data->m_chunk_size) {
-    maxlen = m_data->m_chunk_size;
+  if (maxlen <= 0 || maxlen > m_data->m_chunkSize) {
+    maxlen = m_data->m_chunkSize;
   }
 
   int64_t avail = bufferedLen();
   if (m_data->m_buffer == nullptr) {
-    m_data->m_buffer = (char *)malloc(m_data->m_chunk_size * 3);
-    m_data->m_bufferSize = m_data->m_chunk_size * 3;
-  } else if (m_data->m_bufferSize < m_data->m_chunk_size * 3) {
-    auto newbuf = malloc(m_data->m_chunk_size * 3);
+    m_data->m_buffer = (char *)malloc(m_data->m_chunkSize * 3);
+    m_data->m_bufferSize = m_data->m_chunkSize * 3;
+  } else if (m_data->m_bufferSize < m_data->m_chunkSize * 3) {
+    auto newbuf = malloc(m_data->m_chunkSize * 3);
     memcpy(newbuf, m_data->m_buffer, m_data->m_bufferSize);
     free(m_data->m_buffer);
     m_data->m_buffer = (char*) newbuf;
-    m_data->m_bufferSize = m_data->m_chunk_size * 3;
+    m_data->m_bufferSize = m_data->m_chunkSize * 3;
   }
 
   if (avail < maxlen && !eof()) {
-    assert(m_data->m_writepos + maxlen - avail <= m_data->m_chunk_size * 3);
+    assert(m_data->m_writepos + maxlen - avail <= m_data->m_chunkSize * 3);
     m_data->m_writepos +=
       readImpl(m_data->m_buffer + m_data->m_writepos, maxlen - avail);
     maxlen = bufferedLen();
   }
-  if (m_data->m_readpos >= m_data->m_chunk_size) {
+  if (m_data->m_readpos >= m_data->m_chunkSize) {
     memcpy(m_data->m_buffer,
            m_data->m_buffer + m_data->m_readpos,
            bufferedLen());
@@ -760,18 +762,18 @@ const String& File::o_getResourceName() const {
 }
 
 int64_t File::getChunkSize() const{
-  return m_data->m_chunk_size;
+  return m_data->m_chunkSize;
 }
 
 void File::setChunkSize(int64_t chunk_size) {
 
   assertx(chunk_size > 0);
 
-  m_data->m_chunk_size = chunk_size;
+  m_data->m_chunkSize = chunk_size;
 
-  if (m_data->m_buffer == nullptr) {
-    realloc(m_data->m_buffer, m_data->m_chunk_size);
-    m_data->m_bufferSize = m_data->m_chunk_size;
+  if (m_data->m_buffer != nullptr) {
+    realloc(m_data->m_buffer, m_data->m_chunkSize);
+    m_data->m_bufferSize = m_data->m_chunkSize;
   }
 }
 

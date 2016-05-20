@@ -475,8 +475,8 @@ Variant HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
                       int64_t chunk_size) {
   if (isa<File>(stream) && chunk_size > 0) {
-    int64_t orig_chunk_size = file->getChunkSize();
     auto file = cast<File>(stream);
+    int64_t orig_chunk_size = file->getChunkSize();
     file->setChunkSize(chunk_size);
     return orig_chunk_size;
   }

@@ -81,8 +81,8 @@ struct FileData {
   std::string m_mode;
 
   char *m_buffer{nullptr};
-  int64_t m_bufferSize{DEFAULT_CHUNK_SIZE};
-  int64_t m_chunk_size{DEFAULT_CHUNK_SIZE};
+  int64_t m_bufferSize{0};
+  int64_t m_chunkSize{DEFAULT_CHUNK_SIZE};
 };
 
 /**

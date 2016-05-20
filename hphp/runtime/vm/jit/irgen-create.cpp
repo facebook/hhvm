@@ -68,7 +68,7 @@ void initSProps(IRGS& env, const Class* cls) {
 SSATmp* allocObjFast(IRGS& env, const Class* cls) {
   // CustomInstance classes always go through IR:AllocObj and
   // ObjectData::newInstance()
-  assert(!cls->callsCustomInstanceInit());
+  assert(!cls->needsInitThrowable());
 
   // Make sure our property init vectors are all set up.
   const bool props = cls->pinitVec().size() > 0;

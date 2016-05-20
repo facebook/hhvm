@@ -114,7 +114,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   if (ndi->sweep) {
     MM().addNativeObject(node);
   }
-  if (UNLIKELY(cls->callsCustomInstanceInit())) {
+  if (UNLIKELY(cls->needsInitThrowable())) {
     obj->callCustomInstanceInit();
   }
   return obj;

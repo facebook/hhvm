@@ -915,7 +915,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 }
 
 /**
- * Only call this if cls->callsCustomInstanceInit() is true
+ * Only call this if cls->needsInitThrowable() is true
  */
 ObjectData* ObjectData::callCustomInstanceInit() {
   auto const init = m_cls->lookupMethod(s___init__.get());

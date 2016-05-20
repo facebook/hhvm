@@ -329,10 +329,10 @@ inline const Class::RequirementMap& Class::allRequirements() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Objects.
+// Throwable initialization.
 
-inline bool Class::callsCustomInstanceInit() const {
-  return m_callsCustomInstanceInit;
+inline bool Class::needsInitThrowable() const {
+  return m_needsInitThrowable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

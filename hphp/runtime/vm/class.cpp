@@ -2252,6 +2252,12 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
   }
 }
 
+namespace {
+  const StaticString s_Error("__SystemLib\\Error");
+  const StaticString s_Exception("Exception");
+  const StaticString s___init__("__init__");
+}
+
 void Class::setInitializers() {
   std::vector<const Func*> pinits;
   std::vector<const Func*> sinits;
@@ -2284,10 +2290,18 @@ void Class::setInitializers() {
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);
 
-  // The __init__ method gets special treatment
-  static StringData* s_init__ = makeStaticString("__init__");
-  auto method = lookupMethod(s_init__);
-  m_callsCustomInstanceInit = method && method->isBuiltin();
+  // Implementations of Throwable gets special treatment.
+  if (m_parent.get() != nullptr) {
+    m_needsInitThrowable = m_parent->needsInitThrowable();
+    if (m_needsInitThrowable) {
+      // Avoid calling mocked __init__().
+      m_needsInitThrowable = lookupMethod(s___init__.get())->isBuiltin();
+    }
+  } else {
+    m_needsInitThrowable = name()->same(s_Exception.get()) ||
+                           name()->same(s_Error.get());
+  }
+  assert(!m_needsInitThrowable || lookupMethod(s___init__.get()));
 }
 
 void Class::checkInterfaceConstraints() {

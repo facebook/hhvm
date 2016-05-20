@@ -80,7 +80,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   // wakeup method, and whether or not we can use a fast path that avoids
   // default-initializing properties before setting them to their APC values.
   if (!cls->lookupMethod(s___wakeup.get())) apcObj->m_no_wakeup = 1;
-  if (!cls->instanceCtor() && !cls->callsCustomInstanceInit()) {
+  if (!cls->instanceCtor()) {
     apcObj->m_fast_init = 1;
   }
 

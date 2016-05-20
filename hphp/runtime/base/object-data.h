@@ -494,7 +494,7 @@ struct ExtObjectDataFlags : ObjectData {
                               HeaderKind kind = HeaderKind::Object)
     : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind)
   {
-    assert(!getVMClass()->callsCustomInstanceInit());
+    assert(!getVMClass()->needsInitThrowable());
   }
 
 protected:
@@ -503,7 +503,7 @@ protected:
                               NoInit ni) noexcept
   : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind, ni)
   {
-    assert(!getVMClass()->callsCustomInstanceInit());
+    assert(!getVMClass()->needsInitThrowable());
   }
 
   ~ExtObjectDataFlags() {}

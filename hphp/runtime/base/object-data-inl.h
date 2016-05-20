@@ -92,7 +92,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   auto& mm = MM();
   auto const obj = new (mm.objMalloc(size)) ObjectData(cls);
   assert(obj->hasExactlyOneRef());
-  if (UNLIKELY(cls->callsCustomInstanceInit())) {
+  if (UNLIKELY(cls->needsInitThrowable())) {
     /*
      * This must happen after the constructor finishes, because it can leak
      * references to obj AND it can throw exceptions. If we have this in the
@@ -111,7 +111,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
 inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   if (cls->needInitialization()) cls->initialize();
 
-  assert(!cls->instanceCtor() && !cls->callsCustomInstanceInit() &&
+  assert(!cls->instanceCtor() &&
          !(cls->attrs() &
            (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
 

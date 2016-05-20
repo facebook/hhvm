@@ -831,10 +831,10 @@ public:
   size_t declPropOffset(Slot index) const;
 
   /*
-   * Whether instances of this class need to call a custom __init__ when
-   * created.
+   * Whether instances of this class implement Throwable interface, which
+   * requires additional initialization on construction.
    */
-  bool callsCustomInstanceInit() const;
+  bool needsInitThrowable() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1273,7 +1273,7 @@ private:
    */
   bool m_needInitialization : 1;
 
-  bool m_callsCustomInstanceInit : 1;
+  bool m_needsInitThrowable : 1;
   bool m_hasDeepInitProps : 1;
 
   /*

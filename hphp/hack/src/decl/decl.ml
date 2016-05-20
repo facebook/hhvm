@@ -497,39 +497,48 @@ and build_constructor env class_ method_ =
   Some cstr, mconsist
 
 and class_const_decl env c acc (h, id, e) =
-  let c_name = (snd c.c_name) in
-  let ty =
-    match h, e with
-      | Some h, Some _ -> Decl_hint.hint env h
-      | Some h, None ->
-        let h_ty = Decl_hint.hint env h in
-        let pos, name = id in
-        Reason.Rwitness pos,
-          Tgeneric (c_name^"::"^name, Some (Ast.Constraint_as, h_ty))
-      | None, Some e ->
-        begin match infer_const e with
-          | Some ty -> ty
-          | None ->
-            if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
-            then Errors.missing_typehint (fst id);
-            Reason.Rwitness (fst id), Tany
-        end
-      | None, None ->
-        let pos, name = id in
-        if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
-        let r = Reason.Rwitness pos in
-        let const_ty = r, Tgeneric (c_name^"::"^name,
-          Some (Ast.Constraint_as, (r, Tany))) in
-        const_ty
-  in
-  let cc = {
-    cc_synthesized = false;
-    cc_type = ty;
-    cc_expr = e;
-    cc_origin = c_name;
-  } in
-  let acc = SMap.add (snd id) cc acc in
-  acc
+  match c.c_kind with
+  | Ast.Ctrait ->
+      let kind = match c.c_kind with
+        | Ast.Ctrait -> `trait
+        | Ast.Cenum -> `enum
+        | _ -> assert false in
+      Errors.cannot_declare_constant kind (fst id) c.c_name;
+      acc
+  | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface | Ast.Cenum ->
+    let c_name = (snd c.c_name) in
+    let ty =
+      match h, e with
+        | Some h, Some _ -> Decl_hint.hint env h
+        | Some h, None ->
+          let h_ty = Decl_hint.hint env h in
+          let pos, name = id in
+          Reason.Rwitness pos,
+            Tgeneric (c_name^"::"^name, Some (Ast.Constraint_as, h_ty))
+        | None, Some e ->
+          begin match infer_const e with
+            | Some ty -> ty
+            | None ->
+              if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
+              then Errors.missing_typehint (fst id);
+              Reason.Rwitness (fst id), Tany
+          end
+        | None, None ->
+          let pos, name = id in
+          if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
+          let r = Reason.Rwitness pos in
+          let const_ty = r, Tgeneric (c_name^"::"^name,
+            Some (Ast.Constraint_as, (r, Tany))) in
+          const_ty
+    in
+    let cc = {
+      cc_synthesized = false;
+      cc_type = ty;
+      cc_expr = e;
+      cc_origin = c_name;
+    } in
+    let acc = SMap.add (snd id) cc acc in
+    acc
 
 (* Every class, interface, and trait implicitly defines a ::class to
  * allow accessing its fully qualified name as a string *)

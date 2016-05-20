@@ -1,0 +1,4 @@
+File "trait_const.php", line 4, characters 9-9:
+Cannot declare a constant in a trait (Typing[4130])
+File "trait_const.php", line 3, characters 7-7:
+T was defined as a trait here

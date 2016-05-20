@@ -240,6 +240,8 @@
       - mediawiki-core/tests/phpunit/includes/GlobalFunctions/wfBaseConvertTest.php
       # tests a directory listing in a predefined, written-to location
       - mediawiki-core/tests/phpunit/includes/filebackend/FileBackendTest.php
+      # Works with one internal build system, but not all of them.
+      - mediawiki-core/tests/phpunit/includes/utils/ZipDirectoryReaderTest.php
   jshrink:
     url: https://github.com/tedivm/JShrink.git
     branch: master

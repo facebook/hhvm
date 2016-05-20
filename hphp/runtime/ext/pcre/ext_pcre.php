@@ -287,7 +287,7 @@ function preg_replace(mixed $pattern,
 <<__Native>>
 function preg_split(string $pattern,
                     string $subject,
-                    int $limit = -1,
+                    mixed $limit = null,
                     int $flags = 0): mixed;
 
 /**

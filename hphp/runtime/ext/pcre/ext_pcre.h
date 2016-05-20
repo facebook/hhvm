@@ -44,7 +44,7 @@ Variant HHVM_FUNCTION(
                                  const Variant& subject, int limit = -1,
                                  VRefParam count = uninit_null());
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
-                                  int limit = -1, int flags = 0);
+                                  const Variant& limit, int flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,
                                  const Variant& = null_string);
 int64_t HHVM_FUNCTION(preg_last_error);

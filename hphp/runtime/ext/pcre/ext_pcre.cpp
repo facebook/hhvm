@@ -181,8 +181,9 @@ Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callba
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
-                                  int limit /* = -1 */, int flags /* = 0 */) {
-  return preg_split(pattern, subject, limit, flags);
+                                  const Variant& limit, int flags /* = 0 */) {
+  //NOTE: .toInt64() returns 0 for null
+  return preg_split(pattern, subject, limit.toInt64(), flags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

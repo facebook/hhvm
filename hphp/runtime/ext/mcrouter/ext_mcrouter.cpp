@@ -140,10 +140,7 @@ struct MCRouter {
       mcr_throwException("Unable to initialize MCRouter instance");
     }
 
-    m_client = router->createClient(
-      {nullptr,nullptr,nullptr},
-      nullptr,
-      0);
+    m_client = router->createClient(0 /* disable max_outstanding_requests */);
 
     if (!m_client) {
       mcr_throwException("Unable to initialize MCRouterClient instance");

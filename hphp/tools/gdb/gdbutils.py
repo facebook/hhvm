@@ -253,7 +253,7 @@ def rawptr(val):
     if t.code == gdb.TYPE_CODE_PTR:
         return val
     elif t.code == gdb.TYPE_CODE_REF:
-        return val.referenced_type().address
+        return val.referenced_value().address
 
     name = template_type(t)
     ptr = None

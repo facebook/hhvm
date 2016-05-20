@@ -868,7 +868,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           }
           buf->clear();
           reset_type();
-          check_request_surprise_unlikely();
+          if (!getSurpriseFlag(PendingGCFlag)) {
+            // TODO t10666946 figure out why this can crash
+            check_request_surprise_unlikely();
+          }
         }
         break;
 

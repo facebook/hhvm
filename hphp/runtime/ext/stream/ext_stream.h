@@ -215,7 +215,7 @@ Object HHVM_FUNCTION(stream_await,
 
 bool HHVM_FUNCTION(stream_set_blocking,
                    const Resource& stream,
-                   int mode);
+                   bool mode);
 
 int64_t HHVM_FUNCTION(stream_set_read_buffer,
                       const Resource& stream,

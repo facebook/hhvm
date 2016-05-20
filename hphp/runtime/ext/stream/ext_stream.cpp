@@ -435,7 +435,7 @@ Object HHVM_FUNCTION(stream_await,
 
 bool HHVM_FUNCTION(stream_set_blocking,
                    const Resource& stream,
-                   int mode) {
+                   bool mode) {
   auto file = cast<File>(stream);
   int flags = fcntl(file->fd(), F_GETFL, 0);
   if (mode) {

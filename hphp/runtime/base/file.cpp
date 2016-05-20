@@ -46,7 +46,7 @@
 
 namespace HPHP {
 
-const int FileData::CHUNK_SIZE = 8192;
+const int FileData::DEFAULT_CHUNK_SIZE = 8192;
 
 FileData::FileData(bool nonblocking)
 : m_nonblocking(nonblocking)
@@ -69,7 +69,6 @@ StaticString File::s_resource_name("stream");
 
 int __thread s_pcloseRet;
 
-int File::CHUNK_SIZE = FileData::CHUNK_SIZE;
 const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
@@ -261,8 +260,8 @@ String File::read() {
 
   while (!eof() || avail) {
     if (m_data->m_buffer == nullptr) {
-      m_data->m_buffer = (char *)malloc(CHUNK_SIZE);
-      m_data->m_bufferSize = CHUNK_SIZE;
+      m_data->m_buffer = (char *)malloc(m_data->m_chunk_size);
+      m_data->m_bufferSize = m_data->m_chunk_size;
     }
 
     if (avail > 0) {
@@ -300,8 +299,8 @@ String File::read(int64_t length) {
 
   while (avail < length && !eof()) {
     if (m_data->m_buffer == nullptr) {
-      m_data->m_buffer = (char *)malloc(CHUNK_SIZE);
-      m_data->m_bufferSize = CHUNK_SIZE;
+      m_data->m_buffer = (char *)malloc(m_data->m_chunk_size);
+      m_data->m_bufferSize = m_data->m_chunk_size;
     }
 
     if (avail > 0) {
@@ -336,7 +335,7 @@ String File::read(int64_t length) {
 }
 
 int64_t File::filteredReadToBuffer() {
-  int64_t bytes_read = readImpl(m_data->m_buffer, CHUNK_SIZE);
+  int64_t bytes_read = readImpl(m_data->m_buffer, m_data->m_chunk_size);
   if (LIKELY(m_readFilters.empty())) {
     return bytes_read;
   }
@@ -627,9 +626,10 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       break;
     } else {
       if (m_data->m_buffer == nullptr) {
-        m_data->m_buffer = (char *)malloc(CHUNK_SIZE);
-        m_data->m_bufferSize = CHUNK_SIZE;
+        m_data->m_buffer = (char *)malloc(m_data->m_chunk_size);
+        m_data->m_bufferSize = m_data->m_chunk_size;
       }
+
       m_data->m_writepos = filteredReadToBuffer();
       m_data->m_readpos = 0;
       if (bufferedLen() == 0) {
@@ -652,29 +652,29 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
     return false;
   }
 
-  if (maxlen <= 0 || maxlen > CHUNK_SIZE) {
-    maxlen = CHUNK_SIZE;
+  if (maxlen <= 0 || maxlen > m_data->m_chunk_size) {
+    maxlen = m_data->m_chunk_size;
   }
 
   int64_t avail = bufferedLen();
   if (m_data->m_buffer == nullptr) {
-    m_data->m_buffer = (char *)malloc(CHUNK_SIZE * 3);
-    m_data->m_bufferSize = CHUNK_SIZE * 3;
-  } else if (m_data->m_bufferSize < CHUNK_SIZE * 3) {
-    auto newbuf = malloc(CHUNK_SIZE * 3);
+    m_data->m_buffer = (char *)malloc(m_data->m_chunk_size * 3);
+    m_data->m_bufferSize = m_data->m_chunk_size * 3;
+  } else if (m_data->m_bufferSize < m_data->m_chunk_size * 3) {
+    auto newbuf = malloc(m_data->m_chunk_size * 3);
     memcpy(newbuf, m_data->m_buffer, m_data->m_bufferSize);
     free(m_data->m_buffer);
     m_data->m_buffer = (char*) newbuf;
-    m_data->m_bufferSize = CHUNK_SIZE * 3;
+    m_data->m_bufferSize = m_data->m_chunk_size * 3;
   }
 
   if (avail < maxlen && !eof()) {
-    assert(m_data->m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
+    assert(m_data->m_writepos + maxlen - avail <= m_data->m_chunk_size * 3);
     m_data->m_writepos +=
       readImpl(m_data->m_buffer + m_data->m_writepos, maxlen - avail);
     maxlen = bufferedLen();
   }
-  if (m_data->m_readpos >= CHUNK_SIZE) {
+  if (m_data->m_readpos >= m_data->m_chunk_size) {
     memcpy(m_data->m_buffer,
            m_data->m_buffer + m_data->m_readpos,
            bufferedLen());
@@ -761,20 +761,19 @@ const String& File::o_getResourceName() const {
 }
 
 int64_t File::getChunkSize() const{
-  return CHUNK_SIZE;
+  return m_data->m_chunk_size;
 }
 
 void File::setChunkSize(int64_t chunk_size) {
 
   assertx(chunk_size > 0);
 
-  CHUNK_SIZE = chunk_size;
+  m_data->m_chunk_size = chunk_size;
 
-  if (m_data->m_buffer != nullptr) {
-    realloc(m_data->m_buffer, CHUNK_SIZE);
-    m_data->m_bufferSize = CHUNK_SIZE;
+  if (m_data->m_buffer == nullptr) {
+    realloc(m_data->m_buffer, m_data->m_chunk_size);
+    m_data->m_bufferSize = m_data->m_chunk_size;
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

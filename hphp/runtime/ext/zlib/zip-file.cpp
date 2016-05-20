@@ -56,7 +56,7 @@ bool ZipFile::open(const String& filename, const String& mode) {
     }
     auto file = req::make<TempFile>();
     while (!m_innerFile->eof()) {
-      file->write(m_innerFile->read(File::CHUNK_SIZE));
+      file->write(m_innerFile->read(file->getChunkSize()));
     }
     file->rewind();
     m_tempFile = file;

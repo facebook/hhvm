@@ -48,7 +48,7 @@ extern int __thread s_pcloseRet;
 // FileData to add any persistent data members, e.g. see Socket.
 // Classes in the FileData hierarchy may not contain request-allocated data.
 struct FileData {
-  static const int CHUNK_SIZE;
+  static const int DEFAULT_CHUNK_SIZE;
 
   FileData() { }
   explicit FileData(bool nonblocking);
@@ -81,7 +81,9 @@ struct FileData {
   std::string m_mode;
 
   char *m_buffer{nullptr};
-  int64_t m_bufferSize{CHUNK_SIZE};
+  int64_t m_bufferSize{DEFAULT_CHUNK_SIZE};
+  int64_t m_chunk_size{DEFAULT_CHUNK_SIZE};
+
 };
 
 /**

@@ -330,7 +330,8 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
   if (maxlength == 0) maxlength = INT_MAX;
   while (cbytes < maxlength) {
     int remaining = maxlength - cbytes;
-    String buf = srcFile->read(std::min(remaining, File::CHUNK_SIZE));
+    int chunk_size = srcFile->getChunkSize();
+    String buf = srcFile->read(std::min(remaining, chunk_size));
     if (buf.size() == 0) break;
     if (destFile->write(buf) != buf.size()) {
       return false;

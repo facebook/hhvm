@@ -27,7 +27,7 @@ module HintCycle = struct
     | Happly ((_, x), []) when SMap.mem x params ->
         let stack = SSet.add x stack in
         (match SMap.get x params with
-        | Some (Some (_, param)) ->
+        | Some (Some (_, ((_, Happly (_, [])) as param))) ->
             hint stack params param
         | _ -> ()
         )

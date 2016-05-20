@@ -1,0 +1,2 @@
+File "recursive_constraint_bad_2.php", line 4, characters 18-19:
+Cyclic constraint between type parameters (Naming[2005])

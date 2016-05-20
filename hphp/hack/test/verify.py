@@ -9,6 +9,7 @@ import os.path
 import subprocess
 import sys
 import difflib
+import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
 from itertools import compress
@@ -30,7 +31,7 @@ def get_test_flags(f):
     if not os.path.isfile(path):
         return []
     with open(path) as f:
-        return f.read().strip().split(' ')
+        return shlex.split(f.read().strip())
 
 def run_test_program(files, program, expect_ext, get_flags):
     """
@@ -98,7 +99,7 @@ def get_hh_flags(test_dir):
             print("No HH_FLAGS file found")
         return []
     with open(path) as f:
-        return f.read().strip().split(' ')
+        return shlex.split(f.read().strip())
 
 def files_with_ext(files, ext):
     """

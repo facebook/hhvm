@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Reordered_argument_collections
 open SymbolDefinition
 
 type outline = string SymbolDefinition.t list
@@ -39,7 +40,7 @@ let summarize_property kinds var =
 
 let maybe_summarize_property ~skip kinds var =
   let _, (_, name), _ = var in
-  if SSet.mem name skip then [] else [summarize_property kinds var]
+  if SSet.mem skip name then [] else [summarize_property kinds var]
 
 let summarize_const ((pos, name), (expr_pos, _)) =
   let span = (Pos.btw pos expr_pos) in
@@ -143,7 +144,9 @@ let summarize_class class_ ~no_children =
     | _ -> modifiers
   in
   let children = if no_children then None else begin
-    let implicit_props = SSet.of_list (class_implicit_fields class_) in
+    let implicit_props = List.fold (class_implicit_fields class_)
+      ~f:SSet.add ~init:SSet.empty
+    in
     Some (List.concat_map class_.Ast.c_body ~f:begin function
       | Ast.Method m -> [summarize_method m]
       | Ast.ClassVars (kinds, _, vars) ->

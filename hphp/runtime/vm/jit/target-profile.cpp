@@ -62,7 +62,9 @@ void ArrayKindProfile::report(ArrayData::ArrayKind kind) {
 double ArrayKindProfile::fraction(ArrayData::ArrayKind kind) const {
   const auto idx = getKindIndex(kind);
   if (idx == kNumProfiledArrayKinds - 1) return 0; // untracked kinds
-  return (double)count[idx] / total();
+  const auto tot = total();
+  if (tot == 0) return 0;
+  return (double)count[idx] / tot;
 }
 
 //////////////////////////////////////////////////////////////////////

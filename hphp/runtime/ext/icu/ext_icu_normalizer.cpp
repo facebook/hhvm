@@ -9,7 +9,7 @@ namespace HPHP { namespace Intl {
 
 const StaticString s_Normalizer("Normalizer");
 
-static Variant HHVM_STATIC_METHOD(Normalizer, isNormalized,
+static bool HHVM_STATIC_METHOD(Normalizer, isNormalized,
                                   const String& input, int64_t form) {
   s_intl_error->clearError();
   switch (form) {
@@ -22,7 +22,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, isNormalized,
       s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                              "normalizer_isnormalized: "
                              "illegal normalization form");
-      return init_null();
+      return false;
   }
 
   UErrorCode error = U_ZERO_ERROR;
@@ -33,9 +33,9 @@ static Variant HHVM_STATIC_METHOD(Normalizer, isNormalized,
   }
 
   error = U_ZERO_ERROR;
-  UBool ret = unorm_isNormalizedWithOptions(uinput.getBuffer(), uinput.length(),
+  bool ret = (unorm_isNormalizedWithOptions(uinput.getBuffer(), uinput.length(),
                                             (UNormalizationMode)form,
-                                            0, &error);
+                                            0, &error) == 1 ? true : false);
 
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "Error testing if string is the given "
@@ -64,7 +64,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
       s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                              "normalizer_normalize: "
                              "illegal normalization form");
-      return init_null();
+      return false;
   }
 
   UErrorCode error = U_ZERO_ERROR;
@@ -85,7 +85,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
   if (U_FAILURE(error) &&
       (error != U_BUFFER_OVERFLOW_ERROR) &&
       (error != U_STRING_NOT_TERMINATED_WARNING)) {
-    return init_null();
+    return false;
   }
 
   if (size_needed > capacity) {
@@ -97,7 +97,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
                                   &error);
     if (U_FAILURE(error)) {
       s_intl_error->setError(error, "Error normalizing string");
-      return init_null();
+      return false;
     }
   }
   dest.releaseBuffer(size_needed);
@@ -107,7 +107,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "normalizer_normalize: "
                                   "error converting normalized text UTF-8");
-    return init_null();
+    return false;
   }
   return ret;
 }

@@ -1465,6 +1465,18 @@ To string conversions:
   be null---it is only used for enterTCHelper and ignored by everything else;
   resumed functions store their real return value into the Resumable object.
 
+| AsyncRetFast<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(Cell), T
+
+  Packs retVal (S2) into registers, sync stack (S0) and calls the asyncRetCtrl
+  unique stub. The stub unblocks parents of the async function (represented by
+  the frame pointer S1) and determines if it's possible to resume parent
+  directly (fast path).
+
+| AsyncSwitchFast<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(Cell), T
+
+  Pass control to any pending fast resumable wait handles, bypassing the
+  scheduler.  If no fast resumables are pending, behave like AsyncRetCtrl.
+
 | LdRetVal, D(Gen), S(FramePtr), NF
 
   Load the return value from the already-returned-from ActRec pointed to by S0
@@ -2022,13 +2034,6 @@ To string conversions:
 
   Establish dependency between parent AsyncFunctionWaitHandle object, whose
   ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
-
-| AsyncRetFast<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(Cell), T
-
-  Packs retVal (S2) into registers, sync stack (S0) and calls the asyncRetCtrl
-  unique stub. The stub unblocks parents of the async function (represented by
-  the frame pointer S1) and determines if it's possible to resume parent
-  directly (fast path).
 
 | ABCUnblock, ND, S(ABC), NF
 

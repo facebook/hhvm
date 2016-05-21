@@ -46,11 +46,12 @@ struct AsioContext final {
     m_runnableQueue.push_back(wait_handle);
   }
   void scheduleFast(c_AsyncFunctionWaitHandle* wait_handle) {
-    // assert(wait_handle->isFastResumable());
     m_fastRunnableQueue.push_back(wait_handle);
   }
   void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
                 int64_t priority);
+
+  c_AsyncFunctionWaitHandle* maybePopFast();
 
   template <class TWaitHandle>
   uint32_t registerTo(req::vector<TWaitHandle*>& vec, TWaitHandle* wh);

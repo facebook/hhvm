@@ -137,7 +137,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   auto const retVal = cns(env, TInitNull);
   push(env, retVal);
 
-  gen(env, AsyncRetCtrl, RetCtrlData { bcSPOffset(env), true },
+  gen(env, AsyncSwitchFast, RetCtrlData { bcSPOffset(env), true },
       sp(env), fp(env), retVal);
 }
 

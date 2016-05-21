@@ -117,6 +117,31 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
   wait_handle->incRefCount();
 }
 
+c_AsyncFunctionWaitHandle* AsioContext::maybePopFast() {
+  assertx(this == AsioSession::Get()->getCurrentContext());
+
+  while (!m_fastRunnableQueue.empty()) {
+    auto wh = m_fastRunnableQueue.back();
+    m_fastRunnableQueue.pop_back();
+
+    if (wh->getState() == c_ResumableWaitHandle::STATE_READY &&
+        wh->isFastResumable()) {
+      // We only call maybePopFast() on the current context.  Since `wh' was
+      // scheduled in this context at some point, it must still be scheduled
+      // here now, since the only way it could leave the context is if the
+      // context was destroyed.  (Being scheduled here supercedes it having
+      // been scheduled in earlier contexts.)
+      assertx(wh->getContextIdx() ==
+              AsioSession::Get()->getCurrentContextIdx());
+      return wh;
+    } else {
+      // `wh' is blocked or finished in some other context.
+      decRefObj(wh);
+    }
+  }
+  return nullptr;
+}
+
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(wait_handle);
   assert(wait_handle->getContext() == this);

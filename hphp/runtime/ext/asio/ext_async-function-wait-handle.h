@@ -87,8 +87,8 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
     c_WaitableWaitHandle* child
   ); // nothrow
   static void PrepareChild(const ActRec* fp, c_WaitableWaitHandle* child);
-  void resume();
   void onUnblocked();
+  void resume();
   void await(Offset resumeOffset, c_WaitableWaitHandle* child);
   void ret(Cell& result);
   void fail(ObjectData* exception);

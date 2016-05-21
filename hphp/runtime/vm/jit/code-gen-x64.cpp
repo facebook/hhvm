@@ -4776,6 +4776,14 @@ void CodeGenerator::cgAsyncRetFast(IRInstruction* inst) {
   v << jmpi{mcg->ustubs().asyncRetCtrl, args};
 }
 
+void CodeGenerator::cgAsyncSwitchFast(IRInstruction* inst) {
+  auto& v = vmain();
+  adjustSPForReturn(m_state, inst);
+  prepare_return_regs(v, inst->src(2), srcLoc(inst, 2),
+                      inst->extra<AsyncSwitchFast>()->aux);
+  v << jmpi{mcg->ustubs().asyncSwitchCtrl, php_return_regs()};
+}
+
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
   auto const robj = srcLoc(inst, 0).reg();
   auto const rdst = dstLoc(inst, 0).reg();

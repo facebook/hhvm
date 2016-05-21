@@ -227,14 +227,31 @@ struct UniqueStubs {
   /*
    * Async function return stub.
    *
-   * First check whether the parent can be resumed directly (single parent in
-   * the same asio context, which is the fast & common path).  If not, follow
-   * the slow path, which unblocks parents and returns to the scheduler.
+   * Check whether the parent of the returning WaitHandle can be resumed
+   * directly (namely, if it is the solitary parent and is in the same
+   * AsioContext), and do so if possible.  Otherwise, unblock all parents and
+   * jump to asyncSwitchCtrl.
+   *
+   * rvmfp() should point to the ActRec of the WaitHandle that is returning.
    *
    * @reached:  jmp from TC
    * @context:  func body
    */
   TCA asyncRetCtrl;
+
+  /*
+   * Async function finish-suspend-and-resume stub.
+   *
+   * Check for fast resumables on the AsioContext runnable queue.  If one is
+   * found that is ready to run, jump to it directly; otherwise, leave the TC
+   * and return to the scheduler.
+   *
+   * rvmfp() should point to the ActRec of the WaitHandle that is suspending.
+   *
+   * @reached:  jmp from TC
+   * @context:  func body
+   */
+  TCA asyncSwitchCtrl;
 
 
   /////////////////////////////////////////////////////////////////////////////

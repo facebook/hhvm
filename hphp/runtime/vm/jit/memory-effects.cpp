@@ -503,8 +503,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AStackAny | AFrameAny | AMIStateAny
     };
 
-  case AsyncRetFast:
   case AsyncRetCtrl:
+  case AsyncRetFast:
+  case AsyncSwitchFast:
     if (inst.extra<RetCtrlData>()->suspendingResumed) {
       return UnknownEffects {};
     }

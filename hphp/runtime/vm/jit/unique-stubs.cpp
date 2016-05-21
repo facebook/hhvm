@@ -20,10 +20,12 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -50,6 +52,8 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
+#include "hphp/runtime/ext/asio/asio-context.h"
+#include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
@@ -482,10 +486,93 @@ void unblockParents(Vout& v, Vout& vcold, Vreg parent) {
   });
 }
 
-TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data) {
+/*
+ * Try to pop a fast resumable off the current AsioContext's queue.  If there
+ * is none (or if surprise flags are set), return nullptr.
+ */
+c_AsyncFunctionWaitHandle* getFastRunnableAFWH() {
+  if (checkSurpriseFlags()) return nullptr;
+  auto const ctx = AsioSession::Get()->getCurrentContext();
+
+  auto const afwh = ctx->maybePopFast();
+  assertx(!afwh || afwh->isFastResumable());
+  return afwh;
+}
+
+TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
   alignJmpTarget(cb);
 
-  return vwrap2(cb, data, [] (Vout& v, Vout& vcold) {
+  auto const ret = vwrap(cb, data, [] (Vout& v) {
+    // Set rvmfp() to the suspending WaitHandle's parent frame.
+    v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
+  });
+
+  *inner = vwrap(cb, data, [] (Vout& v) {
+    auto const slow_path = Vlabel(v.makeBlock());
+
+    auto const afwh = v.makeReg();
+    v << vcall{
+      CallSpec::direct(getFastRunnableAFWH),
+      v.makeVcallArgs({{}}),
+      v.makeTuple({afwh}),
+      Fixup{},
+      DestType::SSA
+    };
+
+    auto const isNull = v.makeReg();
+    v << testq{afwh, afwh, isNull};
+    ifThen(v, CC_Z, isNull, slow_path);
+
+    // Transfer our frame linkage into the AFWH that we're resuming.
+    v << store{rvmfp(), afwh[AFWH::arOff() + AROFF(m_sfp)]};
+
+    // Set the AFHW's state to RUNNING.
+    v << storebi{
+      AFWH::toKindState(
+        c_WaitHandle::Kind::AsyncFunction,
+        AFWH::STATE_RUNNING
+      ),
+      afwh[AFWH::stateOff()]
+    };
+
+    auto const child = v.makeReg();
+    v << load{afwh[AFWH::childrenOff() + AFWH::Node::childOff()], child};
+
+    // Copy the child's result onto the stack and incref it.
+    auto const data = v.makeReg();
+    auto const type = v.makeReg();
+    auto const resultOff = c_WaitableWaitHandle::resultOff();
+    v << load {child[resultOff + TVOFF(m_data)], data};
+    v << loadb{child[resultOff + TVOFF(m_type)], type};
+    v << store {data, rvmsp()[TVOFF(m_data)]};
+    v << storeb{type, rvmsp()[TVOFF(m_type)]};
+
+    emitIncRefWork(v, data, type);
+
+    // Now decref `child', which may free it---but note that the WaitHandle's
+    // destructor has no risk of reentry.
+    emitDecRefWorkObj(v, child);
+
+    // Load the address of the ActRec for our AFWH into rvmfp(), and sync it to
+    // vmFirstAR().  We don't need to sync any of the vmRegs(), since we're
+    // jumping straight into the async function.
+    v << lea{afwh[AFWH::arOff()], rvmfp()};
+    v << store{rvmfp(), rvmtl()[rds::kVmFirstAROff]};
+
+    // Jump to the AFWH's resume address.
+    v << jmpm{afwh[AFWH::resumeAddrOff()], php_return_regs()};
+
+    v = slow_path;
+    v << leavetc{php_return_regs()};
+  });
+
+  return ret;
+}
+
+TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
+  alignJmpTarget(cb);
+
+  return vwrap2(cb, data, [&] (Vout& v, Vout& vcold) {
     auto const data = rarg(0);
     auto const type = rarg(1);
 
@@ -540,7 +627,7 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data) {
     v << cmpqim{0, parentBl[bl_rel(AFWH::resumeAddrOff())], isNullAddr};
     ifThen(v, CC_E, isNullAddr, slow_path);
 
-    // CheckparentBl->getContextIdx() == child->getContextIdx().
+    // Check parentBl->getContextIdx() == child->getContextIdx().
     auto const childContextIdx = v.makeReg();
     auto const parentContextIdx = v.makeReg();
     auto const inSameContext = v.makeReg();
@@ -622,10 +709,10 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data) {
     v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
 
     // Decref the WaitHandle.  We only do it once here (unlike in the fast
-    // path) because the scheduler drops the other reference.
+    // path) since we're not also resuming a parent that we've unblocked.
     emitDecRefWorkObj(v, wh);
 
-    v << leavetc{php_return_regs()};
+    v << jmpi{switchCtrl, php_return_regs()};
   });
 }
 
@@ -1091,10 +1178,13 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(genRetHelper,               emitInterpGenRet<false>(cold, data));
   ADD(asyncGenRetHelper,          emitInterpGenRet<true>(cold, data));
   ADD(retInlHelper,               emitInterpRet(cold, data));
-  ADD(asyncRetCtrl,               emitAsyncRetCtrl(main, data));
   ADD(debuggerRetHelper,          emitDebuggerInterpRet(cold, data));
   ADD(debuggerGenRetHelper,       emitDebuggerInterpGenRet<false>(cold, data));
   ADD(debuggerAsyncGenRetHelper,  emitDebuggerInterpGenRet<true>(cold, data));
+
+  TCA inner_stub;
+  ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(main, data, &inner_stub));
+  ADD(asyncRetCtrl,     emitAsyncRetCtrl(main, data, inner_stub));
 
   ADD(bindCallStub,           emitBindCallStub<false>(cold, data));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold, data));

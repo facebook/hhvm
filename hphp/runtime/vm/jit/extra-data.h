@@ -1221,6 +1221,7 @@ X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncRetCtrl,                 RetCtrlData);
 X(AsyncRetFast,                 RetCtrlData);
+X(AsyncSwitchFast,              RetCtrlData);
 X(LdArrFuncCtx,                 IRSPRelOffsetData);
 X(LdArrFPushCuf,                IRSPRelOffsetData);
 X(LdStrFPushCuf,                IRSPRelOffsetData);

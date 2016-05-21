@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/debug/debug.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
@@ -1136,6 +1137,19 @@ bool AdminRequestHandler::handleDumpStaticStringsRequest(
   SCOPE_EXIT { out.close(); };
   for (auto item : list) {
     out << formatStaticString(item);
+    if (RuntimeOption::EvalPerfDataMap) {
+      size_t len = item->size();
+      if (len > 255) len = 255;
+      std::string str(item->data(), len);
+      // Only print the first line (up to 255 characters). Since we want '\0' in
+      // the list of characters to avoid, we need to use the version of
+      // `find_first_of()' with explicit length.
+      auto cutOffPos = str.find_first_of("\r\n", 0, 3);
+      if (cutOffPos != std::string::npos) str.erase(cutOffPos);
+      Debug::DebugInfo::recordDataMap(item->mutableData(),
+                                      item->mutableData() + item->size(),
+                                      "Str-" + str);
+    }
   }
   return true;
 }

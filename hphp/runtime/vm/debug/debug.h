@@ -39,7 +39,8 @@ struct DebugInfo {
                      bool inPrologue);
   void recordBCInstr(TCRange range, uint32_t op);
 
-  static void recordDataMap(void* from, void* to, const std::string& desc);
+  static void recordDataMap(const void* from, const void* to,
+                            const std::string& desc);
   void recordRelocMap(void* from, void* to, const String& desc);
   FILE* getRelocMap() const { return m_relocMap; }
   const std::string& getRelocMapName() const { return m_relocMapName; }

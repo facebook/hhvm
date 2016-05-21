@@ -2364,9 +2364,76 @@ bool is_hphp_session_initialized() {
 }
 
 static struct SetThreadInitFini {
+  template<class ThreadT> static typename std::enable_if<
+    std::is_integral<ThreadT>::value || std::is_pointer<ThreadT>::value>::type
+  recordThreadAddr(ThreadT threadId, char* stackAddr, size_t stackSize) {
+    // In the current glibc implementation, pthread_t is a 64-bit unsigned
+    // integer, whose value equals the address of the thread control block
+    // (TCB).  In x64_64, this is right above the TLS block.  In addition,
+    // TLS and TCB sits at the high end of the stack, i.e.,
+    //
+    // stackAddr + stackSize ----> +---------------+
+    //                             | TCB           |
+    //              threadId ----> +---------------+
+    //                             | TLS           |
+    //                             +---------------+
+    //                             | Stack         |
+    //                             .               .
+    //                             .               .
+    //             stackAddr ----> +---------------+
+    auto const tcbBase = reinterpret_cast<char*>(threadId);
+    auto stackEnd = stackAddr + stackSize;
+    if (tcbBase > stackAddr && tcbBase < stackEnd) { // the expected layout
+      // TCB
+      Debug::DebugInfo::recordDataMap(
+        tcbBase, stackEnd,
+        folly::sformat("Thread-{}", static_cast<void*>(tcbBase)));
+      // TLS
+      auto const tlsRange = getCppTdata();
+      auto const tlsSize = (tlsRange.second + 15) / 16 * 16;
+      stackEnd = tcbBase - tlsSize;
+      if (tlsSize) {
+        Debug::DebugInfo::recordDataMap(
+          stackEnd, tcbBase,
+          folly::sformat("TLS-{}", static_cast<void*>(tcbBase)));
+      }
+    }
+    Debug::DebugInfo::recordDataMap(
+      stackAddr, stackEnd,
+      folly::sformat("TLS-{}", static_cast<void*>(tcbBase)));
+  }
+  template<class ThreadT> static typename std::enable_if<
+    !std::is_integral<ThreadT>::value && !std::is_pointer<ThreadT>::value>::type
+  recordThreadAddr(ThreadT threadId, char* stackAddr, size_t stackSize) {
+    // pthread_t is not an integer or pointer to TCB in this pthread
+    // implementation.  But we can still figure out where TLS is.
+    auto const tlsRange = getCppTdata();
+    auto const tlsSize = (tlsRange.second + 15) / 16 * 16;
+    auto const tlsBaseAddr = reinterpret_cast<char*>(tlsBase());
+    Debug::DebugInfo::recordDataMap(
+      tlsBaseAddr, tlsBaseAddr + tlsSize,
+      folly::sformat("TLS-{}", static_cast<void*>(stackAddr)));
+    Debug::DebugInfo::recordDataMap(
+      stackAddr, stackAddr + stackSize,
+      folly::sformat("Stack-{}", static_cast<void*>(stackAddr)));
+  }
+
   SetThreadInitFini() {
-    AsyncFuncImpl::SetThreadInitFunc([](void*) { hphp_thread_init(); },
-                                     nullptr);
+    AsyncFuncImpl::SetThreadInitFunc(
+      [] (void*) {
+        if (RuntimeOption::EvalPerfDataMap) {
+          pthread_t threadId = pthread_self();
+          pthread_attr_t attr;
+          pthread_getattr_np(threadId, &attr);
+          void* stackAddr{nullptr};
+          size_t stackSize{0};
+          pthread_attr_getstack(&attr, &stackAddr, &stackSize);
+          pthread_attr_destroy(&attr);
+          recordThreadAddr(threadId, static_cast<char*>(stackAddr), stackSize);
+        }
+        hphp_thread_init();
+      },
+      nullptr);
     AsyncFuncImpl::SetThreadFiniFunc([](void*) { hphp_thread_exit(); },
                                      nullptr);
   }

@@ -142,6 +142,9 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return bool
    */
+  <<__Deprecated(
+    "Use Vector::containsKey() for key search or Vector::linearSearch() for value serach"
+  )>>
   public function contains(mixed $key): bool {
     if (!\is_int($key)) {
       throw new \InvalidArgumentException(

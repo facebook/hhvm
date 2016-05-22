@@ -130,7 +130,7 @@ void FunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     parseTimeFatal(
       fs,
       Compiler::NoError,
-      "Only the last parameter in a function call is allowed to use ...");
+      "Cannot use positional argument after argument unpacking");
   }
 }
 
@@ -140,18 +140,17 @@ bool FunctionCall::checkUnpackParams() {
   const auto numParams = params.getCount();
   if (!numParams) return true;
 
-  // when supporting multiple unpacks at the end of the param list, this
-  // will need to disallow transitions from unpack to non-unpack.
-  for (int i = 0; i < (numParams - 1); ++i) {
+  // Disallow non-unpack arguments after at least one unpack
+  bool unpackPresent = false;
+  for (int i = 0; i < numParams; ++i) {
     ExpressionPtr p = params[i];
     if (p->isUnpack()) {
+      unpackPresent = true;
+    } else if (unpackPresent) {
       return false;
     }
   }
 
-  // we don't get here if any parameter before the last has isUnpack()
-  // set, so the last one had better match containsUnpack().
-  assert(params.containsUnpack() == params[numParams - 1]->isUnpack());
   return true;
 }
 

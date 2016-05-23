@@ -1120,6 +1120,45 @@ static bool HHVM_METHOD(ZipArchive, setCommentName, const String& name,
   return true;
 }
 
+static bool HHVM_METHOD(ZipArchive, setCompressionIndex, int64_t index,
+                        int64_t comp_method, int64_t comp_flags) {
+  auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
+
+  FAIL_IF_INVALID_ZIPARCHIVE(setCompressionIndex, zipDir);
+
+  struct zip_stat zipStat;
+  if (zip_stat_index(zipDir->getZip(), index, 0, &zipStat) != 0) {
+    return false;
+  }
+
+  if (zip_set_file_compression(zipDir->getZip(), index, comp_method,
+                           comp_flags) != 0 ) {
+    return false;
+  }
+
+  zip_error_clear(zipDir->getZip());
+  return true;
+}
+
+static bool HHVM_METHOD(ZipArchive, setCompressionName, const String& name,
+                        int64_t comp_method, int64_t comp_flags) {
+  auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
+
+  FAIL_IF_INVALID_ZIPARCHIVE(setCompressionName, zipDir);
+  FAIL_IF_EMPTY_STRING_ZIPARCHIVE(setCompressionName, name);
+
+  int index = zip_name_locate(zipDir->getZip(), name.c_str(), 0);
+  FAIL_IF_INVALID_INDEX(index);
+
+  if (zip_set_file_compression(zipDir->getZip(), index, comp_method,
+                           comp_flags) != 0 ) {
+    return false;
+  }
+
+  zip_error_clear(zipDir->getZip());
+  return true;
+}
+
 const StaticString s_name("name");
 const StaticString s_index("index");
 const StaticString s_crc("crc");
@@ -1358,6 +1397,8 @@ struct zipExtension final : Extension {
     HHVM_ME(ZipArchive, setArchiveComment);
     HHVM_ME(ZipArchive, setCommentIndex);
     HHVM_ME(ZipArchive, setCommentName);
+    HHVM_ME(ZipArchive, setCompressionIndex);
+    HHVM_ME(ZipArchive, setCompressionName);
     HHVM_ME(ZipArchive, statIndex);
     HHVM_ME(ZipArchive, statName);
     HHVM_ME(ZipArchive, unchangeAll);

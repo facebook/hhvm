@@ -348,6 +348,36 @@ class ZipArchive {
                           string $comment): bool;
 
   /**
+   *
+   * Set the compression method of an entry defined by its index.
+   *
+   * @param int $index - Index of the entry.
+   * @param int $comp_method - The compression method. Either 
+   *   ZipArchive::CM_DEFAULT, ZipArchive::CM_STORE or ZipArchive::CM_DEFLATE. 
+   * @param int $comp_flags - Compression flags. Currently unused.
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  function setCompressionIndex(int $index, int $comp_method, 
+                               int $comp_flags = 0): bool;
+
+  /**
+   *
+   * Set the compression method of an entry defined by its name.
+   *
+   * @param string $name - Name of the entry.
+   * @param int $comp_method - The compression method. Either 
+   *   ZipArchive::CM_DEFAULT, ZipArchive::CM_STORE or ZipArchive::CM_DEFLATE.
+   * @param int $comp_flags - Compression flags. Currently unused.
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  function setCompressionNAme(string $name, int $comp_method, 
+                              int $comp_flags = 0): bool;
+
+  /**
    * Get the details of an entry defined by its index.
    *
    * @param int $index - Index of the entry

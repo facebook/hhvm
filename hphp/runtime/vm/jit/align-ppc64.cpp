@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | (c) Copyright IBM Corporation 2015                                   |
+   | (c) Copyright IBM Corporation 2015-2016                              |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@ namespace {
 /*
  * Targets of jmps on ppc64 must be aligned to instruction.
  */
-constexpr size_t kJmpTargetAlign = ppc64_asm::Assembler::kBytesPerInstr;
+constexpr size_t kJmpTargetAlign = ppc64_asm::instr_size_in_bytes;
 
 struct AlignImpl {
   static DECLARE_ALIGN_TABLE(s_table);
@@ -77,6 +77,13 @@ bool is_aligned(TCA frontier, Alignment alignment) {
 void align(CodeBlock& cb, CGMeta* meta,
            Alignment alignment, AlignContext context) {
   return jit::align<AlignImpl>(cb, meta, alignment, context);
+}
+
+const AlignInfo& alignment_info(Alignment alignment) {
+  auto const idx = static_cast<uint32_t>(alignment);
+  bool const is_jccandjmp = alignment == Alignment::SmashJccAndJmp;
+
+  return AlignImpl::s_table[is_jccandjmp ? idx + 2 : idx];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

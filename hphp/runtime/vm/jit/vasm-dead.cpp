@@ -82,15 +82,18 @@ bool effectful(Vinstr& inst) {
     case Vinstr::defvmsp:
     case Vinstr::divint:
     case Vinstr::divsd:
+    case Vinstr::extrb:
     case Vinstr::extsb:
     case Vinstr::extsw:
     case Vinstr::fabs:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
+    case Vinstr::fctidz:
     case Vinstr::imul:
     case Vinstr::incl:
     case Vinstr::incq:
     case Vinstr::incw:
+    case Vinstr::ldarx:
     case Vinstr::ldimmb:
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
@@ -220,12 +223,13 @@ bool effectful(Vinstr& inst) {
     case Vinstr::incqm:
     case Vinstr::incqmlock:
     case Vinstr::incwm:
+    case Vinstr::inittc:
     case Vinstr::jcc:
     case Vinstr::jcci:
     case Vinstr::jmp:
+    case Vinstr::jmpi:
     case Vinstr::jmpm:
     case Vinstr::jmpr:
-    case Vinstr::jmpi:
     case Vinstr::landingpad:
     case Vinstr::leavetc:
     case Vinstr::mcprep:
@@ -249,6 +253,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::resumetc:
     case Vinstr::ret:
     case Vinstr::retransopt:
+    case Vinstr::stdcx:
     case Vinstr::store:
     case Vinstr::storeb:
     case Vinstr::storebi:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | (c) Copyright IBM Corporation 2015                                   |
+   | (c) Copyright IBM Corporation 2015-2016                              |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_ASM_PPC64_H_
-#define incl_ASM_PPC64_H_
+#ifndef incl_HPHP_PPC64_ASM_ASM_PPC64_H_
+#define incl_HPHP_PPC64_ASM_ASM_PPC64_H_
 
 #include <cstdint>
 #include <cassert>
@@ -25,6 +25,7 @@
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/types.h"
 
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/immed.h"
@@ -39,11 +40,27 @@ namespace ppc64_asm {
 /* using override */ using HPHP::CodeAddress;
 /* using override */ using HPHP::jit::ConditionCode;
 
-/* Used to  define a minimal callstack on call/ret vasm */
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Constants definition for PPC64
+ */
+
 // Must be the same value of AROFF(_dummyB).
-constexpr int min_callstack_size       = 32;
-// Must be the same value of AROFF(m_savedRip).
-constexpr int lr_position_on_callstack = 16;
+constexpr uint8_t min_frame_size            = 4 * 8;
+// Must be the same value of AROFF(_savedToc).
+constexpr uint8_t toc_position_on_frame     = 3 * 8;
+// exittc offset on our first native frame. (This position is requested as
+// reserved by ABI)
+constexpr uint8_t exittc_position_on_frame  = 1 * 8;
+
+// How many bytes a PPC64 instruction length is.
+constexpr uint8_t instr_size_in_bytes       = sizeof(PPC64Instr);
+// Amount of bytes to skip after an Assembler::call to grab the return address.
+// Currently it skips a "nop" or a "ld 2,24(1)"
+constexpr uint8_t call_skip_bytes_for_ret   = 1 * instr_size_in_bytes;
+
+//////////////////////////////////////////////////////////////////////
 
 #define BRANCHES(cr) \
   CR##cr##_LessThan,         \
@@ -67,14 +84,18 @@ enum class BranchConditions {
   Always,
 
   // mnemonics for the common case by using CR0:
-  LessThan          = CR0_LessThan,
-  LessThanEqual     = CR0_LessThanEqual,
-  GreaterThan       = CR0_GreaterThan,
-  GreaterThanEqual  = CR0_GreaterThanEqual,
-  Equal             = CR0_Equal,
-  NotEqual          = CR0_NotEqual,
-  Overflow          = CR0_Overflow,
-  NoOverflow        = CR0_NoOverflow
+  LessThan                    = CR0_LessThan,
+  LessThanEqual               = CR0_LessThanEqual,
+  GreaterThan                 = CR0_GreaterThan,
+  GreaterThanEqual            = CR0_GreaterThanEqual,
+  LessThan_Unsigned           = CR1_LessThan,
+  LessThanEqual_Unsigned      = CR1_LessThanEqual,
+  GreaterThan_Unsigned        = CR1_GreaterThan,
+  GreaterThanEqual_Unsigned   = CR1_GreaterThanEqual,
+  Equal                       = CR0_Equal,
+  NotEqual                    = CR0_NotEqual,
+  Overflow                    = CR0_Overflow,
+  NoOverflow                  = CR0_NoOverflow
 };
 
 #undef BRANCHES
@@ -114,38 +135,68 @@ struct BranchParams {
     };
 
   private:
-#define SWITCHES(cr)                                                    \
-  case BranchConditions::CR##cr##_LessThan:                             \
-    m_bo = BO::CRSet;    m_bi = BI::CR##cr##_LessThan;          break;  \
-  case BranchConditions::CR##cr##_LessThanEqual:                        \
-    m_bo = BO::CRNotSet; m_bi = BI::CR##cr##_GreaterThan;       break;  \
-  case BranchConditions::CR##cr##_GreaterThan:                          \
-    m_bo = BO::CRSet;    m_bi = BI::CR##cr##_GreaterThan;       break;  \
-  case BranchConditions::CR##cr##_GreaterThanEqual:                     \
-    m_bo = BO::CRNotSet; m_bi = BI::CR##cr##_LessThan;          break;  \
-  case BranchConditions::CR##cr##_Equal:                                \
-    m_bo = BO::CRSet;    m_bi = BI::CR##cr##_Equal;             break;  \
-  case BranchConditions::CR##cr##_NotEqual:                             \
-    m_bo = BO::CRNotSet; m_bi = BI::CR##cr##_Equal;             break;  \
-  case BranchConditions::CR##cr##_Overflow:                             \
-    m_bo = BO::CRSet;    m_bi = BI::CR##cr##_SummaryOverflow;   break;  \
-  case BranchConditions::CR##cr##_NoOverflow:                           \
-    m_bo = BO::CRNotSet; m_bi = BI::CR##cr##_SummaryOverflow;   break
 
     /* Constructor auxiliary */
     void defineBoBi(BranchConditions bc) {
       switch (bc) {
-        SWITCHES(0);
-        SWITCHES(1);
-        SWITCHES(2);
-        SWITCHES(3);
-        SWITCHES(4);
-        SWITCHES(5);
-        SWITCHES(6);
-        SWITCHES(7);
-        case BranchConditions::Always:
-          m_bo = BO::Always; m_bi = BI(0); break;
-        default:
+      /* Signed comparison */
+      case BranchConditions::LessThan:
+        m_bo = BO::CRSet;
+        m_bi = BI::CR0_LessThan;
+        break;
+      case BranchConditions::LessThanEqual:
+        m_bo = BO::CRNotSet;
+        m_bi = BI::CR0_GreaterThan;
+        break;
+      case BranchConditions::GreaterThan:
+        m_bo = BO::CRSet;
+        m_bi = BI::CR0_GreaterThan;
+        break;
+      case BranchConditions::GreaterThanEqual:
+        m_bo = BO::CRNotSet;
+        m_bi = BI::CR0_LessThan;
+        break;
+
+      /* Unsigned comparison */
+      case BranchConditions::LessThan_Unsigned:
+        m_bo = BO::CRSet;
+        m_bi = BI::CR1_LessThan;
+        break;
+      case BranchConditions::LessThanEqual_Unsigned:
+        m_bo = BO::CRNotSet;
+        m_bi = BI::CR1_GreaterThan;
+        break;
+      case BranchConditions::GreaterThan_Unsigned:
+        m_bo = BO::CRSet;
+        m_bi = BI::CR1_GreaterThan;
+        break;
+      case BranchConditions::GreaterThanEqual_Unsigned:
+        m_bo = BO::CRNotSet;
+        m_bi = BI::CR1_LessThan;
+        break;
+
+      case BranchConditions::Equal:
+        m_bo = BO::CRSet;
+        m_bi = BI::CR0_Equal;
+        break;
+      case BranchConditions::NotEqual:
+        m_bo = BO::CRNotSet;
+        m_bi = BI::CR0_Equal;
+        break;
+      case BranchConditions::Overflow:
+        m_bo = BO::CRSet;
+        m_bi = BI::CR0_SummaryOverflow;
+        break;
+      case BranchConditions::NoOverflow:
+        m_bo = BO::CRNotSet;
+        m_bi = BI::CR0_SummaryOverflow;
+        break;
+      case BranchConditions::Always:
+        m_bo = BO::Always;
+        m_bi = BI(0);
+        break;
+
+      default:
           not_implemented();
       }
     }
@@ -165,46 +216,64 @@ struct BranchParams {
 
       switch (cc) {
         case HPHP::jit::CC_O:
-          ret = BranchConditions::Overflow;         break;
+          ret = BranchConditions::Overflow;
+          break;
         case HPHP::jit::CC_NO:
-          ret = BranchConditions::NoOverflow;       break;
+          ret = BranchConditions::NoOverflow;
+          break;
         case HPHP::jit::CC_B:
-          ret = BranchConditions::LessThan;         break;
+          ret = BranchConditions::LessThan_Unsigned;
+          break;
         case HPHP::jit::CC_AE:
-          ret = BranchConditions::GreaterThanEqual; break;
+          ret = BranchConditions::GreaterThanEqual_Unsigned;
+          break;
         case HPHP::jit::CC_E:
-          ret = BranchConditions::Equal;            break;
+          ret = BranchConditions::Equal;
+          break;
         case HPHP::jit::CC_NE:
-          ret = BranchConditions::NotEqual;         break;
+          ret = BranchConditions::NotEqual;
+          break;
         case HPHP::jit::CC_BE:
-          ret = BranchConditions::LessThanEqual;    break;
+          ret = BranchConditions::LessThanEqual_Unsigned;
+          break;
         case HPHP::jit::CC_A:
-          ret = BranchConditions::GreaterThan;      break;
+          ret = BranchConditions::GreaterThan_Unsigned;
+          break;
         case HPHP::jit::CC_S:
-          ret = BranchConditions::LessThan;         break;
+          ret = BranchConditions::LessThan;
+          break;
         case HPHP::jit::CC_NS:
-          ret = BranchConditions::GreaterThan;      break;
+          ret = BranchConditions::GreaterThan;
+          break;
 
         /*
-         * TODO(gut): Parity on ppc64 is not that easy:
+         * Parity works only for unordered double comparison
+         * Todo: fixed point comparison parity
          * http://stackoverflow.com/q/32319673/5013070
          */
         case HPHP::jit::CC_P:
-          not_implemented(); /*ret = ;*/            break;
+          ret = BranchConditions::Overflow;
+          break;
         case HPHP::jit::CC_NP:
-          not_implemented(); /*ret = ;*/            break;
+          ret = BranchConditions::NoOverflow;
+          break;
 
         case HPHP::jit::CC_L:
-          ret = BranchConditions::LessThan;         break;
+          ret = BranchConditions::LessThan;
+          break;
         case HPHP::jit::CC_NL:
-          ret = BranchConditions::GreaterThanEqual; break;
+          ret = BranchConditions::GreaterThanEqual;
+          break;
         case HPHP::jit::CC_NG:
-          ret = BranchConditions::LessThanEqual;    break;
+          ret = BranchConditions::LessThanEqual;
+          break;
         case HPHP::jit::CC_G:
-          ret = BranchConditions::GreaterThan;      break;
+          ret = BranchConditions::GreaterThan;
+          break;
 
         default:
-          not_implemented();                        break;
+          not_implemented();
+          break;
       }
       return ret;
     }
@@ -212,17 +281,7 @@ struct BranchParams {
     /*
      * Get the BranchParams from an emitted conditional branch
      */
-    BranchParams(PPC64Instr instr) {
-      // first, guarantee that is a conditional branch
-      if (((instr >> 26) == 16) || ((instr >> 26) == 19)) {
-        // bc, bclr, bcctr, bctar
-        m_bo = (BranchParams::BO)((instr >> 21) & 0x1F);
-        m_bi = (BranchParams::BI)((instr >> 16) & 0x1F);
-      } else {
-        assert(false && "Not a valid conditional branch instruction");
-        // also possible: defineBoBi(BranchConditions::Always);
-      }
-    }
+    BranchParams(PPC64Instr instr);
 
     ~BranchParams() {}
 
@@ -234,12 +293,20 @@ struct BranchParams {
 
       switch (m_bi) {
         case BI::CR0_LessThan:
-          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_B;  // CC_S, CC_L
-          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_AE; // CC_NL
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_L;  // CC_S
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_NL;
           break;
         case BI::CR0_GreaterThan:
-          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_A;  // CC_NS, CC_G
-          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_BE; // CC_NG
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_G;  // CC_NS
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_NG;
+          break;
+        case BI::CR1_LessThan:
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_B;  // CC_S
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_AE;
+          break;
+        case BI::CR1_GreaterThan:
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_A;  // CC_NS
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_BE;
           break;
         case BI::CR0_Equal:
           if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_E;
@@ -257,7 +324,6 @@ struct BranchParams {
       return ret;
     }
 
-
     uint8_t bo() { return (uint8_t)m_bo; }
     uint8_t bi() { return (uint8_t)m_bi; }
 
@@ -266,11 +332,7 @@ struct BranchParams {
     BranchParams::BI m_bi;
 };
 
-
-enum class LinkReg {
-  Save,
-  DoNotTouch
-};
+//////////////////////////////////////////////////////////////////////
 
 enum class RegNumber : uint32_t {};
 
@@ -382,7 +444,47 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Label;
+// Forward declaration to be used in Label
+struct Assembler;
+
+enum class LinkReg {
+  Save,
+  DoNotTouch
+};
+
+struct Label {
+  Label() : m_a(nullptr) , m_address(nullptr) {}
+  /* implicit */ Label(CodeAddress predefined) : m_a(nullptr) ,
+                                                 m_address(predefined) {}
+
+  ~Label();
+
+  Label(const Label&) = delete;
+  Label& operator=(const Label&) = delete;
+
+  void branch(Assembler& a, BranchConditions bc, LinkReg lr);
+  void branchFar(Assembler& a, BranchConditions bc, LinkReg lr);
+  void asm_label(Assembler& a);
+
+  enum class BranchType {
+    b,    // unconditional branch up to 26 bits offset
+    bc,   // conditional branch up to 16 bits offset
+    bctr  // conditional branch by using a 64 bits absolute address
+  };
+
+private:
+  struct JumpInfo {
+    BranchType type;
+    Assembler* a;
+    CodeAddress addr;
+  };
+
+  void addJump(Assembler* a, BranchType type);
+
+  Assembler* m_a;
+  CodeAddress m_address;
+  std::vector<JumpInfo> m_toPatch;
+};
 
 struct Assembler {
 
@@ -467,11 +569,32 @@ struct Assembler {
     PPR32    = 898
   };
 
-  // How many bytes a PPC64 instruction length is
-  static const uint8_t kBytesPerInstr = sizeof(PPC64Instr);
+  enum class CR {
+    CR0      = 0,
+    CR1      = 1,
+    CR2      = 2,
+    CR3      = 3,
+    CR4      = 4,
+    CR5      = 5,
+    CR6      = 6,
+    CR7      = 7,
+  };
+
+  // Prologue size of call function (mflr, std, std, addi, std)
+  static const uint8_t kCallPrologueLen = instr_size_in_bytes * 5;
+
+  // Epilogue size of call function after the return address.
+  // ld, addi, ld, mtlr
+  static const uint8_t kCallEpilogueLen = instr_size_in_bytes * 4;
+
+  // Jcc lenght
+  static const uint8_t kJccLen = instr_size_in_bytes * 9;
+
+  // Call lenght prologue + jcc
+  static const uint8_t kCallLen = instr_size_in_bytes * 9;
 
   // Total ammount of bytes that a li64 function emits
-  static const uint8_t kLi64InstrLen = 5 * kBytesPerInstr;
+  static const uint8_t kLi64InstrLen = 5 * instr_size_in_bytes;
 
   // TODO(rcardoso): Must create a macro for these similar instructions.
   // This will make code more clean.
@@ -588,6 +711,9 @@ struct Assembler {
                                                                   bool rc = 0);
   void lfs(const RegXMM& frt, MemoryRef m) {
     EmitDForm(48, rn(frt), rn(m.r.base), m.r.disp);
+  }
+  void lxvd2x(const RegXMM& Xt, const MemoryRef& m) {
+    EmitXX1Form(31, rn(Xt), rn(m.r.base), rn(m.r.index), 844, 0);
   }
   void lxvw4x(const RegXMM& Xt, const MemoryRef& m) {
     EmitXX1Form(31, rn(Xt), rn(m.r.base), rn(m.r.index), 780, 0);
@@ -1068,10 +1194,13 @@ struct Assembler {
   void evsubifw()       { not_implemented(); }
   void evxor()          { not_implemented(); }
   void fabs(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
-    EmitXForm(63, rn(frt), rn(0), rn(frb), 364, rc);
+    EmitXForm(63, rn(frt), rn(0), rn(frb), 264, rc);
   }
   void fadds()          { not_implemented(); }
-  void fcfid()          { not_implemented(); }
+  void fcfid(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
+    EmitXForm(63, rn(frt), rn(0), rn(frb), 846, rc);
+  }
+
   void fcfids(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
     EmitXForm(59, rn(frt), rn(0), rn(frb), 846, rc);
   }
@@ -1089,7 +1218,9 @@ struct Assembler {
   }
   void fctidu()         { not_implemented(); }
   void fctiduz()        { not_implemented(); }
-  void fctidz()         { not_implemented(); }
+  void fctidz(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
+    EmitXForm(63, rn(frt), rn(0), rn(frb), 815, rc);
+  }
   void fctiw()          { not_implemented(); }
   void fctiwu()         { not_implemented(); }
   void fctiwuz()        { not_implemented(); }
@@ -1142,7 +1273,10 @@ struct Assembler {
   void lbdx()           { not_implemented(); }
   void lbepx()          { not_implemented(); }
   void lbzcix()         { not_implemented(); }
-  void ldarx()          { not_implemented(); }
+  //TODO(rcardoso); check default for EH bit
+  void ldarx(const Reg64& rt, MemoryRef m, bool eh = 1) {
+    EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 84, eh);
+  }
   void ldcix()          { not_implemented(); }
   void lddx()           { not_implemented(); }
   void ldepx()          { not_implemented(); }
@@ -1213,7 +1347,9 @@ struct Assembler {
   void maclhwu()        { not_implemented(); }
   void maclhwuo()       { not_implemented(); }
   void mbar()           { not_implemented(); }
-  void mcrfs()          { not_implemented(); }
+  void mcrfs(uint8_t bf, uint8_t bfa) {
+    EmitXForm(63, (bf << 2), (bfa << 2), 0, 64);
+  }
   void mcrxr()          { not_implemented(); }
   void mfbhrbe()        { not_implemented(); }
   void mfcr(const Reg64& rt) {
@@ -1236,11 +1372,16 @@ struct Assembler {
   void msgclrp()        { not_implemented(); }
   void msgsnd()         { not_implemented(); }
   void msgsndp()        { not_implemented(); }
-  void mtcrf()          { not_implemented(); }
+  void mtcrf(uint16_t fxm, const Reg64& ra) {
+    EmitXFXForm(31, rn(ra), (fxm << 1), 144);
+  }
+  void mtocrf(uint16_t fxm, const Reg64& rt)          {
+    EmitXFXForm(31, rn(rt), ( ((fxm << 1) & 0x1fe) |0x200), 144);
+  }
   void mtdcr()          { not_implemented(); }
   void mtdcrux()        { not_implemented(); }
   void mtdcrx ()        { not_implemented(); }
-  void mtfsb0()         { not_implemented(); }
+  void mtfsb0(uint8_t bt) { EmitXForm(63, bt, 0 , 0, 70); }
   void mtfsb1()         { not_implemented(); }
   void mtfsf()          { not_implemented(); }
   void mtfsfi()         { not_implemented(); }
@@ -1293,7 +1434,9 @@ struct Assembler {
   void stbdx()          { not_implemented(); }
   void stbepx()         { not_implemented(); }
   void stdcix()         { not_implemented(); }
-  void stdcx()          { not_implemented(); }
+  void stdcx(const Reg64& rt, MemoryRef m) {
+    EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 214, 1);
+  }
   void stddx()          { not_implemented(); }
   void stdepx()         { not_implemented(); }
   void stfd(const RegXMM& frt, MemoryRef m) {
@@ -1787,21 +1930,21 @@ struct Assembler {
     // TODO(CRField): if other CRs than 0 is used, please change this to 3
     cmp(0, 0, ra, rb);
   }
-  void cmpldi(const Reg64& ra, Immed imm) {
-    cmpli(0, 1, ra, imm);
+  void cmpldi(const Reg64& ra, Immed imm, CR CRnum = CR::CR0) {
+    cmpli(static_cast<uint16_t>(CRnum), 1, ra, imm);
   }
-  void cmplwi(const Reg64& ra, Immed imm) {
+  void cmplwi(const Reg64& ra, Immed imm, CR CRnum = CR::CR0) {
     //Extended cmpli 3,0,Rx,value
     // TODO(CRField): if other CRs than 0 is used, please change this to 3
-    cmpli(0, 0, ra, imm);
+    cmpli(static_cast<uint16_t>(CRnum), 0, ra, imm);
   }
-  void cmpld(const Reg64& ra, const Reg64& rb) {
-    cmpl(0, 1, ra, rb);
+  void cmpld(const Reg64& ra, const Reg64& rb, CR CRnum = CR::CR0) {
+    cmpl(static_cast<uint16_t>(CRnum), 1, ra, rb);
   }
-  void cmplw(const Reg64& ra, const Reg64& rb) {
+  void cmplw(const Reg64& ra, const Reg64& rb, CR CRnum = CR::CR0) {
     //Extended cmpl 3,0,Rx,Ry
     // TODO(CRField): if other CRs than 0 is used, please change this to 3
-    cmpl(0, 0, ra, rb);
+    cmpl(static_cast<uint16_t>(CRnum), 0, ra, rb);
   }
   void twgti()          { not_implemented(); }  //Extended twi 8,Rx,value
   void twllei()         { not_implemented(); }  //Extended twi 6,Rx,value
@@ -1839,14 +1982,16 @@ struct Assembler {
   void srdi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
     rldicl(ra, rs, 64-sh, sh, rc);
   }
-  void clrldi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
-    rldicl(ra, rs, 0, sh, rc);
+  void clrldi(const Reg64& ra, const Reg64& rs, int8_t mb, bool rc = 0) {
+    rldicl(ra, rs, 0, mb, rc);
   }
   void extldi()         { not_implemented(); }  //Extended
   void sldi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
     rldicr(ra, rs, sh, 63-sh, rc);
   }
-  void clrrdi()         { not_implemented(); }  //Extended
+  void clrrdi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
+    rldicr(ra, rs, 0, 63-sh, rc);
+  }
   void clrrwi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
     rlwinm(ra, rs, 0, 0, 31-sh, rc);
   }
@@ -1868,28 +2013,58 @@ struct Assembler {
   }
 
   // Label variants
-  void b(Label& l);
-  void ba(Label& l);
-  void bl(Label& l);
-  void bla(Label& l);
 
-  void bc(Label& l, BranchConditions bc);
-  void bc(Label& l, ConditionCode cc);
-  void bca(Label& l, BranchConditions bc);
-  void bcl(Label& l, BranchConditions bc);
-  void bcla(Label& l, BranchConditions bc);
+  // Simplify to conditional branch that always branch
+  void b(Label& l)  { bc(l, BranchConditions::Always); }
+  void bl(Label& l)  { bcl(l, BranchConditions::Always); }
+
+  void bc(Label& l, BranchConditions bc) {
+    l.branch(*this, bc, LinkReg::DoNotTouch);
+  }
+  void bc(Label& l, ConditionCode cc) {
+    l.branch(*this, BranchParams::convertCC(cc), LinkReg::DoNotTouch);
+  }
+  void bcl(Label& l, BranchConditions bc) {
+    l.branch(*this, bc, LinkReg::Save);
+  }
 
   void branchAuto(Label& l,
                   BranchConditions bc = BranchConditions::Always,
-                  LinkReg lr = LinkReg::DoNotTouch);
+                  LinkReg lr = LinkReg::DoNotTouch) {
+    l.branch(*this, bc, lr);
+  }
 
   void branchAuto(CodeAddress c,
                   BranchConditions bc = BranchConditions::Always,
-                  LinkReg lr = LinkReg::DoNotTouch);
+                  LinkReg lr = LinkReg::DoNotTouch) {
+    Label l(c);
+    l.branch(*this, bc, lr);
+  }
 
   void branchAuto(CodeAddress c,
                   ConditionCode cc,
-                  LinkReg lr = LinkReg::DoNotTouch);
+                  LinkReg lr = LinkReg::DoNotTouch) {
+    branchAuto(c, BranchParams::convertCC(cc), lr);
+  }
+
+  void branchFar(Label& l,
+                 BranchConditions bc = BranchConditions::Always,
+                 LinkReg lr = LinkReg::DoNotTouch) {
+    l.branchFar(*this, bc, lr);
+  }
+
+  void branchFar(CodeAddress c,
+                 BranchConditions bc = BranchConditions::Always,
+                 LinkReg lr = LinkReg::DoNotTouch) {
+    Label l(c);
+    l.branchFar(*this, bc, lr);
+  }
+
+  void branchFar(CodeAddress c,
+                 ConditionCode cc,
+                 LinkReg lr = LinkReg::DoNotTouch) {
+    branchFar(c, BranchParams::convertCC(cc), lr);
+  }
 
   // ConditionCode variants
   void bc(ConditionCode cc, int16_t address) {
@@ -1897,26 +2072,56 @@ struct Assembler {
     bc(bp.bo(), bp.bi(), address);
   }
 
-  // Auxiliary for loading a complete 64bits immediate into a register
-  void li64 (const Reg64& rt, int64_t imm64);
+//////////////////////////////////////////////////////////////////////
 
-  // Create prologue when calling.
-  void prologue (const Reg64& rsp, const Reg64& rfuncln, const Reg64& rvmfp);
+  enum class CallArg {
+                // Saves TOC?    | Smashable?
+                // --------------------------
+    Internal,   // No            | No
+    External,   // Yes           | No
+    Smashable,  // No (internal) | Yes
+  };
 
-  // Create epilogue when calling.
-  void epilogue (const Reg64& rsp, const Reg64& rfuncln);
+  void callEpilogue(CallArg ca) {
+    // Several vasms like nothrow, unwind and syncpoint will skip one
+    // instruction after call and use it as expected return address. Use a nop
+    // to guarantee this consistency even if toc doesn't need to be saved
+    if (CallArg::External != ca) nop();
+    else ld(reg::r2, reg::r1[toc_position_on_frame]);
+  }
 
-  void call (const Reg64& rsp,
-             const Reg64& rfuncln,
-             const Reg64& rvmfp,
-             CodeAddress target);
+  // generic template, for CodeAddress and Label
+  template <typename T>
+  void call(T& target, CallArg ca = CallArg::Internal) {
+    if (CallArg::Smashable == ca) {
+      // To make a branch smashable, the most conservative method needs to be
+      // used so the target can be changed later or on bindCall.
+      branchFar(target, BranchConditions::Always, LinkReg::Save);
+    } else {
+      // tries best performance possible
+      branchAuto(target, BranchConditions::Always, LinkReg::Save);
+    }
+    callEpilogue(ca);
+  }
+
+  // specialization of call for Reg64
+  void call(Reg64 target, CallArg ca = CallArg::Internal) {
+    mr(reg::r12, target);
+    mtctr(reg::r12);
+    bctrl();
+    callEpilogue(ca);
+  }
 
   // checks if the @inst is pointing to a call
   static inline bool isCall(HPHP::jit::TCA inst) {
-    // a call always begin with a mflr and it's rarely used elsewhere: good tag
-    return ((((inst[3] >> 2) & 0x3F) == 31) &&                          // OPCD
-      ((((inst[1] & 0x3) << 7) | ((inst[0] >> 1) & 0xFF)) == 339));     // XO
+    DecodedInstruction di(inst);
+    return di.isCall();
   }
+
+//////////////////////////////////////////////////////////////////////
+
+  // Auxiliary for loading a complete 64bits immediate into a register
+  void li64(const Reg64& rt, int64_t imm64, bool fixedSize = true);
 
   // Retrieve the target defined by li64 instruction
   static int64_t getLi64(PPC64Instr* pinstr);
@@ -1933,9 +2138,6 @@ struct Assembler {
   // Auxiliary for loading a 32bits immediate into a register
   void li32 (const Reg64& rt, int32_t imm32);
 
-  // Auxiliary for loading a 32bits unsigned immediate into a register
-  void li32un (const Reg64& rt, uint32_t imm32);
-
   // Retrieve the target defined by li32 instruction
   static int32_t getLi32(PPC64Instr* pinstr);
   static int32_t getLi32(CodeAddress pinstr) {
@@ -1951,38 +2153,6 @@ struct Assembler {
     return getLi32Reg(reinterpret_cast<PPC64Instr*>(instr));
   }
 
-  //Can be used to generate or force a unimplemented opcode exception
-  void unimplemented();
-
-  static void patchBc(CodeAddress jmp, CodeAddress dest) {
-    // Opcode located at the 6 most significant bits
-    assert(((jmp[3] >> 2) & 0x3F) == 16);  // B-Form
-    ssize_t diff = dest - jmp;
-    assert(HPHP::jit::deltaFits(diff, HPHP::sz::word) &&
-        "Patching offset is too big");
-    int16_t* BD = (int16_t*)(jmp);    // target address location in instruction
-
-    // Keep AA and LK values
-    *BD = static_cast<int16_t>(diff & 0xFFFC) | ((*BD) & 0x3);
-  }
-
-  static void patchBctr(CodeAddress jmp, CodeAddress dest) {
-    // Check Label::branchAuto for details
-    HPHP::CodeBlock cb2;
-
-#ifndef NDEBUG  // avoid "unused variable 'bctr_addr'" warning on release build
-    // skips the li64 and a mtctr instruction
-    CodeAddress bctr_addr = jmp + kLi64InstrLen + 1 * kBytesPerInstr;
-    // check for instruction opcode
-    assert(((bctr_addr[3] >> 2) & 0x3F) == 19);
-#endif
-
-    // Initialize code block cb2 pointing to li64
-    cb2.init(jmp, kLi64InstrLen, "patched bctr");
-    Assembler b{ cb2 };
-    b.li64(reg::r12, ssize_t(dest));
-  }
-
   void emitNop(int nbytes) {
     assert((nbytes % 4 == 0) && "This arch supports only 4 bytes alignment");
     for (; nbytes > 0; nbytes -= 4)
@@ -1995,6 +2165,21 @@ struct Assembler {
     assert(sizeof(instruction) == sizeof(uint32_t));
     dword(instruction);
   }
+
+  // Can be used to generate or force a unimplemented opcode exception
+  void unimplemented();
+
+//////////////////////////////////////////////////////////////////////
+
+  /*
+   * Patch a branch to the correct target.
+   *
+   * It decodes the branch @jmp to decide whether it's an absolute branch or an
+   * offset branch and patches it properly.
+   */
+  static void patchBranch(CodeAddress jmp, CodeAddress dest);
+
+//////////////////////////////////////////////////////////////////////
 
 protected:
 
@@ -2114,6 +2299,26 @@ protected:
       dword(x_formater.instruction);
    }
 
+   void EmitXForm(const uint8_t op,
+                  const uint32_t rt,
+                  const uint32_t ra,
+                  const uint32_t rb,
+                  const uint16_t xop,
+                  const bool rc = 0){
+
+      X_form_t x_formater {
+                            rc,
+                            xop,
+                            static_cast<uint32_t>(rb),
+                            static_cast<uint32_t>(ra),
+                            static_cast<uint32_t>(rt),
+                            op
+                          };
+
+      dword(x_formater.instruction);
+   }
+
+
    void EmitDSForm(const uint8_t op,
                    const RegNumber rt,
                    const RegNumber ra,
@@ -2123,6 +2328,7 @@ protected:
      // GP Register cannot be greater than 31
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rt) < 32);
+     assert(static_cast<uint16_t>(imm << 14) == 0);
 
       DS_form_t ds_formater {
                              xop,
@@ -2142,6 +2348,7 @@ protected:
 
      // GP Register cannot be greater than 31
      assert(static_cast<uint32_t>(ra) < 32);
+     assert(static_cast<uint16_t>(imm << 12) == 0);
 
       DQ_form_t dq_formater {
                              0x0, //Reserved
@@ -2293,6 +2500,26 @@ protected:
       xo,
       (static_cast<uint32_t>(spr) >> 5) & 0x1F,
       static_cast<uint32_t>(spr) & 0x1F,
+      static_cast<uint32_t>(rs),
+      op
+    };
+
+    dword(xfx_formater.instruction);
+  }
+  void EmitXFXForm(const uint8_t op,
+                   const RegNumber rs,
+                   const uint16_t mask,
+                   const uint16_t xo,
+                   const uint8_t rsv = 0) {
+
+    // GP Register cannot be greater than 31
+    assert(static_cast<uint32_t>(rs) < 32);
+
+    XFX_form_t xfx_formater {
+      rsv,
+      xo,
+      static_cast<uint32_t>((mask) & 0x1f),
+      static_cast<uint32_t>(((mask) >> 5) & 0x1F),
       static_cast<uint32_t>(rs),
       op
     };
@@ -2451,166 +2678,6 @@ private:
   }
 
 };
-
-//////////////////////////////////////////////////////////////////////
-// Branches
-//////////////////////////////////////////////////////////////////////
-
-struct Label {
-  Label() : m_a(nullptr) , m_address(nullptr) {}
-  /* implicit */ Label(CodeAddress predefined) : m_a(nullptr) ,
-                                                 m_address(predefined) {}
-
-  ~Label() {
-    if (!m_toPatch.empty()) {
-      assert(m_a && m_address && "Label had jumps but was never set");
-    }
-    for (auto& ji : m_toPatch) {
-      switch (ji.type) {
-      case BranchType::bc:
-        ji.a->patchBc(ji.addr, m_address);
-        break;
-      case BranchType::bctr:
-        ji.a->patchBctr(ji.addr, m_address);
-        break;
-      }
-    }
-  }
-
-  Label(const Label&) = delete;
-  Label& operator=(const Label&) = delete;
-
-  void branchOffset(Assembler& a,
-                    BranchConditions bc,
-                    LinkReg lr) {
-    BranchParams bp(bc);
-    addJump(&a, BranchType::bc);
-
-    int16_t offset;
-    if (m_address) {
-      ssize_t diff = ssize_t(m_address - a.frontier());
-      assert(HPHP::jit::deltaFits(diff, HPHP::sz::word) && "Offset too big");
-
-      offset = diff;
-    } else {
-      // offset will be redefined on patchBc()
-      offset = ssize_t(a.frontier());
-    }
-
-    // TODO(gut): Use a typedef or something to avoid copying code like below:
-    if (LinkReg::Save == lr)
-      a.bcl(bp.bo(), bp.bi(), offset);
-    else
-      a.bc(bp.bo(), bp.bi(), offset);
-  }
-
-  void branchAbsolute(Assembler& a,
-                    BranchConditions bc,
-                    LinkReg lr) {
-    BranchParams bp(bc);
-    addJump(&a, BranchType::bc);
-
-    // Address is going to be redefined on patchBc()
-    const ssize_t address = ssize_t(m_address ? m_address : a.frontier());
-    assert(HPHP::jit::deltaFits(address, HPHP::sz::word) && "Address too big");
-
-    // TODO(gut): Use a typedef or something to avoid copying code like below:
-    if (LinkReg::Save == lr)
-      a.bcla(bp.bo(), bp.bi(), uint16_t(address));
-    else
-      a.bca(bp.bo(), bp.bi(), uint16_t(address));
-  }
-
-  void branchAuto(Assembler& a, BranchConditions bc, LinkReg lr) {
-    // use CTR to perform absolute branch
-    BranchParams bp(bc);
-    const ssize_t address = ssize_t(m_address);
-    // Use reserved function linkage register
-    addJump(&a, BranchType::bctr);  // marking THIS address for patchBctr
-    a.li64(reg::r12, address);
-    // When branching to another context, r12 need to keep the target address
-    // to correctly set r2 (TOC reference).
-    a.mtctr(reg::r12);
-    if (LinkReg::Save == lr)
-      a.bcctrl(bp.bo(), bp.bi(), 0);
-    else
-      a.bcctr(bp.bo(), bp.bi(), 0);
-  }
-
-  void asm_label(Assembler& a) {
-    assert(!m_address && !m_a && "Label was already set");
-    m_a = &a;
-    m_address = a.frontier();
-  }
-
-private:
-  enum class BranchType {
-    bc,
-    bctr
-  };
-
-  struct JumpInfo {
-    BranchType type;
-    Assembler* a;
-    CodeAddress addr;
-  };
-
-private:
-  void addJump(Assembler* a, BranchType type) {
-    if (m_address) return;
-    JumpInfo info;
-    info.type = type;
-    info.a = a;
-    info.addr = a->codeBlock.frontier();
-    m_toPatch.push_back(info);
-  }
-
-private:
-  Assembler* m_a;
-  CodeAddress m_address;
-  std::vector<JumpInfo> m_toPatch;
-};
-
-/* Simplify to conditional branch that always branch */
-// TODO: implement also a patchB if b is not a mnemonic to bc
-inline void Assembler::b(Label& l)  { bc(l, BranchConditions::Always); }
-inline void Assembler::ba(Label& l) { bca(l, BranchConditions::Always); }
-inline void Assembler::bl(Label& l)  { bcl(l, BranchConditions::Always); }
-inline void Assembler::bla(Label& l) { bcla(l, BranchConditions::Always); }
-
-
-inline void Assembler::bc(Label& l, BranchConditions bc) {
-  l.branchOffset(*this, bc, LinkReg::DoNotTouch);
-}
-inline void Assembler::bc(Label& l, ConditionCode cc) {
-  l.branchOffset(*this, BranchParams::convertCC(cc), LinkReg::DoNotTouch);
-}
-inline void Assembler::bca(Label& l, BranchConditions bc) {
-  l.branchAbsolute(*this, bc, LinkReg::DoNotTouch);
-}
-inline void Assembler::bcl(Label& l, BranchConditions bc) {
-  l.branchOffset(*this, bc, LinkReg::Save);
-}
-inline void Assembler::bcla(Label& l, BranchConditions bc) {
-  l.branchAbsolute(*this, bc, LinkReg::Save);
-}
-
-inline void Assembler::branchAuto(Label& l,
-                                  BranchConditions bc,
-                                  LinkReg lr) {
-  l.branchAuto(*this, bc, lr);
-}
-inline void Assembler::branchAuto(CodeAddress c,
-                                  BranchConditions bc,
-                                  LinkReg lr) {
-  Label l(c);
-  l.branchAuto(*this, bc, lr);
-}
-inline void Assembler::branchAuto(CodeAddress c,
-                                  ConditionCode cc,
-                                  LinkReg lr) {
-  branchAuto(c, BranchParams::convertCC(cc), lr);
-}
 
 } // namespace ppc64_asm
 

@@ -114,6 +114,7 @@ struct Vunit;
   /* vm entry intrinsics */\
   O(calltc, Inone, U(target) U(fp) U(args), Dn)\
   O(resumetc, Inone, U(target) U(args), Dn)\
+  O(inittc, Inone, Un, Dn)\
   O(leavetc, Inone, U(args), Dn)\
   /* exception intrinsics */\
   O(landingpad, I(fromPHPCall), Un, Dn)\
@@ -301,17 +302,22 @@ struct Vunit;
   O(pushp, Inone, U(s0) U(s1), Dn)\
   O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
   /* ppc64 instructions */\
-  O(extsb, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(extsw, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(extrb, Inone, UH(s,d), DH(d,s))\
+  O(extsb, Inone, UH(s,d), DH(d,s))\
+  O(extsw, Inone, UH(s,d), DH(d,s))\
+  O(fabs, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
-  O(xscvdpsxds, Inone, U(s), D(d))\
+  O(fctidz, Inone, U(s), D(d) D(sf))\
+  O(ldarx, Inone, U(s), D(d))\
   O(mfcr, Inone, Un, D(d))\
   O(mflr, Inone, Un, D(d))\
   O(mfvsrd, Inone, U(s), D(d))\
   O(movlk, Inone, UH(s,d), DH(d,s))\
   O(mtlr, Inone, U(s), Dn)\
   O(mtvsrd, Inone, U(s), D(d))\
+  O(stdcx, Inone, U(s) U(d), Dn)\
+  O(xscvdpsxds, Inone, U(s), D(d))\
   O(xscvsxddp, Inone, U(s), D(d))\
   O(xxlxor, Inone, U(s0) U(s1), D(d))\
   O(xxpermdi, Inone, U(s0) U(s1), D(d))\
@@ -824,6 +830,12 @@ struct calltc { Vreg64 target, fp; TCA exittc; RegSet args; };
 struct resumetc { Vreg64 target; TCA exittc; RegSet args; };
 
 /*
+ * Architecture specific initialization to be done at the beginning of
+ * enterTCHelper, if needed.
+ */
+struct inittc {};
+
+/*
  * Pop the address of enterTCExit off the stack, and return to it.
  *
  * Used to relinquish control to the async scheduler from an async function.
@@ -1129,23 +1141,30 @@ struct subsb { Vreg8 s0, s1, d; VregSF sf; };
 /*
  * ppc64 intrinsics.
  */
+struct fabs { VregDbl s; VregDbl d; };
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
-struct xscvdpsxds { Vreg128 s, d; };
+struct fctidz { VregDbl s; VregDbl d; VregSF sf; };
+struct ldarx { Vptr s; Vreg64 d; };
 struct mfcr { Vreg64 d; };
 struct mflr { Vreg64 d; };
 struct mfvsrd { Vreg128 s; Vreg64 d; };
+struct xscvdpsxds { Vreg128 s, d; };
 // move 32bits into a register and keep the higher 32bits
 struct movlk { Vreg64 s, d; };
 struct mtlr { Vreg64 s; };
 struct mtvsrd { Vreg64 s; Vreg128 d; };
+struct stdcx { Vreg64 s; Vptr d; };
 struct xscvsxddp { Vreg128 s, d; };
 struct xxlxor { Vreg128 s0, s1, d; };
 struct xxpermdi { Vreg128 s0, s1, d; };
 
+// Extract and zeros the upper bits
+struct extrb { Vreg8 s; Vreg8 d; };
+
 // Extend byte sign
-struct extsb { Vreg64 s; Vreg64 d; VregSF sf; };
-struct extsw { Vreg64 s; Vreg64 d; VregSF sf; };
+struct extsb { Vreg64 s; Vreg64 d; };
+struct extsw { Vreg64 s; Vreg64 d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -133,6 +133,7 @@ Width width(Vinstr::Opcode op) {
     // vm entry abi
     case Vinstr::calltc:
     case Vinstr::resumetc:
+    case Vinstr::inittc:
     case Vinstr::leavetc:
     // exception intrinsics
     case Vinstr::landingpad:
@@ -198,17 +199,22 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::pushp:
     case Vinstr::subsb:
     // ppc64 instructions
+    case Vinstr::extrb:
     case Vinstr::extsb:
     case Vinstr::extsw:
+    case Vinstr::fabs:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
-    case Vinstr::xscvdpsxds:
+    case Vinstr::fctidz:
+    case Vinstr::ldarx:
     case Vinstr::mfcr:
     case Vinstr::mflr:
     case Vinstr::mfvsrd:
     case Vinstr::movlk:
     case Vinstr::mtlr:
     case Vinstr::mtvsrd:
+    case Vinstr::stdcx:
+    case Vinstr::xscvdpsxds:
     case Vinstr::xscvsxddp:
     case Vinstr::xxlxor:
     case Vinstr::xxpermdi:

@@ -641,15 +641,14 @@ struct MemoryManager {
   void setMemoryLimit(size_t limit);
 
   /*
-   * Get most recent stats, updating the tracked stats in the MemoryManager
-   * object.
+   * Update the tracked stats in the MemoryManager object, then return
+   * a copy of the stats.
    */
-  MemoryUsageStats& getStats();
+  MemoryUsageStats getStats();
 
   /*
    * Get most recent stats data, as one would with getStats(), but without
    * altering the underlying data stored in the MemoryManager.
-   *
    * Used for obtaining debug info.
    */
   MemoryUsageStats getStatsCopy();

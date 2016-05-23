@@ -291,7 +291,7 @@ inline int64_t MemoryManager::getDeallocated() const {
 #endif
 }
 
-inline MemoryUsageStats& MemoryManager::getStats() {
+inline MemoryUsageStats MemoryManager::getStats() {
   refreshStats();
   return m_stats;
 }
@@ -303,7 +303,9 @@ inline MemoryUsageStats MemoryManager::getStatsCopy() {
   return ret;
 }
 
-inline void MemoryManager::refreshStats() { refreshStatsImpl<true>(m_stats); }
+inline void MemoryManager::refreshStats() {
+  refreshStatsImpl<true>(m_stats);
+}
 
 inline bool MemoryManager::startStatsInterval() {
   auto ret = !m_statsIntervalActive;

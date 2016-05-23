@@ -887,15 +887,14 @@ Variant HHVM_FUNCTION(ini_set,
 }
 
 static int64_t HHVM_FUNCTION(memory_get_allocation) {
-  auto const& stats = MM().getStats();
-  int64_t ret = stats.totalAlloc;
-  assert(ret >= 0);
-  return ret;
+  auto total = MM().getStats().totalAlloc;
+  assert(total >= 0);
+  return total;
 }
 
 static int64_t HHVM_FUNCTION(hphp_memory_get_interval_peak_usage,
                              bool real_usage /*=false */) {
-  auto const& stats = MM().getStats();
+  auto const stats = MM().getStats();
   int64_t ret = real_usage ? stats.peakIntervalUsage : stats.peakIntervalAlloc;
   assert(ret >= 0);
   return ret;
@@ -903,14 +902,14 @@ static int64_t HHVM_FUNCTION(hphp_memory_get_interval_peak_usage,
 
 static int64_t HHVM_FUNCTION(memory_get_peak_usage,
                              bool real_usage /*=false */) {
-  auto const& stats = MM().getStats();
+  auto const stats = MM().getStats();
   int64_t ret = real_usage ? stats.peakUsage : stats.peakAlloc;
   assert(ret >= 0);
   return ret;
 }
 
 static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
-  auto const& stats = MM().getStats();
+  auto const stats = MM().getStats();
   int64_t ret = real_usage ? stats.usage : stats.alloc;
   // Since we don't always alloc and dealloc a shared structure from the same
   // thread it is possible that this can go negative when we are tracking

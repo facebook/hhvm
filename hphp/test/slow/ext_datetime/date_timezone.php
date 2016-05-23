@@ -54,3 +54,5 @@ $tz = timezone_open("CHAST");
 var_dump(timezone_name_get($tz));
 
 var_dump((bool)timezone_version_get());
+
+var_dump(timezone_open('sdf'));

@@ -20,3 +20,6 @@ string(16) "America/New_York"
 string(19) "America/Los_Angeles"
 string(15) "Pacific/Chatham"
 bool(true)
+
+Warning: timezone_open(): Unknown or bad timezone (sdf) in %s
+bool(false)

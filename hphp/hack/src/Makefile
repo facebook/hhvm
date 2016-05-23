@@ -75,23 +75,22 @@ MODULES=\
   $(FSNOTIFY)\
   $(INOTIFY)
 
-NATIVE_OBJECT_FILES=\
-  heap/hh_shared.o\
-  hhi/hhi_elf.o\
-  hhi/hhi_win32res_stubs.o\
-  libancillary/libancillary-stubs.o\
-  third-party/libancillary/fd_recv.o\
-  third-party/libancillary/fd_send.o\
-  utils/files.o\
-  utils/get_build_id.gen.o\
-  utils/get_build_id.o\
-  utils/handle_stubs.o\
-  utils/nproc.o\
-  utils/priorities.o\
-  utils/realpath.o\
-  utils/sysinfo.o\
-  utils/win32_support.o\
-  $(INOTIFY)/$(notdir $(INOTIFY))_stubs.o
+NATIVE_C_FILES=\
+  heap/hh_shared.c\
+  hhi/hhi_elf.c\
+  hhi/hhi_win32res_stubs.c\
+  libancillary/libancillary-stubs.c\
+  third-party/libancillary/fd_recv.c\
+  third-party/libancillary/fd_send.c\
+  utils/files.c\
+  utils/get_build_id.c\
+  utils/handle_stubs.c\
+  utils/nproc.c\
+  utils/priorities.c\
+  utils/realpath.c\
+  utils/sysinfo.c\
+  utils/win32_support.c\
+  $(INOTIFY)/$(notdir $(INOTIFY))_stubs.c
 
 OCAML_LIBRARIES=\
   str\
@@ -121,6 +120,8 @@ ALL_SRC_FILES=$(call rwildcard,$(patsubst _build,,$(wildcard *)),*.*)
 #                                    Rules                                     #
 ################################################################################
 
+OBJECT_FILES_TO_BUILD=$(patsubst %.c,%.o,$(NATIVE_C_FILES))
+NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) utils/get_build_id.gen.o
 INCLUDE_OPTS=$(foreach dir,$(MODULES),-I $(dir))
 LIB_OPTS=$(foreach lib,$(OCAML_LIBRARIES),-lib $(lib))
 NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
@@ -145,7 +146,7 @@ clean:
 
 build-hack: $(TARGETS) build-hhi-archive
 
-build-hack-with-ocp: build-hhi-archive build-hack-stubs-with-ocp
+build-hack-with-ocp: build-hhi-archive _build/utils/get_build_id.gen.o
 	[ -d ${ROOT}/../_obuild ] || ( cd ${ROOT}/.. && ocp-build init )
 	ocp-build build
 
@@ -166,19 +167,17 @@ $(TARGETS): $(ALL_SRC_FILES)
 	# the new binaries are exactly the same as the old ones
 	touch $(TARGETS)
 
-build-hack-native-deps: build-hack-stubs
-	ocamlbuild -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(NATIVE_OBJECT_FILES)
+build-hack-native-deps: $(NATIVE_C_FILES) _build/utils/get_build_id.gen.o
+	ocamlbuild -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(OBJECT_FILES_TO_BUILD)
 
-# If you modify this rule, do not forget to edit the file
-# `$(ROOT)/scripts/gen_build_id.ml` used on Windows.
-build-hack-stubs:
-	OUT="const char* const BuildInfo_kRevision = \"$$(git rev-parse HEAD || hg id -i)\"; \
-	const unsigned long BuildInfo_kRevisionCommitTimeUnix = $$(git log -1 --pretty=format:%ct || echo $$(hg log -r . -T \{date\} | grep -o ^[^.]* || echo 0))ul;"; \
-	if [ "$$OUT" != "$$(cat utils/get_build_id.gen.c 2>/dev/null)" ]; then echo "$$OUT" > utils/get_build_id.gen.c; fi
-
-build-hack-stubs-with-ocp:
+.PHONY: _build/utils/get_build_id.gen.c # run every time, depends on git commit
+_build/utils/get_build_id.gen.c:
+	mkdir -p $(dir $@)
 	cd $(ROOT)/.. && \
-        ocaml unix.cma scripts/gen_build_id.ml src/utils/get_build_id.gen.c
+        ocaml -w -3 unix.cma scripts/gen_build_id.ml src/_build/utils/get_build_id.gen.c
+
+_build/utils/get_build_id.gen.o: _build/utils/get_build_id.gen.c
+	cd $(dir $@) && ocamlopt $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
 
 build-hhi-archive:
 	mkdir -p ../bin

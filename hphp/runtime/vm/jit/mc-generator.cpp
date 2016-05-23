@@ -62,6 +62,9 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/vixl/a64/constants-a64.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
+
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds.h"
@@ -1142,8 +1145,33 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
     return tDest;
   }
 
-  x64::DecodedInstruction di(toSmash);
-  if (di.isBranch() && !di.isJmp()) {
+  auto const isJcc = [&] {
+    switch (arch()) {
+      case Arch::X64: {
+        x64::DecodedInstruction di(toSmash);
+        return (di.isBranch() && !di.isJmp());
+      }
+
+      case Arch::ARM: {
+        using namespace vixl;
+        struct JccDecoder : public Decoder {
+          void VisitConditionalBranch(Instruction* inst) override {
+            cc = true;
+          }
+          bool cc = false;
+        };
+        JccDecoder decoder;
+        decoder.Decode(Instruction::Cast(toSmash));
+        return decoder.cc;
+      }
+
+      case Arch::PPC64:
+        always_assert(false);
+    }
+    not_reached();
+  }();
+
+  if (isJcc) {
     auto const target = smashableJccTarget(toSmash);
     assertx(target);
 

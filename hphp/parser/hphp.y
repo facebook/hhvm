@@ -790,6 +790,8 @@ ident_no_semireserved:
   | T_XHP_CHILDREN                     { $$ = $1;}
   | T_XHP_REQUIRED                     { $$ = $1;}
   | T_ENUM                             { $$ = $1;}
+  | T_DICT                             { $$ = $1;}
+  | T_VEC                              { $$ = $1;}
 ;
 
 ident_for_class_const:
@@ -859,8 +861,6 @@ ident_for_class_const:
   /** The following must be made semi-reserved since they were keywords in HHVM
     * but not PHP. */
   | T_UNSET
-  | T_DICT
-  | T_VEC
 ;
 
 ident:
@@ -2447,19 +2447,11 @@ xhp_bareword:
   | T_TYPE                             { $$ = $1;}
   | T_NEWTYPE                          { $$ = $1;}
   | T_SHAPE                            { $$ = $1;}
-  | T_DICT                             { $$ = $1;}
-  | T_VEC                              { $$ = $1;}
 ;
 
 simple_function_call:
     namespace_string_typeargs '('
     function_call_parameter_list ')'   { _p->onCall($$,0,$1,$3,NULL);}
-  | T_DICT '('
-    function_call_parameter_list ')'   { $1.setText("dict");
-                                         _p->onCall($$,0,$1,$3,NULL);}
-  | T_VEC '('
-    function_call_parameter_list ')'   { $1.setText("vec");
-                                         _p->onCall($$,0,$1,$3,NULL);}
 ;
 
 fully_qualified_class_name:
@@ -3397,12 +3389,6 @@ hh_type:
   | T_ARRAY                            { Token t; t.reset();
                                          $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, t); }
-  | T_DICT                             { Token t; t.reset();
-                                         $1.setText("HH\\dict");
-                                         _p->onTypeAnnotation($$, $1, t); }
-  | T_VEC                              { Token t; t.reset();
-                                         $1.setText("HH\\vec");
-                                         _p->onTypeAnnotation($$, $1, t); }
   | T_CALLABLE                         { Token t; t.reset();
                                          $1.setText("callable");
                                          _p->onTypeAnnotation($$, $1, t); }
@@ -3413,10 +3399,6 @@ hh_type:
                                          _p->onTypeAnnotation($$, $1, $3);
                                          _p->onTypeSpecialization($$, 'a'); }
   | T_ARRAY array_typelist             { $1.setText("array");
-                                         _p->onTypeAnnotation($$, $1, $2); }
-  | T_DICT array_typelist              { $1.setText("HH\\dict");
-                                         _p->onTypeAnnotation($$, $1, $2); }
-  | T_VEC array_typelist               { $1.setText("HH\\vec");
                                          _p->onTypeAnnotation($$, $1, $2); }
   | T_XHP_LABEL                        { $1.xhpLabel();
                                          Token t; t.reset();

@@ -585,7 +585,10 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "heapgraph_edge" ||
            stripped == "heapgraph_node_in_edges" ||
            stripped == "heapgraph_node_out_edges" ||
-           stripped == "server_warmup_status"
+           stripped == "server_warmup_status" ||
+           stripped == "dict" ||
+           stripped == "vec" ||
+           stripped == "is_vec"
           )) {
         funcName = "HH\\" + stripped;
       }
@@ -2543,6 +2546,8 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(Shapes),
     HH_ONLY_TYPE(TypeStructureKind),
     HH_ONLY_TYPE(TypeStructure),
+    HH_ONLY_TYPE(dict),
+    HH_ONLY_TYPE(vec),
 
     HH_ONLY_TYPE(Awaitable),
     HH_ONLY_TYPE(AsyncGenerator),

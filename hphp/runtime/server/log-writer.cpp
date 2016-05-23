@@ -70,6 +70,10 @@ void ClassicWriter::init(const std::string& username,
     if (m_logdata.file.find('%') != std::string::npos) {
       m_cronolog->m_template = m_logdata.file;
       m_cronolog->setPeriodicity();
+      if (m_logdata.periodMultiplier) {
+        m_cronolog->m_periodMultiple = m_logdata.periodMultiplier;
+      }
+
       m_cronolog->m_linkName = m_logdata.symLink;
       Cronolog::changeOwner(username, m_logdata.symLink);
     } else {

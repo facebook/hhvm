@@ -35,10 +35,12 @@ struct AccessLogFileData {
   AccessLogFileData() {}
   AccessLogFileData(const std::string& fil,
                     const std::string& lnk,
-                    const std::string& fmt);
+                    const std::string& fmt,
+                    int mpl);
   std::string file;
   std::string symLink;
   std::string format;
+  int periodMultiplier;
   // Concrete LogWriter factories to be used depending on the handle
   using factory_t = std::function<
     std::unique_ptr<LogWriter>(const AccessLogFileData&, LogChannel)>;

@@ -46,10 +46,12 @@ AccessLogFileData::m_factories;
 
 AccessLogFileData::AccessLogFileData(const std::string& fil,
                                      const std::string& lnk,
-                                     const std::string& fmt)
+                                     const std::string& fmt,
+                                     int mpl)
   : file(fil)
   , symLink(lnk)
   , format(fmt)
+  , periodMultiplier(mpl)
 {
   /*
    * a LogWriter with it's format can be selected between colons like:
@@ -95,7 +97,7 @@ void AccessLog::init(const std::string &defaultFormat,
   if (m_initialized) return;
   m_initialized = true;
   m_defaultWriter =
-    AccessLogFileData("", "", defaultFormat).Writer(LogChannel::THREADLOCAL);
+    AccessLogFileData("", "", defaultFormat, 0).Writer(LogChannel::THREADLOCAL);
   m_defaultWriter->init(username, m_fGetThreadData);
   for (auto const& file : files) {
     auto ch = Logger::UseCronolog ? LogChannel::CRONOLOG : LogChannel::REGULAR;
@@ -112,7 +114,7 @@ void AccessLog::init(const std::string &defaultFormat,
   if (m_initialized) return;
   m_initialized = true;
   m_defaultWriter =
-    AccessLogFileData("", "", defaultFormat).Writer(LogChannel::THREADLOCAL);
+    AccessLogFileData("", "", defaultFormat, 0).Writer(LogChannel::THREADLOCAL);
   m_defaultWriter->init(username, m_fGetThreadData);
   for (auto const& file : files) {
     auto ch = Logger::UseCronolog ? LogChannel::CRONOLOG : LogChannel::REGULAR;
@@ -130,12 +132,12 @@ void AccessLog::init(const std::string &format,
   if (m_initialized) return;
   m_initialized = true;
   m_defaultWriter =
-    AccessLogFileData("", "", format).Writer(LogChannel::THREADLOCAL);
+    AccessLogFileData("", "", format, 0).Writer(LogChannel::THREADLOCAL);
   m_defaultWriter->init(username, m_fGetThreadData);
   if (!file.empty() && !format.empty()) {
     auto ch = Logger::UseCronolog ? LogChannel::CRONOLOG : LogChannel::REGULAR;
     auto writer = std::shared_ptr<LogWriter>(
-      AccessLogFileData(file, symLink, format).Writer(ch));
+      AccessLogFileData(file, symLink, format, 0).Writer(ch));
     writer->init(username, m_fGetThreadData);
     m_files.push_back(writer);
   }

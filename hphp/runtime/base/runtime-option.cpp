@@ -878,7 +878,11 @@ void RuntimeOption::Load(
                                              false);
           string format = Config::GetString(ini_pl, hdf_pl, "Format",
                                             AccessLogDefaultFormat, false);
-          logs[logName] = AccessLogFileData(fname, symlink, format);
+          auto periodMultiplier = Config::GetUInt16(ini_pl, hdf_pl,
+                                                    "PeriodMultiplier",
+                                                    0, false);
+          logs[logName] = AccessLogFileData(fname, symlink,
+                                            format, periodMultiplier);
 
 
         }

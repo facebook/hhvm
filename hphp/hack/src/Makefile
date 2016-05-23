@@ -174,7 +174,7 @@ build-hack-native-deps: $(NATIVE_C_FILES) _build/utils/get_build_id.gen.o
 _build/utils/get_build_id.gen.c:
 	mkdir -p $(dir $@)
 	cd $(ROOT)/.. && \
-        ocaml -w -3 unix.cma scripts/gen_build_id.ml src/_build/utils/get_build_id.gen.c
+        ocaml -I scripts -w -3 unix.cma scripts/gen_build_id.ml src/_build/utils/get_build_id.gen.c
 
 _build/utils/get_build_id.gen.o: _build/utils/get_build_id.gen.c
 	cd $(dir $@) && ocamlopt $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)

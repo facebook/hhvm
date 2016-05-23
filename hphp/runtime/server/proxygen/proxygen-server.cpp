@@ -594,26 +594,27 @@ bool ProxygenServer::dynamicCertHandler(const std::string &server_name,
 }
 
 bool ProxygenServer::sniNoMatchHandler(const char *server_name) {
-  std::string fqdn(server_name);
-  size_t pos = fqdn.find('.');
-  std::string wildcard;
-  if (pos != std::string::npos) {
-    wildcard = fqdn.substr(pos + 1);
-  }
+  try {
+    if (!RuntimeOption::SSLCertificateDir.empty()) {
+      static std::mutex dynLoadMutex;
+      if (!dynLoadMutex.try_lock()) return false;
+      SCOPE_EXIT { dynLoadMutex.unlock(); };
 
-  LOG(INFO) << "looking for '" << wildcard << "', '" << fqdn << "'";
-  return ServerNameIndication::loadFromFile(
-    wildcard, false,
-    std::bind(&ProxygenServer::dynamicCertHandler, this,
-              std::placeholders::_1,
-              std::placeholders::_2,
-              std::placeholders::_3)) ||
-    ServerNameIndication::loadFromFile(
-      fqdn, false,
-      std::bind(&ProxygenServer::dynamicCertHandler, this,
-                std::placeholders::_1,
-                std::placeholders::_2,
-                std::placeholders::_3));
+      // Reload all certs.
+      Logger::Warning("Reloading SSL certificates upon server name %s",
+                       server_name);
+      ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
+                                 std::bind(&ProxygenServer::dynamicCertHandler,
+                                           this,
+                                           std::placeholders::_1,
+                                           std::placeholders::_2,
+                                           std::placeholders::_3));
+      return true;
+    }
+  } catch (const std::exception &ex) {
+    Logger::Error("Failed to reload certificate files or key files");
+  }
+  return false;
 }
 
 bool ProxygenServer::enableSSL(int port) {

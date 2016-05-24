@@ -113,12 +113,12 @@ let debug () fnl =
         ()
   end
 
-let debug_directory dir =
+let debug_directory ~handle dir =
   let path = Path.make dir in
   let next = compose
     (List.map ~f:Path.make)
     (Find.make_next_files ~filter:FindUtils.is_php path) in
-  let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
+  let workers = ServerWorker.make GlobalConfig.gc_control handle in
   MultiWorker.call
     (Some workers)
     ~job:debug
@@ -215,12 +215,12 @@ let job_in_place modes acc fnl =
     | Some err -> err :: acc
   end ~init:acc
 
-let directory modes dir =
+let directory modes ~handle dir =
   let path = Path.make dir in
   let next = compose
     (List.map ~f:Path.make)
     (Find.make_next_files ~filter:FindUtils.is_php path) in
-  let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
+  let workers = ServerWorker.make GlobalConfig.gc_control handle in
   let messages =
     MultiWorker.call
       (Some workers)
@@ -274,7 +274,7 @@ let format_stdin modes from to_ =
 (*****************************************************************************)
 
 let () =
-  let _handle = SharedMem.init_default () in
+  let handle = SharedMem.init_default () in
   PidLog.log_oc := Some (open_out (Path.to_string Path.null_path));
   let files, from, to_, apply_mode, debug, diff, modes, root, test =
     parse_args() in
@@ -302,8 +302,8 @@ let () =
   | [] -> format_stdin modes from to_
   | [dir] when Sys.is_directory dir ->
       if debug
-      then debug_directory dir
-      else directory modes dir
+      then debug_directory ~handle dir
+      else directory modes ~handle dir
   | [filename] ->
       let filepath = Path.make filename in
       (match apply_mode with

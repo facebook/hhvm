@@ -31,4 +31,4 @@ val should_detach       : options -> bool
 val convert             : options -> Path.t option
 val no_load             : options -> bool
 val save_filename       : options -> string option
-val waiting_client      : options -> Handle.handle option
+val waiting_client      : options -> Unix.file_descr option

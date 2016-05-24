@@ -163,12 +163,12 @@ let hh_match_job
 
 (* Handle a directory by bucketing the contained php files and sending
    them off to worker threads *)
-let directory dir fn =
+let directory ~handle dir fn =
   let path = Path.make dir in
   let next = Utils.compose
     (List.map ~f:Path.make)
     (Find.make_next_files ~filter:FindUtils.is_php path) in
-  let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
+  let workers = ServerWorker.make GlobalConfig.gc_control handle in
   (* Information for the patcher to figure out what transformations to do *)
   let fileschanged =
     MultiWorker.call
@@ -294,7 +294,7 @@ let match_job pat_info acc fnl =
 (*****************************************************************************)
 
 let () =
-  let _handle = SharedMem.init_default () in
+  let handle = SharedMem.init_default () in
   PidLog.log_oc := Some (open_out Path.(to_string null_path));
   let files, pattern, target, format_patches, verbose, showpatch, expr_mode,
     stmt_mode = parse_args() in
@@ -307,7 +307,7 @@ let () =
      match files with
      | [dir] when Sys.is_directory dir ->
         let pat_info = (preproc_match pattern), verbose, expr_mode, stmt_mode in
-        directory dir (match_job pat_info)
+        directory ~handle dir (match_job pat_info)
      | [filename] ->
         let filepath = Path.make filename in
         let pat_info = (preproc_match pattern), verbose, expr_mode, stmt_mode in
@@ -339,7 +339,7 @@ let () =
      else
        match files with
        | [dir] when Sys.is_directory dir ->
-          directory dir (patch_job pat_info)
+          directory ~handle dir (patch_job pat_info)
        | [filename] ->
           let filepath = Path.make filename in
           ignore(patch_file pat_info filepath)

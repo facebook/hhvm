@@ -58,6 +58,9 @@ end
 module Program =
   struct
     let preinit () =
+      (* Warning: Global references inited in this function, should
+         be 'restored' in the workers, because they are not 'forked'
+         anymore. See `ServerWorker.{save/restore}_state`. *)
       HackSearchService.attach_hooks ();
       Sys_utils.set_signal Sys.sigusr1
         (Sys.Signal_handle Typing.debug_print_last_pos);
@@ -73,9 +76,11 @@ module Program =
         (List.map (Errors.get_error_list env.errorl) Errors.to_absolute) stdout;
       match ServerArgs.convert genv.options with
       | None ->
+         Worker.killall ();
          exit (if Errors.is_empty env.errorl then 0 else 1)
       | Some dirname ->
          ServerConvert.go genv env dirname;
+         Worker.killall ();
          exit 0
 
     (* filter and relativize updated file paths *)
@@ -267,7 +272,7 @@ let program_init genv =
   HackEventLogger.init_really_end init_type;
   env
 
-let setup_server options =
+let setup_server options handle =
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   let root = ServerArgs.root options in
   (* The OCaml default is 500, but we care about minimizing the memory
@@ -299,10 +304,10 @@ let setup_server options =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   PidLog.init (ServerFiles.pids_file root);
   PidLog.log ~reason:"main" (Unix.getpid());
-  ServerEnvBuild.make_genv options config local_config
+  ServerEnvBuild.make_genv options config local_config handle
 
-let run_once options =
-  let genv = setup_server options in
+let run_once options handle =
+  let genv = setup_server options handle in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
@@ -316,16 +321,26 @@ let run_once options =
  * The server monitor will pass client connections to this process
  * via ic.
  *)
-let daemon_main options (ic, oc) =
+let daemon_main_exn (handle, options) (ic, oc) =
   let in_fd = Daemon.descr_of_in_channel ic in
   let out_fd = Daemon.descr_of_out_channel oc in
 
-  let genv = setup_server options in
+  let genv = setup_server options handle in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
   let env = MainInit.go options (fun () -> program_init genv) in
   serve genv env in_fd out_fd
+
+let daemon_main (state, handle, options) (ic, oc) =
+  (* Even though the server monitor set up the shared memory, the server daemon
+   * is master here *)
+  SharedMem.connect handle ~is_master:true;
+  ServerGlobalState.restore state;
+  try daemon_main_exn (handle, options) (ic, oc)
+  with SharedMem.Out_of_shared_memory ->
+    Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
+    Exit_status.(exit Out_of_shared_memory)
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

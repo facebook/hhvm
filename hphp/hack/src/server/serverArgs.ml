@@ -21,7 +21,7 @@ type options = {
   convert          : Path.t option;
   no_load          : bool;
   save_filename    : string option;
-  waiting_client   : Handle.handle option;
+  waiting_client   : Unix.file_descr option;
 }
 
 (*****************************************************************************)
@@ -79,10 +79,10 @@ let parse_options () =
   let version       = ref false in
   let waiting_client= ref None in
   let cdir          = fun s -> convert_dir := Some s in
-  let set_ai   = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
-  let set_save () = Printf.eprintf "DEPRECATED\n"; exit 1 in
+  let set_ai        = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
+  let set_save ()   = Printf.eprintf "DEPRECATED\n"; exit 1 in
   let set_save_mini = fun s -> save := Some s in
-  let set_wait      = fun fd -> waiting_client := Some fd in
+  let set_wait      = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
   let options =
     ["--debug"         , Arg.Set debug         , Messages.debug;
      "--ai"            , Arg.String set_ai     , Messages.ai;

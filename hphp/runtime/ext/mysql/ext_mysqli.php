@@ -581,6 +581,13 @@ class mysqli {
       throw new Exception('Port is not numeric');
     }
 
+    if (!is_string($passwd) && !is_null($passwd)) {
+      throw new Exception('passwd must be string or NULL');
+    };
+    if (!is_string($dbname) && !is_null($dbname)) {
+      throw new Exception('dbname must be string or NULL');
+    };
+
     $server = null;
     if ($host) {
       $server = $host;

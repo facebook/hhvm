@@ -1,6 +1,6 @@
 <?hh
 
-$rc = new ReflectionClass('HH\\WaitHandle');
+$rc = new ReflectionClass('HH\\StaticWaitHandle');
 
 try {
   $wh = $rc->newInstanceWithoutConstructor();

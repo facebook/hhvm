@@ -74,6 +74,11 @@ inline size_t ObjectData::heapSize() const {
 }
 
 inline ObjectData* ObjectData::newInstance(Class* cls) {
+  Attr attrs = cls->attrs();
+  if (UNLIKELY(attrs &
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
+    raiseAbstractClassError(cls);
+  }
   if (cls->needInitialization()) {
     cls->initialize();
   }
@@ -81,11 +86,6 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     auto obj = ctor(cls);
     assert(obj->checkCount());
     return obj;
-  }
-  Attr attrs = cls->attrs();
-  if (UNLIKELY(attrs &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
-    raiseAbstractClassError(cls);
   }
   size_t nProps = cls->numDeclProperties();
   size_t size = sizeForNProps(nProps);

@@ -31,7 +31,7 @@ let parse_and_print filename =
 
 let main filename =
   EventLogger.init (Daemon.devnull ()) 0.0;
-  SharedMem.(init default_config);
+  let _handle = SharedMem.init_default () in
   if (String.length filename) = 0 then begin
     Printf.eprintf "%s" usage;
     exit 1

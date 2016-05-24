@@ -41,17 +41,19 @@ let make_gc_control config =
     int_ "gc_space_overhead" ~default:space_overhead config in
   { GlobalConfig.gc_control with Gc.minor_heap_size; space_overhead; }
 
-let make_sharedmem_config config options =
-  let {SharedMem.global_size; heap_size} =
+let make_sharedmem_config config options local_config =
+  let {SharedMem.global_size; heap_size; _;} =
     SharedMem.default_config in
+  let shm_dir = local_config.ServerLocalConfig.shm_dir in
   let global_size = int_ "sharedmem_global_size" ~default:global_size config in
   let heap_size = int_ "sharedmem_heap_size" ~default:heap_size config in
+  let shm_dir = string_ "sharedmem_dir" ~default:shm_dir config in
   match ServerArgs.ai_mode options with
-  | None -> {SharedMem.global_size; heap_size}
+  | None -> {SharedMem.global_size; heap_size; shm_dir}
   | Some ai_options ->
     let global_size, heap_size =
       Ai.modify_shared_mem_sizes global_size heap_size ai_options in
-    {SharedMem.global_size; heap_size}
+    {SharedMem.global_size; heap_size; shm_dir}
 
 let config_list_regexp = (Str.regexp "[, \t]+")
 
@@ -73,6 +75,7 @@ let maybe_relative_path fn =
 
 let load config_filename options =
   let config = Config_file.parse (Relative_path.to_absolute config_filename) in
+  let local_config = ServerLocalConfig.load () in
   let load_script =
     Option.map (SMap.get config "load_script") maybe_relative_path in
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
@@ -90,7 +93,7 @@ let load config_filename options =
     load_script_timeout = load_script_timeout;
     load_mini_script = load_mini_script;
     gc_control = make_gc_control config;
-    sharedmem_config = make_sharedmem_config config options;
+    sharedmem_config = make_sharedmem_config config options local_config;
     tc_options = tcopts;
   }
 

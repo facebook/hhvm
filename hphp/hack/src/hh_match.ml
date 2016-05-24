@@ -294,8 +294,8 @@ let match_job pat_info acc fnl =
 (*****************************************************************************)
 
 let () =
-  SharedMem.(init default_config);
-  PidLog.log_oc := Some (open_out "/dev/null");
+  let _handle = SharedMem.init_default () in
+  PidLog.log_oc := Some (open_out Path.(to_string null_path));
   let files, pattern, target, format_patches, verbose, showpatch, expr_mode,
     stmt_mode = parse_args() in
   (* Make sure there's a pattern and a target *)

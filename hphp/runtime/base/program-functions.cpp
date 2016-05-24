@@ -2421,6 +2421,7 @@ static struct SetThreadInitFini {
   SetThreadInitFini() {
     AsyncFuncImpl::SetThreadInitFunc(
       [] (void*) {
+#ifndef __APPLE__
         if (RuntimeOption::EvalPerfDataMap) {
           pthread_t threadId = pthread_self();
           pthread_attr_t attr;
@@ -2431,6 +2432,7 @@ static struct SetThreadInitFini {
           pthread_attr_destroy(&attr);
           recordThreadAddr(threadId, static_cast<char*>(stackAddr), stackSize);
         }
+#endif
         hphp_thread_init();
       },
       nullptr);

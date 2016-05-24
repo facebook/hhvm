@@ -1309,7 +1309,7 @@ struct VRefParamValue {
   void assignIfRef(const Variant& other) const {
     if (auto ref = getVariantOrNull()) *ref = other;
   }
-  void assignIfRef(const Variant&& other) const {
+  void assignIfRef(Variant&& other) const {
     if (auto ref = getVariantOrNull()) *ref = std::move(other);
   }
 private:

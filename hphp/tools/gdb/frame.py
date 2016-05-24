@@ -95,10 +95,13 @@ def php_line_number(func, pc):
 #------------------------------------------------------------------------------
 # Frame builders.
 
-def create_native(idx, fp, rip, native_frame=None):
+def create_native(idx, fp, rip, native_frame=None, name=None):
     # Try to get the function name.
     if native_frame is None:
-        func_name = '<unknown>'
+        if name is None:
+            func_name = '<unknown>'
+        else:
+            func_name = name
     else:
         try:
             func_name = native_frame.name() + '()'
@@ -120,14 +123,7 @@ def create_native(idx, fp, rip, native_frame=None):
 
     # Munge and print the code location if we have one.
     if loc is not None and loc.symtab is not None:
-        filename = loc.symtab.filename
-
-        if 'hphp' in filename:
-            head, base = os.path.split(filename)
-            _, basedir = os.path.split(head)
-            filename = 'hphp/.../' + basedir + '/' + base
-
-        frame['file'] = filename
+        frame['file'] = loc.symtab.filename
         frame['line'] = loc.line
 
     return frame

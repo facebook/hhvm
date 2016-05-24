@@ -596,7 +596,7 @@ void XDebugServer::sendMessage(xdebug_xml_node& xml) {
     "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
 
   auto const message = xdebug_xml_return_node(&xml);
-  auto const message_len = message.size() + sizeof(XML_MSG_HEADER) - 1;
+  auto const message_len = message.size() + strlen(XML_MSG_HEADER);
 
   log("-> %s\n\n", message.data());
   logFlush();

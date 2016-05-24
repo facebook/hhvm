@@ -99,6 +99,7 @@ OCAML_LIBRARIES=\
 
 NATIVE_LIBRARIES=\
   pthread\
+  rt\
   $(ELF)
 
 TARGETS_BASE=_build/hh_server _build/hh_client \

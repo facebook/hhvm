@@ -136,8 +136,14 @@ let daemon_starter options =
 (** Either starts a monitor daemon (which will spawn a typechecker daemon),
  * or just runs the typechecker if detachment not enabled. *)
 let start () =
-  Daemon.check_entry_point (); (* this call might not return *)
-  let options = ServerArgs.parse_options () in
-  if ServerArgs.should_detach options
-  then Exit_status.exit (daemon_starter options)
-  else monitor_daemon_main options
+  (* TODO: Catch all exceptions that make it this high, log them, and exit with
+   * the proper code *)
+  try
+    Daemon.check_entry_point (); (* this call might not return *)
+    let options = ServerArgs.parse_options () in
+    if ServerArgs.should_detach options
+    then Exit_status.exit (daemon_starter options)
+    else monitor_daemon_main options
+  with
+  | SharedMem.Out_of_shared_memory ->
+      Exit_status.(exit Out_of_shared_memory)

@@ -29,14 +29,6 @@ if (OCAMLC_FOUND)
     list(APPEND extra_cc_flags -DHAVE_ELF_GETSHDRSTRNDX)
   endif()
 
-  if(HAVE_MEMFD_CREATE)
-    list(APPEND extra_cc_flags -DHAVE_MEMFD_CREATE)
-  endif()
-
-  if(HAVE_DECL___NR_MEMFD_CREATE)
-    list(APPEND extra_cc_flags -DHAVE_DECL___NR_MEMFD_CREATE)
-  endif()
-
   list(APPEND extra_cc_flags -DOSS_SMALL_HH_TABLE_POWS)
   list(APPEND extra_cc_flags -pthread)
 

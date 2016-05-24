@@ -273,10 +273,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     if (!btArgs.m_withArgNames && !btArgs.m_withArgValues) {
       // do nothing
     } else if (funcname.same(s_include)) {
-      if (depth != 0) {
-        auto filepath = const_cast<StringData*>(curUnit->filepath());
-        frame.set(s_args, make_packed_array(filepath));
-      }
+      auto filepath = const_cast<StringData*>(curUnit->filepath());
+      frame.set(s_args, make_packed_array(filepath));
     } else if (!RuntimeOption::EnableArgsInBacktraces || isReturning) {
       // Provide an empty 'args' array to be consistent with hphpc.
       frame.set(s_args, empty_array());

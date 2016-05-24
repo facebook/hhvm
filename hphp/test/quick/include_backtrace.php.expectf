@@ -5,6 +5,11 @@ Array
             [file] => %s
             [line] => 1
             [function] => include
+            [args] => Array
+                (
+                    [0] => %sinclude_backtrace.inc
+                )
+
         )
 
 )

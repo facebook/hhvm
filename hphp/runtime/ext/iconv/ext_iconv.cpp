@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
+#include <folly/Assume.h>
 #include <boost/algorithm/string/predicate.hpp>
 
 #define ICONV_SUPPORTS_ERRNO 1
@@ -166,9 +167,13 @@ const char* munge_one(const char* chs, char** tofree,
   if (!chs[len]) return rep;
   if (chs[len] != '/' || chs[len + 1] != '/') return chs;
   auto chslen = strlen(chs);
-  *tofree = static_cast<char*>(malloc(replen + chslen - len + 1));
+  auto charset_len = chslen - len;
+  /* Avoid warnings about reading beyond array bounds, by indicating
+   * to the compiler the relative sizes of the passed in strings.  */
+  folly::assume(len + 2 <= chslen);
+  *tofree = static_cast<char*>(malloc(replen + charset_len + 1));
   memcpy(*tofree, rep, replen);
-  memcpy(*tofree + replen, chs + len, chslen - len + 1);
+  memcpy(*tofree + replen, chs + len, charset_len + 1);
   return *tofree;
 }
 

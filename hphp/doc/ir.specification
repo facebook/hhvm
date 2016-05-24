@@ -1680,8 +1680,16 @@ To string conversions:
 
 | VerifyParamFail, ND, C(Int), Er
 
-  Assumes that parameter number S0 in the current function has failed its
-  typehint and raises a recoverable fatal error describing the type mismatch.
+  Assumes that parameter number S0 in the current function has failed a its
+  type check. Depending on the typehint being verified and a number of runtime
+  options, may coerce the parameter to the correct type or raise a recoverable
+  fatal error describing the type mismatch.
+
+| VerifyParamFailHard, ND, C(Int), Er|T
+
+  A terminal version of VerifyParamFail, to be used when the compiler can
+  statically prove that this failure will result in a fatal error rather than a
+  type coercion.
 
 | VerifyRetCallable, ND, S(Gen), Er
 

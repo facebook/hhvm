@@ -9974,8 +9974,8 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
 static void
 commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                     = Repo::GlobalData{};
-  gd.HardTypeHints            = Option::HardTypeHints;
-  gd.HardReturnTypeHints      = Option::HardReturnTypeHints;
+  gd.HardTypeHints            = HHBBC::options.HardTypeHints;
+  gd.HardReturnTypeHints      = HHBBC::options.HardReturnTypeHints;
   gd.UsedHHBBC                = Option::UseHHBBC;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
@@ -10208,8 +10208,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
-    Option::HardReturnTypeHints =
-      (RuntimeOption::EvalCheckReturnTypeHints >= 3);
+    HHBBC::options.HardReturnTypeHints =
+      RuntimeOption::EvalCheckReturnTypeHints >= 3;
     Option::EnableZendCompat = RuntimeOption::EnableZendCompat;
     Option::JitEnableRenameFunction =
       RuntimeOption::EvalJitEnableRenameFunction;

@@ -15,31 +15,35 @@
 */
 
 #include "hphp/compiler/compiler.h"
-#include "hphp/compiler/package.h"
+
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
 #include "hphp/compiler/analysis/symbol_table.h"
-#include "hphp/compiler/option.h"
-#include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/json.h"
-#include "hphp/util/logger.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/package.h"
+#include "hphp/compiler/parser/parser.h"
+
+#include "hphp/hhbbc/hhbbc.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/system/systemlib.h"
+
+#include "hphp/util/async-func.h"
+#include "hphp/util/build-info.h"
+#include "hphp/util/current-executable.h"
 #include "hphp/util/exception.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
-#include "hphp/util/hdf.h"
-#include "hphp/util/async-func.h"
-#include "hphp/util/current-executable.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/system/systemlib.h"
-#include "hphp/util/build-info.h"
 
 #include "hphp/hhvm/process-init.h"
 
@@ -766,7 +770,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
-  if (Option::HardReturnTypeHints) {
+  if (HHBBC::options.HardReturnTypeHints) {
     RuntimeOption::EvalCheckReturnTypeHints = 3;
   }
   RuntimeOption::EnableZendCompat = Option::EnableZendCompat;

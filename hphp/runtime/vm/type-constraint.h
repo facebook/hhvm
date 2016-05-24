@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_TYPE_CONSTRAINT_H_
 #define incl_HPHP_TYPE_CONSTRAINT_H_
 
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/base/annot-type.h"
 
 #include "hphp/util/functional.h"
 
@@ -240,9 +240,7 @@ struct TypeConstraint {
   void verifyFail(const Func* func, TypedValue* tv, int id,
                   bool useStrictTypes) const;
   void verifyParamFail(const Func* func, TypedValue* tv,
-                       int paramNum, bool useStrictTypes = true) const {
-    verifyFail(func, tv, paramNum, useStrictTypes);
-  }
+                       int paramNum, bool useStrictTypes = true) const;
   void verifyReturnFail(const Func* func, TypedValue* tv,
                         bool useStrictTypes = true) const {
     verifyFail(func, tv, ReturnId, useStrictTypes);

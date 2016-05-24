@@ -129,8 +129,6 @@ void parse_options(int argc, char** argv) {
     ("func-families",           po::value(&options.FuncFamilies))
 
     ("hard-const-prop",         po::value(&options.HardConstProp))
-    ("hard-type-hints",         po::value(&options.HardTypeHints))
-    ("hard-return-type-hints",  po::value(&options.HardReturnTypeHints))
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))

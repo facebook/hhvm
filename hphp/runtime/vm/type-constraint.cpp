@@ -22,10 +22,13 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -411,6 +414,14 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
   not_reached();
 }
 
+void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
+                                     int paramNum, bool useStrictTypes) const {
+  verifyFail(func, tv, paramNum, useStrictTypes);
+  assertx(isSoft() ||
+          !RuntimeOption::RepoAuthoritative || !Repo::global().HardTypeHints ||
+          check(tv, func));
+}
+
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
                                 int id, bool useStrictTypes) const {
   VMRegAnchor _;
@@ -440,7 +451,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
   } else if (UNLIKELY(!func->unit()->isHHFile() &&
                       !RuntimeOption::EnableHipHopSyntax)) {
-    // PHP 7 allows for a widening conversion from Int to Float, we still ban
+    // PHP 7 allows for a widening conversion from Int to Float. We still ban
     // this in HH files.
     if (auto dt = underlyingDataType()) {
       if (*dt == KindOfDouble && tv->m_type == KindOfInt64 &&
@@ -479,6 +490,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
     return;
   }
+
   // Handle implicit collection->array conversion for array parameter type
   // constraints
   auto c = tvToCell(tv);
@@ -499,6 +511,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     tvCastToArrayInPlace(tv);
     return;
   }
+
   // Handle parameter type constraint failures
   if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable

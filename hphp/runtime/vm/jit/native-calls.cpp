@@ -247,6 +247,7 @@ static CallMap s_callMap {
     {VerifyParamCallable, VerifyParamTypeCallable, DNone, SSync,
                            {{TV, 0}, {SSA, 1}}},
     {VerifyParamFail,    VerifyParamTypeFail, DNone, SSync, {{SSA, 0}}},
+    {VerifyParamFailHard,VerifyParamTypeFail, DNone, SSync, {{SSA, 0}}},
     {VerifyRetCls,       VerifyRetTypeSlow, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {TV, 3}}},
     {VerifyRetCallable,  VerifyRetTypeCallable, DNone, SSync, {{TV, 0}}},

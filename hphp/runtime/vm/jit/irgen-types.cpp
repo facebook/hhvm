@@ -15,7 +15,9 @@
 */
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
+
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -156,6 +158,16 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       updateMarker(env);
       env.irb->exceptionStackBoundary();
       gen(env, VerifyRetFail, ldStkAddr(env, BCSPRelOffset{0}));
+      return;
+    }
+
+    auto const strictTypes = RuntimeOption::EnableHipHopSyntax ||
+      curUnit(env)->isHHFile() ||
+      !RuntimeOption::PHP7_ScalarTypes;
+
+    if (RuntimeOption::RepoAuthoritative && Repo::global().HardTypeHints &&
+        strictTypes && !(tc.isArray() && valType.maybe(TObj)) && !tc.isSoft()) {
+      gen(env, VerifyParamFailHard, cns(env, id));
     } else {
       gen(env, VerifyParamFail, cns(env, id));
     }

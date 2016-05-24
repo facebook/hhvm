@@ -660,8 +660,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // possibly avoid storing KindOfUninits if we modify this.
   case VerifyParamCallable:
   case VerifyParamCls:
-  case VerifyParamFail:
+  case VerifyParamFailHard:
     return may_raise(inst, may_load_store(AUnknown, AHeapAny));
+  // VerifyParamFail might coerce the parameter to the desired type rather than
+  // throwing.
+  case VerifyParamFail: {
+    auto const localId = inst.src(0)->intVal();
+    auto const stores = AHeapAny | AFrame{inst.marker().fp(), localId};
+    return may_raise(inst, may_load_store(AUnknown, stores));
+  }
   // However the following ones can't read locals from our frame on the way
   // out, except as a side effect of raising a warning.
   case VerifyRetCallable:

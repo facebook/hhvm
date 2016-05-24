@@ -210,8 +210,6 @@ interpOutputLocals(IRGS& env,
   auto setImmLocType = [&](uint32_t id, Type t) {
     setLocType(inst.imm[id].u_LA, t);
   };
-  auto const func = curFunc(env);
-
   auto handleBoxiness = [&] (Type testTy, Type useTy) {
     return testTy <= TBoxedCell ? TBoxedInitCell :
            testTy.maybe(TBoxedCell) ? TGen :
@@ -311,13 +309,8 @@ interpOutputLocals(IRGS& env,
       break;
 
     case OpVerifyParamType: {
-      auto paramId = inst.imm[0].u_LA;
-      auto const& tc = func->params()[paramId].typeConstraint;
       auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
-      if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
-          (locType <= TObj || locType.maybe(TBoxedCell))) {
-        setImmLocType(0, handleBoxiness(locType, TCell));
-      }
+      setImmLocType(0, handleBoxiness(locType, TCell));
       break;
     }
 

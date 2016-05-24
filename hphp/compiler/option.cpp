@@ -96,8 +96,6 @@ bool Option::PostOptimization = false;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
 bool Option::AnalyzePerfectVirtuals = true;
-bool Option::HardTypeHints = true;
-bool Option::HardReturnTypeHints = false;
 bool Option::HardConstProp = true;
 
 bool Option::KeepStatementsWithNoEffect = false;
@@ -248,8 +246,10 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Config::Bind(AutoloadRoot, ini, config, "AutoloadMap.root");
   }
 
-  Config::Bind(HardTypeHints, ini, config, "HardTypeHints", true);
-  Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", false);
+  Config::Bind(HHBBC::options.HardTypeHints, ini, config,
+               "HardTypeHints", true);
+  Config::Bind(HHBBC::options.HardReturnTypeHints, ini, config,
+               "HardReturnTypeHints", false);
   Config::Bind(HardConstProp, ini, config, "HardConstProp", true);
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
@@ -358,8 +358,6 @@ void initialize_hhbbc_options() {
   HHBBC::options.InterceptableFunctions = HHBBC::make_method_map(
                                             Option::DynamicInvokeFunctions);
   HHBBC::options.HardConstProp          = Option::HardConstProp;
-  HHBBC::options.HardTypeHints          = Option::HardTypeHints;
-  HHBBC::options.HardReturnTypeHints    = Option::HardReturnTypeHints;
   HHBBC::options.DisallowDynamicVarEnvFuncs =
     (Option::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 }

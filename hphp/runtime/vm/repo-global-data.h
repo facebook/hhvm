@@ -29,6 +29,8 @@ namespace HPHP {
  * Only used in RepoAuthoritative mode.  See loadGlobalData().
  */
 struct Repo::GlobalData {
+  GlobalData() {}
+
   /*
    * Indicates whether a repo was compiled using HHBBC.
    */
@@ -42,6 +44,15 @@ struct Repo::GlobalData {
    * would allow violating assumptions from the optimizer.
    */
   bool HardTypeHints = false;
+
+  /*
+   * Indicates whether a repo was compiled with HardReturnTypeHints.
+   *
+   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
+   * raise if you violate a return typehint, because doing so would
+   * allow violating assumptions from the optimizer.
+   */
+  bool HardReturnTypeHints = false;
 
   /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
@@ -60,15 +71,6 @@ struct Repo::GlobalData {
    * haven't been passed).
    */
   bool DisallowDynamicVarEnvFuncs = false;
-
-  /*
-   * Indicates whether a repo was compiled with HardReturnTypeHints.
-   *
-   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
-   * raise if you violate a return typehint, because doing so would
-   * allow violating assumptions from the optimizer.
-   */
-  bool HardReturnTypeHints = false;
 
   /*
    * Indicates whether the repo was compiled with PHP7 integer semantics. This

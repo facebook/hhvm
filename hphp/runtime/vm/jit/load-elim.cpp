@@ -207,7 +207,7 @@ DEBUG_ONLY std::string show(const State& state) {
 //////////////////////////////////////////////////////////////////////
 
 struct Local {
-  Global& global;
+  const Global& global;
   State state;
 };
 
@@ -253,7 +253,6 @@ TrackedLoc* find_tracked(State& state,
 }
 
 TrackedLoc* find_tracked(Local& env,
-                         const IRInstruction& inst,
                          folly::Optional<ALocMeta> meta) {
   return find_tracked(env.state, meta);
 }
@@ -336,45 +335,45 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
 Flags handle_general_effects(Local& env,
                              const IRInstruction& inst,
                              GeneralEffects m) {
+  auto handleCheck = [&](Type typeParam) -> folly::Optional<Flags> {
+    auto const meta = env.global.ainfo.find(canonicalize(m.loads));
+    if (!meta) return folly::none;
+
+    auto const tloc = &env.state.tracked[meta->index];
+    if (!env.state.avail[meta->index]) {
+      // We know nothing about the location. Initialize it with our typeParam.
+      tloc->knownValue = nullptr;
+      tloc->knownType = typeParam;
+      env.state.avail.set(meta->index);
+    } else if (tloc->knownType <= typeParam) {
+      // We had a type that was good enough to pass the check.
+      return Flags{FJmpNext{}};
+    } else {
+      // We had a type that didn't pass the check. Narrow it using our
+      // typeParam.
+      tloc->knownType &= typeParam;
+    }
+
+    if (tloc->knownType <= TBottom) {
+      // i.e., !maybe(typeParam); fail check.
+      return Flags{FJmpTaken{}};
+    }
+    if (tloc->knownValue != nullptr) {
+      return Flags{FReducible{tloc->knownValue, tloc->knownType, meta->index}};
+    }
+    return folly::none;
+  };
+
   switch (inst.op()) {
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
   case CheckRefInner:
-    {
-      auto const meta = env.global.ainfo.find(canonicalize(m.loads));
-      auto const tloc = find_tracked(env, inst, meta);
-      if (!tloc) break;
-      if (tloc->knownType <= inst.typeParam()) {
-        return FJmpNext{};
-      }
-      tloc->knownType &= inst.typeParam();
-
-      if (tloc->knownType <= TBottom) {
-        // i.e., !maybe(inst.typeParam()); fail check.
-        return FJmpTaken{};
-      }
-      if (tloc->knownValue != nullptr) {
-        return FReducible { tloc->knownValue, tloc->knownType, meta->index };
-      }
-    }
+    if (auto flags = handleCheck(inst.typeParam())) return *flags;
     break;
 
   case CheckInitMem:
-    {
-      auto const meta = env.global.ainfo.find(canonicalize(m.loads));
-      auto const tloc = find_tracked(env, inst, meta);
-      if (!tloc) break;
-      if (!tloc->knownType.maybe(TUninit)) {
-        return FJmpNext{};
-      }
-      if (tloc->knownType <= TUninit) {
-        return FJmpTaken{};
-      }
-      if (tloc->knownValue != nullptr) {
-        return FReducible { tloc->knownValue, tloc->knownType, meta->index };
-      }
-    }
+    if (auto flags = handleCheck(TInitGen)) return *flags;
     break;
 
   case CastStk:
@@ -386,7 +385,7 @@ Flags handle_general_effects(Local& env,
       AliasClass const stk = *m.loads.stack();
 
       auto const meta = env.global.ainfo.find(canonicalize(stk));
-      auto const tloc = find_tracked(env, inst, meta);
+      auto const tloc = find_tracked(env, meta);
       if (!tloc) break;
       if (inst.op() == CastStk &&
           inst.typeParam() == TNullableObj &&
@@ -451,7 +450,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
   if (!acls) return FNone{};
 
   auto const meta = env.global.ainfo.find(canonicalize(*acls));
-  auto const tloc = find_tracked(env, inst, meta);
+  auto const tloc = find_tracked(env, meta);
   if (!tloc) return FNone{};
 
   tloc->knownType &= inst.typeParam();
@@ -482,26 +481,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
             inst.toString(),
             show(effects));
 
-  if (inst.taken()) {
-    auto& outState =
-      env.global.blockInfo[inst.block()].stateOutTaken = env.state;
-
-    // CheckInitMem's pointee is TUninit on the taken branch, so update
-    // outState.
-    if (inst.is(CheckInitMem)) {
-      auto const ge = boost::get<GeneralEffects>(effects);
-      auto const meta = env.global.ainfo.find(canonicalize(ge.loads));
-      if (auto const tloc = find_tracked(outState, meta)) {
-        tloc->knownType &= TUninit;
-      } else if (meta) {
-        auto tloc = &outState.tracked[meta->index];
-        tloc->knownValue = nullptr;
-        tloc->knownType = TUninit;
-        outState.avail.set(meta->index);
-      }
-    }
-  }
-
   auto flags = Flags{};
   match<void>(
     effects,
@@ -530,8 +509,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   default:
     break;
   }
-
-  if (inst.next()) env.global.blockInfo[inst.block()].stateOutNext = env.state;
 
   return flags;
 }
@@ -657,7 +634,7 @@ SSATmp* resolve_phis(Global& env, Block* block, uint32_t alocID) {
 }
 
 template<class Flag>
-SSATmp* resolve_value(Local& env, const IRInstruction& inst, Flag flags) {
+SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags) {
   if (inst.dst() && !(flags.knownType <= inst.dst()->type())) {
     /*
      * It's possible we could assert the intersection of the types, but it's
@@ -672,11 +649,11 @@ SSATmp* resolve_value(Local& env, const IRInstruction& inst, Flag flags) {
   if (val == nullptr) return nullptr;
   return val.match(
     [&] (SSATmp* t) { return t; },
-    [&] (Block* b) { return resolve_phis(env.global, b, flags.aloc); }
+    [&] (Block* b) { return resolve_phis(env, b, flags.aloc); }
   );
 }
 
-void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
+void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   auto const resolved = resolve_value(env, inst, flags);
   if (!resolved) return;
 
@@ -685,7 +662,7 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
 
   auto const reduce_to = [&] (Opcode op, folly::Optional<Type> typeParam) {
     auto const taken = hasEdges(op) ? inst.taken() : nullptr;
-    auto const newInst = env.global.unit.gen(
+    auto const newInst = env.unit.gen(
       op,
       inst.marker(),
       taken,
@@ -729,7 +706,7 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
 
 //////////////////////////////////////////////////////////////////////
 
-void optimize_inst(Local& env, IRInstruction& inst, Flags flags) {
+void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
   match<void>(
     flags,
     [&] (FNone) {},
@@ -744,14 +721,9 @@ void optimize_inst(Local& env, IRInstruction& inst, Flags flags) {
              resolved->toString());
 
       if (resolved->type().subtypeOfAny(TGen, TCls)) {
-        env.global.unit.replace(
-          &inst,
-          AssertType,
-          flags.knownType,
-          resolved
-        );
+        env.unit.replace(&inst, AssertType, flags.knownType, resolved);
       } else {
-        env.global.unit.replace(&inst, Mov, resolved);
+        env.unit.replace(&inst, Mov, resolved);
       }
     },
 
@@ -759,29 +731,29 @@ void optimize_inst(Local& env, IRInstruction& inst, Flags flags) {
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
-      env.global.unit.replace(&inst, Jmp, inst.next());
+      env.unit.replace(&inst, Jmp, inst.next());
     },
 
     [&] (FJmpTaken) {
       FTRACE(2, "      unnecessary\n");
-      env.global.unit.replace(&inst, Jmp, inst.taken());
+      env.unit.replace(&inst, Jmp, inst.taken());
     }
   );
 
   // Re-simplify AssertType if we produced any.
-  if (inst.is(AssertType)) simplify(env.global.unit, &inst);
+  if (inst.is(AssertType)) simplify(env.unit, &inst);
 }
 
-void optimize_block(Local& env, Block* blk) {
+void optimize_block(Local& env, Global& genv, Block* blk) {
   if (!env.state.initialized) {
     FTRACE(2, "  unreachable\n");
     return;
   }
 
   for (auto& inst : *blk) {
-    simplify(env.global.unit, &inst);
+    simplify(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
-    optimize_inst(env, inst, flags);
+    optimize_inst(genv, inst, flags);
   }
 }
 
@@ -805,7 +777,7 @@ void optimize(Global& genv) {
     }
 
     auto env = Local { genv, genv.blockInfo[blk].stateIn };
-    optimize_block(env, blk);
+    optimize_block(env, genv, blk);
 
     if (auto const x = blk->next()) reachable[x] = true;
     if (auto const x = blk->taken()) reachable[x] = true;
@@ -881,6 +853,33 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
 
 //////////////////////////////////////////////////////////////////////
 
+void save_taken_state(Global& genv, const IRInstruction& inst,
+                      const State& state) {
+  if (!inst.taken()) return;
+
+  auto& outState = genv.blockInfo[inst.block()].stateOutTaken = state;
+
+  // CheckInitMem's pointee is TUninit on the taken branch, so update outState.
+  if (inst.is(CheckInitMem)) {
+    auto const effects = memory_effects(inst);
+    auto const ge = boost::get<GeneralEffects>(effects);
+    auto const meta = genv.ainfo.find(canonicalize(ge.loads));
+    if (auto const tloc = find_tracked(outState, meta)) {
+      tloc->knownType &= TUninit;
+    } else if (meta) {
+      auto tloc = &outState.tracked[meta->index];
+      tloc->knownValue = nullptr;
+      tloc->knownType = TUninit;
+      outState.avail.set(meta->index);
+    }
+  }
+}
+
+void save_next_state(Global& genv, const IRInstruction& inst,
+                     const State& state) {
+  if (inst.next()) genv.blockInfo[inst.block()].stateOutNext = state;
+}
+
 void analyze(Global& genv) {
   FTRACE(1, "\nAnalyze:\n");
 
@@ -927,7 +926,11 @@ void analyze(Global& genv) {
     FTRACE(2, "B{}:\n", blk->id());
 
     auto env = Local { genv, blkInfo.stateIn };
-    for (auto& inst : *blk) analyze_inst(env, inst);
+    for (auto& inst : *blk) {
+      save_taken_state(genv, inst, env.state);
+      analyze_inst(env, inst);
+      save_next_state(genv, inst, env.state);
+    }
     if (auto const t = blk->taken()) propagate(t);
     if (auto const n = blk->next())  propagate(n);
   } while (!incompleteQ.empty());

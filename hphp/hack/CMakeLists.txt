@@ -29,7 +29,6 @@ if (OCAMLC_FOUND)
     list(APPEND extra_cc_flags -DHAVE_ELF_GETSHDRSTRNDX)
   endif()
 
-  list(APPEND extra_cc_flags -DOSS_SMALL_HH_TABLE_POWS)
   list(APPEND extra_cc_flags -pthread)
 
   foreach(lib ${LIBELF_LIBRARIES})

@@ -42,11 +42,20 @@ let make_gc_control config =
   { GlobalConfig.gc_control with Gc.minor_heap_size; space_overhead; }
 
 let make_sharedmem_config config options local_config =
-  let {SharedMem.global_size; heap_size; shm_min_avail; _;} =
-    SharedMem.default_config in
+  let { SharedMem.
+    global_size;
+    heap_size;
+    shm_min_avail;
+    dep_table_pow;
+    hash_table_pow;
+    _;
+  } = SharedMem.default_config in
   let shm_dirs = local_config.ServerLocalConfig.shm_dirs in
+
   let global_size = int_ "sharedmem_global_size" ~default:global_size config in
   let heap_size = int_ "sharedmem_heap_size" ~default:heap_size config in
+  let dep_table_pow = int_ "sharedmem_dep_table_pow" ~default:17 config in
+  let hash_table_pow = int_ "sharedmem_hash_table_pow" ~default:18 config in
   let shm_dirs = string_list
     ~delim:(Str.regexp ",")
     "sharedmem_dirs"
@@ -54,12 +63,20 @@ let make_sharedmem_config config options local_config =
     config in
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config in
-  match ServerArgs.ai_mode options with
-  | None -> {SharedMem.global_size; heap_size; shm_dirs; shm_min_avail;}
+
+  let global_size, heap_size = match ServerArgs.ai_mode options with
+  | None -> global_size, heap_size
   | Some ai_options ->
-    let global_size, heap_size =
       Ai.modify_shared_mem_sizes global_size heap_size ai_options in
-    {SharedMem.global_size; heap_size; shm_dirs; shm_min_avail;}
+
+  { SharedMem.
+      global_size;
+      heap_size;
+      dep_table_pow;
+      hash_table_pow;
+      shm_dirs;
+      shm_min_avail;
+  }
 
 let config_list_regexp = (Str.regexp "[, \t]+")
 

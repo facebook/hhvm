@@ -87,9 +87,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
   }
 
   if (inst->mayRaiseError() && !inst->taken()) {
-    FTRACE(1, "{}: creating {}catch block\n",
-           inst->toString(),
-           env.catchCreator ? "custom " : "");
+    FTRACE(1, "{}: creating catch block\n", inst->toString());
     /*
      * If you hit this assertion, you're gen'ing an IR instruction that can
      * throw after gen'ing one that could write to the evaluation stack.  This
@@ -98,9 +96,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      * information.
      */
     check_catch_stack_state(env, inst);
-    inst->setTaken(
-      env.catchCreator ? env.catchCreator() : create_catch_block(env)
-    );
+    inst->setTaken(create_catch_block(env));
   }
 
   if (inst->mayRaiseError()) {
@@ -257,7 +253,6 @@ void prepareForNextHHBC(IRGS& env,
   env.bcStateStack.back().setOffset(newSk.offset());
   updateMarker(env);
   env.lastBcInst = lastBcInst;
-  env.catchCreator = nullptr;
   env.irb->exceptionStackBoundary();
 }
 

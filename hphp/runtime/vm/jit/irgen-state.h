@@ -113,15 +113,6 @@ struct IRGS {
    * profile-translation counters in PGO mode.
    */
   double profFactor{1};
-
-  /*
-   * The function to use to create catch blocks when instructions that can
-   * throw are created with no catch block.  The default (when this function is
-   * null) is to spill the stack and then leave.  We allow a non-default
-   * basically for an minstr use case.  This is reset every time we
-   * prepareForNextHHBC.
-   */
-  std::function<Block* ()> catchCreator;
 };
 
 //////////////////////////////////////////////////////////////////////

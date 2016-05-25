@@ -718,6 +718,10 @@ ArrayData* ArrayData::CreateVec() {
   return staticEmptyVecArray();
 }
 
+ArrayData* ArrayData::CreateDict() {
+  return MixedArray::MakeReserveDict(0);
+}
+
 ArrayData *ArrayData::Create(const Variant& value) {
   PackedArrayInit pai(1);
   pai.append(value);

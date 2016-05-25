@@ -2791,7 +2791,7 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 
 // HH\\dict
 Array HHVM_FUNCTION(HH_dict, const Array& arr) {
-  return Array::ConvertToDict(arr);
+  return arr.toDict();
 }
 
 // HH\\vec

@@ -287,6 +287,7 @@ struct RuntimeOption {
 
   static bool UnserializationWhitelistCheck;
   static bool UnserializationWhitelistCheckWarningOnly;
+  static int64_t UnserializationBigMapThreshold;
 
   static std::string TakeoverFilename;
   static int AdminServerPort;

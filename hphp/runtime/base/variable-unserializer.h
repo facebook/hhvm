@@ -87,6 +87,8 @@ struct VariableUnserializer {
   Type type() const;
   bool allowUnknownSerializableClass() const;
   const char* head() const;
+  const char* begin() const;
+  const char* end() const;
   char peek() const;
   char peekBack() const;
   bool endOfBuffer() const;
@@ -153,6 +155,7 @@ private:
   bool m_unknownSerializable;
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;
+  const char* const m_begin;
 };
 
 void reserialize(VariableUnserializer* uns, StringBuffer& buf);

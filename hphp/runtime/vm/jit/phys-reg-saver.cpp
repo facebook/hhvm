@@ -63,8 +63,6 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
         }
       });
       break;
-    default:
-      always_assert(false);
   }
 
   if (m_adjust) {
@@ -99,8 +97,6 @@ PhysRegSaver::~PhysRegSaver() {
         }
       });
       break;
-    default:
-      always_assert(false);
   }
 
   if (!xmm.empty()) {

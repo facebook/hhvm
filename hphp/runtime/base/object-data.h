@@ -488,29 +488,6 @@ inline ObjectData* instanceFromTv(TypedValue* tv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<uint16_t Flags>
-struct ExtObjectDataFlags : ObjectData {
-  explicit ExtObjectDataFlags(HPHP::Class* cb,
-                              HeaderKind kind = HeaderKind::Object)
-    : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind)
-  {
-    assert(!getVMClass()->needsInitThrowable());
-  }
-
-protected:
-  explicit ExtObjectDataFlags(HPHP::Class* cb,
-                              HeaderKind kind,
-                              NoInit ni) noexcept
-  : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind, ni)
-  {
-    assert(!getVMClass()->needsInitThrowable());
-  }
-
-  ~ExtObjectDataFlags() {}
-};
-
-using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
-
 #define DECLARE_CLASS_NO_SWEEP(originalName)                           \
   public:                                                              \
   CLASSNAME_IS(#originalName)                                          \

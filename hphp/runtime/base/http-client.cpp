@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/timer.h"
-#include <curl/curl.h>
 #include <curl/easy.h>
 #include <vector>
 #include "hphp/util/logger.h"
@@ -137,6 +136,8 @@ int HttpClient::request(const char* verb,
   curl_easy_setopt(cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
   curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,    1);
   curl_easy_setopt(cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
+  curl_easy_setopt(cp, CURLOPT_USE_SSL, m_use_ssl);
+  curl_easy_setopt(cp, CURLOPT_SSLVERSION, m_sslversion);
 
   /*
    * cipher list varies according to SSL library, and "ALL" is for OpenSSL

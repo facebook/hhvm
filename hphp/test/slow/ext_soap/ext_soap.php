@@ -36,7 +36,8 @@ function fault() {
 
 //////////////////////////////////////////////////////////////////////
 
-$server = new SoapServer(null, array("uri" => "http://testuri.org"));
+$server = new SoapServer(null, array("uri" => "http://testuri.org",
+                "ssl_method" => SOAP_SSL_METHOD_TLS));
 
 function verify_response($req, $expected) {
   global $server;

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/server/transport.h"
+#include <curl/curl.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +48,22 @@ struct HttpClient {
    */
   void setStreamContextOptions(const Array &opts) {
     m_stream_context_options = opts;
+  }
+  /**
+   * require SLS/TLS
+   * (defaul) CURLUSESSL_NONE, CURLUSESSL_TRY, CURLUSESSL_CONTROL, CURLUSESSL_ALL
+   */
+
+  void setUseSSL(const long level) {
+    m_use_ssl = level;
+  }
+
+  /**
+   * set preferred TLS/SSL version
+   * (default) CURL_SSLVERSION_DEFAULT, CURL_SSLVERSION_TLSv1, CURL_SSLVERSION_SSLv3
+   */
+  void setSSLVersion (const long version) {
+    m_sslversion = version;
   }
 
   /**
@@ -93,6 +110,9 @@ private:
   int         m_proxyPort;
   std::string m_proxyUsername;
   std::string m_proxyPassword;
+
+  long m_use_ssl = CURLUSESSL_NONE;
+  long m_sslversion = CURL_SSLVERSION_DEFAULT;  //try to match remote SSL
 
   Array       m_stream_context_options;
 

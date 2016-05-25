@@ -19,7 +19,7 @@
 #include <folly/Singleton.h>
 
 #include "hphp/compiler/option.h"
-#include "hphp/hhbbc/hhbbc.h"
+#include "hphp/hhbbc/options.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/util/assertions.h"

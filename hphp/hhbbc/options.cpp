@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/hhbbc/hhbbc.h"
+#include "hphp/hhbbc/options.h"
 
 namespace HPHP { namespace HHBBC {
 

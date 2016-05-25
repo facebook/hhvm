@@ -41,9 +41,9 @@ namespace arm {
  */
 constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 3 * 4 + 8; }
+constexpr size_t smashableCallLen() { return 4 + 8 + 2 * 4; }
 constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
-constexpr size_t smashableJccLen()  { return 3 * 4 + 8; }
+constexpr size_t smashableJccLen()  { return 4 + smashableJmpLen(); }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
@@ -69,6 +69,9 @@ TCA smashableCallTarget(TCA inst);
 TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
+
+constexpr size_t kSmashMovqImmOff = 0;
+constexpr size_t kSmashCmpqImmOff = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 

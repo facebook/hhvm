@@ -16,46 +16,66 @@
 
 #include "hphp/runtime/vm/jit/align-arm.h"
 
+#include "hphp/runtime/vm/jit/align-internal.h"
+#include "hphp/runtime/vm/jit/smashable-instr-arm.h"
+
 #include "hphp/util/data-block.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
+
+#include <folly/Bits.h>
+
+#include <utility>
 
 namespace HPHP { namespace jit { namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+/*
+ * Targets of jmps on arm must be aligned to instruction size
+ */
+constexpr size_t kJmpTargetAlign = vixl::kInstructionSize;
+
+struct AlignImpl {
+  static DECLARE_ALIGN_TABLE(s_table);
+
+  static void pad(CodeBlock& cb, AlignContext context, size_t bytes) {
+    vixl::MacroAssembler a { cb };
+
+    switch (context) {
+      case AlignContext::Live:
+        assert(((bytes & 3) == 0) && "alignment must be multiple of 4");
+        for (; bytes > 0; bytes -= 4) {
+          a.Nop();
+        }
+        return;
+
+      case AlignContext::Dead:
+        if (bytes > 4) {
+          a.Brk();
+          bytes -= 4;
+        }
+        if (bytes > 0) pad(cb, AlignContext::Live, bytes);
+        return;
+    }
+    not_reached();
+  }
+};
+
+DEFINE_ALIGN_TABLE(AlignImpl::s_table);
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool is_aligned(TCA frontier, Alignment alignment) {
-  return true;
+  return jit::is_aligned<AlignImpl>(frontier, alignment);
 }
 
 void align(CodeBlock& cb, CGMeta* meta,
            Alignment alignment, AlignContext context) {
-  vixl::MacroAssembler a { cb };
-
-  switch (alignment) {
-    case Alignment::CacheLine:
-    case Alignment::CacheLineRoundUp:
-    case Alignment::JmpTarget:
-      break;
-
-    case Alignment::SmashCmpq:
-      break;
-
-    case Alignment::SmashMovq:
-    case Alignment::SmashJmp:
-      // Smashable movs and jmps are two instructions plus inline 64-bit data,
-      // so they need to be 8-byte aligned.
-      if (!cb.isFrontierAligned(8)) a.Nop();
-      break;
-
-    case Alignment::SmashCall:
-    case Alignment::SmashJcc:
-    case Alignment::SmashJccAndJmp:
-      // Other smashable control flow instructions are three instructions plus
-      // inline 64-bit data, so it needs to be one instruction off from 8-byte
-      // alignment.
-      if (cb.isFrontierAligned(8)) a.Nop();
-      break;
-  }
+  return jit::align<AlignImpl>(cb, meta, alignment, context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

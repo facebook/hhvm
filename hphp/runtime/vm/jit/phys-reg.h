@@ -67,6 +67,7 @@ public:
   constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kSIMDOffset) {}
   constexpr /* implicit */ PhysReg(RegSF r) : n(int(r) + kSFOffset) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(r)) {}
+  explicit constexpr PhysReg(Reg16 r) : n(int(r)) {}
   explicit constexpr PhysReg(Reg8 r) : n(int(r)) {}
 
   constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
@@ -374,6 +375,31 @@ public:
   }
 
   template<class Fun>
+  void forEachPair(Fun f) const {
+    uint64_t out;
+    uint8_t r[2];
+    uint8_t i = 0;
+
+    auto const go = [&] (uint64_t& bits, off_t off) {
+      while (ffs64(bits, out)) {
+        assert(0 <= out && out < 64);
+        bits &= ~(uint64_t{1} << out);
+        r[i++] = out + off;
+        if (i > 1) {
+          f(PhysReg(r[0]), PhysReg(r[1]));
+          i = 0;
+        }
+      }
+    };
+
+    // Low to high.
+    auto copy = *this;
+    go(copy.m_lo, 0);
+    go(copy.m_hi, 64);
+    if (i > 0) f(PhysReg(r[0]), InvalidReg);
+  }
+
+  template<class Fun>
   void forEachR(Fun f) const {
     uint64_t out;
 
@@ -389,6 +415,31 @@ public:
     auto copy = *this;
     go(copy.m_hi, 64);
     go(copy.m_lo, 0);
+  }
+
+  template<class Fun>
+  void forEachPairR(Fun f) const {
+    uint64_t out;
+    uint8_t r[2];
+    uint8_t i = 0;
+
+    auto const go = [&] (uint64_t& bits, off_t off) {
+      while (fls64(bits, out)) {
+        assert(0 <= out && out < 64);
+        bits &= ~(uint64_t{1} << out);
+        r[i++] = out + off;
+        if (i > 1) {
+          f(PhysReg(r[0]), PhysReg(r[1]));
+          i = 0;
+        }
+      }
+    };
+
+    // High to low.
+    auto copy = *this;
+    go(copy.m_hi, 64);
+    go(copy.m_lo, 0);
+    if (i > 0) f(PhysReg(r[0]), InvalidReg);
   }
 
   /*

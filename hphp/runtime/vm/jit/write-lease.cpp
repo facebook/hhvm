@@ -176,8 +176,18 @@ LeaseHolderBase::~LeaseHolderBase() {
   }
 }
 
+bool LeaseHolderBase::acquire() {
+  if (m_lease.amOwner() || (m_acquired = m_lease.acquire())) {
+    m_state = LockLevel::Write;
+    return true;
+  }
+
+  return false;
+}
+
 void LeaseHolderBase::acquireBlocking() {
   assertx(!canWrite());
+  assertx(!m_lease.amOwner());
 
   if (m_lease.amOwner()) {
     m_state = LockLevel::Write;

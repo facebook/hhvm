@@ -38,6 +38,7 @@
   TIMER_NAME(selectTracelet)                    \
   TIMER_NAME(mcg_translate)                     \
   TIMER_NAME(mcg_finishTranslation)             \
+  TIMER_NAME(mcg_finishTranslation_metadata)    \
   TIMER_NAME(irGenRegion)                       \
   TIMER_NAME(irGenRegionAttempt)                \
   TIMER_NAME(translateTracelet)                 \

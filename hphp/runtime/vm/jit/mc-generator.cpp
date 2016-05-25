@@ -301,6 +301,15 @@ TransResult MCGenerator::retranslate(const TransArgs& args) {
 
   auto newArgs = args;
   newArgs.kind = profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+
+  // We only allow concurrent jitting of non-Profile translations if
+  // EvalJitConcurrently is >= 2.
+  if (RuntimeOption::EvalJitConcurrently < 2 &&
+      newArgs.kind != TransKind::Profile &&
+      !writer.acquire()) {
+    return nullptr;
+  }
+
   auto result = translate(newArgs);
 
   checkFreeProfData();
@@ -1851,6 +1860,7 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
           CodeKind::Helper);
   }
 
+  Timer metaTimer(Timer::mcg_finishTranslation_metadata);
   auto loc = maker.markEnd();
 
   if (args.align) {

@@ -85,6 +85,13 @@ struct LeaseHolderBase {
   ~LeaseHolderBase();
 
   /*
+   * Attempt a non-blocking acquisition of the write lease if not already held.
+   *
+   * Returns true iff this thread already owned it or was able to acquire it.
+   */
+  bool acquire();
+
+  /*
    * Perform a blocking acquire of the write lease. Will never fail, but may
    * take a long time to return.
    */

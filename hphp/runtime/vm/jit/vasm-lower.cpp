@@ -91,8 +91,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       if (vargs.indirect) {
         if (vargs.args.size() > 0) {
           // First arg is pointer to storage for the return value
-          auto const rreg = rret_indirect();
-          v << copy{vargs.args[0], rreg};
+          v << copy{vargs.args[0], rret_indirect()};
           VregList rem(vargs.args.begin() + 1, vargs.args.end());
           doArgs(rem, rarg);
           needsCopy = true;

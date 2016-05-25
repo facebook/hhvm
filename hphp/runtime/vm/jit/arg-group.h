@@ -243,7 +243,7 @@ private:
 private:
   const IRInstruction* m_inst;
   const StateVector<SSATmp,Vloc>& m_locs;
-  ArgVec* m_override{nullptr};// used to force args to go into a specific ArgVec
+  ArgVec* m_override{nullptr}; // used to force args to go into a specific ArgVec
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow

@@ -76,10 +76,6 @@ Array Array::Create(const Variant& name, const Variant& var) {
   };
 }
 
-Array Array::ConvertToDict(const Array& arr) {
-  return Array(arr->toDict(), NoIncRef{});
-}
-
 Array::~Array() {}
 
 ///////////////////////////////////////////////////////////////////////////////

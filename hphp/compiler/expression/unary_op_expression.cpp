@@ -202,7 +202,7 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
     }
     if (m_op == T_DICT) {
       if (m_exp->getScalarValue(value)) {
-        value = Array::ConvertToDict(value.toArray());
+        value = value.toArray().toDict();
         return true;
       }
       return false;

@@ -88,12 +88,15 @@ public:
     return Array(ArrayData::CreateVec(), NoIncRef{});
   }
 
+  static Array CreateDict() {
+    return Array(ArrayData::CreateDict(), NoIncRef{});
+  }
+
   static Array Create(const Variant& value) {
     return Array(ArrayData::Create(value), NoIncRef{});
   }
 
   static Array Create(const Variant& key, const Variant& value);
-  static Array ConvertToDict(const Array& arr);
 
 public:
   Array() {}
@@ -130,6 +133,12 @@ public:
   Array toVec() const {
     if (!m_arr) return CreateVec();
     auto new_arr = m_arr->toVec();
+    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
+  }
+
+  Array toDict() const {
+    if (!m_arr) return CreateDict();
+    auto new_arr = m_arr->toDict();
     return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
   }
 

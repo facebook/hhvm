@@ -1727,13 +1727,7 @@ MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
 
 ArrayData* MixedArray::ToDict(ArrayData* ad) {
   auto a = asMixed(ad);
-  if (a->cowCheck()) {
-    a = CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
-  } else {
-    CheckRefsForDict(a);
-    a->m_hdr.init(HeaderKind::Dict, 1);
-  }
-  return a;
+  return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
 }
 
 void MixedArray::Renumber(ArrayData* ad) {

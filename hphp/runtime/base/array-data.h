@@ -102,6 +102,7 @@ public:
   static ArrayData *CreateRef(const Variant& name, Variant& value);
 
   static ArrayData *CreateVec();
+  static ArrayData *CreateDict();
 
   /*
    * Called to return an ArrayData to the request heap.  This is

@@ -27,6 +27,9 @@ let parse_errors = Hashtbl.create 23
 (* helpers *)
 (*****************************************************************************)
 
+let root = "/"
+let make_path fn = Relative_path.create Relative_path.Root (root ^ fn)
+
 let rec to_js_object json =
   match json with
   | JSON_Array l ->
@@ -156,7 +159,7 @@ let rec last_error errors =
     | _ :: tail -> last_error tail
 
 let hh_add_file fn content =
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   Hashtbl.replace files fn content;
   try
     let errors, _ = Errors.do_ begin fun () ->
@@ -167,7 +170,7 @@ let hh_add_file fn content =
     ()
 
 let hh_add_dep fn content =
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   Typing_deps.is_dep := true;
   (try
     Errors.ignore_ begin fun () ->
@@ -180,7 +183,7 @@ let hh_add_dep fn content =
   Typing_deps.is_dep := false
 
 let hh_check fn =
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   match Hashtbl.find parse_errors fn with
     | Some e -> error [e]
     | None ->
@@ -201,7 +204,7 @@ let hh_check fn =
         end
 
 let hh_check_syntax fn content =
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   let errors, _ = Errors.do_ begin fun () ->
     Parser_hack.program fn content
   end in
@@ -209,7 +212,7 @@ let hh_check_syntax fn content =
 
 let hh_auto_complete fn =
   let tcopt = TypecheckerOptions.permissive in
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   AutocompleteService.attach_hooks();
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
@@ -250,7 +253,7 @@ let hh_auto_complete fn =
 
 let hh_get_method_at_position fn line char =
   Autocomplete.auto_complete := false;
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   let result = ref None in
   let tcopt = TypecheckerOptions.permissive in
   IdentifySymbolService.attach_hooks result line char;
@@ -377,7 +380,7 @@ let hh_infer_pos file line char =
   to_js_object output
 
 let hh_file_summary fn =
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
     let outline = FileOutline.(to_legacy (outline_ast ast)) in
@@ -399,7 +402,7 @@ let hh_hack_coloring fn =
   Typing.with_expr_hook
     (fun (p, _) ty -> Hashtbl.replace type_acc p ty)
     (fun () -> ignore (hh_check fn));
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   let level_of_type x = snd (Coverage_level.level_of_type_mapper fn x) in
   let result = Hashtbl.fold (fun p ty xs ->
     (Pos.info_raw p, level_of_type (p, ty)) :: xs) type_acc [] in
@@ -438,7 +441,7 @@ let hh_arg_info fn line char =
   (* all the hooks for arg info happen in typing,
    * so we only need to run typing*)
   ArgumentInfoService.attach_hooks (line, char);
-  let fn = Relative_path.create Relative_path.Root fn in
+  let fn = make_path fn in
   let _, funs, classes = Hashtbl.find globals fn in
   let tcopt = TypecheckerOptions.permissive in
   Errors.ignore_ begin fun () ->
@@ -500,7 +503,7 @@ let js_wrap_string_2 func =
   Js.wrap_callback f
 
 let () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
+  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   Js.Unsafe.set Js.Unsafe.global "hh_check_file" (js_wrap_string_1 hh_check);
   Js.Unsafe.set Js.Unsafe.global "hh_check_syntax" (js_wrap_string_2 hh_check_syntax);
   Js.Unsafe.set Js.Unsafe.global "hh_add_file" (js_wrap_string_2 hh_add_file);

@@ -245,6 +245,7 @@ def idx_accessors():
         'std::vector':              vector_at,
         'std::unordered_map':       unordered_map_at,
         'HPHP::jit::hash_map':      unordered_map_at,
+        'HPHP::hphp_hash_map':      unordered_map_at,
         'boost::container::flat_map':
                                     boost_flat_map_at,
         'tbb::interface5::concurrent_hash_map':

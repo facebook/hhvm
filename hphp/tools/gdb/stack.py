@@ -22,16 +22,7 @@ The output backtrace has the following format:
 
     #<bt frame> <fp> @ <rip>: <function> [at <filename>:<line>]
 
-`walkstk' relies on gdb's internal representation of HHVM's jitted TC frames
-being in one-to-one correspondence with frame records discovered via a simple
-walk of the %fp chain.  (The metadata kept for these frames, however, needn't
-be correct or coherent.)
-
-The heuristics that gdb uses to unwind the stack vary by version, and if gdb
-does not meet the above expectations, `walkstk' may behave aberrantly.  If gdb
-sees too few frames, `walkstk' may drop some native frame metadata (such as
-function names).  If `gdb' sees too many frames, `walkstk' may display garbage
-frames.
+`walkstk' depends on the custom HHVM unwinder defined in unwind.py.
 """
 
     def __init__(self):
@@ -66,20 +57,6 @@ frames.
                    and rip != native_frame.pc()):
                 native_frame = native_frame.older()
 
-        # Get the value of `mcg', the global MCGenerator pointer.
-        mcg = V('HPHP::jit::mcg')
-
-        # Set the bounds of the TC.
-        try:
-            tc_base = mcg['code']['m_base']
-            tc_end = tc_base + mcg['code']['m_codeSize']
-        except:
-            # We can't access `mcg' for whatever reason---maybe it's gotten
-            # corrupted somehow.  Assume that the TC is above the data section,
-            # but restricted to low memory.
-            tc_base = mcg.address.cast(T('uintptr_t'))
-            tc_end = 0x100000000
-
         i = 0
 
         # Make a fake frame for our `fp' and `rip'.  This lets us pop a frame
@@ -91,11 +68,9 @@ frames.
             rip = fp[1]
             fp = fp[0].cast(fp_type)
 
-            in_tc = rip >= tc_base and rip < tc_end
-
             # Try to get the PHP function name from the ActRec at `fp' if we're
             # executing in the TC.
-            if in_tc:
+            if frame.is_jitted(fp, rip):
                 ar_type = T('HPHP::ActRec').pointer()
                 try:
                     print(frame.stringify(frame.create_php(
@@ -124,11 +99,11 @@ frames.
                     frames = []
 
                     while (native_frame is not None
-                           and fp[1] != native_frame.pc()):
+                           and (fp == 0x0 or fp[1] != native_frame.pc())):
                         frames.append(frame.create_native(
                             idx=i,
                             fp='{inline frame}',
-                            rip=rip,
+                            rip=native_frame.pc(),
                             native_frame=native_frame))
 
                         native_frame = native_frame.older()
@@ -142,8 +117,11 @@ frames.
                         print(frame.stringify(f))
                 else:
                     # We only hit this case if gdb undercounted the TC's
-                    # frames.  Guess that the name of the frame is the same as
-                    # the name of the block we're in.
+                    # frames---which shouldn't happen unless the custom
+                    # unwinder (or gdb's unwinder API) is malfunctioning.
+                    #
+                    # Just guess that the name of the frame is the same as the
+                    # name of the block we're in.
                     try:
                         block = gdb.block_for_pc(int(rip))
                         name = block.function.name

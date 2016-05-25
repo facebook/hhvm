@@ -544,7 +544,7 @@ inline void Func::resetPrologues() {
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
-inline char& Func::maybeIntercepted() const {
+inline int8_t& Func::maybeIntercepted() const {
   return m_maybeIntercepted;
 }
 

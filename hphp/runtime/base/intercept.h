@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_INTERCEPT_H_
 #define incl_HPHP_INTERCEPT_H_
 
+#include <stdint.h>
+
 namespace HPHP {
 
 struct Array;
@@ -35,7 +37,7 @@ bool register_intercept(const String& name, const Variant& callback, const Varia
 /**
  * Check to see if it is actually intercepted for current request.
  */
-Variant* get_intercept_handler(const String& name, char* flag);
+Variant* get_intercept_handler(const String& name, int8_t* flag);
 
 /**
  * Call intercept handler with original parameters.
@@ -46,7 +48,7 @@ bool handle_intercept(const Variant& handler, const String& name, const Array& p
 /**
  * Removes a previously registered flag.
  */
-void unregister_intercept_flag(const String& name, char* flag);
+void unregister_intercept_flag(const String& name, int8_t* flag);
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()

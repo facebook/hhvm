@@ -82,13 +82,13 @@ static Mutex s_mutex;
  * The vector contains a list of maybeIntercepted flags for functions
  * with this name.
  */
-typedef StringIMap<std::pair<bool,std::vector<char*>>> RegisteredFlagsMap;
+typedef StringIMap<std::pair<bool,std::vector<int8_t*>>> RegisteredFlagsMap;
 
 static RegisteredFlagsMap s_registered_flags;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void flag_maybe_intercepted(std::vector<char*> &flags) {
+static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
   for (auto flag : flags) {
     *flag = 1;
   }
@@ -158,7 +158,7 @@ static Variant *get_enabled_intercept_handler(const String& name) {
   return handler;
 }
 
-Variant *get_intercept_handler(const String& name, char* flag) {
+Variant *get_intercept_handler(const String& name, int8_t* flag) {
   TRACE(1, "get_intercept_handler %s flag is %d\n",
         name.get()->data(), (int)*flag);
   if (*flag == -1) {
@@ -183,12 +183,12 @@ Variant *get_intercept_handler(const String& name, char* flag) {
   return handler;
 }
 
-void unregister_intercept_flag(const String& name, char *flag) {
+void unregister_intercept_flag(const String& name, int8_t *flag) {
   Lock lock(s_mutex);
   RegisteredFlagsMap::iterator iter =
     s_registered_flags.find(name);
   if (iter != s_registered_flags.end()) {
-    std::vector<char*> &flags = iter->second.second;
+    std::vector<int8_t*> &flags = iter->second.second;
     for (int i = flags.size(); i--; ) {
       if (flag == flags[i]) {
         flags.erase(flags.begin() + i);

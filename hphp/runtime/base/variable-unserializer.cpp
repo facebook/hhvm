@@ -18,6 +18,9 @@
 #include <algorithm>
 #include <utility>
 
+#include <folly/Conv.h>
+#include <folly/Range.h>
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
@@ -237,6 +240,7 @@ VariableUnserializer::VariableUnserializer(
     , m_end(str + len)
     , m_unknownSerializable(allowUnknownSerializableClass)
     , m_options(options)
+    , m_begin(str)
 {}
 
 VariableUnserializer::Type VariableUnserializer::type() const {
@@ -249,6 +253,14 @@ bool VariableUnserializer::allowUnknownSerializableClass() const {
 
 const char* VariableUnserializer::head() const {
   return m_buf;
+}
+
+const char* VariableUnserializer::begin() const {
+  return m_begin;
+}
+
+const char* VariableUnserializer::end() const {
+  return m_end;
 }
 
 char VariableUnserializer::peek() const {
@@ -1144,11 +1156,112 @@ void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
   }
 }
 
+
+/*
+ * Try to read 'str' while advancing 'cur' without reaching 'end'.
+ */
+ALWAYS_INLINE
+static bool match(const char*& cur,
+                  const char* expected,
+                  const char* const end) {
+  if (cur + strlen(expected) >= end) return false;
+  while (*expected) {
+    if (*cur++ != *expected++) return false;
+  }
+  return true;
+}
+
+ALWAYS_INLINE
+static int64_t read64(const char*& cur) {
+  auto p = hh_strtoll_base10(cur);
+  cur = p.second;
+  return p.first;
+}
+
+/*
+ * Read a key/value pair from 'cur' into 'out'. Returns false on unexpected
+ * (but possibly still legal) format or if 'end' is reached.
+ */
+ALWAYS_INLINE
+bool readStringIntPair(const char*& cur, const char* const end,
+                       int maxKeyLen, std::pair<String, int64_t>& out) {
+  /*
+   * Expected format:
+   *
+   *   s:3:"key";i:1234;
+   */
+  if (!match(cur, "s:", end)) return false;
+  auto keyLen = read64(cur);
+  if (keyLen < 0 || keyLen >= maxKeyLen) return false;
+  if (!match(cur, ":\"", end)) return false;
+  auto const keySlice = folly::StringPiece(cur, keyLen);
+  if ((cur += keyLen) >= end) return false;
+  // TODO(11398853): Consider streaming/non-temporal stores here.
+  auto sd = StringData::Make(keySlice, CopyString);
+  sd->hash(); // Compute hash while the entire string is cached; use it later.
+  out.first = String::attach(sd);
+  if (!match(cur, "\";i:", end)) return false;
+  out.second = read64(cur);
+  if (!match(cur, ";", end)) return false;
+  return true;
+}
+
+/*
+ * Attempts to unserialize into an initially empty HH\Map of string->int.
+ * Returns false and leaves both 'map' and 'uns' untouched on failure, including
+ * unexpected types and possibly legal, but uncommon, encodings.
+ */
+NEVER_INLINE
+bool tryUnserializeStrIntMap(BaseMap* map,
+                             VariableUnserializer* uns,
+                             int64_t sz) {
+  auto b = uns->head();
+  /*
+   * For efficiency, we don't add the keys/values to m_refs, so don't support
+   * back-references appearing after this point. For simplicity, we thus require
+   * this map to be the root object being unserialized.
+   */
+  if (folly::StringPiece(uns->begin(), b) !=
+      folly::to<std::string>("K:6:\"HH\\Map\":", sz, ":{")) {
+    return false;
+  }
+  auto const end = uns->end();
+  auto const maxKeyLen = RuntimeOption::MaxSerializedStringSize;
+  /*
+   * First, parse the entire input and allocate the keys (accessing lots of
+   * data, but mostly sequentially).
+   */
+  req::deque<std::pair<String, int64_t>> out(1); // Hold off allocation until...
+  for (int64_t i = 0; i < sz; ++i) {
+    if (!readStringIntPair(b, end, maxKeyLen, out[i])) return false;
+    if (UNLIKELY(i == 0)) out.resize(sz); // ...it looks like a string->int map.
+  }
+  /*
+   * On success, populate the output hash map (very random access).
+   */
+  uns->set(b, end);
+  while (!out.empty()) {
+    // Insert from front to back for consistency with slow-case.
+    auto& kv = out.front();
+    // TODO(11398987): Consider back-to-front for cache; avoid refcount updates.
+    if (auto tv = map->findForUnserialize(kv.first.get())) {
+      tv->m_type = KindOfInt64;
+      tv->m_data.num = kv.second;
+    }
+    out.pop_front();
+  }
+  return true;
+}
+
 void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
                     int64_t sz, char type) {
   if (type != 'K') throwBadFormat(obj, type);
   auto map = static_cast<BaseMap*>(obj);
   map->reserve(sz);
+  if (sz >= RuntimeOption::UnserializationBigMapThreshold &&
+      tryUnserializeStrIntMap(map, uns, sz)) {
+    return;
+  }
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
     unserializeVariant(k, uns, UnserializeMode::ColKey);

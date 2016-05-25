@@ -299,6 +299,7 @@ std::vector<std::string> RuntimeOption::AllowedExecCmds;
 
 bool RuntimeOption::UnserializationWhitelistCheck = false;
 bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
+int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
 
 std::string RuntimeOption::TakeoverFilename;
 int RuntimeOption::AdminServerPort = 0;
@@ -1425,6 +1426,8 @@ void RuntimeOption::Load(
                  "Server.UnserializationWhitelistCheck", false);
     Config::Bind(UnserializationWhitelistCheckWarningOnly, ini, config,
                  "Server.UnserializationWhitelistCheckWarningOnly", true);
+    Config::Bind(UnserializationBigMapThreshold, ini, config,
+                 "Server.UnserializationBigMapThreshold", 1 << 16);
     Config::Bind(AllowedFiles, ini, config, "Server.AllowedFiles");
     Config::Bind(ForbiddenFileExtensions, ini, config,
                  "Server.ForbiddenFileExtensions");

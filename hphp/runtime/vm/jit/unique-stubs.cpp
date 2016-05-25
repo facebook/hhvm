@@ -1177,19 +1177,21 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
 
     // Pack the service request args into a svcreq::ReqInfo on the stack.
     switch (arch()) {
-    case Arch::ARM:
-      assertx(!(svcreq::kMaxArgs & 1));
-      for (auto i = svcreq::kMaxArgs - 1; i > 0; i -= 2) {
-        v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i)};
-      }
-      v << pushp{r_svcreq_req(), r_svcreq_stub()};
-      break;
-    default:
-      for (auto i = svcreq::kMaxArgs; i-- > 0; ) {
-        v << push{r_svcreq_arg(i)};
-      }
-      v << push{r_svcreq_stub()};
-      v << push{r_svcreq_req()};
+      case Arch::X64:
+      case Arch::PPC64:
+        for (auto i = svcreq::kMaxArgs; i-- > 0; ) {
+          v << push{r_svcreq_arg(i)};
+        }
+        v << push{r_svcreq_stub()};
+        v << push{r_svcreq_req()};
+        break;
+      case Arch::ARM:
+        assertx(!(svcreq::kMaxArgs & 1));
+        for (auto i = svcreq::kMaxArgs - 1; i > 0; i -= 2) {
+          v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i)};
+        }
+        v << pushp{r_svcreq_req(), r_svcreq_stub()};
+        break;
     }
 
     // Call mcg->handleServiceRequest(rsp()).

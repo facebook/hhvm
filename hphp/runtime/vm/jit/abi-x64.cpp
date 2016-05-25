@@ -164,6 +164,7 @@ PhysReg rret_simd(size_t i) {
   return reg::xmm0;
 }
 
+
 PhysReg rarg(size_t i) {
   assertx(i < num_arg_regs());
   return gp_args[i];

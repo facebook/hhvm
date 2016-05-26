@@ -64,10 +64,16 @@ let make_sharedmem_config config options local_config =
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config in
 
-  let global_size, heap_size = match ServerArgs.ai_mode options with
-  | None -> global_size, heap_size
-  | Some ai_options ->
-      Ai.modify_shared_mem_sizes global_size heap_size ai_options in
+  let global_size, heap_size, dep_table_pow, hash_table_pow =
+    match ServerArgs.ai_mode options with
+    | None -> global_size, heap_size, dep_table_pow, hash_table_pow
+    | Some ai_options ->
+      Ai.modify_shared_mem_sizes
+        global_size
+        heap_size
+        dep_table_pow
+        hash_table_pow
+        ai_options in
 
   { SharedMem.
       global_size;

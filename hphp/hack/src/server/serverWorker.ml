@@ -18,6 +18,5 @@ let make gc_control heap_handle =
     ~saved_state:(ServerGlobalState.save ())
     ~entry
     ~nbr_procs: (GlobalConfig.nbr_procs)
-    ~debug: false
     ~gc_control
     ~heap_handle

@@ -33,11 +33,16 @@ type t =
 | PostfixUnaryOperator
 | BinaryOperator
 | ParenthesizedExpression
+| BracedExpression
+| XHPExpression
+| XHPOpen
+| XHPAttribute
 
 (* Types *)
 | SimpleTypeSpecifier
 | TypeConstant
 | GenericTypeSpecifier
+| TypeArguments
 
 let to_string kind =
   match kind with
@@ -45,7 +50,7 @@ let to_string kind =
   | Token -> "token"
   | LiteralExpression -> "literal"
   | VariableExpression -> "variable"
-  | QualifiedNameExpression -> "variable"
+  | QualifiedNameExpression -> "qualified_name"
   | Error -> "error"
   | SyntaxList -> "list"
   | ScriptHeader -> "header"
@@ -58,7 +63,12 @@ let to_string kind =
   | PostfixUnaryOperator -> "postfix_unary_operator"
   | BinaryOperator -> "binary_operator"
   | ParenthesizedExpression -> "parenthesized_expression"
+  | BracedExpression -> "parenthesized_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier "
   | GenericTypeSpecifier -> "generic_type_specifier"
+  | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
+  | XHPExpression -> "xhp_expression"
+  | XHPOpen -> "xhp_open"
+  | XHPAttribute -> "xhp_attribute"

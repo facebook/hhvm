@@ -152,6 +152,13 @@ type t =
 | NowdocStringLiteral
 | BooleanLiteral
 | NullLiteral
+(* XHP *)
+| XHPElementName
+| XHPStringLiteral
+| XHPBody
+| SlashGreaterThan
+| LessThanSlash
+
 
 let from_string keyword =
   match keyword with
@@ -365,3 +372,8 @@ let to_string kind =
   | NowdocStringLiteral -> "nowdoc_string_literal"
   | BooleanLiteral -> "boolean_literal"
   | NullLiteral -> "null_literal"
+  | XHPElementName -> "XHP_element_name"
+  | XHPStringLiteral -> "XHP_string_literal"
+  | XHPBody -> "XHP_body"
+  | SlashGreaterThan -> "/>"
+  | LessThanSlash -> "</"

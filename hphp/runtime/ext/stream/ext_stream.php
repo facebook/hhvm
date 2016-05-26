@@ -326,7 +326,7 @@ function stream_select(mixed &$read,
  * @param resource $fp - Stream resource, must be backed by a file descriptor
  *                       such as a normal file, socket, tempfile, or stdio.
  *                       Does not work with memory streams or user streams.
- * @param int $events - Mix of STREAM_AWAIT_READ and/or STREAM_EVENT_WRITE
+ * @param int $events - Mix of STREAM_AWAIT_READ and/or STREAM_AWAIT_WRITE
  * @param float $timeout - Timeout in seconds
  *
  * @return int - Result code

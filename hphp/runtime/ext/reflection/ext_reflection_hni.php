@@ -1951,7 +1951,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   The static properties, as an array.
    */
-  public function getStaticProperties(): array<string, ReflectionProperty> {
+  public function getStaticProperties(): array<string, mixed> {
     $ret = array();
     foreach ($this->getProperties(ReflectionProperty::IS_STATIC) as $prop) {
       $val = hphp_get_static_property($this->getName(), $prop->name, true);

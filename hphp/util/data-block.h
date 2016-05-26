@@ -65,7 +65,6 @@ struct DataBlockFull : std::runtime_error {
  * Free memory is coalesced and allocation is done by best-fit.
  */
 struct DataBlock {
-
   DataBlock() : m_base(nullptr), m_frontier(nullptr), m_size(0), m_name("") {}
 
   DataBlock(const DataBlock& other) = delete;
@@ -243,7 +242,7 @@ struct DataBlock {
   size_t bytesFree()  const { return m_bytesFree; }
   size_t blocksFree() const { return m_freeRanges.size(); }
 
- protected:
+private:
   Address m_base;
   Address m_frontier;
   size_t  m_size;

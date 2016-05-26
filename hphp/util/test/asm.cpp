@@ -38,20 +38,28 @@ using namespace reg;
 
 namespace {
 
-struct TestDataBlock : public DataBlock {
+struct TestDataBlock {
   explicit TestDataBlock(size_t sz) {
-    Address result = (Address)mmap(0, sz, PROT_READ | PROT_WRITE | PROT_EXEC,
-                                   MAP_ANON | MAP_PRIVATE, -1, 0);
-    always_assert(result != MAP_FAILED);
-    m_base = m_frontier = result;
-    m_size = sz;
+    auto code = (Address)mmap(0, sz, PROT_READ | PROT_WRITE | PROT_EXEC,
+                              MAP_ANON | MAP_PRIVATE, -1, 0);
+    always_assert(code != MAP_FAILED);
+    m_db.init(code, sz, "TestBlock");
   }
 
   ~TestDataBlock() {
-    munmap(m_base, m_size);
-    m_base = m_frontier = nullptr;
-    m_size = 0;
+    munmap(m_db.base(), m_db.capacity());
   }
+
+  Address frontier() const {
+    return m_db.frontier();
+  }
+
+  /* implicit */ operator DataBlock&() {
+    return m_db;
+  }
+
+private:
+  DataBlock m_db;
 };
 
 //////////////////////////////////////////////////////////////////////

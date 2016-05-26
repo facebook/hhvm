@@ -1,5 +1,4 @@
 <?hh
-
 /**
  * Representation of date and time.
  *
@@ -876,8 +875,21 @@ function timezone_name_get(DateTimeZone $timezone): string {
 }
 
 <<__ParamCoerceModeFalse>>
-function timezone_open(string $timezone): DateTimeZone {
-  return new DateTimeZone($timezone);
+function timezone_open(string $timezone): mixed {
+  try {
+    return new DateTimeZone($timezone);
+  }
+  catch (Exception $e) {
+    trigger_error(
+      str_replace(
+        'DateTimeZone::__construct():',
+        __FUNCTION__ . '():',
+        $e->getMessage()
+      ),
+      E_WARNING
+    );
+    return false;
+  }
 }
 
 function timezone_transitions_get(DateTimeZone $timezone,

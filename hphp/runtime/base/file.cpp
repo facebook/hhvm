@@ -772,7 +772,7 @@ void File::setChunkSize(int64_t chunk_size) {
   m_data->m_chunkSize = chunk_size;
 
   if (m_data->m_buffer != nullptr && m_data->m_chunkSize > m_data->m_bufferSize) {
-    realloc(m_data->m_buffer, m_data->m_chunkSize);
+    m_data->m_buffer = realloc(m_data->m_buffer, m_data->m_chunkSize);
     m_data->m_bufferSize = m_data->m_chunkSize;
   }
 }

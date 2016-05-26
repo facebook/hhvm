@@ -876,8 +876,16 @@ function timezone_name_get(DateTimeZone $timezone): string {
 }
 
 <<__ParamCoerceModeFalse>>
-function timezone_open(string $timezone): DateTimeZone {
-  return new DateTimeZone($timezone);
+function timezone_open(string $timezone): mixed {
+  try { 
+    return new DateTimeZone($timezone); 
+  }
+  catch (Exception $e) { 
+    $msg = str_replace("DateTimeZone::__construct", "timezone_open",
+                       $e->getMessage());
+    trigger_error($msg, E_WARNING);
+    return false; 
+  }
 }
 
 function timezone_transitions_get(DateTimeZone $timezone,

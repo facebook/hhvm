@@ -234,4 +234,9 @@ namespace HH {
    */
   <<__Native, __ParamCoerceModeFalse>>
   function is_vec(mixed $var): bool;
+
+  /* Finds whether the given variable is a dict.
+   */
+  <<__Native, __ParamCoerceModeFalse>>
+  function is_dict(mixed $var): bool;
 }

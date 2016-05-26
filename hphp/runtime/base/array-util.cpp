@@ -114,7 +114,9 @@ Variant ArrayUtil::Pad(const Array& input, const Variant& pad_value, int pad_siz
     }
     return ret;
   } else {
-    Array ret = input->isVecArray() ? Array::CreateVec() : Array::Create();
+    auto ret = Array::attach(
+      MixedArray::MakeReserveLike(input.get(), pad_size)
+    );
     for (int i = input_size; i < pad_size; i++) {
       ret.append(pad_value);
     }
@@ -275,7 +277,7 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
     return input;
   }
 
-  Array ret = input->isVecArray() ? Array::CreateVec() : Array::Create();
+  auto ret = Array::attach(MixedArray::MakeReserveLike(input.get(), 0));
   auto pos_limit = input->iter_end();
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
        pos = input->iter_rewind(pos)) {
@@ -321,6 +323,13 @@ Variant ArrayUtil::Shuffle(const Array& input) {
 
   if (input->isVecArray()) {
     VecArrayInit ret(count);
+    for (int i = 0; i < count; i++) {
+      ssize_t pos = indices[i];
+      ret.append(input->getValueRef(pos));
+    }
+    return ret.toVariant();
+  } else if (input->isDict()) {
+    DictInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
       ret.append(input->getValueRef(pos));

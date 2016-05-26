@@ -2284,6 +2284,7 @@ dim_expr_base:
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
                                          T_CONSTANT_ENCAPSED_STRING, $1); }
   | '(' expr_no_variable ')'           { $$ = $2;}
+  | T_STRING                           { $$ = $1;}
 ;
 
 lexical_var_list:

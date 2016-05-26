@@ -35,6 +35,7 @@ class Exception {
   final public function getFile(): string;
   final public function getLine(): int;
   final public function getTrace(): array;
+  final protected function __prependTrace(array $trace): void;
   final public function getTraceAsString(): string;
   public function __toString(): string;
   final private function __clone(): void;

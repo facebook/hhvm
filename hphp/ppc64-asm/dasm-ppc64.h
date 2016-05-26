@@ -19,8 +19,6 @@
 
 #include <ostream>
 
-#include "hphp/runtime/vm/jit/types.h"
-
 namespace ppc64_asm {
 
 struct Disassembler {

@@ -168,6 +168,7 @@ struct Vgen {
   void emit(const incqm& i) { a.incq(i.m); }
   void emit(const incqmlock& i) { a.lock(); a.incq(i.m); }
   void emit(const incwm& i) { a.incw(i.m); }
+  void emit(const inittc& i) {}
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);

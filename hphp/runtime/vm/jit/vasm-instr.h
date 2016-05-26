@@ -305,7 +305,6 @@ struct Vunit;
   O(extrb, Inone, UH(s,d), DH(d,s))\
   O(extsb, Inone, UH(s,d), DH(d,s))\
   O(extsw, Inone, UH(s,d), DH(d,s))\
-  O(fabs, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
   O(fctidz, Inone, U(s), D(d) D(sf))\
@@ -1141,7 +1140,6 @@ struct subsb { Vreg8 s0, s1, d; VregSF sf; };
 /*
  * ppc64 intrinsics.
  */
-struct fabs { VregDbl s; VregDbl d; };
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };

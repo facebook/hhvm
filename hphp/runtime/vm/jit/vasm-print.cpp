@@ -233,54 +233,60 @@ std::string show(Vreg r) {
 
 std::string show(Vptr p) {
   std::string str;
-  if (arch() == Arch::PPC64) {
-    auto prefix = false;
-    if (p.disp) {
-      folly::format(&str, "{}{:#x}",
-                    p.disp < 0 ? "-" : "+",
-                    std::abs(p.disp));
-     prefix = true;
-    }
-
-    if (p.base.isValid()) {
-      folly::toAppend(prefix ? "(" : "", show(p.base), &str);
-      if (prefix == true) {
-          folly::toAppend(")", &str);
+  switch(arch()) {
+    case Arch::X64:
+    case Arch::ARM: {
+      // [%fs + %base + disp + %index * scale]
+      str = "[";
+      auto prefix = false;
+      if (p.seg == Vptr::FS) {
+        str += "%fs";
+        prefix = true;
       }
-      prefix = true;
+      if (p.seg == Vptr::GS) {
+        str += "%gs";
+        prefix = true;
+      }
+      if (p.base.isValid()) {
+        folly::toAppend(prefix ? " + " : "", show(p.base), &str);
+        prefix = true;
+      }
+      if (p.disp) {
+        folly::format(&str, "{}{:#x}",
+                      prefix ? p.disp < 0 ? " - " : " + " : "",
+                      prefix ? std::abs(p.disp) : p.disp);
+        prefix = true;
+      }
+      if (p.index.isValid()) {
+        folly::toAppend(prefix ? " + " : "", show(p.index), &str);
+        if (p.scale != 1) folly::toAppend(" * ", p.scale, &str);
+      }
+      str += ']';
+      return str;
     }
-    if (p.index.isValid()) {
-      folly::toAppend(prefix ? "," : "", show(p.index), &str);
+    case Arch::PPC64: {
+      auto prefix = false;
+      if (p.disp) {
+        folly::format(&str, "{}{:#x}",
+                      p.disp < 0 ? "-" : "+",
+                      std::abs(p.disp));
+        prefix = true;
+      }
+
+      if (p.base.isValid()) {
+        folly::toAppend(prefix ? "(" : "", show(p.base), &str);
+        if (prefix == true) {
+          folly::toAppend(")", &str);
+        }
+        prefix = true;
+      }
+      if (p.index.isValid()) {
+        folly::toAppend(prefix ? "," : "", show(p.index), &str);
+      }
+      return str;
     }
-  } else {
-    // [%fs + %base + disp + %index * scale]
-    str = "[";
-    auto prefix = false;
-    if (p.seg == Vptr::FS) {
-      str += "%fs";
-      prefix = true;
-    }
-    if (p.seg == Vptr::GS) {
-      str += "%gs";
-      prefix = true;
-    }
-    if (p.base.isValid()) {
-      folly::toAppend(prefix ? " + " : "", show(p.base), &str);
-      prefix = true;
-    }
-    if (p.disp) {
-      folly::format(&str, "{}{:#x}",
-                    prefix ? p.disp < 0 ? " - " : " + " : "",
-                    prefix ? std::abs(p.disp) : p.disp);
-     prefix = true;
-    }
-    if (p.index.isValid()) {
-      folly::toAppend(prefix ? " + " : "", show(p.index), &str);
-      if (p.scale != 1) folly::toAppend(" * ", p.scale, &str);
-    }
-    str += ']';
   }
-  return str;
+  not_reached();
 }
 
 std::string show(Vconst c) {

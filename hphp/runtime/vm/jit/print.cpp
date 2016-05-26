@@ -271,13 +271,14 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
       return;
     }
 
-    case Arch::PPC64:
+    case Arch::PPC64: {
       ppc64_asm::Disassembler disasm(dumpIR, true, kIndent + 4,
                                       color(ANSI_COLOR_BROWN));
       for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
         disasm.disassembly(os, begin);
       }
       return;
+    }
   }
   not_reached();
 }

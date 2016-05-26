@@ -346,6 +346,8 @@ bool canDCE(IRInstruction* inst) {
   case CheckInitSProps:
   case InitSProps:
   case InitObjProps:
+  case DebugBacktrace:
+  case InitThrowableFileAndLine:
   case ConstructInstance:
   case AllocPackedArray:
   case AllocVecArray:

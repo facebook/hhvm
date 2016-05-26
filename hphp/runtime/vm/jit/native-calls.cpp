@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/native-calls.h"
 
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
@@ -33,8 +34,10 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP { namespace jit {
 
@@ -235,6 +238,10 @@ static CallMap s_callMap {
                            {{extra(&ClassData::cls)}}},
     {InitSProps,         &Class::initSProps, DNone, SSync,
                            {{extra(&ClassData::cls)}}},
+    {DebugBacktrace,     debug_backtrace_jit, DSSA, SSync, {{SSA, 0}}},
+    {InitThrowableFileAndLine,
+                         throwable_init_file_and_line_from_builtin,
+                           DNone, do_assert ? SSync : SNone, {{SSA, 0}}},
     {RegisterLiveObj,    registerLiveObj, DNone, SNone, {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},

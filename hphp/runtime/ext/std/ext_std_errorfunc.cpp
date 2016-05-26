@@ -72,6 +72,10 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                          .setLimit(limit));
 }
 
+ArrayData* debug_backtrace_jit(int64_t options) {
+  return HHVM_FN(debug_backtrace)(options).detach();
+}
+
 /**
  * hphp_debug_caller_info - returns an array of info about the "caller"
  *

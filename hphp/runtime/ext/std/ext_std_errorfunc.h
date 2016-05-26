@@ -71,6 +71,7 @@ bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
 bool HHVM_FUNCTION(user_error, const String& error_msg,
                                int error_type = k_E_USER_NOTICE);
 
+ArrayData* debug_backtrace_jit(int64_t options);
 String debug_string_backtrace(bool skip, bool ignore_args = false,
                               int64_t limit = 0);
 

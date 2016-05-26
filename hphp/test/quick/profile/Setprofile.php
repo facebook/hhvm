@@ -16,11 +16,17 @@ function test_exception() {
   throw new Exception('test');
 }
 
-function profiler() {
+function profiler(string $op, string $fn) {
   // Calling functions from within the profiler function should note
   // use the profile (it would cause an infinite loop)
   pure_function_no_profile();
-  var_dump(func_get_args());
+
+  static $exception_init = false;
+  if ($fn === 'Exception::__init__') {
+    $exception_init = $op === 'enter';
+  } else if (!$exception_init) {
+    var_dump(func_get_args());
+  }
 }
 
 function gen() {

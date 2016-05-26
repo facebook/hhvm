@@ -16,15 +16,26 @@
 #include "hphp/runtime/base/exceptions.h"
 
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/imarker.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+const StaticString s_file("file");
+const StaticString s_line("line");
+const StaticString s_trace("trace");
+const StaticString s_traceOpts("traceOpts");
+const Slot s_fileIdx{3};
+const Slot s_lineIdx{4};
+const Slot s_traceIdx{5};
+const Slot s_traceOptsIdx{0};
 
 std::atomic<int> ExitException::ExitCode{0};  // XXX: this should not be static
 
@@ -94,8 +105,6 @@ Array ExtendedException::getBacktrace() const {
   return Array(m_btp.get());
 }
 
-const StaticString s_file("file"), s_line("line");
-
 std::pair<String, int> ExtendedException::getFileAndLine() const {
   String file = empty_string();
   int line = 0;
@@ -163,5 +172,91 @@ void raise_fatal_error(const char* msg,
   ex.setSilent(silent);
   throw ex;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+  DEBUG_ONLY bool vmfp_is_builtin() {
+    VMRegAnchor _;
+    auto const fp = vmfp();
+    return fp && fp->func()->isBuiltin();
+  }
+
+  DEBUG_ONLY bool is_throwable(ObjectData* throwable) {
+    auto const erCls = SystemLib::s_ErrorClass;
+    auto const exCls = SystemLib::s_ExceptionClass;
+    return throwable->instanceof(erCls) || throwable->instanceof(exCls);
+  }
+
+  DEBUG_ONLY bool throwable_has_expected_props() {
+    auto const erCls = SystemLib::s_ErrorClass;
+    auto const exCls = SystemLib::s_ExceptionClass;
+    return
+      erCls->lookupDeclProp(s_file.get()) == s_fileIdx &&
+      exCls->lookupDeclProp(s_file.get()) == s_fileIdx &&
+      erCls->lookupDeclProp(s_line.get()) == s_lineIdx &&
+      exCls->lookupDeclProp(s_line.get()) == s_lineIdx &&
+      erCls->lookupDeclProp(s_trace.get()) == s_traceIdx &&
+      exCls->lookupDeclProp(s_trace.get()) == s_traceIdx;
+  }
+
+  int64_t exception_get_trace_options() {
+    auto const exCls = SystemLib::s_ExceptionClass;
+    assertx(exCls->lookupSProp(s_traceOpts.get()) == s_traceOptsIdx);
+    assertx(exCls->needInitialization());
+
+    exCls->initialize();
+    auto const traceOptsTV = exCls->getSPropData(s_traceOptsIdx);
+    return traceOptsTV->m_type == KindOfInt64
+      ? traceOptsTV->m_data.num : 0;
+  }
+}
+
+void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
+  assertx(vmfp_is_builtin());
+  assertx(is_throwable(throwable));
+  assertx(throwable_has_expected_props());
+
+  assertx(throwable->propVec()[s_fileIdx].m_type == KindOfNull);
+  assertx(throwable->propVec()[s_lineIdx].m_type == KindOfNull);
+  assertx(throwable->propVec()[s_traceIdx].m_type == KindOfArray);
+  auto const trace = throwable->propVec()[s_traceIdx].m_data.parr;
+  for (ArrayIter iter(trace); iter; ++iter) {
+    assertx(iter.second().asTypedValue()->m_type == KindOfArray);
+    auto const frame = iter.second().asTypedValue()->m_data.parr;
+    auto const file = frame->nvGet(s_file.get());
+    auto const line = frame->nvGet(s_line.get());
+    if (file || line) {
+      if (file) cellDup(*tvAssertCell(file), throwable->propVec()[s_fileIdx]);
+      if (line) cellDup(*tvAssertCell(line), throwable->propVec()[s_lineIdx]);
+      return;
+    }
+  }
+}
+
+void throwable_init(ObjectData* throwable) {
+  assertx(is_throwable(throwable));
+  assertx(throwable_has_expected_props());
+
+  auto trace = HHVM_FN(debug_backtrace)(exception_get_trace_options());
+  cellMove(
+    make_tv<KindOfArray>(trace.detach()), throwable->propVec()[s_traceIdx]);
+
+  VMRegAnchor _;
+  auto const fp = vmfp();
+  if (UNLIKELY(!fp)) return;
+  if (UNLIKELY(fp->func()->isBuiltin())) {
+    throwable_init_file_and_line_from_builtin(throwable);
+  } else {
+    assertx(throwable->propVec()[s_fileIdx].m_type == KindOfNull);
+    assertx(throwable->propVec()[s_lineIdx].m_type == KindOfNull);
+    auto const unit = fp->func()->unit();
+    auto const file = const_cast<StringData*>(unit->filepath());
+    auto const line = unit->getLineNumber(unit->offsetOf(vmpc()));
+    cellDup(make_tv<KindOfString>(file), throwable->propVec()[s_fileIdx]);
+    cellDup(make_tv<KindOfInt64>(line), throwable->propVec()[s_lineIdx]);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

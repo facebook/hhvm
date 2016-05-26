@@ -1242,6 +1242,15 @@ To string conversions:
   Calls the static property initializer function (86sinit) for class. May
   throw.
 
+| DebugBacktrace, D(Arr), S(Int), PRc
+
+  Obtain stack trace by calling the debug_backtrace() method.
+
+| InitThrowableFileAndLine, ND, S(Obj), NF
+
+  Initialize Throwable's file name and line number assuming the stack trace
+  was already initialized and the current vmfp() is a built-in.
+
 | NewInstanceRaw<class>, DAllocObj, NA, PRc
 
   Allocates an instance of class.

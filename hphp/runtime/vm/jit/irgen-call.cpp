@@ -804,7 +804,6 @@ void emitFPushCtorD(IRGS& env,
   bool const fastAlloc =
     persistentCls &&
     canInstantiate &&
-    !cls->needsInitThrowable() &&
     !cls->hasNativePropHandler();
 
   auto const func = lookupImmutableCtor(cls, curClass(env));

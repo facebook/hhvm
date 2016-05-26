@@ -891,6 +891,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitObjProps:
     return may_load_store(AEmpty, APropAny);
 
+  // Loads $obj->trace, stores $obj->file and $obj->line.
+  case InitThrowableFileAndLine:
+    return may_load_store(AHeapAny, APropAny);
+
   //////////////////////////////////////////////////////////////////////
   // Array loads and stores
 
@@ -1557,6 +1561,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals
     return may_reenter(inst,
                        may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny));
+
+  // debug_backtrace() traverses stack and WaitHandles on the heap.
+  case DebugBacktrace:
+    return may_load_store(AHeapAny|AFrameAny|AStackAny, AHeapAny);
 
   // These two instructions don't touch memory we track, except that they may
   // re-enter to construct php Exception objects.  During this re-entry anything

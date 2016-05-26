@@ -16,9 +16,13 @@
 #include "hphp/runtime/vm/jit/irgen-create.h"
 
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -27,6 +31,10 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_uuinvoke("__invoke");
+const StaticString s_traceOpts("traceOpts");
+const StaticString s_trace("trace");
+const StaticString s_file("file");
+const StaticString s_line("line");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,6 +50,64 @@ void initProps(IRGS& env, const Class* cls) {
       gen(env, InitProps, ClassData(cls));
     }
   );
+}
+
+void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
+  assertx(cls->classof(SystemLib::s_ErrorClass) ||
+          cls->classof(SystemLib::s_ExceptionClass));
+  assertx(throwable->type() <= TObj);
+
+  // Root of the class hierarchy.
+  auto const rootCls = cls->classof(SystemLib::s_ExceptionClass)
+    ? SystemLib::s_ExceptionClass : SystemLib::s_ErrorClass;
+
+  auto const propAddr = [&] (Slot idx) {
+    return gen(
+      env,
+      LdPropAddr,
+      ByteOffsetData { (ptrdiff_t)rootCls->declPropOffset(idx) },
+      TInitNull.ptr(Ptr::Prop),
+      throwable
+    );
+  };
+
+  // Load Exception::$traceOpts
+  auto const sprop = ldClsPropAddrKnown(
+    env, SystemLib::s_ExceptionClass, s_traceOpts.get());
+  auto const traceOpts = cond(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckTypeMem, TInt, taken, sprop);
+    },
+    [&] {
+      // sprop is an integer, load it
+      return gen(env, LdMem, TInt, sprop);
+    },
+    [&] {
+      // sprop is a garbage, use default traceOpts value
+      return cns(env, 0);
+    }
+  );
+
+  // Call debug_backtrace(traceOpts)
+  auto const trace = gen(env, DebugBacktrace, traceOpts);
+
+  // $throwable->trace = $trace
+  auto const traceIdx = rootCls->lookupDeclProp(s_trace.get());
+  assertx(traceIdx != kInvalidSlot);
+  gen(env, StMem, propAddr(traceIdx), trace);
+
+  // Populate $throwable->{file,line}
+  if (UNLIKELY(curFunc(env)->isBuiltin())) {
+    gen(env, InitThrowableFileAndLine, throwable);
+  } else {
+    auto const fileIdx = rootCls->lookupDeclProp(s_file.get());
+    auto const lineIdx = rootCls->lookupDeclProp(s_line.get());
+    auto const unit = curFunc(env)->unit();
+    auto const line = unit->getLineNumber(bcOff(env));
+    gen(env, StMem, propAddr(fileIdx), cns(env, unit->filepath()));
+    gen(env, StMem, propAddr(lineIdx), cns(env, line));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -66,10 +132,6 @@ void initSProps(IRGS& env, const Class* cls) {
 }
 
 SSATmp* allocObjFast(IRGS& env, const Class* cls) {
-  // CustomInstance classes always go through IR:AllocObj and
-  // ObjectData::newInstance()
-  assert(!cls->needsInitThrowable());
-
   // Make sure our property init vectors are all set up.
   const bool props = cls->pinitVec().size() > 0;
   const bool sprops = cls->numStaticProperties() > 0;
@@ -89,6 +151,7 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
   // If it's an extension class with a custom instance initializer,
   // that init function does all the work.
   if (cls->instanceCtor()) {
+    // cls->needsInitThrowable() handled by instanceCtor()
     auto const obj = gen(env, ConstructInstance, ClassData(cls));
     return registerObj(obj);
   }
@@ -103,6 +166,12 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
 
   // Initialize the properties
   gen(env, InitObjProps, ClassData(cls), ssaObj);
+
+  // Initialize Throwable
+  if (cls->needsInitThrowable()) {
+    initThrowable(env, cls, ssaObj);
+  }
+
   return registerObj(ssaObj);
 }
 

@@ -171,6 +171,17 @@ struct PhpFileDoesNotExistException : ExtendedException {
 [[noreturn]]
 void throw_not_supported(const char* feature, const char* reason);
 
+/*
+ * Initialize Throwable's file name and line number assuming the stack trace
+ * was already initialized and the current vmfp() is a built-in.
+ */
+void throwable_init_file_and_line_from_builtin(ObjectData* throwable);
+
+/*
+ * Initialize Throwable's stack trace, file name and line number.
+ */
+void throwable_init(ObjectData* throwable);
+
 //////////////////////////////////////////////////////////////////////
 
 }

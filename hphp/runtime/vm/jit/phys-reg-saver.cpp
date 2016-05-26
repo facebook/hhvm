@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -45,9 +47,23 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
     });
   }
 
-  gpr.forEach([&] (PhysReg r) {
-    v << push{r};
-  });
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      gpr.forEach([&] (PhysReg r) {
+        v << push{r};
+      });
+      break;
+    case Arch::ARM:
+      gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
+        if (r1 == InvalidReg) {
+          v << push{r0};
+        } else {
+          v << pushp{r1, r0};
+        }
+      });
+      break;
+  }
 
   if (m_adjust) {
     v << lea{sp[-m_adjust], sp};
@@ -65,9 +81,23 @@ PhysRegSaver::~PhysRegSaver() {
   auto gpr = m_regs & abi().gp();
   auto xmm = m_regs & abi().simd();
 
-  gpr.forEachR([&] (PhysReg r) {
-    v << pop{r};
-  });
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      gpr.forEachR([&] (PhysReg r) {
+        v << pop{r};
+      });
+      break;
+    case Arch::ARM:
+      gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
+        if (r1 == InvalidReg) {
+          v << pop{r0};
+        } else {
+          v << popp{r0, r1};
+        }
+      });
+      break;
+  }
 
   if (!xmm.empty()) {
     int offset = 0;

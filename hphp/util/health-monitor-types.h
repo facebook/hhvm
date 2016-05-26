@@ -19,6 +19,8 @@
 
 #include <string>
 
+#include <folly/Likely.h>
+
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -58,6 +60,25 @@ struct IHostHealthObserver {
   virtual void notifyNewStatus(HealthLevel newStatus) = 0;
   virtual HealthLevel getHealthLevel() = 0;
 };
+
+/*
+ * Helper function to convert HealthLevel enum value to integer number that is
+ * bigger for better health condition.
+ */
+inline int64_t healthLeveltToInt(HealthLevel level) {
+  constexpr int32_t kMaxHealth = 100;
+  // Smaller HealthLevel indicates better health condition, under
+  // which this function returns a bigger number.
+  static_assert(static_cast<int>(HealthLevel::Bold) == 0, "");
+  constexpr int32_t kMaxLevel =
+    static_cast<int32_t>(HealthLevel::NumLevels) - 1;
+  if (LIKELY(level == HealthLevel::Bold)) {
+    return kMaxHealth;
+  }
+  auto const result = kMaxHealth *
+    (kMaxLevel - static_cast<int32_t>(level)) / kMaxLevel;
+  return result;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 }

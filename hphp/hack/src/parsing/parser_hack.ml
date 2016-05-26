@@ -437,7 +437,7 @@ let rec program
   L.comment_list := [];
   L.fixmes := IMap.empty;
   if keep_errors then  begin
-    Parser_heap.HH_FIXMES.add env.file fixmes;
+    Fixmes.HH_FIXMES.add env.file fixmes;
     Option.iter (List.last !(env.errors)) Errors.parsing_error
   end;
   let ast = if elaborate_namespaces

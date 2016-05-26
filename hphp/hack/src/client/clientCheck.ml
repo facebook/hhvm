@@ -11,6 +11,7 @@
 open Core
 open ClientEnv
 open Utils
+open ClientRefactor
 
 module Cmd = ServerCommand
 module Rpc = ServerRpc
@@ -283,6 +284,16 @@ let main args =
     | MODE_STATS ->
       let stats = rpc args @@ Rpc.STATS in
       print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);
+      Exit_status.No_error
+    | MODE_REMOVE_DEAD_FIXMES codes ->
+      let conn = connect args in
+      let patches = ServerCommand.rpc conn @@
+        ServerRpc.REMOVE_DEAD_FIXMES codes in
+      let file_map = List.fold_left patches
+        ~f:map_patches_to_filename ~init:SMap.empty in
+      if args.output_json
+      then print_patches_json file_map
+      else apply_patches file_map;
       Exit_status.No_error
     | MODE_FIND_LVAR_REFS arg ->
       let line, char = parse_position_string arg in

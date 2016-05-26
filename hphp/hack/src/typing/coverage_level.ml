@@ -222,5 +222,5 @@ let level_of_type fixme_map (p, ty) =
   | Unchecked | Partial | Checked -> r, lvl
 
 let level_of_type_mapper fn =
-  let fixme_map = Parser_heap.HH_FIXMES.find_unsafe fn in
+  let fixme_map = Fixmes.HH_FIXMES.find_unsafe fn in
   level_of_type fixme_map

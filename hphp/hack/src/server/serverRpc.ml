@@ -26,6 +26,7 @@ type _ t =
   | REFACTOR : ServerRefactor.action -> ServerRefactor.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoService.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
+  | REMOVE_DEAD_FIXMES : int list -> ServerRefactor.patch list t
   | ARGUMENT_INFO : string * int * int -> ServerArgumentInfo.result t
   | SEARCH : string * string -> ServerSearch.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetric.result t
@@ -67,6 +68,9 @@ let handle : type a. genv -> env -> a t -> a =
         else
           Ai.ServerFindRefs.go find_refs_action genv env
     | REFACTOR refactor_action -> ServerRefactor.go refactor_action genv env
+    | REMOVE_DEAD_FIXMES codes ->
+      HackEventLogger.check_response (Errors.get_error_list env.errorl);
+      ServerRefactor.get_fixme_patches codes env
     | DUMP_SYMBOL_INFO file_list ->
         SymbolInfoService.go genv.workers file_list env
     | DUMP_AI_INFO file_list ->
@@ -102,6 +106,7 @@ let to_string : type a. a t -> _ = function
   | FIND_DEPENDENT_FILES _ -> "FIND_DEPENDENT_FILES"
   | FIND_REFS _ -> "FIND_REFS"
   | REFACTOR _ -> "REFACTOR"
+  | REMOVE_DEAD_FIXMES _ -> "REMOVE_DEAD_FIXMES"
   | DUMP_SYMBOL_INFO _ -> "DUMP_SYMBOL_INFO"
   | DUMP_AI_INFO _ -> "DUMP_AI_INFO"
   | ARGUMENT_INFO _ -> "ARGUMENT_INFO"

@@ -152,7 +152,7 @@ let remove_failed fast failed =
 
 let parsing genv env =
   Parser_heap.ParserHeap.remove_batch env.failed_parsing;
-  Parser_heap.HH_FIXMES.remove_batch env.failed_parsing;
+  Fixmes.HH_FIXMES.remove_batch env.failed_parsing;
   HackSearchService.MasterApi.clear_shared_memory env.failed_parsing;
   SharedMem.collect `gentle;
   let get_next = Bucket.make (Relative_path.Set.elements env.failed_parsing) in

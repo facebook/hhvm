@@ -192,6 +192,20 @@ let parse_check_args cmd =
       " (mode) prints a list of all related classes or methods to the given class";
     "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
       " (mode) show human-readable type info for the given name; output is not meant for machine parsing";
+    "--remove-dead-fixme",
+        Arg.Int begin fun code ->
+        mode := match !mode with
+          | None -> Some (MODE_REMOVE_DEAD_FIXMES [code])
+          | Some (MODE_REMOVE_DEAD_FIXMES codel) ->
+            Some (MODE_REMOVE_DEAD_FIXMES (code :: codel))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) remove dead HH_FIXME for specified error code " ^
+      "(first do hh_client restart)";
+    "--remove-dead-fixmes",
+        Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
+      " (mode) remove dead HH_FIXME for any error code < 5000 " ^
+      "(first do hh_client restart)";
     "--lint", Arg.Rest begin fun fn ->
         mode := match !mode with
           | None -> Some (MODE_LINT [fn])
@@ -206,7 +220,7 @@ let parse_check_args cmd =
     "--monitor-logname", Arg.Set monitor_logname,
       " (mode) show monitor log filename and exit\n";
     "--logname", Arg.Set logname,
-      " (mode) show log filename and exit\n";
+    " (mode) show log filename and exit\n";
     (* Create a checkpoint which can be used to retrieve changed files later *)
     "--create-checkpoint", Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x) ()),
       "";

@@ -35,16 +35,16 @@ let create_line_comment_buf () =
 (*****************************************************************************)
 (* Fixmes accumulators *)
 (*****************************************************************************)
-let (fixmes: Pos.t IMap.t IMap.t ref) = ref IMap.empty
+let fixmes: (Pos.t IMap.t IMap.t ref) = ref IMap.empty
 
-let add_fixme err_nbr pos =
+let add_fixme err_nbr fixmepos pos =
   let line, _, _ = Pos.info_pos pos in
   let line_value =
     match IMap.get line !fixmes with
     | None -> IMap.empty
     | Some x -> x
   in
-  fixmes := IMap.add line (IMap.add err_nbr pos line_value) !fixmes;
+  fixmes := IMap.add line (IMap.add err_nbr fixmepos line_value) !fixmes;
   ()
 
 (*****************************************************************************)
@@ -318,10 +318,12 @@ rule token file = parse
                           * should then consume the remaining comment. *)
                          Tunsafeexpr
                        }
-  | fixme_start        { let fixme = fixme_state0 file lexbuf in
+  | fixme_start        { let fixme_pos = Pos.make file lexbuf in
+                         let fixme = fixme_state0 file lexbuf in
+                         let end_fixme_pos = Pos.make file lexbuf in
                          let tok = token file lexbuf in
                          (match fixme with
-                           | Some err_nbr -> add_fixme err_nbr (Pos.make file lexbuf)
+                           | Some err_nbr -> add_fixme err_nbr (Pos.btw fixme_pos end_fixme_pos) (Pos.make file lexbuf)
                            | None -> ());
                          tok
                        }
@@ -444,10 +446,12 @@ and xhpattr file = parse
   | eof                { Teof        }
   | ws+                { xhpattr file lexbuf }
   | '\n'               { Lexing.new_line lexbuf; xhpattr file lexbuf }
-  | fixme_start        { let fixme = fixme_state0 file lexbuf in
+  | fixme_start        { let fixme_pos = Pos.make file lexbuf in
+                         let fixme = fixme_state0 file lexbuf in
+                         let end_fixme_pos = Pos.make file lexbuf in
                          let tok = xhpattr file lexbuf in
                          (match fixme with
-                           | Some err_nbr -> add_fixme err_nbr (Pos.make file lexbuf)
+                           | Some err_nbr -> add_fixme err_nbr (Pos.btw fixme_pos end_fixme_pos) (Pos.make file lexbuf)
                            | None -> ());
                          tok
                        }
@@ -529,13 +533,16 @@ and fixme_state2 err_nbr file = parse
                          None
                        }
   | "*/" ws* '\n'      { Lexing.new_line lexbuf;
-                         Some err_nbr
+                         fixme_state3 err_nbr file lexbuf
                        }
   | "*/"               { Some err_nbr }
   | '\n'               { Lexing.new_line lexbuf;
                          fixme_state2 err_nbr file lexbuf
                        }
   | _                  { fixme_state2 err_nbr file lexbuf }
+
+and fixme_state3 err_nbr file = parse
+  | ws*                { Some err_nbr }
 
 and line_comment opt_buf file = parse
   | eof                { save_comment file lexbuf opt_buf }

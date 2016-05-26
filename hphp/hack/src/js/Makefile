@@ -21,6 +21,7 @@ SRC = \
   namespace_env.ml\
   ast.ml\
   namespaces.ml\
+  fixmes.ml\
   parser_heap.ml\
   lexing_modes.ml\
   lexer_hack.ml\
@@ -133,6 +134,9 @@ namespaces.ml: $(TOP)/parsing/namespaces.ml
 	cp $< .
 
 parser_heap.ml: $(TOP)/parsing/parser_heap.ml
+	cp $< .
+
+fixmes.ml: $(TOP)/parsing/fixmes.ml
 	cp $< .
 
 parser.ml: $(TOP)/parsing/parser.ml
@@ -290,6 +294,7 @@ clean::
 	rm -f ast.ml
 	rm -f namespaces.ml
 	rm -f parser_heap.ml
+	rm -f fixmes.ml
 	rm -f parser.ml
 	rm -f lexer.ml
 	rm -f hackedLexer.ml

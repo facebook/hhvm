@@ -503,7 +503,7 @@ TypedValue HHVM_FUNCTION(array_merge,
                          ArrayArg array1,
                          const Variant& array2 /* = null_variant */,
                          const Array& args /* = null array */) {
-  Array ret = array1->isVecArray() ? Array::CreateVec() : Array::Create();
+  Array ret = Array::attach(MixedArray::MakeReserveLike(array1.get(), 0));
   php_array_merge(ret, ArrNR(array1.get()));
 
   if (UNLIKELY(numArgs < 2)) return tvReturn(std::move(ret));
@@ -529,8 +529,8 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
                          const Variant& array2 /* = null_variant */,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
-  Array ret = array1.asCArrRef()->isVecArray() ?
-    Array::CreateVec() : Array::Create();
+  auto in1 = array1.asCArrRef();
+  auto ret = Array::attach(MixedArray::MakeReserveLike(in1.get(), 0));
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assert(seen.empty());

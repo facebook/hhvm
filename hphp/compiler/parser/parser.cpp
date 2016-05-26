@@ -588,7 +588,8 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "server_warmup_status" ||
            stripped == "dict" ||
            stripped == "vec" ||
-           stripped == "is_vec"
+           stripped == "is_vec" ||
+           stripped == "is_dict"
           )) {
         funcName = "HH\\" + stripped;
       }

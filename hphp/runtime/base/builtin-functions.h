@@ -66,6 +66,9 @@ inline bool is_array(const Variant& v)  { return v.isArray();}
 inline bool is_vec(const Variant& v) {
   return v.isArray() && v.toCArrRef()->isVecArray();
 }
+inline bool is_dict(const Variant& v) {
+  return v.isArray() && v.toCArrRef()->isDict();
+}
 
 inline bool is_object(const Variant& var) {
   if (!var.is(KindOfObject)) {

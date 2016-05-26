@@ -138,6 +138,10 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
   return is_vec(v);
 }
 
+bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
+  return is_dict(v);
+}
+
 bool HHVM_FUNCTION(is_object, const Variant& v) {
   return is_object(v);
 }
@@ -223,7 +227,8 @@ const StaticString
   s_False("b:0;"),
   s_Res("i:0;"),
   s_EmptyArray("a:0:{}"),
-  s_EmptyVecArray("v:0:{}");
+  s_EmptyVecArray("v:0:{}"),
+  s_EmptyDictArray("D:0:{}");
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
   switch (value.getType()) {
@@ -257,6 +262,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       ArrayData *arr = value.getArrayData();
       if (arr->empty()) {
         if (arr->isVecArray()) return s_EmptyVecArray;
+        if (arr->isDict()) return s_EmptyDictArray;
         return s_EmptyArray;
       }
       // fall-through
@@ -512,6 +518,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(is_scalar);
   HHVM_FE(is_array);
   HHVM_FALIAS(HH\\is_vec, HH_is_vec);
+  HHVM_FALIAS(HH\\is_dict, HH_is_dict);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

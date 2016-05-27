@@ -36,9 +36,8 @@ namespace HPHP { namespace jit { namespace ppc64 { namespace detail {
  */
 template<typename T>
 Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
-
   uintptr_t vaddr = uintptr_t(datum.tls) - tlsBase();
-  return Vptr{MemoryRef(DispReg(rthreadptr(),vaddr))};
+  return rthreadptr()[vaddr];
 }
 
 }}}}

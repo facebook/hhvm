@@ -51,7 +51,8 @@ struct HttpClient {
   }
   /**
    * require SLS/TLS
-   * (defaul) CURLUSESSL_NONE, CURLUSESSL_TRY, CURLUSESSL_CONTROL, CURLUSESSL_ALL
+   * (default) CURLUSESSL_NONE, CURLUSESSL_TRY, CURLUSESSL_CONTROL, 
+   *           CURLUSESSL_ALL
    */
 
   void setUseSSL(const long level) {
@@ -60,7 +61,8 @@ struct HttpClient {
 
   /**
    * set preferred TLS/SSL version
-   * (default) CURL_SSLVERSION_DEFAULT, CURL_SSLVERSION_TLSv1, CURL_SSLVERSION_SSLv3
+   * (default) CURL_SSLVERSION_DEFAULT, CURL_SSLVERSION_TLSv1, 
+   *           CURL_SSLVERSION_SSLv3
    */
   void setSSLVersion (const long version) {
     m_sslversion = version;

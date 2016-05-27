@@ -18,6 +18,7 @@ ifeq ($(OS), Linux)
   INOTIFY=third-party/inotify
   FSNOTIFY=fsnotify_linux
   ELF=elf
+  RT=rt
   FRAMEWORKS=
   SECTCREATE=
 endif
@@ -25,6 +26,7 @@ ifeq ($(OS), Darwin)
   INOTIFY=fsevents
   FSNOTIFY=fsnotify_darwin
   ELF=
+  RT=
   FRAMEWORKS=CoreServices CoreFoundation
   SECTCREATE=-cclib -sectcreate -cclib __text -cclib hhi -cclib $(ROOT)/../bin/hhi.tar.gz
 endif
@@ -99,8 +101,8 @@ OCAML_LIBRARIES=\
 
 NATIVE_LIBRARIES=\
   pthread\
-  rt\
-  $(ELF)
+  $(ELF)\
+  $(RT)
 
 TARGETS_BASE=_build/hh_server _build/hh_client \
 	_build/hh_single_type_check _build/hh_emitter \

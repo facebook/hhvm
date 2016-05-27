@@ -805,19 +805,22 @@ void Vgen::emit(const callphp& i) {
 }
 
 void Vgen::emit(const callarray& i) {
-  a.call(i.target);
+  // callarray target can indeed start with stublogue, therefore reuse callstub
+  // approach
+  emit(callstub{i.target});
 }
 
 void Vgen::emit(const callstub& i) {
-  // Build a minimal call frame in order to save the LR.
+  // Build a minimal call frame in order to save the LR but avoid writing to
+  // rsp() directly as there are stubs that are called that doesn't have a
+  // stublogue/stubret (e.g: freeLocalsHelpers)
   a.addi(ppc64_asm::reg::r1, rsp(), -min_frame_size);
   a.std(rvmfp(), ppc64_asm::reg::r1[AROFF(m_sfp)]);
   a.call(i.target);
 }
 
 void Vgen::emit(const callfaststub& i) {
-  // no frame being built
-  a.call(i.target);
+  emit(callstub{i.target});
   emit(syncpoint{i.fix});
 }
 
@@ -826,11 +829,11 @@ void Vgen::emit(const callfaststub& i) {
  * Stub function ABI
  */
 void Vgen::emit(const stublogue& i) {
-  // Save a complete frame
-  if (i.saveframe) a.stdu(rvmfp(), rsp()[-min_frame_size]);
-  else a.addi(rsp(), rsp(), -min_frame_size);
+  // Recover the frame created on callstub.
+  a.mr(rsp(), ppc64_asm::reg::r1);
+  if (i.saveframe) a.std(rvmfp(), rsp()[0]);
 
-  // save return address on this frame, just like phplogue does
+  // save return address on this frame
   a.mflr(rfuncln());
   a.std(rfuncln(), rsp()[AROFF(m_savedRip)]);
 }
@@ -853,7 +856,7 @@ void Vgen::emit(const tailcallstub& i) {
   // frame and undo stublogue allocation.
   a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);
   a.mtlr(rfuncln());
-  a.addi(rsp(), rsp(), min_frame_size);
+  a.mr(ppc64_asm::reg::r1, rsp());
   emit(jmpi{i.target, i.args});
 }
 

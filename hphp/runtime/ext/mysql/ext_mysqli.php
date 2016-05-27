@@ -561,10 +561,10 @@ class mysqli {
    *
    * @return bool -
    */
-  public function real_connect(mixed $host = null,
+  public function real_connect(?string $host = null,
                                ?string $username = null,
-                               mixed $passwd = null,
-                               mixed $dbname = null,
+                               ?string $passwd = null,
+                               ?string $dbname = null,
                                mixed $port = null,
                                ?string $socket = null,
                                ?int $flags = 0): bool {
@@ -608,8 +608,8 @@ class mysqli {
   <<__Native>>
   private function hh_real_connect(?string $server,
                                    ?string $username,
-                                   mixed $passwd,
-                                   mixed $dbname,
+                                   ?string $passwd,
+                                   ?string $dbname,
                                    ?int $flags): bool;
 
   /**
@@ -2050,10 +2050,10 @@ function mysqli_query(mysqli $link,
  * @return bool -
  */
 function mysqli_real_connect(mysqli $link,
-                             mixed $host = null,
+                             ?string $host = null,
                              ?string $username = null,
-                             mixed $passwd = null,
-                             mixed $dbname = null,
+                             ?string $passwd = null,
+                             ?string $dbname = null,
                              mixed $port = null,
                              ?string $socket = null,
                              ?int $flags = 0): bool {

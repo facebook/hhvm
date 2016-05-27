@@ -141,38 +141,35 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
     if (sprops) initSProps(env, cls);
   }
 
-  auto registerObj = [&] (SSATmp* obj) {
-    if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
-      gen(env, RegisterLiveObj, obj);
-    }
-    return obj;
-  };
-
-  // If it's an extension class with a custom instance initializer,
-  // that init function does all the work.
-  if (cls->instanceCtor()) {
-    // cls->needsInitThrowable() handled by instanceCtor()
-    auto const obj = gen(env, ConstructInstance, ClassData(cls));
-    return registerObj(obj);
-  }
-
   /*
    * Allocate the object.  This must happen after we do sinits for consistency
    * with the interpreter about o_id assignments.  Also, the prop
    * initialization above can throw, so we don't want to have the object
    * allocated already.
    */
-  auto const ssaObj = gen(env, NewInstanceRaw, ClassData(cls));
+  SSATmp* obj;
+  if (cls->instanceCtor()) {
+    // If it's an extension class with a custom instance initializer,
+    // use it to construct the object.
+    obj = gen(env, ConstructInstance, ClassData(cls));
+  } else {
+    // Construct a new instance of PHP class.
+    obj = gen(env, NewInstanceRaw, ClassData(cls));
 
-  // Initialize the properties
-  gen(env, InitObjProps, ClassData(cls), ssaObj);
-
-  // Initialize Throwable
-  if (cls->needsInitThrowable()) {
-    initThrowable(env, cls, ssaObj);
+    // Initialize the properties.
+    gen(env, InitObjProps, ClassData(cls), obj);
   }
 
-  return registerObj(ssaObj);
+  // Initialize Throwable.
+  if (cls->needsInitThrowable()) {
+    initThrowable(env, cls, obj);
+  }
+
+  if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
+    gen(env, RegisterLiveObj, obj);
+  }
+
+  return obj;
 }
 
 //////////////////////////////////////////////////////////////////////

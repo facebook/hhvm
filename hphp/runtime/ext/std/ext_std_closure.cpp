@@ -277,7 +277,6 @@ static ObjectData* closureInstanceCtor(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
   assertx(cls->builtinODTailSize() == sizeof(void*));
-  assertx(!cls->needsInitThrowable());
   auto const nProps = cls->numDeclProperties();
   auto const size = ObjectData::sizeForNProps(nProps) + sizeof(void*);
   auto obj = new (MM().objMalloc(size)) c_Closure(cls);

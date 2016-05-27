@@ -83,22 +83,25 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   if (cls->needInitialization()) {
     cls->initialize();
   }
+
+  ObjectData* obj;
   if (auto const ctor = cls->instanceCtor()) {
-    auto obj = ctor(cls);
+    obj = ctor(cls);
     assert(obj->checkCount());
-    return obj;
-  }
-  size_t nProps = cls->numDeclProperties();
-  size_t size = sizeForNProps(nProps);
-  auto& mm = MM();
-  auto const obj = new (mm.objMalloc(size)) ObjectData(cls);
-  assert(obj->hasExactlyOneRef());
-  if (UNLIKELY(cls->needsInitThrowable())) {
-    throwable_init(obj);
+  } else {
+    size_t nProps = cls->numDeclProperties();
+    size_t size = sizeForNProps(nProps);
+    auto& mm = MM();
+    obj = new (mm.objMalloc(size)) ObjectData(cls);
+    assert(obj->hasExactlyOneRef());
   }
 
-  // throwable_init() may have inc-refd.
-  assert(obj->checkCount());
+  if (UNLIKELY(cls->needsInitThrowable())) {
+    // may incref obj
+    throwable_init(obj);
+    assert(obj->checkCount());
+  }
+
   return obj;
 }
 

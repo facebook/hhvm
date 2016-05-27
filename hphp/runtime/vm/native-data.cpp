@@ -110,9 +110,6 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   if (ndi->sweep) {
     MM().addNativeObject(node);
   }
-  if (UNLIKELY(cls->needsInitThrowable())) {
-    throwable_init(obj);
-  }
   return obj;
 }
 

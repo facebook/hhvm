@@ -136,12 +136,12 @@ struct BaseSet : HashCollection {
   template<class TSet, bool useKey>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_map(const Variant& callback) const;
+  php_map(const Variant& callback);
 
   template<class TSet, bool useKey>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_filter(const Variant& callback) const;
+  php_filter(const Variant& callback);
 
   template<bool useKey>
   Object php_retain(const Variant& callback);

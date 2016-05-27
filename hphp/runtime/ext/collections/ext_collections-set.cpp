@@ -419,7 +419,7 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 template<typename TSet, bool useKey>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_map(const Variant& callback) const {
+BaseSet::php_map(const Variant& callback) {
   VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -459,7 +459,7 @@ BaseSet::php_map(const Variant& callback) const {
 template<typename TSet, bool useKey>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_filter(const Variant& callback) const {
+BaseSet::php_filter(const Variant& callback) {
   VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);

@@ -572,7 +572,7 @@ template<typename TMap>
 ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_zip(const Variant& iterable) const {
+BaseMap::php_zip(const Variant& iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   auto map = req::make<TMap>();

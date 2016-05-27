@@ -18,6 +18,7 @@
 #error "object-data-inl.h should only be included by object-data.h"
 #endif
 
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -93,17 +94,10 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   auto const obj = new (mm.objMalloc(size)) ObjectData(cls);
   assert(obj->hasExactlyOneRef());
   if (UNLIKELY(cls->needsInitThrowable())) {
-    /*
-     * This must happen after the constructor finishes, because it can leak
-     * references to obj AND it can throw exceptions. If we have this in the
-     * ObjectData constructor, and it throws, obj will be partially destroyed
-     * (ie ~ObjectData will be called, resetting the vtable pointer) leaving
-     * dangling references to the object (eg in backtraces).
-     */
-    obj->callCustomInstanceInit();
+    throwable_init(obj);
   }
 
-  // callCustomInstanceInit may have inc-refd.
+  // throwable_init() may have inc-refd.
   assert(obj->checkCount());
   return obj;
 }

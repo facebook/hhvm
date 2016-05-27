@@ -174,7 +174,7 @@ array(3) {
           ["file"]=>
           string(%d) "%s"
           ["line"]=>
-          int(43)
+          int(37)
           ["function"]=>
           string(14) "test_exception"
           ["args"]=>
@@ -186,7 +186,7 @@ array(3) {
           ["file"]=>
           string(%d) "%s"
           ["line"]=>
-          int(51)
+          int(45)
           ["function"]=>
           string(4) "main"
           ["args"]=>

@@ -311,7 +311,6 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   const TypedValue* propVec() const;
 
  public:
-  ObjectData* callCustomInstanceInit();
   const Func* methodNamed(const StringData*) const;
   static size_t sizeForNProps(Slot);
 

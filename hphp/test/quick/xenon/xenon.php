@@ -54,7 +54,6 @@ $required_functions = array(
   'HH\Asio\join',
   'HH\Asio\result',
   Exception::class.'::__construct',
-  Exception::class.'::__init__',
   WaitHandle::class.'::join',
 
   'genList',
@@ -66,9 +65,6 @@ $required_functions = array(
   'main',
 );
 $optional_functions = array(
-  'array_shift',
-  'strcasecmp',
-  Exception::class.'::getTraceOptions',
   AwaitAllWaitHandle::class.'::fromArray',
   RescheduleWaitHandle::class.'::create',
   WaitHandle::class.'::result',

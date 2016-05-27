@@ -896,7 +896,6 @@ const StaticString
   s___set("__set"),
   s___isset("__isset"),
   s___unset("__unset"),
-  s___init__("__init__"),
   s___sleep("__sleep"),
   s___toDebugDisplay("__toDebugDisplay"),
   s___wakeup("__wakeup");
@@ -913,27 +912,6 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
       collections::deepCopy(dst);
     }
   }
-}
-
-/**
- * Only call this if cls->needsInitThrowable() is true
- */
-ObjectData* ObjectData::callCustomInstanceInit() {
-  auto const init = m_cls->lookupMethod(s___init__.get());
-  assert(init);
-
-  // No need to inc-ref here because we're a newly created object and our
-  // ref-count starts at 1.
-  try {
-    DEBUG_ONLY auto const tv = g_context->invokeMethod(this, init);
-    assert(!isRefcountedType(tv.m_type));
-  } catch (...) {
-    this->setNoDestruct();
-    decRefObj(this);
-    throw;
-  }
-
-  return this;
 }
 
 // called from jit code

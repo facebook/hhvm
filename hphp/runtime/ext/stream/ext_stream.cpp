@@ -330,7 +330,17 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
   if (maxlength == 0) maxlength = INT_MAX;
   while (cbytes < maxlength) {
     int remaining = maxlength - cbytes;
-    String buf = srcFile->read(std::min(remaining, File::CHUNK_SIZE));
+    //srcFile->getChunkSize currently returns an int64_t, we need int currently
+    auto chunkSize = srcFile->getChunkSize();
+    int intChunkSize = 0;
+    if (chunkSize <= INT_MAX) {
+      intChunkSize = static_cast<int>(chunkSize);
+    } else {
+      raise_warning("Invalid chunk size provided, using default: %d",
+                    FileData::DEFAULT_CHUNK_SIZE);
+      intChunkSize = FileData::DEFAULT_CHUNK_SIZE;
+    }
+    String buf = srcFile->read(std::min(remaining, intChunkSize));
     if (buf.size() == 0) break;
     if (destFile->write(buf) != buf.size()) {
       return false;
@@ -475,8 +485,9 @@ Variant HHVM_FUNCTION(stream_set_chunk_size,
                       int64_t chunk_size) {
   if (isa<File>(stream) && chunk_size > 0) {
     auto file = cast<File>(stream);
+    int64_t orig_chunk_size = file->getChunkSize();
     file->setChunkSize(chunk_size);
-    return file->getChunkSize();
+    return orig_chunk_size;
   }
   return false;
 }

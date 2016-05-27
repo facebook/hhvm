@@ -12,3 +12,10 @@ if ($mysqli->connect_errno) {
 }
 $r = $mysqli->query("DROP TABLE IF EXISTS test");
 var_dump($r);
+
+//test null for host, passwd, & db
+$mysqlinull = new mysqli(null, $user, null, null, $port);
+if ($mysqlinull->connect_errno) {
+    echo "Failed to connect to MySQL: (" . $mysqlinull->connect_errno . ") " .
+         $mysqlinull->connect_error;
+}

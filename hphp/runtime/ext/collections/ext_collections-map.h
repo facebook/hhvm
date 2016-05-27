@@ -221,7 +221,7 @@ struct BaseMap : HashCollection {
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_zip(const Variant& iterable) const;
+  php_zip(const Variant& iterable);
 
   template<class TMap>
   typename std::enable_if<

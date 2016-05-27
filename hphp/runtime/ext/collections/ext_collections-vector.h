@@ -60,12 +60,12 @@ struct BaseVector : ObjectData {
   template<class TVector, bool useKey>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_map(const Variant& callback) const;
+  php_map(const Variant& callback);
 
   template<class TVector, bool useKey>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_filter(const Variant& callback) const;
+  php_filter(const Variant& callback);
 
   template<class TVector>
   typename std::enable_if<

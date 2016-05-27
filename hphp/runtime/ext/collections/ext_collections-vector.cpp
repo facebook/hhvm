@@ -67,7 +67,7 @@ bool invokeAndCastToBool(const CallCtx& ctx, int argc,
 template<class TVector, bool useKey>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_map(const Variant& callback) const {
+BaseVector::php_map(const Variant& callback) {
   VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -105,7 +105,7 @@ BaseVector::php_map(const Variant& callback) const {
 template<class TVector, bool useKey>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_filter(const Variant& callback) const {
+BaseVector::php_filter(const Variant& callback) {
   VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);

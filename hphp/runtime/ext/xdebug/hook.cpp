@@ -109,11 +109,6 @@ void add_func_breakpoint(int id, XDebugBreakpoint& bp, const Func* func) {
 // unit as a breakpoint. The line number is assumed to be valid in the unit.
 void add_line_breakpoint(int id, XDebugBreakpoint& bp, const Unit* unit) {
   auto filepath = unit->filepath()->toCppString();
-
-  // Figure out the canonical line number for the breakpoint.
-  bp.line = tightestLoc(unit, bp.line).line1;
-  assertx(bp.line != -1);
-
   LINE_MAP[filepath].emplace(bp.line, id);
   bp.unit = unit;
 }
@@ -149,6 +144,18 @@ const Unit* find_unit(String filename) {
   return nullptr;
 }
 
+bool calibrateBreakpointLine(const Unit* unit, int& line) {
+  // Calibrate the line to nearest line with code.
+  auto nearestLine = unit->getNearestLineWithCode(line);
+  if (nearestLine <= 0) {
+    // Can't find source code for the new line.
+    return false;
+  }
+  // Figure out the canonical line number for the breakpoint.
+  line = tightestLoc(unit, nearestLine).line1;
+  return true;
+}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,6 +187,9 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
         UNMATCHED.insert(id);
         break;
       }
+      // Ignore calibration result because we rely on
+      // phpAddBreakPointLine() below to bail out.
+      calibrateBreakpointLine(unit, bp.line);
 
       // If the file/line combo is invalid, throw an error
       if (!phpAddBreakPointLine(unit, bp.line)) {
@@ -285,9 +295,13 @@ bool XDebugThreadBreakpoints::updateBreakpointLine(int id, int newLine) {
     phpRemoveBreakPointLine(bp.unit, bp.line);
   }
 
+  if (!calibrateBreakpointLine(bp.unit, newLine)) {
+    return false;
+  }
+
   // Register the new line.
-  bp.line = tightestLoc(bp.unit, newLine).line1;
-  assertx(bp.line != -1);
+  assertx(newLine != -1);
+  bp.line = newLine;
 
   LINE_MAP[filepath].emplace(bp.line, id);
   phpAddBreakPointLine(bp.unit, bp.line);
@@ -546,6 +560,9 @@ void XDebugHook::onFileLoad(Unit* unit) {
       ++iter;
       continue;
     }
+    // Ignore calibration result because we rely on phpAddBreakPointLine()
+    // return value below to set/erase breakpoint.
+    calibrateBreakpointLine(unit, bp.line);
 
     // If the line is invalid there's not much we can do to inform the client
     // in the dbgp protocol at this point. php5 xdebug doesn't do anything,

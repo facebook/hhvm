@@ -395,6 +395,13 @@ public:
   bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
 
   /*
+   * Get next line with executable code starting from input `line'.
+   *
+   * Return -1 if not found.
+   */
+  int getNearestLineWithCode(int line) const;
+
+  /*
    * Return the Func* for the code at offset `pc'.
    *
    * Return nullptr if the offset is not in a Func body (but this should be

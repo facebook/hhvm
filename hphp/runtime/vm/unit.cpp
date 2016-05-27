@@ -500,6 +500,12 @@ bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
   return true;
 }
 
+int Unit::getNearestLineWithCode(int line) const {
+  auto map = getLineToOffsetRangeVecMap(this);
+  auto it = map.lower_bound(line);
+  return it == map.end() ? -1 : it->first;
+}
+
 const Func* Unit::getFunc(Offset pc) const {
   FuncEntry key = FuncEntry(pc, nullptr);
   auto it = std::upper_bound(m_funcTable.begin(), m_funcTable.end(), key);

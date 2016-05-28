@@ -1786,21 +1786,29 @@ void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec,
  * emitted code.
  */
 void reportJitMaturity(const CodeCache& code) {
+  // Optimized translations are faster than profiling translations, which are
+  // faster than the interpreter.  But when optimized translations are
+  // generated, some profiling translations will become dead.  We assume the
+  // incremental value of an optimized translation over the corresponding
+  // profiling translations is comparable to the incremental value of a
+  // profiling translation of similar size; thus we don't have to apply
+  // different weights to code in different regions.
+  auto const codeSize =
+    code.hot().used() + code.main().used() + code.prof().used();
   if (s_jitMaturityCounter) {
-    // EvalJitMatureSize is supposed to to be set to approximately 15% of the
+    // EvalJitMatureSize is supposed to to be set to approximately 20% of the
     // code that will give us full performance, so recover the "fully mature"
     // size with some math.
-    auto const fullSize = RuntimeOption::EvalJitMatureSize * 100 / 15;
-
-    auto after = code.main().used() * 100 / fullSize;
-    if (after > 100) after = 100;
+    auto const fullSize = RuntimeOption::EvalJitMatureSize * 5;
+    auto const after = codeSize >= fullSize ? 100
+                                            : (codeSize * 100 / fullSize);
     auto const before = s_jitMaturityCounter->getValue();
     if (after > before) s_jitMaturityCounter->setValue(after);
   }
 
   if (!s_loggedJitMature.load(std::memory_order_relaxed) &&
       StructuredLog::enabled() &&
-      code.main().used() >= RuntimeOption::EvalJitMatureSize &&
+      codeSize >= RuntimeOption::EvalJitMatureSize &&
       !s_loggedJitMature.exchange(true, std::memory_order_relaxed)) {
     StructuredLogEntry cols;
     cols.setInt("jit_mature_sec", time(nullptr) - HttpServer::StartTime);

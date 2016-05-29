@@ -32,14 +32,11 @@ BZ2File::BZ2File(req::ptr<PlainFile>&& innerFile)
 }
 
 BZ2File::~BZ2File() {
-  if (m_bzFile)
-    closeImpl();
+  closeImpl();
 }
 
 void BZ2File::sweep() {
-  if (m_bzFile) {
-    closeImpl();
-  }
+  closeImpl();
   File::sweep();
 }
 
@@ -107,14 +104,18 @@ int64_t BZ2File::writeImpl(const char * buf, int64_t length) {
 }
 
 bool BZ2File::closeImpl() {
-  assert(m_bzFile);
   bool ret = true;
-  BZ2_bzclose(m_bzFile);
-  m_bzFile = nullptr;
-  setIsClosed(true);
-  m_innerFile->close();
+  if (!isClosed()) {
+    if (m_bzFile) {
+      BZ2_bzclose(m_bzFile);
+      m_bzFile = nullptr;
+    }
+    setIsClosed(true);
+    if (m_innerFile) {
+      m_innerFile->close();
+    }
+  }
   File::closeImpl();
-  setEof(false);
   return ret;
 }
 

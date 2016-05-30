@@ -21,7 +21,8 @@
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/util/network.h"
-#include <syslog.h>
+
+#include <folly/portability/Syslog.h>
 
 namespace HPHP {
 

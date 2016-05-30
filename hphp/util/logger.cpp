@@ -15,13 +15,13 @@
 */
 #include "hphp/util/logger.h"
 
-#include <syslog.h>
-
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/string-vsnprintf.h"
+
+#include <folly/portability/Syslog.h>
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \

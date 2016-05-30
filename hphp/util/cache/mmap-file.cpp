@@ -16,7 +16,6 @@
 
 #include "hphp/util/cache/mmap-file.h"
 
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -24,6 +23,8 @@
 #include <string>
 
 #include <folly/Format.h>
+#include <folly/portability/SysMman.h>
+
 #include "hphp/util/logger.h"
 
 namespace HPHP {

@@ -18,7 +18,8 @@
 #include "hphp/util/kernel-version.h"
 
 #include <unistd.h>
-#include <sys/mman.h>
+
+#include <folly/portability/SysMman.h>
 
 namespace HPHP {
 

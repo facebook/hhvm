@@ -15,10 +15,10 @@
 */
 #include "hphp/util/read-only-arena.h"
 
-#include <sys/mman.h>
 #include <stdlib.h>
 
 #include <folly/Exception.h>
+#include <folly/portability/SysMman.h>
 
 #include "hphp/util/assertions.h"
 

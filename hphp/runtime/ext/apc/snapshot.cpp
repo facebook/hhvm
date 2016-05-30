@@ -16,7 +16,6 @@
 #include "hphp/runtime/ext/apc/snapshot-builder.h"
 #include "hphp/runtime/ext/apc/snapshot-loader.h"
 
-#include <sys/mman.h> // mmap
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -24,6 +23,7 @@
 #include <vector>
 
 #include <folly/String.h>
+#include <folly/portability/SysMman.h>
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/concurrent-shared-store.h"

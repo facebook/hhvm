@@ -71,16 +71,13 @@
 
 #include <folly/portability/SysFile.h>
 #include <folly/portability/SysTime.h>
+#include <folly/portability/SysMman.h>
 
 #include "fsock.h"
 #include "fopen_wrappers.h"
 
 #if MISSING_FCLOSE_DECL
 extern int fclose(FILE *);
-#endif
-
-#ifdef HAVE_SYS_MMAN_H
-# include <sys/mman.h>
 #endif
 
 #include "zend_API.h"

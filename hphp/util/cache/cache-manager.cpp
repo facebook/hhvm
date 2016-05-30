@@ -17,7 +17,6 @@
 #include "hphp/util/cache/cache-manager.h"
 
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -35,6 +34,8 @@
 #include "hphp/util/cache/mmap-file.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
+
+#include <folly/portability/SysMman.h>
 
 namespace HPHP {
 

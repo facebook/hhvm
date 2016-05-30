@@ -23,7 +23,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 
-#include <sys/mman.h>
+#include <folly/portability/SysMman.h>
 
 namespace HPHP { namespace jit {
 TRACE_SET_MOD(txlease);

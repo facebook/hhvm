@@ -21,10 +21,10 @@
 #include <set>
 #include <cstdint>
 #include <cstring>
-#include <sys/mman.h>
 
 #include <folly/Bits.h>
 #include <folly/Format.h>
+#include <folly/portability/SysMman.h>
 
 #include "hphp/util/assertions.h"
 

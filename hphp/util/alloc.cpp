@@ -18,7 +18,6 @@
 #include <atomic>
 
 #include <sys/resource.h>
-#include <sys/mman.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -29,6 +28,7 @@
 
 #include <folly/Bits.h>
 #include <folly/Format.h>
+#include <folly/portability/SysMman.h>
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"

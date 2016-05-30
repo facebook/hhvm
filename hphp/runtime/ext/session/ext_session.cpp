@@ -21,10 +21,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <dirent.h>
 #include <vector>
 
 #include <folly/String.h>
+#include <folly/portability/Dirent.h>
 #include <folly/portability/SysFile.h>
 #include <folly/portability/SysTime.h>
 

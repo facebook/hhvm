@@ -47,9 +47,9 @@
 #include "hphp/util/process.h"
 
 #include <folly/String.h>
+#include <folly/portability/Dirent.h>
 #include <folly/portability/SysFile.h>
 
-#include <dirent.h>
 #include <glob.h>
 #include <sys/types.h>
 #if defined(__FreeBSD__) || defined(__APPLE__)

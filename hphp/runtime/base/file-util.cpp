@@ -21,12 +21,12 @@
 #include <boost/filesystem.hpp>
 
 #include <sys/types.h>
-#include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <libgen.h>
 
 #include <folly/String.h>
+#include <folly/portability/Dirent.h>
 
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/util/lock.h"

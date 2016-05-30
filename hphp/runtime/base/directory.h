@@ -22,8 +22,9 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 
-#include <dirent.h>
 #include <vector>
+
+#include <folly/portability/Dirent.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <dirent.h>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -26,6 +25,7 @@
 #include <utility>
 #include <vector>
 #include <folly/String.h>
+#include <folly/portability/Dirent.h>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/symbol_table.h"

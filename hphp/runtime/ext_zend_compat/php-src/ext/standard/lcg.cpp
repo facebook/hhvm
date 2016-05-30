@@ -21,11 +21,8 @@
 #include "php.h"
 #include "php_lcg.h"
 
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 #ifdef ZTS
 int lcg_globals_id;

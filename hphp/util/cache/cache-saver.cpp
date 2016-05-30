@@ -17,7 +17,6 @@
 #include "hphp/util/cache/cache-saver.h"
 
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <cstdint>
 #include <string>
@@ -25,6 +24,7 @@
 
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
+#include <folly/portability/Unistd.h>
 #include "hphp/util/cache/magic-numbers.h"
 #include "hphp/util/logger.h"
 

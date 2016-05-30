@@ -15,8 +15,9 @@
 */
 
 #include <stdio.h>
-#include <unistd.h>
 #include "hphp/util/shm-counter.h"
+
+#include <folly/portability/Unistd.h>
 
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,12 +17,12 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/param.h>
 #include <vector>
 
 #include <folly/MapUtil.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/logger.h"

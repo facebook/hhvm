@@ -44,11 +44,7 @@ FILE_RCSID("@(#)$File: cdf.c,v 1.53 2013/02/26 16:20:42 christos Exp $")
 #endif
 #include <stdlib.h>
 
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#else
-#include <unistd.h>
-#endif
+#include <folly/portability/Unistd.h>
 
 #ifndef UINT32_MAX
 # define UINT32_MAX (0xffffffff)

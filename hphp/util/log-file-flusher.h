@@ -18,9 +18,10 @@
 
 #include <cstdio>
 #include <atomic>
-#include <unistd.h>
 
 #include "hphp/util/compatibility.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

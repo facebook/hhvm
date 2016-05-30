@@ -41,9 +41,6 @@ FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 
 #include "magic.h"
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -59,6 +56,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 #endif
 
 #include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 #undef FIONREAD
 

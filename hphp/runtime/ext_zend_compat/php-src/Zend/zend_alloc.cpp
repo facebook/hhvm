@@ -28,9 +28,8 @@
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+
+#include <folly/portability/Unistd.h>
 
 #ifdef ZEND_WIN32
 # include <wincrypt.h>

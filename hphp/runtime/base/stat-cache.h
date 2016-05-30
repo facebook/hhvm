@@ -23,13 +23,14 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/atomic-countable.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

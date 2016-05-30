@@ -21,10 +21,10 @@
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/portability/Unistd.h>
 
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 

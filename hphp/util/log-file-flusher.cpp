@@ -16,7 +16,8 @@
 #include "hphp/util/log-file-flusher.h"
 
 #include <sys/types.h>
-#include <unistd.h>
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

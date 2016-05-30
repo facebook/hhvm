@@ -36,9 +36,6 @@
 #include <novsock2.h>
 #endif
 #endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
@@ -66,6 +63,7 @@
 #include "zend_ini.h"
 
 #include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/text-util.h"
 

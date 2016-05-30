@@ -20,12 +20,13 @@
 #include <execinfo.h>
 #include <dlfcn.h>
 #endif
-#include <unistd.h>
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/mutex.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

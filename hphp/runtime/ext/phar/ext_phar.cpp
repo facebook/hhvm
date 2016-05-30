@@ -16,13 +16,14 @@
 */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/directory.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

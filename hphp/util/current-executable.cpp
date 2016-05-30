@@ -15,7 +15,6 @@
 */
 
 #include "hphp/util/current-executable.h"
-#include <unistd.h>
 #include <limits.h>
 
 #ifdef __APPLE__
@@ -25,6 +24,8 @@
 #ifdef __FreeBSD__
 #include <sys/sysctl.h>
 #endif
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

@@ -17,7 +17,6 @@
 #define incl_HPHP_SMALLLOCKS_H_
 
 #include <atomic>
-#include <unistd.h>
 #include <iostream>
 #ifdef __linux__
 #include <syscall.h>
@@ -25,6 +24,7 @@
 #endif
 
 #include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

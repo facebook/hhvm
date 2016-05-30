@@ -16,7 +16,6 @@
 
 #include "hphp/test/ext/test_logger.h"
 #include <pwd.h>
-#include <unistd.h>
 #include <sys/param.h>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/http-client.h"
@@ -24,6 +23,8 @@
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/url/ext_url.h"
+
+#include <folly/portability/Unistd.h>
 
 using namespace HPHP;
 

@@ -19,12 +19,12 @@
 #include <cstdio>
 #include <dlfcn.h>
 #include <memory>
-#include <unistd.h>
 #include <vector>
 
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/embedded-data.h"
 

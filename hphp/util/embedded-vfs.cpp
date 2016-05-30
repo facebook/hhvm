@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -34,6 +33,8 @@
   #define SQLITE_CORE 1  /* Disable the API redefinition in sqlite3ext.h */
 #endif
 #include <sqlite3ext.h>
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

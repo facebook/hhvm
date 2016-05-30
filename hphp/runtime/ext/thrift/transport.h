@@ -24,8 +24,9 @@
 #include "hphp/util/htonll.h"
 
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdexcept>
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////

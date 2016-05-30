@@ -34,12 +34,11 @@ FILE_RCSID("@(#)$File: readelf.c,v 1.97 2013/03/06 03:35:30 christos Exp $")
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "readelf.h"
 #include "magic.h"
+
+#include <folly/portability/Unistd.h>
 
 #ifdef  ELFCORE
 private int dophn_core(struct magic_set *, int, int, int, off_t, int, size_t,

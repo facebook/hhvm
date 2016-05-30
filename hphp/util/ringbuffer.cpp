@@ -20,9 +20,9 @@
 #include <atomic>
 #include <cstdio>
 #include <cstring>
-#include <unistd.h>
 
 #include <folly/Bits.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/assertions.h"
 

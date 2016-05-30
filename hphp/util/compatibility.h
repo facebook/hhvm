@@ -19,9 +19,9 @@
 #include <cstdint>
 #include <string>
 #include <time.h>
-#include <unistd.h>
 
 #include <folly/Singleton.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/portability.h"
 

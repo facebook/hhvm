@@ -19,13 +19,13 @@
 #include "hphp/util/current-executable.h"
 
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Unistd.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
-#include <unistd.h>
 
 #include <fstream>
 #include <memory>

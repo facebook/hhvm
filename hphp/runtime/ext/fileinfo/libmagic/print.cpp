@@ -40,10 +40,9 @@ FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <time.h>
+
+#include <folly/portability/Unistd.h>
 
 #ifdef PHP_WIN32
 # define asctime_r php_asctime_r

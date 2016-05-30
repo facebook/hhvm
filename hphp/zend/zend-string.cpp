@@ -18,12 +18,13 @@
 #include "hphp/zend/zend-string.h"
 
 #include <cinttypes>
-#include <unistd.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/lock.h"
 #include "hphp/zend/crypt-blowfish.h"
+
+#include <folly/portability/Unistd.h>
 
 #if defined(_MSC_VER) || defined(__APPLE__)
 # include "hphp/zend/php-crypt_r.h"

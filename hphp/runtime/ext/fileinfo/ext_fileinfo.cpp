@@ -16,11 +16,12 @@
 */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 const StaticString s_finfo("finfo");

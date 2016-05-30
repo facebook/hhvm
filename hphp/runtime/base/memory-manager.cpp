@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
-#include <unistd.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -39,6 +38,7 @@
 #include <folly/Random.h>
 #include <folly/ScopeGuard.h>
 #include <folly/portability/SysMman.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/runtime/base/memory-manager-defs.h"
 

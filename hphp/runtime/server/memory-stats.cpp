@@ -27,7 +27,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <unistd.h>
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

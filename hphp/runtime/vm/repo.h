@@ -25,8 +25,6 @@
 
 #include <sqlite3.h>
 
-// For sysconf(3).
-#include <unistd.h>
 // For getpwuid_r(3).
 #include <sys/types.h>
 #include <pwd.h>
@@ -36,6 +34,8 @@
 #include "hphp/runtime/vm/litstr-repo-proxy.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

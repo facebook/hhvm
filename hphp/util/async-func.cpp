@@ -15,11 +15,10 @@
 */
 #include "hphp/util/async-func.h"
 
-#include <unistd.h>
-
 #include <folly/portability/SysTime.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

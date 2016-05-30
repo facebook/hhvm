@@ -39,12 +39,14 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/network.h"
 #include <memory>
-#include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+
+#include <folly/portability/Unistd.h>
+
 #if defined(AF_UNIX)
 #include <sys/un.h>
 #include <algorithm>

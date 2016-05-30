@@ -23,7 +23,6 @@
 #include <netinet/tcp.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -33,6 +32,7 @@
 #include <folly/String.h>
 #include <folly/SocketAddress.h>
 #include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/network.h"
 #include "hphp/runtime/base/array-init.h"

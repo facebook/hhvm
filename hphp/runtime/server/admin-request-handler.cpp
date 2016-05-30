@@ -58,6 +58,7 @@
 
 #include <folly/Conv.h>
 #include <folly/Random.h>
+#include <folly/portability/Unistd.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -65,8 +66,6 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
-#include <unistd.h>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>

@@ -83,18 +83,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <io.h>
-#include <direct.h>
-#endif
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
 
 #include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 /* Some operating systems don't declare getopt() */
 

@@ -12,21 +12,7 @@
 #include "gd.h"
 #include "gdhelpers.h"
 
-#ifndef MSWIN32
-#include <unistd.h>
-#else
-#include <io.h>
-#ifndef R_OK
-# define R_OK 04			/* Needed in Windows */
-#endif
-#endif
-
-#ifdef WIN32
-#define access _access
-#ifndef R_OK
-#define R_OK 2
-#endif
-#endif
+#include <folly/portability/Unistd.h>
 
 /* number of antialised colors for indexed bitmaps */
 /* overwrite Windows GDI define in case of windows build */

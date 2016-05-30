@@ -18,7 +18,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -41,6 +40,8 @@
 #include "hphp/runtime/ext/gd/libgd/gdfontg.h"  /* 5 Giant font */
 #include <zlib.h>
 #include <set>
+
+#include <folly/portability/Unistd.h>
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER

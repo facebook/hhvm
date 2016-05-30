@@ -26,12 +26,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/uio.h>
 #include <poll.h>
 
 #include <folly/String.h>
 #include <folly/SocketAddress.h>
 #include <folly/portability/SysTime.h>
+#include <folly/portability/SysUio.h>
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/network.h"

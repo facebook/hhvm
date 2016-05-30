@@ -38,8 +38,8 @@
 #include "hphp/util/logger.h"
 
 #include <folly/Singleton.h>
+#include <folly/portability/Libgen.h>
 
-#include <libgen.h> // For dirname(3).
 #include <string>
 
 namespace HPHP {

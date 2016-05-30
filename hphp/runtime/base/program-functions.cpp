@@ -94,6 +94,7 @@
 #include <folly/Portability.h>
 #include <folly/Singleton.h>
 #include <folly/portability/Environment.h>
+#include <folly/portability/Libgen.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
@@ -101,7 +102,6 @@
 #include <boost/program_options/variables_map.hpp>
 #include <boost/filesystem.hpp>
 
-#include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
 #include <libxml/parser.h>

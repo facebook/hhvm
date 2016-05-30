@@ -69,14 +69,11 @@
 # endif
 #endif
 
+#include <folly/portability/SysFile.h>
 #include <folly/portability/SysTime.h>
 
 #include "fsock.h"
 #include "fopen_wrappers.h"
-
-#ifdef HAVE_SYS_FILE_H
-# include <sys/file.h>
-#endif
 
 #if MISSING_FCLOSE_DECL
 extern int fclose(FILE *);

@@ -130,9 +130,9 @@
  * appeared in Linux 3.17.
  ****************************************************************************/
 #if !defined __APPLE__ && !defined _WIN32
-  // We're assuming x86_64 linux here
-  #ifndef __x86_64__
-    #error "hh_shared.c requires Linux to be x86_64"
+  // Linux version must support syscall memfd_create
+  #ifndef __NR_memfd_create
+    #error "hh_shared.c requires a Linux version that supports memfd_create"
   #endif
 
   #define MEMFD_CREATE 1
@@ -142,11 +142,10 @@
    * kernel release version and make a decision based on whether
    * the kernel was >= 3.17 or not. However, syscall will return -1
    * with an strerr(errno) of "Function not implemented" if the
-   * kernel is < 3.17, and that's good enough. Also, I got the value
-   * of 319 from here: https://github.com/kernelslacker/trinity/blob/825b51cfe8fcbc7461c9a327411475ae481654c8/include/memfd.h
+   * kernel is < 3.17, and that's good enough.
    */
   static int memfd_create(const char *name, unsigned int flags) {
-    return syscall(319, name, flags);
+    return syscall(__NR_memfd_create, name, flags);
   }
 #endif
 

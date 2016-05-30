@@ -261,7 +261,7 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
     }
     pos = cpPos;
 
-    if (pos->t == T_AS || pos->t == T_SUPER) {
+    while (pos->t == T_AS || pos->t == T_SUPER) {
       nextLookahead(pos);
       if (!tryParseNSType(pos)) {
         return false;

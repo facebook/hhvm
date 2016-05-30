@@ -3295,6 +3295,11 @@ hh_typevar_list:
     possible_comma                     { $$ = $1; }
 ;
 
+hh_non_empty_constraint_list:
+    hh_constraint
+|   hh_non_empty_constraint_list hh_constraint
+;
+
 hh_non_empty_typevar_list:
     hh_non_empty_typevar_list ','
     hh_typevar_variance
@@ -3304,10 +3309,10 @@ hh_non_empty_typevar_list:
  |  hh_non_empty_typevar_list ','
     hh_typevar_variance
     ident_no_semireserved
-    hh_constraint                      { _p->addTypeVar($4.text()); }
+    hh_non_empty_constraint_list       { _p->addTypeVar($4.text()); }
  |  hh_typevar_variance
     ident_no_semireserved
-    hh_constraint                      { _p->addTypeVar($2.text()); }
+    hh_non_empty_constraint_list       { _p->addTypeVar($2.text()); }
 ;
 
 hh_typevar_variance:

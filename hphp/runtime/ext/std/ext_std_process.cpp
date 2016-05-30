@@ -22,13 +22,13 @@
 #include <string>
 #include <iostream>
 
-#include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
 
 #include <folly/String.h>
 #include <folly/portability/Environment.h>
+#include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/light-process.h"

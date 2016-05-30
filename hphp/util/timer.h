@@ -19,8 +19,8 @@
 
 #include <cstdint>
 #include <string>
-#include <sys/resource.h>
 
+#include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/compatibility.h"

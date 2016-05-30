@@ -24,9 +24,8 @@
 #include <set>
 #include <vector>
 
-#include <sys/resource.h>
-
 #include <folly/String.h>
+#include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/build-info.h"

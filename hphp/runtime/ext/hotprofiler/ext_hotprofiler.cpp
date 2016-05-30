@@ -36,7 +36,6 @@
 #include "hphp/util/cycles.h"
 #include "hphp/util/vdso.h"
 
-#include <sys/resource.h>
 #include <iostream>
 #include <fstream>
 #include <zlib.h>
@@ -46,6 +45,7 @@
 #include <utility>
 #include <vector>
 
+#include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
 // Append the delimiter

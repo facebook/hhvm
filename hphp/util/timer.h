@@ -20,7 +20,8 @@
 #include <cstdint>
 #include <string>
 #include <sys/resource.h>
-#include <sys/time.h>
+
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/compatibility.h"
 

@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include <sys/time.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"

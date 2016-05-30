@@ -27,7 +27,7 @@
 #define LDAP_DEPRECATED 1
 #include <ldap.h>
 
-#include <sys/time.h>
+#include <folly/portability/SysTime.h>
 
 #define PHP_LD_FULL_ADD 0xff
 

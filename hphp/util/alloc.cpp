@@ -17,7 +17,6 @@
 
 #include <atomic>
 
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/mman.h>
 #include <stdlib.h>
@@ -30,6 +29,7 @@
 
 #include <folly/Bits.h>
 #include <folly/Format.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"

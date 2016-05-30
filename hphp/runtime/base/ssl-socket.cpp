@@ -20,9 +20,11 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/server/server-stats.h"
+
 #include <folly/String.h>
+#include <folly/portability/SysTime.h>
+
 #include <poll.h>
-#include <sys/time.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

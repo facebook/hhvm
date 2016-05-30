@@ -24,10 +24,10 @@
 #include <set>
 #include <vector>
 
-#include <sys/time.h>
 #include <sys/resource.h>
 
 #include <folly/String.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/hdf.h"

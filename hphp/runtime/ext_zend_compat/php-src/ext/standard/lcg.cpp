@@ -25,9 +25,7 @@
 #include <unistd.h>
 #endif
 
-#ifndef PHP_WIN32
-#include <sys/time.h>
-#endif
+#include <folly/portability/SysTime.h>
 
 #ifdef ZTS
 int lcg_globals_id;

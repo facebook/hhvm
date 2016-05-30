@@ -22,8 +22,9 @@
 #ifdef __linux__
 #include <syscall.h>
 #include <linux/futex.h>
-#include <sys/time.h>
 #endif
+
+#include <folly/portability/SysTime.h>
 
 namespace HPHP {
 

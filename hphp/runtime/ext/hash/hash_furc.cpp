@@ -33,10 +33,11 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
+#include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/ext/hash/hash_murmur.h"
 

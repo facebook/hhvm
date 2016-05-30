@@ -22,12 +22,12 @@
 #include <memory>
 #include <algorithm>
 
-#include <sys/time.h>
-
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <signal.h>
+
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"

@@ -21,11 +21,11 @@
 #include <string>
 #include <limits>
 
-#include <sys/time.h>
 #include <signal.h>
 
 #include <boost/filesystem.hpp>
 #include <folly/Optional.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file.h"

@@ -18,7 +18,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/utsname.h>
 #include <pwd.h>
@@ -27,6 +26,7 @@
 
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"

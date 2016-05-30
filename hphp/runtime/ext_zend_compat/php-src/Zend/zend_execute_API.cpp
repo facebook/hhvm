@@ -31,9 +31,8 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_exceptions.h"
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+
+#include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

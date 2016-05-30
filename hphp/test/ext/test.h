@@ -19,7 +19,7 @@
 
 #include "hphp/test/ext/test_logger.h"
 
-#include <sys/time.h>
+#include <folly/portability/SysTime.h>
 
 #include <string>
 

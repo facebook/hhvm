@@ -53,13 +53,12 @@ FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if defined(HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#endif
 #if defined(HAVE_ZLIB_H) && defined(HAVE_LIBZ)
 #define BUILTIN_DECOMPRESS
 #include <zlib.h>
 #endif
+
+#include <folly/portability/SysTime.h>
 
 #undef FIONREAD
 

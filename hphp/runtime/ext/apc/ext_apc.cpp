@@ -21,13 +21,14 @@
 #ifndef _MSC_VER
 #include <dlfcn.h>
 #endif
-#include <sys/time.h> // gettimeofday
 #include <limits>
 #include <memory>
 #include <set>
 #include <vector>
 #include <stdexcept>
 #include <type_traits>
+
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/async-job.h"

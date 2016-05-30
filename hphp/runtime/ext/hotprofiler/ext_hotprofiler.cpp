@@ -36,7 +36,6 @@
 #include "hphp/util/cycles.h"
 #include "hphp/util/vdso.h"
 
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <iostream>
 #include <fstream>
@@ -46,6 +45,8 @@
 #include <new>
 #include <utility>
 #include <vector>
+
+#include <folly/portability/SysTime.h>
 
 // Append the delimiter
 #define HP_STACK_DELIM        "==>"

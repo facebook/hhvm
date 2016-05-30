@@ -15,12 +15,11 @@
 */
 #include "hphp/runtime/server/http-protocol.h"
 
-#include <sys/time.h>
-
 #include <map>
 #include <string>
 
 #include <folly/Conv.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"

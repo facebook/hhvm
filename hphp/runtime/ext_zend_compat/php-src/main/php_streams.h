@@ -21,9 +21,8 @@
 #ifndef PHP_STREAMS_H
 #define PHP_STREAMS_H
 
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+#include <folly/portability/SysTime.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 

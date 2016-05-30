@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
-#include <poll.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/cmd/all.h"

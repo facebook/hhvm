@@ -18,8 +18,6 @@
 
 #include <fstream>
 
-#include <netinet/in.h>
-
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
 #include <algorithm>
@@ -28,6 +26,7 @@
 #include <vector>
 
 #include <folly/String.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/util/htonll.h"
 #include "hphp/util/logger.h"

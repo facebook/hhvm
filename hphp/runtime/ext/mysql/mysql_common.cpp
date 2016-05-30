@@ -17,9 +17,6 @@
 
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 
-#include <netdb.h>
-#include <netinet/in.h>
-#include <poll.h>
 #include <algorithm>
 #include <cassert>
 #include <unordered_set>
@@ -28,6 +25,7 @@
 #include <folly/Conv.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/util/network.h"
 #include "hphp/util/text-util.h"

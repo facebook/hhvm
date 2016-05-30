@@ -17,13 +17,9 @@
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/std/ext_std_network-internal.h"
 
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-
 #include <folly/IPAddress.h>
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"

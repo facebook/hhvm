@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/server/ip-block-map.h"
 
-#include <arpa/inet.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/config.h"

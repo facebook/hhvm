@@ -18,8 +18,10 @@
 #define incl_HPHP_SOCKET_H_
 
 #include "hphp/runtime/base/file.h"
+
+#include <folly/portability/Sockets.h>
+
 #include <sys/types.h>
-#include <sys/socket.h>
 
 #ifdef SOCKET_ERROR
 # undef SOCKET_ERROR

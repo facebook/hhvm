@@ -15,9 +15,6 @@
 */
 #include "hphp/util/network.h"
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #ifndef _MSC_VER
 #include <arpa/nameser.h>
 #include <resolv.h>
@@ -26,6 +23,7 @@
 
 #include <folly/String.h>
 #include <folly/IPAddress.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/process.h"

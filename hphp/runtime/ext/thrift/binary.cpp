@@ -35,10 +35,10 @@
 
 #include "hphp/util/logger.h"
 
+#include <folly/portability/Sockets.h>
 #include <folly/portability/Unistd.h>
 
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <stdexcept>
 
 namespace HPHP { namespace thrift {

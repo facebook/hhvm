@@ -23,7 +23,7 @@
  * to be worth pulling out.
  */
 
-#include <arpa/inet.h>
+#include <folly/portability/Sockets.h>
 #if defined(__FreeBSD__)
 # include <sys/endian.h>
 #elif defined(__APPLE__)

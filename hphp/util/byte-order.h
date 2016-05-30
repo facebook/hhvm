@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include <arpa/inet.h>
+#include <folly/portability/Sockets.h>
 
 namespace HPHP {
 

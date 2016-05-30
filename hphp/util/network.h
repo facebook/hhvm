@@ -18,11 +18,10 @@
 #define incl_HPHP_NETWORK_H_
 
 #include <string>
-#include <netdb.h>
-#include <sys/socket.h>
 #include <stdlib.h>
 
 #include <folly/IPAddress.h>
+#include <folly/portability/Sockets.h>
 
 /**
  * Network utility functions.

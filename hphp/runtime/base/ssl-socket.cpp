@@ -22,9 +22,8 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include <folly/String.h>
+#include <folly/portability/Sockets.h>
 #include <folly/portability/SysTime.h>
-
-#include <poll.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -40,11 +40,10 @@
 #include "hphp/util/network.h"
 #include <memory>
 #include <fcntl.h>
-#include <poll.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 
+#include <folly/portability/Sockets.h>
 #include <folly/portability/Unistd.h>
 
 #if defined(AF_UNIX)

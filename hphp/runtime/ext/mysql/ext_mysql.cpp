@@ -16,12 +16,9 @@
 */
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 
-#include <netinet/in.h>
-#include <netdb.h>
-#include <poll.h>
-
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/builtin-functions.h"

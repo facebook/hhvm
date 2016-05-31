@@ -584,16 +584,18 @@ void visit(Local& env, IRInstruction& inst) {
 
 void block_visit(Local& env, Block* block) {
   FTRACE(2, "  visiting B{}\n", block->id());
-  auto it = block->instrs().end();
-  --it;
+  assertx(!block->instrs().empty());
+
+  auto prev = std::prev(block->instrs().end());
   for (;;) {
-    folly::Optional<Block::iterator> prev;
+    auto it = prev;
     if (it != block->instrs().begin()) {
       prev = std::prev(it);
+      visit(env, *it);
+    } else {
+      visit(env, *it);
+      break;
     }
-    visit(env, *it);
-    if (!prev) break;
-    it = *prev;
   }
 }
 

@@ -149,16 +149,16 @@ static Variant HHVM_METHOD(Collator, getSortKey, const String& val) {
     return false;
   }
 
-  String ret(sortkey_len + 1, ReserveString);
+  String ret(sortkey_len, ReserveString);
   sortkey_len = ucol_getSortKey(data->collator(),
                                 strval.getBuffer(), strval.length(),
                                 (uint8_t*) ret.get()->mutableData(),
-                                ret.capacity() + 1);
+                                ret.capacity());
   if (sortkey_len <= 0) {
     return false;
   }
 
-  ret.setSize(sortkey_len);
+  ret.setSize(sortkey_len -1);
   return ret;
 }
 

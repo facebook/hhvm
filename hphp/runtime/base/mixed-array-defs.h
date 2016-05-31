@@ -464,36 +464,58 @@ void ConvertTvToUncounted(TypedValue* source) {
   // string/array is already uncounted but not static, we still have to make a
   // copy, as we have no idea about the lifetime of the other uncounted item
   // here.
-  if (!tvIsStatic(source)) {
-    if (type == KindOfString) {
+  switch (type) {
+    case KindOfString:
+      source->m_type = KindOfPersistentString;
+      // Fall-through.
+    case KindOfPersistentString: {
       auto& str = source->m_data.pstr;
-      if (str->empty()) str = staticEmptyString();
+      if (str->isStatic()) break;
+      else if (str->empty()) str = staticEmptyString();
       else if (auto const st = lookupStaticString(str)) str = st;
       else str = StringData::MakeUncounted(str->slice());
-    } else {
-      // Uncounted arrays can have type KindOfPersistentArray.
-      assertx(type == KindOfArray || type == KindOfPersistentArray);
+      break;
+    }
+    case KindOfArray:
+      source->m_type = KindOfPersistentArray;
+      // Fall-through.
+    case KindOfPersistentArray: {
       auto& ad = source->m_data.parr;
-      if (ad->empty()) ad = staticEmptyArray();
+      if (ad->isStatic()) break;
+      else if (ad->empty()) ad = staticEmptyArray();
       else if (ad->isPackedLayout()) ad = PackedArray::MakeUncounted(ad);
       else if (ad->isStruct()) ad = StructArray::MakeUncounted(ad);
       else ad = MixedArray::MakeUncounted(ad);
+      break;
     }
-  } else if (type == KindOfUninit) {
-    source->m_type = KindOfNull;
+    case KindOfUninit: {
+      source->m_type = KindOfNull;
+      break;
+    }
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble: {
+      break;
+    }
+    case KindOfClass:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+      not_reached();
   }
 }
 
 ALWAYS_INLINE
 void ReleaseUncountedTv(TypedValue& tv) {
-  if (tv.m_type == KindOfString) {
+  if (isStringType(tv.m_type)) {
     assert(!tv.m_data.pstr->isRefCounted());
     if (tv.m_data.pstr->isUncounted()) {
       tv.m_data.pstr->destructUncounted();
     }
     return;
   }
-  if (tv.m_type == KindOfArray) {
+  if (isArrayType(tv.m_type)) {
     auto arr = tv.m_data.parr;
     assert(!arr->isRefCounted());
     if (!arr->isStatic()) {

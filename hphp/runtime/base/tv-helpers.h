@@ -576,15 +576,6 @@ ALWAYS_INLINE void tvUnset(TypedValue* to) {
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
-/*
- * Returns true if this tv is not a ref-counted type, or if it is a
- * ref-counted type and the object pointed to is static.
- */
-ALWAYS_INLINE bool tvIsStatic(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  return !isRefcountedType(tv->m_type) || TV_GENERIC_DISPATCH(*tv, isStatic);
-}
-
 /**
  * tvAsVariant and tvAsCVarRef serve as escape hatches that allow us to call
  * into the Variant machinery. Ideally we will use these as little as possible

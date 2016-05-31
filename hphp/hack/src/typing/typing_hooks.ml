@@ -222,4 +222,6 @@ let remove_all_hooks () =
   enter_fun_def_hooks := [];
   exit_fun_def_hooks := [];
   enter_class_def_hooks := [];
-  exit_class_def_hooks := []
+  exit_class_def_hooks := [];
+  taccess_hooks := [];
+  parent_construct_hooks := []

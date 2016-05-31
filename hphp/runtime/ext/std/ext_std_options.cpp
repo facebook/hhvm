@@ -910,7 +910,7 @@ static int64_t HHVM_FUNCTION(memory_get_peak_usage,
 
 static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
   auto const stats = MM().getStats();
-  int64_t ret = real_usage ? stats.usage : stats.alloc;
+  int64_t ret = real_usage ? stats.usage() : stats.alloc;
   // Since we don't always alloc and dealloc a shared structure from the same
   // thread it is possible that this can go negative when we are tracking
   // jemalloc stats.

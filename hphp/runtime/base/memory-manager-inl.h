@@ -193,7 +193,7 @@ inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
 
   if (debug) requestEagerGC();
 
-  m_stats.usage += bytes;
+  m_stats.mmUsage += bytes;
 
   void *p = m_freelists[index].maybePop();
   if (UNLIKELY(p == nullptr)) {
@@ -224,7 +224,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index,
   FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, index);
 
   m_freelists[index].push(ptr, bytes);
-  m_stats.usage -= bytes;
+  m_stats.mmUsage -= bytes;
 
   FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
 }
@@ -242,14 +242,14 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
   FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, i);
 
   m_freelists[i].push(ptr, bytes);
-  m_stats.usage -= bytes;
+  m_stats.mmUsage -= bytes;
 
   FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
 }
 
 ALWAYS_INLINE
 void MemoryManager::freeBigSize(void* vp, size_t bytes) {
-  m_stats.usage -= bytes;
+  m_stats.mmUsage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
   m_stats.repay(bytes);
@@ -312,7 +312,7 @@ inline bool MemoryManager::startStatsInterval() {
   refreshStats();
   // For the reasons stated below in refreshStatsImpl, usage can potentially be
   // negative. Make sure that doesn't occur here.
-  m_stats.peakIntervalUsage = std::max<int64_t>(0, m_stats.usage);
+  m_stats.peakIntervalUsage = std::max<int64_t>(0, m_stats.usage());
   m_stats.peakIntervalAlloc = m_stats.alloc;
   assert(m_stats.peakIntervalAlloc >= 0);
   m_statsIntervalActive = true;
@@ -328,7 +328,7 @@ inline bool MemoryManager::stopStatsInterval() {
 }
 
 inline bool MemoryManager::preAllocOOM(int64_t size) {
-  if (m_couldOOM && m_stats.usage + size > m_stats.maxBytes) {
+  if (m_couldOOM && m_stats.usage() + size > m_stats.maxBytes) {
     refreshStatsHelperExceeded();
     return true;
   }

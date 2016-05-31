@@ -529,7 +529,7 @@ public:
 
     if (m_flags & TrackMemory) {
       auto const stats = MM().getStats();
-      frame->m_mu_start  = stats.usage;
+      frame->m_mu_start  = stats.usage();
       frame->m_pmu_start = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
       frame->m_mu_start = get_allocs();
@@ -552,7 +552,7 @@ public:
 
     if (m_flags & TrackMemory) {
       auto const stats = MM().getStats();
-      int64_t mu_end = stats.usage;
+      int64_t mu_end = stats.usage();
       int64_t pmu_end = stats.peakUsage;
       counts.memory += mu_end - frame->m_mu_start;
       counts.peak_memory += pmu_end - frame->m_pmu_start;
@@ -908,7 +908,7 @@ struct TraceProfiler : Profiler {
     }
     if (m_flags & TrackMemory) {
       auto const stats = MM().getStats();
-      te.memory = stats.usage;
+      te.memory = stats.usage();
       te.peak_memory = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
       te.memory = get_allocs();

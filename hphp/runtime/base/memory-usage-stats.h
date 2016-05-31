@@ -34,7 +34,11 @@ namespace HPHP {
 struct MemoryUsageStats {
   int64_t maxBytes;   // the max bytes allowed for a request before it is
                       // terminated for exceeding the memory limit
-  int64_t usage;      // how many bytes are currently being used
+private:
+  int64_t mmUsage;    // how many bytes are currently being used
+  int64_t auxUsage;
+
+public:
 #if defined(USE_JEMALLOC)
   int64_t jemallocDebt; // how many bytes of jemalloced memory have not
                       // been processed by MemoryManager::refreshStats
@@ -49,6 +53,8 @@ struct MemoryUsageStats {
   int64_t peakIntervalUsage; // peakUsage during a userland specified interval
   int64_t peakIntervalAlloc; // peakAlloc during a userland specified interval
 
+  int64_t usage() const { return mmUsage + auxUsage; }
+
 #ifdef USE_JEMALLOC
   void borrow(size_t amt) { jemallocDebt += amt; }
   void repay(size_t amt) { jemallocDebt -= amt; }
@@ -56,6 +62,8 @@ struct MemoryUsageStats {
   void borrow(size_t) {}
   void repay(size_t) {}
 #endif
+
+  friend struct MemoryManager;
 };
 
 //////////////////////////////////////////////////////////////////////

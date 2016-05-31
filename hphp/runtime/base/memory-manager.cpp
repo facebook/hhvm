@@ -248,7 +248,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) pre:\n", isInternalCall);
   FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
@@ -256,11 +256,12 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
   FTRACE(1, "resetStatsImpl({}) pre:\n"
     "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
     isInternalCall,
-    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
 #endif
   if (isInternalCall) {
     m_statsIntervalActive = false;
-    m_stats.usage = 0;
+    m_stats.mmUsage = 0;
+    m_stats.auxUsage = 0;
     m_stats.alloc = 0;
     m_stats.peakUsage = 0;
     m_stats.peakAlloc = 0;
@@ -309,7 +310,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) post:\n", isInternalCall);
   FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
@@ -317,7 +318,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
   FTRACE(1, "resetStatsImpl({}) post:\n"
     "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
     isInternalCall,
-    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
 #endif
 }
 
@@ -388,7 +389,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
       jeDeallocated, m_prevDeallocated, jeDeallocated - m_prevDeallocated);
     FTRACE(1, "usage: {}\ntotal (je) alloc: {}\nje debt: {}\n",
-      stats.usage, stats.totalAlloc, stats.jemallocDebt);
+      stats.usage(), stats.totalAlloc, stats.jemallocDebt);
 
     if (!contiguous_heap) {
       // Since these deltas potentially include memory allocated from another
@@ -403,10 +404,10 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
 
       // Subtract the old jemalloc adjustment (delta0) and add the current one
       // (delta) to arrive at the new combined usage number.
-      stats.usage += jeDeltaAllocated - mmDeltaAllocated;
+      stats.auxUsage += jeDeltaAllocated - mmDeltaAllocated;
       // Remove the "debt" accrued from allocating the slabs so we don't double
       // count the slab-based allocations.
-      stats.usage -= stats.jemallocDebt;
+      stats.auxUsage -= stats.jemallocDebt;
     }
 
     stats.jemallocDebt = 0;
@@ -420,14 +421,14 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
 
     FTRACE(1, "After stats sync:\n");
     FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
-      stats.usage, stats.totalAlloc);
+      stats.usage(), stats.totalAlloc);
   }
 #endif
   assert(stats.maxBytes > 0);
-  if (live && stats.usage > stats.maxBytes && m_couldOOM) {
+  if (live && stats.usage() > stats.maxBytes && m_couldOOM) {
     refreshStatsHelperExceeded();
   }
-  if (stats.usage > stats.peakUsage) {
+  if (stats.usage() > stats.peakUsage) {
     // Check whether the process's active memory limit has been exceeded, and
     // if so, stop the server.
     //
@@ -446,16 +447,16 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     }
 #endif
     if (live &&
-        stats.usage > m_memThresholdCallbackPeakUsage &&
+        stats.usage() > m_memThresholdCallbackPeakUsage &&
         stats.peakUsage <= m_memThresholdCallbackPeakUsage) {
       setSurpriseFlag(MemThresholdFlag);
     }
 
-    stats.peakUsage = stats.usage;
+    stats.peakUsage = stats.usage();
   }
   if (live && m_statsIntervalActive) {
-    if (stats.usage > stats.peakIntervalUsage) {
-      stats.peakIntervalUsage = stats.usage;
+    if (stats.usage() > stats.peakIntervalUsage) {
+      stats.peakIntervalUsage = stats.usage();
     }
     if (stats.alloc > stats.peakIntervalAlloc) {
       stats.peakIntervalAlloc = stats.alloc;
@@ -839,7 +840,7 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
  * slab list.  Return the newly allocated nbytes-sized block.
  */
 NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
-  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (UNLIKELY(m_stats.usage() > m_stats.maxBytes)) {
     refreshStats();
   }
   requestGC();
@@ -872,7 +873,7 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; mallocBigSize() pulls stats from jemalloc.
-    m_stats.usage -= bytes;
+    m_stats.mmUsage -= bytes;
     return mallocBigSize<false>(nbytes).ptr;
   }
 
@@ -937,7 +938,7 @@ inline void MemoryManager::updateBigStats() {
   // the slabs and the usage so we should force this after an allocation that
   // was too large for one of the existing slabs. When we're not using jemalloc
   // this check won't do anything so avoid the extra overhead.
-  if (use_jemalloc || UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (use_jemalloc || UNLIKELY(m_stats.usage() > m_stats.maxBytes)) {
     refreshStats();
   }
 }
@@ -964,11 +965,11 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes) {
 #ifdef USE_JEMALLOC
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;
-  m_stats.usage += int64_t(delta);
+  m_stats.mmUsage += int64_t(delta);
   // Adjust jemalloc otherwise we'll double count the direct allocation.
   m_stats.borrow(delta);
 #else
-  m_stats.usage += bytes;
+  m_stats.mmUsage += bytes;
 #endif
   updateBigStats();
   auto ptrOut = block.ptr;

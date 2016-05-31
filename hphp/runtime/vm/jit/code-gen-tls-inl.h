@@ -40,6 +40,7 @@ inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
     case Arch::PPC64:
       return ppc64::detail::emitTLSAddr(v, datum);
   }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

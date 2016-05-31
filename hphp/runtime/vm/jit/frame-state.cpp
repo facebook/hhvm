@@ -385,13 +385,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case Call:
     {
       auto const extra = inst->extra<Call>();
-      killLocalsForCall(extra->destroyLocals);
-      for (auto& st : m_stack) st.frameMaySpanCall = true;
       // Remove tracked state for the slots for args and the actrec.
       for (auto i = uint32_t{0}; i < kNumActRecCells + extra->numParams; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
-      clearStackForCall();
+      trackCall(extra->destroyLocals);
       // The return value is known to be at least a Gen.
       setType(
         stk(extra->spOffset + kNumActRecCells + extra->numParams - 1),
@@ -413,15 +411,13 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case CallArray:
     {
       auto const extra = inst->extra<CallArray>();
-      killLocalsForCall(extra->destroyLocals);
-      for (auto& st : m_stack) st.frameMaySpanCall = true;
       // Remove tracked state for the actrec and array arg.
       uint32_t numCells = kNumActRecCells +
         (extra->numParams ? extra->numParams : 1);
       for (auto i = uint32_t{0}; i < numCells; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
-      clearStackForCall();
+      trackCall(extra->destroyLocals);
       setType(stk(extra->spOffset + numCells - 1), TGen);
       // A CallArray pops the ActRec, actual args, and an array arg.
       assertx(cur().bcSPOff == inst->marker().spOff());
@@ -443,9 +439,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case ContEnter:
     {
       auto const extra = inst->extra<ContEnter>();
-      killLocalsForCall(false);
-      for (auto& st : m_stack) st.frameMaySpanCall = true;
-      clearStackForCall();
+      trackCall(false);
       setType(stk(extra->spOffset), TGen);
       // ContEnter pops a cell and pushes a yielded value.
       assertx(cur().bcSPOff == inst->marker().spOff());
@@ -1135,6 +1129,25 @@ void FrameStateMgr::trackInlineReturn() {
   assertx(cur_SP == cur().spValue); // inlining may not change spValue
 }
 
+/*
+ * Clear the tracked values at a Call instruction
+ *
+ * Keeping a value live across a Call requires spilling, so we avoid it---but
+ * we do continue keeping track of types.
+ */
+void FrameStateMgr::trackCall(bool destroysLocals) {
+  if (destroysLocals) clearLocals();
+  for (auto& state : m_stack) {
+    for (auto& loc : state.locals) {
+      if (loc.value && !loc.value->inst()->is(DefConst)) loc.value = nullptr;
+    }
+    for (auto& stk : state.stack) {
+      stk.value = nullptr;
+    }
+    state.frameMaySpanCall = true;
+  }
+}
+
 bool FrameStateMgr::checkInvariants() const {
   for (auto& state : m_stack) {
     always_assert(check_invariants(state));
@@ -1511,15 +1524,6 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
   });
 }
 
-void FrameStateMgr::clearStackForCall() {
-  ITRACE(2, "clearStackForCall\n");
-  for (auto& state : m_stack) {
-    for (auto& stk : state.stack) {
-      stk.value = nullptr;
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void FrameStateMgr::setLocalPredictedType(uint32_t id, Type type) {
@@ -1539,20 +1543,6 @@ void FrameStateMgr::updateLocalRefPredictions(SSATmp* boxedCell, SSATmp* val) {
   for (auto id = uint32_t{0}; id < cur().locals.size(); ++id) {
     if (canonical(cur().locals[id].value) == canonical(boxedCell)) {
       setBoxedPrediction(loc(id), boxType(val->type()));
-    }
-  }
-}
-
-/*
- * Called to clear out the tracked local values at a call site.  Keeping a
- * value live across a Call requires spilling, so we avoid it. We do continue
- * tracking the types in locals, however.
- */
-void FrameStateMgr::killLocalsForCall(bool callDestroysLocals) {
-  if (callDestroysLocals) clearLocals();
-  for (auto& frame : m_stack) {
-    for (auto& loc : frame.locals) {
-      if (loc.value && !loc.value->inst()->is(DefConst)) loc.value = nullptr;
     }
   }
 }

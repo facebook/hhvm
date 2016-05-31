@@ -406,6 +406,7 @@ private:
   void updateMInstr(const IRInstruction*);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
+  void trackCall(bool destroyLocals);
 
   /*
    * Per-block state helpers.

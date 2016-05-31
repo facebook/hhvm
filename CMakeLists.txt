@@ -41,6 +41,14 @@ IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
   MESSAGE(FATAL_ERROR "HHVM requires a 64bit OS")
 ENDIF()
 
+# If available, configure CCache
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+  message(STATUS "Found ccache, enabling")
+endif(CCACHE_FOUND)
+
 # 3rd party library
 IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
   MESSAGE(FATAL_ERROR "third-party/CMakeLists.txt missing. "

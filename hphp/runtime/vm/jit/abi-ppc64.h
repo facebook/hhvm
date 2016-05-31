@@ -67,6 +67,7 @@ inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
+constexpr PhysReg rret_indirect() { return ppc64_asm::reg::r3; };
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);

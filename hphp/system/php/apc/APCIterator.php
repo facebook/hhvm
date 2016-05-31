@@ -109,7 +109,7 @@ class APCIterator implements Iterator{
     if (!$this->valid()) {
       return false;
     }
-    return $this->getInfo()[$this->index]['entry_name'];
+    return $this->getInfo()[$this->index]['info'];
   }
 
   public function current() {
@@ -120,10 +120,10 @@ class APCIterator implements Iterator{
       $ret['type'] = ($info['type'] == 0) ? 'user' : 'file';
     }
     if ($this->format & APC_ITER_KEY) {
-      $ret['key'] = $info['entry_name'];
+      $ret['key'] = $info['info'];
     }
     if ($this->format & APC_ITER_VALUE) {
-      $ret['value'] = apc_fetch($info['entry_name']);
+      $ret['value'] = apc_fetch($info['info']);
     }
     if ($this->format & APC_ITER_MEM_SIZE) {
       $ret['mem_size'] = $info['mem_size'];
@@ -188,11 +188,11 @@ class APCIterator implements Iterator{
       if ($this->search !== null) {
         if (is_array($this->search)) {
           while (!$this->preg_match_recursive($this->search,
-                                              $list['entry_name'])) {
+                                              $list['info'])) {
             continue;
           }
         } else {
-          if (!preg_match($this->search, $list['entry_name'])) {
+          if (!preg_match($this->search, $list['info'])) {
             continue;
           }
         }
@@ -231,16 +231,16 @@ class APCIterator implements Iterator{
       if ($this->search !== null) {
         if (is_array($this->search)) {
           while (!$this->preg_match_recursive($this->search,
-                                              $key['entry_name'])) {
+                                              $key['info'])) {
             continue;
           }
         } else {
-          if (!preg_match($this->search, $key['entry_name'])) {
+          if (!preg_match($this->search, $key['info'])) {
             continue;
           }
         }
       }
-      apc_delete($key['entry_name']);
+      apc_delete($key['info']);
     }
     return true;
   }

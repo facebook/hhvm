@@ -309,8 +309,10 @@ let ai_check genv files_info env t =
       Hh_logger.log "Cannot run AI because of errors in source";
       Exit_status.exit Exit_status.CantRunAI
     end;
+    let check_mode = ServerArgs.check_mode genv.options in
     let errorl, failed = Ai.go
-      Typing_check_utils.check_defs genv.workers files_info env.tcopt ai_opt in
+      Typing_check_utils.check_defs genv.workers files_info
+        env.tcopt ai_opt check_mode in
     let env = { env with
       errorl = Errors.merge errorl env.errorl;
       failed_check = Relative_path.Set.union failed env.failed_check;

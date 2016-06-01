@@ -185,6 +185,7 @@ struct Vgen {
   void emit(const contenter& i);
 
   // vm entry abi
+  void emit(const inittc& i) {}
   void emit(const leavetc&);
 
   // exceptions

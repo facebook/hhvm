@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | (c) Copyright IBM Corporation 2015                                   |
+   | (c) Copyright IBM Corporation 2015-2016                              |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,26 +38,27 @@ const RegSet kGPCallerSaved =
 
 const RegSet kGPCalleeSaved =
   reg::r14 | reg::r15 | reg::r16 | reg::r17 | reg::r18 | reg::r19 | reg::r20 |
-  reg::r21 | reg::r22 | reg::r23 | reg::r24 | reg::r25 | reg::r26 | reg::r31;
-  // r1 is used as rsp
-  // r27 is used as rone (value 1)
-  // r28 is used as rvmfp
+  reg::r21 | reg::r22 | reg::r23 | reg::r24 | reg::r25 | reg::r26;
+
+  // r27 is used as rsp
   // r29 is used as rvmsp
   // r30 is used as rvmtl
+  // r31 is used as rvmfp
+  // r28 is used as rone
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
 const RegSet kGPReserved =
-  reg::r2 | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm |
+  reg::r2 | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm | reg::r1 |
   rfuncln() | rfuncentry() | rthreadptr() | rone() | r_svcreq_stub();
   // Reserve the r2 TOC register to avoid changing it
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kXMMCallerSaved =
-  reg::f1  | reg::f2  | reg::f3  | reg::f4  | reg::f5  | reg::f6  |
-  reg::f7  | reg::f8  | reg::f9  | reg::f10 | reg::f11 | reg::f12 |
-  reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19;
+  reg::f0  | reg::f1  | reg::f2  | reg::f3  | reg::f4  | reg::f5  |
+  reg::f6  | reg::f7  | reg::f8  | reg::f9  | reg::f10 | reg::f11 |
+  reg::f12 | reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19;
 
 const RegSet kXMMCalleeSaved =
   reg::f14 | reg::f15 | reg::v20 | reg::v21 | reg::v22 |

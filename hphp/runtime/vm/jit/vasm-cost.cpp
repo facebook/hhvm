@@ -22,7 +22,7 @@
 namespace HPHP { namespace jit {
 namespace {
 
-Vcost instrSize(const Vunit& u, Vinstr inst) {
+Vcost instrSize(const Vunit& u, AreaIndex area, Vinstr inst) {
   auto const tuple_size = [&] (Vtuple t) -> int {
     return u.tuples[t].size();
   };
@@ -45,7 +45,7 @@ Vcost instrSize(const Vunit& u, Vinstr inst) {
   case Vinstr::fallback:
   case Vinstr::fallbackcc:
   case Vinstr::retransopt:
-    return {1, true};
+    return {1, area == AreaIndex::Main};
 
   default:
     return {1, false};
@@ -58,7 +58,7 @@ Vcost computeVunitCost(const Vunit& unit) {
   bool incomplete = false;
   for (auto const& block : unit.blocks) {
     for (auto const& instr : block.code) {
-      auto info = instrSize(unit, instr);
+      auto info = instrSize(unit, block.area_idx, instr);
       cost += info.cost;
       incomplete |= info.incomplete;
     }

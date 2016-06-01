@@ -85,8 +85,7 @@ char* xdebug_path_to_url(const char* path) {
     // Ignore, phar is cool.
     tmp = xdstrdup(path);
   } else if (path[0] != '/' && path[0] != '\\' && path[1] != ':') {
-    String path(path, CopyString);
-    auto realpath = HHVM_FN(realpath)(path);
+    auto realpath = HHVM_FN(realpath)(String(path, CopyString));
     if (realpath.isString()) {
       auto realpath_str = realpath.toString().get()->mutableData();
       tmp = xdebug_sprintf("file://%s", realpath_str);

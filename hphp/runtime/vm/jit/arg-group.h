@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_JIT_ARG_GROUP_H
 #define incl_HPHP_JIT_ARG_GROUP_H
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -190,10 +192,10 @@ struct ArgGroup {
     ArgDesc arg(s, m_locs[s]);
     if (isFP) {
       push_SIMDarg(arg);
-#if defined(__powerpc64__)
-      // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
-      push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
-#endif
+      if (arch() == Arch::PPC64) {
+        // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
+        push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
+      }
     } else {
       push_arg(arg);
     }

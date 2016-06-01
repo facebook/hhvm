@@ -380,13 +380,6 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void enterTCImpl(TCA start, ActRec* stashedAR) {
-  static_assert(rvmfp() == ppc64_asm::reg::r31 &&
-                rvmsp() == ppc64_asm::reg::r29 &&
-                rvmtl() == ppc64_asm::reg::r30 &&
-                rret_data() == ppc64_asm::reg::r3 &&
-                rret_type() == ppc64_asm::reg::r4,
-                "enterTCHelper needs to be modified to use the correct ABI");
-
   // We have to force C++ to spill anything that might be in a callee-saved
   // register (aside from vmfp), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();

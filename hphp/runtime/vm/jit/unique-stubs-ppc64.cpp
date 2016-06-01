@@ -40,9 +40,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
-// TODO(lbianc) In order to keep different patchs for review, this include
-// was removed, as decoder patch is under review as well (D54933).
-// #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit {
@@ -278,21 +276,20 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void assert_tc_saved_rip(void* saved_lr_pointer) {
-// TODO(lbianc) In order to keep different patchs for review, these asserts
-// were removed, as decoder patch is under review as well (D54933).
-//  // saved on enterTCHelper
-//  auto const saved_lr = *reinterpret_cast<uint8_t**>(saved_lr_pointer);
-//  auto const branch_block = saved_lr; // next instruction after resumetc's callr
-//  auto const branch_instr = branch_block + smashableJccSkip();
-//  auto const exittc = mcg->ustubs().enterTCExit;
-//
-//  ppc64_asm::DecodedInstruction di(branch_instr);
-//  if (di.isJmp()) {
-//    auto const jmp_target = TCA(ppc64_asm::Assembler::getLi64(branch_block));
-//    always_assert(di.isJmp() && jmp_target == exittc);
-//  } else {
-//    always_assert(saved_lr == exittc);
-//  }
+  // saved on enterTCHelper
+  auto const saved_lr = *reinterpret_cast<uint8_t**>(saved_lr_pointer);
+  auto const branch_block = saved_lr; // next instruction after resumetc's callr
+  auto const jccLen = smashableJccLen() - ppc64_asm::instr_size_in_bytes;
+  auto const branch_instr = branch_block + jccLen;
+  auto const exittc = mcg->ustubs().enterTCExit;
+
+  ppc64_asm::DecodedInstruction di(branch_instr);
+  if (di.isJmp()) {
+    auto const jmp_target = TCA(ppc64_asm::Assembler::getLi64(branch_block));
+    always_assert(di.isJmp() && jmp_target == exittc);
+  } else {
+    always_assert(saved_lr == exittc);
+  }
 }
 
 TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {

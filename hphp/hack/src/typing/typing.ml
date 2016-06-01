@@ -943,7 +943,7 @@ and expr_
     if has_lost_info
     then
       let name = "the method "^snd meth in
-      let env, result = Env.lost_info name ISet.empty env result in
+      let env, result = Env.lost_info name env result in
       env, result
     else
       begin
@@ -1217,7 +1217,7 @@ and expr_
       if Env.FakeMembers.is_static_invalid env cid (snd mid)
       then
         let fake_name = Env.FakeMembers.make_static_id cid (snd mid) in
-        let env, ty = Env.lost_info fake_name ISet.empty env ty in
+        let env, ty = Env.lost_info fake_name env ty in
         env, ty
       else env, ty
   | Obj_get (e, (_, Id (_, y)), _)
@@ -1238,7 +1238,7 @@ and expr_
       if has_lost_info
       then
         let name = "the member "^snd m in
-        let env, result = Env.lost_info name ISet.empty env result in
+        let env, result = Env.lost_info name env result in
         env, result
       else env, result
   | Obj_get (e1, _, _) ->
@@ -3111,23 +3111,16 @@ and static_class_id p env = function
     )
   | CIexpr (p, _ as e) ->
       let env, ty = expr env e in
-      let rec resolve_ety seen ty =
+      let rec resolve_ety ty =
         let env, ty = TUtils.fold_unresolved env ty in
         let _, ty = Env.expand_type env ty in
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when
-            classname = SN.Classes.cClassname ->
-          resolve_ety seen the_cls
+            classname = SN.Classes.cClassname -> resolve_ety the_cls
         | _, Tabstract (AKgeneric _, _)
         | _, Tclass _ -> ty
-        | r, Tunresolved tyl -> r, Tunresolved (List.map tyl (resolve_ety seen))
-        | _, Tvar n as ty ->
-          if ISet.mem n seen
-          then Reason.Rnone, Tany
-          else begin
-            let seen = ISet.add n seen in
-            resolve_ety seen ty
-          end
+        | r, Tunresolved tyl -> r, Tunresolved (List.map tyl resolve_ety)
+        | _, Tvar _ as ty -> resolve_ety ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tmixed | Tobject)
               when not (Env.is_strict env) ->
           Reason.Rnone, Tany
@@ -3138,7 +3131,7 @@ and static_class_id p env = function
         ) ->
           Errors.expected_class ~suffix:(", but got "^Typing_print.error ty) p;
           Reason.Rnone, Tany
-      in env, resolve_ety ISet.empty ty
+      in env, resolve_ety ty
 
 and call_construct p env class_ params el uel cid =
   let cstr = Env.get_construct env class_ in
@@ -3511,18 +3504,18 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
   | Ast.Eq _ ->
       assert false
 
-and non_null ?expanded:(expanded=ISet.empty) env ty =
-  let env, expanded, ty = Env.expand_type_recorded env expanded ty in
+and non_null env ty =
+  let env, ty = Env.expand_type env ty in
   match ty with
   | _, Toption ty ->
-      let env, expanded, ty = Env.expand_type_recorded env expanded ty in
+      let env, ty = Env.expand_type env ty in
       (* When "??T" appears in the typing environment due to implicit
        * typing, the recursion here ensures that it's treated as
        * isomorphic to "?T"; that is, all nulls are created equal.
        *)
-      non_null ~expanded env ty
+      non_null env ty
   | r, Tunresolved tyl ->
-      let env, tyl = List.map_env env tyl (non_null ~expanded) in
+      let env, tyl = List.map_env env tyl non_null in
       (* We need to flatten the unresolved types, otherwise we could
        * end up with "Tunresolved[Tunresolved _]" which is not supposed
        * to happen.
@@ -3536,7 +3529,7 @@ and non_null ?expanded:(expanded=ISet.empty) env ty =
 
   | r, Tabstract (ak, tyopt) ->
     begin match TUtils.get_as_constraints env ak tyopt with
-      | Some ty -> let env, ty = non_null ~expanded env ty in
+      | Some ty -> let env, ty = non_null env ty in
         env, (r, Tabstract (ak, Some ty))
       | None -> env, ty
     end

@@ -89,11 +89,11 @@ module ExprDepTy = struct
    *  // (`cls '\A') <> (\cls '\B')
    *  $x->expression_dependent_function();
    *)
-  let rec should_apply ?(seen=ISet.empty) env (_, ty_ as ty) = match ty_ with
+  let rec should_apply env (_, ty_ as ty) = match ty_ with
     | Tabstract (AKgeneric _ as k, tyopt) ->
       begin match Typing_utils.get_as_constraints env k tyopt with
         | None -> true
-        | Some ty -> should_apply ~seen env ty
+        | Some ty -> should_apply env ty
       end
     | Toption ty
     | Tabstract (
@@ -101,14 +101,14 @@ module ExprDepTy = struct
         | AKenum _
         | AKdependent (`this, [])
         ), Some ty) ->
-        should_apply ~seen env ty
+        should_apply env ty
     | Tabstract (AKdependent _, Some _) ->
         false
     | Tvar _ ->
-        let env, seen, ty = Env.expand_type_recorded env seen ty in
-        should_apply ~seen env ty
+        let env, ty = Env.expand_type env ty in
+        should_apply env ty
     | Tunresolved tyl ->
-        List.exists tyl (should_apply ~seen env)
+        List.exists tyl (should_apply env)
     | Tclass ((_, x), _) ->
         let class_ = Env.get_class env x in
         Option.value_map class_

@@ -48,7 +48,7 @@ end
  * to just an array.*)
 class virtual downcast_tabstract_to_array_type_mapper = object(this)
   method on_tabstract env r ak cstr =
-    match TUtils.get_as_constraints (fst env) ak cstr with
+    match TUtils.get_as_constraints env ak cstr with
     | None -> env, (r, Tabstract (ak, cstr))
     | Some ty -> this#on_type env ty
 
@@ -80,13 +80,13 @@ let downcast_aktuple_to_akvec_ env r fields =
   env, (r, Tarraykind (AKvec (value)))
 
 class virtual downcast_aktypes_mapper = object(this)
-  method on_tarraykind_akshape (env, seen) r fdm =
+  method on_tarraykind_akshape env r fdm =
     let env, ty = downcast_akshape_to_akmap_ env r fdm in
-    this#on_type (env, seen) ty
+    this#on_type env ty
 
-  method on_tarraykind_aktuple (env, seen) r fields =
+  method on_tarraykind_aktuple env r fields =
     let env, ty = downcast_aktuple_to_akvec_ env r fields in
-    this#on_type (env, seen) ty
+    this#on_type env ty
 
   method virtual on_type : env -> locl ty -> result
 end
@@ -100,7 +100,7 @@ let downcast_aktypes env ty =
     inherit! downcast_tabstract_to_array_type_mapper
     inherit! downcast_aktypes_mapper
   end in
-  let (env, _), ty = mapper#on_type (fresh_env env) ty in
+  let env, ty = mapper#on_type (fresh_env env) ty in
   env, ty
 
 let fold_akshape_as_akmap_with_acc f env acc r fdm =
@@ -167,22 +167,22 @@ let update_array_type p access_type ~lvar_assignment env ty =
     inherit update_array_type_mapper
     inherit! downcast_tabstract_to_array_type_mapper
 
-    method! on_tarraykind_akempty (env, seen) _ =
+    method! on_tarraykind_akempty env _ =
       match access_type with
         | AKshape_key field_name ->
           let env, tk = Env.fresh_unresolved_type env in
           let env, tv = Env.fresh_unresolved_type env in
           let fdm = ShapeMap.singleton field_name (tk, tv) in
-          (env, seen), (Reason.Rused_as_shape p, Tarraykind (AKshape fdm))
+          env, (Reason.Rused_as_shape p, Tarraykind (AKshape fdm))
         | AKappend ->
           let env, tv = Env.fresh_unresolved_type env in
-          (env, seen), (Reason.Rappend p, Tarraykind (AKvec tv))
+          env, (Reason.Rappend p, Tarraykind (AKvec tv))
         | AKother | AKtuple_index _ ->
           let env, tk = Env.fresh_unresolved_type env in
           let env, tv = Env.fresh_unresolved_type env in
-          (env, seen), (Reason.Rused_as_map p, Tarraykind (AKmap (tk, tv)))
+          env, (Reason.Rused_as_map p, Tarraykind (AKmap (tk, tv)))
 
-    method! on_tarraykind_akshape (env, seen) r fdm =
+    method! on_tarraykind_akshape env r fdm =
       match access_type with
         | AKshape_key field_name ->
           let env, tk = Env.fresh_unresolved_type env in
@@ -195,34 +195,34 @@ let update_array_type p access_type ~lvar_assignment env ty =
             end else
               downcast_akshape_to_akmap_ env r fdm
             in
-          (env, seen), ty
+          env, ty
         | _ ->
           let env, ty = downcast_akshape_to_akmap_ env r fdm in
-          (env, seen), ty
+          env, ty
 
-    method! on_tshape (env, seen) r fields_known fdm =
+    method! on_tshape env r fields_known fdm =
       match access_type with
         | AKshape_key field_name when lvar_assignment ->
           let env, tv = Env.fresh_unresolved_type env in
           let fdm = ShapeMap.add field_name tv fdm in
-          (env, seen), (Reason.Rwitness p, Tshape (fields_known, fdm))
+          env, (Reason.Rwitness p, Tshape (fields_known, fdm))
         | _ ->
-          (env, seen), (r, Tshape (fields_known, fdm))
+          env, (r, Tshape (fields_known, fdm))
 
-    method! on_tarraykind_aktuple (env, seen) r fields =
+    method! on_tarraykind_aktuple env r fields =
       match access_type with
         | AKtuple_index index when IMap.mem index fields ->
            let env, fields = if lvar_assignment then
              let env, ty = Env.fresh_unresolved_type env in
              env, IMap.add index ty fields
            else env, fields in
-           (env, seen), (Reason.Rappend p, Tarraykind (AKtuple fields))
+           env, (Reason.Rappend p, Tarraykind (AKtuple fields))
         | _ ->
            (* no growing of tuples for now *)
           let env, ty = downcast_aktuple_to_akvec_ env r fields in
-          (env, seen), ty
+          env, ty
   end in
-  let (env, _), ty = mapper#on_type (fresh_env env) ty in
+  let env, ty = mapper#on_type (fresh_env env) ty in
   env, ty
 
 (* When the type is updated because of "$a[...] = ..." statement, we can infer

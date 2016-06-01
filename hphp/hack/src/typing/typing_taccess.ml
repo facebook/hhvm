@@ -28,8 +28,7 @@ type env = {
    * error reporting
    *)
   trail : dependent_type list;
-  (* Keep track of any Tvars we see to check for potential recursive Tvars *)
-  seen_tvar : ISet.t;
+
   (* A list of dependent we have encountered while expanding a type constant.
    * After expanding a type constant we can choose either the assigned type or
    * the constrained type. If we choose the assigned type, the result will not
@@ -45,7 +44,6 @@ let empty_env env ety_env ids = {
   tenv = env;
   ety_env = ety_env;
   trail = [];
-  seen_tvar = ISet.empty;
   dep_tys = [];
   ids = ids;
 }
@@ -118,9 +116,9 @@ and expand_ env (root_reason, root_ty as root) =
           end in
           env, (root_reason, Tunresolved tyl)
       | Tvar _ ->
-          let tenv, seen, ty =
-            Env.expand_type_recorded env.tenv env.seen_tvar root in
-          let env = { env with tenv = tenv; seen_tvar = seen } in
+          let tenv, ty =
+            Env.expand_type env.tenv root in
+          let env = { env with tenv = tenv } in
           expand_ env ty
       | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
       | Tarraykind _ | Tfun _ | Tabstract (_, _) ->

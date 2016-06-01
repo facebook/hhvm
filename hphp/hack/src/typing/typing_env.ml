@@ -138,16 +138,6 @@ let expand_type env x =
   | r, Tvar x -> get_type env r x
   | x -> env, x
 
-let expand_type_recorded env set ty =
-  match ty with
-  | r, Tvar x -> begin
-    let env, ty =
-      if ISet.mem x set then env, (r, Tany) else expand_type env ty in
-    let set = ISet.add x set in
-    env, set, ty
-  end
-  | x -> env, set, x
-
 let make_ft p params ret_ty =
   let arity = List.length params in
   {
@@ -643,23 +633,21 @@ let get_last_call env =
   | None -> assert false
   | Some pos -> pos
 
-let rec lost_info fake_name stack env ty =
+let rec lost_info fake_name env ty =
   let info r = Reason.Rlost_info (fake_name, r, get_last_call env) in
   match ty with
-  | _, Tvar v when ISet.mem v stack -> env, ty
   | _, Tvar v ->
-      let stack = ISet.add v stack in
       let env, v' = get_var env v in
       (match IMap.get v' env.tenv with
       | None ->
           env, ty
       | Some ty ->
-          let env, ty = lost_info fake_name stack env ty in
+          let env, ty = lost_info fake_name env ty in
           let env = add env v ty in
           env, ty
       )
   | r, Tunresolved tyl ->
-      let env, tyl = List.map_env env tyl (lost_info fake_name stack) in
+      let env, tyl = List.map_env env tyl (lost_info fake_name) in
       env, (info r, Tunresolved tyl)
   | r, ty ->
       env, (info r, ty)

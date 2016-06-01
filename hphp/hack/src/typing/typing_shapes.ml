@@ -81,7 +81,7 @@ let to_array env shape_ty res =
     inherit! Type_mapper.tunresolved_type_mapper
     inherit! Type_mapper.tvar_expanding_type_mapper
 
-    method! on_tshape (env, seen) r fields_known fdm =
+    method! on_tshape env r fields_known fdm =
       match fields_known with
       | FieldsFullyKnown ->
         let env, values =
@@ -105,14 +105,13 @@ let to_array env shape_ty res =
           Typing_arrays.array_type_list_to_single_type env keys in
         let env, value =
           Typing_arrays.array_type_list_to_single_type env values in
-        (env, seen), (r, Tarraykind (AKmap (key, value)))
+        env, (r, Tarraykind (AKmap (key, value)))
       | FieldsPartiallyKnown _ ->
-        (env, seen), res
+        env, res
 
     method! on_type env (r, ty) = match ty with
       | Tvar _ | Tunresolved _ | Tshape _ ->  super#on_type env (r, ty)
       | _ -> env, res
 
   end in
-  let (env, _), ty = mapper#on_type (Type_mapper.fresh_env env) shape_ty in
-  env, ty
+  mapper#on_type (Type_mapper.fresh_env env) shape_ty

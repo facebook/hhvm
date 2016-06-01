@@ -21,15 +21,10 @@ type uenv = {
    * Toption[Tunresolved[Toption]] or similar. *)
   non_null: bool;
 
-  (* Keep track of the Tvar's we've hit in those other functions so we aren't
-   * infinitely recursive. TODO implement this as part of the aforementioned
-   * "apply" function. *)
-  seen_tvars: ISet.t;
-
   (* The list of expression dependent types we have visited thus far. This is
    * used in Typing_subtype to properly handle the 'this' type for inheritance.
    *)
   dep_tys: (Typing_reason.t * Typing_defs.dependent_type) list;
 }
 
-let empty = { non_null = false; seen_tvars = ISet.empty; dep_tys = []; }
+let empty = { non_null = false; dep_tys = []; }

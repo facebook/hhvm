@@ -163,23 +163,10 @@ and sub_type env ty_super ty_sub =
  *      sub_type env int string => error
 *)
 and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
-  let env, seen_tvars_super, ety_super =
-    Env.expand_type_recorded env uenv_super.TUEnv.seen_tvars ty_super in
-  let env, seen_tvars_sub, ety_sub =
-    Env.expand_type_recorded env uenv_sub.TUEnv.seen_tvars ty_sub in
-  (* UGLY: We don't update uenv_super with seen_tvars_super just yet because
-   * sometimes we call sub_type_with_uenv recursively with the same ty_super
-   * (i.e. ty_sub has changed, but ty_super remains the same). If we pass
-   * through the updated uenv_super, we would not be able to expand ty_super
-   * a second time.
-   * The converse goes for seen_tvars_sub and ty_sub.
-   * TODO: Right now we only update seen_tvars when recursing into
-   * Tunresolveds and Toptions, because we are encountering actual code that
-   * creates such recursive types. Should probably update seen_tvars regardless
-   * of which types we are recursing into, or prove that recursive types can't
-   * happen in those cases.
-   * TODO: Figure out a nicer (type-enforced?) way to associate the right
-   * uenv with the right type. *)
+  let env, ety_super =
+    Env.expand_type env ty_super in
+  let env, ety_sub =
+    Env.expand_type env ty_sub in
 
   match ety_super, ety_sub with
   | (_, Tunresolved _), (_, Tunresolved _) ->
@@ -226,7 +213,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
        *)
       fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
   | _, (_, Tunresolved tyl) when Env.grow_super env ->
-      let uenv_sub = {uenv_sub with TUEnv.seen_tvars = seen_tvars_sub} in
       List.fold_left tyl ~f:begin fun env x ->
         sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x)
       end ~init:env
@@ -241,7 +227,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tunresolved _), (_, Tany) when not (Env.grow_super env) ->
       fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
   | (_, Tunresolved tyl), _ when not (Env.grow_super env) ->
-      let uenv_super = {uenv_super with TUEnv.seen_tvars = seen_tvars_super} in
       List.fold_left tyl ~f:begin fun env x ->
         sub_type_with_uenv env (uenv_super, x) (uenv_sub, ty_sub)
       end ~init:env
@@ -444,30 +429,23 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
         sub_type env ty_super ty_sub
       end env r fields_sub
-    (* recording seen_tvars for Toption variants to avoid infinte recursion
-       in case of type variable X = ?X *)
   | (_, Toption ty_super), _ when uenv_super.TUEnv.non_null ->
-      let uenv_super = {uenv_super with TUEnv.seen_tvars = seen_tvars_super} in
       sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | _, (_, Toption ty_sub) when uenv_sub.TUEnv.non_null ->
-      let uenv_sub = {uenv_sub with TUEnv.seen_tvars = seen_tvars_sub} in
       sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | (_, Toption ty_super), (_, Toption ty_sub) ->
       let uenv_super = {
         TUEnv.non_null = true;
-        TUEnv.seen_tvars = seen_tvars_super;
         TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
       } in
       let uenv_sub = {
         TUEnv.non_null = true;
-        TUEnv.seen_tvars = seen_tvars_sub;
         TUEnv.dep_tys = uenv_sub.TUEnv.dep_tys;
       } in
       sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | (_, Toption ty_opt), _ ->
       let uenv_super = {
         TUEnv.non_null = true;
-        TUEnv.seen_tvars = seen_tvars_super;
         TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
       } in
       sub_type_with_uenv env (uenv_super, ty_opt) (uenv_sub, ty_sub)
@@ -594,12 +572,12 @@ and is_sub_type env ty_super ty_sub =
     (fun () -> ignore(sub_type env ty_super ty_sub); true)
     (fun _ -> false)
 
-and sub_string ?(seen = ISet.empty) p env ty2 =
-  let env, seen, ety2 = Env.expand_type_recorded env seen ty2 in
+and sub_string p env ty2 =
+  let env, ety2 = Env.expand_type env ty2 in
   match ety2 with
-  | (_, Toption ty2) -> sub_string ~seen p env ty2
+  | (_, Toption ty2) -> sub_string p env ty2
   | (_, Tunresolved tyl) ->
-      List.fold_left tyl ~f:(sub_string ~seen p) ~init:env
+      List.fold_left tyl ~f:(sub_string p) ~init:env
   | (_, Tprim _) ->
       env
   | (_, Tabstract (AKenum _, _)) ->
@@ -611,7 +589,7 @@ and sub_string ?(seen = ISet.empty) p env ty2 =
       | None ->
         fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
       | Some ty ->
-        sub_string ~seen p env ty
+        sub_string p env ty
     end
   | (r2, Tclass (x, _)) ->
       let class_ = Env.get_class env (snd x) in

@@ -50,7 +50,6 @@ val add : env -> int -> locl ty -> env
 val get_type : env -> Reason.t -> int -> env * locl ty
 val get_type_unsafe : env -> int -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
-val expand_type_recorded : env -> ISet.t -> locl ty -> env * ISet.t * locl ty
 val make_ft : Pos.t -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
 val debugl : ISet.t -> env -> locl ty list -> unit
@@ -109,7 +108,7 @@ val is_strict : env -> bool
 val is_decl : env -> bool
 val get_options: env -> TypecheckerOptions.t
 val get_last_call : env -> Pos.t
-val lost_info : string -> ISet.t -> env -> locl ty -> env * locl ty
+val lost_info : string -> env -> locl ty -> env * locl ty
 val forget_members : env -> Pos.t -> env
 module FakeMembers :
   sig

@@ -16,14 +16,13 @@ module Reason = Typing_reason
 module ShapeMap = Nast.ShapeMap
 
 (* Mapping environment threaded through all function calls:
- * - typing environment
- * - set of seen variables, to prevent infinite loops on infinite types *)
-type env = Env.env * ISet.t
+ * - typing environment *)
+type env = Env.env
 
 (* Mapping result - updated environment, mapped type *)
 type result = env * locl ty
 
-let fresh_env env = (env, ISet.empty)
+let fresh_env env = env
 
 class type type_mapper_type = object
   method on_tvar : env -> Reason.t -> int -> result
@@ -80,17 +79,8 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_tobject env r = env, (r, Tobject)
   method on_tshape env r fields_known fdm = env, (r, Tshape (fields_known, fdm))
 
-  method private record_tvar (env, seen) r n =
-    if ISet.mem n seen then
-      this#on_infinite_tvar (env, seen) r n
-    else
-      let seen = ISet.add n seen in
-      let (env, seen), ty = this#on_tvar (env, seen) r n in
-      let seen = ISet.remove n seen in
-      (env, seen), ty
-
   method on_type env (r, ty) = match ty with
-    | Tvar n -> this#record_tvar env r n
+    | Tvar n -> this#on_tvar env r n
     | Tmixed -> this#on_tmixed env r
     | Tany -> this#on_tany env r
     | Tanon (fun_arity, id) -> this#on_tanon env r fun_arity id
@@ -200,9 +190,9 @@ class virtual tvar_expanding_type_mapper = object(this)
   method on_infinite_tvar (env : env) (r : Reason.t) (_ : int) : result =
     env, (r, Tany)
 
-  method on_tvar (env, seen) (r : Reason.t) n =
+  method on_tvar env (r : Reason.t) n =
     let env, ty = Env.get_type env r n in
-    this#on_type (env, seen) ty
+    this#on_type env ty
 
   method virtual on_type : env -> locl ty -> result
 end
@@ -210,10 +200,10 @@ end
 (* Mixin that maps across the type inside the typevar, and then changes
  * its value to the result. *)
 class virtual tvar_substituting_type_mapper = object(this)
-  method on_tvar ((env, seen) : env) (r : Reason.t) n =
+  method on_tvar (env : env) (r : Reason.t) n =
     let env, ty = Env.get_type env r n in
-    let (env, seen), ty = this#on_type (env, seen) ty in
+    let env, ty = this#on_type env ty in
     let env = Env.add env n ty in
-    (env, seen), ty
+    env, ty
   method virtual on_type : env -> locl ty -> result
 end

@@ -1,4 +1,4 @@
 
-Notice: Use of undefined constant D00Dz - assumed 'D00Dz' in %s on line 3
+Notice: Use of undefined constant D00Dz - assumed 'D00Dz' in %s on line %d
 D00Dzw00t
 Catchable fatal error: Argument 1 passed to woot() must be an instance of string, int given in %s on line 5

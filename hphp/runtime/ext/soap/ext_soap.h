@@ -79,6 +79,7 @@ struct SoapClient {
   int                         m_max_redirect;
   bool                        m_use11;
   String                      m_user_agent;
+  int                         m_ssl_method = -1;
   int                         m_compression;
   Variant                     m_default_headers;
   Array                       m_cookies;

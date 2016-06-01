@@ -1922,7 +1922,8 @@ const StaticString
   s_compression("compression"),
   s_connection_timeout("connection_timeout"),
   s_user_agent("user_agent"),
-  s_soapaction("soapaction");
+  s_soapaction("soapaction"),
+  s_ssl_method("ssl_method");
 
 void HHVM_METHOD(SoapServer, __construct,
                  const Variant& wsdl,
@@ -2488,6 +2489,7 @@ void HHVM_METHOD(SoapClient, __construct,
     }
     data->m_classmap = options[s_classmap].toArray();
     data->m_features = options[s_features].toInt32();
+    data->m_ssl_method = options[s_ssl_method].toInt32();
     data->m_connection_timeout = options[s_connection_timeout].toInt64();
     data->m_user_agent = options[s_user_agent].toString();
 
@@ -2859,6 +2861,28 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   }
   http.setStreamContextOptions(data->m_stream_context_options);
 
+  if(data->m_ssl_method > -1) {
+    http.setUseSSL(CURLUSESSL_ALL);
+    switch (data->m_ssl_method) {
+      case SOAP_SSL_METHOD_TLS : http.setSSLVersion(CURL_SSLVERSION_TLSv1);
+        break;
+      case SOAP_SSL_METHOD_SSLv2 : http.setSSLVersion(CURL_SSLVERSION_SSLv2);
+        break;
+      case SOAP_SSL_METHOD_SSLv3 : http.setSSLVersion(CURL_SSLVERSION_SSLv3);
+        break;
+      case SOAP_SSL_METHOD_SSLv23 : http.setSSLVersion(CURL_SSLVERSION_SSLv2);
+        break;
+      default: raise_warning("SoapClient(): ssl_method unrecognized"); break;
+    }
+    // Not done by PHP5/7, but using SSL nowadays is a very bad idea.
+    if (data->m_ssl_method != SOAP_SSL_METHOD_TLS) {
+      raise_warning(
+        "SoapClient() ssl_method: SSL is flawed and vulnerable;"
+        "Migrate to TLS as soon as possible."
+      );
+    }
+  }
+
   StringBuffer responseBuffer;
   std::vector<String> responseHeaders;
   int code = http.post(location.data(), buffer.data(), buffer.size(),
@@ -3179,6 +3203,11 @@ static struct SoapExtension final : Extension {
     HHVM_RC_INT_SAME(XSD_ANYTYPE);
     HHVM_RC_INT_SAME(XSD_ANYXML);
     HHVM_RC_INT_SAME(XSD_1999_TIMEINSTANT);
+
+    HHVM_RC_INT_SAME(SOAP_SSL_METHOD_TLS);
+    HHVM_RC_INT_SAME(SOAP_SSL_METHOD_SSLv2);
+    HHVM_RC_INT_SAME(SOAP_SSL_METHOD_SSLv3);
+    HHVM_RC_INT_SAME(SOAP_SSL_METHOD_SSLv23);
 
     HHVM_RC_STR_SAME(XSD_NAMESPACE);
     HHVM_RC_STR_SAME(XSD_1999_NAMESPACE);

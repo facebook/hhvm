@@ -32,7 +32,7 @@ namespace HPHP {
  * totalAlloc will also be maintained, otherwise it will be 0.
  */
 struct MemoryUsageStats {
-  int64_t maxBytes;   // the max bytes allowed for a request before it is
+  int64_t maxUsage;   // the max bytes allowed for a request before it is
                       // terminated for exceeding the memory limit
 private:
   int64_t mmUsage;    // how many bytes are currently being used
@@ -43,15 +43,15 @@ public:
   int64_t jemallocDebt; // how many bytes of jemalloced memory have not
                       // been processed by MemoryManager::refreshStats
 #endif
-  int64_t alloc;      // how many bytes are currently malloc-ed in slabs
+  int64_t slabBytes;  // how many bytes are currently malloc-ed in slabs
                       // by the small-size allocator APIs
   int64_t peakUsage;  // how many bytes have been used at maximum
-  int64_t peakAlloc;  // how many bytes malloc-ed in slabs by the small-size
+  int64_t peakSlabBytes; // how many bytes malloc-ed in slabs by the small-size
                       // APIs at maximum
   int64_t totalAlloc; // how many bytes have cumulatively been allocated
                       // by the underlying allocator
-  int64_t peakIntervalUsage; // peakUsage during a userland specified interval
-  int64_t peakIntervalAlloc; // peakAlloc during a userland specified interval
+  int64_t peakIntervalUsage; // peakUsage during userland interval
+  int64_t peakIntervalSlabBytes; // peakSlabs during userland interval
 
   int64_t usage() const { return mmUsage + auxUsage; }
 

@@ -248,26 +248,27 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) pre:\n", isInternalCall);
   FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
+    m_stats.peakSlabBytes);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) pre:\n"
     "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
-    isInternalCall,
-    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    isInternalCall, m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
+    m_stats.peakSlabBytes);
 #endif
   if (isInternalCall) {
     m_statsIntervalActive = false;
     m_stats.mmUsage = 0;
     m_stats.auxUsage = 0;
-    m_stats.alloc = 0;
+    m_stats.slabBytes = 0;
     m_stats.peakUsage = 0;
-    m_stats.peakAlloc = 0;
+    m_stats.peakSlabBytes = 0;
     m_stats.totalAlloc = 0;
     m_stats.peakIntervalUsage = 0;
-    m_stats.peakIntervalAlloc = 0;
+    m_stats.peakIntervalSlabBytes = 0;
 #ifdef USE_JEMALLOC
     m_enableStatsSync = false;
   } else if (!m_enableStatsSync) {
@@ -278,7 +279,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
 #ifdef USE_JEMALLOC
-    assert(m_stats.jemallocDebt >= m_stats.alloc);
+    assert(m_stats.jemallocDebt >= m_stats.slabBytes);
 #endif
 
     // The effect of this call is simply to ignore anything we've done *outside*
@@ -310,15 +311,16 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) post:\n", isInternalCall);
   FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
+    m_stats.peakSlabBytes);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) post:\n"
     "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
-    isInternalCall,
-    m_stats.usage(), m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+    isInternalCall, m_stats.usage(), m_stats.slabBytes,
+    m_stats.peakUsage, m_stats.peakSlabBytes);
 #endif
 }
 
@@ -424,8 +426,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       stats.usage(), stats.totalAlloc);
   }
 #endif
-  assert(stats.maxBytes > 0);
-  if (live && stats.usage() > stats.maxBytes && m_couldOOM) {
+  assert(stats.maxUsage > 0);
+  if (live && stats.usage() > stats.maxUsage && m_couldOOM) {
     refreshStatsHelperExceeded();
   }
   if (stats.usage() > stats.peakUsage) {
@@ -458,8 +460,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     if (stats.usage() > stats.peakIntervalUsage) {
       stats.peakIntervalUsage = stats.usage();
     }
-    if (stats.alloc > stats.peakIntervalAlloc) {
-      stats.peakIntervalAlloc = stats.alloc;
+    if (stats.slabBytes > stats.peakIntervalSlabBytes) {
+      stats.peakIntervalSlabBytes = stats.slabBytes;
     }
   }
 }
@@ -840,7 +842,7 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
  * slab list.  Return the newly allocated nbytes-sized block.
  */
 NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
-  if (UNLIKELY(m_stats.usage() > m_stats.maxBytes)) {
+  if (UNLIKELY(m_stats.usage() > m_stats.maxUsage)) {
     refreshStats();
   }
   requestGC();
@@ -848,9 +850,9 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
   m_stats.borrow(slab.size);
-  m_stats.alloc += slab.size;
-  if (m_stats.alloc > m_stats.peakAlloc) {
-    m_stats.peakAlloc = m_stats.alloc;
+  m_stats.slabBytes += slab.size;
+  if (m_stats.slabBytes > m_stats.peakSlabBytes) {
+    m_stats.peakSlabBytes = m_stats.slabBytes;
   }
   m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
   m_limit = (void*)(uintptr_t(slab.ptr) + slab.size);
@@ -938,7 +940,7 @@ inline void MemoryManager::updateBigStats() {
   // the slabs and the usage so we should force this after an allocation that
   // was too large for one of the existing slabs. When we're not using jemalloc
   // this check won't do anything so avoid the extra overhead.
-  if (use_jemalloc || UNLIKELY(m_stats.usage() > m_stats.maxBytes)) {
+  if (use_jemalloc || UNLIKELY(m_stats.usage() > m_stats.maxUsage)) {
     refreshStats();
   }
 }

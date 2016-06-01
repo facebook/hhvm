@@ -749,7 +749,7 @@ void MemoryManager::requestGC() {
 }
 
 void MemoryManager::updateNextGc() {
-  m_nextGc = m_stats.usage() + (m_stats.maxBytes - m_stats.usage()) / 2;
+  m_nextGc = m_stats.usage() + (m_stats.maxUsage - m_stats.usage()) / 2;
 }
 
 void MemoryManager::collect(const char* phase) {
@@ -759,7 +759,7 @@ void MemoryManager::collect(const char* phase) {
 }
 
 void MemoryManager::setMemoryLimit(size_t limit) {
-  m_stats.maxBytes = limit;
+  m_stats.maxUsage = limit;
   updateNextGc();
 }
 

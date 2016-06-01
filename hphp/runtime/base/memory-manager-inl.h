@@ -228,12 +228,12 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index,
     return freeBigSize(ptr, bytes);
   }
 
-  FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, index);
+  FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
   m_freelists[index].push(ptr, bytes);
   m_stats.mmUsage -= bytes;
 
-  FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
+  FTRACE(3, "freeSmallIndex: {} ({} bytes)\n", ptr, bytes);
 }
 
 inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
@@ -304,10 +304,9 @@ inline MemoryUsageStats MemoryManager::getStats() {
 }
 
 inline MemoryUsageStats MemoryManager::getStatsCopy() {
-  MemoryUsageStats ret;
-  ret = m_stats;
-  refreshStatsImpl<false>(ret);
-  return ret;
+  auto copy = m_stats;
+  refreshStatsImpl<false>(copy);
+  return copy;
 }
 
 inline void MemoryManager::refreshStats() {
@@ -320,8 +319,8 @@ inline bool MemoryManager::startStatsInterval() {
   // For the reasons stated below in refreshStatsImpl, usage can potentially be
   // negative. Make sure that doesn't occur here.
   m_stats.peakIntervalUsage = std::max<int64_t>(0, m_stats.usage());
-  m_stats.peakIntervalAlloc = m_stats.alloc;
-  assert(m_stats.peakIntervalAlloc >= 0);
+  m_stats.peakIntervalSlabBytes = m_stats.slabBytes;
+  assert(m_stats.peakIntervalSlabBytes >= 0);
   m_statsIntervalActive = true;
   return ret;
 }
@@ -330,12 +329,12 @@ inline bool MemoryManager::stopStatsInterval() {
   auto ret = m_statsIntervalActive;
   m_statsIntervalActive = false;
   m_stats.peakIntervalUsage = 0;
-  m_stats.peakIntervalAlloc = 0;
+  m_stats.peakIntervalSlabBytes = 0;
   return ret;
 }
 
 inline bool MemoryManager::preAllocOOM(int64_t size) {
-  if (m_couldOOM && m_stats.usage() + size > m_stats.maxBytes) {
+  if (m_couldOOM && m_stats.usage() + size > m_stats.maxUsage) {
     refreshStatsHelperExceeded();
     return true;
   }

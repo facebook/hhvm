@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 namespace HPHP { namespace jit {
@@ -53,7 +54,9 @@ std::string show(PhysReg r) {
       );
 
     case Arch::PPC64:
-      not_implemented();
+      return r.type() == PhysReg::GP   ? ppc64_asm::reg::regname(Reg64(r)) :
+             r.type() == PhysReg::SIMD ? ppc64_asm::reg::regname(RegXMM(r)) :
+          /* r.type() == PhysReg::SF)  ? */ ppc64_asm::reg::regname(RegSF(r));
   }
   not_reached();
 }

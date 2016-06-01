@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | (c) Copyright IBM Corporation 2015                                   |
+   | (c) Copyright IBM Corporation 2015-2016                              |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-#include "hphp/runtime/vm/jit/abi-ppc64.h" // For PPC64_HAS_PUSH_POP definition
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/util/data-block.h"
 
@@ -36,7 +35,7 @@ namespace ppc64 {
  * Mirrors the API of smashable-instr.h.
  */
 
-constexpr uint8_t kStdIns = ppc64_asm::Assembler::kBytesPerInstr;
+constexpr uint8_t kStdIns = ppc64_asm::instr_size_in_bytes;
 
 // li64
 constexpr size_t smashableMovqLen() { return kStdIns * 5; }
@@ -47,18 +46,15 @@ constexpr size_t smashableCmpqLen() { return kStdIns * 6; }
 // The following instruction size is from the beginning of the smashableCall
 // to the address the LR saves upon branching with bctrl (so the following)
 // Currently this calculation considers:
-// mflr, std, std, addi, li64 (5 instr), mtctr, bctrl
-constexpr size_t smashableCallLen() { return kStdIns * 11; }
-// prologue of call function until the li64 takes place:
-// skips mflr, std, std, addi
-constexpr uint8_t smashableCallSkip() { return kStdIns * 4; }
+// prologue, li64 (5 instr), mtctr, nop, nop, bctrl
+constexpr size_t smashableCallLen() {
+  return ppc64_asm::Assembler::kCallLen;
+}
 
-// li64 + mtctr + bccrt
-constexpr size_t smashableJccLen()  { return kStdIns * 7; }
-// to analyse the cc, it has to skip the li64 + mtctr
-constexpr size_t smashableJccSkip() { return kStdIns * 6; }
+// li64 + mtctr + nop + nop + bcctr
+constexpr size_t smashableJccLen()  { return ppc64_asm::Assembler::kJccLen; }
 
-// Same length as Jcc
+// Same length as Jcc.
 constexpr size_t smashableJmpLen()  { return smashableJccLen(); }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,

@@ -25,13 +25,16 @@ namespace HPHP { namespace jit {
  * When selecting encodings, we often need to assess a two's complement
  * distance to see if it fits in a shorter encoding.
  */
+inline bool deltaFitsBits(int64_t delta, int64_t bits) {
+  return delta < (1ll << (bits-1)) && delta >= -(1ll << (bits-1));
+}
+
 inline bool deltaFits(int64_t delta, int s) {
   // sz::qword is always true
   assert(s == sz::byte ||
          s == sz::word ||
          s == sz::dword);
-  int64_t bits = s * 8;
-  return delta < (1ll << (bits-1)) && delta >= -(1ll << (bits-1));
+  return deltaFitsBits(delta, s * 8);
 }
 
 // The unsigned equivalent of deltaFits

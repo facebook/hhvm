@@ -224,6 +224,7 @@ struct Vgen {
   void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1, SetFlags); }
   void emit(const incqmlock& i);
   void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, SetFlags); }
+  void emit(const inittc& i) {}
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);

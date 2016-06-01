@@ -252,7 +252,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.peakSlabBytes);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
-  FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
+  FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) pre:\n"
     "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
@@ -279,7 +279,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
 #ifdef USE_JEMALLOC
-    assert(m_stats.jemallocDebt >= m_stats.slabBytes);
+    assert(m_stats.mallocDebt >= m_stats.slabBytes);
 #endif
 
     // The effect of this call is simply to ignore anything we've done *outside*
@@ -294,7 +294,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // Anything that was definitively allocated by the MemoryManager allocator
     // should be counted in this number even if we're otherwise zeroing out
     // the count for each thread.
-    m_stats.totalAlloc = s_statsEnabled ? m_stats.jemallocDebt : 0;
+    m_stats.totalAlloc = s_statsEnabled ? m_stats.mallocDebt : 0;
 
     m_enableStatsSync = s_statsEnabled;
 #else
@@ -303,7 +303,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
   }
 #ifdef USE_JEMALLOC
   if (s_statsEnabled) {
-    m_stats.jemallocDebt = 0;
+    m_stats.mallocDebt = 0;
     m_prevDeallocated = *m_deallocated;
     m_prevAllocated = *m_allocated;
   }
@@ -315,7 +315,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.peakSlabBytes);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
-  FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
+  FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) post:\n"
     "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
@@ -367,7 +367,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   //
   //   int64 musage = delta - delta0;
   //
-  // Note however, the slab allocator adds to m_stats.jemallocDebt
+  // Note however, the slab allocator adds to m_stats.mallocDebt
   // when it calls malloc(), so that this function can avoid
   // double-counting the malloced memory. Thus musage in the example
   // code may well substantially exceed m_stats.usage.
@@ -391,7 +391,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
       jeDeallocated, m_prevDeallocated, jeDeallocated - m_prevDeallocated);
     FTRACE(1, "usage: {}\ntotal (je) alloc: {}\nje debt: {}\n",
-      stats.usage(), stats.totalAlloc, stats.jemallocDebt);
+      stats.usage(), stats.totalAlloc, stats.mallocDebt);
 
     if (!contiguous_heap) {
       // Since these deltas potentially include memory allocated from another
@@ -409,10 +409,10 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       stats.auxUsage += jeDeltaAllocated - mmDeltaAllocated;
       // Remove the "debt" accrued from allocating the slabs so we don't double
       // count the slab-based allocations.
-      stats.auxUsage -= stats.jemallocDebt;
+      stats.auxUsage -= stats.mallocDebt;
     }
 
-    stats.jemallocDebt = 0;
+    stats.mallocDebt = 0;
     // We need to do the calculation instead of just setting it to jeAllocated
     // because of the MaskAlloc capability.
     stats.totalAlloc += jeMMDeltaAllocated;
@@ -849,7 +849,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   storeTail(m_front, (char*)m_limit - (char*)m_front);
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
-  m_stats.borrow(slab.size);
+  m_stats.mallocDebt += slab.size;
   m_stats.slabBytes += slab.size;
   if (m_stats.slabBytes > m_stats.peakSlabBytes) {
     m_stats.peakSlabBytes = m_stats.slabBytes;
@@ -964,15 +964,11 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes) {
 
   auto block = m_heap.allocBig(bytes, HeaderKind::BigObj, 0);
   auto szOut = block.size;
-#ifdef USE_JEMALLOC
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;
-  m_stats.mmUsage += int64_t(delta);
+  m_stats.mmUsage += delta;
   // Adjust jemalloc otherwise we'll double count the direct allocation.
-  m_stats.borrow(delta);
-#else
-  m_stats.mmUsage += bytes;
-#endif
+  m_stats.mallocDebt += delta;
   updateBigStats();
   auto ptrOut = block.ptr;
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",

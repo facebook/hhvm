@@ -259,7 +259,7 @@ void MemoryManager::freeBigSize(void* vp, size_t bytes) {
   m_stats.mmUsage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
-  m_stats.repay(bytes);
+  m_stats.mallocDebt -= bytes;
   FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
   m_heap.freeBig(vp);
 }

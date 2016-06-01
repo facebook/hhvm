@@ -39,10 +39,8 @@ private:
   int64_t auxUsage;
 
 public:
-#if defined(USE_JEMALLOC)
-  int64_t jemallocDebt; // how many bytes of jemalloced memory have not
+  int64_t mallocDebt; // how many bytes of malloced memory have not
                       // been processed by MemoryManager::refreshStats
-#endif
   int64_t slabBytes;  // how many bytes are currently malloc-ed in slabs
                       // by the small-size allocator APIs
   int64_t peakUsage;  // how many bytes have been used at maximum
@@ -54,14 +52,6 @@ public:
   int64_t peakIntervalSlabBytes; // peakSlabs during userland interval
 
   int64_t usage() const { return mmUsage + auxUsage; }
-
-#ifdef USE_JEMALLOC
-  void borrow(size_t amt) { jemallocDebt += amt; }
-  void repay(size_t amt) { jemallocDebt -= amt; }
-#else
-  void borrow(size_t) {}
-  void repay(size_t) {}
-#endif
 
   friend struct MemoryManager;
 };

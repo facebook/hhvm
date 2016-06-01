@@ -145,7 +145,7 @@ struct ReadLock {
   ReadLock& operator=(const ReadLock&) = delete;
 
   ~ReadLock() {
-    m_mutex.releaseRead();
+    m_mutex.release();
   }
 
 private:
@@ -165,7 +165,7 @@ struct WriteLock {
   WriteLock& operator=(const WriteLock&) = delete;
 
   ~WriteLock() {
-    m_mutex.releaseWrite();
+    m_mutex.release();
   }
 
 private:

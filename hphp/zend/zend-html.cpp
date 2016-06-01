@@ -526,12 +526,11 @@ inline static bool decode_entity(char *entity, int *len,
     // since we don't support multibyte chars other than utf-8
     int l = 1;
 
-    if (code == 39 && !decode_single_quote) {
-      return false;
-    }
-
-    if (code == 34 && !decode_double_quote) {
-      return false;
+    if (code == 39 && decode_single_quote) {
+      entity[0] = code;
+      entity[1] = '\0';
+      *len = l;
+      return true;
     }
 
     if (!all          && (code != '&') &&
@@ -558,6 +557,9 @@ inline static bool decode_entity(char *entity, int *len,
         if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
           return false;
         } else {
+          if (code == 39) {
+            return false;
+          }
           entity[0] = code;
           entity[1] = '\0';
         }
@@ -602,11 +604,6 @@ inline static bool decode_entity(char *entity, int *len,
     HtmlEntityMap *entityMap;
 
     if (strncasecmp(entity, "quot", 4) == 0 && !decode_double_quote) {
-      return false;
-    }
-
-    // &apos; is only supported for XHP currently anyway.
-    if (xhp && strncasecmp(entity, "apos", 4) == 0 && !decode_single_quote) {
       return false;
     }
 

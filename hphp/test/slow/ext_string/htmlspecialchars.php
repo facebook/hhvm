@@ -19,19 +19,8 @@ function test_htmlspecialchars_decode() {
   VS(htmlspecialchars_decode("&lt;"), "<");
   VS(htmlspecialchars_decode("&nbsp;"), "&nbsp;");
 
-  $specialCharsInput = "&amp; &Eacute; &Alpha; &#039; &#034;";
-
-  VS(htmlspecialchars_decode($specialCharsInput),
-                               "& &Eacute; &Alpha; &#039; \"");
-
-  VS(htmlspecialchars_decode($specialCharsInput, ENT_COMPAT | ENT_HTML401),
-                               "& &Eacute; &Alpha; &#039; \"");
-
-  VS(htmlspecialchars_decode($specialCharsInput, ENT_QUOTES | ENT_HTML401),
-                               "& &Eacute; &Alpha; ' \"");
-
-  VS(htmlspecialchars_decode($specialCharsInput, ENT_NOQUOTES | ENT_HTML401),
-                               "& &Eacute; &Alpha; &#039; &#034;");
+  VS(htmlspecialchars_decode("&amp; &Eacute; &Alpha; &#039;"),
+                               "& &Eacute; &Alpha; '");
 }
 
 function test_htmlspecialchars() {

@@ -130,6 +130,13 @@ inline uint32_t MemoryManager::bsr(uint32_t x) {
            : "r"(x)    // Inputs.
            );
   return ret;
+#elif defined(__powerpc64__)
+  uint32_t ret;
+  __asm__ ("cntlzw %0, %1"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return 31 - ret;
 #else
   // Equivalent (but incompletely strength-reduced by gcc):
   return 31 - __builtin_clz(x);

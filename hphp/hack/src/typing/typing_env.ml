@@ -102,6 +102,9 @@ let rec get_var env x =
       env, x'
   )
 
+(* This is basically union from union-find, but without balancing
+ *  (linking the smaller tree to the larger tree). In practice this
+ * isn't important: path compression is much more significant. *)
 let rename env x x' =
   let env, x = get_var env x in
   let env, x' = get_var env x' in

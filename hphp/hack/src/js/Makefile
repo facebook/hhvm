@@ -32,6 +32,7 @@ SRC = \
   typing_defs.ml\
   typing_heap.ml\
   typing_env.ml\
+  typing_unify_recursive.ml\
   naming_heap.ml\
   naming_ast_helpers.ml\
   naming.ml\
@@ -268,6 +269,9 @@ typing_generic.ml: $(TOP)/typing/typing_generic.ml
 typing_unify.ml: $(TOP)/typing/typing_unify.ml
 	cp $< .
 
+typing_unify_recursive.ml: $(TOP)/typing/typing_unify_recursive.ml
+	cp $< .
+
 typing_tdef.ml: $(TOP)/typing/typing_tdef.ml
 	cp $< .
 
@@ -340,6 +344,7 @@ clean::
 	rm -f lexer_hack.ml
 	rm -f parser_hack.ml
 	rm -f typing_unify.ml
+        rm -f typing_unify_recursive.ml
 	rm -f fileOutline.ml
 	rm -f format_hack.ml
 

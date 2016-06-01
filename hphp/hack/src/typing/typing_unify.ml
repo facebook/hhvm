@@ -14,6 +14,7 @@ open Utils
 module Env = Typing_env
 module TUtils = Typing_utils
 module TUEnv = Typing_unification_env
+module TURecursive = Typing_unify_recursive
 
 (* Most code -- notably the cases in unify_ -- do *not* need to thread through
  * the uenv, since for example just because we know an array<foo, bar> can't
@@ -30,12 +31,12 @@ and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
   | (r1, Tvar n1), (r2, Tvar n2) -> unify_var env (r1, uenv1, n1) (r2, uenv2, n2)
   | (r, Tvar n), ty2
   | ty2, (r, Tvar n) ->
-      let env, ty1 = Env.get_type env r n in
-      let n' = Env.fresh() in
-      let env = Env.rename env n n' in
-      let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
-      let env = Env.add env n ty in
-      env, (r, Tvar n')
+    let env, ty1 = Env.get_type env r n in
+    let n' = Env.fresh() in
+    let env = Env.rename env n n' in
+    let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
+    let env = TURecursive.add env n ty in
+    env, (r, Tvar n')
   | (r1, Tunresolved tyl1), (r2, Tunresolved tyl2) ->
       let r = unify_reason r1 r2 in
       (* TODO this should probably pass through the uenv *)
@@ -86,7 +87,7 @@ and unify_var env (r1, uenv1, n1) (r2, uenv2, n2) =
   (* We need one more round *)
   let env, ty' = Env.get_type env r n' in
   let env, ty = unify env ty ty' in
-  let env = Env.add env n' ty in
+  let env = TURecursive.add env n' ty in
   env, (r, Tvar n')
 
 and unify_ env r1 ty1 r2 ty2 =

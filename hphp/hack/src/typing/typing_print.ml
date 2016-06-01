@@ -255,10 +255,12 @@ module Full = struct
           ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid) ~init:"")
     | Toption x -> o "?"; k x
     | Tprim x -> prim o x
-    | Tvar n when ISet.mem n st -> o "[rec]"
     | Tvar n ->
+      let _, n' = Env.get_var env n in
+      if ISet.mem n' st then o "[rec]"
+      else
         let _, ety = Env.expand_type env (Reason.Rnone, x) in
-        let st = ISet.add n st in
+        let st = ISet.add n' st in
         ty st env o ety
     | Tfun ft ->
       if ft.ft_abstract then o "abs " else ();
@@ -317,6 +319,11 @@ module Full = struct
   let to_string env x =
     let buf = Buffer.create 50 in
     ty ISet.empty env (Buffer.add_string buf) x;
+    Buffer.contents buf
+
+  let to_string_rec env n x =
+    let buf = Buffer.create 50 in
+    ty (ISet.add n ISet.empty) env (Buffer.add_string buf) x;
     Buffer.contents buf
 
   let to_string_strip_ns env x =
@@ -558,6 +565,7 @@ end
 let error: type a. a ty_ -> _ = fun ty -> ErrorString.type_ ty
 let suggest: type a. a ty -> _ =  fun ty -> Suggest.type_ ty
 let full env ty = Full.to_string env ty
+let full_rec env n ty = Full.to_string_rec env n ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
 let debug env ty =
   let e_str = error (snd ty) in

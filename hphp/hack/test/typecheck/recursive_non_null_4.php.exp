@@ -1,0 +1,6 @@
+App \Map<[1]intersect(), [2]intersect(), >
+App \Map<[3]intersect(Tstring), [4]intersect(option([5]tvar_5), Tstring), >
+App \Map<[6]Tstring, [7]mixed, >
+App \Map<[6]Tstring, [7]mixed, >
+[8]intersect(App \Map<[9]Tstring, [7]mixed, >)
+No errors

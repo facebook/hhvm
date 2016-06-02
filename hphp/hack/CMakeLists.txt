@@ -3,7 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
 find_package(OCaml)
 find_package(LZ4)
 find_package(LibElf)
-find_package(Memfd)
 
 if (OCAMLC_FOUND)
   # This is totally the wrong way to do this, but I am tired of fighting with

@@ -62,6 +62,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cmpl:
     case Vinstr::cmpli:
     case Vinstr::cmplim:
+    case Vinstr::cmplims:
     case Vinstr::cmplm:
     case Vinstr::cmpq:
     case Vinstr::cmpqi:

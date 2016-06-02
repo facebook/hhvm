@@ -283,6 +283,7 @@ struct Vunit;
   O(asrxi, I(s0), UH(s1,d), DH(d,s1))\
   O(asrxis, I(s0), U(s1) U(d), D(df) D(sf))\
   O(bln, Inone, Un, Dn)\
+  O(cmplims, I(s0), U(s1), D(sf))\
   O(cmpsds, I(pred), UA(s0) U(s1), D(d))\
   O(fabs, Inone, U(s), D(d))\
   O(lslwi, I(s0), UH(s1,d), DH(d,s1))\
@@ -1096,6 +1097,7 @@ struct addxi { Immed s0; Vreg64 s1, d; };
 struct asrxi { Immed s0; Vreg64 s1, d; };
 struct asrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct bln {};
+struct cmplims { Immed s0; Vptr s1; VregSF sf; };
 struct cmpsds { ComparisonPred pred; VregDbl s0, s1, d; VregSF sf; };
 struct fabs { VregDbl s, d; };
 struct lslwi { Immed s0; Vreg32 s1, d; };

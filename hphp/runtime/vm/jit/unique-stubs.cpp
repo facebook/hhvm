@@ -1018,16 +1018,6 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
   auto const start = vwrap(cb, data, meta, [] (Vout& v) {
     v << stublogue{};
 
-    // FIXME: Save 'callee' saved registers (4 for now)
-    switch (arch()) {
-      case Arch::X64:
-      case Arch::PPC64:
-        break;
-      case Arch::ARM:
-        v << pushp{PhysReg{vixl::x19}, PhysReg{vixl::x20}};
-        v << pushp{PhysReg{vixl::x21}, PhysReg{vixl::x22}};
-    }
-
     auto const rdata = rarg(0);
     auto const rtype = rarg(1);
 
@@ -1058,16 +1048,6 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
     emitDecRefWork(v, v, rdata, destroy, false);
 
-    // FIXME: Restore 'callee' saved registers
-    switch (arch()) {
-      case Arch::X64:
-      case Arch::PPC64:
-        break;
-      case Arch::ARM:
-        v << popp{PhysReg{vixl::x21}, PhysReg{vixl::x22}};
-        v << popp{PhysReg{vixl::x19}, PhysReg{vixl::x20}};
-    }
-
     v << stubret{};
   });
 
@@ -1082,7 +1062,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Eagerly save VM regs and realign the native stack.
     storeVMRegs(v);
 
-    // Realign the native stack, if it was unaligned
+    // Realign the native stack.
     switch (arch()) {
       case Arch::X64:
       case Arch::PPC64:
@@ -1139,7 +1119,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << copy{sp, rvmsp()};
     v << copy{tl, rvmtl()};
 
-    // Unalign the native stack, if needed
+    // Unalign the native stack.
     switch (arch()) {
       case Arch::X64:
       case Arch::PPC64:

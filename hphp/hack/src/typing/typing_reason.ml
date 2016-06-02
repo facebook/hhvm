@@ -281,7 +281,8 @@ type ureason =
   | URif
   | URawait
   | URyield
-  | URxhp
+  (* Name of XHP class, Name of XHP attribute *)
+  | URxhp of string * string
   | URindex of string
   | URparam
   | URarray_value
@@ -315,7 +316,8 @@ let string_of_ureason = function
   | URif -> "The two branches of ? must have the same type"
   | URawait -> "await can only operate on an Awaitable"
   | URyield -> "Invalid yield"
-  | URxhp -> "Invalid xhp value"
+  | URxhp (cls, attr) ->
+      "Invalid xhp value for attribute " ^ attr ^ " in " ^ (strip_ns cls)
   | URindex s -> "Invalid index type for this " ^ s
   | URparam -> "Invalid argument"
   | URarray_value -> "Incompatible field values"

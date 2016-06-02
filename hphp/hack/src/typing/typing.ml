@@ -1341,7 +1341,8 @@ and expr_
             (match elt_option with
             | Some elt ->
               let env, declty = Phase.localize_with_self env elt.ce_type in
-              let env = Type.sub_type valp Reason.URxhp env declty valty in
+              let ureason = Reason.URxhp (class_.tc_name, snd namepstr) in
+              let env = Type.sub_type valp ureason env declty valty in
               env
             | None when SN.Members.is_special_xhp_attribute name -> env
               (* Special attributes are valid even if they're not declared - eg

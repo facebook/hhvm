@@ -619,20 +619,13 @@ void Vgen::emit(const loadqd& i) {
   a.ld(i.d, rAsm[0]);
 }
 
-void Vgen::emit(const callstub& i) {
-  a.call(i.target);
-}
-
-void Vgen::emit(const callfaststub& i) {
-  a.call(i.target);
-  emit(syncpoint{i.fix});
-}
 void Vgen::emit(const unwind& i) {
   // skip the "ld 2,24(1)" or "nop" emitted by "Assembler::call" at the end
   TCA saved_pc = a.frontier() - call_skip_bytes_for_ret;
   catches.push_back({saved_pc, i.targets[1]});
   emit(jmp{i.targets[0]});
 }
+
 void Vgen::emit(const jmp& i) {
   if (next == i.target) return;
   jmps.push_back({a.frontier(), i.target});
@@ -640,11 +633,13 @@ void Vgen::emit(const jmp& i) {
   // offset to be determined by a.patchBranch
   a.branchAuto(a.frontier());
 }
+
 void Vgen::emit(const jmpr& i) {
   a.mr(ppc64_asm::reg::r12, i.target.asReg());
   a.mtctr(ppc64_asm::reg::r12);
   a.bctr();
 }
+
 void Vgen::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
@@ -703,11 +698,6 @@ void Vgen::emit(const mcprep& i) {
   smashMovq(mov_addr, (imm << 1) | 1);
 
   env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
-}
-
-void Vgen::emit(const callphp& i) {
-  emitSmashableCall(a.code(), env.meta, i.stub);
-  emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 void Vgen::emit(const inittc&) {
@@ -809,8 +799,26 @@ void Vgen::emit(const calls& i) {
   emitSmashableCall(a.code(), env.meta, i.target);
 }
 
+void Vgen::emit(const callphp& i) {
+  emitSmashableCall(a.code(), env.meta, i.stub);
+  emit(unwind{{i.targets[0], i.targets[1]}});
+}
+
 void Vgen::emit(const callarray& i) {
   a.call(i.target);
+}
+
+void Vgen::emit(const callstub& i) {
+  // Build a minimal call frame in order to save the LR.
+  a.addi(ppc64_asm::reg::r1, rsp(), -min_frame_size);
+  a.std(rvmfp(), ppc64_asm::reg::r1[AROFF(m_sfp)]);
+  a.call(i.target);
+}
+
+void Vgen::emit(const callfaststub& i) {
+  // no frame being built
+  a.call(i.target);
+  emit(syncpoint{i.fix});
 }
 
 /////////////////////////////////////////////////////////////////////////////

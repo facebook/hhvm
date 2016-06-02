@@ -2618,6 +2618,9 @@ static_class_constant:
   | T_XHP_LABEL T_DOUBLE_COLON
     ident_for_class_const              { $1.xhpLabel();
                                          _p->onClassConst($$, $1, $3, 1);}
+  | T_XHP_LABEL T_DOUBLE_COLON
+    T_CLASS                            { $1.xhpLabel();
+                                         _p->onClassClass($$, $1, $3, 1);}
   | class_namespace_string_typeargs
     T_DOUBLE_COLON
     T_CLASS                            { _p->onClassClass($$, $1, $3, 1);}

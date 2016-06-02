@@ -357,7 +357,7 @@ private:
   }
 
   static __thread NodeType s_node;
-  typedef typename std::aligned_storage<sizeof(T), sizeof(void*)>::type
+  typedef typename std::aligned_storage<sizeof(T), 16>::type
           StorageType;
   static __thread StorageType s_storage;
   static bool s_inited; // no-fast-TLS requires construction so be consistent

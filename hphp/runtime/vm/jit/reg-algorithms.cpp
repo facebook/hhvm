@@ -38,9 +38,10 @@ bool cycleHasSIMDReg(const CycleInfo& cycle, MovePlan& moves) {
 
 jit::vector<VMoveInfo>
 doVregMoves(Vunit& unit, MovePlan& moves) {
-  assertx(abi().all().size() <= PhysReg::kMaxRegs);
+  constexpr auto N = PhysReg::kMaxRegs;
+  assertx(abi().all().size() <= N);
   jit::vector<VMoveInfo> howTo;
-  CycleInfo cycles[PhysReg::kMaxRegs];
+  CycleInfo cycles[N];
   size_t num_cycles = 0;
   PhysReg::Map<int> outDegree;
   PhysReg::Map<int> index;
@@ -59,7 +60,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
 
     // Begin walking a path from reg.
     for (auto node = reg;;) {
-      assertx(nextIndex < PhysReg::kMaxRegs);
+      assertx(nextIndex < N);
       index[node] = nextIndex++;
       auto next = moves[node];
       if (next != InvalidReg) {
@@ -73,7 +74,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
         // next already visited; check if next is on current path.
         if (index[next] >= index[reg]) {
           // found a cycle.
-          assert(num_cycles < PhysReg::kMaxRegs);
+          assert(num_cycles < N);
           cycles[num_cycles++] = { next, nextIndex - index[next] };
         }
       }
@@ -84,11 +85,9 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
   // Handle all moves that aren't part of a cycle. Only nodes with outdegree
   // zero are put into the queue, which is how nodes in a cycle get excluded.
   {
-    PhysReg q[PhysReg::kMaxRegs];
+    PhysReg q[N];
     int qBack = 0;
-    auto enque = [&](PhysReg r) {
-      assertx(qBack < PhysReg::kMaxRegs); q[qBack++] = r;
-    };
+    auto enque = [&](PhysReg r) { assertx(qBack < N); q[qBack++] = r; };
     for (auto node : outDegree) {
       if (outDegree[node] == 0) enque(node);
     }
@@ -135,9 +134,10 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
 }
 
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
-  assertx(abi().all().size() <= PhysReg::kMaxRegs);
+  constexpr auto N = PhysReg::kMaxRegs;
+  assertx(abi().all().size() <= N);
   jit::vector<MoveInfo> howTo;
-  CycleInfo cycles[PhysReg::kMaxRegs];
+  CycleInfo cycles[N];
   size_t num_cycles = 0;
   PhysReg::Map<int> outDegree;
   PhysReg::Map<int> index;
@@ -157,7 +157,7 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
 
     // Begin walking a path from reg.
     for (auto node = reg;;) {
-      assertx(nextIndex < PhysReg::kMaxRegs);
+      assertx(nextIndex < N);
       index[node] = nextIndex++;
       auto next = moves[node];
       if (next != InvalidReg) {
@@ -171,7 +171,7 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
         // next already visited; check if next is on current path.
         if (index[next] >= index[reg]) {
           // found a cycle.
-          assert(num_cycles < PhysReg::kMaxRegs);
+          assert(num_cycles < N);
           cycles[num_cycles++] = { next, nextIndex - index[next] };
         }
       }
@@ -182,10 +182,11 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   // Handle all moves that aren't part of a cycle. Only nodes with outdegree
   // zero are put into the queue, which is how nodes in a cycle get excluded.
   {
-    PhysReg q[PhysReg::kMaxRegs];
+    PhysReg q[N];
     int qBack = 0;
     auto enque = [&](PhysReg r) {
-      assertx(qBack < PhysReg::kMaxRegs); q[qBack++] = r;
+      assertx(qBack < N);
+      q[qBack++] = r; 
     };
     for (auto node : outDegree) {
       if (outDegree[node] == 0) enque(node);

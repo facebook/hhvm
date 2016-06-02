@@ -110,7 +110,9 @@ const StaticString
   s_capath("capath"),
   s_cafile("cafile"),
   s_local_cert("local_cert"),
-  s_passphrase("passphrase");
+  s_passphrase("passphrase"),
+  s_http("http"),
+  s_header("header");
 
 int HttpClient::request(const char* verb,
                      const char *url, const char *data, size_t size,
@@ -187,7 +189,14 @@ int HttpClient::request(const char* verb,
         slist = curl_slist_append(slist, header.data());
       }
     }
-    if (slist) {
+  if (m_stream_context_options[s_http].isArray()) {
+    const Array http = m_stream_context_options[s_http].toArray();
+    if (http.exists(s_header)) {
+      slist = curl_slist_append(slist,
+                                http[s_header].toString().data());
+    }
+  }
+  if (slist) {
       curl_easy_setopt(cp, CURLOPT_HTTPHEADER, slist);
     }
   }

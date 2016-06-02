@@ -77,10 +77,6 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
                      ConditionCode cc);
 
-std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
-                       ConditionCode cc);
-
 /*
  * Logically smash the smashable operand of an instruction.
  *

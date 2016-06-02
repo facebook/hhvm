@@ -139,15 +139,6 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
   return emitSmashableJccImpl(cb, target, cc);
 }
 
-std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
-                       ConditionCode cc) {
-  align(cb, &fixups, Alignment::SmashJccAndJmp, AlignContext::Live);
-  auto const jcc = emitSmashableJccImpl(cb, target, cc);
-  auto const jmp = emitSmashableJmpImpl(cb, target);
-  return std::make_pair(jcc, jmp);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T>

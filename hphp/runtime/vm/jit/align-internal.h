@@ -47,19 +47,10 @@ void align(CodeBlock& cb, CGMeta* meta,
     { cache_line_size(),  smashableCallLen(),     0 },                        \
     { cache_line_size(),  smashableJmpLen(),      0 },                        \
     { cache_line_size(),  smashableJccLen(),      0 },                        \
-    /*
-     * Three entries for SmashJccAndJmp, one for each half and one for both
-     * together.  The implementation below relies on this being the last
-     */                                                                       \
-    { cache_line_size(),  smashableJccLen(),  0 },                            \
-    { cache_line_size(),  smashableJccLen() +                                 \
-                          smashableJmpLen(),  smashableJccLen() },            \
-    { cache_line_size(),  smashableJccLen() +                                 \
-                          smashableJmpLen(),  0 }                             \
   }
 
 #define DEFINE_ALIGN_TABLE(table) \
-  constexpr AlignInfo table[kNumAlignments + 2]
+  constexpr AlignInfo table[kNumAlignments]
 
 
 ///////////////////////////////////////////////////////////////////////////////

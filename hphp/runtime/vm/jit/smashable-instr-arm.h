@@ -53,10 +53,6 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
                      ConditionCode cc);
-std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
-                       ConditionCode cc);
-
 void smashMovq(TCA inst, uint64_t imm);
 void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);

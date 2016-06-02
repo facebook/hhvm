@@ -138,10 +138,9 @@ struct TransContext {
  * to do after we're done, so it's distinct from the TransContext above.
  */
 struct TransArgs {
-  TransArgs(SrcKey sk, bool align) : sk{sk}, align{align} {}
+  explicit TransArgs(SrcKey sk) : sk{sk} {}
 
   SrcKey sk;
-  bool align;
   Annotations annotations;
   bool allowPartial{false};
   TransFlags flags{0};

@@ -36,7 +36,6 @@ const char* vinst_names[] = {
 bool isBlockEnd(const Vinstr& inst) {
   switch (inst.op) {
     // service request-y things
-    case Vinstr::bindjcc1st:
     case Vinstr::bindjmp:
     case Vinstr::fallback:
     case Vinstr::retransopt:
@@ -78,7 +77,6 @@ Width width(Vinstr::Opcode op) {
     // service requests
     case Vinstr::bindjmp:
     case Vinstr::bindjcc:
-    case Vinstr::bindjcc1st:
     case Vinstr::bindaddr:
     case Vinstr::fallback:
     case Vinstr::fallbackcc:

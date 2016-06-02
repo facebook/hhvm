@@ -58,17 +58,14 @@ size_t align_gap(TCA frontier, const AlignInfo& a) {
 template <class AImpl>
 bool is_aligned(TCA frontier, Alignment alignment) {
   auto const idx = static_cast<uint32_t>(alignment);
-  bool const is_jccandjmp = alignment == Alignment::SmashJccAndJmp;
 
-  return is_aligned(frontier, AImpl::s_table[idx]) &&
-    (!is_jccandjmp || is_aligned(frontier, AImpl::s_table[idx + 1]));
+  return is_aligned(frontier, AImpl::s_table[idx]);
 }
 
 template <class AImpl>
 void align(CodeBlock& cb, CGMeta* meta,
            Alignment alignment, AlignContext context) {
   auto const idx = static_cast<uint32_t>(alignment);
-  bool const is_jccandjmp = alignment == Alignment::SmashJccAndJmp;
 
   auto const pad_for_align = [&] (const AlignInfo& ali) {
     if (is_aligned(cb.frontier(), ali)) return;
@@ -76,13 +73,8 @@ void align(CodeBlock& cb, CGMeta* meta,
   };
 
   pad_for_align(AImpl::s_table[idx]);
-  if (is_jccandjmp) {
-    pad_for_align(AImpl::s_table[idx + 1]);
-  }
 
   assertx(is_aligned(cb.frontier(), AImpl::s_table[idx]));
-  assertx(IMPLIES(is_jccandjmp,
-                  is_aligned(cb.frontier(), AImpl::s_table[idx + 1])));
 
   if (meta) {
     meta->alignments.emplace(

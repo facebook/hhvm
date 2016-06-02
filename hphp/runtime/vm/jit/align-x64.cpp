@@ -79,9 +79,8 @@ void align(CodeBlock& cb, CGMeta* meta,
 
 const AlignInfo& alignment_info(Alignment alignment) {
   auto const idx = static_cast<uint32_t>(alignment);
-  bool const is_jccandjmp = alignment == Alignment::SmashJccAndJmp;
 
-  return AlignImpl::s_table[is_jccandjmp ? idx + 2 : idx];
+  return AlignImpl::s_table[idx];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

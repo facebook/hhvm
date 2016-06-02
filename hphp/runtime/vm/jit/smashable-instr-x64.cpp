@@ -80,22 +80,6 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
   return EMIT_BODY(cb, jcc, Jcc, cc, target);
 }
 
-std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
-                       ConditionCode cc) {
-  assertx(cc != CC_None);
-
-  align(cb, &fixups, Alignment::SmashJccAndJmp, AlignContext::Live);
-
-  X64Assembler a { cb };
-  auto const jcc = cb.frontier();
-  a.jcc(cc, target);
-  auto const jmp = cb.frontier();
-  a.jmp(target);
-
-  return std::make_pair(jcc, jmp);
-}
-
 #undef EMIT_BODY
 
 ///////////////////////////////////////////////////////////////////////////////

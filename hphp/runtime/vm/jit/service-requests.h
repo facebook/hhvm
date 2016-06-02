@@ -63,21 +63,6 @@ struct CGMeta;
   REQ(BIND_JMP)           \
                           \
   /*
-   * bind_jcc_first(TCA jcc, SrcKey taken, SrcKey next, bool did_take)
-   *
-   * A branch between two potentially untranslated targets.
-   *
-   * A bind_jcc_1st is emitted as a jcc followed by a jmp, both to the same
-   * stub.  When invoked, a translation of the appropriate side of the branch
-   * (indicated by `did_take') is obtained, and the jcc is rewritten so that it
-   * will translate the other side of the branch when the inverse condition is
-   * met.
-   *
-   * @see: MCGenerator::bindJccFirst()
-   */                     \
-  REQ(BIND_JCC_FIRST)     \
-                          \
-  /*
    * bind_addr(TCA* addr, SrcKey target, TransFlags trflags)
    *
    * A code pointer to the potentially untranslated `target'; used for

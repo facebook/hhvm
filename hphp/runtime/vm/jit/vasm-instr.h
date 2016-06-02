@@ -59,7 +59,6 @@ struct Vunit;
   /* service requests */\
   O(bindjmp, I(target) I(spOff) I(trflags), U(args), Dn)\
   O(bindjcc, I(cc) I(target) I(spOff) I(trflags), U(sf) U(args), Dn)\
-  O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]) I(spOff), U(sf) U(args), Dn)\
   O(bindaddr, I(addr) I(target) I(spOff), Un, Dn)\
   O(fallback, I(target) I(spOff) I(trflags), U(args), Dn)\
   O(fallbackcc, I(cc) I(target) I(spOff) I(trflags), U(sf) U(args), Dn)\
@@ -383,28 +382,6 @@ struct bindjcc {
   SrcKey target;
   FPInvOffset spOff;
   TransFlags trflags;
-  RegSet args;
-};
-
-struct bindjcc1st {
-  explicit bindjcc1st(ConditionCode cc,
-                      VregSF sf,
-                      std::array<SrcKey,2> targets,
-                      FPInvOffset spOff,
-                      RegSet args)
-    : cc{cc}
-    , sf{sf}
-    , spOff(spOff)
-    , args{args}
-  {
-    this->targets[0] = targets[0];
-    this->targets[1] = targets[1];
-  }
-
-  ConditionCode cc;
-  VregSF sf;
-  SrcKey targets[2];
-  FPInvOffset spOff;
   RegSet args;
 };
 

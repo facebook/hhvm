@@ -196,7 +196,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::addqim:
     case Vinstr::andbim:
     case Vinstr::bindaddr:
-    case Vinstr::bindjcc1st:
     case Vinstr::bindjcc:
     case Vinstr::bindjmp:
     case Vinstr::bln:

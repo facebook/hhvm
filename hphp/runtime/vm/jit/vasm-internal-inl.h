@@ -105,7 +105,6 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p);
 template<class Inst> bool emit(Venv& env, const Inst&) { return false; }
 bool emit(Venv& env, const bindjmp& i);
 bool emit(Venv& env, const bindjcc& i);
-bool emit(Venv& env, const bindjcc1st& i);
 bool emit(Venv& env, const bindaddr& i);
 bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);

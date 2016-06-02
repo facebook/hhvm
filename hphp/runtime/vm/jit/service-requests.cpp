@@ -158,24 +158,6 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   );
 }
 
-TCA emit_bindjcc1st_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                         FPInvOffset spOff, TCA jcc, SrcKey taken, SrcKey next,
-                         ConditionCode cc) {
-  always_assert_flog(taken.resumed() == next.resumed(),
-                     "bind_jcc_1st was confused about resumables");
-  return emit_ephemeral(
-    cb,
-    data,
-    mcg->getFreeStub(cb, &fixups),
-    taken.resumed() ? folly::none : folly::make_optional(spOff),
-    REQ_BIND_JCC_FIRST,
-    jcc,
-    taken.toAtomicInt(),
-    next.toAtomicInt(),
-    cc
-  );
-}
-
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                        FPInvOffset spOff,
                        TCA* addr, SrcKey target, TransFlags trflags) {

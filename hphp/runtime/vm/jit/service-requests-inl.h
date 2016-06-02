@@ -77,8 +77,7 @@ ArgVec pack_args(Args&&... args) {
  */
 inline bool is_ephemeral(ServiceRequest sr) {
   return sr == REQ_BIND_JMP ||
-         sr == REQ_BIND_ADDR ||
-         sr == REQ_BIND_JCC_FIRST;
+         sr == REQ_BIND_ADDR;
 }
 
 /*

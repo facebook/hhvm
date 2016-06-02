@@ -64,11 +64,6 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
                      ConditionCode cc) {
   return ARCH_SWITCH_CALL(emitSmashableJcc, cb, fixups, target, cc);
 }
-std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, CGMeta& fixups, TCA target,
-                       ConditionCode cc) {
-  return ARCH_SWITCH_CALL(emitSmashableJccAndJmp, cb, fixups, target, cc);
-}
 
 void smashMovq(TCA inst, uint64_t imm) {
   assertx(MCGenerator::canWrite());

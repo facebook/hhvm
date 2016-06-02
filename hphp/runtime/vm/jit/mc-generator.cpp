@@ -358,7 +358,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   for (auto region : regions) {
     always_assert(!region->empty());
     auto regionSk = region->start();
-    auto transArgs = TransArgs{regionSk, align};
+    auto transArgs = TransArgs{regionSk};
     if (transCFGAnnot.size() > 0) {
       transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
     }
@@ -771,7 +771,7 @@ TCA MCGenerator::getFuncBody(Func* func) {
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base(), false);
-    tca = mcg->getTranslation(TransArgs{sk, false}).tca();
+    tca = mcg->getTranslation(TransArgs{sk}).tca();
     if (tca) func->setFuncBody(tca);
   }
 
@@ -1031,7 +1031,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
       auto funcletTransId = profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);
-        auto args = TransArgs{funcletSK, false};
+        auto args = TransArgs{funcletSK};
         args.transId = funcletTransId;
         args.kind = TransKind::Optimize;
         auto dvStart = translate(args).tca();
@@ -1128,7 +1128,7 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk,
 TCA
 MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
                      TransFlags trflags, bool& smashed) {
-  auto args = TransArgs{destSk, false};
+  auto args = TransArgs{destSk};
   args.flags = trflags;
   auto tDest = getTranslation(args).tca();
   if (!tDest) return nullptr;
@@ -1197,123 +1197,6 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
   }
 
   smashed = true;
-  return tDest;
-}
-
-/*
- * When we end a tracelet with a conditional jump, emitCondJmp first emits:
- *
- *   1:         j<CC> stubJmpccFirst
- *              jmp   stubJmpccFirst
- *
- * Our "taken" argument tells us whether the branch at 1: was taken or
- * not; and therefore which of offTaken and offNotTaken to continue executing.
- * If we did take the branch, we now rewrite the code so that the branch is
- * straightened. This predicts that subsequent executions will go the same way
- * as the first execution.
- *
- *              jn<CC> stubJmpccSecond:offNotTaken
- *              nop5   ; fallthru, or jmp if there's already a translation.
- * offTaken:
- *
- * If we did not take the branch, we leave the sense of the condition
- * intact, while patching it up to go to the unexplored code:
- *
- *              j<CC> stubJmpccSecond:offTaken
- *              nop5
- * offNotTaken:
- */
-TCA
-MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
-                          bool taken, bool& smashed) {
-  auto const skWillExplore = taken ? skTaken : skNotTaken;
-  auto const skWillDefer = taken ? skNotTaken : skTaken;
-  auto const dest = skWillExplore;
-  TransArgs args{dest, true};
-  args.allowPartial = true;
-
-  auto const jmpAddr = jccAddr + smashableJccLen();
-  auto fallThru = [&] {
-    auto& cb = m_code.blockFor(jccAddr);
-
-    // It's not clear where the IncomingBranch should go to if cb is frozen.
-    assertx(&cb != &m_code.frozen());
-    auto const afterAddr = jmpAddr + smashableJmpLen();
-    return afterAddr == cb.frontier() && !m_tx.getSrcDB().find(dest);
-  };
-
-  LeaseHolder writer{Translator::WriteLease(), dest.func()};
-  if (writer.canWrite()) {
-    args.align = !fallThru();
-  } else if (!writer.canTranslate()) {
-    return nullptr;
-  }
-
-  auto result = getTranslation(args);
-  if (result.finished() && result.tca() == nullptr) return nullptr;
-
-  auto cc = smashableJccCond(jccAddr);
-
-  TRACE(3, "bindJccFirst: explored %d, will defer %d; "
-           "overwriting cc%02x taken %d\n",
-        skWillExplore.offset(), skWillDefer.offset(), cc, taken);
-  always_assert(skTaken.resumed() == skNotTaken.resumed());
-
-  // We want the branch to point to whichever side has not been explored yet.
-  if (taken) cc = ccNegate(cc);
-
-  if (!writer.canWrite()) writer.acquireBlocking();
-
-  auto const tDest = [&] {
-    if (result.finished()) return result.tca();
-
-    result.env().args.align = !fallThru();
-    return finishTranslation(std::move(result.env()));
-  }();
-
-  auto const jmpTarget = smashableJmpTarget(jmpAddr);
-  if (jmpTarget != smashableJccTarget(jccAddr)) {
-    // Someone else already smashed this one.  Ideally we would just re-execute
-    // from jccAddr---except the status flags will have been trashed.
-    return tDest;
-  }
-
-  CGMeta fixups;
-
-  auto code = m_code.view();
-  auto const stub = svcreq::emit_bindjmp_stub(
-    code.frozen(),
-    code.data(),
-    fixups,
-    liveSpOff(),
-    jccAddr,
-    skWillDefer,
-    TransFlags{}
-  );
-
-  fixups.process(nullptr);
-  smashed = true;
-  assertx(Translator::WriteLease().amOwner());
-
-  /*
-   * Roll over the jcc and the jmp/fallthru. E.g., from:
-   *
-   *     toSmash:    jcc   <jmpccFirstStub>
-   *     toSmash+6:  jmp   <jmpccFirstStub>
-   *     toSmash+11: <probably the new translation == tDest>
-   *
-   * to:
-   *
-   *     toSmash:    j[n]z <jmpccSecondStub>
-   *     toSmash+6:  nop5
-   *     toSmash+11: newHotness
-   */
-  smashJcc(jccAddr, stub, cc);
-  auto& destRec = *m_tx.getSrcRec(dest);
-  always_assert(destRec.getTopTranslation());
-  destRec.chainFrom(IncomingBranch::jmpFrom(jmpAddr));
-
-  TRACE(5, "bindJccFirst: overwrote with cc%02x taken %d\n", cc, taken);
   return tDest;
 }
 
@@ -1390,21 +1273,11 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
       break;
     }
 
-    case REQ_BIND_JCC_FIRST: {
-      auto toSmash = info.args[0].tca;
-      auto skTaken = SrcKey::fromAtomicInt(info.args[1].sk);
-      auto skNotTaken = SrcKey::fromAtomicInt(info.args[2].sk);
-      auto taken = info.args[3].boolVal;
-      sk = taken ? skTaken : skNotTaken;
-      start = bindJccFirst(toSmash, skTaken, skNotTaken, taken, smashed);
-      break;
-    }
-
     case REQ_RETRANSLATE: {
       INC_TPC(retranslate);
       sk = SrcKey{liveFunc(), info.args[0].offset, liveResumed()};
       auto trflags = info.args[1].trflags;
-      auto args = TransArgs{sk, true};
+      auto args = TransArgs{sk};
       args.flags = trflags;
       start = retranslate(args).tca();
       SKTRACE(2, sk, "retranslated @%p\n", start);
@@ -1458,7 +1331,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
         }
       }
       sk = SrcKey{caller->func(), vmpc(), caller->resumed()};
-      start = getTranslation(TransArgs{sk, true}).tca();
+      start = getTranslation(TransArgs{sk}).tca();
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
             caller->m_func->fullName()->data());
@@ -1473,7 +1346,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
              vmpc(), fp->func()->fullName()->data());
       sk = SrcKey{fp->func(), vmpc(), fp->resumed()};
-      start = getTranslation(TransArgs{sk, true}).tca();
+      start = getTranslation(TransArgs{sk}).tca();
       break;
     }
   }
@@ -1596,7 +1469,7 @@ TCA MCGenerator::handleResume(bool interpFirst) {
     start = nullptr;
     INC_TPC(interp_bb_force);
   } else {
-    start = getTranslation(TransArgs(sk, true)).tca();
+    start = getTranslation(TransArgs(sk)).tca();
   }
 
   vmJitCalledFrame() = vmfp();
@@ -1614,7 +1487,7 @@ TCA MCGenerator::handleResume(bool interpFirst) {
 
     assertx(vmpc());
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
-    start = getTranslation(TransArgs{sk, true}).tca();
+    start = getTranslation(TransArgs{sk}).tca();
   }
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
@@ -1832,14 +1705,6 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   // we emit code here rather than throwing away the work already done.
   BlockingLeaseHolder write{Translator::WriteLease()};
   auto code = m_code.view(args.kind);
-  auto const preAlignMain = code.main().frontier();
-
-  if (args.align) {
-    // Align without registering fixups. Codegen may fail and cause us to clear
-    // the partially-populated fixups, so we wait until after that to manually
-    // add the alignment fixup.
-    align(code.main(), nullptr, Alignment::CacheLine, AlignContext::Dead);
-  }
 
   CGMeta fixups;
   TransLocMaker maker{code};
@@ -1871,16 +1736,7 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   Timer metaTimer(Timer::mcg_finishTranslation_metadata);
   auto loc = maker.markEnd();
 
-  if (args.align) {
-    fixups.alignments.emplace(
-      loc.mainStart(),
-      std::make_pair(Alignment::CacheLine, AlignContext::Dead)
-    );
-  }
-
-  if (tryRelocateNewTranslation(sk, loc, code, fixups)) {
-    code.main().setFrontier(preAlignMain);
-  }
+  tryRelocateNewTranslation(sk, loc, code, fixups);
 
   // Finally, record various metadata about the translation and add it to the
   // SrcRec.

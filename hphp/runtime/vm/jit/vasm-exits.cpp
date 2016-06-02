@@ -70,26 +70,6 @@ bool match_bindjmp(const Vunit& unit, Vlabel b, Vptr* addr) {
   return false;
 }
 
-/*
- * determine whether block t0 and t1 both end with bindjmp and are compatible
- * enough to fold jcc{cc, f, {t0, t1}} => bindjcc1st{cc,f}. t0 and t1 must
- * pass the match_bindjmp test, have compatible stack pointer adjustments,
- * and be for the same function.
- */
-bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
-  Vptr addr0, addr1; // adjusted stk addresses (sp+offset on each path)
-  if (match_bindjmp(unit, t0, &addr0) &&
-      match_bindjmp(unit, t1, &addr1)) {
-    const auto& bj0 = unit.blocks[t0].code.back().bindjmp_;
-    const auto& bj1 = unit.blocks[t1].code.back().bindjmp_;
-    return addr0 == addr1 &&
-           bj0.target.resumed() == bj1.target.resumed() &&
-           bj0.target.funcID() == bj1.target.funcID() &&
-           bj0.spOff == bj1.spOff;
-  }
-  return false;
-}
-
 }
 
 /*
@@ -133,18 +113,6 @@ void optimizeExits(Vunit& unit) {
       code.insert(std::prev(code.end()),
                   tcode.begin(), std::prev(tcode.end()));
     };
-
-    if (match_bindjcc1st(unit, t0, t1)) {
-      // hoist the sync instructions from t0 to before the jcc,
-      // and replace the jcc with bindjcc1st.
-      const auto& bj0 = unit.blocks[t0].code.back().bindjmp_;
-      const auto& bj1 = unit.blocks[t1].code.back().bindjmp_;
-      hoist_sync(t0);
-      code.back() = bindjcc1st{ijcc.cc, ijcc.sf, {{bj0.target, bj1.target}},
-                               bj0.spOff,
-                               bj0.args | bj1.args};
-      return;
-    }
 
     auto fold_exit = [&](ConditionCode cc, Vlabel exit, Vlabel next) {
       const auto& bj = unit.blocks[exit].code.back().bindjmp_;

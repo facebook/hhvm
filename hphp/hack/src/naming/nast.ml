@@ -46,7 +46,7 @@ and hint_ =
   | Hany
   | Hmixed
   | Htuple of hint list
-  | Habstr of string * (Ast.constraint_kind * hint) option
+  | Habstr of string * (Ast.constraint_kind * hint) list
   | Harray of hint option * hint option
   | Hprim of tprim
   | Hoption of hint
@@ -98,7 +98,7 @@ and class_ = {
     tparam list *
     (* keeping around the ast version of the constraint only
      * for the purposes of Naming.class_meth_bodies *)
-    ((Ast.constraint_kind * Ast.hint) option SMap.t);
+    ((Ast.constraint_kind * Ast.hint) list SMap.t);
   c_extends        : hint list        ;
   c_uses           : hint list        ;
   c_xhp_attr_uses  : hint list        ;
@@ -127,7 +127,7 @@ and user_attribute = {
   ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
-and tparam = Ast.variance * sid * (Ast.constraint_kind * hint) option
+and tparam = Ast.variance * sid * (Ast.constraint_kind * hint) list
 
 (* expr = None indicates an abstract const *)
 and class_const = hint option * sid * expr option

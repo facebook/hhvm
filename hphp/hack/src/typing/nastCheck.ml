@@ -278,18 +278,16 @@ and func env f named_body =
   block env named_body.fnb_nast;
   CheckFunctionType.block f.f_fun_kind named_body.fnb_nast
 
-and tparam env (_, _, cstr_opt) =
-  match cstr_opt with
-  | Some (_, cstr) -> hint env cstr
-  | None -> ()
+and tparam env (_, _, cstrl) =
+  List.iter cstrl (fun (_, h) -> hint env h)
 
 and hint env (p, h) =
   hint_ env p h
 
 and hint_ env p = function
-  | Habstr (_, Some (_, h)) ->
-      hint env h
-  | Hany  | Hmixed  | Habstr _ | Hprim _  | Hthis | Haccess _ ->
+  | Habstr (_, cstrl) ->
+    List.iter cstrl (fun (_, h) -> hint env h)
+  | Hany  | Hmixed  | Hprim _  | Hthis | Haccess _ ->
       ()
   | Harray (ty1, ty2) ->
       maybe hint env ty1;
@@ -333,14 +331,12 @@ and check_arity env p tname arity size =
 and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in
   let decl_ty = Decl_hint.hint env.Env.decl_env h in
-  let env, unchecked_tparams =
-    List.map_env env unchecked_tparams begin fun env (v, sid, cstr_opt) ->
-      let env, cstr_opt = match cstr_opt with
-        | Some (ck, cstr) ->
+  let unchecked_tparams =
+    List.map unchecked_tparams begin fun (v, sid, cstrl) ->
+      let cstrl = List.map cstrl (fun (ck, cstr) ->
             let cstr = Decl_hint.hint env.Env.decl_env cstr in
-            env, Some (ck, cstr)
-        | None -> env, None in
-      env, (v, sid, cstr_opt)
+            (ck, cstr)) in
+      (v, sid, cstrl)
     end in
   let tyl =
     List.map
@@ -365,9 +361,8 @@ and check_happly unchecked_tparams env h =
                   { (Phase.env_with_self env) with
                     substs = Subst.make tc_tparams tyl;
                   } in
-                iter2_shortest begin fun (_, (p, x), cstr_opt) ty ->
-                  match cstr_opt with
-                  | Some (ck, cstr_ty) ->
+                iter2_shortest begin fun (_, (p, x), cstrl) ty ->
+                  List.iter cstrl (fun (ck, cstr_ty) ->
                       let r = Reason.Rwitness p in
                       let env, cstr_ty = Phase.localize ~ety_env env cstr_ty in
                       ignore @@ Errors.try_
@@ -377,8 +372,7 @@ and check_happly unchecked_tparams env h =
                         (fun l ->
                           Reason.explain_generic_constraint env.Env.pos r x l;
                           env
-                        )
-                  | None -> ()
+                        ))
                 end tc_tparams tyl
             | _ -> ()
             )
@@ -601,8 +595,8 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Hany | Hmixed | Hprim _ | Hthis -> ()
     (* We have found a type parameter. Make sure its name does not match
      * a name in class_tparams *)
-    | Habstr (tparam_name, cstr_opt) ->
-        maybe_check_tparams (Option.map cstr_opt snd);
+    | Habstr (tparam_name, cstrl) ->
+        List.iter (List.map cstrl snd) check_tparams;
         matches_class_tparam tparam_name
     | Harray (ty1, ty2) ->
         maybe_check_tparams ty1;

@@ -29,17 +29,13 @@ let rec instantiate subst (r, ty: decl ty) =
    *)
   if SMap.is_empty subst then (r, ty) else
   match ty with
-  | Tgeneric (x, cstr_opt) ->
+  | Tgeneric (x, cstrl) ->
       (match SMap.get x subst with
       | Some x_ty ->
           (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty)
-      | None -> begin
-          match cstr_opt with
-          | Some (ck, ty) ->
-              let ty = instantiate subst ty in
-              (r, Tgeneric (x, Some (ck, ty)))
-          | None -> (r, ty)
-        end
+      | None ->
+        (r, Tgeneric (x, List.map cstrl
+             (fun (ck, ty) -> (ck, instantiate subst ty))))
       )
   | _ ->
       let ty = instantiate_ subst ty in
@@ -87,11 +83,9 @@ and instantiate_ subst x =
         | Fellipsis _ | Fstandard _ as x -> x
       in
       let ret = instantiate subst ft.ft_ret in
-      let tparams = List.map ft.ft_tparams begin fun (var, name, cstropt) ->
-        (var, name, match cstropt with
-        | None -> None
-        | Some (ck, ty) -> Some (ck, instantiate subst ty))
-      end in
+      let tparams = List.map ft.ft_tparams begin fun (var, name, cstrl) ->
+        (var, name, List.map cstrl
+           (fun (ck, ty) -> (ck, instantiate subst ty))) end in
       Tfun { ft with ft_arity = arity; ft_params = params;
                      ft_ret = ret; ft_tparams = tparams }
   | Tapply (x, tyl) ->

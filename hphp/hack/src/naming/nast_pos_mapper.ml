@@ -112,7 +112,7 @@ and hint_ f = function
   | Hthis -> Hthis
   | Htuple hl -> Htuple (List.map hl (hint f))
   | Habstr (s, cstr) ->
-    let cstr = Option.map cstr begin fun (ck, h) ->
+    let cstr = List.map cstr begin fun (ck, h) ->
       ck, hint f h
     end in
     Habstr (s, cstr)

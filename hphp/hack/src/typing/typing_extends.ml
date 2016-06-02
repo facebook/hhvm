@@ -85,16 +85,17 @@ let check_members_implemented check_private parent_reason reason parent_members 
  *
  * Note that we determine if a constant is abstract by seeing if it is
  * a Tgeneric.
- *)
+*)
+(* TODO akenn: multiple constraints *)
 let check_types_for_const env parent_type class_type =
   match (snd parent_type, snd class_type) with
-    | Tgeneric (_, None), _ -> ()
+    | Tgeneric (_, []), _ -> ()
       (* parent abstract constant; no constraints *)
-    | Tgeneric (_, Some (Ast.Constraint_as, fty_parent)),
-      Tgeneric (_, Some (Ast.Constraint_as, fty_child)) ->
+    | Tgeneric (_, [(Ast.Constraint_as, fty_parent)]),
+      Tgeneric (_, [(Ast.Constraint_as, fty_child)]) ->
       (* redeclaration of an abstract constant *)
       ignore (Phase.sub_type_decl env fty_parent fty_child)
-    | Tgeneric (_, Some (Ast.Constraint_as, fty_parent)), _ ->
+    | Tgeneric (_, [(Ast.Constraint_as, fty_parent)]), _ ->
       (* const definition constrained by parent abstract const *)
       ignore (Phase.sub_type_decl env fty_parent class_type)
     | _, Tgeneric(_, _) ->
@@ -277,7 +278,7 @@ let tconst_subsumption env parent_typeconst child_typeconst =
     Errors.abstract_concrete_override pos parent_pos `typeconst;
 
   let default = Reason.Rtconst_no_cstr child_typeconst.ttc_name,
-                Tgeneric (name, None) in
+                Tgeneric (name, []) in
   let child_cstr =
     if child_is_abstract
     then Some (Option.value child_typeconst.ttc_constraint ~default)

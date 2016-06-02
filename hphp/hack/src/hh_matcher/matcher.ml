@@ -1042,7 +1042,8 @@ and match_tparam
   LM.match_attributes
     [match_variance t_variance p_variance;
      match_id_res t_id p_id;
-     LM.match_option
+     LM.match_list
+       (fun _ -> false)
        (LM.match_pair_fn match_constraint_kind match_hint)
        t_chopt
        p_chopt]

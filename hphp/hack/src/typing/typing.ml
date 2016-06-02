@@ -991,10 +991,11 @@ and expr_
             (* We are creating a fake closure:
              * function<T as Class>(T $x): return_type_of(Class:meth_name)
              *)
-            let tparam = Ast.Invariant, pos_cname, Some (Ast.Constraint_as, obj_type) in
+            let tparam = Ast.Invariant, pos_cname,
+              [(Ast.Constraint_as, obj_type)] in
             let env, tvar = TUtils.unresolved_tparam env tparam in
             let param = Reason.Rwitness pos,
-              Tgeneric (class_name, Some (Ast.Constraint_as, obj_type)) in
+              Tgeneric (class_name, [(Ast.Constraint_as, obj_type)]) in
             let ety_env = {
               ety_env with
               substs = Subst.make (tparam :: class_.tc_tparams) (tvar :: tvarl)
@@ -2207,14 +2208,14 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
             | _ -> assert false in
         let params, ret = match List.length el with
           | 2 ->
-            let param2 = (name2, (r2, Toption (r2, Tgeneric ("Tk", None)))) in
+            let param2 = (name2, (r2, Toption (r2, Tgeneric ("Tk", [])))) in
             let rret = fst fty.ft_ret in
-            let ret = (rret, Toption (rret, Tgeneric ("Tv", None))) in
+            let ret = (rret, Toption (rret, Tgeneric ("Tv", []))) in
             [param1; param2], ret
           | 3 ->
-            let param2 = (name2, (r2, Tgeneric ("Tk", None))) in
-            let param3 = (name3, (r3, Tgeneric ("Tv", None))) in
-            let ret = (fst fty.ft_ret, Tgeneric ("Tv", None)) in
+            let param2 = (name2, (r2, Tgeneric ("Tk", []))) in
+            let param3 = (name3, (r3, Tgeneric ("Tv", []))) in
+            let ret = (fst fty.ft_ret, Tgeneric ("Tv", [])) in
             [param1; param2; param3], ret
           | _ -> fty.ft_params, fty.ft_ret in
         let fty = { fty with ft_params = params; ft_ret = ret } in
@@ -3801,17 +3802,16 @@ and check_implements_tparaml (env: Env.env) ht =
       let size2 = List.length paraml in
       if size1 <> size2 then Errors.class_arity p class_.tc_pos c size1;
       let subst = Inst.make_subst class_.tc_tparams paraml in
-      iter2_shortest begin fun (_, (p, _), cstr_opt) ty ->
-        match cstr_opt with
-        | None -> ()
-        | Some (ck, cstr) ->
+      iter2_shortest begin fun (_, (p, _), cstrl) ty ->
+        List.iter cstrl begin fun (ck, cstr) ->
           (* Constraint might contain uses of generic type parameters *)
           let cstr = Inst.instantiate subst cstr in
           match ck with
           | Ast.Constraint_as ->
-            ignore (Type.sub_type_decl p Reason.URnone env cstr ty);
+            ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
           | Ast.Constraint_super ->
             ignore (Type.sub_type_decl p Reason.URnone env ty cstr)
+        end
       end class_.tc_tparams paraml
 
 (* In order to type-check a class, we need to know what "parent"
@@ -3880,12 +3880,8 @@ and class_def tcopt c =
  * TODO AKENN: remove the need for embedded constraints here. *)
 and get_self_from_c env c =
   let tparams = List.map (fst c.c_tparams) begin fun (_, (p, s), cstr) ->
-    let cstr = match cstr with
-      | Some (ck, h) ->
-        let ty = Decl_hint.hint env.Env.decl_env h in
-        Some (ck, ty)
-      | None -> None
-    in
+    let cstr = List.map cstr
+      begin fun (ck, h) -> (ck, Decl_hint.hint env.Env.decl_env h) end in
     Reason.Rwitness p, Tgeneric (s, cstr)
   end in
   let ret = Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams) in
@@ -4012,11 +4008,9 @@ and class_constr_def env c =
 and class_implements_type env c1 ctype2 =
   let env, params =
     List.map_env env (fst c1.c_tparams) begin fun env (_, (p, s), param) ->
-      let env, param = match param with
-        | Some (ck, h) ->
+      let param = List.map param begin fun (ck, h) ->
             let ty = Decl_hint.hint env.Env.decl_env h in
-            env, Some (ck, ty)
-        | None -> env, None in
+            (ck, ty) end in
       env, (Reason.Rwitness p, Tgeneric (s, param))
     end in
   let r = Reason.Rwitness (fst c1.c_name) in

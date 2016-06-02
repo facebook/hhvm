@@ -44,16 +44,13 @@ let rec subtype_funs_generic ~check_return env r_super ft_super r_sub ft_sub =
     | _, _ -> ()
   );
 
-  let add_bound env (_, (_, name), cstr_opt) =
-    match cstr_opt with
-    | None ->
-      env
-    | Some (ck, ty) ->
+  let add_bound env (_, (_, name), cstrl) =
+    List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
       match ck with
       | Ast.Constraint_super ->
         Env.add_lower_bound env name ty
       | Ast.Constraint_as ->
-        Env.add_upper_bound env name ty in
+        Env.add_upper_bound env name ty) in
 
   let env = List.fold_left ft_sub.ft_tparams ~f:add_bound ~init:env in
 

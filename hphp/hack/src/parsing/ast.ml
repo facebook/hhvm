@@ -69,7 +69,7 @@ and constraint_kind =
   | Constraint_as
   | Constraint_super
 
-and tparam = variance * id * (constraint_kind * hint) option
+and tparam = variance * id * (constraint_kind * hint) list
 
 and tconstraint = hint option
 

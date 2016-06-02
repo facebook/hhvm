@@ -98,7 +98,7 @@ module CompareTypes = struct
         acc
     | Tgeneric (s1, cstr1), Tgeneric (s2, cstr2) ->
         let same = same && s1 = s2 in
-        constraint_ (subst, same) cstr1 cstr2
+        constraints_ (subst, same) cstr1 cstr2
     | Toption ty1, Toption ty2 ->
         ty acc ty1 ty2
     | Tprim x, Tprim y ->
@@ -143,11 +143,14 @@ module CompareTypes = struct
 
   and ty_opt acc ty1 ty2 = cmp_opt ty acc ty1 ty2
 
-  and constraint_ (subst, same) cstr_opt1 cstr_opt2 =
-    match cstr_opt1, cstr_opt2 with
-      | Some (ck1, ty1), Some (ck2, ty2) when ck1 = ck2 ->
-          ty (subst, same) ty1 ty2
-      | _ -> subst, false
+  and constraints_ acc cstrl1 cstrl2 =
+    if List.length cstrl1 <> List.length cstrl2
+    then default
+    else List.fold2_exn ~f:constraint_ ~init:acc cstrl1 cstrl2
+
+  and constraint_ (subst, same) (ck1, ty1) (ck2, ty2) =
+    if ck1 = ck2 then ty (subst, same) ty1 ty2
+    else (subst, false)
 
   and fun_type acc ft1 ft2 =
     let acc = pos acc ft1.ft_pos ft2.ft_pos in
@@ -193,7 +196,7 @@ module CompareTypes = struct
   and tparam acc (variance1, sid1, x1) (variance2, sid2, x2) =
     let acc = variance acc variance1 variance2 in
     let acc = string_id acc sid1 sid2 in
-    let acc = constraint_ acc x1 x2 in
+    let acc = constraints_ acc x1 x2 in
     acc
 
   and class_elt (subst, same) celt1 celt2 =

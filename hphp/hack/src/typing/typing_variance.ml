@@ -396,11 +396,8 @@ and fun_param tcopt root env (_, (reason, _ as ty)) =
   let variance = Vcontravariant [reason_contravariant] in
   type_ tcopt root variance env ty
 
-and fun_tparam tcopt root env (_, _, cstr_opt) =
-  begin match cstr_opt with
-  | None -> env
-  | Some cstr -> constraint_ tcopt root env cstr
-  end
+and fun_tparam tcopt root env (_, _, cstrl) =
+  List.fold_left ~f:(constraint_ tcopt root) ~init:env cstrl
 
 and fun_ret tcopt root env (reason, _ as ty) =
   let pos = Reason.to_pos reason in

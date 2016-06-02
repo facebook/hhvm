@@ -34,7 +34,7 @@ module GEnv = NamingGlobal.GEnv
 type positioned_ident = (Pos.t * Local_id.t)
 
 (* <T as A>, A is a type constraint *)
-type type_constraint = (Ast.constraint_kind * Ast.hint) option
+type type_constraint = (Ast.constraint_kind * Ast.hint) list
 
 type genv = {
 
@@ -859,9 +859,9 @@ module Make (GetLocals : GetLocals) = struct
     let genv, lenv = env in
     (* this prevents an infinite loop from occurring since hint invokes
      * get_constraint *)
-    let genv = { genv with type_params = SMap.add tparam None params } in
+    let genv = { genv with type_params = SMap.add tparam [] params } in
     let env = genv, lenv in
-    Option.map gen_constraint (constraint_ env)
+    List.map gen_constraint (constraint_ env)
 
   and constraint_ ?(forbid_this=false) env (ck, h) = ck, hint ~forbid_this env h
 
@@ -1046,10 +1046,10 @@ module Make (GetLocals : GetLocals) = struct
     in
     List.rev ret
 
-  and type_param ~forbid_this env (variance, param_name, cstr_opt) =
+  and type_param ~forbid_this env (variance, param_name, cstr_list) =
     variance,
     param_name,
-    Option.map cstr_opt (constraint_ ~forbid_this env)
+    List.map cstr_list (constraint_ ~forbid_this env)
 
   and class_use env x acc =
     match x with
@@ -1465,14 +1465,14 @@ module Make (GetLocals : GetLocals) = struct
 
   and make_constraints paraml =
     List.fold_right paraml ~init:SMap.empty
-      ~f:begin fun (_, (_, x), cstr_opt) acc ->
-        SMap.add x cstr_opt acc
+      ~f:begin fun (_, (_, x), cstr_list) acc ->
+        SMap.add x cstr_list acc
       end
 
   and extend_params genv paraml =
     let params = List.fold_right paraml ~init:genv.type_params
-      ~f:begin fun (_, (_, x), cstr_opt) acc ->
-        SMap.add x cstr_opt acc
+      ~f:begin fun (_, (_, x), cstr_list) acc ->
+        SMap.add x cstr_list acc
       end in
     { genv with type_params = params }
 
@@ -2242,10 +2242,8 @@ module Make (GetLocals : GetLocals) = struct
     let tconstraint = Option.map tdef.t_constraint (hint env) in
     List.iter tdef.t_tparams check_constraint;
     let tparaml = type_paraml env tdef.t_tparams in
-    List.iter tparaml begin function
-      | (_, _, Some (_, (pos, _))) ->
-          Errors.typedef_constraint pos;
-      | _ -> ()
+    List.iter tparaml begin fun (_, _, constrs) ->
+          List.iter constrs (fun (_, (pos, _)) -> Errors.typedef_constraint pos)
     end;
     let t_vis = match tdef.t_kind with
       | Ast.Alias _ -> N.Transparent

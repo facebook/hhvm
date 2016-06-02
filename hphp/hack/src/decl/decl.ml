@@ -202,13 +202,8 @@ and fun_decl_in_env env f =
   } in
   ft
 
-and type_param env (variance, x, cstr) =
-  let cstr = match cstr with
-    | Some (ck, h) ->
-        let ty = Decl_hint.hint env h in
-        Some (ck, ty)
-    | None -> None in
-  variance, x, cstr
+and type_param env (variance, x, cstrl) =
+  variance, x, List.map cstrl (fun (ck, h) -> (ck, Decl_hint.hint env h))
 
 and check_default pos mandatory e =
   if not mandatory && e = None
@@ -514,7 +509,7 @@ and class_const_decl env c acc (h, id, e) =
           let h_ty = Decl_hint.hint env h in
           let pos, name = id in
           Reason.Rwitness pos,
-            Tgeneric (c_name^"::"^name, Some (Ast.Constraint_as, h_ty))
+            Tgeneric (c_name^"::"^name, [(Ast.Constraint_as, h_ty)])
         | None, Some e ->
           begin match infer_const e with
             | Some ty -> ty
@@ -528,7 +523,7 @@ and class_const_decl env c acc (h, id, e) =
           if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
           let r = Reason.Rwitness pos in
           let const_ty = r, Tgeneric (c_name^"::"^name,
-            Some (Ast.Constraint_as, (r, Tany))) in
+            [(Ast.Constraint_as, (r, Tany))]) in
           const_ty
     in
     let cc = {
@@ -614,7 +609,7 @@ and typeconst_ty_decl pos c_name tc_name ~is_abstract =
   let tsid = pos, SN.FB.cTypeStructure in
   let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [pos, tc_name])]) in
   let ts_ty = if is_abstract
-    then r, Tgeneric (c_name^"::"^tc_name, Some (Ast.Constraint_as, ts_ty))
+    then r, Tgeneric (c_name^"::"^tc_name, [(Ast.Constraint_as, ts_ty)])
     else ts_ty in
   {
     cc_synthesized = true;

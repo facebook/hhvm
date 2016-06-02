@@ -508,11 +508,10 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       acc end acc il
 
   method on_tparam acc t =
-    let (_, i, c_h_opt) = t in
+    let (_, i, c_h_list) = t in
     let acc = this#on_id acc i in
-    let acc = match c_h_opt with
-      | Some (_, h) -> this#on_hint acc h
-      | None -> acc in
+    let on_tparam_constraint acc (_, h) = this#on_hint acc h in
+    let acc = List.fold_left on_tparam_constraint acc c_h_list in
     acc
 
   method on_fun_param acc f =

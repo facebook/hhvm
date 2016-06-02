@@ -100,9 +100,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
 
   and ty_opt x = Option.map x ty
 
-  and constraint_ = function
-    | None -> None
-    | Some (ck, x) -> Some (ck, ty x)
+  and constraint_ = List.map ~f:(fun (ck, x) -> (ck, ty x))
 
   and fun_type ft =
     { ft with

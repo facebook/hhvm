@@ -367,19 +367,18 @@ module PrintClass = struct
     | Ast.Ctrait -> "Ctrait"
     | Ast.Cenum -> "Cenum"
 
-  let constraint_ty_opt = function
-    | None -> ""
-    | Some (Ast.Constraint_as, ty) -> "as " ^ (Full.to_string_decl ty)
-    | Some (Ast.Constraint_super, ty) -> "super " ^ (Full.to_string_decl ty)
+  let constraint_ty = function
+    | (Ast.Constraint_as, ty) -> "as " ^ (Full.to_string_decl ty)
+    | (Ast.Constraint_super, ty) -> "super " ^ (Full.to_string_decl ty)
 
   let variance = function
     | Ast.Covariant -> "+"
     | Ast.Contravariant -> "-"
     | Ast.Invariant -> ""
 
-  let tparam (var, (position, name), cstr_opt) =
+  let tparam (var, (position, name), cstrl) =
     variance var^pos position^" "^name^" "^
-    (constraint_ty_opt cstr_opt)
+    List.fold_right cstrl ~f:(fun x acc -> constraint_ty x^" "^acc) ~init:""
 
   let tparam_list l =
     List.fold_right l ~f:(fun x acc -> tparam x^", "^acc) ~init:""

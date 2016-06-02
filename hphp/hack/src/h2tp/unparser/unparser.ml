@@ -261,7 +261,7 @@ let rec u_program v = u_of_list_spc u_def v
          let v1 = Str "tparam"
          and v2 = u_variance v2
          and v3 = u_id v3
-         and v4 = u_of_option (fun (ck, h) ->
+         and v4 = u_of_list_spc (fun (ck, h) ->
            StrWords [u_constraint_kind ck; u_hint h]) v4
          in StrWords [ v1; v2; v3; v4 ])
   and u_tconstraint v = u_of_option u_hint v

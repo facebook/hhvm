@@ -29,7 +29,7 @@ class type ['a] hint_visitor_type = object
   method on_mixed  : 'a -> 'a
   method on_this   : 'a -> 'a
   method on_tuple  : 'a -> Nast.hint list -> 'a
-  method on_abstr  : 'a -> string -> (Ast.constraint_kind * Nast.hint) option
+  method on_abstr  : 'a -> string -> (Ast.constraint_kind * Nast.hint) list
                       -> 'a
   method on_array  : 'a -> Nast.hint option -> Nast.hint option -> 'a
   method on_prim   : 'a -> Nast.tprim -> 'a
@@ -68,9 +68,8 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
   method on_tuple acc hl =
     List.fold_left ~f:this#on_hint ~init:acc (hl:Nast.hint list)
 
-  method on_abstr acc _ = function
-    | None -> acc
-    | Some (_ck, h) -> this#on_hint acc h
+  method on_abstr acc _ hl =
+    List.fold_left ~f:(fun acc (_, h) -> this#on_hint acc h) ~init:acc hl
 
   method on_array acc hopt1 hopt2 =
     let acc = match hopt1 with
@@ -167,10 +166,8 @@ let check_params_instantiable (env:Env.env) (params:Nast.fun_param list)=
   end
 
 let check_tparams_instantiable (env:Env.env) (tparams:Nast.tparam list) =
-  List.iter tparams ~f:begin fun (_variance, _sid, cstr_opt) ->
-    match cstr_opt with
-    | None -> ()
-    | Some (_ck, h) -> check_instantiable env h
+  List.iter tparams ~f:begin fun (_variance, _sid, cstrl) ->
+    List.iter cstrl ~f:begin fun (_ck, h) -> check_instantiable env h end
   end
 
 let instantiable_hint env h =

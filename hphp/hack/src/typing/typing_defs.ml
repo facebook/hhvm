@@ -48,7 +48,7 @@ and _ ty_ =
    * The type of $x inside f() is
    * Tgeneric("T", Some(Constraint_as, Tprim Tint))
    *)
-  | Tgeneric : string * (Ast.constraint_kind * decl ty) option -> decl ty_
+  | Tgeneric : string * (Ast.constraint_kind * decl ty) list -> decl ty_
 
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : taccess_type -> decl ty_
@@ -429,7 +429,7 @@ and typedef_type = {
 }
 
 and 'phase tparam =
-  Ast.variance * Ast.id * (Ast.constraint_kind * 'phase ty) option
+  Ast.variance * Ast.id * (Ast.constraint_kind * 'phase ty) list
 
 type phase_ty =
   | DeclTy of decl ty

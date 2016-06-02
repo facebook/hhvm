@@ -32,13 +32,8 @@ and hint_ p env = function
     let h2 = Option.map h2 (hint env) in
     Tarray (h1, h2)
   | Hprim p -> Tprim p
-  | Habstr (x, cstr_opt) ->
-    let cstr_opt = match cstr_opt with
-      | Some (ck, h) ->
-        let h = hint env h in
-        Some (ck, h)
-      | None -> None in
-    Tgeneric (x, cstr_opt)
+  | Habstr (x, cstrl) ->
+    Tgeneric (x, List.map cstrl (fun (ck, h) -> (ck, hint env h)))
   | Hoption (_, Hprim Tvoid) ->
     Errors.option_return_only_typehint p `void;
     Tany

@@ -958,19 +958,22 @@ and class_param env =
 and class_param_error env =
   error_expect env "type parameter";
   let parameter_name = Pos.make env.file env.lb, "T*unknown*" in
-  Invariant, parameter_name, None
+  Invariant, parameter_name, []
 
 and class_param_name env =
   let parameter_name = Pos.make env.file env.lb, Lexing.lexeme env.lb in
-  let parameter_constraint = class_parameter_constraint env in
-  parameter_name, parameter_constraint
+  let parameter_constraints = class_parameter_constraint_list env in
+  parameter_name, parameter_constraints
 
-and class_parameter_constraint env =
+and class_parameter_constraint_list env =
   match L.token env.file env.lb with
-  | Tword when Lexing.lexeme env.lb = "as" -> Some (Constraint_as, hint env)
+  | Tword when Lexing.lexeme env.lb = "as" ->
+    let h = hint env in
+    (Constraint_as, h) :: class_parameter_constraint_list env
   | Tword when Lexing.lexeme env.lb = "super" ->
-      Some (Constraint_super, hint env)
-  | _ -> L.back env.lb; None
+    let h = hint env in
+    (Constraint_super, h) :: class_parameter_constraint_list env
+  | _ -> L.back env.lb; []
 
 (*****************************************************************************)
 (* Class hints (A<T> etc ...) *)

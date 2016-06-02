@@ -26,11 +26,15 @@ module HintCycle = struct
         Errors.cyclic_constraint p
     | Happly ((_, x), []) when SMap.mem x params ->
         let stack = SSet.add x stack in
-        (match SMap.get x params with
-        | Some (Some (_, ((_, Happly (_, [])) as param))) ->
-            hint stack params param
-        | _ -> ()
-        )
+        begin match SMap.get x params with
+        | Some cstr_list ->
+          List.iter cstr_list (fun cstr ->
+            match cstr with
+            | (_, ((_, Happly (_, [])) as param)) ->
+              hint stack params param
+            | _ -> ())
+        | None -> ()
+        end
     | Happly (_, hl) ->
         hintl stack params hl
     | Hshape l ->
@@ -40,8 +44,6 @@ module HintCycle = struct
 
   and hintl stack params l = List.iter l (hint stack params)
 
-  let check_constraint cstrs (_, _, cstr_opt) =
-    match cstr_opt with
-    | None -> ()
-    | Some (_, h) -> hint SSet.empty cstrs h
+  let check_constraint cstrs (_, _, cstr_list) =
+    List.iter cstr_list (fun (_, h) -> hint SSet.empty cstrs h)
 end

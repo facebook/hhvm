@@ -279,7 +279,8 @@ bool HHVM_FUNCTION(spl_autoload_register,
 }
 
 bool HHVM_FUNCTION(spl_autoload_unregister, const Variant& autoload_function) {
-  if (same(autoload_function, s_spl_autoload_call)) {
+  if (same(autoload_function, s_spl_autoload_call) &&
+      !AutoloadHandler::s_instance->isRunning()) {
     AutoloadHandler::s_instance->removeAllHandlers();
   } else {
     AutoloadHandler::s_instance->removeHandler(autoload_function);

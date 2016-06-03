@@ -822,7 +822,8 @@ static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,
     // extract all files
     for (decltype(fileCount) index = 0; index < fileCount; ++index) {
       auto file = zip_get_name(zipDir->getZip(), index, ZIP_FL_UNCHANGED);
-      if (!extractFileTo(zipDir->getZip(), file, to, buf, sizeof(buf))) {
+      if (file == nullptr ||
+          !extractFileTo(zipDir->getZip(), file, to, buf, sizeof(buf))) {
         return false;
       }
       to.resize(toSize);

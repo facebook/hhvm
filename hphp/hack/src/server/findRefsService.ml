@@ -28,6 +28,7 @@ let process_fun_id results_acc target_fun id =
 
 let process_method_id results_acc target_classes target_method
     class_ id _ _ ~is_method ~is_const =
+  if not is_method then () else
   let class_name = class_.Typing_defs.tc_name in
   if target_method = (snd id) && (SSet.mem target_classes class_name)
   then

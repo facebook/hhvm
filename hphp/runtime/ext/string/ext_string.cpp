@@ -872,7 +872,11 @@ static bool string_substr_check(int len, int& f, int& l) {
 
 TypedValue HHVM_FUNCTION(substr, const String& str, int start, int length) {
   if (!string_substr_check(str.size(), start, length)) {
-    return make_tv<KindOfBoolean>(false);
+    if (RuntimeOption::PHP7_Substr && str.size() == start) {
+      return make_tv<KindOfPersistentString>(empty_string_ref.get());
+    } else {
+      return make_tv<KindOfBoolean>(false);
+    }
   }
   return tvReturn(str.substr(start, length));
 }

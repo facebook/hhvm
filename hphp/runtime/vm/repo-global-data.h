@@ -89,6 +89,13 @@ struct Repo::GlobalData {
   bool PHP7_ScalarTypes = false;
 
   /*
+   * Indicates whether the repo was compiled with PHP7 substr behavior which
+   * returns an empty string if the stringi length is equal to start characters
+   * long, instead of PHP5's false.
+   */
+  bool PHP7_Substr = false;
+
+  /*
    * Indicates that generators should be autoprimed and not require an initial
    * call to next() before calling other generator functions.
    */
@@ -105,6 +112,7 @@ struct Repo::GlobalData {
       (HardReturnTypeHints)
       (PHP7_IntSemantics)
       (PHP7_ScalarTypes)
+      (PHP7_Substr)
       (AutoprimeGenerators)
       (APCProfile)
       ;

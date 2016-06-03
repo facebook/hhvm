@@ -442,11 +442,11 @@ class CommonTests(object):
             'characters 42-44, defined: line 1, characters 15-17, '
             'definition span: line 1, character 15 - line 1, character 17'
             ], [
-            '{{"name":"\\\\bar","result_type":"function","pos":{{"filename":"",'
-            '"line":1,"char_start":42,"char_end":44}},'
+            '[{{"name":"\\\\bar","result_type":"function",'
+            '"pos":{{"filename":"","line":1,"char_start":42,"char_end":44}},'
             '"definition_pos":{{"filename":"","line":1,"char_start":15,'
             '"char_end":17}},"definition_span":{{"filename":"","line_start":1,'
-            '"char_start":6,"line_end":1,"char_end":22}}}}'
+            '"char_start":6,"line_end":1,"char_end":22}}}}]'
             ],
             options=['--ide-get-definition', '1:43'],
             stdin='<?hh function bar() {} function test() { bar() }')
@@ -494,12 +494,12 @@ class CommonTests(object):
             'characters 26-45, definition span: line 4, character 26 - line 4, '
             'character 45'
             ], [
-            '{{"name":"\\\\ClassToBeIdentified::methodToBeIdentified",'
+            '[{{"name":"\\\\ClassToBeIdentified::methodToBeIdentified",'
             '"result_type":"method","pos":{{"filename":"","line":1,'
             '"char_start":45,"char_end":64}},"definition_pos":'
             '{{"filename":"{root}foo_5.php","line":4,"char_start":26,'
             '"char_end":45}},"definition_span":{{"filename":"{root}foo_5.php",'
-            '"line_start":4,"char_start":3,"line_end":4,"char_end":50}}}}'
+            '"line_start":4,"char_start":3,"line_end":4,"char_end":50}}}}]'
             ],
             options=['--ide-get-definition', '1:50'],
             stdin='<?hh function test() { '

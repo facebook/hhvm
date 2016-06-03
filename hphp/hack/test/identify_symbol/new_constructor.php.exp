@@ -3,3 +3,8 @@ Method
 line 8, characters 3-11
 defined: line 4, characters 19-29
 definition span: line 4, character 3 - line 4, character 34
+\Foo
+Class
+line 8, characters 7-9
+defined: line 3, characters 7-9
+definition span: line 3, character 1 - line 5, character 1

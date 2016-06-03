@@ -83,7 +83,8 @@ let go action genv env =
 
 let go_from_file (content, line, char) genv env =
   let result =
-    (ServerIdentifyFunction.get_occurrence content line char) >>= fun symbol ->
+    List.hd (ServerIdentifyFunction.get_occurrence content line char)
+      >>= fun symbol ->
     let name = symbol.SymbolOccurrence.name in
     begin match symbol.SymbolOccurrence.type_ with
       | SymbolOccurrence.Class -> Some (FindRefsService.Class name)

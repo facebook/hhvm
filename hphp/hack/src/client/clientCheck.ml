@@ -155,7 +155,7 @@ let main args =
       let content = Sys_utils.read_stdin_to_string () in
       let result =
         rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
-      let result = match result with
+      let result = match List.hd result with
         | Some (result, _) -> Utils.strip_ns result.SymbolOccurrence.name
         | _ -> ""
       in
@@ -307,7 +307,7 @@ let main args =
       let content = Sys_utils.read_stdin_to_string () in
       let result =
         rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
-      ClientGetMethodName.go result args.output_json;
+      ClientGetMethodName.go (List.hd result) args.output_json;
       Exit_status.No_error
     | MODE_FORMAT (from, to_) ->
       let content = Sys_utils.read_stdin_to_string () in

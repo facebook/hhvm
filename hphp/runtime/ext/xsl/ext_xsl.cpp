@@ -312,6 +312,10 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   for (int i = nargs - 2; i >= 0; i--) {
     Variant arg;
     obj = valuePop(ctxt);
+    if (obj == nullptr) {
+      args.prepend(init_null());
+      continue;
+    }
     switch (obj->type) {
     case XPATH_STRING:
       arg = String((char*)obj->stringval, CopyString);

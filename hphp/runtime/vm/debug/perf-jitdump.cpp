@@ -90,7 +90,7 @@ static inline uint64_t timespec_to_ns(const struct timespec *ts)  {
 static inline uint64_t perfGetTimestamp(void) {
   struct timespec ts;
 
-  /* cpuCycles returns rdstc value */
+  /* cpuCycles returns arch TS, rdtsc value */
   if (use_arch_timestamp)  return cpuCycles();
 
   if (clock_gettime(perf_clk_id, &ts))  return 0;
@@ -126,14 +126,14 @@ void DebugInfo::initPerfJitDump() {
    * Monotonic clock : perf record -k mono ..
    *                 : perf record -k 1 ..
    * ARCH clock: perf record .. 
-   * The policy used here, defaults to ARCH clock unless the env variable 
-   * is explicitly set to 0. 
+   * The policy used here, defaults to ARCH CPU clock unless 
+   * the env variable is explicitly set to 0. 
    */
-  use_arch_timestamp = 1; 
+  use_arch_timestamp = true; 
   
   const char* str = getenv("JITDUMP_USE_ARCH_TIMESTAMP");
   if (str && *str == '0') {
-    use_arch_timestamp = 0;
+    use_arch_timestamp = false;
   }
 
   /* check if perf_clk_id is supported else exit 

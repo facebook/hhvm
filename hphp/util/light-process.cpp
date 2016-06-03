@@ -502,6 +502,9 @@ bool LightProcess::initShadow(int afdt_lid,
   pid_t child = fork();
   if (child == 0) {
     // child
+    if (s_trackProcessTimes) {
+      HardwareCounter::RecordSubprocessTimes();
+    }
     Logger::ResetPid();
     pid_t sid = setsid();
     if (sid < 0) {

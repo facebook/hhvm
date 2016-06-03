@@ -43,11 +43,6 @@ and unify_unwrapped env ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 =
     let env = Env.rename env n2 n' in
     let env, ty =
       unify_unwrapped env unwrappedToption1 ty1 unwrappedToption2 ty2 in
-    (* I ALWAYS FORGET THIS! ALWAYS!!! *)
-    (* The type of n' could have changed because of recursive types *)
-    (* We need one more round *)
-    let env, ty' = Env.get_type env r n' in
-    let env, ty = unify env ty ty' in
     let env = TURecursive.add env n' ty in
     env, (r, Tvar n')
   | (r, Tvar n), ty2

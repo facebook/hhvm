@@ -33,17 +33,17 @@ let add_ns name =
 let strip_ns results =
   List.map results (fun (s, p) -> ((Utils.strip_ns s), p))
 
-let search class_names method_name include_defs files genv env =
-  (* Get all the references to the provided method name and classes in the files *)
+let search target include_defs files genv env =
+  (* Get all the references to the provided target in the files *)
   let res = FindRefsService.find_references env.tcopt genv.workers
-    class_names method_name include_defs env.files_info files in
+    target include_defs env.files_info files in
   strip_ns res
 
 let search_function function_name include_defs genv env =
   let function_name = add_ns function_name in
   let files = FindRefsService.get_dependent_files_function
     env.tcopt genv.ServerEnv.workers function_name in
-  search None (Some function_name) include_defs files genv env
+  search (FindRefsService.IFunction function_name) include_defs files genv env
 
 let search_method class_name method_name include_defs genv env =
   let class_name = add_ns class_name in
@@ -56,13 +56,16 @@ let search_method class_name method_name include_defs genv env =
   (* Get all the files that reference those classes *)
   let files = FindRefsService.get_dependent_files env.tcopt
       genv.ServerEnv.workers all_classes in
-  search (Some all_classes) (Some method_name) include_defs files genv env
+  let target =
+    FindRefsService.IMember (all_classes, FindRefsService.Method method_name)
+  in
+  search target include_defs files genv env
 
 let search_class class_name include_defs genv env =
   let class_name = add_ns class_name in
   let files = FindRefsService.get_dependent_files env.tcopt
       genv.ServerEnv.workers (SSet.singleton class_name) in
-  search (Some (SSet.singleton class_name)) None include_defs files genv env
+  search (FindRefsService.IClass class_name) include_defs files genv env
 
 let get_refs action include_defs genv env =
   match action with

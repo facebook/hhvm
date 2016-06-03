@@ -20,6 +20,11 @@ type action = Ai.ServerFindRefs.action =
   | Member of string * member
   | Function of string
 
+type action_internal  =
+  | IClass of string
+  | IMember of SSet.t * member
+  | IFunction of string
+
 type result = (string * Pos.absolute) list
 
 let process_fun_id results_acc target_fun id =
@@ -49,20 +54,19 @@ let process_class_id results_acc target_classes cid mid_option =
      results_acc := Pos.Map.add (fst cid) class_name !results_acc
    end
 
-let attach_hooks results_acc target_classes target_fun =
-  match target_classes, target_fun with
-    | Some classes, Some method_name ->
-      let process_method_id =
-        process_method_id results_acc classes method_name in
-      Typing_hooks.attach_cmethod_hook process_method_id;
-      Typing_hooks.attach_smethod_hook process_method_id;
-      Typing_hooks.attach_constructor_hook
-        (process_constructor results_acc classes method_name);
-    | None, Some fun_name ->
-      Typing_hooks.attach_fun_id_hook (process_fun_id results_acc fun_name)
-    | Some classes, None ->
-      Decl_hooks.attach_class_id_hook (process_class_id results_acc classes)
-    | _ -> assert false
+let attach_hooks results_acc = function
+  | IMember (classes, Method method_name) ->
+    let process_method_id =
+      process_method_id results_acc classes method_name in
+    Typing_hooks.attach_cmethod_hook process_method_id;
+    Typing_hooks.attach_smethod_hook process_method_id;
+    Typing_hooks.attach_constructor_hook
+      (process_constructor results_acc classes method_name);
+  | IFunction fun_name ->
+    Typing_hooks.attach_fun_id_hook (process_fun_id results_acc fun_name)
+  | IClass c ->
+    let classes = SSet.singleton c in
+    Decl_hooks.attach_class_id_hook (process_class_id results_acc classes)
 
 let detach_hooks () =
   Decl_hooks.remove_all_hooks ();
@@ -128,9 +132,9 @@ let get_deps_set_function tcopt f_name =
   | None ->
     Relative_path.Set.empty
 
-let find_refs target_classes target_method acc fileinfo_l =
+let find_refs target acc fileinfo_l =
   let results_acc = ref Pos.Map.empty in
-  attach_hooks results_acc target_classes target_method;
+  attach_hooks results_acc target;
   let tcopt = TypecheckerOptions.permissive in
   ServerIdeUtils.recheck tcopt fileinfo_l;
   detach_hooks ();
@@ -138,17 +142,16 @@ let find_refs target_classes target_method acc fileinfo_l =
     (str, p) :: acc
   end !results_acc []
 
-let parallel_find_refs workers fileinfo_l target_classes target_method =
+let parallel_find_refs workers fileinfo_l target =
   MultiWorker.call
     workers
-    ~job:(find_refs target_classes target_method)
+    ~job:(find_refs target)
     ~neutral:([])
     ~merge:(List.rev_append)
     ~next:(Bucket.make fileinfo_l)
 
-let get_definitions tcopt target_classes target_method =
-  match target_classes, target_method with
-  | Some classes, Some method_name ->
+let get_definitions tcopt = function
+  | IMember (classes, Method method_name) ->
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
       match Typing_lazy_heap.get_class tcopt class_name with
       | Some class_ ->
@@ -163,20 +166,18 @@ let get_definitions tcopt target_classes target_method =
         acc
       | None -> acc
     end
-  | Some classes, None ->
-    SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
-      match Typing_lazy_heap.get_class tcopt class_name with
-      | Some class_ -> (class_name, class_.tc_pos) :: acc
-      | None -> acc
+  | IClass class_name ->
+    begin match Typing_lazy_heap.get_class tcopt class_name with
+      | Some class_ -> [(class_name, class_.tc_pos)]
+      | None -> []
     end
-  | None, Some fun_name ->
+  | IFunction fun_name ->
     begin match Typing_lazy_heap.get_fun tcopt fun_name with
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end
-  | None, None -> []
 
-let find_references tcopt workers target_classes target_method include_defs
+let find_references tcopt workers target include_defs
       files_info files =
   let fileinfo_l = Relative_path.Set.fold files ~f:begin fun fn acc ->
     match Relative_path.Map.get files_info fn with
@@ -185,12 +186,12 @@ let find_references tcopt workers target_classes target_method include_defs
   end ~init:[] in
   let results =
     if List.length fileinfo_l < 10 then
-      find_refs target_classes target_method [] fileinfo_l
+      find_refs target [] fileinfo_l
     else
-      parallel_find_refs workers fileinfo_l target_classes target_method
+      parallel_find_refs workers fileinfo_l target
     in
   if include_defs then
-    let defs = get_definitions tcopt target_classes target_method in
+    let defs = get_definitions tcopt target in
     List.rev_append defs results
   else
     results

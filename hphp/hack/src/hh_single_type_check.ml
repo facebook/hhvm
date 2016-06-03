@@ -31,6 +31,7 @@ type mode =
   | Identify_symbol of int * int
   | Find_local of int * int
   | Outline
+  | Find_refs of int * int
 
 type options = {
   filename : string;
@@ -264,6 +265,12 @@ let parse_options () =
     "--outline",
       Arg.Unit (set_mode Outline),
       "Print file outline";
+    "--find-refs",
+      Arg.Tuple ([
+        Arg.Int (fun x -> line := x);
+        Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
+      ]),
+      "Find all usages of a symbol at given line and column";
   ] in
   let options = Arg.align options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -483,6 +490,16 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline file in
     FileOutline.print results;
+  | Find_refs (line, column) ->
+    Typing_deps.update_files files_info;
+    let genv = ServerEnvBuild.default_genv in
+    let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
+      ServerEnv.files_info;
+      ServerEnv.tcopt;
+    } in
+    let file = cat (Relative_path.to_absolute filename) in
+    let results = ServerFindRefs.go_from_file (file, line, column) genv env in
+    FindRefsService.print results;
   | Suggest
   | Errors ->
       let errors =

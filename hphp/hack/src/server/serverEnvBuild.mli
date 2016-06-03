@@ -15,4 +15,6 @@ val make_genv:
   SharedMem.handle ->
     ServerEnv.genv
 
+val default_genv: ServerEnv.genv
+
 val make_env: ServerConfig.t -> ServerEnv.env

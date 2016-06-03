@@ -198,3 +198,8 @@ let get_dependent_files_function tcopt workers f_name =
 let get_dependent_files tcopt workers input_set =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set tcopt input_set
+
+let print results =
+  List.iter (List.rev results) (fun (s, p) ->
+    Printf.printf "%s %s\n" s (Pos.string p)
+  )

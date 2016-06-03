@@ -98,6 +98,9 @@ let go_from_file (content, line, char) genv env =
       | SymbolOccurrence.Property (class_name, prop_name) ->
           Some (FindRefsService.Member
             (class_name, FindRefsService.Property prop_name))
+      | SymbolOccurrence.ClassConst (class_name, const_name) ->
+          Some (FindRefsService.Member
+            (class_name, FindRefsService.Class_const const_name))
       | _ -> None
     end >>= fun action ->
     Some (go action genv env)

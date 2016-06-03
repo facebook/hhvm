@@ -177,11 +177,7 @@ let handle genv env (ic, oc) =
       let t = Unix.gettimeofday () in
       let response = ServerRpc.handle genv env cmd in
       let cmd_string = ServerRpc.to_string cmd in
-      let details =
-        if HackEventLogger.is_outlier cmd_string t
-          then Some (ServerRpc.to_string_with_details cmd) else None
-      in
-      HackEventLogger.handled_command cmd_string t ~details;
+      HackEventLogger.handled_command cmd_string t;
       send_response_to_client (ic, oc) response;
       if cmd = ServerRpc.KILL then ServerUtils.die_nicely ()
   | Stream cmd -> stream_response genv env (ic, oc) ~cmd

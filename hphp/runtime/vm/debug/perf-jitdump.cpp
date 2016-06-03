@@ -25,8 +25,10 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/oprof-jitdump.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/cycles.h"
 
-#include <folly/portability/Syscall.h>
+#include <folly/portability/SysSyscall.h>
 #include <folly/portability/Time.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -43,7 +45,7 @@ const char padding_bytes[7] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 namespace HPHP {
 namespace Debug {
 
-static int getEMachine(struct jitheader *hdr)  {
+static int getEMachine(JitHeader *hdr)  {
   char id[16];
   int fd;
   struct {
@@ -69,21 +71,12 @@ static int getEMachine(struct jitheader *hdr)  {
   return 0;
 }
 
-static int use_arch_timestamp;
+static bool use_arch_timestamp;
 
-static inline uint64_t getArchTimestamp(void)  {
-#if defined(__i386__) || defined(__x86_64__)
-  unsigned int low, high;
-
-  asm volatile("rdtsc" : "=a" (low), "=d" (high));
-  return low | ((uint64_t)high) << 32;
-#else
-  return 0;
-#endif
-}
-
-/*On Win32 and linux CLOCK_MONOTONIC is available */
-#if defined(CLOCK_MONOTONIC) && !defined(__APPLE__)
+/* On Win32 CLOCK_MONOTONIC is available */
+/* On most newer Linux kernels CLOCK_MONOTONIC is defined in <bits/time.h> */
+/* <time.h> includes <bits/time.h> */
+#if defined(CLOCK_MONOTONIC)
 static int perf_clk_id = CLOCK_MONOTONIC;
 #else
 static int perf_clk_id = CLOCK_REALTIME;
@@ -97,7 +90,8 @@ static inline uint64_t timespec_to_ns(const struct timespec *ts)  {
 static inline uint64_t perfGetTimestamp(void) {
   struct timespec ts;
 
-  if (use_arch_timestamp)  return getArchTimestamp();
+  /* cpuCycles returns rdstc value */
+  if (use_arch_timestamp)  return cpuCycles();
 
   if (clock_gettime(perf_clk_id, &ts))  return 0;
 
@@ -123,7 +117,7 @@ void DebugInfo::initPerfJitDump() {
   } else {
     m_perfJitDumpName = folly::sformat("/tmp/jit-{}.dump", getpid());
   }   
-  fprintf(stderr, "jitdump file: %s\n", m_perfJitDumpName.c_str());
+  Logger::Info("jitdump file: %s", m_perfJitDumpName.c_str());
 
   /* env variable JITDUMP_USE_ARCH_TIMESTAMP is used in the perf tools    
    * framework as well, in order to collect Intel PT processor trace 
@@ -141,23 +135,28 @@ void DebugInfo::initPerfJitDump() {
   if (str && *str == '0') {
     use_arch_timestamp = 0;
   }
- 
 
   /* check if perf_clk_id is supported else exit 
    * jitdump records need to be timestamp'd 
    */ 
   if (!perfGetTimestamp()) {
     if (use_arch_timestamp) {
-      fprintf(stderr, "system arch timestamp not supported\n"); 
+      Logger::Error("system arch timestamp not supported"); 
     } else {
-      fprintf(stderr, "kernel does not support (monotonic) %d clk_id\n",
+      Logger::Error("kernel does not support (monotonic) %d clk_id",
               perf_clk_id);
     }
-    fprintf(stderr, "Cannot create %s \n", m_perfJitDumpName.c_str());
+    Logger::Error("Cannot create %s", m_perfJitDumpName.c_str());
     return;  
   }
  
   int fd = open(m_perfJitDumpName.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
+  if (fd < 0) {
+    Logger::Error("Failed to create the file %s for perf jit dump: %s",
+                     m_perfJitDumpName.c_str(), strerror(errno));
+    return; 
+  } 
+  
   m_perfMmapMarker = mmap(nullptr, 
                           sysconf(_SC_PAGESIZE), 
                           PROT_READ|PROT_EXEC, 
@@ -165,25 +164,18 @@ void DebugInfo::initPerfJitDump() {
                           fd, 0); 
   
   if (m_perfMmapMarker == MAP_FAILED) {
-    fprintf(stderr, "Failed to create mmap marker file for perf\n");
+    Logger::Error("Failed to create mmap marker file for perf");
     close(fd);
     return;
   } 
 
   m_perfJitDump = fdopen(fd, "w+");
-  if (!m_perfJitDump) {
-    fprintf(stderr, "Failed to create the file %s for perf\n",
-                     m_perfJitDumpName.c_str() );
-    return; 
-  }
-  /*
-   * Init the jitdump header and write to the file
-   */
-  struct jitheader header; 
-  memset(&header, 0, sizeof(header));
+  
+  /* Init the jitdump header and write to the file */
+  JitHeader header{}; 
  
   if (getEMachine(&header)) {
-    fprintf(stderr, "failed to get machine ELF information\n");
+    Logger::Error("failed to get machine ELF information");
     fclose(m_perfJitDump);
   }
 
@@ -216,9 +208,9 @@ void DebugInfo::initPerfJitDump() {
 void DebugInfo::closePerfJitDump() {
   if (!m_perfJitDump)  return;
 
-  struct jr_code_close rec;
+  JitRecCodeClose rec;
 
-  rec.p.id = JIT_CODE_CLOSE;
+  rec.p.id = JitRecordType::JIT_CODE_CLOSE;
   rec.p.total_size = sizeof(rec);
   rec.p.timestamp = perfGetTimestamp();
 
@@ -227,7 +219,7 @@ void DebugInfo::closePerfJitDump() {
   fclose(m_perfJitDump);
 
   m_perfJitDump = nullptr;
-  if (!m_perfMmapMarker) {
+  if (m_perfMmapMarker != MAP_FAILED) {
     munmap(m_perfMmapMarker, sysconf(_SC_PAGESIZE));
   }
 }
@@ -244,12 +236,12 @@ int DebugInfo::perfJitDumpTrace(const void* startAddr,
   if (!startAddr || !size) return -1; 
   
   static int code_generation = 1;
-  struct jr_code_load rec;  
+  JitRecCodeLoad rec;  
   size_t padding_count;
   
   uint64_t vma = reinterpret_cast<uintptr_t>(startAddr);  
   
-  rec.p.id           = JIT_CODE_LOAD;
+  rec.p.id           = JitRecordType::JIT_CODE_LOAD;
   rec.p.total_size   = sizeof(rec) + strlen(symName) + 1;
   padding_count      = PADDING_8ALIGNED(rec.p.total_size);
   rec.p.total_size  += padding_count;

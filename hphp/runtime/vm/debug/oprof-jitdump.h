@@ -34,7 +34,7 @@
 
 #define JITHEADER_VERSION 1
 
-enum jitdump_flags_bits {
+enum JitdumpFlagBits {
   JITDUMP_FLAGS_ARCH_TIMESTAMP_BIT,
   JITDUMP_FLAGS_MAX_BIT,
 };
@@ -44,7 +44,7 @@ enum jitdump_flags_bits {
 #define JITDUMP_FLAGS_RESERVED (JITDUMP_FLAGS_MAX_BIT < 64 ? \
                                (~((1ULL << JITDUMP_FLAGS_MAX_BIT) - 1)) : 0)
 
-struct jitheader {
+struct JitHeader {
   uint32_t magic;       /* characters "jItD" */
   uint32_t version;     /* header version */
   uint32_t total_size;  /* total size of header */
@@ -55,24 +55,23 @@ struct jitheader {
   uint64_t flags;       /* flags */
 };
 
-enum jit_record_type {
-  JIT_CODE_LOAD        = 0,
-  JIT_CODE_MOVE        = 1,
-  JIT_CODE_DEBUG_INFO  = 2,
-  JIT_CODE_CLOSE       = 3,
-  JIT_CODE_MAX
+enum class JitRecordType : uint8_t {
+  JIT_CODE_LOAD,
+  JIT_CODE_MOVE,
+  JIT_CODE_DEBUG_INFO,
+  JIT_CODE_CLOSE,
+  JIT_CODE_MAX,
 };
 
 /* record prefix (mandatory in each record) */
-struct jr_prefix {
-  uint32_t id;
+struct JitRecPrefix {
+  JitRecordType id;
   uint32_t total_size;
   uint64_t timestamp;
 };
 
-struct jr_code_load {
-  struct jr_prefix p;
-
+struct JitRecCodeLoad {
+  JitRecPrefix p;
   uint32_t pid;
   uint32_t tid;
   uint64_t vma;
@@ -81,13 +80,12 @@ struct jr_code_load {
   uint64_t code_index;
 };
 
-struct jr_code_close {
-  struct jr_prefix p;
+struct JitRecCodeClose {
+  JitRecPrefix p;
 };
 
-struct jr_code_move {
-  struct jr_prefix p;
-
+struct JitRecCodeMove {
+  JitRecPrefix p;
   uint32_t pid;
   uint32_t tid;
   uint64_t vma;
@@ -97,7 +95,7 @@ struct jr_code_move {
   uint64_t code_index;
 };
 
-struct debug_entry {
+struct DebugEntry {
   uint64_t addr;
   /* source line number starting at 1 */
   int lineno;
@@ -107,20 +105,19 @@ struct debug_entry {
   const char name[0];
 };
 
-struct jr_code_debug_info {
-  struct jr_prefix p;
-
+struct JitRecCodeDebugInfo {
+  JitRecPrefix p;
   uint64_t code_addr;
   uint64_t nr_entry;
-  struct debug_entry entries[0];
+  DebugEntry entries[0];
 };
 
-union jr_entry {
-  struct jr_code_debug_info info;
-  struct jr_code_close close;
-  struct jr_code_load load;
-  struct jr_code_move move;
-  struct jr_prefix prefix;
+union JitRecEntry {
+  JitRecCodeDebugInfo info;
+  JitRecCodeClose close;
+  JitRecCodeLoad load;
+  JitRecCodeMove move;
+  JitRecPrefix prefix;
 };
 
 #endif /* !JITDUMP_H */

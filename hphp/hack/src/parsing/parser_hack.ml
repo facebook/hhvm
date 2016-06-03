@@ -598,17 +598,26 @@ and toplevel acc env terminate =
       else toplevel (stmt :: acc) env terminate
 
 and toplevel_word def_start ~attr env = function
-  | "abstract" ->
-    let final = (match L.token env.file env.lb with
-      | Tword when Lexing.lexeme env.lb = "final" -> true
-      | _ -> begin L.back env.lb; false end
-    ) in
-    expect_word env "class";
-    let class_ = class_ def_start ~attr ~final ~kind:Cabstract env in
-    [Class class_]
-  | "final" ->
+  | ("abstract" | "final") as attr_ ->
+      (* parse all the class attributes until we see a non-attribute *)
+      let is_attribute attribute_ =
+        (attribute_ = "final" || attribute_ = "abstract") in
+      let rec parse_attributes attr_accum =
+        (match L.token env.file env.lb with
+          | Tword when is_attribute (Lexing.lexeme env.lb) ->
+            let tok = Lexing.lexeme env.lb in
+            if List.exists attr_accum (fun x -> x = tok) then
+              error env ("Cannot specify attribute '" ^ tok ^
+                "' multiple times.");
+            parse_attributes (attr_accum @ [tok])
+          | _ -> begin L.back env.lb; attr_accum end
+          ) in
+      let attributes = parse_attributes [attr_] in
+      let final = List.exists attributes (fun x -> x = "final") in
+      let abstract = List.exists attributes (fun x -> x = "abstract") in
       expect_word env "class";
-      let class_ = class_ def_start ~attr ~final:true ~kind:Cnormal env in
+      let kind = if abstract then Cabstract else Cnormal in
+      let class_ = class_ def_start ~attr ~final:final ~kind:kind env in
       [Class class_]
   | "class" ->
       let class_ = class_ def_start ~attr ~final:false ~kind:Cnormal env in

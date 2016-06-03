@@ -33,8 +33,6 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-#include <folly/SharedMutex.h>
-
 #include "hphp/util/portability.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/rank.h"
@@ -254,10 +252,12 @@ public:
 #endif
   {
     invalidateWriteOwner();
+    pthread_rwlock_init(&m_rwlock, nullptr);
   }
 
   ~ReadWriteMutex() {
     assertNotWriteOwned();
+    pthread_rwlock_destroy(&m_rwlock);
   }
 
   void acquireRead() {
@@ -267,7 +267,7 @@ public:
      */
     assertNotWriteOwner();
     pushRank(m_rank);
-    m_rwlock.lock_shared();
+    pthread_rwlock_rdlock(&m_rwlock);
     /*
      * Again, see task #528421.
      */
@@ -277,41 +277,28 @@ public:
   void acquireWrite() {
     assertNotWriteOwner();
     pushRank(m_rank);
-    m_rwlock.lock();
+    pthread_rwlock_wrlock(&m_rwlock);
     assertNotWriteOwned();
     recordWriteAcquire();
   }
 
-  bool attemptRead() {
-    return m_rwlock.try_lock_shared();
-  }
-
-  bool attemptWrite() {
-    return m_rwlock.try_lock();
-  }
-
-  void releaseRead() {
+  bool attemptRead() { return !pthread_rwlock_tryrdlock(&m_rwlock); }
+  bool attemptWrite() { return !pthread_rwlock_trywrlock(&m_rwlock); }
+  void release() {
 #ifdef DEBUG
     popRank(m_rank);
-    assertNotWriteOwned();
+    if (m_writeOwner == pthread_self()) {
+      invalidateWriteOwner();
+    }
 #endif
-    m_rwlock.unlock_shared();
-  }
-
-  void releaseWrite() {
-#ifdef DEBUG
-    popRank(m_rank);
-    assert(m_writeOwner == pthread_self());
-    invalidateWriteOwner();
-#endif
-    m_rwlock.unlock();
+    pthread_rwlock_unlock(&m_rwlock);
   }
 
 private:
   ReadWriteMutex(const ReadWriteMutex &); // suppress
   ReadWriteMutex &operator=(const ReadWriteMutex &); // suppress
 
-  folly::SharedMutex m_rwlock;
+  pthread_rwlock_t m_rwlock;
 };
 
 /*

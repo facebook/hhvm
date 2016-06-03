@@ -327,7 +327,7 @@ ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
 }
 
 ArrayData* EmptyArray::ToDict(ArrayData*) {
-  return MixedArray::MakeReserveDict(0);
+  return staticEmptyDictArray();
 }
 
 ArrayData* EmptyArray::ToVec(const ArrayData*) {

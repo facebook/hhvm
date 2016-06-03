@@ -69,7 +69,8 @@ bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
 bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
 
 bool keyCouldBeWeird(Type key) {
-  return key.couldBe(TObj) || key.couldBe(TArr);
+  return key.couldBe(TObj) || key.couldBe(TArr) || key.couldBe(TVec) ||
+    key.couldBe(TDict);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -173,6 +174,40 @@ bool couldBeInSelf(ISS& env, const Base& b) {
 bool couldBeInPublicStatic(ISS& env, const Base& b) {
   return b.loc == BaseLoc::StaticObjProp;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename R, typename B, typename... T>
+typename std::enable_if<
+  !std::is_same<R, Type>::value,
+  folly::Optional<Type>
+>::type vec_or_dict_op(
+  ISS& env,
+  R opV(B, const T&...),
+  R opD(B, const T&...),
+  T... args) {
+  auto const base = env.state.base.type;
+  if (!base.subtypeOf(TVec) && !base.subtypeOf(TDict)) return folly::none;
+  auto res = base.subtypeOf(TVec) ? opV(base, args...) : opD(base, args...);
+  if (res.first == TBottom) unreachable(env);
+  if (res.second) nothrow(env);
+  return res.first;
+}
+template<typename R, typename B, typename... T>
+typename std::enable_if<
+  std::is_same<R, Type>::value,
+  folly::Optional<Type>
+>::type vec_or_dict_op(
+  ISS& env,
+  R opV(B, const T&...),
+  R opD(B, const T&...),
+  T... args) {
+  auto const base = env.state.base.type;
+  if (!base.subtypeOf(TVec) && !base.subtypeOf(TDict)) return folly::none;
+  return base.subtypeOf(TVec) ? opV(base, args...) : opD(base, args...);
+}
+#define hack_array_do(env, op, ...) \
+  vec_or_dict_op(env, vec_ ## op, dict_ ## op, ##__VA_ARGS__)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -351,11 +386,17 @@ Type resolveArrayChain(ISS& env, Type val) {
   do {
     auto arr = std::move(env.state.arrayChain.back().first);
     auto key = std::move(env.state.arrayChain.back().second);
-    assert(arr.subtypeOf(TArr));
     env.state.arrayChain.pop_back();
     FTRACE(5, "{}  | {} := {} in {}\n", prefix,
       show(key), show(val), show(arr));
-    val = array_set(std::move(arr), key, val);
+    if (arr.subtypeOf(TVec)) {
+      val = vec_set(std::move(arr), key, val).first;
+    } else if (arr.subtypeOf(TDict)) {
+      val = dict_set(std::move(arr), key, val).first;
+    } else {
+      assert(arr.subtypeOf(TArr));
+      val = array_set(std::move(arr), key, val);
+    }
   } while (!env.state.arrayChain.empty());
   FTRACE(5, "{}  = {}\n", prefix, show(val));
   return val;
@@ -415,6 +456,12 @@ void handleBaseElemU(ISS& env) {
     // We're conservative with unsets on array types for now.
     ty = union_of(ty, TArr);
   }
+  if (ty.couldBe(TVec)) {
+    ty = ty.subtypeOf(TVec) ? TDict : union_of(ty, TDict);
+  }
+  if (ty.couldBe(TDict)) {
+    ty = union_of(ty, TDict);
+  }
   if (ty.couldBe(TSStr)) {
     ty = loosen_statics(env.state.base.type);
   }
@@ -441,7 +488,7 @@ void handleBaseElemD(ISS& env) {
 
   // When the base is actually a subtype of array, we handle it in the callers
   // of these functions.
-  if (ty.subtypeOf(TArr)) return;
+  if (ty.subtypeOf(TArr) || ty.subtypeOf(TVec) || ty.subtypeOf(TDict)) return;
 
   if (elemMustPromoteToArr(ty)) {
     ty = counted_aempty();
@@ -466,6 +513,12 @@ void handleBaseElemD(ISS& env) {
    */
   if (ty.couldBe(TArr)) {
     ty = union_of(ty, TArr);
+  }
+  if (ty.couldBe(TVec)) {
+    ty = union_of(ty, TVec);
+  }
+  if (ty.couldBe(TDict)) {
+    ty = union_of(ty, TDict);
   }
 }
 
@@ -642,6 +695,8 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
     handleBaseElemU(env);
   }
 
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   if (isDefine) {
     handleInThisElemD(env);
     handleInSelfElemD(env);
@@ -649,11 +704,19 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
     handleBaseElemD(env);
 
     auto const couldDoChain =
-      mustBeInFrame(env.state.base) ||
-      env.state.base.loc == BaseLoc::LocalArrChain;
-    if (couldDoChain && env.state.base.type.subtypeOf(TArr)) {
+      (mustBeInFrame(env.state.base) ||
+       env.state.base.loc == BaseLoc::LocalArrChain) &&
+      (env.state.base.type.subtypeOf(TArr) || isvec || isdict);
+
+    if (couldDoChain) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
-      moveBase(env, Base { array_elem(env.state.base.type, key),
+      auto ty = [&] {
+        if (auto ty = hack_array_do(env, elem, key)) {
+          return *ty;
+        }
+        return array_elem(env.state.base.type, key);
+      }();
+      moveBase(env, Base { ty,
                            BaseLoc::LocalArrChain,
                            TBottom,
                            env.state.base.locName,
@@ -664,6 +727,12 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
 
   if (env.state.base.type.subtypeOf(TArr)) {
     moveBase(env, Base { array_elem(env.state.base.type, key),
+                         BaseLoc::PostElem,
+                         env.state.base.type });
+    return;
+  }
+  if (auto ty = hack_array_do(env, elem, key)) {
+    moveBase(env, Base { *ty,
                          BaseLoc::PostElem,
                          env.state.base.type });
     return;
@@ -690,12 +759,19 @@ void miNewElem(ISS& env) {
   handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
 
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   auto const couldDoChain =
-    mustBeInFrame(env.state.base) ||
-    env.state.base.loc == BaseLoc::LocalArrChain;
-  if (couldDoChain && env.state.base.type.subtypeOf(TArr)) {
-    env.state.arrayChain.push_back(
-      array_newelem_key(env.state.base.type, TInitNull));
+    (mustBeInFrame(env.state.base) ||
+     env.state.base.loc == BaseLoc::LocalArrChain) &&
+    (env.state.base.type.subtypeOf(TArr) || isvec || isdict);
+  if (couldDoChain) {
+    auto par = [&] () -> std::pair<Type, Type> {
+      auto ty = hack_array_do(env, newelem, TInitNull);
+      if (ty) return {*ty, TInt};
+      return array_newelem_key(env.state.base.type, TInitNull);
+    }();
+    env.state.arrayChain.push_back(par);
     moveBase(env, Base { TInitNull,
                          BaseLoc::LocalArrChain,
                          TBottom,
@@ -704,7 +780,7 @@ void miNewElem(ISS& env) {
     return;
   }
 
-  if (env.state.base.type.subtypeOf(TArr)) {
+  if (env.state.base.type.subtypeOf(TArr) || isvec || isdict) {
     moveBase(env, Base { TInitNull, BaseLoc::PostElem, env.state.base.type });
     return;
   }
@@ -896,12 +972,20 @@ void miFinalUnsetProp(ISS& env, int32_t nDiscard, Type key) {
 // handle array chains and frame effects, but don't yet do anything
 // better than supplying a single type.
 void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
-  if (mustBeInFrame(env.state.base) && env.state.base.type.subtypeOf(TArr)) {
-    env.state.base.type = array_set(env.state.base.type, key, ty);
-    return;
-  }
-  if (env.state.base.loc == BaseLoc::LocalArrChain) {
+  if (mustBeInFrame(env.state.base)) {
     if (env.state.base.type.subtypeOf(TArr)) {
+      env.state.base.type = array_set(env.state.base.type, key, ty);
+      return;
+    }
+    if (auto res = hack_array_do(env, set, key, ty)) {
+      env.state.base.type = *res;
+      return;
+    }
+  }
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
+  if (env.state.base.loc == BaseLoc::LocalArrChain) {
+    if (env.state.base.type.subtypeOf(TArr) || isvec || isdict) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       env.state.base.type = ty;
     }
@@ -909,10 +993,15 @@ void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
 }
 
 void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key) {
-  auto const ty =
-    env.state.base.type.subtypeOf(TArr)
-      ? array_elem(env.state.base.type, key)
-      : TInitCell;
+  auto const ty = [&] {
+    if (env.state.base.type.subtypeOf(TArr)) {
+      return array_elem(env.state.base.type, key);
+    }
+    if (auto ty = hack_array_do(env, elem, key)) {
+      return *ty;
+    }
+    return TInitCell;
+  }();
   discard(env, nDiscard);
   push(env, ty);
 }
@@ -923,7 +1012,14 @@ void miFinalVGetElem(ISS& env, int32_t nDiscard, Type key) {
   handleInSelfElemD(env);
   handleInPublicStaticElemD(env);
   handleBaseElemD(env);
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   pessimisticFinalElemD(env, key, TInitGen);
+  if (isvec || isdict) {
+    unreachable(env);
+    push(env, TBottom);
+    return;
+  }
   push(env, TRef);
 }
 
@@ -969,21 +1065,50 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
    * We push the right hand side on the stack only if the base is an
    * array, object or emptyish.
    */
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   auto const isWeird = keyCouldBeWeird(key) ||
                        (!env.state.base.type.subtypeOf(TArr) &&
                         !env.state.base.type.subtypeOf(TObj) &&
-                        !mustBeEmptyish(env.state.base.type));
+                        !mustBeEmptyish(env.state.base.type) &&
+                        !isvec &&
+                        !isdict);
+  auto makeNotWeird = [&] (Type key) {
+    if (isvec) return key.couldBe(TInt) ? TInt : TBottom;
+    if (!key.couldBe(TInt)) return key.couldBe(TStr) ? TStr : TBottom;
+    return key.couldBe(TStr) ? TInitCell : TInt;
+  };
 
-  if (mustBeInFrame(env.state.base) && env.state.base.type.subtypeOf(TArr)) {
-    env.state.base.type = array_set(env.state.base.type, key, t1);
-    push(env, isWeird ? TInitCell : t1);
-    return;
+  if (mustBeInFrame(env.state.base)) {
+    if (env.state.base.type.subtypeOf(TArr)) {
+      env.state.base.type = array_set(env.state.base.type, key, t1);
+      push(env, isWeird ? TInitCell : t1);
+      return;
+    }
+    if (isvec || isdict) {
+      auto ty = hack_array_do(env, set, key, t1);
+      assert(ty);
+      env.state.base.type = *ty;
+      if (*ty == TBottom) {
+        push(env, TBottom);
+        return;
+      }
+      // Vec and Dict throw on weird keys
+      push(env, isWeird ? makeNotWeird(t1) : t1);
+      return;
+    }
   }
   if (env.state.base.loc == BaseLoc::LocalArrChain) {
     if (env.state.base.type.subtypeOf(TArr)) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       env.state.base.type = t1;
       push(env, isWeird ? TInitCell : t1);
+      return;
+    }
+    if (isvec || isdict) {
+      env.state.arrayChain.emplace_back(env.state.base.type, key);
+      env.state.base.type = t1;
+      push(env, isWeird ? makeNotWeird(t1) : t1);
       return;
     }
   }
@@ -1002,9 +1127,15 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard, SetOpOp subop, Type key) {
   handleInSelfElemD(env);
   handleInPublicStaticElemD(env);
   handleBaseElemD(env);
-  auto const lhsTy = env.state.base.type.subtypeOf(TArr) &&
-    !keyCouldBeWeird(key) ? array_elem(env.state.base.type, key)
-                          : TInitCell;
+  auto const lhsTy = [&] {
+    if (env.state.base.type.subtypeOf(TArr) && !keyCouldBeWeird(key)) {
+      return array_elem(env.state.base.type, key);
+    }
+    if (auto ty = hack_array_do(env, elem, key)) {
+      return *ty;
+    }
+    return TInitCell;
+  }();
   auto const resultTy = typeSetOp(subop, lhsTy, rhsTy);
   pessimisticFinalElemD(env, key, resultTy);
   push(env, resultTy);
@@ -1016,9 +1147,13 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard, IncDecOp subop, Type key) {
   handleInSelfElemD(env);
   handleInPublicStaticElemD(env);
   handleBaseElemD(env);
-  auto const postTy = env.state.base.type.subtypeOf(TArr) &&
-    !keyCouldBeWeird(key) ? array_elem(env.state.base.type, key)
-                          : TInitCell;
+  auto const postTy = [&] {
+    if (env.state.base.type.subtypeOf(TArr) && !keyCouldBeWeird(key)) {
+      return array_elem(env.state.base.type, key);
+    }
+    if (auto ty = hack_array_do(env, elem, key)) return *ty;
+    return TInitCell;
+  }();
   auto const preTy = typeIncDec(subop, postTy);
   pessimisticFinalElemD(env, key, typeIncDec(subop, preTy));
   push(env, isPre(subop) ? preTy : postTy);
@@ -1031,7 +1166,14 @@ void miFinalBindElem(ISS& env, int32_t nDiscard, Type key) {
   handleInSelfElemD(env);
   handleInPublicStaticElemD(env);
   handleBaseElemD(env);
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   pessimisticFinalElemD(env, key, TInitGen);
+  if (isvec || isdict) {
+    unreachable(env);
+    push(env, TBottom);
+    return;
+  }
   push(env, TRef);
 }
 
@@ -1054,14 +1196,25 @@ void miFinalUnsetElem(ISS& env, int32_t nDiscard, Type key) {
 // array chains and frame effects, but don't yet do anything better than
 // supplying a single type.
 void pessimisticFinalNewElem(ISS& env, Type ty) {
-  if (mustBeInFrame(env.state.base) && env.state.base.type.subtypeOf(TArr)) {
-    env.state.base.type = array_newelem(env.state.base.type, ty);
-    return;
+  if (mustBeInFrame(env.state.base)) {
+    if (env.state.base.type.subtypeOf(TArr)) {
+      env.state.base.type = array_newelem(env.state.base.type, ty);
+      return;
+    }
+    if (auto res = hack_array_do(env, newelem, ty)) {
+      env.state.base.type = *res;
+      return;
+    }
   }
-  if (env.state.base.loc == BaseLoc::LocalArrChain &&
-      env.state.base.type.subtypeOf(TArr)) {
-    env.state.base.type = array_newelem(env.state.base.type, ty);
-    return;
+  if (env.state.base.loc == BaseLoc::LocalArrChain) {
+    if (env.state.base.type.subtypeOf(TArr)) {
+      env.state.base.type = array_newelem(env.state.base.type, ty);
+      return;
+    }
+    if (auto res = hack_array_do(env, newelem, ty)) {
+      env.state.base.type = *res;
+      return;
+    }
   }
 }
 
@@ -1071,7 +1224,14 @@ void miFinalVGetNewElem(ISS& env, int32_t nDiscard) {
   handleInSelfNewElem(env);
   handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   pessimisticFinalNewElem(env, TInitGen);
+  if (isvec || isdict) {
+    unreachable(env);
+    push(env, TBottom);
+    return;
+  }
   push(env, TRef);
 }
 
@@ -1083,16 +1243,28 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
   handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
 
-  if (mustBeInFrame(env.state.base) && env.state.base.type.subtypeOf(TArr)) {
-    env.state.base.type = array_newelem(env.state.base.type, t1);
-    push(env, t1);
-    return;
+  if (mustBeInFrame(env.state.base)) {
+    if (env.state.base.type.subtypeOf(TArr)) {
+      env.state.base.type = array_newelem(env.state.base.type, t1);
+      push(env, t1);
+      return;
+    }
+    if (auto ty = hack_array_do(env, newelem, t1)) {
+      env.state.base.type = *ty;
+      push(env, t1);
+      return;
+    }
   }
-  if (env.state.base.loc == BaseLoc::LocalArrChain &&
-      env.state.base.type.subtypeOf(TArr)) {
-    env.state.base.type = array_newelem(env.state.base.type, t1);
-    push(env, t1);
-    return;
+  if (env.state.base.loc == BaseLoc::LocalArrChain) {
+    if (env.state.base.type.subtypeOf(TArr)) {
+      env.state.base.type = array_newelem(env.state.base.type, t1);
+      push(env, t1);
+      return;
+    }
+    if (auto ty = hack_array_do(env, newelem, t1)) {
+      env.state.base.type = *ty;
+      push(env, t1);
+    }
   }
 
   // ArrayAccess on $this will always push the rhs.
@@ -1132,15 +1304,26 @@ void miFinalBindNewElem(ISS& env, int32_t nDiscard) {
   handleInSelfNewElem(env);
   handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   pessimisticFinalNewElem(env, TInitGen);
+  if (isvec || isdict) {
+    unreachable(env);
+    push(env, TBottom);
+    return;
+  }
   push(env, TRef);
 }
 
 void miFinalSetWithRef(ISS& env) {
+  auto const isvec = env.state.base.type.subtypeOf(TVec);
+  auto const isdict = env.state.base.type.subtypeOf(TDict);
   moveBase(env, folly::none);
-  killLocals(env);
-  killThisProps(env);
-  killSelfProps(env);
+  if (!isvec && !isdict) {
+    killLocals(env);
+    killThisProps(env);
+    killSelfProps(env);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

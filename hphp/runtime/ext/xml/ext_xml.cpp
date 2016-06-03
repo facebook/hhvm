@@ -497,7 +497,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
               return;
             }
           }
-          if (parser->level <= XML_MAXLEVEL) {
+          if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
             tag = Array::Create();
             _xml_add_to_info(parser, parser->ltags[parser->level-1] +
                              parser->toffset);

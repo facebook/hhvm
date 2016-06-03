@@ -101,6 +101,7 @@ struct HardwareCounter {
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
   static void Init(bool enable, const std::string& events, bool subProc) {}
+  static void RecordSubprocessTimes() {}
 
   // Normally exposed by DECLARE_THREAD_LOCAL_NO_CHECK
   void getCheck() { }

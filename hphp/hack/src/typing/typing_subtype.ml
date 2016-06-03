@@ -168,7 +168,8 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   match ety_super, ety_sub with
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ =
-        Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
+        Unify.unify_unwrapped env uenv_super.TUEnv.non_null ty_super
+                              uenv_sub.TUEnv.non_null ty_sub in
       env
 (****************************************************************************)
 (* ### Begin Tunresolved madness ###
@@ -196,7 +197,9 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tunresolved _), (r_sub, _) when Env.grow_super env ->
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
       let env, _ =
-        Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
+        Unify.unify_unwrapped
+          env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
+              ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub in
       env
   | (_, Tany), (_, Tunresolved _) when Env.grow_super env ->
       (* This branch is necessary in the following case:
@@ -208,7 +211,9 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
        * Thanks to this branch, the type variable unifies with the intersection
        * type.
        *)
-      fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
+    fst (Unify.unify_unwrapped
+        env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
+            ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
   | _, (_, Tunresolved tyl) when Env.grow_super env ->
       List.fold_left tyl ~f:begin fun env x ->
         sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x)
@@ -219,10 +224,14 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (r_super, _), (_, Tunresolved _) when not (Env.grow_super env) ->
       let ty_super = (r_super, Tunresolved [ty_super]) in
       let env, _ =
-        Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
+        Unify.unify_unwrapped
+          env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
+              ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub in
       env
   | (_, Tunresolved _), (_, Tany) when not (Env.grow_super env) ->
-      fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
+    fst (Unify.unify_unwrapped
+        env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
+            ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
   | (_, Tunresolved tyl), _ when not (Env.grow_super env) ->
       List.fold_left tyl ~f:begin fun env x ->
         sub_type_with_uenv env (uenv_super, x) (uenv_sub, ty_sub)
@@ -488,14 +497,12 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | _, (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some x)) ->
       Errors.try_
         (fun () ->
-          fst @@
-            Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+          fst @@ Unify.unify env ty_super ty_sub
         )
         (fun _ -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x))
   | _, (r, Tabstract (AKdependent d, Some ty)) ->
       Errors.try_
-        (fun () -> fst (
-          Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)))
+        (fun () -> fst (Unify.unify env ty_super ty_sub))
         (fun _ ->
           let uenv_sub =
             { uenv_sub with
@@ -608,17 +615,6 @@ and sub_string p env ty2 =
   | _, (Tmixed | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
       fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
-
-(* and subtype_params env l_super l_sub def_super = *)
-(*   match l_super, l_sub with *)
-(*   | l, [] -> env, l *)
-(*   | [], l -> *)
-(*   | (name_super, x_super) :: rl_super, (name_sub, x_sub) :: rl_sub -> *)
-(*     let name = if name_super = name_sub then name_super else None in *)
-(*     let env = { env with Env.pos = Reason.to_pos (fst x_super) } in *)
-(*     let env, _ = Unify.unify env x_super x_sub in *)
-(*     let env, rl = Unify.unify_params env rl_super rl_sub in *)
-(*     env, (name, x_sub) :: rl *)
 
 (*****************************************************************************)
 (* Exporting *)

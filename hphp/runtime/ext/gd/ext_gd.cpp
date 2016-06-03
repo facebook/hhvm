@@ -4551,6 +4551,11 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
       return false;
     }
 
+    if (iptcdata_len >= (INT64_MAX - sizeof(psheader) - st_size - 1024 - 1)) {
+      raise_warning("iptcdata too long");
+      return false;
+    }
+
     auto malloc_size = iptcdata_len + sizeof(psheader) + st_size + 1024 + 1;
     poi = spoolbuf = (unsigned char *)IM_MALLOC(malloc_size);
     CHECK_ALLOC_R(poi, malloc_size, false);

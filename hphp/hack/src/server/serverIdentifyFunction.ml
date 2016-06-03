@@ -8,18 +8,20 @@
  *
  *)
 
+open Core
+
 type result =
-  ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) option
+  ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) list
 
 let get_occurrence_and_map content line char ~f =
-  let result = ref None in
+  let result = ref [] in
   IdentifySymbolService.attach_hooks result line char;
   let path = Relative_path.default in
   let (funs, classes, typedefs), ast =
     ServerIdeUtils.declare_and_check_get_ast path content in
 
   IdentifySymbolService.detach_hooks ();
-  let result = Option.map !result (fun x -> f x ast) in
+  let result = List.map !result (fun x -> f x ast) in
   ServerIdeUtils.revive funs classes typedefs path;
   result
 
@@ -33,6 +35,6 @@ let go content line char tcopt =
   )
 
 let go_absolute content line char tcopt =
-  Option.map (go content line char tcopt) begin fun (x, y) ->
+  List.map (go content line char tcopt) begin fun (x, y) ->
     SymbolOccurrence.to_absolute x, Option.map y SymbolDefinition.to_absolute
   end

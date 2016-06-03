@@ -478,8 +478,8 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     let file = cat (Relative_path.to_absolute filename) in
     let result = ServerIdentifyFunction.go file line column tcopt in
     begin match result with
-      | Some symbol -> print_symbol symbol
-      | None -> print_endline "None"
+      | [] -> print_endline "None"
+      | _ -> List.iter result print_symbol
     end
   | Find_local (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in

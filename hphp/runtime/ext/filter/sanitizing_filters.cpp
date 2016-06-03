@@ -102,8 +102,8 @@ static Variant php_filter_strip(const String& value, long flags) {
   }
 
   /* Optimization for if no strip flags are set */
-  if (! ((flags & k_FILTER_FLAG_STRIP_LOW) ||
-         (flags & k_FILTER_FLAG_STRIP_HIGH)) ) {
+  if (!(flags & (k_FILTER_FLAG_STRIP_LOW |
+                 k_FILTER_FLAG_STRIP_HIGH | k_FILTER_FLAG_STRIP_BACKTICK))) {
     return value;
   }
 

@@ -12,9 +12,12 @@ open Core
 open Reordered_argument_collections
 open Typing_defs
 
+type member = Ai.ServerFindRefs.member =
+  | Method of string
+
 type action = Ai.ServerFindRefs.action =
   | Class of string
-  | Method of string * string
+  | Member of string * member
   | Function of string
 
 type result = (string * Pos.absolute) list

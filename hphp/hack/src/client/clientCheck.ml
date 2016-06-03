@@ -124,7 +124,8 @@ let main args =
         try
           match pieces with
           | class_name :: method_name :: _ ->
-              FindRefsService.Method (class_name, method_name)
+              FindRefsService.Member
+                (class_name, FindRefsService.Method method_name)
           | method_name :: _ -> FindRefsService.Function method_name
           | _ -> raise Exit
         with _ ->
@@ -321,7 +322,8 @@ let main args =
         try
           match pieces with
           | class_name :: method_name :: _ ->
-              Ai.TraceService.Method (class_name, method_name)
+              Ai.TraceService.Member (class_name,
+                  Ai.TraceService.Method method_name)
           | method_name :: _ -> Ai.TraceService.Function method_name
           | _ -> raise Exit
         with _ ->

@@ -66,7 +66,7 @@ let search_class class_name include_defs genv env =
 
 let get_refs action include_defs genv env =
   match action with
-  | FindRefsService.Method (class_name, method_name) ->
+  | FindRefsService.Member (class_name, FindRefsService.Method method_name) ->
       search_method class_name method_name include_defs genv env
   | FindRefsService.Function function_name ->
       search_function function_name include_defs genv env
@@ -90,7 +90,8 @@ let go_from_file (content, line, char) genv env =
       | SymbolOccurrence.Class -> Some (FindRefsService.Class name)
       | SymbolOccurrence.Function -> Some (FindRefsService.Function name)
       | SymbolOccurrence.Method (class_name, method_name) ->
-          Some (FindRefsService.Method (class_name, method_name))
+          Some (FindRefsService.Member
+            (class_name, FindRefsService.Method method_name))
       | _ -> None
     end >>= fun action ->
     Some (go action genv env)

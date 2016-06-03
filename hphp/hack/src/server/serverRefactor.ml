@@ -37,7 +37,8 @@ let go action genv env =
     | ClassRename (old_name, new_name) ->
         FindRefsService.Class old_name, new_name
     | MethodRename (class_name, old_name, new_name) ->
-        FindRefsService.Method (class_name, old_name), new_name
+        FindRefsService.Member (class_name, FindRefsService.Method old_name),
+          new_name
     | FunctionRename (old_name, new_name) ->
       FindRefsService.Function old_name, new_name in
   let refs = ServerFindRefs.get_refs_with_defs find_refs_action genv env in

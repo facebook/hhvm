@@ -141,7 +141,8 @@ let test_find_method_refs_call () =
     {|"--find-refs"|};
     {|"C::getID"|}
   ] in
-  expect_call msg (Find_refs_call (FindRefsService.Method ("C", "getID")))
+  expect_call msg (Find_refs_call
+    (FindRefsService.Member ("C", FindRefsService.Method "getID")))
 
 let test_find_class_refs_call () =
   let msg = build_call_msg [

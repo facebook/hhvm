@@ -58,7 +58,7 @@ let args_to_call = function
     let open FindRefsService in
     begin match Str.split (Str.regexp "::") s with
       | class_name :: method_name :: _ ->
-        Find_refs_call (Method (class_name, method_name))
+        Find_refs_call (Member (class_name, Method method_name))
       | function_name :: _ ->
         Find_refs_call (Function function_name)
       | _ -> raise Not_found

@@ -141,7 +141,8 @@ let to_string_with_details : type a. a t -> _ = function
     Printf.sprintf "%d\n%d\n%s" from to_ content
   | FIND_REFS action -> begin match action with
     | FindRefsService.Class c -> Printf.sprintf "Class\n%s" c
-    | FindRefsService.Method (c, m) -> Printf.sprintf "Method\n%s\n%s" c m
+    | FindRefsService.Member (c, FindRefsService.Method m) ->
+        Printf.sprintf "Method\n%s\n%s" c m
     | FindRefsService.Function f -> Printf.sprintf "Function\n%s" f
     end
   | COVERAGE_LEVELS fn ->

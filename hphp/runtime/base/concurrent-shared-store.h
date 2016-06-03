@@ -56,6 +56,8 @@ struct StoreValue {
     , expire{o.expire}
     , dataSize{o.dataSize}
     , kind(o.kind)
+    , creation_time{o.creation_time}
+    , mtime{o.mtime}
     // Copy everything except the lock
   {
     hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
@@ -109,7 +111,9 @@ struct StoreValue {
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;  // Only valid if data is an APCHandle*.
-  char padding[19];  // Make APCMap nodes cache-line sized (it static_asserts).
+  uint32_t creation_time{0};
+  uint32_t mtime{0};
+  char padding[3];  // Make APCMap nodes cache-line sized (it static_asserts).
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -135,12 +139,16 @@ struct EntryInfo {
             bool inMem,
             int32_t size,
             int64_t ttl,
-            Type type)
+            Type type,
+            int64_t creation_time,
+            int64_t mtime)
     : key(apckey)
     , inMem(inMem)
     , size(size)
     , ttl(ttl)
     , type(type)
+    , creation_time(creation_time)
+    , mtime(mtime)
   {}
 
   static Type getAPCType(const APCHandle* handle);
@@ -150,6 +158,8 @@ struct EntryInfo {
   int32_t size;
   int64_t ttl;
   Type type;
+  int64_t creation_time;
+  int64_t mtime;
 };
 
 //////////////////////////////////////////////////////////////////////

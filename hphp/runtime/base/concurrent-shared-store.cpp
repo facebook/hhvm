@@ -817,6 +817,8 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
 
     sval->set(svar.handle, adjustedTtl);
     sval->dataSize = svar.size;
+    if (sval->creation_time == 0) sval->creation_time = time(nullptr);
+    sval->mtime = time(nullptr);
     expiry = sval->expire;
     if (expiry) {
       auto ikey = intptr_t(acc->first);
@@ -997,7 +999,8 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
     if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
   }
 
-  return EntryInfo(key, inMem, size, ttl, type);
+  return EntryInfo(key, inMem, size, ttl, type, sval->creation_time, 
+                   sval->mtime);
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {

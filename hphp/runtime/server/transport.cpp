@@ -820,6 +820,27 @@ void LogException(const char* msg) {
   }
 }
 
+bool isOff(const String& s) {
+  return s.size() == 3 && bstrcaseeq(s.data(), "off", 3);
+}
+bool isOn(const String& s) {
+  return s.size() == 2 && bstrcaseeq(s.data(), "on", 2);
+}
+void finalizeCompressionOnOff(int8_t& state, const char* ini_key) {
+  if (state == 0) {
+    return;
+  }
+
+  String value;
+  IniSetting::Get(ini_key, value);
+  if (state == -1) {
+    /* default off, can opt in */
+    state = isOn(value) ? 1 : 0;
+  } else /* state == 1 */ {
+    /* default on, can opt out */
+    state = isOff(value) ? 0 : 1;
+  }
+}
 }
 
 const char* Transport::compressionName(CompressionType type) {
@@ -851,19 +872,13 @@ StringHolder Transport::prepareResponse(const void* data,
   }
 
   if (!m_headerSent) {
-    if (m_compressionEnabled[CompressionType::BrotliChunked] == -1) {
-      String compression;
-      IniSetting::Get("brotli.chunked_compression", compression);
-      m_compressionEnabled[CompressionType::BrotliChunked] =
-          compression.size() == 2 && bstrcaseeq(compression.data(), "on", 2);
-    }
-
-    if (m_compressionEnabled[CompressionType::Brotli] == -1) {
-      String compression;
-      IniSetting::Get("brotli.compression", compression);
-      m_compressionEnabled[CompressionType::Brotli] =
-          compression.size() == 2 && bstrcaseeq(compression.data(), "on", 2);
-    }
+    finalizeCompressionOnOff(
+        m_compressionEnabled[CompressionType::Brotli], "brotli.compression");
+    finalizeCompressionOnOff(
+        m_compressionEnabled[CompressionType::BrotliChunked],
+        "brotli.chunked_compression");
+    finalizeCompressionOnOff(
+        m_compressionEnabled[CompressionType::Gzip], "zlib.output_compression");
 
     // If PHP disables a particular compression, then it is the same as if
     // encoding is not accepted.
@@ -902,17 +917,13 @@ StringHolder Transport::compressGzip(const void *data, int size,
                                      bool &compressed, bool last) {
   StringHolder response((const char *)data, size);
 
-  String compression;
   int compressionLevel = RuntimeOption::GzipCompressionLevel;
-  IniSetting::Get("zlib.output_compression", compression);
-  if (compression.size() == 2 && bstrcaseeq(compression.data(), "on", 2)) {
-    String compressionLevelStr;
-    IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
-    int level = compressionLevelStr.toInt64();
-    if (level > compressionLevel &&
-        level <= RuntimeOption::GzipMaxCompressionLevel) {
-      compressionLevel = level;
-    }
+  String compressionLevelStr;
+  IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
+  int level = compressionLevelStr.toInt64();
+  if (level > compressionLevel &&
+      level <= RuntimeOption::GzipMaxCompressionLevel) {
+    compressionLevel = level;
   }
   if (m_compressor == nullptr) {
     m_compressor = folly::make_unique<StreamCompressor>(
@@ -980,7 +991,7 @@ void Transport::enableCompression() {
   m_compressionEnabled[CompressionType::BrotliChunked] =
       RuntimeOption::BrotliChunkedCompressionEnabled;
   m_compressionEnabled[CompressionType::Gzip] =
-      RuntimeOption::GzipCompressionLevel;
+      RuntimeOption::GzipCompressionLevel ? 1 : 0;
 }
 
 void Transport::disableCompression() {

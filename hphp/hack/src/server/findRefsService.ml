@@ -16,6 +16,7 @@ type member = Ai.ServerFindRefs.member =
   | Method of string
   | Property of string
   | Class_const of string
+  | Typeconst of string
 
 type action = Ai.ServerFindRefs.action =
   | Class of string
@@ -42,6 +43,7 @@ let process_member_id results_acc target_classes target_member
       (not is_method) && (not is_const) &&
         ((Utils.lstrip member_name "$") = target_name)
     | Class_const target_name -> is_const && (member_name = target_name)
+    | Typeconst _ -> false
   in
   if not is_target then () else
   let class_name = class_.Typing_defs.tc_name in
@@ -63,14 +65,25 @@ let process_class_id results_acc target_classes cid mid_option =
      results_acc := Pos.Map.add (fst cid) class_name !results_acc
    end
 
+let process_taccess results_acc target_classes target_typeconst
+    class_ typeconst p =
+  let class_name = class_.tc_name in
+  let tconst_name = (snd typeconst.ttc_name) in
+  if (SSet.mem target_classes class_name) &&
+    (target_typeconst = tconst_name) then
+  results_acc :=
+    Pos.Map.add p (class_name ^ "::" ^ tconst_name) !results_acc
+
 let attach_hooks results_acc = function
-  | IMember (classes, member) ->
+  | IMember (classes, ((Method _ | Property _ | Class_const _) as member)) ->
     let process_member_id =
       process_member_id results_acc classes member in
     Typing_hooks.attach_cmethod_hook process_member_id;
     Typing_hooks.attach_smethod_hook process_member_id;
     Typing_hooks.attach_constructor_hook
       (process_constructor results_acc classes member);
+  | IMember (classes, Typeconst t) ->
+    Typing_hooks.attach_taccess_hook (process_taccess results_acc classes t)
   | IFunction fun_name ->
     Typing_hooks.attach_fun_id_hook (process_fun_id results_acc fun_name)
   | IClass c ->
@@ -185,7 +198,7 @@ let get_definitions tcopt = function
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end
-  | IMember (_, (Property _ | Class_const _)) ->
+  | IMember (_, (Property _ | Class_const _ | Typeconst _)) ->
     (* this code path is used only in ServerRefactor, we can update it at some
        later time *)
     []

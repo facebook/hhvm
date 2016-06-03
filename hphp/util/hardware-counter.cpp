@@ -92,6 +92,9 @@ struct HardwareCounterImpl {
       m_err = -1;
       return;
     }
+
+    fcntl(m_fd, F_SETFD, O_CLOEXEC);
+
     if (ioctl(m_fd, PERF_EVENT_IOC_ENABLE, 0) < 0) {
       Logger::Warning("perf_event failed to enable: %s",
                       folly::errnoStr(errno).c_str());
@@ -130,7 +133,11 @@ struct HardwareCounterImpl {
       if (ret == sizeof(*values) * 3) {
         values[0] -= reset_values[0];
         values[1] -= reset_values[1];
-        values[2] -= reset_values[2];
+        if (values[2] > reset_values[2]) {
+          values[2] -= reset_values[2];
+        } else {
+          values[2] = 0;
+        }
         return true;
       }
     }
@@ -206,6 +213,10 @@ HardwareCounter::HardwareCounter()
 }
 
 HardwareCounter::~HardwareCounter() {
+}
+
+void HardwareCounter::RecordSubprocessTimes() {
+  s_recordSubprocessTimes = true;
 }
 
 void HardwareCounter::Init(bool enable, const std::string& events,

@@ -45,7 +45,7 @@ let search_function function_name include_defs genv env =
     env.tcopt genv.ServerEnv.workers function_name in
   search (FindRefsService.IFunction function_name) include_defs files genv env
 
-let search_method class_name method_name include_defs genv env =
+let search_member class_name member include_defs genv env =
   let class_name = add_ns class_name in
   (* Find all the classes that extend this one *)
   let files = FindRefsService.get_child_classes_files env.tcopt
@@ -57,7 +57,7 @@ let search_method class_name method_name include_defs genv env =
   let files = FindRefsService.get_dependent_files env.tcopt
       genv.ServerEnv.workers all_classes in
   let target =
-    FindRefsService.IMember (all_classes, FindRefsService.Method method_name)
+    FindRefsService.IMember (all_classes, member)
   in
   search target include_defs files genv env
 
@@ -69,8 +69,8 @@ let search_class class_name include_defs genv env =
 
 let get_refs action include_defs genv env =
   match action with
-  | FindRefsService.Member (class_name, FindRefsService.Method method_name) ->
-      search_method class_name method_name include_defs genv env
+  | FindRefsService.Member (class_name, member) ->
+      search_member class_name member include_defs genv env
   | FindRefsService.Function function_name ->
       search_function function_name include_defs genv env
   | FindRefsService.Class class_name ->
@@ -95,6 +95,9 @@ let go_from_file (content, line, char) genv env =
       | SymbolOccurrence.Method (class_name, method_name) ->
           Some (FindRefsService.Member
             (class_name, FindRefsService.Method method_name))
+      | SymbolOccurrence.Property (class_name, prop_name) ->
+          Some (FindRefsService.Member
+            (class_name, FindRefsService.Property prop_name))
       | _ -> None
     end >>= fun action ->
     Some (go action genv env)

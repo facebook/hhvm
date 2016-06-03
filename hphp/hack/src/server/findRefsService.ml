@@ -14,6 +14,7 @@ open Typing_defs
 
 type member = Ai.ServerFindRefs.member =
   | Method of string
+  | Property of string
 
 type action = Ai.ServerFindRefs.action =
   | Class of string
@@ -31,18 +32,24 @@ let process_fun_id results_acc target_fun id =
   if target_fun = (snd id)
   then results_acc := Pos.Map.add (fst id) (snd id) !results_acc
 
-let process_method_id results_acc target_classes target_method
+let process_member_id results_acc target_classes target_member
     class_ id _ _ ~is_method ~is_const =
-  if not is_method then () else
+  let member_name = snd id in
+  let is_target = match target_member with
+    | Method target_name  -> is_method && (member_name = target_name)
+    | Property target_name ->
+      (not is_method) && (not is_const) &&
+        ((Utils.lstrip member_name "$") = target_name)
+  in
+  if not is_target then () else
   let class_name = class_.Typing_defs.tc_name in
-  if target_method = (snd id) && (SSet.mem target_classes class_name)
-  then
+  if SSet.mem target_classes class_name then
     results_acc :=
       Pos.Map.add (fst id) (class_name ^ "::" ^ (snd id)) !results_acc
 
-let process_constructor results_acc target_classes target_method class_ _ p =
-  process_method_id
-    results_acc target_classes target_method class_ (p, "__construct")
+let process_constructor results_acc target_classes target_member class_ _ p =
+  process_member_id
+    results_acc target_classes target_member class_ (p, "__construct")
     () () ~is_method:true ~is_const:false
 
 let process_class_id results_acc target_classes cid mid_option =
@@ -55,13 +62,13 @@ let process_class_id results_acc target_classes cid mid_option =
    end
 
 let attach_hooks results_acc = function
-  | IMember (classes, Method method_name) ->
-    let process_method_id =
-      process_method_id results_acc classes method_name in
-    Typing_hooks.attach_cmethod_hook process_method_id;
-    Typing_hooks.attach_smethod_hook process_method_id;
+  | IMember (classes, member) ->
+    let process_member_id =
+      process_member_id results_acc classes member in
+    Typing_hooks.attach_cmethod_hook process_member_id;
+    Typing_hooks.attach_smethod_hook process_member_id;
     Typing_hooks.attach_constructor_hook
-      (process_constructor results_acc classes method_name);
+      (process_constructor results_acc classes member);
   | IFunction fun_name ->
     Typing_hooks.attach_fun_id_hook (process_fun_id results_acc fun_name)
   | IClass c ->
@@ -176,6 +183,8 @@ let get_definitions tcopt = function
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end
+  | IMember (_, Property _) -> [] (* this code path is used only in
+    ServerRefactor, we can update it at some later time *)
 
 let find_references tcopt workers target include_defs
       files_info files =

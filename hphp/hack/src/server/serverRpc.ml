@@ -143,6 +143,8 @@ let to_string_with_details : type a. a t -> _ = function
     | FindRefsService.Class c -> Printf.sprintf "Class\n%s" c
     | FindRefsService.Member (c, FindRefsService.Method m) ->
         Printf.sprintf "Method\n%s\n%s" c m
+    | FindRefsService.Member (c, FindRefsService.Property p) ->
+        Printf.sprintf "Property\n%s\n%s" c p
     | FindRefsService.Function f -> Printf.sprintf "Function\n%s" f
     end
   | COVERAGE_LEVELS fn ->

@@ -742,10 +742,11 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   // We don't update tracked local types for pseudomains, but we do care about
   // stack types.
   auto const isPM = cur().curFunc->isPseudoMain();
-  auto const base = cur().mbr.pointee;
 
   auto const baseTmp = inst->src(minstrBaseIdx(inst->op()));
   if (!baseTmp->type().maybe(TPtrToGen)) return;
+
+  auto const base = pointee(baseTmp);
 
   auto const effect_on = [&] (Type ty) -> folly::Optional<Type> {
     auto const effects = MInstrEffects(inst->op(), ty);
@@ -1130,7 +1131,7 @@ void FrameStateMgr::trackInlineReturn() {
 }
 
 /*
- * Clear the tracked values at a Call instruction
+ * Clear the tracked values at a Call instruction.
  *
  * Keeping a value live across a Call requires spilling, so we avoid it---but
  * we do continue keeping track of types.

@@ -256,6 +256,8 @@ let parse_check_args cmd =
       Arg.String (fun x -> set_mode (MODE_GET_DEFINITION x) ()), "";
     "--ide-outline",
       Arg.Unit (set_mode (MODE_OUTLINE2)), "";
+    "--ide-find-refs",
+      Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x) ()), "";
     (* flags *)
     "--json", Arg.Set output_json,
       " output json for machine consumption. (default: false)";

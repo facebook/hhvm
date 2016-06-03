@@ -23,6 +23,7 @@ type _ t =
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
+  | IDE_FIND_REFS : string * int * int -> FindRefsService.result t
   | REFACTOR : ServerRefactor.action -> ServerRefactor.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoService.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
@@ -67,6 +68,8 @@ let handle : type a. genv -> env -> a t -> a =
           ServerFindRefs.go find_refs_action genv env
         else
           Ai.ServerFindRefs.go find_refs_action genv env
+    | IDE_FIND_REFS (content, line, char) ->
+        ServerFindRefs.go_from_file (content, line, char) genv env
     | REFACTOR refactor_action -> ServerRefactor.go refactor_action genv env
     | REMOVE_DEAD_FIXMES codes ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
@@ -122,3 +125,4 @@ let to_string : type a. a t -> _ = function
   | FIND_LVAR_REFS _ -> "FIND_LVAR_REFS"
   | FORMAT _ -> "FORMAT"
   | TRACE_AI _ -> "TRACE_AI"
+  | IDE_FIND_REFS _ -> "IDE_FIND_REFS"

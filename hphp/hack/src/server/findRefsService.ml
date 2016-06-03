@@ -15,6 +15,7 @@ open Typing_defs
 type member = Ai.ServerFindRefs.member =
   | Method of string
   | Property of string
+  | Class_const of string
 
 type action = Ai.ServerFindRefs.action =
   | Class of string
@@ -40,6 +41,7 @@ let process_member_id results_acc target_classes target_member
     | Property target_name ->
       (not is_method) && (not is_const) &&
         ((Utils.lstrip member_name "$") = target_name)
+    | Class_const target_name -> is_const && (member_name = target_name)
   in
   if not is_target then () else
   let class_name = class_.Typing_defs.tc_name in
@@ -183,8 +185,10 @@ let get_definitions tcopt = function
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end
-  | IMember (_, Property _) -> [] (* this code path is used only in
-    ServerRefactor, we can update it at some later time *)
+  | IMember (_, (Property _ | Class_const _)) ->
+    (* this code path is used only in ServerRefactor, we can update it at some
+       later time *)
+    []
 
 let find_references tcopt workers target include_defs
       files_info files =

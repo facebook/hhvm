@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Option.Monad_infix
 open ServerEnv
 open Reordered_argument_collections
 
@@ -79,3 +80,18 @@ let go action genv env =
   let res = get_refs action false genv env in
   let res = List.map res (fun (r, pos) -> (r, Pos.to_absolute pos)) in
   res
+
+let go_from_file (content, line, char) genv env =
+  let result =
+    (ServerIdentifyFunction.get_occurrence content line char) >>= fun symbol ->
+    let name = symbol.SymbolOccurrence.name in
+    begin match symbol.SymbolOccurrence.type_ with
+      | SymbolOccurrence.Class -> Some (FindRefsService.Class name)
+      | SymbolOccurrence.Function -> Some (FindRefsService.Function name)
+      | SymbolOccurrence.Method (class_name, method_name) ->
+          Some (FindRefsService.Method (class_name, method_name))
+      | _ -> None
+    end >>= fun action ->
+    Some (go action genv env)
+  in
+  Option.value result ~default:[]

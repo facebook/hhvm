@@ -1,0 +1,5 @@
+C::foo File "method.php", line 5, characters 12-14:
+D::foo File "method.php", line 11, characters 12-14:
+C::foo File "method.php", line 18, characters 7-9:
+D::foo File "method.php", line 19, characters 7-9:
+D::foo File "method.php", line 20, characters 7-9:

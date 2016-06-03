@@ -75,6 +75,18 @@ let make_genv options config local_config handle =
     debug_channels = None;
   }
 
+(* useful in testing code *)
+let default_genv =
+  { options          = ServerArgs.default_options "";
+    config           = ServerConfig.default_config;
+    local_config     = ServerLocalConfig.default;
+    workers          = None;
+    indexer          = (fun _ -> fun () -> []);
+    notifier         = (fun () -> SSet.empty);
+    wait_until_ready = (fun () -> ());
+    debug_channels   = None;
+  }
+
 let make_env config =
   { tcopt          = ServerConfig.typechecker_options config;
     files_info     = Relative_path.Map.empty;

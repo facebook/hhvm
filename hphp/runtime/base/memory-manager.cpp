@@ -985,6 +985,16 @@ void* MemoryManager::callocBig(size_t totalbytes, type_scan::Index tyindex) {
   return block.ptr;
 }
 
+NEVER_INLINE
+void MemoryManager::freeBigSize(void* vp, size_t bytes) {
+  m_stats.mmUsage -= bytes;
+  // Since we account for these direct allocations in our usage and adjust for
+  // them on allocation, we also need to adjust for them negatively on free.
+  m_stats.mallocDebt -= bytes;
+  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
+  m_heap.freeBig(vp);
+}
+
 // req::malloc api entry points, with support for malloc/free corner cases.
 namespace req {
 void* malloc(size_t nbytes, type_scan::Index tyindex) {

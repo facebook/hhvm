@@ -31,6 +31,13 @@
 #define PGSQL_STATUS_STRING 2
 
 #define FAIL_RETURN return false
+#define MAKE_STR_VECTOR(name, params) \
+  std::vector<const char *> name; \
+  name.reserve(params.size()); \
+  for (ArrayIter iter(params); iter; ++iter) { \
+    const Variant &param = iter.secondRef(); \
+    name.push_back(param.isNull() ? nullptr : param.toString().detach()->data()); \
+  }
 
 namespace HPHP {
 
@@ -640,44 +647,6 @@ std::vector<PGSQLConnectionPool*>& PGSQLConnectionPoolContainer::GetPools()
   return *v;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-// Simple RAII helper to convert an array to a
-// list of C strings to pass to pgsql functions. Needs
-// to be like this because string conversion may-or-may
-// not allocate and therefore needs to ensure that the
-// underlying data lasts long enough.
-struct CStringArray {
-  std::vector<String> m_strings;
-  std::vector<const char *> m_c_strs;
-
-  public:
-   explicit CStringArray(const Array& arr) {
-    int size = arr.size();
-
-    m_strings.reserve(size);
-    m_c_strs.reserve(size);
-
-    for (ArrayIter iter(arr); iter; ++iter) {
-      const Variant &param = iter.secondRef();
-      if (param.isNull()) {
-        m_strings.push_back(null_string);
-        m_c_strs.push_back(nullptr);
-      } else {
-        m_strings.push_back(param.toString());
-        m_c_strs.push_back(m_strings.back().data());
-      }
-    }
-  }
-
-  const char * const *data() {
-    return m_c_strs.data();
-  }
-
-};
-
 //////////////////// Connection functions /////////////////////////
 
 static Variant HHVM_FUNCTION(pg_connect,
@@ -1155,7 +1124,7 @@ static Variant HHVM_FUNCTION(pg_query_params,
     FAIL_RETURN;
   }
 
-  CStringArray str_array(params);
+  MAKE_STR_VECTOR(str_array, params);
 
   PQ::Result res =
     conn->get().exec(query.data(), params.size(), str_array.data());
@@ -1192,7 +1161,7 @@ static Variant HHVM_FUNCTION(pg_execute,
     FAIL_RETURN;
   }
 
-  CStringArray str_array(params);
+  MAKE_STR_VECTOR(str_array, params);
 
   PQ::Result res =
     conn->get().execPrepared(stmtname.data(), params.size(), str_array.data());
@@ -1282,7 +1251,7 @@ static bool HHVM_FUNCTION(pg_send_query_params,
         " Call pg_get_result() until it returns FALSE");
   }
 
-  CStringArray str_array(params);
+  MAKE_STR_VECTOR(str_array, params);
 
   if (!conn->get().sendQuery(query.data(), params.size(), str_array.data())) {
     return false;
@@ -1318,7 +1287,7 @@ static bool HHVM_FUNCTION(pg_send_execute,
     return false;
   }
 
-  CStringArray str_array(params);
+  MAKE_STR_VECTOR(str_array, params);
 
   return conn->get().sendQueryPrepared(stmtname.data(),
       params.size(), str_array.data());

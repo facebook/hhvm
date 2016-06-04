@@ -1620,6 +1620,10 @@ void ObjectData::raiseObjToIntNotice(const char* clsName) {
   raise_notice("Object of class %s could not be converted to int", clsName);
 }
 
+void ObjectData::raiseObjToDoubleNotice(const char* clsName) {
+  raise_notice("Object of class %s could not be converted to float", clsName);
+}
+
 void ObjectData::raiseAbstractClassError(Class* cls) {
   Attr attrs = cls->attrs();
   raise_error("Cannot instantiate %s %s",

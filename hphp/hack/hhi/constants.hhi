@@ -25,8 +25,9 @@ const int PHP_INT_MAX = (1 << 63) - 1;
 const int PHP_INT_MIN = -1 << 63;
 const int PHP_INT_SIZE = 8;
 
-const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
-const int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
+const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1 << 0;
+const int DEBUG_BACKTRACE_IGNORE_ARGS = 1 << 1;
+const int DEBUG_BACKTRACE_PROVIDE_METADATA = 1 << 16;
 
 const int E_ERROR = 1;
 const int E_WARNING = 1 << 1;

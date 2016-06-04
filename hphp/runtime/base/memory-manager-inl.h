@@ -254,16 +254,6 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
   FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
 }
 
-ALWAYS_INLINE
-void MemoryManager::freeBigSize(void* vp, size_t bytes) {
-  m_stats.mmUsage -= bytes;
-  // Since we account for these direct allocations in our usage and adjust for
-  // them on allocation, we also need to adjust for them negatively on free.
-  m_stats.mallocDebt -= bytes;
-  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
-  m_heap.freeBig(vp);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE

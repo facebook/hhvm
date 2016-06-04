@@ -478,7 +478,7 @@ const StaticString s_info("info");
 const StaticString s_in_memory("in_memory");
 const StaticString s_mem_size("mem_size");
 const StaticString s_type("type");
-const StaticString s_creation_time("creation_time");
+const StaticString s_c_time("creation_time");
 const StaticString s_mtime("mtime");
 
 // This is a guess to the size of the info array. It is significantly
@@ -516,7 +516,7 @@ Variant HHVM_FUNCTION(apc_cache_info,
       ent.add(s_ttl, entry.ttl);
       ent.add(s_mem_size, entry.size);
       ent.add(s_type, static_cast<int64_t>(entry.type));
-      ent.add(s_creation_time, entry.creation_time);
+      ent.add(s_c_time, entry.c_time);
       ent.add(s_mtime, entry.mtime);
       ents.append(ent.toArray());
     }

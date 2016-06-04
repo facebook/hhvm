@@ -93,6 +93,76 @@ bool PDOConnection::support(SupportedMethod method) {
   return false;
 }
 
+int PDOConnection::parseDataSource(const char *data_source,
+                                   int data_source_len,
+                                   struct pdo_data_src_parser *parsed,
+                                   int nparams) {
+  int i, j;
+  int valstart = -1;
+  int semi = -1;
+  int optstart = 0;
+  int nlen;
+  int n_matches = 0;
+
+  i = 0;
+  while (i < data_source_len) {
+    /* looking for NAME= */
+
+    if (data_source[i] == '\0') {
+      break;
+    }
+
+    if (data_source[i] != '=') {
+      ++i;
+      continue;
+    }
+
+    valstart = ++i;
+
+    /* now we're looking for VALUE; or just VALUE<NUL> */
+    semi = -1;
+    while (i < data_source_len) {
+      if (data_source[i] == '\0') {
+        semi = i++;
+        break;
+      }
+      if (data_source[i] == ';') {
+        semi = i++;
+        break;
+      }
+      ++i;
+    }
+
+    if (semi == -1) {
+      semi = i;
+    }
+
+    /* find the entry in the array */
+    nlen = valstart - optstart - 1;
+    for (j = 0; j < nparams; j++) {
+      if (0 == strncmp(data_source + optstart, parsed[j].optname, nlen) &&
+          parsed[j].optname[nlen] == '\0') {
+        /* got a match */
+        if (parsed[j].freeme) {
+          free(parsed[j].optval);
+        }
+        parsed[j].optval = strndup(data_source + valstart, semi - valstart);
+        parsed[j].freeme = 1;
+        ++n_matches;
+        break;
+      }
+    }
+
+    while (i < data_source_len && isspace(data_source[i])) {
+      i++;
+    }
+
+    optstart = i;
+  }
+
+  return n_matches;
+}
+
 bool PDOConnection::closer() {
   throw_pdo_exception(uninit_null(), uninit_null(),
                       "This driver doesn't support %s", __func__);

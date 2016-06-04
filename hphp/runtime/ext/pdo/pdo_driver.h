@@ -287,6 +287,20 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
   virtual ~PDOConnection() {}
   virtual bool create(const Array& options) = 0;
 
+  /* For the convenience of drivers, this function will parse a data source
+   * string, of the form "name=value; name2=value2" and populate variables
+   * according to the data you pass in and array of pdo_data_src_parser structures */
+  struct pdo_data_src_parser {
+    const char *optname;
+    char *optval;
+    int freeme;
+  };
+
+  virtual int parseDataSource(const char *data_source,
+                              int data_source_len,
+                              struct pdo_data_src_parser *parsed,
+                              int nparams);
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Virtual DB methods.

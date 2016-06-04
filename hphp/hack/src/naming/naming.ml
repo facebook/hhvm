@@ -910,15 +910,9 @@ module Make (GetLocals : GetLocals) = struct
   let check_tparams_shadow class_tparam_names methods =
     List.iter methods (check_method_tparams class_tparam_names)
 
-  let rec class_constraints tparams =
-    let cstrs = make_constraints tparams in
-    (* Checking there is no cycle in the type constraints *)
-    List.iter tparams (Naming_ast_helpers.HintCycle.check_constraint cstrs);
-    cstrs
-
   (* Naming of a class *)
-  and class_ nenv c =
-    let constraints = class_constraints c.c_tparams in
+  let rec class_ nenv c =
+    let constraints = make_constraints c.c_tparams in
     let env      = Env.make_class_env nenv constraints c in
     (* Checking for a code smell *)
     List.iter c.c_tparams check_constraint;
@@ -2237,7 +2231,7 @@ module Make (GetLocals : GetLocals) = struct
 
   let typedef genv tdef =
     let ty = match tdef.t_kind with Alias t | NewType t -> t in
-    let cstrs = class_constraints tdef.t_tparams in
+    let cstrs = make_constraints tdef.t_tparams in
     let env = Env.make_typedef_env genv cstrs tdef in
     let tconstraint = Option.map tdef.t_constraint (hint env) in
     List.iter tdef.t_tparams check_constraint;

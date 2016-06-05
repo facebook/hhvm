@@ -47,14 +47,14 @@
 
 namespace HPHP {
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
 std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
+std::atomic_int_fast64_t HttpServer::PrepareToStopTime{0};
 time_t HttpServer::OldServerStopTime;
-unsigned HttpServer::LoadFactor = 100; // desired load level in [0, 100]
+std::atomic_int HttpServer::LoadFactor{100}; // desired load level in [0, 100]
 
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
 
@@ -366,6 +366,7 @@ static void exit_on_timeout(int sig) {
 }
 
 void HttpServer::stop(const char* stopReason) {
+  LoadFactor = 0;
   if (m_stopped) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
@@ -406,6 +407,7 @@ void HttpServer::stop(const char* stopReason) {
 }
 
 void HttpServer::stopOnSignal(int sig) {
+  LoadFactor = 0;
   if (m_stopped) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
@@ -448,8 +450,10 @@ void HttpServer::EvictFileCache() {
 }
 
 void HttpServer::PrepareToStop() {
+  PrepareToStopTime.store(time(nullptr), std::memory_order_release);
+  LoadFactor.store(LoadFactor.load(std::memory_order_relaxed) * 3 / 4,
+                   std::memory_order_relaxed);
   EvictFileCache();
-  LoadFactor = LoadFactor * 3 / 4;
 }
 
 void HttpServer::createPid() {

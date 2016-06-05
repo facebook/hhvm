@@ -926,7 +926,6 @@ static bool readahead_rate(const char* path, int64_t mbPerSec) {
 
 static int start_server(const std::string &username, int xhprof) {
   BootStats::start();
-  HttpServer::ReduceOldServerLoad();
   HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
 

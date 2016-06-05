@@ -32,8 +32,9 @@ struct HttpServer : Synchronizable, TakeoverListener,
   static time_t StartTime;
 
 private:
+  static std::atomic_int_fast64_t PrepareToStopTime;
+  static std::atomic_int LoadFactor;
   static time_t OldServerStopTime;
-  static unsigned LoadFactor;
 
 public:
   explicit HttpServer();
@@ -48,8 +49,10 @@ public:
    */
   void runOrExitProcess();
 
-  // Stop may be called from a signal handler.
+  // stop() cannot be called from a signal handler, use stopOnSignal() in that
+  // case.
   void stop(const char* reason = nullptr);
+  void stopOnSignal(int sig);
 
   bool isStopped() const { return m_stopped;}
 
@@ -65,11 +68,13 @@ public:
   // Get total ongoing/queued request count for all satellite servers.
   std::pair<int, int> getSatelliteRequestCount() const;
 
-  void stopOnSignal(int sig);
-
-  static unsigned GetLoadFactor() { return LoadFactor; }
-  static void ResetLoadFactor() { LoadFactor = 100; }
-
+  static int GetLoadFactor() {
+    return LoadFactor.load(std::memory_order_relaxed);
+  }
+  static int64_t GetPrepareToStopTime() {
+    // Make sure changes are seen right away after PrepareToStop().
+    return PrepareToStopTime.load(std::memory_order_acquire);
+  }
   /*
    * Tell the old server instance to (prepare to) stop.  Return true
    * if the old server acknowledges, or a previous such attempt to

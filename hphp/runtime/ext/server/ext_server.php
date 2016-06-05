@@ -220,6 +220,22 @@ namespace HH {
 function server_is_stopping(): bool;
 
 /**
+ * Whether the server is prepared to stop.  This is different from
+ * 'server_is_stopping', because the server has not received the 'stop' command,
+ * and is not scheduled to stop.  It is still fully functional, able to handle
+ * requests for an indefinite amount of time, and should be considered healthy.
+ * This is just a hint used during server update.
+ *
+ * @return bool - True if server has received 'prepare-to-stop' command from the
+ * admin port in the past 'RuntimeOption::ServerPrepareToStop' seconds; False
+ * if server is not running, or has not received instructions to prepare to
+ * stop.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_is_prepared_to_stop(): bool;
+
+/**
  * Return the health level of the server in the range of 0~100.
  *
  * @return int - 100 if the server is very healthy, and 0 if the
@@ -238,4 +254,5 @@ function server_health_level(): int;
  */
 <<__HipHopSpecific, __Native>>
 function server_uptime(): int;
+
 }

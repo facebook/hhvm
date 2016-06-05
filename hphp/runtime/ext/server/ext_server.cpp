@@ -56,6 +56,7 @@ static struct ServerExtension final : Extension {
     HHVM_FE(xbox_schedule_thread_reset);
     HHVM_FE(xbox_get_thread_time);
     HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
+    HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
     HHVM_FALIAS(HH\\server_health_level, server_health_level);
     HHVM_FALIAS(HH\\server_uptime, server_uptime);
 
@@ -246,6 +247,13 @@ bool HHVM_FUNCTION(server_is_stopping) {
   }
   // Return false if not running in server mode.
   return false;
+}
+
+bool HHVM_FUNCTION(server_is_prepared_to_stop) {
+  auto const now = time(nullptr);
+  auto const lastPrepareTime = HttpServer::GetPrepareToStopTime();
+  if (lastPrepareTime == 0) return false;
+  return (lastPrepareTime + RuntimeOption::ServerPrepareToStopTimeout) >= now;
 }
 
 int64_t HHVM_FUNCTION(server_health_level) {

@@ -165,6 +165,7 @@ struct RuntimeOption {
   static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
   static int ServerShutdownEOMWait;
+  static int ServerPrepareToStopTimeout;
   // If `StopOldServer` is set, we try to stop the old server running
   // on the local host earlier when we initialize, and we do not start
   // serving requests until we are confident that the system can give

@@ -1,0 +1,12 @@
+File "this_type_attr.php", line 8, characters 22-23:
+Invalid xhp value for attribute me in :my-xhp (Typing[4110])
+File "this_type_attr.php", line 4, characters 13-16:
+This is an object of type :my-xhp (known to be exactly the class ':my-xhp')
+File "this_type_attr.php", line 8, characters 11-16:
+  where the class ':my-xhp' was referenced here
+File "this_type_attr.php", line 7, characters 15-21:
+It is incompatible with an object of type :my-xhp
+File "this_type_attr.php", line 8, characters 11-16:
+This requires the late-bound type to be exactly :my-xhp
+File "this_type_attr.php", line 7, characters 15-21:
+Since :my-xhp is not final this might be an instance of a child class

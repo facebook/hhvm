@@ -111,6 +111,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhp_attr_23.php',
         'xhp_attr_24.php',
         'xhp_hint.php',
+        'xhp/*.php',
     ],
     "XhpAttr": [
         'lexing_stack_fail.php',

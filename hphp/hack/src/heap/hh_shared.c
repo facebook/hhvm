@@ -130,9 +130,15 @@
  * appeared in Linux 3.17.
  ****************************************************************************/
 #if !defined __APPLE__ && !defined _WIN32
-  // Linux version must support syscall memfd_create
-  #ifndef __NR_memfd_create
-    #error "hh_shared.c requires a Linux version that supports memfd_create"
+  // Linux version for the architecture must support syscall memfd_create
+  #if defined(__x86_64__)
+    #define SYS_memfd_create 319
+  #elif defined(__powerpc64__)
+    #define SYS_memfd_create 360
+  #elif defined(__aarch64__)
+    #define SYS_memfd_create 385
+  #else
+    #error "hh_shared.c requires a architecture that supports memfd_create"
   #endif
 
   #define MEMFD_CREATE 1
@@ -145,7 +151,7 @@
    * kernel is < 3.17, and that's good enough.
    */
   static int memfd_create(const char *name, unsigned int flags) {
-    return syscall(__NR_memfd_create, name, flags);
+    return syscall(SYS_memfd_create, name, flags);
   }
 #endif
 

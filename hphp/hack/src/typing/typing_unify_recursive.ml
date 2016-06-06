@@ -51,7 +51,6 @@ let rec occurs env n rty =
   | Tarraykind ak -> occurs_array env n ak
   | Tfun ft -> occurs_ft env n ft
   | Tshape(_,sm) -> Nast.ShapeMap.exists (fun _ t -> occurs env n t) sm
-  | _ -> false
 and occurs_opt env n topt =
   match topt with
   | None -> false

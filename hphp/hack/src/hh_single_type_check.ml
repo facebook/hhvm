@@ -339,11 +339,17 @@ let file_to_files file =
   else if str_starts_with content "// @directory " then
     let contentl = Str.split (Str.regexp "\n") content in
     let first_line = List.hd_exn contentl in
-    let regexp = Str.regexp "^// @directory *\\([^ ]*\\)" in
+    let regexp = Str.regexp ("^// @directory *\\([^ ]*\\) \
+      *\\(@file *\\([^ ]*\\)*\\)?") in
     let has_match = Str.string_match regexp first_line 0 in
     assert has_match;
     let dir = Str.matched_group 1 first_line in
-    let file = Relative_path.create Relative_path.Dummy (dir ^ abs_fn) in
+    let file_name =
+      try
+        Str.matched_group 3 first_line
+      with
+        Not_found -> abs_fn in
+    let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
     let content = String.concat "\n" (List.tl_exn contentl) in
     Relative_path.Map.singleton file content
   else

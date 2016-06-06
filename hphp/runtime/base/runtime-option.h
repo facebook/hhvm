@@ -417,6 +417,8 @@ struct RuntimeOption {
   static std::string DynamicExtensionPath;
   static std::vector<std::string> DynamicExtensions;
 
+  // Namespace aliases for the compiler
+  static std::map<std::string, std::string> AliasedNamespaces;
 
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \

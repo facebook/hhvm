@@ -410,6 +410,8 @@ bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_Substr = false;
 bool RuntimeOption::PHP7_UVS = false;
 
+std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
+
 int RuntimeOption::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
@@ -1743,6 +1745,7 @@ void RuntimeOption::Load(
     if (b) RuntimeOption::AssertEmitted = v.toInt64() >= 0;
   }
 
+  Config::Bind(AliasedNamespaces, ini, config, "AliasedNamespaces");
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
   refineStaticStringTableSize();

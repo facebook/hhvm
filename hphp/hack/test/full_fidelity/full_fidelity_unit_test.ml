@@ -68,18 +68,18 @@ let rec minimal_to_string node =
     let children = String.concat "" children in
     Printf.sprintf "(%s%s)" name children
 
-let test_1 source =
+let test_minimal source =
   let source_text = SourceText.make source in
   let syntax_tree = SyntaxTree.make source_text in
   minimal_to_string (SyntaxTree.root syntax_tree)
 
-let source1 =
+let source_simple =
 "<?hh
 /* comment */ function foo() {
   $a = (123 + $b) * $c;
 }"
 
-let result1 = remove_whitespace
+let result_simple = remove_whitespace
   "(script
     (header((<))((?))((name)(end_of_line)))
     (list
@@ -114,12 +114,111 @@ let result1 = remove_whitespace
               ((;)(end_of_line))))
           ((}))))))"
 
+let source_statements =
+"<?hh
+function foo() {
+  if ($a)
+    if ($b)
+      switch ($c) {
+        case 123: break;
+        default: break;
+      }
+    else
+      return $d;
+  elseif($e)
+    do {
+      while($f)
+        throw $g;
+      continue;
+    } while ($h);
+}"
+
+let result_statements = remove_whitespace "
+(script(header((<))((?))((name)(end_of_line)))
+  (list
+    (function_declaration(missing)(missing)((function)(whitespace))((name))
+    (missing)((lparen))(missing)((rparen)(whitespace))(missing)(missing)
+    (compound_statement
+      (({)(end_of_line))
+        (list
+          (if_statement
+            ((whitespace)(if)(whitespace))
+            ((lparen))(variable((variable)))
+            ((rparen)(end_of_line))
+            (if_statement
+              ((whitespace)(if)(whitespace))
+              ((lparen))
+              (variable((variable)))
+              ((rparen)(end_of_line))
+              (switch_statement
+                ((whitespace)(switch)(whitespace))
+                ((lparen))
+                (variable((variable)))
+                ((rparen)(whitespace))
+                (compound_statement
+                  (({)(end_of_line))
+                    (list
+                      (case_statement
+                        ((whitespace)(case)(whitespace))
+                        (literal((decimal_literal)))
+                        ((:)(whitespace))
+                        (break_statement((break))((;)(end_of_line))))
+                      (default_statement
+                        ((whitespace)(default))
+                        ((:)(whitespace))
+                        (break_statement((break))((;)(end_of_line)))))
+                    ((whitespace)(})(end_of_line))))
+              (missing)
+              (else_clause
+                ((whitespace)(else)(end_of_line))
+                (return_statement
+                  ((whitespace)(return)(whitespace))
+                  (variable((variable)))
+                  ((;)(end_of_line)))))
+            (list
+              (elseif_clause
+                ((whitespace)(elseif))
+                ((lparen))
+                (variable((variable)))
+                ((rparen)(end_of_line))
+                (do_statement
+                  ((whitespace)(do)(whitespace))
+                  (compound_statement
+                    (({)(end_of_line))
+                    (list
+                      (while_statement
+                        ((whitespace)(while))
+                        ((lparen))
+                        (variable((variable)))
+                        ((rparen)(end_of_line))
+                        (throw_statement
+                          ((whitespace)(throw)(whitespace))
+                          (variable((variable)))
+                          ((;)(end_of_line))))
+                      (continue_statement
+                        ((whitespace)(continue))
+                        ((;)(end_of_line))))
+                    ((whitespace)(})(whitespace)))
+                  ((while)(whitespace))
+                  ((lparen))
+                  (variable((variable)))
+                  ((rparen))
+                  ((;)(end_of_line)))))
+            (missing)))
+      ((}))))))"
+
 let test_data = [
   {
-    name = "test_1";
-    source = source1;
-    expected = result1;
-    test_function = test_1;
+    name = "test_simple";
+    source = source_simple;
+    expected = result_simple;
+    test_function = test_minimal;
+  };
+  {
+    name = "test_statements";
+    source = source_statements;
+    expected = result_statements;
+    test_function = test_minimal;
   };
 ]
 

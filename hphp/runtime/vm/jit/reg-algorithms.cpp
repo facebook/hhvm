@@ -184,10 +184,7 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   {
     PhysReg q[N];
     int qBack = 0;
-    auto enque = [&](PhysReg r) {
-      assertx(qBack < N);
-      q[qBack++] = r;
-    };
+    auto enque = [&](PhysReg r) { assertx(qBack < N); q[qBack++] = r; };
     for (auto node : outDegree) {
       if (outDegree[node] == 0) enque(node);
     }

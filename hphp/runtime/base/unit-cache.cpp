@@ -427,6 +427,16 @@ const std::string mangleUnitPHP7Options() {
   return s;
 }
 
+const std::string mangleAliasedNamespaces() {
+  std::string s;
+  s += folly::to<std::string>(RuntimeOption::AliasedNamespaces.size());
+  s += '\0';
+  for (auto& par : RuntimeOption::AliasedNamespaces) {
+    s += par.first + '\0' + par.second + '\0';
+  }
+  return s;
+}
+
 std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
@@ -442,7 +452,8 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalExternalEmitterFallback ? '1' : '0')
     + (RuntimeOption::EvalExternalEmitterAllowPartial ? '1' : '0')
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
-    + mangleUnitPHP7Options();
+    + mangleUnitPHP7Options()
+    + mangleAliasedNamespaces();
   return string_md5(t.c_str(), t.size());
 }
 

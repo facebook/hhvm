@@ -545,11 +545,11 @@ public:
     AliasTable(const AutoAliasMap& aliases,
                std::function<AliasFlags ()> autoOracle);
 
-    std::string getName(const std::string& alias, int line_no);
+    std::string getName(const std::string& alias, int line_no, bool forNs);
     std::string getNameRaw(const std::string& alias);
     AliasType getType(const std::string& alias);
     int getLine(const std::string& alias);
-    bool isAliased(const std::string& alias);
+    bool isAliased(const std::string& alias, bool forNs);
     void set(const std::string& alias,
              const std::string& name,
              AliasType type,

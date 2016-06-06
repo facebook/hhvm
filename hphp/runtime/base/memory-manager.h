@@ -409,7 +409,7 @@ struct BigHeap {
   // allocation api for big blocks. These get a BigNode header and
   // are tracked in m_bigs
   MemBlock allocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock callocBig(size_t size, type_scan::Index tyindex);
+  MemBlock callocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
   MemBlock resizeBig(void* p, size_t size);
   void freeBig(void*);
 
@@ -444,7 +444,7 @@ struct ContiguousHeap : BigHeap {
   MemBlock allocSlab(size_t size);
 
   MemBlock allocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock callocBig(size_t size, type_scan::Index tyindex);
+  MemBlock callocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
   MemBlock resizeBig(void* p, size_t size);
   void freeBig(void*);
 
@@ -550,15 +550,24 @@ struct MemoryManager {
    * amay be larger than the requested size.  The returned pointer is
    * guaranteed to be 16-byte aligned.
    *
-   * The size passed to freeBigSize must either be the size that was
-   * passed to mallocBigSize, or the value that was returned as the
+   * The size passed to freeBigSize must either be the requested size that was
+   * passed to mallocBigSize, or the MemBlock size that was returned as the
    * actual allocation size.
+   *
+   * Mode of ZeroFreeActual is the same as FreeActual, but zeros memory.
    *
    * Pre: size > kMaxSmallSize
    */
-  template<bool callerSavesActualSize>
-  MemBlock mallocBigSize(size_t size);
+  enum MBS {
+    FreeRequested, // caller frees requested size
+    FreeActual,    // caller frees actual size returned in MemBlock
+    ZeroFreeActual // calloc & FreeActual
+  };
+  template<MBS Mode>
+  MemBlock mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
+                         type_scan::Index tyindex = 0);
   void freeBigSize(void* vp, size_t size);
+  MemBlock resizeBig(BigNode* n, size_t nbytes);
 
   /*
    * Allocate/deallocate objects when the size is not known to be
@@ -835,17 +844,6 @@ struct MemoryManager {
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  friend void* req::malloc(size_t nbytes, type_scan::Index tyindex);
-  friend void* req::malloc_noptrs(size_t nbytes);
-  friend void* req::calloc(size_t count, size_t bytes,
-                           type_scan::Index tyindex);
-  friend void* req::realloc(void* ptr, size_t nbytes, type_scan::Index tyindex);
-  friend void* req::realloc_noptrs(void* ptr, size_t nbytes);
-  friend void  req::free(void* ptr);
-  friend void* req::malloc_big(size_t, type_scan::Index);
-  friend void* req::calloc_big(size_t, type_scan::Index);
-  friend void* req::realloc_big(void*, size_t);
-  friend void  req::free_big(void*);
   friend struct req::root_handle; // access m_root_handles
 
   struct FreeList {

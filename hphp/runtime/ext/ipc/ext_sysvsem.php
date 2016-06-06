@@ -12,7 +12,7 @@
  *   obtained from sem_get().
  *
  * @param bool $nowait - Specifies if the process shouldn't wait for the
- * semaphore to be acquired. If set to true, the call will return flase
+ * semaphore to be acquired. If set to true, the call will return false
  * immediately if a semaphore cannot be immediately acquired.
  *
  * @return bool - Returns TRUE on success or FALSE on failure.

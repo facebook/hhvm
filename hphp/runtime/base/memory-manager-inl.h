@@ -259,7 +259,7 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
-  return mallocBigSize<false>(size).ptr;
+  return mallocBigSize<FreeRequested>(size).ptr;
 }
 
 ALWAYS_INLINE

@@ -109,7 +109,7 @@ ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
     cc = CapCode::floor(sz - kCapOverhead);
     sd = static_cast<StringData*>(MM().mallocSmallIndex(sizeClass, sz));
   } else {
-    auto const block = MM().mallocBigSize<true>(need);
+    auto const block = MM().mallocBigSize<MemoryManager::FreeActual>(need);
     size_t actualCap = block.size - kCapOverhead;
     if (UNLIKELY(actualCap > StringData::MaxSize)) {
       actualCap = StringData::MaxSize;

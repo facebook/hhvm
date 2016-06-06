@@ -592,58 +592,7 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-inline void* MemoryManager::malloc(size_t nbytes, type_scan::Index tyindex) {
-  auto const nbytes_padded = nbytes + sizeof(SmallNode);
-  if (LIKELY(nbytes_padded) <= kMaxSmallSize) {
-    auto const ptr = static_cast<SmallNode*>(mallocSmallSize(nbytes_padded));
-    ptr->padbytes = nbytes_padded;
-    ptr->hdr.kind = HeaderKind::SmallMalloc;
-    ptr->typeIndex() = tyindex;
-    return ptr + 1;
-  }
-  return mallocBig(nbytes, tyindex);
-}
-
-union MallocNode {
-  BigNode big;
-  SmallNode small;
-};
-
 static_assert(sizeof(SmallNode) == sizeof(BigNode), "");
-
-inline void MemoryManager::free(void* ptr) {
-  assert(ptr != 0);
-  auto const n = static_cast<MallocNode*>(ptr) - 1;
-  auto const padbytes = n->small.padbytes;
-  if (LIKELY(padbytes <= kMaxSmallSize)) {
-    return freeSmallSize(&n->small, n->small.padbytes);
-  }
-  m_heap.freeBig(ptr);
-}
-
-inline void* MemoryManager::realloc(void* ptr,
-                                    size_t nbytes,
-                                    type_scan::Index tyindex) {
-  FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
-         ptr, nbytes, tyindex);
-  assert(nbytes > 0);
-  auto const n = static_cast<MallocNode*>(ptr) - 1;
-  if (LIKELY(n->small.padbytes <= kMaxSmallSize)) {
-    void* newmem = req::malloc(nbytes, tyindex);
-    auto const copySize = std::min(
-      n->small.padbytes - sizeof(SmallNode),
-      nbytes
-    );
-    newmem = memcpy(newmem, ptr, copySize);
-    req::free(ptr);
-    return newmem;
-  }
-  // Ok, it's a big allocation.
-  if (debug) requestEagerGC();
-  auto block = m_heap.resizeBig(ptr, nbytes);
-  refreshStats();
-  return block.ptr;
-}
 
 const char* header_names[] = {
   "PackedArray", "StructArray", "MixedArray", "EmptyArray", "ApcArray",
@@ -940,17 +889,10 @@ inline void MemoryManager::updateBigStats() {
   // the slabs and the usage so we should force this after an allocation that
   // was too large for one of the existing slabs. When we're not using jemalloc
   // this check won't do anything so avoid the extra overhead.
+  if (debug) requestEagerGC();
   if (use_jemalloc || UNLIKELY(m_stats.usage() > m_stats.maxUsage)) {
     refreshStats();
   }
-}
-
-NEVER_INLINE
-void* MemoryManager::mallocBig(size_t nbytes, type_scan::Index tyindex) {
-  assert(nbytes > 0);
-  auto block = m_heap.allocBig(nbytes, HeaderKind::BigMalloc, tyindex);
-  updateBigStats();
-  return block.ptr;
 }
 
 template NEVER_INLINE
@@ -960,8 +902,6 @@ MemBlock MemoryManager::mallocBigSize<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::mallocBigSize(size_t bytes) {
-  if (debug) requestEagerGC();
-
   auto block = m_heap.allocBig(bytes, HeaderKind::BigObj, 0);
   auto szOut = block.size;
   // NB: We don't report the SweepNode size in the stats.
@@ -977,15 +917,6 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes) {
 }
 
 NEVER_INLINE
-void* MemoryManager::callocBig(size_t totalbytes, type_scan::Index tyindex) {
-  if (debug) requestEagerGC();
-  assert(totalbytes > 0);
-  auto block = m_heap.callocBig(totalbytes, tyindex);
-  updateBigStats();
-  return block.ptr;
-}
-
-NEVER_INLINE
 void MemoryManager::freeBigSize(void* vp, size_t bytes) {
   m_stats.mmUsage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
@@ -997,9 +928,45 @@ void MemoryManager::freeBigSize(void* vp, size_t bytes) {
 
 // req::malloc api entry points, with support for malloc/free corner cases.
 namespace req {
+
+union MallocNode {
+  BigNode big;
+  SmallNode small;
+};
+
+NEVER_INLINE void* malloc_big(size_t nbytes, type_scan::Index tyindex) {
+  auto block = MM().m_heap.allocBig(nbytes, HeaderKind::BigMalloc, tyindex);
+  MM().updateBigStats();
+  return block.ptr;
+}
+
+NEVER_INLINE void* calloc_big(size_t total, type_scan::Index tyindex) {
+  auto block = MM().m_heap.callocBig(total, tyindex);
+  MM().updateBigStats();
+  return block.ptr;
+}
+
+NEVER_INLINE void* realloc_big(void* ptr, size_t nbytes) {
+  if (debug) MM().requestEagerGC();
+  auto block = MM().m_heap.resizeBig(ptr, nbytes);
+  MM().refreshStats();
+  return block.ptr;
+}
+
+NEVER_INLINE void free_big(void* ptr) {
+  MM().m_heap.freeBig(ptr);
+}
+
 void* malloc(size_t nbytes, type_scan::Index tyindex) {
-  auto const size = std::max(nbytes, size_t(1));
-  return MM().malloc(size, tyindex);
+  nbytes = std::max(nbytes, size_t(1));
+  auto const npadded = nbytes + sizeof(SmallNode);
+  if (LIKELY(npadded) <= kMaxSmallSize) {
+    auto const ptr = static_cast<SmallNode*>(MM().mallocSmallSize(npadded));
+    ptr->padbytes = npadded;
+    ptr->hdr.init(tyindex, HeaderKind::SmallMalloc, 0);
+    return ptr + 1;
+  }
+  return malloc_big(nbytes, tyindex);
 }
 
 void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
@@ -1007,16 +974,31 @@ void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
   if (totalBytes <= kMaxSmallSize) {
     return memset(req::malloc(totalBytes, tyindex), 0, totalBytes);
   }
-  return MM().callocBig(totalBytes, tyindex);
+  return calloc_big(totalBytes, tyindex);
 }
 
 void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
-  if (!ptr) return req::malloc(nbytes, tyindex);
+  // first handle corner cases that degenerate to malloc() or free()
+  if (!ptr) {
+    return req::malloc(nbytes, tyindex);
+  }
   if (!nbytes) {
     req::free(ptr);
     return nullptr;
   }
-  return MM().realloc(ptr, nbytes, tyindex);
+  FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
+         ptr, nbytes, tyindex);
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  if (LIKELY(n->small.padbytes <= kMaxSmallSize)) {
+    // old block was small, cannot resize.
+    void* newmem = req::malloc(nbytes, tyindex);
+    auto copy_size = std::min(n->small.padbytes - sizeof(SmallNode), nbytes);
+    newmem = memcpy(newmem, ptr, copy_size);
+    MM().freeSmallSize(&n->small, n->small.padbytes);
+    return newmem;
+  }
+  // Ok, it's a big allocation.
+  return realloc_big(ptr, nbytes);
 }
 
 char* strndup(const char* str, size_t len) {
@@ -1030,7 +1012,12 @@ char* strndup(const char* str, size_t len) {
 }
 
 void free(void* ptr) {
-  if (ptr) MM().free(ptr);
+  if (!ptr) return;
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  if (LIKELY(n->small.padbytes <= kMaxSmallSize)) {
+    return MM().freeSmallSize(&n->small, n->small.padbytes);
+  }
+  free_big(ptr);
 }
 } // namespace req
 

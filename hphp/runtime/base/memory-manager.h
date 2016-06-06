@@ -53,6 +53,10 @@ struct ResourceData;
 
 namespace req {
 struct root_handle;
+void* malloc_big(size_t, type_scan::Index);
+void* calloc_big(size_t, type_scan::Index);
+void* realloc_big(void*, size_t);
+void  free_big(void*);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -838,6 +842,10 @@ private:
   friend void* req::realloc(void* ptr, size_t nbytes, type_scan::Index tyindex);
   friend void* req::realloc_noptrs(void* ptr, size_t nbytes);
   friend void  req::free(void* ptr);
+  friend void* req::malloc_big(size_t, type_scan::Index);
+  friend void* req::calloc_big(size_t, type_scan::Index);
+  friend void* req::realloc_big(void*, size_t);
+  friend void  req::free_big(void*);
   friend struct req::root_handle; // access m_root_handles
 
   struct FreeList {
@@ -882,11 +890,6 @@ private:
   void* newSlab(uint32_t nbytes);
   void* mallocSmallSizeSlow(uint32_t bytes, unsigned index);
   void  updateBigStats();
-  void* mallocBig(size_t nbytes, type_scan::Index tyindex);
-  void* callocBig(size_t nbytes, type_scan::Index tyindex);
-  void* malloc(size_t nbytes, type_scan::Index tyindex);
-  void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex);
-  void  free(void* ptr);
 
   static uint32_t bsr(uint32_t x);
 

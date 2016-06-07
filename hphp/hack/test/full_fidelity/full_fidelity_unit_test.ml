@@ -73,6 +73,17 @@ let test_minimal source =
   let syntax_tree = SyntaxTree.make source_text in
   minimal_to_string (SyntaxTree.root syntax_tree)
 
+let test_mode source =
+  let source_text = SourceText.make source in
+  let syntax_tree = SyntaxTree.make source_text in
+  let lang = SyntaxTree.language syntax_tree in
+  let mode = SyntaxTree.mode syntax_tree in
+  let is_strict = SyntaxTree.is_strict syntax_tree in
+  let is_hack = SyntaxTree.is_hack syntax_tree in
+  let is_php = SyntaxTree.is_php syntax_tree in
+  Printf.sprintf "Lang:%sMode:%sStrict:%bHack:%bPhp:%b"
+    lang mode is_strict is_hack is_php
+
 let source_simple =
 "<?hh
 /* comment */ function foo() {
@@ -219,6 +230,42 @@ let test_data = [
     source = source_statements;
     expected = result_statements;
     test_function = test_minimal;
+  };
+  {
+    name = "test_mode_1";
+    source = "<?hh   ";
+    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
+    test_function = test_mode;
+  };
+  {
+    name = "test_mode_2";
+    source = "";
+    expected = "Lang:Mode:Strict:falseHack:falsePhp:false";
+    test_function = test_mode;
+  };
+  {
+    name = "test_mode_3";
+    source = "<?hh // strict ";
+    expected = "Lang:hhMode:strictStrict:trueHack:truePhp:false";
+    test_function = test_mode;
+  };
+  {
+    name = "test_mode_4";
+    source = "<?php // strict "; (* Not strict! *)
+    expected = "Lang:phpMode:strictStrict:falseHack:falsePhp:true";
+    test_function = test_mode;
+  };
+  {
+    name = "test_mode_5";
+    source = "<?hh/";
+    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
+    test_function = test_mode;
+  };
+  {
+    name = "test_mode_6";
+    source = "<?hh//";
+    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
+    test_function = test_mode;
   };
 ]
 

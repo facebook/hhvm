@@ -777,6 +777,10 @@ void File::setChunkSize(int64_t chunk_size) {
   }
 }
 
+std::string File::getWrapperProtocol() const {
+  return Stream::getWrapperProtocol(m_data->m_name.c_str()).toCppString(); 
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // csv functions
 

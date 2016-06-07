@@ -446,7 +446,8 @@ const StaticString
 
 bool MCGenerator::shouldTranslateNoSizeLimit(const Func* func) const {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
-  if (m_numTrans >= RuntimeOption::EvalJitGlobalTranslationLimit) {
+  if (m_numTrans.load(std::memory_order_relaxed) >=
+      RuntimeOption::EvalJitGlobalTranslationLimit) {
     return false;
   }
 
@@ -823,6 +824,11 @@ MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
 
 TCA MCGenerator::emitFuncPrologue(Func* func, int argc,
                                   bool forRegeneratePrologue) {
+  if (m_numTrans.fetch_add(1, std::memory_order_relaxed) >=
+      RuntimeOption::EvalJitGlobalTranslationLimit) {
+    return nullptr;
+  }
+
   const int nparams = func->numNonVariadicParams();
   const int paramIndex = argc <= nparams ? argc : nparams + 1;
 
@@ -923,9 +929,6 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc,
 
   recordGdbTranslation(funcBody, func, code.main(), aStart, false, true);
   recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
-
-  m_numTrans++;
-  assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
 
   return start;
 }
@@ -1720,8 +1723,10 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   }
 
   if (env.vunit) {
-    m_numTrans++;
-    assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
+    if (m_numTrans.fetch_add(1, std::memory_order_relaxed) >=
+        RuntimeOption::EvalJitGlobalTranslationLimit) {
+      return nullptr;
+    }
   } else {
     args.kind = TransKind::Interp;
     FTRACE(1, "emitting dispatchBB interp request for failed "

@@ -389,7 +389,7 @@ private:
   Translator m_tx;
 
   // Number of translations made so far.
-  uint64_t m_numTrans;
+  std::atomic<uint64_t> m_numTrans;
 
   // Handles to registered .eh_frame sections.
   std::vector<EHFrameDesc> m_ehFrames;

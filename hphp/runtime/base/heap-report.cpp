@@ -75,10 +75,8 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       break;
     }
     case HeaderKind::BigMalloc:
-      out << "[" << h->big_.nbytes << "]";
-      break;
     case HeaderKind::SmallMalloc:
-      out << "[" << h->small_.padbytes << "]";
+      out << "[" << h->malloc_.nbytes << "]";
       break;
     case HeaderKind::ResumableFrame:
     case HeaderKind::NativeData:

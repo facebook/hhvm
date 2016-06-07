@@ -60,8 +60,7 @@ struct Header {
     HashCollection hashcoll_;
     ResourceHdr res_;
     RefData ref_;
-    SmallNode small_;
-    BigNode big_;
+    MallocNode malloc_;
     FreeNode free_;
     ResumableNode resumable_;
     NativeNode native_;
@@ -161,11 +160,10 @@ inline size_t Header::size() const {
       return res_.heapSize();
     case HeaderKind::Ref:
       return sizeof(RefData);
-    case HeaderKind::SmallMalloc:
-      return small_.padbytes;
-    case HeaderKind::BigMalloc: // [BigNode][bytes...]
-    case HeaderKind::BigObj:    // [BigNode][Header...]
-      return big_.nbytes;
+    case HeaderKind::SmallMalloc: // [MallocNode][bytes...]
+    case HeaderKind::BigMalloc:   // [MallocNode][bytes...]
+    case HeaderKind::BigObj:      // [MallocNode][Header...]
+      return malloc_.nbytes;
     case HeaderKind::ResumableFrame:
       // Async functions -
       // [ResumableNode][locals][Resumable][ObjectData<WaitHandle>]
@@ -232,8 +230,8 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
 template<class Fn> void MemoryManager::iterate(Fn fn) {
   m_heap.iterate([&](Header* h) {
     if (h->kind() == HeaderKind::BigObj) {
-      // skip BigNode
-      h = reinterpret_cast<Header*>((&h->big_)+1);
+      // skip MallocNode
+      h = reinterpret_cast<Header*>((&h->malloc_)+1);
     } else if (h->kind() == HeaderKind::Hole) {
       // no valid pointer can point here.
       return; // continue iterating

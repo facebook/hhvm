@@ -923,7 +923,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  auto o = new (MM().mallocBigSize<false>(size).ptr)
+  auto o = new (MM().mallocBigSize<MemoryManager::FreeRequested>(size).ptr)
     ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;
@@ -1618,6 +1618,10 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
 
 void ObjectData::raiseObjToIntNotice(const char* clsName) {
   raise_notice("Object of class %s could not be converted to int", clsName);
+}
+
+void ObjectData::raiseObjToDoubleNotice(const char* clsName) {
+  raise_notice("Object of class %s could not be converted to float", clsName);
 }
 
 void ObjectData::raiseAbstractClassError(Class* cls) {

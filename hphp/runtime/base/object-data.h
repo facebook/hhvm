@@ -415,6 +415,7 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   void unsetProp(Class* ctx, const StringData* key);
 
   static void raiseObjToIntNotice(const char*);
+  static void raiseObjToDoubleNotice(const char*);
   static void raiseAbstractClassError(Class*);
   void raiseUndefProp(const StringData*);
 

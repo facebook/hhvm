@@ -2418,7 +2418,15 @@ void Parser::AliasTable::setFalseOracle() {
   m_autoOracle = [] () { return AliasFlags::None; };
 }
 
-std::string Parser::AliasTable::getName(const std::string& alias, int line_no) {
+std::string Parser::AliasTable::getName(const std::string& alias,
+                                        int line_no,
+                                        bool forNs) {
+  if (forNs) {
+    auto it = RuntimeOption::AliasedNamespaces.find(alias);
+    if (it != RuntimeOption::AliasedNamespaces.end()) {
+      return it->second;
+    }
+  }
   auto it = m_aliases.find(alias);
   if (it != m_aliases.end()) {
     return it->second.name;
@@ -2429,6 +2437,7 @@ std::string Parser::AliasTable::getName(const std::string& alias, int line_no) {
     set(alias, autoIt->second.name, AliasType::AUTO_USE, line_no);
     return autoIt->second.name;
   }
+
   return "";
 }
 
@@ -2452,7 +2461,12 @@ int Parser::AliasTable::getLine(const std::string& alias) {
   return (it != m_aliases.end()) ? it->second.line_no : -1;
 }
 
-bool Parser::AliasTable::isAliased(const std::string& alias) {
+bool Parser::AliasTable::isAliased(const std::string& alias, bool forNs) {
+  if (forNs) {
+    if (RuntimeOption::AliasedNamespaces.count(alias)) {
+      return true;
+    }
+  }
   auto t = getType(alias);
   if (t == AliasType::USE || t == AliasType::AUTO_USE) {
     return true;
@@ -2852,15 +2866,16 @@ std::string Parser::nsDecl(const std::string &name) {
 
 std::string Parser::resolve(const std::string &ns, bool cls) {
   auto const pos = ns.find(NAMESPACE_SEP);
-  auto const alias = (pos != std::string::npos) ? ns.substr(0, pos) : ns;
+  auto const forNs = pos != std::string::npos;
+  auto const alias = forNs ? ns.substr(0, pos) : ns;
 
   // Don't expand type variables into the current namespace.
   if (isTypeVar(ns)) {
     return ns;
   }
 
-  if (m_nsAliasTable.isAliased(alias)) {
-    auto name = m_nsAliasTable.getName(alias, line1());
+  if (m_nsAliasTable.isAliased(alias, forNs)) {
+    auto name = m_nsAliasTable.getName(alias, line1(), forNs);
     // Was it a namespace alias?
     if (pos != std::string::npos) {
       return name + ns.substr(pos);

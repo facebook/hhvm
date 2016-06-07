@@ -367,5 +367,12 @@ AsioSession::TimePoint AsioSession::sleepWakeTime() {
          min(timeout, m_sleepEvents.front()->getWakeTime());
 }
 
+c_SleepWaitHandle* AsioSession::nextSleepEvent() {
+  if (m_sleepEvents.empty()) {
+    return nullptr;
+  }
+  return m_sleepEvents.front();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

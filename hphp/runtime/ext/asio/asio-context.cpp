@@ -262,6 +262,25 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 }
 
 c_WaitableWaitHandle* AsioContext::getBlamedWaitHandle() {
+  // first let's try to find wait handle, responsible for wakeup
+  auto session = AsioSession::Get();
+  auto ete_queue = session->getExternalThreadEventQueue();
+
+  c_ExternalThreadEventWaitHandle* ewh = ete_queue->lastReceived();
+  if (ewh != nullptr &&
+      ewh->getContextIdx() == session->getCurrentContextIdx()) {
+    return ewh;
+  }
+
+  // may return cancelled wait handle, which no longer has contextIdx
+  c_SleepWaitHandle* swh = session->nextSleepEvent();
+  if (swh != nullptr && !swh->isFinished() &&
+      swh->getContextIdx() == session->getCurrentContextIdx() &&
+      swh->getWakeTime() <= AsioSession::TimePoint::clock::now()) {
+    return swh;
+  }
+
+  // not found? let's find a wait handle from current context to blame
   if (!m_externalThreadEvents.empty()) {
     return m_externalThreadEvents[0];
   }

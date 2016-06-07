@@ -39,6 +39,7 @@ struct AsioExternalThreadEventQueue final {
   AsioExternalThreadEventQueue();
 
   bool hasReceived() { return m_received; }
+  c_ExternalThreadEventWaitHandle* lastReceived() { return m_received; }
   void processAllReceived();
   bool abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle);
 

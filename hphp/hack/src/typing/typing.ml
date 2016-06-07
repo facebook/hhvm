@@ -1326,10 +1326,6 @@ and expr_
         if TypecheckerOptions.unsafe_xhp (Env.get_options env) then
           env, obj
         else begin
-          (* Check that the declared type of the XHP attribute matches the
-           * expression type *)
-          let attrdec =
-            SMap.filter (fun _ prop -> prop.ce_is_xhp_attr) class_.tc_props in
           let env = List.fold_left attr_ptyl ~f:begin fun env attr ->
             let namepstr, valpty = attr in
             let valp, valty = valpty in
@@ -1338,21 +1334,11 @@ and expr_
              *
              * This converts the member name to an attribute name. *)
             let name = ":" ^ (snd namepstr) in
-            let elt_option = SMap.get name attrdec in
-            (match elt_option with
-            | Some elt ->
-              let env, declty = Phase.localize_with_self env elt.ce_type in
-              let ureason = Reason.URxhp (class_.tc_name, snd namepstr) in
-              let env = Type.sub_type valp ureason env declty valty in
-              env
-            | None when SN.Members.is_special_xhp_attribute name -> env
-              (* Special attributes are valid even if they're not declared - eg
-               * any 'data-' attribute *)
-            | None ->
-              let r = (Reason.Rwitness p) in
-              member_not_found (fst namepstr) ~is_method:false class_ name r;
-              env
-            );
+            let env, declty =
+              obj_get ~is_method:false ~nullsafe:None env obj cid
+                (fst namepstr, name) (fun x -> x) in
+            let ureason = Reason.URxhp (class_.tc_name, snd namepstr) in
+            Type.sub_type valp ureason env declty valty
           end ~init:env in
           env, obj
         end

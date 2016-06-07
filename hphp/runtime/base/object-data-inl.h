@@ -227,7 +227,8 @@ inline double ObjectData::toDouble() const {
   if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
     return toDoubleImpl();
   }
-  return toInt64();
+  raiseObjToDoubleNotice(classname_cstr());
+  return 1;
 }
 
 inline const Func* ObjectData::methodNamed(const StringData* sd) const {

@@ -369,7 +369,7 @@ struct Semaphore : SweepableResourceData {
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
-  bool op(bool acquire) {
+  bool op(bool acquire, bool nowait = false) {
     struct sembuf sop;
 
     if (!acquire && count == 0) {
@@ -380,13 +380,15 @@ struct Semaphore : SweepableResourceData {
 
     sop.sem_num = SYSVSEM_SEM;
     sop.sem_op  = acquire ? -1 : 1;
-    sop.sem_flg = SEM_UNDO;
+    sop.sem_flg = SEM_UNDO | (nowait ? IPC_NOWAIT : 0);
 
-    while (semop(semid, &sop, 1) == -1) {
+    if (semop(semid, &sop, 1) == -1) {
       if (errno != EINTR) {
-        raise_warning("failed to %s key 0x%x: %s",
-                        acquire ? "acquire" : "release",
-                        key, folly::errnoStr(errno).c_str());
+        if (errno != EAGAIN) {
+          raise_warning("failed to %s key 0x%x: %s",
+                          acquire ? "acquire" : "release",
+                          key, folly::errnoStr(errno).c_str());
+        }
         return false;
       }
     }
@@ -428,8 +430,9 @@ struct Semaphore : SweepableResourceData {
 IMPLEMENT_RESOURCE_ALLOCATION(Semaphore)
 
 bool HHVM_FUNCTION(sem_acquire,
-                   const Resource& sem_identifier) {
-  return cast<Semaphore>(sem_identifier)->op(true);
+                   const Resource& sem_identifier,
+                   bool nowait /* = false */) {
+  return cast<Semaphore>(sem_identifier)->op(true, nowait);
 }
 
 bool HHVM_FUNCTION(sem_release,

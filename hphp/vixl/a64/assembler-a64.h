@@ -639,10 +639,6 @@ class Assembler {
     return cb_.frontier();
   }
 
-  bool isFrontierAligned(size_t align) const {
-    return cb_.isFrontierAligned(align);
-  }
-
   // Instruction set functions.
 
   // Branch / Jump instructions.

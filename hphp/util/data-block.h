@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_DATA_BLOCK_H
 #define incl_HPHP_DATA_BLOCK_H
 
-#include <map>
-#include <set>
 #include <cstdint>
 #include <cstring>
+#include <map>
+#include <set>
 
 #include <folly/Bits.h>
 #include <folly/Format.h>
@@ -65,31 +65,10 @@ struct DataBlockFull : std::runtime_error {
  * Free memory is coalesced and allocation is done by best-fit.
  */
 struct DataBlock {
-  DataBlock() : m_base(nullptr), m_frontier(nullptr), m_size(0), m_name("") {}
+  DataBlock() = default;
 
   DataBlock(const DataBlock& other) = delete;
   DataBlock& operator=(const DataBlock& other) = delete;
-
-  DataBlock(DataBlock&& other) noexcept
-    : m_base(other.m_base)
-    , m_frontier(other.m_frontier)
-    , m_size(other.m_size)
-    , m_name(other.m_name) {
-    other.m_base = other.m_frontier = nullptr;
-    other.m_size = 0;
-    other.m_name = "";
-  }
-
-  DataBlock& operator=(DataBlock&& other) {
-    m_base = other.m_base;
-    m_frontier = other.m_frontier;
-    m_size = other.m_size;
-    m_name = other.m_name;
-    other.m_base = other.m_frontier = nullptr;
-    other.m_size = 0;
-    other.m_name = "";
-    return *this;
-  }
 
   /**
    * Uses an existing chunk of memory.
@@ -136,10 +115,6 @@ struct DataBlock {
 
   bool isValidAddress(const CodeAddress tca) const {
     return tca >= m_base && tca < (m_base + m_size);
-  }
-
-  bool isFrontierAligned(const size_t alignment) const {
-    return ((uintptr_t)m_frontier & (alignment - 1)) == 0;
   }
 
   void byte(const uint8_t byte) {
@@ -243,13 +218,14 @@ struct DataBlock {
   size_t blocksFree() const { return m_freeRanges.size(); }
 
 private:
-  Address m_base;
-  Address m_frontier;
-  size_t  m_size;
-  std::string m_name;
 
   using Offset = uint32_t;
   using Size = uint32_t;
+
+  Address m_base{nullptr};
+  Address m_frontier{nullptr};
+  size_t  m_size{0};
+  std::string m_name;
 
   size_t m_nfree{0};
   size_t m_nalloc{0};

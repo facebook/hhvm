@@ -4,6 +4,9 @@ $ret = sem_get(0xDEADBEEF);
 if ($ret === false) { echo "failed\n"; exit(1); }
 $sem = $ret;
 $now = microtime(true);
+var_dump(sem_acquire($sem, false));
+var_dump(sem_acquire($sem, true));
+var_dump(sem_release($sem));
 var_dump(sem_acquire($sem));
 
 $pid = pcntl_fork();

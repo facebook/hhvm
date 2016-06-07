@@ -1,8 +1,14 @@
 ---php://temp---
+int(-1)
+bool(false)
 bool(true)
 bool(true)
 bool(false)
+string(10) "abcdefghij"
 ---php://memory---
+int(-1)
+bool(false)
 bool(true)
 bool(true)
 bool(false)
+string(10) "abcdefghij"

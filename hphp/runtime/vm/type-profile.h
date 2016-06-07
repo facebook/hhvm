@@ -41,8 +41,8 @@ void profileRequestStart();
 void profileRequestEnd();
 void profileSetHotFuncAttr();
 
-// This is best-effort, and returns noisy results.
 int64_t requestCount();
+int singleJitRequestCount();
 
 /*
  * Profiling for func hotness goes through this module.

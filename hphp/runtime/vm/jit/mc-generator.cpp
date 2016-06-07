@@ -267,7 +267,7 @@ void MCGenerator::invalidateFuncProfSrcKeys(const Func* func) {
 }
 
 TransResult MCGenerator::retranslate(const TransArgs& args) {
-  auto sr = m_tx.getSrcDB().find(args.sk);
+  auto sr = m_srcDB.find(args.sk);
   always_assert(sr);
   bool locked = sr->tryLock();
   SCOPE_EXIT {
@@ -412,7 +412,7 @@ TCA MCGenerator::findTranslation(const TransArgs& args) const {
     return nullptr;
   }
 
-  if (auto const sr = m_tx.getSrcDB().find(sk)) {
+  if (auto const sr = m_srcDB.find(sk)) {
     if (auto const tca = sr->getTopTranslation()) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);
       return tca;
@@ -434,7 +434,7 @@ TransResult MCGenerator::getTranslation(const TransArgs& args) {
 }
 
 int MCGenerator::numTranslations(SrcKey sk) const {
-  if (const SrcRec* sr = m_tx.getSrcDB().find(sk)) {
+  if (const SrcRec* sr = m_srcDB.find(sk)) {
     return sr->translations().size();
   }
   return 0;
@@ -547,7 +547,7 @@ TransResult MCGenerator::createTranslation(const TransArgs& args) {
 
   if (!createSrcRec(sk)) return nullptr;
 
-  auto sr = m_tx.getSrcDB().find(sk);
+  auto sr = m_srcDB.find(sk);
   always_assert(sr);
 
   if (auto const tca = sr->getTopTranslation()) {
@@ -561,15 +561,7 @@ TransResult MCGenerator::createTranslation(const TransArgs& args) {
 }
 
 bool MCGenerator::createSrcRec(SrcKey sk) {
-  if (m_tx.getSrcDB().find(sk)) return true;
-
-  LeaseHolder writer{Translator::WriteLease()};
-  if (!writer.canWrite()) return false;
-
-  if (m_tx.getSrcDB().find(sk)) {
-    // Someone created it between our check above and getting the write lease.
-    return true;
-  }
+  if (m_srcDB.find(sk)) return true;
 
   auto const srcRecSPOff = sk.resumed() ? folly::none
                                         : folly::make_optional(liveSpOff());
@@ -606,7 +598,12 @@ bool MCGenerator::createSrcRec(SrcKey sk) {
   }
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
-  SrcRec* sr = m_tx.getSrcRec(sk);
+
+  always_assert(m_srcDB.find(sk) == nullptr);
+  auto const sr = m_srcDB.insert(sk);
+  if (RuntimeOption::EvalEnableReusableTC) {
+    recordFuncSrcRec(sk.func(), sr);
+  }
   sr->setFuncInfo(sk.func());
   sr->setAnchorTranslation(req);
 
@@ -637,7 +634,7 @@ bool MCGenerator::createSrcRec(SrcKey sk) {
 
 TCA
 MCGenerator::lookupTranslation(SrcKey sk) const {
-  if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
+  if (auto const sr = m_srcDB.find(sk)) {
     return sr->getTopTranslation();
   }
   return nullptr;
@@ -718,11 +715,11 @@ TransResult MCGenerator::translate(TransArgs args) {
 
   Timer timer(Timer::mcg_translate);
 
-  assertx(m_tx.getSrcDB().find(args.sk));
-  auto& srcRec = *m_tx.getSrcRec(args.sk);
+  auto const srcRec = m_srcDB.find(args.sk);
+  always_assert(srcRec);
 
-  args.region = reachedTranslationLimit(args.sk, srcRec) ? nullptr
-                                                         : prepareRegion(args);
+  args.region = reachedTranslationLimit(args.sk, *srcRec) ? nullptr
+                                                          : prepareRegion(args);
   TransEnv env{args};
   env.initSpOffset = args.region ? args.region->entry()->initialSpOffset()
                                  : liveSpOff();
@@ -1136,7 +1133,8 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
   LeaseHolder writer(Translator::WriteLease());
   if (!writer.canWrite()) return tDest;
 
-  SrcRec* sr = m_tx.getSrcRec(destSk);
+  auto const sr = m_srcDB.find(destSk);
+  always_assert(sr);
   // The top translation may have changed while we waited for the write lease,
   // so read it again.  If it was replaced with a new translation, then bind to
   // the new one.  If it was invalidated, then don't bind the jump.
@@ -1757,8 +1755,9 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
     }
   }
 
-  auto& srcRec = *m_tx.getSrcRec(args.sk);
-  recordRelocationMetaData(sk, srcRec, loc, fixups);
+  auto const srcRec = m_srcDB.find(args.sk);
+  always_assert(srcRec);
+  recordRelocationMetaData(sk, *srcRec, loc, fixups);
   recordGdbTranslation(sk, sk.func(), code.main(), loc.mainStart(),
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
@@ -1784,7 +1783,7 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   // metadata is not yet visible.
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
         loc.mainStart(), sk.funcID(), sk.offset());
-  srcRec.newTranslation(loc, inProgressTailBranches);
+  srcRec->newTranslation(loc, inProgressTailBranches);
 
   TRACE(1, "mcg: %zd-byte tracelet\n", (ssize_t)loc.mainSize());
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
@@ -1961,13 +1960,12 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
     // Doc says even find _could_ invalidate iterator, in pactice it should
     // be very rare, so go with it now.
     CGMeta fixups;
-    for (SrcDB::const_iterator it = m_tx.getSrcDB().begin();
-         it != m_tx.getSrcDB().end(); ++it) {
-      SrcKey const sk = SrcKey::fromAtomicInt(it->first);
+    for (auto& pair : m_srcDB) {
+      SrcKey const sk = SrcKey::fromAtomicInt(pair.first);
       // We may have a SrcKey to a deleted function. NB: this may miss a
       // race with deleting a Func. See task #2826313.
       if (!Func::isFuncIdValid(sk.funcID())) continue;
-      SrcRec* sr = it->second;
+      SrcRec* sr = pair.second;
       if (sr->unitMd5() == unit->md5() &&
           !sr->hasDebuggerGuard() &&
           m_tx.isSrcKeyInBL(sk)) {
@@ -1987,7 +1985,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
 bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
   SrcKey sk(func, offset, resumed);
   {
-    if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
+    if (SrcRec* sr = m_srcDB.find(sk)) {
       if (sr->hasDebuggerGuard()) {
         return true;
       }
@@ -2005,7 +2003,7 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
   BlockingLeaseHolder writer(Translator::WriteLease());
 
   CGMeta fixups;
-  if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
+  if (SrcRec* sr = m_srcDB.find(sk)) {
     auto code = m_code.view();
     addDbgGuardImpl(sk, sr, code.main(), code.data(), fixups);
   }
@@ -2104,8 +2102,8 @@ void MCGenerator::invalidateSrcKey(SrcKey sk) {
    * Reroute existing translations for SrcKey to an as-yet indeterminate
    * new one.
    */
-  SrcRec* sr = m_tx.getSrcDB().find(sk);
-  assertx(sr);
+  auto const sr = m_srcDB.find(sk);
+  always_assert(sr);
   /*
    * Since previous translations aren't reachable from here, we know we
    * just created some garbage in the TC. We currently have no mechanism

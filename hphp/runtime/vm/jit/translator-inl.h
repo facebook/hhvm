@@ -19,25 +19,6 @@
 #endif
 
 namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
-// Translator accessors.
-
-inline const SrcDB& Translator::getSrcDB() const {
-  return m_srcDB;
-}
-
-inline SrcRec* Translator::getSrcRec(SrcKey sk) {
-  // XXX: Add a insert-or-find primitive to THM.
-  if (SrcRec* r = m_srcDB.find(sk)) return r;
-  assertx(s_writeLease.amOwner());
-
-  auto rec = m_srcDB.insert(sk);
-  if (RuntimeOption::EvalEnableReusableTC) {
-    recordFuncSrcRec(sk.func(), rec);
-  }
-
-  return rec;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // TransDB.

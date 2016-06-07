@@ -56,8 +56,10 @@ void CGMeta::process_only(
   }
   catches.clear();
 
-  for (auto const& elm : jmpTransIDs) {
-    mcg->jmpToTransIDMap()[elm.first] = elm.second;
+  if (auto profData = jit::profData()) {
+    for (auto const& elm : jmpTransIDs) {
+      profData->setJmpTransID(elm.first, elm.second);
+    }
   }
   jmpTransIDs.clear();
 

@@ -438,6 +438,32 @@ struct ProfData {
    */
   void maybeResetCounters();
 
+  /*
+   * Set the TransID for the translation owning the jmp at the given address.
+   */
+  void setJmpTransID(TCA jmp, TransID id) {
+    m_jmpToTransID.emplace(jmp, id).first->second = id;
+  }
+
+  /*
+   * Forget the TransID for the translation owning the jmp at the given address.
+   */
+  void clearJmpTransID(TCA jmp) {
+    auto const it = m_jmpToTransID.find(jmp);
+    if (it == m_jmpToTransID.end()) return;
+    it->second = kInvalidTransID;
+  }
+
+  /*
+   * Look up the TransID for the translation owning the jmp at the given
+   * address, returning kInvalidTransID if it can't be found or has been
+   * forgotten.
+   */
+  TransID jmpTransID(TCA jmp) const {
+    auto const it = m_jmpToTransID.find(jmp);
+    return it == m_jmpToTransID.end() ? kInvalidTransID : it->second;
+  }
+
 private:
   struct PrologueID {
     FuncId func;
@@ -488,6 +514,11 @@ private:
    */
   mutable ReadWriteMutex m_funcProfTransLock;
   std::unordered_map<FuncId, TransIDVec> m_funcProfTrans;
+
+  /*
+   * Map from jump addresses to the ID of the translation containing them.
+   */
+  folly::AtomicHashMap<TCA, TransID> m_jmpToTransID;
 
   /*
    * Cache for Func -> block end offsets. Values in this map are never modified

@@ -70,6 +70,7 @@ ProfData::ProfData()
   , m_optimizedSKs(kFuncCountHint)
   , m_proflogueDB(kFuncCountHint)
   , m_dvFuncletDB(kFuncCountHint)
+  , m_jmpToTransID(kFuncCountHint)
   , m_blockEndOffsets(kFuncCountHint)
 {}
 
@@ -183,6 +184,9 @@ ProfCounters<int64_t> s_persistentCounters{0};
 struct ProfDataTreadmillDeleter {
   void operator()() {
     s_persistentCounters = data->takeCounters();
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Info("Deleting JIT ProfData");
+    }
   }
 
   std::unique_ptr<ProfData> data;
@@ -214,6 +218,9 @@ void discardProfData() {
     s_profData.exchange(nullptr, std::memory_order_relaxed)
   };
   if (data != nullptr) {
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Info("Putting JIT ProfData on Treadmill");
+    }
     Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(data)});
   }
 }

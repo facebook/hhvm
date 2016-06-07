@@ -163,6 +163,13 @@ static void setJmpTransID(Venv& env, TCA jmp) {
   );
 }
 
+static void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
+  auto const incoming = cc == CC_None ? IncomingBranch::jmpFrom(jmp)
+                                      : IncomingBranch::jccFrom(jmp);
+
+  env.meta.inProgressTailJumps.push_back(incoming);
+}
+
 bool emit(Venv& env, const bindjmp& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
@@ -188,7 +195,7 @@ bool emit(Venv& env, const bindaddr& i) {
 bool emit(Venv& env, const fallback& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
-  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jmp, CC_None, env.meta);
+  registerFallbackJump(env, jmp, CC_None);
   return true;
 }
 
@@ -196,7 +203,7 @@ bool emit(Venv& env, const fallbackcc& i) {
   auto const jcc =
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
-  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jcc, i.cc, env.meta);
+  registerFallbackJump(env, jcc, i.cc);
   return true;
 }
 
@@ -243,7 +250,8 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       { auto const& i = p.svcreq.fallback_;
         assertx(p.jmp && !p.jcc);
 
-        auto const srcrec = mcg->tx().getSrcRec(i.target);
+        auto const srcrec = mcg->srcDB().find(i.target);
+        always_assert(srcrec);
         stub = i.trflags.packed
           ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
                                           i.spOff, i.target, i.trflags)
@@ -254,7 +262,8 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       { auto const& i = p.svcreq.fallbackcc_;
         assertx(!p.jmp && p.jcc);
 
-        auto const srcrec = mcg->tx().getSrcRec(i.target);
+        auto const srcrec = mcg->srcDB().find(i.target);
+        always_assert(srcrec);
         stub = i.trflags.packed
           ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
                                           i.spOff, i.target, i.trflags)

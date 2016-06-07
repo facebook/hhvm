@@ -79,7 +79,6 @@ struct TransCFG {
   TransCFG(FuncId funcId,
            const ProfData* profData,
            const SrcDB& srcDB,
-           const TCATransIDMap& jmpToTransID,
            bool inlining = false);
 
   const std::vector<TransID>& nodes() const { return m_transIds; }

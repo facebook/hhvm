@@ -43,10 +43,10 @@ namespace HPHP { namespace jit {
 struct TransRelocInfo {
   TransRelocInfo() {}
 
-  TransRelocInfo(TransRelocInfo&& other) = default;
-  TransRelocInfo& operator=(TransRelocInfo&& other) = default;
+  TransRelocInfo(TransRelocInfo&&) = default;
+  TransRelocInfo& operator=(TransRelocInfo&&) = default;
   TransRelocInfo(const TransRelocInfo&) = delete;
-  TransRelocInfo& operator=(const TransRelocInfo& other) = delete;
+  TransRelocInfo& operator=(const TransRelocInfo&) = delete;
   SrcKey sk;
   int argNum;
   TCA start;
@@ -519,7 +519,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
   // Since we can now execute the relocated code, its ok to start fixing these
   // things now.
 
-  for (auto& it : mcg->tx().getSrcDB()) {
+  for (auto& it : mcg->srcDB()) {
     it.second->relocate(rel);
   }
 

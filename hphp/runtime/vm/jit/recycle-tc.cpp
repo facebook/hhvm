@@ -92,15 +92,11 @@ void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
  */
 void clearTCMaps(TCA start, TCA end) {
   auto& catchMap = mcg->catchTraceMap();
-  auto& jmpMap = mcg->jmpToTransIDMap();
+  auto const profData = jit::profData();
   while (start < end) {
     x64::DecodedInstruction di (start);
-    if (di.isBranch()) {
-      auto it = jmpMap.find(start);
-      if (it != jmpMap.end()) {
-        ITRACE(1, "Erasing JMP @ {}\n", start);
-        jmpMap.erase(it);
-      }
+    if (profData && di.isBranch()) {
+      profData->clearJmpTransID(start);
     }
     if (auto* ct = catchMap.find(start)) {
       // We mark nothrow with a nullptr, which will assert during unwinding,

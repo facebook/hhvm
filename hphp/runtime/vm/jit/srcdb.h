@@ -180,7 +180,6 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
-  void registerFallbackJump(TCA from, ConditionCode cc, CGMeta& fixups);
   TCA getFallbackTranslation() const;
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
@@ -298,7 +297,7 @@ struct SrcDB {
   //////////////////////////////////////////////////////////////////////////////
 
   SrcRec* find(SrcKey sk) const {
-    SrcRec* const* p = m_map.find(sk.toAtomicInt());
+    auto const p = m_map.find(sk.toAtomicInt());
     return p ? *p : 0;
   }
 

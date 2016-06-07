@@ -60,7 +60,6 @@ extern MCGenerator* mcg;
 const TCA kInvalidCatchTrace = TCA(-1);
 
 using CatchTraceMap = TreadHashMap<CTCA, TCA, ctca_identity_hash>;
-using TCATransIDMap = hphp_hash_map<TCA, TransID>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -169,7 +168,6 @@ struct MCGenerator {
   CodeCache& code() { return m_code; }
   const UniqueStubs& ustubs() const { return m_ustubs; }
   Translator& tx() { return m_tx; }
-  TCATransIDMap& jmpToTransIDMap() { return m_jmpToTransID; }
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   FixupMap& fixupMap() { return m_fixupMap; }
   Debug::DebugInfo* debugInfo() { return &m_debugInfo; }
@@ -194,6 +192,13 @@ struct MCGenerator {
    */
   TCA getFreeStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused = nullptr);
   bool freeRequestStub(TCA stub);
+
+  /*
+   * Get the SrcDB.
+   */
+  const SrcDB& srcDB() const {
+    return m_srcDB;
+  }
 
   /*
    * Emit checks for (and hooks into) an attached debugger in front of each
@@ -332,10 +337,6 @@ private:
   bool shouldTranslate(const Func*, TransKind) const;
   bool shouldTranslateNoSizeLimit(const Func*) const;
 
-  TCA getTopTranslation(SrcKey sk) {
-    return m_tx.getSrcRec(sk)->getTopTranslation();
-  }
-
   void syncWork();
 
   TCA findTranslation(const TransArgs& args) const;
@@ -381,12 +382,12 @@ private:
   // Data members.
 
 private:
+  SrcDB m_srcDB;
+
   CodeCache m_code;
   UniqueStubs m_ustubs;
   Translator m_tx;
 
-  // Map from jump addresses to the ID of translation containing them.
-  TCATransIDMap m_jmpToTransID;
   // Number of translations made so far.
   uint64_t m_numTrans;
 

@@ -608,8 +608,8 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
     return nullptr;
   }
 
-  TransCFG cfg(callee->getFuncId(), profData, mcg->tx().getSrcDB(),
-               mcg->jmpToTransIDMap(), true /* inlining */);
+  TransCFG cfg(callee->getFuncId(), profData, mcg->srcDB(),
+               true /* inlining */);
 
   HotTransContext ctx;
   ctx.tid = dvID;

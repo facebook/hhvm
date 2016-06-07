@@ -278,8 +278,7 @@ RegionVec regionizeFunc(const Func* func, MCGenerator* mcg,
 
   auto const funcId = func->getFuncId();
   auto const profData = jit::profData();
-  TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
-               mcg->jmpToTransIDMap());
+  TransCFG cfg(funcId, profData, mcg->srcDB());
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     auto dotFileName = folly::to<std::string>(

@@ -28,8 +28,7 @@ TRACE_SET_MOD(pgo);
 
 static TransIDSet findPredTrans(TransID dstID,
                                 const ProfData* profData,
-                                const SrcDB& srcDB,
-                                const TCATransIDMap& jmpToTransID) {
+                                const SrcDB& srcDB) {
   auto const dstRec = profData->transRec(dstID);
   auto const dstSK = dstRec->srcKey();
   const SrcRec* dstSR = srcDB.find(dstSK);
@@ -37,10 +36,9 @@ static TransIDSet findPredTrans(TransID dstID,
   TransIDSet predSet;
 
   for (auto& inBr : dstSR->incomingBranches()) {
-    auto src = jmpToTransID.find(inBr.toSmash());
-    if (src == jmpToTransID.end()) continue;
+    auto const srcID = profData->jmpTransID(inBr.toSmash());
+    if (srcID == kInvalidTransID) continue;
 
-    auto const srcID = src->second;
     auto const srcRec = profData->transRec(srcID);
     if (!srcRec || !srcRec->isProfile()) continue;
 
@@ -93,7 +91,6 @@ static bool inferredArcWeight(const TransCFG::ArcPtrVec& arcVec,
 TransCFG::TransCFG(FuncId funcId,
                    const ProfData* profData,
                    const SrcDB& srcDB,
-                   const TCATransIDMap& jmpToTransID,
                    bool inlining /* = false */) {
   assertx(profData);
 
@@ -115,7 +112,7 @@ TransCFG::TransCFG(FuncId funcId,
     auto const dstSK = rec->srcKey();
     auto const dstBlock = rec->region()->entry();
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
-    TransIDSet predIDs = findPredTrans(dstId, profData, srcDB, jmpToTransID);
+    TransIDSet predIDs = findPredTrans(dstId, profData, srcDB);
     for (auto predId : predIDs) {
       if (hasNode(predId)) {
         auto const predRec = profData->transRec(predId);

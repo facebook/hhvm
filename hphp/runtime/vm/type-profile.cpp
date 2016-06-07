@@ -57,7 +57,7 @@ void profileInit() {
 
 RequestKind __thread requestKind = RequestKind::Warmup;
 static bool warmingUp;
-static int64_t numRequests;
+static std::atomic<int64_t> numRequests;
 bool __thread standardRequest = true;
 static std::atomic<bool> singleJitLock;
 static std::atomic<int> singleJitRequests;
@@ -153,11 +153,15 @@ void profileIncrementFuncCounter(const Func* f) {
 }
 
 int64_t requestCount() {
-  return numRequests;
+  return numRequests.load(std::memory_order_relaxed);
+}
+
+int singleJitRequestCount() {
+  return singleJitRequests.load(std::memory_order_relaxed);
 }
 
 static inline bool doneProfiling() {
-  return (numRequests >= RuntimeOption::EvalJitProfileInterpRequests) ||
+  return requestCount() >= RuntimeOption::EvalJitProfileInterpRequests ||
     (RuntimeOption::ClientExecutionMode() &&
      !RuntimeOption::EvalJitProfileRecord);
 }
@@ -197,7 +201,7 @@ void profileRequestStart() {
 
 void profileRequestEnd() {
   if (warmingUp) return;
-  numRequests++; // racy RMW; ok to miss a rare few.
+  numRequests.fetch_add(1, std::memory_order_relaxed);
   if (standardRequest &&
       singleJitRequests < RuntimeOption::EvalNumSingleJitRequests &&
       jit::Lease::mayLock(true)) {

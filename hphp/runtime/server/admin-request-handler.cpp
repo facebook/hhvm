@@ -30,11 +30,12 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/repo.h"
 
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc-info.h"
-#include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
@@ -861,6 +862,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("rds-persistent", rds::usedPersistentBytes());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
+    appendStat("request-count", requestCount());
+    appendStat("single-jit-requests", singleJitRequestCount());
 
     if (RuntimeOption::EvalEnableReusableTC) {
       mcg->code().forEachBlock([&](const char* name, const CodeBlock& a) {

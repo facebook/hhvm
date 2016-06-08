@@ -128,9 +128,9 @@ let remove_decls env fast_parsed =
              classes = classel;
              typedefs = typel;
              consts = constl;
-             file_mode;
-             comments;
-             consider_names_just_for_autoload} ->
+             file_mode = _;
+             comments = _;
+             consider_names_just_for_autoload = _} ->
       let funs = set_of_idl funl in
       let classes = set_of_idl classel in
       let typedefs = set_of_idl typel in
@@ -176,7 +176,7 @@ let update_file_info env fast_parsed =
  *)
 (*****************************************************************************)
 
-let declare_names env files_info fast_parsed =
+let declare_names env fast_parsed =
   let env = remove_decls env fast_parsed in
   let errorl, failed_naming =
     Relative_path.Map.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
@@ -229,7 +229,7 @@ let type_check genv env =
 
   (* NAMING *)
   let env, errorl', failed_naming, fast =
-    declare_names env files_info fast_parsed in
+    declare_names env fast_parsed in
 
   (* COMPUTES WHAT MUST BE REDECLARED  *)
   let fast = extend_fast fast files_info env.failed_decl in

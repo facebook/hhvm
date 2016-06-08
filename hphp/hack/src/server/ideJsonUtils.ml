@@ -151,7 +151,7 @@ let call_of_string s =
   match
     (get_object_fields s) >>= fun fields ->
     (get_id_field fields) >>= fun id ->
-    (get_type_field fields) >>= fun type_ ->
+    (get_type_field fields) >>= fun _type ->
     (get_call id fields)
   with
   | Ok x -> x

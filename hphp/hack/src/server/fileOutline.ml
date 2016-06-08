@@ -26,7 +26,7 @@ let modifiers_of_ast_kinds l =
 
 let summarize_property kinds var =
   let modifiers = modifiers_of_ast_kinds kinds in
-  let span, (pos, name), expr_opt = var in
+  let span, (pos, name), _expr_opt = var in
   {
     kind = Property;
     name;
@@ -120,7 +120,7 @@ let summarize_method m =
  * parameter lists. We don't want them to show up in outline view *)
 let params_implicit_fields params =
   List.filter_map params ~f:begin function
-    | { Ast.param_modifier = Some vis; param_id; _ } ->
+    | { Ast.param_modifier = Some _vis; param_id; _ } ->
         Some (Utils.lstrip (snd param_id) "$" )
     | _ -> None
   end

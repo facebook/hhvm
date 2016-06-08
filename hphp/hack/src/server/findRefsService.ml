@@ -115,7 +115,7 @@ let find_child_classes tcopt target_class_name files_info files =
       acc)
   end
 
-let get_child_classes_files tcopt workers files_info class_name =
+let get_child_classes_files tcopt class_name =
   match Typing_lazy_heap.get_class tcopt class_name with
   | Some class_ ->
     (* Find the files that contain classes that extend class_ *)
@@ -162,7 +162,7 @@ let find_refs target acc fileinfo_l =
   detach_hooks ();
   Pos.Map.fold begin fun p str acc ->
     (str, p) :: acc
-  end !results_acc []
+  end !results_acc acc
 
 let parallel_find_refs workers fileinfo_l target =
   MultiWorker.call
@@ -222,11 +222,11 @@ let find_references tcopt workers target include_defs
   else
     results
 
-let get_dependent_files_function tcopt workers f_name =
+let get_dependent_files_function tcopt _workers f_name =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set_function tcopt f_name
 
-let get_dependent_files tcopt workers input_set =
+let get_dependent_files tcopt _workers input_set =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set tcopt input_set
 

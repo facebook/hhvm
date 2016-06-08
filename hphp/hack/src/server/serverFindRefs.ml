@@ -48,8 +48,7 @@ let search_function function_name include_defs genv env =
 let search_member class_name member include_defs genv env =
   let class_name = add_ns class_name in
   (* Find all the classes that extend this one *)
-  let files = FindRefsService.get_child_classes_files env.tcopt
-      genv.workers env.files_info class_name in
+  let files = FindRefsService.get_child_classes_files env.tcopt class_name in
   let all_classes = FindRefsService.find_child_classes env.tcopt
       class_name env.files_info files in
   let all_classes = SSet.add all_classes class_name in

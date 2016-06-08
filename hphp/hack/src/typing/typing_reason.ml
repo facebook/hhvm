@@ -88,7 +88,8 @@ let rec to_string prefix r =
       [(p, prefix)] @
       [(if r2 = Rnone then p else to_pos r2),
         "This can only be indexed with integers"]
-  | Ridx_vector      _ -> [(p, prefix ^ ". Only int can be used to index into a Vector.")]
+  | Ridx_vector      _ -> [(p, prefix ^
+    " because only int can be used to index into a Vector or vec.")]
   | Rappend          _ -> [(p, prefix ^ " because a value is appended to it")]
   | Rfield           _ -> [(p, prefix ^ " because one of its field is accessed")]
   | Rforeach         _ -> [(p, prefix ^ " because this is used in a foreach statement")]

@@ -1,0 +1,6 @@
+File "vec_append_wrong_type.php", line 4, characters 3-10:
+Invalid assignment (Typing[4110])
+File "vec_append_wrong_type.php", line 3, characters 18-23:
+This is a string
+File "vec_append_wrong_type.php", line 4, characters 10-10:
+It is incompatible with an int

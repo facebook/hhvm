@@ -325,6 +325,14 @@ and expr_ =
   | False
   | Id of id
   | Lvar of id
+  (**
+   * PHP's Variable variable. The int is number of variable indirections
+   * (i.e. number of extra $ signs.)
+   *
+   * Example:
+     * $$$sample has int = 2.
+   * *)
+  | Lvarvar of int * id
   | Dollardollar
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor

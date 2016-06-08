@@ -65,6 +65,7 @@ class type ['a] ast_visitor_type = object
   method on_lfun: 'a -> fun_ -> 'a
   method on_list : 'a -> expr list -> 'a
   method on_lvar : 'a -> id -> 'a
+  method on_lvarvar : 'a -> int -> id -> 'a
   method on_dollardollar : 'a -> 'a
   method on_new : 'a -> expr -> expr list -> expr list -> 'a
   method on_noop : 'a -> 'a
@@ -258,6 +259,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | String s    -> this#on_string acc s
    | Id id       -> this#on_id acc id
    | Lvar id     -> this#on_lvar acc id
+   | Lvarvar (n, id)  -> this#on_lvarvar acc n id
    | Dollardollar -> this#on_dollardollar acc
    | Yield_break -> this#on_yield_break acc
    | Yield e     -> this#on_yield acc e
@@ -294,6 +296,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_id acc _ = acc
   method on_lvar acc _ = acc
+  method on_lvarvar acc _ _ = acc
   method on_dollardollar acc = acc
 
   method on_obj_get acc e1 e2 =

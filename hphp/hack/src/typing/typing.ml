@@ -1079,6 +1079,10 @@ and expr_
       Typing_hooks.dispatch_lvar_hook id env;
       let env, x = Env.get_local env x in
       env, x
+  | Lvarvar (_, id) ->
+      Typing_hooks.dispatch_lvar_hook id env;
+      (** Can't easily track any typing information for variable variable. *)
+      env, (Reason.Rnone, Tany)
   | List el ->
       let env, tyl = List.map_env env el expr in
       let env, tyl = List.map_env env tyl Typing_env.unbind in

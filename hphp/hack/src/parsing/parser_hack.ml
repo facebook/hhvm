@@ -230,7 +230,8 @@ let rec check_lvalue env = function
       error_at env pos "?-> syntax is not supported for lvalues"
   | pos, Obj_get (_, (_, Id (_, name)), _) when name.[0] = ':' ->
       error_at env pos "->: syntax is not supported for lvalues"
-  | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ | Unsafeexpr _) -> ()
+  | _, (Lvar _ | Lvarvar _ | Obj_get _ | Array_get _ | Class_get _ |
+    Unsafeexpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _) ->
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
@@ -2743,14 +2744,19 @@ and expr_atomic ~allow_class ~class_const env =
       expr_encapsed env pos
   | Tlvar ->
       let tok_value = Lexing.lexeme env.lb in
-      let var_id, stripped = strip_variablevariable tok_value 0 in
-      if (stripped > 0) && (not (env.mode = FileInfo.Mdecl)) then
-        error_at env pos ("A valid variable name starts with a " ^
-          "letter or underscore, followed by any number of letters, " ^
-          "numbers, or underscores");
+      let dollars, var_id = strip_variablevariable 0 tok_value in
       pos, if peek env = Tlambda
         then lambda_single_arg ~sync:FDeclSync env (pos, var_id)
-        else Lvar (pos, var_id)
+        else if dollars < 1 then
+          Lvar (pos, var_id)
+        else if env.mode = FileInfo.Mdecl then
+          Lvarvar (dollars, (pos, var_id))
+        else begin
+          error_at env pos ("A valid variable name starts with a " ^
+          "letter or underscore, followed by any number of letters, " ^
+          "numbers, or underscores");
+          Lvarvar (dollars, (pos, var_id))
+        end
   | Tcolon ->
       L.back env.lb;
       let name = identifier env in
@@ -2852,14 +2858,12 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
   | x ->
       pos, Id (pos, x)
 
-(** Retuns the identifier with leading $'s stripped and the number of $'s
-  * stripped. *)
-and strip_variablevariable token (dollars: int) =
+and strip_variablevariable (dollars: int) token =
   if (token.[0] = '$') && (token.[1] = '$') then
-    strip_variablevariable (String.sub token 1 ((String.length token) - 1))
-      (dollars + 1)
+    strip_variablevariable (dollars + 1)
+      (String.sub token 1 ((String.length token) - 1))
   else
-    token, dollars
+    dollars, token
 
 (*****************************************************************************)
 (* Expressions in parens. *)

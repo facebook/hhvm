@@ -558,6 +558,7 @@ let mk_mapper = fun m_in ->
       | False -> False
       | Id v1 -> let v1 = map_id v1 in Id ((v1))
       | Lvar v1 -> let v1 = map_id v1 in Lvar ((v1))
+      | Lvarvar (n, v1) -> let v1 = map_id v1 in Lvarvar ((n, v1))
       | Dollardollar -> Dollardollar
       | Clone v1 -> let v1 = map_expr v1 in Clone ((v1))
       | Obj_get ((v1, v2, v3)) ->

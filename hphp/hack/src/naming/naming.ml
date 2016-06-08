@@ -1750,6 +1750,8 @@ module Make (GetLocals : GetLocals) = struct
       N.Lplaceholder pos
     | Lvar x ->
         N.Lvar (Env.lvar env x)
+    | Lvarvar (n, x) ->
+        N.Lvarvar (n, (Env.lvar env x))
     | Obj_get (e1, e2, nullsafe) ->
         (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
            is being used for instance property access; see the case below for

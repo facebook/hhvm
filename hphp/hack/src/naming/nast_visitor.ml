@@ -52,6 +52,7 @@ class type ['a] nast_visitor_type = object
   method on_this : 'a -> 'a
   method on_id : 'a -> sid -> 'a
   method on_lvar : 'a -> id -> 'a
+  method on_lvarvar : 'a -> int -> id -> 'a
   method on_dollardollar : 'a -> id -> 'a
   method on_fun_id : 'a -> sid -> 'a
   method on_method_id : 'a -> expr -> pstring -> 'a
@@ -218,6 +219,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
    | Lplaceholder _pos -> acc
    | Dollardollar id -> this#on_dollardollar acc id
    | Lvar id     -> this#on_lvar acc id
+   | Lvarvar (n, id) -> this#on_lvarvar acc n id
    | Fun_id sid  -> this#on_fun_id acc sid
    | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
    | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
@@ -271,6 +273,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
   method on_this acc = acc
   method on_id acc _ = acc
   method on_lvar acc _ = acc
+  method on_lvarvar acc _ _ = acc
   method on_dollardollar acc id =
     this#on_lvar acc id
 

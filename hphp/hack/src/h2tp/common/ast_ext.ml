@@ -157,7 +157,8 @@ let rec is_collection_expr_ = function
   | Collection _ -> Some true
   | New ((_, Id (_, name)), _, _) when is_collection_str name -> Some true
   | New ((_, Id (_, _)), _, _) -> Some false
-  | Lvar _ | Clone _ | Obj_get _ | Array_get _ | Class_get _  | Yield _
+  | Lvar _ | Lvarvar _ | Clone _ | Obj_get _ | Array_get _ | Class_get _
+  | Yield _
   (* casts to object are the only type we need to worry about *)
   | Cast ((_, Happly ((_, "object"), [])), _) | Eif _ | NullCoalesce _ | Call _
   | Unsafeexpr _ | Expr_list _ | New _ -> None

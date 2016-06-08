@@ -29,6 +29,7 @@ and expr_ f = function
   | Lplaceholder pos -> Lplaceholder (f pos)
   | Dollardollar (p, id) -> Dollardollar (f p, id)
   | Lvar (p, id) -> Lvar (f p, id)
+  | Lvarvar (n, (p, id)) -> Lvarvar (n, (f p, id))
   | Fun_id sid -> Fun_id (pstring f sid)
   | Method_id (e, pstr) -> Method_id (expr f e, pstring f pstr)
   | Method_caller (sid, pstr) -> Method_caller (pstring f sid, pstring f pstr)

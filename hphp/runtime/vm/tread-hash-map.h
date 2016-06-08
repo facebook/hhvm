@@ -32,26 +32,31 @@ namespace Treadmill { void deferredFree(void*); }
 //////////////////////////////////////////////////////////////////////
 
 /*
- * A hashtable safe for multiple concurrent readers, even while writes
- * are happening, but with at most one concurrent writer.  Reads and
- * writes both are wait-free, but that there is only at most one
- * writer will generally require synchronization outside of this
- * class.  (E.g. the translator write lease.)
+ * A hashtable safe for multiple concurrent readers, even while writes are
+ * happening, but with at most one concurrent writer.  Reads and writes both
+ * are wait-free, but that there is only at most one writer will generally
+ * require synchronization outside of this class.  (E.g. the translator write
+ * lease.)
  *
- * Key must be an atomically loadable/storable type.  The Value must
- * be a trivially copyable and assignable type, and it must be legal
- * to copy from it without synchronization (this table may do this
- * during a rehash).  Also, assumes Key == 0 is invalid (i.e. the
- * empty key).
+ * Key must be an atomically loadable/storable type.  The Value must be a
+ * trivially copyable and assignable type, and it must be legal to copy from it
+ * without synchronization (this table may do this during a rehash).  Also,
+ * assumes Key == 0 is invalid (i.e. the empty key).
  *
- * Insertions must be unique.  It is an error to insert the same key
- * more than once.
+ * Insertions must be unique.  It is an error to insert the same key more than
+ * once.
  *
  * Uses the treadmill to collect garbage.
  */
 template<class Key, class Val, class HashFunc>
 struct TreadHashMap {
   typedef std::pair<std::atomic<Key>,Val> value_type;
+
+  static_assert(
+    std::is_trivially_destructible<Key>::value &&
+    std::is_trivially_destructible<Val>::value,
+    "TreadHashMap only supports trivially destructible keys and values"
+  );
 
 private:
   struct Table {
@@ -163,7 +168,7 @@ public:
       auto& entry = tab->entries[idx];
       Key currentProbe = entry.first.load(std::memory_order_acquire);
       if (currentProbe == key) return &entry.second;
-      if (currentProbe == 0) return 0;
+      if (currentProbe == 0) return nullptr;
       if (++idx == tab->capac) idx = 0;
     }
   }

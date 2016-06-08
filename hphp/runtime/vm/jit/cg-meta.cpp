@@ -63,7 +63,10 @@ void CGMeta::process_only(
   }
   jmpTransIDs.clear();
 
-  mcg->literals().insert(literals.begin(), literals.end());
+  for (auto& pair : literals) {
+    if (mcg->literals().find(pair.first)) continue;
+    mcg->literals().insert(pair.first, pair.second);
+  }
   literals.clear();
 
   if (inProgressTailBranches) {

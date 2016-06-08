@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/tread-hash-map.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -60,6 +61,7 @@ extern MCGenerator* mcg;
 const TCA kInvalidCatchTrace = TCA(-1);
 
 using CatchTraceMap = TreadHashMap<CTCA, TCA, ctca_identity_hash>;
+using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

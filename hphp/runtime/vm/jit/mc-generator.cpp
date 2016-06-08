@@ -1803,6 +1803,7 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
 MCGenerator::MCGenerator()
   : m_numTrans(0)
   , m_catchTraceMap(128)
+  , m_literals(128)
 {
   TRACE(1, "MCGenerator@%p startup\n", this);
   mcg = this;

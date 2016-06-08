@@ -606,10 +606,12 @@ void Unit::loadFunc(const Func *func) {
   );
   const_cast<Func*>(func)->setFuncHandle(ne->m_cachedFunc);
   if (RuntimeOption::EvalPerfDataMap) {
-    Debug::DebugInfo::recordDataMap(
-      (char*)(intptr_t)ne->m_cachedFunc.handle(),
-      (char*)(intptr_t)ne->m_cachedFunc.handle() + sizeof(void*),
-      folly::format("rds+Func-{}", func->name()).str());
+    rds::recordRds(
+      ne->m_cachedFunc.handle(),
+      sizeof(void*),
+      "Func",
+      func->name()->toCppString()
+    );
   }
 }
 
@@ -771,10 +773,12 @@ Class* Unit::defClass(const PreClass* preClass,
       Debug::DebugInfo::recordDataMap(
         newClass.get(), newClass.get() + 1,
         folly::format("Class-{}", preClass->name()).str());
-      Debug::DebugInfo::recordDataMap(
-        (char*)(intptr_t)nameList->m_cachedClass.handle(),
-        (char*)(intptr_t)nameList->m_cachedClass.handle() + sizeof(void*),
-        folly::format("rds+Class-{}", preClass->name()).str());
+      rds::recordRds(
+        nameList->m_cachedClass.handle(),
+        sizeof(void*),
+        "Class",
+        preClass->name()->toCppString()
+      );
     }
     /*
      * call setCached after adding to the class list, otherwise the
@@ -854,15 +858,20 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
 
 const Cell* Unit::lookupCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
-  if (LIKELY(handle != 0)) {
-    TypedValue& tv = rds::handleToRef<TypedValue>(handle);
-    if (LIKELY(tv.m_type != KindOfUninit)) {
-      assert(cellIsPlausible(tv));
+
+  if (LIKELY(handle != rds::kInvalidHandle &&
+             rds::isHandleInit(handle))) {
+    auto const& tv = rds::handleToRef<TypedValue>(handle);
+
+    if (LIKELY(rds::isNormalHandle(handle) ||
+               tv.m_type != KindOfUninit)) {
+      assertx(cellIsPlausible(tv));
       return &tv;
     }
+    assertx(rds::isPersistentHandle(handle));
+
     if (UNLIKELY(tv.m_data.pref != nullptr)) {
-      auto callback =
-        reinterpret_cast<SystemConstantCallback>(tv.m_data.pref);
+      auto callback = reinterpret_cast<SystemConstantCallback>(tv.m_data.pref);
       const Cell* tvRet = callback().asTypedValue();
       assert(cellIsPlausible(*tvRet));
       if (LIKELY(tvRet->m_type != KindOfUninit)) {
@@ -878,7 +887,9 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
 
 const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
-  if (!rds::isPersistentHandle(handle)) return nullptr;
+  if (handle == rds::kInvalidHandle || !rds::isPersistentHandle(handle)) {
+    return nullptr;
+  }
   auto const ret = &rds::handleToRef<TypedValue>(handle);
   assert(cellIsPlausible(*ret));
   return ret;
@@ -899,12 +910,18 @@ const TypedValue* Unit::loadCns(const StringData* cnsName) {
   return lookupCns(cnsName);
 }
 
-static uint64_t defCnsHelper(uint64_t ch,
-                             const TypedValue *value,
-                             const StringData *cnsName) {
+static bool defCnsHelper(rds::Handle ch,
+                         const TypedValue *value,
+                         const StringData *cnsName) {
   TypedValue* cns = &rds::handleToRef<TypedValue>(ch);
-  if (UNLIKELY(cns->m_type != KindOfUninit) ||
-      UNLIKELY(cns->m_data.pref != nullptr)) {
+
+  if (!rds::isHandleInit(ch)) {
+    cns->m_type = KindOfUninit;
+    cns->m_data.pref = nullptr;
+  }
+
+  if (UNLIKELY(cns->m_type != KindOfUninit ||
+               cns->m_data.pref != nullptr)) {
     raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
   } else if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
     raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
@@ -913,6 +930,7 @@ static uint64_t defCnsHelper(uint64_t ch,
     v.setEvalScalar();
     cns->m_data = v.asTypedValue()->m_data;
     cns->m_type = v.asTypedValue()->m_type;
+    if (rds::isNormalHandle(ch)) rds::initHandle(ch);
     return true;
   }
   return false;
@@ -922,7 +940,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
                   bool persistent /* = false */) {
   auto const handle = makeCnsHandle(cnsName, persistent);
 
-  if (UNLIKELY(handle == 0)) {
+  if (UNLIKELY(handle == rds::kInvalidHandle)) {
     if (UNLIKELY(!rds::s_constants().get())) {
       /*
        * This only happens when we call define on a non
@@ -955,8 +973,13 @@ bool Unit::defSystemConstantCallback(const StringData* cnsName,
     return false;
   }
   auto const handle = makeCnsHandle(cnsName, true);
-  assert(handle);
+  assert(handle != rds::kInvalidHandle);
   TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
+  if (!rds::isHandleInit(handle)) {
+    cns->m_type = KindOfUninit;
+    cns->m_data.pref = nullptr;
+    rds::initHandle(handle);
+  }
   assert(cns->m_type == KindOfUninit);
   cns->m_data.pref = reinterpret_cast<RefData*>(callback);
   return true;
@@ -1255,12 +1278,14 @@ void Unit::initialMerge() {
             StringData* s = (StringData*)((char*)obj - (int)k);
             auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
             ix += sizeof(*v) / sizeof(void*);
-            v->rdsHandle() = makeCnsHandle(
-              s, k == MergeKind::PersistentDefine);
-            if (k == MergeKind::PersistentDefine) {
-              mergeCns(rds::handleToRef<TypedValue>(v->rdsHandle()),
-                       v, s);
-            }
+
+            auto const persistent = (k == MergeKind::PersistentDefine);
+
+            auto const handle = makeCnsHandle(s, persistent);
+            v->rdsHandle() = handle;
+
+            auto& tv = rds::handleToRef<TypedValue>(handle);
+            if (persistent) mergeCns(tv, v, s);
             break;
           }
           case MergeKind::Global:
@@ -1451,7 +1476,9 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
       do {
         Func* func = *it;
         assert(func->top());
-        getDataRef<LowPtr<Func>>(tcbase, func->funcHandle()) = func;
+        auto const handle = func->funcHandle();
+        getDataRef<LowPtr<Func>>(tcbase, handle) = func;
+        if (rds::isNormalHandle(handle)) rds::initHandle(handle);
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
@@ -1492,13 +1519,19 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
               rds::isPersistentHandle(parent->classHandle())) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
           }
-          if (UNLIKELY(!getDataRef<LowPtr<Class>>(tcbase,
-                                                  parent->classHandle()))) {
+
+          auto const parent_handle = parent->classHandle();
+          auto const parent_cls_present =
+            rds::isHandleInit(parent_handle) &&
+            getDataRef<LowPtr<Class>>(tcbase, parent_handle);
+          if (UNLIKELY(!parent_cls_present)) {
             redoHoistable = true;
             continue;
           }
         }
-        getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
+        auto const handle = cls->classHandle();
+        getDataRef<LowPtr<Class>>(tcbase, handle) = cls;
+        if (rds::isNormalHandle(handle)) rds::initHandle(handle);
         if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
@@ -1575,7 +1608,9 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
             raise_error("unknown class %s", other->name()->data());
           }
           assert(avail == Class::Avail::True);
-          getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
+          auto const handle = cls->classHandle();
+          getDataRef<LowPtr<Class>>(tcbase, handle) = cls;
+          if (rds::isNormalHandle(handle)) rds::initHandle(handle);
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
@@ -1597,10 +1632,16 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         do {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_define);
+
           StringData* name = (StringData*)((char*)obj - (int)k);
           auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
           assert(v->m_type != KindOfUninit);
-          mergeCns(getDataRef<TypedValue>(tcbase, v->rdsHandle()), v, name);
+
+          auto const handle = v->rdsHandle();
+          assertx(rds::isNormalHandle(handle));
+          mergeCns(getDataRef<TypedValue>(tcbase, handle), v, name);
+          rds::initHandle(handle);
+
           ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = MergeKind(uintptr_t(obj) & 7);

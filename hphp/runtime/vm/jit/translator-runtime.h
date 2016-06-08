@@ -131,7 +131,7 @@ void VerifyRetTypeFail(TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 
-RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
+RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
 
 bool ak_exist_string(ArrayData* arr, StringData* key);
 bool ak_exist_string_obj(ObjectData* obj, StringData* key);
@@ -169,16 +169,16 @@ void profileTypeHelper(TypeProfile*, TypedValue);
 
 void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr);
 
-Cell lookupCnsHelper(const TypedValue* tv,
-                     StringData* nm,
-                     bool error);
-Cell lookupCnsUHelper(const TypedValue* tv,
-                      StringData* nm,
-                      StringData* fallback);
-void lookupClsMethodHelper(Class* cls,
-                           StringData* meth,
-                           ActRec* ar,
-                           ActRec* fp);
+Cell lookupCnsHelperNormal(rds::Handle tv_handle,
+                           StringData* nm, bool error);
+Cell lookupCnsHelperPersistent(rds::Handle tv_handle,
+                               StringData* nm, bool error);
+Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
+                            StringData* nm, StringData* fallback);
+Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
+                                StringData* nm, StringData* fallback);
+void lookupClsMethodHelper(Class* cls, StringData* meth,
+                           ActRec* ar, ActRec* fp);
 
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
 void traceCallback(ActRec* fp, Cell* sp, Offset pcOff);
@@ -191,7 +191,7 @@ const Func* loadClassCtor(Class* cls, ActRec* fp);
 const Func* lookupUnknownFunc(const StringData*);
 const Func* lookupFallbackFunc(const StringData*, const StringData*);
 
-Class* lookupKnownClass(LowPtr<Class>* cache, const StringData* clsName);
+Class* lookupKnownClass(rds::Handle cache_handle, const StringData* clsName);
 
 TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const NamedEntity* ne,
@@ -211,7 +211,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
 void raiseMissingArgument(const Func* func, int got);
 
-rds::Handle lookupClsRDSHandle(const StringData* name);
+Class* lookupClsRDS(const StringData* name);
 
 /*
  * Insert obj into the set of live objects to be destructed at the end of the

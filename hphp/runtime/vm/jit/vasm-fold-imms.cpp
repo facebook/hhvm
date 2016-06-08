@@ -102,6 +102,14 @@ struct ImmFolder {
     int val;
     if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
   }
+  void fold(cmpbm& in, Vinstr& out) {
+    int val;
+    if (match_byte(in.s0, val)) { out = cmpbim{val, in.s1, in.sf}; }
+  }
+  void fold(cmpwm& in, Vinstr& out) {
+    int val;
+    if (match_int(in.s0, val)) { out = cmpwim{val, in.s1, in.sf}; }
+  }
   void fold(cmpq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) { out = cmpqi{val, in.s1, in.sf}; }

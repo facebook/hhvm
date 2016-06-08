@@ -225,6 +225,22 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
                  bool force = false);
 
 ///////////////////////////////////////////////////////////////////////////////
+// RDS manipulation.
+
+/*
+ * Whether `ch' is initialized---i.e., whether its generation number matches
+ * the current generation.
+ *
+ * @requires: rds::isNormalHandle(ch)
+ */
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
+
+/*
+ * Update the generation number for `ch' to the current generation.
+ *
+ * @requires: rds::isNormalHandle(ch)
+ */
+void markRDSHandleInitialized(Vout& v, rds::Handle ch);
 
 }}
 

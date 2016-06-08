@@ -429,23 +429,41 @@ void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
   // source location" rule that the inline fastpath requires
   auto const box = [&]{
     if (curFunc(env)->isClosureBody()) {
-      return gen(env, ClosureStaticLocInit, cns(env, name), fp(env), value);
+      auto const box = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
+      ifThen(
+        env,
+        [&] (Block* taken) { gen(env, CheckClosureStaticLocInit, taken, box); },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          gen(env, InitClosureStaticLoc, box, value);
+        }
+      );
+      return box;
     }
 
-    auto const cachedBox =
-      gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
-    ifThen(
+    return cond(
       env,
       [&] (Block* taken) {
-        gen(env, CheckStaticLocInit, taken, cachedBox);
+        return gen(
+          env,
+          LdStaticLoc,
+          StaticLocName { curFunc(env), name },
+          taken
+        );
       },
+      [&] (SSATmp* box) { return box; },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        gen(env, StaticLocInitCached, cachedBox, value);
+        return gen(
+          env,
+          InitStaticLoc,
+          StaticLocName { curFunc(env), name },
+          value
+        );
       }
     );
-    return cachedBox;
   }();
+
   gen(env, IncRef, box);
   auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
   stLocRaw(env, locId, fp(env), box);
@@ -459,38 +477,64 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
 
   auto const ldPMExit = makePseudoMainExit(env);
 
-  auto const box = curFunc(env)->isClosureBody() ?
-    gen(env, ClosureStaticLocInit,
-             cns(env, name), fp(env), cns(env, TUninit)) :
-    gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
+  SSATmp* box;
+  SSATmp* inited;
+  std::tie(box, inited) = [&] {
+    if (curFunc(env)->isClosureBody()) {
+      auto const box = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
+      auto const inited = cond(
+        env,
+        [&] (Block* taken) {
+          gen(env, CheckClosureStaticLocInit, taken, box);
+        },
+        [&] { // Next: the static local is already initialized
+          return cns(env, true);
+        },
+        [&] { // Taken: need to initialize the static local
+          /*
+           * Even though this path is "cold", we're not marking it
+           * unlikely because the size of the instructions this will
+           * generate is about 10 bytes, which is not much larger than the
+           * 5 byte jump to acold would be.
+           */
+          gen(env, InitClosureStaticLoc, box, cns(env, TInitNull));
+          return cns(env, false);
+        }
+      );
+      return std::make_pair(box, inited);
+    }
 
-  auto const res = cond(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckStaticLocInit, taken, box);
-    },
-    [&] { // Next: the static local is already initialized
-      return cns(env, true);
-    },
-    [&] { // Taken: need to initialize the static local
-      /*
-       * Even though this path is "cold", we're not marking it
-       * unlikely because the size of the instructions this will
-       * generate is about 10 bytes, which is not much larger than the
-       * 5 byte jump to acold would be.
-       *
-       * One note about StaticLoc: we're literally always going to
-       * generate a fallthrough trace here that is cold (the code that
-       * initializes the static local).  TODO(#2894612).
-       */
-      gen(env, StaticLocInitCached, box, cns(env, TInitNull));
-      return cns(env, false);
-    });
+    return condPair(
+      env,
+      [&] (Block* taken) {
+        return gen(
+          env,
+          LdStaticLoc,
+          StaticLocName { curFunc(env), name },
+          taken
+        );
+      },
+      [&] (SSATmp* box) { // Next: the static local is already initialized
+        return std::make_pair(box, cns(env, true));
+      },
+      [&] { // Taken: need to initialize the static local
+        hint(env, Block::Hint::Unlikely);
+        auto const inited = gen(
+          env,
+          InitStaticLoc,
+          StaticLocName { curFunc(env), name },
+          cns(env, TInitNull)
+        );
+        return std::make_pair(inited, cns(env, false));
+      }
+    );
+  }();
+
   gen(env, IncRef, box);
   auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeGeneric);
   stLocRaw(env, locId, fp(env), box);
   decRef(env, oldValue);
-  push(env, res);
+  push(env, inited);
 }
 
 //////////////////////////////////////////////////////////////////////

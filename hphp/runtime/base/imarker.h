@@ -71,7 +71,7 @@ template <typename A, typename B, typename P> struct Either;
 template<class T, class Allocator> struct TlsPodBag;
 template <typename T> struct default_ptr;
 template <typename T> struct copy_ptr;
-namespace rds { template <typename T> struct Link; }
+namespace rds { template <typename T, bool N> struct Link; }
 namespace HHBBC {
 struct Type;
 struct ClassInfo;
@@ -427,13 +427,13 @@ struct IMarker {
     p.apply_visitor(variant_visitor(*this));
   }
 
-  template <class T>
+  template <typename T>
   void operator()(const folly::Optional<T>& p) {
     if (p) scan(*p, *this);
   }
 
-  template <typename T>
-  void operator()(const rds::Link<T>& p) {
+  template <typename T, bool N>
+  void operator()(const rds::Link<T,N>& p) {
     scan(*p, *this);
   }
 

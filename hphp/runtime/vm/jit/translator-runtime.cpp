@@ -498,7 +498,7 @@ void VerifyRetTypeFail(TypedValue* tv) {
   tc.verifyReturnFail(func, tv, useStrictTypes);
 }
 
-RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
+RefData* ldClosureStaticLoc(StringData* name, ActRec* fp) {
   auto const func = fp->m_func;
   assertx(func->isClosureBody());
   auto const closureLoc = frame_local(fp, func->numParams());
@@ -506,9 +506,7 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   bool inited;
   auto const refData = lookupStaticFromClosure(
     closureLoc->m_data.pobj, name, inited);
-  if (!inited) {
-    cellCopy(val, *refData->tv());
-  }
+  if (!inited) tvWriteUninit(refData->tv());
   return refData;
 }
 
@@ -676,36 +674,30 @@ TCA sswitchHelperFast(const StringData* val,
   return dest ? *dest : *def;
 }
 
-Cell lookupCnsHelper(const TypedValue* tv,
-                     StringData* nm,
-                     bool error) {
-  assertx(tv->m_type == KindOfUninit);
+namespace {
 
-  // Deferred constants such as SID
-  if (UNLIKELY(tv->m_data.pref != nullptr)) {
-    auto callback = (Unit::SystemConstantCallback)(tv->m_data.pref);
-    const Cell* cns = callback().asTypedValue();
-    if (LIKELY(cns->m_type != KindOfUninit)) {
-      Cell c1;
-      cellDup(*cns, c1);
-      return c1;
-    }
-  }
-
+ALWAYS_INLINE
+const Cell* lookupCnsImpl(StringData* nm) {
   const Cell* cns = nullptr;
+
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
     cns = rds::s_constants()->nvGet(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
   }
+  return cns;
+}
+
+Cell lookupCnsHelper(StringData* nm, bool error) {
+  auto const cns = lookupCnsImpl(nm);
   if (LIKELY(cns != nullptr)) {
     Cell c1;
     cellDup(*cns, c1);
     return c1;
   }
 
-  // Undefined constants
+  // Undefined constants.
   if (error) {
     raise_error("Undefined constant '%s'", nm->data());
   } else {
@@ -716,6 +708,35 @@ Cell lookupCnsHelper(const TypedValue* tv,
     return c1;
   }
   not_reached();
+}
+
+}
+
+Cell lookupCnsHelperNormal(rds::Handle tv_handle,
+                           StringData* nm, bool error) {
+  assertx(rds::isNormalHandle(tv_handle));
+  assertx(!rds::isHandleInit(tv_handle));
+
+  return lookupCnsHelper(nm, error);
+}
+
+Cell lookupCnsHelperPersistent(rds::Handle tv_handle,
+                               StringData* nm, bool error) {
+  assertx(rds::isPersistentHandle(tv_handle));
+  auto const tv = &rds::handleToRef<TypedValue>(tv_handle);
+  assertx(tv->m_type == KindOfUninit);
+
+  // Deferred system constants.
+  if (UNLIKELY(tv->m_data.pref != nullptr)) {
+    auto callback = (Unit::SystemConstantCallback)(tv->m_data.pref);
+    const Cell* cns = callback().asTypedValue();
+    if (LIKELY(cns->m_type != KindOfUninit)) {
+      Cell c1;
+      cellDup(*cns, c1);
+      return c1;
+    }
+  }
+  return lookupCnsHelper(nm, error);
 }
 
 void lookupClsMethodHelper(Class* cls,
@@ -765,44 +786,49 @@ void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr) {
   profile->report(arr->kind());
 }
 
-Cell lookupCnsUHelper(const TypedValue* tv,
-                      StringData* nm,
-                      StringData* fallback) {
-  const Cell* cns = nullptr;
-  Cell c1;
+Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
+                            StringData* nm, StringData* fallback) {
+  assertx(rds::isNormalHandle(tv_handle));
 
-  // lookup qualified name in thread-local constants
-  bool cacheConsts = rds::s_constants().get() != nullptr;
-  if (UNLIKELY(cacheConsts)) {
-    cns = rds::s_constants()->nvGet(nm);
-  }
-  if (!cns) {
-    cns = Unit::loadCns(const_cast<StringData*>(nm));
+  // Lookup qualified name in thread-local constants.
+  auto cns = lookupCnsImpl(nm);
+
+  // Try cache handle for unqualified name.
+  if (UNLIKELY(!cns && rds::isHandleInit(tv_handle, rds::NormalTag{}))) {
+    cns = &rds::handleToRef<TypedValue>(tv_handle);
+    assertx(cns->m_type != KindOfUninit);
   }
 
-  // try cache handle for unqualified name
+  if (LIKELY(cns != nullptr)) {
+    Cell c1;
+    cellDup(*cns, c1);
+    return c1;
+  }
+
+  // Lookup unqualified name in thread-local constants.
+  return lookupCnsHelper(fallback, false);
+}
+
+Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
+                                StringData* nm, StringData* fallback) {
+  assertx(rds::isPersistentHandle(tv_handle));
+
+  // Lookup qualified name in thread-local constants.
+  auto cns = lookupCnsImpl(nm);
+
+  // Try cache handle for unqualified name.
+  auto const tv = &rds::handleToRef<TypedValue>(tv_handle);
   if (UNLIKELY(!cns && tv->m_type != KindOfUninit)) {
-    cns = const_cast<Cell*>(tv);
+    cns = tv;
   }
 
-  // lookup unqualified name in thread-local constants
-  if (UNLIKELY(!cns)) {
-    if (UNLIKELY(cacheConsts)) {
-      cns = rds::s_constants()->nvGet(fallback);
-    }
-    if (!cns) {
-      cns = Unit::loadCns(const_cast<StringData*>(fallback));
-    }
-    if (UNLIKELY(!cns)) {
-      raise_notice(Strings::UNDEFINED_CONSTANT,
-                   fallback->data(), fallback->data());
-      c1.m_data.pstr = const_cast<StringData*>(fallback);
-      c1.m_type = KindOfPersistentString;
-      return c1;
-    }
+  if (LIKELY(cns != nullptr)) {
+    Cell c1;
+    cellDup(*cns, c1);
+    return c1;
   }
-  tvDup(*cns, c1);
-  return c1;
+
+  return lookupCnsHelper(fallback, false);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1024,16 +1050,19 @@ const Func* lookupFallbackFunc(const StringData* name,
   return func;
 }
 
-Class* lookupKnownClass(LowPtr<Class>* cache, const StringData* clsName) {
-  Class* cls = *cache;
-  assertx(!cls); // the caller should already have checked
+Class* lookupKnownClass(rds::Handle cache_handle, const StringData* clsName) {
+  assertx(rds::isNormalHandle(cache_handle));
+  // the caller should already have checked
+  assertx(!rds::isHandleInit(cache_handle));
 
   AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(clsName)));
-  cls = *cache;
 
-  if (UNLIKELY(!cls)) raise_error(Strings::UNKNOWN_CLASS, clsName->data());
-  return cls;
+  // Autoloader should have inited it as a side-effect.
+  if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
+    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
+  }
+  return rds::handleToRef<LowPtr<Class>>(cache_handle).get();
 }
 
 Cell lookupClassConstantTv(TypedValue* cache,
@@ -1216,8 +1245,12 @@ void raiseMissingArgument(const Func* func, int got) {
   }
 }
 
-rds::Handle lookupClsRDSHandle(const StringData* name) {
-  return NamedEntity::get(name)->getClassHandle();
+Class* lookupClsRDS(const StringData* name) {
+  auto const handle = NamedEntity::get(name)->getClassHandle();
+  assertx(handle != rds::kInvalidHandle);
+  return rds::isHandleInit(handle)
+    ? &*rds::handleToRef<LowPtr<Class>>(handle)
+    : nullptr;
 }
 
 void registerLiveObj(ObjectData* obj) {

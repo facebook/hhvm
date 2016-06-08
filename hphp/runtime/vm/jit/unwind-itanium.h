@@ -68,7 +68,7 @@ struct UnwindRDS {
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
 };
-extern rds::Link<UnwindRDS> g_unwind_rds;
+extern rds::Link<UnwindRDS, true /* normal_only */> g_unwind_rds;
 
 #define IMPLEMENT_OFF(Name, member)                             \
   inline ptrdiff_t unwinder##Name##Off() {                      \

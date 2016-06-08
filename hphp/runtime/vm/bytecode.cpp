@@ -2710,6 +2710,7 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
       // Our return address was smashed by the debugger. Do the work of the
       // debuggerRetHelper by setting some unwinder RDS info and resuming at
       // the approprate catch trace.
+      assert(jit::g_unwind_rds.isInit());
       jit::g_unwind_rds->debuggerReturnSP = vmsp();
       jit::g_unwind_rds->debuggerReturnOff = retInfo.soff;
       return jit::unstashDebuggerCatch(retInfo.fp);
@@ -5074,8 +5075,11 @@ static inline RefData* lookupStatic(const StringData* name,
   }
 
   auto const refData = rds::bindStaticLocal(func, name);
-  inited = !refData->isUninitializedInRDS();
-  if (!inited) refData->initInRDS();
+  inited = refData.isInit();
+  if (!inited) {
+    refData->initInRDS();
+    refData.markInit();
+  }
   return refData.get();
 }
 

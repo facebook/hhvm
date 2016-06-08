@@ -114,6 +114,27 @@ template<> struct BranchImpl<SSATmp*> {
   }
 };
 
+template<class T> struct BranchPairImpl;
+
+template<> struct BranchPairImpl<void> {
+  template<class Branch, class Next>
+  static std::pair<SSATmp*, SSATmp*> go(Branch branch,
+                                        Block* taken,
+                                        Next next) {
+    branch(taken);
+    return next();
+  }
+};
+
+template<> struct BranchPairImpl<SSATmp*> {
+  template<class Branch, class Next>
+  static std::pair<SSATmp*, SSATmp*> go(Branch branch,
+                                        Block* taken,
+                                        Next next) {
+    return next(branch(taken));
+  }
+};
+
 /*
  * cond() generates if-then-else blocks within a trace.  The caller supplies
  * lambdas to create the branch, next-body, and taken-body.  The next and
@@ -156,6 +177,37 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
     return result;
   }
   return nullptr;
+}
+
+template<class Branch, class Next, class Taken>
+std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
+                                     Branch branch,
+                                     Next next,
+                                     Taken taken) {
+  auto const taken_block = defBlock(env);
+  auto const done_block  = defBlock(env);
+
+  using T = decltype(branch(taken_block));
+  auto const v1 = BranchPairImpl<T>::go(branch, taken_block, next);
+  assertx(v1.first);
+  assertx(v1.second);
+  gen(env, Jmp, done_block, v1.first, v1.second);
+
+  env.irb->appendBlock(taken_block);
+
+  auto const v2 = taken();
+  assertx(v2.first);
+  assertx(v2.second);
+  gen(env, Jmp, done_block, v2.first, v2.second);
+
+  env.irb->appendBlock(done_block);
+  auto const label = env.unit.defLabel(2, env.irb->curMarker());
+  done_block->push_back(label);
+  auto const result1 = label->dst(0);
+  auto const result2 = label->dst(1);
+  result1->setType(v1.first->type() | v2.first->type());
+  result2->setType(v1.second->type() | v2.second->type());
+  return std::make_pair(result1, result2);
 }
 
 /*

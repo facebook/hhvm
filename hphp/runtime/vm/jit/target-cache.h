@@ -121,7 +121,7 @@ struct Entry {
 };
 
 template<bool fatal>
-void handlePrimeCacheInit(Entry* mce,
+void handlePrimeCacheInit(rds::Handle mce_handle,
                           ActRec* ar,
                           StringData* name,
                           Class* cls,

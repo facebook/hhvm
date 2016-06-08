@@ -188,7 +188,9 @@ struct Vunit;
   O(cmpb, Inone, U(s0) U(s1), D(sf))\
   O(cmpbi, I(s0), U(s1), D(sf))\
   O(cmpbim, I(s0), U(s1), D(sf))\
+  O(cmpbm, Inone, U(s0) U(s1), D(sf))\
   O(cmpwim, I(s0), U(s1), D(sf))\
+  O(cmpwm, Inone, U(s0) U(s1), D(sf))           \
   O(cmpl, Inone, U(s0) U(s1), D(sf))\
   O(cmpli, I(s0), U(s1), D(sf))\
   O(cmplm, Inone, U(s0) U(s1), D(sf))\
@@ -956,7 +958,9 @@ struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct cmpb { Vreg8 s0; Vreg8 s1; VregSF sf; };
 struct cmpbi { Immed s0; Vreg8 s1; VregSF sf; };
 struct cmpbim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpbm { Vreg8 s0; Vptr s1; VregSF sf; };
 struct cmpwim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpwm { Vreg16 s0; Vptr s1; VregSF sf; };
 struct cmpl { Vreg32 s0; Vreg32 s1; VregSF sf; };
 struct cmpli { Immed s0; Vreg32 s1; VregSF sf; };
 struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; };

@@ -89,8 +89,7 @@ void ScannerToken::xhpDecode() {
 Scanner::Scanner(const std::string& filename, int type, bool md5 /* = false */)
     : m_filename(filename), m_stream(nullptr), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0),
-      m_listener(nullptr) {
+      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0) {
 #ifdef _MSC_VER
   // I really don't know why this doesn't work properly with MSVC,
   // but I know this fixes the problem, so use it instead.
@@ -121,8 +120,7 @@ Scanner::Scanner(std::istream &stream, int type,
                  bool md5 /* = false */)
     : m_filename(fileName), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0),
-      m_listener(nullptr) {
+      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0) {
   m_stream = &stream;
   m_streamOwner = false;
   if (md5) computeMd5();
@@ -134,7 +132,7 @@ Scanner::Scanner(const char *source, int len, int type,
     : m_filename(fileName), m_stream(nullptr), m_source(source), m_len(len),
       m_pos(0), m_state(Start), m_type(type), m_yyscanner(nullptr),
       m_token(nullptr), m_loc(nullptr), m_lastToken(-1), m_isHHFile(0),
-      m_lookaheadLtDepth(0), m_listener(nullptr) {
+      m_lookaheadLtDepth(0) {
   assert(m_source);
   m_streamOwner = false;
   if (md5) {
@@ -766,9 +764,6 @@ void Scanner::warn(const char* fmt, ...) {
 void Scanner::incLoc(const char *rawText, int rawLeng, int type) {
   assert(rawText);
   assert(rawLeng > 0);
-  if (m_listener) {
-    m_token->setID(m_listener->publish(rawText, rawLeng, type));
-  }
 
   m_loc->cursor += rawLeng;
 

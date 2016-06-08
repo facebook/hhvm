@@ -290,15 +290,17 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
 }
 
 const uint64_t* alloc_literal(Venv& env, uint64_t val) {
-  assertx(Translator::WriteLease().amOwner());
-  auto it = mcg->literals().find(val);
-  if (it != mcg->literals().end()) {
-    assertx(*it->second == val);
-    return it->second;
+  // TreadHashMap doesn't support 0 as a key, and we have far more efficient
+  // ways of getting 0 in a register anyway.
+  always_assert(val != 0);
+
+  if (auto it = mcg->literals().find(val)) {
+    assertx(**it == val);
+    return *it;
   }
 
   auto& pending = env.meta.literals;
-  it = pending.find(val);
+  auto it = pending.find(val);
   if (it != pending.end()) {
     assertx(*it->second == val);
     return it->second;
@@ -306,7 +308,8 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
 
   auto addr = env.text.data().alloc<uint64_t>(alignof(uint64_t));
   *addr = val;
-  return pending[val] = addr;
+  pending.emplace(val, addr);
+  return addr;
 }
 
 }}

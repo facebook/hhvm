@@ -62,7 +62,7 @@ struct CGMeta {
   std::vector<std::pair<TCA,Fixup>> fixups;
   std::vector<std::pair<CTCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
-  LiteralMap literals;
+  std::unordered_map<uint64_t, const uint64_t*> literals;
 
   /*
    * All the alignment constraints on each code address.

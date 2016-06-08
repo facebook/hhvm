@@ -19,9 +19,10 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/types.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map-typedefs.h"
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP { namespace jit {
 
@@ -56,8 +57,6 @@ using TransIDVec = std::vector<TransID>;
 
 using Annotation = std::pair<std::string, std::string>;
 using Annotations = std::vector<Annotation>;
-
-using LiteralMap = hphp_hash_map<uint64_t,const uint64_t*>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

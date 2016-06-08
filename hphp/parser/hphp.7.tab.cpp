@@ -642,7 +642,7 @@ static void validate_shape_keyname(Token& tok, Parser* _p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
+static int yylex(YYSTYPE* token, HPHP::Location* loc, Parser* _p) {
   return _p->scan(token, loc);
 }
 

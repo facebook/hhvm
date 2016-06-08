@@ -44,16 +44,32 @@ function my_option_map(): OptionInfoMap {
 }
 
 function get_paths(OptionMap $opts): Map<string,string> {
-  $root = __DIR__.'/../../_bin/hphp';
-  if (!is_dir($root)) {
-    $root = __DIR__.'/..';
+  $root = __DIR__.'/..';
+
+  $buck = __DIR__.'/../../buck-out/gen/hphp';
+  if (is_dir($buck)) {
+    $root = $buck;
   }
+
+  $fbbuild = __DIR__.'/../../_bin/hphp';
+  if (is_dir($fbbuild)) {
+    $root = $fbbuild;
+  }
+
   if ($opts->containsKey('build-root')) {
     $root = realpath($opts['build-root']);
   }
+
+  if ($root === $buck) {
+    return Map {
+      'hhvm' => $root.'/hhvm/hhvm/hhvm',
+      'hphp' => $root.'/hhvm/symlinks=hphp/hphp',
+    };
+  }
+
   return Map {
-    'hhvm' => "$root/hhvm/hhvm",
-    'hphp' => "$root/hhvm/hphp",
+    'hhvm' => $root.'/hhvm/hhvm',
+    'hphp' => $root.'/hhvm/hphp',
   };
 }
 

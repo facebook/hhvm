@@ -212,13 +212,8 @@ bool PlainFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // invalidate the current buffer
   setWritePosition(0);
   setReadPosition(0);
-
-  // check if Eof flag is needed
-  if (offset == length) {
-    setEof(true);
-  } else {
-    setEof(false);
-  }
+  // clear the eof flag
+  setEof(false);
   flush();
 
   // lseek instead of seek to be consistent with read

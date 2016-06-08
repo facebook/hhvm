@@ -73,6 +73,7 @@ module Collections = struct
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
   let cDict             = "\\dict"
+  let cVec              = "\\vec"
 
 end
 

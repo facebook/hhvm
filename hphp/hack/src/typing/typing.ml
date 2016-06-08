@@ -2399,7 +2399,8 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       let env = Type.sub_type p Reason.index_array env ty1 ty2 in
       env, ty
   | Tclass ((_, cn) as id, argl)
-    when cn = SN.Collections.cVector ->
+    when cn = SN.Collections.cVector
+    || cn = SN.Collections.cVec ->
       let ty = match argl with
         | [ty] -> ty
         | _ -> arity_error id; Reason.Rwitness p, Tany in
@@ -2583,7 +2584,9 @@ and array_append is_lvalue p env ty1 =
   match snd ety1 with
   | Tany | Tarraykind (AKany | AKempty) -> env, (Reason.Rnone, Tany)
   | Tclass ((_, n), [ty])
-      when n = SN.Collections.cVector || n = SN.Collections.cSet ->
+      when n = SN.Collections.cVector
+      || n = SN.Collections.cSet
+      || n = SN.Collections.cVec ->
       env, ty
   | Tclass ((_, n), [])
       when n = SN.Collections.cVector || n = SN.Collections.cSet ->

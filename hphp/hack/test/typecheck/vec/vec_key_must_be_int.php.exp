@@ -1,0 +1,6 @@
+File "vec_key_must_be_int.php", line 4, characters 10-18:
+Invalid index type for this vec (Typing[4110])
+File "vec_key_must_be_int.php", line 4, characters 15-17:
+This is an int because only int can be used to index into a Vector or vec.
+File "vec_key_must_be_int.php", line 4, characters 15-17:
+It is incompatible with a string

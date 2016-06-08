@@ -183,11 +183,13 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     if (!req_data.getDebuggerNext()) {
       // Next command is not active, just break.
       hook->onStepInBreak(unit, line);
+      return;
     } else if (req_data.getDebuggerStackDepth() <=
                 req_data.getDebuggerFlowDepth()) {
       // Next command is active but we didn't step in. We are done.
       req_data.setDebuggerNext(false);
       hook->onNextBreak(unit, line);
+      return;
     } else {
       // Next command is active and we stepped in. Step out, but save the filter
       // first, as it is cleared when we step out.
@@ -211,27 +213,32 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     if (!req_data.getDebuggerNext()) {
       // Next command not active, break
       hook->onStepOutBreak(unit, line);
+      return;
     } else {
       // Next command is active, but it is done. Break.
       req_data.setDebuggerNext(false);
       hook->onNextBreak(unit, line);
+      return;
     }
   }
 
   // Check if we are hitting a call breakpoint
   if (UNLIKELY(req_data.m_callBreakPointFilter.checkPC(pc))) {
     hook->onFuncEntryBreak(func);
+    return;
   }
 
   // Check if we are hitting a return breakpoint
   if (UNLIKELY(req_data.m_retBreakPointFilter.checkPC(pc))) {
     hook->onFuncExitBreak(func);
+    return;
   }
 
   // Check if we are hitting a line breakpoint.
   if (UNLIKELY(req_data.m_lineBreakPointFilter.checkPC(pc))) {
     req_data.setActiveLineBreak(line);
     hook->onLineBreak(unit, line);
+    return;
   }
 
   TRACE(5, "out phpDebuggerOpcodeHook()\n");

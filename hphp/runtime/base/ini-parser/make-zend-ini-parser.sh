@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SED=`which sed`
+SED=$(which sed)
 if [ ! -x "$SED" ]; then
   echo "sed not found" 1>&2
   exit 1
@@ -9,12 +9,19 @@ fi
 unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
+# If we're using buck, then we'll be in a sandboxed source directory instead of
+# the repo.  We want the path to the repo so we can check in the generated
+# parser artifacts.
+if [ -n "${FBCODE_DIR}" ]; then
+  DIR="${FBCODE_DIR}/hphp/runtime/base/ini-parser"
+fi
+
 if [ -z "${INSTALL_DIR}" ]; then
   INFILE=${DIR}/zend-ini.y
   OUTFILE=${DIR}/zend-ini.tab.cpp
   OUTHEADER=${DIR}/zend-ini.tab.hpp
 
-  BISON=`which bison`
+  BISON=$(which bison)
   if [ ! -x "$BISON" ]; then
     echo "bison not found" 1>&2
     exit 1

@@ -15,6 +15,13 @@ fi
 unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
+# If we're using buck, then we'll be in a sandboxed source directory instead of
+# the repo.  We want the path to the repo so we can check in the generated
+# parser artifacts.
+if [ -n "${FBCODE_DIR}" ]; then
+  DIR="${FBCODE_DIR}/hphp/parser"
+fi
+
 if [ -z "${INSTALL_DIR}" ]; then
   INFILE=${DIR}/hphp.y
   OUTFILE5=${DIR}/hphp.5.tab.cpp
@@ -23,7 +30,7 @@ if [ -z "${INSTALL_DIR}" ]; then
   OUTHEADER7=${DIR}/hphp.7.tab.hpp
   OUTHEADER=${DIR}/hphp.tab.hpp
 
-  BISON=`which bison`
+  BISON=$(which bison)
   if [ ! -x "$BISON" ]; then
     echo "bison not found" 1>&2
     exit 1

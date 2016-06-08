@@ -137,10 +137,10 @@ constant_string:
 ///////////////////////////////////////////////////////////////////////////////
 // exposed to runtime/base/ini-setting.cpp
 
-bool zend_parse_ini_string(const std::string &str, const std::string &filename,
+bool zend_parse_ini_string(const std::string& str, const std::string& filename,
                            int scanner_mode,
-                           IniSetting::ParserCallback &callback,
-                           void *arg) {
+                           IniSetting::ParserCallback& callback,
+                           void* arg) {
   if (boost::contains(filename, ".hdf")
     || boost::ends_with(filename, ".hphp")) {
     return false;

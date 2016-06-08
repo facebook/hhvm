@@ -13,7 +13,7 @@
 (* Code for auto-completion *)
 (*****************************************************************************)
 
-let auto_complete tcopt files_info content =
+let auto_complete tcopt content =
   AutocompleteService.attach_hooks();
   let path = Relative_path.default in
   let content_funs, content_classes, content_typedefs =

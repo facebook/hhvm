@@ -105,9 +105,8 @@ let find_extended_classes_in_files_parallel tcopt workers target_class_name
         target_class_name mthds target_class_pos [] classes
 
 (* Find child classes *)
-let get_child_classes_and_methods tcopt cls files_info workers acc =
-  let files = FindRefsService.get_child_classes_files tcopt
-    workers files_info cls.tc_name in
+let get_child_classes_and_methods tcopt cls files_info workers =
+  let files = FindRefsService.get_child_classes_files tcopt cls.tc_name in
   find_extended_classes_in_files_parallel tcopt
     workers cls.tc_name cls.tc_methods cls.tc_pos files_info files
 
@@ -117,7 +116,7 @@ let get_ancestor_classes_and_methods tcopt cls acc =
   match class_ with
   | None -> []
   | Some cls ->
-      SMap.fold cls.Typing_defs.tc_ancestors ~init:acc ~f:begin fun k v acc ->
+      SMap.fold cls.Typing_defs.tc_ancestors ~init:acc ~f:begin fun k _v acc ->
         let class_ = TLazyHeap.get_class tcopt k in
         match class_ with
         | None -> acc
@@ -146,5 +145,5 @@ let get_inheritance tcopt class_ ~find_children files_info workers =
   | None -> []
   | Some c ->
     if find_children then
-      get_child_classes_and_methods tcopt c files_info workers []
+      get_child_classes_and_methods tcopt c files_info workers
     else get_ancestor_classes_and_methods tcopt c []

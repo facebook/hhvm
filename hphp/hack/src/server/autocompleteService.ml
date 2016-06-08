@@ -139,7 +139,7 @@ let get_class_elt_types env class_ cid elts =
   end in
   SMap.map elts (fun class_elt -> class_elt.ce_type)
 
-let autocomplete_method is_static class_ id env cid ~is_method ~is_const =
+let autocomplete_method is_static class_ id env cid ~is_method:_ ~is_const:_ =
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;
@@ -347,7 +347,7 @@ let compute_complete_global tcopt content_funs content_classes =
     List.iter gname_gns_results add_res;
   | _ -> ()
 
-let process_fun_call fun_args used_args env =
+let process_fun_call fun_args used_args _env =
   let is_target target_pos p =
     let line, char_pos, _ = Pos.info_pos target_pos in
     let start_line, start_col, end_col = Pos.info_pos p in

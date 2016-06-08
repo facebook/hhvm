@@ -66,7 +66,7 @@ let read_file fn =
 
 let write_file fn numbered_lines =
   let buf = Buffer.create 256 in
-  List.iter numbered_lines begin fun (lnum, line) ->
+  List.iter numbered_lines begin fun (_lnum, line) ->
     Buffer.add_string buf line;
     Buffer.add_char buf '\n'
   end;
@@ -207,7 +207,7 @@ let split_file fn =
  * line numbers. *)
 let rec reconcile_split orig_content split_content split_locs acc =
   match (orig_content, split_content) with
-    | ((o_n, o_l) :: o_c, (s_n, s_l) :: s_c) -> begin
+    | ((o_n, _o_l) :: o_c, (s_n, s_l) :: s_c) -> begin
       match split_locs with
         | (n :: split_locs) when n = s_n ->
           (* This line got split by split_vars -- i.e., there's an extra line
@@ -272,15 +272,15 @@ let add_soft_param name patch_line type_ _ content =
 (* Checking that the root directory is clean. *)
 (*****************************************************************************)
 
-let fail_not_clean genv =
+let fail_not_clean () =
   let msg = "The directory is not clean. Fix the errors before converting." in
   Printf.fprintf stderr "%s\n" msg;
   exit 3
 
-let check_no_error genv env =
+let check_no_error env =
   if Errors.is_empty env.ServerEnv.errorl
   then ()
-  else fail_not_clean genv
+  else fail_not_clean ()
 
 (*****************************************************************************)
 (* Entry point *)
@@ -333,7 +333,7 @@ let go (genv:ServerEnv.genv) env dirname_path =
   let dirname = Path.to_string dirname_path in
   let env = ref env in
   let continue = ref false in
-  check_no_error genv !env;
+  check_no_error !env;
   let tried_patches = Hashtbl.create 23 in
   let patches = infer_types genv !env dirname in
   apply_patches tried_patches genv env continue patches;

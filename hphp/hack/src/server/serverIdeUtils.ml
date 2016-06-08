@@ -81,7 +81,7 @@ let declare_and_check_get_ast path content =
   let declared_typedefs = ref SSet.empty in
   try
     Errors.ignore_ begin fun () ->
-      let {Parser_hack.file_mode; comments; ast} =
+      let {Parser_hack.file_mode = _; comments = _; ast} =
         Parser_hack.program path content
       in
       let funs, classes, typedefs =

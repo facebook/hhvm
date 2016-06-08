@@ -704,8 +704,6 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
   substitute_ent = domdoc->m_substituteentities;
   recover = domdoc->m_recover;
 
-  xmlInitParser();
-
   req::ptr<File> stream;
 
   if (isFile) {

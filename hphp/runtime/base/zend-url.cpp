@@ -136,6 +136,9 @@ bool url_parse(Url &output, const char *str, size_t length) {
       auto port = atoi(port_buf);
       if (port > 0 && port <= 65535) {
         output.port = port;
+        if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+          s += 2;
+        }
       } else {
         return false;
       }

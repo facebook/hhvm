@@ -171,7 +171,7 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
   }
 
   if (callee->cls()) {
-    if (!rds::isPersistentHandle(callee->cls()->classHandle())) {
+    if (!classHasPersistentRDS(callee->cls())) {
       // if the callee's class is not persistent, its still ok
       // to use it if we're jitting into a method of a subclass
       auto ctx = callSK.func()->cls();
@@ -180,7 +180,8 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
       }
     }
   } else {
-    if (!rds::isPersistentHandle(callee->funcHandle())) {
+    auto const handle = callee->funcHandle();
+    if (handle == rds::kInvalidHandle || !rds::isPersistentHandle(handle)) {
       // if the callee isn't persistent, its still ok to
       // use it if its defined at the top level in the same
       // unit as the caller

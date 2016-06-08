@@ -171,15 +171,10 @@ bool canDCE(IRInstruction* inst) {
   case LdClsCctx:
   case DefConst:
   case Conjure:
-  case LdClsCachedSafe:
   case LdClsInitData:
-  case LookupClsRDSHandle:
-  case DerefClsRDSHandle:
-  case LdCns:
-  case LdClsMethodFCacheFunc:
+  case LookupClsRDS:
   case GetCtxFwdCallDyn:
   case GetCtxFwdCall:
-  case LdClsMethodCacheFunc:
   case LdClsMethodCacheCls:
   case LdFuncVecLen:
   case LdClsMethod:
@@ -187,12 +182,11 @@ bool canDCE(IRInstruction* inst) {
   case LdPropAddr:
   case LdObjClass:
   case LdClsName:
-  case LdFuncCachedSafe:
   case LdARFuncPtr:
   case LdARNumParams:
   case LdFuncNumParams:
   case LdStrLen:
-  case LdStaticLocCached:
+  case LdClosureStaticLoc:
   case NewInstanceRaw:
   case NewArray:
   case NewMixedArray:
@@ -268,7 +262,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckRefs:
   case EndGuards:
   case CheckNonNull:
-  case CheckStaticLocInit:
+  case CheckClosureStaticLocInit:
   case DivDbl:
   case DivInt:
   case AddIntO:
@@ -320,10 +314,13 @@ bool canDCE(IRInstruction* inst) {
   case LdClsCtor:
   case LdCls:
   case LdClsCached:
+  case LdClsCachedSafe:
+  case LdCns:
   case LookupCns:
   case LookupCnsE:
   case LookupCnsU:
-  case LookupClsCns:
+  case LdClsCns:
+  case InitClsCns:
   case LookupClsMethodFCache:
   case LookupClsMethodCache:
   case LookupClsMethod:
@@ -339,6 +336,7 @@ bool canDCE(IRInstruction* inst) {
   case LdFunc:
   case LdFuncCached:
   case LdFuncCachedU:
+  case LdFuncCachedSafe:
   case AllocObj:
   case RegisterLiveObj:
   case CheckInitProps:
@@ -396,8 +394,8 @@ bool canDCE(IRInstruction* inst) {
   case RaiseNotice:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
-  case ClosureStaticLocInit:
-  case StaticLocInitCached:
+  case InitClosureStaticLoc:
+  case InitStaticLoc:
   case PrintStr:
   case PrintInt:
   case PrintBool:
@@ -561,6 +559,9 @@ bool canDCE(IRInstruction* inst) {
   case SyncReturnBC:
   case SetOpCell:
   case ConjureUse:
+  case LdStaticLoc:
+  case LdClsMethodFCacheFunc:
+  case LdClsMethodCacheFunc:
     return false;
   }
   not_reached();

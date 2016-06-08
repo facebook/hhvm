@@ -220,8 +220,7 @@ void inlSingletonSLoc(IRGS& env, const Func* func, PC op) {
   auto const name = func->unit()->lookupLitstrId(getImmPtr(op, 1)->u_SA);
 
   // Side exit if the static local is uninitialized.
-  auto const box = gen(env, LdStaticLocCached, StaticLocName { func, name });
-  gen(env, CheckStaticLocInit, exit, box);
+  auto const box = gen(env, LdStaticLoc, StaticLocName { func, name }, exit);
 
   // Side exit if the static local is null.
   auto const value  = gen(env, LdRef, TInitCell, box);

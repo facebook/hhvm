@@ -111,7 +111,8 @@ private:
     const EnumValues*>;
 
   EnumValuesMap m_enumValuesMap;
-  rds::Link<ReqEnumValuesMap*> m_nonScalarEnumValuesMap{rds::kInvalidHandle};
+  rds::Link<ReqEnumValuesMap*,true /* normal_only */>
+    m_nonScalarEnumValuesMap{rds::kInvalidHandle};
 };
 
 //////////////////////////////////////////////////////////////////////

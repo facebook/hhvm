@@ -24,15 +24,24 @@ namespace HPHP {
 
 ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   assert(!func->isMethod());
-  rds::Link<LowPtr<Func>> funcLink(func->funcHandle());
-  auto const funcAddr = funcLink.get();
-  if (UNLIKELY(*funcAddr != nullptr)) {
-    if (*funcAddr == func) return;
-    if (!(*funcAddr)->isAllowOverride()) {
-      raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
+  auto const handle = func->funcHandle();
+  auto& funcAddr = rds::handleToRef<LowPtr<Func>>(handle);
+
+  if (rds::isPersistentHandle(handle)) {
+    assertx(funcAddr.get() == nullptr || funcAddr.get() == func);
+  } else {
+    assertx(rds::isNormalHandle(handle));
+    if (!rds::isHandleInit(handle, rds::NormalTag{})) {
+      rds::initHandle(handle);
+    } else {
+      if (funcAddr.get() == func) return;
+      if (!funcAddr->isAllowOverride()) {
+        raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
+      }
     }
   }
-  *funcAddr = func;
+  funcAddr = func;
+
   if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
 }
 

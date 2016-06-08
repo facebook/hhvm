@@ -592,9 +592,9 @@ static Array get_function_static_variables(const Func* func) {
     // FIXME: this should not require variant hops
     ai.setUnknownKey(
       VarNR(sv.name),
-      refData->isUninitializedInRDS()
-        ? null_variant
-        : tvAsCVarRef(refData.get()->tv())
+      refData.isInit()
+        ? tvAsCVarRef(refData.get()->tv())
+        : null_variant
     );
   }
   return ai.toArray();

@@ -33,31 +33,47 @@ namespace HPHP {
 
 void NamedEntity::setCachedFunc(Func* f) {
   *m_cachedFunc = f;
+  if (m_cachedFunc.isNormal()) {
+    f ? m_cachedFunc.markInit() : m_cachedFunc.markUninit();
+  }
 }
 
 Func* NamedEntity::getCachedFunc() const {
-  return LIKELY(m_cachedFunc.bound()) ? *m_cachedFunc : nullptr;
+  return LIKELY(m_cachedFunc.bound() && m_cachedFunc.isInit())
+    ? *m_cachedFunc
+    : nullptr;
 }
 
 void NamedEntity::setCachedClass(Class* f) {
   *m_cachedClass = f;
+  if (m_cachedClass.isNormal()) {
+    f ? m_cachedClass.markInit() : m_cachedClass.markUninit();
+  }
 }
 
 Class* NamedEntity::getCachedClass() const {
-  return LIKELY(m_cachedClass.bound()) ? *m_cachedClass : nullptr;
+  return LIKELY(m_cachedClass.bound() && m_cachedClass.isInit())
+    ? *m_cachedClass
+    : nullptr;
 }
 
 bool NamedEntity::isPersistentTypeAlias() const {
-  return m_cachedTypeAlias.isPersistent();
+  return m_cachedTypeAlias.bound() && m_cachedTypeAlias.isPersistent();
 }
 
 void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
-  *m_cachedTypeAlias = td;
+  if (!m_cachedTypeAlias.isInit()) {
+    m_cachedTypeAlias.initWith(td);
+  } else {
+    *m_cachedTypeAlias = td;
+  }
 }
 
 const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
   // TODO(#2103214): Support persistent type aliases.
-  return m_cachedTypeAlias.bound() && m_cachedTypeAlias->name
+  return m_cachedTypeAlias.bound() &&
+         m_cachedTypeAlias.isInit() &&
+         m_cachedTypeAlias->name
     ? m_cachedTypeAlias.get()
     : nullptr;
 }

@@ -52,7 +52,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-rds::Link<UnwindRDS> g_unwind_rds(rds::kInvalidHandle);
+rds::Link<UnwindRDS,true> g_unwind_rds(rds::kInvalidHandle);
 
 namespace {
 
@@ -139,6 +139,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // things to the handler using the RDS. This also simplifies the handler code
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
+  assert(g_unwind_rds.isInit());
   if (do_side_exit) {
     g_unwind_rds->exn = nullptr;
 #ifndef _MSC_VER
@@ -250,6 +251,8 @@ tc_unwind_personality(int version,
 
     auto const ip = TCA(_Unwind_GetIP(context));
 
+    assert(g_unwind_rds.isInit());
+
     auto& stubs = mcg->ustubs();
     if (ip == stubs.endCatchHelperPast) {
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
@@ -300,6 +303,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
       return {nullptr, newFp};
     }
 
+    assert(g_unwind_rds.isInit());
     auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
     if (isDebuggerReturnHelper(savedRip)) {
       // If this frame had its return address smashed by the debugger, the real

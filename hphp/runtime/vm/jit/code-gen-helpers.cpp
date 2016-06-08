@@ -390,4 +390,22 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  auto const gen = v.makeReg();
+  auto const sf = v.makeReg();
+  v << loadb{rvmtl()[rds::genNumberHandleFrom(ch)], gen};
+  v << cmpbm{gen, rvmtl()[rds::currentGenNumberHandle()], sf};
+  return sf;
+}
+
+void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  auto const gen = v.makeReg();
+  v << loadb{rvmtl()[rds::currentGenNumberHandle()], gen};
+  v << storeb{gen, rvmtl()[rds::genNumberHandleFrom(ch)]};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 }}

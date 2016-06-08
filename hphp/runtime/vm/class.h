@@ -1188,7 +1188,8 @@ private:
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   uint32_t m_numDeclInterfaces{0};
-  mutable rds::Link<Array> m_nonScalarConstantCache{rds::kInvalidHandle};
+  mutable rds::Link<Array, true /* normal_only */>
+    m_nonScalarConstantCache{rds::kInvalidHandle};
 
   LowPtr<Func> m_toString;
   LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
@@ -1265,7 +1266,8 @@ private:
 
   MaybeDataType m_enumBaseTy;
   uint16_t m_ODAttrs;
-  mutable rds::Link<PropInitVec*> m_propDataCache{rds::kInvalidHandle};
+  mutable rds::Link<PropInitVec*, true /* normal_only */>
+    m_propDataCache{rds::kInvalidHandle};
 
   /*
    * Whether the Class requires initialization, because it has either

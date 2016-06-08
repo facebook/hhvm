@@ -47,17 +47,6 @@ namespace {
 
 using Guard = std::lock_guard<std::mutex>;
 
-// Current allocation frontier for the non-persistent region.
-size_t s_normal_frontier = sizeof(Header);
-
-// Frontier and base of the persistent region.
-size_t s_persistent_base = 0;
-size_t s_persistent_frontier = 0;
-
-// Frontier for the "local" part of the persistent region (data not
-// shared between threads, but not zero'd)---downward-growing.
-size_t s_local_frontier = 0;
-
 /*
  * This mutex protects actually allocating from RDS (the above
  * statics).  It is ordered *after* the locks in s_linkTable.
@@ -69,7 +58,6 @@ std::mutex s_allocMutex;
 struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(StaticLocal k) const { return "StaticLocal"; }
   std::string operator()(ClsConstant k) const { return "ClsConstant"; }
-  std::string operator()(StaticProp k) const { return "StaticProp"; }
   std::string operator()(StaticMethod k) const { return "StaticMethod"; }
   std::string operator()(StaticMethodF k) const { return "StaticMethodF"; }
   std::string operator()(Profile k) const { return "Profile"; }
@@ -93,7 +81,6 @@ struct SymbolRep : boost::static_visitor<std::string> {
     return k.clsName->data() + std::string("::") + k.cnsName->data();
   }
 
-  std::string operator()(StaticProp k)    const { return k.name->data(); }
   std::string operator()(StaticMethod k)  const { return k.name->data(); }
   std::string operator()(StaticMethodF k) const { return k.name->data(); }
 
@@ -124,11 +111,6 @@ struct SymbolEq : boost::static_visitor<bool> {
     assert(k2.clsName->isStatic() && k2.cnsName->isStatic());
     return k1.clsName->isame(k2.clsName) &&
            k1.cnsName == k2.cnsName;
-  }
-
-  bool operator()(StaticProp k1, StaticProp k2) const {
-    assert(k1.name->isStatic() && k2.name->isStatic());
-    return k1.name == k2.name;
   }
 
   bool operator()(Profile k1, Profile k2) const {
@@ -172,7 +154,6 @@ struct SymbolHash : boost::static_visitor<size_t> {
     );
   }
 
-  size_t operator()(StaticProp k)    const { return k.name->hash(); }
   size_t operator()(StaticMethod k)  const { return k.name->hash(); }
   size_t operator()(StaticMethodF k) const { return k.name->hash(); }
 };
@@ -197,17 +178,6 @@ LinkTable s_linkTable;
 
 //////////////////////////////////////////////////////////////////////
 
-const char* mode_name(Mode mode) {
-  switch (mode) {
-  case Mode::Normal:      return "Normal";
-  case Mode::Local:       return "Local";
-  case Mode::Persistent:  return "Persistent";
-  }
-  not_reached();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Space wasted by alignment is tracked in these maps. We don't bother with
  * free lists for local RDS because we aren't sensitive to its layout or
@@ -223,6 +193,19 @@ FreeLists s_persistent_free_lists;
 //////////////////////////////////////////////////////////////////////
 
 namespace detail {
+
+// Current allocation frontier for the non-persistent region.
+size_t s_normal_frontier = sizeof(Header);
+
+// Frontier and base of the persistent region.
+size_t s_persistent_base = 0;
+size_t s_persistent_frontier = 0;
+
+// Frontier for the "local" part of the persistent region (data not
+// shared between threads, but not zero'd)---downward-growing.
+size_t s_local_frontier = 0;
+
+Link<GenNumber> g_current_gen_link{kInvalidHandle};
 
 /*
  * Round base up to align, which must be a power of two.
@@ -247,64 +230,100 @@ void addFreeBlock(FreeLists& lists, size_t where, size_t size) {
  * re-added to the appropriate free lists.
  */
 folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
-                                     size_t align) {
+                                      size_t align) {
   for (auto it = lists.lower_bound(size); it != lists.end(); ++it) {
-    if (it->second.empty()) continue;
+    for (auto list_it = it->second.begin();
+         list_it != it->second.end();
+         ++list_it) {
+      auto const blockSize = it->first;
+      auto const raw = *list_it;
+      auto const end = raw + blockSize;
 
-    auto const blockSize = it->first;
-    auto const raw = it->second.front();
-    it->second.pop_front();
-    auto const end = raw + it->first;
-    auto const handle = roundUp(raw, align);
-    always_assert(handle + size <= end);
+      auto const handle = roundUp(raw, align);
 
-    auto const headerSize = handle - raw;
-    addFreeBlock(lists, raw, headerSize);
+      if (handle + size > end) continue;
+      it->second.erase(list_it);
 
-    auto const footerSize = blockSize - size - headerSize;
-    addFreeBlock(lists, handle + size, footerSize);
+      auto const headerSize = handle - raw;
+      addFreeBlock(lists, raw, headerSize);
 
-    return handle;
+      auto const footerSize = blockSize - size - headerSize;
+      addFreeBlock(lists, handle + size, footerSize);
+
+      return handle;
+    }
   }
-
   return folly::none;
 }
 
 Handle alloc(Mode mode, size_t numBytes, size_t align) {
-  align = folly::nextPowTwo(align);
-  always_assert(align <= numBytes);
-
   switch (mode) {
-    case Mode::Persistent:
     case Mode::Normal: {
-      auto& frontier = mode == Mode::Persistent ? s_persistent_frontier
-                                                : s_normal_frontier;
-      auto& freeLists = mode == Mode::Persistent ? s_persistent_free_lists
-                                                 : s_normal_free_lists;
+      align = folly::nextPowTwo(std::max(align, alignof(GenNumber)));
+      auto const prefix = roundUp(sizeof(GenNumber), align);
+      numBytes += prefix;
+      always_assert(align <= numBytes);
 
-      if (auto free = findFreeBlock(freeLists, numBytes, align)) {
+      if (auto free = findFreeBlock(s_normal_free_lists, numBytes, align)) {
+        auto const begin = *free;
+        addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
+        auto const handle = begin + prefix;
+        uninitHandle(handle);
+        return handle;
+      }
+
+      auto const oldFrontier = s_normal_frontier;
+      s_normal_frontier = roundUp(s_normal_frontier, align);
+
+      addFreeBlock(s_normal_free_lists, oldFrontier,
+                  s_normal_frontier - oldFrontier);
+      s_normal_frontier += numBytes;
+      if (debug) {
+        memset(
+          (char*)(tl_base) + oldFrontier,
+          kRDSTrashFill,
+          s_normal_frontier - oldFrontier
+        );
+      }
+      always_assert_flog(
+        s_normal_frontier < s_local_frontier,
+        "Ran out of RDS space (mode=Normal)"
+      );
+
+      auto const begin = s_normal_frontier - numBytes;
+      addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
+
+      auto const handle = begin + prefix;
+      uninitHandle(handle);
+      return handle;
+    }
+    case Mode::Persistent: {
+      align = folly::nextPowTwo(align);
+      always_assert(align <= numBytes);
+
+      if (auto free = findFreeBlock(s_persistent_free_lists, numBytes, align)) {
         return *free;
       }
 
       // Note: it's ok not to zero new allocations, because we've never done
       // anything with this part of the page yet, so it must still be zero.
-      auto const oldFrontier = frontier;
-      frontier = roundUp(frontier, align);
-      addFreeBlock(freeLists, oldFrontier, frontier - oldFrontier);
-      frontier += numBytes;
+      auto const oldFrontier = s_persistent_frontier;
+      s_persistent_frontier = roundUp(s_persistent_frontier, align);
+      addFreeBlock(s_persistent_free_lists, oldFrontier,
+                   s_persistent_frontier - oldFrontier);
+      s_persistent_frontier += numBytes;
 
-      auto const limit = mode == Mode::Persistent
-        ? RuntimeOption::EvalJitTargetCacheSize
-        : s_local_frontier;
       always_assert_flog(
-        frontier < limit,
-        "Ran out of RDS space (mode={})",
-        mode_name(mode)
+        s_persistent_frontier < RuntimeOption::EvalJitTargetCacheSize,
+        "Ran out of RDS space (mode=Persistent)"
       );
 
-      return frontier - numBytes;
+      return s_persistent_frontier - numBytes;
     }
     case Mode::Local: {
+      align = folly::nextPowTwo(align);
+      always_assert(align <= numBytes);
+
       auto& frontier = s_local_frontier;
 
       frontier -= numBytes;
@@ -361,6 +380,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
 
 }
 
+using namespace detail;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -396,7 +416,30 @@ void requestInit() {
   assert(tl_base);
   new (&s_constantsStorage) Array();
   assert(!s_constants().get());
-  memset(tl_base, 0, s_normal_frontier);
+  assert(g_current_gen_link.bound());
+
+  memset(tl_base, 0, sizeof(Header));
+  if (debug) {
+    // Trash the normal section in debug mode, so that we can catch errors with
+    // not checking the gen number quickly.
+    memset(
+      static_cast<char*>(tl_base) + sizeof(Header),
+      kRDSTrashFill,
+      s_normal_frontier - sizeof(Header)
+    );
+    *g_current_gen_link = 1;
+    return;
+  } else if (++*g_current_gen_link == kInvalidGenNumber) {
+    // If the current gen number has wrapped around back to the "invalid"
+    // number, memset the entire normal section.  Once the current gen number
+    // wraps, it becomes ambiguous whether any given gen number is up to date.
+    memset(
+      static_cast<char*>(tl_base) + sizeof(Header),
+      kInvalidGenNumber,
+      s_normal_frontier - sizeof(Header)
+    );
+    ++*g_current_gen_link;
+  }
 }
 
 void requestExit() {
@@ -473,36 +516,48 @@ Array& s_constants() {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+constexpr std::size_t kAllocBitNumBytes = 8;
+
+}
+
+/////////////////////////////////////////////////////////////////////
+
 size_t allocBit() {
   Guard g(s_allocMutex);
   if (s_bits_to_go == 0) {
-    static const int kNumBytes = 8;
-    static const int kNumBytesMask = kNumBytes - 1;
-    s_next_bit = s_normal_frontier * CHAR_BIT;
-    // allocate at least kNumBytes bytes, and make sure we end on a kNumBytes
-    // aligned boundary.
-    int bytes = ((~s_normal_frontier + 1) & kNumBytesMask) + kNumBytes;
-    s_bits_to_go = bytes * CHAR_BIT;
-    s_normal_frontier += bytes;
-    recordRds(s_normal_frontier - bytes, bytes, "Unknown", "bits");
+    auto const handle = detail::alloc(
+      Mode::Normal,
+      kAllocBitNumBytes,
+      kAllocBitNumBytes
+    );
+    s_next_bit = handle * CHAR_BIT;
+    s_bits_to_go = kAllocBitNumBytes * CHAR_BIT;
+    recordRds(handle, kAllocBitNumBytes, "Unknown", "bits");
   }
   s_bits_to_go--;
   return s_next_bit++;
 }
 
 bool testAndSetBit(size_t bit) {
-  Handle handle = bit / CHAR_BIT;
+  size_t block = bit / CHAR_BIT;
   unsigned char mask = 1 << (bit % CHAR_BIT);
-  bool ret = handleToRef<unsigned char>(handle) & mask;
-  handleToRef<unsigned char>(handle) |= mask;
+  Handle handle = block & ~(kAllocBitNumBytes - 1);
+
+  if (!isHandleInit(handle, NormalTag{})) {
+    auto ptr = &handleToRef<unsigned char>(handle);
+    for (size_t i = 0; i < kAllocBitNumBytes; ++i) ptr[i] = 0;
+    initHandle(handle);
+  }
+  bool ret = handleToRef<unsigned char>(block) & mask;
+  handleToRef<unsigned char>(block) |= mask;
   return ret;
 }
 
-bool isPersistentHandle(Handle handle) {
-  static_assert(std::is_unsigned<Handle>::value,
-                "Handle is supposed to be unsigned");
-  assert(handle < RuntimeOption::EvalJitTargetCacheSize);
-  return handle >= (unsigned)s_persistent_base;
+bool isValidHandle(Handle handle) {
+  return handle >= sizeof(Header) &&
+    handle < RuntimeOption::EvalJitTargetCacheSize;
 }
 
 static void initPersistentCache() {
@@ -521,6 +576,7 @@ static void initPersistentCache() {
 
 void threadInit() {
   assert(tl_base == nullptr);
+
   if (!s_tc_fd) {
     initPersistentCache();
   }
@@ -574,6 +630,16 @@ void threadInit() {
       (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
       "rds");
   }
+
+  g_current_gen_link.bind(Mode::Local);
+  *g_current_gen_link = 1;
+  if (RuntimeOption::EvalPerfDataMap) {
+    Debug::DebugInfo::recordDataMap(
+      (char*)tl_base + g_current_gen_link.handle(),
+      (char*)tl_base + g_current_gen_link.handle() +
+      RuntimeOption::EvalJitTargetCacheSize,
+      "-rds-gen-number");
+  }
 }
 
 void threadExit() {
@@ -603,6 +669,10 @@ void threadExit() {
 void recordRds(Handle h, size_t size,
                const std::string& type, const std::string& msg) {
   if (RuntimeOption::EvalPerfDataMap) {
+    if (isNormalHandle(h)) {
+      h = genNumberHandleFrom(h);
+      size += sizeof(GenNumber);
+    }
     Debug::DebugInfo::recordDataMap(
       (char*)(intptr_t)h,
       (char*)(intptr_t)h + size,

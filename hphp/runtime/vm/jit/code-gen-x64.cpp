@@ -399,7 +399,7 @@ CALL_OPCODE(DebugBacktrace)
 CALL_OPCODE(InitThrowableFileAndLine)
 CALL_OPCODE(RegisterLiveObj)
 CALL_OPCODE(LdClsCtor)
-CALL_OPCODE(LookupClsRDSHandle)
+CALL_OPCODE(LookupClsRDS)
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
 CALL_OPCODE(PrintBool)
@@ -421,7 +421,7 @@ CALL_OPCODE(RaiseNotice)
 CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(RaiseArrayKeyNotice)
 CALL_OPCODE(IncStatGrouped)
-CALL_OPCODE(ClosureStaticLocInit)
+CALL_OPCODE(LdClosureStaticLoc)
 CALL_OPCODE(MapIdx)
 CALL_OPCODE(LdClsPropAddrOrNull)
 CALL_OPCODE(LdClsPropAddrOrRaise)
@@ -1418,65 +1418,106 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   });
 }
 
-Vreg CodeGenerator::cgLdFuncCachedCommon(const StringData* name, Vreg dst) {
-  auto const ch   = NamedEntity::get(name)->getFuncHandle();
-  auto& v = vmain();
-  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Func>));
-  auto const sf = v.makeReg();
-  v << testq{dst, dst, sf};
-  return sf;
-}
-
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
+  auto const dst = dstLoc(inst, 0).reg();
+  auto const extra = inst->extra<LdFuncCached>();
+  auto const ch = NamedEntity::get(extra->name)->getFuncHandle();
   auto& v = vmain();
-  auto dst1 = v.makeReg();
-  auto const sf =
-    cgLdFuncCachedCommon(inst->extra<LdFuncCachedData>()->name, dst1);
-  unlikelyCond(v, vcold(), CC_Z, sf, dstLoc(inst, 0).reg(), [&] (Vout& v) {
-    auto dst2 = v.makeReg();
-    const Func* (*const func)(const StringData*) = lookupUnknownFunc;
-    cgCallHelper(v,
-      CallSpec::direct(func),
-      callDest(dst2),
-      SyncOptions::Sync,
-      argGroup(inst)
-        .immPtr(inst->extra<LdFuncCached>()->name)
-    );
-    return dst2;
-  }, [&](Vout& v) {
-    return dst1;
-  });
-}
+  auto const sf = v.makeReg();
 
-void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  cgLdFuncCachedCommon(inst->extra<LdFuncCachedData>()->name,
-                       dstLoc(inst, 0).reg());
+  auto const call_helper = [&] (Vout& v) {
+    auto const ptr = v.makeReg();
+    const Func* (*const func)(const StringData*) = lookupUnknownFunc;
+    cgCallHelper(
+      v,
+      CallSpec::direct(func),
+      callDest(ptr),
+      SyncOptions::Sync,
+      argGroup(inst).immPtr(extra->name)
+    );
+    return ptr;
+  };
+
+  if (rds::isNormalHandle(ch)) {
+    auto const sf = checkRDSHandleInitialized(v, ch);
+    unlikelyCond(
+      v, vcold(), CC_NE, sf, dst,
+      [&] (Vout& v) { return call_helper(v); },
+      [&] (Vout& v) {
+        auto const ptr = v.makeReg();
+        emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
+        return ptr;
+      }
+    );
+  } else {
+    auto const ptr = v.makeReg();
+    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
+    v << testq{ptr, ptr, sf};
+    unlikelyCond(
+      v, vcold(), CC_Z, sf, dst,
+      [&] (Vout& v) { return call_helper(v); },
+      [&] (Vout& v) { return ptr; }
+    );
+  }
 }
 
 void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
-  auto const dstReg    = dstLoc(inst, 0).reg();
-  auto const extra     = inst->extra<LdFuncCachedU>();
-
+  auto const dst = dstLoc(inst, 0).reg();
+  auto const extra = inst->extra<LdFuncCachedU>();
+  auto const ch = NamedEntity::get(extra->name)->getFuncHandle();
   auto& v = vmain();
-  auto const dst1 = v.makeReg();
-  auto const sf = cgLdFuncCachedCommon(extra->name, dst1);
 
-  unlikelyCond(v, vcold(), CC_Z, sf, dstReg, [&] (Vout& v) {
+  auto const call_helper = [&] (Vout& v) {
     // If we get here, things are going to be slow anyway, so do all the
     // autoloading logic in lookupFallbackFunc instead of ASM
+    auto const ptr = v.makeReg();
     const Func* (*const func)(const StringData*, const StringData*) =
         lookupFallbackFunc;
-    auto dst2 = v.makeReg();
-    cgCallHelper(v, CallSpec::direct(func), callDest(dst2),
+    cgCallHelper(v, CallSpec::direct(func), callDest(ptr),
       SyncOptions::Sync,
       argGroup(inst)
         .immPtr(extra->name)
         .immPtr(extra->fallback)
     );
-    return dst2;
-  }, [&](Vout& v) {
-    return dst1;
-  });
+    return ptr;
+  };
+
+  if (rds::isNormalHandle(ch)) {
+    auto const sf = checkRDSHandleInitialized(v, ch);
+    unlikelyCond(
+      v, vcold(), CC_NE, sf, dst,
+      [&] (Vout& v) { return call_helper(v); },
+      [&] (Vout& v) {
+        auto const ptr = v.makeReg();
+        emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
+        return ptr;
+      }
+    );
+  } else {
+    auto const ptr = v.makeReg();
+    auto const sf = v.makeReg();
+    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
+    v << testq{ptr, ptr, sf};
+    unlikelyCond(
+      v, vcold(), CC_Z, sf, dst,
+      [&] (Vout& v) { return call_helper(v); },
+      [&] (Vout& v) { return ptr; }
+    );
+  }
+}
+
+void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
+  auto const dst = dstLoc(inst, 0).reg();
+  auto const ch = NamedEntity::get(
+    inst->extra<LdFuncCachedSafe>()->name
+  )->getFuncHandle();
+  auto& v = vmain();
+
+  if (rds::isNormalHandle(ch)) {
+    auto const sf = checkRDSHandleInitialized(v, ch);
+    emitFwdJcc(v, CC_NE, sf, inst->taken());
+  }
+  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Func>));
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
@@ -1567,14 +1608,12 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   // Allocate the request-local one-way method cache for this lookup.
   auto const handle = rds::alloc<Entry, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
-    auto const caddr_hand = reinterpret_cast<char*>(
-      static_cast<intptr_t>(handle)
+    rds::recordRds(
+      handle,
+      sizeof(TypedValue),
+      "MethodCache",
+      getFunc(inst->marker())->fullName()->toCppString()
     );
-    Debug::DebugInfo::recordDataMap(
-      caddr_hand,
-      caddr_hand + sizeof(TypedValue),
-      folly::format("rds+MethodCache-{}",
-        getFunc(inst->marker())->fullName()).str());
   }
 
   auto const mcHandler = extra->fatal ? handlePrimeCacheInit<true>
@@ -1631,7 +1670,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
     kVoidDest,
     SyncOptions::Sync,
     argGroup(inst)
-      .addr(rvmtl(), safe_cast<int32_t>(handle))
+      .imm(safe_cast<int32_t>(handle))
       .addr(srcLoc(inst, 1).reg(), cellsToBytes(extra->offset.offset))
       .immPtr(extra->method)
       .ssa(0/*cls*/)
@@ -2510,20 +2549,23 @@ void CodeGenerator::cgConstructInstance(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckInitProps(IRInstruction* inst) {
   auto const cls = inst->extra<CheckInitProps>()->cls;
-  auto const branch = inst->taken();
   auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmpqim{0, rvmtl()[cls->propHandle()], sf};
-  v << jcc{CC_Z, sf, {label(inst->next()), label(branch)}};
+  auto const sf = checkRDSHandleInitialized(v, cls->propHandle());
+  v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgCheckInitSProps(IRInstruction* inst) {
   auto const cls = inst->extra<CheckInitSProps>()->cls;
-  auto const branch = inst->taken();
   auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmpbim{0, rvmtl()[cls->sPropInitHandle()], sf};
-  v << jcc{CC_Z, sf, {label(inst->next()), label(branch)}};
+  auto const handle = cls->sPropInitHandle();
+  if (rds::isNormalHandle(handle)) {
+    auto const sf = checkRDSHandleInitialized(v, handle);
+    v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
+  } else {
+    // Always initialized; just fall through to next.
+    assert(rds::isPersistentHandle(handle));
+    assert(rds::handleToRef<bool>(handle));
+  }
 }
 
 void CodeGenerator::cgNewInstanceRaw(IRInstruction* inst) {
@@ -2562,8 +2604,12 @@ void CodeGenerator::cgInitObjProps(IRInstruction* inst) {
     } else {
       // Slower case: we have to load the src address from the targetcache
       auto propInitVec = v.makeReg();
-      // Load the Class's propInitVec from the targetcache
-      v << load{rvmtl()[cls->propHandle()], propInitVec};
+      // Load the Class's propInitVec from the targetcache. We
+      // know its already been initialized as a pre-condition
+      // on this op.
+      auto const propHandle = cls->propHandle();
+      assertx(rds::isNormalHandle(propHandle));
+      v << load{rvmtl()[propHandle], propInitVec};
       // We want &(*propData)[0]
       auto rPropData = v.makeReg();
       v << load{propInitVec[Class::PropInitVec::dataOff()], rPropData};
@@ -3127,14 +3173,7 @@ void CodeGenerator::cgLdARNumParams(IRInstruction* inst) {
   v << andqi{ActRec::kNumArgsMask, tmp, dstReg, v.makeReg()};
 }
 
-void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
-  auto const extra = inst->extra<LdStaticLocCached>();
-  auto const link  = rds::bindStaticLocal(extra->func, extra->name);
-  auto const dst   = dstLoc(inst, 0).reg();
-  vmain() << lea{rvmtl()[link.handle()], dst};
-}
-
-void CodeGenerator::cgCheckStaticLocInit(IRInstruction* inst) {
+void CodeGenerator::cgCheckClosureStaticLocInit(IRInstruction* inst) {
   auto const src = srcLoc(inst, 0).reg();
   auto& v = vmain();
   auto const sf = v.makeReg();
@@ -3142,9 +3181,28 @@ void CodeGenerator::cgCheckStaticLocInit(IRInstruction* inst) {
   v << jcc{CC_E, sf, {label(inst->next()), label(inst->taken())}};
 }
 
-void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
-  auto const rdSrc = srcLoc(inst, 0).reg();
-  auto& v = vmain();
+void CodeGenerator::cgInitClosureStaticLoc(IRInstruction* inst) {
+  always_assert(!srcLoc(inst, 1).isFullSIMD());
+  auto ptr = srcLoc(inst, 0).reg();
+  auto off = RefData::tvOffset();
+  storeTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
+}
+
+void CodeGenerator::cgLdStaticLoc(IRInstruction* inst) {
+  auto const extra = inst->extra<LdStaticLoc>();
+  auto const link  = rds::bindStaticLocal(extra->func, extra->name);
+  auto const dst   = dstLoc(inst, 0).reg();
+  auto& v          = vmain();
+  auto const sf    = checkRDSHandleInitialized(v, link.handle());
+  emitFwdJcc(v, CC_NE, sf, inst->taken());
+  v << lea{rvmtl()[link.handle()], dst};
+}
+
+void CodeGenerator::cgInitStaticLoc(IRInstruction* inst) {
+  auto const extra = inst->extra<InitStaticLoc>();
+  auto const link  = rds::bindStaticLocal(extra->func, extra->name);
+  auto const dst   = dstLoc(inst, 0).reg();
+  auto& v          = vmain();
 
   // If we're here, the target-cache-local RefData is all zeros, so we
   // can initialize it by storing the new value into it's TypedValue
@@ -3154,10 +3212,44 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   // We are storing the rdSrc value into the static, but we don't need
   // to inc ref it because it's a bytecode invariant that it's not a
   // reference counted type.
-  storeTV(v, rdSrc[RefData::tvOffset()], srcLoc(inst, 1), inst->src(1));
-  v << inclm{rdSrc[FAST_REFCOUNT_OFFSET], v.makeReg()};
-  v << storebi{uint8_t(HeaderKind::Ref), rdSrc[HeaderKindOffset]};
+
+  v << lea{rvmtl()[link.handle()], dst};
+  storeTV(v, dst[RefData::tvOffset()], srcLoc(inst, 0), inst->src(0));
+  v << storeli{1, dst[FAST_REFCOUNT_OFFSET]};
+  v << storebi{0, dst[RefData::cowZOffset()]};
+  v << storebi{uint8_t(HeaderKind::Ref), dst[HeaderKindOffset]};
+  markRDSHandleInitialized(v, link.handle());
+
   static_assert(sizeof(HeaderKind) == 1, "");
+}
+
+void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
+  auto const extra = inst->extra<LdClsCns>();
+  auto const link  = rds::bindClassConstant(extra->clsName, extra->cnsName);
+  auto const dst   = dstLoc(inst, 0).reg();
+  auto& v          = vmain();
+  auto const sf    = checkRDSHandleInitialized(v, link.handle());
+  emitFwdJcc(v, CC_NE, sf, inst->taken());
+  v << lea{rvmtl()[link.handle()], dst};
+}
+
+void CodeGenerator::cgInitClsCns(IRInstruction* inst) {
+  auto const extra = inst->extra<InitClsCns>();
+  auto const link  = rds::bindClassConstant(extra->clsName, extra->cnsName);
+  auto& v          = vmain();
+
+  cgCallHelper(v,
+    CallSpec::direct(jit::lookupClassConstantTv),
+    callDestTV(inst),
+    SyncOptions::Sync,
+    argGroup(inst)
+      .addr(rvmtl(), safe_cast<int32_t>(link.handle()))
+      .immPtr(NamedEntity::get(extra->clsName))
+      .immPtr(extra->clsName)
+      .immPtr(extra->cnsName)
+  );
+
+  markRDSHandleInitialized(v, link.handle());
 }
 
 void CodeGenerator::cgLdContField(IRInstruction* inst) {
@@ -3796,8 +3888,8 @@ void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
   auto const cls = extra.clsName;
   auto const method = extra.methodName;
   auto const ne = extra.namedEntity;
-  auto const ch = StaticMethodCache::alloc(cls, method,
-                                   getContextName(getClass(inst->marker())));
+  auto const ch = StaticMethodCache::alloc(
+    cls, method, getContextName(getClass(inst->marker())));
 
   if (false) { // typecheck
     UNUSED TypedValue* fake_fp = nullptr;
@@ -3820,24 +3912,39 @@ void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
               );
 }
 
-void CodeGenerator::cgLdClsMethodCacheCommon(IRInstruction* inst, Offset off) {
-  auto dstReg = dstLoc(inst, 0).reg();
+void CodeGenerator::cgLdClsMethodCacheFunc(IRInstruction* inst) {
+  auto const dstReg = dstLoc(inst, 0).reg();
   auto const& extra = *inst->extra<ClsMethodData>();
   auto const clsName = extra.clsName;
   auto const methodName = extra.methodName;
-  auto const ch = StaticMethodCache::alloc(clsName, methodName,
-                                     getContextName(getClass(inst->marker())));
+  auto const ch = StaticMethodCache::alloc(
+    clsName, methodName, getContextName(getClass(inst->marker())));
+  auto& v = vmain();
+
   static_assert(sizeof(LowPtr<const Class>) == sizeof(LowPtr<const Func>), "");
-  emitLdLowPtr(vmain(), rvmtl()[ch + off], dstReg, sizeof(LowPtr<const Class>));
-}
 
-void CodeGenerator::cgLdClsMethodCacheFunc(IRInstruction* inst) {
-  cgLdClsMethodCacheCommon(inst, offsetof(StaticMethodCache, m_func));
-
+  auto const sf = checkRDSHandleInitialized(v, ch);
+  emitFwdJcc(v, CC_NE, sf, inst->taken());
+  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_func)],
+               dstReg, sizeof(LowPtr<const Class>));
 }
 
 void CodeGenerator::cgLdClsMethodCacheCls(IRInstruction* inst) {
-  cgLdClsMethodCacheCommon(inst, offsetof(StaticMethodCache, m_cls));
+  auto const dstReg = dstLoc(inst, 0).reg();
+  auto const& extra = *inst->extra<ClsMethodData>();
+  auto const clsName = extra.clsName;
+  auto const methodName = extra.methodName;
+  auto& v = vmain();
+
+  auto const ch = StaticMethodCache::alloc(
+    clsName, methodName, getContextName(getClass(inst->marker())));
+
+  static_assert(sizeof(LowPtr<const Class>) == sizeof(LowPtr<const Func>), "");
+
+  // The StaticMethodCache here is guaranteed to already be initialized in RDS
+  // by the pre-conditions of this instruction.
+  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_cls)],
+               dstReg, sizeof(LowPtr<const Class>));
 }
 
 /**
@@ -3894,10 +4001,13 @@ void CodeGenerator::cgLdClsMethodFCacheFunc(IRInstruction* inst) {
   auto const clsName    = extra.clsName;
   auto const methodName = extra.methodName;
   auto const dstReg     = dstLoc(inst, 0).reg();
+  auto& v               = vmain();
   auto const ch = StaticMethodFCache::alloc(
     clsName, methodName, getContextName(getClass(inst->marker()))
   );
-  emitLdLowPtr(vmain(), rvmtl()[ch], dstReg, sizeof(LowPtr<const Func>));
+  auto const sf = checkRDSHandleInitialized(v, ch);
+  emitFwdJcc(v, CC_NE, sf, inst->taken());
+  emitLdLowPtr(v, rvmtl()[ch], dstReg, sizeof(LowPtr<const Func>));
 }
 
 void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
@@ -3908,9 +4018,10 @@ void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
   auto const fpReg       = srcLoc(inst, 1).reg();
   auto const clsName     = cls->name();
 
-  auto ch = StaticMethodFCache::alloc(
+  auto const ch = StaticMethodFCache::alloc(
     clsName, methName, getContextName(getClass(inst->marker()))
   );
+  assertx(rds::isNormalHandle(ch));
 
   const Func* (*lookup)(
     rds::Handle, const Class*, const StringData*, TypedValue*) =
@@ -3929,23 +4040,27 @@ void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
 Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                                  rds::Handle ch) {
   auto& v = vmain();
+
   // thisReg is holding $this. Should we pass it to the callee?
+
+  // RDS entry is guaranteed to be already initialized due to pre-conditions on
+  // this op.
   auto const sf = v.makeReg();
   v << cmplim{1, rvmtl()[ch + offsetof(StaticMethodFCache, m_static)], sf};
   return cond(v, CC_E, sf, destCtxReg, [&](Vout& v) {
-    // If calling a static method...
-    // Load (this->m_cls | 0x1) into destCtxReg
-    auto vmclass = v.makeReg();
-    auto dst1 = v.makeReg();
-    emitLdLowPtr(v, thisReg[ObjectData::getVMClassOffset()],
-                 vmclass, sizeof(LowPtr<Class>));
-    v << orqi{1, vmclass, dst1, v.makeReg()};
-    return dst1;
-  }, [&](Vout& v) {
-    // Else: calling non-static method
-    emitIncRef(v, thisReg);
-    return thisReg;
-  });
+      // If calling a static method...
+      // Load (this->m_cls | 0x1) into destCtxReg
+      auto vmclass = v.makeReg();
+      auto dst1 = v.makeReg();
+      emitLdLowPtr(v, thisReg[ObjectData::getVMClassOffset()],
+                   vmclass, sizeof(LowPtr<Class>));
+      v << orqi{1, vmclass, dst1, v.makeReg()};
+      return dst1;
+    }, [&](Vout& v) {
+      // Else: calling non-static method
+      emitIncRef(v, thisReg);
+      return thisReg;
+    });
 }
 
 /**
@@ -3991,44 +4106,61 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   });
 }
 
-rds::Handle CodeGenerator::cgLdClsCachedCommon(Vout& v, IRInstruction* inst,
-                                               Vreg dst, Vreg sf) {
+void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
-  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Class>));
-  v << testq{dst, dst, sf};
-  return ch;
-}
-
-void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
+  auto const dst = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  auto dst1 = v.makeReg();
-  auto const sf = v.makeReg();
-  auto ch = cgLdClsCachedCommon(v, inst, dst1, sf);
-  unlikelyCond(v, vcold(), CC_E, sf, dstLoc(inst, 0).reg(), [&] (Vout& v) {
-    auto dst2 = v.makeReg();
-    cgCallHelper(v, CallSpec::direct(jit::lookupKnownClass), callDest(dst2),
-                 SyncOptions::Sync,
-                 argGroup(inst).addr(rvmtl(), safe_cast<int32_t>(ch))
-                           .ssa(0));
-    return dst2;
-  }, [&](Vout& v) {
-    return dst1;
-  });
+
+  auto const call_helper = [&] (Vout& v) {
+    auto ptr = v.makeReg();
+    cgCallHelper(
+      v,
+      CallSpec::direct(jit::lookupKnownClass),
+      callDest(ptr),
+      SyncOptions::Sync,
+      argGroup(inst).
+        imm(ch).
+        ssa(0)
+    );
+    return ptr;
+  };
+
+  if (rds::isNormalHandle(ch)) {
+    auto const sf = checkRDSHandleInitialized(v, ch);
+    unlikelyCond(
+      v, vcold(), CC_NE, sf, dst,
+      [&] (Vout& v) { return call_helper(v); },
+      [&] (Vout& v) {
+        auto const ptr = v.makeReg();
+        emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Class>));
+        return ptr;
+      }
+    );
+  } else {
+    auto const sf = v.makeReg();
+    auto const ptr = v.makeReg();
+    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Class>));
+    v << testq{ptr, ptr, sf};
+    unlikelyCond(
+      v, vcold(), CC_Z, sf, dst,
+      [&] (Vout& v) { return call_helper(v); },
+      [&] (Vout& v) { return ptr; }
+    );
+  }
 }
 
 void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
+  const StringData* className = inst->src(0)->strVal();
+  auto ch = NamedEntity::get(className)->getClassHandle();
+  auto const dst = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  auto const sf = v.makeReg();
-  cgLdClsCachedCommon(v, inst, dstLoc(inst, 0).reg(), sf);
-}
 
-void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
-  auto const dreg = dstLoc(inst, 0).reg();
-  auto const ch   = srcLoc(inst, 0).reg();
-  const Vreg rds = rvmtl();
-  auto& v = vmain();
-  emitLdLowPtr(v, rds[ch], dreg, sizeof(LowPtr<Class>));
+  if (rds::isNormalHandle(ch)) {
+    auto const sf = checkRDSHandleInitialized(v, ch);
+    emitFwdJcc(v, CC_NE, sf, inst->taken());
+  }
+  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Class>));
 }
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {
@@ -4047,25 +4179,61 @@ void CodeGenerator::cgLdRDSAddr(IRInstruction* inst) {
   vmain() << lea{rvmtl()[handle], dstLoc(inst, 0).reg()};
 }
 
-void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
-  auto const extra = inst->extra<LookupClsCns>();
-  auto const link  = rds::bindClassConstant(extra->clsName, extra->cnsName);
-  cgCallHelper(vmain(),
-    CallSpec::direct(jit::lookupClassConstantTv),
-    callDestTV(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .addr(rvmtl(), safe_cast<int32_t>(link.handle()))
-      .immPtr(NamedEntity::get(extra->clsName))
-      .immPtr(extra->clsName)
-      .immPtr(extra->cnsName)
-  );
-}
-
 void CodeGenerator::cgLdCns(IRInstruction* inst) {
   auto const cnsName = inst->src(0)->strVal();
   auto const ch = makeCnsHandle(cnsName, false);
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0), rvmtl()[ch]);
+  auto const dst = dstLoc(inst, 0);
+  auto& v = vmain();
+  assertx(inst->taken());
+
+  if (rds::isNormalHandle(ch)) {
+    auto const sf = checkRDSHandleInitialized(v, ch);
+    emitFwdJcc(v, CC_NE, sf, inst->taken());
+    loadTV(v, inst->dst(), dst, rvmtl()[ch]);
+    return;
+  }
+  assertx(rds::isPersistentHandle(ch));
+
+  auto const& cns = rds::handleToRef<TypedValue>(ch);
+
+  if (cns.m_type == KindOfUninit) {
+    loadTV(v, inst->dst(), dst, rvmtl()[ch]);
+    auto const sf = v.makeReg();
+    emitTypeTest(
+      TUninit, dst.reg(1), dst.reg(0), sf,
+      [&] (ConditionCode cc, Vreg sf) {
+        emitFwdJcc(v, cc, sf, inst->taken());
+      }
+    );
+  } else {
+    // Statically known constant.
+    assertx(!dst.isFullSIMD());
+    switch (cns.m_type) {
+      case KindOfNull:
+        v << copy{v.cns(nullptr), dst.reg(0)};
+        break;
+      case KindOfBoolean:
+        v << copy{v.cns(!!cns.m_data.num), dst.reg(0)};
+        break;
+      case KindOfInt64:
+      case KindOfPersistentString:
+      case KindOfPersistentArray:
+      case KindOfString:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+        v << copy{v.cns(cns.m_data.num), dst.reg(0)};
+        break;
+      case KindOfDouble:
+        v << copy{v.cns(cns.m_data.dbl), dst.reg(0)};
+        break;
+      case KindOfUninit:
+      case KindOfClass:
+        not_reached();
+    }
+    v << copy{v.cns(cns.m_type), dst.reg(1)};
+  }
 }
 
 void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {
@@ -4077,14 +4245,19 @@ void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {
   auto const ch = makeCnsHandle(cnsName, false);
 
   auto args = argGroup(inst);
-  args.addr(rvmtl(), safe_cast<int32_t>(ch))
+  args.imm(safe_cast<int32_t>(ch))
       .immPtr(cnsName)
       .imm(inst->op() == LookupCnsE);
 
-  cgCallHelper(vmain(), CallSpec::direct(lookupCnsHelper),
-               callDestTV(inst),
-               SyncOptions::Sync,
-               args);
+  cgCallHelper(
+    vmain(),
+    rds::isNormalHandle(ch)
+      ? CallSpec::direct(lookupCnsHelperNormal)
+      : CallSpec::direct(lookupCnsHelperPersistent),
+    callDestTV(inst),
+    SyncOptions::Sync,
+    args
+  );
 }
 
 void CodeGenerator::cgLookupCns(IRInstruction* inst) {
@@ -4105,14 +4278,19 @@ void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
   auto const fallbackCh = makeCnsHandle(fallbackName, false);
 
   auto args = argGroup(inst);
-  args.addr(rvmtl(), safe_cast<int32_t>(fallbackCh))
+  args.imm(safe_cast<int32_t>(fallbackCh))
       .immPtr(cnsName)
       .immPtr(fallbackName);
 
-  cgCallHelper(vmain(), CallSpec::direct(lookupCnsUHelper),
-               callDestTV(inst),
-               SyncOptions::Sync,
-               args);
+  cgCallHelper(
+    vmain(),
+    rds::isNormalHandle(fallbackCh)
+      ? CallSpec::direct(lookupCnsUHelperNormal)
+      : CallSpec::direct(lookupCnsUHelperPersistent),
+    callDestTV(inst),
+    SyncOptions::Sync,
+    args
+  );
 }
 
 void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {

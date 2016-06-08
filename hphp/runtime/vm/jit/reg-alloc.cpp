@@ -53,9 +53,8 @@ bool loadsCell(Opcode op) {
   case LdContField:
   case LdElem:
   case LdRef:
-  case LdStaticLocCached:
   case LookupCns:
-  case LookupClsCns:
+  case InitClsCns:
   case CGetProp:
   case VGetProp:
   case ArrayGet:

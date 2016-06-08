@@ -60,19 +60,9 @@ struct RefData final : type_scan::MarkCountable<RefData> {
    * change how initialization works it keep that up to date.
    */
   void initInRDS() {
-    assert(isUninitializedInRDS());
     m_hdr.kind = HeaderKind::Ref;
     m_hdr.count = 1;
-    assert(!m_hdr.aux.cow && !m_hdr.aux.z); // because RDS is pre-zeroed
-  }
-
-  /*
-   * For RefDatas in RDS, we need a way to check if they are
-   * initialized while avoiding the usual kind assertions (kind
-   * will be zero if it's not initialized). This function does that.
-   */
-  bool isUninitializedInRDS() const {
-    return m_tv.m_type == KindOfUninit;
+    m_hdr.aux.cow = m_hdr.aux.z = 0;
   }
 
   /*
@@ -122,6 +112,11 @@ struct RefData final : type_scan::MarkCountable<RefData> {
   Variant* var() { return reinterpret_cast<Variant*>(tv()); }
 
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
+  static constexpr int cowZOffset() {
+    return offsetof(RefData, m_hdr) +
+      offsetof(HeaderWord<Flags>, aux) +
+      sizeof(DataType);
+  }
 
   void assertValid() const { assert(kindIsValid()); }
 

@@ -1388,6 +1388,7 @@ static void php_session_reset_id() {
       v.setEvalScalar();
       cns->m_data = v.asTypedValue()->m_data;
       cns->m_type = v.asTypedValue()->m_type;
+      if (rds::isNormalHandle(handle)) rds::initHandle(handle);
     }
   }
 }

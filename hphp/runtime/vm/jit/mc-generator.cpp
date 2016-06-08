@@ -1342,6 +1342,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
     case REQ_POST_DEBUGGER_RET: {
       auto fp = vmfp();
       auto caller = fp->func();
+      assert(g_unwind_rds.isInit());
       vmpc() = caller->unit()->at(caller->base() +
                                   g_unwind_rds->debuggerReturnOff);
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
@@ -1883,6 +1884,9 @@ void MCGenerator::requestInit() {
   Stats::init();
   requestInitProfData();
   s_initialTCSize = m_code.totalUsed();
+  assert(!g_unwind_rds.isInit());
+  memset(g_unwind_rds.get(), 0, sizeof(UnwindRDS));
+  g_unwind_rds.markInit();
 }
 
 void MCGenerator::requestExit() {

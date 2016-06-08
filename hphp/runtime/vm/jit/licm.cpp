@@ -85,7 +85,6 @@ bool is_pure_licmable(const IRInstruction* inst) {
   case LdClsCtor:
   case LdClsName:
   case Mov:
-  case LookupClsRDSHandle:
   case LdContActRec:
   case LdAFWHActRec:
   case LdCtx:

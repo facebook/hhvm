@@ -75,20 +75,16 @@ void implCns(IRGS& env,
       result = staticTVCns(env, tv);
     }
   } else {
-    auto const c1 = gen(env, LdCns, cnsNameTmp);
     result = cond(
       env,
       [&] (Block* taken) { // branch
-        gen(env, CheckInit, taken, c1);
+        return gen(env, LdCns, taken, cnsNameTmp);
       },
-      [&] { // Next: LdCns hit in TC
-        return c1;
+      [&] (SSATmp* cns) { // Next: LdCns hit in TC
+        return cns;
       },
       [&] { // Taken: miss in TC, do lookup & init
         hint(env, Block::Hint::Unlikely);
-        // We know that c1 is Uninit in this branch but we have to encode this
-        // in the IR.
-        gen(env, AssertType, TUninit, c1);
 
         if (fallbackNameTmp) {
           return gen(env,
@@ -129,11 +125,9 @@ void emitClsCnsD(IRGS& env,
                  const StringData* clsNameStr) {
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
 
-  /*
-   * If the class is already defined in this request, the class is persistent
-   * or a parent of the current context, and this constant is a scalar
-   * constant, we can just compile it to a literal.
-   */
+  // If the class is already defined in this request, the class is persistent
+  // or a parent of the current context, and this constant is a scalar
+  // constant, we can just compile it to a literal.
   if (auto const cls = Unit::lookupClass(clsNameStr)) {
     Slot ignore;
     auto const tv = cls->cnsNameToTV(cnsNameStr, ignore);
@@ -144,40 +138,33 @@ void emitClsCnsD(IRGS& env,
     }
   }
 
-  /*
-   * Otherwise, load the constant out of RDS.  Right now we always guard that
-   * it is at least uncounted (this means a constant set to STDIN or something
-   * will always side exit here).
-   */
-  auto const link = rds::bindClassConstant(clsNameStr, cnsNameStr);
-  auto const prds = gen(
-    env,
-    LdRDSAddr,
-    RDSHandleData { link.handle() },
-    TCell.ptr(Ptr::ClsCns)
-  );
-  auto const guardType = TUncountedInit;
-
-  ifThen(
+  // Otherwise, load the constant out of RDS.  Right now we always guard that
+  // it is at least uncounted (this means a constant set to STDIN or something
+  // will always side exit here).
+  cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckTypeMem, guardType, taken, prds);
+      auto const prds = gen(env, LdClsCns, clsCnsName, taken);
+      gen(env, CheckTypeMem, TUncountedInit, taken, prds);
+      return prds;
     },
-    [&] {
+    [&] (SSATmp* prds) {
+      auto const val = gen(env, LdMem, TUncountedInit, prds);
+      push(env, val);
+      return nullptr;
+    },
+    [&] () -> SSATmp* {
       // Make progress through this instruction before side-exiting to the next
       // instruction, by doing a slower lookup.
       hint(env, Block::Hint::Unlikely);
-      auto const val = gen(env, LookupClsCns, clsCnsName);
+      auto const val = gen(env, InitClsCns, clsCnsName);
       push(env, val);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      return nullptr;
     }
   );
-
-  auto const val = gen(env, LdMem, guardType, prds);
-  push(env, val);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

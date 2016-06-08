@@ -582,7 +582,7 @@ void Class::initProps() const {
   VMRegAnchor _;
 
   initPropHandle();
-  *m_propDataCache = propVec;
+  m_propDataCache.initWith(propVec);
 
   try {
     // Iteratively invoke 86pinit() methods upward
@@ -598,6 +598,7 @@ void Class::initProps() const {
     req::destroy_raw_array(propVec->begin(), propVec->size());
     req::destroy_raw(propVec);
     *m_propDataCache = nullptr;
+    m_propDataCache.markUninit();
     throw;
   }
 
@@ -621,7 +622,7 @@ void Class::initProps() const {
 }
 
 bool Class::needsInitSProps() const {
-  return !m_sPropCacheInit.bound() || !*m_sPropCacheInit;
+  return !m_sPropCacheInit.bound() || !m_sPropCacheInit.isInit();
 }
 
 void Class::initSProps() const {
@@ -663,7 +664,7 @@ void Class::initSProps() const {
     }
   }
 
-  *m_sPropCacheInit = true;
+  m_sPropCacheInit.initWith(true);
 }
 
 
@@ -743,7 +744,9 @@ void Class::initSPropHandles() const {
 }
 
 Class::PropInitVec* Class::getPropData() const {
-  return m_propDataCache.bound() ? *m_propDataCache : nullptr;
+  return (m_propDataCache.bound() && m_propDataCache.isInit())
+    ? *m_propDataCache
+    : nullptr;
 }
 
 TypedValue* Class::getSPropData(Slot index) const {
@@ -937,13 +940,15 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   m_nonScalarConstantCache.bind();
   auto& clsCnsData = *m_nonScalarConstantCache;
 
-  if (clsCnsData.get() != nullptr) {
+  if (m_nonScalarConstantCache.isInit()) {
     if (auto cCns = clsCnsData->nvGet(clsCnsName)) return *cCns;
   }
 
   auto makeCache = [&] {
-    if (clsCnsData.get() == nullptr) {
+    if (!m_nonScalarConstantCache.isInit()) {
+      clsCnsData.detach();
       clsCnsData = Array::attach(PackedArray::MakeReserve(m_constants.size()));
+      m_nonScalarConstantCache.markInit();
     }
   };
 
@@ -1052,17 +1057,16 @@ size_t Class::declPropOffset(Slot index) const {
 
 bool Class::verifyPersistent() const {
   if (!(attrs() & AttrPersistent)) return false;
-  if (m_parent.get() &&
-      !rds::isPersistentHandle(m_parent->classHandle())) {
+  if (m_parent.get() && !classHasPersistentRDS(m_parent.get())) {
     return false;
   }
   for (auto const& declInterface : declInterfaces()) {
-    if (!rds::isPersistentHandle(declInterface->classHandle())) {
+    if (!classHasPersistentRDS(declInterface.get())) {
       return false;
     }
   }
   for (auto const& usedTrait : m_extra->m_usedTraits) {
-    if (!rds::isPersistentHandle(usedTrait->classHandle())) {
+    if (!classHasPersistentRDS(usedTrait.get())) {
       return false;
     }
   }

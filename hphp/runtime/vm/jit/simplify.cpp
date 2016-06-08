@@ -283,7 +283,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckInitProps,
                    CheckInitSProps,
                    CheckPackedArrayBounds,
-                   CheckStaticLocInit,
+                   CheckClosureStaticLocInit,
                    CheckRefInner,
                    CheckCtxThis));
   if (inst->next() != nullptr && inst->next() == inst->taken()) {
@@ -360,7 +360,9 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   if (!src->hasConstVal()) return nullptr;
 
   auto const cls = src->clsVal();
-  if (!rds::isPersistentHandle(cls->classHandle())) return nullptr;
+  if (!classHasPersistentRDS(cls)) {
+    return nullptr;
+  }
 
   auto const meth = cls->getCachedInvoke();
   return meth == nullptr ? nullptr : cns(env, meth);
@@ -2021,7 +2023,8 @@ SSATmp* simplifyCheckStk(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
-SSATmp* simplifyCheckStaticLocInit(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCheckClosureStaticLocInit(State& env,
+                                          const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
@@ -2538,7 +2541,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckLoc)
   X(CheckRefInner)
   X(CheckStk)
-  X(CheckStaticLocInit)
+  X(CheckClosureStaticLocInit)
   X(CheckType)
   X(CheckTypeMem)
   X(AssertType)

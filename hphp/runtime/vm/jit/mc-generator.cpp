@@ -1951,7 +1951,7 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
     }
     if (RuntimeOption::EvalPerfPidMap) {
       m_debugInfo.recordPerfMap(rangeFrom(cb, start, &cb == &m_code.cold()),
-                                srcFunc, exit, inPrologue);
+                                sk, srcFunc, exit, inPrologue);
     }
   }
 }

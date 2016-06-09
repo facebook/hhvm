@@ -96,7 +96,13 @@ struct Object;
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
 #define HHVM_NAMED_FE_STR(fn, fimpl) \
-        Native::registerBuiltinFunction(fn, fimpl)
+        do { \
+          /* This calls Extension::registerExtensionFunction() on the */ \
+          /* local 'this' at the call site. */ \
+          String name{makeStaticString(fn)}; \
+          registerExtensionFunction(name); \
+          Native::registerBuiltinFunction(name, fimpl); \
+        } while(0)
 #define HHVM_NAMED_FE(fn, fimpl) HHVM_NAMED_FE_STR(#fn, fimpl)
 #define HHVM_FE(fn) HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn))
 #define HHVM_FALIAS(fn, falias) HHVM_NAMED_FE_STR(#fn, HHVM_FN(falias))

@@ -177,7 +177,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
       new_prefix.append("%5B");
       url_encode_array(ret, data, seen_arrs, String(),
                        new_prefix.detach(), String("%5D", CopyString),
-                       arg_sep);
+                       arg_sep, encode_plus);
     } else {
       if (!ret.empty()) {
         ret.append(arg_sep);

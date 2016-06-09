@@ -192,7 +192,8 @@ let builtins =
   "interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}\n"^
   "abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}\n"^
   "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"^
-  "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"
+  "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"^
+  "function meth_caller(string $cls_name, string $meth_name);\n"
 
 (*****************************************************************************)
 (* Helpers *)

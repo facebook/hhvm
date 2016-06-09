@@ -935,6 +935,7 @@ and expr_
      * Typing this is pretty simple, we just need to check that instance->meth
      * is public+not static and then return its type.
      *)
+    Typing_hooks.dispatch_fun_id_hook (p, "\\"^SN.SpecialFunctions.inst_meth);
     let env, ty1 = expr env instance in
     let env, result, vis =
       obj_get_with_visibility ~is_method:true ~nullsafe:None env ty1
@@ -963,6 +964,7 @@ and expr_
     (* meth_caller('X', 'foo') desugars to:
      * $x ==> $x->foo()
      *)
+    Typing_hooks.dispatch_fun_id_hook (p, "\\"^SN.SpecialFunctions.meth_caller);
     let class_ = Env.get_class env class_name in
     (match class_ with
     | None -> unbound_name env pos_cname
@@ -1030,6 +1032,7 @@ and expr_
      * Typing this is pretty simple, we just need to check that c::meth is
      * public+static and then return its type.
      *)
+    Typing_hooks.dispatch_fun_id_hook (p, "\\"^SN.SpecialFunctions.class_meth);
     let class_ = Env.get_class env (snd c) in
     (match class_ with
     | None ->

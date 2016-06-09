@@ -100,10 +100,20 @@ public:
     return m_name;
   }
 
+  void registerExtensionFunction(const String& name) {
+    assert(name.get()->isStatic());
+    m_functions.push_back(name.get());
+  }
+
+  const std::vector<StringData*>& getExtensionFunctions() const {
+    return m_functions;
+  }
+
 private:
   std::string m_name;
   std::string m_version;
   std::string m_dsoName;
+  std::vector<StringData*> m_functions;
 };
 
 struct ExtensionBuildInfo {

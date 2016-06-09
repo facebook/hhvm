@@ -61,10 +61,10 @@ function extension_loaded(string $name): bool;
 function get_loaded_extensions(bool $zend_extensions = false): array;
 
 /* This function returns the names of all the functions defined in the module
- * indicated by module_name.
+ * indicated by module_name or false if $module_name is not a valid extension.
  */
 <<__Native>>
-function get_extension_funcs(string $module_name): array;
+function get_extension_funcs(string $module_name): mixed;
 
 /* Gets the value of a PHP configuration option.  This function will not
  * return configuration information set when the PHP was compiled, or read

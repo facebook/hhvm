@@ -283,12 +283,16 @@ static Array HHVM_FUNCTION(get_loaded_extensions,
   return ExtensionRegistry::getLoaded();
 }
 
-static Array HHVM_FUNCTION(get_extension_funcs,
-                           const String& module_name) {
-  // TODO Have loadSystemlib() or Native::registerBuiltinFunction
-  // track this for us so that we can support this here and
-  // in ReflectionExtesion
-  throw_not_supported(__func__, "extensions are built differently");
+static Variant HHVM_FUNCTION(get_extension_funcs, const String& module_name) {
+  auto extension = ExtensionRegistry::get(module_name);
+  if (!extension) return Variant(false);
+
+  auto const& fns = extension->getExtensionFunctions();
+  PackedArrayInit result(fns.size());
+  for (auto const& fn : fns) {
+    result.append(Variant(fn));
+  }
+  return result.toVariant();
 }
 
 static Variant HHVM_FUNCTION(get_cfg_var, const String& option) {

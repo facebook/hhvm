@@ -450,7 +450,10 @@ namespace HH\Asio {
  *
  * Pass a cURL handle, or, more simply, a string containing a URL (and the
  * cURL handle will be created for you), and the cURL request will be executed
- * via async and the `string` result will be retuned.
+ * via async and the `string` result will be returned.
+ *
+ * curl_multi_info_read must be used to retrieve error information,
+ * curl_errno can't be used as this function is a wrapper to curl_multi_await.
  *
  * @param $urlOrHandle - An existing cURL handle or a URL as a `string`. String
  *                       URLs will create a default cURL GET handle.

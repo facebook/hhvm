@@ -67,8 +67,9 @@ static void alignJmpTarget(CodeBlock& cb) {
 static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                             PhysReg tv, PhysReg type, RegSet live) {
   return vwrap(cb, data, fixups, [&] (Vout& v) {
-    // Save FP/LR
+    // Save FP/LR and copy SP to FP to avoid indirect fixup
     v << pushp{rfp(), rlr()};
+    v << copy{rsp(), rfp()};
 
     // We use the first argument register for the TV data because we might pass
     // it to the native release call.  It's not live when we enter the helper.
@@ -96,13 +97,6 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       // The refcount is exactly 1; release the value.
       // Avoid 'this' pointer overwriting by reserving it as an argument.
       v << callm{lookupDestructor(v, type), arg_regs(1)};
-
-      // Between where %rsp is now and the saved RIP of the call into the
-      // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
-      // saved RIP of the call from the stub to this helper.
-      // +4 below comes from the pushp(s) of caller and current stub
-      v << syncpoint{makeIndirectFixup(prs.dwordsPushed() + 1 + 4)};
-      // fallthru
     });
 
     // Either we did a decref, or the value was static.
@@ -153,6 +147,8 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // until we hit that point.
     v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
 
+    // Copy SP to FP to avoid indirect fixup
+    v << copy{rsp(), rfp()};
     doWhile(v, CC_NZ, {},
       [&] (const VregList& in, const VregList& out) {
         auto const sf = v.makeReg();
@@ -186,6 +182,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
     us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
       v << pushp{rfp(), rlr()};
+      v << copy{rsp(), rfp()};
       v << jmpi{freeLocalsHelpers[i]};
     });
   }

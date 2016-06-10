@@ -23,9 +23,19 @@ type action = Ai.ServerFindRefs.action =
   | Member of string * member
   | Function of string
 
+(* The class containing the member can be specified in two ways:
+ * - Class_set - as an explicit, pre-computed set of names, which are then
+ *   compared using string comparison
+ * - Subclasses_of - the class's name, in which comparison will use the
+ *   subtyping relation
+ *)
+type member_class =
+  | Class_set of SSet.t
+  | Subclasses_of of string
+
 type action_internal  =
   | IClass of string
-  | IMember of SSet.t * member
+  | IMember of member_class * member
   | IFunction of string
 
 type result = (string * Pos.absolute) list
@@ -34,7 +44,27 @@ let process_fun_id results_acc target_fun id =
   if target_fun = (snd id)
   then results_acc := Pos.Map.add (fst id) (snd id) !results_acc
 
-let process_member_id results_acc target_classes target_member
+let check_if_extends_class tcopt target_class_name class_name =
+  let class_ = Typing_lazy_heap.get_class tcopt class_name in
+  match class_ with
+  | Some { Typing_defs.tc_ancestors = imps; _ }
+      when SMap.mem target_class_name imps -> true
+  | _ -> false
+
+let is_target_class tcopt target_classes class_name =
+  match tcopt, target_classes with
+  | _, Class_set s -> SSet.mem s class_name
+  | Some tcopt, Subclasses_of s ->
+    s = class_name || check_if_extends_class tcopt s class_name
+  | None, Subclasses_of _ ->
+    (* The only reason why tcopt is optional is because this function can
+     * be called both from master and parallel worker. In current usage,
+     * the workers always use Class_set method so they won't need the
+     * tcopt, and passing it down to them is complicated/expensive.
+     *)
+    failwith "TypecheckerOptions are required to check subtyping"
+
+let process_member_id tcopt results_acc target_classes  target_member
     class_ id _ _ ~is_method ~is_const =
   let member_name = snd id in
   let is_target = match target_member with
@@ -47,13 +77,14 @@ let process_member_id results_acc target_classes target_member
   in
   if not is_target then () else
   let class_name = class_.Typing_defs.tc_name in
-  if SSet.mem target_classes class_name then
+  if is_target_class tcopt target_classes class_name then
     results_acc :=
       Pos.Map.add (fst id) (class_name ^ "::" ^ (snd id)) !results_acc
 
-let process_constructor results_acc target_classes target_member class_ _ p =
+let process_constructor tcopt results_acc
+    target_classes target_member class_ _ p =
   process_member_id
-    results_acc target_classes target_member class_ (p, "__construct")
+    tcopt results_acc target_classes target_member class_ (p, "__construct")
     () () ~is_method:true ~is_const:false
 
 let process_class_id results_acc target_classes cid mid_option =
@@ -65,25 +96,26 @@ let process_class_id results_acc target_classes cid mid_option =
      results_acc := Pos.Map.add (fst cid) class_name !results_acc
    end
 
-let process_taccess results_acc target_classes target_typeconst
+let process_taccess tcopt results_acc target_classes target_typeconst
     class_ typeconst p =
   let class_name = class_.tc_name in
   let tconst_name = (snd typeconst.ttc_name) in
-  if (SSet.mem target_classes class_name) &&
+  if (is_target_class tcopt target_classes class_name) &&
     (target_typeconst = tconst_name) then
   results_acc :=
     Pos.Map.add p (class_name ^ "::" ^ tconst_name) !results_acc
 
-let attach_hooks results_acc = function
+let attach_hooks tcopt results_acc = function
   | IMember (classes, ((Method _ | Property _ | Class_const _) as member)) ->
     let process_member_id =
-      process_member_id results_acc classes member in
+      process_member_id tcopt results_acc classes member in
     Typing_hooks.attach_cmethod_hook process_member_id;
     Typing_hooks.attach_smethod_hook process_member_id;
     Typing_hooks.attach_constructor_hook
-      (process_constructor results_acc classes member);
+      (process_constructor tcopt results_acc classes member);
   | IMember (classes, Typeconst t) ->
-    Typing_hooks.attach_taccess_hook (process_taccess results_acc classes t)
+    Typing_hooks.attach_taccess_hook
+      (process_taccess tcopt results_acc classes t)
   | IFunction fun_name ->
     Typing_hooks.attach_fun_id_hook (process_fun_id results_acc fun_name)
   | IClass c ->
@@ -94,13 +126,9 @@ let detach_hooks () =
   Decl_hooks.remove_all_hooks ();
   Typing_hooks.remove_all_hooks ()
 
-let check_if_extends_class tcopt target_class_name class_name acc =
-  let class_ = Typing_lazy_heap.get_class tcopt class_name in
-  match class_ with
-  | None -> acc
-  | Some { Typing_defs.tc_ancestors = imps; _ }
-      when SMap.mem target_class_name imps -> SSet.add acc class_name
-  | _ -> acc
+let add_if_extends_class tcopt target_class_name class_name acc =
+  if check_if_extends_class tcopt target_class_name class_name
+  then SSet.add acc class_name else acc
 
 let find_child_classes tcopt target_class_name files_info files =
   SharedMem.invalidate_caches();
@@ -109,7 +137,7 @@ let find_child_classes tcopt target_class_name files_info files =
       let { FileInfo.classes; _ } =
         Relative_path.Map.find_unsafe fn files_info in
       List.fold_left classes ~init:acc ~f:begin fun acc cid ->
-        check_if_extends_class tcopt target_class_name (snd cid) acc
+        add_if_extends_class tcopt target_class_name (snd cid) acc
       end
     with Not_found ->
       acc)
@@ -154,9 +182,9 @@ let get_deps_set_function tcopt f_name =
   | None ->
     Relative_path.Set.empty
 
-let find_refs target acc fileinfo_l =
+let find_refs tcopt target acc fileinfo_l =
   let results_acc = ref Pos.Map.empty in
-  attach_hooks results_acc target;
+  attach_hooks tcopt results_acc target;
   let tcopt = TypecheckerOptions.permissive in
   ServerIdeUtils.recheck tcopt fileinfo_l;
   detach_hooks ();
@@ -167,13 +195,13 @@ let find_refs target acc fileinfo_l =
 let parallel_find_refs workers fileinfo_l target =
   MultiWorker.call
     workers
-    ~job:(find_refs target)
+    ~job:(find_refs None target)
     ~neutral:([])
     ~merge:(List.rev_append)
     ~next:(Bucket.make fileinfo_l)
 
 let get_definitions tcopt = function
-  | IMember (classes, Method method_name) ->
+  | IMember (Class_set classes, Method method_name) ->
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
       match Typing_lazy_heap.get_class tcopt class_name with
       | Some class_ ->
@@ -198,6 +226,7 @@ let get_definitions tcopt = function
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end
+  | IMember (Subclasses_of _, _)
   | IMember (_, (Property _ | Class_const _ | Typeconst _)) ->
     (* this code path is used only in ServerRefactor, we can update it at some
        later time *)
@@ -212,7 +241,7 @@ let find_references tcopt workers target include_defs
   end ~init:[] in
   let results =
     if List.length fileinfo_l < 10 then
-      find_refs target [] fileinfo_l
+      find_refs None target [] fileinfo_l
     else
       parallel_find_refs workers fileinfo_l target
     in

@@ -172,7 +172,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
   auto const cc = CapCode::ceil(sl.size());
   auto const need = cc.decode() + kCapOverhead;
   auto const sd = static_cast<StringData*>(
-    trueStatic ? low_malloc(need) : malloc(need)
+    trueStatic ? low_malloc_data(need) : malloc(need)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
@@ -226,7 +226,7 @@ StringData* StringData::MakeEmpty() {
 void StringData::destructStatic() {
   assert(checkSane() && isStatic());
   assert(isFlat());
-  low_free(this);
+  low_free_data(this);
 }
 
 void StringData::destructUncounted() {

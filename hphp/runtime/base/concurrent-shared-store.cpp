@@ -182,7 +182,7 @@ struct HotCache {
     const char* operator()(const StringData* sd) const {
       auto const nbytes = sd->size() + 1;
       auto const dst = reinterpret_cast<char*>(apcExtension::HotKeyAllocLow ?
-                                               low_malloc(nbytes) :
+                                               low_malloc_data(nbytes) :
                                                malloc(nbytes));
       assert((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
       memcpy(dst, sd->data(), nbytes);
@@ -193,11 +193,11 @@ struct HotCache {
   struct HotMapAllocator {
     char* allocate(size_t nbytes, const void* hint = nullptr) {
       return reinterpret_cast<char*>(apcExtension::HotMapAllocLow ?
-                                     low_malloc(nbytes) :
+                                     low_malloc_data(nbytes) :
                                      malloc(nbytes));
     }
     void deallocate(char* p, size_t nbytes) {
-      apcExtension::HotMapAllocLow ? low_free(p) : free(p);
+      apcExtension::HotMapAllocLow ? low_free_data(p) : free(p);
     }
   };
 

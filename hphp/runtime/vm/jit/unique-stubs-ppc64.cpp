@@ -14,31 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
+#include "hphp/runtime/vm/jit/unique-stubs-ppc64.h"
 
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/event-hook.h"
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/align-x64.h"
-#include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/abi-ppc64.h"
+#include "hphp/runtime/vm/jit/align-ppc64.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/code-gen-tls.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/phys-reg-saver.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
-#include "hphp/util/asm-x64.h"
+#include "hphp/ppc64-asm/asm-ppc64.h"
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/util/data-block.h"
-#include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
 
@@ -46,7 +49,7 @@ TRACE_SET_MOD(ustubs);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace x64 {
+namespace ppc64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -87,19 +90,30 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
         v << ret{live};
       });
 
-      // Note that the stack is aligned since we called to this helper from an
-      // stack-unaligned stub.
       PhysRegSaver prs{v, live};
+
+      auto const dword_size = sizeof(int64_t);
+
+      // saving return value on the stack, but keeping it 16-byte aligned
+      v << mflr{rfuncln()};
+      v << lea {rsp()[-2 * dword_size], rsp()};
+      v << store{rfuncln(), rsp()[0]};
 
       // The refcount is exactly 1; release the value.
       // Avoid 'this' pointer overwriting by reserving it as an argument.
       v << callm{lookupDestructor(v, type), arg_regs(1)};
 
-      // Between where %rsp is now and the saved RIP of the call into the
+      // Between where r1 is now and the saved RIP of the call into the
       // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
-      // saved RIP of the call from the stub to this helper.
+      // stack size reserved for the LR saved right above and the LR offset in
+      // the frame.
       v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
       // fallthru
+
+      // restore the return value from the stack
+      v << load{rsp()[0], rfuncln()};
+      v << lea {rsp()[2 * dword_size], rsp()};
+      v << mtlr{rfuncln()};
     });
 
     // Either we did a decref, or the value was static.
@@ -129,7 +143,19 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
 
     ifThen(v, CC_G, sf, [&] (Vout& v) {
+      auto const dword_size = sizeof(int64_t);
+
+      // saving return value on the stack, but keeping it 16-byte aligned
+      v << mflr{rfuncln()};
+      v << lea {rsp()[-2 * dword_size], rsp()};
+      v << store{rfuncln(), rsp()[0]};
+
       v << call{release, arg_regs(3)};
+
+      // restore the return value from the stack
+      v << load{rsp()[0], rfuncln()};
+      v << lea {rsp()[2 * dword_size], rsp()};
+      v << mtlr{rfuncln()};
     });
   };
 
@@ -168,11 +194,11 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   vwrap(cb, data, fixups, [] (Vout& v) { v << ret{}; });
 
   // This stub is hot, so make sure to keep it small.
-  // Alas, we have more work to do in this under Windows,
-  // so we can't be this small :(
-#ifndef _WIN32
+#if 0
+  // TODO(gut): Currently this assert fails.
+  // Take a closer look when looking at performance
   always_assert(Stats::enabled() ||
-                (cb.frontier() - release <= 4 * x64::cache_line_size()));
+                (cb.frontier() - release <= 4 * cache_line_size()));
 #endif
 
   fixups.process(nullptr);
@@ -181,59 +207,55 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void assert_tc_saved_rip(void* sp) {
-  auto const saved_rip = *reinterpret_cast<uint8_t**>(sp);
+void assert_tc_saved_rip(void* saved_lr_pointer) {
+  // saved on enterTCHelper
+  auto const saved_lr = *reinterpret_cast<uint8_t**>(saved_lr_pointer);
+  auto const branch_block = saved_lr; // next instruction after resumetc's callr
+  auto const jccLen = smashableJccLen() - ppc64_asm::instr_size_in_bytes;
+  auto const branch_instr = branch_block + jccLen;
   auto const exittc = mcg->ustubs().enterTCExit;
 
-  DecodedInstruction di(saved_rip);
-  auto const jmp_target = [&] { return saved_rip + di.size() + di.offset(); };
-
-  // We should either be returning to enterTCExit, or to a jmp to enterTCExit.
-  always_assert(saved_rip == exittc || (di.isJmp() && jmp_target() == exittc));
+  ppc64_asm::DecodedInstruction di(branch_instr);
+  if (di.isJmp()) {
+    auto const jmp_target = TCA(ppc64_asm::Assembler::getLi64(branch_block));
+    always_assert(di.isJmp() && jmp_target == exittc);
+  } else {
+    always_assert(saved_lr == exittc);
+  }
 }
 
 TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
-  X64Assembler a { cb };
-
-  // Emit a byte of padding. This is a kind of hacky way to avoid
-  // hitting an assert in recordGdbStub when we call it with stub - 1
-  // as the start address.
-  a.emitNop(1);
-
+  ppc64_asm::Assembler a { cb };
   auto const start = a.frontier();
+
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    always_assert(rarg(0) != rret(0) &&
-                  rarg(0) != rret(1));
-    a.movq(rsp(), rarg(0));
+    vwrap(cb, data, [&] (Vout& v) {
+      // Not doing it directly as rret(0) == rarg(0) on ppc64
+      Vreg ret_addr = v.makeReg();
+      v << lea{rsp()[ppc64_asm::exittc_position_on_frame], ret_addr};
 
-    // We need to spill the return registers around the assert call.
-    a.push(rret(0));
-    a.push(rret(1));
-    a.call(TCA(assert_tc_saved_rip));
-    a.pop(rret(1));
-    a.pop(rret(0));
+      // We need to spill the return registers around the assert call.
+      v << push{rret(0)};
+      v << push{rret(1)};
+
+      v << copy{ret_addr, rarg(0)};
+      v << call{TCA(assert_tc_saved_rip), RegSet(rarg(0))};
+
+      v << pop{rret(1)};
+      v << pop{rret(0)};
+    });
   }
 
-  // Emulate a ret to enterTCExit without actually doing one to avoid
-  // unbalancing the return stack buffer. The call from enterTCHelper() that
-  // got us into the TC was popped off the RSB by the ret that got us to this
-  // stub.
-  a.addq(8, rsp());
-  if (a.jmpDeltaFits(us.enterTCExit)) {
-    a.jmp(us.enterTCExit);
-  } else {
-    // can't do a near jmp and a rip-relative load/jmp would require threading
-    // through extra state to allocate a literal. use an indirect jump through
-    // a register
-    a.emitImmReg(us.enterTCExit, reg::rax);
-    a.jmp(reg::rax);
-  }
+  // Reinitialize r1 for the external code found after enterTCExit's stubret
+  a.mr(ppc64_asm::reg::r1, rsp());
 
-  // On a backtrace, gdb tries to locate the calling frame at address
-  // returnRIP-1. However, for the first VM frame, there is no code at
-  // returnRIP-1, since the AR was set up manually. For this frame,
-  // record the tracelet address as starting from this callToExit-1,
-  // so gdb does not barf.
+  // r31 should have the same value as caller's r1. Loading it soon on stubret.
+  // (this corrupts the backchain, but it's not relevant as this frame will be
+  // destroyed soon)
+  a.std(ppc64_asm::reg::r1, rsp()[0]);
+
+  // Simply go to enterTCExit
+  a.branchAuto(TCA(mcg->ustubs().enterTCExit));
   return start;
 }
 

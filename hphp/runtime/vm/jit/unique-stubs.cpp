@@ -1045,7 +1045,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
       // The stub frame's saved RIP is at %rsp[8] before we saved the
       // caller-saved registers.
-      v << syncpoint{makeIndirectFixup(prs.dwordsPushed() + 1)};
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
     };
 
     emitDecRefWork(v, v, rdata, destroy, false);

@@ -51,6 +51,9 @@
 # undef MALLOCX_LG_ALIGN
 # undef MALLOCX_ZERO
 # include <jemalloc/jemalloc.h>
+# if JEMALLOC_VERSION_MAJOR == 4
+#  define USE_JEMALLOC_CHUNK_HOOKS 1
+# endif
 #endif
 
 #include "hphp/util/maphuge.h"
@@ -91,7 +94,7 @@ inline void* operator new(size_t, NotNull, void* location) {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const bool use_jemalloc =
+constexpr bool use_jemalloc =
 #ifdef USE_JEMALLOC
   true
 #else
@@ -131,6 +134,32 @@ inline int low_dallocx_flags() {
   return MALLOCX_ARENA(low_arena);
 #endif
 }
+
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+extern unsigned low_huge1g_arena;
+
+inline int low_mallocx_huge1g_flags() {
+  // Allocate from low_arena, and bypass the implicit tcache to assure that the
+  // result actually comes from low_arena.
+#ifdef MALLOCX_TCACHE_NONE
+  return MALLOCX_ARENA(low_huge1g_arena) | MALLOCX_TCACHE_NONE;
+#else
+  return MALLOCX_ARENA(low_huge1g_arena);
+#endif
+}
+
+inline int low_dallocx_huge1g_flags() {
+#ifdef MALLOCX_TCACHE_NONE
+  // Bypass the implicit tcache for this deallocation.
+  return MALLOCX_TCACHE_NONE;
+#else
+  // Prior to the introduction of MALLOCX_TCACHE_NONE, explicitly specifying
+  // MALLOCX_ARENA(a) caused jemalloc to bypass tcache.
+  return MALLOCX_ARENA(low_huge1g_arena);
+#endif
+}
+#endif
+
 #endif
 
 inline void* low_malloc(size_t size) {
@@ -157,6 +186,32 @@ inline void low_malloc_huge_pages(int pages) {
 }
 
 void low_malloc_skip_huge(void* start, void* end);
+
+inline void* low_malloc_data(size_t size) {
+#ifndef USE_JEMALLOC_CHUNK_HOOKS
+  return low_malloc(size);
+#else
+  if (low_huge1g_arena == 0) return low_malloc(size);
+  extern void* low_malloc_huge1g_impl(size_t);
+  auto ret = low_malloc_huge1g_impl(size);
+  if (ret != nullptr) return ret;
+  return low_malloc(size);
+#endif
+}
+
+inline void low_free_data(void* ptr) {
+#ifndef USE_JEMALLOC_CHUNK_HOOKS
+  low_free(ptr);
+#else
+  if (ptr) {
+    if (low_huge1g_arena != 0) {
+      dallocx(ptr, low_dallocx_huge1g_flags());
+    } else {
+      low_free(ptr);
+    }
+  }
+#endif
+}
 
 /**
  * Safe memory allocation.

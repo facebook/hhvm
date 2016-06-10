@@ -102,7 +102,7 @@ void* Func::allocFuncMem(int numParams) {
   auto const funcSize =
     sizeof(Func) + numExtraPrologues * sizeof(m_prologueTable[0]);
 
-  return low_malloc(funcSize);
+  return low_malloc_data(funcSize);
 }
 
 void Func::destroy(Func* func) {
@@ -122,7 +122,7 @@ void Func::destroy(Func* func) {
     }
   }
   func->~Func();
-  low_free(func);
+  low_free_data(func);
 }
 
 void Func::freeClone() {

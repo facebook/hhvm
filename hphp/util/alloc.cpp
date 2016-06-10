@@ -31,8 +31,10 @@
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
-#include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
+#include "hphp/util/hugetlb.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/managed-arena.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -232,6 +234,7 @@ void numa_bind_to(void* start, size_t size, int node) {}
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
+unsigned low_huge1g_arena = 0;
 std::atomic<int> low_huge_pages(0);
 std::atomic<void*> highest_lowmall_addr;
 static const unsigned kLgHugeGranularity = 21;
@@ -499,7 +502,7 @@ struct JEMallocInitializer {
       // Error; bail out.
       return;
     }
-    if (mallctlWrite(folly::format("arena.{}.dss", low_arena).str().c_str(),
+    if (mallctlWrite(folly::sformat("arena.{}.dss", low_arena).c_str(),
                      "primary", true) != 0) {
       // Error; bail out.
       return;
@@ -513,6 +516,42 @@ struct JEMallocInitializer {
     (void) sbrk(leftInPage);
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = (char*)sbrk(0) - 1;
+
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+    char* use1GPage = getenv("HHVM_USE_1G_PAGE");
+    // Here we try to use a huge page by default, this is used to test error
+    // handing (e.g., when there isn't sufficient huge pages reserved).  After
+    // testing, we should make nPages default to 0, and only try to grab a page
+    // when the HHVM_USE_1G_PAGE is set.
+    int nPages = 1;
+    if (use1GPage) {
+      // If the string is not an integer, we use 1 huge page for now.
+      sscanf(use1GPage, "%d", &nPages);
+    }
+    // Search existing mount points first, and if we don't find hugetlbfs with
+    // 1G page size, try create our own mount.
+    if ((nPages > 0) && (find_hugetlbfs_path() || auto_mount_hugetlbfs())) {
+      size_t hugeSize = 0;
+      void* base = mmap_1g((void*)0xc0000000);
+      if (base) {
+        hugeSize = 1 << 30;
+        if (nPages > 1) {
+          void* newBase = mmap_1g((void*)0x80000000);
+          if (newBase) {
+            base = newBase;
+            hugeSize += 1 << 30;
+          }
+        }
+        // Try to distribute the 2G (or 1G) pages to NUMA nodes.
+        numa_interleave(base, hugeSize);
+        try {
+          // leaked
+          auto ma = new ManagedArena(base, hugeSize);
+          if (ma) low_huge1g_arena = ma->getArenaId();
+        } catch (...) { }
+      }
+    }
+#endif
   }
 };
 
@@ -578,6 +617,13 @@ void low_malloc_skip_huge(void* start, void* end) {
     }
   }
 }
+
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+void* low_malloc_huge1g_impl(size_t size) {
+  assert(low_huge1g_arena != 0);
+  return mallocx(size, low_mallocx_huge1g_flags());
+}
+#endif
 
 #else
 

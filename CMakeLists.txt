@@ -41,13 +41,18 @@ IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
   MESSAGE(FATAL_ERROR "HHVM requires a 64bit OS")
 ENDIF()
 
-# If available, configure CCache
+# Enable ccache if present and not already in use. Optionally
+# "-DIgnoreCcache=TRUE" can passed to cmake to ignore ccache.
+option(IgnoreCcache "IgnoreCcache" FALSE)
 find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-  message(STATUS "Found ccache, enabling")
-endif(CCACHE_FOUND)
+if(CCACHE_FOUND AND NOT IgnoreCcache)
+  if (NOT ("${CMAKE_CXX_COMPILER} ${CMAKE_C_COMPILER}" MATCHES ".*ccache.*"))
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_FOUND})
+    message(STATUS "Found ccache: ${CCACHE_FOUND} - enabling ccache as compiler wrapper")
+  else()
+    message(STATUS "Found ccache - ccache already in use as C and/or CXX compiler wrapper")
+  endif()
+endif()
 
 # 3rd party library
 IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")

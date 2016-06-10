@@ -41,9 +41,8 @@ IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
   MESSAGE(FATAL_ERROR "HHVM requires a 64bit OS")
 ENDIF()
 
-# Enable ccache if present and not already in use. Optionally
-# "-DIgnoreCcache=TRUE" can passed to cmake to ignore ccache.
-option(IgnoreCcache "IgnoreCcache" FALSE)
+# Enable ccache if present and not already enabled system wide.
+option(SKIP_CCACHE "Skip detecting/enabling ccache - no effect if ccache enabled system wide" FALSE)
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND AND NOT IgnoreCcache)
   if (NOT ("${CMAKE_CXX_COMPILER} ${CMAKE_C_COMPILER}" MATCHES ".*ccache.*"))

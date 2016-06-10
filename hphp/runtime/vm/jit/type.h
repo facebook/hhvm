@@ -725,16 +725,11 @@ private:
 
 private:
   union {
-    struct {
-      // Only 38 of the 51 bits are actively in use but we make sure these
-      // three bit fields fill up all 64 bits to ensure they're all
-      // initialized.
-      bits_t m_bits : 50;
-      bits_t m_ptrKind : 13;
-      bits_t m_hasConstVal : 1;
-    };
-    uint64_t m_raw;
+    bits_t m_bits;
+    Bits m_typedBits;
   };
+  Ptr m_ptrKind;
+  bool m_hasConstVal;
 
   union {
     uintptr_t m_extra;
@@ -759,13 +754,6 @@ private:
 };
 
 using OptType = folly::Optional<Type>;
-
-/*
- * jit::Type must be small enough for efficient pass-by-value.
- */
-static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
-              "jit::Type should fit in (2 * sizeof(uint64_t))");
-
 
 /////////////////////////////////////////////////////////////////////////////
 

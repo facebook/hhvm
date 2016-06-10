@@ -33,7 +33,7 @@ namespace HPHP { namespace jit {
 
 constexpr inline Type::Type(bits_t bits, Ptr kind)
   : m_bits(bits)
-  , m_ptrKind(static_cast<ptr_t>(kind))
+  , m_ptrKind(kind)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
@@ -120,28 +120,33 @@ inline Type for_const(TCA)           { return TTCA; }
 
 inline Type::Type()
   : m_bits(kBottom)
-  , m_ptrKind(static_cast<ptr_t>(Ptr::Bottom))
+  , m_ptrKind(Ptr::Bottom)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline Type::Type(DataType outer, DataType inner)
   : m_bits(bitsFromDataType(outer, inner))
-  , m_ptrKind(static_cast<ptr_t>(outer == KindOfClass ? Ptr::Bottom
-                                                      : Ptr::NotPtr))
+  , m_ptrKind(outer == KindOfClass ? Ptr::Bottom : Ptr::NotPtr)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline size_t Type::hash() const {
-  return hash_int64_pair(m_raw, m_extra);
+  return hash_int64_pair(
+    hash_int64_pair(m_bits, static_cast<ptr_t>(m_ptrKind)) ^ m_hasConstVal,
+    m_extra
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
 inline bool Type::operator==(Type rhs) const {
-  return m_raw == rhs.m_raw && m_extra == rhs.m_extra;
+  return m_bits == rhs.m_bits &&
+    m_ptrKind == rhs.m_ptrKind &&
+    m_hasConstVal == rhs.m_hasConstVal &&
+    m_extra == rhs.m_extra;
 }
 
 inline bool Type::operator!=(Type rhs) const {
@@ -469,7 +474,7 @@ inline Type Type::strip() const {
 }
 
 inline Ptr Type::ptrKind() const {
-  return static_cast<Ptr>(m_ptrKind);
+  return m_ptrKind;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -477,7 +482,7 @@ inline Ptr Type::ptrKind() const {
 
 inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra)
   : m_bits(bits)
-  , m_ptrKind(static_cast<ptr_t>(kind))
+  , m_ptrKind(kind)
   , m_hasConstVal(false)
   , m_extra(extra)
 {

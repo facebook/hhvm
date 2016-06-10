@@ -27,7 +27,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 
-#ifdef FOLLY_SANITIZE_ADDRESS
+#if defined(FOLLY_SANITIZE_ADDRESS) || defined(FOLLY_SANITIZE_THREAD)
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
 # define VALGRIND
 // TODO: (t2869817) ASan doesn't play well with jemalloc

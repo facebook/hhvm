@@ -47,6 +47,8 @@ type t = {
   consider_names_just_for_autoload: bool;
 }
 
+val empty_t: t
+
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)

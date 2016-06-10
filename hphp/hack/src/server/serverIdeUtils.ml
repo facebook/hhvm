@@ -48,6 +48,15 @@ let oldify_file name =
   Parser_heap.ParserHeap.oldify_batch @@
     Parser_heap.ParserHeap.KeySet.singleton name
 
+let oldify_file_info path file_info =
+  oldify_file path;
+  let {
+    FileInfo.n_funs; n_classes; n_types; n_consts = _
+  } = FileInfo.simplify file_info in
+  oldify_funs n_funs;
+  oldify_classes n_classes;
+  oldify_typedefs n_types
+
 let revive funs classes typedefs file_name =
   Typing_heap.Funs.revive_batch funs;
   Naming_heap.FunPosHeap.revive_batch funs;
@@ -64,6 +73,12 @@ let revive funs classes typedefs file_name =
   Parser_heap.ParserHeap.revive_batch @@
     Parser_heap.ParserHeap.KeySet.singleton file_name
 
+let revive_file_info path file_info =
+  let {
+    FileInfo.n_funs; n_classes; n_types; n_consts = _
+  } = FileInfo.simplify file_info in
+  revive n_funs n_classes n_types path
+
 (* This will parse, declare and check all functions and classes in content
  * buffer.
  *
@@ -72,14 +87,12 @@ let revive funs classes typedefs file_name =
  * SharedMem.S.oldify_batch) - after working with local content is done,
  * original definitions can (and should) be restored using "revive".
  *)
-let declare_and_check_get_ast path content =
+let declare_and_check content ~f =
+  let path = Relative_path.default in
   let tcopt = TypecheckerOptions.permissive in
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
-  let declared_funs = ref SSet.empty in
-  let declared_classes = ref SSet.empty in
-  let declared_typedefs = ref SSet.empty in
-  try
+  let file_info = try
     Errors.ignore_ begin fun () ->
       let {Parser_hack.file_mode = _; comments = _; ast} =
         Parser_hack.program path content
@@ -88,21 +101,19 @@ let declare_and_check_get_ast path content =
         List.fold_left ast ~f:begin fun (funs, classes, typedefs) def ->
         match def with
           | Ast.Fun { Ast.f_name; _ } ->
-            declared_funs := SSet.add !declared_funs (snd f_name);
             f_name::funs, classes, typedefs
           | Ast.Class { Ast.c_name; _ } ->
-            declared_classes := SSet.add !declared_classes (snd c_name);
             funs, c_name::classes, typedefs
           | Ast.Typedef { Ast.t_id; _ } ->
-            declared_typedefs := SSet.add !declared_typedefs (snd t_id);
             funs, classes, t_id::typedefs
           | _ -> funs, classes, typedefs
       end ~init:([], [], []) in
 
-      oldify_file path;
-      oldify_funs !declared_funs;
-      oldify_classes !declared_classes;
-      oldify_typedefs !declared_typedefs;
+      let file_info = { FileInfo.empty_t with
+        FileInfo.funs; classes; typedefs;
+      } in
+
+      oldify_file_info path file_info;
 
       Parser_heap.ParserHeap.add path ast;
       NamingGlobal.make_env ~funs ~classes ~typedefs ~consts:[];
@@ -124,14 +135,15 @@ let declare_and_check_get_ast path content =
         | Nast.Typedef t -> Typing.typedef_def t
         | _ -> ()
       end;
-      (!declared_funs, !declared_classes, !declared_typedefs), ast
+      file_info
     end
   with e ->
     report_error e;
-    (SSet.empty, SSet.empty, SSet.empty), []
-
-let declare_and_check path content =
-  fst (declare_and_check_get_ast path content)
+    FileInfo.empty_t
+  in
+  let result = f path file_info in
+  revive_file_info path file_info;
+  result
 
 let recheck tcopt filetuple_l =
   SharedMem.invalidate_caches();
@@ -142,10 +154,7 @@ let recheck tcopt filetuple_l =
 let check_file_input tcopt files_info fi =
   match fi with
   | ServerUtils.FileContent content ->
-      let path = Relative_path.default in
-      let funs, classes, typedefs = declare_and_check path content in
-      revive funs classes typedefs path;
-      path
+      declare_and_check content ~f:(fun path _ -> path);
   | ServerUtils.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
       let () = match Relative_path.Map.get files_info path with

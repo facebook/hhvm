@@ -78,10 +78,6 @@ struct XDebugServer {
    * Returns true if the xdebug server is attached to the current thread.
    */
   static bool isAttached() {
-    // Don't allocate a new XDebugServer if we don't already have one.  This
-    // gets called from a signal handler.
-    if (XDebugExtension::Server.isNull()) return false;
-
     return XDEBUG_GLOBAL(Server) != nullptr;
   }
 

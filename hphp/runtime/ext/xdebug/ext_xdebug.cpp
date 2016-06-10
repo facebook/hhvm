@@ -514,7 +514,7 @@ static Array HHVM_FUNCTION(xdebug_get_function_stack) {
                             .skipTop()
                             .withPseudoMain()
                             .withArgNames()
-                            .withArgValues(*XDebugExtension::CollectParams));
+                            .withArgValues(XDebugExtension::CollectParams));
   return ArrayUtil::Reverse(bt).toArray();
 }
 
@@ -1035,8 +1035,7 @@ void XDebugExtension::requestShutdown() {
 bool XDebugExtension::Enable = false;
 
 // Standard config options
-#define XDEBUG_OPT(T, name, sym, val) \
-  IMPLEMENT_THREAD_LOCAL(T, XDebugExtension::sym);
+#define XDEBUG_OPT(T, name, sym, val) thread_local T XDebugExtension::sym;
 XDEBUG_CFG
 XDEBUG_MAPPED_CFG
 XDEBUG_HDF_CFG

@@ -40,6 +40,8 @@ void CGMeta::process(
 void CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
+  mcg->assertOwnsMetadataLock();
+
   for (auto const& pair : fixups) {
     assertx(mcg->code().isValidCodeAddress(pair.first));
     mcg->fixupMap().recordFixup(pair.first, pair.second);

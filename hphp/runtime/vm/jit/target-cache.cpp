@@ -489,12 +489,9 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
   // First fill the request local method cache for this call.
   lookup<fatal>(mce, ar, name, cls, ctx);
 
-  // If we fail to get the write lease, just let it stay unsmashed for now.
-  // We are using the write lease + whether the code is already smashed to
-  // determine which thread should free the SmashLoc---after getting the
-  // lease, we need to re-check if someone else smashed it first.
-  LeaseHolder writer(Translator::WriteLease());
-  if (!writer.canWrite()) return;
+  // We are using whether the code is already smashed to determine which thread
+  // should free the SmashLoc.
+  auto codeLock = mcg->lockCode();
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);

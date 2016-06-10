@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/runtime/base/program-functions.h"
@@ -217,7 +218,7 @@ void CodeCache::unprotect() {
 }
 
 CodeCache::View CodeCache::view(TransKind kind) {
-  assertx(Translator::WriteLease().amOwner());
+  mcg->assertOwnsCodeLock();
 
   if (kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
     return View{m_prof, m_frozen, m_frozen, m_data};

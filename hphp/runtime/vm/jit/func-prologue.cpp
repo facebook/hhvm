@@ -98,20 +98,21 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   IRUnit unit{context};
   irgen::IRGS env{unit};
 
-  auto& main = code.main();
-  auto& frozen = code.frozen();
-
-  auto const start = main.frontier();
-
   irgen::emitFuncBodyDispatch(env, dvs);
   irgen::sealUnit(env);
 
   CGMeta fixups;
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::CrossTrace);
+
+  auto& main = code.main();
+  auto const start = main.frontier();
+
   emitVunit(*vunit, env.unit, code, fixups);
 
+  auto metaLock = mcg->lockMetadata();
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;
+    auto& frozen = code.frozen();
     recordPerfRelocMap(start, main.frontier(),
                        frozen.frontier(), frozen.frontier(),
                        SrcKey { func, dvs[0].second, false },

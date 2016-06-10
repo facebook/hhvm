@@ -20,6 +20,8 @@
 #include "hphp/util/compilation-flags.h"
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/runtime/vm/jit/types.h"
+
 #include <pthread.h>
 
 namespace HPHP {
@@ -39,7 +41,7 @@ namespace jit {
 
 struct LeaseHolderBase;
 struct Lease {
-  friend struct LeaseHolderBase;
+  friend struct LeaseHolder;
 
   Lease();
   ~Lease();
@@ -81,83 +83,43 @@ enum class LeaseAcquire {
   BLOCKING
 };
 
-struct LeaseHolderBase {
-  ~LeaseHolderBase();
+struct LeaseHolder {
+  LeaseHolder(Lease& l, const Func* f, TransKind kind);
+  ~LeaseHolder();
 
   /*
-   * Attempt a non-blocking acquisition of the write lease if not already held.
-   *
-   * Returns true iff this thread already owned it or was able to acquire it.
+   * Returns true iff all the necessary locks were acquired and it's ok to
+   * continue with translation.
    */
-  bool acquire();
-
-  /*
-   * Perform a blocking acquire of the write lease. Will never fail, but may
-   * take a long time to return.
-   */
-  void acquireBlocking();
-
-  /*
-   * Returns true iff the thread owning this LeaseHolder may proceed with the
-   * unsynchronized first phase of translation.
-   */
-  bool canTranslate() const {
-    switch (m_state) {
-      case LockLevel::None:
-        return false;
-      case LockLevel::Translate:
-      case LockLevel::Write:
-        return true;
-    }
-    not_reached();
+  explicit operator bool() const {
+    return m_canTranslate;
   }
 
   /*
-   * Returns true iff the thread owning this LeaseHolder may write to the
-   * translation cache.
+   * If the combination of RuntimeOption::EvalJitConcurrently and kind require
+   * holding the global write lease and it can't be acquired, return false.
    */
-  bool canWrite() const {
-    switch (m_state) {
-      case LockLevel::None:
-      case LockLevel::Translate:
-        return false;
-      case LockLevel::Write:
-        return true;
-    }
-    not_reached();
-  }
-
- protected:
-  LeaseHolderBase(Lease& l, LeaseAcquire acquire, const Func* f = nullptr);
+  bool checkKind(TransKind kind);
 
  private:
-  enum class LockLevel {
-    None,
-    Translate,
-    Write,
-  };
+  void dropLocks();
 
   Lease& m_lease;
-  LockLevel m_state{LockLevel::None};
-  bool m_acquired{false};
   const Func* m_func;
+
+  /*
+   * Did this object acquire all the locks it was supposed to in its
+   * constructor?
+   */
+  bool m_canTranslate{false};
+
+  /*
+   * Flags indicating which specific locks were acquired by this object and
+   * should be released in its destructor.
+   */
+  bool m_acquired{false};
   bool m_acquiredFunc{false};
-};
-
-struct LeaseHolder : public LeaseHolderBase {
-  explicit LeaseHolder(Lease& l)
-    : LeaseHolderBase(l,
-                      RuntimeOption::EvalJitRequireWriteLease ?
-                      LeaseAcquire::BLOCKING : LeaseAcquire::ACQUIRE)
-  {}
-  explicit LeaseHolder(Lease& l, const Func* func)
-    : LeaseHolderBase(l, LeaseAcquire::ACQUIRE, func)
-  {}
-};
-
-struct BlockingLeaseHolder : public LeaseHolderBase {
-  explicit BlockingLeaseHolder(Lease& l)
-    : LeaseHolderBase(l, LeaseAcquire::BLOCKING) {}
+  bool m_acquiredThread{false};
 };
 
 }} // HPHP::jit

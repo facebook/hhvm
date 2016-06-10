@@ -269,6 +269,8 @@ void SrcRec::removeIncomingBranch(TCA toSmash) {
 }
 
 void SrcRec::replaceOldTranslations() {
+  mcg->assertOwnsCodeLock();
+
   // Everyone needs to give up on old translations; send them to the anchor,
   // which is a REQ_RETRANSLATE.
   auto translations = std::move(m_translations);

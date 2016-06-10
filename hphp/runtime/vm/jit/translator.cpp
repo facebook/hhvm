@@ -1268,7 +1268,7 @@ void Translator::addTranslation(const TransRec& transRec) {
   }
 
   if (!isTransDBEnabled()) return;
-  assertx(Translator::WriteLease().amOwner());
+  mcg->assertOwnsCodeLock();
   TransID id = transRec.id == kInvalidTransID ? m_translations.size()
                                               : transRec.id;
   if (id >= m_translations.size()) {

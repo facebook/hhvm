@@ -521,10 +521,11 @@ private:
   folly::AtomicHashMap<TCA, TransID> m_jmpToTransID;
 
   /*
-   * Cache for Func -> block end offsets. Values in this map are never modified
+   * Cache for Func -> block end offsets. Values in this map cannot be modified
    * after insertion so no locking is necessary for lookups.
    */
-  folly::AtomicHashMap<FuncId, std::unordered_set<Offset>> m_blockEndOffsets;
+  folly::AtomicHashMap<FuncId, const std::unordered_set<Offset>>
+    m_blockEndOffsets;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -56,7 +56,7 @@ let search_member class_name member include_defs genv env =
   let files = FindRefsService.get_dependent_files env.tcopt
       genv.ServerEnv.workers all_classes in
   let target =
-    FindRefsService.IMember (all_classes, member)
+    FindRefsService.IMember (FindRefsService.Class_set all_classes, member)
   in
   search target include_defs files genv env
 

@@ -40,6 +40,7 @@
 #include <folly/Optional.h>
 
 #include <fstream>
+#include <mutex>
 #include <utility>
 #include <vector>
 
@@ -156,6 +157,35 @@ private:
  * MCGenerator handles the machine-level details of code generation (e.g.,
  * translation cache entry, code smashing, code cache management) and delegates
  * the bytecode-to-asm translation process to translateRegion().
+ *
+ * There are a number of different locks that protect data owned by or related
+ * to MCGenerator, described here in ascending Rank order (see
+ * hphp/util/rank.h).
+ *
+ * - Global write lease (Translator::WriteLease()). The write lease has a
+ *   number of heuristics that are used to ensure we lay out Live translations
+ *   in a good order. When Eval.JitConcurrently == 0, holding the write lease
+ *   gives the owning thread exclusive permission to write to the Translation
+ *   Cache (TC) and all associated metadata tables. When Eval.JitConcurrently >
+ *   0, the global write lease is only used to influence code layout and
+ *   provides no protection against data races. In the latter case, the
+ *   remaining locks are used to protect the integrity of the TC and its
+ *   metadata:
+ *
+ * - Func-specific write leases (Func* argument to LeaseHolder). These locks
+ *   give the owning thread exclusive permission to write to the SrcRec for
+ *   translations of the corresponding Func, modify its prologue table, and
+ *   read/write any ProfTransRecs for translations in the Func. Note that the
+ *   Func-specific lease *must* be held to modify any Func-specific metadata
+ *   when Eval.JitConcurrently > 0, even if the current thread holds the global
+ *   write lease.
+ *
+ * - MCGenerator::lockCode() gives the owning thread exclusive permission to
+ *   modify the contents and frontiers of all code/data blocks in m_code.
+ *
+ * - MCGenerator::lockMetadata() gives the owning thread exclusive permission
+ *   to modify the metadata tables owned by mcg (m_catchTraceMap, m_fixupMap,
+ *   or m_srcDB, etc...).
  */
 struct MCGenerator {
   MCGenerator();
@@ -193,7 +223,7 @@ struct MCGenerator {
    * svcreq::stub_size().
    */
   TCA getFreeStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused = nullptr);
-  bool freeRequestStub(TCA stub);
+  void freeRequestStub(TCA stub);
 
   /*
    * Get the SrcDB.
@@ -320,11 +350,29 @@ public:
   /////////////////////////////////////////////////////////////////////////////
 
   /*
-   * True iff the calling thread is the sole writer.
+   * Acquire a lock on this object's code cache.
+   *
+   * Must be held even if the current thread owns the global write lease.
    */
-  static bool canWrite() {
-    // We can get called early in boot, so allow null mcg.
-    return !mcg || Translator::WriteLease().amOwner();
+  std::unique_lock<SimpleMutex> lockCode() {
+    return std::unique_lock<SimpleMutex>{m_codeLock};
+  }
+
+  void assertOwnsCodeLock() const {
+    m_codeLock.assertOwnedBySelf();
+  }
+
+  /*
+   * Acquire a lock on this object's metadata tables.
+   *
+   * Must be held even if the current thread owns the global write lease.
+   */
+  std::unique_lock<SimpleMutex> lockMetadata() {
+    return std::unique_lock<SimpleMutex>{m_metadataLock};
+  }
+
+  void assertOwnsMetadataLock() const {
+    m_metadataLock.assertOwnedBySelf();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -343,14 +391,14 @@ private:
 
   TCA findTranslation(const TransArgs& args) const;
   TransResult getTranslation(const TransArgs& args);
-  TransResult createTranslation(const TransArgs& args);
+  TransResult createTranslation(TransArgs args);
   bool createSrcRec(SrcKey sk);
-  TransResult retranslate(const TransArgs& args);
+  TransResult retranslate(TransArgs args);
   TransResult translate(TransArgs args);
   TCA finishTranslation(TransEnv env);
 
   TCA lookupTranslation(SrcKey sk) const;
-  TCA retranslateOpt(TransID transId, bool align);
+  TCA retranslateOpt(SrcKey sk, TransID transId, bool align);
   void checkFreeProfData();
 
   /*
@@ -359,7 +407,7 @@ private:
   TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody);
   TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
                          bool& emittedDVInit);
-  TCA emitFuncPrologue(Func* func, int nPassed, bool forRegeneratePrologue);
+  TCA emitFuncPrologue(Func* func, int nPassed, TransKind kind);
   bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
   bool profileSrcKey(SrcKey sk) const;
@@ -387,6 +435,8 @@ private:
   SrcDB m_srcDB;
 
   CodeCache m_code;
+  SimpleMutex m_codeLock{false, RankCodeCache};
+
   UniqueStubs m_ustubs;
   Translator m_tx;
 
@@ -407,6 +457,8 @@ private:
   FreeStubList m_freeStubs;
   // Map from integral literals to their location in the TC data section.
   LiteralMap m_literals;
+  // Lock protecting all metadata tables.
+  SimpleMutex m_metadataLock{false, RankCodeMetadata};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

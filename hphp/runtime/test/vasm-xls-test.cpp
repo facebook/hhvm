@@ -61,8 +61,7 @@ template<class T> uint64_t test_const(T val) {
 
   optimizeX64(vasm.unit(), test_abi, true /* regalloc */);
   CGMeta fixups;
-  LeaseHolder writer{Translator::WriteLease()};
-  EXPECT_TRUE(writer.canWrite());
+
   emitX64(unit, text, fixups, nullptr);
   // The above code might use fixups.literals but shouldn't use anything else.
   fixups.literals.clear();

@@ -468,6 +468,16 @@ static inline int nsjrDefault() {
   return RuntimeOption::ServerExecutionMode() ? 20 : 0;
 }
 
+static inline uint32_t profileRequestsDefault() {
+  return debug ? 1 << 31
+       : RuntimeOption::EvalJitConcurrently ? 100
+       : 2000;
+}
+
+static inline uint32_t resetProfCountersDefault() {
+  return RuntimeOption::EvalJitConcurrently ? 500 : 1000;
+}
+
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }
@@ -481,7 +491,6 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
-static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 2000;
 static const uint64_t kJitRelocationSizeDefault = 1 << 20;
 
 static const bool kJitTimerDefault =

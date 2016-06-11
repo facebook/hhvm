@@ -3,5 +3,5 @@
 ini_set( 'display_errors', 'stderr' );
 $reader = new XMLReader();
 $url = "compress.bzip2://".dirname(__FILE__)."/book.xml.bz2";
-$reader->open( $url, null );
-$reader->read();
+var_dump($reader->open( $url, null ));
+var_dump($reader->read());

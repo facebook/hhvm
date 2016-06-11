@@ -104,7 +104,6 @@ int64_t BZ2File::writeImpl(const char * buf, int64_t length) {
 }
 
 bool BZ2File::closeImpl() {
-  bool ret = true;
   if (!isClosed()) {
     if (m_bzFile) {
       BZ2_bzclose(m_bzFile);
@@ -116,7 +115,7 @@ bool BZ2File::closeImpl() {
     }
   }
   File::closeImpl();
-  return ret;
+  return true;
 }
 
 bool BZ2File::eof() {

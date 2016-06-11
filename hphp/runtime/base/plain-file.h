@@ -69,7 +69,6 @@ protected:
                         // for buffered io.
 
   bool closeImpl();
-  int64_t m_length{-1};
 };
 
 /**

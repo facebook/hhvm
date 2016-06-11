@@ -306,9 +306,6 @@ protected:
     m_streamType = streamType.get();
   }
 
-  // return the wrapper protocol such as file, php, http, https, data, or glob
-  std::string getWrapperProtocol() const;
-
   /**
    * call readImpl(m_buffer, CHUNK_SIZE), passing through stream filters if any.
    */

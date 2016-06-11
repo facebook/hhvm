@@ -2638,8 +2638,22 @@ and lambda_expr_body : env -> block = fun env ->
 and lambda_body ~sync env params ret =
   let is_generator, body_stmts =
     (if peek env = Tlcb
-     then function_body env
-     (* as of Apr 2015, a lambda expression body can't contain a yield *)
+     (** e.g.
+      *   ==> { ...function body }
+      * We reset the priority for parsing the function body.
+      *
+      * See test ternary_within_lambda_block_within_ternary.php
+      *)
+     then with_base_priority env function_body
+     (** e.g.
+      *   ==> x + 5
+      *   We keep the current priority so that possible priority ambiguities
+      *   give rise to errors and must be resolved with parens.
+      *
+      *   See test ternary_within_lambda_within_ternary.php
+      *
+      *   NB: as of Apr 2015, a lambda expression body can't contain a yield
+      *)
      else false, (lambda_expr_body env))
   in
   let f_fun_kind = fun_kind sync is_generator in

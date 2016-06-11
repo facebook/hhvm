@@ -176,12 +176,6 @@ int64_t PlainFile::writeImpl(const char *buffer, int64_t length) {
   // use write instead of fwrite to be consistent with read
   // o.w., read-and-write files would not work
   int64_t written = ::write(getFd(), buffer, length);
-
-  // store the true file length for future use
-  struct stat stat_buf;
-  fstat(getFd(), &stat_buf);
-  m_length = stat_buf.st_size;
-
   return written < 0 ? 0 : written;
 }
 
@@ -200,15 +194,6 @@ bool PlainFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
     }
     offset += getPosition();
     whence = SEEK_SET;
-  } else if (whence == SEEK_END) {
-    offset += m_length;
-    whence = SEEK_SET;
-  }
-
-  // return false if seeking past Eof for php protocols
-  if (getWrapperProtocol() == "php" && (offset > m_length || 
-      m_length == (off_t)-1)) {
-    return false;
   }
 
   // invalidate the current buffer
@@ -217,7 +202,6 @@ bool PlainFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // clear the eof flag
   setEof(false);
   flush();
-
   // lseek instead of seek to be consistent with read
   off_t result = lseek(getFd(), offset, whence);
   setPosition(result);
@@ -226,14 +210,7 @@ bool PlainFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 
 int64_t PlainFile::tell() {
   assert(valid());
-
-  if (getWrapperProtocol() == "php" && m_length == (off_t)0) {
-    return -1;
-  } else if (m_length == (off_t)-1) {
-    return -1;
-  } else {
-    return getPosition();
-  }
+  return getPosition();
 }
 
 bool PlainFile::eof() {
@@ -270,9 +247,6 @@ bool PlainFile::flush() {
 
 bool PlainFile::truncate(int64_t size) {
   assert(valid());
-  if (getWrapperProtocol() == "php") {
-    seek(size, SEEK_SET);
-  }
   return ftruncate(getFd(), size) == 0;
 }
 

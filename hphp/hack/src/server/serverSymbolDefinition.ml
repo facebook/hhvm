@@ -33,6 +33,10 @@ let get_function_by_name x =
   Naming_heap.FunPosHeap.get x >>= fun p ->
   Parser_heap.find_fun_in_file (Pos.filename p) x
 
+let get_gconst_by_name x =
+  Naming_heap.ConstPosHeap.get x >>= fun p ->
+  Parser_heap.find_const_in_file (Pos.filename p) x
+
 (* Span information is stored only in parsing AST *)
 let get_member_def (x : class_element) =
   let type_, member_origin, member_name = x in
@@ -128,6 +132,9 @@ let go tcopt ast result =
     | SymbolOccurrence.Function ->
       get_function_by_name result.SymbolOccurrence.name >>= fun f ->
       Some (FileOutline.summarize_fun f)
+    | SymbolOccurrence.GConst ->
+      get_gconst_by_name result.SymbolOccurrence.name >>= fun cst ->
+      Some (FileOutline.summarize_gconst cst)
     | SymbolOccurrence.Class ->
       get_class_by_name result.SymbolOccurrence.name >>= fun c ->
       Some (FileOutline.summarize_class c ~no_children:true)

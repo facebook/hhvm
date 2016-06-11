@@ -72,6 +72,17 @@ let process_fun_id result_ref is_target_fun id =
            }
   end
 
+let process_global_const result_ref is_target_fun id =
+  if is_target_fun (fst id)
+  then begin
+    let name = snd id in
+    append_result result_ref @@
+           { name;
+             type_ = GConst;
+             pos   = fst id
+           }
+  end
+
 let process_lvar_id result_ref is_target_fun _ id _ =
   if is_target_fun (fst id)
   then begin
@@ -144,6 +155,8 @@ let attach_hooks result_ref line char =
   Typing_hooks.attach_constructor_hook
     (process_constructor result_ref is_target_fun);
   Typing_hooks.attach_fun_id_hook (process_fun_id result_ref is_target_fun);
+  Typing_hooks.attach_global_const_hook
+    (process_global_const result_ref is_target_fun);
   Typing_hooks.attach_taccess_hook (process_taccess result_ref is_target_fun);
   Decl_hooks.attach_class_id_hook (process_class_id result_ref is_target_fun);
   Naming_hooks.attach_lvar_hook (process_lvar_id result_ref is_target_fun);

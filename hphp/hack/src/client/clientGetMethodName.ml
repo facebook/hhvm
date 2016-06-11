@@ -19,6 +19,7 @@ let get_result_type res =
   | SymbolOccurrence.Property _ -> "property"
   | SymbolOccurrence.ClassConst _ -> "class_const"
   | SymbolOccurrence.Typeconst _ -> "typeconst"
+  | SymbolOccurrence.GConst -> "global_const"
 
 let to_json = function
   | Some (res, _) ->

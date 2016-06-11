@@ -191,6 +191,21 @@ let summarize_fun f =
     docblock = None;
   }
 
+let summarize_gconst cst =
+  let pos = fst cst.Ast.cst_name in
+  let gconst_start = Option.value_map cst.Ast.cst_type ~f:fst ~default:pos in
+  let gconst_end = fst cst.Ast.cst_value in
+  {
+    kind = Const;
+    name = Utils.strip_ns (snd cst.Ast.cst_name);
+    pos;
+    span = Pos.btw gconst_start gconst_end;
+    modifiers = [];
+    children = None;
+    params = None;
+    docblock = None;
+  }
+
 let summarize_local name span =
   {
     kind = LocalVar;

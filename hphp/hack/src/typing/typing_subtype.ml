@@ -437,8 +437,18 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       end env r fields_sub
   | (_, Toption ty_super), _ when uenv_super.TUEnv.non_null ->
       sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+
+  (* Subtype is generic parameter
+   * We delegate this case to a separate function in order to catch cycles
+   * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
+   * Need to match on this *before* Toption, in order to deal with T<:?t
+   *)
+  | _, (_, Tabstract (AKgeneric _, _)) ->
+    sub_generic_params SSet.empty env (uenv_super, ty_super) (uenv_sub, ty_sub)
+
   | _, (_, Toption ty_sub) when uenv_sub.TUEnv.non_null ->
-      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+    sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+
   | (_, Toption ty_super), (_, Toption ty_sub) ->
       let uenv_super = {
         TUEnv.non_null = true;
@@ -509,11 +519,10 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
               TUEnv.dep_tys = (r, d)::uenv_sub.TUEnv.dep_tys } in
           sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty))
 
-  (* Subtype or supertype is generic parameter
-   * We delegate these cases to a separate function in order to catch cycles
+  (* Supertype is generic parameter
+   * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
    *)
-  | _, (_, Tabstract (AKgeneric _, _))
   | (_, Tabstract (AKgeneric _, _)), _ ->
     sub_generic_params SSet.empty env (uenv_super, ty_super) (uenv_sub, ty_sub)
 
@@ -529,16 +538,11 @@ and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
 
   (* Subtype is generic parameter *)
   | _, (r_sub, Tabstract (AKgeneric name_sub, opt_sub_cstr)) ->
-    begin match ety_super with
-      (* If supertype is the same generic parameter, we're done *)
-      | (_, Tabstract (AKgeneric name_super, _)) when name_sub = name_super
-        -> env
-
-      | _ ->
-        (* If we've seen this type parameter before then we must have gone
+    let default () =
+         (* If we've seen this type parameter before then we must have gone
          * round a cycle so we fail
          *)
-        if SSet.mem name_sub seen
+        (if SSet.mem name_sub seen
         then fst (Unify.unify env ty_super ty_sub)
         else
           let seen = SSet.add name_sub seen in
@@ -566,7 +570,26 @@ and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                      env.Env.pos r_sub name_sub l; env)
                  else try_bounds tyl)
           in try_bounds (Option.to_list opt_sub_cstr @
-              Env.get_upper_bounds env name_sub)
+              Env.get_upper_bounds env name_sub)) in
+
+    begin match ety_super with
+      (* If supertype is the same generic parameter, we're done *)
+      | (_, Tabstract (AKgeneric name_super, _)) when name_sub = name_super
+        -> env
+
+      (* Try this first *)
+      | (_, Toption ty_super) ->
+        Errors.try_
+          (fun () ->
+          let uenv_super = {
+            TUEnv.non_null = true;
+            TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
+          } in
+          sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
+          (fun _ ->
+              default ())
+
+      | _ -> default ()
     end
 
   (* Supertype is generic parameter *)

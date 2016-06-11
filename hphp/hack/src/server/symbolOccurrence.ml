@@ -16,6 +16,7 @@ type kind =
   | Property of string * string
   | ClassConst of string * string
   | Typeconst of string * string
+  | GConst
 
 type 'a t = {
   name:  string;

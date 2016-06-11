@@ -216,6 +216,7 @@ let json_string_of_response id response =
           | SymbolOccurrence.Property _ -> "property"
           | SymbolOccurrence.ClassConst _ -> "class_const"
           | SymbolOccurrence.Typeconst _ -> "typeconst"
+          | SymbolOccurrence.GConst -> "global_const"
         in
         JSON_Object [
           "name",        JSON_String res.SymbolOccurrence.name;

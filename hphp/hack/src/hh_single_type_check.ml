@@ -388,6 +388,7 @@ let print_symbol (symbol, definition) =
     | Property _ -> "Property"
     | ClassConst _ -> "ClassConst"
     | Typeconst _ -> "Typeconst"
+    | GConst -> "GlobalConst"
     end
     (Pos.string_no_file symbol.pos);
   Printf.printf "defined: %s\n"

@@ -919,6 +919,7 @@ and expr_
       env, fty
   | Id ((cst_pos, cst_name) as id) ->
       Typing_hooks.dispatch_id_hook id env;
+      Typing_hooks.dispatch_global_const_hook id;
       (match Env.get_gconst env cst_name with
       | None when Env.is_strict env ->
           Errors.unbound_global cst_pos;

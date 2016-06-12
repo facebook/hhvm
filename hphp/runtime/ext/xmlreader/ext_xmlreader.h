@@ -36,6 +36,7 @@ namespace HPHP {
 struct XMLReader {
   XMLReader();
   ~XMLReader();
+  void sweep();
   void close();
   String read_string_func(xmlreader_read_char_t internal_function);
   bool bool_func_no_arg(xmlreader_read_int_t internal_function);

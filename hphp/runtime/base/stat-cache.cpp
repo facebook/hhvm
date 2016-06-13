@@ -516,7 +516,7 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
 bool StatCache::mergePath(const std::string& path, bool follow) {
   String canonicalPath = FileUtil::canonicalize(path);
   std::vector<std::string> pvec;
-  split('/', canonicalPath.data(), pvec);
+  folly::split('/', canonicalPath.slice(), pvec);
   assert((pvec[0].size() == 0)); // path should be absolute.
   // Lazily initialize so that if StatCache never gets used, no kernel
   // resources are consumed.

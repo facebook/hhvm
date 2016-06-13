@@ -26,12 +26,6 @@
 namespace HPHP {
 
 /**
- * Split a string into a list of tokens by character delimiter.
- */
-void split(char delimiter, const char *s, std::vector<std::string> &out,
-           bool ignoreEmpty = false);
-
-/**
  * Replace all occurrences of "from" substring to "to" string.
  */
 void replaceAll(std::string &s, const char *from, const char *to);

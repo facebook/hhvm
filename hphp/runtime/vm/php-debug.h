@@ -19,16 +19,14 @@
 
 namespace HPHP {
 
-#ifdef DEBUG
 bool phpBreakpointEnabled(const char* sourceName);
 
-#else
+#ifndef DEBUG
 inline bool phpBreakpointEnabled(const char* sourceName) {
   return false;
 }
+#endif
 
-#endif /* DEBUG */
+}
 
-}      // namespace HPHP
-
-#endif /* incl_HPHP_PHP_DEBUG_H_ */
+#endif

@@ -303,7 +303,7 @@ void Transport::getSplitParam(const char *name,
                               Method method /* = Method::GET */) {
   std::string param = getParam(name, method);
   if (!param.empty()) {
-    split(delimiter, param.c_str(), values);
+    folly::split(delimiter, param, values);
   }
 }
 
@@ -441,14 +441,14 @@ bool Transport::acceptEncoding(const char *encoding) {
     header = header.substr(1, len - 2);
   }
 
- // Split the header by ','
+  // Split the header by ','
   std::vector<std::string> cTokens;
-  split(',', header.c_str(), cTokens);
+  folly::split(',', header, cTokens);
   for (size_t i = 0; i < cTokens.size(); ++i) {
     // Then split by ';'
-    std::string& cToken = cTokens[i];
+    auto& cToken = cTokens[i];
     std::vector<std::string> scTokens;
-    split(';', cToken.c_str(), scTokens);
+    folly::split(';', cToken, scTokens);
     assert(scTokens.size() > 0);
     // lhs contains the encoding
     // rhs, if it exists, contains the qvalue

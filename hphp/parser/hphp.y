@@ -9,8 +9,10 @@
 #define YYLEX_PARAM _p
 
 #include "hphp/compiler/parser/parser.h"
+
 #include <folly/Conv.h>
-#include "hphp/util/text-util.h"
+#include <folly/String.h>
+
 #include "hphp/util/logger.h"
 
 #define line0 r.line0
@@ -311,7 +313,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   _p->onMethodStart(fname, modifiers);
 
   std::vector<std::string> classes;
-  HPHP::split(':', attributes.text().c_str(), classes, true);
+  folly::split(':', attributes.text(), classes, true);
   Token arrAttributes; _p->onArray(arrAttributes, attributes);
 
   Token dummy;

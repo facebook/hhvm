@@ -65,7 +65,7 @@ void DSandboxInfo::set(const std::string &id) {
   m_path.clear();
   if (!id.empty()) {
     std::vector<std::string> tokens;
-    split('\t', id.c_str(), tokens);
+    folly::split('\t', id, tokens);
     if (tokens.size() == 2) {
       m_user = tokens[0];
       m_name = tokens[1];

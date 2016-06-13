@@ -27,25 +27,6 @@ namespace HPHP {
 using std::string;
 using std::vector;
 
-void split(char delimiter, const char *s, vector<string> &out,
-           bool ignoreEmpty /* = false */) {
-  assert(s);
-
-  const char *start = s;
-  const char *p = s;
-  for (; *p; p++) {
-    if (*p == delimiter) {
-      if (!ignoreEmpty || p > start) {
-        out.push_back(string(start, p - start));
-      }
-      start = p + 1;
-    }
-  }
-  if (!ignoreEmpty || p > start) {
-    out.push_back(string(start, p - start));
-  }
-}
-
 void replaceAll(string &s, const char *from, const char *to) {
   assert(from && *from);
   assert(to);

@@ -170,6 +170,7 @@ void create_string_data_map() {
   always_assert(!s_stringDataMap);
   StringDataMap::Config config;
   config.growthFactor = 1;
+  config.entryCountThreadCacheSize = 10;
   MemoryStats::GetInstance()->ResetStaticStringSize();
 
   s_stringDataMap.emplace(RuntimeOption::EvalInitialStaticStringTableSize,

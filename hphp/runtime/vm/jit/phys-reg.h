@@ -39,14 +39,6 @@ struct Vout;
  */
 struct PhysReg {
 private:
-  /*
-   * 48 GP regs + 64 SIMD regs + 1 SF reg + 15 empty == 128 regs.
-   *
-   * We can toggle these values, but they need sum to 128 so that RegSet can
-   * fit into two registers.
-   */
-  static constexpr auto kMaxRegs = 128;
-
   static constexpr auto kGPOffset = 0;
   static constexpr auto kNumGP = 48;
 
@@ -57,6 +49,14 @@ private:
   static constexpr auto kNumSF = 1;
 
 public:
+  /*
+   * 48 GP regs + 64 SIMD regs + 1 SF reg + 15 empty == 128 regs.
+   *
+   * We can toggle these values, but they need sum to 128 so that RegSet can
+   * fit into two registers.
+   */
+  static constexpr auto kMaxRegs = 128;
+
   enum Type {
     GP,
     SIMD,

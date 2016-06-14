@@ -251,7 +251,9 @@ and parse_parameter parser =
     default-argument-specifieropt
 *)
 and parse_parameter_declaration parser =
-  (* TODO: The type specifier is required in strict mode. *)
+  (* ERROR RECOVERY
+     In strict mode, we require a type specifier. This error is not caught
+     at parse time but rather by a later pass. *)
   let (parser, attrs) = parse_attribute_specification_opt parser in
   let token = peek_token parser in
   let (parser, type_specifier) =
@@ -278,6 +280,9 @@ and parse_default_argument_specifier_opt parser =
   | _ -> (parser, make_missing())
 
 and parse_function_declaration parser =
+  (* ERROR RECOVERY
+     In strict mode, we require a type specifier. This error is not caught
+     at parse time but rather by a later pass. *)
   let (parser, attribute_specification) =
     parse_attribute_specification_opt parser in
   let (parser, async_token) = optional_token parser Async in
@@ -292,7 +297,6 @@ and parse_function_declaration parser =
   let (parser, parameter_list) = parse_parameter_list_opt parser in
   let (parser, right_paren_token) =
     expect_token parser RightParen SyntaxError.error1004 in
-  (* TODO: required in strict mode *)
   let (parser, colon_token, return_type) =
     parse_return_type_hint_opt parser in
   let (parser, body) = parse_compound_statement parser in
@@ -347,9 +351,6 @@ let parse_declarations parser =
 
 let parse_script_header parser =
   (* TODO: Detect if there is trivia before or after any token. *)
-  (* TODO: Detect if there is a strict comment *)
-  (* TODO: Detect the language *)
-
   let (parser1, less_than) = next_token parser in
   let (parser2, question) = next_token parser1 in
   let (parser3, language) = next_token parser2 in

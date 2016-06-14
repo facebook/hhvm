@@ -16,6 +16,9 @@ module TokenKind = Full_fidelity_token_kind
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module MinimalToken = Full_fidelity_minimal_token
 module MinimalTrivia = Full_fidelity_minimal_trivia
+module PositionedSyntax = Full_fidelity_positioned_syntax
+module ParserErrors = Full_fidelity_parser_errors
+module SyntaxError = Full_fidelity_syntax_error
 
 open Core
 open OUnit
@@ -83,6 +86,17 @@ let test_mode source =
   let is_php = SyntaxTree.is_php syntax_tree in
   Printf.sprintf "Lang:%sMode:%sStrict:%bHack:%bPhp:%b"
     lang mode is_strict is_hack is_php
+
+let test_errors source =
+  let source_text = SourceText.make source in
+  let offset_to_position = SourceText.offset_to_position source_text in
+  let syntax_tree = SyntaxTree.make source_text in
+  let is_strict = SyntaxTree.is_strict syntax_tree in
+  let root = PositionedSyntax.from_tree syntax_tree in
+  let errors = ParserErrors.find_syntax_errors root is_strict in
+  let mapper err = SyntaxError.to_positioned_string err offset_to_position in
+  let errors = List.map errors ~f:mapper in
+  Printf.sprintf "%s" (String.concat "\n" errors)
 
 let source_simple =
 "<?hh
@@ -218,6 +232,28 @@ let result_statements = remove_whitespace "
             (missing)))
       ((}))))))"
 
+let source_errors_strict =
+"<?hh // strict
+function foo($a) {
+  return $a;
+}"
+
+let source_errors_not_strict =
+"<?hh
+function foo($a) {
+  return $a;
+}"
+
+let source_no_errors_strict =
+"<?hh // strict
+function foo(int $a) : int {
+  return $a;
+}"
+
+let results_errors_strict =
+"(2,14)-(2,15) A type annotation is required in strict mode.
+(2,16)-(2,16) A type annotation is required in strict mode."
+
 let test_data = [
   {
     name = "test_simple";
@@ -267,6 +303,25 @@ let test_data = [
     expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
     test_function = test_mode;
   };
+  {
+    name = "test_errors_not_strict";
+    source = source_errors_not_strict;
+    expected = "";
+    test_function = test_errors;
+  };
+  {
+    name = "test_errors_strict";
+    source = source_errors_strict;
+    expected = results_errors_strict;
+    test_function = test_errors;
+  };
+  {
+    name = "test_no_errors_strict";
+    source = source_no_errors_strict;
+    expected = "";
+    test_function = test_errors;
+  };
+
 ]
 
 let driver test () =

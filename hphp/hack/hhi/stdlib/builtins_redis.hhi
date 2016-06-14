@@ -32,10 +32,10 @@ class Redis {
   public function __construct() {}
   public function connect($host, $port = 6379, $timeout = 0.0) {}
   public function psetex($key, $ttl, $value) {}
-  public function sScan($key, $iterator, $pattern = '', $count = 0) {}
-  public function scan($iterator, $pattern = '', $count = 0) {}
-  public function zScan($key, $iterator, $pattern = '', $count = 0) {}
-  public function hScan($key, $iterator, $pattern = '', $count = 0) {}
+  public function sScan($key, &$iterator, $pattern = '', $count = 0) {}
+  public function scan(&$iterator, $pattern = '', $count = 0) {}
+  public function zScan($key, &$iterator, $pattern = '', $count = 0) {}
+  public function hScan($key, &$iterator, $pattern = '', $count = 0) {}
   public function client($command, $arg = '') {}
   public function slowlog($command) {}
   public function open($host, $port = 6379, $timeout = 0.0) {}

@@ -107,7 +107,6 @@ let source_simple =
 let result_simple = remove_whitespace
   "(script
     (header((<))((?))((name)(end_of_line)))
-    (list
       (function_declaration
         (missing)
         (missing)
@@ -121,7 +120,6 @@ let result_simple = remove_whitespace
         (missing)
         (compound_statement
           (({)(end_of_line))
-          (list
             (expression_statement
               (binary_operator
                 (variable((whitespace)(variable)(whitespace)))
@@ -136,8 +134,8 @@ let result_simple = remove_whitespace
                     ((rparen)(whitespace)))
                   ((*)(whitespace))
                   (variable((variable)))))
-              ((;)(end_of_line))))
-          ((}))))))"
+              ((;)(end_of_line)))
+          ((})))))"
 
 let source_statements =
 "<?hh
@@ -160,12 +158,10 @@ function foo() {
 
 let result_statements = remove_whitespace "
 (script(header((<))((?))((name)(end_of_line)))
-  (list
     (function_declaration(missing)(missing)((function)(whitespace))((name))
     (missing)((lparen))(missing)((rparen)(whitespace))(missing)(missing)
     (compound_statement
       (({)(end_of_line))
-        (list
           (if_statement
             ((whitespace)(if)(whitespace))
             ((lparen))(variable((variable)))
@@ -200,7 +196,6 @@ let result_statements = remove_whitespace "
                   ((whitespace)(return)(whitespace))
                   (variable((variable)))
                   ((;)(end_of_line)))))
-            (list
               (elseif_clause
                 ((whitespace)(elseif))
                 ((lparen))
@@ -228,9 +223,9 @@ let result_statements = remove_whitespace "
                   ((lparen))
                   (variable((variable)))
                   ((rparen))
-                  ((;)(end_of_line)))))
-            (missing)))
-      ((}))))))"
+                  ((;)(end_of_line))))
+            (missing))
+      ((})))))"
 
 let source_errors_strict =
 "<?hh // strict

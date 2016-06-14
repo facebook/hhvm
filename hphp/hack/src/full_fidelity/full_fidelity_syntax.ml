@@ -781,7 +781,10 @@ module WithToken(Token: TokenType) = struct
           [ xhp_attr_name; xhp_attr_equal; xhp_attr_expr ]
 
       let make_list items =
-        from_children SyntaxKind.SyntaxList items
+        match items with
+        | [] -> make_missing()
+        | h :: [] -> h
+        | _ -> from_children SyntaxKind.SyntaxList items
 
       let make_error items =
         from_children SyntaxKind.Error items

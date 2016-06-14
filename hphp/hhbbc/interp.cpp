@@ -157,14 +157,7 @@ void in(ISS& env, const bc::String& op) {
 
 void in(ISS& env, const bc::Array& op) {
   nothrow(env);
-  auto ty = [&] {
-    switch (op.arr1->kind()) {
-    case ArrayData::kDictKind: return dict_val(op.arr1);
-    case ArrayData::kVecKind:  return vec_val(op.arr1);
-    default:                   return aval(op.arr1);
-    }
-  }();
-  push(env, ty);
+  push(env, aval(op.arr1));
 }
 
 void in(ISS& env, const bc::NewArray& op) {
@@ -172,7 +165,7 @@ void in(ISS& env, const bc::NewArray& op) {
 }
 
 void in(ISS& env, const bc::NewDictArray& op) {
-  push(env, op.arg1 == 0 ? dict_empty() : counted_dict_empty());
+  push(env, Type { BArr });
 }
 
 void in(ISS& env, const bc::NewMixedArray& op) {
@@ -197,11 +190,12 @@ void in(ISS& env, const bc::NewStructArray& op) {
 }
 
 void in(ISS& env, const bc::NewVecArray& op) {
-  auto ty = TBottom;
+  auto elems = std::vector<Type>{};
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    ty = union_of(ty, popC(env));
+    elems.push_back(popC(env));
   }
-  push(env, cvec_n(ty, op.arg1));
+  std::reverse(begin(elems), end(elems));
+  push(env, carr_packed(std::move(elems)));
 }
 
 void in(ISS& env, const bc::NewLikeArrayL&) {

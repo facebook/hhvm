@@ -2108,9 +2108,8 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
        */
       return TCell;
     case AnnotMetaType::Dict:
-      return TDict;
     case AnnotMetaType::Vec:
-      return TVec;
+      return TArr;
     case AnnotMetaType::Self:
     case AnnotMetaType::Parent:
     case AnnotMetaType::Callable:

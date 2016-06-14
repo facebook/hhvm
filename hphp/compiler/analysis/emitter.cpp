@@ -9300,7 +9300,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
 
   if (el == nullptr) {
     if (isDict) {
-      e.Array(staticEmptyDictArray());
+      e.Array(ArrayData::GetScalarArray(MixedArray::MakeReserveDict(0)));
       return;
     }
     if (isVec) {

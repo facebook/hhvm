@@ -88,7 +88,7 @@ void ZendExtension::moduleInit() {
   // The systemlib name must match the name used by the build process. For
   // in-tree builds this is the directory name, which is typically the same
   // as the extension name converted to lower case.
-  std::string slName = toLower(std::string(getName()));
+  auto slName = toLower(getName());
   loadSystemlib(slName);
 }
 

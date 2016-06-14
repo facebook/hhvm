@@ -177,6 +177,9 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   // Create a table of branches
   us.freeManyLocalsHelper = vwrap(cb, data, [&] (Vout& v) {
     v << pushp{rfp(), rlr()};
+
+    // rvmfp() is needed by the freeManyLocalsHelper stub above. So, frame
+    // linkage setup is deferred until after its use in freeManyLocalsHelper
     v << jmpi{freeManyLocalsHelper};
   });
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {

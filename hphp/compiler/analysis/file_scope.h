@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_container.h"
@@ -34,6 +32,7 @@
 
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/md5.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,12 +136,7 @@ public:
   void getConstantNames(std::vector<std::string> &names);
 
   void addClassAlias(const std::string& target, const std::string& alias) {
-    m_classAliasMap.insert(
-      std::make_pair(
-        boost::to_lower_copy(target),
-        boost::to_lower_copy(alias)
-      )
-    );
+    m_classAliasMap.emplace(toLower(target), toLower(alias));
   }
 
   std::multimap<std::string,std::string> const& getClassAliases() const {
@@ -150,7 +144,7 @@ public:
   }
 
   void addTypeAliasName(const std::string& name) {
-    m_typeAliasNames.insert(boost::to_lower_copy(name));
+    m_typeAliasNames.emplace(toLower(name));
   }
 
   std::set<std::string> const& getTypeAliasNames() const {

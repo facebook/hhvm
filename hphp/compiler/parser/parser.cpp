@@ -1403,7 +1403,7 @@ void Parser::checkClassDeclName(const std::string& name) {
           // resolution is performed, so when we're in the HH namespace
           // we can't just assume the name starts with "HH\", we need
           // to actually check.
-          (isHHNamespace && boost::starts_with(name, "HH\\"))
+          (isHHNamespace && folly::StringPiece(name).startsWith("HH\\"))
             ? name.substr(3) : name);
         auto const flags = isHHNamespace
           ? getAliasFlags() | AliasFlags::HH

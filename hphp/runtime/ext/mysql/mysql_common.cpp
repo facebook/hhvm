@@ -1406,8 +1406,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
     auto marray = matches.toArray();
     int size = marray.size();
     if (size > 2) {
-      std::string verb = toLower(marray[size - 2].toString().toCppString());
-      std::string table = toLower(marray[size - 1].toString().toCppString());
+      auto verb = toLower(marray[size - 2].toString().slice());
+      auto table = toLower(marray[size - 1].toString().slice());
       if (!table.empty() && table[0] == '`') {
         table = table.substr(1, table.length() - 2);
       }
@@ -1435,7 +1435,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
       auto marray = matches.toArray();
       size = marray.size();
       if (size == 2) {
-        std::string verb = toLower(marray[1].toString().data());
+        auto verb = toLower(marray[1].toString().slice());
         rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
         ServerStats::Log(std::string("sql.query.") + verb, 1);
         if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {

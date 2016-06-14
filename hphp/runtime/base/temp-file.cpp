@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/temp-file.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
@@ -101,6 +101,11 @@ bool TempFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
     offset += getPosition();
     whence = SEEK_SET;
   } else if (whence == SEEK_END) {
+    if (getLength() == -1) {
+      Logger::Verbose("%s/%d: error finding end of file", __FUNCTION__, 
+                       __LINE__);
+      return false;
+    }
     offset += getLength();
     whence = SEEK_SET;
   }
@@ -136,7 +141,7 @@ int64_t TempFile::getLength() {
   if (StatCache::lstat(File::TranslatePathWithFileCache(m_rawName).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     folly::errnoStr(errno).c_str());
-    return false;
+    return -1;
   }
   return sb.st_size;
 }

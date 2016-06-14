@@ -2179,8 +2179,6 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TInt));
-  assertx(!arr->arrVal()->isDict());
-  assertx(!arr->arrVal()->isVecArray());
   auto const value = arr->arrVal()->nvGet(idx->intVal());
   return value ? cns(env, *value) : nullptr;
 }
@@ -2190,8 +2188,6 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TStr));
-  assertx(!arr->arrVal()->isDict());
-  assertx(!arr->arrVal()->isVecArray());
   auto const value = [&] {
     int64_t val;
     if (arr->arrVal()->convertKey(idx->strVal(), val)) {
@@ -2202,26 +2198,8 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   return value ? cns(env, *value) : nullptr;
 }
 
-SSATmp* hackArrayGetImpl(State& env, const ArrayData* arr, SSATmp* key) {
-  assertx(key->hasConstVal(TStr) || key->hasConstVal(TInt));
-  assertx(arr->isDict() || arr->isVecArray());
-  if (key->type() <= TInt) {
-    auto r = arr->nvGet(key->intVal());
-    return r ? cns(env, *r) : nullptr;
-  }
-  if (key->type() <= TStr) {
-    auto r = arr->nvGet(key->strVal());
-    return r ? cns(env, *r) : nullptr;
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const arr = inst->src(0)->arrVal();
-    if (arr->isDict() || arr->isVecArray()) {
-      return hackArrayGetImpl(env, arr, inst->src(1));
-    }
     if (inst->src(1)->type() <= TInt) {
       if (auto result = arrIntKeyImpl(env, inst)) {
         return result;
@@ -2258,11 +2236,6 @@ SSATmp* simplifyMixedArrayGetK(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const arr = inst->src(0)->arrVal();
-    if (arr->isDict() || arr->isVecArray()) {
-      auto r = hackArrayGetImpl(env, arr, inst->src(1));
-      return r ? r : inst->src(2);
-    }
     if (inst->src(1)->isA(TInt)) {
       if (auto result = arrIntKeyImpl(env, inst)) {
         return result;
@@ -2281,10 +2254,6 @@ SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const arr = inst->src(0)->arrVal();
-    if (arr->isDict() || arr->isVecArray()) {
-      return cns(env, hackArrayGetImpl(env, arr, inst->src(1)) != nullptr);
-    }
     if (inst->src(1)->isA(TInt)) {
       if (arrIntKeyImpl(env, inst)) {
         return cns(env, true);

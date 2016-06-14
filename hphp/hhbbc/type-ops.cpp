@@ -92,21 +92,17 @@ Type typeToInt(Type ty) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeAdd(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellAdd))       return *t;
-  if (auto t = usual_arith_conversions(t1, t2))   return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))   return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))   return TDict;
-  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict)) return TDict;
+  if (auto t = eval_const(t1, t2, cellAdd))     return *t;
+  if (auto t = usual_arith_conversions(t1, t2)) return *t;
+  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) return TArr;
   return TInitCell;
 }
 
 Type typeAddO(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellAddO))      return *t;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt))   return TNum;
-  if (auto t = usual_arith_conversions(t1, t2))   return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))   return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))   return TDict;
-  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict)) return TDict;
+  if (auto t = eval_const(t1, t2, cellAddO))    return *t;
+  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TNum;
+  if (auto t = usual_arith_conversions(t1, t2)) return *t;
+  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) return TArr;
   return TInitCell;
 }
 
@@ -176,7 +172,7 @@ Type typeIncDec(IncDecOp op, Type t) {
     }
 
     // No-op on bool, array, resource, object.
-    if (t.subtypeOfAny(TBool, TArr, TRes, TObj, TVec, TDict)) return t;
+    if (t.subtypeOfAny(TBool, TArr, TRes, TObj)) return t;
 
     // Last unhandled case: strings. These result in Int|Str because of the
     // behavior on strictly-numeric strings, and we can't express that yet.

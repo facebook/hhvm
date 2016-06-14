@@ -65,8 +65,7 @@ ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
   if (arr->empty()) {
     if (arr->isVecArray()) return staticEmptyVecArray();
-    if (arr->isDict()) return staticEmptyDictArray();
-    return staticEmptyArray();
+    if (!arr->isDict()) return staticEmptyArray();
   }
   auto key = GetScalarArrayKey(arr);
   return GetScalarArray(arr, key);
@@ -76,8 +75,7 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
                                      const ScalarArrayKey& key) {
   if (arr->empty()) {
     if (arr->isVecArray()) return staticEmptyVecArray();
-    if (arr->isDict()) return staticEmptyDictArray();
-    return staticEmptyArray();
+    if (!arr->isDict()) return staticEmptyArray();
   }
   assert(key == GetScalarArrayKey(arr));
 
@@ -721,7 +719,7 @@ ArrayData* ArrayData::CreateVec() {
 }
 
 ArrayData* ArrayData::CreateDict() {
-  return staticEmptyDictArray();
+  return MixedArray::MakeReserveDict(0);
 }
 
 ArrayData *ArrayData::Create(const Variant& value) {

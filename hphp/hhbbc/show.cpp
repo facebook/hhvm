@@ -434,30 +434,11 @@ std::string show(Type t) {
   case BCls:         ret = "Cls";      break;
   case BRef:         ret = "Ref";      break;
 
-  case BSVec:        ret = "SVec";     break;
-  case BCVec:        ret = "CVec";     break;
-  case BSVecE:       ret = "SVecE";    break;
-  case BCVecE:       ret = "CVecE";    break;
-  case BSVecN:       ret = "SVecN";    break;
-  case BCVecN:       ret = "CVecN";    break;
-  case BVecE:        ret = "VecE";     break;
-  case BVecN:        ret = "VecN";     break;
-  case BSDict:       ret = "SDict";    break;
-  case BCDict:       ret = "CDict";    break;
-  case BSDictE:      ret = "SDictE";   break;
-  case BCDictE:      ret = "CDictE";   break;
-  case BSDictN:      ret = "SDictN";   break;
-  case BCDictN:      ret = "CDictN";   break;
-  case BDictE:       ret = "DictE";    break;
-  case BDictN:       ret = "DictN";    break;
-
   case BNull:        ret = "Null";     break;
   case BNum:         ret = "Num";      break;
   case BBool:        ret = "Bool";     break;
   case BStr:         ret = "Str";      break;
   case BArr:         ret = "Arr";      break;
-  case BVec:         ret = "Vec";      break;
-  case BDict:        ret = "Dict";     break;
 
   case BOptTrue:     ret = "?True";    break;
   case BOptFalse:    ret = "?False";   break;
@@ -480,25 +461,6 @@ std::string show(Type t) {
   case BOptObj:      ret = "?Obj";     break;
   case BOptRes:      ret = "?Res";     break;
 
-  case BOptSVecE:    ret = "?SVecE";   break;
-  case BOptCVecE:    ret = "?CVecE";   break;
-  case BOptSVecN:    ret = "?SVecN";   break;
-  case BOptCVecN:    ret = "?CVecN";   break;
-  case BOptSVec:     ret = "?SVec";    break;
-  case BOptCVec:     ret = "?CVec";    break;
-  case BOptVecE:     ret = "?VecE";    break;
-  case BOptVecN:     ret = "?VecN";    break;
-  case BOptVec:      ret = "?Vec";     break;
-  case BOptSDictE:   ret = "?SDictE";  break;
-  case BOptCDictE:   ret = "?CDictE";  break;
-  case BOptSDictN:   ret = "?SDictN";  break;
-  case BOptCDictN:   ret = "?CDictN";  break;
-  case BOptSDict:    ret = "?SDict";   break;
-  case BOptCDict:    ret = "?CDict";   break;
-  case BOptDictE:    ret = "?DictE";   break;
-  case BOptDictN:    ret = "?DictN";   break;
-  case BOptDict:     ret = "?Dict";    break;
-
   case BInitPrim:    ret = "InitPrim"; break;
   case BPrim:        ret = "Prim";     break;
   case BInitUnc:     ret = "InitUnc";  break;
@@ -520,11 +482,7 @@ std::string show(Type t) {
   case DataTag::ArrPackedN:
   case DataTag::ArrStruct:
   case DataTag::ArrMapN:
-  case DataTag::Dict:
-  case DataTag::Vec:
     break;
-  case DataTag::VecVal:
-  case DataTag::DictVal:
   case DataTag::ArrVal:
     folly::toAppend("~", &ret);
     break;
@@ -539,8 +497,6 @@ std::string show(Type t) {
   case DataTag::Int: folly::toAppend(t.m_data.ival, &ret); break;
   case DataTag::Dbl: folly::toAppend(t.m_data.dval, &ret); break;
   case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
-  case DataTag::VecVal:
-  case DataTag::DictVal:
   case DataTag::ArrVal:
     ret += array_string(t.m_data.aval);
     break;
@@ -603,24 +559,6 @@ std::string show(Type t) {
       show(t.m_data.amapn->key),
       show(t.m_data.amapn->val)
     ).str();
-    break;
-  case DataTag::Dict:
-    ret += folly::format(
-      "([{}:{}])",
-      show(t.m_data.dict->key),
-      show(t.m_data.dict->val)
-    ).str();
-    break;
-  case DataTag::Vec:
-    if (t.m_data.vec->len) {
-      ret += folly::sformat(
-        "([{}]:{})",
-        show(t.m_data.vec->val),
-        *t.m_data.vec->len
-      );
-    } else {
-      ret += folly::sformat("([{}])", show(t.m_data.vec->val));
-    }
     break;
   }
 

@@ -660,9 +660,7 @@ bool pushesActRec(Op opcode) {
 }
 
 void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
-  if (ad->isVecArray()) out << "vec(";
-  if (ad->isDict()) out << "dict(";
-  else out << "array(";
+  out << "array(";
   if (!ad->empty()) {
     bool comma = false;
     for (ArrayIter it(ad); !it.end(); it.next()) {

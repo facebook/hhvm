@@ -310,7 +310,31 @@ let rec get_doc node =
     let condition_part = indent_block_no_space left_part condition right indt in
     group_doc (statement_part ^| condition_part) ^^^ semicolon
   | ForStatement x ->
-    failwith "Pretty printing of for statements not implemented"
+    let keyword = get_doc x.for_keyword in
+    let left_paren = get_doc x.for_left_paren in
+    let initializer_expr = get_doc x.for_initializer_expr in
+    let first_semicolon = get_doc x.for_first_semicolon in
+    let control_expr = get_doc x.for_control_expr in
+    let second_semicolon = get_doc x.for_second_semicolon in
+    let end_of_loop_expr = get_doc x.for_end_of_loop_expr in
+    let right_paren = get_doc x.for_right_paren in
+    let statement = get_doc x.for_statement in
+
+    let left_part = group_doc (keyword ^^| left_paren) in
+
+    let for_expressions =
+      control_expr ^^^ second_semicolon ^| end_of_loop_expr in
+    let for_expressions = if is_missing x.for_control_expr
+      then first_semicolon ^^| for_expressions
+      else first_semicolon ^| for_expressions
+    in
+    let for_expressions = group_doc (initializer_expr ^^^ for_expressions) in
+
+    let start_block =
+      indent_block_no_space left_part for_expressions right_paren indt
+    in
+    let indt = peek_and_decide_indent x.for_statement indt in
+    group_doc (indent_doc start_block statement indt)
   | SwitchStatement x ->
     let keyword = get_doc (switch_keyword x) in
     let left = get_doc (switch_left_paren x) in

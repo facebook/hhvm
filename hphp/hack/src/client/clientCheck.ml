@@ -176,6 +176,10 @@ let main args =
         rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       ClientGetDefinition.go result args.output_json;
       Exit_status.No_error
+    | MODE_GET_DEFINITION_BY_ID id ->
+      let result = rpc args @@ Rpc.GET_DEFINITION_BY_ID id in
+      ClientOutline.print_definition result args.output_json;
+      Exit_status.No_error
     | MODE_TYPE_AT_POS arg ->
       let tpos = Str.split (Str.regexp ":") arg in
       let fn, line, char =

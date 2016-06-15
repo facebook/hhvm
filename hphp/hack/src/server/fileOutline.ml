@@ -274,27 +274,27 @@ let to_json_legacy input =
 
 (* Transforms the outline type to format that existing --outline command
  * expects *)
- let rec to_legacy prefix acc defs =
-   List.fold_left defs ~init:acc ~f:begin fun acc def ->
-     match def.kind with
-     | Function -> (def.pos, def.name, "function") :: acc
-     | Class | Enum | Interface | Trait ->
-         let acc = (def.pos, def.name, "class") :: acc in
-         Option.value_map def.children
-          ~f:(to_legacy (prefix ^ def.name ^ "::") acc)
-          ~default:acc
-     | Method ->
-       let desc =
-         if List.mem def.modifiers Static
-         then "static method" else "method"
-       in
-       (def.pos, prefix ^ def.name, desc) :: acc
-     | Param
-     | Typeconst
-     | LocalVar
-     | Property
-     | Const -> acc
-   end
+let rec to_legacy prefix acc defs =
+  List.fold_left defs ~init:acc ~f:begin fun acc def ->
+    match def.kind with
+    | Function -> (def.pos, def.name, "function") :: acc
+    | Class | Enum | Interface | Trait ->
+      let acc = (def.pos, def.name, "class") :: acc in
+      Option.value_map def.children
+        ~f:(to_legacy (prefix ^ def.name ^ "::") acc)
+        ~default:acc
+    | Method ->
+      let desc =
+        if List.mem def.modifiers Static
+        then "static method" else "method"
+      in
+      (def.pos, prefix ^ def.name, desc) :: acc
+    | Param
+    | Typeconst
+    | LocalVar
+    | Property
+    | Const -> acc
+  end
 
 let to_legacy outline = to_legacy "" [] outline
 
@@ -335,68 +335,71 @@ let add_docblocks defs comments =
   in
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
- let outline content =
-   let {Parser_hack.ast; comments; _} =
-     Parser_hack.program Relative_path.default content
-       ~include_line_comments:true
-       ~keep_errors:false
-   in
-   let result = outline_ast ast in
-   add_docblocks result comments
+let outline content =
+  let {Parser_hack.ast; comments; _} =
+    Parser_hack.program Relative_path.default content
+      ~include_line_comments:true
+      ~keep_errors:false
+  in
+  let result = outline_ast ast in
+  add_docblocks result comments
 
- let outline_legacy content =
-   to_legacy @@ outline content
+let outline_legacy content =
+  to_legacy @@ outline content
 
- let rec to_json outline =
-   Hh_json.JSON_Array begin
-     List.map outline ~f:begin fun def -> Hh_json.JSON_Object ([
-       "kind", Hh_json.JSON_String (string_of_kind def.kind);
-       "name", Hh_json.JSON_String def.name;
-       "id", Option.value_map def.id
-         ~f:(fun x -> Hh_json.JSON_String x) ~default:Hh_json.JSON_Null;
-       "position", Pos.json def.pos;
-       "span", Pos.multiline_json def.span;
-       "modifiers", Hh_json.JSON_Array
-         (List.map def.modifiers
-           (fun x -> Hh_json.JSON_String (string_of_modifier x)));
-     ] @
-     (Option.value_map def.children
-       ~f:(fun x -> [("children", to_json x)]) ~default:[])
-       @
-     (Option.value_map def.params
-       ~f:(fun x -> [("params", to_json x)]) ~default:[])
-       @
-     (Option.value_map def.docblock
-       ~f:(fun x -> [("docblock", Hh_json.JSON_String x)]) ~default:[]))
-     end
-   end
+let rec definition_to_json def =
+  Hh_json.JSON_Object ([
+    "kind", Hh_json.JSON_String (string_of_kind def.kind);
+    "name", Hh_json.JSON_String def.name;
+    "id", Option.value_map def.id
+      ~f:(fun x -> Hh_json.JSON_String x) ~default:Hh_json.JSON_Null;
+    "position", Pos.json def.pos;
+    "span", Pos.multiline_json def.span;
+    "modifiers", Hh_json.JSON_Array
+      (List.map def.modifiers
+      (fun x -> Hh_json.JSON_String (string_of_modifier x)));
+  ] @
+  (Option.value_map def.children
+    ~f:(fun x -> [("children", to_json x)]) ~default:[])
+    @
+  (Option.value_map def.params
+    ~f:(fun x -> [("params", to_json x)]) ~default:[])
+    @
+  (Option.value_map def.docblock
+    ~f:(fun x -> [("docblock", Hh_json.JSON_String x)]) ~default:[]))
 
- let rec print indent defs  =
-   List.iter defs ~f:begin fun def ->
-     let
-      {name; kind; id; pos; span; modifiers; children; params; docblock} = def
-     in
-     Printf.printf "%s%s\n" indent name;
-     Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
-     Option.iter id (fun id -> Printf.printf "%s  id: %s\n" indent id);
-     Printf.printf "%s  position: %s\n" indent (Pos.string pos);
-     Printf.printf "%s  span: %s\n" indent (Pos.multiline_string span);
-     Printf.printf "%s  modifiers: " indent;
-     List.iter modifiers
-       (fun x -> Printf.printf "%s " (string_of_modifier x));
-       Printf.printf "\n";
-     Option.iter params (fun x ->
-       Printf.printf "%s  params:\n" indent;
-       print (indent ^ "    ") x;
-     );
-     Option.iter docblock (fun x ->
-       Printf.printf "%s  docblock:\n" indent;
-       Printf.printf "%s\n" x;
-     );
-     Printf.printf "\n";
-     Option.iter children (fun x ->
-       print (indent ^ "  ") x
-     );
-   end
+and to_json outline =
+  Hh_json.JSON_Array begin
+    List.map outline ~f:definition_to_json
+  end
 
- let print  = print ""
+let rec print_def indent def =
+  let
+    {name; kind; id; pos; span; modifiers; children; params; docblock} = def
+  in
+  Printf.printf "%s%s\n" indent name;
+  Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
+  Option.iter id (fun id -> Printf.printf "%s  id: %s\n" indent id);
+  Printf.printf "%s  position: %s\n" indent (Pos.string pos);
+  Printf.printf "%s  span: %s\n" indent (Pos.multiline_string span);
+  Printf.printf "%s  modifiers: " indent;
+  List.iter modifiers
+    (fun x -> Printf.printf "%s " (string_of_modifier x));
+    Printf.printf "\n";
+  Option.iter params (fun x ->
+    Printf.printf "%s  params:\n" indent;
+    print (indent ^ "    ") x;
+  );
+  Option.iter docblock (fun x ->
+    Printf.printf "%s  docblock:\n" indent;
+    Printf.printf "%s\n" x;
+  );
+  Printf.printf "\n";
+  Option.iter children (fun x ->
+    print (indent ^ "  ") x
+  );
+
+and print indent defs  =
+  List.iter defs ~f:(print_def indent)
+
+let print  = print ""

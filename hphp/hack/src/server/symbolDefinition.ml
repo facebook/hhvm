@@ -35,6 +35,7 @@ and modifier =
 and 'a t = {
   kind : kind;
   name : string;
+  id : string option;
   pos : 'a Pos.pos;
   span : 'a Pos.pos;
   modifiers : modifier list;
@@ -46,6 +47,7 @@ and 'a t = {
 let rec to_absolute x = {
   kind = x.kind;
   name = x.name;
+  id = x.id;
   pos = Pos.to_absolute x.pos;
   span = Pos.to_absolute x.span;
   modifiers = x.modifiers;
@@ -75,3 +77,19 @@ let string_of_modifier = function
   | Public -> "public"
   | Protected -> "protected"
   | Async -> "async"
+
+let get_symbol_id kind parent_class name =
+  let prefix = match kind with
+    | Function -> Some "function"
+    | Class | Enum | Interface | Trait -> Some "type_id"
+    | Method -> Some "method"
+    | Property -> Some "property"
+    | Typeconst | Const -> Some "class_const"
+    | LocalVar | Param -> None
+  in
+  match prefix, parent_class with
+  | Some prefix, Some parent_class ->
+      Some (Printf.sprintf "%s::%s::%s" prefix parent_class name)
+  | Some prefix, None ->
+      Some (Printf.sprintf "%s::%s" prefix name)
+  | None, _ -> None

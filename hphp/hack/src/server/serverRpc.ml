@@ -20,6 +20,7 @@ type _ t =
   | AUTOCOMPLETE : string -> AutocompleteService.result t
   | IDENTIFY_FUNCTION : string * int * int -> ServerIdentifyFunction.result t
   | OUTLINE : string -> FileOutline.outline t
+  | GET_DEFINITION_BY_ID : string -> string SymbolDefinition.t option t
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
@@ -57,6 +58,9 @@ let handle : type a. genv -> env -> a t -> a =
         ServerIdentifyFunction.go_absolute content line char env.tcopt
     | OUTLINE content ->
         FileOutline.outline content
+    | GET_DEFINITION_BY_ID id ->
+        Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
+          SymbolDefinition.to_absolute
     | METHOD_JUMP (class_, find_children) ->
       MethodJumps.get_inheritance env.tcopt class_ ~find_children
         env.files_info genv.workers
@@ -126,3 +130,4 @@ let to_string : type a. a t -> _ = function
   | FORMAT _ -> "FORMAT"
   | TRACE_AI _ -> "TRACE_AI"
   | IDE_FIND_REFS _ -> "IDE_FIND_REFS"
+  | GET_DEFINITION_BY_ID _ -> "GET_DEFINITION_BY_ID"

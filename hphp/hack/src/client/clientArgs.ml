@@ -156,6 +156,9 @@ let parse_check_args cmd =
         "";
     "--identify-function", Arg.String (fun x -> set_mode (MODE_IDENTIFY_FUNCTION x) ()),
       " (mode) print the full function name at the position [line:character] of the text on stdin";
+    "--get-definition-by-id",
+      Arg.String (fun x -> set_mode (MODE_GET_DEFINITION_BY_ID x) ()),
+      "";
     "--refactor", Arg.Tuple ([
         Arg.Symbol (
           ["Class"; "Function"; "Method"],

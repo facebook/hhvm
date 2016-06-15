@@ -20,6 +20,11 @@ function gc_disable(): void;
 <<__Native>>
 function gc_collect_cycles(): int;
 
+/* Reclaims memory used by the memory manager.
+ */
+<<__Native>>
+function gc_mem_caches(): int;
+
 /* Check heap integrity
  */
 <<__Native>>

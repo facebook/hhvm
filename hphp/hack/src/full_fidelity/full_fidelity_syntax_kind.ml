@@ -87,7 +87,7 @@ let to_string kind =
   | PostfixUnaryOperator -> "postfix_unary_operator"
   | BinaryOperator -> "binary_operator"
   | ParenthesizedExpression -> "parenthesized_expression"
-  | BracedExpression -> "parenthesized_expression"
+  | BracedExpression -> "braced_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier "
   | GenericTypeSpecifier -> "generic_type_specifier"

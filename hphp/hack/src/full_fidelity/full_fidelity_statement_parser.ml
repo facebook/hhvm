@@ -115,10 +115,59 @@ module WithExpressionParser(ExpressionParser :
       expect_token parser RightParen SyntaxError.error1011 in
     (parser, left_paren, expr_syntax, right_paren)
 
+  (* List of expressions and commas. No trailing comma. *)
+  and parse_for_expr_group parser =
+    let rec aux parser acc =
+      let (parser, expr) = parse_expression parser in
+      let acc = expr :: acc in
+      let (parser1, token) = next_token parser in
+      match (Token.kind token) with
+      | Comma -> aux parser1 ((make_token token) :: acc )
+      | RightParen -> (parser, acc)
+      | _ ->
+        let parser = with_error parser SyntaxError.error1009 in
+        (parser, acc) in
+    let (parser, expressions_and_commas) = aux parser [] in
+    (parser, make_list (List.rev expressions_and_commas))
+
+  and parse_for_expr parser =
+    let token = peek_token parser in
+    let parser, for_expr_group = match Token.kind token with
+      | Semicolon -> parser, make_missing ()
+      | _ -> parse_for_expr_group parser
+    in
+    let parser, semicolon =
+      expect_token parser Semicolon SyntaxError.error1010 in
+    parser, for_expr_group, semicolon
+
+  and parse_last_for_expr parser =
+    let token = peek_token parser in
+    let parser, for_expr_group = match Token.kind token with
+      | RightParen -> parser, make_missing ()
+      | _ -> parse_for_expr_group parser
+    in
+    (parser, for_expr_group)
+
   and parse_for_statement parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+    let parser, for_keyword_token =
+      assert_token parser For in
+    let parser, for_left_paren =
+      expect_token parser LeftParen SyntaxError.error1019 in
+    let parser, for_initializer_expr, for_first_semicolon =
+      parse_for_expr parser in
+    let parser, for_control_expr, for_second_semicolon =
+      parse_for_expr parser in
+    let parser, for_end_of_loop_expr =
+      parse_last_for_expr parser in
+    let parser, for_right_paren =
+      expect_token parser RightParen SyntaxError.error1011 in
+    let parser, for_statement =
+      parse_statement parser in
+    let syntax = make_for_statement for_keyword_token for_left_paren
+      for_initializer_expr for_first_semicolon for_control_expr
+      for_second_semicolon for_end_of_loop_expr for_right_paren for_statement
+    in
+    (parser, syntax)
 
   and parse_foreach_statement parser =
     (* TODO *)

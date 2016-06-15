@@ -227,6 +227,163 @@ let result_statements = remove_whitespace "
             (missing))
       ((})))))"
 
+let source_for_statements =
+"<?hh
+function foo() {
+  for($x;$y;$z) {
+    return $a;
+  }
+  for($x;$y;$z) {}
+  for(;$y;$z) {}
+  for($x;;$z) {}
+  for($x;$y;) {}
+  for($x;;) {}
+  for(;$y;) {}
+  for(;;$z) {}
+  for($x, $y;;) {}
+  for(;$x, $y, $z;) {}
+}"
+
+let result_for_statements = remove_whitespace
+"(script(header((<))((?))((name)(end_of_line)))(function_declaration
+  (missing)
+  (missing)
+  ((function)(whitespace))
+  ((name))
+  (missing)
+  ((lparen))
+  (missing)
+  ((rparen)(whitespace))
+  (missing)
+  (missing)
+  (compound_statement(({)(end_of_line))(list
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (variable((variable)))
+      ((;))
+      (variable((variable)))
+      ((;))
+      (variable((variable)))
+      ((rparen)(whitespace))
+      (compound_statement
+        (({)(end_of_line))
+        (return_statement
+          ((whitespace)(return)(whitespace))
+          (variable((variable)))
+          ((;)(end_of_line))
+        )
+        ((whitespace)(})(end_of_line))
+      )
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (variable((variable)))
+      ((;))
+      (variable((variable)))
+      ((;))
+      (variable((variable)))
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (missing)
+      ((;))
+      (variable((variable)))
+      ((;))
+      (variable((variable)))
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (variable((variable)))
+      ((;))
+      (missing)
+      ((;))
+      (variable((variable)))
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (variable((variable)))
+      ((;))
+      (variable((variable)))
+      ((;))
+      (missing)
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (variable((variable)))
+      ((;))
+      (missing)
+      ((;))
+      (missing)
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (missing)
+      ((;))
+      (variable((variable)))
+      ((;))
+      (missing)
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (missing)
+      ((;))
+      (missing)
+      ((;))
+      (variable((variable)))
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (list(variable((variable)))((,)(whitespace))(variable((variable))))
+      ((;))
+      (missing)
+      ((;))
+      (missing)
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+    (for_statement
+      ((whitespace)(for))
+      ((lparen))
+      (missing)
+      ((;))
+      (list
+        (variable((variable)))
+        ((,)(whitespace))
+        (variable((variable)))
+        ((,)(whitespace))
+        (variable((variable)))
+      )
+      ((;))
+      (missing)
+      ((rparen)(whitespace))
+      (compound_statement(({))(missing)((})(end_of_line)))
+    )
+  )((})))
+))"
+
 let source_errors_strict =
 "<?hh // strict
 function foo($a) {
@@ -260,6 +417,12 @@ let test_data = [
     name = "test_statements";
     source = source_statements;
     expected = result_statements;
+    test_function = test_minimal;
+  };
+  {
+    name = "test_for_statements";
+    source = source_for_statements;
+    expected = result_for_statements;
     test_function = test_minimal;
   };
   {

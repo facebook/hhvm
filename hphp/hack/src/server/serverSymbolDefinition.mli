@@ -13,3 +13,8 @@
    Ast.program ->
    Relative_path.t SymbolOccurrence.t ->
    Relative_path.t SymbolDefinition.t option
+
+val from_symbol_id :
+  TypecheckerOptions.t ->
+  string ->
+  Relative_path.t SymbolDefinition.t option

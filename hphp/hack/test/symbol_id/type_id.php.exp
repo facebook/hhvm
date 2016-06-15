@@ -1,0 +1,7 @@
+Foo
+  kind: class
+  id: type_id::Foo
+  position: File "type_id.php", line 3, characters 7-9:
+  span: File "type_id.php", line 3, character 1 - line 3, character 12:
+  modifiers: 
+

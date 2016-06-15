@@ -1,0 +1,7 @@
+BAR
+  kind: const
+  id: class_const::Foo::BAR
+  position: File "class_const.php", line 4, characters 9-11:
+  span: File "class_const.php", line 4, character 9 - line 4, character 19:
+  modifiers: 
+

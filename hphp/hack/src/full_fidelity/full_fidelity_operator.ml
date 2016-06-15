@@ -188,7 +188,6 @@ let is_trailing_operator_token token =
   | Plus
   | Minus
   | Ampersand
-  | Colon
   | EqualEqualGreaterThan
   | BarGreaterThan
   | Question

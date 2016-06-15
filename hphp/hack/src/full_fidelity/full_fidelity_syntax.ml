@@ -396,63 +396,115 @@ module WithToken(Token: TokenType) = struct
       | QualifiedNameExpression x -> [x]
       | Error x -> x
       | SyntaxList x -> x
-      | ScriptHeader x ->
-        [ x.header_less_than; x.header_question; x.header_language ]
-      | Script x -> [ x.script_header; x.script_declarations ]
-      | FunctionDeclaration x -> [ x.function_attr; x.function_async;
-        x.function_token; x.function_name; x.function_type_params;
-        x.function_left_paren; x.function_params; x.function_right_paren;
-        x.function_colon; x.function_type; x.function_body]
-      | ParameterDeclaration x ->
-        [ x.param_attr; x.param_type; x.param_name; x.param_default ]
-      | DefaultArgumentSpecifier x -> [ x.default_equal; x.default_value ]
-      | CompoundStatement x ->
-        [ x.compound_left_brace; x.compound_statements; x.compound_right_brace ]
-      | ExpressionStatement x -> [ x.expr_statement_expr;
-        x.expr_statement_semicolon ]
-      | WhileStatement x -> [ x.while_keyword; x.while_left_paren;
-        x.while_condition_expr; x.while_right_paren; x.while_body ]
-      | IfStatement x -> [ x.if_keyword; x.if_left_paren; x.if_condition_expr;
-        x.if_right_paren; x.if_statement; x.if_elseif_clauses;
-        x.if_else_clause ]
-      | ElseifClause x -> [ x.elseif_keyword; x.elseif_left_paren;
-        x.elseif_condition_expr; x.elseif_right_paren; x.elseif_statement ]
-      | ElseClause x -> [ x.else_keyword; x.else_statement ]
-      | DoStatement x -> [ x.do_keyword; x.do_statement;
-      x.do_while_keyword; x.do_left_paren; x.do_condition_expr;
-      x.do_right_paren; x.do_semicolon ]
-      | SwitchStatement x -> [ x.switch_keyword; x.switch_left_paren;
-        x.switch_expr; x.switch_right_paren; x.switch_compound_statement ]
-      | CaseStatement x ->
-        [ x.case_keyword; x.case_expr; x.case_colon; x.case_stmt ]
-      | DefaultStatement x ->
-        [ x.default_keyword; x.default_colon; x.default_stmt ]
-      | ReturnStatement x -> [ x.return_keyword;
-        x.return_expr; x.return_semicolon ]
-      | ThrowStatement x -> [ x.throw_keyword; x.throw_expr; x.throw_semicolon ]
-      | BreakStatement x -> [ x.break_keyword; x.break_semicolon ]
-      | ContinueStatement x -> [ x.continue_keyword; x.continue_semicolon ]
-      | PrefixUnaryOperator x -> [ x.unary_operator; x.unary_operand ]
-      | PostfixUnaryOperator x -> [ x.unary_operand; x.unary_operator ]
-      | BinaryOperator x ->
-        [ x.binary_left_operand; x.binary_operator; x.binary_right_operand ]
-      | ParenthesizedExpression x ->
-        [ x.paren_expr_left_paren; x.paren_expr; x.paren_expr_right_paren ]
-      | BracedExpression x ->
-        [ x.braced_expr_left_brace; x.braced_expr; x.braced_expr_right_brace ]
-      | XHPExpression x ->
-        [ x.xhp_open; x.xhp_body; x.xhp_close ]
-      | XHPOpen x ->
-        [ x.xhp_open_name; x.xhp_open_attrs; x.xhp_open_right_angle ]
-      | XHPAttribute x ->
-        [ x.xhp_attr_name; x.xhp_attr_equal; x.xhp_attr_expr ]
-      | TypeConstant x ->
-        [ x.type_constant_left_type; x.type_constant_separator;
-        x.type_constant_right_type ]
+      | ScriptHeader
+        { header_less_than; header_question; header_language } ->
+        [ header_less_than; header_question; header_language ]
+      | Script
+        { script_header; script_declarations } ->
+        [ script_header; script_declarations ]
+      | FunctionDeclaration
+        { function_attr; function_async; function_token; function_name;
+          function_type_params; function_left_paren; function_params;
+          function_right_paren; function_colon; function_type; function_body} ->
+        [ function_attr; function_async; function_token; function_name;
+          function_type_params; function_left_paren; function_params;
+          function_right_paren; function_colon; function_type; function_body]
+      | ParameterDeclaration
+        { param_attr; param_type; param_name; param_default } ->
+        [ param_attr; param_type; param_name; param_default ]
+      | DefaultArgumentSpecifier
+        { default_equal; default_value } ->
+        [ default_equal; default_value ]
+      | CompoundStatement
+        { compound_left_brace; compound_statements; compound_right_brace } ->
+        [ compound_left_brace; compound_statements; compound_right_brace ]
+      | ExpressionStatement
+        { expr_statement_expr; expr_statement_semicolon } ->
+        [ expr_statement_expr; expr_statement_semicolon ]
+      | WhileStatement
+        { while_keyword; while_left_paren; while_condition_expr;
+          while_right_paren; while_body } ->
+        [ while_keyword; while_left_paren; while_condition_expr;
+          while_right_paren; while_body ]
+      | IfStatement
+        { if_keyword; if_left_paren; if_condition_expr; if_right_paren;
+          if_statement; if_elseif_clauses; if_else_clause } ->
+        [ if_keyword; if_left_paren; if_condition_expr; if_right_paren;
+          if_statement; if_elseif_clauses; if_else_clause ]
+      | ElseifClause
+        { elseif_keyword; elseif_left_paren; elseif_condition_expr;
+          elseif_right_paren; elseif_statement } ->
+        [ elseif_keyword; elseif_left_paren; elseif_condition_expr;
+          elseif_right_paren; elseif_statement ]
+      | ElseClause
+        { else_keyword; else_statement } ->
+        [ else_keyword; else_statement ]
+      | DoStatement
+        { do_keyword; do_statement; do_while_keyword; do_left_paren;
+          do_condition_expr; do_right_paren; do_semicolon } ->
+        [ do_keyword; do_statement; do_while_keyword; do_left_paren;
+          do_condition_expr; do_right_paren; do_semicolon ]
+      | SwitchStatement
+        { switch_keyword; switch_left_paren; switch_expr; switch_right_paren;
+          switch_compound_statement } ->
+        [ switch_keyword; switch_left_paren; switch_expr; switch_right_paren;
+          switch_compound_statement ]
+      | CaseStatement
+        { case_keyword; case_expr; case_colon; case_stmt } ->
+        [ case_keyword; case_expr; case_colon; case_stmt ]
+      | DefaultStatement
+        { default_keyword; default_colon; default_stmt } ->
+        [ default_keyword; default_colon; default_stmt ]
+      | ReturnStatement
+        { return_keyword; return_expr; return_semicolon } ->
+        [ return_keyword; return_expr; return_semicolon ]
+      | ThrowStatement
+        { throw_keyword; throw_expr; throw_semicolon } ->
+        [ throw_keyword; throw_expr; throw_semicolon ]
+      | BreakStatement
+        { break_keyword; break_semicolon } ->
+        [ break_keyword; break_semicolon ]
+      | ContinueStatement
+        { continue_keyword; continue_semicolon } ->
+        [ continue_keyword; continue_semicolon ]
+      | PrefixUnaryOperator
+        { unary_operator; unary_operand } ->
+        [ unary_operator; unary_operand ]
+      | PostfixUnaryOperator
+        { unary_operand; unary_operator } ->
+        [ unary_operand; unary_operator ]
+      | BinaryOperator
+        { binary_left_operand; binary_operator; binary_right_operand } ->
+        [ binary_left_operand; binary_operator; binary_right_operand ]
+      | ParenthesizedExpression
+        { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
+        [ paren_expr_left_paren; paren_expr; paren_expr_right_paren ]
+      | BracedExpression
+        { braced_expr_left_brace; braced_expr; braced_expr_right_brace } ->
+        [ braced_expr_left_brace; braced_expr; braced_expr_right_brace ]
+      | XHPExpression
+        { xhp_open; xhp_body; xhp_close } ->
+        [ xhp_open; xhp_body; xhp_close ]
+      | XHPOpen
+        { xhp_open_name; xhp_open_attrs; xhp_open_right_angle } ->
+        [ xhp_open_name; xhp_open_attrs; xhp_open_right_angle ]
+      | XHPAttribute
+        { xhp_attr_name; xhp_attr_equal; xhp_attr_expr } ->
+        [ xhp_attr_name; xhp_attr_equal; xhp_attr_expr ]
+      | TypeConstant
+        { type_constant_left_type; type_constant_separator;
+          type_constant_right_type } ->
+        [ type_constant_left_type; type_constant_separator;
+        type_constant_right_type ]
       | SimpleTypeSpecifier x -> [x]
-      | GenericTypeSpecifier x -> [ x.generic_class_type; x.generic_arguments ]
-      | TypeArguments x -> [ x.type_arguments_left_angle;
-        x.type_arguments; x.type_arguments_right_angle ]
+      | GenericTypeSpecifier
+        { generic_class_type; generic_arguments } ->
+        [ generic_class_type; generic_arguments ]
+      | TypeArguments
+        { type_arguments_left_angle; type_arguments;
+          type_arguments_right_angle } ->
+        [ type_arguments_left_angle; type_arguments;
+          type_arguments_right_angle ]
 
     let script_header x = x.script_header
     let script_declarations x = x.script_declarations

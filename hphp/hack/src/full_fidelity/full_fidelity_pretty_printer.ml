@@ -309,6 +309,8 @@ let rec get_doc node =
     let left_part = group_doc (while_keyword ^^| left) in
     let condition_part = indent_block_no_space left_part condition right indt in
     group_doc (statement_part ^| condition_part) ^^^ semicolon
+  | ForStatement x ->
+    failwith "Pretty printing of for statements not implemented"
   | SwitchStatement x ->
     let keyword = get_doc (switch_keyword x) in
     let left = get_doc (switch_left_paren x) in

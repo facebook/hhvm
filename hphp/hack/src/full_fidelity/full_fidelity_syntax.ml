@@ -158,6 +158,17 @@ module WithToken(Token: TokenType) = struct
       do_right_paren: t;
       do_semicolon: t
     }
+    and for_statement = {
+      for_keyword: t;
+      for_left_paren: t;
+      for_initializer_expr: t;
+      for_first_semicolon: t;
+      for_control_expr: t;
+      for_second_semicolon: t;
+      for_end_of_loop_expr: t;
+      for_right_paren: t;
+      for_statement: t;
+    }
     and switch_statement = {
       switch_keyword: t;
       switch_left_paren: t;
@@ -271,6 +282,7 @@ module WithToken(Token: TokenType) = struct
     | ElseifClause of elseif_clause
     | ElseClause of else_clause
     | DoStatement of do_statement
+    | ForStatement of for_statement
     | SwitchStatement of switch_statement
     | CaseStatement of case_statement
     | DefaultStatement of default_statement
@@ -328,6 +340,7 @@ module WithToken(Token: TokenType) = struct
       | ElseifClause _ -> SyntaxKind.ElseifClause
       | ElseClause _ -> SyntaxKind.ElseClause
       | DoStatement _ -> SyntaxKind.DoStatement
+      | ForStatement _ -> SyntaxKind.ForStatement
       | SwitchStatement _ -> SyntaxKind.SwitchStatement
       | CaseStatement _ -> SyntaxKind.CaseStatement
       | DefaultStatement _ -> SyntaxKind.DefaultStatement
@@ -444,6 +457,13 @@ module WithToken(Token: TokenType) = struct
           do_condition_expr; do_right_paren; do_semicolon } ->
         [ do_keyword; do_statement; do_while_keyword; do_left_paren;
           do_condition_expr; do_right_paren; do_semicolon ]
+      | ForStatement
+        { for_keyword; for_left_paren; for_initializer_expr;
+          for_first_semicolon; for_control_expr; for_second_semicolon;
+          for_end_of_loop_expr; for_right_paren; for_statement } ->
+        [ for_keyword; for_left_paren; for_initializer_expr;
+          for_first_semicolon; for_control_expr; for_second_semicolon;
+          for_end_of_loop_expr; for_right_paren; for_statement ]
       | SwitchStatement
         { switch_keyword; switch_left_paren; switch_expr; switch_right_paren;
           switch_compound_statement } ->
@@ -707,6 +727,14 @@ module WithToken(Token: TokenType) = struct
         DoStatement { do_keyword; do_statement;
           do_while_keyword; do_left_paren; do_condition_expr;
           do_right_paren; do_semicolon }
+      | (SyntaxKind.ForStatement, [ for_keyword; for_left_paren;
+        for_initializer_expr; for_first_semicolon; for_control_expr;
+        for_second_semicolon; for_end_of_loop_expr; for_right_paren;
+        for_statement ]) ->
+        ForStatement { for_keyword; for_left_paren;
+          for_initializer_expr; for_first_semicolon; for_control_expr;
+          for_second_semicolon; for_end_of_loop_expr; for_right_paren;
+          for_statement }
       | (SyntaxKind.SwitchStatement, [ switch_keyword; switch_left_paren;
         switch_expr; switch_right_paren; switch_compound_statement ]) ->
         SwitchStatement{ switch_keyword; switch_left_paren;
@@ -906,6 +934,15 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.DoStatement
         [ do_keyword; do_statement; do_while_keyword; do_left_paren;
         do_condition_expr; do_right_paren; do_semicolon ]
+
+      let make_for_statement
+        for_keyword for_left_paren for_initializer_expr for_first_semicolon
+        for_control_expr for_second_semicolon for_end_of_loop_expr
+        for_right_paren for_statement =
+        from_children SyntaxKind.ForStatement
+        [ for_keyword; for_left_paren; for_initializer_expr;
+        for_first_semicolon; for_control_expr; for_second_semicolon;
+        for_end_of_loop_expr; for_right_paren; for_statement ]
 
       let make_switch_statement
         switch_keyword switch_left_paren switch_expr

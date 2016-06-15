@@ -26,6 +26,7 @@ type t =
 | ExpressionStatement
 | WhileStatement
 | DoStatement
+| ForStatement
 | IfStatement
 | ElseifClause
 | ElseClause
@@ -73,6 +74,7 @@ let to_string kind =
   | ExpressionStatement -> "expression_statement"
   | WhileStatement -> "while_statement"
   | DoStatement -> "do_statement"
+  | ForStatement -> "for_statement"
   | IfStatement -> "if_statement"
   | ElseifClause -> "elseif_clause"
   | ElseClause -> "else_clause"

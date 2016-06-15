@@ -78,13 +78,19 @@ let string_of_modifier = function
   | Protected -> "protected"
   | Async -> "async"
 
+let function_kind_name = "function"
+let type_id_kind_name = "type_id"
+let method_kind_name = "method"
+let property_kind_name = "property"
+let class_const_kind_name = "class_const"
+
 let get_symbol_id kind parent_class name =
   let prefix = match kind with
-    | Function -> Some "function"
-    | Class | Enum | Interface | Trait -> Some "type_id"
-    | Method -> Some "method"
-    | Property -> Some "property"
-    | Typeconst | Const -> Some "class_const"
+    | Function -> Some function_kind_name
+    | Class | Enum | Interface | Trait -> Some type_id_kind_name
+    | Method -> Some method_kind_name
+    | Property -> Some property_kind_name
+    | Typeconst | Const -> Some class_const_kind_name
     | LocalVar | Param -> None
   in
   match prefix, parent_class with

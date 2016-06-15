@@ -1,0 +1,8 @@
+foo
+  kind: function
+  id: function::foo
+  position: File "function.php", line 3, characters 10-12:
+  span: File "function.php", line 3, character 1 - line 3, character 24:
+  modifiers: 
+  params:
+

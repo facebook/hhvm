@@ -1,0 +1,8 @@
+bar
+  kind: method
+  id: method::Foo::bar
+  position: File "method.php", line 4, characters 19-21:
+  span: File "method.php", line 4, character 3 - line 4, character 26:
+  modifiers: public 
+  params:
+

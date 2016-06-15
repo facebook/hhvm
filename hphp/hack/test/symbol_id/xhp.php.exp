@@ -1,0 +1,8 @@
+foo
+  kind: method
+  id: method:::x:xhp::foo
+  position: File "xhp.php", line 4, characters 19-21:
+  span: File "xhp.php", line 4, character 3 - line 4, character 26:
+  modifiers: public 
+  params:
+

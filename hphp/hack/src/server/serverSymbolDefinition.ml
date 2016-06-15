@@ -146,3 +146,38 @@ let go tcopt ast result =
     | SymbolOccurrence.LocalVar ->
       get_local_var_def
         ast result.SymbolOccurrence.name result.SymbolOccurrence.pos
+
+let build_symbol_occurence kind name =
+  {
+    SymbolOccurrence.name = "\\" ^ name;
+    type_ = kind;
+    pos = Pos.none;
+  }
+
+let from_symbol_id tcopt id =
+  match Str.split (Str.regexp_string "::") id with
+  | [kind; name] when kind = SymbolDefinition.function_kind_name ->
+      go tcopt [] (build_symbol_occurence SymbolOccurrence.Function name)
+  | [kind; name] when kind = SymbolDefinition.type_id_kind_name ->
+      go tcopt [] (build_symbol_occurence SymbolOccurrence.Class name)
+  | [kind; class_name; method_name ]
+        when kind = SymbolDefinition.method_kind_name ->
+      go tcopt [] (build_symbol_occurence
+        (SymbolOccurrence.Method ("\\" ^ class_name, method_name)) "")
+  | [kind; class_name; property_name ]
+        when kind = SymbolDefinition.property_kind_name ->
+      go tcopt [] (build_symbol_occurence
+        (SymbolOccurrence.Property ("\\" ^ class_name, property_name)) "")
+  | [kind; class_name; const_name ]
+        when kind = SymbolDefinition.class_const_kind_name ->
+      let try_const () = go tcopt [] (build_symbol_occurence
+        (SymbolOccurrence.ClassConst ("\\" ^ class_name, const_name)) "")
+      in
+      let try_typeconst () = go tcopt [] (build_symbol_occurence
+        (SymbolOccurrence.Typeconst ("\\" ^ class_name, const_name)) "")
+      in
+      begin match try_const () with
+      | Some result -> Some result
+      | None -> try_typeconst ()
+      end
+  | _ -> None

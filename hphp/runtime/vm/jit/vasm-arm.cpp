@@ -298,6 +298,7 @@ struct Vgen {
   void emit(const asrxi& i);
   void emit(const asrxis& i);
   void emit(const bln& i);
+  void emit(const cmplims& i);
   void emit(const cmpsds& i);
   void emit(const fabs& i) { a->Fabs(D(i.d), D(i.s)); }
   void emit(const lslwi& i);
@@ -840,6 +841,42 @@ void Vgen::emit(const bln& i) {
 
   a->Bl(&stub);
   a->bind(&stub);
+}
+
+/*
+ * 'cmplims' instruction is intended for use where temporary Vregs can't be
+ * allocated, E.g., in stubs called via callfaststub{}. As the memory
+ * operand is not lowered, make sure that it is in one of the following
+ * formats
+ * 	[base]
+ * 	[base, index]
+ * 	[base, #imm] where #imm is in the range [-256, 255]
+ */
+void Vgen::emit(const cmplims& i) {
+  enum {
+    BASE = 1,
+    INDEX = 2,
+    DISP = 4
+  };
+
+  // TODO: Allow TLS addresses if possible
+  assertx(i.s1.seg == Vptr::DS);
+
+  uint8_t mode = (((i.s1.base.isValid()  & 0x1) << 0) |
+                  ((i.s1.index.isValid() & 0x1) << 1) |
+                  (((i.s1.disp != 0)     & 0x1) << 2));
+  switch (mode) {
+    case BASE:
+    case BASE | INDEX:
+      break;
+    case BASE | DISP:
+      assertx(i.s1.disp >= -256 && i.s1.disp <= 255);
+      break;
+    default:
+      always_assert(false);
+  }
+  a->Ldr(rAsm.W(), M(i.s1));
+  a->Cmp(rAsm.W(), i.s0.l());
 }
 
 void Vgen::emit(const cmpsds& i) {

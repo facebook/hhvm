@@ -145,13 +145,11 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitFreeLocalsHelpers(cb, data, us);
+  return ARCH_SWITCH_CALL(emitFreeLocalsHelpers, cb, data, us);
 }
 
 TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::emitCallToExit(cb, data, us);
+  return ARCH_SWITCH_CALL(emitCallToExit, cb, data, us);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1049,6 +1047,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
     };
 
     emitDecRefWork(v, v, rdata, destroy, false);
+
     v << stubret{};
   });
 
@@ -1062,7 +1061,16 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   us.enterTCExit = vwrap(cb, data, [&] (Vout& v) {
     // Eagerly save VM regs and realign the native stack.
     storeVMRegs(v);
-    v << lea{rsp()[8], rsp()};
+
+    // Realign the native stack.
+    switch (arch()) {
+      case Arch::X64:
+      case Arch::PPC64:
+        v << lea{rsp()[8], rsp()};
+        break;
+      case Arch::ARM:
+        break;
+    }
 
     // Store the return value on the top of the eval stack.  Whenever we get to
     // enterTCExit, we're semantically executing some PHP construct that sends
@@ -1112,7 +1120,14 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << copy{tl, rvmtl()};
 
     // Unalign the native stack.
-    v << lea{rsp()[-8], rsp()};
+    switch (arch()) {
+      case Arch::X64:
+      case Arch::PPC64:
+        v << lea{rsp()[-8], rsp()};
+        break;
+      case Arch::ARM:
+        break;
+    }
 
     // Check if `calleeAR' was set.
     auto const sf = v.makeReg();
@@ -1141,11 +1156,23 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
     storeVMRegs(v);
 
     // Pack the service request args into a svcreq::ReqInfo on the stack.
-    for (auto i = svcreq::kMaxArgs; i-- > 0; ) {
-      v << push{r_svcreq_arg(i)};
+    switch (arch()) {
+      case Arch::X64:
+      case Arch::PPC64:
+        for (auto i = svcreq::kMaxArgs; i-- > 0; ) {
+          v << push{r_svcreq_arg(i)};
+        }
+        v << push{r_svcreq_stub()};
+        v << push{r_svcreq_req()};
+        break;
+      case Arch::ARM:
+        assertx(!(svcreq::kMaxArgs & 1));
+        for (auto i = svcreq::kMaxArgs - 1; i > 0; i -= 2) {
+          v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i)};
+        }
+        v << pushp{r_svcreq_req(), r_svcreq_stub()};
+        break;
     }
-    v << push{r_svcreq_stub()};
-    v << push{r_svcreq_req()};
 
     // Call mcg->handleServiceRequest(rsp()).
     auto const args = VregList { v.makeReg(), v.makeReg() };

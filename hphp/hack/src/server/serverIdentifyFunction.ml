@@ -22,16 +22,16 @@ type result =
 let get_occurrence_and_map content line char ~f =
   let result = ref [] in
   IdentifySymbolService.attach_hooks result line char;
-  ServerIdeUtils.declare_and_check content ~f:begin fun path _ ->
+  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info ->
     IdentifySymbolService.detach_hooks ();
-    f path !result
+    f path file_info !result
   end
 
 let get_occurrence content line char =
-  get_occurrence_and_map content line char ~f:(fun _ x -> x)
+  get_occurrence_and_map content line char ~f:(fun _ _ x -> x)
 
 let go content line char tcopt =
-  get_occurrence_and_map content line char ~f:(fun path symbols ->
+  get_occurrence_and_map content line char ~f:(fun path _ symbols ->
     let ast = Parser_heap.ParserHeap.find_unsafe path in
     List.map symbols ~f:(fun x ->
       let symbol_definition = ServerSymbolDefinition.go tcopt ast x in

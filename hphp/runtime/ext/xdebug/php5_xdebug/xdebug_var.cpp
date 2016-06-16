@@ -18,8 +18,6 @@
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
-
 #include <cstdint>
 
 #include "hphp/runtime/ext/string/ext_string.h"

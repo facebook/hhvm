@@ -261,6 +261,10 @@ let parse_check_args cmd =
       Arg.Unit (set_mode (MODE_OUTLINE2)), "";
     "--ide-find-refs",
       Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x) ()), "";
+    "--ide-highlight-refs",
+      Arg.String (fun x -> set_mode (MODE_IDE_HIGHLIGHT_REFS x) ()),
+    (* Similar to --ide-find-refs, but returns references in current file only,
+     * and is optimized to be faster in that case *) "";
     (* flags *)
     "--json", Arg.Set output_json,
       " output json for machine consumption. (default: false)";

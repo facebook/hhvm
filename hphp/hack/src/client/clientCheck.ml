@@ -142,6 +142,13 @@ let main args =
         rpc args @@ Rpc.IDE_FIND_REFS (content, line, char) in
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
+    | MODE_IDE_HIGHLIGHT_REFS arg ->
+      let line, char = parse_position_string arg in
+      let content = Sys_utils.read_stdin_to_string () in
+      let results =
+        rpc args @@ Rpc.IDE_HIGHLIGHT_REFS (content, line, char) in
+      ClientHighlightRefs.go results ~output_json:args.output_json;
+      Exit_status.No_error
     | MODE_DUMP_SYMBOL_INFO files ->
       let conn = connect args in
       ClientSymbolInfo.go conn files expand_path;

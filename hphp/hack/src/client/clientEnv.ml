@@ -46,6 +46,7 @@ type client_mode =
 | MODE_TRACE_AI of string
 | MODE_REMOVE_DEAD_FIXMES of int list
 | MODE_IDE_FIND_REFS of string
+| MODE_IDE_HIGHLIGHT_REFS of string
 
 type client_check_env = {
   mode: client_mode;
@@ -96,3 +97,4 @@ let mode_to_string = function
   | MODE_REMOVE_DEAD_FIXMES _ -> "MODE_REMOVE_DEAD_FIXMES"
   | MODE_IDE_FIND_REFS _ -> "MODE_IDE_FIND_REFS"
   | MODE_GET_DEFINITION_BY_ID _ -> "MODE_GET_DEFINITION_BY_ID"
+  | MODE_IDE_HIGHLIGHT_REFS _ -> "MODE_IDE_HIGHLIGHT_REFS"

@@ -22,9 +22,8 @@ function gc_collect_cycles(): int;
 
 /* Reclaims memory used by the memory manager.
  */
-function gc_mem_caches(): int {
-  return 0; //no-op
-}
+<<__Native>>
+function gc_mem_caches(): int;
 
 /* Check heap integrity
  */

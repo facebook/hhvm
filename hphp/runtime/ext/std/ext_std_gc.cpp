@@ -35,6 +35,10 @@ static int64_t HHVM_FUNCTION(gc_collect_cycles) {
   return 0; // seriously, count cycles?
 }
 
+static int64_t HHVM_FUNCTION(gc_mem_caches) {
+  return 0; // no-op
+}
+
 static void HHVM_FUNCTION(gc_check_heap) {
   MM().checkHeap("gc_check_heap");
 }

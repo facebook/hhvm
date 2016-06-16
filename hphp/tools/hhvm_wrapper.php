@@ -53,6 +53,14 @@ function get_paths(OptionMap $opts): Map<string,string> {
 
   $fbbuild = __DIR__.'/../../_bin/hphp';
   if (is_dir($fbbuild)) {
+
+    if ($root === $buck) {
+      echo "Multiple build directories found.\n";
+      echo " - " . $fbbuild . "\n";
+      echo " - " . $buck . "\n";
+      error("Delete one of them, or use the --build-root flag.");
+    }
+
     $root = $fbbuild;
   }
 

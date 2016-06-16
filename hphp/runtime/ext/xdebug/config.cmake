@@ -13,7 +13,6 @@ HHVM_DEFINE_EXTENSION("xdebug"
   HEADERS
     ext_xdebug.h
     hook.h
-    php5_xdebug/xdebug_mm.h
     php5_xdebug/xdebug_str.h
     php5_xdebug/xdebug_var.h
     php5_xdebug/xdebug_xml.h

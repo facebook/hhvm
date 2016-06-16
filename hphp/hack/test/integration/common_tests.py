@@ -345,6 +345,21 @@ class CommonTests(object):
             options=['--ide-find-refs', '1:20'],
             stdin='<?hh function test(Foo $foo) { new Foo(); }')
 
+    def test_ide_highlight_refs(self):
+        self.write_load_config()
+
+        self.check_cmd_and_json_cmd(
+            [
+                'line 1, characters 20-22',
+                'line 1, characters 36-38',
+                '2 total results',
+            ], [
+                '[{{"filename":"","line":1,"char_start":20,"char_end":22}},'
+                '{{"filename":"","line":1,"char_start":36,"char_end":38}}]'
+            ],
+            options=['--ide-highlight-refs', '1:20'],
+            stdin='<?hh function test(Foo $foo) { new Foo(); }')
+
     def test_search(self):
         """
         Test hh_client --search

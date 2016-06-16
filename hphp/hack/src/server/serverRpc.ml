@@ -25,6 +25,7 @@ type _ t =
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
   | IDE_FIND_REFS : string * int * int -> FindRefsService.result t
+  | IDE_HIGHLIGHT_REFS : string * int * int -> ServerHighlightRefs.result t
   | REFACTOR : ServerRefactor.action -> ServerRefactor.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoService.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
@@ -74,6 +75,8 @@ let handle : type a. genv -> env -> a t -> a =
           Ai.ServerFindRefs.go find_refs_action genv env
     | IDE_FIND_REFS (content, line, char) ->
         ServerFindRefs.go_from_file (content, line, char) genv env
+    | IDE_HIGHLIGHT_REFS (content, line, char) ->
+        ServerHighlightRefs.go (content, line, char) env.tcopt
     | REFACTOR refactor_action -> ServerRefactor.go refactor_action genv env
     | REMOVE_DEAD_FIXMES codes ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
@@ -131,3 +134,4 @@ let to_string : type a. a t -> _ = function
   | TRACE_AI _ -> "TRACE_AI"
   | IDE_FIND_REFS _ -> "IDE_FIND_REFS"
   | GET_DEFINITION_BY_ID _ -> "GET_DEFINITION_BY_ID"
+  | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"

@@ -33,6 +33,7 @@ type mode =
   | Outline
   | Find_refs of int * int
   | Symbol_definition_by_id of string
+  | Highlight_refs of int * int
 
 type options = {
   filename : string;
@@ -277,6 +278,12 @@ let parse_options () =
         Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
       ]),
       "Find all usages of a symbol at given line and column";
+    "--highlight-refs",
+      Arg.Tuple ([
+        Arg.Int (fun x -> line := x);
+        Arg.Int (fun column -> set_mode (Highlight_refs (!line, column)) ());
+      ]),
+      "Highlight all usages of a symbol at given line and column";
   ] in
   let options = Arg.align options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -519,6 +526,10 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     let file = cat (Relative_path.to_absolute filename) in
     let results = ServerFindRefs.go_from_file (file, line, column) genv env in
     FindRefsService.print results;
+  | Highlight_refs (line, column) ->
+    let file = cat (Relative_path.to_absolute filename) in
+    let results = ServerHighlightRefs.go (file, line, column) tcopt  in
+    ClientHighlightRefs.go results ~output_json:false;
   | Suggest
   | Errors ->
       let errors =

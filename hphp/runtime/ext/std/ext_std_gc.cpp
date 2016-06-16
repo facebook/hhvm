@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/std/ext_std.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 
@@ -36,7 +37,8 @@ static int64_t HHVM_FUNCTION(gc_collect_cycles) {
 }
 
 static int64_t HHVM_FUNCTION(gc_mem_caches) {
-  return 0; // no-op
+  flush_thread_caches();
+  return 0;
 }
 
 static void HHVM_FUNCTION(gc_check_heap) {

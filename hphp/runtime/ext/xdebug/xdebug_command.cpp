@@ -1557,6 +1557,7 @@ struct EvalCmd : XDebugCommand {
 
   void handleImpl(xdebug_xml_node& xml) override {
     auto result = do_eval(m_evalUnit, 0);
+    m_server.setStatus(Status::Break, Reason::Ok);
 
     // Construct the exporter
     XDebugExporter exporter;

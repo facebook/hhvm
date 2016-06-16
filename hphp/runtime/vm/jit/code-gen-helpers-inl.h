@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/header-kind.h"
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -47,7 +48,15 @@ template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
                     Destroy destroy, bool unlikelyDestroy) {
   auto const sf = v.makeReg();
-  v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+      break;
+    case Arch::ARM:
+      v << cmplims{1, data[FAST_REFCOUNT_OFFSET], sf};
+      break;
+  }
   ifThenElse(
     v, vcold, CC_E, sf,
     destroy,

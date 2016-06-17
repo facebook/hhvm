@@ -62,6 +62,12 @@ bool isHphpd(const DebuggerHook*);
 // debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR (RID().getDebuggerForceIntr())
 
+enum class StackDepthDisposition {
+  Equal,        // Same.
+  Shallower,    // Less than baseline.
+  Deeper,       // Greater than baseline.
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // DebuggerHook
 // A hook for debugger events.  Any extension can subclass this class and
@@ -242,6 +248,8 @@ void phpRemoveBreakPointFuncExit(const Func* f);
 void phpRemoveBreakPointLine(const Unit* unit, int line);
 
 bool phpHasBreakpoint(const Unit* unit, Offset offset);
+
+StackDepthDisposition getStackDisposition(int baseline);
 
 }
 

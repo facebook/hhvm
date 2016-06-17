@@ -75,3 +75,11 @@ let from_minimal source_text minimal_token offset =
   let trailing = EditableTrivia.from_minimal_list source_text
     (MinimalToken.trailing minimal_token) (offset + lw + w) in
   make (MinimalToken.kind minimal_token) text leading trailing
+
+let to_json token =
+  let open Hh_json in
+  JSON_Object [
+    ("kind", JSON_String (TokenKind.to_string token.kind));
+    ("text", JSON_String token.text);
+    ("leading", JSON_Array (List.map EditableTrivia.to_json token.leading));
+    ("trailing", JSON_Array (List.map EditableTrivia.to_json token.trailing)) ]

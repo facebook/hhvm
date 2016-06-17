@@ -145,3 +145,16 @@ let from_minimal source_text minimal_token offset =
   let trailing = PositionedTrivia.from_minimal_list source_text
     (MinimalToken.trailing minimal_token) (offset + leading_width + width) in
   make kind source_text offset width leading trailing
+
+let to_json token =
+  let open Hh_json in
+  JSON_Object [
+    ("kind", JSON_String (TokenKind.to_string token.kind));
+    ("text", JSON_String (text token));
+    ("offset", int_ token.offset);
+    ("leading_width", int_ token.leading_width);
+    ("width", int_ token.width);
+    ("trailing_width", int_ token.trailing_width);
+    ("leading", JSON_Array (List.map PositionedTrivia.to_json token.leading));
+    ("trailing", JSON_Array (List.map PositionedTrivia.to_json token.trailing))
+    ]

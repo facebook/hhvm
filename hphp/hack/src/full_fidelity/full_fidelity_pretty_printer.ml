@@ -353,6 +353,14 @@ let rec get_doc node =
     let op = get_doc (binary_operator x) in
     let right = get_doc (binary_right_operand x) in
     group_doc (left ^| op ^| right)
+  | ConditionalExpression x ->
+    let tst = get_doc (conditional_test x) in
+    let qm = get_doc (conditional_question x) in
+    let con = get_doc (conditional_consequence x) in
+    let col = get_doc (conditional_colon x) in
+    let alt = get_doc (conditional_alternative x) in
+    (* TODO: Could this be improved? *)
+    group_doc ( tst ^| qm ^| con ^| col ^| alt )
   | ParenthesizedExpression x ->
     let left = get_doc (paren_expr_left_paren x) in
     let right = get_doc (paren_expr_right_paren x) in

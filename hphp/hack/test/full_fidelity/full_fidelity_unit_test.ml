@@ -34,14 +34,16 @@ let cat_file name =
   let path = Filename.concat test_files_dir name in
   let raw = Sys_utils.cat path in
   (** cat adds an extra newline at the end. *)
-  if (String.length raw > 0) && (String.get raw (String.length raw - 1)) == '\n' then
+  if (String.length raw > 0) &&
+      (String.get raw (String.length raw - 1)) == '\n' then
     String.sub raw 0 (String.length raw - 1)
   else
     raw
 
 (** Create a test_case by reading input from <cwd>/<test_files_dir>/name.php
  * and name.exp *)
-let make_test_case_from_files ?preprocess_exp:(preprocess_exp=ident) name test_function =
+let make_test_case_from_files
+    ?preprocess_exp:(preprocess_exp=ident) name test_function =
   let source = cat_file (name ^ ".php") in
   let expected = preprocess_exp (cat_file (name ^ ".exp")) in
   {
@@ -94,9 +96,14 @@ let test_errors source =
   Printf.sprintf "%s" (String.concat "\n" errors)
 
 let test_data = [
-  make_test_case_from_files ~preprocess_exp:remove_whitespace "test_simple" test_minimal;
-  make_test_case_from_files ~preprocess_exp:remove_whitespace "test_statements" test_minimal;
-  make_test_case_from_files ~preprocess_exp:remove_whitespace "test_for_statements" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_simple" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_conditional" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_statements" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_for_statements" test_minimal;
   {
     name = "test_mode_1";
     source = "<?hh   ";

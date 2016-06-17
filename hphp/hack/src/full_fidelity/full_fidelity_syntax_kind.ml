@@ -45,6 +45,7 @@ type t =
 | PrefixUnaryOperator
 | PostfixUnaryOperator
 | BinaryOperator
+| ConditionalExpression
 | ParenthesizedExpression
 | BracedExpression
 | XHPExpression
@@ -88,6 +89,7 @@ let to_string kind =
   | PrefixUnaryOperator -> "prefix_unary_operator"
   | PostfixUnaryOperator -> "postfix_unary_operator"
   | BinaryOperator -> "binary_operator"
+  | ConditionalExpression -> "conditional_expression"
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"
   | TypeConstant -> "type_constant"

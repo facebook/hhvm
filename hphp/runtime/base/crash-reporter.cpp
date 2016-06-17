@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/ringbuffer-print.h"
 
 #include "hphp/util/build-info.h"
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
@@ -44,6 +45,15 @@ static void bt_handler(int sig) {
   if (IsCrashing) {
     // If we re-enter bt_handler while already crashing, just abort. This
     // includes if we hit the timeout set below.
+    signal(SIGABRT, SIG_DFL);
+    abort();
+  }
+
+  // TSAN instruments malloc() to make sure it can't be used in signal handlers.
+  // Unfortunately, we use malloc() all over the place here.  This is bad, but
+  // ends up working most of the time.  Just abort so TSAN won't infinite crash
+  // loop.
+  if (use_tsan) {
     signal(SIGABRT, SIG_DFL);
     abort();
   }

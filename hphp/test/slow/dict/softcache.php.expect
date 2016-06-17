@@ -1,0 +1,8 @@
+dict(2) {
+  ["1"]=>
+  string(1) "2"
+  ["b"]=>
+  string(1) "c"
+}
+string(1) "z"
+NULL

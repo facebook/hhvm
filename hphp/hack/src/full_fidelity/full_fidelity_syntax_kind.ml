@@ -93,7 +93,7 @@ let to_string kind =
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"
   | TypeConstant -> "type_constant"
-  | SimpleTypeSpecifier -> "simple_type_specifier "
+  | SimpleTypeSpecifier -> "simple_type_specifier"
   | GenericTypeSpecifier -> "generic_type_specifier"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"

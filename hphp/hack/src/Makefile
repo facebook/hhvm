@@ -58,6 +58,7 @@ MODULES=\
   hh_matcher\
   hh_matcher/test\
   hhi\
+  injection/default_injector\
   libancillary\
   naming\
   parsing\

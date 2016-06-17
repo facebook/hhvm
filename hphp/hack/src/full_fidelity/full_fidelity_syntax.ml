@@ -69,6 +69,7 @@ module Operator = Full_fidelity_operator
 module type TokenType = sig
   type t
   val kind: t -> Full_fidelity_token_kind.t
+  val to_json: t -> Hh_json.json
 end
 
 module type SyntaxValueType = sig
@@ -525,6 +526,151 @@ module WithToken(Token: TokenType) = struct
           type_arguments_right_angle } ->
         [ type_arguments_left_angle; type_arguments;
           type_arguments_right_angle ]
+
+    let children_names node =
+      match node.syntax with
+      | Missing -> []
+      | Token _ -> []
+      | LiteralExpression _ -> [ "literal_expression" ]
+      | VariableExpression _ -> [ "variable_expression" ]
+      | QualifiedNameExpression _ -> [ "qualified_name_expression" ]
+      | Error _ -> []
+      | SyntaxList _ -> []
+      | ScriptHeader
+        { header_less_than; header_question; header_language } ->
+        [ "header_less_than"; "header_question"; "header_language" ]
+      | Script
+        { script_header; script_declarations } ->
+        [ "script_header"; "script_declarations" ]
+      | FunctionDeclaration
+        { function_attr; function_async; function_token; function_name;
+          function_type_params; function_left_paren; function_params;
+          function_right_paren; function_colon; function_type;
+          function_body} ->
+        [ "function_attr"; "function_async"; "function_token"; "function_name";
+          "function_type_params"; "function_left_paren"; "function_params";
+          "function_right_paren"; "function_colon"; "function_type";
+          "function_body" ]
+      | ParameterDeclaration
+        { param_attr; param_type; param_name; param_default } ->
+        [ "param_attr"; "param_type"; "param_name"; "param_default" ]
+      | DefaultArgumentSpecifier
+        { default_equal; default_value } ->
+        [ "default_equal"; "default_value" ]
+      | CompoundStatement
+        { compound_left_brace; compound_statements; compound_right_brace } ->
+        [ "compound_left_brace"; "compound_statements"; "compound_right_brace" ]
+      | ExpressionStatement
+        { expr_statement_expr; expr_statement_semicolon } ->
+        [ "expr_statement_expr"; "expr_statement_semicolon" ]
+      | WhileStatement
+        { while_keyword; while_left_paren; while_condition_expr;
+          while_right_paren; while_body } ->
+        [ "while_keyword"; "while_left_paren"; "while_condition_expr";
+          "while_right_paren"; "while_body" ]
+      | IfStatement
+        { if_keyword; if_left_paren; if_condition_expr; if_right_paren;
+          if_statement; if_elseif_clauses; if_else_clause } ->
+        [ "if_keyword"; "if_left_paren"; "if_condition_expr"; "if_right_paren";
+          "if_statement"; "if_elseif_clauses"; "if_else_clause" ]
+      | ElseifClause
+        { elseif_keyword; elseif_left_paren; elseif_condition_expr;
+          elseif_right_paren; elseif_statement } ->
+        [ "elseif_keyword"; "elseif_left_paren"; "elseif_condition_expr";
+          "elseif_right_paren"; "elseif_statement" ]
+      | ElseClause
+        { else_keyword; else_statement } ->
+        [ "else_keyword"; "else_statement" ]
+      | DoStatement
+        { do_keyword; do_statement; do_while_keyword; do_left_paren;
+          do_condition_expr; do_right_paren; do_semicolon } ->
+        [ "do_keyword"; "do_statement"; "do_while_keyword"; "do_left_paren";
+          "do_condition_expr"; "do_right_paren"; "do_semicolon" ]
+      | ForStatement
+        { for_keyword; for_left_paren; for_initializer_expr;
+          for_first_semicolon; for_control_expr; for_second_semicolon;
+          for_end_of_loop_expr; for_right_paren; for_statement } ->
+        [ "for_keyword"; "for_left_paren"; "for_initializer_expr";
+          "for_first_semicolon"; "for_control_expr"; "for_second_semicolon";
+          "for_end_of_loop_expr"; "for_right_paren"; "for_statement" ]
+      | SwitchStatement
+        { switch_keyword; switch_left_paren; switch_expr;
+          switch_right_paren; switch_compound_statement } ->
+        [ "switch_keyword"; "switch_left_paren"; "switch_expr";
+          "switch_right_paren"; "switch_compound_statement" ]
+      | CaseStatement
+        { case_keyword; case_expr; case_colon; case_stmt } ->
+        [ "case_keyword"; "case_expr"; "case_colon"; "case_stmt" ]
+      | DefaultStatement
+        { default_keyword; default_colon; default_stmt } ->
+        [ "default_keyword"; "default_colon"; "default_stmt" ]
+      | ReturnStatement
+        { return_keyword; return_expr; return_semicolon } ->
+        [ "return_keyword"; "return_expr"; "return_semicolon" ]
+      | ThrowStatement
+        { throw_keyword; throw_expr; throw_semicolon } ->
+        [ "throw_keyword"; "throw_expr"; "throw_semicolon" ]
+      | BreakStatement
+        { break_keyword; break_semicolon } ->
+        [ "break_keyword"; "break_semicolon" ]
+      | ContinueStatement
+        { continue_keyword; continue_semicolon } ->
+        [ "continue_keyword"; "continue_semicolon" ]
+      | PrefixUnaryOperator
+        { unary_operator; unary_operand } ->
+        [ "unary_operator"; "unary_operand" ]
+      | PostfixUnaryOperator
+        { unary_operand; unary_operator } ->
+        [ "unary_operand"; "unary_operator" ]
+      | BinaryOperator
+        { binary_left_operand; binary_operator; binary_right_operand } ->
+        [ "binary_left_operand"; "binary_operator"; "binary_right_operand" ]
+      | ParenthesizedExpression
+        { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
+        [ "paren_expr_left_paren"; "paren_expr"; "paren_expr_right_paren" ]
+      | BracedExpression
+        { braced_expr_left_brace; braced_expr; braced_expr_right_brace } ->
+        [ "braced_expr_left_brace"; "braced_expr"; "braced_expr_right_brace" ]
+      | XHPExpression
+        { xhp_open; xhp_body; xhp_close } ->
+        [ "xhp_open"; "xhp_body"; "xhp_close" ]
+      | XHPOpen
+        { xhp_open_name; xhp_open_attrs; xhp_open_right_angle } ->
+        [ "xhp_open_name"; "xhp_open_attrs"; "xhp_open_right_angle" ]
+      | XHPAttribute
+        { xhp_attr_name; xhp_attr_equal; xhp_attr_expr } ->
+        [ "xhp_attr_name"; "xhp_attr_equal"; "xhp_attr_expr" ]
+      | TypeConstant
+        { type_constant_left_type; type_constant_separator;
+          type_constant_right_type } ->
+        [ "type_constant_left_type"; "type_constant_separator";
+        "type_constant_right_type" ]
+      | SimpleTypeSpecifier _ -> [ "simple_type_specifier" ]
+      | GenericTypeSpecifier
+        { generic_class_type; generic_arguments } ->
+        [ "generic_class_type"; "generic_arguments" ]
+      | TypeArguments
+        { type_arguments_left_angle; type_arguments;
+          type_arguments_right_angle } ->
+        [ "type_arguments_left_angle"; "type_arguments";
+          "type_arguments_right_angle" ]
+
+    let rec to_json node =
+      let open Hh_json in
+      let ch = match node.syntax with
+      | Token t -> [ "token", Token.to_json t ]
+      | Error x -> [ ("errors", JSON_Array (List.map to_json x)) ]
+      | SyntaxList x -> [ ("elements", JSON_Array (List.map to_json x)) ]
+      | _ ->
+        let rec aux acc c n =
+          match c, n with
+          | ([], []) -> acc
+          | ((hc :: tc), (hn :: tn)) ->
+            aux ((hn, to_json hc) :: acc) tc tn
+          | _ -> failwith "mismatch between children and names" in
+        List.rev (aux [] (children node) (children_names node)) in
+      let k = ("kind", JSON_String (SyntaxKind.to_string (kind node))) in
+      JSON_Object (k :: ch)
 
     let script_header x = x.script_header
     let script_declarations x = x.script_declarations

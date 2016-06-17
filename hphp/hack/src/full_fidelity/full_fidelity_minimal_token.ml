@@ -50,3 +50,11 @@ let leading token =
 
 let trailing token =
   token.trailing
+
+let to_json token =
+  let open Hh_json in
+  JSON_Object [
+    ("kind", JSON_String (TokenKind.to_string token.kind));
+    ("width", int_ token.width);
+    ("leading", JSON_Array (List.map MinimalTrivia.to_json token.leading));
+    ("trailing", JSON_Array (List.map MinimalTrivia.to_json token.trailing)) ]

@@ -90,10 +90,10 @@ module ExprDepTy = struct
    *  $x->expression_dependent_function();
    *)
   let rec should_apply env (_, ty_ as ty) = match ty_ with
-    | Tabstract (AKgeneric _ as k, tyopt) ->
-      begin match Typing_utils.get_as_constraints env k tyopt with
-        | None -> true
-        | Some ty -> should_apply env ty
+    | Tabstract (AKgeneric _, _) ->
+      begin match Typing_utils.get_concrete_supertypes env ty with
+        | _, None -> true
+        | _, Some ty -> should_apply env ty
       end
     | Toption ty
     | Tabstract (

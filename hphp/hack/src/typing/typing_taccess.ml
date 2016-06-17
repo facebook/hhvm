@@ -89,16 +89,16 @@ and expand_ env (root_reason, root_ty as root) =
             create_root_from_type_constant
               env class_pos class_name root head in
           expand_ { env with ids = tail } ty
-      | Tabstract (AKgeneric s, tyopt) ->
-        begin match TUtils.get_as_constraints env.tenv (AKgeneric s) tyopt with
-        | Some ty ->
+      | Tabstract (AKgeneric s, _) ->
+        begin match TUtils.get_concrete_supertypes env.tenv root with
+        | _, Some ty ->
           (* Expanding a generic creates a dependent type *)
           let dep_ty = `cls s, [] in
           let env =
             { env with
               dep_tys = (root_reason, dep_ty)::env.dep_tys } in
           expand_ env ty
-        | None ->
+        | _, None ->
           let pos, tconst = head in
           let ty = Typing_print.error root_ty in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;

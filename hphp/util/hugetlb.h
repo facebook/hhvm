@@ -36,11 +36,11 @@ bool find_hugetlbfs_path();
 // there.  Return whether the operation succeeded.
 bool auto_mount_hugetlbfs();
 
-// Get a 1GB huge page, and bind it to NUMA node `node`, and return the mapped
-// address suggested by `addr` or nullptr on failure.  If `addr` is nullptr, the
-// system will choose a proper address.  If the address range [addr, addr+1G)
-// already contains address in the process address space, nullptr is returned
-// and the mapping won't be changed.  If `node` is -1, any NUMA node is OK.
+// Get a 1GB huge page from NUMA node `node`, and return the mapped address
+// suggested by `addr` or nullptr on failure.  If `addr` is nullptr, the system
+// will choose a proper address.  If the address range [addr, addr+1G) already
+// contains address in the process address space, nullptr is returned and the
+// mapping won't be changed.  If `node` is -1, any NUMA node is OK.
 void* mmap_1g(void* addr = nullptr, int node = -1);
 
 struct Huge1GPageInfo {
@@ -52,6 +52,8 @@ struct Huge1GPageInfo {
 // nodes.
 Huge1GPageInfo get_huge1g_info(int node = -1);
 
+// Get error message for hugetlb mapping.
+const char* get_hugetlb_err_msg();
 }
 
 #endif

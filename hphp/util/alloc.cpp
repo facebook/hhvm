@@ -33,6 +33,7 @@
 
 #include "hphp/util/async-func.h"
 #include "hphp/util/hugetlb.h"
+#include "hphp/util/kernel-version.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
 
@@ -518,35 +519,59 @@ struct JEMallocInitializer {
     highest_lowmall_addr = (char*)sbrk(0) - 1;
 
 #ifdef USE_JEMALLOC_CHUNK_HOOKS
-    char* use1GPage = getenv("HHVM_USE_1G_PAGE");
-    // Here we try to use a huge page by default, this is used to test error
-    // handing (e.g., when there isn't sufficient huge pages reserved).  After
-    // testing, we should make nPages default to 0, and only try to grab a page
-    // when the HHVM_USE_1G_PAGE is set.
-    int nPages = 1;
-    if (use1GPage) {
-      // If the string is not an integer, we use 1 huge page for now.
-      sscanf(use1GPage, "%d", &nPages);
+    int nPages = 0;
+    if (char* lowMem1GPages = getenv("HHVM_LOW_1G_PAGE")) {
+      sscanf(lowMem1GPages, "%d", &nPages);
     }
-    // Search existing mount points first, and if we don't find hugetlbfs with
-    // 1G page size, try create our own mount.
-    if ((nPages > 0) && (find_hugetlbfs_path() || auto_mount_hugetlbfs())) {
+    if (nPages > 0) {
+      KernelVersion version;
+      if (version.m_major < 3 ||
+          (version.m_major == 3 && version.m_minor < 9)) {
+        // Older kernels need an explicit hugetlbfs mount point.
+        find_hugetlbfs_path() || auto_mount_hugetlbfs();
+      }
       size_t hugeSize = 0;
-      void* base = mmap_1g((void*)0xc0000000);
-      if (base) {
-        hugeSize = 1 << 30;
-        if (nPages > 1) {
-          void* newBase = mmap_1g((void*)0x80000000);
-          if (newBase) {
-            base = newBase;
-            hugeSize += 1 << 30;
+      int node = -1;
+#ifdef HAVE_NUMA
+      node = numa_max_node();
+      if (node == 0) node = -1;
+#endif
+      void* base = nullptr;
+      if (node > 0) {                   // explicit NUMA balancing
+        while (node >= 0) {
+          base = mmap_1g((void*)0xc0000000, node--);
+          if (base != nullptr) {
+            break;
           }
         }
-        // Try to distribute the 2G (or 1G) pages to NUMA nodes.
-        numa_interleave(base, hugeSize);
+        if (base != nullptr) {
+          // Try the rest of the NUMA nodes, and all nodes (-1) at last.
+          do {
+            void *newBase = mmap_1g((void*)0x80000000, node--);
+            if (newBase != nullptr) {
+              base = newBase;
+              hugeSize += 1 << 30;
+              break;
+            }
+          } while (node >= -1);
+        }
+      } else {                          // don't care about NUMA
+        base = mmap_1g((void*)0xc0000000, -1);
+        if (base) {
+          hugeSize = 1 << 30;
+          if (nPages > 1) {
+            void* newBase = mmap_1g((void*)0x80000000, -1);
+            if (newBase) {
+              base = newBase;
+              hugeSize += 1 << 30;
+            }
+          }
+        }
+      }
+
+      if (base) {
         try {
-          // leaked
-          auto ma = new ManagedArena(base, hugeSize);
+          auto ma = new ManagedArena(base, hugeSize); // leaked
           if (ma) low_huge1g_arena = ma->getArenaId();
         } catch (...) { }
       }

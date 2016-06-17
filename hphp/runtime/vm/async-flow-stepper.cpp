@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/async-flow-stepper.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -23,6 +24,36 @@
 namespace HPHP {
 
 TRACE_SET_MOD(debuggerflow);
+
+c_WaitableWaitHandle *objToWaitableWaitHandle(const Object& o) {
+  assert(o->instanceof(c_WaitableWaitHandle::classof()));
+  return static_cast<c_WaitableWaitHandle*>(o.get());
+}
+
+bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
+  auto currentWaitHandle = HHVM_FN(asio_get_running)();
+  if (currentWaitHandle.isNull()) {
+    return false;
+  }
+  auto const depStack =
+    objToWaitableWaitHandle(currentWaitHandle)->getDependencyStack();
+  if (depStack.empty()) {
+    return false;
+  }
+  ArrayIter iter(depStack);
+  ++iter; // Skip the top frame.
+  for (; iter; ++iter) {
+    if (iter.secondRef().isNull()) {
+      return false;
+    }
+    auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
+    if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction &&
+      target == wh->asAsyncFunction()->actRec()) {
+      return true;
+    }
+  }
+  return false;
+}
 
 // Setup async stepping if needed.
 void AsyncFlowStepper::setup() {
@@ -125,6 +156,23 @@ AsyncStepHandleOpcodeResult AsyncFlowStepper::handleOpcode(PC pc) {
       break;
   }
   return ret;
+}
+
+void AsyncFlowStepper::handleExceptionThrown() {
+  m_isCurrentAsyncStepException = isActRecOnAsyncStack(m_asyncResumableId);
+}
+
+bool AsyncFlowStepper::handleExceptionHandler() {
+  // Check if the throwing exception will break out of
+  // current async stepping or not; if true we need
+  // finish the async stepping in the exception handler.
+  if (m_stage == AsyncStepperStage::WaitResume &&
+    m_isCurrentAsyncStepException &&
+    !isActRecOnAsyncStack(m_asyncResumableId)) {
+    reset();
+    return true;
+  }
+  return false;
 }
 
 // Called when hitting a blocked "await" opcode.

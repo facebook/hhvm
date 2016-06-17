@@ -18,12 +18,39 @@ module TestUtils = Full_fidelity_test_utils
 open Core
 open OUnit
 
-type code_extent_test = {
+let test_files_dir = "./hphp/hack/test/full_fidelity/cases"
+
+type test_case = {
+  (** Source files is loaded from <name>.php in the <cwd>/<test_files_dir>/ *)
   name: string;
   source: string;
   expected: string;
   test_function: string -> string;
 }
+
+let ident str = str
+
+let cat_file name =
+  let path = Filename.concat test_files_dir name in
+  let raw = Sys_utils.cat path in
+  (** cat adds an extra newline at the end. *)
+  if (String.length raw > 0) && (String.get raw (String.length raw - 1)) == '\n' then
+    String.sub raw 0 (String.length raw - 1)
+  else
+    raw
+
+(** Create a test_case by reading input from <cwd>/<test_files_dir>/name.php
+ * and name.exp *)
+let make_test_case_from_files ?preprocess_exp:(preprocess_exp=ident) name test_function =
+  let source = cat_file (name ^ ".php") in
+  let expected = preprocess_exp (cat_file (name ^ ".exp")) in
+  {
+    name = name;
+    source = source;
+    expected = expected;
+    test_function = test_function;
+  }
+
 
 let remove_whitespace text =
   let length = String.length text in
@@ -66,333 +93,10 @@ let test_errors source =
   let errors = List.map errors ~f:mapper in
   Printf.sprintf "%s" (String.concat "\n" errors)
 
-let source_simple =
-"<?hh
-/* comment */ function foo() {
-  $a = (123 + $b) * $c;
-}"
-
-let result_simple = remove_whitespace
-  "(script
-    (header((<))((?))((name)(end_of_line)))
-      (function_declaration
-        (missing)
-        (missing)
-        ((delimited_comment)(whitespace)(function)(whitespace))
-        ((name))
-        (missing)
-        ((lparen))
-        (missing)
-        ((rparen)(whitespace))
-        (missing)
-        (missing)
-        (compound_statement
-          (({)(end_of_line))
-            (expression_statement
-              (binary_operator
-                (variable((whitespace)(variable)(whitespace)))
-                ((=)(whitespace))
-                (binary_operator
-                  (parenthesized_expression
-                    ((lparen))
-                    (binary_operator
-                      (literal((decimal_literal)(whitespace)))
-                      ((+)(whitespace))
-                      (variable((variable))))
-                    ((rparen)(whitespace)))
-                  ((*)(whitespace))
-                  (variable((variable)))))
-              ((;)(end_of_line)))
-          ((})))))"
-
-let source_statements =
-"<?hh
-function foo() {
-  if ($a)
-    if ($b)
-      switch ($c) {
-        case 123: break;
-        default: break;
-      }
-    else
-      return $d;
-  elseif($e)
-    do {
-      while($f)
-        throw $g;
-      continue;
-    } while ($h);
-}"
-
-let result_statements = remove_whitespace "
-(script(header((<))((?))((name)(end_of_line)))
-    (function_declaration(missing)(missing)((function)(whitespace))((name))
-    (missing)((lparen))(missing)((rparen)(whitespace))(missing)(missing)
-    (compound_statement
-      (({)(end_of_line))
-          (if_statement
-            ((whitespace)(if)(whitespace))
-            ((lparen))(variable((variable)))
-            ((rparen)(end_of_line))
-            (if_statement
-              ((whitespace)(if)(whitespace))
-              ((lparen))
-              (variable((variable)))
-              ((rparen)(end_of_line))
-              (switch_statement
-                ((whitespace)(switch)(whitespace))
-                ((lparen))
-                (variable((variable)))
-                ((rparen)(whitespace))
-                (compound_statement
-                  (({)(end_of_line))
-                    (list
-                      (case_statement
-                        ((whitespace)(case)(whitespace))
-                        (literal((decimal_literal)))
-                        ((:)(whitespace))
-                        (break_statement((break))((;)(end_of_line))))
-                      (default_statement
-                        ((whitespace)(default))
-                        ((:)(whitespace))
-                        (break_statement((break))((;)(end_of_line)))))
-                    ((whitespace)(})(end_of_line))))
-              (missing)
-              (else_clause
-                ((whitespace)(else)(end_of_line))
-                (return_statement
-                  ((whitespace)(return)(whitespace))
-                  (variable((variable)))
-                  ((;)(end_of_line)))))
-              (elseif_clause
-                ((whitespace)(elseif))
-                ((lparen))
-                (variable((variable)))
-                ((rparen)(end_of_line))
-                (do_statement
-                  ((whitespace)(do)(whitespace))
-                  (compound_statement
-                    (({)(end_of_line))
-                    (list
-                      (while_statement
-                        ((whitespace)(while))
-                        ((lparen))
-                        (variable((variable)))
-                        ((rparen)(end_of_line))
-                        (throw_statement
-                          ((whitespace)(throw)(whitespace))
-                          (variable((variable)))
-                          ((;)(end_of_line))))
-                      (continue_statement
-                        ((whitespace)(continue))
-                        ((;)(end_of_line))))
-                    ((whitespace)(})(whitespace)))
-                  ((while)(whitespace))
-                  ((lparen))
-                  (variable((variable)))
-                  ((rparen))
-                  ((;)(end_of_line))))
-            (missing))
-      ((})))))"
-
-let source_for_statements =
-"<?hh
-function foo() {
-  for($x;$y;$z) {
-    return $a;
-  }
-  for($x;$y;$z) {}
-  for(;$y;$z) {}
-  for($x;;$z) {}
-  for($x;$y;) {}
-  for($x;;) {}
-  for(;$y;) {}
-  for(;;$z) {}
-  for($x, $y;;) {}
-  for(;$x, $y, $z;) {}
-}"
-
-let result_for_statements = remove_whitespace
-"(script(header((<))((?))((name)(end_of_line)))(function_declaration
-  (missing)
-  (missing)
-  ((function)(whitespace))
-  ((name))
-  (missing)
-  ((lparen))
-  (missing)
-  ((rparen)(whitespace))
-  (missing)
-  (missing)
-  (compound_statement(({)(end_of_line))(list
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (variable((variable)))
-      ((;))
-      (variable((variable)))
-      ((;))
-      (variable((variable)))
-      ((rparen)(whitespace))
-      (compound_statement
-        (({)(end_of_line))
-        (return_statement
-          ((whitespace)(return)(whitespace))
-          (variable((variable)))
-          ((;)(end_of_line))
-        )
-        ((whitespace)(})(end_of_line))
-      )
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (variable((variable)))
-      ((;))
-      (variable((variable)))
-      ((;))
-      (variable((variable)))
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (missing)
-      ((;))
-      (variable((variable)))
-      ((;))
-      (variable((variable)))
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (variable((variable)))
-      ((;))
-      (missing)
-      ((;))
-      (variable((variable)))
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (variable((variable)))
-      ((;))
-      (variable((variable)))
-      ((;))
-      (missing)
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (variable((variable)))
-      ((;))
-      (missing)
-      ((;))
-      (missing)
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (missing)
-      ((;))
-      (variable((variable)))
-      ((;))
-      (missing)
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (missing)
-      ((;))
-      (missing)
-      ((;))
-      (variable((variable)))
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (list(variable((variable)))((,)(whitespace))(variable((variable))))
-      ((;))
-      (missing)
-      ((;))
-      (missing)
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-    (for_statement
-      ((whitespace)(for))
-      ((lparen))
-      (missing)
-      ((;))
-      (list
-        (variable((variable)))
-        ((,)(whitespace))
-        (variable((variable)))
-        ((,)(whitespace))
-        (variable((variable)))
-      )
-      ((;))
-      (missing)
-      ((rparen)(whitespace))
-      (compound_statement(({))(missing)((})(end_of_line)))
-    )
-  )((})))
-))"
-
-let source_errors_strict =
-"<?hh // strict
-function foo($a) {
-  return $a;
-}"
-
-let source_errors_not_strict =
-"<?hh
-function foo($a) {
-  return $a;
-}"
-
-let source_no_errors_strict =
-"<?hh // strict
-function foo(int $a) : int {
-  return $a;
-}"
-
-let results_errors_strict =
-"(2,14)-(2,15) A type annotation is required in strict mode.
-(2,16)-(2,16) A type annotation is required in strict mode."
-
 let test_data = [
-  {
-    name = "test_simple";
-    source = source_simple;
-    expected = result_simple;
-    test_function = test_minimal;
-  };
-  {
-    name = "test_statements";
-    source = source_statements;
-    expected = result_statements;
-    test_function = test_minimal;
-  };
-  {
-    name = "test_for_statements";
-    source = source_for_statements;
-    expected = result_for_statements;
-    test_function = test_minimal;
-  };
+  make_test_case_from_files ~preprocess_exp:remove_whitespace "test_simple" test_minimal;
+  make_test_case_from_files ~preprocess_exp:remove_whitespace "test_statements" test_minimal;
+  make_test_case_from_files ~preprocess_exp:remove_whitespace "test_for_statements" test_minimal;
   {
     name = "test_mode_1";
     source = "<?hh   ";
@@ -429,25 +133,9 @@ let test_data = [
     expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
     test_function = test_mode;
   };
-  {
-    name = "test_errors_not_strict";
-    source = source_errors_not_strict;
-    expected = "";
-    test_function = test_errors;
-  };
-  {
-    name = "test_errors_strict";
-    source = source_errors_strict;
-    expected = results_errors_strict;
-    test_function = test_errors;
-  };
-  {
-    name = "test_no_errors_strict";
-    source = source_no_errors_strict;
-    expected = "";
-    test_function = test_errors;
-  };
-
+  make_test_case_from_files "test_errors_not_strict" test_errors;
+  make_test_case_from_files "test_errors_strict" test_errors;
+  make_test_case_from_files "test_no_errors_strict" test_errors;
 ]
 
 let driver test () =
@@ -458,6 +146,7 @@ let run_test test =
   test.name >:: (driver test)
 
 let run_tests tests =
+  Printf.printf "%s" (Sys.getcwd());
   List.map tests ~f:run_test
 
 let test_suite =

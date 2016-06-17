@@ -215,6 +215,13 @@ module WithToken(Token: TokenType) = struct
       binary_operator : t;
       binary_right_operand : t
     }
+    and conditional_expression = {
+      conditional_test : t;
+      conditional_question : t;
+      conditional_consequence : t;
+      conditional_colon : t;
+      conditional_alternative : t
+    }
     and parenthesized_expression = {
       paren_expr_left_paren : t;
       paren_expr : t;
@@ -298,6 +305,7 @@ module WithToken(Token: TokenType) = struct
     | PrefixUnaryOperator of unary_operator
     | PostfixUnaryOperator of unary_operator
     | BinaryOperator of binary_operator
+    | ConditionalExpression of conditional_expression
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
     | XHPExpression of xhp_expression
@@ -352,6 +360,7 @@ module WithToken(Token: TokenType) = struct
       | PrefixUnaryOperator _ -> SyntaxKind.PrefixUnaryOperator
       | PostfixUnaryOperator _ -> SyntaxKind.PostfixUnaryOperator
       | BinaryOperator _ -> SyntaxKind.BinaryOperator
+      | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
       | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
       | BracedExpression _ -> SyntaxKind.BracedExpression
       | XHPExpression _ -> SyntaxKind.XHPExpression
@@ -390,6 +399,8 @@ module WithToken(Token: TokenType) = struct
     let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
     let is_postfix_operator node = kind node = SyntaxKind.PostfixUnaryOperator
     let is_binary_operator node = kind node = SyntaxKind.BinaryOperator
+    let is_conditional_expression node =
+      kind node = SyntaxKind.ConditionalExpression
     let is_parenthesized_expression node =
       kind node = SyntaxKind.ParenthesizedExpression
     let is_braced_expression node = kind node = SyntaxKind.BracedExpression
@@ -497,6 +508,11 @@ module WithToken(Token: TokenType) = struct
       | BinaryOperator
         { binary_left_operand; binary_operator; binary_right_operand } ->
         [ binary_left_operand; binary_operator; binary_right_operand ]
+      | ConditionalExpression
+        { conditional_test; conditional_question; conditional_consequence;
+          conditional_colon; conditional_alternative } ->
+        [ conditional_test; conditional_question; conditional_consequence;
+          conditional_colon; conditional_alternative ]
       | ParenthesizedExpression
         { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
         [ paren_expr_left_paren; paren_expr; paren_expr_right_paren ]
@@ -625,6 +641,11 @@ module WithToken(Token: TokenType) = struct
       | BinaryOperator
         { binary_left_operand; binary_operator; binary_right_operand } ->
         [ "binary_left_operand"; "binary_operator"; "binary_right_operand" ]
+      | ConditionalExpression
+        { conditional_test; conditional_question; conditional_consequence;
+          conditional_colon; conditional_alternative } ->
+        [ "conditional_test"; "conditional_question"; "conditional_consequence";
+          "conditional_colon"; "conditional_alternative" ]
       | ParenthesizedExpression
         { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
         [ "paren_expr_left_paren"; "paren_expr"; "paren_expr_right_paren" ]
@@ -752,6 +773,11 @@ module WithToken(Token: TokenType) = struct
     let binary_left_operand b = b.binary_left_operand
     let binary_operator b = b.binary_operator
     let binary_right_operand b = b.binary_right_operand
+    let conditional_test x = x.conditional_test
+    let conditional_question x = x.conditional_question
+    let conditional_consequence x = x.conditional_consequence
+    let conditional_colon x = x.conditional_colon
+    let conditional_alternative x = x.conditional_alternative
     let paren_expr_left_paren x = x.paren_expr_left_paren
     let paren_expr x = x.paren_expr
     let paren_expr_right_paren x = x.paren_expr_right_paren
@@ -910,6 +936,12 @@ module WithToken(Token: TokenType) = struct
         binary_right_operand ]) ->
         BinaryOperator { binary_left_operand; binary_operator;
         binary_right_operand }
+      | (SyntaxKind.ConditionalExpression,
+        [ conditional_test; conditional_question; conditional_consequence;
+          conditional_colon; conditional_alternative ]) ->
+        ConditionalExpression
+        { conditional_test; conditional_question; conditional_consequence;
+          conditional_colon; conditional_alternative }
       | (SyntaxKind.ParenthesizedExpression, [ paren_expr_left_paren;
         paren_expr; paren_expr_right_paren ]) ->
         ParenthesizedExpression { paren_expr_left_paren; paren_expr;
@@ -984,6 +1016,13 @@ module WithToken(Token: TokenType) = struct
         binary_left_operand binary_operator binary_right_operand =
           from_children SyntaxKind.BinaryOperator
             [ binary_left_operand; binary_operator; binary_right_operand ]
+
+      let make_conditional_expression
+        conditional_test conditional_question conditional_consequence
+        conditional_colon conditional_alternative =
+        from_children SyntaxKind.ConditionalExpression
+        [ conditional_test; conditional_question; conditional_consequence;
+          conditional_colon; conditional_alternative ]
 
       let make_parenthesized_expression
         paren_expr_left_paren paren_expr paren_expr_right_paren =

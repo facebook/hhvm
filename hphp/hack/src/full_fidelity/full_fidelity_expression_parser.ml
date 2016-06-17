@@ -68,6 +68,13 @@ module WithStatementParser
          and continue on from the current token. Don't skip it. *)
       (with_error parser error, (make_missing()))
 
+  let with_reset_precedence parser parse_function =
+    let old_precedence = parser.precedence in
+    let parser = with_precedence parser 0 in
+    let (parser, result) = parse_function parser in
+    let parser = with_precedence parser old_precedence in
+    (parser, result)
+
   let rec parse_expression parser =
     let (parser, term) = parse_term parser in
     parse_remaining_expression parser term
@@ -205,20 +212,16 @@ module WithStatementParser
     | LeftParen (* TODO: Parse call *)
     | LeftBracket
     | LeftBrace -> (* TODO indexers *) (* TODO: Produce an error for brace *)
-    (parser1, make_token token)
-    | Question -> (* TODO conditional expression *)
       (parser1, make_token token)
+    | Question -> parse_conditional_expression parser1 term (make_token token)
     | _ -> (parser, term)
 
   and parse_parenthesized_or_lambda_expression parser =
     (*TODO: Does not yet deal with lambdas *)
     let (parser, left_paren) = next_token parser in
-    let precedence = parser.precedence in
-    let parser = with_precedence parser 0 in
-    let (parser, expression) = parse_expression parser in
+    let (parser, expression) = with_reset_precedence parser parse_expression in
     let (parser, right_paren) =
       expect_token parser RightParen SyntaxError.error1011 in
-    let parser = with_precedence parser precedence in
     let syntax =
       make_parenthesized_expression
         (make_token left_paren) expression right_paren in
@@ -320,4 +323,25 @@ module WithStatementParser
     else
       (parser, right_term)
 
+  and parse_conditional_expression parser test question =
+    (* POSSIBLE SPEC PROBLEM
+       We allow any expression, including assignment expressions, to be in
+       the consequence and alternative of a conditional expression, even
+       though assignment is lower precedence than ?:.  This is legal:
+       $a ? $b = $c : $d = $e
+       Interestingly, this is illegal in C and Java, which require parens,
+       but legal in C#.
+    *)
+    let token = peek_token parser in
+    (* e1 ?: e2 -- where there is no consequence -- is legal *)
+    let (parser, consequence) = if (Token.kind token) = Colon then
+      (parser, make_missing())
+    else
+      with_reset_precedence parser parse_expression in
+    let (parser, colon) =
+      expect_token parser Colon SyntaxError.error1020 in
+    let (parser, alternative) = with_reset_precedence parser parse_expression in
+    let result = make_conditional_expression
+      test question consequence colon alternative in
+    (parser, result)
 end

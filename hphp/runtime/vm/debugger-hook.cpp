@@ -176,6 +176,8 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     req_data.clearActiveLineBreak();
   }
 
+  auto curStackDisp = getStackDisposition(req_data.getDebuggerFlowDepth());
+
   // Check if the step in command is active. Special case builtins because they
   // are meaningless to the user
   if (UNLIKELY(req_data.getDebuggerStepIn() && !func->isBuiltin())) {
@@ -184,8 +186,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
       // Next command is not active, just break.
       hook->onStepInBreak(unit, line);
       return;
-    } else if (req_data.getDebuggerStackDepth() <=
-                req_data.getDebuggerFlowDepth()) {
+    } else if (curStackDisp != StackDepthDisposition::Deeper) {
       // Next command is active but we didn't step in. We are done.
       req_data.setDebuggerNext(false);
       hook->onNextBreak(unit, line);
@@ -207,7 +208,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   // original, then we skip over the PopR opcode if it exists and then break
   // (matching hphpd).
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::Out &&
-      req_data.getDebuggerStackDepth() < req_data.getDebuggerFlowDepth() &&
+      curStackDisp == StackDepthDisposition::Shallower &&
       peek_op(pc) != OpPopR)) {
     req_data.setDebuggerStepOut(StepOutState::None);
     if (!req_data.getDebuggerNext()) {
@@ -244,6 +245,17 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   TRACE(5, "out phpDebuggerOpcodeHook()\n");
 }
 
+StackDepthDisposition getStackDisposition(int baseline) {
+  auto& req_data = RID();
+  auto curStackDepth = req_data.getDebuggerStackDepth();
+  if (curStackDepth > baseline) {
+    return StackDepthDisposition::Deeper;
+  } else if (curStackDepth < baseline) {
+    return StackDepthDisposition::Shallower;
+  }
+  return StackDepthDisposition::Equal;
+}
+
 // Hook called on request start before main() is invoked
 void phpDebuggerRequestInitHook() {
   getDebuggerHook()->onRequestInit();
@@ -269,8 +281,9 @@ void phpDebuggerFuncExitHook(const ActRec* ar) {
 
   // If the step out command is active and if our stack depth has decreased,
   // we are out of the function being stepped out of
+  auto baseline = req_data.getDebuggerFlowDepth();
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::Stepping &&
-      req_data.getDebuggerStackDepth() < req_data.getDebuggerFlowDepth())) {
+      getStackDisposition(baseline) == StackDepthDisposition::Shallower)) {
       req_data.setDebuggerStepOut(StepOutState::Out);
   }
 }

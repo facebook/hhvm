@@ -224,7 +224,6 @@ void phpDebuggerNext();
 
 // Add breakpoints of various types
 void phpAddBreakPoint(const Unit* unit, Offset offset);
-void phpAddBreakPointRange(const Unit* unit, OffsetRangeVec& offsets);
 void phpAddBreakPointFuncEntry(const Func* f);
 void phpAddBreakPointFuncExit(const Func* f);
 // Returns false if the line is invalid
@@ -250,6 +249,9 @@ void phpRemoveBreakPointLine(const Unit* unit, int line);
 bool phpHasBreakpoint(const Unit* unit, Offset offset);
 
 StackDepthDisposition getStackDisposition(int baseline);
+
+PCFilter* getBreakPointFilter();
+PCFilter* getFlowFilter();
 
 }
 

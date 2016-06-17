@@ -134,16 +134,17 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
+
   auto& req_data = RID();
-  // Short-circuit for cases where we're executing a line of code that we know
-  // we don't need an interrupt for, e.g., stepping over a line of code.
-  if (UNLIKELY(req_data.m_flowFilter.checkPC(pc))) {
-    TRACE_RB(5, "Location filter hit at pc %p\n", pc);
-    return;
-  }
   // Are we hitting a breakpoint?
   if (LIKELY(!req_data.m_breakPointFilter.checkPC(pc))) {
     TRACE(5, "not in the PC range for any breakpoints\n");
+    // Short-circuit for cases where we're executing a line of code that we know
+    // we don't need an interrupt for, e.g., stepping over a line of code.
+    if (UNLIKELY(req_data.m_flowFilter.checkPC(pc))) {
+      TRACE_RB(5, "Location filter hit at pc %p\n", pc);
+      return;
+    }
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
       return;
     }
@@ -176,8 +177,27 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     req_data.clearActiveLineBreak();
   }
 
-  auto curStackDisp = getStackDisposition(req_data.getDebuggerFlowDepth());
+  // Checking breakpoint before stepping logic.
+  // Check if we are hitting a call breakpoint
+  if (UNLIKELY(req_data.m_callBreakPointFilter.checkPC(pc))) {
+    hook->onFuncEntryBreak(func);
+    return;
+  }
 
+  // Check if we are hitting a return breakpoint
+  if (UNLIKELY(req_data.m_retBreakPointFilter.checkPC(pc))) {
+    hook->onFuncExitBreak(func);
+    return;
+  }
+
+  // Check if we are hitting a line breakpoint.
+  if (UNLIKELY(req_data.m_lineBreakPointFilter.checkPC(pc))) {
+    req_data.setActiveLineBreak(line);
+    hook->onLineBreak(unit, line);
+    return;
+  }
+
+  auto curStackDisp = getStackDisposition(req_data.getDebuggerFlowDepth());
   // Check if the step in command is active. Special case builtins because they
   // are meaningless to the user
   if (UNLIKELY(req_data.getDebuggerStepIn() && !func->isBuiltin())) {
@@ -222,26 +242,6 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
       return;
     }
   }
-
-  // Check if we are hitting a call breakpoint
-  if (UNLIKELY(req_data.m_callBreakPointFilter.checkPC(pc))) {
-    hook->onFuncEntryBreak(func);
-    return;
-  }
-
-  // Check if we are hitting a return breakpoint
-  if (UNLIKELY(req_data.m_retBreakPointFilter.checkPC(pc))) {
-    hook->onFuncExitBreak(func);
-    return;
-  }
-
-  // Check if we are hitting a line breakpoint.
-  if (UNLIKELY(req_data.m_lineBreakPointFilter.checkPC(pc))) {
-    req_data.setActiveLineBreak(line);
-    hook->onLineBreak(unit, line);
-    return;
-  }
-
   TRACE(5, "out phpDebuggerOpcodeHook()\n");
 }
 

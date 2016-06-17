@@ -36,7 +36,10 @@ static void addBreakPointInUnit(BreakPointInfoPtr bp, Unit* unit) {
   bp->m_bindState = BreakPointInfo::KnownToBeValid;
   TRACE(3, "Add to breakpoint filter for %s:%d, unit %p:\n",
       unit->filepath()->data(), bp->m_line1, unit);
-  phpAddBreakPointRange(unit, offsets);
+
+  assertx(offsets.size() > 0);
+  auto bpOffset = offsets[0].base;
+  phpAddBreakPoint(unit, bpOffset);
 }
 
 void proxySetBreakPoints(DebuggerProxy* proxy) {

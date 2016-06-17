@@ -46,9 +46,12 @@ struct AsyncFlowStepper {
 public:
   void setup();
   AsyncStepHandleOpcodeResult handleOpcode(PC pc);
+  void handleExceptionThrown();
+  bool handleExceptionHandler();
 
 private:
   void handleBlockedAwaitOpcode(PC pc);
+  bool isActRecOnAsyncStack(const ActRec* target);
   void stepOverAwaitOpcode();
   void captureResumeIdAfterAwait();
   void setResumeInternalBreakpoint(PC pc);
@@ -60,8 +63,14 @@ private:
 
 private:
   AsyncStepperStage m_stage{AsyncStepperStage::Disabled};
+  // ActRec address that issued current async operation
+  // We used it to check if the completed async operation
+  // is the one we are current stepping.
   ActRec* m_asyncResumableId{nullptr};
   int m_stepStartStackDepth{0};
+  // Whether there is an exception thrown for current
+  // stepped async operation.
+  bool m_isCurrentAsyncStepException{false};
 
   PCFilter m_stepRangeFlowFilter;
   PCFilter m_awaitOpcodeBreakpointFilter;

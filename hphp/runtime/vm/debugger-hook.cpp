@@ -298,6 +298,7 @@ void phpDebuggerExceptionThrownHook(ObjectData* exception) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
+  RID().m_asyncStepper.handleExceptionThrown();
   getDebuggerHook()->onExceptionThrown(exception);
   TRACE(5, "out phpDebuggerExceptionThrownHook()\n");
 }
@@ -309,6 +310,19 @@ void phpDebuggerExceptionHandlerHook() noexcept {
     TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
     if (UNLIKELY(g_context->m_dbgNoBreak)) {
       TRACE(5, "NoBreak flag is on\n");
+      return;
+    }
+    if (RID().m_asyncStepper.handleExceptionHandler()) {
+      auto const fp = g_context->getStackFrame();
+      auto const func = fp != nullptr ? fp->func() : nullptr;
+      auto const unit = func != nullptr ? func->unit() : nullptr;
+      if (UNLIKELY(unit != nullptr)) {
+        TRACE(5, "Could not grab stack information\n");
+        return;
+      }
+      const auto pc = vmpc();
+      auto line = unit->getLineNumber(unit->offsetOf(pc));
+      getDebuggerHook()->onNextBreak(unit, line);
       return;
     }
     getDebuggerHook()->onExceptionHandle();

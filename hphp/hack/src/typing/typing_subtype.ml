@@ -644,11 +644,11 @@ and sub_string p env ty2 =
       (* Enums are either ints or strings, and so can always be used in a
        * stringish context *)
       env
-  | (_, Tabstract (ak, tyopt)) ->
-    begin match TUtils.get_as_constraints env ak tyopt with
-      | None ->
+  | (_, Tabstract _) ->
+    begin match TUtils.get_concrete_supertypes env ty2 with
+      | env, None ->
         fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
-      | Some ty ->
+      | env, Some ty ->
         sub_string p env ty
     end
   | (r2, Tclass (x, _)) ->

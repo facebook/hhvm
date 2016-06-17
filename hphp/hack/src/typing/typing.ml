@@ -1105,8 +1105,7 @@ and expr_
       env, ty
   | Array_get (e, None) ->
       let env, ty1 = update_array_type p env e None valkind in
-      let is_lvalue = (valkind == `lvalue) in
-      array_append is_lvalue p env ty1
+      array_append p env ty1
   | Array_get (e1, Some e2) ->
       let env, ty1 = update_array_type p env e1 (Some e2) valkind in
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -1679,10 +1678,10 @@ and assign p env e1 ty2 =
     let placeholder_ty = Reason.Rplaceholder p, (Tprim Tvoid) in
     env, placeholder_ty
   | (_, List el) ->
-      let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
-      let env, folded_ety2 = Env.expand_type env folded_ty2 in
-      (match folded_ety2 with
-      | _, Tclass ((_, x), [elt_type])
+    let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
+    let env, opt_folded_ety2 = TUtils.get_concrete_supertypes env folded_ty2 in
+      (match opt_folded_ety2 with
+      | Some (_, Tclass ((_, x), [elt_type]))
         when x = SN.Collections.cVector
           || x = SN.Collections.cImmVector
           || x = SN.Collections.cConstVector ->
@@ -1690,19 +1689,20 @@ and assign p env e1 ty2 =
             assign (fst e) env e elt_type
           end in
           env, ty2
-      | _, Tarraykind (AKvec elt_type) ->
+      | Some (_, Tarraykind (AKvec elt_type)) ->
           let env, _ = List.map_env env el begin fun env e ->
             assign (fst e) env e elt_type
           end in
           env, ty2
-      | r, Tarraykind AKany
-      | r, Tarraykind AKempty
-      | r, Tany ->
+      | Some (r, Tarraykind AKany)
+      | Some (r, Tarraykind AKempty)
+      | Some (r, Tany) ->
           let env, _ = List.map_env env el begin fun env e ->
             assign (fst e) env e (r, Tany)
           end in
           env, ty2
-      | r, Tclass ((_, coll), [ty1; ty2]) when coll = SN.Collections.cPair ->
+      | Some ((r, Tclass ((_, coll), [ty1; ty2])) as folded_ety2)
+        when coll = SN.Collections.cPair ->
           (match el with
           | [x1; x2] ->
               let env, _ = assign p env x1 ty1 in
@@ -1712,7 +1712,7 @@ and assign p env e1 ty2 =
               Errors.pair_arity p;
               env, (r, Tany)
           )
-      | r, (Ttuple _ | Tarraykind (AKtuple _) as tuple) ->
+      | Some (r, (Ttuple _ | Tarraykind (AKtuple _) as tuple)) ->
           let p1 = fst e1 in
           let p2 = Reason.to_pos r in
           let tyl = match tuple with
@@ -1731,14 +1731,9 @@ and assign p env e1 ty2 =
               fst (assign p env lvalue ty2)
             end ~init:env in
             env, ty2
-      | _, Tabstract (ak, tyopt) ->
-        begin match TUtils.get_as_constraints env ak tyopt with
-          | None -> assign_simple p env e1 ty2
-          | Some ty -> assign p env e1 ty
-        end
-      | _, (Tmixed | Tarraykind _ | Toption _ | Tprim _
-        | Tvar _ | Tfun _ | Tanon (_, _)
-        | Tunresolved _ | Tclass (_, _) | Tobject | Tshape _) ->
+      | (Some (_, (Tmixed | Tarraykind _ | Toption _ | Tprim _
+        | Tvar _ | Tfun _ | Tanon (_, _) | Tabstract _
+        | Tunresolved _ | Tclass (_, _) | Tobject | Tshape _))) | None ->
           assign_simple p env e1 ty2
       )
   | _, Class_get _
@@ -2569,10 +2564,10 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       let env, fields = TS.transform_shapemap env ty fields in
       let ty = r, Tshape (fk, fields) in
       array_get is_lvalue p env ty ty e2 ty2
-  | Tabstract (ak, tyopt) ->
-    begin match TUtils.get_as_constraints env ak tyopt with
-      | None -> error_array env p ety1
-      | Some ty ->
+  | Tabstract _ ->
+    begin match TUtils.get_concrete_supertypes env ety1 with
+      | env, None -> error_array env p ety1
+      | env, Some ty ->
         let env, ety = Env.expand_type env ty in
         Errors.try_
           (fun () -> array_get is_lvalue p env ty ety e2 ty2)
@@ -2582,46 +2577,42 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
   | Tclass (_, _) | Tanon (_, _) ->
       error_array env p ety1
 
-and array_append is_lvalue p env ty1 =
+and array_append p env ty1 =
   let env, ty1 = TUtils.fold_unresolved env ty1 in
-  let env, ety1 = Env.expand_type env ty1 in
-  match snd ety1 with
-  | Tany | Tarraykind (AKany | AKempty) -> env, (Reason.Rnone, Tany)
-  | Tclass ((_, n), [ty])
-      when n = SN.Collections.cVector
-      || n = SN.Collections.cSet
-      || n = SN.Collections.cVec ->
-      env, ty
-  | Tclass ((_, n), [])
-      when n = SN.Collections.cVector || n = SN.Collections.cSet ->
-      (* Handle the case where "Vector" or "Set" was used as a typehint
-         without type parameters *)
-      env, (Reason.Rnone, Tany)
-  | Tclass ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
-      (* You can append a pair to a map *)
-      env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair), [tkey; tvalue]))
-  | Tclass ((_, n), []) when n = SN.Collections.cMap ->
-      (* Handle the case where "Map" was used as a typehint without
-         type parameters *)
-      env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair), []))
-  | Tarraykind (AKvec ty) ->
-      env, ty
-  | Tobject ->
-      if Env.is_strict env
-      then error_array_append env p ety1
-      else env, (Reason.Rnone, Tany)
-  | Tabstract (ak, tyopt) ->
-    begin match TUtils.get_as_constraints env ak tyopt with
-    | None -> error_array_append env p ety1
-    | Some ty ->
-      Errors.try_
-        (fun () -> array_append is_lvalue p env ty)
-        (fun _ -> error_array_append env p ety1)
-    end
-  | Tmixed | Tarraykind _ | Toption _ | Tprim _
-  | Tvar _ | Tfun _ | Tclass (_, _) | Ttuple _
-  | Tanon (_, _) | Tunresolved _ | Tshape _ ->
-      error_array_append env p ety1
+  let env, opt_ety1 = TUtils.get_concrete_supertypes env ty1 in
+  match opt_ety1 with
+  | None -> error_array_append env p ty1
+  | Some (_, ty_) ->
+    match ty_ with
+    | Tany | Tarraykind (AKany | AKempty) -> env, (Reason.Rnone, Tany)
+    | Tclass ((_, n), [ty])
+        when n = SN.Collections.cVector
+        || n = SN.Collections.cSet
+        || n = SN.Collections.cVec ->
+        env, ty
+    | Tclass ((_, n), [])
+        when n = SN.Collections.cVector || n = SN.Collections.cSet ->
+        (* Handle the case where "Vector" or "Set" was used as a typehint
+           without type parameters *)
+        env, (Reason.Rnone, Tany)
+    | Tclass ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
+        (* You can append a pair to a map *)
+      env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair),
+          [tkey; tvalue]))
+    | Tclass ((_, n), []) when n = SN.Collections.cMap ->
+        (* Handle the case where "Map" was used as a typehint without
+           type parameters *)
+        env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair), []))
+    | Tarraykind (AKvec ty) ->
+        env, ty
+    | Tobject ->
+        if Env.is_strict env
+        then error_array_append env p ty1
+        else env, (Reason.Rnone, Tany)
+    | Tmixed | Tarraykind _ | Toption _ | Tprim _
+    | Tvar _ | Tfun _ | Tclass (_, _) | Ttuple _
+    | Tanon (_, _) | Tunresolved _ | Tshape _ | Tabstract _ ->
+      error_array_append env p ty1
 
 and error_array env p (r, ty) =
   Errors.array_access p (Reason.to_pos r) (Typing_print.error ty);
@@ -2648,16 +2639,14 @@ and class_contains_smethod env cty (_pos, mid) =
       | Some class_ ->
         Env.get_static_member true env class_ mid
     ) in
-  match cty with
-  | _, Tabstract (ak, tyopt) ->
-    begin match TUtils.get_as_constraints env ak tyopt with
-      | Some (_, Tclass ((_, c), _)) -> lookup_member c
-      | _ -> None
-    end
-  | _, Tclass ((_, c), _) -> lookup_member c
-  | _, (Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
-    | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _)
-    | Tunresolved _ | Tobject | Tshape _)-> None
+  match TUtils.get_concrete_supertypes env cty with
+  | _, None -> None
+  | _, Some(_, ty) ->
+    match ty with
+    | Tclass ((_, c), _) -> lookup_member c
+    | Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
+    | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tabstract _
+    | Tunresolved _ | Tobject | Tshape _ -> None
 
 and class_get ~is_method ~is_const ?(incl_tc=false) env cty (p, mid) cid =
   let env, this_ty =
@@ -2684,11 +2673,11 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
       end in
       let env, method_ = TUtils.in_var env (fst cty, Tunresolved tyl) in
       env, method_
-  | _, Tabstract (ak, tyopt) ->
-      begin match TUtils.get_as_constraints env ak tyopt with
-      | Some cty ->
+  | _, Tabstract _ ->
+      begin match TUtils.get_concrete_supertypes env cty with
+      | env, Some cty ->
         class_get_ ~is_method ~is_const ~ety_env ~incl_tc env cid cty (p, mid)
-      | None ->
+      | env, None ->
         env, (Reason.Rnone, Tany)
       end
   | _, Tclass ((_, c), paraml) ->
@@ -2932,9 +2921,9 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
         end in
       let env, method_ = TUtils.in_var env (fst ety1, Tunresolved (tyl)) in
       env, method_, vis
-  | p', (Tabstract (ak, tyopt)) ->
-    begin match TUtils.get_as_constraints env ak tyopt with
-     | Some ty ->
+  | p', (Tabstract(ak,_)) ->
+    begin match TUtils.get_concrete_supertypes env ety1 with
+     | env, Some ty ->
       (* We probably don't want to rewrap new types for the 'this' closure *)
       (* TODO AKENN: we shouldn't refine constraints by changing
        * the type like this *)
@@ -2942,7 +2931,7 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
          | AKnewtype (_, _) -> k_lhs ty
          | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
          obj_get_ ~is_method ~nullsafe env ty cid id k k_lhs'
-     | None -> default_case ()
+     | _, None -> default_case ()
     end
   | _, Toption ty -> begin match nullsafe with
     | Some p1 ->
@@ -2966,17 +2955,15 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
 
 (* Return true if the type ty1 contains the null value *)
 and type_could_be_null env ty1 =
-  let env, ety1 = Env.expand_type env ty1 in
-  match (snd ety1) with
-    | Tabstract (ak, tyopt) ->
-      begin match TUtils.get_as_constraints env ak tyopt with
-        | None -> false
-        | Some ty -> type_could_be_null env ty
-      end
-    | Toption _ | Tunresolved _ | Tmixed | Tany -> true
-    | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
-    | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tobject
-    | Tshape _ -> false
+  let _, opt_ety1 = TUtils.get_concrete_supertypes env ty1 in
+  match opt_ety1 with
+    | None -> false
+    | Some ety1 ->
+      match snd ety1 with
+        Toption _ | Tunresolved _ | Tmixed | Tany -> true
+      | Tarraykind _ | Tprim _ | Tvar _ | Tfun _ | Tabstract _
+      | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tobject
+      | Tshape _ -> false
 
 and class_id_for_new p env cid =
   let env, ty = static_class_id p env cid in
@@ -3526,11 +3513,11 @@ and non_null env ty =
       end ~init:[] in
       env, (r, Tunresolved tyl)
 
-  | r, Tabstract (ak, tyopt) ->
-    begin match TUtils.get_as_constraints env ak tyopt with
-      | Some ty -> let env, ty = non_null env ty in
+  | r, Tabstract (ak, _) ->
+    begin match TUtils.get_concrete_supertypes env ty with
+      | env, Some ty -> let env, ty = non_null env ty in
         env, (r, Tabstract (ak, Some ty))
-      | None -> env, ty
+      | env, None -> env, ty
     end
   | _, (Tany | Tmixed | Tarraykind _ | Tprim _ | Tvar _
     | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _

@@ -1,0 +1,4 @@
+File "recursive_constraint_bad_7.php", line 5, characters 12-14:
+You are trying to access the member Foo but this is not an object, it is a value of generic type Tv (Typing[4062])
+File "recursive_constraint_bad_7.php", line 4, characters 34-35:
+Check this out

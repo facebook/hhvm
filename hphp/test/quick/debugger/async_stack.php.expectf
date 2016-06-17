@@ -168,10 +168,10 @@ switching stack contexts (sync->async) resetting stack state
     at %s/async_stack.php:%d
 #4  <<join>>
 c
-Breakpoint 1 reached at gen1() on line 13 of %s/async_stack.php
-  %d   error_log('Finished in gen1');
-  %d*  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
-  %d   return $a + 1;
+Breakpoint 2 reached at gen1() on line 14 of %s/async_stack.php
+  %d   await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
+  %d*  return $a + 1;
+  %d }
 
 w
 switching stack contexts (async->sync) resetting stack state
@@ -204,9 +204,10 @@ switching stack contexts (sync->async) resetting stack state
     at %s/async_stack.php:%d
 #6  <<join>>
 c
-Breakpoint 2 reached at gen1() on line 14 of %s/async_stack.php
-  %d   await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
-  %d*  return $a + 1;
-  %d }
+Finished in gen2
+Breakpoint 6 reached at genFoo() on line 42 of %s/async_stack.php
+  %d   );
+  %d*  var_dump($x);
+  %d   var_dump($y);
 
 quit

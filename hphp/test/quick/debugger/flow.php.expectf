@@ -285,13 +285,5 @@ continue
 foo:25
 out pri:7
 out pub:7
-Breakpoint 1 reached at test() on line 62 of %s/flow.php
-  61   $obj = new cls();
-  62*  $obj->pub($x);
-  63   error_log("test done ".$x);
-
-break clear all
-All breakpoints are cleared.
-continue
 test done 7
 quit

@@ -53,6 +53,4 @@ break flow.php:7
 break clear all
 break flow.php:62
 continue
-break clear all
-continue
 quit

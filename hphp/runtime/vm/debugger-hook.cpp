@@ -21,6 +21,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
+#include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/pc-filter.h"
@@ -109,14 +110,6 @@ void blacklistFuncInJit(const Func* f) {
   blacklistRangesInJit(unit, ranges);
 }
 
-PCFilter* getBreakPointFilter() {
-  return &RID().m_breakPointFilter;
-}
-
-PCFilter* getFlowFilter() {
-  return &RID().m_flowFilter;
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -194,6 +187,16 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   if (UNLIKELY(req_data.m_lineBreakPointFilter.checkPC(pc))) {
     req_data.setActiveLineBreak(line);
     hook->onLineBreak(unit, line);
+    return;
+  }
+
+  // Async stepper should handle before normal stepping logic.
+  auto const handleResult = req_data.m_asyncStepper.handleOpcode(pc);
+  if (handleResult != AsyncStepHandleOpcodeResult::Unhandled) {
+    if (handleResult == AsyncStepHandleOpcodeResult::Completed) {
+      hook->onNextBreak(unit, line);
+    }
+    // Handled by async stepper.
     return;
   }
 
@@ -450,6 +453,13 @@ void phpDebuggerNext() {
   // our step completes if the stack depth has increased.
   req_data.setDebuggerNext(true);
   req_data.setDebuggerFlowDepth(stack_depth);
+
+  // Setup async stepping if needed.
+  req_data.m_asyncStepper.setup();
+
+  // handleOpcode() here in case the current pc points to "await" opcode.
+  auto pc = vmpc();
+  req_data.m_asyncStepper.handleOpcode(pc);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -469,13 +479,6 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
       // to it so we have a chance to honor breakpoints.
       debuggerPreventReturnsToTC();
     }
-  }
-}
-
-void phpAddBreakPointRange(const Unit* unit, OffsetRangeVec& offsets) {
-  getBreakPointFilter()->addRanges(unit, offsets);
-  if (RuntimeOption::EvalJit) {
-    blacklistRangesInJit(unit, offsets);
   }
 }
 
@@ -533,10 +536,12 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
     return false;
   }
 
-  // Add to the breakpoint filter and the line filter
-  phpAddBreakPointRange(unit, offsets);
+  // Add to the breakpoint filter and the line filter.
   assertx(offsets.size() > 0);
-  auto pc = unit->at(offsets[0].base);
+  auto bpOffset = offsets[0].base;
+  phpAddBreakPoint(unit, bpOffset);
+
+  auto pc = unit->at(bpOffset);
   RID().m_lineBreakPointFilter.addPC(pc);
   return true;
 }
@@ -583,6 +588,14 @@ bool phpHasBreakpoint(const Unit* unit, Offset offset) {
     return req_data.m_breakPointFilter.checkPC(pc);
   }
   return false;
+}
+
+PCFilter* getBreakPointFilter() {
+  return &RID().m_breakPointFilter;
+}
+
+PCFilter* getFlowFilter() {
+  return &RID().m_flowFilter;
 }
 
 /////////////////////////////////////////////////////////////////////////

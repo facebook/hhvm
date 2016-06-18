@@ -95,6 +95,7 @@ let test_errors source =
   let errors = List.map errors ~f:mapper in
   Printf.sprintf "%s" (String.concat "\n" errors)
 
+
 let test_data = [
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_simple" test_minimal;
@@ -104,6 +105,9 @@ let test_data = [
     ~preprocess_exp:remove_whitespace "test_statements" test_minimal;
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_for_statements" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_try_statement" test_minimal;
+
   {
     name = "test_mode_1";
     source = "<?hh   ";

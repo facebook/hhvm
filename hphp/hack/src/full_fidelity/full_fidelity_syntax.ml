@@ -150,6 +150,23 @@ module WithToken(Token: TokenType) = struct
       else_keyword: t;
       else_statement: t;
     }
+    and try_statement = {
+      try_keyword: t;
+      try_compound_statement: t;
+      catch_clauses: t;
+      finally_clause: t;
+    }
+    and catch_clause = {
+      catch_keyword: t;
+      catch_left_paren: t;
+      catch_params: t;
+      catch_right_paren: t;
+      catch_compound_statement: t;
+    }
+    and finally_clause = {
+      finally_keyword: t;
+      finally_compound_statement: t;
+    }
     and do_statement = {
       do_keyword: t;
       do_statement: t;
@@ -289,6 +306,9 @@ module WithToken(Token: TokenType) = struct
     | IfStatement of if_statement
     | ElseifClause of elseif_clause
     | ElseClause of else_clause
+    | TryStatement of try_statement
+    | CatchClause of catch_clause
+    | FinallyClause of finally_clause
     | DoStatement of do_statement
     | ForStatement of for_statement
     | SwitchStatement of switch_statement
@@ -348,6 +368,9 @@ module WithToken(Token: TokenType) = struct
       | IfStatement _ -> SyntaxKind.IfStatement
       | ElseifClause _ -> SyntaxKind.ElseifClause
       | ElseClause _ -> SyntaxKind.ElseClause
+      | TryStatement _ -> SyntaxKind.TryStatement
+      | CatchClause _ -> SyntaxKind.CatchClause
+      | FinallyClause _ -> SyntaxKind.FinallyClause
       | DoStatement _ -> SyntaxKind.DoStatement
       | ForStatement _ -> SyntaxKind.ForStatement
       | SwitchStatement _ -> SyntaxKind.SwitchStatement
@@ -394,6 +417,9 @@ module WithToken(Token: TokenType) = struct
     let is_if_statement node = kind node = SyntaxKind.IfStatement
     let is_elseif node = kind node = SyntaxKind.ElseifClause
     let is_else node = kind node = SyntaxKind.ElseClause
+    let is_try_statement node = kind node = SyntaxKind.TryStatement
+    let is_catch node = kind node = SyntaxKind.CatchClause
+    let is_finally node = kind node = SyntaxKind.FinallyClause
     let is_do_statement node = kind node = SyntaxKind.DoStatement
     let is_switch_statement node = kind node = SyntaxKind.SwitchStatement
     let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
@@ -464,6 +490,15 @@ module WithToken(Token: TokenType) = struct
       | ElseClause
         { else_keyword; else_statement } ->
         [ else_keyword; else_statement ]
+      | TryStatement {try_keyword; try_compound_statement; catch_clauses;
+                      finally_clause} ->
+        [try_keyword; try_compound_statement; catch_clauses; finally_clause]
+      | CatchClause {catch_keyword; catch_left_paren; catch_params;
+                     catch_right_paren; catch_compound_statement} ->
+        [catch_keyword; catch_left_paren; catch_params; catch_right_paren;
+         catch_compound_statement]
+      | FinallyClause {finally_keyword; finally_compound_statement} ->
+        [finally_keyword; finally_compound_statement]
       | DoStatement
         { do_keyword; do_statement; do_while_keyword; do_left_paren;
           do_condition_expr; do_right_paren; do_semicolon } ->
@@ -533,6 +568,7 @@ module WithToken(Token: TokenType) = struct
           type_constant_right_type } ->
         [ type_constant_left_type; type_constant_separator;
         type_constant_right_type ]
+
       | SimpleTypeSpecifier x -> [x]
       | GenericTypeSpecifier
         { generic_class_type; generic_arguments } ->
@@ -597,6 +633,16 @@ module WithToken(Token: TokenType) = struct
       | ElseClause
         { else_keyword; else_statement } ->
         [ "else_keyword"; "else_statement" ]
+      | TryStatement {try_keyword; try_compound_statement; catch_clauses;
+                      finally_clause} ->
+        ["try_keyword"; "try_compound_statement"; "catch_clauses";
+        "finally_clause"]
+      | CatchClause {catch_keyword; catch_left_paren; catch_params;
+                     catch_right_paren; catch_compound_statement} ->
+        ["catch_keyword"; "catch_left_paren"; "catch_params";
+        "catch_right_paren"; "catch_compound_statement"]
+      | FinallyClause {finally_keyword; finally_compound_statement} ->
+        ["finally_keyword"; "finally_compound_statement"]
       | DoStatement
         { do_keyword; do_statement; do_while_keyword; do_left_paren;
           do_condition_expr; do_right_paren; do_semicolon } ->
@@ -737,6 +783,19 @@ module WithToken(Token: TokenType) = struct
     let elseif_statement x = x.elseif_statement
     let else_keyword x = x.else_keyword
     let else_statement x = x.else_statement
+
+
+    let try_keyword x = x.try_keyword
+    let try_compound_statement x = x.try_compound_statement
+    let catch_clauses x = x.catch_clauses
+    let finally_clause x = x.finally_clause
+    let catch_keyword x = x.catch_keyword
+    let catch_left_paren x = x.catch_left_paren
+    let catch_params x = x.catch_params
+    let catch_right_paren x = x.catch_right_paren
+    let catch_compound_statement x = x.catch_compound_statement
+    let finally_keyword x = x.finally_keyword
+    let finally_compound_statement x = x.finally_compound_statement
     let do_keyword x = x.do_keyword
     let do_statement x = x.do_statement
     let do_while_keyword x = x.do_while_keyword
@@ -893,6 +952,18 @@ module WithToken(Token: TokenType) = struct
           elseif_condition_expr; elseif_right_paren; elseif_statement }
       | (SyntaxKind.ElseClause, [ else_keyword; else_statement ]) ->
         ElseClause { else_keyword; else_statement }
+
+      | SyntaxKind.TryStatement, [try_keyword; try_compound_statement;
+        catch_clauses; finally_clause] ->
+        TryStatement {try_keyword; try_compound_statement; catch_clauses;
+          finally_clause}
+      | SyntaxKind.CatchClause, [catch_keyword; catch_left_paren; catch_params;
+        catch_right_paren; catch_compound_statement] ->
+        CatchClause {catch_keyword; catch_left_paren; catch_params;
+          catch_right_paren; catch_compound_statement}
+      | SyntaxKind.FinallyClause, [finally_keyword;
+        finally_compound_statement] ->
+        FinallyClause {finally_keyword; finally_compound_statement}
       | (SyntaxKind.DoStatement, [ do_keyword; do_statement;
         do_while_keyword; do_left_paren; do_condition_expr;
         do_right_paren; do_semicolon ]) ->
@@ -1110,15 +1181,29 @@ module WithToken(Token: TokenType) = struct
           elseif_right_paren; elseif_statement ]
 
       let make_else_clause else_keyword else_statement =
-        from_children SyntaxKind.ElseClause
-          [ else_keyword; else_statement ]
+        from_children SyntaxKind.ElseClause [ else_keyword; else_statement ]
+
+      let make_try_statement
+        try_keyword try_compound_statement catch_clauses finally_clause =
+          from_children SyntaxKind.TryStatement
+          [ try_keyword; try_compound_statement; catch_clauses; finally_clause ]
+
+      let make_catch_clause catch_keyword catch_left_paren catch_params
+        catch_right_paren catch_compound_statement =
+        from_children SyntaxKind.CatchClause
+          [ catch_keyword; catch_left_paren; catch_params; catch_right_paren;
+          catch_compound_statement ]
+
+      let make_finally_clause finally_keyword finally_compound_statement =
+        from_children SyntaxKind.FinallyClause
+          [finally_keyword; finally_compound_statement]
 
       let make_do_statement
         do_keyword do_statement do_while_keyword do_left_paren
         do_condition_expr do_right_paren do_semicolon =
         from_children SyntaxKind.DoStatement
-        [ do_keyword; do_statement; do_while_keyword; do_left_paren;
-        do_condition_expr; do_right_paren; do_semicolon ]
+          [ do_keyword; do_statement; do_while_keyword; do_left_paren;
+          do_condition_expr; do_right_paren; do_semicolon ]
 
       let make_for_statement
         for_keyword for_left_paren for_initializer_expr for_first_semicolon

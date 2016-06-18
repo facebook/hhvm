@@ -20,8 +20,9 @@ module Operator = Full_fidelity_operator
 open TokenKind
 open Syntax
 
-module WithStatementParser
-  (StatementParser : Full_fidelity_statement_parser_type.StatementParserType) :
+module WithStatementAndDeclParser
+  (StatementParser : Full_fidelity_statement_parser_type.StatementParserType)
+  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType) :
   Full_fidelity_expression_parser_type.ExpressionParserType = struct
 
   type t = {

@@ -437,6 +437,7 @@ let rec get_doc node =
     let keyword = get_doc (continue_keyword x) in
     let semicolon = get_doc (continue_semicolon x) in
     keyword ^^^ semicolon
+  | TryStatement _ | CatchClause _ | FinallyClause _ -> missing (*TODO*)
 (* sep is the compulsory separator separating the children in the list *)
 and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in

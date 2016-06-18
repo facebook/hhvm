@@ -30,6 +30,9 @@ type t =
 | IfStatement
 | ElseifClause
 | ElseClause
+| TryStatement
+| CatchClause
+| FinallyClause
 | SwitchStatement
 | CaseStatement
 | DefaultStatement
@@ -79,6 +82,9 @@ let to_string kind =
   | IfStatement -> "if_statement"
   | ElseifClause -> "elseif_clause"
   | ElseClause -> "else_clause"
+  | TryStatement -> "try_statement"
+  | CatchClause -> "catch_clause"
+  | FinallyClause -> "finally_clause"
   | SwitchStatement -> "switch_statement"
   | CaseStatement -> "case_statement"
   | DefaultStatement -> "default_statement"

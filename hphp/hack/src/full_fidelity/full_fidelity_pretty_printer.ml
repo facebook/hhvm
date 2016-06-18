@@ -295,6 +295,25 @@ let rec get_doc node =
     let statement = get_doc (else_statement x) in
     let indt = peek_and_decide_indent (else_statement x) indt in
     group_doc (indent_doc keyword statement indt)
+  | TryStatement x ->
+    let keyword = get_doc (try_keyword x) in
+    let compound_stmt = get_doc (try_compound_statement x) in
+    let catch_clauses = get_doc (try_catch_clauses x) in
+    let finally_clause = get_doc (try_finally_clause x) in
+    group_doc (keyword ^| compound_stmt ^| catch_clauses ^| finally_clause)
+  | CatchClause x ->
+    let keyword = get_doc (catch_keyword x) in
+    let left = get_doc (catch_left_paren x) in
+    let params = get_doc (catch_params x) in
+    let right = get_doc (catch_right_paren x) in
+    let stmt = get_doc (catch_compound_statement x) in
+    let front_part = group_doc (keyword ^| left) in
+    let before_stmt = indent_block_no_space front_part params right indt in
+    group_doc (before_stmt ^| stmt)
+  | FinallyClause x ->
+    let keyword = get_doc (finally_keyword x) in
+    let stmt = get_doc (finally_compound_statement x) in
+    group_doc (keyword ^| stmt)
   | DoStatement x ->
     let keyword = get_doc (do_keyword x) in
     let statement = get_doc (do_statement x) in
@@ -437,7 +456,6 @@ let rec get_doc node =
     let keyword = get_doc (continue_keyword x) in
     let semicolon = get_doc (continue_semicolon x) in
     keyword ^^^ semicolon
-  | TryStatement _ | CatchClause _ | FinallyClause _ -> missing (*TODO*)
 (* sep is the compulsory separator separating the children in the list *)
 and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in

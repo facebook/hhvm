@@ -783,12 +783,10 @@ module WithToken(Token: TokenType) = struct
     let elseif_statement x = x.elseif_statement
     let else_keyword x = x.else_keyword
     let else_statement x = x.else_statement
-
-
     let try_keyword x = x.try_keyword
     let try_compound_statement x = x.try_compound_statement
-    let catch_clauses x = x.catch_clauses
-    let finally_clause x = x.finally_clause
+    let try_catch_clauses x = x.catch_clauses
+    let try_finally_clause x = x.finally_clause
     let catch_keyword x = x.catch_keyword
     let catch_left_paren x = x.catch_left_paren
     let catch_params x = x.catch_params

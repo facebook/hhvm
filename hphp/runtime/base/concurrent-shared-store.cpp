@@ -60,7 +60,9 @@ bool check_noTTL(const char* key, size_t keyLen) {
 
 void StoreValue::set(APCHandle* v, int64_t ttl) {
   setHandle(v);
-  expire = ttl ? time(nullptr) + ttl : 0;
+  mtime = time(nullptr);
+  if (c_time == 0)  c_time = mtime;
+  expire = ttl ? mtime + ttl : 0;
 }
 
 bool StoreValue::expired() const {
@@ -817,8 +819,6 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
 
     sval->set(svar.handle, adjustedTtl);
     sval->dataSize = svar.size;
-    if (sval->c_time == 0) sval->c_time = time(nullptr);
-    sval->mtime = time(nullptr);
     expiry = sval->expire;
     if (expiry) {
       auto ikey = intptr_t(acc->first);

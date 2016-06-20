@@ -1,0 +1,1864 @@
+FenomTest::testAddAllowedFunctions
+.
+FenomTest::testAddBlockCompilerSmart
+.
+FenomTest::testAddInlineCompilerSmart
+.
+FenomTest::testCheckMTime
+.
+FenomTest::testCompileFile
+F
+FenomTest::testCompileIdAndName
+F
+FenomTest::testCreating
+E
+FenomTest::testFactory
+.
+FenomTest::testFactoryInvalid
+.
+FenomTest::testFactoryInvalid2
+.
+FenomTest::testFilter
+.
+FenomTest::testForceCompile
+.
+FenomTest::testOptions with data set #0
+.
+FenomTest::testOptions with data set #1
+.
+FenomTest::testOptions with data set #2
+.
+FenomTest::testOptions with data set #3
+.
+FenomTest::testOptions with data set #4
+.
+FenomTest::testOptions with data set #5
+.
+FenomTest::testOptions with data set #6
+.
+FenomTest::testOptions with data set #7
+.
+FenomTest::testOptions with data set #8
+.
+FenomTest::testPipe
+.
+FenomTest::testSetCompilers
+.
+FenomTest::testSetFunctions
+.
+FenomTest::testSetModifier
+.
+FenomTest::testSetModifierClosure
+.
+FenomTest::testStorage
+.
+FenomTest::testStrip
+.
+FenomTest::testStripXML
+.
+FenomTest::testTagFilter
+.
+Fenom\AccessorTest::testCallbackAccessor
+.
+Fenom\AccessorTest::testConst with data set #0
+.
+Fenom\AccessorTest::testConst with data set #1
+.
+Fenom\AccessorTest::testConst with data set #2
+.
+Fenom\AccessorTest::testConst with data set #3
+.
+Fenom\AccessorTest::testConst with data set #4
+.
+Fenom\AccessorTest::testConst with data set #5
+.
+Fenom\AccessorTest::testConst with data set #6
+.
+Fenom\AccessorTest::testConst with data set #7
+.
+Fenom\AccessorTest::testConst with data set #8
+.
+Fenom\AccessorTest::testFetch with data set #0
+.
+Fenom\AccessorTest::testFetch with data set #1
+.
+Fenom\AccessorTest::testFetch with data set #2
+.
+Fenom\AccessorTest::testFetch with data set #3
+.
+Fenom\AccessorTest::testFetchInvalidTpl with data set #0
+.
+Fenom\AccessorTest::testFetchInvalidTpl with data set #1
+.
+Fenom\AccessorTest::testGetVar with data set #0
+.
+Fenom\AccessorTest::testGetVar with data set #1
+.
+Fenom\AccessorTest::testGetVar with data set #2
+.
+Fenom\AccessorTest::testGetVar with data set #3
+.
+Fenom\AccessorTest::testGetVar with data set #4
+.
+Fenom\AccessorTest::testGetVar with data set #5
+.
+Fenom\AccessorTest::testGetVar with data set #6
+.
+Fenom\AccessorTest::testGetVar with data set #7
+.
+Fenom\AccessorTest::testGetVar with data set #8
+.
+Fenom\AccessorTest::testPHP with data set #0
+.
+Fenom\AccessorTest::testPHP with data set #1
+.
+Fenom\AccessorTest::testPHP with data set #10
+.
+Fenom\AccessorTest::testPHP with data set #11
+.
+Fenom\AccessorTest::testPHP with data set #12
+.
+Fenom\AccessorTest::testPHP with data set #13
+.
+Fenom\AccessorTest::testPHP with data set #14
+.
+Fenom\AccessorTest::testPHP with data set #15
+.
+Fenom\AccessorTest::testPHP with data set #16
+.
+Fenom\AccessorTest::testPHP with data set #17
+.
+Fenom\AccessorTest::testPHP with data set #2
+.
+Fenom\AccessorTest::testPHP with data set #3
+.
+Fenom\AccessorTest::testPHP with data set #4
+.
+Fenom\AccessorTest::testPHP with data set #5
+.
+Fenom\AccessorTest::testPHP with data set #6
+.
+Fenom\AccessorTest::testPHP with data set #7
+.
+Fenom\AccessorTest::testPHP with data set #8
+.
+Fenom\AccessorTest::testPHP with data set #9
+.
+Fenom\AccessorTest::testPHPInvalid with data set #0
+.
+Fenom\AccessorTest::testPHPInvalid with data set #1
+.
+Fenom\AccessorTest::testPHPInvalid with data set #10
+.
+Fenom\AccessorTest::testPHPInvalid with data set #11
+.
+Fenom\AccessorTest::testPHPInvalid with data set #12
+.
+Fenom\AccessorTest::testPHPInvalid with data set #13
+.
+Fenom\AccessorTest::testPHPInvalid with data set #14
+.
+Fenom\AccessorTest::testPHPInvalid with data set #15
+.
+Fenom\AccessorTest::testPHPInvalid with data set #2
+.
+Fenom\AccessorTest::testPHPInvalid with data set #3
+.
+Fenom\AccessorTest::testPHPInvalid with data set #4
+.
+Fenom\AccessorTest::testPHPInvalid with data set #5
+.
+Fenom\AccessorTest::testPHPInvalid with data set #6
+.
+Fenom\AccessorTest::testPHPInvalid with data set #7
+.
+Fenom\AccessorTest::testPHPInvalid with data set #8
+.
+Fenom\AccessorTest::testPHPInvalid with data set #9
+.
+Fenom\AccessorTest::testSmartAccessor with data set #0
+.
+Fenom\AccessorTest::testSmartAccessor with data set #1
+.
+Fenom\AccessorTest::testSmartAccessor with data set #2
+.
+Fenom\AccessorTest::testSmartAccessor with data set #3
+.
+Fenom\AccessorTest::testTpl with data set #0
+.
+Fenom\AccessorTest::testTpl with data set #1
+.
+Fenom\AccessorTest::testTpl with data set #2
+.
+Fenom\AccessorTest::testTpl with data set #3
+.
+Fenom\AccessorTest::testTpl with data set #4
+.
+Fenom\AccessorTest::testVersion
+.
+Fenom\AutoEscapeTest::testEscaping with data set #0
+.
+Fenom\AutoEscapeTest::testEscaping with data set #1
+.
+Fenom\AutoEscapeTest::testEscaping with data set #10
+.
+Fenom\AutoEscapeTest::testEscaping with data set #11
+.
+Fenom\AutoEscapeTest::testEscaping with data set #12
+.
+Fenom\AutoEscapeTest::testEscaping with data set #13
+.
+Fenom\AutoEscapeTest::testEscaping with data set #14
+.
+Fenom\AutoEscapeTest::testEscaping with data set #15
+.
+Fenom\AutoEscapeTest::testEscaping with data set #16
+.
+Fenom\AutoEscapeTest::testEscaping with data set #17
+.
+Fenom\AutoEscapeTest::testEscaping with data set #18
+.
+Fenom\AutoEscapeTest::testEscaping with data set #19
+.
+Fenom\AutoEscapeTest::testEscaping with data set #2
+.
+Fenom\AutoEscapeTest::testEscaping with data set #20
+.
+Fenom\AutoEscapeTest::testEscaping with data set #21
+.
+Fenom\AutoEscapeTest::testEscaping with data set #22
+.
+Fenom\AutoEscapeTest::testEscaping with data set #23
+.
+Fenom\AutoEscapeTest::testEscaping with data set #24
+.
+Fenom\AutoEscapeTest::testEscaping with data set #25
+.
+Fenom\AutoEscapeTest::testEscaping with data set #26
+.
+Fenom\AutoEscapeTest::testEscaping with data set #27
+.
+Fenom\AutoEscapeTest::testEscaping with data set #28
+.
+Fenom\AutoEscapeTest::testEscaping with data set #29
+.
+Fenom\AutoEscapeTest::testEscaping with data set #3
+.
+Fenom\AutoEscapeTest::testEscaping with data set #30
+.
+Fenom\AutoEscapeTest::testEscaping with data set #31
+.
+Fenom\AutoEscapeTest::testEscaping with data set #32
+.
+Fenom\AutoEscapeTest::testEscaping with data set #33
+.
+Fenom\AutoEscapeTest::testEscaping with data set #34
+.
+Fenom\AutoEscapeTest::testEscaping with data set #35
+.
+Fenom\AutoEscapeTest::testEscaping with data set #36
+.
+Fenom\AutoEscapeTest::testEscaping with data set #4
+.
+Fenom\AutoEscapeTest::testEscaping with data set #5
+.
+Fenom\AutoEscapeTest::testEscaping with data set #6
+.
+Fenom\AutoEscapeTest::testEscaping with data set #7
+.
+Fenom\AutoEscapeTest::testEscaping with data set #8
+.
+Fenom\AutoEscapeTest::testEscaping with data set #9
+.
+Fenom\CommentTest::testError
+.
+Fenom\CommentTest::testInline with data set #0
+.
+Fenom\CommentTest::testInline with data set #1
+.
+Fenom\CommentTest::testInline with data set #10
+.
+Fenom\CommentTest::testInline with data set #11
+.
+Fenom\CommentTest::testInline with data set #12
+.
+Fenom\CommentTest::testInline with data set #13
+.
+Fenom\CommentTest::testInline with data set #14
+.
+Fenom\CommentTest::testInline with data set #15
+.
+Fenom\CommentTest::testInline with data set #16
+.
+Fenom\CommentTest::testInline with data set #17
+.
+Fenom\CommentTest::testInline with data set #18
+.
+Fenom\CommentTest::testInline with data set #19
+.
+Fenom\CommentTest::testInline with data set #2
+.
+Fenom\CommentTest::testInline with data set #20
+.
+Fenom\CommentTest::testInline with data set #21
+.
+Fenom\CommentTest::testInline with data set #22
+.
+Fenom\CommentTest::testInline with data set #23
+.
+Fenom\CommentTest::testInline with data set #24
+.
+Fenom\CommentTest::testInline with data set #25
+.
+Fenom\CommentTest::testInline with data set #26
+.
+Fenom\CommentTest::testInline with data set #27
+.
+Fenom\CommentTest::testInline with data set #28
+.
+Fenom\CommentTest::testInline with data set #29
+.
+Fenom\CommentTest::testInline with data set #3
+.
+Fenom\CommentTest::testInline with data set #30
+.
+Fenom\CommentTest::testInline with data set #31
+.
+Fenom\CommentTest::testInline with data set #4
+.
+Fenom\CommentTest::testInline with data set #5
+.
+Fenom\CommentTest::testInline with data set #6
+.
+Fenom\CommentTest::testInline with data set #7
+.
+Fenom\CommentTest::testInline with data set #8
+.
+Fenom\CommentTest::testInline with data set #9
+.
+Fenom\CommentTest::testMultiLine with data set #0
+.
+Fenom\CommentTest::testMultiLine with data set #1
+.
+Fenom\CommentTest::testMultiLine with data set #10
+.
+Fenom\CommentTest::testMultiLine with data set #11
+.
+Fenom\CommentTest::testMultiLine with data set #12
+.
+Fenom\CommentTest::testMultiLine with data set #13
+.
+Fenom\CommentTest::testMultiLine with data set #14
+.
+Fenom\CommentTest::testMultiLine with data set #15
+.
+Fenom\CommentTest::testMultiLine with data set #16
+.
+Fenom\CommentTest::testMultiLine with data set #17
+.
+Fenom\CommentTest::testMultiLine with data set #18
+.
+Fenom\CommentTest::testMultiLine with data set #19
+.
+Fenom\CommentTest::testMultiLine with data set #2
+.
+Fenom\CommentTest::testMultiLine with data set #20
+.
+Fenom\CommentTest::testMultiLine with data set #21
+.
+Fenom\CommentTest::testMultiLine with data set #22
+.
+Fenom\CommentTest::testMultiLine with data set #23
+.
+Fenom\CommentTest::testMultiLine with data set #24
+.
+Fenom\CommentTest::testMultiLine with data set #25
+.
+Fenom\CommentTest::testMultiLine with data set #26
+.
+Fenom\CommentTest::testMultiLine with data set #27
+.
+Fenom\CommentTest::testMultiLine with data set #28
+.
+Fenom\CommentTest::testMultiLine with data set #29
+.
+Fenom\CommentTest::testMultiLine with data set #3
+.
+Fenom\CommentTest::testMultiLine with data set #30
+.
+Fenom\CommentTest::testMultiLine with data set #31
+.
+Fenom\CommentTest::testMultiLine with data set #4
+.
+Fenom\CommentTest::testMultiLine with data set #5
+.
+Fenom\CommentTest::testMultiLine with data set #6
+.
+Fenom\CommentTest::testMultiLine with data set #7
+.
+Fenom\CommentTest::testMultiLine with data set #8
+.
+Fenom\CommentTest::testMultiLine with data set #9
+.
+Fenom\CustomProviderTest::testCustom
+.
+Fenom\ExtendsTest::testAutoAndStaticExtend
+.
+Fenom\ExtendsTest::testAutoExtends
+.
+Fenom\ExtendsTest::testAutoExtendsManual
+.
+Fenom\ExtendsTest::testDynamicExtendLevel2
+.
+Fenom\ExtendsTest::testDynamicExtendLevel3
+.
+Fenom\ExtendsTest::testDynamicExtendLevel4
+.
+Fenom\ExtendsTest::testExtendsInvalid with data set #0
+.
+Fenom\ExtendsTest::testExtendsInvalid with data set #1
+.
+Fenom\ExtendsTest::testExtendsInvalid with data set #2
+.
+Fenom\ExtendsTest::testExtendsInvalid with data set #3
+.
+Fenom\ExtendsTest::testExtendsInvalid with data set #4
+.
+Fenom\ExtendsTest::testStaticExtendLevel1
+.
+Fenom\ExtendsTest::testStaticExtendLevel3
+.
+Fenom\ExtendsTest::testStaticExtendNested
+.
+Fenom\FunctionsTest::testFunctionWithArrayNamedParam
+.
+Fenom\FunctionsTest::testFunctionWithArrayPositionalParam
+.
+Fenom\FunctionsTest::testFunctionWithDefaultParamArray
+.
+Fenom\FunctionsTest::testFunctionWithDefaultParamConst
+.
+Fenom\FunctionsTest::testFunctionWithDefaultParamScalar
+.
+Fenom\FunctionsTest::testFunctionWithDynamicParams
+.
+Fenom\FunctionsTest::testFunctionWithParams
+E
+Fenom\MacrosTest::testImport
+.
+Fenom\MacrosTest::testImportCustom
+.
+Fenom\MacrosTest::testImportMiss
+.
+Fenom\MacrosTest::testImportRecursive
+.
+Fenom\MacrosTest::testMacros
+.
+Fenom\MacrosTest::testRecursive
+.
+Fenom\ModifiersTest::testEMatch
+.
+Fenom\ModifiersTest::testEReplace
+.
+Fenom\ModifiersTest::testESplit
+.
+Fenom\ModifiersTest::testESplitArray
+.
+Fenom\ModifiersTest::testESplitOther
+.
+Fenom\ModifiersTest::testIn with data set #0
+.
+Fenom\ModifiersTest::testIn with data set #1
+.
+Fenom\ModifiersTest::testIn with data set #2
+.
+Fenom\ModifiersTest::testIn with data set #3
+.
+Fenom\ModifiersTest::testIn with data set #4
+.
+Fenom\ModifiersTest::testIn with data set #5
+.
+Fenom\ModifiersTest::testJoin
+.
+Fenom\ModifiersTest::testJoinOther
+.
+Fenom\ModifiersTest::testJoinString
+.
+Fenom\ModifiersTest::testLength with data set #0
+.
+Fenom\ModifiersTest::testLength with data set #1
+.
+Fenom\ModifiersTest::testLength with data set #2
+.
+Fenom\ModifiersTest::testLength with data set #3
+.
+Fenom\ModifiersTest::testLength with data set #4
+.
+Fenom\ModifiersTest::testLength with data set #5
+.
+Fenom\ModifiersTest::testLength with data set #6
+.
+Fenom\ModifiersTest::testLength with data set #7
+.
+Fenom\ModifiersTest::testMatch
+.
+Fenom\ModifiersTest::testReplace
+.
+Fenom\ModifiersTest::testSplit
+.
+Fenom\ModifiersTest::testSplitArray
+.
+Fenom\ModifiersTest::testSplitOther
+.
+Fenom\ModifiersTest::testTruncate with data set #0
+.
+Fenom\ModifiersTest::testTruncate with data set #1
+.
+Fenom\ModifiersTest::testTruncate with data set #10
+.
+Fenom\ModifiersTest::testTruncate with data set #11
+.
+Fenom\ModifiersTest::testTruncate with data set #12
+.
+Fenom\ModifiersTest::testTruncate with data set #13
+.
+Fenom\ModifiersTest::testTruncate with data set #2
+.
+Fenom\ModifiersTest::testTruncate with data set #3
+.
+Fenom\ModifiersTest::testTruncate with data set #4
+.
+Fenom\ModifiersTest::testTruncate with data set #5
+.
+Fenom\ModifiersTest::testTruncate with data set #6
+.
+Fenom\ModifiersTest::testTruncate with data set #7
+.
+Fenom\ModifiersTest::testTruncate with data set #8
+.
+Fenom\ModifiersTest::testTruncate with data set #9
+.
+Fenom\ModifiersTest::testUpLow with data set #0
+.
+Fenom\ModifiersTest::testUpLow with data set #1
+.
+Fenom\ModifiersTest::testUpLow with data set #2
+.
+Fenom\ModifiersTest::testUpLow with data set #3
+.
+Fenom\ModifiersTest::testUpLow with data set #4
+.
+Fenom\ModifiersTest::testUpLow with data set #5
+.
+Fenom\ModifiersTest::testUpLow with data set #6
+.
+Fenom\ModifiersTest::testUpLow with data set #7
+.
+Fenom\ProviderTest::testGetAll
+.
+Fenom\ProviderTest::testGetLastModified
+.
+Fenom\ProviderTest::testGetLastModifiedInvalid
+.
+Fenom\ProviderTest::testGetSource
+.
+Fenom\ProviderTest::testGetSourceInvalid
+.
+Fenom\ProviderTest::testIsTemplateExists
+.
+Fenom\ProviderTest::testRm
+.
+Fenom\ProviderTest::testVerify
+.
+Fenom\ProviderTest::testVerifyInvalid
+.
+Fenom\RenderTest::testCreate
+.
+Fenom\RenderTest::testDisplay
+.
+Fenom\RenderTest::testFetch
+.
+Fenom\RenderTest::testFetchException
+.
+Fenom\SandboxTest::test
+.
+Fenom\ScopeTest::testBlock
+.
+Fenom\TagOptionTest::testTrim
+.
+Fenom\TagsTest::testCycle
+.
+Fenom\TagsTest::testCycleIndex
+.
+Fenom\TagsTest::testFilter with data set #0
+.
+Fenom\TagsTest::testFilter with data set #1
+.
+Fenom\TagsTest::testFilter with data set #10
+.
+Fenom\TagsTest::testFilter with data set #11
+.
+Fenom\TagsTest::testFilter with data set #12
+.
+Fenom\TagsTest::testFilter with data set #13
+.
+Fenom\TagsTest::testFilter with data set #14
+.
+Fenom\TagsTest::testFilter with data set #15
+.
+Fenom\TagsTest::testFilter with data set #16
+.
+Fenom\TagsTest::testFilter with data set #17
+.
+Fenom\TagsTest::testFilter with data set #18
+.
+Fenom\TagsTest::testFilter with data set #19
+.
+Fenom\TagsTest::testFilter with data set #2
+.
+Fenom\TagsTest::testFilter with data set #20
+.
+Fenom\TagsTest::testFilter with data set #21
+.
+Fenom\TagsTest::testFilter with data set #22
+.
+Fenom\TagsTest::testFilter with data set #23
+.
+Fenom\TagsTest::testFilter with data set #24
+.
+Fenom\TagsTest::testFilter with data set #25
+.
+Fenom\TagsTest::testFilter with data set #26
+.
+Fenom\TagsTest::testFilter with data set #27
+.
+Fenom\TagsTest::testFilter with data set #28
+.
+Fenom\TagsTest::testFilter with data set #29
+.
+Fenom\TagsTest::testFilter with data set #3
+.
+Fenom\TagsTest::testFilter with data set #30
+.
+Fenom\TagsTest::testFilter with data set #31
+.
+Fenom\TagsTest::testFilter with data set #4
+.
+Fenom\TagsTest::testFilter with data set #5
+.
+Fenom\TagsTest::testFilter with data set #6
+.
+Fenom\TagsTest::testFilter with data set #7
+.
+Fenom\TagsTest::testFilter with data set #8
+.
+Fenom\TagsTest::testFilter with data set #9
+.
+Fenom\TagsTest::testVar with data set #0
+.
+Fenom\TagsTest::testVar with data set #1
+.
+Fenom\TagsTest::testVar with data set #10
+.
+Fenom\TagsTest::testVar with data set #11
+.
+Fenom\TagsTest::testVar with data set #12
+.
+Fenom\TagsTest::testVar with data set #13
+.
+Fenom\TagsTest::testVar with data set #14
+.
+Fenom\TagsTest::testVar with data set #15
+.
+Fenom\TagsTest::testVar with data set #16
+.
+Fenom\TagsTest::testVar with data set #17
+.
+Fenom\TagsTest::testVar with data set #18
+.
+Fenom\TagsTest::testVar with data set #19
+.
+Fenom\TagsTest::testVar with data set #2
+.
+Fenom\TagsTest::testVar with data set #20
+.
+Fenom\TagsTest::testVar with data set #21
+.
+Fenom\TagsTest::testVar with data set #22
+.
+Fenom\TagsTest::testVar with data set #23
+.
+Fenom\TagsTest::testVar with data set #24
+.
+Fenom\TagsTest::testVar with data set #25
+.
+Fenom\TagsTest::testVar with data set #26
+.
+Fenom\TagsTest::testVar with data set #27
+.
+Fenom\TagsTest::testVar with data set #28
+.
+Fenom\TagsTest::testVar with data set #29
+.
+Fenom\TagsTest::testVar with data set #3
+.
+Fenom\TagsTest::testVar with data set #30
+.
+Fenom\TagsTest::testVar with data set #31
+.
+Fenom\TagsTest::testVar with data set #4
+.
+Fenom\TagsTest::testVar with data set #5
+.
+Fenom\TagsTest::testVar with data set #6
+.
+Fenom\TagsTest::testVar with data set #7
+.
+Fenom\TagsTest::testVar with data set #8
+.
+Fenom\TagsTest::testVar with data set #9
+.
+Fenom\TagsTest::testVarBlock with data set #0
+.
+Fenom\TagsTest::testVarBlock with data set #1
+.
+Fenom\TagsTest::testVarBlock with data set #10
+.
+Fenom\TagsTest::testVarBlock with data set #11
+.
+Fenom\TagsTest::testVarBlock with data set #12
+.
+Fenom\TagsTest::testVarBlock with data set #13
+.
+Fenom\TagsTest::testVarBlock with data set #14
+.
+Fenom\TagsTest::testVarBlock with data set #15
+.
+Fenom\TagsTest::testVarBlock with data set #16
+.
+Fenom\TagsTest::testVarBlock with data set #17
+.
+Fenom\TagsTest::testVarBlock with data set #18
+.
+Fenom\TagsTest::testVarBlock with data set #19
+.
+Fenom\TagsTest::testVarBlock with data set #2
+.
+Fenom\TagsTest::testVarBlock with data set #20
+.
+Fenom\TagsTest::testVarBlock with data set #21
+.
+Fenom\TagsTest::testVarBlock with data set #22
+.
+Fenom\TagsTest::testVarBlock with data set #23
+.
+Fenom\TagsTest::testVarBlock with data set #24
+.
+Fenom\TagsTest::testVarBlock with data set #25
+.
+Fenom\TagsTest::testVarBlock with data set #26
+.
+Fenom\TagsTest::testVarBlock with data set #27
+.
+Fenom\TagsTest::testVarBlock with data set #28
+.
+Fenom\TagsTest::testVarBlock with data set #29
+.
+Fenom\TagsTest::testVarBlock with data set #3
+.
+Fenom\TagsTest::testVarBlock with data set #30
+.
+Fenom\TagsTest::testVarBlock with data set #31
+.
+Fenom\TagsTest::testVarBlock with data set #4
+.
+Fenom\TagsTest::testVarBlock with data set #5
+.
+Fenom\TagsTest::testVarBlock with data set #6
+.
+Fenom\TagsTest::testVarBlock with data set #7
+.
+Fenom\TagsTest::testVarBlock with data set #8
+.
+Fenom\TagsTest::testVarBlock with data set #9
+.
+Fenom\TagsTest::testVarBlockModified with data set #0
+.
+Fenom\TagsTest::testVarBlockModified with data set #1
+.
+Fenom\TagsTest::testVarBlockModified with data set #10
+.
+Fenom\TagsTest::testVarBlockModified with data set #11
+.
+Fenom\TagsTest::testVarBlockModified with data set #12
+.
+Fenom\TagsTest::testVarBlockModified with data set #13
+.
+Fenom\TagsTest::testVarBlockModified with data set #14
+.
+Fenom\TagsTest::testVarBlockModified with data set #15
+.
+Fenom\TagsTest::testVarBlockModified with data set #16
+.
+Fenom\TagsTest::testVarBlockModified with data set #17
+.
+Fenom\TagsTest::testVarBlockModified with data set #18
+.
+Fenom\TagsTest::testVarBlockModified with data set #19
+.
+Fenom\TagsTest::testVarBlockModified with data set #2
+.
+Fenom\TagsTest::testVarBlockModified with data set #20
+.
+Fenom\TagsTest::testVarBlockModified with data set #21
+.
+Fenom\TagsTest::testVarBlockModified with data set #22
+.
+Fenom\TagsTest::testVarBlockModified with data set #23
+.
+Fenom\TagsTest::testVarBlockModified with data set #24
+.
+Fenom\TagsTest::testVarBlockModified with data set #25
+.
+Fenom\TagsTest::testVarBlockModified with data set #26
+.
+Fenom\TagsTest::testVarBlockModified with data set #27
+.
+Fenom\TagsTest::testVarBlockModified with data set #28
+.
+Fenom\TagsTest::testVarBlockModified with data set #29
+.
+Fenom\TagsTest::testVarBlockModified with data set #3
+.
+Fenom\TagsTest::testVarBlockModified with data set #30
+.
+Fenom\TagsTest::testVarBlockModified with data set #31
+.
+Fenom\TagsTest::testVarBlockModified with data set #4
+.
+Fenom\TagsTest::testVarBlockModified with data set #5
+.
+Fenom\TagsTest::testVarBlockModified with data set #6
+.
+Fenom\TagsTest::testVarBlockModified with data set #7
+.
+Fenom\TagsTest::testVarBlockModified with data set #8
+.
+Fenom\TagsTest::testVarBlockModified with data set #9
+.
+Fenom\TemplateTest::testArrays with data set #0
+.
+Fenom\TemplateTest::testArrays with data set #1
+.
+Fenom\TemplateTest::testArrays with data set #10
+.
+Fenom\TemplateTest::testArrays with data set #11
+.
+Fenom\TemplateTest::testArrays with data set #12
+.
+Fenom\TemplateTest::testArrays with data set #13
+.
+Fenom\TemplateTest::testArrays with data set #14
+.
+Fenom\TemplateTest::testArrays with data set #15
+.
+Fenom\TemplateTest::testArrays with data set #16
+.
+Fenom\TemplateTest::testArrays with data set #17
+.
+Fenom\TemplateTest::testArrays with data set #2
+.
+Fenom\TemplateTest::testArrays with data set #3
+.
+Fenom\TemplateTest::testArrays with data set #4
+.
+Fenom\TemplateTest::testArrays with data set #5
+.
+Fenom\TemplateTest::testArrays with data set #6
+.
+Fenom\TemplateTest::testArrays with data set #7
+.
+Fenom\TemplateTest::testArrays with data set #8
+.
+Fenom\TemplateTest::testArrays with data set #9
+.
+Fenom\TemplateTest::testConcat with data set #0
+.
+Fenom\TemplateTest::testConcat with data set #1
+.
+Fenom\TemplateTest::testConcat with data set #10
+.
+Fenom\TemplateTest::testConcat with data set #11
+.
+Fenom\TemplateTest::testConcat with data set #2
+.
+Fenom\TemplateTest::testConcat with data set #3
+.
+Fenom\TemplateTest::testConcat with data set #4
+.
+Fenom\TemplateTest::testConcat with data set #5
+.
+Fenom\TemplateTest::testConcat with data set #6
+.
+Fenom\TemplateTest::testConcat with data set #7
+.
+Fenom\TemplateTest::testConcat with data set #8
+.
+Fenom\TemplateTest::testConcat with data set #9
+.
+Fenom\TemplateTest::testCreateVar with data set #0
+.
+Fenom\TemplateTest::testCreateVar with data set #1
+.
+Fenom\TemplateTest::testCreateVar with data set #10
+.
+Fenom\TemplateTest::testCreateVar with data set #11
+.
+Fenom\TemplateTest::testCreateVar with data set #12
+.
+Fenom\TemplateTest::testCreateVar with data set #13
+.
+Fenom\TemplateTest::testCreateVar with data set #14
+.
+Fenom\TemplateTest::testCreateVar with data set #15
+.
+Fenom\TemplateTest::testCreateVar with data set #2
+.
+Fenom\TemplateTest::testCreateVar with data set #3
+.
+Fenom\TemplateTest::testCreateVar with data set #4
+.
+Fenom\TemplateTest::testCreateVar with data set #5
+.
+Fenom\TemplateTest::testCreateVar with data set #6
+.
+Fenom\TemplateTest::testCreateVar with data set #7
+.
+Fenom\TemplateTest::testCreateVar with data set #8
+.
+Fenom\TemplateTest::testCreateVar with data set #9
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #0
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #1
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #10
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #11
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #12
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #13
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #14
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #2
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #3
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #4
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #5
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #6
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #7
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #8
+.
+Fenom\TemplateTest::testCreateVarInvalid with data set #9
+.
+Fenom\TemplateTest::testDo with data set #0
+.
+Fenom\TemplateTest::testDo with data set #1
+.
+Fenom\TemplateTest::testDo with data set #2
+.
+Fenom\TemplateTest::testExpressions with data set #0
+.
+Fenom\TemplateTest::testExpressions with data set #1
+.
+Fenom\TemplateTest::testExpressions with data set #10
+.
+Fenom\TemplateTest::testExpressions with data set #11
+.
+Fenom\TemplateTest::testExpressions with data set #12
+.
+Fenom\TemplateTest::testExpressions with data set #13
+.
+Fenom\TemplateTest::testExpressions with data set #14
+.
+Fenom\TemplateTest::testExpressions with data set #15
+.
+Fenom\TemplateTest::testExpressions with data set #16
+.
+Fenom\TemplateTest::testExpressions with data set #17
+.
+Fenom\TemplateTest::testExpressions with data set #18
+.
+Fenom\TemplateTest::testExpressions with data set #19
+.
+Fenom\TemplateTest::testExpressions with data set #2
+.
+Fenom\TemplateTest::testExpressions with data set #20
+.
+Fenom\TemplateTest::testExpressions with data set #21
+.
+Fenom\TemplateTest::testExpressions with data set #3
+.
+Fenom\TemplateTest::testExpressions with data set #4
+.
+Fenom\TemplateTest::testExpressions with data set #5
+.
+Fenom\TemplateTest::testExpressions with data set #6
+.
+Fenom\TemplateTest::testExpressions with data set #7
+.
+Fenom\TemplateTest::testExpressions with data set #8
+.
+Fenom\TemplateTest::testExpressions with data set #9
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #0
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #1
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #10
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #11
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #12
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #13
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #14
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #15
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #2
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #3
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #4
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #5
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #6
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #7
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #8
+.
+Fenom\TemplateTest::testExpressionsInvalid with data set #9
+.
+Fenom\TemplateTest::testForeach with data set #0
+.
+Fenom\TemplateTest::testForeach with data set #1
+.
+Fenom\TemplateTest::testForeach with data set #10
+.
+Fenom\TemplateTest::testForeach with data set #11
+.
+Fenom\TemplateTest::testForeach with data set #12
+E
+Fenom\TemplateTest::testForeach with data set #13
+E
+Fenom\TemplateTest::testForeach with data set #14
+E
+Fenom\TemplateTest::testForeach with data set #15
+E
+Fenom\TemplateTest::testForeach with data set #16
+E
+Fenom\TemplateTest::testForeach with data set #17
+E
+Fenom\TemplateTest::testForeach with data set #18
+E
+Fenom\TemplateTest::testForeach with data set #19
+E
+Fenom\TemplateTest::testForeach with data set #2
+.
+Fenom\TemplateTest::testForeach with data set #20
+E
+Fenom\TemplateTest::testForeach with data set #21
+E
+Fenom\TemplateTest::testForeach with data set #22
+E
+Fenom\TemplateTest::testForeach with data set #23
+.
+Fenom\TemplateTest::testForeach with data set #24
+.
+Fenom\TemplateTest::testForeach with data set #3
+.
+Fenom\TemplateTest::testForeach with data set #4
+.
+Fenom\TemplateTest::testForeach with data set #5
+.
+Fenom\TemplateTest::testForeach with data set #6
+.
+Fenom\TemplateTest::testForeach with data set #7
+.
+Fenom\TemplateTest::testForeach with data set #8
+.
+Fenom\TemplateTest::testForeach with data set #9
+.
+Fenom\TemplateTest::testForeachInvalid with data set #0
+.
+Fenom\TemplateTest::testForeachInvalid with data set #1
+.
+Fenom\TemplateTest::testForeachInvalid with data set #10
+F
+Fenom\TemplateTest::testForeachInvalid with data set #11
+F
+Fenom\TemplateTest::testForeachInvalid with data set #12
+F
+Fenom\TemplateTest::testForeachInvalid with data set #13
+F
+Fenom\TemplateTest::testForeachInvalid with data set #14
+F
+Fenom\TemplateTest::testForeachInvalid with data set #15
+F
+Fenom\TemplateTest::testForeachInvalid with data set #16
+F
+Fenom\TemplateTest::testForeachInvalid with data set #17
+.
+Fenom\TemplateTest::testForeachInvalid with data set #18
+.
+Fenom\TemplateTest::testForeachInvalid with data set #2
+.
+Fenom\TemplateTest::testForeachInvalid with data set #3
+.
+Fenom\TemplateTest::testForeachInvalid with data set #4
+.
+Fenom\TemplateTest::testForeachInvalid with data set #5
+.
+Fenom\TemplateTest::testForeachInvalid with data set #6
+.
+Fenom\TemplateTest::testForeachInvalid with data set #7
+.
+Fenom\TemplateTest::testForeachInvalid with data set #8
+.
+Fenom\TemplateTest::testForeachInvalid with data set #9
+.
+Fenom\TemplateTest::testIf with data set #0
+.
+Fenom\TemplateTest::testIf with data set #1
+.
+Fenom\TemplateTest::testIf with data set #10
+.
+Fenom\TemplateTest::testIf with data set #11
+.
+Fenom\TemplateTest::testIf with data set #12
+.
+Fenom\TemplateTest::testIf with data set #13
+.
+Fenom\TemplateTest::testIf with data set #14
+.
+Fenom\TemplateTest::testIf with data set #15
+.
+Fenom\TemplateTest::testIf with data set #16
+.
+Fenom\TemplateTest::testIf with data set #17
+.
+Fenom\TemplateTest::testIf with data set #18
+.
+Fenom\TemplateTest::testIf with data set #19
+.
+Fenom\TemplateTest::testIf with data set #2
+.
+Fenom\TemplateTest::testIf with data set #20
+.
+Fenom\TemplateTest::testIf with data set #21
+.
+Fenom\TemplateTest::testIf with data set #22
+.
+Fenom\TemplateTest::testIf with data set #23
+.
+Fenom\TemplateTest::testIf with data set #3
+.
+Fenom\TemplateTest::testIf with data set #4
+.
+Fenom\TemplateTest::testIf with data set #5
+.
+Fenom\TemplateTest::testIf with data set #6
+.
+Fenom\TemplateTest::testIf with data set #7
+.
+Fenom\TemplateTest::testIf with data set #8
+.
+Fenom\TemplateTest::testIf with data set #9
+.
+Fenom\TemplateTest::testIfInvalid with data set #0
+.
+Fenom\TemplateTest::testIfInvalid with data set #1
+.
+Fenom\TemplateTest::testIfInvalid with data set #2
+.
+Fenom\TemplateTest::testIfInvalid with data set #3
+.
+Fenom\TemplateTest::testIgnores with data set #0
+.
+Fenom\TemplateTest::testIgnores with data set #1
+.
+Fenom\TemplateTest::testIgnores with data set #2
+.
+Fenom\TemplateTest::testIgnores with data set #3
+.
+Fenom\TemplateTest::testIgnores with data set #4
+.
+Fenom\TemplateTest::testIgnores with data set #5
+.
+Fenom\TemplateTest::testIgnores with data set #6
+.
+Fenom\TemplateTest::testInOperator with data set #0
+.
+Fenom\TemplateTest::testInOperator with data set #1
+.
+Fenom\TemplateTest::testInOperator with data set #10
+.
+Fenom\TemplateTest::testInOperator with data set #11
+.
+Fenom\TemplateTest::testInOperator with data set #12
+.
+Fenom\TemplateTest::testInOperator with data set #2
+.
+Fenom\TemplateTest::testInOperator with data set #3
+.
+Fenom\TemplateTest::testInOperator with data set #4
+.
+Fenom\TemplateTest::testInOperator with data set #5
+.
+Fenom\TemplateTest::testInOperator with data set #6
+.
+Fenom\TemplateTest::testInOperator with data set #7
+.
+Fenom\TemplateTest::testInOperator with data set #8
+.
+Fenom\TemplateTest::testInOperator with data set #9
+.
+Fenom\TemplateTest::testInOperatorInvalid with data set #0
+.
+Fenom\TemplateTest::testInOperatorInvalid with data set #1
+.
+Fenom\TemplateTest::testInOperatorInvalid with data set #2
+.
+Fenom\TemplateTest::testInOperatorInvalid with data set #3
+.
+Fenom\TemplateTest::testInOperatorInvalid with data set #4
+.
+Fenom\TemplateTest::testInclude with data set #0
+.
+Fenom\TemplateTest::testInclude with data set #1
+.
+Fenom\TemplateTest::testInclude with data set #10
+.
+Fenom\TemplateTest::testInclude with data set #11
+.
+Fenom\TemplateTest::testInclude with data set #12
+.
+Fenom\TemplateTest::testInclude with data set #13
+.
+Fenom\TemplateTest::testInclude with data set #14
+.
+Fenom\TemplateTest::testInclude with data set #2
+.
+Fenom\TemplateTest::testInclude with data set #3
+.
+Fenom\TemplateTest::testInclude with data set #4
+.
+Fenom\TemplateTest::testInclude with data set #5
+.
+Fenom\TemplateTest::testInclude with data set #6
+.
+Fenom\TemplateTest::testInclude with data set #7
+.
+Fenom\TemplateTest::testInclude with data set #8
+.
+Fenom\TemplateTest::testInclude with data set #9
+.
+Fenom\TemplateTest::testIncludeInvalid with data set #0
+.
+Fenom\TemplateTest::testIncludeInvalid with data set #1
+.
+Fenom\TemplateTest::testIncludeInvalid with data set #2
+.
+Fenom\TemplateTest::testInsert with data set #0
+.
+Fenom\TemplateTest::testInsert with data set #1
+.
+Fenom\TemplateTest::testInsertInvalid with data set #0
+.
+Fenom\TemplateTest::testInsertInvalid with data set #1
+.
+Fenom\TemplateTest::testInsertInvalid with data set #2
+E
+Fenom\TemplateTest::testInsertInvalid with data set #3
+.
+Fenom\TemplateTest::testInsertInvalid with data set #4
+.
+Fenom\TemplateTest::testInsertInvalid with data set #5
+.
+Fenom\TemplateTest::testInsertInvalid with data set #6
+.
+Fenom\TemplateTest::testInsertInvalid with data set #7
+.
+Fenom\TemplateTest::testInsertInvalid with data set #8
+.
+Fenom\TemplateTest::testInsertInvalid with data set #9
+.
+Fenom\TemplateTest::testIsOperator with data set #0
+.
+Fenom\TemplateTest::testIsOperator with data set #1
+.
+Fenom\TemplateTest::testIsOperator with data set #10
+.
+Fenom\TemplateTest::testIsOperator with data set #11
+.
+Fenom\TemplateTest::testIsOperator with data set #12
+.
+Fenom\TemplateTest::testIsOperator with data set #13
+.
+Fenom\TemplateTest::testIsOperator with data set #14
+.
+Fenom\TemplateTest::testIsOperator with data set #15
+.
+Fenom\TemplateTest::testIsOperator with data set #16
+.
+Fenom\TemplateTest::testIsOperator with data set #17
+.
+Fenom\TemplateTest::testIsOperator with data set #18
+.
+Fenom\TemplateTest::testIsOperator with data set #19
+.
+Fenom\TemplateTest::testIsOperator with data set #2
+.
+Fenom\TemplateTest::testIsOperator with data set #20
+.
+Fenom\TemplateTest::testIsOperator with data set #21
+.
+Fenom\TemplateTest::testIsOperator with data set #22
+.
+Fenom\TemplateTest::testIsOperator with data set #23
+.
+Fenom\TemplateTest::testIsOperator with data set #24
+.
+Fenom\TemplateTest::testIsOperator with data set #25
+.
+Fenom\TemplateTest::testIsOperator with data set #26
+.
+Fenom\TemplateTest::testIsOperator with data set #27
+.
+Fenom\TemplateTest::testIsOperator with data set #28
+.
+Fenom\TemplateTest::testIsOperator with data set #29
+.
+Fenom\TemplateTest::testIsOperator with data set #3
+.
+Fenom\TemplateTest::testIsOperator with data set #30
+.
+Fenom\TemplateTest::testIsOperator with data set #31
+.
+Fenom\TemplateTest::testIsOperator with data set #32
+.
+Fenom\TemplateTest::testIsOperator with data set #33
+.
+Fenom\TemplateTest::testIsOperator with data set #34
+.
+Fenom\TemplateTest::testIsOperator with data set #35
+.
+Fenom\TemplateTest::testIsOperator with data set #36
+.
+Fenom\TemplateTest::testIsOperator with data set #37
+.
+Fenom\TemplateTest::testIsOperator with data set #38
+.
+Fenom\TemplateTest::testIsOperator with data set #39
+.
+Fenom\TemplateTest::testIsOperator with data set #4
+.
+Fenom\TemplateTest::testIsOperator with data set #40
+.
+Fenom\TemplateTest::testIsOperator with data set #41
+.
+Fenom\TemplateTest::testIsOperator with data set #42
+.
+Fenom\TemplateTest::testIsOperator with data set #43
+.
+Fenom\TemplateTest::testIsOperator with data set #44
+.
+Fenom\TemplateTest::testIsOperator with data set #45
+.
+Fenom\TemplateTest::testIsOperator with data set #46
+.
+Fenom\TemplateTest::testIsOperator with data set #47
+.
+Fenom\TemplateTest::testIsOperator with data set #5
+.
+Fenom\TemplateTest::testIsOperator with data set #6
+.
+Fenom\TemplateTest::testIsOperator with data set #7
+.
+Fenom\TemplateTest::testIsOperator with data set #8
+.
+Fenom\TemplateTest::testIsOperator with data set #9
+.
+Fenom\TemplateTest::testLayersInvalid with data set #0
+.
+Fenom\TemplateTest::testLayersInvalid with data set #1
+.
+Fenom\TemplateTest::testLayersInvalid with data set #2
+.
+Fenom\TemplateTest::testLayersInvalid with data set #3
+.
+Fenom\TemplateTest::testLayersInvalid with data set #4
+.
+Fenom\TemplateTest::testLayersInvalid with data set #5
+.
+Fenom\TemplateTest::testLayersInvalid with data set #6
+.
+Fenom\TemplateTest::testLayersInvalid with data set #7
+.
+Fenom\TemplateTest::testModifiers with data set #0
+.
+Fenom\TemplateTest::testModifiers with data set #1
+.
+Fenom\TemplateTest::testModifiers with data set #10
+.
+Fenom\TemplateTest::testModifiers with data set #11
+.
+Fenom\TemplateTest::testModifiers with data set #12
+.
+Fenom\TemplateTest::testModifiers with data set #13
+.
+Fenom\TemplateTest::testModifiers with data set #14
+.
+Fenom\TemplateTest::testModifiers with data set #15
+.
+Fenom\TemplateTest::testModifiers with data set #16
+.
+Fenom\TemplateTest::testModifiers with data set #17
+.
+Fenom\TemplateTest::testModifiers with data set #18
+.
+Fenom\TemplateTest::testModifiers with data set #19
+.
+Fenom\TemplateTest::testModifiers with data set #2
+.
+Fenom\TemplateTest::testModifiers with data set #20
+.
+Fenom\TemplateTest::testModifiers with data set #3
+.
+Fenom\TemplateTest::testModifiers with data set #4
+.
+Fenom\TemplateTest::testModifiers with data set #5
+.
+Fenom\TemplateTest::testModifiers with data set #6
+.
+Fenom\TemplateTest::testModifiers with data set #7
+.
+Fenom\TemplateTest::testModifiers with data set #8
+.
+Fenom\TemplateTest::testModifiers with data set #9
+.
+Fenom\TemplateTest::testModifiersInvalid with data set #0
+.
+Fenom\TemplateTest::testModifiersInvalid with data set #1
+.
+Fenom\TemplateTest::testModifiersInvalid with data set #2
+.
+Fenom\TemplateTest::testModifiersInvalid with data set #3
+.
+Fenom\TemplateTest::testModifiersInvalid with data set #4
+.
+Fenom\TemplateTest::testModifiersInvalid with data set #5
+.
+Fenom\TemplateTest::testRange with data set #0
+.
+Fenom\TemplateTest::testRange with data set #1
+.
+Fenom\TemplateTest::testRange with data set #10
+.
+Fenom\TemplateTest::testRange with data set #11
+.
+Fenom\TemplateTest::testRange with data set #12
+.
+Fenom\TemplateTest::testRange with data set #13
+.
+Fenom\TemplateTest::testRange with data set #14
+.
+Fenom\TemplateTest::testRange with data set #15
+.
+Fenom\TemplateTest::testRange with data set #16
+.
+Fenom\TemplateTest::testRange with data set #17
+.
+Fenom\TemplateTest::testRange with data set #18
+.
+Fenom\TemplateTest::testRange with data set #19
+.
+Fenom\TemplateTest::testRange with data set #2
+.
+Fenom\TemplateTest::testRange with data set #3
+.
+Fenom\TemplateTest::testRange with data set #4
+.
+Fenom\TemplateTest::testRange with data set #5
+.
+Fenom\TemplateTest::testRange with data set #6
+.
+Fenom\TemplateTest::testRange with data set #7
+.
+Fenom\TemplateTest::testRange with data set #8
+.
+Fenom\TemplateTest::testRange with data set #9
+.
+Fenom\TemplateTest::testScalars with data set #0
+.
+Fenom\TemplateTest::testScalars with data set #1
+.
+Fenom\TemplateTest::testScalars with data set #10
+.
+Fenom\TemplateTest::testScalars with data set #11
+.
+Fenom\TemplateTest::testScalars with data set #12
+.
+Fenom\TemplateTest::testScalars with data set #13
+.
+Fenom\TemplateTest::testScalars with data set #14
+.
+Fenom\TemplateTest::testScalars with data set #15
+.
+Fenom\TemplateTest::testScalars with data set #16
+.
+Fenom\TemplateTest::testScalars with data set #17
+.
+Fenom\TemplateTest::testScalars with data set #18
+.
+Fenom\TemplateTest::testScalars with data set #19
+.
+Fenom\TemplateTest::testScalars with data set #2
+.
+Fenom\TemplateTest::testScalars with data set #20
+.
+Fenom\TemplateTest::testScalars with data set #21
+.
+Fenom\TemplateTest::testScalars with data set #22
+.
+Fenom\TemplateTest::testScalars with data set #23
+.
+Fenom\TemplateTest::testScalars with data set #24
+.
+Fenom\TemplateTest::testScalars with data set #25
+.
+Fenom\TemplateTest::testScalars with data set #26
+.
+Fenom\TemplateTest::testScalars with data set #27
+.
+Fenom\TemplateTest::testScalars with data set #28
+.
+Fenom\TemplateTest::testScalars with data set #29
+.
+Fenom\TemplateTest::testScalars with data set #3
+.
+Fenom\TemplateTest::testScalars with data set #30
+.
+Fenom\TemplateTest::testScalars with data set #31
+.
+Fenom\TemplateTest::testScalars with data set #4
+.
+Fenom\TemplateTest::testScalars with data set #5
+.
+Fenom\TemplateTest::testScalars with data set #6
+.
+Fenom\TemplateTest::testScalars with data set #7
+.
+Fenom\TemplateTest::testScalars with data set #8
+.
+Fenom\TemplateTest::testScalars with data set #9
+.
+Fenom\TemplateTest::testStatic with data set #0
+.
+Fenom\TemplateTest::testStatic with data set #1
+.
+Fenom\TemplateTest::testStatic with data set #2
+.
+Fenom\TemplateTest::testStaticInvalid with data set #0
+.
+Fenom\TemplateTest::testStaticInvalid with data set #1
+.
+Fenom\TemplateTest::testStaticInvalid with data set #2
+.
+Fenom\TemplateTest::testStaticInvalid with data set #3
+.
+Fenom\TemplateTest::testStaticInvalid with data set #4
+.
+Fenom\TemplateTest::testStaticInvalid with data set #5
+.
+Fenom\TemplateTest::testStaticInvalid with data set #6
+.
+Fenom\TemplateTest::testStaticInvalid with data set #7
+.
+Fenom\TemplateTest::testSwitch with data set #0
+.
+Fenom\TemplateTest::testSwitch with data set #1
+.
+Fenom\TemplateTest::testSwitch with data set #2
+.
+Fenom\TemplateTest::testSwitch with data set #3
+.
+Fenom\TemplateTest::testSwitch with data set #4
+.
+Fenom\TemplateTest::testSwitch with data set #5
+.
+Fenom\TemplateTest::testSwitch with data set #6
+.
+Fenom\TemplateTest::testSwitch with data set #7
+.
+Fenom\TemplateTest::testSwitch with data set #8
+.
+Fenom\TemplateTest::testSwitchInvalid with data set #0
+.
+Fenom\TemplateTest::testSwitchInvalid with data set #1
+.
+Fenom\TemplateTest::testSwitchInvalid with data set #2
+.
+Fenom\TemplateTest::testTernary with data set #0
+.
+Fenom\TemplateTest::testTernary with data set #1
+.
+Fenom\TemplateTest::testTernary with data set #10
+.
+Fenom\TemplateTest::testTernary with data set #11
+.
+Fenom\TemplateTest::testTernary with data set #12
+.
+Fenom\TemplateTest::testTernary with data set #13
+.
+Fenom\TemplateTest::testTernary with data set #14
+.
+Fenom\TemplateTest::testTernary with data set #15
+.
+Fenom\TemplateTest::testTernary with data set #16
+.
+Fenom\TemplateTest::testTernary with data set #17
+.
+Fenom\TemplateTest::testTernary with data set #18
+.
+Fenom\TemplateTest::testTernary with data set #19
+.
+Fenom\TemplateTest::testTernary with data set #2
+.
+Fenom\TemplateTest::testTernary with data set #20
+.
+Fenom\TemplateTest::testTernary with data set #21
+.
+Fenom\TemplateTest::testTernary with data set #22
+.
+Fenom\TemplateTest::testTernary with data set #23
+.
+Fenom\TemplateTest::testTernary with data set #24
+.
+Fenom\TemplateTest::testTernary with data set #25
+.
+Fenom\TemplateTest::testTernary with data set #26
+.
+Fenom\TemplateTest::testTernary with data set #27
+.
+Fenom\TemplateTest::testTernary with data set #28
+.
+Fenom\TemplateTest::testTernary with data set #29
+.
+Fenom\TemplateTest::testTernary with data set #3
+.
+Fenom\TemplateTest::testTernary with data set #30
+.
+Fenom\TemplateTest::testTernary with data set #31
+.
+Fenom\TemplateTest::testTernary with data set #32
+.
+Fenom\TemplateTest::testTernary with data set #33
+.
+Fenom\TemplateTest::testTernary with data set #34
+.
+Fenom\TemplateTest::testTernary with data set #35
+.
+Fenom\TemplateTest::testTernary with data set #36
+.
+Fenom\TemplateTest::testTernary with data set #37
+.
+Fenom\TemplateTest::testTernary with data set #38
+.
+Fenom\TemplateTest::testTernary with data set #39
+.
+Fenom\TemplateTest::testTernary with data set #4
+.
+Fenom\TemplateTest::testTernary with data set #40
+.
+Fenom\TemplateTest::testTernary with data set #41
+.
+Fenom\TemplateTest::testTernary with data set #42
+.
+Fenom\TemplateTest::testTernary with data set #43
+.
+Fenom\TemplateTest::testTernary with data set #44
+.
+Fenom\TemplateTest::testTernary with data set #45
+.
+Fenom\TemplateTest::testTernary with data set #46
+.
+Fenom\TemplateTest::testTernary with data set #47
+.
+Fenom\TemplateTest::testTernary with data set #48
+.
+Fenom\TemplateTest::testTernary with data set #49
+.
+Fenom\TemplateTest::testTernary with data set #5
+.
+Fenom\TemplateTest::testTernary with data set #50
+.
+Fenom\TemplateTest::testTernary with data set #51
+.
+Fenom\TemplateTest::testTernary with data set #6
+.
+Fenom\TemplateTest::testTernary with data set #7
+.
+Fenom\TemplateTest::testTernary with data set #8
+.
+Fenom\TemplateTest::testTernary with data set #9
+.
+Fenom\TemplateTest::testUnset with data set #0
+.
+Fenom\TemplateTest::testUnset with data set #1
+.
+Fenom\TemplateTest::testUnset with data set #2
+.
+Fenom\TemplateTest::testVars with data set #0
+.
+Fenom\TemplateTest::testVars with data set #1
+.
+Fenom\TemplateTest::testVars with data set #10
+.
+Fenom\TemplateTest::testVars with data set #11
+.
+Fenom\TemplateTest::testVars with data set #12
+.
+Fenom\TemplateTest::testVars with data set #13
+.
+Fenom\TemplateTest::testVars with data set #14
+.
+Fenom\TemplateTest::testVars with data set #15
+.
+Fenom\TemplateTest::testVars with data set #16
+.
+Fenom\TemplateTest::testVars with data set #17
+.
+Fenom\TemplateTest::testVars with data set #18
+.
+Fenom\TemplateTest::testVars with data set #19
+.
+Fenom\TemplateTest::testVars with data set #2
+.
+Fenom\TemplateTest::testVars with data set #20
+.
+Fenom\TemplateTest::testVars with data set #21
+.
+Fenom\TemplateTest::testVars with data set #22
+.
+Fenom\TemplateTest::testVars with data set #23
+.
+Fenom\TemplateTest::testVars with data set #24
+.
+Fenom\TemplateTest::testVars with data set #25
+.
+Fenom\TemplateTest::testVars with data set #26
+.
+Fenom\TemplateTest::testVars with data set #27
+.
+Fenom\TemplateTest::testVars with data set #28
+.
+Fenom\TemplateTest::testVars with data set #29
+.
+Fenom\TemplateTest::testVars with data set #3
+.
+Fenom\TemplateTest::testVars with data set #30
+.
+Fenom\TemplateTest::testVars with data set #31
+.
+Fenom\TemplateTest::testVars with data set #32
+.
+Fenom\TemplateTest::testVars with data set #33
+.
+Fenom\TemplateTest::testVars with data set #34
+.
+Fenom\TemplateTest::testVars with data set #35
+.
+Fenom\TemplateTest::testVars with data set #36
+.
+Fenom\TemplateTest::testVars with data set #37
+.
+Fenom\TemplateTest::testVars with data set #38
+.
+Fenom\TemplateTest::testVars with data set #39
+.
+Fenom\TemplateTest::testVars with data set #4
+.
+Fenom\TemplateTest::testVars with data set #40
+.
+Fenom\TemplateTest::testVars with data set #41
+.
+Fenom\TemplateTest::testVars with data set #42
+.
+Fenom\TemplateTest::testVars with data set #43
+.
+Fenom\TemplateTest::testVars with data set #44
+.
+Fenom\TemplateTest::testVars with data set #45
+.
+Fenom\TemplateTest::testVars with data set #46
+.
+Fenom\TemplateTest::testVars with data set #5
+.
+Fenom\TemplateTest::testVars with data set #6
+.
+Fenom\TemplateTest::testVars with data set #7
+.
+Fenom\TemplateTest::testVars with data set #8
+.
+Fenom\TemplateTest::testVars with data set #9
+.
+Fenom\TemplateTest::testVarsInvalid with data set #0
+.
+Fenom\TemplateTest::testVarsInvalid with data set #1
+.
+Fenom\TemplateTest::testVarsInvalid with data set #2
+.
+Fenom\TemplateTest::testVarsInvalid with data set #3
+.
+Fenom\TemplateTest::testVarsInvalid with data set #4
+.
+Fenom\TemplateTest::testVarsInvalid with data set #5
+.
+Fenom\TemplateTest::testVarsInvalid with data set #6
+.
+Fenom\TemplateTest::testVarsInvalid with data set #7
+.
+Fenom\TemplateTest::testVarsInvalid with data set #8
+.
+Fenom\TemplateTest::testVarsInvalid with data set #9
+.
+Fenom\TemplateTest::testWhile with data set #0
+.
+Fenom\TemplateTest::testWhile with data set #1
+.
+Fenom\TemplateTest::testWhile with data set #2
+.
+Fenom\TemplateTest::testWhile with data set #3
+.
+Fenom\TemplateTest::testWhileInvalid with data set #0
+.
+Fenom\TokenizerTest::testFixFloats
+.
+Fenom\TokenizerTest::testGetName
+.
+Fenom\TokenizerTest::testSkip
+.
+Fenom\TokenizerTest::testTokens
+.

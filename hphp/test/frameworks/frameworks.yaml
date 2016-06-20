@@ -528,3 +528,9 @@
     commit: 8c5e86eb97f3eee633729b22e950082fb5591328
     install_root: silex
     test_root: silex
+  fenom:
+    url: https://github.com/fenom-template/fenom.git
+    branch: "2.11.1"
+    commit: 7fffa19fa901315f06d9a0e4ddce2681bddfa826
+    install_root: fenom
+    test_root: fenom

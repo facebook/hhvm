@@ -63,24 +63,28 @@ namespace HPHP {
  */
 struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   PushTxnHandler(uint64_t pushId,
-                 const std::shared_ptr<ProxygenTransport>& transport)
+                 const std::shared_ptr<ProxygenTransport>& transport,
+                 const char *host, const char *path,
+                 uint8_t priority, const Array &headers, bool isSecure)
       : m_pushId(pushId),
-        m_transport(transport) {}
+        m_transport(transport) {
+    createPushPromise(host, path, priority, headers, isSecure);
+    m_response.setStatusCode(200);
+  }
 
   proxygen::HTTPTransaction *getOrCreateTransaction(
-    proxygen::HTTPTransaction *clientTxn, bool newPushOk) {
+    proxygen::HTTPTransaction *clientTxn, HTTPMessage** msg, bool newPushOk) {
     if (!m_pushTxn && newPushOk) {
       m_pushTxn = clientTxn->newPushedTransaction(this);
+      *msg = &m_pushPromise;
+    } else {
+      *msg = &m_response;
     }
     return m_pushTxn;
   }
 
   proxygen::HTTPTransaction *getTransaction() const {
     return m_pushTxn;
-  }
-
-  proxygen::HTTPMessage& getPushMessage() {
-    return m_pushMessage;
   }
 
   // HTTPPushTransactionHandler interface
@@ -107,10 +111,40 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   void onEgressResumed() noexcept override {}
 
  private:
+  void createPushPromise(const char *host, const char *path,
+                         uint8_t priority, const Array &headers,
+                         bool isSecure) {
+    m_pushPromise.setMethod(HTTPMethod::GET);
+    m_pushPromise.setSecure(isSecure);
+    m_pushPromise.setURL(path);
+    m_pushPromise.setIsChunked(true); // implicitly chunked
+    m_pushPromise.setPriority(priority);
+
+    for (ArrayIter iter(headers); iter; ++iter) {
+      Variant key = iter.first();
+      auto header = iter.second().toString();
+      if (key.isString() && !key.toString().empty()) {
+        m_pushPromise.getHeaders().add(key.toString().data(), header.data());
+      } else {
+        int pos = header.find(": ");
+        if (pos >= 0) {
+          std::string name = header.substr(0, pos).data();
+          std::string value = header.substr(pos + 2).data();
+          m_pushPromise.getHeaders().add(name, value);
+        } else {
+          Logger::Error("throwing away bad header: %s", header.data());
+        }
+      }
+    }
+
+    m_pushPromise.getHeaders().set(HTTP_HEADER_HOST, host);
+  }
+
   uint64_t m_pushId;
   std::shared_ptr<ProxygenTransport> m_transport;
   proxygen::HTTPTransaction *m_pushTxn{nullptr};
-  proxygen::HTTPMessage m_pushMessage;
+  proxygen::HTTPMessage m_pushPromise;
+  proxygen::HTTPMessage m_response;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -479,8 +513,7 @@ HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
     *msg = nullptr;
     return nullptr;
   }
-  *msg = &it->second->getPushMessage();
-  return it->second->getOrCreateTransaction(m_clientTxn, newPushOk);
+  return it->second->getOrCreateTransaction(m_clientTxn, msg, newPushOk);
 }
 
 void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
@@ -493,6 +526,7 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
   HTTPTransaction *txn = getTransaction(message.m_pushId, &msg, newPushOk);
   if (!txn) {
     // client is gone, just eat the msg
+    VLOG(4) << "client is gone, eating the msg";
     return;
   }
   switch (message.m_type) {
@@ -618,6 +652,8 @@ bool ProxygenTransport::supportsServerPush() {
   Lock lock(this);
   return (m_clientTxn &&
           m_clientTxn->supportsPushTransactions() &&
+          isHTTP2CodecProtocol(
+            m_clientTxn->getTransport().getCodec().getProtocol()) &&
           !m_sendEnded);
 }
 
@@ -630,42 +666,24 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   }
 
   int64_t pushId = m_nextPushId++;
-  PushTxnHandler *handler = new PushTxnHandler(pushId, shared_from_this());
-  HTTPMessage& pushMsg = handler->getPushMessage();
-  pushMsg.setURL(path);
-  pushMsg.setIsChunked(true); // implicitly chunked
-  pushMsg.setSecure(true); // should we allow setting scheme?
-  pushMsg.setPriority(priority);
-
-  for (ArrayIter iter(headers); iter; ++iter) {
-    Variant key = iter.first();
-    auto header = iter.second().toString();
-    if (key.isString() && !key.toString().empty()) {
-      pushMsg.getHeaders().add(key.toString().data(), header.data());
-    } else {
-      int pos = header.find(": ");
-      if (pos >= 0) {
-        std::string name = header.substr(0, pos).data();
-        std::string value = header.substr(pos + 2).data();
-        pushMsg.getHeaders().add(name, value);
-      } else {
-        Logger::Error("throwing away bad header: %s", header.data());
-      }
-    }
-  }
-
-  pushMsg.getHeaders().set(HTTP_HEADER_HOST, host);
+  PushTxnHandler *handler = new PushTxnHandler(
+    pushId, shared_from_this(),
+    host, path, priority, headers,
+    m_request && m_request->isSecure());
   {
     Lock lock(this);
     m_pushHandlers[pushId] = handler;
   }
 
+  // Push Promise
+  m_server->putResponseMessage(
+    ResponseMessage(shared_from_this(), ResponseMessage::Type::HEADERS,
+                    pushId));
+
   m_server->putResponseMessage(
     ResponseMessage(shared_from_this(),
                     ResponseMessage::Type::HEADERS,
                     pushId, false, data, size, eom));
-
-
   return pushId;
 }
 

@@ -247,28 +247,28 @@ void MemoryManager::resetRuntimeOptions() {
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) pre:\n", isInternalCall);
-  FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
-    m_stats.peakSlabBytes);
+  FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak alloc: {}\n",
+    m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
+    m_stats.peakCap);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) pre:\n"
-    "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
-    isInternalCall, m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
-    m_stats.peakSlabBytes);
+    "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
+    isInternalCall, m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
+    m_stats.peakCap);
 #endif
   if (isInternalCall) {
     m_statsIntervalActive = false;
     m_stats.mmUsage = 0;
     m_stats.auxUsage = 0;
-    m_stats.slabBytes = 0;
+    m_stats.capacity = 0;
     m_stats.peakUsage = 0;
-    m_stats.peakSlabBytes = 0;
+    m_stats.peakCap = 0;
     m_stats.totalAlloc = 0;
     m_stats.peakIntervalUsage = 0;
-    m_stats.peakIntervalSlabBytes = 0;
+    m_stats.peakIntervalCap = 0;
 #ifdef USE_JEMALLOC
     m_enableStatsSync = false;
   } else if (!m_enableStatsSync) {
@@ -279,7 +279,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
 #ifdef USE_JEMALLOC
-    assert(m_stats.mallocDebt >= m_stats.slabBytes);
+    assert(m_stats.mallocDebt >= m_stats.capacity);
 #endif
 
     // The effect of this call is simply to ignore anything we've done *outside*
@@ -310,17 +310,17 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #endif
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) post:\n", isInternalCall);
-  FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
-    m_stats.peakSlabBytes);
+  FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n",
+    m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
+    m_stats.peakCap);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) post:\n"
-    "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
-    isInternalCall, m_stats.usage(), m_stats.slabBytes,
-    m_stats.peakUsage, m_stats.peakSlabBytes);
+    "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
+    isInternalCall, m_stats.usage(), m_stats.capacity,
+    m_stats.peakUsage, m_stats.peakCap);
 #endif
 }
 
@@ -457,12 +457,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     stats.peakUsage = stats.usage();
   }
   if (live && m_statsIntervalActive) {
-    if (stats.usage() > stats.peakIntervalUsage) {
-      stats.peakIntervalUsage = stats.usage();
-    }
-    if (stats.slabBytes > stats.peakIntervalSlabBytes) {
-      stats.peakIntervalSlabBytes = stats.slabBytes;
-    }
+    stats.peakIntervalUsage = std::max(stats.peakIntervalUsage, stats.usage());
+    stats.peakIntervalCap = std::max(stats.peakIntervalCap, stats.capacity);
   }
 }
 
@@ -797,10 +793,8 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
   m_stats.mallocDebt += slab.size;
-  m_stats.slabBytes += slab.size;
-  if (m_stats.slabBytes > m_stats.peakSlabBytes) {
-    m_stats.peakSlabBytes = m_stats.slabBytes;
-  }
+  m_stats.capacity += slab.size;
+  m_stats.peakCap = std::max(m_stats.peakCap, m_stats.capacity);
   m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
   m_limit = (void*)(uintptr_t(slab.ptr) + slab.size);
   FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab.ptr, m_limit);
@@ -904,6 +898,7 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
   m_stats.mmUsage += delta;
   // Adjust jemalloc otherwise we'll double count the direct allocation.
   m_stats.mallocDebt += delta;
+  m_stats.capacity += block.size + sizeof(MallocNode);
   updateBigStats();
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
          block.ptr, bytes, block.size);
@@ -928,16 +923,20 @@ MemBlock MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   auto block = m_heap.resizeBig(n + 1, nbytes);
   m_stats.mmUsage += block.size - old_size;
   m_stats.mallocDebt += block.size - old_size;
+  m_stats.capacity += block.size - old_size;
   updateBigStats();
   return block;
 }
 
 NEVER_INLINE
 void MemoryManager::freeBigSize(void* vp, size_t bytes) {
-  m_stats.mmUsage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
+  m_stats.mmUsage -= bytes;
   m_stats.mallocDebt -= bytes;
+  auto actual = static_cast<MallocNode*>(vp)[-1].nbytes;
+  assert(bytes <= actual);
+  m_stats.capacity -= actual;
   FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
   m_heap.freeBig(vp);
 }

@@ -309,8 +309,8 @@ inline bool MemoryManager::startStatsInterval() {
   // For the reasons stated below in refreshStatsImpl, usage can potentially be
   // negative. Make sure that doesn't occur here.
   m_stats.peakIntervalUsage = std::max<int64_t>(0, m_stats.usage());
-  m_stats.peakIntervalSlabBytes = m_stats.slabBytes;
-  assert(m_stats.peakIntervalSlabBytes >= 0);
+  m_stats.peakIntervalCap = m_stats.capacity;
+  assert(m_stats.peakIntervalCap >= 0);
   m_statsIntervalActive = true;
   return ret;
 }
@@ -319,7 +319,7 @@ inline bool MemoryManager::stopStatsInterval() {
   auto ret = m_statsIntervalActive;
   m_statsIntervalActive = false;
   m_stats.peakIntervalUsage = 0;
-  m_stats.peakIntervalSlabBytes = 0;
+  m_stats.peakIntervalCap = 0;
   return ret;
 }
 

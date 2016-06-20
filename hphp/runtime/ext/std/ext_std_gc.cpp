@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/std/ext_std.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 
@@ -35,6 +36,11 @@ static int64_t HHVM_FUNCTION(gc_collect_cycles) {
   return 0; // seriously, count cycles?
 }
 
+static int64_t HHVM_FUNCTION(gc_mem_caches) {
+  flush_thread_caches();
+  return 0;
+}
+
 static void HHVM_FUNCTION(gc_check_heap) {
   MM().checkHeap("gc_check_heap");
 }
@@ -44,6 +50,7 @@ void StandardExtension::initGc() {
   HHVM_FE(gc_enable);
   HHVM_FE(gc_disable);
   HHVM_FE(gc_collect_cycles);
+  HHVM_FE(gc_mem_caches);
   HHVM_FE(gc_check_heap);
   loadSystemlib("std_gc");
 }

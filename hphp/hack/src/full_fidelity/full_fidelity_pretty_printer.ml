@@ -420,6 +420,11 @@ let rec get_doc node =
     let right = get_doc (type_arguments_right_angle x) in
     let args = get_doc (type_arguments x) in
     indent_block_no_space left args right indt
+  | TupleTypeSpecifier x ->
+    let left = get_doc x.tuple_left_paren in
+    let types = get_doc x.tuple_types in
+    let right = get_doc x.tuple_right_paren in
+    indent_block_no_space left types right indt
   (* this ideally should never be called *)
   | CaseStatement x ->
     let keyword = get_doc (case_keyword x) in

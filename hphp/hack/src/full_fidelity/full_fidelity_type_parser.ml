@@ -153,56 +153,59 @@ and parse_generic_type_argument_list_opt parser =
   else
     (parser, make_missing())
 
-and parse_generic_type_argument_list_remainder parser open_angle first =
+and parse_type_list parser close_kind =
   let rec aux parser acc =
-    let (parser, token) = next_token parser in
+    let (parser1, token) = next_token parser in
     let kind = Token.kind token in
-    if kind = Comma then
-      let (parser, type_specifier) = parse_type_specifier parser in
-      aux parser (type_specifier :: (make_token token) :: acc)
+    if kind = close_kind || kind = EndOfFile then
+      (* ERROR RECOVERY: If we're here and we got a close brace then
+         the list is empty; we expect at least one type. If we're here
+         at the end of the file, then we were expecting one more type. *)
+      let parser = with_error parser SyntaxError.error1007 in
+      (parser, ((make_missing()) :: acc))
+    else if kind = Comma then
+
+      (* ERROR RECOVERY: We're expecting a type but we got a comma.
+         Assume the type was missing, eat the comma, and move on.
+         TODO: This could be poor recovery. For example:
+
+              function bar (Foo< , int blah)
+
+        Plainly the type is missing, but the comma is not associated with
+        the type, it's associated with the formal parameter list.  *)
+
+      let parser = with_error parser1 SyntaxError.error1007 in
+      aux parser ((make_token token) :: (make_missing()) :: acc)
     else
-      (parser, acc) in
-  let (parser0, acc) = aux parser [first] in
-  let args = make_list (List.rev acc) in
-  let (parser1, close_angle) = next_token parser in
-  let (parser, close_angle) =
-    if (Token.kind close_angle) = GreaterThan then
-      (parser1, make_token close_angle)
-    else
-    (* ERROR RECOVERY: Don't eat the token that is in the place of the
-       missing > or ,.  Assume that it is the > that is missing and
-       try to parse whatever is coming after the type *)
-     (with_error parser0 SyntaxError.error1014, make_missing()) in
-  let node = make_type_arguments open_angle args close_angle in
-  (parser, node)
+      let (parser, ty) = parse_type_specifier parser in
+      let (parser1, token) = next_token parser in
+      let kind = Token.kind token in
+      if kind = close_kind then
+        (parser, (ty :: acc))
+      else if kind = Comma then
+        aux parser1 ((make_token token) :: ty :: acc)
+      else
+        (* ERROR RECOVERY: We were expecting a close brace or comma, but
+           got neither. Bail out. Caller will give an error. *)
+        (parser, (ty :: acc)) in
+  let (parser, types) = aux parser [] in
+  (parser, make_list (List.rev types))
 
 and parse_generic_type_argument_list parser =
   let (parser, open_angle) = next_token parser in
   let open_angle = make_token open_angle in
-  let token = peek_token parser in
-  let kind = Token.kind token in
-  if kind = GreaterThan then
-    (* ERROR RECOVERY: We have "Foo< >".  Treat the argument list as missing
-       and keep on going. *)
-    let parser = with_error parser SyntaxError.error1012 in
-    let (parser, close_angle) = next_token parser in
-    let args = make_missing() in
-    let close_angle = make_token close_angle in
-    (parser, make_type_arguments open_angle args close_angle)
-  else if kind = Comma then
-
-    (* ERROR RECOVERY: We have "Foo< ," .  Assume that the first argument
-       is missing and keep parsing the remainder of the list.
-     TODO: This could be poor recovery, eg in function bar (Foo< , int blah)
-           we might want to say that the comma is the continuation of the
-           formal parameter list, not the generic type argument list. *)
-
-    let parser = with_error parser SyntaxError.error1012 in
-    let first = make_missing() in
-    parse_generic_type_argument_list_remainder parser open_angle first
+  let (parser, args) = parse_type_list parser GreaterThan in
+  let (parser1, close_angle) = next_token parser in
+  if (Token.kind close_angle) = GreaterThan then
+    let result = make_type_arguments open_angle args (make_token close_angle) in
+    (parser1, result)
   else
-    let (parser, first) = parse_type_specifier parser in
-    parse_generic_type_argument_list_remainder parser open_angle first
+    (* ERROR RECOVERY: Don't eat the token that is in the place of the
+       missing > or ,.  Assume that it is the > that is missing and
+       try to parse whatever is coming after the type.  *)
+    let parser = with_error parser SyntaxError.error1014 in
+    let result = make_type_arguments open_angle args (make_missing()) in
+    (parser, result)
 
 and parse_array_type_specifier parser =
   let (parser, token) = next_token parser in
@@ -210,9 +213,34 @@ and parse_array_type_specifier parser =
     (parser, make_error [make_token token])
 
 and parse_tuple_or_closure_type_specifier parser =
+  let (parser1, _) = next_token parser in
+  let token = peek_token parser1 in
+  if (Token.kind token) = Function then
+    parse_closure_type_specifier parser
+  else
+    parse_tuple_type_specifier parser
+
+and parse_closure_type_specifier parser =
   let (parser, token) = next_token parser in
     (* TODO *)
     (parser, make_error [make_token token])
+
+and parse_tuple_type_specifier parser =
+  let (parser, left_paren) = next_token parser in
+  let left_paren = make_token left_paren in
+  let (parser, args) = parse_type_list parser RightParen in
+  let (parser1, right_paren) = next_token parser in
+  if (Token.kind right_paren) = RightParen then
+    let result = make_tuple_type_specifier left_paren args
+      (make_token right_paren) in
+    (parser1, result)
+  else
+    (* ERROR RECOVERY: Don't eat the token that is in the place of the
+       missing ) or ,.  Assume that it is the ) that is missing and
+       try to parse whatever is coming after the type.  *)
+    let parser = with_error parser SyntaxError.error1022 in
+    let result = make_tuple_type_specifier left_paren args (make_missing()) in
+    (parser, result)
 
 and parse_nullable_type_specifier parser =
   let (parser, token) = next_token parser in

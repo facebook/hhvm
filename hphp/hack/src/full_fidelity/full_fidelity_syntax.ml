@@ -288,6 +288,11 @@ module WithToken(Token: TokenType) = struct
       type_arguments : t;
       type_arguments_right_angle : t
     }
+    and tuple_type_specifier = {
+      tuple_left_paren : t;
+      tuple_types : t;
+      tuple_right_paren : t
+    }
     and syntax =
     | Token of Token.t
     | Error of t list
@@ -336,6 +341,7 @@ module WithToken(Token: TokenType) = struct
     | TypeConstant of type_constant
     | GenericTypeSpecifier of generic_type
     | TypeArguments of type_arguments
+    | TupleTypeSpecifier of tuple_type_specifier
 
     and t = { syntax : syntax ; value : SyntaxValue.t}
 
@@ -393,6 +399,7 @@ module WithToken(Token: TokenType) = struct
       | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
       | TypeArguments _ -> SyntaxKind.TypeArguments
+      | TupleTypeSpecifier _ -> SyntaxKind.TupleTypeSpecifier
 
     let kind node =
       to_kind (syntax node)
@@ -437,6 +444,7 @@ module WithToken(Token: TokenType) = struct
     let is_simple_type node = kind node = SyntaxKind.SimpleTypeSpecifier
     let is_generic_type node = kind node = SyntaxKind.GenericTypeSpecifier
     let is_type_arguments node = kind node = SyntaxKind.TypeArguments
+    let is_tuple_type node = kind node = SyntaxKind.TupleTypeSpecifier
 
     let children node =
       match node.syntax with
@@ -578,6 +586,9 @@ module WithToken(Token: TokenType) = struct
           type_arguments_right_angle } ->
         [ type_arguments_left_angle; type_arguments;
           type_arguments_right_angle ]
+      | TupleTypeSpecifier
+        { tuple_left_paren; tuple_types; tuple_right_paren } ->
+        [ tuple_left_paren; tuple_types; tuple_right_paren ]
 
     let children_names node =
       match node.syntax with
@@ -721,6 +732,10 @@ module WithToken(Token: TokenType) = struct
           type_arguments_right_angle } ->
         [ "type_arguments_left_angle"; "type_arguments";
           "type_arguments_right_angle" ]
+      | TupleTypeSpecifier
+        { tuple_left_paren; tuple_types; tuple_right_paren } ->
+        [ "tuple_left_paren"; "tuple_types"; "tuple_right_paren" ]
+
 
     let rec to_json node =
       let open Hh_json in
@@ -1038,7 +1053,10 @@ module WithToken(Token: TokenType) = struct
           type_arguments; type_arguments_right_angle ]) ->
         TypeArguments { type_arguments_left_angle;
             type_arguments; type_arguments_right_angle }
-
+      | (SyntaxKind.TupleTypeSpecifier,
+          [ tuple_left_paren; tuple_types; tuple_right_paren ]) ->
+        TupleTypeSpecifier
+          { tuple_left_paren; tuple_types; tuple_right_paren }
       | _ -> failwith "with_children called with wrong number of children"
 
     let all_tokens node =
@@ -1258,6 +1276,9 @@ module WithToken(Token: TokenType) = struct
 
       let make_type_arguments left items right =
         from_children SyntaxKind.TypeArguments [ left; items; right ]
+
+      let make_tuple_type_specifier left types right =
+        from_children SyntaxKind.TupleTypeSpecifier [ left; types; right ]
 
       let make_literal_expression literal =
         from_children SyntaxKind.LiteralExpression [ literal ]

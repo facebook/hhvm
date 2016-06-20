@@ -60,6 +60,7 @@ type t =
 | TypeConstant
 | GenericTypeSpecifier
 | TypeArguments
+| TupleTypeSpecifier
 
 let to_string kind =
   match kind with
@@ -101,6 +102,7 @@ let to_string kind =
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | GenericTypeSpecifier -> "generic_type_specifier"
+  | TupleTypeSpecifier -> "tuple_type_specifier"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
   | XHPExpression -> "xhp_expression"

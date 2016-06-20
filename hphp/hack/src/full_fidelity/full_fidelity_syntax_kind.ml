@@ -57,6 +57,7 @@ type t =
 
 (* Types *)
 | SimpleTypeSpecifier
+| NullableTypeSpecifier
 | TypeConstant
 | GenericTypeSpecifier
 | TypeArguments
@@ -101,6 +102,7 @@ let to_string kind =
   | BracedExpression -> "braced_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"
+  | NullableTypeSpecifier -> "nullable_type_specifier"
   | GenericTypeSpecifier -> "generic_type_specifier"
   | TupleTypeSpecifier -> "tuple_type_specifier"
   | TypeArguments -> "type_arguments"

@@ -65,6 +65,8 @@ let peek_token parser =
   type constant?  *)
 
 let rec parse_type_specifier parser =
+  (* Strictly speaking, "mixed" is a nullable type specifier. We parse it as
+     a simple type specifier here. *)
   let (parser1, token) = next_token parser in
   match Token.kind token with
   | Bool
@@ -243,9 +245,11 @@ and parse_tuple_type_specifier parser =
     (parser, result)
 
 and parse_nullable_type_specifier parser =
-  let (parser, token) = next_token parser in
-    (* TODO *)
-    (parser, make_error [make_token token])
+  let (parser, question) = next_token parser in
+  let question = make_token question in
+  let (parser, nullable_type) = parse_type_specifier parser in
+  let result = make_nullable_type_specifier question nullable_type in
+  (parser, result)
 
 and parse_classname_type_specifier parser =
   let (parser, token) = next_token parser in

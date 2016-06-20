@@ -411,6 +411,10 @@ let rec get_doc node =
     let separator = get_doc (type_constant_separator x) in
     left ^^^ separator ^^^ right
   | SimpleTypeSpecifier x -> get_doc x
+  | NullableTypeSpecifier x ->
+    let qm = get_doc x.nullable_question in
+    let ty = get_doc x.nullable_type in
+    qm ^^^ ty
   | GenericTypeSpecifier x ->
     let name = get_doc (generic_class_type x) in
     let argument = get_doc (generic_arguments x) in

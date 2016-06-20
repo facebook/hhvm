@@ -283,6 +283,10 @@ module WithToken(Token: TokenType) = struct
       generic_class_type : t;
       generic_arguments : t
     }
+    and nullable_type_specifier = {
+      nullable_question : t;
+      nullable_type : t
+    }
     and type_arguments = {
       type_arguments_left_angle : t;
       type_arguments : t;
@@ -338,6 +342,7 @@ module WithToken(Token: TokenType) = struct
     | XHPAttribute of xhp_attribute
 
     | SimpleTypeSpecifier of t
+    | NullableTypeSpecifier of nullable_type_specifier
     | TypeConstant of type_constant
     | GenericTypeSpecifier of generic_type
     | TypeArguments of type_arguments
@@ -397,6 +402,7 @@ module WithToken(Token: TokenType) = struct
       | XHPAttribute _ -> SyntaxKind.XHPAttribute
       | TypeConstant _ ->  SyntaxKind.TypeConstant
       | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
+      | NullableTypeSpecifier _ -> SyntaxKind.NullableTypeSpecifier
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
       | TypeArguments _ -> SyntaxKind.TypeArguments
       | TupleTypeSpecifier _ -> SyntaxKind.TupleTypeSpecifier
@@ -443,6 +449,8 @@ module WithToken(Token: TokenType) = struct
     let is_type_constant node = kind node = SyntaxKind.TypeConstant
     let is_simple_type node = kind node = SyntaxKind.SimpleTypeSpecifier
     let is_generic_type node = kind node = SyntaxKind.GenericTypeSpecifier
+    let is_nullable_type_specifier node =
+      kind node = SyntaxKind.NullableTypeSpecifier
     let is_type_arguments node = kind node = SyntaxKind.TypeArguments
     let is_tuple_type node = kind node = SyntaxKind.TupleTypeSpecifier
 
@@ -578,6 +586,9 @@ module WithToken(Token: TokenType) = struct
         type_constant_right_type ]
 
       | SimpleTypeSpecifier x -> [x]
+      | NullableTypeSpecifier
+        { nullable_question; nullable_type } ->
+        [ nullable_question; nullable_type ]
       | GenericTypeSpecifier
         { generic_class_type; generic_arguments } ->
         [ generic_class_type; generic_arguments ]
@@ -724,6 +735,9 @@ module WithToken(Token: TokenType) = struct
         [ "type_constant_left_type"; "type_constant_separator";
         "type_constant_right_type" ]
       | SimpleTypeSpecifier _ -> [ "simple_type_specifier" ]
+      | NullableTypeSpecifier
+        { nullable_question; nullable_type } ->
+        [ "nullable_question"; "nullable_type" ]
       | GenericTypeSpecifier
         { generic_class_type; generic_arguments } ->
         [ "generic_class_type"; "generic_arguments" ]
@@ -1049,6 +1063,10 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.GenericTypeSpecifier, [ generic_class_type;
           generic_arguments ]) ->
         GenericTypeSpecifier { generic_class_type; generic_arguments }
+      | (SyntaxKind.NullableTypeSpecifier,
+          [ nullable_question; nullable_type ]) ->
+          NullableTypeSpecifier
+          { nullable_question; nullable_type }
       | (SyntaxKind.TypeArguments, [ type_arguments_left_angle;
           type_arguments; type_arguments_right_angle ]) ->
         TypeArguments { type_arguments_left_angle;
@@ -1269,6 +1287,10 @@ module WithToken(Token: TokenType) = struct
 
       let make_simple_type_specifier simple_type =
         from_children SyntaxKind.SimpleTypeSpecifier [ simple_type ]
+
+      let make_nullable_type_specifier nullable_question nullable_type =
+        from_children SyntaxKind.NullableTypeSpecifier
+          [ nullable_question; nullable_type ]
 
       let make_generic_type_specifier generic_class_type generic_arguments =
         from_children SyntaxKind.GenericTypeSpecifier

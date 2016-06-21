@@ -564,6 +564,13 @@ DELEGATE_OPCODE(MapGet)
 DELEGATE_OPCODE(MapSet)
 DELEGATE_OPCODE(MapIsset)
 
+DELEGATE_OPCODE(LdCns)
+DELEGATE_OPCODE(LookupCns)
+DELEGATE_OPCODE(LookupCnsE)
+DELEGATE_OPCODE(LookupCnsU)
+DELEGATE_OPCODE(LdClsCns)
+DELEGATE_OPCODE(InitClsCns)
+
 DELEGATE_OPCODE(IterInit)
 DELEGATE_OPCODE(IterInitK)
 DELEGATE_OPCODE(WIterInit)
@@ -3022,35 +3029,6 @@ void CodeGenerator::cgInitStaticLoc(IRInstruction* inst) {
   static_assert(sizeof(HeaderKind) == 1, "");
 }
 
-void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
-  auto const extra = inst->extra<LdClsCns>();
-  auto const link  = rds::bindClassConstant(extra->clsName, extra->cnsName);
-  auto const dst   = dstLoc(inst, 0).reg();
-  auto& v          = vmain();
-  auto const sf    = checkRDSHandleInitialized(v, link.handle());
-  emitFwdJcc(v, CC_NE, sf, inst->taken());
-  v << lea{rvmtl()[link.handle()], dst};
-}
-
-void CodeGenerator::cgInitClsCns(IRInstruction* inst) {
-  auto const extra = inst->extra<InitClsCns>();
-  auto const link  = rds::bindClassConstant(extra->clsName, extra->cnsName);
-  auto& v          = vmain();
-
-  cgCallHelper(v,
-    CallSpec::direct(jit::lookupClassConstantTv),
-    callDestTV(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .addr(rvmtl(), safe_cast<int32_t>(link.handle()))
-      .immPtr(NamedEntity::get(extra->clsName))
-      .immPtr(extra->clsName)
-      .immPtr(extra->cnsName)
-  );
-
-  markRDSHandleInitialized(v, link.handle());
-}
-
 void CodeGenerator::cgLdContField(IRInstruction* inst) {
   loadTV(vmain(), inst->dst(), dstLoc(inst, 0),
          srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
@@ -3847,120 +3825,6 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
 void CodeGenerator::cgLdRDSAddr(IRInstruction* inst) {
   auto const handle = inst->extra<LdRDSAddr>()->handle;
   vmain() << lea{rvmtl()[handle], dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgLdCns(IRInstruction* inst) {
-  auto const cnsName = inst->src(0)->strVal();
-  auto const ch = makeCnsHandle(cnsName, false);
-  auto const dst = dstLoc(inst, 0);
-  auto& v = vmain();
-  assertx(inst->taken());
-
-  if (rds::isNormalHandle(ch)) {
-    auto const sf = checkRDSHandleInitialized(v, ch);
-    emitFwdJcc(v, CC_NE, sf, inst->taken());
-    loadTV(v, inst->dst(), dst, rvmtl()[ch]);
-    return;
-  }
-  assertx(rds::isPersistentHandle(ch));
-
-  auto const& cns = rds::handleToRef<TypedValue>(ch);
-
-  if (cns.m_type == KindOfUninit) {
-    loadTV(v, inst->dst(), dst, rvmtl()[ch]);
-    auto const sf = v.makeReg();
-    irlower::emitTypeTest(
-      vmain(), m_state, TUninit, dst.reg(1), dst.reg(0), sf,
-      [&] (ConditionCode cc, Vreg sf) {
-        emitFwdJcc(v, cc, sf, inst->taken());
-      }
-    );
-  } else {
-    // Statically known constant.
-    assertx(!dst.isFullSIMD());
-    switch (cns.m_type) {
-      case KindOfNull:
-        v << copy{v.cns(nullptr), dst.reg(0)};
-        break;
-      case KindOfBoolean:
-        v << copy{v.cns(!!cns.m_data.num), dst.reg(0)};
-        break;
-      case KindOfInt64:
-      case KindOfPersistentString:
-      case KindOfPersistentArray:
-      case KindOfString:
-      case KindOfArray:
-      case KindOfObject:
-      case KindOfResource:
-      case KindOfRef:
-        v << copy{v.cns(cns.m_data.num), dst.reg(0)};
-        break;
-      case KindOfDouble:
-        v << copy{v.cns(cns.m_data.dbl), dst.reg(0)};
-        break;
-      case KindOfUninit:
-      case KindOfClass:
-        not_reached();
-    }
-    v << copy{v.cns(cns.m_type), dst.reg(1)};
-  }
-}
-
-void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {
-  SSATmp* cnsNameTmp = inst->src(0);
-
-  assertx(cnsNameTmp->hasConstVal(TStaticStr));
-
-  auto const cnsName = cnsNameTmp->strVal();
-  auto const ch = makeCnsHandle(cnsName, false);
-
-  auto args = argGroup(inst);
-  args.imm(safe_cast<int32_t>(ch))
-      .immPtr(cnsName)
-      .imm(inst->op() == LookupCnsE);
-
-  cgCallHelper(
-    vmain(),
-    rds::isNormalHandle(ch)
-      ? CallSpec::direct(lookupCnsHelperNormal)
-      : CallSpec::direct(lookupCnsHelperPersistent),
-    callDestTV(inst),
-    SyncOptions::Sync,
-    args
-  );
-}
-
-void CodeGenerator::cgLookupCns(IRInstruction* inst) {
-  cgLookupCnsCommon(inst);
-}
-
-void CodeGenerator::cgLookupCnsE(IRInstruction* inst) {
-  cgLookupCnsCommon(inst);
-}
-
-void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
-  SSATmp* cnsNameTmp = inst->src(0);
-  SSATmp* fallbackNameTmp = inst->src(1);
-
-  const StringData* cnsName = cnsNameTmp->strVal();
-
-  const StringData* fallbackName = fallbackNameTmp->strVal();
-  auto const fallbackCh = makeCnsHandle(fallbackName, false);
-
-  auto args = argGroup(inst);
-  args.imm(safe_cast<int32_t>(fallbackCh))
-      .immPtr(cnsName)
-      .immPtr(fallbackName);
-
-  cgCallHelper(
-    vmain(),
-    rds::isNormalHandle(fallbackCh)
-      ? CallSpec::direct(lookupCnsUHelperNormal)
-      : CallSpec::direct(lookupCnsUHelperPersistent),
-    callDestTV(inst),
-    SyncOptions::Sync,
-    args
-  );
 }
 
 void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {

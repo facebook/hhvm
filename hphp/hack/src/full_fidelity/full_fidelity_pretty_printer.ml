@@ -394,7 +394,13 @@ let rec get_doc node =
     let right = get_doc (braced_expr_right_brace x) in
     let expr = get_doc (braced_expr x) in
     indent_block_no_space left expr right indt
-  | ListExpression x -> missing (* TODO *)
+  | ListExpression x ->
+    let keyword = get_doc (listlike_keyword x) in
+    let left_paren = get_doc (listlike_left_paren x) in
+    let right_paren = get_doc (listlike_right_paren x) in
+    let members = get_doc (listlike_members x) in
+    let left = group_doc (keyword ^| left_paren) in
+    indent_block_no_space left members right_paren indt
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in

@@ -93,11 +93,6 @@ private:
   void emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
                         const Class* cls, size_t nProps);
 
-  void decRefImpl(Vout& v, const IRInstruction*, const OptDecRefProfile&, bool);
-  float decRefDestroyRate(const IRInstruction* inst,
-                          OptDecRefProfile& profile, Type type);
-  void emitDecRefTypeStat(Vout& v, const IRInstruction*);
-
   void cgPropImpl(IRInstruction*);
   void cgIssetEmptyPropImpl(IRInstruction*);
   void cgElemImpl(IRInstruction*);

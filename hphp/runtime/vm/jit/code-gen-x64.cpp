@@ -114,40 +114,6 @@ const char* getContextName(const Class* ctx) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class Then>
-void ifNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
-  if (!ty.maybe(TPersistent)) {
-    then(v); // non-persistent check below will always succeed
-    return;
-  }
-
-  auto const sf = v.makeReg();
-  v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
-  static_assert(UncountedValue < 0 && StaticValue < 0, "");
-  ifThen(v, CC_GE, sf, then);
-}
-
-template<class Then>
-void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
-  if (!ty.maybe(TCounted)) return;
-  if (ty.isKnownDataType()) {
-    if (isRefcountedType(ty.toDataType())) then(v);
-    return;
-  }
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
-  unlikelyIfThen(v, vtaken, CC_NLE, sf, then);
-}
-
-template<class Then>
-void ifRefCountedNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
-  ifRefCountedType(v, v, ty, loc, [&] (Vout& v) {
-    ifNonPersistent(v, ty, loc, then);
-  });
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void debug_trashsp(Vout& v) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     v << syncvmsp{v.cns(0x42)};
@@ -531,6 +497,12 @@ DELEGATE_OPCODE(IsNType)
 DELEGATE_OPCODE(IsTypeMem)
 DELEGATE_OPCODE(IsNTypeMem)
 DELEGATE_OPCODE(IsScalarType)
+
+DELEGATE_OPCODE(IncRef)
+DELEGATE_OPCODE(IncRefCtx)
+DELEGATE_OPCODE(DecRef)
+DELEGATE_OPCODE(DecRefNZ)
+DELEGATE_OPCODE(DbgAssertRefCount)
 
 DELEGATE_OPCODE(BaseG)
 DELEGATE_OPCODE(PropX)
@@ -1640,72 +1612,6 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   };
 }
 
-void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  // This is redundant with a check in ifRefCountedNonPersistent, but we check
-  // earlier to avoid emitting profiling code in this case.
-  auto const ty = inst->src(0)->type();
-  if (!ty.maybe(TCounted)) return;
-
-  folly::Optional<rds::Handle> profHandle;
-  auto vtaken = &vmain();
-  // We profile generic IncRefs to see which ones are unlikely to see
-  // refcounted values.
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && !ty.isKnownDataType()) {
-    auto const profileKey =
-      makeStaticString(folly::to<std::string>("IncRefProfile-",
-                                              ty.toString()));
-    TargetProfile<IncRefProfile> profile{
-      m_state.unit.context(), inst->marker(), profileKey
-    };
-    if (profile.profiling()) {
-      profHandle = profile.handle();
-    } else if (profile.optimizing()) {
-      auto const data = profile.data(IncRefProfile::reduce);
-      if (data.tryinc == 0) {
-        FTRACE(3, "Emitting cold IncRef for {}, {}\n", data, *inst);
-        vtaken = &vcold();
-      }
-    }
-  }
-
-  auto& v = vmain();
-  auto const loc = srcLoc(inst, 0);
-  ifRefCountedType(v, *vtaken, ty, loc, [&](Vout& v) {
-    if (profHandle) {
-      v << incwm{rvmtl()[*profHandle + offsetof(IncRefProfile, tryinc)],
-                 v.makeReg()};
-    }
-    ifNonPersistent(v, ty, loc, [&](Vout& v) {
-      emitIncRef(v, loc.reg());
-    });
-  });
-}
-
-void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
-  auto const ty = inst->src(0)->type();
-
-  if (ty <= TObj) return cgIncRef(inst);
-  if (ty <= TCctx || ty <= TNullptr) return;
-
-  auto const src = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-
-  if (ty.maybe(TNullptr)) {
-    auto const shifted = v.makeReg();
-    v << shrqi{1, src, shifted, sf};
-
-    ifThen(v, CC_NBE, sf, [&] (Vout& v) {
-      auto const unshifted = v.makeReg();
-      v << shlqi{1, shifted, unshifted, v.makeReg()};
-      emitIncRef(v, unshifted);
-    });
-  } else {
-    v << testqi{0x1, src, sf};
-    ifThen(v, CC_Z, sf, [&] (Vout& v) { emitIncRef(v, src); });
-  }
-}
-
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = srcLoc(inst, 0).reg();
   auto const numLocals = getFunc(inst->marker())->numLocals();
@@ -1733,236 +1639,6 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const args = v.makeVcallArgs({{v.cns(Vconst::Quad), iterReg}});
   v << vcall{CallSpec::stub(target),
              args, v.makeTuple({}), fix, DestType::None, false};
-}
-
-/*
- * Depending on the current translation kind, do nothing, profile, or collect
- * profiling data for the current DecRef* instruction
- *
- * Returns true iff the release path for this DecRef should be put in cold
- * code.
- */
-float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
-                                       OptDecRefProfile& profile,
-                                       Type type) {
-  auto const kind = m_state.unit.context().kind;
-  // Without profiling data, we assume destroy is unlikely.
-  if (kind != TransKind::Profile && kind != TransKind::Optimize) return 0.0;
-
-  auto const locId = inst->extra<DecRef>()->locId;
-  auto const profileKey =
-    makeStaticString(folly::to<std::string>("DecRefProfile-",
-                                            opcodeName(inst->op()),
-                                            '-', type.toString(),
-                                            '-', locId));
-  profile.emplace(m_state.unit.context(), inst->marker(), profileKey);
-
-  auto& v = vmain();
-  if (profile->profiling()) {
-    v << incwm{rvmtl()[profile->handle() + offsetof(DecRefProfile, hits)],
-               v.makeReg()};
-  } else if (profile->optimizing()) {
-    auto const data = profile->data(DecRefProfile::reduce);
-    if (data.destroyRate() != 0.0 && data.destroyRate() != 1.0) {
-      // These are the only interesting cases where we could be doing better.
-      FTRACE(5, "DecRefProfile: {}: {} {}\n",
-             data, inst->marker().show(), profileKey->data());
-    }
-    if (data.destroyRate() == 0.0) {
-      emitIncStat(v, Stats::TC_DecRef_Profiled_0);
-    } else if (data.destroyRate() == 1.0) {
-      emitIncStat(v, Stats::TC_DecRef_Profiled_100);
-    }
-    return data.destroyRate();
-  }
-
-  return 0.0;
-}
-
-static CallSpec getDtorCallSpec(DataType type) {
-  switch (type) {
-    case KindOfString:
-      return CallSpec::method(&StringData::release);
-    case KindOfArray:
-      return CallSpec::method(&ArrayData::release);
-    case KindOfObject:
-      return CallSpec::method(
-        RuntimeOption::EnableObjDestructCall
-          ? &ObjectData::release
-          : &ObjectData::releaseNoObjDestructCheck
-      );
-    case KindOfResource:
-      return CallSpec::method(&ResourceHdr::release);
-    case KindOfRef:
-      return CallSpec::method(&RefData::release);
-    DT_UNCOUNTED_CASE:
-    case KindOfClass:
-      break;
-  }
-  not_reached();
-}
-
-static CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
-  static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
-  static auto const TVecArr = Type::Array(ArrayData::kVecKind);
-  static auto const TDictArr = Type::Array(ArrayData::kDictKind);
-  static auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
-  static auto const TApcArr = Type::Array(ArrayData::kApcKind);
-
-  if (ty <= TPackedArr) return CallSpec::direct(PackedArray::Release);
-  if (ty <= TVecArr) return CallSpec::direct(PackedArray::Release);
-  if (ty <= TDictArr) return CallSpec::direct(MixedArray::Release);
-  if (ty <= TMixedArr) return CallSpec::direct(MixedArray::Release);
-  if (ty <= TApcArr) return CallSpec::direct(APCLocalArray::Release);
-  if (ty <= TArr) return  CallSpec::array(&g_array_funcs.release);
-
-  if (ty <= TObj && ty.clsSpec().cls()) {
-    auto cls = ty.clsSpec().cls();
-
-    // These conditions must match what causes us to call cls->instanceDtor()
-    // in ObjectData::release().
-    if ((cls->attrs() & AttrNoOverride) &&
-        !cls->getDtor() && cls->instanceDtor()) {
-      args.immPtr(cls);
-      return CallSpec::direct(cls->instanceDtor().get());
-    }
-  }
-
-  return ty.isKnownDataType() ? getDtorCallSpec(ty.toDataType())
-                              : CallSpec::destruct(loc.reg(1));
-}
-
-/*
- * We've tried a variety of tweaks to this and found the current state of
- * things optimal, at least when measurements of the following factors were
- * made:
- *
- * - whether to load the count into a register
- *
- * - whether to use if (!--count) release(); if we don't need a static check
- *
- * - whether to skip using the register and just emit --count if we know
- *   its not static, and can't hit zero.
- *
- * The current scheme generates if (!--count) release() for types that cannot
- * possibly be static.  For types that might be static, it generates a compare
- * of the m_count field against 1, followed by two conditional branches on the
- * same flags.  We make use of the invariant that count fields are never zero,
- * and use a code sequence that looks like this:
- *
- *    cmpl $1, $FAST_REFCOUNT_OFFSET(%base)
- *    je do_release  // call the destructor, usually in acold
- *    jl skip_dec    // count < 1 implies it's static
- *    decl $FAST_REFCOUNT_OFFSET(%base)
- *  skip_dec:
- *    // ....
- */
-void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
-                               const OptDecRefProfile& profile,
-                               bool unlikelyDestroy) {
-  auto const ty   = inst->src(0)->type();
-  auto const base = srcLoc(inst, 0).reg(0);
-
-  auto destroy = [&] (Vout& v) {
-    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy
-                                   : Stats::TC_DecRef_Likely_Destroy);
-    if (profile && profile->profiling()) {
-      v << incwm{rvmtl()[profile->handle() + offsetof(DecRefProfile, destroy)],
-                 v.makeReg()};
-    }
-    auto args = argGroup(inst).reg(base);
-    auto const dtor = makeDtorCall(ty, srcLoc(inst, 0), args);
-    cgCallHelper(v, dtor, kVoidDest, SyncOptions::Sync, args);
-  };
-
-  emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
-                                 : Stats::TC_DecRef_Likely_Decl);
-
-  if (profile && profile->profiling()) {
-    v << incwm{rvmtl()[profile->handle() + offsetof(DecRefProfile, trydec)],
-               v.makeReg()};
-  }
-
-  if (!ty.maybe(TPersistent)) {
-    auto const sf = emitDecRef(v, base);
-    ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
-    return;
-  }
-
-  emitDecRefWork(v, vcold(), base, destroy, unlikelyDestroy);
-}
-
-void CodeGenerator::emitDecRefTypeStat(Vout& v, const IRInstruction* inst) {
-  if (!Trace::moduleEnabled(Trace::decreftype)) return;
-
-  auto category = makeStaticString(inst->is(DecRef) ? "DecRef" : "DecRefNZ");
-  auto key = makeStaticString(inst->src(0)->type().unspecialize().toString());
-  cgCallHelper(
-    v,
-    CallSpec::direct(Stats::incStatGrouped),
-    kVoidDest,
-    SyncOptions::None,
-    argGroup(inst)
-      .immPtr(category)
-      .immPtr(key)
-      .imm(1)
-  );
-}
-
-void CodeGenerator::cgDecRef(IRInstruction *inst) {
-  // This is redundant with a check in ifRefCounted, but we check earlier to
-  // avoid emitting profiling code in this case.
-  auto const ty = inst->src(0)->type();
-  if (!ty.maybe(TCounted)) return;
-
-  auto& v = vmain();
-  emitDecRefTypeStat(v, inst);
-  OptDecRefProfile profile;
-  auto const destroyRate = decRefDestroyRate(inst, profile, ty);
-  FTRACE(3, "destroyPercent {:.2%} for {}\n", destroyRate, *inst);
-
-  auto const rData = srcLoc(inst, 0).reg(0);
-  auto const rType = srcLoc(inst, 0).reg(1);
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
-      profile && profile->optimizing() && !ty.isKnownDataType()) {
-    auto const data = profile->data(DecRefProfile::reduce);
-    if (data.trydec == 0) {
-      // This DecRef never saw a refcounted type during profiling, so call the
-      // stub in cold, keeping only the type check in main.
-      FTRACE(3, "Emitting partially outlined DecRef for {}, {}\n", data, *inst);
-      auto const sf = v.makeReg();
-      emitCmpTVType(v, sf, KindOfRefCountThreshold, rType);
-      unlikelyIfThen(v, vcold(), CC_NLE, sf, [&](Vout& v) {
-        auto const stub = mcg->ustubs().decRefGeneric;
-        v << copy2{rData, rType, rarg(0), rarg(1)};
-        v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};
-      });
-      return;
-    }
-  }
-
-  ifRefCountedType(
-    v, v, ty, srcLoc(inst, 0),
-    [&] (Vout& v) {
-      decRefImpl(
-        v, inst, profile,
-        destroyRate * 100 < RuntimeOption::EvalJitUnlikelyDecRefPercent
-      );
-    }
-  );
-}
-
-void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
-  emitIncStat(vmain(), Stats::TC_DecRef_NZ);
-  emitDecRefTypeStat(vmain(), inst);
-  auto const ty = inst->src(0)->type();
-  ifRefCountedNonPersistent(
-    vmain(), ty, srcLoc(inst, 0),
-    [&] (Vout& v) {
-      auto const base = srcLoc(inst, 0).reg();
-      emitDecRef(v, base);
-    }
-  );
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
@@ -4380,15 +4056,6 @@ void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {
       .ssa(0)
       .addr(srcLoc(inst, 1).reg(), cellsToBytes(spOff.offset))
       .imm(inst->marker().bcOff())
-  );
-}
-
-void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
-  ifRefCountedType(
-    vmain(), vmain(), inst->src(0)->type(), srcLoc(inst, 0),
-    [&] (Vout& v) {
-      emitAssertRefCount(v, srcLoc(inst, 0).reg());
-    }
   );
 }
 

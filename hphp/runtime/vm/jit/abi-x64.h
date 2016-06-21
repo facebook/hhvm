@@ -46,6 +46,7 @@ inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
 
 constexpr PhysReg rret_data() { return reg::rax; }
 constexpr PhysReg rret_type() { return reg::rdx; }
+constexpr PhysReg rret_indirect() { return reg::rax; }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);

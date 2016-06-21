@@ -80,6 +80,14 @@ module WithStatementAndDeclParser
     let (parser, term) = parse_term parser in
     parse_remaining_expression parser term
 
+  (* try to parse an expression. If parser cannot make progress, return None *)
+  and parse_expression_optional parser =
+    let module Lexer = Full_fidelity_lexer in
+    let offset = Lexer.start_offset (lexer parser) in
+    let (parser, expr) = parse_expression parser in
+    let offset1 = Lexer.start_offset (lexer parser) in
+    if offset1 = offset then None else Some (parser, expr)
+
   and parse_term parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
@@ -128,7 +136,7 @@ module WithStatementAndDeclParser
     | Class -> (* TODO When is this legal? *)
       (parser1, make_token token)
 
-
+    | List  -> parse_list_expression parser
     | Shape (* TODO: Parse shape *)
     | New  (* TODO: Parse object creation *)
     | Async (* TODO: Parse lambda *)
@@ -345,4 +353,34 @@ module WithStatementAndDeclParser
     let result = make_conditional_expression
       test question consequence colon alternative in
     (parser, result)
+
+  and parse_list_expression parser =
+    let parser, keyword_token = next_token parser in
+    let parser, left_paren =
+      expect_token parser LeftParen SyntaxError.error1019 in
+    let parser, members = parse_list_expression_list parser in
+    let parser, right_paren =
+      expect_token parser RightParen SyntaxError.error1011 in
+    let syntax = make_listlike_expression
+      (make_token keyword_token) left_paren members right_paren in
+    (parser, syntax)
+  and parse_list_expression_list parser =
+    let rec aux parser acc =
+      let (parser1, token) = next_token parser in
+      match Token.kind token with
+      | Comma ->
+        aux parser1 ((make_token token) :: acc)
+      | RightParen
+      | Equal -> (* list intrinsic appears only on LHS of equal sign *)
+        (parser, make_list (List.rev acc))
+      | _ -> begin
+        (* ERROR RECOVERY if parser makes no progress, make an error *)
+        match parse_expression_optional parser with
+        | None ->
+          let parser = with_error parser SyntaxError.error1015 in
+          (parser, make_missing ())
+        | Some (parser, expr) -> aux parser (expr :: acc)
+        end
+    in
+    aux parser []
 end

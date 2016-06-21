@@ -49,6 +49,7 @@ type t =
 | Insteadof
 | Int
 | Interface
+| List
 | Mixed
 | Namespace
 | New
@@ -197,6 +198,7 @@ let from_string keyword =
   | "insteadof" -> Some Insteadof
   | "int" -> Some Int
   | "interface" -> Some Interface
+  | "list" -> Some List
   | "mixed" -> Some Mixed
   | "namespace" -> Some Namespace
   | "new" -> Some New
@@ -266,6 +268,7 @@ let to_string kind =
   | Insteadof -> "insteadof"
   | Int -> "int"
   | Interface -> "interface"
+  | List -> "list"
   | Mixed -> "mixed"
   | Namespace -> "namespace"
   | New -> "new"

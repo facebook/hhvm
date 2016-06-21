@@ -364,7 +364,11 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part expr right indt in
     group_doc (start_block ^| statement)
   | PrefixUnaryOperator x ->
-    get_doc (unary_operator x) ^^^ get_doc (unary_operand x)
+    let op = unary_operator x in
+    if is_separable_prefix op then
+      get_doc op ^| get_doc (unary_operand x)
+    else
+      get_doc op ^^^ get_doc (unary_operand x)
   | PostfixUnaryOperator x ->
     get_doc (unary_operand x) ^^^ get_doc (unary_operator x)
   | BinaryOperator x ->

@@ -57,6 +57,9 @@ static std::set<std::string> s_post_methods{
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+ServiceData::ExportedTimeSeries* ProxygenTransport::s_requestErrorCount;
+ServiceData::ExportedTimeSeries* ProxygenTransport::s_requestNonErrorCount;
+
 /**
  * The server side push handler is just here to catch errors and
  * egress state changes.
@@ -637,6 +640,11 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
      */
     onChunkedProgress(size);
   }
+  if (code >= 500) {
+    s_requestErrorCount->addValue(1);
+  } else {
+    s_requestNonErrorCount->addValue(1);
+  }
 }
 
 void ProxygenTransport::onSendEndImpl() {
@@ -702,6 +710,7 @@ void ProxygenTransport::abort() {
   if (m_clientTxn) {
     m_clientTxn->sendAbort();
   }
+  s_requestErrorCount->addValue(1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

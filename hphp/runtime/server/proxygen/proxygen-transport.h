@@ -345,6 +345,11 @@ struct ProxygenTransport final
   // never handed to the server.  m_enqueued implies !is_linked(), but
   // aborted ones can have !m_enqueued && !is_linked().
   folly::IntrusiveListHook m_listHook;
+
+  // Initialized upon ProxygenServer creation.  These counters work at Transport
+  // level and include requests that are dropped before getting executed.
+  static ServiceData::ExportedTimeSeries* s_requestErrorCount;
+  static ServiceData::ExportedTimeSeries* s_requestNonErrorCount;
 };
 
 using ProxygenTransportList =

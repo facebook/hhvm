@@ -85,6 +85,7 @@ struct RuntimeOption {
   static std::map<std::string, ErrorLogFileData> ErrorLogs;
   static std::string LogFile;
   static std::string LogFileSymLink;
+  static uint16_t LogFilePeriodMultiplier;
 
   static int LogHeaderMangle;
   static bool AlwaysEscapeLog;

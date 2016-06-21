@@ -498,6 +498,11 @@ DELEGATE_OPCODE(DecRef)
 DELEGATE_OPCODE(DecRefNZ)
 DELEGATE_OPCODE(DbgAssertRefCount)
 
+DELEGATE_OPCODE(LdClsCtx)
+DELEGATE_OPCODE(LdClsCctx)
+DELEGATE_OPCODE(CastCtxThis)
+DELEGATE_OPCODE(CheckCtxThis)
+
 DELEGATE_OPCODE(LdClsName)
 DELEGATE_OPCODE(LdClsMethod)
 DELEGATE_OPCODE(LdIfaceMethod)
@@ -2197,48 +2202,6 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
     makeFixup(inst->marker(), SyncOptions::Sync)
   };
   m_state.catch_calls[inst->taken()] = CatchCall::CPP;
-}
-
-void CodeGenerator::cgCastCtxThis(IRInstruction* inst) {
-  vmain() << copy{srcLoc(inst, 0).reg(), dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgCheckCtxThis(IRInstruction* inst) {
-  auto const rctx = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  auto const func = getFunc(inst->marker());
-  if (func->isPseudoMain() || !func->mayHaveThis()) {
-    // Check for a null $this pointer first.
-    auto const sf = v.makeReg();
-    v << testq{rctx, rctx, sf};
-    emitFwdJcc(v, CC_Z, sf, inst->taken());
-  }
-
-  auto const sf = v.makeReg();
-  v << testqi{1, rctx, sf};
-  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  // Context could be either a this object or a class ptr
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << testqi{1, srcReg, sf};
-  cond(v, CC_NZ, sf, dstReg,
-    [&](Vout& v) { // ctx is a class
-      return emitLdClsCctx(v, srcReg, v.makeReg());
-    }, [&](Vout& v) { // ctx is this ptr
-      return emitLdObjClass(v, srcReg, v.makeReg());
-    });
-}
-
-void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  emitLdClsCctx(vmain(), srcReg, dstReg);
 }
 
 void CodeGenerator::cgLdCtx(IRInstruction* inst) {

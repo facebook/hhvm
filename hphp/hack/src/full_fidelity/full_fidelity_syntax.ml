@@ -475,6 +475,13 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.VectorTypeSpecifier
     let is_map_type_specifier node =
       kind node = SyntaxKind.MapTypeSpecifier
+    let is_separable_prefix node =
+      match syntax node with
+      | Token t -> begin
+        Full_fidelity_token_kind.(match Token.kind t with
+        | PlusPlus | MinusMinus -> false
+        | _ -> true) end
+      | _ -> true
 
     let children node =
       match node.syntax with

@@ -135,16 +135,18 @@ void APCArray::Delete(APCHandle* handle) {
 }
 
 APCArray::~APCArray() {
+  // This array is refcounted, but keys/values might be uncounted strings, so
+  // we must use unreferenceRoot here (corresponding to Create calls above).
   if (isPacked()) {
     APCHandle** v = vals();
     for (size_t i = 0, n = m_size; i < n; i++) {
-      v[i]->unreference();
+      v[i]->unreferenceRoot();
     }
   } else {
     Bucket* bks = buckets();
     for (int i = 0; i < m.m_num; i++) {
-      bks[i].key->unreference();
-      bks[i].val->unreference();
+      bks[i].key->unreferenceRoot();
+      bks[i].val->unreferenceRoot();
     }
   }
 }

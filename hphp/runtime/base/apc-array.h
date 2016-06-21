@@ -56,12 +56,9 @@ struct APCArray {
     return reinterpret_cast<const APCArray*>(handle);
   }
 
-  APCHandle* getHandle() {
-    return &m_handle;
-  }
-  const APCHandle* getHandle() const {
-    return &m_handle;
-  }
+  // Used when creating/destroying a local wrapper (see APCLocalArray).
+  void reference() const { m_handle.referenceNonRoot(); }
+  void unreference() const { m_handle.unreferenceNonRoot(); }
 
   //
   // Array API
@@ -147,6 +144,13 @@ private:
   Bucket* buckets() const { return (Bucket*)(hash() + m.m_capacity_mask + 1); }
   /* start of the data for packed array */
   APCHandle** vals() const { return (APCHandle**)(this + 1); }
+
+  APCHandle* getHandle() {
+    return &m_handle;
+  }
+  const APCHandle* getHandle() const {
+    return &m_handle;
+  }
 
 private:
   APCHandle m_handle;

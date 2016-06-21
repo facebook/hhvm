@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 
@@ -258,7 +259,7 @@ unsigned StringData::sweepAll() {
     assert(next && uintptr_t(next) != kMallocFreeWord);
     auto const s = node2str(n);
     assert(s->isProxy());
-    s->proxy()->apcstr->getHandle()->unreference();
+    s->proxy()->apcstr->unreference();
   }
   head.next = head.prev = &head;
   return count;
@@ -428,7 +429,7 @@ StringData* StringData::MakeProxySlowPath(const APCString* apcstr) {
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->proxy()->apcstr = apcstr;
   sd->enlist();
-  apcstr->getHandle()->reference();
+  apcstr->reference();
 
   assert(sd->m_len == data->size());
   assert(sd->m_hdr.aux == data->m_hdr.aux);
@@ -441,6 +442,7 @@ StringData* StringData::MakeProxySlowPath(const APCString* apcstr) {
 }
 
 StringData* StringData::MakeProxy(const APCString* apcstr) {
+  assert(!apcExtension::UseUncounted);
   // No need to check if len > MaxSize, because if it were we'd never
   // have made the StringData in the APCVariant without throwing.
   assert(size_t(apcstr->getStringData()->size()) <= size_t(MaxSize));
@@ -476,7 +478,7 @@ NEVER_INLINE
 void StringData::releaseDataSlowPath() {
   assert(isProxy());
   assert(checkSane());
-  proxy()->apcstr->getHandle()->unreference();
+  proxy()->apcstr->unreference();
   delist();
   MM().freeSmallSize(this, sizeof(StringData) + sizeof(Proxy));
 }

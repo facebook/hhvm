@@ -53,7 +53,7 @@ Variant APCLocalArray::getKey(ssize_t pos) const {
 }
 
 void APCLocalArray::sweep() {
-  m_arr->getHandle()->unreference();
+  m_arr->unreference();
 }
 
 const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
@@ -85,7 +85,7 @@ APCLocalArray::~APCLocalArray() {
     }
     req::free(m_localCache);
   }
-  m_arr->getHandle()->unreference();
+  m_arr->unreference();
   MM().removeApcArray(this);
 }
 

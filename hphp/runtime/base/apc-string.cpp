@@ -44,7 +44,7 @@ APCString::MakeSharedString(APCKind kind, StringData* data) {
   assert(apcStr->m_str.isUncounted());
   assert(apcStr->m_str.isFlat());
   assert(apcStr->m_str.checkSane());
-  return {apcStr->getHandle(), size};
+  return {&apcStr->m_handle, size};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

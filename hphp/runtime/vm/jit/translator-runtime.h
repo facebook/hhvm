@@ -169,14 +169,6 @@ void profileTypeHelper(TypeProfile*, TypedValue);
 
 void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr);
 
-Cell lookupCnsHelperNormal(rds::Handle tv_handle,
-                           StringData* nm, bool error);
-Cell lookupCnsHelperPersistent(rds::Handle tv_handle,
-                               StringData* nm, bool error);
-Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
-                            StringData* nm, StringData* fallback);
-Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
-                                StringData* nm, StringData* fallback);
 void lookupClsMethodHelper(Class* cls, StringData* meth,
                            ActRec* ar, ActRec* fp);
 
@@ -192,11 +184,6 @@ const Func* lookupUnknownFunc(const StringData*);
 const Func* lookupFallbackFunc(const StringData*, const StringData*);
 
 Class* lookupKnownClass(rds::Handle cache_handle, const StringData* clsName);
-
-TypedValue lookupClassConstantTv(TypedValue* cache,
-                                 const NamedEntity* ne,
-                                 const StringData* cls,
-                                 const StringData* cns);
 
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,

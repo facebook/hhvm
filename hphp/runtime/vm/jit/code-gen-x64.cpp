@@ -380,7 +380,6 @@ CALL_OPCODE(RaiseNotice)
 CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(RaiseArrayKeyNotice)
 CALL_OPCODE(IncStatGrouped)
-CALL_OPCODE(LdClosureStaticLoc)
 CALL_OPCODE(MapIdx)
 CALL_OPCODE(LdClsPropAddrOrNull)
 CALL_OPCODE(LdClsPropAddrOrRaise)
@@ -572,6 +571,12 @@ DELEGATE_OPCODE(LookupCnsE)
 DELEGATE_OPCODE(LookupCnsU)
 DELEGATE_OPCODE(LdClsCns)
 DELEGATE_OPCODE(InitClsCns)
+
+DELEGATE_OPCODE(LdStaticLoc)
+DELEGATE_OPCODE(InitStaticLoc)
+DELEGATE_OPCODE(CheckClosureStaticLocInit)
+DELEGATE_OPCODE(LdClosureStaticLoc)
+DELEGATE_OPCODE(InitClosureStaticLoc)
 
 DELEGATE_OPCODE(IterInit)
 DELEGATE_OPCODE(IterInitK)
@@ -2232,56 +2237,6 @@ void CodeGenerator::cgLdARNumParams(IRInstruction* inst) {
   auto tmp = v.makeReg();
   v << loadzlq{baseReg[AROFF(m_numArgsAndFlags)], tmp};
   v << andqi{ActRec::kNumArgsMask, tmp, dstReg, v.makeReg()};
-}
-
-void CodeGenerator::cgCheckClosureStaticLocInit(IRInstruction* inst) {
-  auto const src = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfUninit, src[RefData::tvOffset() + TVOFF(m_type)]);
-  v << jcc{CC_E, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgInitClosureStaticLoc(IRInstruction* inst) {
-  always_assert(!srcLoc(inst, 1).isFullSIMD());
-  auto ptr = srcLoc(inst, 0).reg();
-  auto off = RefData::tvOffset();
-  storeTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
-}
-
-void CodeGenerator::cgLdStaticLoc(IRInstruction* inst) {
-  auto const extra = inst->extra<LdStaticLoc>();
-  auto const link  = rds::bindStaticLocal(extra->func, extra->name);
-  auto const dst   = dstLoc(inst, 0).reg();
-  auto& v          = vmain();
-  auto const sf    = checkRDSHandleInitialized(v, link.handle());
-  emitFwdJcc(v, CC_NE, sf, inst->taken());
-  v << lea{rvmtl()[link.handle()], dst};
-}
-
-void CodeGenerator::cgInitStaticLoc(IRInstruction* inst) {
-  auto const extra = inst->extra<InitStaticLoc>();
-  auto const link  = rds::bindStaticLocal(extra->func, extra->name);
-  auto const dst   = dstLoc(inst, 0).reg();
-  auto& v          = vmain();
-
-  // If we're here, the target-cache-local RefData is all zeros, so we
-  // can initialize it by storing the new value into it's TypedValue
-  // and incrementing the RefData reference count (which will set it
-  // to 1).
-  //
-  // We are storing the rdSrc value into the static, but we don't need
-  // to inc ref it because it's a bytecode invariant that it's not a
-  // reference counted type.
-
-  v << lea{rvmtl()[link.handle()], dst};
-  storeTV(v, dst[RefData::tvOffset()], srcLoc(inst, 0), inst->src(0));
-  v << storeli{1, dst[FAST_REFCOUNT_OFFSET]};
-  v << storebi{0, dst[RefData::cowZOffset()]};
-  v << storebi{uint8_t(HeaderKind::Ref), dst[HeaderKindOffset]};
-  markRDSHandleInitialized(v, link.handle());
-
-  static_assert(sizeof(HeaderKind) == 1, "");
 }
 
 void CodeGenerator::cgLdContField(IRInstruction* inst) {

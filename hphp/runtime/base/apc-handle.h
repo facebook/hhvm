@@ -136,12 +136,20 @@ struct APCHandle {
    * Treadmill.  Memory management operations on APC handles go through this
    * API to hide which scheme is being used from users of APCHandle.  The
    * active scheme can be different for different handles in the same process.
+   * In any case, the correct method for removing references must be used:
    *
-   *          function | Uncounted |  Counted
-   *  -----------------+-----------+-----------
-   *         reference |   no-op   |  incref
-   *       unreference |   no-op   |  decref
-   *   unreferenceRoot | treadmill |  decref
+   * unreferenceRoot
+   *  should only be called once to remove the initial reference added by Create
+   * unreferenceNonRoot
+   *  should be called to remove each reference added by referenceNonRoot
+   *
+   * This table shows the implementation of the two modes:
+   *
+   *            function | Uncounted |  Counted
+   *  -------------------+-----------+-----------
+   *    referenceNonRoot |   no-op   |  incref
+   *  unreferenceNonRoot |   no-op   |  decref
+   *     unreferenceRoot | treadmill |  decref
    *
    * The `size' argument to unreferenceRoot is only use for stats collection,
    * so zero may be passed in some situations.
@@ -150,9 +158,9 @@ struct APCHandle {
    * other threads---it is an exception to the thread-safety rule documented
    * above the class.
    */
-  void reference() const;
-  void unreference() const;
-  void unreferenceRoot(size_t size);
+  void referenceNonRoot() const;
+  void unreferenceNonRoot() const;
+  void unreferenceRoot(size_t size = 0);
 
   /*
    * Get an instance of the PHP object represented by this APCHandle. The
@@ -228,6 +236,7 @@ private:
   const DataType m_type;
   const APCKind m_kind;
   std::atomic<uint8_t> m_obj_attempted{false};
+  DEBUG_ONLY std::atomic<uint8_t> m_unref_root_count{0};
   mutable std::atomic<uint32_t> m_count{1};
 };
 

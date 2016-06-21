@@ -1,0 +1,8 @@
+array(2) {
+  ["obj"]=>
+  object(stdClass)#1 (0) {
+  }
+  ["unc"]=>
+  string(16) "foobar0123456789"
+}
+string(16) "foobar0123456789"

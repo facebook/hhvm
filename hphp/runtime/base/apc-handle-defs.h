@@ -23,19 +23,20 @@
 
 namespace HPHP {
 
-inline void APCHandle::reference() const {
+inline void APCHandle::referenceNonRoot() const {
   if (!isUncounted()) {
     atomicIncRef();
   }
 }
 
-inline void APCHandle::unreference() const {
+inline void APCHandle::unreferenceNonRoot() const {
   if (!isUncounted()) {
     atomicDecRef();
   }
 }
 
 inline void APCHandle::unreferenceRoot(size_t size) {
+  assert(isSingletonKind() || m_unref_root_count++ == 0);
   if (!isUncounted()) {
     atomicDecRef();
   } else {
@@ -59,6 +60,7 @@ inline void APCHandle::atomicDecRef() const {
     assert(isAtomicCounted());
     if (--m_count) return;
   }
+  assert(isSingletonKind() || m_unref_root_count == 1);
   const_cast<APCHandle*>(this)->deleteShared();
 }
 

@@ -589,7 +589,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
            kind == APCKind::SharedCollection) &&
           !svar->objAttempted()) {
         // Hold ref here for later promoting the object
-        svar->reference();
+        svar->referenceNonRoot();
         promoteObj = true;
       }
       value = sval->toLocal();
@@ -614,7 +614,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   if (promoteObj)  {
     handlePromoteObj(keyStr, svar, value);
     // release the extra ref
-    svar->unreference();
+    svar->unreferenceNonRoot();
   }
   return true;
 }

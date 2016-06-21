@@ -30,7 +30,7 @@ inline APCLocalArray::APCLocalArray(const APCArray* source)
   , m_localCache(nullptr)
 {
   m_size = m_arr->size();
-  source->getHandle()->reference();
+  source->reference();
   MM().addApcArray(this);
   assert(hasExactlyOneRef());
 }

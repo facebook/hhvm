@@ -108,12 +108,6 @@ using namespace jit::reg;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const char* getContextName(const Class* ctx) {
-  return ctx ? ctx->name()->data() : ":anonymous:";
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void debug_trashsp(Vout& v) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     v << syncvmsp{v.cns(0x42)};
@@ -504,6 +498,13 @@ DELEGATE_OPCODE(DecRef)
 DELEGATE_OPCODE(DecRefNZ)
 DELEGATE_OPCODE(DbgAssertRefCount)
 
+DELEGATE_OPCODE(LdClsName)
+DELEGATE_OPCODE(LdClsMethod)
+DELEGATE_OPCODE(LdIfaceMethod)
+DELEGATE_OPCODE(LdObjInvoke)
+DELEGATE_OPCODE(LdFuncVecLen)
+DELEGATE_OPCODE(LdFuncNumParams)
+
 DELEGATE_OPCODE(BaseG)
 DELEGATE_OPCODE(PropX)
 DELEGATE_OPCODE(PropDX)
@@ -549,6 +550,16 @@ DELEGATE_OPCODE(LdFunc)
 DELEGATE_OPCODE(LdFuncCached)
 DELEGATE_OPCODE(LdFuncCachedSafe)
 DELEGATE_OPCODE(LdFuncCachedU)
+
+DELEGATE_OPCODE(LdObjMethod)
+DELEGATE_OPCODE(LookupClsMethodCache)
+DELEGATE_OPCODE(LdClsMethodCacheFunc)
+DELEGATE_OPCODE(LdClsMethodCacheCls)
+DELEGATE_OPCODE(LookupClsMethodFCache)
+DELEGATE_OPCODE(LdClsMethodFCacheFunc)
+
+DELEGATE_OPCODE(GetCtxFwdCall)
+DELEGATE_OPCODE(GetCtxFwdCallDyn)
 
 DELEGATE_OPCODE(LdCns)
 DELEGATE_OPCODE(LookupCns)
@@ -1082,101 +1093,6 @@ void CodeGenerator::cgLookupClsMethod(IRInstruction* inst) {
             cellsToBytes(inst->extra<LookupClsMethod>()->offset.offset))
       .ssa(3)
   );
-}
-
-void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
-  assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
-  using namespace MethodCache;
-
-  auto const clsReg    = srcLoc(inst, 0).reg();
-  auto const actRecReg = srcLoc(inst, 1).reg();
-  auto const extra     = inst->extra<LdObjMethodData>();
-  auto& v = vmain();
-
-  // Allocate the request-local one-way method cache for this lookup.
-  auto const handle = rds::alloc<Entry, sizeof(Entry)>().handle();
-  if (RuntimeOption::EvalPerfDataMap) {
-    rds::recordRds(
-      handle,
-      sizeof(TypedValue),
-      "MethodCache",
-      getFunc(inst->marker())->fullName()->toCppString()
-    );
-  }
-
-  auto const mcHandler = extra->fatal ? handlePrimeCacheInit<true>
-                                      : handlePrimeCacheInit<false>;
-
-  auto fast_path = v.makeBlock();
-  auto slow_path = v.makeBlock();
-  auto done = v.makeBlock();
-
-  /*
-   * The `mcprep' instruction here creates a smashable move, which serves as
-   * the inline cache, or "prime cache" for the method lookup.
-   *
-   * On our first time through this codepath in the TC, we "prime" this cache
-   * (which holds across /all/ requests) by smashing the mov immediate to hold
-   * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
-   * not always possible (see handlePrimeCacheInit() for details), in which
-   * case we smash an immediate with some low bits set, so that we always miss
-   * on the inline cache when comparing against our live Class*.
-   *
-   * The inline cache is set up so that we always miss initially, and take the
-   * slow path to initialize it.  After initialization, we also smash the slow
-   * path call to point instead to a lookup routine for the out-of-line method
-   * cache (allocated above).  The inline cache is guaranteed to be set only
-   * once, but the one-way request-local method cache is updated on each miss.
-   */
-  auto func_class = v.makeReg();
-  auto classptr = v.makeReg();
-  v << mcprep{func_class};
-
-  // Get the Class* part of the cache line.
-  auto tmp = v.makeReg();
-  v << movtql{func_class, tmp};
-  v << movzlq{tmp, classptr};
-
-  // Check the inline cache.
-  auto const sf = v.makeReg();
-  v << cmpq{classptr, clsReg, sf};
-  v << jcc{CC_NE, sf, {fast_path, slow_path}};
-
-  // Inline cache hit; store the value in the AR.
-  v = fast_path;
-  auto funcptr = v.makeReg();
-  v << shrqi{32, func_class, funcptr, v.makeReg()};
-  v << store{funcptr,
-             actRecReg[cellsToBytes(extra->offset.offset) + AROFF(m_func)]};
-  v << jmp{done};
-
-  // Initialize the inline cache, or do a lookup in the out-of-line cache if
-  // we've finished initialization and have smashed this call.
-  v = slow_path;
-  cgCallHelper(v,
-    CallSpec::smashable(mcHandler),
-    kVoidDest,
-    SyncOptions::Sync,
-    argGroup(inst)
-      .imm(safe_cast<int32_t>(handle))
-      .addr(srcLoc(inst, 1).reg(), cellsToBytes(extra->offset.offset))
-      .immPtr(extra->method)
-      .ssa(0/*cls*/)
-      .immPtr(getClass(inst->marker()))
-      .reg(func_class)
-  );
-  v << jmp{done};
-  v = done;
-}
-
-void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
-  auto const rsrc = srcLoc(inst, 0).reg();
-  auto const rdst = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  emitLdLowPtr(v, rsrc[Class::invokeOff()], rdst, sizeof(LowPtr<Func>));
-  auto const sf = v.makeReg();
-  v << testq{rdst, rdst, sf};
-  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgLdRetVal(IRInstruction* inst) {
@@ -2339,16 +2255,6 @@ void CodeGenerator::cgLdClosure(IRInstruction* inst) {
   return cgLdCtx(inst);
 }
 
-void CodeGenerator::cgLdClsName(IRInstruction* inst) {
-  auto const dstReg = dstLoc(inst, 0).reg();
-  auto const srcReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto preclass = v.makeReg();
-  v << load{srcReg[Class::preClassOff()], preclass};
-  emitLdLowPtr(v, preclass[PreClass::nameOffset()],
-               dstReg, sizeof(LowStringPtr));
-}
-
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto const off = cellsToBytes(inst->extra<LdARFuncPtr>()->offset.offset);
   auto dstReg = dstLoc(inst, 0).reg();
@@ -2844,271 +2750,6 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   auto const dstReg = dstLoc(inst, 0).reg();
   auto const objReg = srcLoc(inst, 0).reg();
   vmain() << lea{objReg[inst->extra<LdPropAddr>()->offsetBytes], dstReg};
-}
-
-void CodeGenerator::cgLdFuncVecLen(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto clsReg = srcLoc(inst, 0).reg();
-
-  // A Cctx is a Cls with the bottom bit set; subtract one from the
-  // offset to handle that case
-  auto off = Class::funcVecLenOff() - (inst->src(0)->isA(TCctx) ? 1 : 0);
-  vmain() << loadzlq{clsReg[off], dstReg};
-}
-
-void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto clsReg = srcLoc(inst, 0).reg();
-  int32_t mSlotVal = inst->src(1)->rawVal();
-  // We could have a Cls or a Cctx. The Cctx has the low bit set, so
-  // we need to subtract one in that case.
-  auto methOff = int32_t(mSlotVal * sizeof(LowPtr<Func>)) -
-    (inst->src(0)->isA(TCctx) ? 1 : 0);
-  auto& v = vmain();
-  emitLdLowPtr(v, clsReg[methOff], dstReg, sizeof(LowPtr<Func>));
-}
-
-void CodeGenerator::cgLdIfaceMethod(IRInstruction* inst) {
-  auto& extra = *inst->extra<LdIfaceMethod>();
-  auto& v = vmain();
-  auto const clsReg = srcLoc(inst, 0).reg();
-  auto const vtableVecReg = v.makeReg();
-  auto const vtableReg = v.makeReg();
-  auto const funcReg = dstLoc(inst, 0).reg();
-
-  emitLdLowPtr(v, clsReg[Class::vtableVecOff()],
-               vtableVecReg, sizeof(LowPtr<Class::VtableVecSlot>));
-  auto const vtableOff = extra.vtableIdx * sizeof(Class::VtableVecSlot) +
-             offsetof(Class::VtableVecSlot, vtable);
-  emitLdLowPtr(v, vtableVecReg[vtableOff], vtableReg,
-               sizeof(Class::VtableVecSlot::vtable));
-  emitLdLowPtr(v, vtableReg[extra.methodIdx * sizeof(LowPtr<Func>)],
-               funcReg, sizeof(LowPtr<Func>));
-}
-
-void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
-  auto funcDestReg   = dstLoc(inst, 0).reg(0);
-
-  auto const& extra = *inst->extra<ClsMethodData>();
-  auto const cls = extra.clsName;
-  auto const method = extra.methodName;
-  auto const ne = extra.namedEntity;
-  auto const ch = StaticMethodCache::alloc(
-    cls, method, getContextName(getClass(inst->marker())));
-
-  if (false) { // typecheck
-    UNUSED TypedValue* fake_fp = nullptr;
-    UNUSED TypedValue* fake_sp = nullptr;
-    const UNUSED Func* f = StaticMethodCache::lookup(
-      ch, ne, cls, method, fake_fp);
-  }
-
-  // can raise an error if class is undefined
-  cgCallHelper(vmain(),
-               CallSpec::direct(StaticMethodCache::lookup),
-               callDest(funcDestReg),
-               SyncOptions::Sync,
-               argGroup(inst)
-                 .imm(ch)       // Handle ch
-                 .immPtr(ne)            // NamedEntity* np.second
-                 .immPtr(cls)           // className
-                 .immPtr(method)        // methodName
-                 .reg(srcLoc(inst, 0).reg()) // frame pointer
-              );
-}
-
-void CodeGenerator::cgLdClsMethodCacheFunc(IRInstruction* inst) {
-  auto const dstReg = dstLoc(inst, 0).reg();
-  auto const& extra = *inst->extra<ClsMethodData>();
-  auto const clsName = extra.clsName;
-  auto const methodName = extra.methodName;
-  auto const ch = StaticMethodCache::alloc(
-    clsName, methodName, getContextName(getClass(inst->marker())));
-  auto& v = vmain();
-
-  static_assert(sizeof(LowPtr<const Class>) == sizeof(LowPtr<const Func>), "");
-
-  auto const sf = checkRDSHandleInitialized(v, ch);
-  emitFwdJcc(v, CC_NE, sf, inst->taken());
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_func)],
-               dstReg, sizeof(LowPtr<const Class>));
-}
-
-void CodeGenerator::cgLdClsMethodCacheCls(IRInstruction* inst) {
-  auto const dstReg = dstLoc(inst, 0).reg();
-  auto const& extra = *inst->extra<ClsMethodData>();
-  auto const clsName = extra.clsName;
-  auto const methodName = extra.methodName;
-  auto& v = vmain();
-
-  auto const ch = StaticMethodCache::alloc(
-    clsName, methodName, getContextName(getClass(inst->marker())));
-
-  static_assert(sizeof(LowPtr<const Class>) == sizeof(LowPtr<const Func>), "");
-
-  // The StaticMethodCache here is guaranteed to already be initialized in RDS
-  // by the pre-conditions of this instruction.
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_cls)],
-               dstReg, sizeof(LowPtr<const Class>));
-}
-
-/**
- * Helper to emit getting the value for ActRec's m_this/m_cls slot
- * from a This pointer depending on whether the callee method is
- * static or not.
- */
-void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx,
-                                              bool staticCallee) {
-  auto& v = vmain();
-  if (staticCallee) {
-    // Load (this->m_cls | 0x1) into ctxReg.
-    auto vmclass = v.makeReg();
-    emitLdLowPtr(v, srcCtx[ObjectData::getVMClassOffset()],
-                 vmclass, sizeof(LowPtr<Class>));
-    v << orqi{1, vmclass, dstCtx, v.makeReg()};
-  } else {
-    // Just incref $this.
-    emitIncRef(v, srcCtx);
-    v << copy{srcCtx, dstCtx};
-  }
-}
-
-void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
-  auto destCtxReg = dstLoc(inst, 0).reg(0);
-  auto srcCtxTmp = inst->src(0);
-  auto srcCtxReg = srcLoc(inst, 0).reg(0);
-  const Func* callee = inst->src(1)->funcVal();
-  bool      withThis = srcCtxTmp->isA(TObj);
-  auto& v = vmain();
-
-  // If we don't know whether we have a This, we need to check dynamically
-  if (!withThis) {
-    auto const sf = v.makeReg();
-    v << testqi{1, srcCtxReg, sf};
-    cond(v, CC_Z, sf, destCtxReg, [&](Vout& v) {
-      // If we have a This pointer in destCtxReg, then select either This
-      // or its Class based on whether callee is static or not
-      auto dst1 = v.makeReg();
-      emitGetCtxFwdCallWithThis(srcCtxReg, dst1, callee->isStatic());
-      return dst1;
-    }, [&](Vout& v) {
-      return srcCtxReg;
-    });
-  } else {
-    // If we have a This pointer in destCtxReg, then select either This
-    // or its Class based on whether callee is static or not
-    emitGetCtxFwdCallWithThis(srcCtxReg, destCtxReg, callee->isStatic());
-  }
-}
-
-void CodeGenerator::cgLdClsMethodFCacheFunc(IRInstruction* inst) {
-  auto const& extra     = *inst->extra<ClsMethodData>();
-  auto const clsName    = extra.clsName;
-  auto const methodName = extra.methodName;
-  auto const dstReg     = dstLoc(inst, 0).reg();
-  auto& v               = vmain();
-  auto const ch = StaticMethodFCache::alloc(
-    clsName, methodName, getContextName(getClass(inst->marker()))
-  );
-  auto const sf = checkRDSHandleInitialized(v, ch);
-  emitFwdJcc(v, CC_NE, sf, inst->taken());
-  emitLdLowPtr(v, rvmtl()[ch], dstReg, sizeof(LowPtr<const Func>));
-}
-
-void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
-  auto const funcDestReg = dstLoc(inst, 0).reg(0);
-  auto const cls         = inst->src(0)->clsVal();
-  auto const& extra      = *inst->extra<ClsMethodData>();
-  auto const methName    = extra.methodName;
-  auto const fpReg       = srcLoc(inst, 1).reg();
-  auto const clsName     = cls->name();
-
-  auto const ch = StaticMethodFCache::alloc(
-    clsName, methName, getContextName(getClass(inst->marker()))
-  );
-  assertx(rds::isNormalHandle(ch));
-
-  const Func* (*lookup)(
-    rds::Handle, const Class*, const StringData*, TypedValue*) =
-    StaticMethodFCache::lookup;
-  cgCallHelper(vmain(),
-               CallSpec::direct(lookup),
-               callDest(funcDestReg),
-               SyncOptions::Sync,
-               argGroup(inst)
-                 .imm(ch)
-                 .immPtr(cls)
-                 .immPtr(methName)
-                 .reg(fpReg));
-}
-
-Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
-                                                 rds::Handle ch) {
-  auto& v = vmain();
-
-  // thisReg is holding $this. Should we pass it to the callee?
-
-  // RDS entry is guaranteed to be already initialized due to pre-conditions on
-  // this op.
-  auto const sf = v.makeReg();
-  v << cmplim{1, rvmtl()[ch + offsetof(StaticMethodFCache, m_static)], sf};
-  return cond(v, CC_E, sf, destCtxReg, [&](Vout& v) {
-      // If calling a static method...
-      // Load (this->m_cls | 0x1) into destCtxReg
-      auto vmclass = v.makeReg();
-      auto dst1 = v.makeReg();
-      emitLdLowPtr(v, thisReg[ObjectData::getVMClassOffset()],
-                   vmclass, sizeof(LowPtr<Class>));
-      v << orqi{1, vmclass, dst1, v.makeReg()};
-      return dst1;
-    }, [&](Vout& v) {
-      // Else: calling non-static method
-      emitIncRef(v, thisReg);
-      return thisReg;
-    });
-}
-
-/**
- * This method is similar to emitGetCtxFwdCall above, but whether or not the
- * callee is a static method is unknown at JIT time, and that is determined
- * dynamically by looking up into the StaticMethodFCache.
- */
-void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
-  auto srcCtxTmp  = inst->src(0);
-  auto srcCtxReg  = srcLoc(inst, 0).reg();
-  auto destCtxReg = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const t = srcCtxTmp->type();
-
-  // Allocate a StaticMethodFCache and return its RDS handle.
-  auto make_cache = [&] {
-    auto const& extra = *inst->extra<ClsMethodData>();
-    return StaticMethodFCache::alloc(extra.clsName, extra.methodName,
-                                     getContextName(getClass(inst->marker())));
-  };
-
-  if (t <= TCctx) {
-    // Nothing to do. Forward the context as is.
-    v << copy{srcCtxReg, destCtxReg};
-    return;
-  }
-  if (t <= TObj) {
-    // We definitely have $this, so always run code emitted by
-    // emitGetCtxFwdCallWithThisDyn
-    emitGetCtxFwdCallWithThisDyn(destCtxReg, srcCtxReg, make_cache());
-    return;
-  }
-
-  // dynamically check if we have a This pointer and call
-  // emitGetCtxFwdCallWithThisDyn below
-  auto const sf = v.makeReg();
-  v << testqi{1, srcCtxReg, sf};
-  cond(v, CC_Z, sf, destCtxReg, [&](Vout& v) {
-    // If we have a 'this' pointer ...
-    return emitGetCtxFwdCallWithThisDyn(v.makeReg(), srcCtxReg, make_cache());
-  }, [&](Vout& v) {
-    return srcCtxReg;
-  });
 }
 
 void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
@@ -4114,16 +3755,6 @@ void CodeGenerator::cgLdStrLen(IRInstruction* inst) {
     srcLoc(inst, 0).reg()[StringData::sizeOff()],
     dstLoc(inst, 0).reg()
   };
-}
-
-void CodeGenerator::cgLdFuncNumParams(IRInstruction* inst) {
-  auto& v = vmain();
-  auto dst = dstLoc(inst, 0).reg();
-  auto src = srcLoc(inst, 0).reg()[Func::paramCountsOff()];
-  auto tmp = v.makeReg();
-  // See Func::finishedEmittingParams and Func::numParams.
-  v << loadzlq{src, tmp};
-  v << shrqi{1, tmp, dst, v.makeReg()};
 }
 
 void CodeGenerator::cgInitPackedArray(IRInstruction* inst) {

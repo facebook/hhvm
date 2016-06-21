@@ -1053,9 +1053,9 @@ To string conversions:
 
 | GetCtxFwdCall, D(Ctx), S(Ctx) C(Func), PRc
 
-  If S0 is an object and S1 is static, this opcode returns S0's class. If S0 is
-  an object and S1 is not static, this opcode increfs S0 and returns it. If S0
-  is a Cctx, this opcode returns S0.
+  If S0 is an object and S1 is static, this opcode returns S0's class with the
+  low bit set (i.e., as a Cctx). If S0 is an object and S1 is not static, this
+  opcode increfs S0 and returns it. If S0 is a Cctx, this opcode returns S0.
 
 | LdClsMethodCacheFunc<clsName,methodName>, D(Func), NA, B
 

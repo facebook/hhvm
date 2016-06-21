@@ -443,12 +443,6 @@ CALL_OPCODE(ThrowOutOfBounds)
 CALL_OPCODE(ThrowArithmeticError)
 CALL_OPCODE(ThrowDivisionByZeroError)
 
-CALL_OPCODE(InstanceOfIface)
-CALL_OPCODE(InterfaceSupportsArr)
-CALL_OPCODE(InterfaceSupportsStr)
-CALL_OPCODE(InterfaceSupportsInt)
-CALL_OPCODE(InterfaceSupportsDbl)
-
 CALL_OPCODE(ZeroErrorLevel)
 CALL_OPCODE(RestoreErrorLevel)
 
@@ -514,6 +508,18 @@ DELEGATE_OPCODE(SameObj)
 DELEGATE_OPCODE(NSameObj)
 DELEGATE_OPCODE(EqRes)
 DELEGATE_OPCODE(NeqRes)
+
+DELEGATE_OPCODE(EqCls)
+DELEGATE_OPCODE(InstanceOf)
+DELEGATE_OPCODE(InstanceOfIface)
+DELEGATE_OPCODE(InstanceOfIfaceVtable)
+DELEGATE_OPCODE(ExtendsClass)
+DELEGATE_OPCODE(InstanceOfBitmask)
+DELEGATE_OPCODE(NInstanceOfBitmask)
+DELEGATE_OPCODE(InterfaceSupportsArr)
+DELEGATE_OPCODE(InterfaceSupportsStr)
+DELEGATE_OPCODE(InterfaceSupportsInt)
+DELEGATE_OPCODE(InterfaceSupportsDbl)
 
 DELEGATE_OPCODE(CheckType)
 DELEGATE_OPCODE(CheckTypeMem)
@@ -739,156 +745,6 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Check instanceof using instance bitmasks.
- *
- * Note it's not necessary to check whether the test class is defined:
- * if it doesn't exist than the candidate can't be an instance of it
- * and will fail this check.
- */
-Vreg CodeGenerator::emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst) {
-  auto const rObjClass     = srcLoc(inst, 0).reg(0);
-  auto const testClassName = inst->src(1)->strVal();
-  int offset;
-  uint8_t mask;
-  if (!InstanceBits::getMask(testClassName, offset, mask)) {
-    always_assert(!"cgInstanceOfBitmask had no bitmask");
-  }
-  auto const sf = v.makeReg();
-  v << testbim{int8_t(mask), rObjClass[offset], sf};
-  return sf;
-}
-
-void CodeGenerator::cgInstanceOfBitmask(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  v << setcc{CC_NZ, sf, dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgNInstanceOfBitmask(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  v << setcc{CC_Z, sf, dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
-  auto test = inst->src(1);
-  auto testReg = srcLoc(inst, 1).reg();
-  auto destReg = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  auto call_classof = [&](Vreg dst) {
-    cgCallHelper(
-      v,
-      CallSpec::method(&Class::classof),
-      {DestType::Byte, dst},
-      SyncOptions::None,
-      argGroup(inst).ssa(0).ssa(1)
-    );
-    return dst;
-  };
-
-  if (test->isA(TCls)) {
-    call_classof(destReg);
-    return;
-  }
-
-  auto const sf = v.makeReg();
-  v << testq{testReg, testReg, sf};
-  cond(v, CC_NZ, sf, destReg, [&](Vout& v) {
-    return call_classof(v.makeReg());
-  }, [&](Vout& v) {
-    // testReg == 0, set dest to false
-    return v.cns(false);
-  });
-}
-
-/*
- * Check instanceof using the superclass vector on the end of the
- * Class entry.
- */
-void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
-  auto const extra      = inst->extra<ExtendsClassData>();
-  auto const rdst       = dstLoc(inst, 0).reg();
-  auto const rObjClass  = srcLoc(inst, 0).reg();
-  auto const testClass  = extra->cls;
-  auto& v = vmain();
-
-  assertx(testClass != nullptr);
-
-  // Check whether rObjClass is a subclass of testClass,
-  // given that its classvec is at least as long as testClass's
-  auto check_clsvec = [&](Vout& v, Vreg dst) {
-    // If it's a subclass, testClass must be at the appropriate index.
-    auto const vecOffset = Class::classVecOff() +
-      sizeof(LowPtr<Class>) * (testClass->classVecLen() - 1);
-    auto const sf = v.makeReg();
-    emitCmpLowPtr(v, sf, testClass, rObjClass[vecOffset]);
-    v << setcc{CC_E, sf, dst};
-    return dst;
-  };
-
-  // Check whether rObjClass points to a subclass of testClass,
-  // set dst with the bool true/false result, and return dst.
-  auto check_subclass = [&](Vreg dst) {
-    if (testClass->classVecLen() == 1) {
-      // every class has at least one entry in its class vec,
-      // so no need to check the length
-      return check_clsvec(v, dst);
-    }
-    assertx(testClass->classVecLen() > 1);
-    // Check the length of the class vectors. If the candidate's is at
-    // least as long as the potential base (testClass) it might be a
-    // subclass.
-    auto const sf = v.makeReg();
-    emitCmpVecLen(v, sf, static_cast<int32_t>(testClass->classVecLen()),
-                  rObjClass[Class::classVecLenOff()]);
-    return cond(v, CC_NB, sf, dst,
-                [&](Vout& v) {
-                  return check_clsvec(v, v.makeReg());
-                },
-                [&](Vout& v) {
-                  return v.cns(false);
-                });
-  };
-
-  if (testClass->attrs() & AttrAbstract ||
-      (extra->strictLikely && !(testClass->attrs() & AttrNoOverride))) {
-    // If the test must be extended, or the hint says it's probably not an
-    // exact match, don't check for the same class.
-    check_subclass(rdst);
-    return;
-  }
-
-  // Test if it is the exact same class.  TODO(#2044801): we should be
-  // doing this control flow at the IR level.
-  auto const sf = v.makeReg();
-  emitCmpLowPtr<Class>(v, sf, v.cns(testClass), rObjClass);
-  if (testClass->attrs() & AttrNoOverride) {
-    // If the test class cannot be extended, we only need to do the
-    // same-class check, never the subclass check.
-    v << setcc{CC_E, sf, rdst};
-    return;
-  }
-
-  cond(v, CC_E, sf, rdst, [&](Vout& v) {
-    return v.cns(true);
-  }, [&](Vout& v) {
-    return check_subclass(v.makeReg());
-  });
-}
-
-void CodeGenerator::cgEqCls(IRInstruction* inst) {
-  auto const dst  = dstLoc(inst, 0).reg();
-  auto const src1 = srcLoc(inst, 0).reg();
-  auto const src2 = srcLoc(inst, 1).reg();
-
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitCmpLowPtr<Class>(v, sf, src2, src1);
-  v << setcc{CC_E, sf, dst};
-}
 
 void CodeGenerator::cgEqFunc(IRInstruction* inst) {
   auto const dst  = dstLoc(inst, 0).reg();
@@ -3462,35 +3318,6 @@ void CodeGenerator::cgLdIfaceMethod(IRInstruction* inst) {
                sizeof(Class::VtableVecSlot::vtable));
   emitLdLowPtr(v, vtableReg[extra.methodIdx * sizeof(LowPtr<Func>)],
                funcReg, sizeof(LowPtr<Func>));
-}
-
-void CodeGenerator::cgInstanceOfIfaceVtable(IRInstruction* inst) {
-  auto iface = inst->extra<InstanceOfIfaceVtable>()->cls;
-  auto const slot = iface->preClass()->ifaceVtableSlot();
-  auto& v = vmain();
-  auto const clsReg = srcLoc(inst, 0).reg();
-
-  auto const sf = v.makeReg();
-  emitCmpVecLen(v, sf, static_cast<int32_t>(slot),
-                clsReg[Class::vtableVecLenOff()]);
-  cond(
-    v, CC_A, sf, dstLoc(inst, 0).reg(),
-    [&](Vout& v) {
-      auto const vtableVecReg = v.makeReg();
-      emitLdLowPtr(v, clsReg[Class::vtableVecOff()],
-                   vtableVecReg, sizeof(LowPtr<Class::VtableVecSlot>));
-      auto const ifaceOff = slot * sizeof(Class::VtableVecSlot) +
-        offsetof(Class::VtableVecSlot, iface);
-      auto const sf = v.makeReg();
-      emitCmpLowPtr<Class>(v, sf, iface, vtableVecReg[ifaceOff]);
-      auto dst = v.makeReg();
-      v << setcc{CC_E, sf, dst};
-      return dst;
-    },
-    [&](Vout& v) {
-      return v.cns(false);
-    }
-  );
 }
 
 void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {

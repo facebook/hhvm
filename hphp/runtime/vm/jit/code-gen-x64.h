@@ -90,7 +90,6 @@ private:
 private:
   Vreg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);
-  Vreg emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst);
   void emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
                         const Class* cls, size_t nProps);
 

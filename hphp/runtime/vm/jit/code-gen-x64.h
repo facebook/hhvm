@@ -99,10 +99,6 @@ private:
                           OptDecRefProfile& profile, Type type);
   void emitDecRefTypeStat(Vout& v, const IRInstruction*);
 
-  void cgIterNextCommon(IRInstruction* inst);
-  void cgIterInitCommon(IRInstruction* inst);
-  void cgMIterNextCommon(IRInstruction* inst);
-  void cgMIterInitCommon(IRInstruction* inst);
   void cgLookupCnsCommon(IRInstruction* inst);
   void cgPropImpl(IRInstruction*);
   void cgIssetEmptyPropImpl(IRInstruction*);

@@ -564,6 +564,23 @@ DELEGATE_OPCODE(MapGet)
 DELEGATE_OPCODE(MapSet)
 DELEGATE_OPCODE(MapIsset)
 
+DELEGATE_OPCODE(IterInit)
+DELEGATE_OPCODE(IterInitK)
+DELEGATE_OPCODE(WIterInit)
+DELEGATE_OPCODE(WIterInitK)
+DELEGATE_OPCODE(MIterInit)
+DELEGATE_OPCODE(MIterInitK)
+DELEGATE_OPCODE(IterNext)
+DELEGATE_OPCODE(IterNextK)
+DELEGATE_OPCODE(WIterNext)
+DELEGATE_OPCODE(WIterNextK)
+DELEGATE_OPCODE(MIterNext)
+DELEGATE_OPCODE(MIterNextK)
+DELEGATE_OPCODE(IterFree)
+DELEGATE_OPCODE(MIterFree)
+DELEGATE_OPCODE(CIterFree)
+DELEGATE_OPCODE(DecodeCufIter)
+
 #undef NOOP_OPCODE
 #undef DELEGATE_OPCODE
 
@@ -4662,235 +4679,6 @@ void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
   auto& v = vmain();
   auto const objectOff = Resumable::dataOff() - Resumable::arOff();
   v << lea{resumableArReg[objectOff], dstReg};
-}
-
-void CodeGenerator::cgIterInit(IRInstruction* inst) {
-  cgIterInitCommon(inst);
-}
-
-void CodeGenerator::cgIterInitK(IRInstruction* inst) {
-  cgIterInitCommon(inst);
-}
-
-void CodeGenerator::cgWIterInit(IRInstruction* inst) {
-  cgIterInitCommon(inst);
-}
-
-void CodeGenerator::cgWIterInitK(IRInstruction* inst) {
-  cgIterInitCommon(inst);
-}
-
-void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
-  bool isInitK = inst->op() == IterInitK || inst->op() == WIterInitK;
-  bool isWInit = inst->op() == WIterInit || inst->op() == WIterInitK;
-
-  auto           fpReg = srcLoc(inst, 1).reg();
-  int       iterOffset = this->iterOffset(inst->marker(),
-                                          inst->extra<IterData>()->iterId);
-  int   valLocalOffset = localOffset(inst->extra<IterData>()->valId);
-  SSATmp*          src = inst->src(0);
-  auto args = argGroup(inst);
-  args.addr(fpReg, iterOffset).ssa(0/*src*/);
-  if (src->isA(TArr)) {
-    args.addr(fpReg, valLocalOffset);
-    if (isInitK) {
-      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-    } else if (isWInit) {
-      args.imm(0);
-    }
-    // MSVC gets confused if we try to directly assign
-    // the template overload, so use a temporary and
-    // let the optimizer sort it out.
-    TCA helperAddr;
-    if (isWInit) {
-      auto tmp = new_iter_array_key<true>;
-      helperAddr = (TCA)tmp;
-    } else if (isInitK) {
-      auto tmp = new_iter_array_key<false>;
-      helperAddr = (TCA)tmp;
-    } else {
-      helperAddr = (TCA)new_iter_array;
-    }
-    cgCallHelper(
-      vmain(),
-      CallSpec::direct(reinterpret_cast<void (*)()>(helperAddr)),
-      callDest(inst),
-      SyncOptions::Sync,
-      args);
-  } else {
-    assertx(src->type() <= TObj);
-    args.imm(uintptr_t(getClass(inst->marker()))).addr(fpReg, valLocalOffset);
-    if (isInitK) {
-      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-    } else {
-      args.imm(0);
-    }
-    // new_iter_object decrefs its src object if it propagates an
-    // exception out, so we use SyncAdjustOne, which adjusts the
-    // stack pointer by 1 stack element on an unwind, skipping over
-    // the src object.
-    cgCallHelper(vmain(), CallSpec::direct(new_iter_object), callDest(inst),
-                 SyncOptions::SyncAdjustOne, args);
-  }
-}
-
-void CodeGenerator::cgMIterInit(IRInstruction* inst) {
-  cgMIterInitCommon(inst);
-}
-
-void CodeGenerator::cgMIterInitK(IRInstruction* inst) {
-  cgMIterInitCommon(inst);
-}
-
-void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
-  auto const fpReg = srcLoc(inst, 1).reg();
-  auto const iterOffset = this->iterOffset(inst->marker(),
-                                           inst->extra<IterData>()->iterId);
-  auto const valLocalOffset = localOffset(inst->extra<IterData>()->valId);
-
-  auto args = argGroup(inst);
-  args.addr(fpReg, iterOffset).ssa(0/*src*/);
-
-  auto innerType = inst->typeParam();
-  assertx(innerType.isKnownDataType());
-
-  if (innerType <= TArr) {
-    args.addr(fpReg, valLocalOffset);
-    if (inst->op() == MIterInitK) {
-      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-    } else {
-      args.imm(0);
-    }
-    cgCallHelper(vmain(),
-                 CallSpec::direct(new_miter_array_key),
-                 callDest(inst),
-                 SyncOptions::Sync,
-                 args);
-    return;
-  }
-
-  always_assert(innerType <= TObj);
-
-  args.immPtr(getClass(inst->marker())).addr(fpReg, valLocalOffset);
-  if (inst->op() == MIterInitK) {
-    args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-  } else {
-    args.imm(0);
-  }
-  // new_miter_object decrefs its src object if it propagates an
-  // exception out, so we use SyncAdjustOne, which adjusts the
-  // stack pointer by 1 stack element on an unwind, skipping over
-  // the src object.
-  cgCallHelper(vmain(),
-               CallSpec::direct(new_miter_object),
-               callDest(inst),
-               SyncOptions::SyncAdjustOne,
-               args);
-}
-
-void CodeGenerator::cgIterNext(IRInstruction* inst) {
-  cgIterNextCommon(inst);
-}
-
-void CodeGenerator::cgIterNextK(IRInstruction* inst) {
-  cgIterNextCommon(inst);
-}
-
-void CodeGenerator::cgWIterNext(IRInstruction* inst) {
-  cgIterNextCommon(inst);
-}
-
-void CodeGenerator::cgWIterNextK(IRInstruction* inst) {
-  cgIterNextCommon(inst);
-}
-
-void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
-  // Nothing uses WIterNext so we intentionally don't support it here to avoid
-  // a null check in the witer_next_key helper. This will need to change if we
-  // ever start using it in an hhas file.
-  always_assert(!inst->is(WIterNext));
-
-  bool isNextK = inst->is(IterNextK, WIterNextK);
-  bool isWNext = inst->is(WIterNext, WIterNextK);
-  auto fpReg = srcLoc(inst, 0).reg();
-  auto args = argGroup(inst);
-  auto& marker = inst->marker();
-  args.addr(fpReg, iterOffset(marker, inst->extra<IterData>()->iterId))
-      .addr(fpReg, localOffset(inst->extra<IterData>()->valId));
-  if (isNextK) {
-    args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-  }
-  TCA helperAddr = isWNext ? (TCA)witer_next_key :
-    isNextK ? (TCA)iter_next_key_ind : (TCA)iter_next_ind;
-  cgCallHelper(vmain(),
-               CallSpec::direct(reinterpret_cast<void (*)()>(helperAddr)),
-               callDest(inst),
-               SyncOptions::Sync,
-               args);
-}
-
-void CodeGenerator::cgMIterNext(IRInstruction* inst) {
-  cgMIterNextCommon(inst);
-}
-
-void CodeGenerator::cgMIterNextK(IRInstruction* inst) {
-  cgMIterNextCommon(inst);
-}
-
-void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 0).reg();
-  auto& marker = inst->marker();
-  auto args = argGroup(inst);
-  args.addr(fpReg, iterOffset(marker, inst->extra<IterData>()->iterId))
-      .addr(fpReg, localOffset(inst->extra<IterData>()->valId));
-  if (inst->op() == MIterNextK) {
-    args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-  } else {
-    args.imm(0);
-  }
-  cgCallHelper(vmain(), CallSpec::direct(miter_next_key), callDest(inst),
-               SyncOptions::Sync, args);
-}
-
-void CodeGenerator::cgIterFree(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 0).reg();
-  int offset = iterOffset(inst->marker(), inst->extra<IterFree>()->iterId);
-  cgCallHelper(vmain(),
-               CallSpec::method(&Iter::free),
-               kVoidDest,
-               SyncOptions::Sync,
-               argGroup(inst).addr(fpReg, offset));
-}
-
-void CodeGenerator::cgMIterFree(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 0).reg();
-  int offset = iterOffset(inst->marker(), inst->extra<MIterFree>()->iterId);
-  cgCallHelper(vmain(),
-               CallSpec::method(&Iter::mfree),
-               kVoidDest,
-               SyncOptions::Sync,
-               argGroup(inst).addr(fpReg, offset));
-}
-
-void CodeGenerator::cgDecodeCufIter(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 1).reg();
-  int offset = iterOffset(inst->marker(), inst->extra<DecodeCufIter>()->iterId);
-  cgCallHelper(vmain(),
-               CallSpec::direct(decodeCufIterHelper),
-               callDest(inst),
-               SyncOptions::Sync,
-               argGroup(inst).addr(fpReg, offset)
-                                  .typedValue(0));
-}
-
-void CodeGenerator::cgCIterFree(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 0).reg();
-  int offset = iterOffset(inst->marker(), inst->extra<CIterFree>()->iterId);
-  cgCallHelper(vmain(),
-               CallSpec::method(&Iter::cfree),
-               kVoidDest,
-               SyncOptions::Sync,
-               argGroup(inst).addr(fpReg, offset));
 }
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {

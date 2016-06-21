@@ -51,6 +51,7 @@ type t =
 | ConditionalExpression
 | ParenthesizedExpression
 | BracedExpression
+| ListExpression
 | XHPExpression
 | XHPOpen
 | XHPAttribute
@@ -102,6 +103,7 @@ let to_string kind =
   | ConditionalExpression -> "conditional_expression"
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"
+  | ListExpression -> "list_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | NullableTypeSpecifier -> "nullable_type_specifier"

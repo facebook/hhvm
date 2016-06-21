@@ -22,22 +22,26 @@ open Typing_defs
 module Class = struct
   type t = Typing_defs.class_type
   let prefix = Prefix.make()
+  let description = "Class"
 end
 
 (* a function type *)
 module Fun = struct
   type t = decl Typing_defs.fun_type
   let prefix = Prefix.make()
+  let description = "Fun"
 end
 
 module Typedef = struct
   type t = Typing_defs.typedef_type
   let prefix = Prefix.make()
+  let description = "Typedef"
 end
 
 module GConst = struct
   type t = decl ty
   let prefix = Prefix.make()
+  let description = "GConst"
 end
 
 module Funs = SharedMem.WithCache (StringKey) (Fun)

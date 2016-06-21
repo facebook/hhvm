@@ -10,14 +10,27 @@
 
 open Typing_defs
 
-module Class : sig type t = class_type val prefix : Prefix.t end
-module Fun : sig type t = decl fun_type val prefix : Prefix.t end
+module Class : sig
+  type t = class_type
+  val prefix : Prefix.t
+  val description : string
+end
+module Fun : sig
+  type t = decl fun_type
+  val prefix : Prefix.t
+  val description : string
+end
 module Typedef :
   sig
     type t = typedef_type
     val prefix : Prefix.t
+    val description : string
   end
-module GConst : sig type t = decl ty val prefix : Prefix.t end
+module GConst : sig
+  type t = decl ty
+  val prefix : Prefix.t
+  val description : string
+end
 
 module Funs : module type of SharedMem.WithCache (StringKey) (Fun)
 module Classes : module type of SharedMem.WithCache (StringKey) (Class)

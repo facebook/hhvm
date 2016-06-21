@@ -17,11 +17,13 @@ module type CanonHeap =
 module TypeCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
   type t = string
   let prefix = Prefix.make()
+  let description = "TypeCanon"
 end)
 
 module FunCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
   type t = string
   let prefix = Prefix.make()
+  let description = "FunCanon"
 end)
 
 (* TypeIdHeap records both class names and typedefs since they live in the
@@ -30,14 +32,17 @@ end)
 module TypeIdHeap = SharedMem.NoCache (StringKey) (struct
   type t = Pos.t * [`Class | `Typedef]
   let prefix = Prefix.make ()
+  let description = "TypeId"
 end)
 
 module FunPosHeap = SharedMem.NoCache (StringKey) (struct
   type t = Pos.t
   let prefix = Prefix.make()
+  let description = "FunPos"
 end)
 
 module ConstPosHeap = SharedMem.NoCache (StringKey) (struct
   type t = Pos.t
   let prefix = Prefix.make()
+  let description = "ConstPos"
 end)

@@ -512,6 +512,17 @@ DELEGATE_OPCODE(NSameObj)
 DELEGATE_OPCODE(EqRes)
 DELEGATE_OPCODE(NeqRes)
 
+DELEGATE_OPCODE(CheckType)
+DELEGATE_OPCODE(CheckTypeMem)
+DELEGATE_OPCODE(CheckLoc)
+DELEGATE_OPCODE(CheckStk)
+DELEGATE_OPCODE(CheckRefInner)
+DELEGATE_OPCODE(IsType)
+DELEGATE_OPCODE(IsNType)
+DELEGATE_OPCODE(IsTypeMem)
+DELEGATE_OPCODE(IsNTypeMem)
+DELEGATE_OPCODE(IsScalarType)
+
 DELEGATE_OPCODE(BaseG)
 DELEGATE_OPCODE(PropX)
 DELEGATE_OPCODE(PropDX)
@@ -716,235 +727,6 @@ void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,
 void CodeGenerator::cgMov(IRInstruction* inst) {
   always_assert(inst->src(0)->numWords() == inst->dst(0)->numWords());
   copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0), inst->dst()->type());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Type check operators
-///////////////////////////////////////////////////////////////////////////////
-
-// Overloads to put the {Object,Array}Data* into a register so
-// emitTypeTest can cmp to the Class*/ArrayKind expected by the
-// specialized Type
-
-// Nothing to do, return the register that contain the ObjectData already
-Vreg getDataPtrEnregistered(Vout&, Vreg dataSrc) {
-  return dataSrc;
-}
-
-// Enregister the memoryRef so it can be used with an offset by the
-// cmp instruction
-Vreg getDataPtrEnregistered(Vout& v, Vptr dataSrc) {
-  auto t = v.makeReg();
-  v << load{dataSrc, t};
-  return t;
-}
-
-template<class Loc1, class Loc2, class JmpFn>
-void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
-                                 Vreg sf, JmpFn doJcc) {
-  // Note: if you add new supported type tests, you should update
-  // negativeCheckType() to indicate whether it is precise or not.
-  always_assert(!type.hasConstVal());
-  always_assert_flog(
-    !type.subtypeOfAny(TCls, TCountedStr, TPersistentArr),
-    "Unsupported type in emitTypeTest: {}", type
-  );
-
-  // Nothing to check.
-  if (type == TGen) return;
-
-  auto& v = vmain();
-
-  auto const cc = [&] {
-    auto const cmp = [&] (DataType kind, ConditionCode cc) {
-      emitCmpTVType(v, sf, kind, typeSrc);
-      return cc;
-    };
-
-    auto const test = [&] (int bits, ConditionCode cc) {
-      emitTestTVType(v, sf, bits, typeSrc);
-      return cc;
-    };
-
-    if (type <= TPersistentStr) return cmp(KindOfPersistentString, CC_E);
-    if (type <= TStr)           return test(KindOfStringBit, CC_NZ);
-    if (type <= TArr)           return test(KindOfArrayBit, CC_NZ);
-
-    // These are intentionally == and not <=.
-    if (type == TNull)          return cmp(KindOfNull, CC_LE);
-    if (type == TUncountedInit) return test(KindOfUncountedInitBit, CC_NZ);
-    if (type == TUncounted)     return cmp(KindOfRefCountThreshold, CC_LE);
-    if (type == TCell)          return cmp(KindOfRef, CC_L);
-
-    always_assert(type.isKnownDataType());
-    always_assert(!(type < TBoxedInitCell));
-    auto const dt = type.toDataType();
-    assertx(dt == KindOfRef || (dt >= KindOfUninit && dt <= KindOfResource));
-    return cmp(dt, CC_E);
-  }();
-
-  doJcc(cc, sf);
-
-  if (type.isSpecialized()) {
-    auto const sf2 = v.makeReg();
-    emitSpecializedTypeTest(type, dataSrc, sf2, doJcc);
-  }
-}
-
-template<class DataLoc, class JmpFn>
-void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
-                                            JmpFn doJcc) {
-  if (type < TRes) {
-    // No cls field in Resource
-    always_assert(0 && "unexpected guard on specialized Resource");
-  }
-
-  auto& v = vmain();
-  if (type < TObj || type < TCls) {
-    // Emit the specific class test.
-    assertx(type.clsSpec());
-    assertx(type.clsSpec().exact() ||
-            type.clsSpec().cls()->attrs() & AttrNoOverride);
-
-    auto reg = getDataPtrEnregistered(v, dataSrc);
-    if (type < TObj) {
-      emitCmpLowPtr(v, sf, type.clsSpec().cls(),
-                    reg[ObjectData::getVMClassOffset()]);
-    } else {
-      v << cmpq{v.cns(type.clsSpec().cls()), reg, sf};
-    }
-    doJcc(CC_E, sf);
-  } else {
-    assertx(type < TArr && type.arrSpec() && type.arrSpec().kind());
-    assertx(type.arrSpec().type() == nullptr);
-
-    auto arrSpec = type.arrSpec();
-    auto reg = getDataPtrEnregistered(v, dataSrc);
-
-    static_assert(sizeof(HeaderKind) == 1, "");
-    v << cmpbim{*arrSpec.kind(), reg[HeaderKindOffset], sf};
-    doJcc(CC_E, sf);
-
-    if (arrSpec.kind() == ArrayData::kStructKind && arrSpec.shape()) {
-      auto newSf = v.makeReg();
-      auto offset = StructArray::shapeOffset();
-      v << cmpqm{v.cns(arrSpec.shape()), reg[offset], newSf};
-      doJcc(CC_E, newSf);
-    }
-  }
-}
-
-template<class JmpFn>
-void CodeGenerator::emitIsTypeTest(IRInstruction* inst, Vreg sf, JmpFn doJcc) {
-  auto const src = inst->src(0);
-  auto const loc = srcLoc(inst, 0);
-
-  if (src->isA(TPtrToGen)) {
-    auto base = loc.reg();
-    emitTypeTest(inst->typeParam(), base[TVOFF(m_type)],
-                 base[TVOFF(m_data)], sf, doJcc);
-    return;
-  }
-  assertx(src->isA(TGen));
-
-  auto typeSrcReg = loc.reg(1); // type register
-  if (typeSrcReg == InvalidReg) {
-    typeSrcReg = vmain().cns(src->type().toDataType());
-  }
-  auto dataSrcReg = loc.reg(0); // data register
-  emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg, sf, doJcc);
-}
-
-template<class Loc>
-void CodeGenerator::emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc,
-                                  Block* taken) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitTypeTest(type, typeSrc, dataSrc, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      emitFwdJcc(v, ccNegate(cc), sfTaken, taken);
-    });
-}
-
-void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc, Vreg sf) {
-  vmain() << setcc{cc, sf, dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgIsTypeMemCommon(IRInstruction* inst, bool negate) {
-  bool called = false; // check emitSetCc is called only once
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitIsTypeTest(inst, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      assertx(!called);
-      emitSetCc(inst, negate ? ccNegate(cc) : cc, sfTaken);
-      called = true;
-    });
-}
-
-void CodeGenerator::cgIsTypeCommon(IRInstruction* inst, bool negate) {
-  bool called = false; // check emitSetCc is called only once
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitIsTypeTest(inst, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      always_assert(!called);
-      emitSetCc(inst, negate ? ccNegate(cc) : cc, sfTaken);
-      called = true;
-    });
-}
-
-void CodeGenerator::cgIsType(IRInstruction* inst) {
-  cgIsTypeCommon(inst, false);
-}
-
-void CodeGenerator::cgIsNType(IRInstruction* inst) {
-  cgIsTypeCommon(inst, true);
-}
-
-void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
-  auto typeReg = srcLoc(inst, 0).reg(1);
-  auto dstReg  = dstLoc(inst, 0).reg(0);
-
-  /* static asserts for KindOfBoolean <= scalar type <= KindOfString */
-  static_assert(KindOfUninit < KindOfBoolean, "fix checks for IsScalar");
-  static_assert(KindOfNull < KindOfBoolean, "fix checks for IsScalar");
-  static_assert(KindOfInt64 > KindOfBoolean, "fix checks for IsScalar");
-  static_assert(KindOfDouble > KindOfBoolean, "fix checks for IsScalar");
-  static_assert(KindOfPersistentString > KindOfBoolean,
-                "fix checks for IsScalar");
-  static_assert(KindOfString > KindOfBoolean, "fix checks for IsScalar");
-
-  static_assert(KindOfInt64 < KindOfString, "fix checks for IsScalar");
-  static_assert(KindOfDouble < KindOfString, "fix checks for IsScalar");
-  static_assert(KindOfPersistentString < KindOfString,
-                "fix checks for IsScalar");
-  static_assert(KindOfArray > KindOfString, "fix checks for IsScalar");
-  static_assert(KindOfObject > KindOfString, "fix checks for IsScalar");
-  static_assert(KindOfResource > KindOfString, "fix checks for IsScalar");
-
-  static_assert(sizeof(DataType) == 1, "");
-  auto& v = vmain();
-  if (typeReg == InvalidReg) {
-    auto const type = inst->src(0)->type();
-    auto const imm = type <= (TBool | TInt | TDbl | TStr);
-    v << copy{v.cns(imm), dstReg};
-    return;
-  }
-
-  auto diff = v.makeReg();
-  v << subbi{KindOfBoolean, typeReg, diff, v.makeReg()};
-  auto const sf = v.makeReg();
-  v << cmpbi{KindOfString - KindOfBoolean, diff, sf};
-  v << setcc{CC_BE, sf, dstReg};
-}
-
-void CodeGenerator::cgIsTypeMem(IRInstruction* inst) {
-  cgIsTypeMemCommon(inst, false);
-}
-
-void CodeGenerator::cgIsNTypeMem(IRInstruction* inst) {
-  cgIsTypeMemCommon(inst, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3266,17 +3048,6 @@ void CodeGenerator::cgLdRef(IRInstruction* inst) {
          srcLoc(inst, 0).reg()[RefData::tvOffset()]);
 }
 
-void CodeGenerator::cgCheckRefInner(IRInstruction* inst) {
-  if (inst->typeParam() >= TInitCell) return;
-  auto const base = srcLoc(inst, 0).reg()[RefData::tvOffset()];
-  emitTypeCheck(
-    inst->typeParam(),
-    base + TVOFF(m_type),
-    base + TVOFF(m_type),
-    inst->taken()
-  );
-}
-
 void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   auto strReg = srcLoc(inst, 0).reg();
   auto idxReg = srcLoc(inst, 1).reg();
@@ -3538,7 +3309,8 @@ void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
 void CodeGenerator::cgLdLocPseudoMain(IRInstruction* inst) {
   auto const rsrc = srcLoc(inst, 0).reg();
   auto const lmem = rsrc[localOffset(inst->extra<LdLocPseudoMain>()->locId)];
-  emitTypeCheck(
+  irlower::emitTypeCheck(
+    vmain(), m_state,
     inst->typeParam(),
     lmem + TVOFF(m_type),
     lmem + TVOFF(m_data),
@@ -3565,20 +3337,6 @@ void CodeGenerator::cgLdStk(IRInstruction* inst) {
   loadTV(vmain(), inst->dst(), dstLoc(inst, 0), srcLoc(inst, 0).reg()[offset]);
 }
 
-void CodeGenerator::cgCheckStk(IRInstruction* inst) {
-  auto const rbase = srcLoc(inst, 0).reg();
-  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset.offset);
-  emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
-                rbase[baseOff + TVOFF(m_data)], inst->taken());
-}
-
-void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
-  auto const rbase = srcLoc(inst, 0).reg();
-  auto const baseOff = localOffset(inst->extra<CheckLoc>()->locId);
-  emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
-                rbase[baseOff + TVOFF(m_data)], inst->taken());
-}
-
 void CodeGenerator::cgLdMBase(IRInstruction* inst) {
   vmain() << load{rvmtl()[rds::kVmMInstrStateOff + offsetof(MInstrState, base)],
                   dstLoc(inst, 0).reg()};
@@ -3589,111 +3347,6 @@ void CodeGenerator::cgStMBase(IRInstruction* inst) {
     srcLoc(inst, 0).reg(),
     rvmtl()[rds::kVmMInstrStateOff + offsetof(MInstrState, base)]
   };
-}
-
-void CodeGenerator::cgCheckType(IRInstruction* inst) {
-  auto const src   = inst->src(0);
-  auto const dst   = inst->dst();
-  auto const rData = srcLoc(inst, 0).reg(0);
-  auto const rType = srcLoc(inst, 0).reg(1);
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-
-  auto doJcc = [&] (ConditionCode cc, Vreg sfTaken) {
-    emitFwdJcc(v, ccNegate(cc), sfTaken, inst->taken());
-  };
-
-  auto doMov = [&] () {
-    auto const valDst = dstLoc(inst, 0).reg(0);
-    auto const typeDst = dstLoc(inst, 0).reg(1);
-    if (dst->isA(TBool) && !src->isA(TBool)) {
-      v << movtqb{rData, valDst};
-    } else {
-      v << copy{rData, valDst};
-    }
-    if (typeDst == InvalidReg) return;
-    if (rType != InvalidReg) {
-      v << copy{rType, typeDst};
-    } else {
-      v << ldimmq{src->type().toDataType(), typeDst};
-    }
-  };
-
-  // Note: if you make changes to the behavior here you may need to update
-  // negativeCheckType().
-  auto const typeParam = inst->typeParam();
-  auto const srcType = src->type();
-
-  if (src->isA(typeParam)) {
-    // src is the target type or better.  Just define our dst.
-    doMov();
-    return;
-  }
-  if (!srcType.maybe(typeParam)) {
-    // src is definitely not the target type.  Always jump.
-    v << jmp{label(inst->taken())};
-    return;
-  }
-
-  if (rType != InvalidReg) {
-    emitTypeTest(typeParam, rType, rData, sf, doJcc);
-    doMov();
-    return;
-  }
-
-  if (srcType <= TBoxedCell && typeParam <= TBoxedCell) {
-    always_assert(!(typeParam < TBoxedInitCell));
-    doMov();
-    return;
-  }
-
-  /*
-   * See if we're just checking the array kind or object class of a value
-   * with a mostly-known type.
-   *
-   * Important: we don't support typeParam being something like
-   * StaticArr=kPackedKind unless the srcType also already knows its
-   * staticness.  We do allow things like CheckType<Arr=Packed> t1:StaticArr,
-   * though.  This is why we have to check that the unspecialized type is at
-   * least as big as the srcType.
-   */
-  if (typeParam.isSpecialized() && typeParam.unspecialize() >= srcType) {
-    emitSpecializedTypeTest(typeParam, rData, sf, doJcc);
-    doMov();
-    return;
-  }
-
-  /*
-   * Since not all of our unions carry a type register, there are some
-   * situations with strings and arrays that are neither constantly-foldable
-   * nor in the emitTypeTest code path.
-   *
-   * We currently actually check their persistent bit here, which will let
-   * both static and uncounted strings through. Also note that
-   * CheckType<Uncounted> t1:{Null|Str} doesn't get this treatment currently --
-   * the emitTypeTest path above will only check the type register.
-   */
-  if (!typeParam.isSpecialized() &&
-      typeParam <= TUncounted &&
-      srcType.subtypeOfAny(TStr, TArr) &&
-      srcType.maybe(typeParam)) {
-    assertx(srcType.maybe(TPersistent));
-    v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
-    doJcc(CC_L, sf);
-    doMov();
-    return;
-  }
-
-  always_assert_flog(
-    false,
-    "Bad src: {} and dst: {} types in '{}'", srcType, typeParam, *inst
-  );
-}
-
-void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
-  auto const reg = srcLoc(inst, 0).reg();
-  emitTypeCheck(inst->typeParam(), reg[TVOFF(m_type)],
-                reg[TVOFF(m_data)], inst->taken());
 }
 
 template <class JmpFn>
@@ -4199,8 +3852,8 @@ void CodeGenerator::cgLdCns(IRInstruction* inst) {
   if (cns.m_type == KindOfUninit) {
     loadTV(v, inst->dst(), dst, rvmtl()[ch]);
     auto const sf = v.makeReg();
-    emitTypeTest(
-      TUninit, dst.reg(1), dst.reg(0), sf,
+    irlower::emitTypeTest(
+      vmain(), m_state, TUninit, dst.reg(1), dst.reg(0), sf,
       [&] (ConditionCode cc, Vreg sf) {
         emitFwdJcc(v, cc, sf, inst->taken());
       }
@@ -4577,7 +4230,8 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
   auto dstReg  = dstLoc(inst, 0).reg();
   auto& v = vmain();
   auto const sf = v.makeReg();
-  emitTypeTest(TBoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)],
+  irlower::emitTypeTest(
+    vmain(), m_state, TBoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)],
     sf, [&](ConditionCode cc, Vreg sfTaken) {
       cond(v, cc, sfTaken, dstReg, [&](Vout& v) {
         return base;
@@ -5320,7 +4974,8 @@ void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
   auto const sf = v.makeReg();
   auto data_reg = srcLoc(inst, 0).reg(0);
   auto type_reg = srcLoc(inst, 0).reg(0);
-  emitTypeTest(inst->typeParam(), type_reg, data_reg, sf,
+  irlower::emitTypeTest(
+    vmain(), m_state, inst->typeParam(), type_reg, data_reg, sf,
     [&](ConditionCode cc, Vreg sfTaken) {
       ifThen(v, ccNegate(cc), sfTaken, [&](Vout& v) {
         v << ud2{};

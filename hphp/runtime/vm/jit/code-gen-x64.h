@@ -74,11 +74,6 @@ private:
 
   void emitVerifyCls(IRInstruction* inst);
 
-  void emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx, bool staticCallee);
-
-  Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
-                                    rds::Handle ch);
-
   void cgCoerceHelper(IRInstruction* inst, Vreg base, int offset,
                       Func const* callee, int argNum);
   void cgCastHelper(IRInstruction* inst, Vreg base, int offset);

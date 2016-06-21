@@ -34,12 +34,14 @@ struct Exception;
 
 struct ErrorLogFileData {
   ErrorLogFileData() {}
-  ErrorLogFileData(const std::string& file, const std::string& symlink)
+  ErrorLogFileData(const std::string& file, const std::string& symlink, int mpl)
     : logFile(file)
     , symLink(symlink)
+    , periodMultiplier(mpl)
   {}
   std::string logFile;
   std::string symLink;
+  int periodMultiplier;
   bool isPipeOutput() const { return !logFile.empty() && logFile[0] == '|'; }
   bool hasTemplate() const { return logFile.find('%') != std::string::npos; }
 };

@@ -105,6 +105,7 @@ std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
 // these hold the DEFAULT logger
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
+uint16_t RuntimeOption::LogFilePeriodMultiplier;
 
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysLogUnhandledExceptions =
@@ -808,6 +809,8 @@ void RuntimeOption::Load(
     Config::Bind(Logger::UseLogFile, ini, config, "Log.UseLogFile", true);
     Config::Bind(LogFile, ini, config, "Log.File");
     Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
+    Config::Bind(LogFilePeriodMultiplier, ini,
+                 config, "Log.PeriodMultiplier", 0);
 #ifdef FACEBOOK
     Config::Bind(UseThriftLogger, ini, config, "Log.UseThriftLogger");
     Config::Bind(LoggerBatchSize, ini, config, "Log.BatchSize", 100);
@@ -818,16 +821,18 @@ void RuntimeOption::Load(
       Logger::UseLogFile = true;
       // replace default logger with thrift-logger
       RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-          ErrorLogFileData(LogFile, LogFileSymLink);
+          ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
       Logger::SetTheLogger(Logger::DEFAULT, new ThriftLogger());
       // mirror thrift log in plain text
       if (Config::GetBool(ini, config, "Log.TextMirror.Enable", false)) {
         auto logFile = Config::GetString(ini, config, "Log.TextMirror.File",
-                                         "", false);
+                                         "");
         auto symLink = Config::GetString(ini, config, "Log.TextMirror.SymLink",
-                                         "", false);
+                                         "");
+        auto periodMultiplier = Config::GetUInt16(
+            ini, config, "Log.TextMirror.PeriodMultiplier", 0);
         RuntimeOption::ErrorLogs["TextMirror"] =
-            ErrorLogFileData(logFile, symLink);
+            ErrorLogFileData(logFile, symLink, periodMultiplier);
         if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
           Logger::SetTheLogger("TextMirror", new ExtendedLogger());
           ExtendedLogger::EnabledByDefault = true;
@@ -841,7 +846,7 @@ void RuntimeOption::Load(
     } else {
       if (Logger::UseLogFile && RuntimeOption::ServerExecutionMode()) {
         RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-            ErrorLogFileData(LogFile, LogFileSymLink);
+            ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
       }
       if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
         Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());

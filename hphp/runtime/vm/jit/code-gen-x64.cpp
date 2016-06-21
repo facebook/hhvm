@@ -291,7 +291,6 @@ CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
 CALL_OPCODE(AddNewElem)
 CALL_OPCODE(ArrayAdd)
-CALL_OPCODE(Box)
 CALL_OPCODE(MapAddElemC)
 CALL_OPCODE(ColAddNewElemC)
 
@@ -462,6 +461,10 @@ CALL_OPCODE(ReturnHook)
 CALL_OPCODE(OODeclExists)
 
 CALL_OPCODE(GetMemoKey)
+
+DELEGATE_OPCODE(Box)
+DELEGATE_OPCODE(BoxPtr)
+DELEGATE_OPCODE(UnboxPtr)
 
 DELEGATE_OPCODE(AddInt)
 DELEGATE_OPCODE(SubInt)
@@ -700,25 +703,7 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
-  using namespace NativeCalls;
-  always_assert(CallMap::hasInfo(inst->op()));
-  auto const& info = CallMap::info(inst->op());
-
-  ArgGroup argGroup = toArgGroup(info, m_state.locs, inst);
-
-  auto const dest = [&]() -> CallDest {
-    switch (info.dest) {
-    case DestType::None:  return kVoidDest;
-    case DestType::TV:
-    case DestType::SIMD:  return callDestTV(inst);
-    case DestType::SSA:
-    case DestType::Byte:  return callDest(inst);
-    case DestType::Dbl:   return callDestDbl(inst);
-    }
-    not_reached();
-  }();
-
-  cgCallHelper(v, info.func.call, dest, info.sync, argGroup);
+  return irlower::cgCallNative(v, m_state, inst);
 }
 
 CallDest CodeGenerator::callDest(Vreg reg0) const {
@@ -1201,27 +1186,6 @@ void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
   auto const dreg = dstLoc(inst, 0).reg();
   auto& v = vmain();
   v << orqi{1, sreg, dreg, v.makeReg()};
-}
-
-void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
-  auto src = srcLoc(inst, 0).reg();
-  auto dst = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRef, src[TVOFF(m_type)]);
-  if (RefData::tvOffset() == 0) {
-    v << cloadq{CC_E, sf, src, src[TVOFF(m_data)], dst};
-    return;
-  }
-  cond(v, CC_E, sf, dst, [&](Vout& v) {
-    auto ref_ptr = v.makeReg();
-    auto cell_ptr = v.makeReg();
-    v << load{src[TVOFF(m_data)], ref_ptr};
-    v << lea{ref_ptr[RefData::tvOffset()], cell_ptr};
-    return cell_ptr;
-  }, [&](Vout& v) {
-    return src;
-  });
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
@@ -4104,26 +4068,6 @@ void CodeGenerator::cgReleaseVVAndSkip(IRInstruction* inst) {
       }, true /* else is unlikely */);
   },
   releaseUnlikely);
-}
-
-void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
-  auto base    = srcLoc(inst, 0).reg();
-  auto dstReg  = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  irlower::emitTypeTest(
-    vmain(), m_state, TBoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)],
-    sf, [&](ConditionCode cc, Vreg sfTaken) {
-      cond(v, cc, sfTaken, dstReg, [&](Vout& v) {
-        return base;
-      }, [&](Vout& v) {
-        auto dst2 = v.makeReg();
-        cgCallHelper(v, CallSpec::direct(tvBox), callDest(dst2),
-                     SyncOptions::None,
-                     argGroup(inst).ssa(0/*addr*/));
-        return dst2;
-      });
-    });
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {

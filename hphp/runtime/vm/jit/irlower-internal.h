@@ -79,6 +79,8 @@ CallDest callDestDbl(IRLS& env, const IRInstruction*);
  */
 void fwdJcc(Vout& v, IRLS& env, ConditionCode cc, Vreg sf, Block* target);
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Make a Fixup at `marker' with `sync' options.
  */
@@ -89,6 +91,16 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync = SyncOptions::Sync);
  */
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
                   SyncOptions sync, const ArgGroup& args);
+
+/*
+ * Helper for native calls registered in the NativeCalls::CallMap.
+ */
+void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst);
+
+#define IMPL_OPCODE_CALL(Opcode)                        \
+  void cg##Opcode(IRLS& env, const IRInstruction* i) {  \
+    cgCallNative(vmain(env), env, i);                   \
+  }
 
 ///////////////////////////////////////////////////////////////////////////////
 

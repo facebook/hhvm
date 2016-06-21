@@ -715,12 +715,15 @@ void Array::remove(const Variant& key) {
 }
 
 const Variant& Array::append(const Variant& v) {
-  if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::Create(v));
-  } else {
-    auto escalated = m_arr->append(*v.asCell(), m_arr->cowCheck());
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
+  if (!m_arr) operator=(Create());
+  assertx(m_arr);
+
+  auto cell = *v.asCell();
+  if (UNLIKELY(cell.m_type == KindOfUninit)) cell = make_tv<KindOfNull>();
+
+  auto escalated = m_arr->append(cell, m_arr->cowCheck());
+  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+
   return v;
 }
 
@@ -763,11 +766,13 @@ Variant Array::dequeue() {
 
 void Array::prepend(const Variant& v) {
   if (!m_arr) operator=(Create());
-  assert(m_arr);
+  assertx(m_arr);
+
   auto cell = *v.asCell();
   if (UNLIKELY(cell.m_type == KindOfUninit)) cell = make_tv<KindOfNull>();
-  auto newarr = m_arr->prepend(cell, m_arr->cowCheck());
-  if (newarr != m_arr) m_arr = Ptr::attach(newarr);
+
+  auto escalated = m_arr->prepend(cell, m_arr->cowCheck());
+  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

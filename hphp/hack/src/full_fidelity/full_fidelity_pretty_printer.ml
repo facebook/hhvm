@@ -419,6 +419,20 @@ let rec get_doc node =
     let name = get_doc (generic_class_type x) in
     let argument = get_doc (generic_arguments x) in
     group_doc (indent_doc_no_space name argument indt)
+  | VectorTypeSpecifier x ->
+    let ar = get_doc x.vector_array in
+    let la = get_doc x.vector_left_angle in
+    let ty = get_doc x.vector_type in
+    let ra = get_doc x.vector_right_angle in
+    ar ^^^ la ^^^ ty ^^^ ra
+  | MapTypeSpecifier x ->
+    let ar = get_doc x.map_array in
+    let la = get_doc x.map_left_angle in
+    let kt = get_doc x.map_key in
+    let co = get_doc x.map_comma in
+    let vt = get_doc x.map_value in
+    let ra = get_doc x.map_right_angle in
+    ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
   | TypeArguments x ->
     let left = get_doc (type_arguments_left_angle x) in
     let right = get_doc (type_arguments_right_angle x) in

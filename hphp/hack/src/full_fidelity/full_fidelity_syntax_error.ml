@@ -65,6 +65,7 @@ let error1017 = "An XHP attribute value is expected here."
 let error1018 = "The 'while' keyword is expected here"
 let error1019 = "A left parenthesis is expected here."
 let error1020 = "A colon is expected here."
+let error1021 = "An opening angle bracket is expected here."
 let error1022 = "A right parenthesis or comma is expected here."
 
 let error2001 = "A type annotation is required in strict mode."

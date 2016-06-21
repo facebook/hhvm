@@ -177,10 +177,6 @@ static void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold,
   vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
 }
 
-ptrdiff_t genOffset(bool isAsync) {
-  return isAsync ? AsyncGenerator::objectOff() : Generator::objectOff();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 } // unnamed namespace
@@ -338,12 +334,6 @@ CALL_OPCODE(CmpRes);
 CALL_OPCODE(ThrowInvalidOperation);
 CALL_OPCODE(HasToString);
 
-CALL_OPCODE(CreateCont)
-CALL_OPCODE(CreateAFWH)
-CALL_OPCODE(CreateAFWHNoVV)
-CALL_OPCODE(CreateSSWH)
-CALL_OPCODE(AFWHPrepareChild)
-CALL_OPCODE(ABCUnblock)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewDictArray)
@@ -577,6 +567,44 @@ DELEGATE_OPCODE(InitStaticLoc)
 DELEGATE_OPCODE(CheckClosureStaticLocInit)
 DELEGATE_OPCODE(LdClosureStaticLoc)
 DELEGATE_OPCODE(InitClosureStaticLoc)
+
+DELEGATE_OPCODE(LdClosureCtx)
+DELEGATE_OPCODE(StClosureCtx)
+DELEGATE_OPCODE(StClosureArg)
+
+DELEGATE_OPCODE(LdResumableArObj)
+DELEGATE_OPCODE(CreateCont)
+DELEGATE_OPCODE(ContEnter)
+DELEGATE_OPCODE(ContPreNext)
+DELEGATE_OPCODE(ContStartedCheck)
+DELEGATE_OPCODE(ContStarted)
+DELEGATE_OPCODE(ContValid)
+DELEGATE_OPCODE(StContArState)
+DELEGATE_OPCODE(LdContField)
+DELEGATE_OPCODE(LdContActRec)
+DELEGATE_OPCODE(LdContArValue)
+DELEGATE_OPCODE(StContArValue)
+DELEGATE_OPCODE(LdContResumeAddr)
+DELEGATE_OPCODE(StContArResume)
+DELEGATE_OPCODE(LdContArKey)
+DELEGATE_OPCODE(StContArKey)
+DELEGATE_OPCODE(ContArIncKey)
+DELEGATE_OPCODE(ContArIncIdx)
+DELEGATE_OPCODE(ContArUpdateIdx)
+DELEGATE_OPCODE(CreateAFWH)
+DELEGATE_OPCODE(CreateAFWHNoVV)
+DELEGATE_OPCODE(CreateSSWH)
+DELEGATE_OPCODE(AFWHPrepareChild)
+DELEGATE_OPCODE(AFWHBlockOn)
+DELEGATE_OPCODE(ABCUnblock)
+DELEGATE_OPCODE(IsWaitHandle)
+DELEGATE_OPCODE(LdWHState)
+DELEGATE_OPCODE(StAsyncArSucceeded)
+DELEGATE_OPCODE(LdWHResult)
+DELEGATE_OPCODE(StAsyncArResult)
+DELEGATE_OPCODE(LdAFWHActRec)
+DELEGATE_OPCODE(LdAsyncArParentChain)
+DELEGATE_OPCODE(StAsyncArResume)
 
 DELEGATE_OPCODE(IterInit)
 DELEGATE_OPCODE(IterInitK)
@@ -1599,29 +1627,6 @@ void CodeGenerator::cgSyncReturnBC(IRInstruction* inst) {
   v << store{fpReg, spReg[spOffset + AROFF(m_sfp)]};
 }
 
-void CodeGenerator::cgStClosureArg(IRInstruction* inst) {
-  auto const ptr = srcLoc(inst, 0).reg();
-  auto const off = inst->extra<StClosureArg>()->offsetBytes;
-  storeTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
-}
-
-void CodeGenerator::cgLdClosureCtx(IRInstruction* inst) {
-  auto const obj = srcLoc(inst, 0).reg();
-  auto const ctx = dstLoc(inst, 0).reg();
-  vmain() << load{obj[c_Closure::ctxOffset()], ctx};
-}
-
-void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
-  auto const obj = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  if (inst->src(1)->isA(TNullptr)) {
-    v << storeqi{0, obj[c_Closure::ctxOffset()]};
-  } else {
-    auto const ctx = srcLoc(inst, 1).reg();
-    v << store{ctx, obj[c_Closure::ctxOffset()]};
-  }
-}
-
 void CodeGenerator::emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
                                      const Class* cls, size_t nProps) {
   // If the object has a small number of properties, just emit stores
@@ -2237,11 +2242,6 @@ void CodeGenerator::cgLdARNumParams(IRInstruction* inst) {
   auto tmp = v.makeReg();
   v << loadzlq{baseReg[AROFF(m_numArgsAndFlags)], tmp};
   v << andqi{ActRec::kNumArgsMask, tmp, dstReg, v.makeReg()};
-}
-
-void CodeGenerator::cgLdContField(IRInstruction* inst) {
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0),
-         srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
 }
 
 void CodeGenerator::cgLdMem(IRInstruction* inst) {
@@ -3060,289 +3060,6 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
             interp_one_cf_regs()};
 }
 
-void CodeGenerator::cgContEnter(IRInstruction* inst) {
-  auto const extra     = inst->extra<ContEnter>();
-  auto const curSpReg  = srcLoc(inst, 0).reg();
-  auto const curFpReg  = srcLoc(inst, 1).reg();
-  auto const genFpReg  = srcLoc(inst, 2).reg();
-  auto const addrReg   = srcLoc(inst, 3).reg();
-  auto const spOff     = extra->spOffset;
-  auto const returnOff = extra->returnBCOffset;
-  auto& v = vmain();
-
-  auto const catchBlock = m_state.labels[inst->taken()];
-  auto const next = v.makeBlock();
-
-  v << store{curFpReg, genFpReg[AROFF(m_sfp)]};
-  v << storeli{returnOff, genFpReg[AROFF(m_soff)]};
-  v << copy{genFpReg, curFpReg};
-  auto const sync_sp = v.makeReg();
-  v << lea{curSpReg[cellsToBytes(spOff.offset)], sync_sp};
-  v << syncvmsp{sync_sp};
-  v << contenter{curFpReg, addrReg, cross_trace_regs_resumed(),
-                 {next, catchBlock}};
-  m_state.catch_calls[inst->taken()] = CatchCall::PHP;
-  v = next;
-}
-
-void CodeGenerator::cgContPreNext(IRInstruction* inst) {
-  auto contReg      = srcLoc(inst, 0).reg();
-  auto checkStarted = inst->src(1)->boolVal();
-  auto isAsync      = inst->extra<IsAsyncData>()->isAsync;
-  auto stateOff     = BaseGenerator::stateOff() - genOffset(isAsync);
-  auto& v           = vmain();
-  auto const sf     = v.makeReg();
-
-  // These asserts make sure that the startedCheck work.
-  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
-  static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
-  static_assert(uint8_t(BaseGenerator::State::Done) > 3, "");
-  // These asserts ensure that the state transition works. If we're in the
-  // Created state we want to transition to Priming, and if we're in the
-  // Started state we want to transition to Running. By laying out the enum
-  // this way we can avoid the branch and just transition by adding 2 to the
-  // current state.
-  static_assert(uint8_t(BaseGenerator::State::Priming) ==
-                uint8_t(BaseGenerator::State::Created) +  2, "used below");
-  static_assert(uint8_t(BaseGenerator::State::Running) ==
-                uint8_t(BaseGenerator::State::Started) +  2, "used below");
-
-  // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
-  v << cmpbim{int8_t(BaseGenerator::State::Started), contReg[stateOff], sf};
-  emitFwdJcc(v, checkStarted ? CC_NE : CC_A, sf, inst->taken());
-
-  // Transition the generator into either the Priming state (if we were just
-  // created) or the Running state (if we were started). Due to the way the
-  // enum is layed out, we can model this by just adding 2.
-  auto const isf = v.makeReg();
-  v << addlim{int8_t(2), contReg[stateOff], isf};
-}
-
-void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
-  auto contReg  = srcLoc(inst, 0).reg();
-  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
-  auto stateOff = BaseGenerator::stateOff() - genOffset(isAsync);
-  auto& v       = vmain();
-
-  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
-
-  // Take exit if state == 0.
-  auto const sf = v.makeReg();
-  v << testbim{int8_t(0xffu), contReg[stateOff], sf};
-  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgContStarted(IRInstruction* inst) {
-  auto contReg  = srcLoc(inst, 0).reg();
-  auto dstReg   = dstLoc(inst, 0).reg();
-  auto stateOff = BaseGenerator::stateOff() - genOffset(false /* isAsync */);
-  auto& v       = vmain();
-
-  // Return 1 if generator state is not in the Created state.
-  auto const sf = v.makeReg();
-  v << cmpbim{int8_t(BaseGenerator::State::Created), contReg[stateOff], sf};
-  v << setcc{CC_NE, sf, dstReg};
-}
-
-void CodeGenerator::cgContValid(IRInstruction* inst) {
-  auto contReg  = srcLoc(inst, 0).reg();
-  auto dstReg   = dstLoc(inst, 0).reg();
-  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
-  auto stateOff = BaseGenerator::stateOff() - genOffset(isAsync);
-  auto& v       = vmain();
-
-  // Return 1 if generator state is not Done.
-  auto const sf = v.makeReg();
-  v << cmpbim{int8_t(BaseGenerator::State::Done), contReg[stateOff], sf};
-  v << setcc{CC_NE, sf, dstReg};
-}
-
-void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
-  auto contArReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << incqm{contArReg[GENDATAOFF(m_key) + TVOFF(m_data)
-             - Generator::arOff()], v.makeReg()};
-}
-
-void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
-  auto contArReg = srcLoc(inst, 0).reg();
-  auto newIdxReg = srcLoc(inst, 1).reg();
-  int64_t off = GENDATAOFF(m_index) - Generator::arOff();
-  auto& v = vmain();
-  auto mem_index = v.makeReg();
-  auto res = v.makeReg();
-  v << load{contArReg[off], mem_index};
-  auto const sf = v.makeReg();
-  v << cmpq{mem_index, newIdxReg, sf};
-  v << cmovq{CC_G, sf, mem_index, newIdxReg, res};
-  v << store{res, contArReg[off]};
-}
-
-void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
-  auto dest = dstLoc(inst, 0).reg();
-  auto base = srcLoc(inst, 0).reg();
-  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
-  auto offset = BaseGenerator::arOff() - genOffset(isAsync);
-  vmain() << lea{base[offset], dest};
-}
-
-void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
-  auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t valueOff = GENDATAOFF(m_value);
-  int64_t off = valueOff - Generator::arOff();
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0), contArReg[off]);
-}
-
-void CodeGenerator::cgStContArValue(IRInstruction* inst) {
-  auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t valueOff = GENDATAOFF(m_value);
-  const int64_t off = valueOff - Generator::arOff();
-  storeTV(vmain(), contArReg[off], srcLoc(inst, 1), inst->src(1));
-}
-
-void CodeGenerator::cgLdContArKey(IRInstruction* inst) {
-  auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t keyOff = GENDATAOFF(m_key);
-  int64_t off = keyOff - Generator::arOff();
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0), contArReg[off]);
-}
-
-void CodeGenerator::cgStContArKey(IRInstruction* inst) {
-  auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t keyOff = GENDATAOFF(m_key);
-  const int64_t off = keyOff - Generator::arOff();
-  storeTV(vmain(), contArReg[off], srcLoc(inst, 1), inst->src(1));
-}
-
-void CodeGenerator::cgStAsyncArSucceeded(IRInstruction* inst) {
-  auto const off = c_WaitHandle::stateOff()
-                 - c_AsyncFunctionWaitHandle::arOff();
-  vmain() << storebi{
-    c_WaitHandle::toKindState(
-      c_WaitHandle::Kind::AsyncFunction,
-      c_WaitHandle::STATE_SUCCEEDED
-    ),
-    srcLoc(inst, 0).reg()[off]
-  };
-}
-
-void CodeGenerator::resumableStResumeImpl(IRInstruction* inst,
-                                          ptrdiff_t offAddr,
-                                          ptrdiff_t offOffset) {
-  vmain() << store{
-    srcLoc(inst, 1).reg(),
-    srcLoc(inst, 0).reg()[offAddr]
-  };
-  vmain() << storeli{
-    inst->extra<ResumeOffset>()->off,
-    srcLoc(inst, 0).reg()[offOffset]
-  };
-}
-
-void CodeGenerator::cgStAsyncArResume(IRInstruction* inst) {
-  resumableStResumeImpl(
-    inst,
-    c_AsyncFunctionWaitHandle::resumeAddrOff() -
-      c_AsyncFunctionWaitHandle::arOff(),
-    c_AsyncFunctionWaitHandle::resumeOffsetOff() -
-      c_AsyncFunctionWaitHandle::arOff()
-  );
-}
-
-void CodeGenerator::cgStContArResume(IRInstruction* inst) {
-  resumableStResumeImpl(
-    inst,
-    BaseGenerator::resumeAddrOff() - BaseGenerator::arOff(),
-    BaseGenerator::resumeOffsetOff() - BaseGenerator::arOff()
-  );
-}
-
-void CodeGenerator::cgLdContResumeAddr(IRInstruction* inst) {
-  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
-  vmain() << load{
-    srcLoc(inst, 0).reg()[
-      BaseGenerator::resumeAddrOff() - genOffset(isAsync)],
-    dstLoc(inst, 0).reg()
-  };
-}
-
-void CodeGenerator::cgContArIncIdx(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const idxOff = GENDATAOFF(m_index) - Generator::arOff();
-  auto const dst    = dstLoc(inst, 0).reg();
-  auto const src    = srcLoc(inst, 0).reg()[idxOff];
-  auto const tmp    = v.makeReg();
-  v << load{src, tmp};
-  v << incq{tmp, dst, v.makeReg()};
-  v << store{dst, src};
-}
-
-void CodeGenerator::cgStContArState(IRInstruction* inst) {
-  auto const off = BaseGenerator::stateOff() - BaseGenerator::arOff();
-  vmain() << storebi{
-    static_cast<int8_t>(inst->extra<StContArState>()->state),
-    srcLoc(inst, 0).reg()[off]
-  };
-}
-
-void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
-  auto asyncArReg = srcLoc(inst, 0).reg();
-  const int64_t off = c_AsyncFunctionWaitHandle::resultOff()
-                    - c_AsyncFunctionWaitHandle::arOff();
-  storeTV(vmain(), asyncArReg[off], srcLoc(inst, 1), inst->src(1));
-}
-
-void CodeGenerator::cgLdAsyncArParentChain(IRInstruction* inst) {
-  auto asyncArReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  const int64_t off = c_AsyncFunctionWaitHandle::parentChainOff()
-                    - c_AsyncFunctionWaitHandle::arOff();
-  auto& v = vmain();
-  v << load{asyncArReg[off], dstReg};
-}
-
-void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
-  typedef c_AsyncFunctionWaitHandle::Node Node;
-  auto parentArReg = srcLoc(inst, 0).reg();
-  auto childReg = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  const int8_t afblocked = c_WaitHandle::toKindState(
-    c_WaitHandle::Kind::AsyncFunction,
-    c_AsyncFunctionWaitHandle::STATE_BLOCKED
-  );
-  const int64_t firstParentOff = c_WaitableWaitHandle::parentChainOff()
-                               + AsioBlockableChain::firstParentOff();
-  const int64_t stateToArOff = c_AsyncFunctionWaitHandle::stateOff()
-                             - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t nextParentToArOff = c_AsyncFunctionWaitHandle::childrenOff()
-                                  + Node::blockableOff()
-                                  + AsioBlockable::bitsOff()
-                                  - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t childToArOff = c_AsyncFunctionWaitHandle::childrenOff()
-                             + Node::childOff()
-                             - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t blockableToArOff = c_AsyncFunctionWaitHandle::childrenOff()
-                                 + Node::blockableOff()
-                                 - c_AsyncFunctionWaitHandle::arOff();
-
-  // parent->setState(STATE_BLOCKED);
-  v << storebi{afblocked, parentArReg[stateToArOff]};
-
-  // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::AFWH;
-  auto firstParent = v.makeReg();
-  assertx(uint8_t(AsioBlockable::Kind::AsyncFunctionWaitHandleNode) == 0);
-  v << load{childReg[firstParentOff], firstParent};
-  v << store{firstParent, parentArReg[nextParentToArOff]};
-
-  // child->m_parentChain.m_firstParent = &parent->m_blockable;
-  auto objToAr = v.makeReg();
-  v << lea{parentArReg[blockableToArOff], objToAr};
-  v << store{objToAr, childReg[firstParentOff]};
-
-  // parent->m_child = child;
-  v << store{childReg, parentArReg[childToArOff]};
-}
-
 // Packing the TV type and data into two registers.
 void emitPackTVRegs(Vout& v, Vloc loc, const SSATmp* src,
                     Vreg rData, Vreg rType) {
@@ -3394,51 +3111,6 @@ void CodeGenerator::cgAsyncSwitchFast(IRInstruction* inst) {
   prepare_return_regs(v, inst->src(2), srcLoc(inst, 2),
                       inst->extra<AsyncSwitchFast>()->aux);
   v << jmpi{mcg->ustubs().asyncSwitchCtrl, php_return_regs()};
-}
-
-void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
-  auto const robj = srcLoc(inst, 0).reg();
-  auto const rdst = dstLoc(inst, 0).reg();
-
-  static_assert(
-    ObjectData::IsWaitHandle < 0xff,
-    "we use byte instructions for IsWaitHandle"
-  );
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << testwim{ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()], sf};
-  v << setcc{CC_NZ, sf, rdst};
-}
-
-void CodeGenerator::cgLdWHState(IRInstruction* inst) {
-  auto const robj = srcLoc(inst, 0).reg();
-  auto const rdst = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto state = v.makeReg();
-  v << loadzbq{robj[c_WaitHandle::stateOff()], state};
-  v << andqi{0x0F, state, rdst, v.makeReg()};
-}
-
-void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
-  auto const robj = srcLoc(inst, 0).reg();
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0),
-         robj[c_WaitHandle::resultOff()]);
-}
-
-void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
-  auto const dest = dstLoc(inst, 0).reg();
-  auto const base = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto asyncArOffset = c_AsyncFunctionWaitHandle::arOff();
-  v << lea{base[asyncArOffset], dest};
-}
-
-void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
-  auto const dstReg = dstLoc(inst, 0).reg();
-  auto const resumableArReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const objectOff = Resumable::dataOff() - Resumable::arOff();
-  v << lea{resumableArReg[objectOff], dstReg};
 }
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {

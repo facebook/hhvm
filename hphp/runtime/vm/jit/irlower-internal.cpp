@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -180,6 +181,32 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
   } else {
     v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow};
   }
+}
+
+void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
+  using namespace NativeCalls;
+  always_assert(CallMap::hasInfo(inst->op()));
+  auto const& info = CallMap::info(inst->op());
+
+  ArgGroup args = toArgGroup(info, env.locs, inst);
+
+  auto const dest = [&]() -> CallDest {
+    switch (info.dest) {
+      case DestType::None:
+        return kVoidDest;
+      case DestType::TV:
+      case DestType::SIMD:
+        return callDestTV(env, inst);
+      case DestType::SSA:
+      case DestType::Byte:
+        return callDest(env, inst);
+      case DestType::Dbl:
+        return callDestDbl(env, inst);
+    }
+    not_reached();
+  }();
+
+  cgCallHelper(v, env, info.func.call, dest, info.sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

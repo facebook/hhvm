@@ -116,7 +116,6 @@ private:
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
-  void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
 
   Vout& vmain() { assert(m_state.vmain); return *m_state.vmain; }
   Vout& vcold() { assert(m_state.vcold); return *m_state.vcold; }

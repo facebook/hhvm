@@ -134,6 +134,7 @@ namespace Trace {
       TM(instancebits)  \
       TM(intercept)     \
       TM(interpOne)     \
+      TM(irlower)       \
       TM(jittime)       \
       TM(layout)        \
       TM(libxml)        \

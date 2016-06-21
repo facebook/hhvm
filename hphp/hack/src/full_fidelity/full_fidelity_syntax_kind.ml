@@ -62,6 +62,8 @@ type t =
 | GenericTypeSpecifier
 | TypeArguments
 | TupleTypeSpecifier
+| VectorTypeSpecifier
+| MapTypeSpecifier
 
 let to_string kind =
   match kind with
@@ -105,6 +107,8 @@ let to_string kind =
   | NullableTypeSpecifier -> "nullable_type_specifier"
   | GenericTypeSpecifier -> "generic_type_specifier"
   | TupleTypeSpecifier -> "tuple_type_specifier"
+  | VectorTypeSpecifier -> "vector_type_specifier"
+  | MapTypeSpecifier -> "map_type_specifier"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
   | XHPExpression -> "xhp_expression"

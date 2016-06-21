@@ -279,6 +279,20 @@ module WithToken(Token: TokenType) = struct
       type_constant_separator : t;
       type_constant_right_type : t
     }
+    and vector_type_specifier = {
+      vector_array : t;
+      vector_left_angle : t;
+      vector_type : t;
+      vector_right_angle : t
+    }
+    and map_type_specifier = {
+      map_array : t;
+      map_left_angle : t;
+      map_key : t;
+      map_comma : t;
+      map_value : t;
+      map_right_angle : t
+    }
     and generic_type = {
       generic_class_type : t;
       generic_arguments : t
@@ -347,6 +361,8 @@ module WithToken(Token: TokenType) = struct
     | GenericTypeSpecifier of generic_type
     | TypeArguments of type_arguments
     | TupleTypeSpecifier of tuple_type_specifier
+    | VectorTypeSpecifier of vector_type_specifier
+    | MapTypeSpecifier of map_type_specifier
 
     and t = { syntax : syntax ; value : SyntaxValue.t}
 
@@ -406,6 +422,8 @@ module WithToken(Token: TokenType) = struct
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
       | TypeArguments _ -> SyntaxKind.TypeArguments
       | TupleTypeSpecifier _ -> SyntaxKind.TupleTypeSpecifier
+      | VectorTypeSpecifier _ -> SyntaxKind.VectorTypeSpecifier
+      | MapTypeSpecifier _ -> SyntaxKind.MapTypeSpecifier
 
     let kind node =
       to_kind (syntax node)
@@ -453,6 +471,10 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.NullableTypeSpecifier
     let is_type_arguments node = kind node = SyntaxKind.TypeArguments
     let is_tuple_type node = kind node = SyntaxKind.TupleTypeSpecifier
+    let is_vector_type_specifier node =
+      kind node = SyntaxKind.VectorTypeSpecifier
+    let is_map_type_specifier node =
+      kind node = SyntaxKind.MapTypeSpecifier
 
     let children node =
       match node.syntax with
@@ -600,6 +622,14 @@ module WithToken(Token: TokenType) = struct
       | TupleTypeSpecifier
         { tuple_left_paren; tuple_types; tuple_right_paren } ->
         [ tuple_left_paren; tuple_types; tuple_right_paren ]
+      | VectorTypeSpecifier
+        { vector_array; vector_left_angle; vector_type; vector_right_angle } ->
+        [ vector_array; vector_left_angle; vector_type; vector_right_angle ]
+      | MapTypeSpecifier
+        { map_array; map_left_angle; map_key; map_comma; map_value;
+          map_right_angle } ->
+        [ map_array; map_left_angle; map_key; map_comma; map_value;
+          map_right_angle ]
 
     let children_names node =
       match node.syntax with
@@ -749,7 +779,15 @@ module WithToken(Token: TokenType) = struct
       | TupleTypeSpecifier
         { tuple_left_paren; tuple_types; tuple_right_paren } ->
         [ "tuple_left_paren"; "tuple_types"; "tuple_right_paren" ]
-
+      | VectorTypeSpecifier
+        { vector_array; vector_left_angle; vector_type; vector_right_angle } ->
+        [ "vector_array"; "vector_left_angle"; "vector_type";
+          "vector_right_angle" ]
+      | MapTypeSpecifier
+        { map_array; map_left_angle; map_key; map_comma; map_value;
+          map_right_angle } ->
+        [ "map_array"; "map_left_angle"; "map_key"; "map_comma"; "map_value";
+          "map_right_angle" ]
 
     let rec to_json node =
       let open Hh_json in
@@ -1075,6 +1113,16 @@ module WithToken(Token: TokenType) = struct
           [ tuple_left_paren; tuple_types; tuple_right_paren ]) ->
         TupleTypeSpecifier
           { tuple_left_paren; tuple_types; tuple_right_paren }
+      | (SyntaxKind.VectorTypeSpecifier,
+        [ vector_array; vector_left_angle; vector_type; vector_right_angle ]) ->
+        VectorTypeSpecifier
+        { vector_array; vector_left_angle; vector_type; vector_right_angle }
+      | (SyntaxKind.MapTypeSpecifier,
+        [ map_array; map_left_angle; map_key; map_comma; map_value;
+          map_right_angle ]) ->
+        MapTypeSpecifier
+        { map_array; map_left_angle; map_key; map_comma; map_value;
+          map_right_angle }
       | _ -> failwith "with_children called with wrong number of children"
 
     let all_tokens node =
@@ -1301,6 +1349,17 @@ module WithToken(Token: TokenType) = struct
 
       let make_tuple_type_specifier left types right =
         from_children SyntaxKind.TupleTypeSpecifier [ left; types; right ]
+
+      let make_vector_type_specifier
+          vector_array vector_left_angle vector_type vector_right_angle =
+        from_children SyntaxKind.VectorTypeSpecifier
+          [ vector_array; vector_left_angle; vector_type; vector_right_angle ]
+
+      let make_map_type_specifier
+          map_array map_left_angle map_key map_comma map_value map_right_angle =
+        from_children SyntaxKind.MapTypeSpecifier
+          [ map_array; map_left_angle; map_key; map_comma; map_value;
+            map_right_angle ]
 
       let make_literal_expression literal =
         from_children SyntaxKind.LiteralExpression [ literal ]

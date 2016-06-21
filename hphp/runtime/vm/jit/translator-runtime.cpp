@@ -916,30 +916,6 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
   return f;
 }
 
-const Func* lookupUnknownFunc(const StringData* name) {
-  VMRegAnchor _;
-  auto const func = Unit::loadFunc(name);
-  if (UNLIKELY(!func)) {
-    raise_error("Call to undefined function %s()", name->data());
-  }
-  return func;
-}
-
-const Func* lookupFallbackFunc(const StringData* name,
-                               const StringData* fallback) {
-  VMRegAnchor _;
-  // Try to load the first function
-  auto func = Unit::loadFunc(name);
-  if (LIKELY(!func)) {
-    // Then try to load the fallback function
-    func = Unit::loadFunc(fallback);
-    if (UNLIKELY(!func)) {
-        raise_error("Call to undefined function %s()", name->data());
-    }
-  }
-  return func;
-}
-
 Class* lookupKnownClass(rds::Handle cache_handle, const StringData* clsName) {
   assertx(rds::isNormalHandle(cache_handle));
   // the caller should already have checked

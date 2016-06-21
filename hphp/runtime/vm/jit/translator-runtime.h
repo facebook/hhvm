@@ -180,8 +180,6 @@ void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
-const Func* lookupUnknownFunc(const StringData*);
-const Func* lookupFallbackFunc(const StringData*, const StringData*);
 
 Class* lookupKnownClass(rds::Handle cache_handle, const StringData* clsName);
 

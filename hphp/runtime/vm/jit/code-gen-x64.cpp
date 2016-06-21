@@ -545,6 +545,11 @@ DELEGATE_OPCODE(MapGet)
 DELEGATE_OPCODE(MapSet)
 DELEGATE_OPCODE(MapIsset)
 
+DELEGATE_OPCODE(LdFunc)
+DELEGATE_OPCODE(LdFuncCached)
+DELEGATE_OPCODE(LdFuncCachedSafe)
+DELEGATE_OPCODE(LdFuncCachedU)
+
 DELEGATE_OPCODE(LdCns)
 DELEGATE_OPCODE(LookupCns)
 DELEGATE_OPCODE(LookupCnsE)
@@ -1014,121 +1019,6 @@ void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
   auto const dreg = dstLoc(inst, 0).reg();
   auto& v = vmain();
   v << orqi{1, sreg, dreg, v.makeReg()};
-}
-
-void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
-  auto const dst = dstLoc(inst, 0).reg();
-  auto const extra = inst->extra<LdFuncCached>();
-  auto const ch = NamedEntity::get(extra->name)->getFuncHandle();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-
-  auto const call_helper = [&] (Vout& v) {
-    auto const ptr = v.makeReg();
-    const Func* (*const func)(const StringData*) = lookupUnknownFunc;
-    cgCallHelper(
-      v,
-      CallSpec::direct(func),
-      callDest(ptr),
-      SyncOptions::Sync,
-      argGroup(inst).immPtr(extra->name)
-    );
-    return ptr;
-  };
-
-  if (rds::isNormalHandle(ch)) {
-    auto const sf = checkRDSHandleInitialized(v, ch);
-    unlikelyCond(
-      v, vcold(), CC_NE, sf, dst,
-      [&] (Vout& v) { return call_helper(v); },
-      [&] (Vout& v) {
-        auto const ptr = v.makeReg();
-        emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
-        return ptr;
-      }
-    );
-  } else {
-    auto const ptr = v.makeReg();
-    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
-    v << testq{ptr, ptr, sf};
-    unlikelyCond(
-      v, vcold(), CC_Z, sf, dst,
-      [&] (Vout& v) { return call_helper(v); },
-      [&] (Vout& v) { return ptr; }
-    );
-  }
-}
-
-void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
-  auto const dst = dstLoc(inst, 0).reg();
-  auto const extra = inst->extra<LdFuncCachedU>();
-  auto const ch = NamedEntity::get(extra->name)->getFuncHandle();
-  auto& v = vmain();
-
-  auto const call_helper = [&] (Vout& v) {
-    // If we get here, things are going to be slow anyway, so do all the
-    // autoloading logic in lookupFallbackFunc instead of ASM
-    auto const ptr = v.makeReg();
-    const Func* (*const func)(const StringData*, const StringData*) =
-        lookupFallbackFunc;
-    cgCallHelper(v, CallSpec::direct(func), callDest(ptr),
-      SyncOptions::Sync,
-      argGroup(inst)
-        .immPtr(extra->name)
-        .immPtr(extra->fallback)
-    );
-    return ptr;
-  };
-
-  if (rds::isNormalHandle(ch)) {
-    auto const sf = checkRDSHandleInitialized(v, ch);
-    unlikelyCond(
-      v, vcold(), CC_NE, sf, dst,
-      [&] (Vout& v) { return call_helper(v); },
-      [&] (Vout& v) {
-        auto const ptr = v.makeReg();
-        emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
-        return ptr;
-      }
-    );
-  } else {
-    auto const ptr = v.makeReg();
-    auto const sf = v.makeReg();
-    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Func>));
-    v << testq{ptr, ptr, sf};
-    unlikelyCond(
-      v, vcold(), CC_Z, sf, dst,
-      [&] (Vout& v) { return call_helper(v); },
-      [&] (Vout& v) { return ptr; }
-    );
-  }
-}
-
-void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  auto const dst = dstLoc(inst, 0).reg();
-  auto const ch = NamedEntity::get(
-    inst->extra<LdFuncCachedSafe>()->name
-  )->getFuncHandle();
-  auto& v = vmain();
-
-  if (rds::isNormalHandle(ch)) {
-    auto const sf = checkRDSHandleInitialized(v, ch);
-    emitFwdJcc(v, CC_NE, sf, inst->taken());
-  }
-  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Func>));
-}
-
-void CodeGenerator::cgLdFunc(IRInstruction* inst) {
-  auto const ch = FuncCache::alloc();
-  rds::recordRds(ch, sizeof(FuncCache),
-                 "FuncCache", getFunc(inst->marker())->fullName()->data());
-
-  // raises an error if function not found
-  cgCallHelper(vmain(),
-               CallSpec::direct(FuncCache::lookup),
-               callDest(dstLoc(inst, 0).reg()),
-               SyncOptions::Sync,
-               argGroup(inst).imm(ch).ssa(0/*methodName*/));
 }
 
 void CodeGenerator::cgLdObjClass(IRInstruction* inst) {

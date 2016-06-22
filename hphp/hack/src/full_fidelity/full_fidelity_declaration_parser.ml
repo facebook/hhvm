@@ -212,6 +212,7 @@ module WithExpressionAndStatementParser
           parameter-declaration-list  ,  parameter-declaration
   *)
   and parse_parameter_list parser =
+    (* TODO: Update this to produce a sequence of list_item elements. *)
     let rec aux parser parameters =
       let (parser, parameter) = parse_parameter parser in
       let parameters = parameter :: parameters in

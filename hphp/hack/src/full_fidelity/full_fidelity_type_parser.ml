@@ -186,7 +186,8 @@ and parse_type_list parser close_kind =
         the type, it's associated with the formal parameter list.  *)
 
       let parser = with_error parser1 SyntaxError.error1007 in
-      aux parser ((make_token token) :: (make_missing()) :: acc)
+      let item = make_list_item (make_missing()) (make_token token) in
+      aux parser (item :: acc)
     else
       let (parser, ty) = parse_type_specifier parser in
       let (parser1, token) = next_token parser in
@@ -194,7 +195,8 @@ and parse_type_list parser close_kind =
       if kind = close_kind then
         (parser, (ty :: acc))
       else if kind = Comma then
-        aux parser1 ((make_token token) :: ty :: acc)
+        let item = make_list_item ty (make_token token) in
+        aux parser1 (item :: acc)
       else
         (* ERROR RECOVERY: We were expecting a close brace or comma, but
            got neither. Bail out. Caller will give an error. *)
@@ -258,11 +260,41 @@ and parse_tuple_or_closure_type_specifier parser =
     parse_tuple_type_specifier parser
 
 and parse_closure_type_specifier parser =
-  let (parser, token) = next_token parser in
-    (* TODO *)
-    (parser, make_error [make_token token])
+
+  (* SPEC
+      closure-type-specifier:
+          ( function ( type-specifier-listopt ) : type-specifier )
+  *)
+
+  (* TODO: Error recovery is pretty weak here. We could be smarter. *)
+  let (parser, olp) = next_token parser in
+  let olp = make_token olp in
+  let (parser, fnc) = next_token parser in
+  let fnc = make_token fnc in
+  let (parser, ilp) = expect_token parser LeftParen SyntaxError.error1019 in
+  let (parser1, token) = next_token parser in
+  let (parser, pts, irp) =
+    if (Token.kind token) = RightParen then
+      (parser1, (make_missing()), (make_token token))
+    else
+      let (parser, pts) = parse_type_list parser RightParen in
+      let (parser, irp) =
+        expect_token parser RightParen SyntaxError.error1011 in
+      (parser, pts, irp) in
+  let (parser, col) = expect_token parser Colon SyntaxError.error1020 in
+  let (parser, ret) = parse_type_specifier parser in
+  let (parser, orp) =
+    expect_token parser RightParen SyntaxError.error1011 in
+  let result = make_closure_type_specifier olp fnc ilp pts irp col ret orp in
+  (parser, result)
 
 and parse_tuple_type_specifier parser =
+
+  (* SPEC
+      tuple-type-specifier:
+        ( type-specifier  ,  type-specifier-list  )
+  *)
+
   let (parser, left_paren) = next_token parser in
   let left_paren = make_token left_paren in
   let (parser, args) = parse_type_list parser RightParen in

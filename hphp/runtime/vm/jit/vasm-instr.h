@@ -230,6 +230,8 @@ struct Vunit;
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(movzbq, Inone, UH(s,d), DH(d,s))\
   O(movzlq, Inone, UH(s,d), DH(d,s))\
+  O(movtdb, Inone, UH(s,d), DH(d,s))\
+  O(movtdq, Inone, UH(s,d), DH(d,s))\
   O(movtqb, Inone, UH(s,d), DH(d,s))\
   O(movtql, Inone, UH(s,d), DH(d,s))\
   /* loads/stores */\
@@ -1017,8 +1019,11 @@ struct movzbl { Vreg8 s; Vreg32 d; };
 struct movzbq { Vreg8 s; Vreg64 d; };
 struct movzlq { Vreg32 s; Vreg64 d; };
 // truncated s to d
+struct movtdb { VregDbl s; Vreg8 d; };
+struct movtdq { VregDbl s; Vreg64 d; };
 struct movtqb { Vreg64 s; Vreg8 d; };
 struct movtql { Vreg64 s; Vreg32 d; };
+
 
 /*
  * Loads and stores.

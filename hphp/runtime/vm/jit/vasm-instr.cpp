@@ -151,6 +151,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::movzbq:
     case Vinstr::movzlq:
     case Vinstr::movtqb:
+    case Vinstr::movtdb:
+    case Vinstr::movtdq:
     case Vinstr::movtql:
     // branches
     case Vinstr::jcc:

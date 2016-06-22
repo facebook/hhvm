@@ -841,6 +841,12 @@ void lower(Vunit& unit, divint& inst, Vlabel b, size_t i) {
 void lower(Vunit& unit, movtqb& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, inst.d};
 }
+void lower(Vunit& unit, movtdb& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
+void lower(Vunit& unit, movtdq& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
 void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, inst.d};
 }

@@ -762,8 +762,8 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   auto srcReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
-  constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
+  constexpr uint64_t maxULong = std::numeric_limits<unsigned long>::max();
+  constexpr uint64_t maxLong = std::numeric_limits<long>::max();
 
   auto rIndef = v.cns(0x8000000000000000L);
   auto dst1 = v.makeReg();
@@ -773,7 +773,7 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   unlikelyCond(v, vcold(), CC_E, sf, dstReg, [&](Vout& v) {
     // result > max signed int or unordered
     auto const sf = v.makeReg();
-    v << ucomisd{v.cns(0), srcReg, sf};
+    v << ucomisd{v.cns(0.0), srcReg, sf};
     return cond(v, CC_NB, sf, v.makeReg(), [&](Vout& v) {
       return dst1;
     }, [&](Vout& v) {
@@ -790,7 +790,7 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
         }
       }, [&](Vout& v) {
         auto const sf = v.makeReg();
-        v << ucomisd{v.cns(maxULongAsDouble), srcReg, sf};
+        v << ucomisd{v.cns(static_cast<double>(maxULong)), srcReg, sf};
         return cond(v, CC_B, sf, v.makeReg(), [&](Vout& v) { // src0 > ULONG_MAX
             return v.cns(0);
         }, [&](Vout& v) {
@@ -800,7 +800,7 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
           auto tmp_sub = v.makeReg();
           auto tmp_int = v.makeReg();
           auto dst5 = v.makeReg();
-          v << subsd{v.cns(maxLongAsDouble), srcReg, tmp_sub};
+          v << subsd{v.cns(static_cast<double>(maxLong)), srcReg, tmp_sub};
           v << cvttsd2siq{tmp_sub, tmp_int};
 
           // We want to simulate integer overflow so we take the resulting
@@ -824,7 +824,10 @@ void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {
   auto& v = vmain();
   auto t1 = v.makeReg();
   auto const sf = v.makeReg();
-  v << shlqi{1, src, t1, sf}; // 0.0 stays zero and -0.0 is now 0.0
+  auto const movtdq_res = v.makeReg();
+
+  v << movtdq{src, movtdq_res};
+  v << shlqi{1, movtdq_res, t1, sf}; // 0.0 stays zero and -0.0 is now 0.0
   v << setcc{CC_NE, sf, dst}; // lower byte becomes 1 if dstReg != 0
 }
 

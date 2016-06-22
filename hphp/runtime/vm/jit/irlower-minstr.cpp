@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -36,7 +37,7 @@
 
 namespace HPHP { namespace jit { namespace irlower {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 

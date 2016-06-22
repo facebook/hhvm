@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
@@ -27,8 +28,11 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/immed.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace irlower {
+
+TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 

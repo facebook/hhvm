@@ -1,0 +1,44 @@
+(script(header((<))((?))((name)(end_of_line)))
+(function_declaration(missing)(missing)((function)(whitespace))((name))(missing)
+((lparen))(missing)((rparen)(whitespace))(missing)(missing)
+(compound_statement(({)(end_of_line))(list(
+  foreach_statement((whitespace)
+    (foreach)(whitespace))(
+      (lparen))
+      (variable((variable)(whitespace)))(missing)
+      ((as)(whitespace))(missing)(missing)
+      (variable((variable)))
+      ((rparen))
+      (compound_statement(
+        ({)(end_of_line))(missing)((whitespace)(})(end_of_line)))
+      )
+  (foreach_statement((whitespace)
+    (foreach)(whitespace))
+    ((lparen))
+    (variable((variable)(whitespace)))(missing)
+    ((as)(whitespace))(variable((variable)(whitespace)))
+    ((=>)(whitespace))(variable((variable)))((rparen))
+    (compound_statement(
+      ({)(end_of_line))
+        (expression_statement(
+          postfix_unary_operator
+          (variable((whitespace)(variable)))
+          ((++)))((;)(end_of_line)))
+          ((whitespace)
+      (})(end_of_line))))
+  (foreach_statement((whitespace)
+    (foreach)(whitespace))
+    ((lparen))
+    (variable((variable)(whitespace)))((await)(whitespace))
+    ((as)(whitespace))(missing)(missing)(variable((variable)))((rparen))
+    (compound_statement(
+      ({)(end_of_line))(missing)((whitespace)(})(end_of_line))))
+  (foreach_statement((whitespace)
+    (foreach)(whitespace))
+    ((lparen))
+    (variable((variable)(whitespace)))
+    ((await)(whitespace))((as)(whitespace))
+    (variable((variable)(whitespace)))((=>)(whitespace))(variable((variable)))
+    ((rparen))
+    (compound_statement(
+      ({)(end_of_line))(missing)((whitespace)(})(end_of_line)))))((})))))

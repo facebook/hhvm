@@ -109,6 +109,8 @@ let test_data = [
     ~preprocess_exp:remove_whitespace "test_try_statement" test_minimal;
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_list_expression" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_foreach_statements" test_minimal;
 
   {
     name = "test_mode_1";

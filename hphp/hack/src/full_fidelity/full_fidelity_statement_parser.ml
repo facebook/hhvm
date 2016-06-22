@@ -335,7 +335,7 @@ module WithExpressionAndDeclParser
     let (parser, return_token) = assert_token parser Return in
     let (parser1, semi_token) = next_token parser in
     if Token.kind semi_token = Semicolon then
-      (parser, make_return_statement
+      (parser1, make_return_statement
         return_token (make_missing()) (make_token semi_token))
     else
       let (parser, expr) = parse_expression parser in
@@ -373,9 +373,15 @@ module WithExpressionAndDeclParser
     (parser, make_error [make_token token])
 
   and parse_expression_statement parser =
-    let (parser, expression) = parse_expression parser in
-    let (parser, token) = expect_token parser Semicolon SyntaxError.error1010 in
-    (parser, make_expression_statement expression token)
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Semicolon ->
+      (parser1, make_expression_statement (make_missing ()) (make_token token))
+    | _ ->
+      let (parser, expression) = parse_expression parser in
+      let (parser, token) =
+        expect_token parser Semicolon SyntaxError.error1010 in
+      (parser, make_expression_statement expression token)
 
   and parse_statement_list_opt parser =
      let rec aux parser acc =

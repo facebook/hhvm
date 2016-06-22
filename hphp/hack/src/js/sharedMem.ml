@@ -54,6 +54,7 @@ module type NoCache = sig
   module KeyMap : MyMap.S
 
   val add: key -> t -> unit
+  val write_through: key -> t -> unit
   val get: key -> t option
   val get_old: key -> t option
   val find_unsafe: key -> t
@@ -99,6 +100,8 @@ module NoCache: NoCache_type =
   let add x y =
     let x = Prefix.make_key Value.prefix (UserKeyType.to_string x) in
     add x (Obj.magic y)
+
+  let write_through = add
 
   let find_unsafe x =
     let x = Prefix.make_key Value.prefix (UserKeyType.to_string x) in

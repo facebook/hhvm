@@ -29,7 +29,7 @@ end)
 (* TypeIdHeap records both class names and typedefs since they live in the
  * same namespace. That is, one cannot both define a class Foo and a typedef
  * Foo (or FOO or fOo, due to case insensitivity). *)
-module TypeIdHeap = SharedMem.NoCache (StringKey) (struct
+module TypeIdHeap = SharedMem.WithCache (StringKey) (struct
   type t = Pos.t * [`Class | `Typedef]
   let prefix = Prefix.make ()
   let description = "TypeId"

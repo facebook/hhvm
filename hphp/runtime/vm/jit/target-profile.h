@@ -339,23 +339,6 @@ struct StructArrayProfile {
 
 //////////////////////////////////////////////////////////////////////
 
-struct ReleaseVVProfile {
-  uint16_t executed;
-  uint16_t released;
-
-  int percentReleased() const {
-    return executed ? (100 * released / executed) : 0;
-  };
-
-  static void reduce(ReleaseVVProfile& a, const ReleaseVVProfile& b) {
-    // Racy but OK -- just used for profiling to trigger optimization.
-    a.executed += b.executed;
-    a.released += b.released;
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * TypeProfile keeps the union of all the types observed during profiling.
  */

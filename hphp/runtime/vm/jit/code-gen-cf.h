@@ -150,7 +150,11 @@ void ifThenElse(Vout& vmain, ConditionCode cc, Vreg sf,
   code_gen_detail::ifThenElse(vmain, vmain, cc, sf, thenBlock, elseBlock);
 }
 
-// Nobody currently needs unlikelyIfThenElse().
+template <class Then, class Else>
+void unlikelyIfThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
+                        Then thenBlock, Else elseBlock) {
+  code_gen_detail::ifThenElse(vmain, vcold, cc, sf, thenBlock, elseBlock);
+}
 
 template <class Then, class Else>
 void ifThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,

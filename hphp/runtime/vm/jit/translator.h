@@ -547,24 +547,6 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
 
 /*
- * Return true if type is passed in/out of C++ as String&/Array&/Object&.
- */
-inline bool isReqPtrRef(MaybeDataType t) {
-  return isStringType(t) || isArrayType(t) ||
-         t == KindOfObject || t == KindOfResource;
-}
-
-/*
- * Is a call to `funcd' with `numArgs' arguments a NativeImpl call?
- */
-inline bool isNativeImplCall(const Func* funcd, int numArgs) {
-  return funcd &&
-    funcd->builtinFuncPtr() &&
-    !funcd->nativeFuncPtr() &&
-    numArgs == funcd->numParams();
-}
-
-/*
  * The offset, in cells, of this location from the frame pointer.
  */
 int locPhysicalOffset(int32_t localIndex);

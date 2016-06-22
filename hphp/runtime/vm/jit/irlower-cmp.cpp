@@ -23,10 +23,13 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/trace.h"
 
 #include <utility>
 
 namespace HPHP { namespace jit { namespace irlower {
+
+TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 

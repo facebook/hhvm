@@ -173,7 +173,6 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
                            ActRec* ar, ActRec* fp);
 
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
-void traceCallback(ActRec* fp, Cell* sp, Offset pcOff);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);

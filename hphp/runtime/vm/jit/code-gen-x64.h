@@ -67,8 +67,6 @@ private:
                     SyncOptions sync, const ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
-  void emitTrashTV(Vreg, int32_t, char fillByte);
-
   template <class JmpFn>
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
 

@@ -140,6 +140,8 @@ module Utility (P : Library) = struct
 
   let indent_block_no_space l blk r indt =
     group_doc ((indent_doc_no_space l blk indt) ^^| r)
+
+  let add_break (a, b, c, d, e) = (a, b, c, d, true)
 end
 
 module LineConf = struct
@@ -207,7 +209,7 @@ let rec get_doc node =
   | SyntaxList x -> get_from_children x
   | ScriptHeader x -> get_doc (header_less_than x) ^^^
                       get_doc (header_question x) ^^^
-                      get_doc (header_language x)
+                      (x |> header_language |> get_doc |> add_break)
   | Script x -> group_doc ( get_doc (script_header x)
                      ^| get_doc (script_declarations x) )
   | FunctionDeclaration x ->
@@ -230,13 +232,13 @@ let rec get_doc node =
       let fun_type = get_doc (function_type x) in
       group_doc (fun_colon ^| fun_type)
     in
-    let body = get_doc (function_body x) in
+    let body = function_body x in
+    let before_body =
       group_doc (
-        group_doc (
-          group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
-          ^| type_declaration
-        ) ^| body
-      )
+        group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
+        ^| type_declaration
+      ) in
+      handle_compound_inline_brace before_body body missing
   | ParameterDeclaration x ->
     let attr = get_doc (param_attr x) in
     let parameter_type = get_doc (param_type x) in
@@ -251,80 +253,84 @@ let rec get_doc node =
     let left = get_doc (compound_left_brace x) in
     let right = get_doc (compound_right_brace x) in
     let body = get_doc (compound_statements x) in
-    indent_block_no_space left body right indt
+    indent_block_no_space left body right indt |> add_break
   | ExpressionStatement x ->
     let body = get_doc (expr_statement_expr x) in
     let semicolon = get_doc (expr_statement_semicolon x) in
-    group_doc (body ^^^ semicolon) (* semicolon always follows the last line *)
+    (* semicolon always follows the last line *)
+    body ^^^ semicolon |> group_doc |> add_break
   | WhileStatement x ->
     let keyword = get_doc (while_keyword x) in
     let left = get_doc (while_left_paren x) in
     let right = get_doc (while_right_paren x) in
     let condition = get_doc (while_condition_expr x) in
-    let body = get_doc (while_body x) in
     let left_part = group_doc (keyword ^^| left) in
     let start_block = indent_block_no_space left_part condition right indt in
-    let indt = peek_and_decide_indent (while_body x) indt in
-    group_doc (indent_doc start_block body indt)
+    handle_compound_brace_prefix_indent start_block (while_body x) indt
+    |> add_break
   | IfStatement x ->
     let keyword = get_doc (if_keyword x) in
     let left = get_doc (if_left_paren x) in
     let condition = get_doc (if_condition_expr x) in
     let right = get_doc (if_right_paren x) in
-    let statement = get_doc (if_statement x) in
+    let if_stmt = if_statement x in
     let elseif_clause = get_doc (if_elseif_clauses x) in
     let else_clause = get_doc (if_else_clause x) in
     let left_part = group_doc (keyword ^^| left) in
     let start_block = indent_block_no_space left_part condition right indt in
     let if_statement =
-      let indt = peek_and_decide_indent (if_statement x) indt in
-      group_doc (indent_doc start_block statement indt) in
+      handle_compound_brace_prefix_indent start_block if_stmt indt in
+    let if_statement = add_break if_statement in
     group_doc (if_statement ^| elseif_clause ^| else_clause)
   | ElseifClause x ->
     let keyword = get_doc (elseif_keyword x) in
     let left = get_doc (elseif_left_paren x) in
     let condition = get_doc (elseif_condition_expr x) in
     let right = get_doc (elseif_right_paren x) in
-    let statement = get_doc (elseif_statement x) in
+    let elif_statement_syntax = elseif_statement x in
     let left_part = group_doc (keyword ^^| left) in
     let start_block = indent_block_no_space left_part condition right indt in
-    let indt = peek_and_decide_indent (elseif_statement x) indt in
-    group_doc (indent_doc start_block statement indt)
+    handle_compound_brace_prefix_indent start_block elif_statement_syntax indt
+    |> add_break
   | ElseClause x ->
     let keyword = get_doc (else_keyword x) in
-    let statement = get_doc (else_statement x) in
-    let indt = peek_and_decide_indent (else_statement x) indt in
-    group_doc (indent_doc keyword statement indt)
+    let statement = else_statement x in
+    handle_compound_brace_prefix_indent keyword statement indt
+    |> add_break
   | TryStatement x ->
     let keyword = get_doc (try_keyword x) in
-    let compound_stmt = get_doc (try_compound_statement x) in
+    let compound_stmt = try_compound_statement x in
+    let try_part =
+      handle_compound_brace_prefix_indent keyword compound_stmt indt in
     let catch_clauses = get_doc (try_catch_clauses x) in
     let finally_clause = get_doc (try_finally_clause x) in
-    group_doc (keyword ^| compound_stmt ^| catch_clauses ^| finally_clause)
+    group_doc (try_part ^| catch_clauses ^| finally_clause)
+    |> add_break
   | CatchClause x ->
     let keyword = get_doc (catch_keyword x) in
     let left = get_doc (catch_left_paren x) in
     let params = get_doc (catch_params x) in
     let right = get_doc (catch_right_paren x) in
-    let stmt = get_doc (catch_compound_statement x) in
+    let stmt = catch_compound_statement x in
     let front_part = group_doc (keyword ^| left) in
     let before_stmt = indent_block_no_space front_part params right indt in
-    group_doc (before_stmt ^| stmt)
+    handle_compound_brace_prefix_indent before_stmt stmt indt
+    |> add_break
   | FinallyClause x ->
     let keyword = get_doc (finally_keyword x) in
-    let stmt = get_doc (finally_compound_statement x) in
-    group_doc (keyword ^| stmt)
+    let stmt = finally_compound_statement x in
+    handle_compound_brace_prefix_indent keyword stmt indt
+    |> add_break
   | DoStatement x ->
     let keyword = get_doc (do_keyword x) in
-    let statement = get_doc (do_statement x) in
+    let statement = do_statement x in
     let while_keyword = get_doc (do_while_keyword x) in
     let left = get_doc (do_left_paren x) in
     let right = get_doc (do_right_paren x) in
     let condition = get_doc (do_condition_expr x) in
     let semicolon = get_doc (do_semicolon x) in
     let statement_part =
-      let indt = peek_and_decide_indent (do_statement x) indt in
-      group_doc (indent_doc keyword statement indt) in
+      handle_compound_brace_prefix_indent keyword statement indt |> add_break in
     let left_part = group_doc (while_keyword ^^| left) in
     let condition_part = indent_block_no_space left_part condition right indt in
     group_doc (statement_part ^| condition_part) ^^^ semicolon
@@ -337,7 +343,7 @@ let rec get_doc node =
     let second_semicolon = get_doc x.for_second_semicolon in
     let end_of_loop_expr = get_doc x.for_end_of_loop_expr in
     let right_paren = get_doc x.for_right_paren in
-    let statement = get_doc x.for_statement in
+    let statement = x.for_statement in
 
     let left_part = group_doc (keyword ^^| left_paren) in
 
@@ -352,17 +358,16 @@ let rec get_doc node =
     let start_block =
       indent_block_no_space left_part for_expressions right_paren indt
     in
-    let indt = peek_and_decide_indent x.for_statement indt in
-    group_doc (indent_doc start_block statement indt)
+    handle_compound_brace_prefix_indent start_block statement indt |> add_break
   | SwitchStatement x ->
     let keyword = get_doc (switch_keyword x) in
     let left = get_doc (switch_left_paren x) in
     let right = get_doc (switch_right_paren x) in
     let expr = get_doc (switch_expr x) in
-    let statement = handle_switch x in
     let left_part = group_doc (keyword ^^| left) in
     let start_block = indent_block_no_space left_part expr right indt in
-    group_doc (start_block ^| statement)
+    handle_switch start_block x
+    (* group_doc (start_block ^| statement) *)
   | PrefixUnaryOperator x ->
     let op = unary_operator x in
     if is_separable_prefix op then
@@ -459,17 +464,15 @@ let rec get_doc node =
     let keyword = get_doc (case_keyword x) in
     let expr = get_doc (case_expr x) in
     let colon = get_doc (case_colon x) in
-    let statement = get_doc (case_stmt x) in
+    let statement = case_stmt x in
     let front_part = keyword ^^^ space ^^^ expr ^^^ colon in
-    let indt = peek_and_decide_indent (case_stmt x) indt in
-    group_doc (indent_doc front_part statement indt)
+    handle_compound_brace_prefix_indent front_part statement indt
   | DefaultStatement x ->
     let keyword = get_doc (default_keyword x) in
     let colon = get_doc (default_colon x) in
-    let statement = get_doc (default_stmt x) in
+    let statement = default_stmt x in
     let front_part = keyword ^^^ colon in
-    let indt = peek_and_decide_indent (default_stmt x) indt in
-    group_doc (indent_doc front_part statement indt)
+    handle_compound_brace_prefix_indent front_part statement indt
   | ReturnStatement x ->
     let keyword = get_doc (return_keyword x) in
     let expr = get_doc (return_expr x) in
@@ -501,10 +504,11 @@ and peek_and_decide_indent x default =
   | CompoundStatement _ -> 0
   | _ -> default
 (* Generate documents for a switch statement *)
-and handle_switch switch =
+and handle_switch prefix switch =
   match syntax (switch_compound_statement switch) with
   | CompoundStatement x ->
     let left = get_doc (compound_left_brace x) in
+    let left = group_doc (prefix ^| left) in
     let right = get_doc (compound_right_brace x) in
     let body =
       let compound_body = compound_statements x in
@@ -512,8 +516,8 @@ and handle_switch switch =
       | SyntaxList lst -> handle_switch_lists lst
       | _ -> get_doc compound_body
     in
-    indent_block_no_space left body right indt
-  | _ -> get_doc (switch_compound_statement switch)
+    indent_block_no_space left body right indt |> add_break
+  | _ -> prefix ^| get_doc (switch_compound_statement switch) |> add_break
 (* specifically identify case chunks and generate docs from the list of
  * statements inside the compound statement of the switch statements *)
 and handle_switch_lists lst =
@@ -523,19 +527,19 @@ and handle_switch_lists lst =
   let fold_fun (current, docs) node =
     match syntax node with
     | CaseStatement x ->
-      let keyword = get_doc (case_keyword x) in
+      let keyword = x |> case_keyword |> get_doc in
       let expr = get_doc (case_expr x) in
       let colon = get_doc (case_colon x) in
-      let front_part = keyword ^^^ space ^^^ expr ^^^ colon in
+      let front_part = keyword ^^^ space ^^^ expr ^^^ colon |> add_break in
       let case_chunk = SyntaxList ((case_stmt x) :: current) in
       let new_list = make case_chunk (value node) in
       let end_part = get_doc new_list in
       let new_chunk = group_doc (indent_doc front_part end_part indt) in
       ([], new_chunk :: docs)
     | DefaultStatement x ->
-      let keyword = get_doc (default_keyword x) in
+      let keyword =  x |> default_keyword |> get_doc in
       let colon = get_doc (default_colon x) in
-      let front_part = keyword ^^^ colon in
+      let front_part = keyword ^^^ colon |> add_break in
       let default_chunk = SyntaxList ((default_stmt x) :: current) in
       let new_list = make default_chunk (value node) in
       let end_part = get_doc new_list in
@@ -551,6 +555,25 @@ and handle_switch_lists lst =
   let rest_doc = get_doc rest_node in
   let all_docs = rest_doc :: docs in
   List.fold_left (^|) (make_simple nil) all_docs
+(* puts [prefix] on the same line as a compound brace. If the statement is not
+ * compound, put an optional newline and group the result *)
+and handle_compound_inline_brace prefix statement postfix =
+  match syntax statement with
+  | CompoundStatement compound_stmt ->
+  let left = compound_stmt |> compound_left_brace |> get_doc in
+  let right = compound_stmt |> compound_right_brace |> get_doc in
+  let statement = compound_stmt |> compound_statements |> get_doc in
+  let prefix = group_doc (prefix ^| left) in
+  let postfix = group_doc (right ^| postfix) in
+  indent_block prefix statement postfix indt
+  | _ -> group_doc (prefix ^| get_doc statement ^| postfix)
+(* keep open brace of compound statement on the same line as the prefix.
+ * If statement is not a compound statement, then indent it with [indt] *)
+and handle_compound_brace_prefix_indent prefix statement indt =
+  if is_compound_statement statement then
+    handle_compound_inline_brace prefix statement missing
+  else
+    group_doc (indent_doc prefix (get_doc statement) indt)
 
 let pretty_print node =
   let to_print = combine (get_doc node) in

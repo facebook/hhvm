@@ -485,7 +485,7 @@ let scan_token in_type lexer =
   | ('+', '+', _) -> (advance lexer 2, TokenKind.PlusPlus)
   | ('+', _, _) -> (advance lexer 1, TokenKind.Plus)
   | ('*', '=', _) -> (advance lexer 2, TokenKind.StarEqual)
-  | ('*', '*', '=') -> (advance lexer 2, TokenKind.StarStarEqual)
+  | ('*', '*', '=') -> (advance lexer 3, TokenKind.StarStarEqual)
   | ('*', '*', _) -> (advance lexer 2, TokenKind.StarStar)
   | ('*', _, _) -> (advance lexer 1, TokenKind.Star)
   | ('~', _, _) -> (advance lexer 1, TokenKind.Tilde)

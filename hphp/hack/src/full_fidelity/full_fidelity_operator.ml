@@ -59,6 +59,7 @@ type t =
 | SubtractionAssignmentOperator
 | MultiplicationAssignmentOperator
 | DivisionAssignmentOperator
+| ExponentiationAssignmentOperator
 | ConcatenationAssignmentOperator
 | RemainderAssignmentOperator
 | AndAssignmentOperator
@@ -90,8 +91,9 @@ let precedence operator =
   | YieldOperator
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
-  | DivisionAssignmentOperator | ConcatenationAssignmentOperator
-  | RemainderAssignmentOperator | AndAssignmentOperator
+  | DivisionAssignmentOperator | ExponentiationAssignmentOperator
+  | RemainderAssignmentOperator | ConcatenationAssignmentOperator
+  | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
   | LambdaOperator -> 1
@@ -153,7 +155,8 @@ let associativity operator =
   | PrefixIncrementOperator | PrefixDecrementOperator | ExponentOperator
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
-  | DivisionAssignmentOperator | ConcatenationAssignmentOperator
+  | DivisionAssignmentOperator | ExponentiationAssignmentOperator
+  | ConcatenationAssignmentOperator
   | RemainderAssignmentOperator | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
@@ -217,6 +220,7 @@ let is_trailing_operator_token token =
   | MinusEqual
   | StarEqual
   | SlashEqual
+  | StarStarEqual
   | DotEqual
   | PercentEqual
   | AmpersandEqual
@@ -263,6 +267,7 @@ let trailing_from_token token =
   | MinusEqual -> SubtractionAssignmentOperator
   | StarEqual -> MultiplicationAssignmentOperator
   | SlashEqual -> DivisionAssignmentOperator
+  | StarStarEqual -> ExponentiationAssignmentOperator
   | DotEqual -> ConcatenationAssignmentOperator
   | PercentEqual -> RemainderAssignmentOperator
   | AmpersandEqual -> AndAssignmentOperator
@@ -330,6 +335,7 @@ let is_assignment operator =
   | SubtractionAssignmentOperator
   | MultiplicationAssignmentOperator
   | DivisionAssignmentOperator
+  | ExponentiationAssignmentOperator
   | ConcatenationAssignmentOperator
   | RemainderAssignmentOperator
   | AndAssignmentOperator
@@ -389,6 +395,7 @@ let to_string kind =
   | SubtractionAssignmentOperator -> "subtraction_assignment"
   | MultiplicationAssignmentOperator -> "multiplication_assignment"
   | DivisionAssignmentOperator -> "division_assignment"
+  | ExponentiationAssignmentOperator -> "exponentiation_assignment"
   | ConcatenationAssignmentOperator -> "concatenation_assignment"
   | RemainderAssignmentOperator -> "reminder_assignment"
   | AndAssignmentOperator -> "and_assignment"

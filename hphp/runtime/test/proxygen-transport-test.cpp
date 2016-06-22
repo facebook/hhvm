@@ -54,7 +54,8 @@ struct MockProxygenServer : ProxygenServer {
     while (n > 0 || (n < 0 && !m_messageQueue.empty())) {
       EXPECT_FALSE(m_messageQueue.empty());
       auto message = std::move(m_messageQueue.front());
-      message.m_transport->messageAvailable(std::move(message));
+      auto m_transport = message.m_transport;
+      m_transport->messageAvailable(std::move(message));
       m_messageQueue.pop_front();
       n--;
     }

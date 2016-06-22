@@ -123,7 +123,8 @@ struct ProxygenServer : Server,
   }
 
   void messageAvailable(ResponseMessage&& message) override {
-    message.m_transport->messageAvailable(std::move(message));
+    auto m_transport = message.m_transport;
+    m_transport->messageAvailable(std::move(message));
   }
 
   bool canAccept();

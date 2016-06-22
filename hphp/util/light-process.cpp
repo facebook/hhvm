@@ -225,7 +225,8 @@ void hardwareCounterWrapperHelper(pid_t (*func)(int), int afdt_fd) {
   arg->barrier.wait();
   if (arg->pid > 0) {
     // successfully forked, so don't join until waitpid.
-    s_pidToHCWMap[arg->pid] = std::move(arg);
+    auto& map_entry = s_pidToHCWMap[arg->pid];
+    map_entry = std::move(arg);
   } else {
     // fork failed, join now.
     pthread_join(arg->thr, nullptr);

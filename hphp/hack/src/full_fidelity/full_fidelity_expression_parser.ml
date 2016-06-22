@@ -177,6 +177,7 @@ module WithStatementAndDeclParser
     | BarEqual
     | PlusEqual
     | StarEqual
+    | StarStarEqual
     | SlashEqual
     | DotEqual
     | MinusEqual

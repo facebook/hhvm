@@ -27,6 +27,7 @@ type t =
 | WhileStatement
 | DoStatement
 | ForStatement
+| ForeachStatement
 | IfStatement
 | ElseifClause
 | ElseClause
@@ -84,6 +85,7 @@ let to_string kind =
   | WhileStatement -> "while_statement"
   | DoStatement -> "do_statement"
   | ForStatement -> "for_statement"
+  | ForeachStatement -> "foreach_statement"
   | IfStatement -> "if_statement"
   | ElseifClause -> "elseif_clause"
   | ElseClause -> "else_clause"

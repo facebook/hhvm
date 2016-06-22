@@ -1034,12 +1034,8 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
       assertx(callerSaved.contains(rdata));
       assertx(callerSaved.contains(rtype));
 
-      v << movzbq{rtype, rtype};
-      v << shrli{kShiftDataTypeToDestrIndex, rtype, rtype, v.makeReg()};
-
-      auto const dtor_table =
-        safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
-      v << callm{baseless(rtype * 8 + dtor_table), arg_regs(1)};
+      auto const dtor = lookupDestructor(v, rtype);
+      v << callm{dtor, arg_regs(1)};
 
       // The stub frame's saved RIP is at %rsp[8] before we saved the
       // caller-saved registers.

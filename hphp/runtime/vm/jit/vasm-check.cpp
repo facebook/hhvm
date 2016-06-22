@@ -276,8 +276,7 @@ struct WidthChecker {
     if (r.isPhys()) return;
     m_widths[r] = width(r);
   }
-  // We don't check doubles yet.
-  void def(VregDbl) {}
+
   void def(Vptr) = delete;
   void def(VcallArgsId) = delete;
   void def(const RegSet& s) { s.forEach([this](Vreg r){ def(r); }); }
@@ -293,8 +292,7 @@ struct WidthChecker {
                 "width mismatch for %{}: def {}, use {}\n{}",
                 size_t(r), show(dw), show(uw), show(m_unit));
   }
-  // We don't check doubles yet.
-  void use(VregDbl) {}
+
   void use(Vptr m) {
     if (m.base.isValid())  use(m.base);
     if (m.index.isValid()) use(m.index);

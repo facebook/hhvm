@@ -84,10 +84,12 @@ void implCmpEqDbl(IRLS& env, const IRInstruction* inst, ComparisonPred pred) {
   auto const d  = dstLoc(env, inst, 0).reg();
 
   auto& v = vmain(env);
-  auto const tmp = v.makeReg();
+  auto const cmpsd_res = v.makeReg();
+  auto const movtdb_res = v.makeReg();
 
-  v << cmpsd{pred, s0, s1, tmp};
-  v << andbi{1, tmp, d, v.makeReg()};
+  v << cmpsd{pred, s0, s1, cmpsd_res};
+  v << movtdb{cmpsd_res, movtdb_res};
+  v << andbi{1, movtdb_res, d, v.makeReg()};
 }
 
 void implCmpRelDbl(IRLS& env, const IRInstruction* inst,

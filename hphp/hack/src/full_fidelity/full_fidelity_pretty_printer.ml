@@ -359,6 +359,7 @@ let rec get_doc node =
       indent_block_no_space left_part for_expressions right_paren indt
     in
     handle_compound_brace_prefix_indent start_block statement indt |> add_break
+  | ForeachStatement x -> missing (* TODO *)
   | SwitchStatement x ->
     let keyword = get_doc (switch_keyword x) in
     let left = get_doc (switch_left_paren x) in

@@ -187,6 +187,18 @@ module WithToken(Token: TokenType) = struct
       for_right_paren: t;
       for_statement: t;
     }
+    and foreach_statement = {
+      foreach_keyword: t;
+      foreach_left_paren: t;
+      foreach_collection_name: t;
+      foreach_await_opt: t;
+      foreach_as: t;
+      foreach_key_opt: t;
+      foreach_key_arrow_opt: t;
+      foreach_value: t;
+      foreach_right_paren: t;
+      foreach_statement: t;
+    }
     and switch_statement = {
       switch_keyword: t;
       switch_left_paren: t;
@@ -340,6 +352,7 @@ module WithToken(Token: TokenType) = struct
     | FinallyClause of finally_clause
     | DoStatement of do_statement
     | ForStatement of for_statement
+    | ForeachStatement of foreach_statement
     | SwitchStatement of switch_statement
     | CaseStatement of case_statement
     | DefaultStatement of default_statement
@@ -407,6 +420,7 @@ module WithToken(Token: TokenType) = struct
       | FinallyClause _ -> SyntaxKind.FinallyClause
       | DoStatement _ -> SyntaxKind.DoStatement
       | ForStatement _ -> SyntaxKind.ForStatement
+      | ForeachStatement _ -> SyntaxKind.ForeachStatement
       | SwitchStatement _ -> SyntaxKind.SwitchStatement
       | CaseStatement _ -> SyntaxKind.CaseStatement
       | DefaultStatement _ -> SyntaxKind.DefaultStatement
@@ -452,6 +466,7 @@ module WithToken(Token: TokenType) = struct
     let is_compound_statement node = kind node = SyntaxKind.CompoundStatement
     let is_expression_statement node =
       kind node = SyntaxKind.ExpressionStatement
+    let is_foreach_statement node = kind node = SyntaxKind.ForeachStatement
     let is_while_statement node = kind node = SyntaxKind.WhileStatement
     let is_if_statement node = kind node = SyntaxKind.IfStatement
     let is_elseif node = kind node = SyntaxKind.ElseifClause
@@ -565,6 +580,13 @@ module WithToken(Token: TokenType) = struct
         [ for_keyword; for_left_paren; for_initializer_expr;
           for_first_semicolon; for_control_expr; for_second_semicolon;
           for_end_of_loop_expr; for_right_paren; for_statement ]
+      | ForeachStatement
+        { foreach_keyword; foreach_left_paren; foreach_collection_name;
+          foreach_await_opt; foreach_as; foreach_key_opt; foreach_key_arrow_opt;
+          foreach_value; foreach_right_paren; foreach_statement } ->
+        [ foreach_keyword; foreach_left_paren; foreach_collection_name;
+          foreach_await_opt; foreach_as; foreach_key_opt; foreach_key_arrow_opt;
+          foreach_value; foreach_right_paren; foreach_statement ]
       | SwitchStatement
         { switch_keyword; switch_left_paren; switch_expr; switch_right_paren;
           switch_compound_statement } ->
@@ -728,6 +750,14 @@ module WithToken(Token: TokenType) = struct
         [ "for_keyword"; "for_left_paren"; "for_initializer_expr";
           "for_first_semicolon"; "for_control_expr"; "for_second_semicolon";
           "for_end_of_loop_expr"; "for_right_paren"; "for_statement" ]
+      | ForeachStatement
+        { foreach_keyword; foreach_left_paren; foreach_collection_name;
+          foreach_await_opt; foreach_as; foreach_key_opt; foreach_key_arrow_opt;
+          foreach_value; foreach_right_paren; foreach_statement } ->
+        [ "foreach_keyword"; "foreach_left_paren"; "foreach_collection_name";
+          "foreach_await_opt"; "foreach_as"; "foreach_key_opt";
+          "foreach_key_arrow_opt"; "foreach_value"; "foreach_right_paren";
+          "foreach_statement" ]
       | SwitchStatement
         { switch_keyword; switch_left_paren; switch_expr;
           switch_right_paren; switch_compound_statement } ->
@@ -862,6 +892,16 @@ module WithToken(Token: TokenType) = struct
     let while_condition_expr x = x.while_condition_expr
     let while_right_paren x = x.while_right_paren
     let while_body x = x.while_body
+    let foreach_keyword x = x.foreach_keyword
+    let foreach_left_paren x = x.foreach_left_paren
+    let foreach_collection_name x = x.foreach_collection_name
+    let foreach_await_opt x = x.foreach_await_opt
+    let foreach_as x = x.foreach_as
+    let foreach_key_opt x = x.foreach_key_opt
+    let foreach_key_arrow_opt x = x.foreach_key_arrow_opt
+    let foreach_value x = x.foreach_value
+    let foreach_right_paren x = x.foreach_right_paren
+    let foreach_statement x = x.foreach_statement
     let if_keyword x = x.if_keyword
     let if_left_paren x = x.if_left_paren
     let if_condition_expr x = x.if_condition_expr
@@ -1073,6 +1113,14 @@ module WithToken(Token: TokenType) = struct
           for_initializer_expr; for_first_semicolon; for_control_expr;
           for_second_semicolon; for_end_of_loop_expr; for_right_paren;
           for_statement }
+      | (SyntaxKind.ForeachStatement, [ foreach_keyword; foreach_left_paren;
+          foreach_collection_name; foreach_await_opt; foreach_as;
+          foreach_key_opt; foreach_key_arrow_opt; foreach_value;
+          foreach_right_paren; foreach_statement ]) ->
+        ForeachStatement { foreach_keyword; foreach_left_paren;
+          foreach_collection_name; foreach_await_opt; foreach_as;
+          foreach_key_opt; foreach_key_arrow_opt; foreach_value;
+          foreach_right_paren; foreach_statement }
       | (SyntaxKind.SwitchStatement, [ switch_keyword; switch_left_paren;
         switch_expr; switch_right_paren; switch_compound_statement ]) ->
         SwitchStatement{ switch_keyword; switch_left_paren;
@@ -1336,6 +1384,14 @@ module WithToken(Token: TokenType) = struct
         [ for_keyword; for_left_paren; for_initializer_expr;
         for_first_semicolon; for_control_expr; for_second_semicolon;
         for_end_of_loop_expr; for_right_paren; for_statement ]
+
+      let make_foreach_statement foreach_keyword foreach_left_paren
+        foreach_collection_name foreach_await_opt foreach_as foreach_key_opt
+        foreach_arrow foreach_value foreach_right_paren foreach_statement =
+        from_children SyntaxKind.ForeachStatement
+        [ foreach_keyword; foreach_left_paren; foreach_collection_name;
+        foreach_await_opt; foreach_as; foreach_key_opt; foreach_arrow;
+        foreach_value; foreach_right_paren; foreach_statement]
 
       let make_switch_statement
         switch_keyword switch_left_paren switch_expr

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 

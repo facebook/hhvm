@@ -16,13 +16,12 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 #include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 

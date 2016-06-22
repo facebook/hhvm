@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -34,6 +33,7 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>

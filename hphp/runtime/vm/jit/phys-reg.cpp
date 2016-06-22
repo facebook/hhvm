@@ -16,13 +16,12 @@
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-#include "hphp/util/asm-x64.h"
 #include "hphp/ppc64-asm/asm-ppc64.h"
+#include "hphp/util/arch.h"
+#include "hphp/util/asm-x64.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 namespace HPHP { namespace jit {

@@ -16,12 +16,12 @@
 
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+
+#include "hphp/util/arch.h"
 
 namespace HPHP { namespace jit {
 

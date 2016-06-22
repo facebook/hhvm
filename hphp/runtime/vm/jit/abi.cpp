@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 
-#include "hphp/runtime/base/arch.h"
+#include "hphp/util/arch.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"

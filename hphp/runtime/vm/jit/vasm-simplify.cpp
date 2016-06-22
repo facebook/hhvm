@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -26,6 +24,7 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 
 #include <utility>

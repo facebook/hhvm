@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/header-kind.h"
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 
 namespace HPHP { namespace jit {

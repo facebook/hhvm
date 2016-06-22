@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/service-requests.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -28,6 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
 

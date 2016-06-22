@@ -29,9 +29,9 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {

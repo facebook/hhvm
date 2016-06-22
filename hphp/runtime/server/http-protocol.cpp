@@ -21,10 +21,10 @@
 #include <folly/Conv.h>
 #include <folly/portability/SysTime.h>
 
+#include "hphp/util/arch.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/externals.h"

@@ -13,17 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_ARCH_H
 #define incl_HPHP_ARCH_H
 
-#include "hphp/runtime/base/runtime-option.h"
-
 #include "hphp/util/assertions.h"
 
-#include <boost/type_traits.hpp>
-
 namespace HPHP {
-
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class Arch { X64, ARM, PPC64, };
@@ -38,9 +34,11 @@ constexpr Arch arch() {
 #endif
 }
 
-// MSVC's Preprocessor is completely idiotic, so we have to play by its
-// rules and forcefully expand the variadic args so they aren't all
-// interpreted as the first argument to func.
+/*
+ * MSVC's Preprocessor is completely idiotic, so we have to play by its rules
+ * and forcefully expand the variadic args so they aren't all interpreted as the
+ * first argument to func.
+ */
 #define MSVC_GLUE(x, y) x y
 
 /*
@@ -48,18 +46,18 @@ constexpr Arch arch() {
  *
  * We need to specify the return type explicitly, or else we may drop refs.
  */
-#define ARCH_SWITCH_CALL(func, ...)                  \
-  ([&]() -> boost::function_traits<decltype(x64::func)>::result_type {  \
-    switch (arch()) {                                \
-      case Arch::X64:                                \
-        return x64::MSVC_GLUE(func, (__VA_ARGS__));  \
-      case Arch::ARM:                                \
-        return arm::MSVC_GLUE(func, (__VA_ARGS__));  \
-      case Arch::PPC64:                              \
-        not_implemented();                           \
-        break;                                       \
-    }                                                \
-    not_reached();                                   \
+#define ARCH_SWITCH_CALL(func, ...)                                   \
+  ([&]() -> decltype(x64::func(__VA_ARGS__)) {                        \
+    switch (arch()) {                                                 \
+      case Arch::X64:                                                 \
+        return x64::MSVC_GLUE(func, (__VA_ARGS__));                   \
+      case Arch::ARM:                                                 \
+        return arm::MSVC_GLUE(func, (__VA_ARGS__));                   \
+      case Arch::PPC64:                                               \
+        not_implemented();                                            \
+        break;                                                        \
+    }                                                                 \
+    not_reached();                                                    \
   }())
 
 ///////////////////////////////////////////////////////////////////////////////

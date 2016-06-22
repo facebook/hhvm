@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -63,6 +62,7 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/disasm.h"

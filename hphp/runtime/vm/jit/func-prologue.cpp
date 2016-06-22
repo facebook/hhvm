@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/func-prologue.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -37,6 +36,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/growable-vector.h"

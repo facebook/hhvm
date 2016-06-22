@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -24,6 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/thread-local.h"
 

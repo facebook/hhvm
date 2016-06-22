@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -36,6 +35,8 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
+
+#include "hphp/util/arch.h"
 
 #include <algorithm>
 #include <tuple>

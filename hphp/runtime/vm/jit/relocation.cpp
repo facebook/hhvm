@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/relocation.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -29,6 +28,7 @@
 
 #include "hphp/tools/hfsort/jitsort.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 

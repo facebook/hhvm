@@ -30,12 +30,12 @@
 #include <folly/Conv.h>
 #include <folly/MapUtil.h>
 
+#include "hphp/util/arch.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"

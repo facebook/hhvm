@@ -16,12 +16,12 @@
 
 #include "hphp/runtime/vm/jit/func-guard.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit {

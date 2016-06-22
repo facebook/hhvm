@@ -16,10 +16,10 @@
 
 #include "hphp/runtime/vm/jit/align.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/align-x64.h"
+
+#include "hphp/util/arch.h"
 
 namespace HPHP { namespace jit {
 

@@ -13,6 +13,7 @@ type t =
 | Error
 | Missing
 | SyntaxList
+| ListItem
 
 (* Declarations *)
 | ScriptHeader
@@ -66,6 +67,7 @@ type t =
 | TupleTypeSpecifier
 | VectorTypeSpecifier
 | MapTypeSpecifier
+| ClosureTypeSpecifier
 
 let to_string kind =
   match kind with
@@ -76,6 +78,7 @@ let to_string kind =
   | QualifiedNameExpression -> "qualified_name"
   | Error -> "error"
   | SyntaxList -> "list"
+  | ListItem -> "list_item"
   | ScriptHeader -> "header"
   | Script -> "script"
   | FunctionDeclaration -> "function_declaration"
@@ -113,6 +116,7 @@ let to_string kind =
   | TupleTypeSpecifier -> "tuple_type_specifier"
   | VectorTypeSpecifier -> "vector_type_specifier"
   | MapTypeSpecifier -> "map_type_specifier"
+  | ClosureTypeSpecifier -> "closure_type_specifier"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
   | XHPExpression -> "xhp_expression"

@@ -66,6 +66,7 @@ let error1018 = "The 'while' keyword is expected here"
 let error1019 = "A left parenthesis is expected here."
 let error1020 = "A colon is expected here."
 let error1021 = "An opening angle bracket is expected here."
+(* TODO: Remove this; redundant to 1009. *)
 let error1022 = "A right parenthesis or comma is expected here."
 let error1023 = "An 'as' keyword is expected here"
 

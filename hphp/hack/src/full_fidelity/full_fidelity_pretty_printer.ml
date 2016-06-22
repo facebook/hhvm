@@ -207,6 +207,7 @@ let rec get_doc node =
   | QualifiedNameExpression x -> get_doc x
   | Error x -> get_from_children x
   | SyntaxList x -> get_from_children x
+  | ListItem x -> (get_doc x.list_item) ^^^ (get_doc x.list_separator)
   | ScriptHeader x -> get_doc (header_less_than x) ^^^
                       get_doc (header_question x) ^^^
                       (x |> header_language |> get_doc |> add_break)
@@ -467,6 +468,16 @@ let rec get_doc node =
     let vt = get_doc x.map_value in
     let ra = get_doc x.map_right_angle in
     ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
+  | ClosureTypeSpecifier x ->
+    let olp = get_doc x.closure_outer_left_paren in
+    let fnc = get_doc x.closure_function in
+    let ilp = get_doc x.closure_inner_left_paren in
+    let pts = get_doc x.closure_parameter_types in
+    let irp = get_doc x.closure_inner_right_paren in
+    let col = get_doc x.closure_colon in
+    let ret = get_doc x.closure_return_type in
+    let orp = get_doc x.closure_outer_right_paren in
+    olp ^^^ fnc ^^| ilp ^^^ pts ^^^ irp ^^^ col ^^^ ret ^^^ orp
   | TypeArguments x ->
     let left = get_doc (type_arguments_left_angle x) in
     let right = get_doc (type_arguments_right_angle x) in

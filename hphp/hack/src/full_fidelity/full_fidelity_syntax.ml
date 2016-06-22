@@ -311,6 +311,16 @@ module WithToken(Token: TokenType) = struct
       map_value : t;
       map_right_angle : t
     }
+    and closure_type_specifier = {
+      closure_outer_left_paren : t;
+      closure_function : t;
+      closure_inner_left_paren : t;
+      closure_parameter_types : t;
+      closure_inner_right_paren : t;
+      closure_colon : t;
+      closure_return_type : t;
+      closure_outer_right_paren : t
+    }
     and generic_type = {
       generic_class_type : t;
       generic_arguments : t
@@ -329,11 +339,16 @@ module WithToken(Token: TokenType) = struct
       tuple_types : t;
       tuple_right_paren : t
     }
+    and list_item = {
+      list_item : t;
+      list_separator : t
+    }
     and syntax =
     | Token of Token.t
     | Error of t list
     | Missing
     | SyntaxList of t list
+    | ListItem of list_item
     | ScriptHeader of script_header
     | Script of script
 
@@ -383,6 +398,7 @@ module WithToken(Token: TokenType) = struct
     | TupleTypeSpecifier of tuple_type_specifier
     | VectorTypeSpecifier of vector_type_specifier
     | MapTypeSpecifier of map_type_specifier
+    | ClosureTypeSpecifier of closure_type_specifier
 
     and t = { syntax : syntax ; value : SyntaxValue.t}
 
@@ -404,6 +420,7 @@ module WithToken(Token: TokenType) = struct
       | QualifiedNameExpression _ -> SyntaxKind.QualifiedNameExpression
       | Error _ -> SyntaxKind.Error
       | SyntaxList _ -> SyntaxKind.SyntaxList
+      | ListItem _ -> SyntaxKind.ListItem
       | ScriptHeader _ -> SyntaxKind.ScriptHeader
       | Script _ -> SyntaxKind.Script
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
@@ -446,6 +463,7 @@ module WithToken(Token: TokenType) = struct
       | TupleTypeSpecifier _ -> SyntaxKind.TupleTypeSpecifier
       | VectorTypeSpecifier _ -> SyntaxKind.VectorTypeSpecifier
       | MapTypeSpecifier _ -> SyntaxKind.MapTypeSpecifier
+      | ClosureTypeSpecifier _ -> SyntaxKind.ClosureTypeSpecifier
 
     let kind node =
       to_kind (syntax node)
@@ -457,6 +475,7 @@ module WithToken(Token: TokenType) = struct
     let is_qualified_name node = kind node = SyntaxKind.QualifiedNameExpression
     let is_error node = kind node = SyntaxKind.Error
     let is_list node = kind node = SyntaxKind.SyntaxList
+    let is_list_item node = kind node = SyntaxKind.ListItem
     let is_header node = kind node = SyntaxKind.ScriptHeader
     let is_script node = kind node = SyntaxKind.Script
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
@@ -499,6 +518,9 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.VectorTypeSpecifier
     let is_map_type_specifier node =
       kind node = SyntaxKind.MapTypeSpecifier
+    let is_closure_type_specifier node =
+      kind node = SyntaxKind.ClosureTypeSpecifier
+
     let is_separable_prefix node =
       match syntax node with
       | Token t -> begin
@@ -516,6 +538,9 @@ module WithToken(Token: TokenType) = struct
       | QualifiedNameExpression x -> [x]
       | Error x -> x
       | SyntaxList x -> x
+      | ListItem
+        { list_item; list_separator } ->
+        [ list_item; list_separator ]
       | ScriptHeader
         { header_less_than; header_question; header_language } ->
         [ header_less_than; header_question; header_language ]
@@ -673,6 +698,15 @@ module WithToken(Token: TokenType) = struct
           map_right_angle } ->
         [ map_array; map_left_angle; map_key; map_comma; map_value;
           map_right_angle ]
+      | ClosureTypeSpecifier
+        { closure_outer_left_paren; closure_function;
+          closure_inner_left_paren; closure_parameter_types;
+          closure_inner_right_paren; closure_colon; closure_return_type;
+          closure_outer_right_paren } ->
+        [ closure_outer_left_paren; closure_function;
+          closure_inner_left_paren; closure_parameter_types;
+          closure_inner_right_paren; closure_colon; closure_return_type;
+          closure_outer_right_paren ]
 
     let children_names node =
       match node.syntax with
@@ -683,6 +717,9 @@ module WithToken(Token: TokenType) = struct
       | QualifiedNameExpression _ -> [ "qualified_name_expression" ]
       | Error _ -> []
       | SyntaxList _ -> []
+      | ListItem
+        { list_item; list_separator } ->
+        [ "list_item"; "list_separator" ]
       | ScriptHeader
         { header_less_than; header_question; header_language } ->
         [ "header_less_than"; "header_question"; "header_language" ]
@@ -844,6 +881,15 @@ module WithToken(Token: TokenType) = struct
           map_right_angle } ->
         [ "map_array"; "map_left_angle"; "map_key"; "map_comma"; "map_value";
           "map_right_angle" ]
+      | ClosureTypeSpecifier
+        { closure_outer_left_paren; closure_function;
+          closure_inner_left_paren; closure_parameter_types;
+          closure_inner_right_paren; closure_colon; closure_return_type;
+          closure_outer_right_paren } ->
+        [ "closure_outer_left_paren"; "closure_function";
+          "closure_inner_left_paren"; "closure_parameter_types";
+          "closure_inner_right_paren"; "closure_colon"; "closure_return_type";
+          "closure_outer_right_paren" ]
 
     let rec to_json node =
       let open Hh_json in
@@ -1041,6 +1087,8 @@ module WithToken(Token: TokenType) = struct
       match kind, ts with
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, x) -> SyntaxList x
+      | (SyntaxKind.ListItem, [ list_item; list_separator ]) ->
+        ListItem { list_item; list_separator }
       | (SyntaxKind.Error, x) -> Error x
       | (SyntaxKind.LiteralExpression, [x]) -> LiteralExpression x
       | (SyntaxKind.VariableExpression, [x]) -> VariableExpression x
@@ -1205,6 +1253,16 @@ module WithToken(Token: TokenType) = struct
         MapTypeSpecifier
         { map_array; map_left_angle; map_key; map_comma; map_value;
           map_right_angle }
+      | (SyntaxKind.ClosureTypeSpecifier,
+        [ closure_outer_left_paren; closure_function;
+          closure_inner_left_paren; closure_parameter_types;
+          closure_inner_right_paren; closure_colon; closure_return_type;
+          closure_outer_right_paren ]) ->
+        ClosureTypeSpecifier
+        { closure_outer_left_paren; closure_function;
+          closure_inner_left_paren; closure_parameter_types;
+          closure_inner_right_paren; closure_colon; closure_return_type;
+          closure_outer_right_paren }
       | _ -> failwith "with_children called with wrong number of children"
 
     let all_tokens node =
@@ -1292,6 +1350,9 @@ module WithToken(Token: TokenType) = struct
         | [] -> make_missing()
         | h :: [] -> h
         | _ -> from_children SyntaxKind.SyntaxList items
+
+      let make_list_item item separator =
+        from_children SyntaxKind.ListItem [item; separator]
 
       let make_error items =
         from_children SyntaxKind.Error items
@@ -1457,6 +1518,17 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.MapTypeSpecifier
           [ map_array; map_left_angle; map_key; map_comma; map_value;
             map_right_angle ]
+
+      let make_closure_type_specifier
+          closure_outer_left_paren closure_function
+          closure_inner_left_paren closure_parameter_types
+          closure_inner_right_paren closure_colon closure_return_type
+          closure_outer_right_paren =
+        from_children SyntaxKind.ClosureTypeSpecifier
+          [ closure_outer_left_paren; closure_function;
+            closure_inner_left_paren; closure_parameter_types;
+            closure_inner_right_paren; closure_colon; closure_return_type;
+            closure_outer_right_paren ]
 
       let make_literal_expression literal =
         from_children SyntaxKind.LiteralExpression [ literal ]

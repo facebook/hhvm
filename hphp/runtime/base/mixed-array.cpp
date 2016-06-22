@@ -35,6 +35,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 
+#include <folly/portability/Constexpr.h>
+
 #include <algorithm>
 #include <utility>
 
@@ -48,7 +50,7 @@ TRACE_SET_MOD(runtime);
 
 std::aligned_storage<
   computeAllocBytes(1),
-  alignof(MixedArray)
+  folly::constexpr_max(alignof(MixedArray), size_t(16))
 >::type s_theEmptyDictArray;
 
 struct MixedArray::DictInitializer {

@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include <folly/portability/Constexpr.h>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -701,7 +703,7 @@ ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
 
 extern std::aligned_storage<
   computeAllocBytes(1),
-  alignof(MixedArray)
+  folly::constexpr_max(alignof(MixedArray), size_t(16))
 >::type s_theEmptyDictArray;
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {

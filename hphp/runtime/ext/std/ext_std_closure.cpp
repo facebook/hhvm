@@ -276,13 +276,13 @@ static Variant HHVM_METHOD(Closure, call,
 static ObjectData* closureInstanceCtor(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
-  assertx(cls->builtinODTailSize() == sizeof(void*));
+  assertx(cls->builtinODTailSize() == sizeof(c_Closure) - sizeof(ObjectData));
   auto const nProps = cls->numDeclProperties();
-  auto const size = ObjectData::sizeForNProps(nProps) + sizeof(void*);
-  auto obj = new (MM().objMalloc(size)) c_Closure(cls);
+  auto const size = ObjectData::sizeForNProps(nProps) +
+                    sizeof(c_Closure) - sizeof(ObjectData);
+  auto obj = new (MM().objMalloc(size))
+             c_Closure(cls, ObjectData::IsCppBuiltin | ObjectData::HasClone);
   assertx(obj->hasExactlyOneRef());
-  obj->setAttribute(ObjectData::IsCppBuiltin);
-  obj->setAttribute(ObjectData::HasClone);
   return obj;
 }
 
@@ -316,8 +316,8 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
   for (; prop != stop; ++prop) {
     tvRefcountedDecRef(prop);
   }
-
-  auto const size = ObjectData::sizeForNProps(nProps) + sizeof(void*);
+  auto const size = ObjectData::sizeForNProps(nProps) +
+                    sizeof(c_Closure) - sizeof(ObjectData);
   MM().objFree(obj, size);
 }
 

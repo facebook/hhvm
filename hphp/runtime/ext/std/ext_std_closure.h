@@ -40,7 +40,8 @@ struct c_Closure : ObjectData {
   /* closureInstanceCtor() skips this constructor call in debug mode.
    * Update that method if this assumption changes.
    */
-  explicit c_Closure(Class* cls = classof()): ObjectData(cls) {
+  explicit c_Closure(Class* cls = classof(), uint16_t flags = 0)
+    : ObjectData(cls, flags) {
     // m_ctx must be initialized by init() or the TC.
     if (debug) setThis(reinterpret_cast<ObjectData*>(-uintptr_t(1)));
   }

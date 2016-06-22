@@ -359,7 +359,24 @@ let rec get_doc node =
       indent_block_no_space left_part for_expressions right_paren indt
     in
     handle_compound_brace_prefix_indent start_block statement indt |> add_break
-  | ForeachStatement x -> missing (* TODO *)
+  | ForeachStatement x ->
+    let keyword = get_doc (foreach_keyword x) in
+    let left = get_doc (foreach_left_paren x) in
+    let right = get_doc (foreach_right_paren x) in
+    let collection_name = get_doc (foreach_collection_name x) in
+    let await_keyword = get_doc (foreach_await_opt x) in
+    let as_keyword = get_doc (foreach_as x) in
+    let key = get_doc (foreach_key_opt x) in
+    let arrow = get_doc (foreach_key_arrow_opt x) in
+    let value = get_doc (foreach_value x) in
+    let statement = foreach_statement x in
+    let left_part = group_doc (keyword ^| left) in
+    let arrow_part = group_doc (group_doc (key ^| arrow) ^| value) in
+    let as_part = group_doc (await_keyword ^| as_keyword) in
+    let as_part = group_doc (collection_name ^| as_part) in
+    let middle_part = group_doc (as_part ^| arrow_part) in
+    let start_block = indent_block_no_space left_part middle_part right indt in
+    handle_compound_brace_prefix_indent start_block statement indt |> add_break
   | SwitchStatement x ->
     let keyword = get_doc (switch_keyword x) in
     let left = get_doc (switch_left_paren x) in

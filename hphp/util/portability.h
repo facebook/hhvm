@@ -81,6 +81,12 @@
 
 #endif
 
+#ifdef __clang__
+#define NO_OPT [[clang::optnone]]
+#else
+#define NO_OPT __attribute__((__optimize__("O0")))
+#endif
+
 #if defined(__GNUC__)
 # define HHVM_ATTRIBUTE_WEAK __attribute__((__weak__))
 #elif defined(__clang__)

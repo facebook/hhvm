@@ -916,21 +916,6 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
   return f;
 }
 
-Class* lookupKnownClass(rds::Handle cache_handle, const StringData* clsName) {
-  assertx(rds::isNormalHandle(cache_handle));
-  // the caller should already have checked
-  assertx(!rds::isHandleInit(cache_handle));
-
-  AutoloadHandler::s_instance->autoloadClass(
-    StrNR(const_cast<StringData*>(clsName)));
-
-  // Autoloader should have inited it as a side-effect.
-  if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
-    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
-  }
-  return rds::handleToRef<LowPtr<Class>>(cache_handle).get();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {

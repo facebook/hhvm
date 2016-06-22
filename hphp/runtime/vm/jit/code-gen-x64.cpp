@@ -540,10 +540,13 @@ DELEGATE_OPCODE(MapGet)
 DELEGATE_OPCODE(MapSet)
 DELEGATE_OPCODE(MapIsset)
 
+DELEGATE_OPCODE(LdCls)
+DELEGATE_OPCODE(LdClsCached)
+DELEGATE_OPCODE(LdClsCachedSafe)
 DELEGATE_OPCODE(LdFunc)
 DELEGATE_OPCODE(LdFuncCached)
-DELEGATE_OPCODE(LdFuncCachedSafe)
 DELEGATE_OPCODE(LdFuncCachedU)
+DELEGATE_OPCODE(LdFuncCachedSafe)
 
 DELEGATE_OPCODE(LdObjMethod)
 DELEGATE_OPCODE(LookupClsMethodCache)
@@ -2668,74 +2671,6 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   auto const dstReg = dstLoc(inst, 0).reg();
   auto const objReg = srcLoc(inst, 0).reg();
   vmain() << lea{objReg[inst->extra<LdPropAddr>()->offsetBytes], dstReg};
-}
-
-void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
-  const StringData* className = inst->src(0)->strVal();
-  auto ch = NamedEntity::get(className)->getClassHandle();
-  auto const dst = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  auto const call_helper = [&] (Vout& v) {
-    auto ptr = v.makeReg();
-    cgCallHelper(
-      v,
-      CallSpec::direct(jit::lookupKnownClass),
-      callDest(ptr),
-      SyncOptions::Sync,
-      argGroup(inst).
-        imm(ch).
-        ssa(0)
-    );
-    return ptr;
-  };
-
-  if (rds::isNormalHandle(ch)) {
-    auto const sf = checkRDSHandleInitialized(v, ch);
-    unlikelyCond(
-      v, vcold(), CC_NE, sf, dst,
-      [&] (Vout& v) { return call_helper(v); },
-      [&] (Vout& v) {
-        auto const ptr = v.makeReg();
-        emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Class>));
-        return ptr;
-      }
-    );
-  } else {
-    auto const sf = v.makeReg();
-    auto const ptr = v.makeReg();
-    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<Class>));
-    v << testq{ptr, ptr, sf};
-    unlikelyCond(
-      v, vcold(), CC_Z, sf, dst,
-      [&] (Vout& v) { return call_helper(v); },
-      [&] (Vout& v) { return ptr; }
-    );
-  }
-}
-
-void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
-  const StringData* className = inst->src(0)->strVal();
-  auto ch = NamedEntity::get(className)->getClassHandle();
-  auto const dst = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  if (rds::isNormalHandle(ch)) {
-    auto const sf = checkRDSHandleInitialized(v, ch);
-    emitFwdJcc(v, CC_NE, sf, inst->taken());
-  }
-  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Class>));
-}
-
-void CodeGenerator::cgLdCls(IRInstruction* inst) {
-  auto const ch = ClassCache::alloc();
-  rds::recordRds(ch, sizeof(ClassCache),
-                 "ClassCache", getFunc(inst->marker())->fullName()->data());
-  cgCallHelper(vmain(),
-               CallSpec::direct(ClassCache::lookup),
-               callDest(inst),
-               SyncOptions::Sync,
-               argGroup(inst).imm(ch).ssa(0/*className*/));
 }
 
 void CodeGenerator::cgLdRDSAddr(IRInstruction* inst) {

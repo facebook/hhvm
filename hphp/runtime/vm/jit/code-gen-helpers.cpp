@@ -272,12 +272,8 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
     } return;
 
     case CallSpec::Kind::Destructor: {
-      // this movzbq is only needed because callers aren't required to
-      // zero-extend the type.
-      auto zextType = v.makeReg();
-      v << movzbl{target.reg(), zextType};
-      auto dtor_ptr = lookupDestructor(v, zextType);
-      v << callm{dtor_ptr, args};
+      auto dtor = lookupDestructor(v, target.reg());
+      v << callm{dtor, args};
     } return;
 
     case CallSpec::Kind::Stub:
@@ -289,15 +285,23 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
 
 Vptr lookupDestructor(Vout& v, Vreg type) {
   auto const table = reinterpret_cast<intptr_t>(g_destructors);
-  always_assert_flog(deltaFits(table, sz::dword),
-    "Destructor function table is expected to be in the data "
-    "segment, with addresses less than 2^31"
-  );
-  auto index = v.makeReg();
-  auto indexl = v.makeReg();
-  v << shrli{kShiftDataTypeToDestrIndex, type, indexl, v.makeReg()};
+
+  auto const typel = v.makeReg();
+  auto const index = v.makeReg();
+  auto const indexl = v.makeReg();
+
+  // This movzbl is only needed because callers aren't required to zero-extend
+  // the type.
+  v << movzbl{type, typel};
+  v << shrli{kShiftDataTypeToDestrIndex, typel, indexl, v.makeReg()};
   v << movzlq{indexl, index};
-  return baseless(index * 8 + safe_cast<int>(table));
+
+  // The baseless form is more compact, but isn't supported for 64-bit
+  // displacements.
+  if (table <= std::numeric_limits<int>::max()) {
+    return baseless(index * 8 + safe_cast<int>(table));
+  }
+  return v.cns(table)[index * 8];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

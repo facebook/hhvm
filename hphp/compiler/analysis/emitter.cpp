@@ -8449,7 +8449,7 @@ void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
     tvWriteNull(&tvProp);
   }
 
-  Attr attrs = AttrPrivate | AttrBuiltin;
+  Attr attrs = AttrPrivate | AttrNoSerialize;
   attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
   pce->addProperty(m_curFunc->memoizePropName, attrs, nullptr, nullptr, &tvProp,
                    RepoAuthType{});

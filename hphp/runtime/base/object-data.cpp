@@ -774,7 +774,11 @@ ObjectData* ObjectData::clone() {
   Object clone = Object::attach(obj);
   auto const nProps = m_cls->numDeclProperties();
   auto const clonePropVec = clone->propVec();
+  auto const props = m_cls->declProperties();
   for (auto i = Slot{0}; i < nProps; i++) {
+    if (props[i].attrs & AttrNoSerialize) {
+      continue;
+    }
     tvRefcountedDecRef(&clonePropVec[i]);
     tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
   }
@@ -1644,8 +1648,9 @@ void ObjectData::getProp(const Class* klass,
                          Array& props,
                          std::vector<bool>& inserted) const {
   if (prop->attrs()
-      & (AttrStatic | // statics aren't part of individual instances
-         AttrBuiltin  // runtime-internal attrs, such as the <<Memoize>> cache
+      & (AttrStatic |    // statics aren't part of individual instances
+         AttrNoSerialize // runtime-internal attrs, such as the
+                         // <<__Memoize>> cache
         )) {
     return;
   }

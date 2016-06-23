@@ -246,6 +246,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       // location where it can construct the return Array, String, Object, or
       // Variant.
       args.addr(rvmtl(), returnOffset);
+      args.indirect();
     }
   }
 

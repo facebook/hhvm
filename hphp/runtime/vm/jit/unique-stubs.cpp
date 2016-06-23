@@ -411,12 +411,29 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& cb, DataBlock& data,
                                          const UniqueStubs& us) {
   alignJmpTarget(cb);
 
-  return vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+
+  auto const start = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vc) {
     v << stublogue{};
-    v << vcall{CallSpec::direct(handlePossibleStackOverflow),
-               v.makeVcallArgs({{rvmfp()}}), v.makeTuple({})};
+
+    auto const done = v.makeBlock();
+    auto const ctch = v.makeBlock();
+
+    v << vinvoke{CallSpec::direct(handlePossibleStackOverflow),
+                 v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
+                 {done, ctch}};
+    v = done;
     v << tailcallstub{us.functionEnterHelper};
+
+    vc = ctch;
+    always_assert(us.endCatchHelper);
+    vc << landingpad{};
+    vc << stubunwind{};
+    vc << jmpi{us.endCatchHelper};
   });
+
+  meta.process(nullptr);
+  return start;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1304,8 +1321,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   enterTCHelper = decltype(enterTCHelper)(emitEnterTCHelper(main, data, *this));
 
 #define ADD(name, stub) name = add(#name, (stub), code, dbg)
-  // required by emitInterpRet():
+  // These guys are required by a number of other stubs.
   ADD(handleSRHelper, emitHandleSRHelper(cold, data));
+  ADD(endCatchHelper, emitEndCatchHelper(frozen, data, *this));
 
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot(), data));
   ADD(fcallHelperThunk,       emitFCallHelperThunk(cold, data));
@@ -1329,12 +1347,11 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(bindCallStub,           emitBindCallStub<false>(cold, data));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold, data));
   ADD(fcallArrayHelper,       emitFCallArrayHelper(hot(), data, *this));
+  ADD(fcallArrayEndCatch,     emitFCallArrayEndCatch(frozen, data, *this));
 
   ADD(decRefGeneric,  emitDecRefGeneric(cold, data));
 
   ADD(callToExit,         emitCallToExit(main, data, *this));
-  ADD(endCatchHelper,     emitEndCatchHelper(frozen, data, *this));
-  ADD(fcallArrayEndCatch, emitFCallArrayEndCatch(frozen, data, *this));
   ADD(throwSwitchMode,    emitThrowSwitchMode(frozen, data));
 
 #undef ADD

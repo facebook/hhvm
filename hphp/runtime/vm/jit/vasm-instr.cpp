@@ -114,6 +114,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::callstub:
     case Vinstr::callfaststub:
     case Vinstr::tailcallstub:
+    case Vinstr::stubunwind:
     // php function abi
     case Vinstr::defvmsp:
     case Vinstr::syncvmsp:

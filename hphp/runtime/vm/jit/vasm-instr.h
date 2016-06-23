@@ -96,6 +96,7 @@ struct Vunit;
   O(callstub, I(target), U(args), Dn)\
   O(callfaststub, I(fix), U(args), Dn)\
   O(tailcallstub, I(target), U(args), Dn)\
+  O(stubunwind, Inone, Un, Dn)\
   /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
@@ -626,6 +627,17 @@ struct callfaststub { TCA target; Fixup fix; RegSet args; };
  * the world to a pre-stublogue{} state before jumping.
  */
 struct tailcallstub { CodeAddress target; RegSet args; };
+
+/*
+ * Restore %rsp when leaving a stub context via an exception edge.
+ *
+ * When we unwind into normal TC frames (i.e., for PHP functions), we require
+ * that %rsp be restored correctly, since we use spill space as our means of
+ * restoring all other registers.  Thus, when we leave a stub because of an
+ * exception, we have to undo the stack effects of both the stublogue{} and the
+ * callstub{}.
+ */
+struct stubunwind {};
 
 ///////////////////////////////////////////////////////////////////////////////
 // PHP function ABI.

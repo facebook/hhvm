@@ -774,6 +774,10 @@ void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   }
 }
 
+void lower(Vunit& unit, stubunwind& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
+}
+
 void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = popm{inst.fp[AROFF(m_savedRip)]};
 }

@@ -1263,6 +1263,12 @@ void lower(Vunit& u, loadstubret& i, Vlabel b, size_t z) {
   });
 }
 
+void lower(Vunit& u, stubunwind& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    v << lea{rsp()[16], rsp()};
+  });
+}
+
 void lower(Vunit& u, stubtophp& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
     v << lea{rsp()[16], rsp()};

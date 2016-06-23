@@ -11,6 +11,7 @@
 (* Code for emitting expressions and various related forms (like lvalues) *)
 
 open Core
+open String_utils
 open Utils
 open Nast
 

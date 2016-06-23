@@ -71,7 +71,7 @@ let process_member_id tcopt results_acc target_classes  target_member
     | Method target_name  -> is_method && (member_name = target_name)
     | Property target_name ->
       (not is_method) && (not is_const) &&
-        ((Utils.lstrip member_name "$") = target_name)
+        ((String_utils.lstrip member_name "$") = target_name)
     | Class_const target_name -> is_const && (member_name = target_name)
     | Typeconst _ -> false
   in

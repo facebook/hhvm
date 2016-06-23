@@ -13,6 +13,7 @@ open ServerEnv
 open ServerCheckUtils
 open Reordered_argument_collections
 open Utils
+open String_utils
 
 open Result.Export
 open Result.Monad_infix
@@ -378,7 +379,7 @@ let init ?load_mini_script genv =
     let root = Path.to_string root in
     let updates = genv.notifier () in
     let updates = SSet.filter updates (fun p ->
-      str_starts_with p root && ServerEnv.file_filter p) in
+      string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
     (* Build targets are untracked by version control, so we must always
      * recheck them. While we could query hg / git for the untracked files,

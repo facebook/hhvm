@@ -25,6 +25,7 @@
 open Autocomplete
 open Core
 open Nast
+open String_utils
 open Typing_defs
 open Utils
 

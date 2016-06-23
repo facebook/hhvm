@@ -11,6 +11,7 @@
 (* This contains the underlying data structures and hhas emitting routines. *)
 
 open Core
+open String_utils
 open Utils
 
 (* TODO: these ought to take positions *)

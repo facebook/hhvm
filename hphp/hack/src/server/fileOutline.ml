@@ -140,7 +140,7 @@ let summarize_method class_name m =
 let params_implicit_fields params =
   List.filter_map params ~f:begin function
     | { Ast.param_modifier = Some _vis; param_id; _ } ->
-        Some (Utils.lstrip (snd param_id) "$" )
+        Some (String_utils.lstrip (snd param_id) "$" )
     | _ -> None
   end
 

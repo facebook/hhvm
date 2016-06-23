@@ -12,6 +12,7 @@ open Core
 open Reordered_argument_collections
 open Typing_defs
 open Utils
+open String_utils
 
 module Phase = Typing_phase
 
@@ -274,7 +275,7 @@ let compute_complete_global tcopt content_funs content_classes =
   let on_class name ~seen =
     (* Skip the names that we know we have analyzed before *)
     if SSet.mem seen name then None else
-    if not (str_starts_with (strip_ns name) gname) then None else
+    if not (string_starts_with (strip_ns name) gname) then None else
     match Typing_lazy_heap.get_class tcopt name with
     | Some c
       when should_complete_class completion_type c.Typing_defs.tc_kind ->
@@ -303,10 +304,10 @@ let compute_complete_global tcopt content_funs content_classes =
     if SSet.mem seen name then None else
     if should_complete_fun completion_type then begin
       let stripped_name = strip_ns name in
-      let matches_gname = str_starts_with stripped_name gname in
+      let matches_gname = string_starts_with stripped_name gname in
       let matches_gname_gns = match gname_gns with
         | None -> false
-        | Some s -> str_starts_with stripped_name s in
+        | Some s -> string_starts_with stripped_name s in
       if matches_gname || matches_gname_gns
       then match Typing_lazy_heap.get_fun tcopt name with
         | Some fun_ ->

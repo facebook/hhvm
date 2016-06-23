@@ -84,7 +84,7 @@ end = struct
   and start env = function
     | [] -> ()
     | line :: lines
-      when Utils.str_starts_with line "+++" ->
+      when String_utils.string_starts_with line "+++" ->
         header env line;
         modified env 0 lines
     | _ :: lines -> start env lines

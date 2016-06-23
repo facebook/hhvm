@@ -419,7 +419,7 @@ void phpDebuggerStepIn() {
   // Try to get needed context info. Bail if we can't
   const Func* func = fp->func();
   const Unit* unit = func != nullptr ? func->unit() : nullptr;
-  if (func == nullptr || func == nullptr) {
+  if (unit == nullptr) {
     TRACE(5, "Could not grab the current unit or function\n");
     return;
   }

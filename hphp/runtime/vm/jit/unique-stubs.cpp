@@ -300,10 +300,10 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
   });
 }
 
-TCA emitFCallHelperThunk(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
+TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
+  alignJmpTarget(main);
 
-  return vwrap2(cb, data, [] (Vout& v, Vout& vc) {
+  return vwrap2(main, cold, data, [] (Vout& v, Vout& vc) {
     v << phplogue{rvmfp()};
 
     // fcallHelper asserts native stack alignment for us.
@@ -353,12 +353,13 @@ TCA emitFuncBodyHelperThunk(CodeBlock& cb, DataBlock& data) {
   });
 }
 
-TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  alignJmpTarget(cb);
+TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
+                            DataBlock& data, UniqueStubs& us) {
+  alignJmpTarget(main);
 
   CGMeta meta;
 
-  auto const start = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vc) {
+  auto const start = vwrap2(main, cold, data, meta, [&] (Vout& v, Vout& vc) {
     auto const ar = v.makeReg();
 
     v << copy{rvmfp(), ar};
@@ -420,13 +421,15 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   return start;
 }
 
-TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& cb, DataBlock& data,
+TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
+                                         CodeBlock& cold,
+                                         DataBlock& data,
                                          const UniqueStubs& us) {
-  alignJmpTarget(cb);
+  alignJmpTarget(main);
 
   CGMeta meta;
 
-  auto const start = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vc) {
+  auto const start = vwrap2(main, cold, data, meta, [&] (Vout& v, Vout& vc) {
     v << stublogue{};
 
     auto const done = v.makeBlock();
@@ -657,7 +660,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
 TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
   alignJmpTarget(cb);
 
-  return vwrap2(cb, data, [&] (Vout& v, Vout& vc) {
+  return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
     auto const data = rarg(0);
     auto const type = rarg(1);
 
@@ -838,16 +841,18 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
   });
 }
 
-TCA emitFCallArrayHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
+TCA emitFCallArrayHelper(CodeBlock& main, CodeBlock& cold,
+                         DataBlock& data, UniqueStubs& us) {
+  align(main, nullptr, Alignment::CacheLine, AlignContext::Dead);
 
   CGMeta meta;
 
-  TCA ret = vwrap(cb, data, [] (Vout& v) {
+  auto const ret = vwrap(main, data, [] (Vout& v) {
     v << movl{v.cns(0), rarg(2)};
   });
 
-  us.fcallUnpackHelper = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vc) {
+  us.fcallUnpackHelper = vwrap2(main, cold, data, meta,
+                                [&] (Vout& v, Vout& vc) {
     // We reach fcallArrayHelper in the same context as a func prologue, so
     // this should really be a phplogue{}---but we don't need the return
     // address in the ActRec until later, and in the event the callee is
@@ -1143,7 +1148,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   auto const calleeAR = rarg(5);
 #endif
 
-  return vwrap2(cb, data, [&] (Vout& v, Vout& vc) {
+  return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
     // Native func prologue.
     v << stublogue{true};
 
@@ -1337,11 +1342,11 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(endCatchHelper, emitEndCatchHelper(frozen, data, *this));
 
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot(), data));
-  ADD(fcallHelperThunk,       emitFCallHelperThunk(cold, data));
+  ADD(fcallHelperThunk,       emitFCallHelperThunk(cold, frozen, data));
   ADD(funcBodyHelperThunk,    emitFuncBodyHelperThunk(cold, data));
-  ADD(functionEnterHelper,    emitFunctionEnterHelper(cold, data, *this));
+  ADD(functionEnterHelper, emitFunctionEnterHelper(cold, frozen, data, *this));
   ADD(functionSurprisedOrStackOverflow,
-      emitFunctionSurprisedOrStackOverflow(cold, data, *this));
+      emitFunctionSurprisedOrStackOverflow(cold, frozen, data, *this));
 
   ADD(retHelper,                  emitInterpRet(cold, data));
   ADD(genRetHelper,               emitInterpGenRet<false>(cold, data));
@@ -1357,7 +1362,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ADD(bindCallStub,           emitBindCallStub<false>(cold, data));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold, data));
-  ADD(fcallArrayHelper,       emitFCallArrayHelper(hot(), data, *this));
+  ADD(fcallArrayHelper,       emitFCallArrayHelper(hot(), frozen, data, *this));
 
   ADD(decRefGeneric,  emitDecRefGeneric(cold, data));
 

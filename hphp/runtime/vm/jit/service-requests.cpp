@@ -69,7 +69,7 @@ void emit_svcreq(CodeBlock& cb,
     CGMeta fixups;
     SCOPE_EXIT { assert(fixups.empty()); };
 
-    Vauto vasm{stub, data, fixups};
+    Vauto vasm{stub, stub, data, fixups};
     auto& v = vasm.main();
 
     // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do

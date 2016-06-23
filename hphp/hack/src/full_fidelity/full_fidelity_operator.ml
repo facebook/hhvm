@@ -283,7 +283,8 @@ let trailing_from_token token =
   | LeftParen -> FunctionCallOperator
   | LeftBracket -> IndexingOperator
   | LeftBrace -> IndexingOperator
-  | _ -> failwith "not a trailing operator"
+  | _ -> failwith (Printf.sprintf "%s is not a trailing operator"
+                    (Full_fidelity_token_kind.to_string token))
 
 let is_binary_operator_token token =
   match token with

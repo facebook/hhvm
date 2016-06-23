@@ -66,7 +66,7 @@ and parse_remaining_type_constant parser left =
     begin
       let syntax =
         make_type_constant left (make_token separator) (make_token right) in
-      let token = peek_token parser in
+      let token = peek_token parser1 in
       if (Token.kind token) = ColonColon then
         parse_remaining_type_constant parser1 syntax
       else

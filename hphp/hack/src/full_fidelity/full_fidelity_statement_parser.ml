@@ -15,6 +15,7 @@ module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_lexer
+module SimpleParser = Full_fidelity_simple_parser
 
 open TokenKind
 open Syntax
@@ -24,68 +25,8 @@ module WithExpressionAndDeclParser
   (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType) :
   Full_fidelity_statement_parser_type.StatementParserType = struct
 
-  type t = {
-    lexer : Lexer.t;
-    errors : SyntaxError.t list
-  }
-
-  let make lexer errors =
-    { lexer; errors }
-
-  let errors parser =
-    parser.errors
-
-  let lexer parser =
-    parser.lexer
-
-  let with_error parser message =
-    (* TODO: Should be able to express errors on whole syntax node. *)
-    (* TODO: Is this even right? Won't this put the error on the trivia? *)
-    let start_offset = Lexer.start_offset parser.lexer in
-    let end_offset = Lexer.end_offset parser.lexer in
-    let error = SyntaxError.make start_offset end_offset message in
-    { parser with errors = error :: parser.errors }
-
-  let next_token parser =
-    let (lexer, token) = Lexer.next_token parser.lexer in
-    let parser = { parser with lexer } in
-    (parser, token)
-
-  (* let skip_token parser =
-    let (lexer, _) = Lexer.next_token parser.lexer in
-    let parser = { parser with lexer } in
-    parser *)
-
-  (* let next_token_as_name parser =
-    let (lexer, token) = Lexer.next_token_as_name parser.lexer in
-    let parser = { parser with lexer } in
-    (parser, token) *)
-
-  let peek_token parser =
-    let (_, token) = Lexer.next_token parser.lexer in
-    token
-
-  let optional_token parser kind =
-    let (parser1, token) = next_token parser in
-    if (Token.kind token) = kind then
-      (parser1, make_token token)
-    else
-      (parser, make_missing())
-
-  let expect_token parser kind error =
-    let (parser1, token) = next_token parser in
-    if (Token.kind token) = kind then
-      (parser1, make_token token)
-    else
-      (* ERROR RECOVERY: Create a missing token for the expected token,
-         and continue on from the current token. Don't skip it. *)
-      (with_error parser error, (make_missing()))
-
-  let assert_token parser kind =
-    let (parser, token) = next_token parser in
-    assert ((Token.kind token) = kind);
-    (parser, make_token token)
-
+  include SimpleParser
+  include Full_fidelity_parser_helpers.WithParser(SimpleParser)
 
   let rec parse_statement parser =
     let token = peek_token parser in

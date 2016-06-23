@@ -13,62 +13,13 @@ module Syntax = Full_fidelity_minimal_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
-module SyntaxError = Full_fidelity_syntax_error
-module Lexer = Full_fidelity_lexer
+module SimpleParser = Full_fidelity_simple_parser
 
 open TokenKind
 open Syntax
 
-type t = {
-  lexer : Lexer.t;
-  errors : SyntaxError.t list
-}
-
-let make lexer errors =
-  { lexer; errors }
-
-let errors parser =
-  parser.errors
-
-let lexer parser =
-  parser.lexer
-
-let with_error parser message =
-  (* TODO: Should be able to express errors on whole syntax node. *)
-  (* TODO: Is this even right? Won't this put the error on the trivia? *)
-  let start_offset = Lexer.start_offset parser.lexer in
-  let end_offset = Lexer.end_offset parser.lexer in
-  let error = SyntaxError.make start_offset end_offset message in
-  { parser with errors = error :: parser.errors }
-
-let next_token parser =
-  let (lexer, token) = Lexer.next_token_in_type parser.lexer in
-  let parser = { parser with lexer } in
-  (parser, token)
-
-let next_token_as_name parser =
-  (* TODO: This isn't right.  Pass flags to the lexer. *)
-  let (lexer, token) = Lexer.next_token_as_name parser.lexer in
-  let parser = { parser with lexer } in
-  (parser, token)
-
-let skip_token parser =
-  let (lexer, _) = Lexer.next_token_in_type parser.lexer in
-  let parser = { parser with lexer } in
-  parser
-
-let peek_token parser =
-  let (_, token) = Lexer.next_token_in_type parser.lexer in
-  token
-
-let expect_token parser kind error =
-  let (parser1, token) = next_token parser in
-  if (Token.kind token) = kind then
-    (parser1, make_token token)
-  else
-    (* ERROR RECOVERY: Create a missing token for the expected token,
-       and continue on from the current token. Don't skip it. *)
-    (with_error parser error, (make_missing()))
+include SimpleParser
+include Full_fidelity_parser_helpers.WithParser(SimpleParser)
 
 (* TODO: What about something like for::for? Is that a legal
   type constant?  *)

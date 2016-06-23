@@ -262,12 +262,6 @@ tc_unwind_personality(int version,
       FTRACE(1, "rip == functionEnterHelperReturn, continuing unwind\n");
       return _URC_CONTINUE_UNWIND;
     }
-    if (ip == stubs.fcallArrayReturn) {
-      FTRACE(1, "rip == fcallArrayReturn, entering catch\n");
-      g_unwind_rds->exn = ue;
-      _Unwind_SetIP(context, uint64_t(stubs.fcallArrayEndCatch));
-      return _URC_INSTALL_CONTEXT;
-    }
 
     FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
     g_unwind_rds->exn = ue;

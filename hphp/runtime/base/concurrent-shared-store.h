@@ -56,6 +56,8 @@ struct StoreValue {
     , expire{o.expire}
     , dataSize{o.dataSize}
     , kind(o.kind)
+    , c_time{o.c_time}
+    , mtime{o.mtime}
     // Copy everything except the lock
   {
     hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
@@ -100,7 +102,8 @@ struct StoreValue {
    * lock during their initial file-data-to-APCHandle conversion, so these two
    * fields are unioned.
    *
-   * Note: expiration times are stored in 32-bits as seconds since the Epoch.
+   * Note: expiration, creation, and modification times are stored unsigned 
+   * in 32-bits as seconds since the Epoch to save cache-line space.
    * HHVM might get confused after 2106 :)
    */
   mutable Either<APCHandle*,char*,either_policy::high_bit> data;
@@ -109,7 +112,9 @@ struct StoreValue {
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;  // Only valid if data is an APCHandle*.
-  char padding[19];  // Make APCMap nodes cache-line sized (it static_asserts).
+  char padding[11];  // Make APCMap nodes cache-line sized (it static_asserts).
+  uint32_t c_time{0}; // Modification time
+  uint32_t mtime{0}; // Creation time
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -135,12 +140,16 @@ struct EntryInfo {
             bool inMem,
             int32_t size,
             int64_t ttl,
-            Type type)
+            Type type,
+            int64_t c_time,
+            int64_t mtime)
     : key(apckey)
     , inMem(inMem)
     , size(size)
     , ttl(ttl)
     , type(type)
+    , c_time(c_time)
+    , mtime(mtime)
   {}
 
   static Type getAPCType(const APCHandle* handle);
@@ -150,6 +159,8 @@ struct EntryInfo {
   int32_t size;
   int64_t ttl;
   Type type;
+  int64_t c_time;
+  int64_t mtime;
 };
 
 //////////////////////////////////////////////////////////////////////

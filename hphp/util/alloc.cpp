@@ -260,8 +260,8 @@ static void initNuma() {
   // When linked dynamically numa_init() is called before JEMallocInitializer()
   // numa_init is not exported by libnuma.so so it will be NULL
   // however when linked statically numa_init() is not guaranteed to be called
-  // before JEMallocInitializer(),so call it here.
-  if(&numa_init) {
+  // before JEMallocInitializer(), so call it here.
+  if (&numa_init) {
     numa_init();
   }
   if (numa_available() < 0) return;
@@ -534,7 +534,7 @@ struct JEMallocInitializer {
       int node = -1;
 #ifdef HAVE_NUMA
       node = numa_max_node();
-      if (node == 0) node = -1;
+      if (node == 0 || nPages < 2) node = -1;
 #endif
       void* base = nullptr;
       if (node > 0) {                   // explicit NUMA balancing

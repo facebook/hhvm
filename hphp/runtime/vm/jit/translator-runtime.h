@@ -148,7 +148,6 @@ TypedValue getMemoKeyHelper(TypedValue tv);
 
 int32_t arrayVsize(ArrayData*);
 
-TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,

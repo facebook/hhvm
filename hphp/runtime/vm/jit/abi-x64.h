@@ -49,6 +49,7 @@ constexpr PhysReg rret_type() { return reg::rdx; }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
+constexpr PhysReg rret_indirect() { return reg::rax; }
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);

@@ -152,9 +152,6 @@ PhysReg rret_simd(size_t i) {
   assertx(i == 0);
   return vixl::d0;
 }
-PhysReg rret_indirect() {
-  return vixl::x8;
-}
 
 PhysReg rarg(size_t i) {
   assertx(i < num_arg_regs());

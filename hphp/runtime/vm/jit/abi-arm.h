@@ -53,7 +53,7 @@ inline PhysReg rret_type() { return vixl::x1; }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
-PhysReg rret_indirect();
+inline PhysReg rret_indirect() { return vixl::x8; }
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);

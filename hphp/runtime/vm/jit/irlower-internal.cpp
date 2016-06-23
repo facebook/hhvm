@@ -173,7 +173,8 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
   auto const argsId = v.makeVcallArgs({
     std::move(vargs),
     std::move(vSimdArgs),
-    std::move(vStkArgs)
+    std::move(vStkArgs),
+    args.isIndirect()
   });
   auto const dstId = v.makeTuple(std::move(dstRegs));
 

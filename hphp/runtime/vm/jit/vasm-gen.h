@@ -195,6 +195,10 @@ TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen) {
                             CodeKind::CrossTrace);
 }
 template<class GenFunc>
+TCA vwrap2(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen) {
+  return detail::vwrap_impl(cb, data, &meta, gen, CodeKind::CrossTrace);
+}
+template<class GenFunc>
 TCA vwrap2(CodeBlock& cb, DataBlock& data, GenFunc gen) {
   return detail::vwrap_impl(cb, data, nullptr, gen, CodeKind::CrossTrace);
 }

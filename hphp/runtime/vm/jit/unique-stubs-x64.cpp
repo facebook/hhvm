@@ -67,9 +67,9 @@ static void alignJmpTarget(CodeBlock& cb) {
  * The `live' registers must be preserved across any native calls (and
  * generally left untouched).
  */
-static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& meta,
                             PhysReg tv, PhysReg type, RegSet live) {
-  return vwrap(cb, data, fixups, [&] (Vout& v) {
+  return vwrap(cb, data, meta, [&] (Vout& v) {
     // We use the first argument register for the TV data because we might pass
     // it to the native release call.  It's not live when we enter the helper.
     auto const data = rarg(0);
@@ -113,12 +113,12 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   auto const local = rarg(1);
   auto const last = rarg(2);
   auto const type = rarg(3);
-  CGMeta fixups;
+  CGMeta meta;
 
   // This stub is very hot; keep it cache-aligned.
-  align(cb, &fixups, Alignment::CacheLine, AlignContext::Dead);
+  align(cb, &meta, Alignment::CacheLine, AlignContext::Dead);
   auto const release =
-    emitDecRefHelper(cb, data, fixups, local, type, local | last);
+    emitDecRefHelper(cb, data, meta, local, type, local | last);
 
   auto const decref_local = [&] (Vout& v) {
     auto const sf = v.makeReg();
@@ -140,7 +140,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
   alignJmpTarget(cb);
 
-  us.freeManyLocalsHelper = vwrap(cb, data, fixups, [&] (Vout& v) {
+  us.freeManyLocalsHelper = vwrap(cb, data, meta, [&] (Vout& v) {
     // We always unroll the final `kNumFreeLocalsHelpers' decrefs, so only loop
     // until we hit that point.
     v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
@@ -165,7 +165,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   }
 
   // All the stub entrypoints share the same ret.
-  vwrap(cb, data, fixups, [] (Vout& v) { v << ret{}; });
+  vwrap(cb, data, meta, [] (Vout& v) { v << ret{}; });
 
   // This stub is hot, so make sure to keep it small.
   // Alas, we have more work to do in this under Windows,
@@ -175,7 +175,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
                 (cb.frontier() - release <= 4 * x64::cache_line_size()));
 #endif
 
-  fixups.process(nullptr);
+  meta.process(nullptr);
   return release;
 }
 

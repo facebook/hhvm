@@ -151,7 +151,6 @@ NOOP_OPCODE(HintLocInner)
 NOOP_OPCODE(HintStkInner)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(FinishMemberOp)
-NOOP_OPCODE(BeginInlining)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -503,6 +502,14 @@ DELEGATE_OPCODE(DbgTrashRetVal)
 DELEGATE_OPCODE(FreeActRec)
 DELEGATE_OPCODE(GenericRetDecRefs)
 DELEGATE_OPCODE(ReleaseVVAndSkip)
+
+DELEGATE_OPCODE(BeginInlining)
+DELEGATE_OPCODE(DefInlineFP)
+DELEGATE_OPCODE(InlineReturn)
+DELEGATE_OPCODE(InlineReturnNoFrame)
+DELEGATE_OPCODE(SyncReturnBC)
+DELEGATE_OPCODE(Conjure)
+DELEGATE_OPCODE(ConjureUse)
 
 DELEGATE_OPCODE(LdStaticLoc)
 DELEGATE_OPCODE(InitStaticLoc)
@@ -1094,49 +1101,6 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dstReg};
 }
 
-/*
- * It'd be nice not to have the cgMov here (and just copy propagate
- * the source or something), but for now we're keeping it allocated to
- * rvmfp() so inlined calls to C++ helpers that use the rbp chain to
- * find the caller's ActRec will work correctly.
- *
- * This instruction primarily exists to assist in optimizing away
- * unused activation records, so it's usually not going to happen
- * anyway.
- */
-void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
-  auto const callerSP = srcLoc(inst, 0).reg();
-  auto const callerFP = srcLoc(inst, 1).reg();
-  auto const fakeRet  = mcg->ustubs().retInlHelper;
-  auto const extra    = inst->extra<DefInlineFP>();
-  auto const retBCOff = extra->retBCOff;
-  auto const offset   = cellsToBytes(extra->spOffset.offset);
-  auto& v = vmain();
-  v << store{callerFP, callerSP[offset + AROFF(m_sfp)]};
-  emitImmStoreq(v, intptr_t(fakeRet), callerSP[offset + AROFF(m_savedRip)]);
-  v << storeli{retBCOff, callerSP[offset + AROFF(m_soff)]};
-  if (extra->target->attrs() & AttrMayUseVV) {
-    v << storeqi{0, callerSP[offset + AROFF(m_invName)]};
-  }
-  v << lea{callerSP[offset], dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 0).reg();
-  assertx(fpReg == rvmfp());
-  vmain() << load{fpReg[AROFF(m_sfp)], rvmfp()};
-}
-
-void CodeGenerator::cgInlineReturnNoFrame(IRInstruction* inst) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const offset = cellsToBytes(
-      inst->extra<InlineReturnNoFrame>()->frameOffset.offset);
-    for (auto i = 0; i < kNumActRecCells; ++i) {
-      trashTV(vmain(), rvmfp(), offset - cellsToBytes(i), kTVTrashJITFrame);
-    }
-  }
-}
-
 void CodeGenerator::cgStMem(IRInstruction* inst) {
   auto const ptr = srcLoc(inst, 0).reg();
   storeTV(vmain(), ptr[0], srcLoc(inst, 1), inst->src(1));
@@ -1327,18 +1291,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     flags
   ));
   v << storeli{encoded, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
-}
-
-void CodeGenerator::cgSyncReturnBC(IRInstruction* inst) {
-  auto const extra = inst->extra<SyncReturnBC>();
-  auto const spOffset = cellsToBytes(extra->spOffset.offset);
-  auto const bcOffset = extra->bcOffset;
-  auto const spReg = srcLoc(inst, 0).reg();
-  auto const fpReg = srcLoc(inst, 1).reg();
-
-  auto& v = vmain();
-  v << storeli{safe_cast<int32_t>(bcOffset), spReg[spOffset + AROFF(m_soff)]};
-  v << store{fpReg, spReg[spOffset + AROFF(m_sfp)]};
 }
 
 void CodeGenerator::emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
@@ -2389,28 +2341,6 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   v << loadzlq{clsReg[offset], handle};
   v << load{rds[handle], vec};
   v << load{vec[Class::PropInitVec::dataOff()], dstReg};
-}
-
-void CodeGenerator::cgConjure(IRInstruction* inst) {
-  auto dst = dstLoc(inst, 0);
-  auto& v = vmain();
-  if (dst.hasReg(0)) {
-    v << conjure{dst.reg(0)};
-  }
-  if (dst.hasReg(1)) {
-    v << conjure{dst.reg(1)};
-  }
-}
-
-void CodeGenerator::cgConjureUse(IRInstruction* inst) {
-  auto src = srcLoc(inst, 0);
-  auto& v = vmain();
-  if (src.hasReg(0)) {
-    v << conjureuse{src.reg(0)};
-  }
-  if (src.hasReg(1)) {
-    v << conjureuse{src.reg(1)};
-  }
 }
 
 void CodeGenerator::cgCountArray(IRInstruction* inst) {

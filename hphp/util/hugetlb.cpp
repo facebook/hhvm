@@ -294,20 +294,24 @@ inline void* mmap_1g_impl(void* addr) {
 void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
 #ifdef __linux__
 #ifdef HAVE_NUMA
-  bitmask* origMask = nullptr;
+  bitmask* memMask = nullptr;
+  bitmask* interleaveMask = nullptr;
   if (node >= 0) {
-    origMask = numa_get_run_node_mask();
+    memMask = numa_get_membind();
+    interleaveMask = numa_get_interleave_mask();
     bitmask* mask = numa_allocate_nodemask();
     numa_bitmask_setbit(mask, node);
-    numa_bind(mask);
+    numa_set_membind(mask);
     numa_bitmask_free(mask);
   }
 #endif
   void* ret = mmap_1g_impl(addr);
 #ifdef HAVE_NUMA
-  if (origMask != nullptr) {
-    numa_bind(origMask);
-    numa_bitmask_free(origMask);
+  if (node >= 0) {
+    numa_set_membind(memMask);
+    numa_set_interleave_mask(interleaveMask);
+    numa_bitmask_free(memMask);
+    numa_bitmask_free(interleaveMask);
   }
 #endif
   return ret;

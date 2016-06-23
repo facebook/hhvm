@@ -418,6 +418,5 @@ let init ?load_mini_script genv =
   let env, _t = ai_check genv env.files_info env t in
 
   SharedMem.init_done ();
-  Measure.print_stats ();
   print_hash_stats ();
   env, Result.is_ok state

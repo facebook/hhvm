@@ -343,7 +343,9 @@ TCA emitFuncBodyHelperThunk(CodeBlock& cb, DataBlock& data) {
 TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignJmpTarget(cb);
 
-  auto const start = vwrap2(cb, data, [&] (Vout& v, Vout& vcold) {
+  CGMeta meta;
+
+  auto const start = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vcold) {
     auto const ar = v.makeReg();
 
     v << copy{rvmfp(), ar};
@@ -401,6 +403,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << stubret{RegSet(), true};
   });
 
+  meta.process(nullptr);
   return start;
 }
 
@@ -811,11 +814,13 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
 TCA emitFCallArrayHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
 
+  CGMeta meta;
+
   TCA ret = vwrap(cb, data, [] (Vout& v) {
     v << movl{v.cns(0), rarg(2)};
   });
 
-  us.fcallUnpackHelper = vwrap2(cb, data, [&] (Vout& v, Vout& vcold) {
+  us.fcallUnpackHelper = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vcold) {
     // We reach fcallArrayHelper in the same context as a func prologue, so
     // this should really be a phplogue{}---but we don't need the return
     // address in the ActRec until later, and in the event the callee is
@@ -882,6 +887,7 @@ TCA emitFCallArrayHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << jmpr{body};
   });
 
+  meta.process(nullptr);
   return ret;
 }
 
@@ -1211,7 +1217,9 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   });
   svcreq::emit_persistent(cb, data, folly::none, REQ_POST_DEBUGGER_RET);
 
-  auto const resumeCPPUnwind = vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+
+  auto const resumeCPPUnwind = vwrap(cb, data, meta, [&] (Vout& v) {
     static_assert(sizeof(tl_regState) == 1,
                   "The following store must match the size of tl_regState.");
     auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
@@ -1221,6 +1229,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << call{TCA(_Unwind_Resume), arg_regs(1), &us.endCatchHelperPast};
     v << ud2{};
   });
+  meta.process(nullptr);
 
   alignJmpTarget(cb);
 

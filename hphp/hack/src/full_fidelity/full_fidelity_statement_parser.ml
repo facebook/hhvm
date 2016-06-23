@@ -177,22 +177,8 @@ module WithExpressionAndDeclParser
     let parser, foreach_collection_name = parse_expression parser in
     let parser, await_token = optional_token parser Await in
     let parser, as_token = expect_token parser As SyntaxError.error1023 in
-    let (parser1, token) = next_token parser in
-    let (parser, after_as) =
-      match Token.kind token with
-      | List ->
-        (* TODO need to handle list intrinsic. For now just create error *)
-        let rec aux parser acc =
-          let (parser1, token) = next_token parser in
-          match Token.kind token with
-          | RightParen -> (parser, make_list (List.rev acc))
-          | _ ->
-            let error = make_error [make_token token] in
-            aux parser1 (error :: acc)
-        in
-        aux parser []
-      | _ -> parse_expression parser
-    in
+    (* let (parser1, token) = next_token parser in *)
+    let (parser, after_as) = parse_expression parser in
     (* let parser, expr = parse_expression parser in *)
     let (parser, foreach_key, foreach_arrow, foreach_value) =
     match Token.kind (peek_token parser) with

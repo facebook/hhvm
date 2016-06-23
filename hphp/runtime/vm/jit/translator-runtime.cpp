@@ -667,13 +667,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
   return switchBoundsCheck(ival, base, nTargets);
 }
 
-TCA sswitchHelperFast(const StringData* val,
-                      const SSwitchMap* table,
-                      TCA* def) {
-  TCA* dest = table->find(val);
-  return dest ? *dest : *def;
-}
-
 void lookupClsMethodHelper(Class* cls,
                            StringData* meth,
                            ActRec* ar,

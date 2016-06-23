@@ -120,6 +120,7 @@ void blacklistFuncInJit(const Func* f) {
 // here and execute any number of commands from the client. Return from here
 // lets the opcode execute.
 void phpDebuggerOpcodeHook(const unsigned char* pc) {
+  VMRegAnchor anchor;
   TRACE(5, "in phpDebuggerOpcodeHook() with pc %p\n", pc);
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.
@@ -261,17 +262,20 @@ StackDepthDisposition getStackDisposition(int baseline) {
 
 // Hook called on request start before main() is invoked
 void phpDebuggerRequestInitHook() {
+  VMRegAnchor anchor;
   getDebuggerHook()->onRequestInit();
 }
 
 // Hook called on request shutdown after main() exits
 void phpDebuggerRequestShutdownHook() {
+  VMRegAnchor anchor;
   getDebuggerHook()->onRequestShutdown();
 }
 
 // Hook called on function entry. Since function entry breakpoints are handled
 // by onOpcode, this just handles pushing the active line breakpoint
 void phpDebuggerFuncEntryHook(const ActRec* ar) {
+  VMRegAnchor anchor;
   RID().pushActiveLineBreak();
 }
 
@@ -279,6 +283,7 @@ void phpDebuggerFuncEntryHook(const ActRec* ar) {
 // this just handles stack-related manipulations. This handles returns,
 // suspends, and exceptions.
 void phpDebuggerFuncExitHook(const ActRec* ar) {
+  VMRegAnchor anchor;
   auto& req_data = RID();
   req_data.popActiveLineBreak();
 
@@ -293,6 +298,7 @@ void phpDebuggerFuncExitHook(const ActRec* ar) {
 
 // Hook called from iopThrow to signal that we are about to throw an exception.
 void phpDebuggerExceptionThrownHook(ObjectData* exception) {
+  VMRegAnchor anchor;
   TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
   if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
@@ -307,6 +313,7 @@ void phpDebuggerExceptionThrownHook(ObjectData* exception) {
 // exception.
 void phpDebuggerExceptionHandlerHook() noexcept {
   try {
+    VMRegAnchor anchor;
     TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
     if (UNLIKELY(g_context->m_dbgNoBreak)) {
       TRACE(5, "NoBreak flag is on\n");
@@ -335,6 +342,7 @@ void phpDebuggerExceptionHandlerHook() noexcept {
 void phpDebuggerErrorHook(const ExtendedException &ee,
                           int errnum,
                           const std::string& message) {
+  VMRegAnchor anchor;
   TRACE(5, "in phpDebuggerErrorHook()\n");
   if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
@@ -345,6 +353,7 @@ void phpDebuggerErrorHook(const ExtendedException &ee,
 }
 
 void phpDebuggerEvalHook(const Func* f) {
+  VMRegAnchor anchor;
   if (RuntimeOption::EvalJit) {
     blacklistFuncInJit(f);
   }
@@ -353,16 +362,19 @@ void phpDebuggerEvalHook(const Func* f) {
 
 // Called by the VM when a file is loaded.
 void phpDebuggerFileLoadHook(Unit* unit) {
+  VMRegAnchor anchor;
   getDebuggerHook()->onFileLoad(unit);
 }
 
 // Called by the VM when a class definition is loaded.
 void phpDebuggerDefClassHook(const Class* cls) {
+  VMRegAnchor anchor;
   getDebuggerHook()->onDefClass(cls);
 }
 
 // Called by the VM when a function definition is loaded.
 void phpDebuggerDefFuncHook(const Func* func) {
+  VMRegAnchor anchor;
   getDebuggerHook()->onDefFunc(func);
 }
 
@@ -371,6 +383,7 @@ void phpDebuggerDefFuncHook(const Func* func) {
 // Flow Control
 
 void phpDebuggerContinue() {
+  VMRegAnchor anchor;
   // Short-circuit other commands
   auto& req_data = RID();
   req_data.setDebuggerStepIn(false);
@@ -383,6 +396,7 @@ void phpDebuggerContinue() {
 }
 
 void phpDebuggerStepIn() {
+  VMRegAnchor anchor;
   // If this is called in the middle of a flow command we short-circuit the
   // other commands
   auto& req_data = RID();
@@ -395,7 +409,6 @@ void phpDebuggerStepIn() {
   flow_filter->clear();
 
   // Check if the site is valid.
-  VMRegAnchor _;
   ActRec* fp = vmfp();
   PC pc = vmpc();
   if (fp == nullptr || pc == nullptr) {
@@ -435,6 +448,7 @@ void phpDebuggerStepIn() {
 }
 
 void phpDebuggerStepOut() {
+  VMRegAnchor anchor;
   // If this is called in the middle of a flow command we short-circuit the
   // other commands
   auto& req_data = RID();
@@ -451,6 +465,7 @@ void phpDebuggerStepOut() {
 }
 
 void phpDebuggerNext() {
+  VMRegAnchor anchor;
   // Grab the request data and set up a step in
   auto& req_data = RID();
   phpDebuggerStepIn();

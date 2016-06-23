@@ -97,14 +97,14 @@ struct Vunit;
   O(callfaststub, I(fix), U(args), Dn)\
   O(tailcallstub, I(target), U(args), Dn)\
   O(stubunwind, Inone, Un, Dn)\
+  O(stubtophp, Inone, U(fp), Dn)\
+  O(loadstubret, Inone, Un, D(d))\
   /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
   O(defvmret, Inone, Un, D(data) D(type))\
   O(syncvmret, Inone, U(data) U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
-  O(stubtophp, Inone, Un, Dn)\
-  O(loadstubret, Inone, Un, D(d))\
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
   O(tailcallphp, Inone, U(target) U(fp) U(args), Dn)\
@@ -639,6 +639,29 @@ struct tailcallstub { CodeAddress target; RegSet args; };
  */
 struct stubunwind {};
 
+/*
+ * Convert from a stublogue{} context to a phplogue{} context.  `fp' is the
+ * target PHP context's frame.
+ *
+ * This is only used by fcallArrayHelper, which needs to begin with a
+ * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
+ *
+ * This instruction should, in theory, teleport the stub frame's saved %rip
+ * onto the PHP callee's frame.  However, since fcallArrayHelper is the only
+ * user, and since the PHP frame's m_savedRip always gets updated by a native
+ * helper before stubtophp{} is hit, for now, implementations of stubtophp{}
+ * needn't touch the callee frame at all.
+ */
+struct stubtophp { Vreg fp; };
+
+/*
+ * Load the saved return address from the stub's frame record.
+ *
+ * This is only valid from a stublogue{} context, and when the native stack
+ * pointer has not been further adjusted.
+ */
+struct loadstubret { Vreg d; };
+
 ///////////////////////////////////////////////////////////////////////////////
 // PHP function ABI.
 
@@ -698,26 +721,6 @@ struct syncvmret { Vreg data; Vreg type; };
  * register allocator spill space.
  */
 struct phplogue { Vreg fp; };
-
-/*
- * Convert from a stublogue{} context to a phplogue{} context.
- *
- * This is only used by fcallArrayHelper, which needs to begin with a
- * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
- *
- * This does not modify the PHP ActRec, which can be loaded prior to this
- * instruction using loadstubret.
- */
-struct stubtophp {};
-
-/*
- * Load the return address for this stub in rvmfp(). This is only valid from a
- * stublogue{} context.
- *
- * This is only used by fcallArrayHelper, which needs to begin with a
- * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
- */
-struct loadstubret { Vreg d; };
 
 /*
  * Load fp[m_sfp] into `d' and return to m_savedRip on `fp'.

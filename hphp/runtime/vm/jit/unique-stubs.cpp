@@ -142,6 +142,19 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
   };
 }
 
+/*
+ * Emit a catch trace that unwinds a stub context back to the PHP context that
+ * called it.
+ */
+template<class GenFn>
+void emitStubCatch(Vout& v, const UniqueStubs& us, GenFn gen) {
+  always_assert(us.endCatchHelper);
+  v << landingpad{};
+  v << stubunwind{};
+  gen(v);
+  v << jmpi{us.endCatchHelper};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
@@ -290,7 +303,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
 TCA emitFCallHelperThunk(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
-  return vwrap2(cb, data, [] (Vout& v, Vout& vcold) {
+  return vwrap2(cb, data, [] (Vout& v, Vout& vc) {
     v << phplogue{rvmfp()};
 
     // fcallHelper asserts native stack alignment for us.
@@ -304,7 +317,7 @@ TCA emitFCallHelperThunk(CodeBlock& cb, DataBlock& data) {
     auto const sf = v.makeReg();
     v << testq{dest, dest, sf};
 
-    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
       // A nullptr dest means the callee was intercepted and should be skipped.
       // Make a copy of the current rvmfp(), which belongs to the callee,
       // before syncing VM regs and return regs.
@@ -345,7 +358,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
   CGMeta meta;
 
-  auto const start = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vcold) {
+  auto const start = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vc) {
     auto const ar = v.makeReg();
 
     v << copy{rvmfp(), ar};
@@ -372,7 +385,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     auto const sf = v.makeReg();
     v << testb{rret(), rret(), sf};
 
-    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
       auto const saved_rip = v.makeReg();
 
       // The event hook has already cleaned up the stack and popped the
@@ -422,14 +435,11 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& cb, DataBlock& data,
     v << vinvoke{CallSpec::direct(handlePossibleStackOverflow),
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
                  {done, ctch}};
+    vc = ctch;
+    emitStubCatch(vc, us, [](Vout& v) {});
+
     v = done;
     v << tailcallstub{us.functionEnterHelper};
-
-    vc = ctch;
-    always_assert(us.endCatchHelper);
-    vc << landingpad{};
-    vc << stubunwind{};
-    vc << jmpi{us.endCatchHelper};
   });
 
   meta.process(nullptr);
@@ -551,13 +561,13 @@ void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
  * In a cold path, call into native code to unblock every member of an async
  * function's dependency chain, if it has any.
  */
-void unblockParents(Vout& v, Vout& vcold, Vreg parent) {
+void unblockParents(Vout& v, Vout& vc, Vreg parent) {
   auto const sf = v.makeReg();
   v << testq{parent, parent, sf};
 
-  unlikelyIfThen(v, vcold, CC_NZ, sf, [&] (Vout& v) {
+  unlikelyIfThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
     v << vcall{CallSpec::direct(AsioBlockableChain::UnblockJitHelper),
-        v.makeVcallArgs({{rvmfp(), rvmsp(), parent}}), v.makeTuple({})};
+               v.makeVcallArgs({{rvmfp(), rvmsp(), parent}}), v.makeTuple({})};
   });
 }
 
@@ -647,7 +657,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
 TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
   alignJmpTarget(cb);
 
-  return vwrap2(cb, data, [&] (Vout& v, Vout& vcold) {
+  return vwrap2(cb, data, [&] (Vout& v, Vout& vc) {
     auto const data = rarg(0);
     auto const type = rarg(1);
 
@@ -737,7 +747,7 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
       nextParent,
       v.makeReg()
     };
-    unblockParents(v, vcold, nextParent);
+    unblockParents(v, vc, nextParent);
 
     // Set up PHP frame linkage for our parent by copying our ActRec's sfp.
     auto const sfp = v.makeReg();
@@ -778,7 +788,7 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
     // union), so it has to be done after the checks in the fast path (but
     // before unblocking parents).
     storeAFWHResult(v, data, type);
-    unblockParents(v, vcold, parentBl);
+    unblockParents(v, vc, parentBl);
 
     // Load the saved frame pointer from the ActRec.
     v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
@@ -837,7 +847,7 @@ TCA emitFCallArrayHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << movl{v.cns(0), rarg(2)};
   });
 
-  us.fcallUnpackHelper = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vcold) {
+  us.fcallUnpackHelper = vwrap2(cb, data, meta, [&] (Vout& v, Vout& vc) {
     // We reach fcallArrayHelper in the same context as a func prologue, so
     // this should really be a phplogue{}---but we don't need the return
     // address in the ActRec until later, and in the event the callee is
@@ -868,18 +878,32 @@ TCA emitFCallArrayHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     auto const retAddr = v.makeReg();
     v << loadstubret{retAddr};
 
+    auto const done = v.makeBlock();
+    auto const ctch = v.makeBlock();
+    auto const should_continue = v.makeReg();
     bool (*helper)(PC, int32_t, void*) = &doFCallArrayTC;
-    v << copyargs{
-      v.makeTuple({next, rarg(2), retAddr}),
-      v.makeTuple({rarg(0), rarg(1), rarg(2)})
+
+    v << vinvoke{
+      CallSpec::direct(helper),
+      v.makeVcallArgs({{next, rarg(2), retAddr}}),
+      v.makeTuple({should_continue}),
+      {done, ctch},
+      Fixup{},
+      DestType::SSA
     };
-    v << call{TCA(helper), arg_regs(3), &us.fcallArrayReturn};
+    vc = ctch;
+    emitStubCatch(vc, us, [] (Vout& vc) { loadVMRegs(vc); });
+
+    v = done;
+
+    // Load only rvmsp(); we need to wait to make sure we aren't skipping the
+    // callee before loading rvmfp().
     v << load{rvmtl()[rds::kVmspOff], rvmsp()};
 
     auto const sf = v.makeReg();
-    v << testb{rret(), rret(), sf};
+    v << testb{should_continue, should_continue, sf};
 
-    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
       // If false was returned, we should skip the callee.  The interpreter
       // will have popped the pre-live ActRec already, so we can just return to
       // the caller after syncing the return regs.
@@ -889,9 +913,8 @@ TCA emitFCallArrayHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
 
     // If true was returned, we're calling the callee, so undo the stublogue{}
-    // and convert to a phplogue{}. The m_savedRip will be set during the call
-    // to doFCallArrayTC.
-    v << stubtophp{};
+    // and convert to a phplogue{}.
+    v << stubtophp{rvmfp()};
 
     auto const callee = v.makeReg();
     auto const body = v.makeReg();
@@ -1120,7 +1143,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   auto const calleeAR = rarg(5);
 #endif
 
-  return vwrap2(cb, data, [&] (Vout& v, Vout& vcold) {
+  return vwrap2(cb, data, [&] (Vout& v, Vout& vc) {
     // Native func prologue.
     v << stublogue{true};
 
@@ -1157,7 +1180,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // without it, both the jcc for the branch and the jmp for the resumetc{}
     // will end up in the same 16-byte extent of code, which messes up the
     // branch predictor.
-    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
       // No callee means we're resuming in the middle of a TC function.
       v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
     });
@@ -1276,18 +1299,6 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   });
 }
 
-TCA emitFCallArrayEndCatch(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  return vwrap(cb, data, [&] (Vout& v) {
-    // The CallArray that triggered the call to doFCallArrayTC has a catch trace
-    // which needs to be run.  Switch to a phplogue context to enter the catch.
-    v << stubtophp{};
-    loadVMRegs(v);
-
-    always_assert(us.endCatchHelper);
-    v << jmpi{us.endCatchHelper};
-  });
-}
-
 TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
@@ -1347,7 +1358,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(bindCallStub,           emitBindCallStub<false>(cold, data));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold, data));
   ADD(fcallArrayHelper,       emitFCallArrayHelper(hot(), data, *this));
-  ADD(fcallArrayEndCatch,     emitFCallArrayEndCatch(frozen, data, *this));
 
   ADD(decRefGeneric,  emitDecRefGeneric(cold, data));
 

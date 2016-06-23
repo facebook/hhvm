@@ -102,7 +102,8 @@ struct StoreValue {
    * lock during their initial file-data-to-APCHandle conversion, so these two
    * fields are unioned.
    *
-   * Note: expiration times are stored in 32-bits as seconds since the Epoch.
+   * Note: expiration, creation, and modification times are stored unsigned 
+   * in 32-bits as seconds since the Epoch to save cache-line space.
    * HHVM might get confused after 2106 :)
    */
   mutable Either<APCHandle*,char*,either_policy::high_bit> data;
@@ -111,9 +112,9 @@ struct StoreValue {
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;  // Only valid if data is an APCHandle*.
-  char padding[3];  // Make APCMap nodes cache-line sized (it static_asserts).
-  int64_t c_time{0}; //modification time
-  int64_t mtime{0}; //creation time
+  char padding[11];  // Make APCMap nodes cache-line sized (it static_asserts).
+  uint32_t c_time{0}; // Modification time
+  uint32_t mtime{0}; // Creation time
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -27,15 +27,21 @@ let parse_and_print filename =
   let errors = SyntaxTree.errors syntax_tree in
   (* TODO: Errors do not know positions, just offsets. *)
   let printer err = Printf.printf "%s\n" (SyntaxError.to_string err) in
-
   let str = Debug.dump_full_fidelity syntax_tree in
-  let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
-  let pretty = Full_fidelity_pretty_printer.pretty_print editable in
-  let text = Full_fidelity_editable_syntax.text editable in
-  Printf.printf "Original text:\n%s" text;
+  let module AstGenGrammar = Hack_grammar_descriptor.HackGrammar in
+  let module AstGen = Random_ast_generator.Make(AstGenGrammar) in
+  let gen_str = AstGen.generate 30 in
+  Printf.printf "gen: \n %s \n %!"  gen_str;
+  Printf.printf "----\n";
+  let gen_source = SourceText.make gen_str in
+  let gen_syntax_tree = SyntaxTree.make gen_source in
+  let gen_errors = SyntaxTree.errors gen_syntax_tree in
+  let gen_ast_str = Debug.dump_full_fidelity gen_syntax_tree in
+  Printf.printf "generated parse: \n";
+  List.iter printer gen_errors;
+  Printf.printf "%s" gen_ast_str;
   Printf.printf "\n----\n";
-  Printf.printf "Pretty print result:\n%s" pretty;
-  Printf.printf "\n----\n";
+  Printf.printf "parse:\n";
   List.iter printer errors;
   Printf.printf "%s" str;
   Printf.printf "\n----\n";

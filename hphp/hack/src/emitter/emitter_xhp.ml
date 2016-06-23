@@ -9,7 +9,7 @@
  *)
 
 open Core
-open Utils
+open String_utils
 module N = Nast
 module C = Emitter_core
 module XC = Emitter_consts.XHPConsts

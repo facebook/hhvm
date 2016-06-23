@@ -10,6 +10,7 @@
 
 open Core
 open Utils
+open String_utils
 
 
 type error_code = int
@@ -749,7 +750,7 @@ let duplicate_user_attribute (pos, name) existing_attr_pos =
   ]
 
 let unbound_attribute_name pos name =
-  let reason = if (str_starts_with name "__")
+  let reason = if (string_starts_with name "__")
     then "starts with __ but is not a standard attribute"
     else "is not listed in .hhconfig"
   in add Naming.unbound_name pos

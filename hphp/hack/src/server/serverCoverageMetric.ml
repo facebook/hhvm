@@ -12,6 +12,7 @@ open Core
 open Coverage_level
 open Reordered_argument_collections
 open Utils
+open String_utils
 
 module FileInfoStore = GlobalStorage.Make(struct
   type t = FileInfo.t Relative_path.Map.t
@@ -84,7 +85,7 @@ let mk_trie acc fn_counts_l =
 let relativize root path =
   (* naive implementation *)
   let root = Path.to_string root ^ Filename.dir_sep in
-  if str_starts_with path root
+  if string_starts_with path root
   then
     let root_len = String.length root in
     Some (String.sub path root_len (String.length path - root_len))

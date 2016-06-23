@@ -17,6 +17,7 @@
 open Ast
 open Core
 open Utils
+open String_utils
 
 module N = Nast
 module ShapeMap = N.ShapeMap
@@ -483,7 +484,7 @@ end = struct
       (* Don't let people use strictly internal classes
        * (except when they are being declared in .hhi files) *)
       if name = SN.Classes.cHH_BuiltinEnum &&
-        not (str_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi")
+        not (string_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi")
       then Errors.using_internal_class pos (strip_ns name);
       pos, name
     | Some (def_pos, `Typedef) when not allow_typedef ->
@@ -1006,7 +1007,7 @@ module Make (GetLocals : GetLocals) = struct
     let validate_name = begin fun ua_name ->
       (validate_seen ua_name) && begin
         let pos, name = ua_name in
-        let valid = if str_starts_with name "__"
+        let valid = if string_starts_with name "__"
           then SSet.mem name SN.UserAttributes.as_set
           else (TypecheckerOptions.allowed_attribute tc_options name)
         in if not valid then Errors.unbound_attribute_name pos name;

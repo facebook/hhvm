@@ -13,6 +13,7 @@
 
 open Core
 open Utils
+open String_utils
 open Nast
 
 open Emitter_core
@@ -99,7 +100,7 @@ let fmt_user_attribute attr =
 
 let fmt_user_attributes attrs = List.map ~f:fmt_user_attribute attrs
 
-let is_internal_attribute attr = str_starts_with (snd attr.ua_name) "__"
+let is_internal_attribute attr = string_starts_with (snd attr.ua_name) "__"
 
 (* Do whatever special processing for any __ user attrs;
  * this is mostly just failing on ones we don't expect, but

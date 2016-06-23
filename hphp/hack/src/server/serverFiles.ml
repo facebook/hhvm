@@ -9,6 +9,7 @@
  *)
 
 open Utils
+open String_utils
 
 let path_of_root root extension =
   (* TODO: move this to places that write this file *)
@@ -18,7 +19,7 @@ let path_of_root root extension =
 
 let is_of_root root fn =
   let root_part = Path.slash_escaped_string_of_path root in
-  str_starts_with fn (Filename.concat GlobalConfig.tmp_dir root_part)
+  string_starts_with fn (Filename.concat GlobalConfig.tmp_dir root_part)
 
 (**
  * Lock on this file will be held after the server has finished initializing.

@@ -10,7 +10,7 @@
 
 open Core
 open Coverage_level
-open Utils
+open String_utils
 open Sys_utils
 
 (*****************************************************************************)
@@ -349,7 +349,7 @@ let file_to_files file =
         Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
       Relative_path.Map.add acc ~key:file ~data:content
     end ~init: Relative_path.Map.empty files
-  else if str_starts_with content "// @directory " then
+  else if string_starts_with content "// @directory " then
     let contentl = Str.split (Str.regexp "\n") content in
     let first_line = List.hd_exn contentl in
     let regexp = Str.regexp ("^// @directory *\\([^ ]*\\) \

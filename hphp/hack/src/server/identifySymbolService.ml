@@ -11,7 +11,6 @@
 open Core
 open SymbolOccurrence
 open Typing_defs
-open Utils
 
 let is_target target_line target_char pos =
   let l, start, end_ = Pos.info_pos pos in
@@ -32,7 +31,7 @@ let process_class_id result_ref is_target_fun cid _ =
       }
   end
 
-let clean_member_name name = lstrip name "$"
+let clean_member_name name = String_utils.lstrip name "$"
 
 let process_member result_ref is_target_fun c_name id ~is_method ~is_const =
   if is_target_fun (fst id)

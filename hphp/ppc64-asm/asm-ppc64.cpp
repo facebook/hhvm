@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 
@@ -1128,3 +1130,5 @@ void Label::addJump(Assembler* a, BranchType type) {
 }
 
 } // namespace ppc64_asm
+
+#endif

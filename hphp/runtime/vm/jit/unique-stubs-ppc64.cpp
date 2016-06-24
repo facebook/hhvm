@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/runtime/vm/jit/unique-stubs-ppc64.h"
 
 #include "hphp/runtime/base/header-kind.h"
@@ -262,3 +264,5 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

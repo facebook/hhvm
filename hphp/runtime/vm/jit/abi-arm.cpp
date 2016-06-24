@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/abi-arm.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -177,3 +179,5 @@ PhysReg r_svcreq_arg(size_t i) { return rarg(i + 2); }
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

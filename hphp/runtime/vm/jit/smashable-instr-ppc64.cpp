@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"
 
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
@@ -196,3 +198,5 @@ ConditionCode smashableJccCond(TCA inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

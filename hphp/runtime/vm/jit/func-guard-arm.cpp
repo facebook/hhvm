@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -93,3 +95,5 @@ void clobberFuncGuard(TCA guard, const Func* func) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
@@ -1569,3 +1571,5 @@ void emitPPC64(const Vunit& unit, Vtext& text, CGMeta& fixups,
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
+
+#endif

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -192,3 +194,5 @@ PhysReg r_svcreq_arg(size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

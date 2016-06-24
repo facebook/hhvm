@@ -275,7 +275,7 @@ let format_stdin modes from to_ =
 
 let () =
   let handle = SharedMem.init_default () in
-  PidLog.log_oc := Some (open_out (Path.to_string Path.null_path));
+  PidLog.log_oc := Some (open_out Sys_utils.null_path);
   let files, from, to_, apply_mode, debug, diff, modes, root, test =
     parse_args() in
   if not test then FormatEventLogger.init (Unix.gettimeofday());

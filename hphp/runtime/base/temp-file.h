@@ -46,16 +46,11 @@ struct TempFile : PlainFile {
       "Temporary stream does not support awaiting");
   }
 
-  bool seek(int64_t offset, int whence = SEEK_SET) override;
-  bool truncate(int64_t size) override;
-  int64_t tell() override;
-
 private:
   bool m_autoDelete;
   std::string m_rawName;
 
   bool closeImpl();
-  int64_t getLength();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

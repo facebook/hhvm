@@ -52,6 +52,16 @@ let get_first_class_header_as_string contents =
     class_ in
   Ast_code_extent.lexing_slice_to_string extent contents
 
+let get_first_class_as_string contents =
+  let {Parser_hack.ast; _} = Parser_hack.program dummy_path contents in
+  let classes = Ast_utils.get_classes ast in
+  let class_ = List.hd_exn classes in
+  let extent = Ast_code_extent.source_extent_class_
+    dummy_path
+    contents
+    class_ in
+  Ast_code_extent.lexing_slice_to_string extent contents
+
 let test_data = [
   {
     name = "test_empty_method";
@@ -216,6 +226,19 @@ let test_data = [
       "  implements IFoo {";
     ];
     test_function = get_first_class_header_as_string
+  };
+  {
+    name = "test_class_header_extends_implements";
+    source = String.concat "\n" [
+      "<?hh";
+      "class Foo extends FooBase<string> {";
+      "}";
+    ];
+    result = String.concat "\n" [
+      "class Foo extends FooBase<string> {";
+      "}";
+    ];
+    test_function = get_first_class_as_string
   };
 ]
 

@@ -228,8 +228,8 @@ size_t stub_size() {
     case Arch::ARM:
       return kTotalArgs * arm::kMovLen + arm::kLeaVmSpLen;
     case Arch::PPC64:
-    // This calculus was based on the amount of emitted instructions in
-    // emit_svcreq.
+      // This calculus was based on the amount of emitted instructions in
+      // emit_svcreq.
       return (ppc64::kStdIns + ppc64::kLeaVMSpLen) * kTotalArgs +
           ppc64::kLeaVMSpLen + 3 * ppc64::kStdIns;
   }

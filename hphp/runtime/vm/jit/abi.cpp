@@ -19,8 +19,8 @@
 #include "hphp/util/arch.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 
 namespace HPHP { namespace jit {
 

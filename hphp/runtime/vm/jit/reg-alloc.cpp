@@ -62,12 +62,7 @@ bool loadsCell(Opcode op) {
   case CGetElem:
   case VGetElem:
   case ArrayIdx:
-    switch (arch()) {
-    case Arch::X64: return true;
-    case Arch::ARM: return true;
-    case Arch::PPC64: return true;
-    }
-    not_reached();
+    return true;
 
   default:
     return false;
@@ -115,12 +110,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   auto opc = inst->op();
 
   auto const forceStkPtrs = [&] {
-    switch (arch()) {
-    case Arch::X64: return false;
-    case Arch::ARM: return false;
-    case Arch::PPC64: return false;
-    }
-    not_reached();
+    return false;
   }();
 
   if (forceStkPtrs && tmp.isA(TStkPtr)) {
@@ -217,12 +207,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::calls:
     case Vinstr::callstub:
       defs = abi.all() - (abi.calleeSaved | rvmfp());
-
-      switch (arch()) {
-        case Arch::ARM: break;
-        case Arch::X64: break;
-        case Arch::PPC64: break;
-      }
       break;
 
     case Vinstr::callfaststub:
@@ -231,21 +215,13 @@ void getEffects(const Abi& abi, const Vinstr& i,
 
     case Vinstr::callphp:
       defs = abi.all();
-      switch (arch()) {
-        case Arch::ARM: defs -= rvmtl(); break;
-        case Arch::X64: defs -= rvmtl(); break;
-        case Arch::PPC64: defs -= rvmtl(); break;
-      }
+      defs -= rvmtl();
       break;
 
     case Vinstr::callarray:
     case Vinstr::contenter:
       defs = abi.all() - RegSet(rvmfp());
-      switch (arch()) {
-        case Arch::ARM: defs -= rvmtl(); break;
-        case Arch::X64: defs -= rvmtl(); break;
-        case Arch::PPC64: defs -= rvmtl(); break;
-      }
+      defs -= rvmtl();
       break;
 
     case Vinstr::cqo:

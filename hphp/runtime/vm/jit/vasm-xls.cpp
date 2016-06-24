@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/ppc64-asm/asm-ppc64.h"
+
 #include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/jit/abi-ppc64.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"

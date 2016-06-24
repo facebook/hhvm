@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/runtime/vm/jit/func-guard-ppc64.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -85,3 +87,5 @@ void clobberFuncGuard(TCA guard, const Func* func) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

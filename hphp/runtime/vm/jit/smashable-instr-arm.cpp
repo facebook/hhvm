@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -224,3 +226,5 @@ ConditionCode smashableJccCond(TCA inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

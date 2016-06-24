@@ -167,7 +167,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
 
   // Handle the top frame.
-  if (btArgs.m_withSelf || btArgs.m_fromWaitHandle) {
+  if (btArgs.m_withSelf) {
     // Builtins don't have a file and line number.
     if (!fp->func()->isBuiltin()) {
       auto const unit = fp->func()->unit();

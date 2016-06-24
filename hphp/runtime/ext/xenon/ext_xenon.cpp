@@ -97,6 +97,7 @@ const StaticString
   s_metadata("metadata"),
   s_time("time"),
   s_isWait("ioWaitSample"),
+  s_stack("stack"),
   s_phpStack("phpStack");
 
 namespace {
@@ -269,7 +270,8 @@ Array XenonRequestLocalData::createResponse() {
     const auto& frame = it.second().toArray();
     stacks.append(make_map_array(
       s_time, frame[s_time],
-      s_phpStack, parsePhpStack(frame[s_phpStack].toArray()),
+      s_stack, frame[s_stack].toArray(),
+      s_phpStack, parsePhpStack(frame[s_stack].toArray()),
       s_isWait, frame[s_isWait]
     ));
   }
@@ -282,12 +284,11 @@ void XenonRequestLocalData::log(Xenon::SampleType t, c_WaitableWaitHandle* wh) {
   auto bt = createBacktrace(BacktraceArgs()
                              .skipTop(t == Xenon::EnterSample)
                              .fromWaitHandle(wh)
-                             .withSelf()
                              .withMetadata()
                              .ignoreArgs());
   m_stackSnapshots.append(make_map_array(
     s_time, now,
-    s_phpStack, bt,
+    s_stack, bt,
     s_isWait, (t == Xenon::IOWaitSample)
   ));
 }
@@ -307,7 +308,7 @@ void XenonRequestLocalData::requestInit() {
 void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
   clearSurpriseFlag(XenonSignalFlag);
-  m_stackSnapshots.detach();
+  m_stackSnapshots.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

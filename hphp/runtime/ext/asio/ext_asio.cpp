@@ -108,6 +108,7 @@ Array HHVM_FUNCTION(backtrace,
 
   return createBacktrace(BacktraceArgs()
                          .fromWaitHandle(handle)
+                         .withSelf()
                          .withThis(provide_object)
                          .withMetadata(provide_metadata)
                          .ignoreArgs(ignore_args)

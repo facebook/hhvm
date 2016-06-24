@@ -8,6 +8,7 @@ namespace HH {
  *
  * @return array - an array with the following keys:
  *  'time' - unixtime when the snapshot was taken
+ *  'stack' - stack trace formatted as debug_backtrace()
  *  'phpStack' - array with the following keys: 'function', 'file', 'line'
  *  'ioWaitSample' - the snapshot occurred while request was in asio scheduler
  *

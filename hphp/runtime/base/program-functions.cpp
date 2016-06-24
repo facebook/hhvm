@@ -1988,7 +1988,7 @@ void hphp_thread_exit() {
 void hphp_process_init() {
   pthread_attr_t attr;
 // Linux+GNU extension
-#if defined(_GNU_SOURCE) && (defined(__linux__) || defined(__CYGWIN__))
+#if defined(_GNU_SOURCE) && defined(__linux__)
   if (pthread_getattr_np(pthread_self(), &attr) != 0 ) {
     Logger::Error("pthread_getattr_np failed before checking stack limits");
     _exit(1);
@@ -2401,7 +2401,7 @@ static struct SetThreadInitFini {
     }
     Debug::DebugInfo::recordDataMap(
       stackAddr, stackEnd,
-      folly::sformat("TLS-{}", static_cast<void*>(tcbBase)));
+      folly::sformat("Stack-{}", static_cast<void*>(tcbBase)));
   }
   template<class ThreadT> static typename std::enable_if<
     !std::is_integral<ThreadT>::value && !std::is_pointer<ThreadT>::value>::type
@@ -2422,7 +2422,7 @@ static struct SetThreadInitFini {
   SetThreadInitFini() {
     AsyncFuncImpl::SetThreadInitFunc(
       [] (void*) {
-#ifndef __APPLE__
+#if defined(_GNU_SOURCE) && defined(__linux__)
         if (RuntimeOption::EvalPerfDataMap) {
           pthread_t threadId = pthread_self();
           pthread_attr_t attr;

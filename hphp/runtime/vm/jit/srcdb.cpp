@@ -156,16 +156,6 @@ void SrcRec::chainFrom(IncomingBranch br) {
   }
 }
 
-void SrcRec::registerFallbackJump(TCA from, ConditionCode cc,
-                                  CGMeta& fixups) {
-  auto incoming = cc < 0 ? IncomingBranch::jmpFrom(from)
-                         : IncomingBranch::jccFrom(from);
-
-  // We'll need to know the location of this jump later so we can
-  // patch it to new translations added to the chain.
-  fixups.inProgressTailJumps.push_back(incoming);
-}
-
 void SrcRec::newTranslation(TransLoc loc,
                             GrowableVector<IncomingBranch>& tailBranches) {
   // When translation punts due to hitting limit, will generate one
@@ -279,6 +269,8 @@ void SrcRec::removeIncomingBranch(TCA toSmash) {
 }
 
 void SrcRec::replaceOldTranslations() {
+  mcg->assertOwnsCodeLock();
+
   // Everyone needs to give up on old translations; send them to the anchor,
   // which is a REQ_RETRANSLATE.
   auto translations = std::move(m_translations);

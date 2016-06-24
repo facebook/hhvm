@@ -198,7 +198,13 @@ class RecursiveIteratorIterator implements OuterIterator {
         }
         return self::NEXT_COMPLETE;
       case self::STATE_CHILD:
-        $children = $this->callGetChildren();
+        try {
+          $children = $this->callGetChildren();
+        } catch (Exception $e) {
+          if (!($this->flags == self::CATCH_GET_CHILD)) throw $e;
+          $this->setInnerIteratorState(self::STATE_NEXT);
+          return self::NEXT_REPEAT;
+        }
         if (!$children instanceof RecursiveIterator) {
           throw new UnexpectedValueException(
             'Objects returned by RecursiveIterator::getChildren() must '.

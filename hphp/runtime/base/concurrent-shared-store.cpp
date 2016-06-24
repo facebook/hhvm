@@ -60,7 +60,9 @@ bool check_noTTL(const char* key, size_t keyLen) {
 
 void StoreValue::set(APCHandle* v, int64_t ttl) {
   setHandle(v);
-  expire = ttl ? time(nullptr) + ttl : 0;
+  mtime = time(nullptr);
+  if (c_time == 0)  c_time = mtime;
+  expire = ttl ? mtime + ttl : 0;
 }
 
 bool StoreValue::expired() const {
@@ -182,7 +184,7 @@ struct HotCache {
     const char* operator()(const StringData* sd) const {
       auto const nbytes = sd->size() + 1;
       auto const dst = reinterpret_cast<char*>(apcExtension::HotKeyAllocLow ?
-                                               low_malloc(nbytes) :
+                                               low_malloc_data(nbytes) :
                                                malloc(nbytes));
       assert((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
       memcpy(dst, sd->data(), nbytes);
@@ -193,11 +195,11 @@ struct HotCache {
   struct HotMapAllocator {
     char* allocate(size_t nbytes, const void* hint = nullptr) {
       return reinterpret_cast<char*>(apcExtension::HotMapAllocLow ?
-                                     low_malloc(nbytes) :
+                                     low_malloc_data(nbytes) :
                                      malloc(nbytes));
     }
     void deallocate(char* p, size_t nbytes) {
-      apcExtension::HotMapAllocLow ? low_free(p) : free(p);
+      apcExtension::HotMapAllocLow ? low_free_data(p) : free(p);
     }
   };
 
@@ -589,7 +591,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
            kind == APCKind::SharedCollection) &&
           !svar->objAttempted()) {
         // Hold ref here for later promoting the object
-        svar->reference();
+        svar->referenceNonRoot();
         promoteObj = true;
       }
       value = sval->toLocal();
@@ -614,7 +616,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   if (promoteObj)  {
     handlePromoteObj(keyStr, svar, value);
     // release the extra ref
-    svar->unreference();
+    svar->unreferenceNonRoot();
   }
   return true;
 }
@@ -997,7 +999,7 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
     if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
   }
 
-  return EntryInfo(key, inMem, size, ttl, type);
+  return EntryInfo(key, inMem, size, ttl, type, sval->c_time, sval->mtime);
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {

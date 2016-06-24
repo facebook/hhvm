@@ -51,18 +51,30 @@ module ServerFindDepFiles = struct
 end
 
 module ServerFindRefs = struct
+  type member =
+    | Method of string
+    | Property of string
+    | Class_const of string
+    | Typeconst of string
+
   type action =
     | Class of string
-    | Method of string * string
+    | Member of string * member
     | Function of string
 
   let go _  _ _ = []
 end
 
 module TraceService = struct
+  type member =
+    | Method of string
+    | Property of string
+    | Class_const of string
+    | Typeconst of string
+
   type action =
     | Class of string
-    | Method of string * string
+    | Member of string * member
     | Function of string
 
   let go _ _ _ _ = ""

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
@@ -24,6 +23,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(vasm);

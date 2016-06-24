@@ -254,54 +254,6 @@ struct MethProfile {
 
 //////////////////////////////////////////////////////////////////////
 
-struct IncRefProfile {
-  /* The number of times this IncRef made it at least as far as the static
-   * check (meaning it was given a refcounted DataType. */
-  uint16_t tryinc;
-
-  std::string toString() const {
-    return folly::sformat("tryinc: {:4}", tryinc);
-  }
-
-  static void reduce(IncRefProfile& a, const IncRefProfile& b) {
-    a.tryinc += b.tryinc;
-  }
-};
-
-/*
- * DecRefProfile is used to track which types go through DecRef instructions,
- * and which ones arelikely go to zero.
- */
-struct DecRefProfile {
-  /* The number of times this DecRef was executed. */
-  uint16_t hits;
-
-  /* The number of times this DecRef made it at least as far as the static
-   * check (meaning it was given a refcounted DataType. */
-  uint16_t trydec;
-
-  /* The number of times this DecRef went to zero and called destroy(). */
-  uint16_t destroy;
-
-  float destroyRate() const {
-    return hits ? float(destroy) / hits : 0.0;
-  }
-
-  std::string toString() const {
-    return folly::sformat("hits: {:4} trydec: {:4}, destroy: {:4} ({:.2%}%)",
-                          hits, trydec, destroy, destroyRate());
-  }
-
-  static void reduce(DecRefProfile& a, const DecRefProfile& b) {
-    a.hits    += b.hits;
-    a.trydec  += b.trydec;
-    a.destroy += b.destroy;
-  }
-};
-typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * ArrayKindProfile profiles the distribution of the array kinds
  * observed for a given value.  The array kinds currently tracked are
@@ -382,23 +334,6 @@ struct StructArrayProfile {
     if (b.isMonomorphic() && a.getShape() == b.getShape()) return;
     a.makePolymorphic();
     return;
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-
-struct ReleaseVVProfile {
-  uint16_t executed;
-  uint16_t released;
-
-  int percentReleased() const {
-    return executed ? (100 * released / executed) : 0;
-  };
-
-  static void reduce(ReleaseVVProfile& a, const ReleaseVVProfile& b) {
-    // Racy but OK -- just used for profiling to trigger optimization.
-    a.executed += b.executed;
-    a.released += b.released;
   }
 };
 

@@ -131,7 +131,7 @@ void VerifyRetTypeFail(TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 
-RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
+RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
 
 bool ak_exist_string(ArrayData* arr, StringData* key);
 bool ak_exist_string_obj(ObjectData* obj, StringData* key);
@@ -148,7 +148,6 @@ TypedValue getMemoKeyHelper(TypedValue tv);
 
 int32_t arrayVsize(ArrayData*);
 
-TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,
@@ -160,43 +159,22 @@ int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 
-typedef FixedStringMap<TCA,true> SSwitchMap;
-TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
-
 void profileClassMethodHelper(MethProfile*, const ActRec*, const Class*);
 
 void profileTypeHelper(TypeProfile*, TypedValue);
 
 void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr);
 
-Cell lookupCnsHelper(const TypedValue* tv,
-                     StringData* nm,
-                     bool error);
-Cell lookupCnsUHelper(const TypedValue* tv,
-                      StringData* nm,
-                      StringData* fallback);
-void lookupClsMethodHelper(Class* cls,
-                           StringData* meth,
-                           ActRec* ar,
-                           ActRec* fp);
+void lookupClsMethodHelper(Class* cls, StringData* meth,
+                           ActRec* ar, ActRec* fp);
 
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
-void traceCallback(ActRec* fp, Cell* sp, Offset pcOff);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
-const Func* lookupUnknownFunc(const StringData*);
-const Func* lookupFallbackFunc(const StringData*, const StringData*);
-
-Class* lookupKnownClass(LowPtr<Class>* cache, const StringData* clsName);
-
-TypedValue lookupClassConstantTv(TypedValue* cache,
-                                 const NamedEntity* ne,
-                                 const StringData* cls,
-                                 const StringData* cns);
 
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
@@ -211,7 +189,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
 void raiseMissingArgument(const Func* func, int got);
 
-rds::Handle lookupClsRDSHandle(const StringData* name);
+Class* lookupClsRDS(const StringData* name);
 
 /*
  * Insert obj into the set of live objects to be destructed at the end of the

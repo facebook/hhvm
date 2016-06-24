@@ -55,6 +55,14 @@ constexpr bool hhvm_reuse_tc =
 #endif
   ;
 
+constexpr bool use_tsan =
+#ifdef FOLLY_SANITIZE_THREAD
+  true
+#else
+  false
+#endif
+  ;
+
 //////////////////////////////////////////////////////////////////////
 
 }

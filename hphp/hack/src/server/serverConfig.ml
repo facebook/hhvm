@@ -46,8 +46,6 @@ let make_sharedmem_config config options local_config =
     global_size;
     heap_size;
     shm_min_avail;
-    dep_table_pow;
-    hash_table_pow;
     _;
   } = SharedMem.default_config in
   let shm_dirs = local_config.ServerLocalConfig.shm_dirs in
@@ -56,6 +54,7 @@ let make_sharedmem_config config options local_config =
   let heap_size = int_ "sharedmem_heap_size" ~default:heap_size config in
   let dep_table_pow = int_ "sharedmem_dep_table_pow" ~default:17 config in
   let hash_table_pow = int_ "sharedmem_hash_table_pow" ~default:18 config in
+  let log_level = int_ "sharedmem_log_level" ~default:0 config in
   let shm_dirs = string_list
     ~delim:(Str.regexp ",")
     "sharedmem_dirs"
@@ -80,6 +79,7 @@ let make_sharedmem_config config options local_config =
       heap_size;
       dep_table_pow;
       hash_table_pow;
+      log_level;
       shm_dirs;
       shm_min_avail;
   }

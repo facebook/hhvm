@@ -657,12 +657,11 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   auto func = cns(env, callee);
   if (cls) {
     auto const exitSlow = makeExitSlow(env);
-    if (!rds::isPersistentHandle(cls->classHandle())) {
+    if (!classHasPersistentRDS(cls)) {
       // The miss path is complicated and rare.  Punt for now.  This must be
       // checked before we IncRef the context below, because the slow exit will
       // want to do that same IncRef via InterpOne.
-      auto const clsOrNull = gen(env, LdClsCachedSafe, cns(env, cls->name()));
-      gen(env, CheckNonNull, exitSlow, clsOrNull);
+      gen(env, LdClsCachedSafe, exitSlow, cns(env, cls->name()));
     }
 
     if (forward) {
@@ -673,10 +672,13 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
     }
   } else {
     ctx = cns(env, TNullptr);
-    if (!rds::isPersistentHandle(callee->funcHandle())) {
+    auto const handle = callee->funcHandle();
+    if (handle == rds::kInvalidHandle ||
+        !rds::isPersistentHandle(handle)) {
       // The miss path is complicated and rare. Punt for now.
-      func = gen(env, LdFuncCachedSafe, LdFuncCachedData(callee->name()));
-      func = gen(env, CheckNonNull, makeExitSlow(env), func);
+      func = gen(env, LdFuncCachedSafe,
+                 LdFuncCachedData { callee->name() },
+                 makeExitSlow(env));
     }
   }
 
@@ -893,8 +895,7 @@ static void checkImmutableClsMethod(IRGS& env, Func const* func) {
     auto clsName = cns(env, func->cls()->name());
     ifThen(env,
            [&] (Block* notLoaded) {
-             auto const clsOrNull = gen(env, LdClsCachedSafe, clsName);
-             gen(env, CheckNonNull, notLoaded, clsOrNull);
+             gen(env, LdClsCachedSafe, notLoaded, clsName);
            },
            [&] {
              hint(env, Block::Hint::Unlikely);
@@ -935,8 +936,7 @@ void emitFPushClsMethodD(IRGS& env,
   auto const func = cond(
     env,
     [&] (Block* taken) {
-      auto const mcFunc = gen(env, LdClsMethodCacheFunc, data);
-      return gen(env, CheckNonNull, taken, mcFunc);
+      return gen(env, LdClsMethodCacheFunc, data, taken);
     },
     [&] (SSATmp* func) { // next
       return func;
@@ -1086,8 +1086,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
   auto const funcTmp = cond(
     env,
     [&](Block* taken) {
-      auto const fcacheFunc = gen(env, LdClsMethodFCacheFunc, data);
-      return gen(env, CheckNonNull, taken, fcacheFunc);
+      return gen(env, LdClsMethodFCacheFunc, data, taken);
     },
     [&](SSATmp* func) { // next
       return func;

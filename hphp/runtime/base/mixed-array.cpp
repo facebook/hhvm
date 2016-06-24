@@ -35,6 +35,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 
+#include <folly/portability/Constexpr.h>
+
 #include <algorithm>
 #include <utility>
 
@@ -45,6 +47,25 @@
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
+
+std::aligned_storage<
+  computeAllocBytes(1),
+  folly::constexpr_max(alignof(MixedArray), size_t(16))
+>::type s_theEmptyDictArray;
+
+struct MixedArray::DictInitializer {
+  DictInitializer() {
+    auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDictArray);
+    auto const data = mixedData(ad);
+    auto const hash = mixedHash(data, 1);
+    ad->initHash(hash, 1);
+    ad->m_sizeAndPos = 0;
+    ad->m_scale_used = 1;
+    ad->m_nextKI = 0;
+    ad->m_hdr.init(HeaderKind::Dict, StaticValue);
+  }
+};
+MixedArray::DictInitializer MixedArray::s_initializer;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -294,8 +315,10 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
     case KindOfArray: {
       auto const ad = source.getArrayData();
       if (ad->empty()) {
-        return ad->isVecArray() ?
-          Variant{staticEmptyVecArray()} : Variant{staticEmptyArray()};
+        return
+          ad->isVecArray() ? Variant{staticEmptyVecArray()} :
+          ad->isDict() ? Variant{staticEmptyDictArray()} :
+          Variant{staticEmptyArray()};
       }
       if (ad->isPackedLayout()) return Variant{PackedArray::MakeUncounted(ad)};
       if (ad->isStruct()) return Variant{StructArray::MakeUncounted(ad)};

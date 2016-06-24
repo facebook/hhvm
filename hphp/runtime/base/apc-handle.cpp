@@ -74,7 +74,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
         auto value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
-      if (level == APCHandleLevel::Outer && apcExtension::UseUncounted) {
+      if (apcExtension::UseUncounted) {
         auto st = StringData::MakeUncounted(s->slice());
         auto value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
         return {value->getHandle(), st->size() + sizeof(APCTypedValue)};

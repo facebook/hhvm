@@ -101,25 +101,15 @@ template<class F> void scanHeader(const Header* h,
     case HeaderKind::Ref:
       return h->ref_.scan(mark);
     case HeaderKind::SmallMalloc:
-      if (scanner) {
-        return scanner->scanByIndex(
-          h->small_.typeIndex(),
-          (&h->small_)+1,
-          h->small_.padbytes - sizeof(SmallNode)
-        );
-      } else {
-        return mark((&h->small_)+1, h->small_.padbytes - sizeof(SmallNode));
-      }
     case HeaderKind::BigMalloc:
       if (scanner) {
         return scanner->scanByIndex(
-          h->big_.typeIndex(),
-          (&h->big_)+1,
-          h->big_.nbytes - sizeof(BigNode)
+          h->malloc_.typeIndex(),
+          (&h->malloc_)+1,
+          h->malloc_.nbytes - sizeof(MallocNode)
         );
-      } else {
-        return mark((&h->big_)+1, h->big_.nbytes - sizeof(BigNode));
       }
+      return mark((&h->malloc_)+1, h->malloc_.nbytes - sizeof(MallocNode));
     case HeaderKind::NativeData:
       return h->nativeObj()->scan(mark);
     case HeaderKind::ResumableFrame:

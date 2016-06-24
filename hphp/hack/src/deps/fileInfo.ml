@@ -49,6 +49,16 @@ type t = {
   consider_names_just_for_autoload: bool;
 }
 
+let empty_t = {
+  file_mode = None;
+  funs = [];
+  classes = [];
+  typedefs = [];
+  consts = [];
+  comments = [];
+  consider_names_just_for_autoload = false;
+}
+
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)

@@ -176,6 +176,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     // and interactions well enough to feel comfortable fixing now.
     RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
     RuntimeOption::PHP7_ScalarTypes  = s_globalData.PHP7_ScalarTypes;
+    RuntimeOption::PHP7_Substr       = s_globalData.PHP7_Substr;
     RuntimeOption::AutoprimeGenerators = s_globalData.AutoprimeGenerators;
     HHBBC::options.HardTypeHints = s_globalData.HardTypeHints;
     HHBBC::options.HardReturnTypeHints = s_globalData.HardReturnTypeHints;

@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/irlower.h"
@@ -27,6 +25,8 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
+
+#include "hphp/util/arch.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -53,9 +53,8 @@ bool loadsCell(Opcode op) {
   case LdContField:
   case LdElem:
   case LdRef:
-  case LdStaticLocCached:
   case LookupCns:
-  case LookupClsCns:
+  case InitClsCns:
   case CGetProp:
   case VGetProp:
   case ArrayGet:

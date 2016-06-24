@@ -94,7 +94,7 @@ module Env = struct
       if not (Pos.compare p p' = 0)
       then Errors.error_name_already_bound name canonical p p'
     | None ->
-      TypeIdHeap.add name (p, cid_kind);
+      TypeIdHeap.write_through name (p, cid_kind);
       TypeCanonHeap.add name_key name;
       ()
 

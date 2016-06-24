@@ -35,7 +35,7 @@ enum class HeaderKind : uint8_t {
   NativeData, // a NativeData header preceding an HNI ObjectData
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block
-  BigObj, // big size-tracked object (valid header follows BigNode)
+  BigObj, // big size-tracked object (valid header follows MallocNode)
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
 };

@@ -10,7 +10,7 @@
 
 open Core
 open Coverage_level
-open Utils
+open String_utils
 open Sys_utils
 
 (*****************************************************************************)
@@ -31,6 +31,9 @@ type mode =
   | Identify_symbol of int * int
   | Find_local of int * int
   | Outline
+  | Find_refs of int * int
+  | Symbol_definition_by_id of string
+  | Highlight_refs of int * int
 
 type options = {
   filename : string;
@@ -190,7 +193,9 @@ let builtins =
   "const string __NAMESPACE__ = '';\n"^
   "interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}\n"^
   "abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}\n"^
-  "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"
+  "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"^
+  "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"^
+  "function meth_caller(string $cls_name, string $meth_name);\n"
 
 (*****************************************************************************)
 (* Helpers *)
@@ -255,6 +260,9 @@ let parse_options () =
         Arg.Int (fun column -> set_mode (Identify_symbol (!line, column)) ());
       ]),
       "Show info about symbol at given line and column";
+    "--symbol-by-id",
+      Arg.String (fun s -> set_mode (Symbol_definition_by_id s) ()),
+      "Show info about symbol with given id";
     "--find-local",
       Arg.Tuple ([
         Arg.Int (fun x -> line := x);
@@ -264,6 +272,18 @@ let parse_options () =
     "--outline",
       Arg.Unit (set_mode Outline),
       "Print file outline";
+    "--find-refs",
+      Arg.Tuple ([
+        Arg.Int (fun x -> line := x);
+        Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
+      ]),
+      "Find all usages of a symbol at given line and column";
+    "--highlight-refs",
+      Arg.Tuple ([
+        Arg.Int (fun x -> line := x);
+        Arg.Int (fun column -> set_mode (Highlight_refs (!line, column)) ());
+      ]),
+      "Highlight all usages of a symbol at given line and column";
   ] in
   let options = Arg.align options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -329,14 +349,20 @@ let file_to_files file =
         Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
       Relative_path.Map.add acc ~key:file ~data:content
     end ~init: Relative_path.Map.empty files
-  else if str_starts_with content "// @directory " then
+  else if string_starts_with content "// @directory " then
     let contentl = Str.split (Str.regexp "\n") content in
     let first_line = List.hd_exn contentl in
-    let regexp = Str.regexp "^// @directory *\\([^ ]*\\)" in
+    let regexp = Str.regexp ("^// @directory *\\([^ ]*\\) \
+      *\\(@file *\\([^ ]*\\)*\\)?") in
     let has_match = Str.string_match regexp first_line 0 in
     assert has_match;
     let dir = Str.matched_group 1 first_line in
-    let file = Relative_path.create Relative_path.Dummy (dir ^ abs_fn) in
+    let file_name =
+      try
+        Str.matched_group 3 first_line
+      with
+        Not_found -> abs_fn in
+    let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
     let content = String.concat "\n" (List.tl_exn contentl) in
     Relative_path.Map.singleton file content
   else
@@ -373,6 +399,7 @@ let print_symbol (symbol, definition) =
     | Property _ -> "Property"
     | ClassConst _ -> "ClassConst"
     | Typeconst _ -> "Typeconst"
+    | GConst -> "GlobalConst"
     end
     (Pos.string_no_file symbol.pos);
   Printf.printf "defined: %s\n"
@@ -390,7 +417,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
   | Autocomplete ->
       let file = cat (Relative_path.to_absolute filename) in
       let result =
-        ServerAutoComplete.auto_complete tcopt files_info file in
+        ServerAutoComplete.auto_complete tcopt file in
       List.iter ~f: begin fun r ->
         let open AutocompleteService in
         Printf.printf "%s %s\n" r.res_name r.res_ty
@@ -471,8 +498,14 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     let file = cat (Relative_path.to_absolute filename) in
     let result = ServerIdentifyFunction.go file line column tcopt in
     begin match result with
-      | Some symbol -> print_symbol symbol
+      | [] -> print_endline "None"
+      | _ -> List.iter result print_symbol
+    end
+  | Symbol_definition_by_id id ->
+    let result = ServerSymbolDefinition.from_symbol_id tcopt id in
+    begin match result with
       | None -> print_endline "None"
+      | Some s -> FileOutline.print [SymbolDefinition.to_absolute s]
     end
   | Find_local (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
@@ -483,6 +516,20 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline file in
     FileOutline.print results;
+  | Find_refs (line, column) ->
+    Typing_deps.update_files files_info;
+    let genv = ServerEnvBuild.default_genv in
+    let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
+      ServerEnv.files_info;
+      ServerEnv.tcopt;
+    } in
+    let file = cat (Relative_path.to_absolute filename) in
+    let results = ServerFindRefs.go_from_file (file, line, column) genv env in
+    FindRefsService.print results;
+  | Highlight_refs (line, column) ->
+    let file = cat (Relative_path.to_absolute filename) in
+    let results = ServerHighlightRefs.go (file, line, column) tcopt  in
+    ClientHighlightRefs.go results ~output_json:false;
   | Suggest
   | Errors ->
       let errors =
@@ -543,7 +590,7 @@ let main_hack ({filename; mode; no_builtins;} as opts) =
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init (Daemon.devnull ()) 0.0;
   let _handle = SharedMem.init_default () in
-  let tmp_hhi = Path.concat Path.temp_dir_name "hhi" in
+  let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
   Hhi.set_hhi_root_for_unit_test tmp_hhi;
   match mode with
   | Ai ai_options ->

@@ -86,7 +86,7 @@ void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
 /*
  * Store `loc', the registers representing `src', to `dst'.
  */
-void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src);
+void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src);
 
 /*
  * Load `src' into `loc', the registers representing `dst'.
@@ -94,12 +94,21 @@ void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src);
  * If `aux' is true, we also need to load the m_aux field of the TypedValue
  * into the type reg.  This should only happen when loading a return value.
  */
-void loadTV(Vout& v, const SSATmp* dst, Vloc loc, Vptr src, bool aux = false);
+void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
+            bool aux = false);
 
 /*
- * Copy the TV in `src' to `dst'.
+ * Copy the TV in `src' into `dst', or into `data' and `type'.
  */
-void copyTV(Vout& v, Vloc src, Vloc dst, Type destType);
+void copyTV(Vout& v, Vreg data, Vreg type, Vloc srcLoc, const SSATmp* src);
+void copyTV(Vout& v, Vloc src, Vloc dst, Type dstType);
+
+/*
+ * Fill all the bytes of a TypedValue with trash.
+ *
+ * Note that this will also clobber the Aux area of a TypedValueAux.
+ */
+void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte);
 
 /*
  * Incref or decref `data', and perform some asserts.
@@ -225,6 +234,22 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
                  bool force = false);
 
 ///////////////////////////////////////////////////////////////////////////////
+// RDS manipulation.
+
+/*
+ * Whether `ch' is initialized---i.e., whether its generation number matches
+ * the current generation.
+ *
+ * @requires: rds::isNormalHandle(ch)
+ */
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
+
+/*
+ * Update the generation number for `ch' to the current generation.
+ *
+ * @requires: rds::isNormalHandle(ch)
+ */
+void markRDSHandleInitialized(Vout& v, rds::Handle ch);
 
 }}
 

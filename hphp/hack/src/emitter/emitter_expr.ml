@@ -11,6 +11,7 @@
 (* Code for emitting expressions and various related forms (like lvalues) *)
 
 open Core
+open String_utils
 open Utils
 open Nast
 
@@ -474,6 +475,8 @@ and emit_expr env (pos, expr_ as expr) =
   | Class_get _ ->
     let env, lval = emit_lval env expr in
     emit_CGet env lval
+  | Lvarvar _ ->
+    not_supported "Variable-variable"
   | Pipe _ ->
     not_supported "Pipe operator"
   (* Assignment is technically a binop, although it is weird. *)

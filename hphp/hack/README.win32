@@ -21,14 +21,7 @@ problem is fixed.
 In the Hack root directory, edit the file  `00_config.ocp`
 and adjust the two following variables:
 
-    has_lz4 = false (* true if lz4 is installed on your machine *)
     debug = false   (* true if you want to activate the debug mode *)
-
-NOTE: lz4 is not required to build Hack. If you want to use it, and lz4 is not
-      installed in the default path, you have to set the
-      `ccopt` variable correctly in the `00_config.ocp` file. For instance:
-
-    ccopt = [ "-I/PATH/TO/LZ4/DIRECTORY" ]
 
 Then, execute the `make.bat` script:
 

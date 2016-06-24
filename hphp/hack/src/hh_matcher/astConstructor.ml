@@ -147,6 +147,7 @@ object(this)
    | String s    -> String (this#on_pstring env s)
    | Id id       -> Id (this#on_id env id)
    | Lvar id     -> Lvar (this#on_id env id)
+   | Lvarvar (n, id) -> Lvarvar (n, this#on_id env id)
    | Dollardollar -> Dollardollar
    | Yield af    -> Yield (this#on_afield env af)
    | Await e     -> Await (list_to_single this#on_expr env e)

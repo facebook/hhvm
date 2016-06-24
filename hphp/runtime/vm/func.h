@@ -435,11 +435,15 @@ struct Func {
   MaybeDataType returnType() const;
 
   /*
-   * For builtins, whether the return value is returned in registers.
+   * For builtins, whether the return value is returned in registers (as
+   * opposed to indirect return, via tvBuiltinReturn).
+   *
+   * Not well-defined if this function is not a builtin.
    */
   bool isReturnByValue() const;
+
   /*
-   * Whether this function returns by reference.
+   * Whether this function returns by reference (e.g., function &foo()).
    */
   bool isReturnRef() const;
 

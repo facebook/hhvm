@@ -181,13 +181,13 @@ APCObject::~APCObject() {
   if (m_persistent) {
     auto props = persistentProps();
     for (unsigned i = 0; i < numProps; ++i) {
-      if (props[i]) props[i]->unreference();
+      if (props[i]) props[i]->unreferenceRoot();
     }
     return;
   }
 
   for (auto i = uint32_t{0}; i < numProps; ++i) {
-    if (props()[i].val) props()[i].val->unreference();
+    if (props()[i].val) props()[i].val->unreferenceRoot();
     assert(props()[i].name->isStatic());
   }
 }
@@ -237,6 +237,10 @@ Object APCObject::createObject() const {
   auto const apcProp = persistentProps();
 
   if (m_fast_init) {
+    if (UNLIKELY(RuntimeOption::EvalEnableGC)) {
+      // TODO: t11328828 recursive apc fast-init re-enters vm with uninit objs
+      memset(objProp, KindOfUninit, numProps * sizeof(*objProp));
+    }
     unsigned i = 0;
     try {
       while (i < numProps) {

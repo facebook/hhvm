@@ -1089,7 +1089,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
       if (v.isString()) {
         Variant t = StringUtil::Explode(v.toString(), "::", 3);
         if (!t.isArray() || t.toArray().size() != 2) {
-          std::string name = toLower(v.toString().data());
+          auto name = toLower(v.toString().slice());
           FunctionScopePtr func = ar->findFunction(name);
           if (!func || func->isDynamicInvoke()) {
             error = !func;
@@ -1131,7 +1131,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           return SimpleFunctionCallPtr();
         }
         std::string sclass = classname.toString().data();
-        std::string smethod = toLower(methodname.toString().data());
+        auto smethod = toLower(methodname.toString().slice());
 
         ClassScopePtr cls;
         if (sclass == "self") {

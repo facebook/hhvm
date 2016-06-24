@@ -11,11 +11,15 @@
  * @param resource $sem_identifier - sem_identifier is a semaphore resource,
  *   obtained from sem_get().
  *
+ * @param bool $nowait - Specifies if the process shouldn't wait for the
+ * semaphore to be acquired. If set to true, the call will return false
+ * immediately if a semaphore cannot be immediately acquired.
+ *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
-function sem_acquire(resource $sem_identifier): bool;
+function sem_acquire(resource $sem_identifier, bool $nowait = false): bool;
 
 /**
  * sem_get() returns an id that can be used to access the System V semaphore

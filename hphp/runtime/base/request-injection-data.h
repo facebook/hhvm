@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/pc-filter.h"
 
 #include <atomic>
@@ -282,6 +283,8 @@ public:
   PCFilter m_lineBreakPointFilter;
   PCFilter m_callBreakPointFilter;
   PCFilter m_retBreakPointFilter;
+  // Only allow one async stepper at a time.
+  AsyncFlowStepper m_asyncStepper;
 
 private:
   int m_debuggerFlowDepth{0};

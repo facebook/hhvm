@@ -230,7 +230,8 @@ let rec check_lvalue env = function
       error_at env pos "?-> syntax is not supported for lvalues"
   | pos, Obj_get (_, (_, Id (_, name)), _) when name.[0] = ':' ->
       error_at env pos "->: syntax is not supported for lvalues"
-  | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ | Unsafeexpr _) -> ()
+  | _, (Lvar _ | Lvarvar _ | Obj_get _ | Array_get _ | Class_get _ |
+    Unsafeexpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _) ->
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
@@ -598,17 +599,26 @@ and toplevel acc env terminate =
       else toplevel (stmt :: acc) env terminate
 
 and toplevel_word def_start ~attr env = function
-  | "abstract" ->
-    let final = (match L.token env.file env.lb with
-      | Tword when Lexing.lexeme env.lb = "final" -> true
-      | _ -> begin L.back env.lb; false end
-    ) in
-    expect_word env "class";
-    let class_ = class_ def_start ~attr ~final ~kind:Cabstract env in
-    [Class class_]
-  | "final" ->
+  | ("abstract" | "final") as attr_ ->
+      (* parse all the class attributes until we see a non-attribute *)
+      let is_attribute attribute_ =
+        (attribute_ = "final" || attribute_ = "abstract") in
+      let rec parse_attributes attr_accum =
+        (match L.token env.file env.lb with
+          | Tword when is_attribute (Lexing.lexeme env.lb) ->
+            let tok = Lexing.lexeme env.lb in
+            if List.exists attr_accum (fun x -> x = tok) then
+              error env ("Cannot specify attribute '" ^ tok ^
+                "' multiple times.");
+            parse_attributes (attr_accum @ [tok])
+          | _ -> begin L.back env.lb; attr_accum end
+          ) in
+      let attributes = parse_attributes [attr_] in
+      let final = List.exists attributes (fun x -> x = "final") in
+      let abstract = List.exists attributes (fun x -> x = "abstract") in
       expect_word env "class";
-      let class_ = class_ def_start ~attr ~final:true ~kind:Cnormal env in
+      let kind = if abstract then Cabstract else Cnormal in
+      let class_ = class_ def_start ~attr ~final:final ~kind:kind env in
       [Class class_]
   | "class" ->
       let class_ = class_ def_start ~attr ~final:false ~kind:Cnormal env in
@@ -2628,8 +2638,22 @@ and lambda_expr_body : env -> block = fun env ->
 and lambda_body ~sync env params ret =
   let is_generator, body_stmts =
     (if peek env = Tlcb
-     then function_body env
-     (* as of Apr 2015, a lambda expression body can't contain a yield *)
+     (** e.g.
+      *   ==> { ...function body }
+      * We reset the priority for parsing the function body.
+      *
+      * See test ternary_within_lambda_block_within_ternary.php
+      *)
+     then with_base_priority env function_body
+     (** e.g.
+      *   ==> x + 5
+      *   We keep the current priority so that possible priority ambiguities
+      *   give rise to errors and must be resolved with parens.
+      *
+      *   See test ternary_within_lambda_within_ternary.php
+      *
+      *   NB: as of Apr 2015, a lambda expression body can't contain a yield
+      *)
      else false, (lambda_expr_body env))
   in
   let f_fun_kind = fun_kind sync is_generator in
@@ -2734,14 +2758,19 @@ and expr_atomic ~allow_class ~class_const env =
       expr_encapsed env pos
   | Tlvar ->
       let tok_value = Lexing.lexeme env.lb in
-      let var_id, stripped = strip_variablevariable tok_value 0 in
-      if (stripped > 0) && (not (env.mode = FileInfo.Mdecl)) then
-        error_at env pos ("A valid variable name starts with a " ^
-          "letter or underscore, followed by any number of letters, " ^
-          "numbers, or underscores");
+      let dollars, var_id = strip_variablevariable 0 tok_value in
       pos, if peek env = Tlambda
         then lambda_single_arg ~sync:FDeclSync env (pos, var_id)
-        else Lvar (pos, var_id)
+        else if dollars < 1 then
+          Lvar (pos, var_id)
+        else if env.mode = FileInfo.Mdecl then
+          Lvarvar (dollars, (pos, var_id))
+        else begin
+          error_at env pos ("A valid variable name starts with a " ^
+          "letter or underscore, followed by any number of letters, " ^
+          "numbers, or underscores");
+          Lvarvar (dollars, (pos, var_id))
+        end
   | Tcolon ->
       L.back env.lb;
       let name = identifier env in
@@ -2843,14 +2872,12 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
   | x ->
       pos, Id (pos, x)
 
-(** Retuns the identifier with leading $'s stripped and the number of $'s
-  * stripped. *)
-and strip_variablevariable token (dollars: int) =
+and strip_variablevariable (dollars: int) token =
   if (token.[0] = '$') && (token.[1] = '$') then
-    strip_variablevariable (String.sub token 1 ((String.length token) - 1))
-      (dollars + 1)
+    strip_variablevariable (dollars + 1)
+      (String.sub token 1 ((String.length token) - 1))
   else
-    token, dollars
+    dollars, token
 
 (*****************************************************************************)
 (* Expressions in parens. *)

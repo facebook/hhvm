@@ -12,6 +12,7 @@ open Core
 open Reordered_argument_collections
 open Typing_defs
 open Utils
+open String_utils
 
 module Phase = Typing_phase
 
@@ -139,7 +140,7 @@ let get_class_elt_types env class_ cid elts =
   end in
   SMap.map elts (fun class_elt -> class_elt.ce_type)
 
-let autocomplete_method is_static class_ id env cid ~is_method ~is_const =
+let autocomplete_method is_static class_ id env cid ~is_method:_ ~is_const:_ =
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;
@@ -274,7 +275,7 @@ let compute_complete_global tcopt content_funs content_classes =
   let on_class name ~seen =
     (* Skip the names that we know we have analyzed before *)
     if SSet.mem seen name then None else
-    if not (str_starts_with (strip_ns name) gname) then None else
+    if not (string_starts_with (strip_ns name) gname) then None else
     match Typing_lazy_heap.get_class tcopt name with
     | Some c
       when should_complete_class completion_type c.Typing_defs.tc_kind ->
@@ -303,10 +304,10 @@ let compute_complete_global tcopt content_funs content_classes =
     if SSet.mem seen name then None else
     if should_complete_fun completion_type then begin
       let stripped_name = strip_ns name in
-      let matches_gname = str_starts_with stripped_name gname in
+      let matches_gname = string_starts_with stripped_name gname in
       let matches_gname_gns = match gname_gns with
         | None -> false
-        | Some s -> str_starts_with stripped_name s in
+        | Some s -> string_starts_with stripped_name s in
       if matches_gname || matches_gname_gns
       then match Typing_lazy_heap.get_fun tcopt name with
         | Some fun_ ->
@@ -347,7 +348,7 @@ let compute_complete_global tcopt content_funs content_classes =
     List.iter gname_gns_results add_res;
   | _ -> ()
 
-let process_fun_call fun_args used_args env =
+let process_fun_call fun_args used_args _env =
   let is_target target_pos p =
     let line, char_pos, _ = Pos.info_pos target_pos in
     let start_line, start_col, end_col = Pos.info_pos p in

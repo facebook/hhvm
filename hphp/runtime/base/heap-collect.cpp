@@ -449,14 +449,9 @@ NEVER_INLINE void Marker::init() {
         break;
       }
       case HeaderKind::SmallMalloc:
-        ptrs_.insert(h);
-        if (typeIndexIsUnknown(h->small_.typeIndex())) {
-          unknowns_.emplace_back(h);
-        }
-        break;
       case HeaderKind::BigMalloc:
         ptrs_.insert(h);
-        if (typeIndexIsUnknown(h->big_.typeIndex())) {
+        if (typeIndexIsUnknown(h->malloc_.typeIndex())) {
           unknowns_.emplace_back(h);
         }
         break;
@@ -523,12 +518,9 @@ NEVER_INLINE void Marker::trace() {
           (*this)(h->res_.data(), h->res_.heapSize() - sizeof(ResourceHdr));
           break;
         case HeaderKind::SmallMalloc:
-          assert(typeIndexIsUnknown(h->small_.typeIndex()));
-          (*this)((&h->small_)+1, h->small_.padbytes - sizeof(SmallNode));
-          break;
         case HeaderKind::BigMalloc:
-          assert(typeIndexIsUnknown(h->big_.typeIndex()));
-          (*this)((&h->big_)+1, h->big_.nbytes - sizeof(BigNode));
+          assert(typeIndexIsUnknown(h->malloc_.typeIndex()));
+          (*this)((&h->malloc_)+1, h->malloc_.nbytes - sizeof(MallocNode));
           break;
         default:
           assert(false && "unknown kind in unknown type list");

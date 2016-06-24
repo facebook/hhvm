@@ -148,15 +148,15 @@ private:
  * it will finalize and emit any code it contains.
  */
 struct Vauto {
-  explicit Vauto(CodeBlock& code, DataBlock& data,
+  explicit Vauto(CodeBlock& main, CodeBlock& cold, DataBlock& data,
                  CGMeta& fixups, CodeKind kind = CodeKind::Helper)
-    : m_text{code, code, data}
+    : m_text{main, cold, data}
     , m_fixups(fixups)
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
     , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
     , m_kind{kind}
   {
-    m_unit.entry = Vlabel(main());
+    m_unit.entry = Vlabel(this->main());
   }
 
   Vunit& unit() { return m_unit; }
@@ -176,8 +176,9 @@ private:
 
 namespace detail {
   template<class GenFunc>
-  TCA vwrap_impl(CodeBlock& cb, DataBlock& data, CGMeta* meta,
-                 GenFunc gen, CodeKind kind);
+  TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
+                 CGMeta* meta, GenFunc gen,
+                 CodeKind kind = CodeKind::CrossTrace);
 }
 
 /*
@@ -186,17 +187,22 @@ namespace detail {
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
           CodeKind kind = CodeKind::CrossTrace) {
-  return detail::vwrap_impl(cb, data, &meta,
+  return detail::vwrap_impl(cb, cb, data, &meta,
                             [&] (Vout& v, Vout&) { gen(v); }, kind);
 }
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen) {
-  return detail::vwrap_impl(cb, data, nullptr, [&] (Vout& v, Vout&) { gen(v); },
-                            CodeKind::CrossTrace);
+  return detail::vwrap_impl(cb, cb, data, nullptr,
+                            [&] (Vout& v, Vout&) { gen(v); });
 }
 template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, DataBlock& data, GenFunc gen) {
-  return detail::vwrap_impl(cb, data, nullptr, gen, CodeKind::CrossTrace);
+TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data,
+           CGMeta& meta, GenFunc gen) {
+  return detail::vwrap_impl(main, cold, data, &meta, gen);
+}
+template<class GenFunc>
+TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data, GenFunc gen) {
+  return detail::vwrap_impl(main, cold, data, nullptr, gen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

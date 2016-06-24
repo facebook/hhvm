@@ -328,11 +328,10 @@ exceptions depending on how coercion is implemented.
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
 
-| CheckStaticLocInit, ND, S(BoxedCell), B
+| CheckClosureStaticLocInit, ND, S(BoxedCell), B
 
-  Check if the static local (RDS) RefData represented by S0 is initialized, and
-  if not branch to block B.
-
+  Check if the closure static local represented by S0 is initialized, and if
+  not branch to block B.
 
 2. Arithmetic
 
@@ -990,51 +989,49 @@ To string conversions:
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
 
-| LdClsCachedSafe, D(Cls|Nullptr), CStr, NF
+| LdClsCachedSafe, D(Cls), CStr, B
 
   Loads the class whose name is S0 out of the RDS. If the class is not defined,
-  returns a null pointer.
+  branch to B.
 
 | LdClsInitData, D(PtrToClsInitCell), S(Cls), NF
 
   Loads the pointer to the property initializer array for class S0.
 
-| LookupClsRDSHandle, D(RDSHandle), S(Str), NF
+| LookupClsRDS, D(Cls|Nullptr), S(Str), NF
 
-  Look up the cached-class RDS handle for a given class name.
+  Lookup the cached-class RDS handle for a given class name. Dereference that
+  handle and return the associated Class, or null if not present.
 
-| DerefClsRDSHandle, D(Cls|Nullptr), S(RDSHandle), NF
+| LdCns, DCns, CStr, B|PRc
 
-  Dereference an RDS handle that points to a cached class slot.
-
-| LdCns, DCns, CStr, PRc
-
-  Load the constant named S0.
+  Load the constant named S0, branching to B if isn't present.
 
 | LookupCns<T,constName>,   DCns, CStr, Er|PRc
 
 | LookupCnsE<T,constName>,  DCns, CStr, Er|PRc
 
   Load a constant via the RDS. Raises an undefined constant notice if the
-  constant cannot be defined. The E variant will instead throw a fatal error if
-  it cannot define the constant.
+  constant cannot be defined.  The E variant will instead throw a fatal error if
+  it cannot define the constant.  These should only be executed if LdCns on the
+  same constant has failed.
 
 | LookupCnsU<T,constName,fallbackName>, DCns, CStr CStr, Er|PRc
 
   Load an unqualified constant via the RDS, first by trying constName, then by
-  trying fallbackName. Raises a notice if neither can be found.
+  trying fallbackName.  Raises a notice if neither can be found.  Should only
+  be executed if LdCns on the same constant has failed.
 
-| LookupClsCns<T,className,constName>, DCns, NA, Er|PRc
+| LdClsCns<className,constantName>, D(PtrToGen), NA, B
 
-  Load a class constant for a class via the RDS, invoking autoload if it is not
-  defined. This instruction may raise an undefined constant error if autoload
-  cannot define the constant.
+  Load the address of the constant 'constantName' for the class 'className' in
+  RDS. If not initialized, branch to B.
 
-| LdClsMethodFCacheFunc<clsName,methodName>, D(Func|Nullptr), NA, NF
+| LdClsMethodFCacheFunc<clsName,methodName>, D(Func), NA, B
 
   Loads the target cache entry for a forwarding call to clsName::methodName.
-  May be Nullptr, if the method does not exist or the cache hasn't been filled
-  yet.
+  If the method does not exist, or the cache hasn't been filled yet, branch to
+  B.
 
 | LookupClsMethodFCache<clsName,methodName>,
 |    D(Func|Nullptr), C(Cls) S(FramePtr),
@@ -1051,25 +1048,26 @@ To string conversions:
   If S0 is a Cctx, return S0. If S0 is an object, check if clsName::methodName
   is a static method. If it is, return S0's class as a Ctx pointer. If not,
   return S0. If S0 is a Ctx, dynamically check if it is a non-null object
-  pointer or Cctx at runtime and perform the operations described above.
+  pointer or Cctx at runtime and perform the operations described above. This
+  instruction must only be used when the value is known to not be empty.
 
 | GetCtxFwdCall, D(Ctx), S(Ctx) C(Func), PRc
 
-  If S0 is an object and S1 is static, this opcode returns S0's class. If S0 is
-  an object and S1 is not static, this opcode increfs S0 and returns it. If S0
-  is a Cctx, this opcode returns S0.
+  If S0 is an object and S1 is static, this opcode returns S0's class with the
+  low bit set (i.e., as a Cctx). If S0 is an object and S1 is not static, this
+  opcode increfs S0 and returns it. If S0 is a Cctx, this opcode returns S0.
 
-| LdClsMethodCacheFunc<clsName,methodName>, D(Func|Nullptr), NA, NF
+| LdClsMethodCacheFunc<clsName,methodName>, D(Func), NA, B
 
-  Loads the target cache entry for the method clsName::methodName. The result
-  may be Nullptr, if the method does not exist or the cache hasn't been filled
-  yet.
+  Loads the target cache entry for the method clsName::methodName. If the
+  method does not exist or the cache hasn't been filled yet, branch to B.
 
 | LdClsMethodCacheCls<clsName,methodName>, D(Cctx), NA, NF
 
   Loads the target cache class context entry for a call to clsName::methodName
   from the current context. This instruction must only be used when the value
-  is known to not be empty.
+  is known to not be empty (i.e., LdClsMethodCacheFunc must have succeeded, or
+  LookupClsMethodCache returned a non-null value).
 
 | LookupClsMethodCache<clsName,methodName>, D(Func|Nullptr),
 |                                           S(FramePtr),
@@ -1179,16 +1177,16 @@ To string conversions:
   Loads the Func whose name is funcName from the RDS, invoking autoload if it
   not defined yet. Fatal if function autoloader fails to define it.
 
-| LdFuncCachedSafe<funcName>, D(Func|Nullptr), NA, NF
-
-  Try to load the Func named funcName from the RDS. If the function is not
-  defined, returns a null pointer.
-
 | LdFuncCachedU<funcName,fallbackName>, D(Func), NA, Er
 
   Try to load a Func named funcName from the RDS, if it isn't defined, try to
   load a Func named fallbackName. If that also isn't defined, invoke autoload.
   If this still doesn't result in a Func, raise a fatal error.
+
+| LdFuncCachedSafe<funcName>, D(Func), NA, B
+
+  Try to load the Func named funcName from the RDS. If the function is not
+  defined, branch to B.
 
 | LdARFuncPtr<offset>, D(Func), S(StkPtr), NF
 
@@ -1207,11 +1205,15 @@ To string conversions:
 
   Load the length of the string in S0.
 
-| LdStaticLocCached<func,staticLocalName>, D(BoxedInitCell), NA, NF
+| LdClosureStaticLoc, D(BoxedCell), CStr S(FramePtr), NF
 
-  Load the address of the static local RefData from the targetcache for
-  function `func' with the static local variable named `staticLocalName'.
+  Get boxed value to initialize static local named S0 in frame S1, where S1
+  must be either a closure or generatorFromClosure function.
 
+| LdStaticLoc<func,staticLocalName>, D(BoxedInitCell), NA, B
+
+  Load the address of the static local variable named 'staticLocalName' for
+  function 'func' in RDS. If the variable isn't initialized, branch to B.
 
 8. Allocation
 
@@ -1745,16 +1747,21 @@ To string conversions:
 
   Raises a notice that S0 is an undefined key for an array.
 
-| ClosureStaticLocInit, D(BoxedInitCell), CStr S(FramePtr) S(Cell), NF
+| InitClosureStaticLoc, ND, S(BoxedCell) S(Cell), NF
 
-  Get boxed value to initialize static local named S0 in frame S1, where S1
-  must be either a closure or generatorFromClosure function. If the static
-  local has not yet been initialized, its value will be set to S2.
+  Assuming S0 is an uninitialized closure static local, initialize it by
+  setting it to the value in S1.
 
-| StaticLocInitCached, ND, S(BoxedCell) S(Cell), NF
+| InitStaticLoc<func,staticLocalName>, D(BoxedInitCell), S(Cell), NF
 
-  Assuming S0 is an uninitialized static local RDS slot, initialize it by
-  setting it to the value of S1.
+  Initialize the static local variable named 'staticLocalName' for
+  function 'func' with S0 and return it.
+
+| InitClsCns<className,constName>, DCns, NA, Er|PRc
+
+  Initialize the RDS entry for a constant for a class, invoking autoload if it
+  is not defined. The initialized value is returned. This instruction may raise
+  an undefined constant error if autoload cannot define the constant.
 
 | PrintStr,  ND, S(Str),  Er|CRc
 

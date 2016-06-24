@@ -247,28 +247,28 @@ void MemoryManager::resetRuntimeOptions() {
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) pre:\n", isInternalCall);
-  FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
-    m_stats.peakSlabBytes);
+  FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak alloc: {}\n",
+    m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
+    m_stats.peakCap);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) pre:\n"
-    "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
-    isInternalCall, m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
-    m_stats.peakSlabBytes);
+    "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
+    isInternalCall, m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
+    m_stats.peakCap);
 #endif
   if (isInternalCall) {
     m_statsIntervalActive = false;
     m_stats.mmUsage = 0;
     m_stats.auxUsage = 0;
-    m_stats.slabBytes = 0;
+    m_stats.capacity = 0;
     m_stats.peakUsage = 0;
-    m_stats.peakSlabBytes = 0;
+    m_stats.peakCap = 0;
     m_stats.totalAlloc = 0;
     m_stats.peakIntervalUsage = 0;
-    m_stats.peakIntervalSlabBytes = 0;
+    m_stats.peakIntervalCap = 0;
 #ifdef USE_JEMALLOC
     m_enableStatsSync = false;
   } else if (!m_enableStatsSync) {
@@ -279,7 +279,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
 #ifdef USE_JEMALLOC
-    assert(m_stats.mallocDebt >= m_stats.slabBytes);
+    assert(m_stats.mallocDebt >= m_stats.capacity);
 #endif
 
     // The effect of this call is simply to ignore anything we've done *outside*
@@ -310,17 +310,17 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #endif
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) post:\n", isInternalCall);
-  FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage(), m_stats.slabBytes, m_stats.peakUsage,
-    m_stats.peakSlabBytes);
+  FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n",
+    m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
+    m_stats.peakCap);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
   FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) post:\n"
-    "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
-    isInternalCall, m_stats.usage(), m_stats.slabBytes,
-    m_stats.peakUsage, m_stats.peakSlabBytes);
+    "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
+    isInternalCall, m_stats.usage(), m_stats.capacity,
+    m_stats.peakUsage, m_stats.peakCap);
 #endif
 }
 
@@ -457,12 +457,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     stats.peakUsage = stats.usage();
   }
   if (live && m_statsIntervalActive) {
-    if (stats.usage() > stats.peakIntervalUsage) {
-      stats.peakIntervalUsage = stats.usage();
-    }
-    if (stats.slabBytes > stats.peakIntervalSlabBytes) {
-      stats.peakIntervalSlabBytes = stats.slabBytes;
-    }
+    stats.peakIntervalUsage = std::max(stats.peakIntervalUsage, stats.usage());
+    stats.peakIntervalCap = std::max(stats.peakIntervalCap, stats.capacity);
   }
 }
 
@@ -553,7 +549,7 @@ void MemoryManager::flush() {
  *  a) Big allocations.  (size >= kMaxSmallSize)
  *
  *     In this case we behave as a wrapper around the normal libc
- *     malloc/free.  We insert a BigNode header at the front of the
+ *     malloc/free.  We insert a MallocNode header at the front of the
  *     allocation in order to find these at sweep time (end of
  *     request) so we can give them back to libc.
  *
@@ -562,16 +558,16 @@ void MemoryManager::flush() {
  *     This is used for the generic case, for callers who can't tell
  *     us the size of the allocation at free time.
  *
- *     In this situation, we put a SmallNode header at the front of
+ *     In this situation, we put a MallocNode header at the front of
  *     the block that tells us the size for when we need to free it
- *     later.  We differentiate this from a BigNode using the size
+ *     later.  We differentiate this from a MallocNode using the size
  *     field in either structure (they overlap at the same address).
  *
  *  c) Size-untracked small allocation
  *
  *     Many callers have an easy time telling you how big the object
  *     was when they need to free it.  In this case we can avoid the
- *     SmallNode, which saves us some memory and also let's us give
+ *     MallocNode, which saves us some memory and also let's us give
  *     out 16-byte aligned pointers easily.
  *
  *     We know when we have one of these because it has to be freed
@@ -583,67 +579,14 @@ void MemoryManager::flush() {
  * passed back to libc via free.
  *
  * There are currently two kinds of freelist entries: entries where
- * there is already a valid SmallNode on the list (case b), and
+ * there is already a valid MallocNode on the list (case b), and
  * entries where there isn't (case c).  The reason for this is that
  * that way, when allocating for case b, you don't need to store the
- * SmallNode size again.  Much of the heap is going through case b at
+ * MallocNode size again.  Much of the heap is going through case b at
  * the time of this writing, so it is a measurable regression to try
  * to just combine the free lists, but presumably we can move more to
  * case c and combine the lists eventually.
  */
-
-inline void* MemoryManager::malloc(size_t nbytes, type_scan::Index tyindex) {
-  auto const nbytes_padded = nbytes + sizeof(SmallNode);
-  if (LIKELY(nbytes_padded) <= kMaxSmallSize) {
-    auto const ptr = static_cast<SmallNode*>(mallocSmallSize(nbytes_padded));
-    ptr->padbytes = nbytes_padded;
-    ptr->hdr.kind = HeaderKind::SmallMalloc;
-    ptr->typeIndex() = tyindex;
-    return ptr + 1;
-  }
-  return mallocBig(nbytes, tyindex);
-}
-
-union MallocNode {
-  BigNode big;
-  SmallNode small;
-};
-
-static_assert(sizeof(SmallNode) == sizeof(BigNode), "");
-
-inline void MemoryManager::free(void* ptr) {
-  assert(ptr != 0);
-  auto const n = static_cast<MallocNode*>(ptr) - 1;
-  auto const padbytes = n->small.padbytes;
-  if (LIKELY(padbytes <= kMaxSmallSize)) {
-    return freeSmallSize(&n->small, n->small.padbytes);
-  }
-  m_heap.freeBig(ptr);
-}
-
-inline void* MemoryManager::realloc(void* ptr,
-                                    size_t nbytes,
-                                    type_scan::Index tyindex) {
-  FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
-         ptr, nbytes, tyindex);
-  assert(nbytes > 0);
-  auto const n = static_cast<MallocNode*>(ptr) - 1;
-  if (LIKELY(n->small.padbytes <= kMaxSmallSize)) {
-    void* newmem = req::malloc(nbytes, tyindex);
-    auto const copySize = std::min(
-      n->small.padbytes - sizeof(SmallNode),
-      nbytes
-    );
-    newmem = memcpy(newmem, ptr, copySize);
-    req::free(ptr);
-    return newmem;
-  }
-  // Ok, it's a big allocation.
-  if (debug) requestEagerGC();
-  auto block = m_heap.resizeBig(ptr, nbytes);
-  refreshStats();
-  return block.ptr;
-}
 
 const char* header_names[] = {
   "PackedArray", "StructArray", "MixedArray", "EmptyArray", "ApcArray",
@@ -850,10 +793,8 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
   m_stats.mallocDebt += slab.size;
-  m_stats.slabBytes += slab.size;
-  if (m_stats.slabBytes > m_stats.peakSlabBytes) {
-    m_stats.peakSlabBytes = m_stats.slabBytes;
-  }
+  m_stats.capacity += slab.size;
+  m_stats.peakCap = std::max(m_stats.peakCap, m_stats.capacity);
   m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
   m_limit = (void*)(uintptr_t(slab.ptr) + slab.size);
   FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab.ptr, m_limit);
@@ -876,7 +817,7 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; mallocBigSize() pulls stats from jemalloc.
     m_stats.mmUsage -= bytes;
-    return mallocBigSize<false>(nbytes).ptr;
+    return mallocBigSize<FreeRequested>(nbytes).ptr;
   }
 
   void* ptr = m_front;
@@ -940,73 +881,116 @@ inline void MemoryManager::updateBigStats() {
   // the slabs and the usage so we should force this after an allocation that
   // was too large for one of the existing slabs. When we're not using jemalloc
   // this check won't do anything so avoid the extra overhead.
+  if (debug) requestEagerGC();
   if (use_jemalloc || UNLIKELY(m_stats.usage() > m_stats.maxUsage)) {
     refreshStats();
   }
 }
 
-NEVER_INLINE
-void* MemoryManager::mallocBig(size_t nbytes, type_scan::Index tyindex) {
-  assert(nbytes > 0);
-  auto block = m_heap.allocBig(nbytes, HeaderKind::BigMalloc, tyindex);
-  updateBigStats();
-  return block.ptr;
-}
-
-template NEVER_INLINE
-MemBlock MemoryManager::mallocBigSize<true>(size_t);
-template NEVER_INLINE
-MemBlock MemoryManager::mallocBigSize<false>(size_t);
-
-template<bool callerSavesActualSize> NEVER_INLINE
-MemBlock MemoryManager::mallocBigSize(size_t bytes) {
-  if (debug) requestEagerGC();
-
-  auto block = m_heap.allocBig(bytes, HeaderKind::BigObj, 0);
-  auto szOut = block.size;
+template<MemoryManager::MBS Mode> NEVER_INLINE
+MemBlock MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
+                                      type_scan::Index ty) {
+  if (debug) MM().requestEagerGC();
+  auto block = Mode == ZeroFreeActual ? m_heap.callocBig(bytes, kind, ty) :
+               m_heap.allocBig(bytes, kind, ty);
   // NB: We don't report the SweepNode size in the stats.
-  auto const delta = callerSavesActualSize ? szOut : bytes;
+  auto const delta = Mode == FreeRequested ? bytes : block.size;
   m_stats.mmUsage += delta;
   // Adjust jemalloc otherwise we'll double count the direct allocation.
   m_stats.mallocDebt += delta;
+  m_stats.capacity += block.size + sizeof(MallocNode);
   updateBigStats();
-  auto ptrOut = block.ptr;
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
-         ptrOut, bytes, szOut);
-  return {ptrOut, szOut};
+         block.ptr, bytes, block.size);
+  return block;
+}
+
+template NEVER_INLINE
+MemBlock MemoryManager::mallocBigSize<MemoryManager::FreeRequested>(
+    size_t, HeaderKind, type_scan::Index
+);
+template NEVER_INLINE
+MemBlock MemoryManager::mallocBigSize<MemoryManager::FreeActual>(
+    size_t, HeaderKind, type_scan::Index
+);
+template NEVER_INLINE
+MemBlock MemoryManager::mallocBigSize<MemoryManager::ZeroFreeActual>(
+    size_t, HeaderKind, type_scan::Index
+);
+
+MemBlock MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
+  auto old_size = n->nbytes - sizeof(MallocNode);
+  auto block = m_heap.resizeBig(n + 1, nbytes);
+  m_stats.mmUsage += block.size - old_size;
+  m_stats.mallocDebt += block.size - old_size;
+  m_stats.capacity += block.size - old_size;
+  updateBigStats();
+  return block;
 }
 
 NEVER_INLINE
-void* MemoryManager::callocBig(size_t totalbytes, type_scan::Index tyindex) {
-  if (debug) requestEagerGC();
-  assert(totalbytes > 0);
-  auto block = m_heap.callocBig(totalbytes, tyindex);
-  updateBigStats();
-  return block.ptr;
+void MemoryManager::freeBigSize(void* vp, size_t bytes) {
+  // Since we account for these direct allocations in our usage and adjust for
+  // them on allocation, we also need to adjust for them negatively on free.
+  m_stats.mmUsage -= bytes;
+  m_stats.mallocDebt -= bytes;
+  auto actual = static_cast<MallocNode*>(vp)[-1].nbytes;
+  assert(bytes <= actual);
+  m_stats.capacity -= actual;
+  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
+  m_heap.freeBig(vp);
 }
 
 // req::malloc api entry points, with support for malloc/free corner cases.
 namespace req {
+
+template<bool zero>
+static void* allocate(size_t nbytes, type_scan::Index ty) {
+  nbytes = std::max(nbytes, size_t(1));
+  auto const npadded = nbytes + sizeof(MallocNode);
+  if (LIKELY(npadded <= kMaxSmallSize)) {
+    auto const ptr = static_cast<MallocNode*>(MM().mallocSmallSize(npadded));
+    ptr->nbytes = npadded;
+    ptr->hdr.init(ty, HeaderKind::SmallMalloc, 0);
+    return zero ? memset(ptr + 1, 0, nbytes) : ptr + 1;
+  }
+  auto constexpr mode = zero ? MemoryManager::ZeroFreeActual :
+                        MemoryManager::FreeActual;
+  auto block = MM().mallocBigSize<mode>(nbytes, HeaderKind::BigMalloc, ty);
+  return block.ptr;
+}
+
 void* malloc(size_t nbytes, type_scan::Index tyindex) {
-  auto const size = std::max(nbytes, size_t(1));
-  return MM().malloc(size, tyindex);
+  return allocate<false>(nbytes, tyindex);
 }
 
 void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
-  auto const totalBytes = std::max<size_t>(count * nbytes, 1);
-  if (totalBytes <= kMaxSmallSize) {
-    return memset(req::malloc(totalBytes, tyindex), 0, totalBytes);
-  }
-  return MM().callocBig(totalBytes, tyindex);
+  return allocate<true>(count * nbytes, tyindex);
 }
 
 void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
-  if (!ptr) return req::malloc(nbytes, tyindex);
+  // first handle corner cases that degenerate to malloc() or free()
+  if (!ptr) {
+    return req::malloc(nbytes, tyindex);
+  }
   if (!nbytes) {
     req::free(ptr);
     return nullptr;
   }
-  return MM().realloc(ptr, nbytes, tyindex);
+  FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
+         ptr, nbytes, tyindex);
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  if (LIKELY(n->nbytes <= kMaxSmallSize)) {
+    // old block was small, cannot resize.
+    auto newmem = req::malloc(nbytes, tyindex);
+    auto copy_size = std::min(n->nbytes - sizeof(MallocNode), nbytes);
+    newmem = memcpy(newmem, ptr, copy_size);
+    MM().freeSmallSize(n, n->nbytes);
+    return newmem;
+  }
+  // Ok, it's a big allocation.
+  auto block = MM().resizeBig(n, nbytes);
+  return block.ptr;
 }
 
 char* strndup(const char* str, size_t len) {
@@ -1020,8 +1004,14 @@ char* strndup(const char* str, size_t len) {
 }
 
 void free(void* ptr) {
-  if (ptr) MM().free(ptr);
+  if (!ptr) return;
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  if (LIKELY(n->nbytes <= kMaxSmallSize)) {
+    return MM().freeSmallSize(n, n->nbytes);
+  }
+  MM().freeBigSize(ptr, n->nbytes - sizeof(MallocNode));
 }
+
 } // namespace req
 
 //////////////////////////////////////////////////////////////////////
@@ -1172,7 +1162,7 @@ void BigHeap::reset() {
 void BigHeap::flush() {
   assert(empty());
   m_slabs = std::vector<MemBlock>{};
-  m_bigs = std::vector<BigNode*>{};
+  m_bigs = std::vector<MallocNode*>{};
 }
 
 MemBlock BigHeap::allocSlab(size_t size) {
@@ -1181,7 +1171,7 @@ MemBlock BigHeap::allocSlab(size_t size) {
   return {slab, size};
 }
 
-void BigHeap::enlist(BigNode* n, HeaderKind kind,
+void BigHeap::enlist(MallocNode* n, HeaderKind kind,
                      size_t size, type_scan::Index tyindex) {
   n->nbytes = size;
   n->hdr.kind = kind;
@@ -1194,20 +1184,21 @@ MemBlock BigHeap::allocBig(size_t bytes,
                            HeaderKind kind,
                            type_scan::Index tyindex) {
 #ifdef USE_JEMALLOC
-  auto n = static_cast<BigNode*>(mallocx(bytes + sizeof(BigNode), 0));
+  auto n = static_cast<MallocNode*>(mallocx(bytes + sizeof(MallocNode), 0));
   auto cap = sallocx(n, 0);
 #else
-  auto cap = bytes + sizeof(BigNode);
-  auto n = static_cast<BigNode*>(safe_malloc(cap));
+  auto cap = bytes + sizeof(MallocNode);
+  auto n = static_cast<MallocNode*>(safe_malloc(cap));
 #endif
   enlist(n, kind, cap, tyindex);
-  return {n + 1, cap - sizeof(BigNode)};
+  return {n + 1, cap - sizeof(MallocNode)};
 }
 
-MemBlock BigHeap::callocBig(size_t nbytes, type_scan::Index tyindex) {
-  auto cap = nbytes + sizeof(BigNode);
-  auto const n = static_cast<BigNode*>(safe_calloc(cap, 1));
-  enlist(n, HeaderKind::BigMalloc, cap, tyindex);
+MemBlock BigHeap::callocBig(size_t nbytes, HeaderKind kind,
+                            type_scan::Index tyindex) {
+  auto cap = nbytes + sizeof(MallocNode);
+  auto const n = static_cast<MallocNode*>(safe_calloc(cap, 1));
+  enlist(n, kind, cap, tyindex);
   return {n + 1, nbytes};
 }
 
@@ -1222,9 +1213,8 @@ bool BigHeap::contains(void* ptr) const {
   return it != std::end(m_slabs);
 }
 
-NEVER_INLINE
 void BigHeap::freeBig(void* ptr) {
-  auto n = static_cast<BigNode*>(ptr) - 1;
+  auto n = static_cast<MallocNode*>(ptr) - 1;
   auto i = n->index();
   auto last = m_bigs.back();
   last->index() = i;
@@ -1236,9 +1226,9 @@ void BigHeap::freeBig(void* ptr) {
 MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
   // Since we don't know how big it is (i.e. how much data we should memcpy),
   // we have no choice but to ask malloc to realloc for us.
-  auto const n = static_cast<BigNode*>(ptr) - 1;
-  auto const newNode = static_cast<BigNode*>(
-    safe_realloc(n, newsize + sizeof(BigNode))
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  auto const newNode = static_cast<MallocNode*>(
+    safe_realloc(n, newsize + sizeof(MallocNode))
   );
   if (newNode != n) {
     m_bigs[newNode->index()] = newNode;
@@ -1317,7 +1307,7 @@ void ContiguousHeap::flush() {
   m_freeList.size() = 0;
   m_freeList.next = nullptr;
   m_slabs = std::vector<MemBlock>{};
-  m_bigs = std::vector<BigNode*>{};
+  m_bigs = std::vector<MallocNode*>{};
 }
 
 MemBlock ContiguousHeap::allocSlab(size_t size) {
@@ -1331,18 +1321,19 @@ MemBlock ContiguousHeap::allocBig(size_t bytes,
                                   HeaderKind kind,
                                   type_scan::Index tyindex) {
   size_t cap;
-  auto n = static_cast<BigNode*>(heapAlloc(bytes + sizeof(BigNode), cap));
+  auto n = static_cast<MallocNode*>(heapAlloc(bytes + sizeof(MallocNode), cap));
   enlist(n, kind, cap, tyindex);
-  return {n + 1, cap - sizeof(BigNode)};
+  return {n + 1, cap - sizeof(MallocNode)};
 }
 
-MemBlock ContiguousHeap::callocBig(size_t nbytes, type_scan::Index tyindex) {
+MemBlock ContiguousHeap::callocBig(size_t nbytes, HeaderKind kind,
+                                   type_scan::Index tyindex) {
   size_t cap;
-  auto const n = static_cast<BigNode*>(
-        heapAlloc(nbytes + sizeof(BigNode), cap));
+  auto const n = static_cast<MallocNode*>(
+        heapAlloc(nbytes + sizeof(MallocNode), cap));
   memset(n, 0, cap);
-  enlist(n, HeaderKind::BigMalloc, cap, tyindex);
-  return {n + 1, cap - sizeof(BigNode)};
+  enlist(n, kind, cap, tyindex);
+  return {n + 1, cap - sizeof(MallocNode)};
 }
 
 bool ContiguousHeap::contains(void* ptr) const {
@@ -1354,7 +1345,7 @@ bool ContiguousHeap::contains(void* ptr) const {
 NEVER_INLINE
 void ContiguousHeap::freeBig(void* ptr) {
   // remove from big list
-  auto n = static_cast<BigNode*>(ptr) - 1;
+  auto n = static_cast<MallocNode*>(ptr) - 1;
   auto i = n->index();
   auto last = m_bigs.back();
   auto size = n->nbytes;
@@ -1389,14 +1380,14 @@ void ContiguousHeap::freeBig(void* ptr) {
 MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize) {
   // Since we don't know how big it is (i.e. how much data we should memcpy),
   // we have no choice but to ask malloc to realloc for us.
-  auto const n = static_cast<BigNode*>(ptr) - 1;
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
   size_t cap = 0;
-  BigNode* newNode = nullptr;
-  if (n->nbytes >= newsize + sizeof(BigNode)) {
+  MallocNode* newNode = nullptr;
+  if (n->nbytes >= newsize + sizeof(MallocNode)) {
     newNode = n;
   } else {
-    newNode = static_cast<BigNode*>(
-      heapAlloc(newsize + sizeof(BigNode),cap)
+    newNode = static_cast<MallocNode*>(
+      heapAlloc(newsize + sizeof(MallocNode),cap)
     );
     memcpy(newNode, ptr, n->nbytes);
     newNode->nbytes = cap;
@@ -1405,7 +1396,7 @@ MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize) {
     m_bigs[newNode->index()] = newNode;
     freeBig(n);
   }
-  return {newNode + 1, n->nbytes - sizeof(BigNode)};
+  return {newNode + 1, n->nbytes - sizeof(MallocNode)};
 }
 
 void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {

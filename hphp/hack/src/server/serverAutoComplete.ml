@@ -13,13 +13,15 @@
 (* Code for auto-completion *)
 (*****************************************************************************)
 
-let auto_complete tcopt files_info content =
+let get_results tcopt _ file_info =
+  let {
+    FileInfo.n_funs = content_funs; n_classes = content_classes; _
+  } = FileInfo.simplify file_info in
+  AutocompleteService.get_results tcopt content_funs content_classes
+
+let auto_complete tcopt content =
   AutocompleteService.attach_hooks();
-  let path = Relative_path.default in
-  let content_funs, content_classes, content_typedefs =
-    ServerIdeUtils.declare_and_check path content in
-  let result = AutocompleteService.get_results
-    tcopt content_funs content_classes in
-  ServerIdeUtils.revive content_funs content_classes content_typedefs path;
+  let result =
+    ServerIdeUtils.declare_and_check content ~f:(get_results tcopt) in
   AutocompleteService.detach_hooks();
   result

@@ -104,19 +104,19 @@ Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src) {
+void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src) {
   auto const type = src->type();
 
-  if (loc.isFullSIMD()) {
+  if (srcLoc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << storeups{loc.reg(), dst};
+    v << storeups{srcLoc.reg(), dst};
     return;
   }
 
   if (type.needsReg()) {
-    assertx(loc.hasReg(1));
-    v << storeb{loc.reg(1), dst + TVOFF(m_type)};
+    assertx(srcLoc.hasReg(1));
+    v << storeb{srcLoc.reg(1), dst + TVOFF(m_type)};
   } else {
     v << storeb{v.cns(type.toDataType()), dst + TVOFF(m_type)};
   }
@@ -129,36 +129,60 @@ void storeTV(Vout& v, Vptr dst, Vloc loc, const SSATmp* src) {
     // Skip potential zero-extend if we know the value.
     v << store{v.cns(src->rawVal()), dst + TVOFF(m_data)};
   } else {
-    assertx(loc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, src, loc.reg(0));
+    assertx(srcLoc.hasReg(0));
+    auto const extended = zeroExtendIfBool(v, src, srcLoc.reg(0));
     v << store{extended, dst + TVOFF(m_data)};
   }
 }
 
-void loadTV(Vout& v, const SSATmp* dst, Vloc loc, Vptr src,
+void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
             bool aux /* = false */) {
   auto const type = dst->type();
 
-  if (loc.isFullSIMD()) {
+  if (dstLoc.isFullSIMD()) {
     // The whole TV is loaded into a single SIMD reg.
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << loadups{src, loc.reg()};
+    v << loadups{src, dstLoc.reg()};
     return;
   }
 
   if (type.needsReg()) {
-    assertx(loc.hasReg(1));
+    assertx(dstLoc.hasReg(1));
     if (aux) {
-      v << load{src + TVOFF(m_type), loc.reg(1)};
+      v << load{src + TVOFF(m_type), dstLoc.reg(1)};
     } else {
-      v << loadb{src + TVOFF(m_type), loc.reg(1)};
+      v << loadb{src + TVOFF(m_type), dstLoc.reg(1)};
     }
   }
 
   if (type <= TBool) {
-    v << loadtqb{src + TVOFF(m_data), loc.reg(0)};
+    v << loadtqb{src + TVOFF(m_data), dstLoc.reg(0)};
   } else {
-    v << load{src + TVOFF(m_data), loc.reg(0)};
+    v << load{src + TVOFF(m_data), dstLoc.reg(0)};
+  }
+}
+
+void copyTV(Vout& v, Vreg data, Vreg type, Vloc srcLoc, const SSATmp* src) {
+  // SIMD register are not supported here.
+  assertx(!srcLoc.isFullSIMD());
+
+  if (src->type().needsReg()) {
+    assertx(srcLoc.hasReg(1));
+    v << copy{srcLoc.reg(1), type};
+  } else {
+    v << copy{v.cns(src->type().toDataType()), type};
+  }
+
+  // Ignore the values for nulls.
+  if (src->isA(TNull)) return;
+
+  if (src->hasConstVal()) {
+    // Skip potential zero-extend if we know the value.
+    v << copy{v.cns(src->rawVal()), data};
+  } else {
+    assertx(srcLoc.hasReg(0));
+    auto const extended = zeroExtendIfBool(v, src, srcLoc.reg(0));
+    v << copy{extended, data};
   }
 }
 
@@ -184,6 +208,16 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   } else {
     v << copy{src.reg(0), dst.reg(0)};
   }
+}
+
+void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte) {
+  int32_t trash32;
+  memset(&trash32, byte, sizeof(trash32));
+  static_assert(sizeof(TypedValue) == 16, "");
+  v << storeli{trash32, ptr[offset + 0x0]};
+  v << storeli{trash32, ptr[offset + 0x4]};
+  v << storeli{trash32, ptr[offset + 0x8]};
+  v << storeli{trash32, ptr[offset + 0xc]};
 }
 
 void emitAssertRefCount(Vout& v, Vreg data) {
@@ -272,12 +306,8 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
     } return;
 
     case CallSpec::Kind::Destructor: {
-      // this movzbq is only needed because callers aren't required to
-      // zero-extend the type.
-      auto zextType = v.makeReg();
-      v << movzbl{target.reg(), zextType};
-      auto dtor_ptr = lookupDestructor(v, zextType);
-      v << callm{dtor_ptr, args};
+      auto dtor = lookupDestructor(v, target.reg());
+      v << callm{dtor, args};
     } return;
 
     case CallSpec::Kind::Stub:
@@ -289,15 +319,23 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
 
 Vptr lookupDestructor(Vout& v, Vreg type) {
   auto const table = reinterpret_cast<intptr_t>(g_destructors);
-  always_assert_flog(deltaFits(table, sz::dword),
-    "Destructor function table is expected to be in the data "
-    "segment, with addresses less than 2^31"
-  );
-  auto index = v.makeReg();
-  auto indexl = v.makeReg();
-  v << shrli{kShiftDataTypeToDestrIndex, type, indexl, v.makeReg()};
+
+  auto const typel = v.makeReg();
+  auto const index = v.makeReg();
+  auto const indexl = v.makeReg();
+
+  // This movzbl is only needed because callers aren't required to zero-extend
+  // the type.
+  v << movzbl{type, typel};
+  v << shrli{kShiftDataTypeToDestrIndex, typel, indexl, v.makeReg()};
   v << movzlq{indexl, index};
-  return baseless(index * 8 + safe_cast<int>(table));
+
+  // The baseless form is more compact, but isn't supported for 64-bit
+  // displacements.
+  if (table <= std::numeric_limits<int>::max()) {
+    return baseless(index * 8 + safe_cast<int>(table));
+  }
+  return v.cns(table)[index * 8];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -389,5 +427,23 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  auto const gen = v.makeReg();
+  auto const sf = v.makeReg();
+  v << loadb{rvmtl()[rds::genNumberHandleFrom(ch)], gen};
+  v << cmpbm{gen, rvmtl()[rds::currentGenNumberHandle()], sf};
+  return sf;
+}
+
+void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  auto const gen = v.makeReg();
+  v << loadb{rvmtl()[rds::currentGenNumberHandle()], gen};
+  v << storeb{gen, rvmtl()[rds::genNumberHandleFrom(ch)]};
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 }}

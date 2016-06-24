@@ -66,7 +66,7 @@ public:
   PCFilter() {}
 
   // Filter function to exclude opcodes when adding ranges.
-  typedef std::function<bool(Op)> OpcodeFilter;
+  using OpcodeFilter = std::function<bool(Op)>;
 
   // Add/remove offsets, either individually or by range. By default allow all
   // opcodes.

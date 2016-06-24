@@ -161,6 +161,16 @@ ProxygenServer::ProxygenServer(
   if (!options.m_takeoverFilename.empty()) {
     m_takeover_agent.reset(new TakeoverAgent(options.m_takeoverFilename));
   }
+  const std::vector<std::chrono::seconds> levels {
+    std::chrono::seconds(10), std::chrono::seconds(120)};
+  ProxygenTransport::s_requestErrorCount =
+    ServiceData::createTimeseries("http_response_error",
+                                  {ServiceData::StatsType::COUNT},
+                                  levels, 10);
+  ProxygenTransport::s_requestNonErrorCount =
+    ServiceData::createTimeseries("http_response_nonerror",
+                                  {ServiceData::StatsType::COUNT},
+                                  levels, 10);
 }
 
 int ProxygenServer::onTakeoverRequest(TakeoverAgent::RequestType type) {

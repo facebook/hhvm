@@ -170,6 +170,7 @@ void create_string_data_map() {
   always_assert(!s_stringDataMap);
   StringDataMap::Config config;
   config.growthFactor = 1;
+  config.entryCountThreadCacheSize = 10;
   MemoryStats::GetInstance()->ResetStaticStringSize();
 
   s_stringDataMap.emplace(RuntimeOption::EvalInitialStaticStringTableSize,
@@ -260,7 +261,7 @@ rds::Handle lookupCnsHandle(const StringData* cnsName) {
   if (it != s_stringDataMap->end()) {
     return it->second.handle();
   }
-  return 0;
+  return rds::kInvalidHandle;
 }
 
 rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
@@ -270,7 +271,7 @@ rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
     // Its a dynamic constant, that doesn't correspond to
     // an already allocated handle. We'll allocate it in
     // the request local rds::s_constants instead.
-    return 0;
+    return rds::kInvalidHandle;
   }
   auto const it = s_stringDataMap->find(cnsName);
   assert(it != s_stringDataMap->end());
@@ -308,10 +309,11 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
   for (auto it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second.bound()) {
-      Array *tbl = (categorize &&
-                    rds::isPersistentHandle(it->second.handle()))
-                 ? &sys : &usr;
+      if (!it->second.isInit()) continue;
+
+      Array *tbl = (categorize && it->second.isPersistent()) ? &sys : &usr;
       auto& tv = *it->second;
+
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         tbl->set(key, tvAsVariant(&tv), true);

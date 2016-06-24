@@ -1,0 +1,8 @@
+File "generic_attr2.php", line 8, characters 11-28:
+Invalid return type (Typing[4110])
+File "generic_attr2.php", line 7, characters 32-37:
+This is a string
+File "generic_attr2.php", line 7, characters 15-17:
+It is incompatible with an int
+File "generic_attr2.php", line 7, characters 32-37:
+Considering that this type argument is invariant with respect to :my-xhp

@@ -47,12 +47,26 @@ SSATmp* ldClassSafe(IRGS& env, const StringData* className,
   if (!knownCls) knownCls = Unit::lookupClassOrUniqueClass(className);
 
   // We can only burn in the Class* if it's unique or in the inheritance
-  // hierarchy of our context. If we can't burn in the class, use
-  // LdClsCachedSafe - InstanceOfD and Verify(Ret|Param)Type don't invoke
+  // hierarchy of our context.  If we can't burn in the class, use
+  // LdClsCachedSafe---InstanceOfD and Verify(Ret|Param)Type don't invoke
   // autoload.
-  return classIsUniqueOrCtxParent(env, knownCls)
-    ? cns(env, knownCls)
-    : gen(env, LdClsCachedSafe, cns(env, className));
+  if (classIsUniqueOrCtxParent(env, knownCls)) {
+    return cns(env, knownCls);
+  }
+
+  return cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, LdClsCachedSafe, taken, cns(env, className));
+    },
+    [&] (SSATmp* cls) { // next
+      return cls;
+    },
+    [&] { // taken
+      hint(env, Block::Hint::Unlikely);
+      return cns(env, nullptr);
+    }
+  );
 }
 
 /*
@@ -459,8 +473,7 @@ void emitInstanceOf(IRGS& env) {
   if (!t1->isA(TStr)) PUNT(InstanceOf-NotStr);
 
   if (t2->isA(TObj)) {
-    auto const rds = gen(env, LookupClsRDSHandle, t1);
-    auto const c1  = gen(env, DerefClsRDSHandle, rds);
+    auto const c1 = gen(env, LookupClsRDS, t1);
     auto const c2  = gen(env, LdObjClass, t2);
     push(env, gen(env, InstanceOf, c2, c1));
     decRef(env, t2);

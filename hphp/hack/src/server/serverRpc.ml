@@ -20,9 +20,12 @@ type _ t =
   | AUTOCOMPLETE : string -> AutocompleteService.result t
   | IDENTIFY_FUNCTION : string * int * int -> ServerIdentifyFunction.result t
   | OUTLINE : string -> FileOutline.outline t
+  | GET_DEFINITION_BY_ID : string -> string SymbolDefinition.t option t
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
+  | IDE_FIND_REFS : string * int * int -> FindRefsService.result t
+  | IDE_HIGHLIGHT_REFS : string * int * int -> ServerHighlightRefs.result t
   | REFACTOR : ServerRefactor.action -> ServerRefactor.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoService.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
@@ -51,11 +54,14 @@ let handle : type a. genv -> env -> a t -> a =
     | INFER_TYPE (fn, line, char) ->
         ServerInferType.go env (fn, line, char)
     | AUTOCOMPLETE content ->
-        ServerAutoComplete.auto_complete env.tcopt env.files_info content
+        ServerAutoComplete.auto_complete env.tcopt content
     | IDENTIFY_FUNCTION (content, line, char) ->
         ServerIdentifyFunction.go_absolute content line char env.tcopt
     | OUTLINE content ->
         FileOutline.outline content
+    | GET_DEFINITION_BY_ID id ->
+        Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
+          SymbolDefinition.to_absolute
     | METHOD_JUMP (class_, find_children) ->
       MethodJumps.get_inheritance env.tcopt class_ ~find_children
         env.files_info genv.workers
@@ -67,6 +73,10 @@ let handle : type a. genv -> env -> a t -> a =
           ServerFindRefs.go find_refs_action genv env
         else
           Ai.ServerFindRefs.go find_refs_action genv env
+    | IDE_FIND_REFS (content, line, char) ->
+        ServerFindRefs.go_from_file (content, line, char) genv env
+    | IDE_HIGHLIGHT_REFS (content, line, char) ->
+        ServerHighlightRefs.go (content, line, char) env.tcopt
     | REFACTOR refactor_action -> ServerRefactor.go refactor_action genv env
     | REMOVE_DEAD_FIXMES codes ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
@@ -122,31 +132,6 @@ let to_string : type a. a t -> _ = function
   | FIND_LVAR_REFS _ -> "FIND_LVAR_REFS"
   | FORMAT _ -> "FORMAT"
   | TRACE_AI _ -> "TRACE_AI"
-
-let to_string_with_details : type a. a t -> _ = function
-  | AUTOCOMPLETE content -> content
-  | INFER_TYPE (fn, line, char) ->
-    let content = match fn with
-      | ServerUtils.FileContent content -> content
-      | ServerUtils.FileName f -> f
-    in
-    Printf.sprintf "%d\n%d\n%s" line char content
-  | IDENTIFY_FUNCTION (content, line, char) ->
-    Printf.sprintf "%d\n%d\n%s" line char content
-  | SEARCH (query, type_) -> Printf.sprintf "%s\n%s" query type_
-  | FIND_LVAR_REFS (content, line, char) ->
-    Printf.sprintf "%d\n%d\n%s" line char content
-  | OUTLINE content -> content
-  | FORMAT (content, from, to_) ->
-    Printf.sprintf "%d\n%d\n%s" from to_ content
-  | FIND_REFS action -> begin match action with
-    | FindRefsService.Class c -> Printf.sprintf "Class\n%s" c
-    | FindRefsService.Method (c, m) -> Printf.sprintf "Method\n%s\n%s" c m
-    | FindRefsService.Function f -> Printf.sprintf "Function\n%s" f
-    end
-  | COVERAGE_LEVELS fn ->
-    begin match fn with
-    | ServerUtils.FileContent content -> content
-    | ServerUtils.FileName f -> f
-    end
-  | _ -> ""
+  | IDE_FIND_REFS _ -> "IDE_FIND_REFS"
+  | GET_DEFINITION_BY_ID _ -> "GET_DEFINITION_BY_ID"
+  | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"

@@ -141,7 +141,9 @@ struct Vgen {
   void emit(const cmpb& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbim& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpbm& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpwim& i) { a.cmpw(i.s0, i.s1); }
+  void emit(const cmpwm& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpl& i) { a.cmpl(i.s0, i.s1); }
   void emit(const cmpli& i) { a.cmpl(i.s0, i.s1); }
   void emit(const cmplim& i) { a.cmpl(i.s0, i.s1); }
@@ -181,6 +183,7 @@ struct Vgen {
   void emit(const loadups& i) { a.movups(i.s, i.d); }
   void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
   void emit(const loadb& i) { a.loadb(i.s, i.d); }
+  void emit(const loadw& i) { a.loadw(i.s, i.d); }
   void emit(const loadl& i) { a.loadl(i.s, i.d); }
   void emit(const loadqp& i) { a.loadq(i.s, i.d); }
   void emit(const loadqd& i) { a.loadq(rip[(intptr_t)i.s.get()], i.d); }
@@ -771,16 +774,20 @@ void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   }
 }
 
-void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
-  unit.blocks[b].code[i] = popm{inst.fp[AROFF(m_savedRip)]};
+void lower(Vunit& unit, stubunwind& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
+}
+
+void lower(Vunit& unit, stubtophp& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
 }
 
 void lower(Vunit& unit, loadstubret& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = load{reg::rsp[8], inst.d};
 }
 
-void lower(Vunit& unit, stubtophp& inst, Vlabel b, size_t i) {
-  unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
+void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = popm{inst.fp[AROFF(m_savedRip)]};
 }
 
 void lower(Vunit& unit, resumetc& inst, Vlabel b, size_t i) {
@@ -836,6 +843,12 @@ void lower(Vunit& unit, divint& inst, Vlabel b, size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void lower(Vunit& unit, movtqb& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
+void lower(Vunit& unit, movtdb& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
+void lower(Vunit& unit, movtdq& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, inst.d};
 }
 void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {

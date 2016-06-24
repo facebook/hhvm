@@ -120,7 +120,8 @@ and 'a slave = {
 
 let slave_main ic oc =
   let send_result data =
-    let s = Marshal.to_string data [Marshal.Closures] in
+    let stats = Measure.serialize (Measure.pop_global ()) in
+    let s = Marshal.to_string (data,stats) [Marshal.Closures] in
     let len = String.length s in
     if len > 10 * 1024 * 1024 (* 10 MB *) then begin
       Hh_logger.log "WARNING: you are sending quite a lot of data (%d bytes), \
@@ -133,16 +134,7 @@ let slave_main ic oc =
     Daemon.output_string oc s;
     Daemon.flush oc in
   try
-    let Request do_process =
-      (* OCaml 4.03.0 changed the behavior of Marshal.from_channel to no longer
-       * throw End_of_file when the pipe has closed. We can simulate that
-       * behavior, however, by trying to read a byte afterwards, which WILL
-       * raise End_of_file if the pipe has closed *)
-      try Daemon.from_channel ic
-      with Failure msg as e when msg = "input_value: truncated object" ->
-        Daemon.input_char ic |> ignore;
-        raise e
-    in
+    let Request do_process = Daemon.from_channel ic in
     do_process { send = send_result };
     exit 0
   with
@@ -268,9 +260,10 @@ let call w (type a) (type b) (f : a -> b) (x : a) : b handle =
   let result () : b =
     match Unix.waitpid [Unix.WNOHANG] slave_pid with
     | 0, _ | _, Unix.WEXITED 0 ->
-        let res : b = Daemon.input_value inc in
+        let res : b * Measure.record_data = Daemon.input_value inc in
         if w.prespawned = None then Daemon.close h;
-        res
+        Measure.merge (Measure.deserialize (snd res));
+        fst res
     | _, Unix.WEXITED i when i = Exit_status.(exit_code Out_of_shared_memory) ->
         raise SharedMem.Out_of_shared_memory
     | _, Unix.WEXITED i ->

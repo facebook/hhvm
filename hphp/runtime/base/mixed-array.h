@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include <folly/portability/Constexpr.h>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -674,6 +676,9 @@ public:
   template<class F> void scan(F&) const; // in mixed-array-defs.h
 
 private:
+  struct DictInitializer;
+  static DictInitializer s_initializer;
+
   // Some of these are packed into qword-sized unions so we can
   // combine stores during initialization. (gcc won't do it on its own.)
   union {
@@ -694,6 +699,16 @@ ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
   return sizeof(MixedArray) +
          MixedArray::HashSize(scale) * sizeof(int32_t) +
          MixedArray::Capacity(scale) * sizeof(MixedArray::Elm);
+}
+
+extern std::aligned_storage<
+  computeAllocBytes(1),
+  folly::constexpr_max(alignof(MixedArray), size_t(16))
+>::type s_theEmptyDictArray;
+
+ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
+  void* vp = &s_theEmptyDictArray;
+  return static_cast<ArrayData*>(vp);
 }
 
 //////////////////////////////////////////////////////////////////////

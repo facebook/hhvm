@@ -105,6 +105,7 @@ std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
 // these hold the DEFAULT logger
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
+uint16_t RuntimeOption::LogFilePeriodMultiplier;
 
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysLogUnhandledExceptions =
@@ -186,6 +187,7 @@ bool RuntimeOption::ServerKillOnTimeout = true;
 int RuntimeOption::ServerPreShutdownWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownEOMWait = 0;
+int RuntimeOption::ServerPrepareToStopTimeout = 0;
 bool RuntimeOption::StopOldServer = false;
 int RuntimeOption::OldServerWait = 30;
 int RuntimeOption::CacheFreeFactor = 50;
@@ -406,7 +408,10 @@ bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_ReportVersion = false;
 bool RuntimeOption::PHP7_ScalarTypes = false;
+bool RuntimeOption::PHP7_Substr = false;
 bool RuntimeOption::PHP7_UVS = false;
+
+std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -464,6 +469,16 @@ static inline int nsjrDefault() {
   return RuntimeOption::ServerExecutionMode() ? 20 : 0;
 }
 
+static inline uint32_t profileRequestsDefault() {
+  return debug ? 1 << 31
+       : RuntimeOption::EvalJitConcurrently ? 100
+       : 2000;
+}
+
+static inline uint32_t resetProfCountersDefault() {
+  return RuntimeOption::EvalJitConcurrently ? 500 : 1000;
+}
+
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }
@@ -477,7 +492,6 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
-static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 2000;
 static const uint64_t kJitRelocationSizeDefault = 1 << 20;
 
 static const bool kJitTimerDefault =
@@ -795,6 +809,8 @@ void RuntimeOption::Load(
     Config::Bind(Logger::UseLogFile, ini, config, "Log.UseLogFile", true);
     Config::Bind(LogFile, ini, config, "Log.File");
     Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
+    Config::Bind(LogFilePeriodMultiplier, ini,
+                 config, "Log.PeriodMultiplier", 0);
 #ifdef FACEBOOK
     Config::Bind(UseThriftLogger, ini, config, "Log.UseThriftLogger");
     Config::Bind(LoggerBatchSize, ini, config, "Log.BatchSize", 100);
@@ -805,16 +821,18 @@ void RuntimeOption::Load(
       Logger::UseLogFile = true;
       // replace default logger with thrift-logger
       RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-          ErrorLogFileData(LogFile, LogFileSymLink);
+          ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
       Logger::SetTheLogger(Logger::DEFAULT, new ThriftLogger());
       // mirror thrift log in plain text
       if (Config::GetBool(ini, config, "Log.TextMirror.Enable", false)) {
         auto logFile = Config::GetString(ini, config, "Log.TextMirror.File",
-                                         "", false);
+                                         "");
         auto symLink = Config::GetString(ini, config, "Log.TextMirror.SymLink",
-                                         "", false);
+                                         "");
+        auto periodMultiplier = Config::GetUInt16(
+            ini, config, "Log.TextMirror.PeriodMultiplier", 0);
         RuntimeOption::ErrorLogs["TextMirror"] =
-            ErrorLogFileData(logFile, symLink);
+            ErrorLogFileData(logFile, symLink, periodMultiplier);
         if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
           Logger::SetTheLogger("TextMirror", new ExtendedLogger());
           ExtendedLogger::EnabledByDefault = true;
@@ -828,7 +846,7 @@ void RuntimeOption::Load(
     } else {
       if (Logger::UseLogFile && RuntimeOption::ServerExecutionMode()) {
         RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-            ErrorLogFileData(LogFile, LogFileSymLink);
+            ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
       }
       if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
         Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
@@ -1064,7 +1082,7 @@ void RuntimeOption::Load(
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),
-                          EvalRecordSubprocessTimes);
+                          false);
 
     Config::Bind(EnableEmitterStats, ini, config, "Eval.EnableEmitterStats",
                  EnableEmitterStats);
@@ -1225,6 +1243,8 @@ void RuntimeOption::Load(
                  s_PHP7_master);
     Config::Bind(PHP7_ScalarTypes, ini, config, "PHP7.ScalarTypes",
                  s_PHP7_master);
+    Config::Bind(PHP7_Substr, ini, config, "PHP7.Substr",
+                 s_PHP7_master);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
   }
   {
@@ -1305,6 +1325,8 @@ void RuntimeOption::Load(
                  "Server.ShutdownListenWait", 0);
     Config::Bind(ServerShutdownEOMWait, ini, config,
                  "Server.ShutdownEOMWait", 0);
+    Config::Bind(ServerPrepareToStopTimeout, ini, config,
+                 "Server.PrepareToStopTimeout", 240);
     Config::Bind(StopOldServer, ini, config, "Server.StopOld", false);
     Config::Bind(OldServerWait, ini, config, "Server.StopOldWait", 30);
     Config::Bind(ServerRSSNeededMb, ini, config, "Server.RSSNeededMb", 4096);
@@ -1737,6 +1759,7 @@ void RuntimeOption::Load(
     if (b) RuntimeOption::AssertEmitted = v.toInt64() >= 0;
   }
 
+  Config::Bind(AliasedNamespaces, ini, config, "AliasedNamespaces");
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
   refineStaticStringTableSize();

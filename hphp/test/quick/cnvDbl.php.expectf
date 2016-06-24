@@ -6,7 +6,7 @@ float(1.1)
 float(0)
 float(1)
 
-Notice: Object of class C could not be converted to int in %s on line 4
+Notice: Object of class C could not be converted to float in %s on line 4
 float(1)
 float(0)
 float(0)
@@ -17,7 +17,7 @@ float(0)
 float(1.1)
 float(0)
 
-Notice: Object of class C could not be converted to int in %s on line 50
+Notice: Object of class C could not be converted to float in %s on line 50
 float(1)
 float(0)
 float(1)

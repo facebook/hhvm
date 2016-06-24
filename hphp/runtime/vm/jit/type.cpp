@@ -113,8 +113,14 @@ std::string Type::constValString() const {
     return folly::sformat("TV: {}", m_ptrVal);
   }
 
-  always_assert_flog(false, "Bad type in constValString(): {:#16x}:{:#16x}",
-                     m_raw, m_extra);
+  always_assert_flog(
+    false,
+    "Bad type in constValString(): {:#16x}:{}:{}:{:#16x}",
+    m_bits,
+    static_cast<ptr_t>(m_ptrKind),
+    m_hasConstVal,
+    m_extra
+  );
 }
 
 static std::string show(Ptr ptr) {
@@ -244,8 +250,8 @@ bool Type::checkValid() const {
   // We should have one canonical representation of Bottom.
   if (m_bits == kBottom) {
     assert_flog(*this == TBottom,
-                "Bottom m_bits but nonzero others in {:#16x}:{:#16x}",
-                m_raw, m_extra);
+                "Bottom m_bits but nonzero others in {:#16x}:{}:{}:{:#16x}",
+                m_bits, m_ptrVal, m_hasConstVal, m_extra);
   }
 
   return true;

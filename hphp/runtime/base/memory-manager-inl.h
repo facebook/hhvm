@@ -254,22 +254,12 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
   FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
 }
 
-ALWAYS_INLINE
-void MemoryManager::freeBigSize(void* vp, size_t bytes) {
-  m_stats.mmUsage -= bytes;
-  // Since we account for these direct allocations in our usage and adjust for
-  // them on allocation, we also need to adjust for them negatively on free.
-  m_stats.mallocDebt -= bytes;
-  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
-  m_heap.freeBig(vp);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
-  return mallocBigSize<false>(size).ptr;
+  return mallocBigSize<FreeRequested>(size).ptr;
 }
 
 ALWAYS_INLINE
@@ -319,8 +309,8 @@ inline bool MemoryManager::startStatsInterval() {
   // For the reasons stated below in refreshStatsImpl, usage can potentially be
   // negative. Make sure that doesn't occur here.
   m_stats.peakIntervalUsage = std::max<int64_t>(0, m_stats.usage());
-  m_stats.peakIntervalSlabBytes = m_stats.slabBytes;
-  assert(m_stats.peakIntervalSlabBytes >= 0);
+  m_stats.peakIntervalCap = m_stats.capacity;
+  assert(m_stats.peakIntervalCap >= 0);
   m_statsIntervalActive = true;
   return ret;
 }
@@ -329,7 +319,7 @@ inline bool MemoryManager::stopStatsInterval() {
   auto ret = m_statsIntervalActive;
   m_statsIntervalActive = false;
   m_stats.peakIntervalUsage = 0;
-  m_stats.peakIntervalSlabBytes = 0;
+  m_stats.peakIntervalCap = 0;
   return ret;
 }
 

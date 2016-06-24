@@ -114,6 +114,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::callstub:
     case Vinstr::callfaststub:
     case Vinstr::tailcallstub:
+    case Vinstr::stubunwind:
     // php function abi
     case Vinstr::defvmsp:
     case Vinstr::syncvmsp:
@@ -151,6 +152,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::movzbq:
     case Vinstr::movzlq:
     case Vinstr::movtqb:
+    case Vinstr::movtdb:
+    case Vinstr::movtdq:
     case Vinstr::movtql:
     // branches
     case Vinstr::jcc:
@@ -179,6 +182,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::asrxi:
     case Vinstr::asrxis:
     case Vinstr::bln:
+    case Vinstr::cmplims:
     case Vinstr::cmpsds:
     case Vinstr::fabs:
     case Vinstr::lslwi:
@@ -228,6 +232,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cmpb:
     case Vinstr::cmpbi:
     case Vinstr::cmpbim:
+    case Vinstr::cmpbm:
     case Vinstr::testb:
     case Vinstr::testbi:
     case Vinstr::testbim:
@@ -245,6 +250,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::orwim:
     case Vinstr::cmovw:
     case Vinstr::cmpwim:
+    case Vinstr::cmpwm:
     case Vinstr::testwim:
     case Vinstr::loadw:
     case Vinstr::storew:

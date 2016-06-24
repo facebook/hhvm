@@ -50,6 +50,7 @@ SSATmp* ldClsPropAddrKnown(IRGS& env,
   initSProps(env, cls); // calls init; must be above sPropHandle()
   auto const slot = cls->lookupSProp(name);
   auto const handle = cls->sPropHandle(slot);
+  assertx(!rds::isNormalHandle(handle));
   auto const repoTy =
     !RuntimeOption::RepoAuthoritative
       ? RepoAuthType{}
@@ -367,6 +368,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       // For sinit, the context class is always the same as the late-bound
       // class, so we can just use curClass().
       auto const handle = ctx->sPropHandle(ctx->lookupSProp(propName));
+      assertx(!rds::isNormalHandle(handle));
       base = gen(
         env,
         LdRDSAddr,

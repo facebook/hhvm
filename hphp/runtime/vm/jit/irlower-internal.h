@@ -79,6 +79,8 @@ CallDest callDestDbl(IRLS& env, const IRInstruction*);
  */
 void fwdJcc(Vout& v, IRLS& env, ConditionCode cc, Vreg sf, Block* target);
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Make a Fixup at `marker' with `sync' options.
  */
@@ -89,6 +91,45 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync = SyncOptions::Sync);
  */
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
                   SyncOptions sync, const ArgGroup& args);
+
+/*
+ * Helper for native calls registered in the NativeCalls::CallMap.
+ */
+void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst);
+
+#define IMPL_OPCODE_CALL(Opcode)                        \
+  void cg##Opcode(IRLS& env, const IRInstruction* i) {  \
+    cgCallNative(vmain(env), env, i);                   \
+  }
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Test whether the TypedValue given by (`typeSrc', `dataSrc') matches `type',
+ * setting the result in `sf', and delegating conditional work to `doJcc':
+ *
+ *    void doJcc(ConditionCode cc, Vreg sf)
+ *
+ * `doJcc' is passed `sf', and can check whether `cc' is set to determine if
+ * the type matched.
+ */
+template<class Loc, class JmpFn>
+void emitTypeTest(Vout& v, IRLS& env, Type type,
+                  Loc typeSrc, Loc dataSrc, Vreg sf, JmpFn doJcc);
+
+/*
+ * Does the work of emitTypeTest(), then branches to `taken' if the type does
+ * not match.
+ */
+template<class Loc>
+void emitTypeCheck(Vout& v, IRLS& env, Type type,
+                   Loc typeSrc, Loc dataSrc, Block* taken);
+
+/*
+ * Check the surprise flags, and call functionEnterHelper if they are set.
+ */
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
+                                 Fixup fixup, Vlabel catchBlock);
 
 ///////////////////////////////////////////////////////////////////////////////
 

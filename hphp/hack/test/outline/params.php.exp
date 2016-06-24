@@ -1,5 +1,6 @@
 f
   kind: function
+  id: function::f
   position: File "", line 3, characters 10-10:
   span: File "", line 3, character 1 - line 7, character 1:
   modifiers: 
@@ -19,6 +20,7 @@ f
 
 g
   kind: function
+  id: function::g
   position: File "", line 9, characters 10-10:
   span: File "", line 9, character 1 - line 12, character 1:
   modifiers: 
@@ -32,12 +34,14 @@ g
 
 C
   kind: class
+  id: type_id::C
   position: File "", line 14, characters 7-7:
   span: File "", line 14, character 1 - line 21, character 1:
   modifiers: 
 
   __construct
     kind: method
+    id: method::C::__construct
     position: File "", line 16, characters 19-29:
     span: File "", line 16, character 3 - line 18, character 6:
     modifiers: public 
@@ -51,6 +55,7 @@ C
 
   h
     kind: method
+    id: method::C::h
     position: File "", line 20, characters 19-19:
     span: File "", line 20, character 3 - line 20, character 41:
     modifiers: public 

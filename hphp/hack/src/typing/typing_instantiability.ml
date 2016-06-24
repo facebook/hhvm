@@ -136,7 +136,9 @@ module CheckInstantiability = struct
       let () = (match Env.get_class env n with
         | Some {tc_kind = Ast.Ctrait; tc_name; tc_pos; _}
         | Some {tc_kind = Ast.Cabstract; tc_final = true;
-                tc_name; tc_pos; _} when tc_name <> SN.Collections.cDict ->
+                tc_name; tc_pos; _}
+            when tc_name <> SN.Collections.cDict
+            && tc_name <> SN.Collections.cVec ->
           Errors.uninstantiable_class usage_pos tc_pos tc_name []
         | _ -> ()) in
       if n = SN.Classes.cClassname

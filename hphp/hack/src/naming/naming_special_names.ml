@@ -73,6 +73,7 @@ module Collections = struct
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
   let cDict             = "\\dict"
+  let cVec              = "\\vec"
 
 end
 
@@ -94,7 +95,8 @@ module Members = struct
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)
   let is_special_xhp_attribute s =
-    (Utils.str_starts_with s ":data-") || (Utils.str_starts_with s ":aria-")
+    (String_utils.string_starts_with s ":data-") ||
+    (String_utils.string_starts_with s ":aria-")
 end
 
 module UserAttributes = struct

@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 
-#include "hphp/runtime/base/arch.h"
+#include "hphp/util/arch.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
@@ -40,6 +40,7 @@ PhysReg rret_type() { return ARCH_SWITCH_CALL(rret_type); }
 
 PhysReg rret(size_t i) { return ARCH_SWITCH_CALL(rret, i); }
 PhysReg rret_simd(size_t i) { return ARCH_SWITCH_CALL(rret_simd, i); }
+PhysReg rret_indirect() { return ARCH_SWITCH_CALL(rret_indirect); }
 
 PhysReg rarg(size_t i) { return ARCH_SWITCH_CALL(rarg, i); }
 PhysReg rarg_simd(size_t i) { return ARCH_SWITCH_CALL(rarg_simd, i); }

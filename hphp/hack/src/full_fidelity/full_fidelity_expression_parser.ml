@@ -16,61 +16,30 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_lexer
 module Operator = Full_fidelity_operator
+module PrecedenceParser = Full_fidelity_precedence_parser
 
 open TokenKind
 open Syntax
 
-module WithStatementParser
-  (StatementParser : Full_fidelity_statement_parser_type.StatementParserType) :
+module WithStatementAndDeclParser
+  (StatementParser : Full_fidelity_statement_parser_type.StatementParserType)
+  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType) :
   Full_fidelity_expression_parser_type.ExpressionParserType = struct
 
-  type t = {
-    lexer : Lexer.t;
-    precedence : int;
-    errors : SyntaxError.t list
-  }
-
-  let make lexer errors =
-    { lexer; errors; precedence = 0 }
-
-  let errors parser =
-    parser.errors
-
-  let lexer parser =
-    parser.lexer
-
-  let with_error parser message =
-    (* TODO: Should be able to express errors on whole syntax node. *)
-    (* TODO: Is this even right? Won't this put the error on the trivia? *)
-    let start_offset = Lexer.start_offset parser.lexer in
-    let end_offset = Lexer.end_offset parser.lexer in
-    let error = SyntaxError.make start_offset end_offset message in
-    { parser with errors = error :: parser.errors }
-
-  let with_precedence parser precedence =
-    { parser with precedence }
-
-  let next_token parser =
-    let (lexer, token) = Lexer.next_token parser.lexer in
-    let parser = { parser with lexer } in
-    (parser, token)
-
-  let peek_token parser =
-    let (_, token) = Lexer.next_token parser.lexer in
-    token
-
-  let expect_token parser kind error =
-    let (parser1, token) = next_token parser in
-    if (Token.kind token) = kind then
-      (parser1, make_token token)
-    else
-      (* ERROR RECOVERY: Create a missing token for the expected token,
-         and continue on from the current token. Don't skip it. *)
-      (with_error parser error, (make_missing()))
+  include PrecedenceParser
+  include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
 
   let rec parse_expression parser =
     let (parser, term) = parse_term parser in
     parse_remaining_expression parser term
+
+  (* try to parse an expression. If parser cannot make progress, return None *)
+  and parse_expression_optional parser =
+    let module Lexer = Full_fidelity_lexer in
+    let offset = Lexer.start_offset (lexer parser) in
+    let (parser, expr) = parse_expression parser in
+    let offset1 = Lexer.start_offset (lexer parser) in
+    if offset1 = offset then None else Some (parser, expr)
 
   and parse_term parser =
     let (parser1, token) = next_token parser in
@@ -120,7 +89,7 @@ module WithStatementParser
     | Class -> (* TODO When is this legal? *)
       (parser1, make_token token)
 
-
+    | List  -> parse_list_expression parser
     | Shape (* TODO: Parse shape *)
     | New  (* TODO: Parse object creation *)
     | Async (* TODO: Parse lambda *)
@@ -161,6 +130,7 @@ module WithStatementParser
     | BarEqual
     | PlusEqual
     | StarEqual
+    | StarStarEqual
     | SlashEqual
     | DotEqual
     | MinusEqual
@@ -205,20 +175,16 @@ module WithStatementParser
     | LeftParen (* TODO: Parse call *)
     | LeftBracket
     | LeftBrace -> (* TODO indexers *) (* TODO: Produce an error for brace *)
-    (parser1, make_token token)
-    | Question -> (* TODO conditional expression *)
       (parser1, make_token token)
+    | Question -> parse_conditional_expression parser1 term (make_token token)
     | _ -> (parser, term)
 
   and parse_parenthesized_or_lambda_expression parser =
     (*TODO: Does not yet deal with lambdas *)
     let (parser, left_paren) = next_token parser in
-    let precedence = parser.precedence in
-    let parser = with_precedence parser 0 in
-    let (parser, expression) = parse_expression parser in
+    let (parser, expression) = with_reset_precedence parser parse_expression in
     let (parser, right_paren) =
       expect_token parser RightParen SyntaxError.error1011 in
-    let parser = with_precedence parser precedence in
     let syntax =
       make_parenthesized_expression
         (make_token left_paren) expression right_paren in
@@ -320,4 +286,55 @@ module WithStatementParser
     else
       (parser, right_term)
 
+  and parse_conditional_expression parser test question =
+    (* POSSIBLE SPEC PROBLEM
+       We allow any expression, including assignment expressions, to be in
+       the consequence and alternative of a conditional expression, even
+       though assignment is lower precedence than ?:.  This is legal:
+       $a ? $b = $c : $d = $e
+       Interestingly, this is illegal in C and Java, which require parens,
+       but legal in C#.
+    *)
+    let token = peek_token parser in
+    (* e1 ?: e2 -- where there is no consequence -- is legal *)
+    let (parser, consequence) = if (Token.kind token) = Colon then
+      (parser, make_missing())
+    else
+      with_reset_precedence parser parse_expression in
+    let (parser, colon) =
+      expect_token parser Colon SyntaxError.error1020 in
+    let (parser, alternative) = with_reset_precedence parser parse_expression in
+    let result = make_conditional_expression
+      test question consequence colon alternative in
+    (parser, result)
+
+  and parse_list_expression parser =
+    let parser, keyword_token = next_token parser in
+    let parser, left_paren =
+      expect_token parser LeftParen SyntaxError.error1019 in
+    let parser, members = parse_list_expression_list parser in
+    let parser, right_paren =
+      expect_token parser RightParen SyntaxError.error1011 in
+    let syntax = make_listlike_expression
+      (make_token keyword_token) left_paren members right_paren in
+    (parser, syntax)
+  and parse_list_expression_list parser =
+    let rec aux parser acc =
+      let (parser1, token) = next_token parser in
+      match Token.kind token with
+      | Comma ->
+        aux parser1 ((make_token token) :: acc)
+      | RightParen
+      | Equal -> (* list intrinsic appears only on LHS of equal sign *)
+        (parser, make_list (List.rev acc))
+      | _ -> begin
+        (* ERROR RECOVERY if parser makes no progress, make an error *)
+        match parse_expression_optional parser with
+        | None ->
+          let parser = with_error parser SyntaxError.error1015 in
+          (parser, make_missing ())
+        | Some (parser, expr) -> aux parser (expr :: acc)
+        end
+    in
+    aux parser []
 end

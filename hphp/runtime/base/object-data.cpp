@@ -774,7 +774,11 @@ ObjectData* ObjectData::clone() {
   Object clone = Object::attach(obj);
   auto const nProps = m_cls->numDeclProperties();
   auto const clonePropVec = clone->propVec();
+  auto const props = m_cls->declProperties();
   for (auto i = Slot{0}; i < nProps; i++) {
+    if (props[i].attrs & AttrNoSerialize) {
+      continue;
+    }
     tvRefcountedDecRef(&clonePropVec[i]);
     tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
   }
@@ -923,7 +927,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  auto o = new (MM().mallocBigSize<false>(size).ptr)
+  auto o = new (MM().mallocBigSize<MemoryManager::FreeRequested>(size).ptr)
     ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;
@@ -1620,6 +1624,10 @@ void ObjectData::raiseObjToIntNotice(const char* clsName) {
   raise_notice("Object of class %s could not be converted to int", clsName);
 }
 
+void ObjectData::raiseObjToDoubleNotice(const char* clsName) {
+  raise_notice("Object of class %s could not be converted to float", clsName);
+}
+
 void ObjectData::raiseAbstractClassError(Class* cls) {
   Attr attrs = cls->attrs();
   raise_error("Cannot instantiate %s %s",
@@ -1640,8 +1648,9 @@ void ObjectData::getProp(const Class* klass,
                          Array& props,
                          std::vector<bool>& inserted) const {
   if (prop->attrs()
-      & (AttrStatic | // statics aren't part of individual instances
-         AttrBuiltin  // runtime-internal attrs, such as the <<Memoize>> cache
+      & (AttrStatic |    // statics aren't part of individual instances
+         AttrNoSerialize // runtime-internal attrs, such as the
+                         // <<__Memoize>> cache
         )) {
     return;
   }

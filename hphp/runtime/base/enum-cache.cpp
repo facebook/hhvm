@@ -88,10 +88,10 @@ const EnumCache::EnumValues* EnumCache::cacheRequestEnumValues(
   Array&& values) {
 
   m_nonScalarEnumValuesMap.bind();
-  auto& enumValuesData = *m_nonScalarEnumValuesMap;
-  if (!enumValuesData) {
-    enumValuesData = req::make_raw<ReqEnumValuesMap>();
+  if (!m_nonScalarEnumValuesMap.isInit()) {
+    m_nonScalarEnumValuesMap.initWith(req::make_raw<ReqEnumValuesMap>());
   }
+  auto& enumValuesData = *m_nonScalarEnumValuesMap;
 
   auto enums = req::make_raw<EnumCache::EnumValues>();
   enums->values = std::move(values);
@@ -158,7 +158,8 @@ const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
   if (m_enumValuesMap.find(acc, key)) {
     return acc->second;
   }
-  if (!m_nonScalarEnumValuesMap.bound() || !*m_nonScalarEnumValuesMap) {
+  if (!m_nonScalarEnumValuesMap.bound() ||
+      !m_nonScalarEnumValuesMap.isInit()) {
     return nullptr;
   }
   auto data = *m_nonScalarEnumValuesMap;
@@ -187,7 +188,8 @@ void EnumCache::deleteEnumValues(intptr_t key) {
     return;
   }
 
-  if (m_nonScalarEnumValuesMap.bound() && *m_nonScalarEnumValuesMap) {
+  if (m_nonScalarEnumValuesMap.bound() &&
+      m_nonScalarEnumValuesMap.isInit()) {
     auto data = *m_nonScalarEnumValuesMap;
     data->erase(key);
   }

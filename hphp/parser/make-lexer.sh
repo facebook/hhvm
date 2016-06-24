@@ -3,11 +3,18 @@
 unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
+# If we're using buck, then we'll be in a sandboxed source directory instead of
+# the repo.  We want the path to the repo so we can check in the generated
+# parser artifacts.
+if [ -n "${FBCODE_DIR}" ]; then
+  DIR="${FBCODE_DIR}/hphp/parser"
+fi
+
 if [ -z "${INSTALL_DIR}" ]; then
   INFILE=${DIR}/hphp.ll
   OUTFILE=${DIR}/lex.yy.cpp
 
-  FLEX=`which flex`
+  FLEX=$(which flex)
   if [ ! -x "$FLEX" ]; then
     echo "flex not found" 1>&2
     exit 1
@@ -24,7 +31,7 @@ if [ $? -ne 0 ] ; then
   exit 1
 fi
 
-SED=`which sed`
+SED=$(which sed)
 if [ ! -x "$SED" ]; then
   echo "sed not found" 1>&2
   exit 1

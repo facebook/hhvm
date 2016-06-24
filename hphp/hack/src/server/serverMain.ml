@@ -12,7 +12,7 @@ open Core
 open ServerEnv
 open ServerUtils
 open Reordered_argument_collections
-open Utils
+open String_utils
 
 type recheck_loop_stats = {
   rechecked_batches : int;
@@ -88,7 +88,7 @@ module Program =
       let root = Path.to_string @@ ServerArgs.root genv.options in
       (* Because of symlinks, we can have updates from files that aren't in
        * the .hhconfig directory *)
-      let updates = SSet.filter updates (fun p -> str_starts_with p root) in
+      let updates = SSet.filter updates (fun p -> string_starts_with p root) in
       Relative_path.(relativize_set Root updates)
 
     let recheck genv old_env typecheck_updates =

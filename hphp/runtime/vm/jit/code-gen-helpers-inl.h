@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 
 namespace HPHP { namespace jit {
@@ -47,7 +48,15 @@ template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
                     Destroy destroy, bool unlikelyDestroy) {
   auto const sf = v.makeReg();
-  v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+      break;
+    case Arch::ARM:
+      v << cmplims{1, data[FAST_REFCOUNT_OFFSET], sf};
+      break;
+  }
   ifThenElse(
     v, vcold, CC_E, sf,
     destroy,

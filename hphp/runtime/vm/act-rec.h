@@ -342,6 +342,11 @@ static_assert(offsetof(ActRec, m_sfp) == 0,
               "m_sfp should be at offset 0 of ActRec");
 
 /*
+ * Size in bytes of the target architecture's call frame.
+ */
+constexpr auto kNativeFrameSize = offsetof(ActRec, _dummyB);
+
+/*
  * Whether `address' is a helper stub that we're permitted to set
  * ActRec::m_savedRip to.
  */

@@ -74,17 +74,49 @@ let get_as_constraints env ak tyopt =
          (match Env.get_upper_bounds env n with ty::_ -> Some ty | _ -> None)
        | _ -> None)
 
+(*****************************************************************************
+ * Get the "as" constraint from an abstract type or generic parameter, or
+ * return the type itself if there is no "as" constraint.
+ * In the case of a generic parameter whose "as" constraint is another
+ * generic parameter, repeat the process until a type is reached that is not
+ * a generic parameter, or return None if there is a cycle.
+ * (For example, functon foo<Tu as Tv, Tv as Tu>(...))
+ *
+ * TODO: return a list of types if there are multiple constraints.
+ *****************************************************************************)
+let get_concrete_supertypes env ty =
+  let rec iter seen env ty =
+    let env, ty = Env.expand_type env ty in
+    match snd ty with
+    | Tabstract (_, Some ty) ->
+      env, Some ty
+    | Tabstract (AKgeneric n, _) ->
+      if SSet.mem n seen
+      then env, None
+      else
+      begin match Env.get_upper_bounds env n with
+      | ty::_ -> iter (SSet.add n seen) env ty
+      | _ -> env, None
+      end
+    | Tabstract (_, tyopt) ->
+      env, tyopt
+    | _ ->
+      env, Some ty
+  in iter SSet.empty env ty
+
+
 (*****************************************************************************)
 (* Gets the base type of an abstract type *)
 (*****************************************************************************)
 
-let rec get_base_type env ty = match snd ty with
+let rec get_base_type env ty =
+  match snd ty with
   | Tabstract (AKnewtype (classname, _), _) when
       classname = SN.Classes.cClassname -> ty
-  | Tabstract (ak, tyopt) ->
-    begin match get_as_constraints env ak tyopt with
-    | None -> ty
-    | Some ty -> get_base_type env ty
+  | Tabstract _ ->
+    begin match get_concrete_supertypes env ty with
+    | _, Some ty -> get_base_type env ty
+    | _, None -> ty
     end
   | _ -> ty
 

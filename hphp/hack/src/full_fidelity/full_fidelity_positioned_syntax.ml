@@ -53,7 +53,6 @@ module PositionedSyntaxValue = struct
 
   let trailing_width value =
     value.trailing_width
-
 end
 
 include SyntaxWithPositionedToken.WithSyntaxValue(PositionedSyntaxValue)

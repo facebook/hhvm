@@ -17,6 +17,7 @@ open Core
 module ParserHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = Ast.program
     let prefix = Prefix.make()
+    let description = "Parser"
   end)
 
 let find_class_in_file file_name class_name =

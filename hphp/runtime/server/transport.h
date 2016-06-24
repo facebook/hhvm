@@ -481,7 +481,9 @@ protected:
 
   std::string m_mimeType;
   bool m_sendContentType;
-  // 0 - disabled, -1 - ini_set dictates the setting, enabled otherwise
+  //  0 - disabled
+  //  1 - enabled, ini_set("off) allows to disable
+  // -1 - disabled, ini_set("on") allows to enable
   int8_t m_compressionEnabled[CompressionType::Max];
   // encodings accepted by the client, and enabled
   bool m_acceptedEncodings[CompressionType::Max];

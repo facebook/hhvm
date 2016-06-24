@@ -85,6 +85,7 @@ struct RuntimeOption {
   static std::map<std::string, ErrorLogFileData> ErrorLogs;
   static std::string LogFile;
   static std::string LogFileSymLink;
+  static uint16_t LogFilePeriodMultiplier;
 
   static int LogHeaderMangle;
   static bool AlwaysEscapeLog;
@@ -165,6 +166,7 @@ struct RuntimeOption {
   static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
   static int ServerShutdownEOMWait;
+  static int ServerPrepareToStopTimeout;
   // If `StopOldServer` is set, we try to stop the old server running
   // on the local host earlier when we initialize, and we do not start
   // serving requests until we are confident that the system can give
@@ -396,6 +398,7 @@ struct RuntimeOption {
   static bool PHP7_ReportVersion;
   static bool PHP7_ScalarTypes;
   static bool PHP7_EngineExceptions;
+  static bool PHP7_Substr;
   static bool PHP7_UVS;
 
   static int64_t HeapSizeMB;
@@ -415,6 +418,8 @@ struct RuntimeOption {
   static std::string DynamicExtensionPath;
   static std::vector<std::string> DynamicExtensions;
 
+  // Namespace aliases for the compiler
+  static std::map<std::string, std::string> AliasedNamespaces;
 
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
@@ -434,7 +439,8 @@ struct RuntimeOption {
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(uint64_t, JitMatureSize,           25 << 20)                        \
   F(bool, JitTimer,                    kJitTimerDefault)                \
-  F(int,  JitConcurrently,             0)                               \
+  F(int, JitConcurrently,              0)                               \
+  F(int, JitThreads,                   6)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \
@@ -469,6 +475,8 @@ struct RuntimeOption {
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
+  F(bool, PerfJitDump,                 false)                           \
+  F(string, PerfJitDumpDir,            "/tmp")                          \
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
   F(int32_t, PerfRelocate,             0)                               \
@@ -486,8 +494,8 @@ struct RuntimeOption {
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
-  F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
-  F(uint32_t, JitResetProfCountersRequest, 1000)                        \
+  F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
+  F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \

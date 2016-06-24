@@ -348,11 +348,11 @@ inline void Class::setClassHandle(rds::Link<LowPtr<Class>> link) const {
 }
 
 inline Class* Class::getCached() const {
-  return *m_cachedClass;
+  return m_cachedClass.isInit() ? *m_cachedClass : nullptr;
 }
 
 inline void Class::setCached() {
-  *m_cachedClass = this;
+  m_cachedClass.initWith(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -511,7 +511,9 @@ inline bool isAbstract(const Class* cls) {
 }
 
 inline bool classHasPersistentRDS(const Class* cls) {
-  return cls && rds::isPersistentHandle(cls->classHandle());
+  return cls != nullptr &&
+    cls->classHandle() != rds::kInvalidHandle &&
+    rds::isPersistentHandle(cls->classHandle());
 }
 
 inline bool classMayHaveMagicPropMethods(const Class* cls) {

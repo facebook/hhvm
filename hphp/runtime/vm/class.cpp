@@ -225,14 +225,14 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const size = sizeof_Class
                     + sizeof(m_classVec[0]) * classVecLen
                     + sizeof(LowPtr<Func>) * funcVecLen;
-  auto const mem = low_malloc(size);
+  auto const mem = low_malloc_data(size);
   auto const classPtr = (void *)((uintptr_t)mem +
                                  funcVecLen * sizeof(LowPtr<Func>));
   try {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
   } catch (...) {
-    low_free(mem);
+    low_free_data(mem);
     throw;
   }
 }
@@ -349,7 +349,7 @@ void Class::atomicRelease() {
   assert(!m_cachedClass.bound());
   assert(!getCount());
   this->~Class();
-  low_free(mallocPtr());
+  low_free_data(mallocPtr());
 }
 
 Class::~Class() {
@@ -379,7 +379,7 @@ Class::~Class() {
   // clean enum cache
   EnumCache::deleteValues(this);
 
-  low_free(m_vtableVec.get());
+  low_free_data(m_vtableVec.get());
 }
 
 void Class::releaseRefs() {
@@ -582,7 +582,7 @@ void Class::initProps() const {
   VMRegAnchor _;
 
   initPropHandle();
-  *m_propDataCache = propVec;
+  m_propDataCache.initWith(propVec);
 
   try {
     // Iteratively invoke 86pinit() methods upward
@@ -598,6 +598,7 @@ void Class::initProps() const {
     req::destroy_raw_array(propVec->begin(), propVec->size());
     req::destroy_raw(propVec);
     *m_propDataCache = nullptr;
+    m_propDataCache.markUninit();
     throw;
   }
 
@@ -621,7 +622,7 @@ void Class::initProps() const {
 }
 
 bool Class::needsInitSProps() const {
-  return !m_sPropCacheInit.bound() || !*m_sPropCacheInit;
+  return !m_sPropCacheInit.bound() || !m_sPropCacheInit.isInit();
 }
 
 void Class::initSProps() const {
@@ -663,7 +664,7 @@ void Class::initSProps() const {
     }
   }
 
-  *m_sPropCacheInit = true;
+  m_sPropCacheInit.initWith(true);
 }
 
 
@@ -743,7 +744,9 @@ void Class::initSPropHandles() const {
 }
 
 Class::PropInitVec* Class::getPropData() const {
-  return m_propDataCache.bound() ? *m_propDataCache : nullptr;
+  return (m_propDataCache.bound() && m_propDataCache.isInit())
+    ? *m_propDataCache
+    : nullptr;
 }
 
 TypedValue* Class::getSPropData(Slot index) const {
@@ -937,13 +940,15 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   m_nonScalarConstantCache.bind();
   auto& clsCnsData = *m_nonScalarConstantCache;
 
-  if (clsCnsData.get() != nullptr) {
+  if (m_nonScalarConstantCache.isInit()) {
     if (auto cCns = clsCnsData->nvGet(clsCnsName)) return *cCns;
   }
 
   auto makeCache = [&] {
-    if (clsCnsData.get() == nullptr) {
+    if (!m_nonScalarConstantCache.isInit()) {
+      clsCnsData.detach();
       clsCnsData = Array::attach(PackedArray::MakeReserve(m_constants.size()));
+      m_nonScalarConstantCache.markInit();
     }
   };
 
@@ -1052,17 +1057,16 @@ size_t Class::declPropOffset(Slot index) const {
 
 bool Class::verifyPersistent() const {
   if (!(attrs() & AttrPersistent)) return false;
-  if (m_parent.get() &&
-      !rds::isPersistentHandle(m_parent->classHandle())) {
+  if (m_parent.get() && !classHasPersistentRDS(m_parent.get())) {
     return false;
   }
   for (auto const& declInterface : declInterfaces()) {
-    if (!rds::isPersistentHandle(declInterface->classHandle())) {
+    if (!classHasPersistentRDS(declInterface.get())) {
       return false;
     }
   }
   for (auto const& usedTrait : m_extra->m_usedTraits) {
-    if (!rds::isPersistentHandle(usedTrait->classHandle())) {
+    if (!classHasPersistentRDS(usedTrait.get())) {
       return false;
     }
   }
@@ -1264,7 +1268,7 @@ void Class::setSpecial() {
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, s_86ctor.get());
   assert(m_ctor && "class had no user-defined constructor or 86ctor");
-  assert((m_ctor->attrs() & ~(AttrBuiltin|AttrAbstract|
+  assert((m_ctor->attrs() & ~(AttrBuiltin|AttrAbstract|AttrHot|
                               AttrInterceptable|AttrMayUseVV)) ==
          (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
@@ -2461,7 +2465,7 @@ void Class::setInterfaceVtables() {
   const size_t nVtables = maxSlot + 1;
   auto const vtableVecSz = nVtables * sizeof(VtableVecSlot);
   auto const memSz = vtableVecSz + totalMethods * sizeof(LowPtr<Func>);
-  auto const mem = static_cast<char*>(low_malloc(memSz));
+  auto const mem = static_cast<char*>(low_malloc_data(memSz));
   auto cursor = mem;
 
   ITRACE(3, "Setting interface vtables for class {}. "

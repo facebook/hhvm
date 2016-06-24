@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/irlower.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -66,28 +67,10 @@ private:
                     SyncOptions sync, const ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
-  void emitTrashTV(Vreg, int32_t, char fillByte);
-
   template <class JmpFn>
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
 
-  template<class Loc1, class Loc2, class JmpFn>
-  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, Vreg sf,
-                    JmpFn doJcc);
-
-  template<class DataLoc, class JmpFn>
-  void emitSpecializedTypeTest(Type type, DataLoc data, Vreg sf, JmpFn doJcc);
-
-  template<class Loc>
-  void emitTypeCheck(Type type, Loc typeSrc,
-                     Loc dataSrc, Block* taken);
-
   void emitVerifyCls(IRInstruction* inst);
-
-  void emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx, bool staticCallee);
-
-  Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
-                                    rds::Handle ch);
 
   void cgCoerceHelper(IRInstruction* inst, Vreg base, int offset,
                       Func const* callee, int argNum);
@@ -100,28 +83,9 @@ private:
 private:
   Vreg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);
-  void emitSetCc(IRInstruction*, ConditionCode cc, Vreg sf);
-  template<class JmpFn>
-  void emitIsTypeTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
-  void cgIsTypeCommon(IRInstruction* inst, bool negate);
-  void cgIsTypeMemCommon(IRInstruction*, bool negate);
-  Vreg emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst);
   void emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
                         const Class* cls, size_t nProps);
 
-  void decRefImpl(Vout& v, const IRInstruction*, const OptDecRefProfile&, bool);
-  float decRefDestroyRate(const IRInstruction* inst,
-                          OptDecRefProfile& profile, Type type);
-  void emitDecRefTypeStat(Vout& v, const IRInstruction*);
-
-  void cgIterNextCommon(IRInstruction* inst);
-  void cgIterInitCommon(IRInstruction* inst);
-  void cgMIterNextCommon(IRInstruction* inst);
-  void cgMIterInitCommon(IRInstruction* inst);
-  Vreg cgLdFuncCachedCommon(const StringData* name, Vreg dst);
-  void cgLookupCnsCommon(IRInstruction* inst);
-  rds::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
-                                  Vreg sf);
   void cgPropImpl(IRInstruction*);
   void cgIssetEmptyPropImpl(IRInstruction*);
   void cgElemImpl(IRInstruction*);
@@ -148,10 +112,8 @@ private:
   int iterOffset(const BCMarker& marker, uint32_t id);
 
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
-  void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
-  void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
 
   Vout& vmain() { assert(m_state.vmain); return *m_state.vmain; }
   Vout& vcold() { assert(m_state.vcold); return *m_state.vcold; }

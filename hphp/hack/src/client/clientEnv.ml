@@ -42,8 +42,11 @@ type client_mode =
 | MODE_FORMAT of int * int
 | MODE_FIND_DEPENDENT_FILES of string
 | MODE_GET_DEFINITION of string
+| MODE_GET_DEFINITION_BY_ID of string
 | MODE_TRACE_AI of string
 | MODE_REMOVE_DEAD_FIXMES of int list
+| MODE_IDE_FIND_REFS of string
+| MODE_IDE_HIGHLIGHT_REFS of string
 
 type client_check_env = {
   mode: client_mode;
@@ -92,3 +95,6 @@ let mode_to_string = function
   | MODE_GET_DEFINITION _ -> "MODE_GET_DEFINITION"
   | MODE_TRACE_AI _ -> "MODE_TRACE_AI"
   | MODE_REMOVE_DEAD_FIXMES _ -> "MODE_REMOVE_DEAD_FIXMES"
+  | MODE_IDE_FIND_REFS _ -> "MODE_IDE_FIND_REFS"
+  | MODE_GET_DEFINITION_BY_ID _ -> "MODE_GET_DEFINITION_BY_ID"
+  | MODE_IDE_HIGHLIGHT_REFS _ -> "MODE_IDE_HIGHLIGHT_REFS"

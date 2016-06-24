@@ -21,11 +21,11 @@
 #include <algorithm>
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-util.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/asm-info.h"

@@ -16,3 +16,6 @@ val get_refs_with_defs : action -> ServerEnv.genv ->
   ServerEnv.env -> (string * Pos.t) list
 
 val go : action -> ServerEnv.genv -> ServerEnv.env -> result
+
+val go_from_file :
+  (string * int * int) -> ServerEnv.genv -> ServerEnv.env -> result

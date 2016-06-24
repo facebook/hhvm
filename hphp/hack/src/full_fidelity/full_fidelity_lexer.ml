@@ -485,7 +485,7 @@ let scan_token in_type lexer =
   | ('+', '+', _) -> (advance lexer 2, TokenKind.PlusPlus)
   | ('+', _, _) -> (advance lexer 1, TokenKind.Plus)
   | ('*', '=', _) -> (advance lexer 2, TokenKind.StarEqual)
-  | ('*', '*', '=') -> (advance lexer 2, TokenKind.StarStarEqual)
+  | ('*', '*', '=') -> (advance lexer 3, TokenKind.StarStarEqual)
   | ('*', '*', _) -> (advance lexer 2, TokenKind.StarStar)
   | ('*', _, _) -> (advance lexer 1, TokenKind.Star)
   | ('~', _, _) -> (advance lexer 1, TokenKind.Tilde)
@@ -505,6 +505,7 @@ let scan_token in_type lexer =
   | ('<', '=', _) -> (advance lexer 2, TokenKind.LessThanEqual)
   | ('<', '<', _) -> (advance lexer 2, TokenKind.LessThanLessThan)
   | ('<', _, _) -> (advance lexer 1, TokenKind.LessThan)
+  | ('>', '>', '=') -> (advance lexer 3, TokenKind.GreaterThanGreaterThanEqual)
   | ('>', '>', _) ->
     (* If we are parsing a generic type argument list then we might be
        at the >> in List<List<int>>.  In that case we want to lex two

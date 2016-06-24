@@ -20,6 +20,8 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/arch.h"
+
 namespace HPHP { namespace jit {
 
 struct SSATmp;
@@ -135,12 +137,13 @@ struct ArgGroup {
 
   explicit ArgGroup(const IRInstruction* inst,
                     const StateVector<SSATmp,Vloc>& locs)
-    : m_inst(inst), m_locs(locs), m_override(nullptr)
+    : m_inst(inst), m_locs(locs)
   {}
 
   size_t numGpArgs() const { return m_gpArgs.size(); }
   size_t numSimdArgs() const { return m_simdArgs.size(); }
   size_t numStackArgs() const { return m_stkArgs.size(); }
+  bool isIndirect() const { return m_indirect; }
 
   ArgDesc& gpArg(size_t i) {
     assertx(i < m_gpArgs.size());
@@ -190,9 +193,18 @@ struct ArgGroup {
     ArgDesc arg(s, m_locs[s]);
     if (isFP) {
       push_SIMDarg(arg);
+      if (arch() == Arch::PPC64) {
+        // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
+        push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
+      }
     } else {
       push_arg(arg);
     }
+    return *this;
+  }
+
+  ArgGroup& indirect() {
+    m_indirect = true;
     return *this;
   }
 
@@ -237,10 +249,11 @@ private:
 private:
   const IRInstruction* m_inst;
   const StateVector<SSATmp,Vloc>& m_locs;
-  ArgVec* m_override; // used to force args to go into a specific ArgVec
+  ArgVec* m_override{nullptr}; // force args to go into a specific ArgVec
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
+  bool m_indirect{false}; // has indirect result?
 };
 
 ArgGroup toArgGroup(const NativeCalls::CallInfo&,

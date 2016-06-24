@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
@@ -171,7 +171,7 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
   }
 
   if (callee->cls()) {
-    if (!rds::isPersistentHandle(callee->cls()->classHandle())) {
+    if (!classHasPersistentRDS(callee->cls())) {
       // if the callee's class is not persistent, its still ok
       // to use it if we're jitting into a method of a subclass
       auto ctx = callSK.func()->cls();
@@ -180,7 +180,8 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
       }
     }
   } else {
-    if (!rds::isPersistentHandle(callee->funcHandle())) {
+    auto const handle = callee->funcHandle();
+    if (handle == rds::kInvalidHandle || !rds::isPersistentHandle(handle)) {
       // if the callee isn't persistent, its still ok to
       // use it if its defined at the top level in the same
       // unit as the caller
@@ -608,8 +609,8 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
     return nullptr;
   }
 
-  TransCFG cfg(callee->getFuncId(), profData, mcg->tx().getSrcDB(),
-               mcg->jmpToTransIDMap(), true /* inlining */);
+  TransCFG cfg(callee->getFuncId(), profData, mcg->srcDB(),
+               true /* inlining */);
 
   HotTransContext ctx;
   ctx.tid = dvID;

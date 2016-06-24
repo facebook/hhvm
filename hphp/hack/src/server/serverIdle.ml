@@ -9,7 +9,7 @@
  *)
 
 open Core
-open Utils
+open String_utils
 
 (*****************************************************************************)
 (* Periodically called by the daemon *)
@@ -118,7 +118,7 @@ let init (root : Path.t) =
         let fn = Filename.concat GlobalConfig.tmp_dir fn in
         if (try Sys.is_directory fn with _ -> false)
           (* We don't want to touch things like .watchman_failed *)
-          || str_starts_with fn "."
+          || string_starts_with fn "."
           || not (ServerFiles.is_of_root root fn) then ()
         else Sys_utils.try_touch ~follow_symlinks:false fn
       end (Sys.readdir GlobalConfig.tmp_dir);

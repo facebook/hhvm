@@ -1,0 +1,15 @@
+C::$foo File "static_property.php", line 9, characters 11-14:
+C::$foo File "static_property.php", line 10, characters 12-15:
+C::$foo File "static_property.php", line 11, characters 8-11:
+C::$foo File "static_property.php", line 12, characters 13-16:
+D::$foo File "static_property.php", line 18, characters 11-14:
+D::$foo File "static_property.php", line 19, characters 12-15:
+C::$foo File "static_property.php", line 20, characters 8-11:
+D::$foo File "static_property.php", line 21, characters 13-16:
+C::$foo File "static_property.php", line 22, characters 13-16:
+C::$foo File "static_property.php", line 30, characters 7-10:
+D::$foo File "static_property.php", line 31, characters 7-10:
+C::$foo File "static_property.php", line 32, characters 7-10:
+C::$foo File "static_property.php", line 33, characters 7-10:
+C::$foo File "static_property.php", line 34, characters 6-9:
+D::$foo File "static_property.php", line 35, characters 6-9:

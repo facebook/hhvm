@@ -72,13 +72,9 @@ struct APCString {
     return reinterpret_cast<const APCString*>(handle);
   }
 
-  const APCHandle* getHandle() const {
-    return &m_handle;
-  }
-
-  APCHandle* getHandle() {
-    return &m_handle;
-  }
+  // Used when creating/destroying a local proxy (see StringData).
+  void reference() const { m_handle.referenceNonRoot(); }
+  void unreference() const { m_handle.unreferenceNonRoot(); }
 
   StringData* getStringData() {
     return &m_str;

@@ -8,10 +8,11 @@
  *
 *)
 
+open Core
 open Hh_json
 
-let to_json = function
-  | Some (symbol, definition) ->
+let to_json x =
+  JSON_Array (List.map x begin function (symbol, definition) ->
     let definition_pos, definition_span = Option.value_map definition
       ~f:(fun x -> Pos.json x.SymbolDefinition.pos,
                    Pos.multiline_json x.SymbolDefinition.span)
@@ -25,13 +26,13 @@ let to_json = function
       "definition_pos", definition_pos;
       "definition_span", definition_span;
     ]
-  | None -> JSON_Null
+  end)
 
 let print_json res =
   print_endline (Hh_json.json_to_string (to_json res))
 
-let print_readable = function
-  | Some (symbol, definition) ->
+let print_readable x =
+  List.iter x begin function (symbol, definition) ->
     Printf.printf "Name: %s, type: %s, position: %s"
       symbol.SymbolOccurrence.name
       (ClientGetMethodName.get_result_type symbol)
@@ -42,7 +43,7 @@ let print_readable = function
         (Pos.multiline_string_no_file x.SymbolDefinition.pos)
     end;
     print_newline ()
-  | None -> ()
+  end
 
 let go res output_json =
   if output_json then

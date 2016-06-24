@@ -11,23 +11,27 @@
 open Core
 open SymbolOccurrence
 open Typing_defs
-open Utils
 
 let is_target target_line target_char pos =
   let l, start, end_ = Pos.info_pos pos in
   l = target_line && start <= target_char && target_char - 1 <= end_
 
+let append_result result_ref result =
+  if not (List.mem !result_ref result) then result_ref := result :: !result_ref
+
 let process_class_id result_ref is_target_fun cid _ =
   if is_target_fun (fst cid)
   then begin
     let name = snd cid in
-    result_ref := Some { name;
-                         type_ = Class;
-                         pos   = fst cid
-                       }
+    append_result result_ref @@
+      {
+        name;
+        type_ = Class;
+        pos   = fst cid
+      }
   end
 
-let clean_member_name name = lstrip name "$"
+let clean_member_name name = String_utils.lstrip name "$"
 
 let process_member result_ref is_target_fun c_name id ~is_method ~is_const =
   if is_target_fun (fst id)
@@ -38,8 +42,8 @@ let process_member result_ref is_target_fun c_name id ~is_method ~is_const =
       else if is_method then Method (c_name, member_name)
       else Property (c_name, member_name)
     in
-    result_ref :=
-      Some { name  = (c_name ^ "::" ^ (clean_member_name member_name));
+    append_result result_ref @@
+           { name  = (c_name ^ "::" ^ (clean_member_name member_name));
              type_;
              pos   = fst id
            }
@@ -60,9 +64,20 @@ let process_fun_id result_ref is_target_fun id =
   if is_target_fun (fst id)
   then begin
     let name = snd id in
-    result_ref :=
-      Some { name;
+    append_result result_ref @@
+           { name;
              type_ = Function;
+             pos   = fst id
+           }
+  end
+
+let process_global_const result_ref is_target_fun id =
+  if is_target_fun (fst id)
+  then begin
+    let name = snd id in
+    append_result result_ref @@
+           { name;
+             type_ = GConst;
              pos   = fst id
            }
   end
@@ -70,7 +85,8 @@ let process_fun_id result_ref is_target_fun id =
 let process_lvar_id result_ref is_target_fun _ id _ =
   if is_target_fun (fst id)
   then begin
-    result_ref := Some { name  = snd id;
+    append_result result_ref @@
+                       { name  = snd id;
                          type_ = LocalVar;
                          pos   = fst id
                        }
@@ -78,8 +94,8 @@ let process_lvar_id result_ref is_target_fun _ id _ =
 
 let process_typeconst result_ref is_target_fun class_name tconst_name pos =
   if (is_target_fun pos) then begin
-    result_ref :=
-      Some { name = class_name ^ "::" ^ tconst_name;
+    append_result result_ref @@
+           { name = class_name ^ "::" ^ tconst_name;
              type_ = Typeconst (class_name, tconst_name);
              pos;
            }
@@ -138,6 +154,8 @@ let attach_hooks result_ref line char =
   Typing_hooks.attach_constructor_hook
     (process_constructor result_ref is_target_fun);
   Typing_hooks.attach_fun_id_hook (process_fun_id result_ref is_target_fun);
+  Typing_hooks.attach_global_const_hook
+    (process_global_const result_ref is_target_fun);
   Typing_hooks.attach_taccess_hook (process_taccess result_ref is_target_fun);
   Decl_hooks.attach_class_id_hook (process_class_id result_ref is_target_fun);
   Naming_hooks.attach_lvar_hook (process_lvar_id result_ref is_target_fun);

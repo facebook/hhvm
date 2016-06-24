@@ -39,3 +39,9 @@ let width trivia =
 
 let kind trivia =
   trivia.kind
+
+let to_json trivia =
+  let open Hh_json in
+  JSON_Object [
+    ("kind", JSON_String (to_string trivia.kind));
+    ("width", int_ trivia.width); ]

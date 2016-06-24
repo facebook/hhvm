@@ -71,6 +71,7 @@ void HHVM_FUNCTION(xbox_set_thread_timeout,
 void HHVM_FUNCTION(xbox_schedule_thread_reset);
 int64_t HHVM_FUNCTION(xbox_get_thread_time);
 bool HHVM_FUNCTION(server_is_stopping);
+bool HHVM_FUNCTION(server_is_prepared_to_stop);
 int64_t HHVM_FUNCTION(server_health_level);
 int64_t HHVM_FUNCTION(server_uptime);
 

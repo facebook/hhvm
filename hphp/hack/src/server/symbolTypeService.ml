@@ -51,7 +51,7 @@ let find_match_pos_in_list match_pos types_list =
             None
     end ~init:None in
     match find_result with
-    | Some (pos, value) -> value
+    | Some (_pos, value) -> value
     | None -> ""
 
 (* Given all the idents for this file, make a rekeying map which *)
@@ -107,8 +107,8 @@ let process_symbol_type result_map type_ pos env =
   let type_str = Typing_print.full_strip_ns env type_ in
   result_map := Pos.Map.add pos type_str !result_map
 
-let handle_lvar result_map ident id locals =
-  let pos, name = id in
+let handle_lvar result_map ident id _locals =
+  let pos, _name = id in
   result_map := Pos.Map.add pos ident !result_map
 
 let attach_hooks type_map lvar_map =

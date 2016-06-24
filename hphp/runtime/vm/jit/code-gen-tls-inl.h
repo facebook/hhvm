@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -24,6 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/thread-local.h"
 
@@ -33,8 +32,14 @@ namespace HPHP { namespace jit {
 
 template<typename T>
 inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
-  if (arch() != Arch::X64 && arch() != Arch::ARM) not_implemented();
-  return x64::detail::emitTLSAddr(v, datum);
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::ARM:
+      return x64::detail::emitTLSAddr(v, datum);
+    case Arch::PPC64:
+      return ppc64::detail::emitTLSAddr(v, datum);
+  }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

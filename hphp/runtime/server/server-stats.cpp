@@ -626,9 +626,9 @@ void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
       auto const stats = ts.m_mm->getStatsCopy();
       w->beginObject("memory");
       w->writeEntry("current usage", stats.usage());
-      w->writeEntry("current alloc", stats.slabBytes);
+      w->writeEntry("current alloc", stats.capacity);
       w->writeEntry("peak usage", stats.peakUsage);
-      w->writeEntry("peak alloc", stats.peakSlabBytes);
+      w->writeEntry("peak alloc", stats.peakCap);
       w->endObject("memory");
     }
     w->writeEntry("io", ts.m_ioInProcess);
@@ -977,7 +977,7 @@ ServerStatsHelper::~ServerStatsHelper() {
       auto const stats = MM().getStats();
       ServerStats::Log(string("mem.") + m_section, stats.peakUsage);
       ServerStats::Log(string("mem.allocated.") + m_section,
-                       stats.peakSlabBytes);
+                       stats.peakCap);
     }
 
     if (m_track & TRACK_HWINST) {

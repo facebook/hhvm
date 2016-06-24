@@ -1,0 +1,8 @@
+File "generic_attr_constraint.php", line 7, characters 10-13:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_attr_constraint.php", line 4, characters 13-13:
+'T' is a constrained type
+File "generic_attr_constraint.php", line 3, characters 20-22:
+This is a num (int/float)
+File "generic_attr_constraint.php", line 8, characters 15-17:
+It is incompatible with a string

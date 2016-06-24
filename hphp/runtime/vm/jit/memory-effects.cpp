@@ -826,7 +826,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // in AliasClass yet.
     return PureStore { AUnknown, inst.src(1) };
 
-  case ClosureStaticLocInit:
+  case LdClosureStaticLoc:
     return may_load_store(AFrameAny, AFrameAny);
 
   //////////////////////////////////////////////////////////////////////
@@ -1223,7 +1223,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsScalarType:
   case LdMIStateAddr:
   case LdPairBase:
-  case LdStaticLocCached:
+  case LdStaticLoc:
+  case LdClsCns:
   case CheckCtxThis:
   case CastCtxThis:
   case LdARNumParams:
@@ -1347,7 +1348,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvResToDbl:
   case ConvVecToArr:
   case ConvDictToArr:
-  case DerefClsRDSHandle:
   case EagerSyncVMRegs:
   case ExtendsClass:
   case LdUnwinderValue:
@@ -1388,7 +1388,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdVectorBase:
   case LdWHResult:
   case LdWHState:
-  case LookupClsRDSHandle:
+  case LookupClsRDS:
   case GetCtxFwdCallDyn:
   case DbgTraceCall:
   case InitCtx:
@@ -1396,8 +1396,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
-  case CheckStaticLocInit:
-  case StaticLocInitCached:
+  case CheckClosureStaticLocInit:
+  case InitClosureStaticLoc:
+  case InitStaticLoc:
   case ColIsEmpty:
   case ColIsNEmpty:
   case ConvCellToBool:
@@ -1510,7 +1511,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFuncCached:   // autoload
   case LdFuncCachedU:  // autoload
   case LdSwitchObjIndex:  // decrefs arg
-  case LookupClsCns:      // autoload
+  case InitClsCns:      // autoload
   case LookupClsMethodCache:  // autoload
   case LookupClsMethodFCache: // autoload
   case LookupCns:

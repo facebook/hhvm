@@ -65,8 +65,18 @@ struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   void onIngressError(const proxygen::HTTPSession&,
                       proxygen::ProxygenError error) override;
 
+  proxygen::HTTPSessionController* getController() override {
+    return m_controllerPtr;
+  }
+
+  void setController(proxygen::HTTPSessionController* controller) {
+    m_controllerPtr = controller;
+  }
+
  private:
   ProxygenServer *m_server;
+  proxygen::SimpleController m_simpleController{this};
+  proxygen::HTTPSessionController* m_controllerPtr{&m_simpleController};
 };
 
 using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
@@ -113,7 +123,8 @@ struct ProxygenServer : Server,
   }
 
   void messageAvailable(ResponseMessage&& message) override {
-    message.m_transport->messageAvailable(std::move(message));
+    auto m_transport = message.m_transport;
+    m_transport->messageAvailable(std::move(message));
   }
 
   bool canAccept();

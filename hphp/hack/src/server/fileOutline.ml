@@ -24,12 +24,15 @@ let modifiers_of_ast_kinds l =
     | Ast.Protected -> Protected
   end
 
-let summarize_property kinds var =
+let summarize_property class_name kinds var =
   let modifiers = modifiers_of_ast_kinds kinds in
-  let span, (pos, name), expr_opt = var in
+  let span, (pos, name), _expr_opt = var in
+  let kind = Property in
+  let id = get_symbol_id kind (Some class_name) name in
   {
-    kind = Property;
+    kind;
     name;
+    id;
     pos;
     span;
     modifiers;
@@ -38,15 +41,18 @@ let summarize_property kinds var =
     docblock = None;
   }
 
-let maybe_summarize_property ~skip kinds var =
+let maybe_summarize_property class_name ~skip kinds var =
   let _, (_, name), _ = var in
-  if SSet.mem skip name then [] else [summarize_property kinds var]
+  if SSet.mem skip name then [] else [summarize_property class_name kinds var]
 
-let summarize_const ((pos, name), (expr_pos, _)) =
+let summarize_const class_name ((pos, name), (expr_pos, _)) =
   let span = (Pos.btw pos expr_pos) in
+  let kind = Const in
+  let id = get_symbol_id kind (Some class_name) name in
   {
-    kind = Const;
+    kind;
     name;
+    id;
     pos;
     span;
     modifiers = [];
@@ -55,10 +61,13 @@ let summarize_const ((pos, name), (expr_pos, _)) =
     docblock = None;
   }
 
-let summarize_abs_const (pos, name) =
+let summarize_abs_const class_name (pos, name) =
+  let kind = Const in
+  let id = get_symbol_id kind (Some class_name) name in
   {
-    kind = Const;
+    kind;
     name;
+    id;
     pos = pos;
     span = pos;
     modifiers = [Abstract];
@@ -71,11 +80,14 @@ let modifier_of_fun_kind acc = function
   | Ast.FAsync | Ast.FAsyncGenerator -> Async :: acc
   | _ -> acc
 
-let summarize_typeconst t =
+let summarize_typeconst class_name t =
   let pos, name = t.Ast.tconst_name in
+  let kind = Typeconst in
+  let id = get_symbol_id kind (Some class_name) name in
   {
-    kind = Typeconst;
+    kind;
     name;
+    id;
     pos;
     span = t.Ast.tconst_span;
     modifiers = if t.Ast.tconst_abstract then [Abstract] else [];
@@ -90,9 +102,12 @@ let summarize_param param =
   let param_end = Option.value_map param.Ast.param_expr ~f:fst ~default:pos in
   let modifiers =
     modifiers_of_ast_kinds (Option.to_list param.Ast.param_modifier) in
+  let kind = Param in
+  let id = get_symbol_id kind None name in
   {
-    kind = Param;
+    kind;
     name;
+    id;
     pos;
     span = Pos.btw param_start param_end;
     children = None;
@@ -101,13 +116,17 @@ let summarize_param param =
     docblock = None;
   }
 
-let summarize_method m =
+let summarize_method class_name m =
   let modifiers = modifier_of_fun_kind [] m.Ast.m_fun_kind in
   let modifiers = (modifiers_of_ast_kinds m.Ast.m_kind) @ modifiers in
   let params = Some (List.map m.Ast.m_params summarize_param) in
+  let name = snd m.Ast.m_name in
+  let kind = Method in
+  let id = get_symbol_id kind (Some class_name) name in
   {
-    kind = Method;
-    name = snd m.Ast.m_name;
+    kind;
+    name;
+    id;
     pos = (fst m.Ast.m_name);
     span = m.Ast.m_span;
     modifiers;
@@ -120,8 +139,8 @@ let summarize_method m =
  * parameter lists. We don't want them to show up in outline view *)
 let params_implicit_fields params =
   List.filter_map params ~f:begin function
-    | { Ast.param_modifier = Some vis; param_id; _ } ->
-        Some (Utils.lstrip (snd param_id) "$" )
+    | { Ast.param_modifier = Some _vis; param_id; _ } ->
+        Some (String_utils.lstrip (snd param_id) "$" )
     | _ -> None
   end
 
@@ -148,15 +167,15 @@ let summarize_class class_ ~no_children =
       ~f:SSet.add ~init:SSet.empty
     in
     Some (List.concat_map class_.Ast.c_body ~f:begin function
-      | Ast.Method m -> [summarize_method m]
+      | Ast.Method m -> [summarize_method class_name m]
       | Ast.ClassVars (kinds, _, vars) ->
           List.concat_map vars
-            ~f:(maybe_summarize_property ~skip:implicit_props kinds)
+            ~f:(maybe_summarize_property class_name ~skip:implicit_props kinds)
       | Ast.XhpAttr (_, var, _, _) ->
-          maybe_summarize_property ~skip:implicit_props [] var
-      | Ast.Const (_, cl) -> List.map cl ~f:summarize_const
-      | Ast.AbsConst (_, id) -> [summarize_abs_const id]
-      | Ast.TypeConst t -> [summarize_typeconst t]
+          maybe_summarize_property class_name ~skip:implicit_props [] var
+      | Ast.Const (_, cl) -> List.map cl ~f:(summarize_const class_name)
+      | Ast.AbsConst (_, id) -> [summarize_abs_const class_name id]
+      | Ast.TypeConst t -> [summarize_typeconst class_name t]
       | _ -> []
       end)
   end in
@@ -166,9 +185,12 @@ let summarize_class class_ ~no_children =
     | Ast.Cenum -> Enum
     | _ -> Class
   in
+  let name = class_name in
+  let id = get_symbol_id kind None name in
   {
     kind;
-    name = class_name;
+    name;
+    id;
     pos = class_name_pos;
     span = c_span;
     modifiers;
@@ -180,9 +202,13 @@ let summarize_class class_ ~no_children =
 let summarize_fun f =
   let modifiers = modifier_of_fun_kind [] f.Ast.f_fun_kind in
   let params = Some (List.map f.Ast.f_params summarize_param) in
+  let kind = Function in
+  let name = Utils.strip_ns (snd f.Ast.f_name) in
+  let id = get_symbol_id kind None name in
   {
-    kind = Function;
-    name = Utils.strip_ns (snd f.Ast.f_name);
+    kind;
+    name;
+    id;
     pos = fst f.Ast.f_name;
     span = f.Ast.f_span;
     modifiers;
@@ -191,10 +217,32 @@ let summarize_fun f =
     docblock = None;
   }
 
-let summarize_local name span =
+let summarize_gconst cst =
+  let pos = fst cst.Ast.cst_name in
+  let gconst_start = Option.value_map cst.Ast.cst_type ~f:fst ~default:pos in
+  let gconst_end = fst cst.Ast.cst_value in
+  let kind = Const in
+  let name = Utils.strip_ns (snd cst.Ast.cst_name) in
+  let id = get_symbol_id kind None name in
   {
-    kind = LocalVar;
+    kind;
     name;
+    id;
+    pos;
+    span = Pos.btw gconst_start gconst_end;
+    modifiers = [];
+    children = None;
+    params = None;
+    docblock = None;
+  }
+
+let summarize_local name span =
+  let kind = LocalVar in
+  let id = get_symbol_id kind None name in
+  {
+    kind;
+    name;
+    id;
     pos = span;
     span;
     modifiers = [];
@@ -226,27 +274,27 @@ let to_json_legacy input =
 
 (* Transforms the outline type to format that existing --outline command
  * expects *)
- let rec to_legacy prefix acc defs =
-   List.fold_left defs ~init:acc ~f:begin fun acc def ->
-     match def.kind with
-     | Function -> (def.pos, def.name, "function") :: acc
-     | Class | Enum | Interface | Trait ->
-         let acc = (def.pos, def.name, "class") :: acc in
-         Option.value_map def.children
-          ~f:(to_legacy (prefix ^ def.name ^ "::") acc)
-          ~default:acc
-     | Method ->
-       let desc =
-         if List.mem def.modifiers Static
-         then "static method" else "method"
-       in
-       (def.pos, prefix ^ def.name, desc) :: acc
-     | Param
-     | Typeconst
-     | LocalVar
-     | Property
-     | Const -> acc
-   end
+let rec to_legacy prefix acc defs =
+  List.fold_left defs ~init:acc ~f:begin fun acc def ->
+    match def.kind with
+    | Function -> (def.pos, def.name, "function") :: acc
+    | Class | Enum | Interface | Trait ->
+      let acc = (def.pos, def.name, "class") :: acc in
+      Option.value_map def.children
+        ~f:(to_legacy (prefix ^ def.name ^ "::") acc)
+        ~default:acc
+    | Method ->
+      let desc =
+        if List.mem def.modifiers Static
+        then "static method" else "method"
+      in
+      (def.pos, prefix ^ def.name, desc) :: acc
+    | Param
+    | Typeconst
+    | LocalVar
+    | Property
+    | Const -> acc
+  end
 
 let to_legacy outline = to_legacy "" [] outline
 
@@ -287,62 +335,71 @@ let add_docblocks defs comments =
   in
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
- let outline content =
-   let {Parser_hack.ast; comments; _} =
-     Parser_hack.program Relative_path.default content
-       ~include_line_comments:true
-       ~keep_errors:false
-   in
-   let result = outline_ast ast in
-   add_docblocks result comments
+let outline content =
+  let {Parser_hack.ast; comments; _} =
+    Parser_hack.program Relative_path.default content
+      ~include_line_comments:true
+      ~keep_errors:false
+  in
+  let result = outline_ast ast in
+  add_docblocks result comments
 
- let outline_legacy content =
-   to_legacy @@ outline content
+let outline_legacy content =
+  to_legacy @@ outline content
 
- let rec to_json outline =
-   Hh_json.JSON_Array begin
-     List.map outline ~f:begin fun def -> Hh_json.JSON_Object ([
-       "kind", Hh_json.JSON_String (string_of_kind def.kind);
-       "name", Hh_json.JSON_String def.name;
-       "position", Pos.json def.pos;
-       "span", Pos.multiline_json def.span;
-       "modifiers", Hh_json.JSON_Array
-         (List.map def.modifiers
-           (fun x -> Hh_json.JSON_String (string_of_modifier x)));
-     ] @
-     (Option.value_map def.children
-       ~f:(fun x -> [("children", to_json x)]) ~default:[])
-       @
-     (Option.value_map def.params
-       ~f:(fun x -> [("params", to_json x)]) ~default:[])
-       @
-     (Option.value_map def.docblock
-       ~f:(fun x -> [("docblock", Hh_json.JSON_String x)]) ~default:[]))
-     end
-   end
+let rec definition_to_json def =
+  Hh_json.JSON_Object ([
+    "kind", Hh_json.JSON_String (string_of_kind def.kind);
+    "name", Hh_json.JSON_String def.name;
+    "id", Option.value_map def.id
+      ~f:(fun x -> Hh_json.JSON_String x) ~default:Hh_json.JSON_Null;
+    "position", Pos.json def.pos;
+    "span", Pos.multiline_json def.span;
+    "modifiers", Hh_json.JSON_Array
+      (List.map def.modifiers
+      (fun x -> Hh_json.JSON_String (string_of_modifier x)));
+  ] @
+  (Option.value_map def.children
+    ~f:(fun x -> [("children", to_json x)]) ~default:[])
+    @
+  (Option.value_map def.params
+    ~f:(fun x -> [("params", to_json x)]) ~default:[])
+    @
+  (Option.value_map def.docblock
+    ~f:(fun x -> [("docblock", Hh_json.JSON_String x)]) ~default:[]))
 
- let rec print indent defs  =
-   List.iter defs ~f:begin fun def ->
-     Printf.printf "%s%s\n" indent def.name;
-     Printf.printf "%s  kind: %s\n" indent (string_of_kind def.kind);
-     Printf.printf "%s  position: %s\n" indent (Pos.string def.pos);
-     Printf.printf "%s  span: %s\n" indent (Pos.multiline_string def.span);
-     Printf.printf "%s  modifiers: " indent;
-     List.iter def.modifiers
-       (fun x -> Printf.printf "%s " (string_of_modifier x));
-       Printf.printf "\n";
-     Option.iter def.params (fun x ->
-       Printf.printf "%s  params:\n" indent;
-       print (indent ^ "    ") x;
-     );
-     Option.iter def.docblock (fun x ->
-       Printf.printf "%s  docblock:\n" indent;
-       Printf.printf "%s\n" x;
-     );
-     Printf.printf "\n";
-     Option.iter def.children (fun x ->
-       print (indent ^ "  ") x
-     );
-   end
+and to_json outline =
+  Hh_json.JSON_Array begin
+    List.map outline ~f:definition_to_json
+  end
 
- let print  = print ""
+let rec print_def indent def =
+  let
+    {name; kind; id; pos; span; modifiers; children; params; docblock} = def
+  in
+  Printf.printf "%s%s\n" indent name;
+  Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
+  Option.iter id (fun id -> Printf.printf "%s  id: %s\n" indent id);
+  Printf.printf "%s  position: %s\n" indent (Pos.string pos);
+  Printf.printf "%s  span: %s\n" indent (Pos.multiline_string span);
+  Printf.printf "%s  modifiers: " indent;
+  List.iter modifiers
+    (fun x -> Printf.printf "%s " (string_of_modifier x));
+    Printf.printf "\n";
+  Option.iter params (fun x ->
+    Printf.printf "%s  params:\n" indent;
+    print (indent ^ "    ") x;
+  );
+  Option.iter docblock (fun x ->
+    Printf.printf "%s  docblock:\n" indent;
+    Printf.printf "%s\n" x;
+  );
+  Printf.printf "\n";
+  Option.iter children (fun x ->
+    print (indent ^ "  ") x
+  );
+
+and print indent defs  =
+  List.iter defs ~f:(print_def indent)
+
+let print  = print ""

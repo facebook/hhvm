@@ -170,7 +170,7 @@ struct XDebugServer;
   XDEBUG_OPT(folly::Optional<bool>, nullptr, OutputIsTTY, folly::none)
 
 // Retrieves the value of the given xdebug global
-#define XDEBUG_GLOBAL(name) (*XDebugExtension::name)
+#define XDEBUG_GLOBAL(name) XDebugExtension::name
 
 // Returns the ini name for the given hhvm configuration option.
 #define XDEBUG_INI(name) ((XDEBUG_NAME ".") + std::string(name))
@@ -197,7 +197,7 @@ struct XDebugExtension final : Extension {
   void requestShutdown() override;
 
   // Standard config options
-  #define XDEBUG_OPT(T, name, sym, val) static DECLARE_THREAD_LOCAL(T, sym);
+  #define XDEBUG_OPT(T, name, sym, val) static thread_local T sym;
   XDEBUG_CFG
   XDEBUG_MAPPED_CFG
   XDEBUG_HDF_CFG

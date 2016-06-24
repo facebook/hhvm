@@ -1,0 +1,7 @@
+bar
+  kind: property
+  id: property::Foo::bar
+  position: File "property.php", line 4, characters 18-21:
+  span: File "property.php", line 4, character 18 - line 4, character 21:
+  modifiers: public 
+

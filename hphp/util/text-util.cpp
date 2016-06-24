@@ -27,25 +27,6 @@ namespace HPHP {
 using std::string;
 using std::vector;
 
-void split(char delimiter, const char *s, vector<string> &out,
-           bool ignoreEmpty /* = false */) {
-  assert(s);
-
-  const char *start = s;
-  const char *p = s;
-  for (; *p; p++) {
-    if (*p == delimiter) {
-      if (!ignoreEmpty || p > start) {
-        out.push_back(string(start, p - start));
-      }
-      start = p + 1;
-    }
-  }
-  if (!ignoreEmpty || p > start) {
-    out.push_back(string(start, p - start));
-  }
-}
-
 void replaceAll(string &s, const char *from, const char *to) {
   assert(from && *from);
   assert(to);
@@ -59,24 +40,20 @@ void replaceAll(string &s, const char *from, const char *to) {
   }
 }
 
-std::string toLower(const std::string &s) {
-  unsigned int len = s.size();
-  string ret;
-  if (len) {
-    ret.reserve(len);
-    for (unsigned int i = 0; i < len; i++) {
-      ret += tolower(s[i]);
-    }
+std::string toLower(folly::StringPiece s) {
+  std::string ret;
+  ret.reserve(s.size());
+  for (auto const c : s) {
+    ret += tolower(c);
   }
   return ret;
 }
 
-std::string toUpper(const std::string &s) {
-  unsigned int len = s.size();
-  string ret;
-  ret.reserve(len);
-  for (unsigned int i = 0; i < len; i++) {
-    ret += toupper(s[i]);
+std::string toUpper(folly::StringPiece s) {
+  std::string ret;
+  ret.reserve(s.size());
+  for (auto const c : s) {
+    ret += toupper(c);
   }
   return ret;
 }

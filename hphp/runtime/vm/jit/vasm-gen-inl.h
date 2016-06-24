@@ -74,14 +74,16 @@ T* Vout::allocData(Args&&... args) {
 namespace detail {
 
 template<class GenFunc>
-TCA vwrap_impl(CodeBlock& cb, DataBlock& data, CGMeta* meta,
-               GenFunc gen, CodeKind kind) {
+TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
+               CGMeta* meta, GenFunc gen, CodeKind kind) {
   CGMeta dummy_meta;
 
-  auto const start = cb.frontier();
-  Vauto vauto { cb, data, meta ? *meta : dummy_meta, kind };
-  gen(vauto.main(), vauto.cold());
+  auto const start = main.frontier();
 
+  { // Finish emitting in this scope so that we can assert about `dummy_meta'.
+    Vauto vauto { main, cold, data, meta ? *meta : dummy_meta, kind };
+    gen(vauto.main(), vauto.cold());
+  }
   assertx(dummy_meta.empty());
 
   return start;

@@ -10,16 +10,13 @@
 
 open Core
 open Utils
+open String_utils
 
 
 type error_code = int
 (* We use `Pos.t message` on the server and convert to `Pos.absolute message`
  * before sending it to the client *)
 type 'a message = 'a * string
-
-type applied_fixme = Pos.t * int
-
-let applied_fixmes: applied_fixme list ref = ref []
 
 module Common = struct
 
@@ -36,7 +33,7 @@ module Common = struct
     | [] -> result
     | l :: _ -> f2 result l
 
-  let do_ f error_list accumulate_errors =
+  let do_ f error_list accumulate_errors applied_fixmes =
     let error_list_copy = !error_list in
     let accumulate_errors_copy = !accumulate_errors in
     let applied_fixmes_copy = !applied_fixmes in
@@ -78,6 +75,8 @@ module type Errors_modes = sig
 
   type 'a error_
   type error = Pos.t error_
+  type applied_fixme = Pos.t * int
+  val applied_fixmes: applied_fixme list ref
 
   val try_with_result: (unit -> 'a) -> ('a -> error -> 'a) -> 'a
   val do_: (unit -> 'a) -> (error list * applied_fixme list) * 'a
@@ -100,6 +99,8 @@ end
 module NonTracingErrors: Errors_modes = struct
   type 'a error_ = error_code * 'a message list
   type error = Pos.t error_
+  type applied_fixme = Pos.t * int
+  let applied_fixmes: applied_fixme list ref = ref []
 
   let (error_list: error list ref) = ref []
   let accumulate_errors = ref false
@@ -115,7 +116,7 @@ module NonTracingErrors: Errors_modes = struct
     Common.try_with_result f1 f2 error_list accumulate_errors
 
   let do_ f =
-    Common.do_ f error_list accumulate_errors
+    Common.do_ f error_list accumulate_errors applied_fixmes
 
   and make_error code (x: (Pos.t * string) list) = ((code, x): error)
 
@@ -160,6 +161,8 @@ end
 module TracingErrors: Errors_modes = struct
   type 'a error_ = (Printexc.raw_backtrace * error_code * 'a message list)
   type error = Pos.t error_
+  type applied_fixme = Pos.t * int
+  let applied_fixmes: applied_fixme list ref = ref []
 
   let (error_list: error list ref) = ref []
   let accumulate_errors = ref false
@@ -175,7 +178,7 @@ module TracingErrors: Errors_modes = struct
     Common.try_with_result f1 f2 error_list accumulate_errors
 
   let do_ f =
-    Common.do_ f error_list accumulate_errors
+    Common.do_ f error_list accumulate_errors applied_fixmes
 
   let make_error code (x: (Pos.t * string) list) =
     let bt = Printexc.get_callstack 25 in
@@ -233,12 +236,14 @@ module Errors_with_mode(M: Errors_modes) = struct
 
 type 'a error_ = 'a M.error_
 type error = Pos.t error_
-
+type applied_fixme = M.applied_fixme
 type t = error list * applied_fixme list
 
 (*****************************************************************************)
 (* HH_FIXMEs hook *)
 (*****************************************************************************)
+
+let applied_fixmes = M.applied_fixmes
 
 let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
@@ -314,7 +319,7 @@ module Naming                               = struct
   let typeparam_alok                        = 2002 (* DONT MODIFY!!!! *)
   let assert_arity                          = 2003 (* DONT MODIFY!!!! *)
   let primitive_invalid_alias               = 2004 (* DONT MODIFY!!!! *)
-  let cyclic_constraint                     = 2005 (* DONT MODIFY!!!! *)
+  (* DECPRECATED let cyclic_constraint      = 2005 *)
   let did_you_mean_naming                   = 2006 (* DONT MODIFY!!!! *)
   let different_scope                       = 2007 (* DONT MODIFY!!!! *)
   let disallowed_xhp_type                   = 2008 (* DONT MODIFY!!!! *)
@@ -745,7 +750,7 @@ let duplicate_user_attribute (pos, name) existing_attr_pos =
   ]
 
 let unbound_attribute_name pos name =
-  let reason = if (str_starts_with name "__")
+  let reason = if (string_starts_with name "__")
     then "starts with __ but is not a standard attribute"
     else "is not listed in .hhconfig"
   in add Naming.unbound_name pos
@@ -921,10 +926,6 @@ let local_const var_pos =
 let illegal_constant pos =
   add Naming.illegal_constant pos
     "Illegal constant value"
-
-let cyclic_constraint pos =
-  add Naming.cyclic_constraint pos
-    "Cyclic constraint between type parameters"
 
 let invalid_req_implements pos =
   add Naming.invalid_req_implements pos
@@ -2123,5 +2124,11 @@ let must_error f error_fun =
 
 end
 
-(** Call with TracingErrors to add tracing to accumulated errors. *)
-include Errors_with_mode(NonTracingErrors)
+let errors_without_tracing =
+  (module Errors_with_mode(NonTracingErrors) : Errors_sig.S)
+let errors_with_tracing =
+  (module Errors_with_mode(TracingErrors) : Errors_sig.S)
+
+include (val (if Injector_config.use_error_tracing
+  then errors_with_tracing
+  else errors_without_tracing))

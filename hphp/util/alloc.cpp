@@ -31,8 +31,11 @@
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
-#include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
+#include "hphp/util/hugetlb.h"
+#include "hphp/util/kernel-version.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/managed-arena.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -232,6 +235,7 @@ void numa_bind_to(void* start, size_t size, int node) {}
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
+unsigned low_huge1g_arena = 0;
 std::atomic<int> low_huge_pages(0);
 std::atomic<void*> highest_lowmall_addr;
 static const unsigned kLgHugeGranularity = 21;
@@ -256,8 +260,8 @@ static void initNuma() {
   // When linked dynamically numa_init() is called before JEMallocInitializer()
   // numa_init is not exported by libnuma.so so it will be NULL
   // however when linked statically numa_init() is not guaranteed to be called
-  // before JEMallocInitializer(),so call it here.
-  if(&numa_init) {
+  // before JEMallocInitializer(), so call it here.
+  if (&numa_init) {
     numa_init();
   }
   if (numa_available() < 0) return;
@@ -499,7 +503,7 @@ struct JEMallocInitializer {
       // Error; bail out.
       return;
     }
-    if (mallctlWrite(folly::format("arena.{}.dss", low_arena).str().c_str(),
+    if (mallctlWrite(folly::sformat("arena.{}.dss", low_arena).c_str(),
                      "primary", true) != 0) {
       // Error; bail out.
       return;
@@ -513,6 +517,66 @@ struct JEMallocInitializer {
     (void) sbrk(leftInPage);
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = (char*)sbrk(0) - 1;
+
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+    int nPages = 0;
+    if (char* lowMem1GPages = getenv("HHVM_LOW_1G_PAGE")) {
+      sscanf(lowMem1GPages, "%d", &nPages);
+    }
+    if (nPages > 0) {
+      KernelVersion version;
+      if (version.m_major < 3 ||
+          (version.m_major == 3 && version.m_minor < 9)) {
+        // Older kernels need an explicit hugetlbfs mount point.
+        find_hugetlbfs_path() || auto_mount_hugetlbfs();
+      }
+      size_t hugeSize = 0;
+      int node = -1;
+#ifdef HAVE_NUMA
+      node = numa_max_node();
+      if (node == 0 || nPages < 2) node = -1;
+#endif
+      void* base = nullptr;
+      if (node > 0) {                   // explicit NUMA balancing
+        while (node >= 0) {
+          base = mmap_1g((void*)0xc0000000, node--);
+          if (base != nullptr) {
+            break;
+          }
+        }
+        if (base != nullptr) {
+          // Try the rest of the NUMA nodes, and all nodes (-1) at last.
+          do {
+            void *newBase = mmap_1g((void*)0x80000000, node--);
+            if (newBase != nullptr) {
+              base = newBase;
+              hugeSize += 1 << 30;
+              break;
+            }
+          } while (node >= -1);
+        }
+      } else {                          // don't care about NUMA
+        base = mmap_1g((void*)0xc0000000, -1);
+        if (base) {
+          hugeSize = 1 << 30;
+          if (nPages > 1) {
+            void* newBase = mmap_1g((void*)0x80000000, -1);
+            if (newBase) {
+              base = newBase;
+              hugeSize += 1 << 30;
+            }
+          }
+        }
+      }
+
+      if (base) {
+        try {
+          auto ma = new ManagedArena(base, hugeSize); // leaked
+          if (ma) low_huge1g_arena = ma->getArenaId();
+        } catch (...) { }
+      }
+    }
+#endif
   }
 };
 
@@ -578,6 +642,13 @@ void low_malloc_skip_huge(void* start, void* end) {
     }
   }
 }
+
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+void* low_malloc_huge1g_impl(size_t size) {
+  assert(low_huge1g_arena != 0);
+  return mallocx(size, low_mallocx_huge1g_flags());
+}
+#endif
 
 #else
 

@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/service-requests.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -28,6 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
 
@@ -70,7 +69,7 @@ void emit_svcreq(CodeBlock& cb,
     CGMeta fixups;
     SCOPE_EXIT { assert(fixups.empty()); };
 
-    Vauto vasm{stub, data, fixups};
+    Vauto vasm{stub, stub, data, fixups};
     auto& v = vasm.main();
 
     // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do

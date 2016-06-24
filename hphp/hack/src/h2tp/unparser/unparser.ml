@@ -731,6 +731,7 @@ let rec u_program v = u_of_list_spc u_def v
       | False
       | Id _
       | Lvar _
+      | Lvarvar _
       | Array_get _
       | Class_get _
       | Class_const _
@@ -794,6 +795,10 @@ let rec u_program v = u_of_list_spc u_def v
     | False -> Str "false"
     | Id id -> u_id id
     | Lvar lvar -> u_id lvar
+    | Lvarvar (n, lvar) -> begin
+      let p, var_id = lvar in
+      u_id (p, (String.make n '$') ^ var_id)
+    end
     | Clone expr -> StrWords [Str "clone"; u_expr_nested expr]
     | Obj_get (objExpr, itemExpr, null_flavor) ->
         let objStr = u_expr_nested objExpr

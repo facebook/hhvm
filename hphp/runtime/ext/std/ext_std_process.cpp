@@ -224,7 +224,7 @@ String HHVM_FUNCTION(exec,
 
   PackedArrayInit pai(count);
   for (int i = 0; i < count; i++) {
-    pai.append(lines[i]);
+    pai.append(HHVM_FN(rtrim)(lines[i].toString(), "\f\n\r\t\x0b\x00 "));
   }
   output.assignIfRef(pai.toArray());
 

@@ -41,13 +41,14 @@ namespace HPHP { namespace rds {
  * live in RDS.  Note that we don't put closure locals here because
  * they are per-instance.
  */
-Link<RefData> bindStaticLocal(const Func*, const StringData*);
+Link<RefData, true /* normal_only */>
+bindStaticLocal(const Func*, const StringData*);
 
 /*
  * Allocate storage for the value of a class constant in RDS.
  */
-Link<TypedValue> bindClassConstant(const StringData* className,
-                                   const StringData* constName);
+Link<TypedValue, true /* normal_only */>
+bindClassConstant(const StringData* clsName, const StringData* cnsName);
 
 //////////////////////////////////////////////////////////////////////
 

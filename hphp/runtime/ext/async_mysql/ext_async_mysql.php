@@ -108,8 +108,8 @@ final class AsyncMysqlClient {
    * the async `AsyncMysqlConnection` methods like `queryf()`, etc.
    *
    * This is a tricky function to use and we are actually thinking of
-   * deprecating it. This function *requrires* a deprecated, MySQL resource.
-   * Once this resource is adpoted by a call to this function, it is no longer
+   * deprecating it. This function *requires* a deprecated, MySQL resource.
+   * Once this resource is adopted by a call to this function, it is no longer
    * valid in the context on which it was being used.
    *
    * If you are using this function, you might consider just creating a
@@ -165,12 +165,12 @@ class AsyncMysqlConnectionPool {
    *                            `AsyncMysqlClient::setPoolsConnectionLimit()`.
    * - `idle_timeout_micros`: The maximum amount of time, in microseconds, that
    *                          a connection is allowed to sit idle in the pool
-   *                          becore being destroyed. The default is 4 seconds.
+   *                          before being destroyed. The default is 4 seconds.
    * - `age_timeout_micros`: The maximum age, in microseconds, that a connection
    *                         in the pool will be allowed to reach before being
    *                         destroyed. The default is 60 seconds.
    * - `expiration_policy`: A `string` of either `'IdleTime'` or `'Age'" that
-   *                        specifies whehter connections in the pool will be
+   *                        specifies whether connections in the pool will be
    *                        destroyed based on how long it sits idle or total
    *                        age in the pool. The default is `'Age'`.
    *
@@ -334,7 +334,7 @@ final class AsyncMysqlConnection {
    *                          query must be completed; -1 for default, 0 for
    *                          no timeout.
    *
-   * @return - an `Awaitable` representing the result of your mutli-query. Use
+   * @return - an `Awaitable` representing the result of your multi-query. Use
    *           `await` or `join` to get the actual `Vector` of
    *           `AsyncMysqlQueryResult` objects.
    */
@@ -371,7 +371,7 @@ final class AsyncMysqlConnection {
    * This method will destroy the current `AsyncMysqlConnection` object and give
    * you back a vanilla, synchronous MySQL resource.
    *
-   * @return - A `resouce` respresenting a
+   * @return - A `resource` representing a
    *           [MySQL](http://php.net/manual/en/book.mysql.php) resource, or
    *           `false` on failure.
    */
@@ -449,7 +449,7 @@ final class AsyncMysqlConnection {
   /**
    * Sets if the current connection can be recycled without any clean up.
    *
-   * By default, the current connection *is* resuable.
+   * By default, the current connection *is* reusable.
    *
    * If a connection in a `AsyncMysqlConnectionPool` is used, but you call
    * `setReusable(false)`, then you will have to create a whole new connection
@@ -587,7 +587,7 @@ class AsyncMysqlClientStats {
    *
    * This returns an exponentially-smoothed average.
    *
-   * @return - A `float` representing the average callback dealy on this
+   * @return - A `float` representing the average callback delay on this
    *           MySQL client.
    */
   <<__HipHopSpecific, __Native>>

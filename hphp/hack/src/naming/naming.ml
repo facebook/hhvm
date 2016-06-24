@@ -17,6 +17,7 @@
 open Ast
 open Core
 open Utils
+open String_utils
 
 module N = Nast
 module ShapeMap = N.ShapeMap
@@ -483,7 +484,7 @@ end = struct
       (* Don't let people use strictly internal classes
        * (except when they are being declared in .hhi files) *)
       if name = SN.Classes.cHH_BuiltinEnum &&
-        not (str_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi")
+        not (string_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi")
       then Errors.using_internal_class pos (strip_ns name);
       pos, name
     | Some (def_pos, `Typedef) when not allow_typedef ->
@@ -910,15 +911,9 @@ module Make (GetLocals : GetLocals) = struct
   let check_tparams_shadow class_tparam_names methods =
     List.iter methods (check_method_tparams class_tparam_names)
 
-  let rec class_constraints tparams =
-    let cstrs = make_constraints tparams in
-    (* Checking there is no cycle in the type constraints *)
-    List.iter tparams (Naming_ast_helpers.HintCycle.check_constraint cstrs);
-    cstrs
-
   (* Naming of a class *)
-  and class_ nenv c =
-    let constraints = class_constraints c.c_tparams in
+  let rec class_ nenv c =
+    let constraints = make_constraints c.c_tparams in
     let env      = Env.make_class_env nenv constraints c in
     (* Checking for a code smell *)
     List.iter c.c_tparams check_constraint;
@@ -1012,7 +1007,7 @@ module Make (GetLocals : GetLocals) = struct
     let validate_name = begin fun ua_name ->
       (validate_seen ua_name) && begin
         let pos, name = ua_name in
-        let valid = if str_starts_with name "__"
+        let valid = if string_starts_with name "__"
           then SSet.mem name SN.UserAttributes.as_set
           else (TypecheckerOptions.allowed_attribute tc_options name)
         in if not valid then Errors.unbound_attribute_name pos name;
@@ -1756,6 +1751,8 @@ module Make (GetLocals : GetLocals) = struct
       N.Lplaceholder pos
     | Lvar x ->
         N.Lvar (Env.lvar env x)
+    | Lvarvar (n, x) ->
+        N.Lvarvar (n, (Env.lvar env x))
     | Obj_get (e1, e2, nullsafe) ->
         (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
            is being used for instance property access; see the case below for
@@ -2237,7 +2234,7 @@ module Make (GetLocals : GetLocals) = struct
 
   let typedef genv tdef =
     let ty = match tdef.t_kind with Alias t | NewType t -> t in
-    let cstrs = class_constraints tdef.t_tparams in
+    let cstrs = make_constraints tdef.t_tparams in
     let env = Env.make_typedef_env genv cstrs tdef in
     let tconstraint = Option.map tdef.t_constraint (hint env) in
     List.iter tdef.t_tparams check_constraint;

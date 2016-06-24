@@ -330,6 +330,36 @@ class CommonTests(object):
             '[{{"name":"Foo::__construct","filename":"{root}foo_3.php","line":10,"char_start":17,"char_end":19}}]'
             ], options=['--find-class-refs', 'Foo'])
 
+    def test_ide_find_refs(self):
+        self.write_load_config()
+
+        self.check_cmd_and_json_cmd(
+            [
+                'File "{root}foo_3.php", line 10, characters 17-19: '
+                'Foo::__construct',
+                '1 total results'
+            ], [
+                '[{{"name":"Foo::__construct","filename":"{root}foo_3.php",'
+                '"line":10,"char_start":17,"char_end":19}}]'
+            ],
+            options=['--ide-find-refs', '1:20'],
+            stdin='<?hh function test(Foo $foo) { new Foo(); }')
+
+    def test_ide_highlight_refs(self):
+        self.write_load_config()
+
+        self.check_cmd_and_json_cmd(
+            [
+                'line 1, characters 20-22',
+                'line 1, characters 36-38',
+                '2 total results',
+            ], [
+                '[{{"filename":"","line":1,"char_start":20,"char_end":22}},'
+                '{{"filename":"","line":1,"char_start":36,"char_end":38}}]'
+            ],
+            options=['--ide-highlight-refs', '1:20'],
+            stdin='<?hh function test(Foo $foo) { new Foo(); }')
+
     def test_search(self):
         """
         Test hh_client --search
@@ -442,11 +472,11 @@ class CommonTests(object):
             'characters 42-44, defined: line 1, characters 15-17, '
             'definition span: line 1, character 15 - line 1, character 17'
             ], [
-            '{{"name":"\\\\bar","result_type":"function","pos":{{"filename":"",'
-            '"line":1,"char_start":42,"char_end":44}},'
+            '[{{"name":"\\\\bar","result_type":"function",'
+            '"pos":{{"filename":"","line":1,"char_start":42,"char_end":44}},'
             '"definition_pos":{{"filename":"","line":1,"char_start":15,'
             '"char_end":17}},"definition_span":{{"filename":"","line_start":1,'
-            '"char_start":6,"line_end":1,"char_end":22}}}}'
+            '"char_start":6,"line_end":1,"char_end":22}}}}]'
             ],
             options=['--ide-get-definition', '1:43'],
             stdin='<?hh function bar() {} function test() { bar() }')
@@ -467,13 +497,15 @@ class CommonTests(object):
         self.check_cmd_and_json_cmd([
             'bar',
             '  kind: function',
+            '  id: function::bar',
             '  position: File "", line 1, characters 15-17:',
             '  span: File "", line 1, character 6 - line 1, character 22:',
             '  modifiers: ',
             '  params:',
             '',
             ], [
-            '[{{"kind":"function","name":"bar","position":{{"filename":"",'
+            '[{{"kind":"function","name":"bar","id":"function::bar",'
+            '"position":{{"filename":"",'
             '"line":1,"char_start":15,"char_end":17}},"span":'
             '{{"filename":"","line_start":1,"char_start":6,"line_end":1,'
             '"char_end":22}},"modifiers":[],"params":[]}}]',
@@ -494,12 +526,12 @@ class CommonTests(object):
             'characters 26-45, definition span: line 4, character 26 - line 4, '
             'character 45'
             ], [
-            '{{"name":"\\\\ClassToBeIdentified::methodToBeIdentified",'
+            '[{{"name":"\\\\ClassToBeIdentified::methodToBeIdentified",'
             '"result_type":"method","pos":{{"filename":"","line":1,'
             '"char_start":45,"char_end":64}},"definition_pos":'
             '{{"filename":"{root}foo_5.php","line":4,"char_start":26,'
             '"char_end":45}},"definition_span":{{"filename":"{root}foo_5.php",'
-            '"line_start":4,"char_start":3,"line_end":4,"char_end":50}}}}'
+            '"line_start":4,"char_start":3,"line_end":4,"char_end":50}}}}]'
             ],
             options=['--ide-get-definition', '1:50'],
             stdin='<?hh function test() { '
@@ -530,6 +562,28 @@ function test(C $c) {
   $c->foo();
 }
 ''')
+
+    def test_ide_get_definition_by_id(self):
+        self.write_load_config()
+        self.check_cmd_and_json_cmd([
+            'f',
+            '  kind: function',
+            '  id: function::f',
+            '  position: File "{root}foo_1.php", line 3, characters 18-18:',
+            '  span: File "{root}foo_1.php", line 3, character 9 - '
+            'line 5, character 9:',
+            '  modifiers: ',
+            '  params:',
+            '',
+        ], [
+            '{{"kind":"function","name":"f","id":"function::f","position":'
+            '{{"filename":"{root}foo_1.php","line":3,"char_start":18,'
+            '"char_end":18}},"span":{{"filename":"{root}foo_1.php",'
+            '"line_start":3,"char_start":9,"line_end":5,"char_end":9}},'
+            '"modifiers":[],"params":[]}}'
+        ],
+            options=["--get-definition-by-id", "function::f"],
+        )
 
     def test_format(self):
         """

@@ -56,6 +56,7 @@ struct VcallArgs {
   VregList args;
   VregList simdArgs;
   VregList stkArgs;
+  bool indirect;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

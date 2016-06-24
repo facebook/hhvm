@@ -1,0 +1,6 @@
+File "generic_attr1.php", line 10, characters 10-20:
+Invalid return type (Typing[4110])
+File "generic_attr1.php", line 7, characters 18-20:
+This is an int
+File "generic_attr1.php", line 8, characters 29-31:
+It is incompatible with a string

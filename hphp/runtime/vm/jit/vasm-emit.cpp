@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -28,9 +29,9 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
@@ -80,7 +81,7 @@ private:
 void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   if (vunit.dataBlocks.empty()) return;
 
-  assertx(Translator::WriteLease().amOwner());
+  mcg->assertOwnsCodeLock();
   Timer timer(Timer::vasm_bind_ptrs);
   FTRACE(1, "{:-^80}\n", "binding VdataPtrs");
 
@@ -125,7 +126,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
   Timer _t(Timer::vasm_emit);
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
-  assertx(Translator::WriteLease().amOwner());
+  mcg->assertOwnsCodeLock();
 
   CodeBlock& main_in = code.main();
   CodeBlock& cold_in = code.cold();

@@ -53,6 +53,10 @@ struct ResourceData;
 
 namespace req {
 struct root_handle;
+void* malloc_big(size_t, type_scan::Index);
+void* calloc_big(size_t, type_scan::Index);
+void* realloc_big(void*, size_t);
+void  free_big(void*);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -313,12 +317,13 @@ static_assert(kNumSmallSizes <= sizeof(kSmallSize2Index),
  * debugging.  There's also 0x7a for junk-filling some cases of
  * ex-TypedValue memory (evaluation stack).
  */
-constexpr char kSmallFreeFill    = 0x6a;
-constexpr char kTVTrashFill      = 0x7a; // used by interpreter
-constexpr char kTVTrashFill2     = 0x7b; // used by req::ptr dtors
-constexpr char kTVTrashJITStk    = 0x7c; // used by the JIT for stack slots
-constexpr char kTVTrashJITFrame  = 0x7d; // used by the JIT for stack frames
-constexpr char kTVTrashJITHeap   = 0x7e; // used by the JIT for heap
+constexpr char kSmallFreeFill   = 0x6a;
+constexpr char kRDSTrashFill    = 0x6b; // used by RDS for "normal" section
+constexpr char kTVTrashFill     = 0x7a; // used by interpreter
+constexpr char kTVTrashFill2    = 0x7b; // used by req::ptr dtors
+constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
+constexpr char kTVTrashJITFrame = 0x7d; // used by the JIT for stack frames
+constexpr char kTVTrashJITHeap  = 0x7e; // used by the JIT for heap
 constexpr char kTVTrashJITRetVal = 0x7f; // used by the JIT for ActRec::m_r
 constexpr uintptr_t kSmallFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
@@ -337,19 +342,12 @@ static_assert(std::numeric_limits<type_scan::Index>::max() <=
               "to fit into HeaderWord");
 
 // This is the header MemoryManager uses to remember large allocations
-// so they can be auto-freed in MemoryManager::reset()
-struct BigNode {
+// so they can be auto-freed in MemoryManager::reset(), as well as large/small
+// req::malloc()'d blocks, which must track their size internally.
+struct MallocNode {
   size_t nbytes;
   HeaderWord<> hdr;
   uint32_t& index() { return hdr.hi32; }
-  uint16_t& typeIndex() { return hdr.aux; }
-  uint16_t typeIndex() const { return hdr.aux; }
-};
-
-// Header used for small req::malloc allocations (but not *Size allocs)
-struct SmallNode {
-  size_t padbytes;
-  HeaderWord<> hdr;
   uint16_t& typeIndex() { return hdr.aux; }
   uint16_t typeIndex() const { return hdr.aux; }
 };
@@ -402,10 +400,10 @@ struct BigHeap {
   // allocate a MemBlock of at least size bytes, track in m_slabs.
   MemBlock allocSlab(size_t size);
 
-  // allocation api for big blocks. These get a BigNode header and
+  // allocation api for big blocks. These get a MallocNode header and
   // are tracked in m_bigs
   MemBlock allocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock callocBig(size_t size, type_scan::Index tyindex);
+  MemBlock callocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
   MemBlock resizeBig(void* p, size_t size);
   void freeBig(void*);
 
@@ -419,11 +417,11 @@ struct BigHeap {
   template<class Fn> void iterate(Fn);
 
  protected:
-  void enlist(BigNode*, HeaderKind kind, size_t size, type_scan::Index tyindex);
+  void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 
  protected:
   std::vector<MemBlock> m_slabs;
-  std::vector<BigNode*> m_bigs;
+  std::vector<MallocNode*> m_bigs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -440,7 +438,7 @@ struct ContiguousHeap : BigHeap {
   MemBlock allocSlab(size_t size);
 
   MemBlock allocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock callocBig(size_t size, type_scan::Index tyindex);
+  MemBlock callocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
   MemBlock resizeBig(void* p, size_t size);
   void freeBig(void*);
 
@@ -546,15 +544,24 @@ struct MemoryManager {
    * amay be larger than the requested size.  The returned pointer is
    * guaranteed to be 16-byte aligned.
    *
-   * The size passed to freeBigSize must either be the size that was
-   * passed to mallocBigSize, or the value that was returned as the
+   * The size passed to freeBigSize must either be the requested size that was
+   * passed to mallocBigSize, or the MemBlock size that was returned as the
    * actual allocation size.
+   *
+   * Mode of ZeroFreeActual is the same as FreeActual, but zeros memory.
    *
    * Pre: size > kMaxSmallSize
    */
-  template<bool callerSavesActualSize>
-  MemBlock mallocBigSize(size_t size);
+  enum MBS {
+    FreeRequested, // caller frees requested size
+    FreeActual,    // caller frees actual size returned in MemBlock
+    ZeroFreeActual // calloc & FreeActual
+  };
+  template<MBS Mode>
+  MemBlock mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
+                         type_scan::Index tyindex = 0);
   void freeBigSize(void* vp, size_t size);
+  MemBlock resizeBig(MallocNode* n, size_t nbytes);
 
   /*
    * Allocate/deallocate objects when the size is not known to be
@@ -831,13 +838,6 @@ struct MemoryManager {
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  friend void* req::malloc(size_t nbytes, type_scan::Index tyindex);
-  friend void* req::malloc_noptrs(size_t nbytes);
-  friend void* req::calloc(size_t count, size_t bytes,
-                           type_scan::Index tyindex);
-  friend void* req::realloc(void* ptr, size_t nbytes, type_scan::Index tyindex);
-  friend void* req::realloc_noptrs(void* ptr, size_t nbytes);
-  friend void  req::free(void* ptr);
   friend struct req::root_handle; // access m_root_handles
 
   struct FreeList {
@@ -882,11 +882,6 @@ private:
   void* newSlab(uint32_t nbytes);
   void* mallocSmallSizeSlow(uint32_t bytes, unsigned index);
   void  updateBigStats();
-  void* mallocBig(size_t nbytes, type_scan::Index tyindex);
-  void* callocBig(size_t nbytes, type_scan::Index tyindex);
-  void* malloc(size_t nbytes, type_scan::Index tyindex);
-  void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex);
-  void  free(void* ptr);
 
   static uint32_t bsr(uint32_t x);
 

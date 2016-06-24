@@ -40,6 +40,8 @@ void CGMeta::process(
 void CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
+  mcg->assertOwnsMetadataLock();
+
   for (auto const& pair : fixups) {
     assertx(mcg->code().isValidCodeAddress(pair.first));
     mcg->fixupMap().recordFixup(pair.first, pair.second);
@@ -56,12 +58,17 @@ void CGMeta::process_only(
   }
   catches.clear();
 
-  for (auto const& elm : jmpTransIDs) {
-    mcg->jmpToTransIDMap()[elm.first] = elm.second;
+  if (auto profData = jit::profData()) {
+    for (auto const& elm : jmpTransIDs) {
+      profData->setJmpTransID(elm.first, elm.second);
+    }
   }
   jmpTransIDs.clear();
 
-  mcg->literals().insert(literals.begin(), literals.end());
+  for (auto& pair : literals) {
+    if (mcg->literals().find(pair.first)) continue;
+    mcg->literals().insert(pair.first, pair.second);
+  }
   literals.clear();
 
   if (inProgressTailBranches) {

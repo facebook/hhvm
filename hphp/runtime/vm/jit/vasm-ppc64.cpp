@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -36,6 +35,8 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
+
+#include "hphp/util/arch.h"
 
 #include <algorithm>
 #include <tuple>
@@ -454,6 +455,7 @@ struct Vgen {
   void emit(const stublogue& i);
   void emit(const stubret& i);
   void emit(const stubtophp& i);
+  void emit(const stubunwind& i);
   void emit(const syncpoint& i);
   void emit(const tailcallstub& i);
   void emit(const testqi& i);
@@ -863,12 +865,16 @@ void Vgen::emit(const loadstubret& i) {
   a.ld(i.d, rsp()[AROFF(m_savedRip)]);
 }
 
-void Vgen::emit(const stubtophp& i) {
+void Vgen::emit(const stubunwind& i) {
   // reset the return address from native frame due to call to the vm frame
   a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);
   a.mtlr(rfuncln());
   // pop this frame as created by stublogue
   a.addi(rsp(), rsp(), min_frame_size);
+}
+
+void Vgen::emit(const stubtophp& i) {
+  emit(stubunwind{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

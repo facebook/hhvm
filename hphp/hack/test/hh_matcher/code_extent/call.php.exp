@@ -2482,13 +2482,13 @@ on_expr:
 
 on_def:
 
-class Bar
+class Bar {}
 
 =====
 
 on_class_:
 
-class Bar
+class Bar {}
 
 =====
 

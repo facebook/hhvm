@@ -34,7 +34,6 @@ SRC = \
   typing_env.ml\
   typing_unify_recursive.ml\
   naming_heap.ml\
-  naming_ast_helpers.ml\
   naming.ml\
   prefix.ml\
   typing_print.ml\
@@ -227,9 +226,6 @@ autocomplete.ml: $(TOP)/globals/autocomplete.ml
 find_refs.ml: $(TOP)/globals/find_refs.ml
 	cp $< .
 
-naming_ast_helpers.ml: $(TOP)/naming/naming_ast_helpers.ml
-	cp $< .
-
 naming_heap.ml: $(TOP)/naming/naming_heap.ml
 	cp $< .
 
@@ -314,7 +310,6 @@ clean::
 	rm -f nastCheck.ml
 	rm -f nastInitCheck.ml
 	rm -f naming_heap.ml
-	rm -f naming_ast_helpers.ml
 	rm -f naming.ml
 	rm -f typing_reason.ml
 	rm -f typing_defs.ml

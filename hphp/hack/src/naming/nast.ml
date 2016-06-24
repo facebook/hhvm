@@ -294,6 +294,7 @@ and expr_ =
   | This
   | Id of sid
   | Lvar of id
+  | Lvarvar of int * id
   | Lplaceholder of Pos.t
   | Dollardollar of id
   | Fun_id of sid

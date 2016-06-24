@@ -87,6 +87,8 @@ struct AsioSession final {
   // Wakeup time of next sleep wait handle or request timeout time.
   // The returned timestamp may correspond to canceled wait handle.
   TimePoint sleepWakeTime();
+  // The next wait handle to wake up. The wait handle may be cancled
+  c_SleepWaitHandle* nextSleepEvent();
 
   // Abrupt interrupt exception.
   ObjectData* getAbruptInterruptException() {

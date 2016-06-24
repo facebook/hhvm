@@ -82,3 +82,11 @@ let from_minimal_list source_text ts offset =
       let et = from_minimal source_text h offset in
       aux (et :: acc) t (offset + (MinimalTrivia.width h)) in
   List.rev (aux [] ts offset)
+
+let to_json trivia =
+  let open Hh_json in
+  JSON_Object [
+    ("kind", JSON_String (TriviaKind.to_string trivia.kind));
+    ("text", JSON_String (text trivia));
+    ("offset", int_ trivia.offset);
+    ("width", int_ trivia.width); ]

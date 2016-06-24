@@ -22,6 +22,11 @@ let make start_offset end_offset message =
 let to_string error =
   Printf.sprintf "(%d-%d) %s" error.start_offset error.end_offset error.message
 
+let to_positioned_string error offset_to_position =
+  let (sl, sc) = offset_to_position error.start_offset in
+  let (el, ec) = offset_to_position error.end_offset in
+  Printf.sprintf "(%d,%d)-(%d,%d) %s" sl sc el ec error.message
+
 (* Lexical errors *)
 let error0001 = "A hexadecimal literal needs at least one digit."
 let error0002 = "A binary literal needs at least one digit."
@@ -59,3 +64,10 @@ let error1016 = "An assignment is expected here."
 let error1017 = "An XHP attribute value is expected here."
 let error1018 = "The 'while' keyword is expected here"
 let error1019 = "A left parenthesis is expected here."
+let error1020 = "A colon is expected here."
+let error1021 = "An opening angle bracket is expected here."
+(* TODO: Remove this; redundant to 1009. *)
+let error1022 = "A right parenthesis or comma is expected here."
+let error1023 = "An 'as' keyword is expected here"
+let error1024 = "A comma or semicolon is expected here."
+let error2001 = "A type annotation is required in strict mode."

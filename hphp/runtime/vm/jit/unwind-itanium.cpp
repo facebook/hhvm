@@ -52,7 +52,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-rds::Link<UnwindRDS> g_unwind_rds(rds::kInvalidHandle);
+rds::Link<UnwindRDS,true> g_unwind_rds(rds::kInvalidHandle);
 
 namespace {
 
@@ -139,6 +139,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // things to the handler using the RDS. This also simplifies the handler code
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
+  assert(g_unwind_rds.isInit());
   if (do_side_exit) {
     g_unwind_rds->exn = nullptr;
 #ifndef _MSC_VER
@@ -250,6 +251,8 @@ tc_unwind_personality(int version,
 
     auto const ip = TCA(_Unwind_GetIP(context));
 
+    assert(g_unwind_rds.isInit());
+
     auto& stubs = mcg->ustubs();
     if (ip == stubs.endCatchHelperPast) {
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
@@ -258,12 +261,6 @@ tc_unwind_personality(int version,
     if (ip == stubs.functionEnterHelperReturn) {
       FTRACE(1, "rip == functionEnterHelperReturn, continuing unwind\n");
       return _URC_CONTINUE_UNWIND;
-    }
-    if (ip == stubs.fcallArrayReturn) {
-      FTRACE(1, "rip == fcallArrayReturn, entering catch\n");
-      g_unwind_rds->exn = ue;
-      _Unwind_SetIP(context, uint64_t(stubs.fcallArrayEndCatch));
-      return _URC_INSTALL_CONTEXT;
     }
 
     FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
@@ -300,6 +297,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
       return {nullptr, newFp};
     }
 
+    assert(g_unwind_rds.isInit());
     auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
     if (isDebuggerReturnHelper(savedRip)) {
       // If this frame had its return address smashed by the debugger, the real
@@ -349,10 +347,10 @@ void write_tc_cie(EHFrameWriter& ehfw) {
   ehfw.offset_extended_sf(dw_reg::TOC, (record_size - AROFF(m_savedToc)) / 8);
 #endif
 
-  // This is an artifact of a time when we did not spill registers onto the
-  // native stack.  Now that we do, this CFI is a lie.  Fortunately, our TC
-  // personality routine skips all the way back to native frames before
-  // resuming the unwinder, so its brokenness goes unnoticed.
+  // It's not actually the case that %rsp keeps the same value across all TC
+  // frames---in particular, we use the native stack for spill space.  However,
+  // the responsibility of restoring it properly falls to TC catch traces, so
+  // this .eh_frame entry need only preserve it.
   ehfw.same_value(dw_reg::SP);
 
   ehfw.end_cie();

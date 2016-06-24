@@ -356,6 +356,11 @@ struct Vgen {
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lowest 32 bits
     a.extsw(Reg64(i.d), Reg64(i.d));                // extend sign
   }
+  void emit(const movw& i) {
+    int8_t sh = sizeof(int) * (CHAR_BIT * 2);       // 16 bits
+    a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lowest 16 bits
+    a.extsh(Reg64(i.d), Reg64(i.d));                // extend sign
+  }
   void emit(const movb& i) {
     int8_t sh = CHAR_BIT;
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lower byte
@@ -1175,6 +1180,25 @@ X(cmplm,  cmpl,  loadl, s1, s0)
 X(cmpqm,  cmpq,  load,  s1, s0)
 
 #undef X
+
+// Handles MemoryRef arguments, load the data input from memory and
+// filter the reg og 16bits to 64bits. These ones have no output other
+// than the sign flag register update (SF)
+#define X(vasm_src, vasm_filter, vasm_dst, vasm_load, attr_addr, attr)  \
+void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
+  Vreg tmp1 = v.makeReg(), tmp2 = v.makeReg();                          \
+  Vptr p = inst.attr_addr;                                              \
+  v << vasm_filter{inst.attr, tmp1};                                    \
+  patchVptr(p, v);                                                      \
+  v << vasm_load{p, tmp2};                                              \
+  v << vasm_dst{tmp1, tmp2, inst.sf};                                   \
+}
+
+X(cmpwm, movw, cmpq, loadw, s1, s0)
+X(cmpbm, movb, cmpq, loadb, s1, s0)
+
+#undef X
+
 
 /*
  * For PPC64 there are no instructions to perform operations with only part of

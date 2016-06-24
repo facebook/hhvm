@@ -253,6 +253,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cmpwm:
     case Vinstr::testwim:
     case Vinstr::loadw:
+    case Vinstr::movw:
     case Vinstr::storew:
     case Vinstr::storewi:
       return Width::Word;

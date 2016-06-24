@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | (c) Copyright IBM Corporation 2015                                   |
+   | (c) Copyright IBM Corporation 2015-2016                              |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,9 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-constexpr auto kFuncGuardLen = 0x38;
+// funcGuard: li64 (5 instr), ld, cmpd, li64 (5 instr), mtctr, nop, nop, bctr
+// it needs to rewind all of those instructions but pointing to the first.
+constexpr auto kFuncGuardLen = 16 * ppc64_asm::instr_size_in_bytes;
 
 ALWAYS_INLINE bool isPrologueStub(TCA addr) {
   return addr == mcg->ustubs().fcallHelperThunk;
@@ -57,9 +59,9 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
 
   emitSmashableMovq(a.code(), fixups, uint64_t(func), tmp1);
   a.  ld     (tmp2, rvmfp()[AROFF(m_func)]);
-  a.  cmpld  (tmp1, tmp2);
+  a.  cmpd   (tmp1, tmp2);
 
-  a.  branchAuto(mcg->ustubs().funcPrologueRedispatch,
+  a.  branchFar(mcg->ustubs().funcPrologueRedispatch,
                   ppc64_asm::BranchConditions::NotEqual);
 
   DEBUG_ONLY auto guard = funcGuardFromPrologue(a.frontier(), func);

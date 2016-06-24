@@ -65,7 +65,7 @@ bool loadsCell(Opcode op) {
     switch (arch()) {
     case Arch::X64: return true;
     case Arch::ARM: return true;
-    case Arch::PPC64: not_implemented(); break;
+    case Arch::PPC64: return true;
     }
     not_reached();
 
@@ -83,7 +83,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   switch (arch()) {
   case Arch::X64: break;
   case Arch::ARM: break;
-  case Arch::PPC64: not_implemented(); break;
+  case Arch::PPC64: return false;
   }
 
   // If this function returns true for an operand, then the register allocator
@@ -118,7 +118,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     switch (arch()) {
     case Arch::X64: return false;
     case Arch::ARM: return false;
-    case Arch::PPC64: not_implemented(); break;
+    case Arch::PPC64: return false;
     }
     not_reached();
   }();
@@ -221,7 +221,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       switch (arch()) {
         case Arch::ARM: break;
         case Arch::X64: break;
-        case Arch::PPC64: not_implemented(); break;
+        case Arch::PPC64: break;
       }
       break;
 
@@ -234,7 +234,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       switch (arch()) {
         case Arch::ARM: defs -= rvmtl(); break;
         case Arch::X64: defs -= rvmtl(); break;
-        case Arch::PPC64: not_implemented(); break;
+        case Arch::PPC64: defs -= rvmtl(); break;
       }
       break;
 
@@ -244,7 +244,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       switch (arch()) {
         case Arch::ARM: defs -= rvmtl(); break;
         case Arch::X64: defs -= rvmtl(); break;
-        case Arch::PPC64: not_implemented(); break;
+        case Arch::PPC64: defs -= rvmtl(); break;
       }
       break;
 

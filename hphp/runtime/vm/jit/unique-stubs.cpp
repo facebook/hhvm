@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
+#include "hphp/runtime/vm/jit/unique-stubs-ppc64.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -822,6 +823,9 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
     v << subqi{callLen, savedRIP, args[1], v.makeReg()};
 
     v << copy{rvmfp(), args[2]};
+    // Promote bool type argument size to long in order to avoid issues on
+    // platforms that optimization might not ignore the higher bits of the
+    // register (e.g: ppc64)
     v << movb{v.cns(immutable), args[3]};
 
     auto const handler = reinterpret_cast<void (*)()>(
@@ -1112,8 +1116,8 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Realign the native stack.
     switch (arch()) {
       case Arch::X64:
-      case Arch::PPC64:
         v << lea{rsp()[8], rsp()};
+      case Arch::PPC64:
         break;
       case Arch::ARM:
         break;
@@ -1149,6 +1153,9 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 #endif
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
+    // Architecture-specific setup to enter on TC.
+    v << inittc{};
+
     // Native func prologue.
     v << stublogue{true};
 
@@ -1169,8 +1176,8 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Unalign the native stack.
     switch (arch()) {
       case Arch::X64:
-      case Arch::PPC64:
         v << lea{rsp()[-8], rsp()};
+      case Arch::PPC64:
         break;
       case Arch::ARM:
         break;

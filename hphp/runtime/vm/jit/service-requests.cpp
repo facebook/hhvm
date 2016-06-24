@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
+
 #include "hphp/runtime/vm/jit/service-requests.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -209,6 +211,13 @@ namespace arm {
   static constexpr int kLeaVmSpLen = 4 * 4;
 }
 
+namespace ppc64 {
+  // Standard ppc64 instructions are 4 bytes long
+  static constexpr int kStdIns = 4;
+  // Leap for ppc64, in worst case, have 5 standard ppc64 instructions.
+  static constexpr int kLeaVMSpLen = kStdIns * 5;
+}
+
 size_t stub_size() {
   // The extra args are the request type and the stub address.
   constexpr auto kTotalArgs = kMaxArgs + 2;
@@ -219,7 +228,10 @@ size_t stub_size() {
     case Arch::ARM:
       return kTotalArgs * arm::kMovLen + arm::kLeaVmSpLen;
     case Arch::PPC64:
-      not_implemented();
+    // This calculus was based on the amount of emitted instructions in
+    // emit_svcreq.
+      return (ppc64::kStdIns + ppc64::kLeaVMSpLen) * kTotalArgs +
+          ppc64::kLeaVMSpLen + 3 * ppc64::kStdIns;
   }
   not_reached();
 }
@@ -281,7 +293,15 @@ FPInvOffset extract_spoff(TCA stub) {
       }
 
     case Arch::PPC64:
-      not_implemented();
+    {
+      ppc64_asm::DecodedInstruction instr(stub);
+      if (!instr.isSpOffsetInstr()) {
+        return FPInvOffset{0};
+      } else {
+        auto const offBytes = safe_cast<int32_t>(instr.offset());
+        return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+      }
+    }
   }
   not_reached();
 }

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/jit/abi-ppc64.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -323,7 +324,7 @@ struct VxlsContext {
         tmp = vixl::x17; // also used as tmp1 by MacroAssembler
         break;
       case Arch::PPC64:
-        not_implemented();
+        tmp = ppc64_asm::reg::v29;
         break;
     }
     this->abi.simdUnreserved -= tmp;

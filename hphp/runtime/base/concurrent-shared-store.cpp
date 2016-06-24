@@ -60,7 +60,9 @@ bool check_noTTL(const char* key, size_t keyLen) {
 
 void StoreValue::set(APCHandle* v, int64_t ttl) {
   setHandle(v);
-  expire = ttl ? time(nullptr) + ttl : 0;
+  mtime = time(nullptr);
+  if (c_time == 0)  c_time = mtime;
+  expire = ttl ? mtime + ttl : 0;
 }
 
 bool StoreValue::expired() const {
@@ -997,7 +999,7 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
     if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
   }
 
-  return EntryInfo(key, inMem, size, ttl, type);
+  return EntryInfo(key, inMem, size, ttl, type, sval->c_time, sval->mtime);
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {

@@ -917,7 +917,9 @@ and source_extent_class_ file source c =
   let accum = visitor#on_class_
     { default_range_accum with
         ignore_keywords = non_empty c.Ast.c_user_attributes } c in
-  let right = skip_trailing_delims
+  let right = if c.Ast.c_body = [] then
+    skip_to_token (visitor#get_lexbuf ()) Lexer_hack.Trcb file accum.lex_env
+  else skip_trailing_delims
                 (visitor#get_lexbuf ())
                 accum.unmatched_lcb
                 accum.unmatched_lp

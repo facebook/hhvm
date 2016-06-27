@@ -1825,7 +1825,6 @@ MCGenerator::MCGenerator()
 
   s_jitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
-  // Do not initialize JIT stubs for PPC64 - port under development
   m_ustubs.emitAll(m_code, m_debugInfo);
 
   // Write an .eh_frame section that covers the whole TC.

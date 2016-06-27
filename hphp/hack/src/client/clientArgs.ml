@@ -265,6 +265,8 @@ let parse_check_args cmd =
       Arg.String (fun x -> set_mode (MODE_IDE_HIGHLIGHT_REFS x) ()),
     (* Similar to --ide-find-refs, but returns references in current file only,
      * and is optimized to be faster in that case *) "";
+    "--ai-query", Arg.String (fun x -> set_mode (MODE_AI_QUERY x) ()),
+    (* Send an AI query *) "";
     (* flags *)
     "--json", Arg.Set output_json,
       " output json for machine consumption. (default: false)";

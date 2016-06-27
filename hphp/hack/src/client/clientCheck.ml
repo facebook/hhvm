@@ -351,6 +351,10 @@ let main args =
       let results = rpc args @@ Rpc.TRACE_AI action in
       ClientTraceAi.go results args.output_json;
       Exit_status.No_error
+    | MODE_AI_QUERY json ->
+      let results = rpc args @@ Rpc.AI_QUERY json in
+      ClientAiQuery.go results;
+      Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   exit_status

@@ -43,6 +43,7 @@ type _ t =
   | FIND_LVAR_REFS : string * int * int -> ServerFindLocals.result t
   | FORMAT : string * int * int -> string Format_hack.return t
   | TRACE_AI : Ai.TraceService.action -> string t
+  | AI_QUERY : string -> string t
 
 let handle : type a. genv -> env -> a t -> a =
   fun genv env -> function
@@ -104,6 +105,8 @@ let handle : type a. genv -> env -> a t -> a =
     | TRACE_AI action ->
         Ai.TraceService.go action Typing_check_utils.check_defs
            (ServerArgs.ai_mode genv.options) env.tcopt
+    | AI_QUERY json ->
+        Ai.QueryService.go json
 
 let to_string : type a. a t -> _ = function
   | STATUS -> "STATUS"
@@ -135,3 +138,4 @@ let to_string : type a. a t -> _ = function
   | IDE_FIND_REFS _ -> "IDE_FIND_REFS"
   | GET_DEFINITION_BY_ID _ -> "GET_DEFINITION_BY_ID"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
+  | AI_QUERY _ -> "AI_QUERY"

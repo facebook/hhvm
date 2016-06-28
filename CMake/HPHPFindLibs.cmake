@@ -15,6 +15,9 @@
 #   +----------------------------------------------------------------------+
 #
 
+#Increased minimum to 2.8.8 to support CURL_VERSION_STRING
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+
 include(CheckFunctionExists)
 
 # libdl
@@ -105,6 +108,10 @@ find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 if (CURL_STATIC)
   add_definitions("-DCURL_STATICLIB")
+endif()
+
+if (${CURL_VERSION_STRING} VERSION_LESS "7.29.0")
+  message(FATAL_ERROR "libcurl ${CURL_VERSION_STRING} is too old, please install at least 7.29.0 or higher")
 endif()
 
 set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")

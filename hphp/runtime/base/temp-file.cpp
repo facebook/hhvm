@@ -141,7 +141,9 @@ int64_t TempFile::getLength() {
   if (StatCache::lstat(File::TranslatePathWithFileCache(m_rawName).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     folly::errnoStr(errno).c_str());
-    return -1;
+    // use fstat directly
+    fstat(getFd(), &sb);
+    return sb.st_size;
   }
   return sb.st_size;
 }

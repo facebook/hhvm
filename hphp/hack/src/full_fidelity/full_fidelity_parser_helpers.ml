@@ -7,14 +7,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
- module Token = Full_fidelity_minimal_token
- module Syntax = Full_fidelity_minimal_syntax
- module SyntaxKind = Full_fidelity_syntax_kind
- module TokenKind = Full_fidelity_token_kind
- module SyntaxError = Full_fidelity_syntax_error
- module Lexer = Full_fidelity_lexer
+module Token = Full_fidelity_minimal_token
+module Syntax = Full_fidelity_minimal_syntax
+module SyntaxKind = Full_fidelity_syntax_kind
+module TokenKind = Full_fidelity_token_kind
+module SyntaxError = Full_fidelity_syntax_error
 
 module type ParserType = sig
+  module Lexer : Full_fidelity_lexer_sig.Lexer_S
   type t
   val errors : t -> SyntaxError.t list
   val with_errors : t -> SyntaxError.t list -> t
@@ -26,13 +26,13 @@ module WithParser(Parser : ParserType) = struct
 
   let next_token parser =
     let lexer = Parser.lexer parser in
-    let (lexer, token) = Lexer.next_token lexer in
+    let (lexer, token) = Parser.Lexer.next_token lexer in
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
   let peek_token parser =
     let lexer = Parser.lexer parser in
-    let (_, token) = Lexer.next_token lexer in
+    let (_, token) = Parser.Lexer.next_token lexer in
     token
 
   let skip_token parser =
@@ -43,8 +43,8 @@ module WithParser(Parser : ParserType) = struct
     (* TODO: Should be able to express errors on whole syntax node. *)
     (* TODO: Is this even right? Won't this put the error on the trivia? *)
     let lexer = Parser.lexer parser in
-    let start_offset = Lexer.start_offset lexer in
-    let end_offset = Lexer.end_offset lexer in
+    let start_offset = Parser.Lexer.start_offset lexer in
+    let end_offset = Parser.Lexer.end_offset lexer in
     let error = SyntaxError.make start_offset end_offset message in
     let errors = Parser.errors parser in
     Parser.with_errors parser (error :: errors)
@@ -73,7 +73,7 @@ module WithParser(Parser : ParserType) = struct
   let next_token_as_name parser =
     (* TODO: This isn't right.  Pass flags to the lexer. *)
     let lexer = Parser.lexer parser in
-    let (lexer, token) = Lexer.next_token_as_name lexer in
+    let (lexer, token) = Parser.Lexer.next_token_as_name lexer in
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 

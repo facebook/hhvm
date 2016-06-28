@@ -14,8 +14,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module Lexer = Full_fidelity_lexer
-module SimpleParser = Full_fidelity_simple_parser
+module SimpleParser = Full_fidelity_simple_parser.WithLexer(Full_fidelity_lexer)
 
 open TokenKind
 open Syntax

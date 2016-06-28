@@ -14,7 +14,6 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module Lexer = Full_fidelity_lexer
 module Operator = Full_fidelity_operator
 module PrecedenceParser = Full_fidelity_precedence_parser
 
@@ -35,7 +34,7 @@ module WithStatementAndDeclParser
 
   (* try to parse an expression. If parser cannot make progress, return None *)
   and parse_expression_optional parser =
-    let module Lexer = Full_fidelity_lexer in
+    let module Lexer = PrecedenceParser.Lexer in
     let offset = Lexer.start_offset (lexer parser) in
     let (parser, expr) = parse_expression parser in
     let offset1 = Lexer.start_offset (lexer parser) in

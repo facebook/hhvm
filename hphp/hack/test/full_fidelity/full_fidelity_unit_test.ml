@@ -111,9 +111,8 @@ let test_data = [
     ~preprocess_exp:remove_whitespace "test_list_expression" test_minimal;
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_foreach_statements" test_minimal;
-  (* Temporarily disable; >> is being lexed incorrectly *)
-  (* make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_types" test_minimal; *)
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_types" test_minimal;
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_types_type_const" test_minimal;
   make_test_case_from_files

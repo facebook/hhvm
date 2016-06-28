@@ -9,24 +9,28 @@
  *)
 
 module SyntaxError = Full_fidelity_syntax_error
-module Lexer = Full_fidelity_lexer
 
-type t = {
-  lexer : Lexer.t;
-  errors : SyntaxError.t list
-}
+module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
+  module Lexer = Lexer
 
-let make lexer errors =
-  { lexer; errors }
+  type t = {
+    lexer : Lexer.t;
+    errors : SyntaxError.t list
+  }
 
-let errors parser =
-  parser.errors
+  let make lexer errors =
+    { lexer; errors }
 
-let with_errors parser errors =
-  { parser with errors }
+  let errors parser =
+    parser.errors
 
-let lexer parser =
-  parser.lexer
+  let with_errors parser errors =
+    { parser with errors }
 
-let with_lexer parser lexer =
-  { parser with lexer }
+  let lexer parser =
+    parser.lexer
+
+  let with_lexer parser lexer =
+    { parser with lexer }
+
+end

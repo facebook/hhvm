@@ -267,6 +267,13 @@ module WithToken(Token: TokenType) = struct
       listlike_members: t;
       listlike_right_paren: t;
     }
+    and object_creation_expression = {
+      object_creation_new : t;
+      object_creation_class : t;
+      object_creation_lparen : t;
+      object_creation_arguments : t;
+      object_creation_rparen : t
+    }
     and xhp_attribute = {
       xhp_attr_name : t;
       xhp_attr_equal : t;
@@ -386,6 +393,7 @@ module WithToken(Token: TokenType) = struct
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
     | ListExpression of listlike_expression
+    | ObjectCreationExpression of object_creation_expression
     | XHPExpression of xhp_expression
     | XHPOpen of xhp_open
     | XHPAttribute of xhp_attribute
@@ -452,6 +460,7 @@ module WithToken(Token: TokenType) = struct
       | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
       | BracedExpression _ -> SyntaxKind.BracedExpression
       | ListExpression _ -> SyntaxKind.ListExpression
+      | ObjectCreationExpression _ -> SyntaxKind.ObjectCreationExpression
       | XHPExpression _ -> SyntaxKind.XHPExpression
       | XHPOpen _ -> SyntaxKind.XHPOpen
       | XHPAttribute _ -> SyntaxKind.XHPAttribute
@@ -504,6 +513,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ParenthesizedExpression
     let is_braced_expression node = kind node = SyntaxKind.BracedExpression
     let is_listlike_expression node = kind node = SyntaxKind.ListExpression
+    let is_object_creation_expression node =
+      kind node = SyntaxKind.ObjectCreationExpression
     let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
     let is_xhp_open node = kind node = SyntaxKind.XHPOpen
     let is_xhp_attribute node = kind node = SyntaxKind.XHPAttribute
@@ -660,6 +671,11 @@ module WithToken(Token: TokenType) = struct
           listlike_right_paren } ->
         [ listlike_keyword; listlike_left_paren; listlike_members;
           listlike_right_paren ]
+      | ObjectCreationExpression
+        { object_creation_new; object_creation_class; object_creation_lparen;
+          object_creation_arguments; object_creation_rparen } ->
+        [ object_creation_new; object_creation_class; object_creation_lparen;
+          object_creation_arguments; object_creation_rparen ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ xhp_open; xhp_body; xhp_close ]
@@ -843,6 +859,13 @@ module WithToken(Token: TokenType) = struct
           listlike_right_paren } ->
         [ "listlike_keyword"; "listlike_left_paren"; "listlike_members";
           "listlike_right_paren" ]
+      | ObjectCreationExpression
+        { object_creation_new; object_creation_class;
+          object_creation_lparen; object_creation_arguments;
+          object_creation_rparen } ->
+        [ "object_creation_new"; "object_creation_class";
+          "object_creation_lparen"; "object_creation_arguments";
+          "object_creation_rparen" ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ "xhp_open"; "xhp_body"; "xhp_close" ]
@@ -1216,6 +1239,12 @@ module WithToken(Token: TokenType) = struct
         listlike_members; listlike_right_paren ]) ->
         ListExpression { listlike_keyword; listlike_left_paren;
           listlike_members; listlike_right_paren }
+      | (SyntaxKind.ObjectCreationExpression,
+        [ object_creation_new; object_creation_class; object_creation_lparen;
+          object_creation_arguments; object_creation_rparen ]) ->
+        ObjectCreationExpression
+        { object_creation_new; object_creation_class; object_creation_lparen;
+          object_creation_arguments; object_creation_rparen }
       | (SyntaxKind.XHPExpression, [ xhp_open; xhp_body; xhp_close ]) ->
         XHPExpression { xhp_open; xhp_body; xhp_close }
       | (SyntaxKind.XHPOpen, [ xhp_open_name; xhp_open_attrs;
@@ -1333,6 +1362,13 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.ListExpression
           [ listlike_keyword; listlike_left_paren; listlike_members;
           listlike_right_paren ]
+
+      let make_object_creation_expression
+        object_creation_new object_creation_class object_creation_lparen
+        object_creation_arguments object_creation_rparen =
+        from_children SyntaxKind.ObjectCreationExpression
+        [ object_creation_new; object_creation_class; object_creation_lparen;
+          object_creation_arguments; object_creation_rparen]
 
       let make_xhp xhp_open xhp_body xhp_close =
         from_children SyntaxKind.XHPExpression [xhp_open; xhp_body; xhp_close ]

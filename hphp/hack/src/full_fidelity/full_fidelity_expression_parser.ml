@@ -91,7 +91,7 @@ module WithStatementAndDeclParser
 
     | List  -> parse_list_expression parser
     | Shape (* TODO: Parse shape *)
-    | New  (* TODO: Parse object creation *)
+    | New -> parse_object_creation_expression parser
     | Async (* TODO: Parse lambda *)
     | Function  (* TODO: Parse local function *)
 
@@ -178,6 +178,59 @@ module WithStatementAndDeclParser
       (parser1, make_token token)
     | Question -> parse_conditional_expression parser1 term (make_token token)
     | _ -> (parser, term)
+
+  and parse_designator parser =
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Name
+    | QualifiedName
+    | Variable
+    | Static -> parser1, (make_token token)
+    | LeftParen ->
+      (* ERROR RECOVERY: We have "new (", so the type is almost certainly
+         missing. Mark the type as missing, don't eat the token, and we'll
+         try to parse the parameter list. *)
+      (with_error parser SyntaxError.error1027, (make_missing()))
+    | _ ->
+      (* ERROR RECOVERY: We have "new " followed by something not recognizable
+         as a type name. Take the token as the name and hope that what follows
+         is the parameter list. *)
+      (with_error parser1 SyntaxError.error1027, (make_token token))
+
+  and parse_expression_list parser =
+    let rec aux parser exprs =
+      let (parser, expr) = with_reset_precedence parser parse_expression in
+      let exprs = expr :: exprs in
+      let (parser1, token) = next_token parser in
+      match (Token.kind token) with
+      | Comma ->
+        aux parser1 ((make_token token) :: exprs )
+      | RightParen ->
+        (parser, exprs)
+      | EndOfFile
+      | _ ->
+        (* ERROR RECOVERY TODO: How to recover? *)
+        let parser = with_error parser SyntaxError.error1009 in
+        (parser, exprs) in
+    let (parser, exprs) = aux parser [] in
+    (parser, make_list (List.rev exprs))
+
+  and parse_expression_list_opt parser =
+    let token = peek_token parser in
+    if (Token.kind token) = RightParen then (parser, make_missing())
+    else parse_expression_list parser
+
+  and parse_object_creation_expression parser =
+    let (parser, new_token) = next_token parser in
+    let (parser, designator) = parse_designator parser in
+    let (parser, left_paren) =
+     expect_token parser LeftParen SyntaxError.error1019 in
+    let (parser, args) = parse_expression_list_opt parser in
+    let (parser, right_paren) =
+      expect_token parser RightParen SyntaxError.error1011 in
+    let result = make_object_creation_expression (make_token new_token)
+      designator left_paren args right_paren in
+    (parser, result)
 
   and parse_parenthesized_or_lambda_expression parser =
     (*TODO: Does not yet deal with lambdas *)

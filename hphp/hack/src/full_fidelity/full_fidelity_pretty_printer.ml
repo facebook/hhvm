@@ -425,6 +425,13 @@ let rec get_doc node =
     let members = get_doc (listlike_members x) in
     let left = group_doc (keyword ^| left_paren) in
     indent_block_no_space left members right_paren indt
+  | ObjectCreationExpression x ->
+    let n = get_doc x.object_creation_new in
+    let c = get_doc x.object_creation_class in
+    let l = get_doc x.object_creation_lparen in
+    let a = get_doc x.object_creation_arguments in
+    let r = get_doc x.object_creation_rparen in
+    n ^| c ^^^ l ^^^ a ^^^ r
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in

@@ -51,6 +51,7 @@ type t =
 | PostfixUnaryOperator
 | BinaryOperator
 | ConditionalExpression
+| FunctionCallExpression
 | ParenthesizedExpression
 | BracedExpression
 | ListExpression
@@ -107,6 +108,7 @@ let to_string kind =
   | PostfixUnaryOperator -> "postfix_unary_operator"
   | BinaryOperator -> "binary_operator"
   | ConditionalExpression -> "conditional_expression"
+  | FunctionCallExpression -> "function_call_expression"
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"
   | ListExpression -> "list_expression"

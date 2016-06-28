@@ -89,8 +89,8 @@ module WithStatementAndDeclParser
       (parser1, make_token token)
 
     | List  -> parse_list_expression parser
-    | Shape (* TODO: Parse shape *)
     | New -> parse_object_creation_expression parser
+    | Shape (* TODO: Parse shape *)
     | Async (* TODO: Parse lambda *)
     | Function  (* TODO: Parse local function *)
 
@@ -168,10 +168,8 @@ module WithStatementAndDeclParser
       (* TODO parse lambda *)
       (parser1, make_token token)
     | PlusPlus
-    | MinusMinus ->
-      parse_postfix_unary parser term
-
-    | LeftParen (* TODO: Parse call *)
+    | MinusMinus -> parse_postfix_unary parser term
+    | LeftParen -> parse_function_call parser term
     | LeftBracket
     | LeftBrace -> (* TODO indexers *) (* TODO: Produce an error for brace *)
       (parser1, make_token token)
@@ -179,6 +177,13 @@ module WithStatementAndDeclParser
     | _ -> (parser, term)
 
   and parse_designator parser =
+    (* SPEC
+      class-type-designator:
+        static
+        qualified-name
+        variable-name
+    *)
+
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Name
@@ -197,6 +202,12 @@ module WithStatementAndDeclParser
       (with_error parser1 SyntaxError.error1027, (make_token token))
 
   and parse_expression_list parser =
+    (* SPEC
+      argument-expression-list:
+        expression
+        argument-expression-list  ,  expression
+    *)
+
     let rec aux parser exprs =
       let (parser, expr) = with_reset_precedence parser parse_expression in
       let exprs = expr :: exprs in
@@ -220,6 +231,10 @@ module WithStatementAndDeclParser
     else parse_expression_list parser
 
   and parse_object_creation_expression parser =
+    (* SPEC
+      object-creation-expression:
+        new  class-type-designator  (  argument-expression-listopt  )
+    *)
     let (parser, new_token) = next_token parser in
     let (parser, designator) = parse_designator parser in
     let (parser, left_paren) =
@@ -229,6 +244,19 @@ module WithStatementAndDeclParser
       expect_token parser RightParen SyntaxError.error1011 in
     let result = make_object_creation_expression (make_token new_token)
       designator left_paren args right_paren in
+    (parser, result)
+
+  and parse_function_call parser receiver =
+    (* SPEC
+      function-call-expression:
+        postfix-expression  (  argument-expression-listopt  )
+    *)
+    let (parser, left_paren) = next_token parser in
+    let (parser, args) = parse_expression_list_opt parser in
+    let (parser, right_paren) =
+      expect_token parser RightParen SyntaxError.error1011 in
+    let result = make_function_call_expression receiver (make_token left_paren)
+      args right_paren in
     (parser, result)
 
   and parse_parenthesized_or_lambda_expression parser =

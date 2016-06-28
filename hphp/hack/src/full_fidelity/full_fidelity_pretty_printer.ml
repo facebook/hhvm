@@ -408,6 +408,12 @@ let rec get_doc node =
     let alt = get_doc (conditional_alternative x) in
     (* TODO: Could this be improved? *)
     group_doc ( tst ^| qm ^| con ^| col ^| alt )
+  | FunctionCallExpression x ->
+    let receiver = get_doc x.function_call_receiver in
+    let lparen = get_doc x.function_call_lparen in
+    let args = get_doc x.function_call_arguments in
+    let rparen = get_doc x.function_call_rparen in
+    receiver ^^^ lparen ^^^ args ^^^ rparen
   | ParenthesizedExpression x ->
     let left = get_doc (paren_expr_left_paren x) in
     let right = get_doc (paren_expr_right_paren x) in

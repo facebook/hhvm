@@ -251,6 +251,12 @@ module WithToken(Token: TokenType) = struct
       conditional_colon : t;
       conditional_alternative : t
     }
+    and function_call_expression = {
+      function_call_receiver  : t;
+      function_call_lparen : t;
+      function_call_arguments : t;
+      function_call_rparen : t
+    }
     and parenthesized_expression = {
       paren_expr_left_paren : t;
       paren_expr : t;
@@ -390,6 +396,7 @@ module WithToken(Token: TokenType) = struct
     | PostfixUnaryOperator of unary_operator
     | BinaryOperator of binary_operator
     | ConditionalExpression of conditional_expression
+    | FunctionCallExpression of function_call_expression
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
     | ListExpression of listlike_expression
@@ -457,6 +464,7 @@ module WithToken(Token: TokenType) = struct
       | PostfixUnaryOperator _ -> SyntaxKind.PostfixUnaryOperator
       | BinaryOperator _ -> SyntaxKind.BinaryOperator
       | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
+      | FunctionCallExpression _ -> SyntaxKind.FunctionCallExpression
       | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
       | BracedExpression _ -> SyntaxKind.BracedExpression
       | ListExpression _ -> SyntaxKind.ListExpression
@@ -509,6 +517,8 @@ module WithToken(Token: TokenType) = struct
     let is_binary_operator node = kind node = SyntaxKind.BinaryOperator
     let is_conditional_expression node =
       kind node = SyntaxKind.ConditionalExpression
+    let is_function_call_expression node =
+      kind node = SyntaxKind.FunctionCallExpression
     let is_parenthesized_expression node =
       kind node = SyntaxKind.ParenthesizedExpression
     let is_braced_expression node = kind node = SyntaxKind.BracedExpression
@@ -660,6 +670,11 @@ module WithToken(Token: TokenType) = struct
           conditional_colon; conditional_alternative } ->
         [ conditional_test; conditional_question; conditional_consequence;
           conditional_colon; conditional_alternative ]
+      | FunctionCallExpression
+        { function_call_receiver; function_call_lparen;
+          function_call_arguments; function_call_rparen } ->
+        [ function_call_receiver; function_call_lparen;
+          function_call_arguments; function_call_rparen ]
       | ParenthesizedExpression
         { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
         [ paren_expr_left_paren; paren_expr; paren_expr_right_paren ]
@@ -848,6 +863,11 @@ module WithToken(Token: TokenType) = struct
           conditional_colon; conditional_alternative } ->
         [ "conditional_test"; "conditional_question"; "conditional_consequence";
           "conditional_colon"; "conditional_alternative" ]
+      | FunctionCallExpression
+        { function_call_receiver; function_call_lparen;
+          function_call_arguments; function_call_rparen } ->
+        [ "function_call_receiver"; "function_call_lparen";
+          "function_call_arguments"; "function_call_rparen" ]
       | ParenthesizedExpression
         { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
         [ "paren_expr_left_paren"; "paren_expr"; "paren_expr_right_paren" ]
@@ -1227,6 +1247,12 @@ module WithToken(Token: TokenType) = struct
         ConditionalExpression
         { conditional_test; conditional_question; conditional_consequence;
           conditional_colon; conditional_alternative }
+      | (SyntaxKind.FunctionCallExpression,
+          [ function_call_receiver; function_call_lparen;
+            function_call_arguments; function_call_rparen ]) ->
+        FunctionCallExpression
+          { function_call_receiver; function_call_lparen;
+            function_call_arguments; function_call_rparen }
       | (SyntaxKind.ParenthesizedExpression, [ paren_expr_left_paren;
         paren_expr; paren_expr_right_paren ]) ->
         ParenthesizedExpression { paren_expr_left_paren; paren_expr;
@@ -1345,6 +1371,13 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.ConditionalExpression
         [ conditional_test; conditional_question; conditional_consequence;
           conditional_colon; conditional_alternative ]
+
+      let make_function_call_expression
+          function_call_receiver function_call_lparen
+          function_call_arguments function_call_rparen =
+        from_children SyntaxKind.FunctionCallExpression
+          [ function_call_receiver; function_call_lparen;
+            function_call_arguments; function_call_rparen ]
 
       let make_parenthesized_expression
         paren_expr_left_paren paren_expr paren_expr_right_paren =

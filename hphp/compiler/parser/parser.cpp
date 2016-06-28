@@ -588,8 +588,10 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "server_warmup_status" ||
            stripped == "dict" ||
            stripped == "vec" ||
+           stripped == "keyset" ||
            stripped == "is_vec" ||
-           stripped == "is_dict"
+           stripped == "is_dict" ||
+           stripped == "is_keyset"
           )) {
         funcName = "HH\\" + stripped;
       }
@@ -919,6 +921,7 @@ void Parser::onNewObject(Token &out, Token &name, Token &args) {
 }
 
 void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
+  if (op == T_KEYSET) op = T_VEC;
   switch (op) {
   case T_INCLUDE:
   case T_INCLUDE_ONCE:
@@ -984,6 +987,10 @@ void Parser::onDict(Token &out, Token &pairs) {
 
 void Parser::onVec(Token& out, Token& exprs) {
   onUnaryOpExp(out, exprs, T_VEC, true);
+}
+
+void Parser::onKeyset(Token& out, Token& exprs) {
+  onUnaryOpExp(out, exprs, T_KEYSET, true);
 }
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,

@@ -41,6 +41,18 @@
         ((,)(end_of_line))
         (parameter_declaration
           (missing)
+          (shape_type_specifier
+            ((whitespace)(shape))
+            ((lparen))
+            (field_specifier
+              ((name)(whitespace))
+              ((=>)(whitespace))
+              (simple_type_specifier((int))))
+            ((rparen)(whitespace)))
+            ((variable))(missing))
+            ((,)(end_of_line))
+        (parameter_declaration
+          (missing)
           (classname_type_specifier
             ((whitespace)(classname))
             ((<))

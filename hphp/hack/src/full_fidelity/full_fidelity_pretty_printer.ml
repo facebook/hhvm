@@ -438,6 +438,17 @@ let rec get_doc node =
     let a = get_doc x.object_creation_arguments in
     let r = get_doc x.object_creation_rparen in
     n ^| c ^^^ l ^^^ a ^^^ r
+  | FieldInitializer x ->
+    let n = get_doc x.field_init_name in
+    let a = get_doc x.field_init_arrow in
+    let v = get_doc x.field_init_value in
+    n ^| a ^| v
+  | ShapeExpression x ->
+    let sh = get_doc x.shape_shape in
+    let lp = get_doc x.shape_left_paren in
+    let fs = get_doc x.shape_fields in
+    let rp = get_doc x.shape_right_paren in
+    sh ^| lp ^^^ fs ^^^ rp
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in
@@ -497,6 +508,17 @@ let rec get_doc node =
     let ty = get_doc x.classname_type in
     let ra = get_doc x.classname_right_angle in
     cn ^^^ la ^^^ ty ^^^ ra
+  | FieldSpecifier x ->
+    let n = get_doc x.field_name in
+    let a = get_doc x.field_arrow in
+    let t = get_doc x.field_type in
+    n ^| a ^| t
+  | ShapeTypeSpecifier x ->
+    let sh = get_doc x.shape_shape in
+    let lp = get_doc x.shape_left_paren in
+    let fs = get_doc x.shape_fields in
+    let rp = get_doc x.shape_right_paren in
+    sh ^| lp ^^^ fs ^^^ rp
   | TypeArguments x ->
     let left = get_doc (type_arguments_left_angle x) in
     let right = get_doc (type_arguments_right_angle x) in

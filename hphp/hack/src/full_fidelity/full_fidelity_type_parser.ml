@@ -117,7 +117,10 @@ and parse_generic_type_argument_list_opt parser =
   else
     (parser, make_missing())
 
-and parse_type_list parser close_kind =
+(* This parses a comma-separated list of items that must contain at least
+   one item.  The list is terminated by a close_kind token. The item is
+   parsed by the given function. *)
+and parse_comma_list parser close_kind error parse_item =
   let rec aux parser acc =
     let (parser1, token) = next_token parser in
     let kind = Token.kind token in
@@ -125,7 +128,7 @@ and parse_type_list parser close_kind =
       (* ERROR RECOVERY: If we're here and we got a close brace then
          the list is empty; we expect at least one type. If we're here
          at the end of the file, then we were expecting one more type. *)
-      let parser = with_error parser SyntaxError.error1007 in
+      let parser = with_error parser error in
       (parser, ((make_missing()) :: acc))
     else if kind = Comma then
 
@@ -138,11 +141,11 @@ and parse_type_list parser close_kind =
         Plainly the type is missing, but the comma is not associated with
         the type, it's associated with the formal parameter list.  *)
 
-      let parser = with_error parser1 SyntaxError.error1007 in
+      let parser = with_error parser1 error in
       let item = make_list_item (make_missing()) (make_token token) in
       aux parser (item :: acc)
     else
-      let (parser, ty) = parse_type_specifier parser in
+      let (parser, ty) = parse_item parser in
       let (parser1, token) = next_token parser in
       let kind = Token.kind token in
       if kind = close_kind then
@@ -156,6 +159,9 @@ and parse_type_list parser close_kind =
         (parser, (ty :: acc)) in
   let (parser, types) = aux parser [] in
   (parser, make_list (List.rev types))
+
+and parse_type_list parser close_kind =
+  parse_comma_list parser close_kind SyntaxError.error1007 parse_type_specifier
 
 and parse_generic_type_argument_list parser =
   let (parser, open_angle) = next_token parser in
@@ -294,7 +300,52 @@ and parse_classname_type_specifier parser =
     classname left_angle classname_type right_angle in
   (parser, result)
 
+and parse_field_specifier parser =
+  (* SPEC
+    field-specifier:
+      single-quoted-string-literal  =>  type-specifier
+      qualified-name  =>  type-specifier
+  *)
+
+  (* TODO: ERROR RECOVERY is not very sophisticated here. *)
+  let (parser, name) = next_token parser in
+  let parser = match Token.kind name with
+  | SingleQuotedStringLiteral
+  | QualifiedName
+  | Name -> parser
+  | _ -> with_error parser SyntaxError.error1025 in
+  let name = make_token name in
+  let (parser, arrow) =
+    expect_token parser EqualGreaterThan SyntaxError.error1028 in
+  let (parser, field_type) = parse_type_specifier parser in
+  let result = make_field_specifier name arrow field_type in
+  (parser, result)
+
+and parse_field_list parser =
+  (* SPEC
+    field-specifier-list:
+      field-specifier
+      field-specifier-list  ,  field-specifier
+  *)
+  parse_comma_list parser RightParen SyntaxError.error1025 parse_field_specifier
+
+and parse_field_list_opt parser =
+  let token = peek_token parser in
+  if Token.kind token = RightParen then
+    (parser, (make_missing()))
+  else
+    parse_field_list parser
+
 and parse_shape_specifier parser =
-  let (parser, token) = next_token parser in
-    (* TODO *)
-    (parser, make_error [make_token token])
+  (* SPEC
+    shape-specifier:
+      shape ( field-specifier-list-opt )
+  *)
+  (* TODO: ERROR RECOVERY is not very sophisticated here. *)
+  let (parser, shape) = next_token parser in
+  let shape = make_token shape in
+  let (parser, lparen) = expect_token parser LeftParen SyntaxError.error1019 in
+  let (parser, fields) = parse_field_list_opt parser in
+  let (parser, rparen) = expect_token parser RightParen SyntaxError.error1011 in
+  let result = make_shape_type_specifier shape lparen fields rparen in
+  (parser, result)

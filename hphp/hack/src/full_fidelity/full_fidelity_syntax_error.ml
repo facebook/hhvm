@@ -68,8 +68,10 @@ let error1020 = "A colon is expected here."
 let error1021 = "An opening angle bracket is expected here."
 (* TODO: Remove this; redundant to 1009. *)
 let error1022 = "A right parenthesis or comma is expected here."
-let error1023 = "An 'as' keyword is expected here"
+let error1023 = "An 'as' keyword is expected here."
 let error1024 = "A comma or semicolon is expected here."
+let error1025 = "A shape field name is expected here."
 let error1027 = "A class name, variable name, or 'static' is expected here."
+let error1028 = "A shape field specifier arrow ('=>') is expected here."
 
 let error2001 = "A type annotation is required in strict mode."

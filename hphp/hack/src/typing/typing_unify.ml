@@ -237,9 +237,11 @@ and unify_ env r1 ty1 r2 ty2 =
         )
   | _, Tabstract (AKdependent (_, _), Some (_, Tclass _)) ->
       unify_ env r2 ty2 r1 ty1
-  | (Ttuple _ as ty), Tarraykind (AKany | AKempty)
-  | Tarraykind (AKany | AKempty), (Ttuple _ as ty) ->
+
+  | (Ttuple _ as ty), Tarraykind AKany
+  | Tarraykind AKany, (Ttuple _ as ty) ->
       env, ty
+
   | Ttuple tyl1, Ttuple tyl2 ->
       let size1 = List.length tyl1 in
       let size2 = List.length tyl2 in

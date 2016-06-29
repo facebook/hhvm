@@ -46,7 +46,7 @@ module ErrorString = struct
     | Tany               -> "an untyped value"
     | Tunresolved l      -> unresolved l
     | Tarray (x, y)      -> array (x, y)
-    | Tarraykind AKempty -> array (None, None)
+    | Tarraykind AKempty -> "an empty array"
     | Tarraykind AKany   -> array (None, None)
     | Tarraykind (AKvec x)
                          -> array (Some x, None)
@@ -237,7 +237,7 @@ module Full = struct
     | Tthis -> o SN.Typehints.this
     | Tmixed -> o "mixed"
     | Tarraykind AKany -> o "array"
-    | Tarraykind AKempty -> o "array"
+    | Tarraykind AKempty -> o "array (empty)"
     | Tarray (None, None) -> o "array"
     | Tarraykind (AKvec x) -> o "array<"; k x; o ">"
     | Tarray (Some x, None) -> o "array<"; k x; o ">"

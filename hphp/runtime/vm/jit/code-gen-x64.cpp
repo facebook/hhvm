@@ -414,6 +414,7 @@ DELEGATE_OPCODE(StMBase)
 DELEGATE_OPCODE(LdGblAddr)
 DELEGATE_OPCODE(LdPropAddr)
 DELEGATE_OPCODE(LdRDSAddr)
+DELEGATE_OPCODE(LdTVAux)
 
 DELEGATE_OPCODE(IncRef)
 DELEGATE_OPCODE(IncRefCtx)
@@ -513,11 +514,27 @@ DELEGATE_OPCODE(LookupCnsU)
 DELEGATE_OPCODE(LdClsCns)
 DELEGATE_OPCODE(InitClsCns)
 
+DELEGATE_OPCODE(SpillFrame)
+DELEGATE_OPCODE(CufIterSpillFrame)
+DELEGATE_OPCODE(LdARFuncPtr)
+DELEGATE_OPCODE(LdARNumArgsAndFlags)
+DELEGATE_OPCODE(StARNumArgsAndFlags)
+DELEGATE_OPCODE(LdARNumParams)
+DELEGATE_OPCODE(CheckARMagicFlag)
+DELEGATE_OPCODE(LdCtx)
+DELEGATE_OPCODE(LdCctx)
+DELEGATE_OPCODE(InitCtx)
+DELEGATE_OPCODE(LdARInvName)
+DELEGATE_OPCODE(StARInvName)
+DELEGATE_OPCODE(InitExtraArgs)
+DELEGATE_OPCODE(PackMagicArgs)
+
 DELEGATE_OPCODE(Call)
 DELEGATE_OPCODE(CallArray)
 DELEGATE_OPCODE(CallBuiltin)
 DELEGATE_OPCODE(NativeImpl)
 DELEGATE_OPCODE(DbgTraceCall)
+DELEGATE_OPCODE(EnterFrame)
 DELEGATE_OPCODE(RetCtrl)
 DELEGATE_OPCODE(AsyncRetCtrl)
 DELEGATE_OPCODE(AsyncRetFast)
@@ -542,6 +559,7 @@ DELEGATE_OPCODE(CheckClosureStaticLocInit)
 DELEGATE_OPCODE(LdClosureStaticLoc)
 DELEGATE_OPCODE(InitClosureStaticLoc)
 
+DELEGATE_OPCODE(LdClosure)
 DELEGATE_OPCODE(LdClosureCtx)
 DELEGATE_OPCODE(StClosureCtx)
 DELEGATE_OPCODE(StClosureArg)
@@ -1126,11 +1144,6 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dstReg};
 }
 
-int CodeGenerator::iterOffset(const BCMarker& marker, uint32_t id) {
-  const Func* func = getFunc(marker);
-  return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
-}
-
 void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   auto const spOff = inst->extra<EagerSyncVMRegs>()->offset;
   auto& v = vmain();
@@ -1138,136 +1151,6 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff.offset)], sync_sp};
   emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
                      rvmtl(), srcLoc(inst, 0).reg(), sync_sp);
-}
-
-void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
-  auto const extra = inst->extra<CufIterSpillFrame>();
-  auto const nArgs = extra->args;
-  auto const iterId = extra->iterId;
-  auto const itOff = iterOffset(inst->marker(), iterId);
-
-  auto const spOffset = cellsToBytes(extra->spOffset.offset);
-  auto spReg = srcLoc(inst, 0).reg();
-  auto fpReg = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-
-  auto func = v.makeReg();
-  v << load{fpReg[itOff + CufIter::funcOff()], func};
-  v << store{func, spReg[spOffset + int(AROFF(m_func))]};
-
-  auto ctx = v.makeReg();
-  v << load{fpReg[itOff + CufIter::ctxOff()], ctx};
-  v << store{ctx, spReg[spOffset + int(AROFF(m_this))]};
-
-  auto ctx2 = v.makeReg();
-  {
-    auto const sf = v.makeReg();
-    v << shrqi{1, ctx, ctx2, sf};
-    ifThen(v, CC_NBE, sf, [&](Vout& v) {
-      auto ctx3 = v.makeReg();
-      v << shlqi{1, ctx2, ctx3, v.makeReg()};
-      emitIncRef(v, ctx3);
-    });
-  }
-
-  auto callerFunc = inst->marker().func();
-  auto unit = callerFunc->unit();
-  auto weakTypesFlag = !callerFunc->isBuiltin() && !unit->useStrictTypes()
-      ? ActRec::Flags::UseWeakTypes
-      : ActRec::Flags::None;
-
-  auto name = v.makeReg();
-  v << load{fpReg[itOff + CufIter::nameOff()], name};
-  auto const sf = v.makeReg();
-  v << testq{name, name, sf};
-  ifThenElse(v, CC_NZ, sf, [&](Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
-    static_assert(UncountedValue < 0 && StaticValue < 0, "");
-    ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
-    v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
-    auto const encoded = ActRec::encodeNumArgsAndFlags(
-      safe_cast<int32_t>(nArgs),
-      static_cast<ActRec::Flags>(ActRec::Flags::MagicDispatch | weakTypesFlag)
-    );
-    v << storeli{static_cast<int32_t>(encoded),
-                 spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
-  }, [&](Vout& v) {
-    auto const encoded = ActRec::encodeNumArgsAndFlags(
-      safe_cast<int32_t>(nArgs),
-      weakTypesFlag
-    );
-    v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
-    v << storeli{safe_cast<int32_t>(encoded),
-                 spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
-  });
-}
-
-void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
-  auto const func      = inst->src(1);
-  auto const objOrCls  = inst->src(2);
-  auto const extra     = inst->extra<SpillFrame>();
-  auto const magicName = extra->invName;
-  auto const nArgs     = extra->numArgs;
-  auto& v              = vmain();
-
-  auto const spOffset = cellsToBytes(extra->spOffset.offset);
-
-  auto spReg = srcLoc(inst, 0).reg();
-  // actRec->m_this
-  if (objOrCls->isA(TCls)) {
-    // store class
-    if (objOrCls->hasConstVal()) {
-      emitImmStoreq(v, uintptr_t(objOrCls->clsVal()) | 1,
-                    spReg[spOffset + int(AROFF(m_this))]);
-    } else {
-      auto clsPtrReg = srcLoc(inst, 2/*objOrCls*/).reg();
-      auto thisptr = v.makeReg();
-      v << orqi{1, clsPtrReg, thisptr, v.makeReg()};
-      v << store{thisptr, spReg[spOffset + int(AROFF(m_this))]};
-    }
-  } else if (objOrCls->isA(TObj)) {
-    // store this pointer
-    v << store{srcLoc(inst, 2/*objOrCls*/).reg(),
-               spReg[spOffset + int(AROFF(m_this))]};
-  } else if (objOrCls->isA(TCtx)) {
-    // Stores either a this pointer or a Cctx -- statically unknown.
-    auto objOrClsPtrReg = srcLoc(inst, 2/*objOrCls*/).reg();
-    v << store{objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]};
-  } else {
-    always_assert(objOrCls->isA(TNullptr));
-    // no obj or class; this happens in FPushFunc
-    int offset_m_this = spOffset + int(AROFF(m_this));
-    v << storeqi{0, spReg[offset_m_this]};
-  }
-
-  // actRec->m_invName
-  if (magicName) {
-    auto const invName = reinterpret_cast<uintptr_t>(magicName);
-    emitImmStoreq(v, invName, spReg[spOffset] + int{AROFF(m_invName)});
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot,
-                  spReg[spOffset] + int{AROFF(m_invName)});
-  }
-
-  // actRec->m_func
-  if (!func->isA(TNullptr)) {
-    v << store{srcLoc(inst, 1).reg(0), spReg[spOffset + int(AROFF(m_func))]};
-  }
-
-  auto callerFunc = inst->marker().func();
-  auto unit = callerFunc->unit();
-  auto flags = !callerFunc->isBuiltin() && !unit->useStrictTypes()
-      ? ActRec::Flags::UseWeakTypes
-      : ActRec::Flags::None;
-  if (magicName) {
-    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
-  }
-  auto const encoded = static_cast<int32_t>(ActRec::encodeNumArgsAndFlags(
-    nArgs,
-    flags
-  ));
-  v << storeli{encoded, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
 }
 
 void CodeGenerator::emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
@@ -1517,36 +1400,6 @@ void CodeGenerator::cgCoerceMem(IRInstruction *inst) {
   auto ptr        = srcLoc(inst, 0).reg();
 
   cgCoerceHelper(inst, ptr, 0, extra->callee, extra->argNum);
-}
-
-void CodeGenerator::cgLdCtx(IRInstruction* inst) {
-  auto const dstReg = dstLoc(inst, 0).reg();
-  auto const srcReg = srcLoc(inst, 0).reg();
-  vmain() << load{srcReg[AROFF(m_this)], dstReg};
-}
-
-void CodeGenerator::cgLdCctx(IRInstruction* inst) {
-  return cgLdCtx(inst);
-}
-
-void CodeGenerator::cgLdClosure(IRInstruction* inst) {
-  return cgLdCtx(inst);
-}
-
-void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
-  auto const off = cellsToBytes(inst->extra<LdARFuncPtr>()->offset.offset);
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto baseReg = srcLoc(inst, 0).reg();
-  vmain() << load{baseReg[off + AROFF(m_func)], dstReg};
-}
-
-void CodeGenerator::cgLdARNumParams(IRInstruction* inst) {
-  auto& v = vmain();
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto baseReg = srcLoc(inst, 0).reg();
-  auto tmp = v.makeReg();
-  v << loadzlq{baseReg[AROFF(m_numArgsAndFlags)], tmp};
-  v << andqi{ActRec::kNumArgsMask, tmp, dstReg, v.makeReg()};
 }
 
 void CodeGenerator::cgStringIsset(IRInstruction* inst) {
@@ -2276,157 +2129,6 @@ void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
   auto const actualOffset = StructArray::dataOffset() +
     sizeof(TypedValue) * offset;
   loadTV(vmain(), inst->dst(), dstLoc(inst, 0), array[actualOffset]);
-}
-
-void CodeGenerator::cgEnterFrame(IRInstruction* inst) {
-  vmain() << phplogue{srcLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgInitExtraArgs(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  auto const extra = inst->extra<InitExtraArgs>();
-  auto const func = extra->func;
-  auto const argc = extra->argc;
-
-  using Action = ExtraArgsAction;
-
-  auto& v = vmain();
-  void (*handler)(ActRec*) = nullptr;
-
-  switch (extra_args_action(func, argc)) {
-    case Action::None:
-      if (func->attrs() & AttrMayUseVV) {
-        v << storeqi{0, fp[AROFF(m_invName)]};
-      }
-      return;
-
-    case Action::Discard:
-      handler = trimExtraArgs;
-      break;
-    case Action::Variadic:
-      handler = shuffleExtraArgsVariadic;
-      break;
-    case Action::MayUseVV:
-      handler = shuffleExtraArgsMayUseVV;
-      break;
-    case Action::VarAndVV:
-      handler = shuffleExtraArgsVariadicAndVV;
-      break;
-  }
-
-  v << vcall{
-    CallSpec::direct(handler),
-    v.makeVcallArgs({{fp}}),
-    v.makeTuple({})
-  };
-}
-
-void CodeGenerator::cgInitCtx(IRInstruction* inst) {
-  auto const ptr = srcLoc(inst, 0).reg();
-  auto const ctx = srcLoc(inst, 1).reg();
-  vmain() << store{ctx, ptr[AROFF(m_this)]};
-}
-
-void CodeGenerator::cgCheckARMagicFlag(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-
-  auto const mask = static_cast<int32_t>(ActRec::Flags::MagicDispatch);
-
-  if (mask & (mask - 1)) {
-    auto const tmp = v.makeReg();
-    auto const arflags = v.makeReg();
-    // need to test multiple bits
-    v << loadl{fp[AROFF(m_numArgsAndFlags)], arflags};
-    v << andli{mask, arflags, tmp, v.makeReg()};
-    v << cmpli{mask, tmp, sf};
-    v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
-  } else {
-    v << testlim{mask, fp[AROFF(m_numArgsAndFlags)], sf};
-    v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
-  }
-}
-
-void CodeGenerator::cgLdARNumArgsAndFlags(IRInstruction* inst) {
-  auto fp = srcLoc(inst, 0).reg();
-  auto dst = dstLoc(inst, 0).reg();
-  vmain() << loadzlq{fp[AROFF(m_numArgsAndFlags)], dst};
-}
-
-void CodeGenerator::cgStARNumArgsAndFlags(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  auto const val = srcLoc(inst, 1).reg();
-  auto &v = vmain();
-  auto const tmp = v.makeReg();
-  v << movtql{val, tmp};
-  v << storel{tmp, fp[AROFF(m_numArgsAndFlags)]};
-}
-
-void CodeGenerator::cgLdTVAux(IRInstruction* inst) {
-  auto const tv = srcLoc(inst, 0);
-  assertx(tv.hasReg(1));
-  auto const type = tv.reg(1);
-  auto const dst = dstLoc(inst, 0).reg();
-
-  auto& v = vmain();
-  v << shrqi{32, type, dst, v.makeReg()};
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const extra = inst->extra<LdTVAux>();
-    auto const mask = -extra->valid - 1;
-
-    if (mask) {
-      auto const sf = v.makeReg();
-      v << testqi{mask, dst, sf};
-      ifThen(v, CC_NZ, sf, [](Vout& v) {
-        v << ud2{};
-      });
-    }
-  }
-}
-
-void CodeGenerator::cgLdARInvName(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  auto const dst = dstLoc(inst, 0).reg();
-  vmain() << load{fp[AROFF(m_invName)], dst};
-}
-
-void CodeGenerator::cgStARInvName(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  auto const val = srcLoc(inst, 1).reg();
-  vmain() << store{val, fp[AROFF(m_invName)]};
-}
-
-void CodeGenerator::cgPackMagicArgs(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-
-  auto& v = vmain();
-  auto const naaf = v.makeReg();
-  auto const num_args = v.makeReg();
-
-  v << loadl{fp[AROFF(m_numArgsAndFlags)], naaf};
-  v << andli{ActRec::kNumArgsMask, naaf, num_args, v.makeReg()};
-
-  auto const offset = v.makeReg();
-  auto const offsetq = v.makeReg();
-  auto const values = v.makeReg();
-
-  static_assert(sizeof(Cell) == 16, "");
-  v << shlli{4, num_args, offset, v.makeReg()};
-  v << movzlq{offset, offsetq};
-  v << subq{offsetq, fp, values, v.makeReg()};
-
-  cgCallHelper(
-    v,
-    CallSpec::direct(PackedArray::MakePacked),
-    callDest(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .reg(num_args)
-      .reg(values)
-  );
 }
 
 void CodeGenerator::cgProfileMethod(IRInstruction* inst) {

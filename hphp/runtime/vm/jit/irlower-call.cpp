@@ -404,4 +404,11 @@ void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  vmain(env) << phplogue{fp};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

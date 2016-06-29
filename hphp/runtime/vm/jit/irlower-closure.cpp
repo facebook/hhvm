@@ -37,6 +37,10 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgLdClosure(IRLS& env, const IRInstruction* inst) {
+  return cgLdCtx(env, inst);
+}
+
 void cgLdClosureCtx(IRLS& env, const IRInstruction* inst) {
   auto const ctx = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();

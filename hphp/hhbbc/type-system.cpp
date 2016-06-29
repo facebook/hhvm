@@ -2800,13 +2800,6 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename L>
-ArrayData* mutate_array(const ArrayData* ad, L func) {
-  auto newAd = func(const_cast<ArrayData*>(ad));
-  SCOPE_EXIT { newAd->release(); };
-  return newAd->copyStatic();
-}
-
 struct VecKey {
   folly::Optional<int64_t> i;
   Type type;
@@ -2899,16 +2892,6 @@ vec_set(Type vec, const Type& undisectedKey, const Type& val) {
     return {std::move(vec), false};
 
   case DataTag::VecVal: {
-    auto const ad = vec.m_data.aval;
-    if (key.i) {
-      if (*key.i < 0 || ad->size() <= *key.i) return {TBottom, false};
-      if (auto valTv = tv(val)) {
-        vec.m_data.aval = mutate_array(ad, [&] (ArrayData* ad) {
-          return ad->set(*key.i, *valTv, true);
-        });
-        return {std::move(vec), !maybeEmpty};
-      }
-    }
     vec = toDVecType(vec);
     /* fallthrough */
   }
@@ -2947,13 +2930,6 @@ Type vec_newelem(Type vec, const Type& val) {
     return vec;
 
   case DataTag::VecVal: {
-    auto const ad = vec.m_data.aval;
-    if (auto valTv = tv(val)) {
-      vec.m_data.aval = mutate_array(ad, [&] (ArrayData* ad) {
-        return ad->append(*valTv, true);
-      });
-      return vec;
-    }
     vec = toDVecType(vec);
     /* fallthrough */
   }
@@ -3077,20 +3053,6 @@ dict_set(Type dict, const Type& undisectedKey, const Type& val) {
     return {std::move(dict), validKey};
 
   case DataTag::DictVal: {
-    auto const ad = dict.m_data.aval;
-    if (auto valTv = tv(val)) {
-      if (key.i) {
-        dict.m_data.aval = mutate_array(ad, [&] (ArrayData* ad) {
-          return ad->set(*key.i, tvAsVariant(&*valTv), true);
-        });
-        return {std::move(dict), true};
-      } else if (key.s) {
-        dict.m_data.aval = mutate_array(ad, [&] (ArrayData* ad) {
-          return ad->set(StrNR(*key.s), tvAsVariant(&*valTv), true);
-        });
-        return {std::move(dict), true};
-      }
-    }
     dict = toDDictType(dict);
     /* fallthrough */
   }
@@ -3127,13 +3089,6 @@ Type dict_newelem(Type dict, const Type& val) {
     return dict;
 
   case DataTag::DictVal: {
-    auto const ad = dict.m_data.aval;
-    if (auto valTv = tv(val)) {
-      dict.m_data.aval = mutate_array(ad, [&] (ArrayData* ad) {
-        return ad->append(*valTv, true);
-      });
-      return dict;
-    }
     dict = toDDictType(dict);
     /* fallthrough */
   }

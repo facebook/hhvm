@@ -197,7 +197,8 @@ typename std::enable_if<
   //   unreachable(env);
   // }
   if (res.second) nothrow(env);
-  return res.first;
+  if (res.first != TBottom) return res.first;
+  return base.subtypeOf(TVec) ? TVec : TDict;
 }
 template<typename R, typename B, typename... T>
 typename std::enable_if<
@@ -385,9 +386,11 @@ Type currentChainType(ISS& env, Type val) {
       val = array_set(it->first, it->second, val);
     } else if (it->first.subtypeOf(TVec)) {
       val = vec_set(it->first, it->second, val).first;
+      if (val == TBottom) val = TVec;
     } else {
       assert(it->first.subtypeOf(TDict));
       val = dict_set(it->first, it->second, val).first;
+      if (val == TBottom) val = TDict;
     }
   }
   return val;
@@ -404,8 +407,10 @@ Type resolveArrayChain(ISS& env, Type val) {
       show(key), show(val), show(arr));
     if (arr.subtypeOf(TVec)) {
       val = vec_set(std::move(arr), key, val).first;
+      if (val == TBottom) val = TVec;
     } else if (arr.subtypeOf(TDict)) {
       val = dict_set(std::move(arr), key, val).first;
+      if (val == TBottom) val = TDict;
     } else {
       assert(arr.subtypeOf(TArr));
       val = array_set(std::move(arr), key, val);
@@ -1102,12 +1107,10 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       auto ty = hack_array_do(env, set, key, t1);
       assert(ty);
       env.state.base.type = *ty;
-      if (*ty == TBottom) {
-        push(env, TBottom);
-        return;
-      }
       // Vec and Dict throw on weird keys
-      push(env, isWeird ? makeNotWeird(t1) : t1);
+      auto pushTy = isWeird ? makeNotWeird(t1) : t1;
+      if (pushTy == TBottom) unreachable(env);
+      push(env, pushTy);
       return;
     }
   }

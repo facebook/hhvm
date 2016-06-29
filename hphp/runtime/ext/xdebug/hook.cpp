@@ -521,8 +521,6 @@ void XDebugHook::onOpcode(PC pc) {
   xdebug_xml_add_attribute_dup(response, "command", cmd_str.data());
   xdebug_xml_add_attribute_dup(response, "transaction_id", trans_id.data());
 
-  delete brk;
-
   server->sendMessage(*response);
   xdebug_xml_node_dtor(response);
 

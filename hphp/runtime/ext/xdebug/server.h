@@ -142,10 +142,19 @@ struct XDebugServer {
                   int line);
 
   /*
-   * Simultaneously gets the result of 'm_break', and clears it.
+   * Gets the result of 'm_break', and clears it.
    */
-  XDebugCommand* getAndClearBreak() {
-    return m_break.exchange(nullptr);
+  std::shared_ptr<XDebugCommand> getAndClearBreak() {
+    std::lock_guard<std::mutex> guard(m_breakCmdMtx);
+    auto const cmd = m_break;
+    m_break = nullptr;
+    return cmd;
+  }
+
+  void setNewBreak(const std::shared_ptr<XDebugCommand>& cmd) {
+    std::lock_guard<std::mutex> guard(m_breakCmdMtx);
+    always_assert(m_break == nullptr);
+    m_break = cmd;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -197,7 +206,7 @@ struct XDebugServer {
    * Parses the input from the buffer and returns an instance of the
    * corresponding command.  Throws an XDebugError on failure.
    */
-  XDebugCommand* parseCommand();
+  std::shared_ptr<XDebugCommand> parseCommand();
 
   /*
    * Grab the command and an array of arguments from the given input string.
@@ -254,7 +263,7 @@ struct XDebugServer {
 
  private:
 
-  const XDebugCommand* m_lastCommand{nullptr};
+  std::shared_ptr<XDebugCommand> m_lastCommand;
   char* m_buffer{nullptr};
   char* m_bufferCur{nullptr};
   size_t m_bufferAvail{0};
@@ -267,8 +276,11 @@ struct XDebugServer {
   /* Mutex that protects the socket. */
   std::recursive_mutex m_pollingMtx;
 
+  /* Mutex that protects m_break. */
+  std::mutex m_breakCmdMtx;
+
   /* The "break" command that gets read by the polling thread is stored here. */
-  std::atomic<XDebugCommand*> m_break{nullptr};
+  std::shared_ptr<XDebugCommand> m_break;
 
   /* The request thread sets this to tell the polling thread what to do. */
   std::atomic<PollingState> m_pollingState{PollingState::Run};

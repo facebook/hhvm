@@ -70,6 +70,7 @@ type t =
 | VectorTypeSpecifier
 | MapTypeSpecifier
 | ClosureTypeSpecifier
+| ClassnameTypeSpecifier
 
 let to_string kind =
   match kind with
@@ -121,6 +122,7 @@ let to_string kind =
   | VectorTypeSpecifier -> "vector_type_specifier"
   | MapTypeSpecifier -> "map_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"
+  | ClassnameTypeSpecifier -> "classname_type_specifier"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
   | XHPExpression -> "xhp_expression"

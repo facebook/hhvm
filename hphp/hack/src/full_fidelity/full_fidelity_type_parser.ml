@@ -272,9 +272,27 @@ and parse_nullable_type_specifier parser =
   (parser, result)
 
 and parse_classname_type_specifier parser =
-  let (parser, token) = next_token parser in
-    (* TODO *)
-    (parser, make_error [make_token token])
+  (* SPEC
+    classname-type-specifier:
+      classname  <  qualified-name  >
+  *)
+
+  (* TODO ERROR RECOVERY is unsophisticated here. *)
+  let (parser, classname) = next_token parser in
+  let classname = make_token classname in
+  let (parser, left_angle) =
+    expect_token parser LessThan SyntaxError.error1021 in
+  let (parser, classname_type) = next_token parser in
+  let parser = match Token.kind classname_type with
+  | QualifiedName
+  | Name -> parser
+  | _ -> with_error parser SyntaxError.error1004 in
+  let classname_type = make_token classname_type in
+  let (parser, right_angle) =
+    expect_token parser GreaterThan SyntaxError.error1013 in
+  let result = make_classname_type_specifier
+    classname left_angle classname_type right_angle in
+  (parser, result)
 
 and parse_shape_specifier parser =
   let (parser, token) = next_token parser in

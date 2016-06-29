@@ -3,41 +3,53 @@
   (function_declaration
     (missing)(missing)((function)(whitespace))((name))(missing)
     ((lparen)(end_of_line))
-    (parameter_declaration
-      (missing)
-      (closure_type_specifier
-        ((whitespace)(lparen))
-        ((function)(whitespace))
-        ((lparen))
-        (list
-          (list_item
-            (map_type_specifier
-              ((array))
-              ((<))
-              (simple_type_specifier((int)))
-              ((,)(whitespace))
-              (vector_type_specifier
+    (list
+      (parameter_declaration
+        (missing)
+        (closure_type_specifier
+          ((whitespace)(lparen))
+          ((function)(whitespace))
+          ((lparen))
+          (list
+            (list_item
+              (map_type_specifier
                 ((array))
                 ((<))
-                (tuple_type_specifier
-                  ((lparen))
-                  (list
-                    (list_item
-                      (simple_type_specifier((name)))
-                      ((,)(whitespace)))
-                    (simple_type_specifier((string))))
-                  ((rparen)))
+                (simple_type_specifier((int)))
+                ((,)(whitespace))
+                (vector_type_specifier
+                  ((array))
+                  ((<))
+                  (tuple_type_specifier
+                    ((lparen))
+                      (list
+                        (list_item
+                          (simple_type_specifier((name)))
+                          ((,)(whitespace)))
+                          (simple_type_specifier((string))))
+                    ((rparen)))
+                  ((>)))
                 ((>)))
-              ((>)))
-            ((,)(whitespace)))
-          (simple_type_specifier((string))))
+              ((,)(whitespace)))
+              (simple_type_specifier((string))))
+            ((rparen)(whitespace))
+            ((:)(whitespace))
+            (simple_type_specifier((void)))
+            ((rparen)(whitespace)))
+          ((variable))
+          (missing))
+        ((,)(end_of_line))
+        (parameter_declaration
+          (missing)
+          (classname_type_specifier
+            ((whitespace)(classname))
+            ((<))
+            ((name))
+            ((>)(whitespace)))
+          ((variable)(end_of_line))
+          (missing)))
         ((rparen)(whitespace))
         ((:)(whitespace))
-        (simple_type_specifier((void)))
-        ((rparen)(whitespace)))
-      ((variable)(end_of_line))
-      (missing))
-    ((rparen)(whitespace))
-    ((:)(whitespace))
-    (simple_type_specifier((void)(whitespace)))
-    (compound_statement(({))(missing)((})))))
+        (simple_type_specifier
+          ((void)(whitespace)))
+        (compound_statement(({))(missing)((})))))

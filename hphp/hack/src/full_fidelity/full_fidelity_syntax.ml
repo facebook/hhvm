@@ -334,6 +334,12 @@ module WithToken(Token: TokenType) = struct
       closure_return_type : t;
       closure_outer_right_paren : t
     }
+    and classname_type_specifier = {
+      classname_classname : t;
+      classname_left_angle : t;
+      classname_type : t;
+      classname_right_angle : t
+    }
     and generic_type = {
       generic_class_type : t;
       generic_arguments : t
@@ -414,6 +420,7 @@ module WithToken(Token: TokenType) = struct
     | VectorTypeSpecifier of vector_type_specifier
     | MapTypeSpecifier of map_type_specifier
     | ClosureTypeSpecifier of closure_type_specifier
+    | ClassnameTypeSpecifier of classname_type_specifier
 
     and t = { syntax : syntax ; value : SyntaxValue.t}
 
@@ -481,6 +488,7 @@ module WithToken(Token: TokenType) = struct
       | VectorTypeSpecifier _ -> SyntaxKind.VectorTypeSpecifier
       | MapTypeSpecifier _ -> SyntaxKind.MapTypeSpecifier
       | ClosureTypeSpecifier _ -> SyntaxKind.ClosureTypeSpecifier
+      | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
 
     let kind node =
       to_kind (syntax node)
@@ -541,6 +549,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.MapTypeSpecifier
     let is_closure_type_specifier node =
       kind node = SyntaxKind.ClosureTypeSpecifier
+    let is_classname_type_specifier node =
+      kind node = SyntaxKind.ClassnameTypeSpecifier
 
     let is_separable_prefix node =
       match syntax node with
@@ -738,6 +748,11 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren; closure_parameter_types;
           closure_inner_right_paren; closure_colon; closure_return_type;
           closure_outer_right_paren ]
+      | ClassnameTypeSpecifier
+        { classname_classname; classname_left_angle; classname_type;
+          classname_right_angle } ->
+        [ classname_classname; classname_left_angle; classname_type;
+          classname_right_angle ]
 
     let children_names node =
       match node.syntax with
@@ -933,6 +948,11 @@ module WithToken(Token: TokenType) = struct
           "closure_inner_left_paren"; "closure_parameter_types";
           "closure_inner_right_paren"; "closure_colon"; "closure_return_type";
           "closure_outer_right_paren" ]
+      | ClassnameTypeSpecifier
+        { classname_classname; classname_left_angle; classname_type;
+          classname_right_angle } ->
+        [ "classname_classname"; "classname_left_angle"; "classname_type";
+          "classname_right_angle" ]
 
     let rec to_json node =
       let open Hh_json in
@@ -1318,6 +1338,12 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren; closure_parameter_types;
           closure_inner_right_paren; closure_colon; closure_return_type;
           closure_outer_right_paren }
+      | (SyntaxKind.ClassnameTypeSpecifier,
+        [ classname_classname; classname_left_angle; classname_type;
+          classname_right_angle ]) ->
+        ClassnameTypeSpecifier
+        { classname_classname; classname_left_angle; classname_type;
+          classname_right_angle }
       | _ -> failwith "with_children called with wrong number of children"
 
     let all_tokens node =
@@ -1598,6 +1624,9 @@ module WithToken(Token: TokenType) = struct
             closure_inner_left_paren; closure_parameter_types;
             closure_inner_right_paren; closure_colon; closure_return_type;
             closure_outer_right_paren ]
+      let make_classname_type_specifier classname left classname_type right =
+        from_children SyntaxKind.ClassnameTypeSpecifier
+          [ classname; left; classname_type; right ]
 
       let make_literal_expression literal =
         from_children SyntaxKind.LiteralExpression [ literal ]

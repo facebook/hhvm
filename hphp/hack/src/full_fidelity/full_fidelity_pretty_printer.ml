@@ -491,6 +491,12 @@ let rec get_doc node =
     let ret = get_doc x.closure_return_type in
     let orp = get_doc x.closure_outer_right_paren in
     olp ^^^ fnc ^^| ilp ^^^ pts ^^^ irp ^^^ col ^^^ ret ^^^ orp
+  | ClassnameTypeSpecifier x ->
+    let cn = get_doc x.classname_classname in
+    let la = get_doc x.classname_left_angle in
+    let ty = get_doc x.classname_type in
+    let ra = get_doc x.classname_right_angle in
+    cn ^^^ la ^^^ ty ^^^ ra
   | TypeArguments x ->
     let left = get_doc (type_arguments_left_angle x) in
     let right = get_doc (type_arguments_right_angle x) in

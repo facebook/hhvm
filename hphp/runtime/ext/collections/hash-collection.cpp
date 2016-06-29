@@ -374,7 +374,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   }
   assert(canMutateBuffer());
   assert(m_immCopy.isNull());
-  assert(!isCapacityTooHigh());
+  assert(!isCapacityTooHigh() || newCap == oldCap);
 }
 
 HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {

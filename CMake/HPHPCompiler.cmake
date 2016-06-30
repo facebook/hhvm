@@ -52,6 +52,9 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # Options to pass for release mode to the C++ compiler
   set(RELEASE_CXX_OPTIONS)
 
+  # Suboption of -g in debug mode
+  set(GDB_SUBOPTION)
+
   # Enable GCC/LLVM stack-smashing protection
   if(ENABLE_SSP)
     list(APPEND GENERAL_OPTIONS
@@ -180,12 +183,10 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     if(STATIC_CXX_LIB)
       set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
     endif()
-  endif()
 
-  if (ENABLE_SPLIT_DWARF)
-    set(GDB_SUBOPTION "split-dwarf")
-  else()
-    set(GDB_SUBOPTION "")
+    if (ENABLE_SPLIT_DWARF)
+      set(GDB_SUBOPTION "split-dwarf")
+    endif()
   endif()
 
   # No optimizations for debug builds.

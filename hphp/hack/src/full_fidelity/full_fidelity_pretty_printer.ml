@@ -461,9 +461,18 @@ let rec get_doc node =
     let fs = get_doc x.shape_fields in
     let rp = get_doc x.shape_right_paren in
     sh ^| lp ^^^ fs ^^^ rp
-  | ArrayCreationExpression _
-  | ArrayIntrinsicExpression _
-    -> make_simple nil
+  | ArrayCreationExpression x ->
+    let left_bracket = get_doc (array_creation_left_bracket x) in
+    let right_bracket = get_doc (array_creation_right_bracket x) in
+    let members = get_doc (array_creation_members x) in
+    indent_block_no_space left_bracket members right_bracket indt
+  | ArrayIntrinsicExpression x ->
+    let keyword = get_doc (array_intrinsic_keyword x) in
+    let left = get_doc (array_intrinsic_left_paren x) in
+    let right = get_doc (array_intrinsic_right_paren x) in
+    let members = get_doc (array_intrinsic_members x) in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in

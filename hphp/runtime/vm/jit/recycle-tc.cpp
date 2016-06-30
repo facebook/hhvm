@@ -98,7 +98,7 @@ void clearTCMaps(TCA start, TCA end) {
     if (profData && di.isBranch()) {
       profData->clearJmpTransID(start);
     }
-    if (auto* ct = catchMap.find(start)) {
+    if (auto ct = catchMap.find(mcg->code().toOffset(start))) {
       // We mark nothrow with a nullptr, which will assert during unwinding,
       // use a separate marker here to indicate the catch has been erased
       *ct = kInvalidCatchTrace;

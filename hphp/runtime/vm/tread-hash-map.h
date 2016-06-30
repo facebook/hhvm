@@ -137,6 +137,10 @@ public:
   typedef thm_iterator<value_type> iterator;
   typedef thm_iterator<const value_type> const_iterator;
 
+  size_t size() const {
+    return m_table.load(std::memory_order_acquire)->size;
+  }
+
   iterator begin() {
     return iterator(m_table.load(std::memory_order_acquire), 0);
   }

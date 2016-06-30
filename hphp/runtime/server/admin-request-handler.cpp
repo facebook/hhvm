@@ -860,6 +860,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("rds", rds::usedBytes());
     appendStat("rds-local", rds::usedLocalBytes());
     appendStat("rds-persistent", rds::usedPersistentBytes());
+    appendStat("catch-traces", mcg->catchTraceMap().size());
+    appendStat("fixups", mcg->fixupMap().size());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
     appendStat("request-count", requestCount());

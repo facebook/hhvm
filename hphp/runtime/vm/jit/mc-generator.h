@@ -59,9 +59,9 @@ struct MCGenerator;
 
 extern MCGenerator* mcg;
 
-const TCA kInvalidCatchTrace = TCA(-1);
+constexpr uint32_t kInvalidCatchTrace = 0x0;
 
-using CatchTraceMap = TreadHashMap<CTCA, TCA, ctca_identity_hash>;
+using CatchTraceMap = TreadHashMap<uint32_t, uint32_t, std::hash<uint32_t>>;
 using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
 
 ///////////////////////////////////////////////////////////////////////////////

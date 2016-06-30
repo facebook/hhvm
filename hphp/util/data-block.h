@@ -38,8 +38,9 @@ namespace sz {
   constexpr int qword = 8;
 }
 
-typedef uint8_t* Address;
-typedef uint8_t* CodeAddress;
+using Address          = uint8_t*;
+using CodeAddress      = uint8_t*;
+using ConstCodeAddress = const uint8_t*;
 
 struct DataBlockFull : std::runtime_error {
   std::string name;

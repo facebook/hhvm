@@ -32,7 +32,7 @@ namespace HPHP { namespace jit {
 bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
   CTCA tca = (CTCA)ar->m_savedRip;
 
-  auto ent = m_fixups.find(tca);
+  auto ent = m_fixups.find(mcg->code().toOffset(tca));
   if (!ent) return false;
 
   // Note: If indirect fixups happen frequently enough, we could just compare
@@ -40,7 +40,9 @@ bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
   if (ent->isIndirect()) {
     auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
                         ent->indirect.returnIpDisp;
-    ent = m_fixups.find(*reinterpret_cast<CTCA*>(savedRIPAddr));
+    ent = m_fixups.find(
+      mcg->code().toOffset(*reinterpret_cast<CTCA*>(savedRIPAddr))
+    );
     assertx(ent && !ent->isIndirect());
   }
 
@@ -51,6 +53,24 @@ bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
 
   regsFromActRec(tca, ar, ent->fixup, outVMRegs);
   return true;
+}
+
+void FixupMap::recordFixup(CTCA tca, const Fixup& fixup) {
+  TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
+        tca, fixup.pcOffset, fixup.spOffset);
+
+  auto const offset = mcg->code().toOffset(tca);
+  if (auto pos = m_fixups.find(offset)) {
+    *pos = FixupEntry(fixup);
+  } else {
+    m_fixups.insert(offset, FixupEntry(fixup));
+  }
+}
+
+const Fixup* FixupMap::findFixup(CTCA tca) const {
+  auto ent = m_fixups.find(mcg->code().toOffset(tca));
+  if (!ent) return nullptr;
+  return &ent->fixup;
 }
 
 void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
@@ -122,7 +142,7 @@ void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
 
     if (!rbp) continue;
 
-    auto* ent = m_fixups.find(tca);
+    auto const ent = m_fixups.find(mcg->code().toOffset(tca));
     if (!ent) {
       continue;
     }

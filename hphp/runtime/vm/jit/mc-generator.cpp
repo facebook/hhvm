@@ -1837,8 +1837,8 @@ MCGenerator::MCGenerator()
 }
 
 folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
-  TCA* found = m_catchTraceMap.find(ip);
-  if (found && *found != kInvalidCatchTrace) return *found;
+  auto const found = m_catchTraceMap.find(m_code.toOffset(ip));
+  if (found && *found != kInvalidCatchTrace) return m_code.toAddr(*found);
   return folly::none;
 }
 

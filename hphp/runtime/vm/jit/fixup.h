@@ -148,22 +148,11 @@ struct FixupMap {
 
   FixupMap() : m_fixups(kInitCapac) {}
 
-  void recordFixup(CTCA tca, const Fixup& fixup) {
-    TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
-          tca, fixup.pcOffset, fixup.spOffset);
+  void recordFixup(CTCA tca, const Fixup& fixup);
 
-    if (auto pos = m_fixups.find(tca)) {
-      *pos = FixupEntry(fixup);
-    } else {
-      m_fixups.insert(tca, FixupEntry(fixup));
-    }
-  }
+  const Fixup* findFixup(CTCA tca) const;
 
-  const Fixup* findFixup(CTCA tca) const {
-    auto ent = m_fixups.find(tca);
-    if (!ent) return nullptr;
-    return &ent->fixup;
-  }
+  size_t size() const { return m_fixups.size(); }
 
   bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const;
 
@@ -217,7 +206,7 @@ private:
   }
 
 private:
-  TreadHashMap<CTCA,FixupEntry,ctca_identity_hash> m_fixups;
+  TreadHashMap<uint32_t,FixupEntry,std::hash<uint32_t>> m_fixups;
 };
 
 //////////////////////////////////////////////////////////////////////

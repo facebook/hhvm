@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/string-data-macros.h"
 
 namespace HPHP {
 
@@ -162,7 +163,9 @@ struct StringData final: type_scan::MarkCountable<StringData> {
   /*
    * Offset accessors for the JIT compiler.
    */
+#ifndef NO_M_DATA
   static constexpr ptrdiff_t dataOff() { return offsetof(StringData, m_data); }
+#endif
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
 
   /*
@@ -442,7 +445,11 @@ struct StringData final: type_scan::MarkCountable<StringData> {
                    - sizeof(StringData)
     );
   }
+#ifdef NO_M_DATA
+  static constexpr bool isProxy() { return false; }
+#else
   bool isProxy() const;
+#endif
 
 private:
   struct Proxy {
@@ -464,7 +471,11 @@ private:
   const Proxy* proxy() const;
   Proxy* proxy();
 
+#ifdef NO_M_DATA
+  static constexpr bool isFlat() { return true; }
+#else
   bool isFlat() const;
+#endif
   bool isImmutable() const;
 
   void releaseDataSlowPath();
@@ -476,20 +487,31 @@ private:
   bool checkSane() const;
   void preCompute();
 
-private:
-  char* m_data;
-
   // We have the next fields blocked into qword-size unions so
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
+private:
+#ifdef NO_M_DATA
+  union {
+    struct {
+      uint32_t m_len;
+      mutable strhash_t m_hash;   // precomputed for persistent strings
+    };
+    uint64_t m_lenAndHash;
+  };
+  HeaderWord<CapCode,Counted::Maybe> m_hdr;
+#else
+  // TODO(5601154): Add KindOfApcString and remove StringData m_data field.
+  char* m_data;
   HeaderWord<CapCode,Counted::Maybe> m_hdr;
   union {
     struct {
       uint32_t m_len;
-      mutable strhash_t m_hash;   // precompute hash codes for static strings
+      mutable strhash_t m_hash;   // precomputed for persistent strings
     };
     uint64_t m_lenAndHash;
   };
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -191,22 +191,20 @@ ETCH_ALIGN16
 ETCH_NAME(g_hashHelper_crc):
 ETCH_LABEL(FB804):
         CFI(startproc)
-        xor     %ecx, %ecx
+        mov     (%rdi), %ecx
         or      $-1, %eax
-        sub     0x10(%rdi), %ecx
+        lea     0x10(%rdi, %rcx), %rdx
+        neg     %rcx
         jz      ETCH_LABEL(hend)
-
-        mov     (%rdi), %rdx
         movabs  $0xdfdfdfdfdfdfdfdf, %r8
         jmp     ETCH_LABEL(hheader)
 
 ETCH_LABEL(hloop):
-        add     $8, %rdx
         crc32q  %rsi, %rax
 ETCH_LABEL(hheader):
         mov     %r8, %rsi
-        and     (%rdx), %rsi
-        add     $8, %ecx
+        and     (%rdx, %rcx), %rsi
+        add     $8, %rcx
         jnc     ETCH_LABEL(hloop)
 
         shl     $3, %ecx
@@ -215,7 +213,7 @@ ETCH_LABEL(hheader):
 
 ETCH_LABEL(hend):
         shr     %eax
-        or      %eax, 0x14(%rdi)
+        or      %eax, 0x4(%rdi)
         ret
         CFI(endproc)
 

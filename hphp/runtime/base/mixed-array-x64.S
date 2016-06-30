@@ -1,6 +1,7 @@
 #include "hphp/util/etch-helpers.h"
+#include "hphp/runtime/base/string-data-macros.h"  // NO_M_DATA
 
-#if defined(__x86_64__) && defined(FACEBOOK) && !defined(NO_SSE42)
+#if defined(__x86_64__) && defined(FACEBOOK) && !defined(NO_SSE42) && defined(NO_M_DATA)
 
         .file     "hphp/runtime/base/mixed-array-x64.S"
 
@@ -11,20 +12,19 @@ ETCH_SECTION(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE)
 ETCH_NAME(hashHelper_NvGetStr):
         CFI(startproc)
 
-        mov       0x10(%rsi), %ecx      // key->size()
-        mov       (%rsi), %r9           // key->data()
+        mov       (%rsi), %ecx          // key->size()
+        lea       0x10(%rsi, %rcx), %r9 // key->data() + key->size()
         not       %edx                  // initialize to -1 (assert: it was 0)
         movabs    $0xdfdfdfdfdfdfdfdf, %r8
-        neg       %ecx
+        neg       %rcx
         jnz       ETCH_LABEL(hheader)
         jmp       ETCH_LABEL(hend)
 ETCH_LABEL(hloop):
-        add       $8, %r9
         crc32q    %r11, %rdx
 ETCH_LABEL(hheader):
-        mov       (%r9), %r11
+        mov       (%r9, %rcx), %r11
         and       %r8, %r11
-        add       $8, %ecx
+        add       $8, %rcx
         js        ETCH_LABEL(hloop)
 
         shl       $3, %ecx
@@ -33,7 +33,7 @@ ETCH_LABEL(hheader):
 
 ETCH_LABEL(hend):
         shr       %edx
-        or        %edx, 0x14(%rsi)
+        or        %edx, 0x4(%rsi)
         jmp       ETCH_LABEL(hasHash)
 
         CFI(endproc)
@@ -48,7 +48,7 @@ ETCH_LABEL(hend):
 ETCH_NAME(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE):
         CFI(startproc)
 
-        mov       0x14(%rsi), %edx      // hash
+        mov       0x4(%rsi), %edx       // hash
         mov       0x10(%rdi), %eax      // scale
         push      %rbp
         mov       %rsp, %rbp
@@ -109,16 +109,16 @@ ETCH_LABEL(fail):
         ret
 
 ETCH_LABEL(cmplength):
-        mov       0x10(%rsi), %ecx      // string length
-        cmp       %ecx, 0x10(%r11)
+        mov       (%rsi), %ecx          // string length
+        cmp       %ecx, (%r11)
         jne       ETCH_LABEL(nextprobe)
 
         neg       %rcx
         jz        ETCH_LABEL(found)     // both emtpy strings
 
         push      %rdi
-        mov       (%r11), %r11
-        mov       (%rsi), %rdi
+        lea       0x10(%r11), %r11
+        lea       0x10(%rsi), %rdi
         push      %rdx
         sub       %rcx, %r11
         sub       %rcx, %rdi

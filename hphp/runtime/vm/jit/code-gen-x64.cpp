@@ -968,10 +968,14 @@ void CodeGenerator::cgConvStrToBool(IRInstruction* inst) {
     // Unlikely case is we end up having to check whether the first byte of the
     // string is equal to '0'.
     auto const dst = v.makeReg();
-    auto const sd  = v.makeReg();
     auto const sf  = v.makeReg();
+#ifdef NO_M_DATA
+    v << cmpbim{'0', src[sizeof(StringData)], sf};
+#else
+    auto const sd  = v.makeReg();
     v << load{src[StringData::dataOff()], sd};
     v << cmpbim{'0', sd[0], sf};
+#endif
     v << setcc{CC_NE, sf, dst};
     return dst;
   }, [&] (Vout& v) {
@@ -1012,11 +1016,18 @@ void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
 
 void CodeGenerator::cgOrdStr(IRInstruction* inst) {
   auto& v = vmain();
+  auto const str = srcLoc(inst, 0).reg(); // StringData*
+  auto const dst = dstLoc(inst, 0).reg(); // uchar
+#ifdef NO_M_DATA
+  // dst = (unsigned char)str[sizeof(StringData)];
+  v << loadzbq{str[sizeof(StringData)], dst};
+#else
   auto const sd = v.makeReg();
   // sd = StringData->m_data;
-  v << load{srcLoc(inst, 0).reg()[StringData::dataOff()], sd};
+  v << load{str[StringData::dataOff()], sd};
   // dst = (unsigned char)sd[0];
-  v << loadzbq{sd[0], dstLoc(inst, 0).reg()};
+  v << loadzbq{sd[0], dst};
+#endif
 }
 
 void CodeGenerator::cgOrdStrIdx(IRInstruction* inst) {
@@ -1042,9 +1053,13 @@ void CodeGenerator::cgOrdStrIdx(IRInstruction* inst) {
                },
                [&] (Vout& v) {
                  auto const dst = v.makeReg();
-                 // sd = StringData->m_data;
+                 // sd = StringData->data();
+#ifdef NO_M_DATA
+                 v << lea{strReg[sizeof(StringData)], sd};
+#else
                  v << load{strReg[StringData::dataOff()], sd};
-                 // dst = (unsigned char)sd[0];
+#endif
+                 // dst = (unsigned char)sd[srcOff];
                  v << loadzbq{sd[srcOff], dst};
                  return dst;
                });

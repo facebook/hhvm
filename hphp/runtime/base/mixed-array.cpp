@@ -1348,7 +1348,7 @@ const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
-#if !defined(__x86_64__) || !defined(FACEBOOK) || defined(NO_SSE42)
+#if !defined(__x86_64__) || !defined(FACEBOOK) || defined(NO_SSE42) || !defined(NO_M_DATA)
 const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
                                        const StringData* k) {
   auto a = asMixed(ad);

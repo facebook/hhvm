@@ -84,7 +84,9 @@ ALWAYS_INLINE StringData* allocFlatSmallImpl(size_t len) {
 
   auto const cap = allocSize - kCapOverhead;
 
+#ifndef NO_M_DATA
   sd->m_data = reinterpret_cast<char*>(sd + 1);
+#endif
   // Refcount initialized to 1.
   sd->m_hdr.init(CapCode::exact(cap), HeaderKind::String, 1);
   return sd;
@@ -119,7 +121,9 @@ ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
     sd = static_cast<StringData*>(block.ptr);
   }
   assert(cc.decode() >= len);
+#ifndef NO_M_DATA
   sd->m_data = reinterpret_cast<char*>(sd + 1);
+#endif
   // Refcount initialized to 1.
   sd->m_hdr.init(cc, HeaderKind::String, 1);
   return sd;
@@ -177,7 +181,9 @@ StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
+#ifndef NO_M_DATA
   sd->m_data = data;
+#endif
   auto const count = trueStatic ? StaticValue : UncountedValue;
   sd->m_hdr.init(cc, HeaderKind::String, count);
   sd->m_len = sl.size(); // m_hash is computed soon.
@@ -209,7 +215,9 @@ StringData* StringData::MakeEmpty() {
   auto const sd = static_cast<StringData*>(vpEmpty);
   auto const data = reinterpret_cast<char*>(sd + 1);
 
+#ifndef NO_M_DATA
   sd->m_data        = data;
+#endif
   sd->m_hdr.init(HeaderKind::String, StaticValue);
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
@@ -354,8 +362,8 @@ StringData* StringData::Make(const StringData* s1, const StringData* s2) {
   sd->m_lenAndHash = len; // hash=0
 
   auto const data = reinterpret_cast<char*>(sd + 1);
-  auto const next = memcpy8(data, s1->m_data, s1->m_len);
-  *memcpy8(next, s2->m_data, s2->m_len) = 0;
+  auto const next = memcpy8(data, s1->data(), s1->m_len);
+  *memcpy8(next, s2->data(), s2->m_len) = 0;
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
@@ -420,6 +428,10 @@ ALWAYS_INLINE void StringData::enlist() {
 
 NEVER_INLINE
 StringData* StringData::MakeProxySlowPath(const APCString* apcstr) {
+#ifdef NO_M_DATA
+  always_assert(false);
+  not_reached();
+#else
   auto const sd = static_cast<StringData*>(
     MM().mallocSmallSize(sizeof(StringData) + sizeof(Proxy))
   );
@@ -439,6 +451,7 @@ StringData* StringData::MakeProxySlowPath(const APCString* apcstr) {
   assert(sd->isProxy());
   assert(sd->checkSane());
   return sd;
+#endif
 }
 
 StringData* StringData::MakeProxy(const APCString* apcstr) {
@@ -636,13 +649,23 @@ StringData* StringData::reserve(size_t cap) {
   auto const sd = allocFlatForLenSmall(cap);
 
   // Request-allocated StringData are always aligned at 16 bytes, thus it is
-  // safe to copy in 16-byte groups. This copies m_lenAndHash (8 bytes), the
-  // characters (m_len bytes), add the trailing zero (1 byte).
+  // safe to copy in 16-byte groups.
+#ifdef NO_M_DATA
+  // layout: [m_lenAndHash][header][...data]
+  sd->m_lenAndHash = m_lenAndHash;
+  // This copies the characters (m_len bytes), and the trailing zero (1 byte)
+  memcpy16_inline(sd+1, this+1, (m_len + 1 + 15) & ~0xF);
+  assertx(reinterpret_cast<uintptr_t>(this+1) % 16 == 0);
+#else
+  // layout: [m_data][header][m_lenAndHash][...data]
+  // This copies m_lenAndHash (8 bytes), the characters (m_len bytes),
+  // and the trailing zero (1 byte).
   memcpy16_inline(&sd->m_lenAndHash, &m_lenAndHash,
                   (m_len + 8 + 1 + 15) & ~0xF);
   assertx(reinterpret_cast<uintptr_t>(&m_lenAndHash) + 8 ==
           reinterpret_cast<uintptr_t>(m_data));
   assertx(reinterpret_cast<uintptr_t>(&m_lenAndHash) % 16 == 0);
+#endif
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
@@ -680,8 +703,8 @@ StringData* StringData::escalate(size_t cap) {
 
   auto const sd = allocFlatForLenSmall(cap);
   sd->m_lenAndHash = m_lenAndHash;
-  auto const data = reinterpret_cast<char*>(sd + 1);
-  *memcpy8(data, m_data, m_len) = 0;
+  auto const sd_data = reinterpret_cast<char*>(sd + 1);
+  *memcpy8(sd_data, data(), m_len) = 0;
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
@@ -710,7 +733,7 @@ void StringData::dump() const {
 
 StringData* StringData::getChar(int offset) const {
   if (offset >= 0 && offset < size()) {
-    return makeStaticString(m_data[offset]);
+    return makeStaticString(data()[offset]);
   }
   raise_notice("Uninitialized string offset: %d", offset);
   return staticEmptyString();
@@ -738,7 +761,7 @@ void StringData::incrementHelper() {
   };
 
   auto const len = m_len;
-  auto const s = m_data;
+  auto const s = mutableData();
   int carry = 0;
   int pos = len - 1;
   auto last = CharKind::UNKNOWN; // Shut up the compiler warning
@@ -822,7 +845,7 @@ void StringData::preCompute() {
 
 NEVER_INLINE strhash_t StringData::hashHelper() const {
   assert(!isProxy());
-  strhash_t h = hash_string_i_unsafe(m_data, m_len);
+  strhash_t h = hash_string_i_unsafe(data(), m_len);
   assert(h >= 0);
   m_hash |= h;
   return h;
@@ -1013,7 +1036,7 @@ std::string StringData::toCppString() const {
 }
 
 bool StringData::checkSane() const {
-  static_assert(sizeof(StringData) == 24,
+  static_assert(sizeof(StringData) == use_lowptr ? 16 : 24,
                 "StringData size changed---update assertion if you mean it");
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
   static_assert(offsetof(StringData, m_hdr) == HeaderOffset, "");

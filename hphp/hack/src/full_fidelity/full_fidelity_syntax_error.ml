@@ -73,5 +73,7 @@ let error1024 = "A comma or semicolon is expected here."
 let error1025 = "A shape field name is expected here."
 let error1027 = "A class name, variable name, or 'static' is expected here."
 let error1028 = "A shape field specifier arrow ('=>') is expected here."
+let error1029 = "A closing double angle bracket is expected here."
+let error1030 = "An attribute is expected here."
 
 let error2001 = "A type annotation is required in strict mode."

@@ -113,13 +113,97 @@ module WithExpressionAndStatementParser
     let (parser, token) = next_token parser in
     (parser, make_error [make_token token])
 
+  (* SPEC:
+    attribute_specification := << attribute_list >>
+    attribute_list :=
+      attribute
+      attribute_list , attribute
+    attribute := attribute_name attribute_value_list_opt
+    attribute_name := name
+    attribute_value_list := ( attribute_values_opt )
+    attribute_values :=
+      attribute_value
+      attribute_values , attribute_value
+    attribute_value := expression
+   *)
   and parse_attribute_specification_opt parser =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = LessThanLessThan then
-      (* TODO *)
-      (parser1, make_error [make_token token])
+      let (parser, attr_list) = parse_attribute_list_opt parser1 in
+      let (parser, right) =
+        expect_token parser GreaterThanGreaterThan SyntaxError.error1029 in
+      (parser, make_attribute_specification (make_token token) attr_list right)
     else
       (parser, make_missing())
+
+  and parse_attribute_list_opt parser =
+    let token = peek_token parser in
+    if (Token.kind token) = GreaterThanGreaterThan then
+      let parser = with_error parser SyntaxError.error1030 in
+      (parser, make_missing())
+    else
+      (* TODO use Eric's generic comma list parse once it lands *)
+      let rec aux parser acc =
+        let parser, attr = parse_attribute parser in
+        let parser1, token = next_token parser in
+        match Token.kind token with
+        | Comma ->
+          let comma = make_token token in
+          let item = make_list_item attr comma in
+          aux parser1 (item :: acc)
+        | GreaterThanGreaterThan ->
+          let comma = make_missing () in
+          let item = make_list_item attr comma in
+          parser, make_list (List.rev (item :: acc))
+        | _ ->
+          (* ERROR RECOVERY: assume closing bracket is missing. Caller will
+           * report an error. Do not eat token.
+           * TODO better ways to recover *)
+          parser, make_list (List.rev acc)
+      in
+      aux parser []
+
+  and parse_attribute parser =
+    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | LeftParen ->
+      let left = make_token token in
+      let parser, values = parse_attribute_values_opt parser1 in
+      let parser, right =
+        expect_token parser RightParen SyntaxError.error1011 in
+      parser, make_attribute name left values right
+    | _ ->
+      let left = make_missing () in
+      let values = make_missing () in
+      let right = make_missing () in
+      parser, make_attribute name left values right
+
+  and parse_attribute_values_opt parser =
+    let token = peek_token parser in
+    if (Token.kind token) = RightParen then
+      (parser, make_missing())
+    else
+      (* TODO replace with generic comma list parsing *)
+      let rec aux parser acc =
+        let parser, expr = parse_expression parser in
+        let parser1, token = next_token parser in
+        match Token.kind token with
+        | Comma ->
+          let comma = make_token token in
+          let item = make_list_item expr comma in
+          aux parser1 (item :: acc)
+        | RightParen ->
+          let comma = make_missing () in
+          let item = make_list_item expr comma in
+          parser, make_list (List.rev (item :: acc))
+        | _ ->
+          (* ERROR RECOVERY: assume right paren is missing. Caller will
+           * report an error. Do not eat token.
+           * TODO better ways to recover *)
+          parser, make_list (List.rev acc)
+      in
+      aux parser []
 
   and parse_generic_type_parameter_list_opt parser =
     let (parser1, token) = next_token parser in
@@ -223,12 +307,12 @@ module WithExpressionAndStatementParser
       (parser, make_default_argument_specifier (make_token token) default_value)
     | _ -> (parser, make_missing())
 
-  and parse_function_declaration parser =
+  and parse_function_declaration parser attribute_specification =
     (* ERROR RECOVERY
        In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
-    let (parser, attribute_specification) =
-      parse_attribute_specification_opt parser in
+    (* let (parser, attribute_specification) =
+      parse_attribute_specification_opt parser in *)
     let (parser, async_token) = optional_token parser Async in
     let (parser, function_token) =
       expect_token parser Function SyntaxError.error1003 in
@@ -250,9 +334,15 @@ module WithExpressionAndStatementParser
     (parser, syntax)
 
   let parse_class_function_interface_or_trait_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+    let parser, attribute_specification =
+      parse_attribute_specification_opt parser in
+    let parser1, token = next_token parser in
+    match Token.kind token with
+    | Async | Function ->
+      parse_function_declaration parser attribute_specification
+    | _ ->
+      (* TODO *)
+      (parser1, make_error [make_token token])
 
   let parse_declaration parser =
     let (parser1, token) = next_token parser in
@@ -270,7 +360,7 @@ module WithExpressionAndStatementParser
     | Final
     | Class -> parse_class_declaration parser
     | Async
-    | Function -> parse_function_declaration parser
+    | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->
       parse_class_function_interface_or_trait_declaration parser
     | _ ->

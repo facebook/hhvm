@@ -121,6 +121,9 @@ let test_data = [
     ~preprocess_exp:remove_whitespace "test_object_creation" test_minimal;
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_function_call" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_attribute_spec" test_minimal;
+
   {
     name = "test_mode_1";
     source = "<?hh   ";

@@ -291,6 +291,17 @@ module WithToken(Token: TokenType) = struct
       object_creation_arguments : t;
       object_creation_rparen : t
     }
+    and array_creation_expression = {
+      array_creation_left_bracket: t;
+      array_creation_members: t;
+      array_creation_right_bracket: t;
+    }
+    and array_intrinsic_expression = {
+      array_intrinsic_keyword: t;
+      array_intrinsic_left_paren: t;
+      array_intrinsic_members: t;
+      array_intrinsic_right_paren: t;
+    }
     and xhp_attribute = {
       xhp_attr_name : t;
       xhp_attr_equal : t;
@@ -438,6 +449,8 @@ module WithToken(Token: TokenType) = struct
     | ObjectCreationExpression of object_creation_expression
     | ShapeExpression of shape
     | FieldInitializer of field_initializer
+    | ArrayCreationExpression of array_creation_expression
+    | ArrayIntrinsicExpression of array_intrinsic_expression
     | XHPExpression of xhp_expression
     | XHPOpen of xhp_open
     | XHPAttribute of xhp_attribute
@@ -513,6 +526,8 @@ module WithToken(Token: TokenType) = struct
       | ObjectCreationExpression _ -> SyntaxKind.ObjectCreationExpression
       | ShapeExpression _ -> SyntaxKind.ShapeExpression
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
+      | ArrayCreationExpression _ -> SyntaxKind.ArrayCreationExpression
+      | ArrayIntrinsicExpression _ -> SyntaxKind.ArrayIntrinsicExpression
       | XHPExpression _ -> SyntaxKind.XHPExpression
       | XHPOpen _ -> SyntaxKind.XHPOpen
       | XHPAttribute _ -> SyntaxKind.XHPAttribute
@@ -577,6 +592,10 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ObjectCreationExpression
     let is_shape_expression node = kind node = SyntaxKind.ShapeExpression
     let is_field_initializer node = kind node = SyntaxKind.FieldInitializer
+    let is_array_creation_expression node =
+      kind node = SyntaxKind.ArrayCreationExpression
+    let is_array_intrinsic_expression node =
+      kind node = SyntaxKind.ArrayIntrinsicExpression
     let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
     let is_xhp_open node = kind node = SyntaxKind.XHPOpen
     let is_xhp_attribute node = kind node = SyntaxKind.XHPAttribute
@@ -765,6 +784,16 @@ module WithToken(Token: TokenType) = struct
       | FieldInitializer
         { field_init_name; field_init_arrow; field_init_value } ->
         [ field_init_name; field_init_arrow; field_init_value ]
+      | ArrayCreationExpression
+        { array_creation_left_bracket; array_creation_members;
+          array_creation_right_bracket } ->
+        [ array_creation_left_bracket; array_creation_members;
+          array_creation_right_bracket ]
+      | ArrayIntrinsicExpression
+       { array_intrinsic_keyword; array_intrinsic_left_paren;
+         array_intrinsic_members; array_intrinsic_right_paren } ->
+       [ array_intrinsic_keyword; array_intrinsic_left_paren;
+         array_intrinsic_members; array_intrinsic_right_paren ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ xhp_open; xhp_body; xhp_close ]
@@ -988,6 +1017,16 @@ module WithToken(Token: TokenType) = struct
       | FieldInitializer
         { field_init_name; field_init_arrow; field_init_value } ->
         [ "field_init_name"; "field_init_arrow"; "field_init_value" ]
+      | ArrayCreationExpression
+        { array_creation_left_bracket; array_creation_members;
+          array_creation_right_bracket } ->
+        [ "array_creation_left_bracket"; "array_creation_members";
+          "array_creation_right_bracket" ]
+      | ArrayIntrinsicExpression
+       { array_intrinsic_keyword; array_intrinsic_left_paren;
+         array_intrinsic_members; array_intrinsic_right_paren } ->
+       [ "array_intrinsic_keyword"; "array_intrinsic_left_paren";
+         "array_intrinsic_members"; "array_intrinsic_right_paren" ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ "xhp_open"; "xhp_body"; "xhp_close" ]
@@ -1189,6 +1228,13 @@ module WithToken(Token: TokenType) = struct
     let listlike_left_paren x = x.listlike_left_paren
     let listlike_members x = x.listlike_members
     let listlike_right_paren x = x.listlike_right_paren
+    let array_creation_left_bracket x = x.array_creation_left_bracket
+    let array_creation_members x = x.array_creation_members
+    let array_creation_right_bracket x = x.array_creation_right_bracket
+    let array_intrinsic_keyword x = x.array_intrinsic_keyword
+    let array_intrinsic_left_paren x = x.array_intrinsic_left_paren
+    let array_intrinsic_members x = x.array_intrinsic_members
+    let array_intrinsic_right_paren x = x.array_intrinsic_right_paren
     let xhp_open x = x.xhp_open
     let xhp_body x = x.xhp_body
     let xhp_close x = x.xhp_close
@@ -1409,6 +1455,16 @@ module WithToken(Token: TokenType) = struct
         [ field_init_name; field_init_arrow; field_init_value ]) ->
         FieldInitializer
         { field_init_name; field_init_arrow; field_init_value }
+      | SyntaxKind.ArrayCreationExpression, [ array_creation_left_bracket;
+        array_creation_members; array_creation_right_bracket ] ->
+        ArrayCreationExpression { array_creation_left_bracket;
+          array_creation_members; array_creation_right_bracket }
+      | SyntaxKind.ArrayIntrinsicExpression, [ array_intrinsic_keyword;
+        array_intrinsic_left_paren; array_intrinsic_members;
+        array_intrinsic_right_paren ] ->
+        ArrayIntrinsicExpression { array_intrinsic_keyword;
+          array_intrinsic_left_paren; array_intrinsic_members;
+          array_intrinsic_right_paren }
       | (SyntaxKind.XHPExpression, [ xhp_open; xhp_body; xhp_close ]) ->
         XHPExpression { xhp_open; xhp_body; xhp_close }
       | (SyntaxKind.XHPOpen, [ xhp_open_name; xhp_open_attrs;
@@ -1562,6 +1618,20 @@ module WithToken(Token: TokenType) = struct
       let make_shape_expression shape lparen fields rparen =
         from_children SyntaxKind.ShapeExpression
           [ shape; lparen; fields; rparen ]
+
+      let make_array_creation_expression
+        array_creation_left_bracket array_creation_members
+        array_creation_right_bracket =
+        from_children SyntaxKind.ArrayCreationExpression
+          [array_creation_left_bracket; array_creation_members;
+          array_creation_right_bracket ]
+
+      let make_array_intrinsic_expression
+        array_intrinsic_keyword array_intrinsic_left_paren
+        array_intrinsic_members array_intrinsic_right_paren =
+        from_children SyntaxKind.ArrayIntrinsicExpression
+          [ array_intrinsic_keyword; array_intrinsic_left_paren;
+          array_intrinsic_members; array_intrinsic_right_paren ]
 
       let make_xhp xhp_open xhp_body xhp_close =
         from_children SyntaxKind.XHPExpression [xhp_open; xhp_body; xhp_close ]

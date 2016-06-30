@@ -461,6 +461,9 @@ let rec get_doc node =
     let fs = get_doc x.shape_fields in
     let rp = get_doc x.shape_right_paren in
     sh ^| lp ^^^ fs ^^^ rp
+  | ArrayCreationExpression _
+  | ArrayIntrinsicExpression _
+    -> make_simple nil
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in

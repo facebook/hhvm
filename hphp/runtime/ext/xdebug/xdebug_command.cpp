@@ -171,6 +171,13 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
     xdebug_xml_add_attribute(xml, "state", "disabled");
   }
 
+  // Whether the breakpoint is resolved or not.
+  xdebug_xml_add_attribute(
+    xml,
+    "resolved",
+    bp.resolved ? "resolved" : "unresolved"
+  );
+
   // Add the hit condition and count
   switch (bp.hitCondition) {
     case XDebugBreakpoint::HitCondition::GREATER_OR_EQUAL:

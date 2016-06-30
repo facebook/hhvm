@@ -111,6 +111,7 @@ void add_line_breakpoint(int id, XDebugBreakpoint& bp, const Unit* unit) {
   auto filepath = unit->filepath()->toCppString();
   LINE_MAP[filepath].emplace(bp.line, id);
   bp.unit = unit;
+  bp.resolved = true;
 }
 
 // Helper used when looping through the unmatched breakpoints. Checks if the
@@ -178,6 +179,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
         XDEBUG_REMOVE_BREAKPOINT(iter->second);
       }
       EXCEPTION_MAP[exceptionName] = id;
+      bp.resolved = true;
       break;
     }
     // Attempt to find the unit/line combo
@@ -216,6 +218,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
       // exists, we can verify that the method is valid.
       if (func != nullptr) {
         add_func_breakpoint(id, bp, func);
+        bp.resolved = true;
       } else if (!bp.className.isNull() && cls != nullptr) {
         throw_exn(XDebugError::BreakpointInvalid);
       } else {

@@ -52,6 +52,7 @@ struct XDebugBreakpoint {
 
   Type type; // The breakpoint type. This must be provided.
   bool enabled = true; // Whether or not this breakpoint is enabled
+  bool resolved = false;
   bool temporary = false; // If true, removed after being hit
   HitCondition hitCondition = HitCondition::GREATER_OR_EQUAL;
   int hitValue = 0; // Value to compare hitCount against

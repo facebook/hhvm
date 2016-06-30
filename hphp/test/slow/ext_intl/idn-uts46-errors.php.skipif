@@ -1,0 +1,11 @@
+<?php
+
+$utf8dn = "www.fußball.com";
+$ret = idn_to_ascii(
+  $utf8dn, 
+  IDNA_NONTRANSITIONAL_TO_ASCII, 
+  INTL_IDNA_VARIANT_UTS46
+);
+if ($ret === false && intl_get_error_code() == U_UNSUPPORTED_ERROR) {
+  echo "intl too old";
+}

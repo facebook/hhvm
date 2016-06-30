@@ -114,6 +114,17 @@ module WithToken(Token: TokenType) = struct
       default_equal : t;
       default_value : t
     }
+    and attribute_specification = {
+      attribute_spec_left_double_angle : t;
+      attribute_spec_attribute_list : t;
+      attribute_spec_right_double_angle : t
+    }
+    and attribute = {
+      attribute_name : t;
+      attribute_left_paren : t;
+      attribute_values : t;
+      attribute_right_paren : t
+    }
     and compound_statement = {
       compound_left_brace : t;
       compound_statements : t;
@@ -390,6 +401,8 @@ module WithToken(Token: TokenType) = struct
     | FunctionDeclaration of function_declaration
     | ParameterDeclaration of parameter_declaration
     | DefaultArgumentSpecifier of default_argument_specifier
+    | AttributeSpecification of attribute_specification
+    | Attribute of attribute
 
     | CompoundStatement of compound_statement
     | ExpressionStatement of expression_statement
@@ -468,6 +481,8 @@ module WithToken(Token: TokenType) = struct
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | DefaultArgumentSpecifier _ -> SyntaxKind.DefaultArgumentSpecifier
+      | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
+      | Attribute _ -> SyntaxKind.Attribute
       | CompoundStatement _ -> SyntaxKind.CompoundStatement
       | ExpressionStatement _ -> SyntaxKind.ExpressionStatement
       | WhileStatement _ -> SyntaxKind.WhileStatement
@@ -531,6 +546,9 @@ module WithToken(Token: TokenType) = struct
     let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
     let is_default_arg_specifier node =
       kind node = SyntaxKind.DefaultArgumentSpecifier
+    let is_attribute_specification node =
+      kind node = SyntaxKind.AttributeSpecification
+    let is_attribute node = kind node = SyntaxKind.Attribute
     let is_compound_statement node = kind node = SyntaxKind.CompoundStatement
     let is_expression_statement node =
       kind node = SyntaxKind.ExpressionStatement
@@ -621,6 +639,16 @@ module WithToken(Token: TokenType) = struct
       | DefaultArgumentSpecifier
         { default_equal; default_value } ->
         [ default_equal; default_value ]
+      | AttributeSpecification
+        { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
+          attribute_spec_right_double_angle } ->
+        [ attribute_spec_left_double_angle; attribute_spec_attribute_list ;
+          attribute_spec_right_double_angle ]
+      | Attribute
+        { attribute_name; attribute_left_paren; attribute_values;
+          attribute_right_paren } ->
+        [ attribute_name; attribute_left_paren; attribute_values;
+          attribute_right_paren ]
       | CompoundStatement
         { compound_left_brace; compound_statements; compound_right_brace } ->
         [ compound_left_brace; compound_statements; compound_right_brace ]
@@ -829,6 +857,16 @@ module WithToken(Token: TokenType) = struct
       | DefaultArgumentSpecifier
         { default_equal; default_value } ->
         [ "default_equal"; "default_value" ]
+      | AttributeSpecification
+        { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
+          attribute_spec_right_double_angle } ->
+        [ "attribute_spec_left_double_angle"; "attribute_spec_attribute_list" ;
+          "attribute_spec_right_double_angle" ]
+      | Attribute
+        { attribute_name; attribute_left_paren; attribute_values;
+          attribute_right_paren } ->
+        [ "attribute_name"; "attribute_left_paren"; "attribute_values";
+          "attribute_right_paren" ]
       | CompoundStatement
         { compound_left_brace; compound_statements; compound_right_brace } ->
         [ "compound_left_brace"; "compound_statements"; "compound_right_brace" ]
@@ -1049,6 +1087,14 @@ module WithToken(Token: TokenType) = struct
     let param_default x = x.param_default
     let default_equal x = x.default_equal
     let default_value x = x.default_value
+    let attribute_spec_left_double_angle x = x.attribute_spec_left_double_angle
+    let attribute_spec_attribute_list x = x.attribute_spec_attribute_list
+    let attribute_spec_right_double_angle x =
+      x.attribute_spec_right_double_angle
+    let attribute_name x = x.attribute_name
+    let attribute_left_paren x = x.attribute_left_paren
+    let attribute_values x = x.attribute_values
+    let attribute_right_paren x = x.attribute_right_paren
     let compound_left_brace x = x.compound_left_brace
     let compound_statements x = x.compound_statements
     let compound_right_brace x = x.compound_right_brace
@@ -1233,6 +1279,14 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.DefaultArgumentSpecifier, [ default_equal;
         default_value ]) ->
         DefaultArgumentSpecifier { default_equal; default_value }
+      | SyntaxKind.AttributeSpecification, [ attribute_spec_left_double_angle;
+        attribute_spec_attribute_list; attribute_spec_right_double_angle ] ->
+        AttributeSpecification { attribute_spec_left_double_angle;
+          attribute_spec_attribute_list; attribute_spec_right_double_angle }
+      | SyntaxKind.Attribute, [ attribute_name; attribute_left_paren;
+        attribute_values; attribute_right_paren ] ->
+        Attribute { attribute_name; attribute_left_paren; attribute_values;
+          attribute_right_paren }
       | (SyntaxKind.CompoundStatement, [ compound_left_brace;
         compound_statements; compound_right_brace ]) ->
         CompoundStatement { compound_left_brace; compound_statements;
@@ -1555,6 +1609,18 @@ module WithToken(Token: TokenType) = struct
       let make_default_argument_specifier default_equal default_value =
         from_children SyntaxKind.DefaultArgumentSpecifier
           [ default_equal; default_value ]
+
+      let make_attribute_specification attribute_spec_left_double_angle
+        attribute_spec_attribute_list attribute_spec_right_double_angle =
+        from_children SyntaxKind.AttributeSpecification
+          [ attribute_spec_left_double_angle; attribute_spec_attribute_list;
+          attribute_spec_right_double_angle ]
+
+      let make_attribute attribute_name attribute_left_paren attribute_values
+        attribute_right_paren =
+        from_children SyntaxKind.Attribute
+        [ attribute_name; attribute_left_paren; attribute_values;
+          attribute_right_paren ]
 
       let make_compound_statement
         compound_left_brace compound_statements compound_right_brace =

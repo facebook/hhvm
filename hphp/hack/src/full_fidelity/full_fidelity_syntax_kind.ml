@@ -21,6 +21,8 @@ type t =
 | FunctionDeclaration
 | ParameterDeclaration
 | DefaultArgumentSpecifier
+| AttributeSpecification
+| Attribute
 
 (* Statements *)
 | CompoundStatement
@@ -90,6 +92,8 @@ let to_string kind =
   | Script -> "script"
   | FunctionDeclaration -> "function_declaration"
   | ParameterDeclaration -> "parameter_declaration"
+  | AttributeSpecification -> "attribute_specification"
+  | Attribute -> "attribute"
   | CompoundStatement -> "compound_statement"
   | ExpressionStatement -> "expression_statement"
   | WhileStatement -> "while_statement"

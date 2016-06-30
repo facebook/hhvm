@@ -250,6 +250,18 @@ let rec get_doc node =
     let def_equal = get_doc (default_equal x) in
     let def_value = get_doc (default_value x) in
     group_doc (def_equal ^| def_value)
+  | AttributeSpecification x ->
+    let left = get_doc (attribute_spec_left_double_angle x) in
+    let right = get_doc (attribute_spec_right_double_angle x) in
+    let specs = get_doc (attribute_spec_attribute_list x) in
+    indent_block_no_space left specs right indt
+  | Attribute x ->
+    let name = get_doc (attribute_name x) in
+    let left = get_doc (attribute_left_paren x) in
+    let right = get_doc (attribute_right_paren x) in
+    let values = get_doc (attribute_values x) in
+    let left_part = group_doc (name ^^| left) in
+    indent_block_no_space left_part values right indt
   | CompoundStatement x ->
     let left = get_doc (compound_left_brace x) in
     let right = get_doc (compound_right_brace x) in

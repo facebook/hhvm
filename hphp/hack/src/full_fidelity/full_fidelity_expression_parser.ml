@@ -257,7 +257,7 @@ module WithStatementAndDeclParser
       expect_token parser RightParen SyntaxError.error1011 in
     let result = make_function_call_expression receiver (make_token left_paren)
       args right_paren in
-    (parser, result)
+    parse_remaining_expression parser result
 
   and parse_parenthesized_or_lambda_expression parser =
     (*TODO: Does not yet deal with lambdas *)

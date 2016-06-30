@@ -33,10 +33,12 @@ module WithStatementAndDeclParser
     parse_remaining_expression parser term
 
   (* try to parse an expression. If parser cannot make progress, return None *)
-  and parse_expression_optional parser =
+  and parse_expression_optional parser ~reset_prec =
     let module Lexer = PrecedenceParser.Lexer in
     let offset = Lexer.start_offset (lexer parser) in
-    let (parser, expr) = parse_expression parser in
+    let (parser, expr) =
+      if reset_prec then with_reset_precedence parser parse_expression
+      else parse_expression parser in
     let offset1 = Lexer.start_offset (lexer parser) in
     if offset1 = offset then None else Some (parser, expr)
 
@@ -392,7 +394,8 @@ module WithStatementAndDeclParser
     let parser, keyword_token = next_token parser in
     let parser, left_paren =
       expect_token parser LeftParen SyntaxError.error1019 in
-    let parser, members = parse_list_expression_list parser in
+    let parser, members =
+      with_reset_precedence parser parse_list_expression_list in
     let parser, right_paren =
       expect_token parser RightParen SyntaxError.error1011 in
     let syntax = make_listlike_expression
@@ -403,18 +406,30 @@ module WithStatementAndDeclParser
       let (parser1, token) = next_token parser in
       match Token.kind token with
       | Comma ->
-        aux parser1 ((make_token token) :: acc)
+        let missing_expr = make_missing () in
+        let item = make_list_item missing_expr (make_token token) in
+        aux parser1 (item :: acc)
       | RightParen
       | Equal -> (* list intrinsic appears only on LHS of equal sign *)
         (parser, make_list (List.rev acc))
       | _ -> begin
-        (* ERROR RECOVERY if parser makes no progress, make an error *)
-        match parse_expression_optional parser with
+        match parse_expression_optional parser ~reset_prec:false with
         | None ->
+          (* ERROR RECOVERY if parser makes no progress, make an error *)
           let parser = with_error parser SyntaxError.error1015 in
-          (parser, make_missing ())
-        | Some (parser, expr) -> aux parser (expr :: acc)
-        end
-    in
+          (parser, make_missing () :: acc |> List.rev |> make_list)
+        | Some (parser, expr) ->
+          let (parser1, token) = next_token parser in
+          let parser, trailing = begin
+            match Token.kind token with
+            | Comma -> parser1, make_list_item expr (make_token token)
+            | RightParen -> parser, make_list_item expr (make_missing ())
+            | _ ->
+              (* ERROR RECOVERY: require a comma or right paren *)
+              let parser = with_error parser SyntaxError.error1009 in
+              parser, make_list_item expr (make_missing ())
+          end in
+          aux parser (trailing :: acc)
+    end in
     aux parser []
 end

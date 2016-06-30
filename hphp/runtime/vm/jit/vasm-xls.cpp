@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/ppc64-asm/asm-ppc64.h"
-
 #include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/runtime/base/stats.h"
@@ -37,6 +35,8 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
+
+#include "hphp/ppc64-asm/asm-ppc64.h"
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>

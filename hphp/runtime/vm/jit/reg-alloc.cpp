@@ -109,20 +109,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   auto inst = tmp.inst();
   auto opc = inst->op();
 
-  auto const forceStkPtrs = [&] {
-    return false;
-  }();
-
-  if (forceStkPtrs && tmp.isA(TStkPtr)) {
-    assert_flog(
-      opc == DefSP ||
-      opc == Mov,
-      "unexpected StkPtr dest from {}",
-      opcodeName(opc)
-    );
-    return rvmsp();
-  }
-
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rvmfp().
   if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(TFramePtr)) {
@@ -214,14 +200,12 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
 
     case Vinstr::callphp:
-      defs = abi.all();
-      defs -= rvmtl();
+      defs = abi.all() - RegSet(rvmtl());
       break;
 
     case Vinstr::callarray:
     case Vinstr::contenter:
-      defs = abi.all() - RegSet(rvmfp());
-      defs -= rvmtl();
+      defs = abi.all() - (rvmfp() | rvmtl());
       break;
 
     case Vinstr::cqo:

@@ -232,8 +232,9 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
     vwrap(cb, data, [&] (Vout& v) {
       // Not doing it directly as rret(0) == rarg(0) on ppc64
       Vreg ret_addr = v.makeReg();
+
       // exittc address pushed on calltc/resumetc.
-      v << lea{rsp()[0], ret_addr};
+      v << copy{rsp(), ret_addr};
 
       // We need to spill the return registers around the assert call.
       v << push{rret(0)};

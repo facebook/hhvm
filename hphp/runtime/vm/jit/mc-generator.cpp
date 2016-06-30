@@ -1181,10 +1181,9 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
         return decoder.cc;
       }
 
-      case Arch::PPC64: {
+      case Arch::PPC64:
         ppc64_asm::DecodedInstruction di(toSmash);
         return (di.isBranch() && !di.isJmp());
-      }
     }
     not_reached();
   }();

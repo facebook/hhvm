@@ -612,6 +612,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
     json->stack.resize(depth);
   }
   SCOPE_EXIT {
+    if (json->stack.empty()) return;
     for (int i = 0; i <= json->mark; i++) {
       json->stack[i].key.reset();
       json->stack[i].val.unset();

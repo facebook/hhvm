@@ -213,6 +213,53 @@ let rec get_doc node =
                       (x |> header_language |> get_doc |> add_break)
   | Script x -> group_doc ( get_doc (script_header x)
                      ^| get_doc (script_declarations x) )
+  | ClassishDeclaration x ->
+    let attr = add_break (get_doc (classish_attr x)) in
+
+    let preface = group_doc (
+      get_doc (classish_abstract x) ^|
+      get_doc (classish_final x) ^|
+      get_doc (classish_token x)
+    ) in
+
+    let name_and_generics =
+      let name = get_doc (classish_name x) in
+      let type_params = get_doc (classish_type_params x) in
+      group_doc (indent_doc name type_params indt)
+    in
+
+    let extends =
+      let extends_token = get_doc (classish_extends x) in
+      let extends_list = get_doc (classish_extends_list x) in
+      group_doc (indent_doc extends_token extends_list indt)
+    in
+
+    let implements =
+      let implements_token = get_doc (classish_implements x) in
+      let implements_list = get_doc (classish_implements_list x) in
+      group_doc (indent_doc implements_token implements_list indt)
+    in
+
+    let body = get_doc (classish_body x) in
+
+    (* TODO: Make this better *)
+    attr ^^^
+    group_doc (
+      group_doc (
+        preface ^|
+        name_and_generics
+      ) ^|
+      group_doc (
+        extends ^|
+        implements
+      ) ^|
+      body
+    )
+  | ClassishBody x ->
+    let left = get_doc (classish_body_left_brace x) in
+    let right = get_doc (classish_body_right_brace x) in
+    let body = get_doc (classish_body_elements x) in
+    indent_block_no_space left body right indt
   | FunctionDeclaration x ->
     let preface = group_doc ( get_doc (function_attr x)
                        ^| get_doc (function_async x)

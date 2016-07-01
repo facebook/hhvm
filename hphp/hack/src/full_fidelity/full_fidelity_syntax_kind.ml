@@ -19,6 +19,8 @@ type t =
 | ScriptHeader
 | Script
 | FunctionDeclaration
+| ClassishDeclaration
+| ClassishBody
 | ParameterDeclaration
 | DefaultArgumentSpecifier
 | AttributeSpecification
@@ -93,6 +95,8 @@ let to_string kind =
   | ScriptHeader -> "header"
   | Script -> "script"
   | FunctionDeclaration -> "function_declaration"
+  | ClassishDeclaration -> "classish_declaration"
+  | ClassishBody -> "classish_body"
   | ParameterDeclaration -> "parameter_declaration"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"

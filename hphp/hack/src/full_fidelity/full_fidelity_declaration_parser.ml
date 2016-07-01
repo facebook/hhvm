@@ -62,7 +62,6 @@ module WithExpressionAndStatementParser
     (parser, node)
 
   (* Declarations *)
-
   let rec parse_require_multiple_directive parser =
     (* TODO *)
     let (parser, token) = next_token parser in
@@ -88,11 +87,6 @@ module WithExpressionAndStatementParser
     let (parser, token) = next_token parser in
     (parser, make_error [make_token token])
 
-  and parse_interface_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
-
   and parse_namespace_declaration parser =
     (* TODO *)
     let (parser, token) = next_token parser in
@@ -103,15 +97,102 @@ module WithExpressionAndStatementParser
     let (parser, token) = next_token parser in
     (parser, make_error [make_token token])
 
-  and parse_trait_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+  and parse_classish_declaration parser =
+    let (parser, attribute_spec) =
+      parse_attribute_specification_opt parser in
+    let (parser, abstract, final) =
+      parse_classish_modifier_opt parser in
+    let (parser, token) =
+      parse_classish_token parser in
+    let (parser, name) =
+      expect_token parser Name SyntaxError.error1004 in
+    let (parser, generic_type_parameter_list) =
+      parse_generic_type_parameter_list_opt parser in
+    let (parser, classish_extends, classish_extends_list) =
+      parse_classish_extends_opt parser in
+    let (parser, classish_implements, classish_implements_list) =
+      parse_classish_implements_opt parser in
+    let (parser, body) = parse_classish_body parser in
+    let syntax = make_classish
+      attribute_spec abstract final token name generic_type_parameter_list
+      classish_extends classish_extends_list classish_implements
+      classish_implements_list
+      body
+    in
+    (parser, syntax)
 
-  and parse_class_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+  and parse_classish_modifier_opt parser =
+    let (parser, abstract) = optional_token parser Abstract in
+    let (parser, final) = optional_token parser Final in
+    (parser, abstract, final)
+
+  and parse_classish_token parser =
+    let (parser1, token) = next_token parser in
+    match (Token.kind token) with
+      | Class
+      | Trait
+      | Interface -> (parser1, make_token token)
+      | _ -> (with_error parser SyntaxError.error1035, (make_missing()))
+
+  and parse_classish_extends_opt parser =
+    let (parser1, extends_token) = next_token parser in
+    if (Token.kind extends_token) <> Extends then
+      (parser, make_missing (), Syntax.make_missing ())
+    else
+    let (parser, extends_list) = parse_qualified_name_list parser1 in
+    (parser, make_token extends_token, extends_list)
+
+  and parse_classish_implements_opt parser =
+    let (parser1, implements_token) = next_token parser in
+    if (Token.kind implements_token) <> Implements then
+      (parser, make_missing (), Syntax.make_missing ())
+    else
+    let (parser, implements_list) = parse_qualified_name_list parser1 in
+    (parser, make_token implements_token, implements_list)
+
+  and parse_qualified_name_list parser =
+    let rec aux parser acc =
+      let token = peek_token parser in
+      match (Token.kind token) with
+        | Comma ->
+            let (parser1, token) = next_token parser in
+            aux parser1 ((make_token token) :: acc)
+        | Name
+        | QualifiedName ->
+            let (parser, classish_reference) = parse_type_specifier parser in
+            aux parser (classish_reference :: acc)
+        | _ -> (parser, acc)
+    in
+    let (parser, qualified_name_list) = aux parser [] in
+    let qualified_name_list = List.rev qualified_name_list in
+    (parser, make_list qualified_name_list)
+
+  and parse_classish_body parser =
+    let (parser, left_brace_token) =
+      expect_token parser LeftBrace SyntaxError.error1034 in
+    let (parser, classish_element_list) =
+      parse_classish_element_list_opt parser in
+    let (parser, right_brace_token) =
+      expect_token parser RightBrace SyntaxError.error1006 in
+    let syntax = make_classish_body
+      left_brace_token classish_element_list right_brace_token in
+    (parser, syntax)
+
+  and parse_classish_element_list_opt parser =
+    let rec aux parser acc =
+      let token = peek_token parser in
+      match (Token.kind token) with
+      | RightBrace
+      | EndOfFile -> (parser, acc)
+      | _ ->
+          (* TODO *)
+        let (parser, token) = next_token parser in
+        let parser = with_error parser SyntaxError.error1033 in
+        aux parser (make_error [make_token token] :: acc)
+    in
+    let (parser, classish_elements) = aux parser [] in
+    let classish_elements = List.rev classish_elements in
+    (parser, make_list classish_elements)
 
   (* SPEC:
     attribute_specification := << attribute_list >>
@@ -333,7 +414,7 @@ module WithExpressionAndStatementParser
       parameter_list right_paren_token colon_token return_type body in
     (parser, syntax)
 
-  let parse_class_function_interface_or_trait_declaration parser =
+  let parse_classish_or_function_declaration parser =
     let parser, attribute_specification =
       parse_attribute_specification_opt parser in
     let parser1, token = next_token parser in
@@ -351,18 +432,18 @@ module WithExpressionAndStatementParser
     | Require_once -> parse_require_once_directive parser
     | Type -> parse_type_alias_declaration parser
     | Newtype -> parse_newtype_alias_declaration parser
-    | Enum -> parse_enum_declaration parser
-    | Interface -> parse_interface_declaration parser
     | Namespace -> parse_namespace_declaration parser
     | Use -> parse_namespace_use_declaration parser
-    | Trait -> parse_trait_declaration parser
+    | Trait
+    | Interface
     | Abstract
     | Final
-    | Class -> parse_class_declaration parser
+    | Class -> parse_classish_declaration parser
+    | Enum -> parse_enum_declaration parser
     | Async
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->
-      parse_class_function_interface_or_trait_declaration parser
+      parse_classish_or_function_declaration parser
     | _ ->
       (* ERROR RECOVERY: Skip the token, try again. *)
       (* TODO: Better policy would be to skip ahead to

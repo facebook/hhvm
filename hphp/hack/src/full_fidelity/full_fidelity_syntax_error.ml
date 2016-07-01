@@ -78,5 +78,10 @@ let error1029 = "A closing double angle bracket is expected here."
 let error1030 = "An attribute is expected here."
 let error1031 = "A comma or a closing square bracket is expected here."
 let error1032 = "A closing square bracket is expected here."
+(* TODO: Break this up according to classish type *)
+let error1033 = "A class member, method, type, trait usage, trait require, " ^
+  "xhp attribute, xhp use, or xhp category is expected here."
+let error1034 = "A left brace is expected here."
+let error1035 = "'Class' keyword is expected here."
 
 let error2001 = "A type annotation is required in strict mode."

@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/preclass.h"
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -105,6 +106,48 @@ void cgLdFuncVecLen(IRLS& env, const IRInstruction* inst) {
   auto const off = Class::funcVecLenOff() - (inst->src(0)->isA(TCctx) ? 1 : 0);
   v << loadzlq{cls[off], dst};
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgLdClsInitData(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto const offset = Class::propDataCacheOff() +
+                      rds::Link<Class::PropInitVec*>::handleOff();
+  auto& v = vmain(env);
+
+  auto const handle = v.makeReg();
+  auto const vec = v.makeReg();
+  v << loadzlq{cls[offset], handle};
+  v << load{Vreg(rvmtl())[handle], vec};
+  v << load{vec[Class::PropInitVec::dataOff()], dst};
+}
+
+void cgCheckInitProps(IRLS& env, const IRInstruction* inst) {
+  auto const cls = inst->extra<CheckInitProps>()->cls;
+  auto& v = vmain(env);
+
+  auto const sf = checkRDSHandleInitialized(v, cls->propHandle());
+  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+void cgCheckInitSProps(IRLS& env, const IRInstruction* inst) {
+  auto const cls = inst->extra<CheckInitSProps>()->cls;
+  auto& v = vmain(env);
+
+  auto const handle = cls->sPropInitHandle();
+  if (rds::isNormalHandle(handle)) {
+    auto const sf = checkRDSHandleInitialized(v, handle);
+    v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+  } else {
+    // Always initialized; just fall through to inst->next().
+    assert(rds::isPersistentHandle(handle));
+    assert(rds::handleToRef<bool>(handle));
+  }
+}
+
+IMPL_OPCODE_CALL(InitProps)
+IMPL_OPCODE_CALL(InitSProps)
 
 ///////////////////////////////////////////////////////////////////////////////
 

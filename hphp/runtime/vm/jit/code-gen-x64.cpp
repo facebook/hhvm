@@ -251,8 +251,6 @@ CALL_OPCODE(AllocPackedArray)
 CALL_OPCODE(AllocVecArray)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
-CALL_OPCODE(InitProps)
-CALL_OPCODE(InitSProps)
 CALL_OPCODE(DebugBacktrace)
 CALL_OPCODE(InitThrowableFileAndLine)
 CALL_OPCODE(RegisterLiveObj)
@@ -433,6 +431,7 @@ DELEGATE_OPCODE(ReqRetranslateOpt)
 
 DELEGATE_OPCODE(LdClsCtx)
 DELEGATE_OPCODE(LdClsCctx)
+DELEGATE_OPCODE(ConvClsToCctx)
 DELEGATE_OPCODE(CastCtxThis)
 DELEGATE_OPCODE(CheckCtxThis)
 
@@ -441,7 +440,23 @@ DELEGATE_OPCODE(LdClsMethod)
 DELEGATE_OPCODE(LdIfaceMethod)
 DELEGATE_OPCODE(LdObjInvoke)
 DELEGATE_OPCODE(LdFuncVecLen)
+DELEGATE_OPCODE(LdClsInitData)
+DELEGATE_OPCODE(CheckInitProps)
+DELEGATE_OPCODE(CheckInitSProps)
+DELEGATE_OPCODE(InitProps)
+DELEGATE_OPCODE(InitSProps)
+
 DELEGATE_OPCODE(LdFuncNumParams)
+
+DELEGATE_OPCODE(LdObjClass)
+DELEGATE_OPCODE(ConstructInstance)
+DELEGATE_OPCODE(NewInstanceRaw)
+DELEGATE_OPCODE(InitObjProps)
+
+DELEGATE_OPCODE(LdStrLen)
+DELEGATE_OPCODE(OrdStr)
+DELEGATE_OPCODE(OrdStrIdx)
+DELEGATE_OPCODE(StringIsset)
 
 DELEGATE_OPCODE(BaseG)
 DELEGATE_OPCODE(PropX)
@@ -493,6 +508,7 @@ DELEGATE_OPCODE(LdFuncCachedU)
 DELEGATE_OPCODE(LdFuncCachedSafe)
 
 DELEGATE_OPCODE(LdObjMethod)
+DELEGATE_OPCODE(LookupClsMethod)
 DELEGATE_OPCODE(LookupClsMethodCache)
 DELEGATE_OPCODE(LdClsMethodCacheFunc)
 DELEGATE_OPCODE(LdClsMethodCacheCls)
@@ -1021,57 +1037,6 @@ void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
   vmain() << movzbq{srcReg, dstReg};
 }
 
-void CodeGenerator::cgOrdStr(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const str = srcLoc(inst, 0).reg(); // StringData*
-  auto const dst = dstLoc(inst, 0).reg(); // uchar
-#ifdef NO_M_DATA
-  // dst = (unsigned char)str[sizeof(StringData)];
-  v << loadzbq{str[sizeof(StringData)], dst};
-#else
-  auto const sd = v.makeReg();
-  // sd = StringData->m_data;
-  v << load{str[StringData::dataOff()], sd};
-  // dst = (unsigned char)sd[0];
-  v << loadzbq{sd[0], dst};
-#endif
-}
-
-void CodeGenerator::cgOrdStrIdx(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const strReg = srcLoc(inst, 0).reg();
-  auto const sd = v.makeReg();
-  auto const strLen = v.makeReg();
-  auto const srcOff = srcLoc(inst, 1).reg();
-  auto const sf = v.makeReg();
-
-  v << loadzlq{strReg[StringData::sizeOff()], strLen};
-  v << cmpq{srcOff, strLen, sf};
-  unlikelyCond(v, vcold(), CC_B, sf, dstLoc(inst, 0).reg(),
-               [&] (Vout& v) {
-                 cgCallHelper(
-                   v,
-                   CallSpec::direct(MInstrHelpers::stringGetI),
-                   kVoidDest,
-                   SyncOptions::Sync,
-                   argGroup(inst).ssa(0).ssa(1)
-                 );
-                 return v.cns(0);
-               },
-               [&] (Vout& v) {
-                 auto const dst = v.makeReg();
-                 // sd = StringData->data();
-#ifdef NO_M_DATA
-                 v << lea{strReg[sizeof(StringData)], sd};
-#else
-                 v << load{strReg[StringData::dataOff()], sd};
-#endif
-                 // dst = (unsigned char)sd[srcOff];
-                 v << loadzbq{sd[srcOff], dst};
-                 return dst;
-               });
-}
-
 static const StaticString s_1("1");
 
 void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
@@ -1083,19 +1048,6 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testb{srcReg, srcReg, sf};
   v << cmovq{CC_NZ, sf, f, t, dstReg};
-}
-
-void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
-  auto const sreg = srcLoc(inst, 0).reg();
-  auto const dreg = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << orqi{1, sreg, dreg, v.makeReg()};
-}
-
-void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto objReg = srcLoc(inst, 0).reg();
-  emitLdObjClass(vmain(), objReg, dstReg);
 }
 
 void CodeGenerator::cgLdArrFuncCtx(IRInstruction* inst) {
@@ -1140,21 +1092,6 @@ void CodeGenerator::cgLdStrFPushCuf(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgLookupClsMethod(IRInstruction* inst) {
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(lookupClsMethodHelper),
-    callDest(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .ssa(0)
-      .ssa(1)
-      .addr(srcLoc(inst, 2).reg(),
-            cellsToBytes(inst->extra<LookupClsMethod>()->offset.offset))
-      .ssa(3)
-  );
-}
-
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   auto const extra  = inst->extra<LdBindAddr>();
   auto const dstReg = dstLoc(inst, 0).reg();
@@ -1173,154 +1110,6 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff.offset)], sync_sp};
   emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
                      rvmtl(), srcLoc(inst, 0).reg(), sync_sp);
-}
-
-void CodeGenerator::emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
-                                     const Class* cls, size_t nProps) {
-  // If the object has a small number of properties, just emit stores
-  // inline.
-  auto& v = vmain();
-  if (nProps < 8) {
-    for (int i = 0; i < nProps; ++i) {
-      auto propOffset =
-        sizeof(ObjectData) + cls->builtinODTailSize() + sizeof(TypedValue) * i;
-      auto propDataOffset = propOffset + TVOFF(m_data);
-      auto propTypeOffset = propOffset + TVOFF(m_type);
-      if (!isNullType(cls->declPropInit()[i].m_type)) {
-        emitImmStoreq(v, cls->declPropInit()[i].m_data.num,
-                      dstReg[propDataOffset]);
-      }
-      v << storebi{cls->declPropInit()[i].m_type, dstReg[propTypeOffset]};
-    }
-    return;
-  }
-
-  // Use memcpy for large numbers of properties.
-  auto args = argGroup(inst)
-    .addr(dstReg,
-          safe_cast<int32_t>(sizeof(ObjectData) + cls->builtinODTailSize()))
-    .imm(int64_t(&cls->declPropInit()[0]))
-    .imm(cellsToBytes(nProps));
-  cgCallHelper(v,
-               CallSpec::direct(memcpy),
-               kVoidDest,
-               SyncOptions::None,
-               args);
-}
-
-void CodeGenerator::cgConstructInstance(IRInstruction* inst) {
-  auto const cls    = inst->extra<ConstructInstance>()->cls;
-  auto const dstReg = dstLoc(inst, 0).reg();
-  cgCallHelper(vmain(),
-               CallSpec::direct(cls->instanceCtor().get()),
-               callDest(dstReg),
-               SyncOptions::Sync,
-               argGroup(inst).immPtr(cls));
-}
-
-void CodeGenerator::cgCheckInitProps(IRInstruction* inst) {
-  auto const cls = inst->extra<CheckInitProps>()->cls;
-  auto& v = vmain();
-  auto const sf = checkRDSHandleInitialized(v, cls->propHandle());
-  v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgCheckInitSProps(IRInstruction* inst) {
-  auto const cls = inst->extra<CheckInitSProps>()->cls;
-  auto& v = vmain();
-  auto const handle = cls->sPropInitHandle();
-  if (rds::isNormalHandle(handle)) {
-    auto const sf = checkRDSHandleInitialized(v, handle);
-    v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
-  } else {
-    // Always initialized; just fall through to next.
-    assert(rds::isPersistentHandle(handle));
-    assert(rds::handleToRef<bool>(handle));
-  }
-}
-
-void CodeGenerator::cgNewInstanceRaw(IRInstruction* inst) {
-  auto const cls    = inst->extra<NewInstanceRaw>()->cls;
-  auto const dstReg = dstLoc(inst, 0).reg();
-  size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
-  cgCallHelper(vmain(),
-               size <= kMaxSmallSize
-               ? CallSpec::direct(ObjectData::newInstanceRaw)
-               : CallSpec::direct(ObjectData::newInstanceRawBig),
-               callDest(dstReg),
-               SyncOptions::Sync,
-               argGroup(inst).imm((uint64_t)cls).imm(size));
-}
-
-void CodeGenerator::cgInitObjProps(IRInstruction* inst) {
-  auto const cls    = inst->extra<InitObjProps>()->cls;
-  auto const srcReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  // Set the attributes, if any
-  int odAttrs = cls->getODAttrs();
-  if (odAttrs) {
-    static_assert(sizeof(ObjectData::Attribute) == 2,
-                  "Codegen expects 2-byte ObjectData attributes");
-    assertx(!(odAttrs & 0xffff0000));
-    v << orwim{odAttrs, srcReg[ObjectData::attributeOff()], v.makeReg()};
-  }
-
-  // Initialize the properties
-  size_t nProps = cls->numDeclProperties();
-  if (nProps > 0) {
-    if (cls->pinitVec().size() == 0) {
-      // Fast case: copy from a known address in the Class
-      emitInitObjProps(inst, srcReg, cls, nProps);
-    } else {
-      // Slower case: we have to load the src address from the targetcache
-      auto propInitVec = v.makeReg();
-      // Load the Class's propInitVec from the targetcache. We
-      // know its already been initialized as a pre-condition
-      // on this op.
-      auto const propHandle = cls->propHandle();
-      assertx(rds::isNormalHandle(propHandle));
-      v << load{rvmtl()[propHandle], propInitVec};
-      // We want &(*propData)[0]
-      auto rPropData = v.makeReg();
-      v << load{propInitVec[Class::PropInitVec::dataOff()], rPropData};
-      if (!cls->hasDeepInitProps()) {
-        auto args = argGroup(inst)
-          .addr(srcReg,
-              safe_cast<int32_t>(sizeof(ObjectData) + cls->builtinODTailSize()))
-          .reg(rPropData)
-          .imm(cellsToBytes(nProps));
-        cgCallHelper(v,
-                     CallSpec::direct(memcpy),
-                     kVoidDest,
-                     SyncOptions::None,
-                     args);
-      } else {
-        auto args = argGroup(inst)
-          .addr(srcReg,
-              safe_cast<int32_t>(sizeof(ObjectData) + cls->builtinODTailSize()))
-          .reg(rPropData)
-          .imm(nProps);
-        cgCallHelper(v,
-                     CallSpec::direct(deepInitHelper),
-                     kVoidDest,
-                     SyncOptions::None,
-                     args);
-      }
-    }
-  }
-}
-
-void CodeGenerator::cgStringIsset(IRInstruction* inst) {
-  auto strReg = srcLoc(inst, 0).reg();
-  auto idxReg = srcLoc(inst, 1).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const strLen = v.makeReg();
-  auto const sf = v.makeReg();
-  v << loadzlq{strReg[StringData::sizeOff()], strLen};
-  v << cmpq{idxReg, strLen, sf};
-  v << setcc{CC_NBE, sf, dstReg};
 }
 
 void CodeGenerator::cgProfileArrayKind(IRInstruction* inst) {
@@ -1888,20 +1677,6 @@ void CodeGenerator::cgRBTraceMsg(IRInstruction* inst) {
                  .imm(extra.type));
 }
 
-void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
-  const Vreg rds = rvmtl();
-  auto clsReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto offset = Class::propDataCacheOff() +
-                rds::Link<Class::PropInitVec*>::handleOff();
-  auto& v = vmain();
-  auto handle = v.makeReg();
-  auto vec = v.makeReg();
-  v << loadzlq{clsReg[offset], handle};
-  v << load{rds[handle], vec};
-  v << load{vec[Class::PropInitVec::dataOff()], dstReg};
-}
-
 void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto const baseReg = srcLoc(inst, 0).reg();
   auto const dstReg  = dstLoc(inst, 0).reg();
@@ -1938,13 +1713,6 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
   auto const dstReg  = dstLoc(inst, 0).reg();
   auto& v = vmain();
   v << loadzlq{baseReg[collections::FAST_SIZE_OFFSET], dstReg};
-}
-
-void CodeGenerator::cgLdStrLen(IRInstruction* inst) {
-  vmain() << loadzlq{
-    srcLoc(inst, 0).reg()[StringData::sizeOff()],
-    dstLoc(inst, 0).reg()
-  };
 }
 
 void CodeGenerator::cgInitPackedArray(IRInstruction* inst) {

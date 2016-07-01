@@ -663,38 +663,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
   return switchBoundsCheck(ival, base, nTargets);
 }
 
-void lookupClsMethodHelper(Class* cls,
-                           StringData* meth,
-                           ActRec* ar,
-                           ActRec* fp) {
-  try {
-    const Func* f;
-    ObjectData* obj = fp->hasThis() ? fp->getThis() : nullptr;
-    Class* ctx = fp->m_func->cls();
-    LookupResult res =
-      g_context->lookupClsMethod(f, cls, meth, obj, ctx, true);
-    if (res == LookupResult::MethodFoundNoThis ||
-        res == LookupResult::MagicCallStaticFound) {
-      ar->setClass(cls);
-    } else {
-      assertx(obj);
-      assertx(res == LookupResult::MethodFoundWithThis ||
-             res == LookupResult::MagicCallFound);
-      obj->incRefCount();
-      ar->setThis(obj);
-    }
-    ar->m_func = f;
-    if (res == LookupResult::MagicCallFound ||
-        res == LookupResult::MagicCallStaticFound) {
-      ar->setMagicDispatch(meth);
-      meth->incRefCount();
-    }
-  } catch (...) {
-    *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
-    throw;
-  }
-}
-
 void profileClassMethodHelper(MethProfile* profile,
                               const ActRec* ar,
                               const Class* cls) {

@@ -165,9 +165,6 @@ void profileTypeHelper(TypeProfile*, TypedValue);
 
 void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr);
 
-void lookupClsMethodHelper(Class* cls, StringData* meth,
-                           ActRec* ar, ActRec* fp);
-
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);

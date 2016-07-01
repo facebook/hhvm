@@ -551,6 +551,12 @@ ArrayData* StructArray::ToDict(ArrayData* ad) {
   return MixedArray::ToDictInPlace(mixed);
 }
 
+ArrayData* StructArray::ToKeyset(ArrayData* ad) {
+  auto a = asStructArray(ad);
+  auto mixed = ad->cowCheck() ? ToMixedCopy(a) : ToMixed(a);
+  return MixedArray::ToKeysetInPlace(mixed);
+}
+
 void StructArray::Renumber(ArrayData* ad) {
   // No integer keys so nothing to do.
 }

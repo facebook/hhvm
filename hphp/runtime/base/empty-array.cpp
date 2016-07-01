@@ -334,6 +334,10 @@ ArrayData* EmptyArray::ToVec(const ArrayData*) {
   return staticEmptyVecArray();
 }
 
+ArrayData* EmptyArray::ToKeyset(ArrayData*) {
+  return staticEmptyKeysetArray();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {

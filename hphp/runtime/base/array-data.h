@@ -62,6 +62,8 @@ struct ArrayData {
     kDictKind = 7,    // MixedArray without implicit conversion of integer-like
                       // string keys
     kVecKind = 8,     // Vector array (more restrictive PackedArray)
+    kKeysetKind = 7,  // MixedArray storing its keys as values, no implicit
+                      // conversions from integer-like string keys
     kNumKinds = 9     // insert new values before kNumKinds.
   };
 
@@ -103,6 +105,7 @@ public:
 
   static ArrayData *CreateVec();
   static ArrayData *CreateDict();
+  static ArrayData *CreateKeyset();
 
   /*
    * Called to return an ArrayData to the request heap.  This is
@@ -131,7 +134,7 @@ public:
    * are inserted?
    */
   bool useWeakKeys() const {
-    return !isDict() && !isVecArray();
+    return !isDict() && !isVecArray() && !isKeyset();
   }
 
   bool convertKey(const StringData* key, int64_t& i) const;
@@ -184,10 +187,11 @@ public:
   bool isEmptyArray() const { return kind() == kEmptyKind; }
   bool isDict() const { return kind() == kDictKind; }
   bool isVecArray() const { return kind() == kVecKind; }
+  bool isKeyset() const { return kind() == kKeysetKind; }
 
   bool isPackedLayout() const { return isPacked() || isVecArray(); }
 
-  bool isMixedLayout() const { return isMixed() || isDict(); }
+  bool isMixedLayout() const { return isMixed() || isDict() || isKeyset(); }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -393,11 +397,11 @@ public:
   ArrayData* prepend(Cell v, bool copy);
 
   /**
-   * Convert array to dictionary type
+   * Convert array to hack array types.
    */
   ArrayData* toDict();
-
   ArrayData* toVec() const;
+  ArrayData* toKeyset();
 
   /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
@@ -561,8 +565,8 @@ ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
  * dispatch to be done with a single indexed load, using kind as the index.
  */
 struct ArrayFunctions {
-  // NK stands for number of array kinds; here just for shorthand.
-  static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
+  // NK stands for number of array kinds.
+  static auto const NK = size_t{9};
   void (*release[NK])(ArrayData*);
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
@@ -626,6 +630,7 @@ struct ArrayFunctions {
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
   ArrayData* (*toDict[NK])(ArrayData*);
   ArrayData* (*toVec[NK])(const ArrayData*);
+  ArrayData* (*toKeyset[NK])(ArrayData*);
 };
 
 extern const ArrayFunctions g_array_funcs;

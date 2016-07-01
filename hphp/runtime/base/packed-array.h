@@ -111,6 +111,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToDict(ArrayData*);
   static ArrayData* ToVec(const ArrayData*);
+  static ArrayData* ToKeyset(ArrayData*);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad) {
@@ -173,6 +174,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto EscalateVec = &Escalate;
   static constexpr auto ToDictVec = &ToDict;
+  static constexpr auto ToKeysetVec = &ToKeyset;
 
   //////////////////////////////////////////////////////////////////////
 

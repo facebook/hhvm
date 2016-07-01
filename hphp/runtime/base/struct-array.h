@@ -108,6 +108,7 @@ struct StructArray final : public ArrayData,
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToDict(ArrayData*);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
+  static ArrayData* ToKeyset(ArrayData*);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);

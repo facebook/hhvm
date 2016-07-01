@@ -66,6 +66,7 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
   if (arr->empty()) {
     if (arr->isVecArray()) return staticEmptyVecArray();
     if (arr->isDict()) return staticEmptyDictArray();
+    if (arr->isKeyset()) return staticEmptyKeysetArray();
     return staticEmptyArray();
   }
   auto key = GetScalarArrayKey(arr);
@@ -77,6 +78,7 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
   if (arr->empty()) {
     if (arr->isVecArray()) return staticEmptyVecArray();
     if (arr->isDict()) return staticEmptyDictArray();
+    if (arr->isKeyset()) return staticEmptyKeysetArray();
     return staticEmptyArray();
   }
   assert(key == GetScalarArrayKey(arr));
@@ -84,7 +86,8 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData* ad;
-    if (arr->isVectorData() && !arr->isPackedLayout() && !arr->isDict()) {
+    if (arr->isVectorData() && !arr->isPackedLayout() && !arr->isDict() &&
+        !arr->isKeyset()) {
       ad = PackedArray::ConvertStatic(arr);
     } else {
       ad = arr->copyStatic();
@@ -110,10 +113,16 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
   raise_fatal_error("Unimplemented ArrayData::ZAppend");
 }
 
-const StaticString s_failConvertToDict("Unsupported conversion to Dict array");
+const StaticString
+  s_failConvertToDict("Unsupported conversion to Dict array"),
+  s_failConvertToKeyset("Unsupported conversion to Keyset array");
 
 static ArrayData* ToDictThrow(ArrayData*) {
   SystemLib::throwExceptionObject(s_failConvertToDict);
+}
+
+static ArrayData* ToKeysetThrow(ArrayData*) {
+  SystemLib::throwExceptionObject(s_failConvertToKeyset);
 }
 
 static ArrayData* ToDictNoop(ArrayData* ad) {
@@ -121,7 +130,12 @@ static ArrayData* ToDictNoop(ArrayData* ad) {
   return ad;
 }
 
+// static constexpr auto ToKeysetNoop = &ToDictNoop;
+
 //////////////////////////////////////////////////////////////////////
+
+static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
+              "add new kinds here");
 
 #define DISPATCH(entry)                         \
   { PackedArray::entry,                         \
@@ -131,8 +145,9 @@ static ArrayData* ToDictNoop(ArrayData* ad) {
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
     ProxyArray::entry,                          \
-    MixedArray::entry##Dict, /* Dict */         \
-    PackedArray::entry##Vec, /* Vec */          \
+    MixedArray::entry##Dict,   /* Dict */       \
+    PackedArray::entry##Vec,   /* Vec */        \
+    /* MixedArray::entry##Keyset, */ /* Keyset */     \
   },
 
 /*
@@ -647,6 +662,7 @@ const ArrayFunctions g_array_funcs = {
     &ProxyArray::ZSetInt,
     &MixedArray::ZSetInt,
     &ZSetIntThrow,
+    /* &ZSetIntThrow, */
   },
 
   {
@@ -659,6 +675,7 @@ const ArrayFunctions g_array_funcs = {
     &ProxyArray::ZSetStr,
     &MixedArray::ZSetStr,
     &ZSetStrThrow,
+    /* &ZSetStrThrow, */
   },
 
   {
@@ -671,6 +688,7 @@ const ArrayFunctions g_array_funcs = {
     &ProxyArray::ZAppend,
     &MixedArray::ZAppend,
     &ZAppendThrow,
+    /* &ZAppendThrow, */
   },
 
   {
@@ -683,6 +701,7 @@ const ArrayFunctions g_array_funcs = {
     ProxyArray::ToDict,
     ToDictNoop,
     PackedArray::ToDictVec,
+    /* MixedArray::ToDictKeyset, */
   },
 
   /*
@@ -693,6 +712,19 @@ const ArrayFunctions g_array_funcs = {
    *   already a vector array, it will be returned unchanged (without copying).
    */
   DISPATCH(ToVec)
+
+  {
+    PackedArray::ToKeyset,
+    StructArray::ToKeyset,
+    MixedArray::ToKeyset,
+    EmptyArray::ToKeyset,
+    ToKeysetThrow,
+    ToKeysetThrow,
+    ProxyArray::ToKeyset,
+    MixedArray::ToKeysetDict,
+    PackedArray::ToKeysetVec,
+    /* ToKeysetNoop, */
+  }
 };
 
 #undef DISPATCH
@@ -722,6 +754,10 @@ ArrayData* ArrayData::CreateVec() {
 
 ArrayData* ArrayData::CreateDict() {
   return staticEmptyDictArray();
+}
+
+ArrayData* ArrayData::CreateKeyset() {
+  return staticEmptyKeysetArray();
 }
 
 ArrayData *ArrayData::Create(const Variant& value) {
@@ -935,7 +971,8 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "GlobalsKind",
     "ProxyKind",
     "DictKind",
-    "VecKind"
+    "VecKind",
+    /* "KeysetKind" */
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];
@@ -958,6 +995,7 @@ const char* describeKeyType(const TypedValue* tv) {
   case KindOfArray: {
     if (tv->m_data.parr->isVecArray()) return "vec";
     if (tv->m_data.parr->isDict()) return "dict";
+    if (tv->m_data.parr->isKeyset()) return "keyset";
     return "array";
   }
   case KindOfResource:
@@ -1003,17 +1041,17 @@ std::string describeKeyValue(TypedValue tv) {
 }
 
 void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
-  const char* msg = [&]{
-    if (ad->isVecArray()) {
-      return "Invalid vec key: expected a key of type int, {} given";
-    }
-    if (ad->isDict()) {
-      return "Invalid dict key: expected a key of type int or string, {} given";
-    }
-    return "Invalid array key: expected a key of type int or string, {} given";
+  std::pair<const char*, const char*> kind_type = [&]{
+    if (ad->isVecArray()) return std::make_pair("vec", "int");
+    if (ad->isDict()) return std::make_pair("dict", "int or string");
+    if (ad->isKeyset()) return std::make_pair("keyset", "int or string");
+    return std::make_pair("array", "int or string");
   }();
   SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat(msg, describeKeyType(key))
+    folly::sformat(
+      "Invalid {} key: expected a key of type {}, {} given",
+      kind_type.first, kind_type.second, describeKeyType(key)
+    )
   );
 }
 
@@ -1053,10 +1091,8 @@ void throwOOBArrayKeyException(const StringData* key) {
 
 void throwRefInvalidArrayValueException(const ArrayData* ad) {
   SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat(
-      ad->isVecArray() ?
-      "Vecs cannot contain references" :
-      "Dicts cannot contain references"
+    folly::sformat("{} cannot contain references",
+      ad->isVecArray() ? "Vecs" : ad->isDict() ? "Dicts" : "Keysets"
     )
   );
 }

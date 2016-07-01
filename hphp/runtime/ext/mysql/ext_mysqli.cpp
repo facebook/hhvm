@@ -1073,11 +1073,17 @@ void HHVM_FUNCTION(mysqli_free_result, const Variant& result) {
 //}
 
 static TypedValue* HHVM_FN(mysqli_stmt_bind_param)(ActRec* ar) {
-  return bind_param_helper(Object{getArg<KindOfObject>(ar, 0)}, ar, 1);
+  if (auto const obj = getArg<KindOfObject>(ar, 0)) {
+    return bind_param_helper(Object{obj}, ar, 1);
+  }
+  return arReturn(ar, false);
 }
 
 static TypedValue* HHVM_FN(mysqli_stmt_bind_result)(ActRec* ar) {
-  return bind_result_helper(Object{getArg<KindOfObject>(ar, 0)}, ar, 1);
+  if (auto const obj = getArg<KindOfObject>(ar, 0)) {
+    return bind_result_helper(Object{obj}, ar, 1);
+  }
+  return arReturn(ar, false);
 }
 
 static bool HHVM_FUNCTION(mysqli_thread_safe) {

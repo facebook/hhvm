@@ -48,7 +48,7 @@ if(CPACK_GENERATOR)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "binutils, libboost-filesystem1.54.0,"
       "libboost-program-options1.54.0, libboost-regex1.54.0,"
       "libboost-system1.54.0, libboost-thread1.54.0, libbz2-1.0,"
-      "libc-client2007e, libc6, libcap2, libcomerr2, libcurl3 (>= 7.29.0),"
+      "libc-client2007e, libc6, libcap2, libcomerr2, libcurl3 (>= 7.26.0),"
       "libedit2, libelf1, libevent-2.0-5, libexpat1, libfontconfig1, "
       "libfreetype6, libgcc1, libgcrypt11, libgd2-xpm-dev, libgnutls26, "
       "libgoogle-glog0, libgpg-error0, libgssapi-krb5-2, libicu52, libidn11, "

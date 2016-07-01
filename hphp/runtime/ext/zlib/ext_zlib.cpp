@@ -24,7 +24,10 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
 #include <folly/String.h>
@@ -224,7 +227,7 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
 static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
                                        int &status) {
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
-  String ret(retsize + 1, ReserveString);
+  String ret;
   size_t retused = 0;
   int round = 0;
 
@@ -234,7 +237,20 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
       break;
     }
 
-    auto const ms = ret.reserve(retsize + 1);
+    if (UNLIKELY(retsize >= kMaxSmallSize && MM().preAllocOOM(retsize + 1))) {
+      VMRegAnchor _;
+      assert(checkSurpriseFlags());
+      handle_request_surprise();
+    }
+
+    auto const ms = [&]() -> folly::MutableStringPiece {
+      if (!ret.get()) {
+        ret = String(retsize + 1, ReserveString);
+        return ret.bufferSlice();
+      }
+      return ret.reserve(retsize + 1);
+    }();
+
     auto retbuf = ms.data();
     Z->avail_out = ms.size() - retused;
     Z->next_out = (Bytef *) (retbuf + retused);
@@ -273,22 +289,21 @@ static Variant hhvm_zlib_decode(const String& data,
   Z.zfree = (free_func) hhvm_zlib_free;
 
 retry_raw_inflate:
+  SCOPE_EXIT { inflateEnd(&Z); };
+
   int status = inflateInit2(&Z, enc);
   if (Z_OK == status) {
     Z.next_in = (Bytef*)data.c_str();
     Z.avail_in = data.size() + 1;
     String ret = hhvm_zlib_inflate_rounds(&Z, maxlen, status);
     if (status == Z_STREAM_END) {
-      inflateEnd(&Z);
       return ret;
     }
     if ((status == Z_DATA_ERROR) &&
         (k_ZLIB_ENCODING_ANY == enc)) {
-       inflateEnd(&Z);
       enc = k_ZLIB_ENCODING_RAW;
       goto retry_raw_inflate;
     }
-    inflateEnd(&Z);
   }
 
   raise_warning("%s", zError(status));

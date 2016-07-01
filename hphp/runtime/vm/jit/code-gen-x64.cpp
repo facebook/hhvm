@@ -265,11 +265,6 @@ CALL_OPCODE(DbgAssertPtr)
 CALL_OPCODE(LdSwitchDblIndex)
 CALL_OPCODE(LdSwitchStrIndex)
 CALL_OPCODE(LdSwitchObjIndex)
-CALL_OPCODE(VerifyParamCallable)
-CALL_OPCODE(VerifyParamFail)
-CALL_OPCODE(VerifyParamFailHard)
-CALL_OPCODE(VerifyRetCallable)
-CALL_OPCODE(VerifyRetFail)
 CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseMissingArg)
@@ -619,6 +614,18 @@ DELEGATE_OPCODE(CheckSurpriseFlags)
 DELEGATE_OPCODE(CheckStackOverflow)
 DELEGATE_OPCODE(CheckSurpriseFlagsEnter)
 DELEGATE_OPCODE(CheckSurpriseAndStack)
+
+DELEGATE_OPCODE(CastStk)
+DELEGATE_OPCODE(CastMem)
+DELEGATE_OPCODE(CoerceStk)
+DELEGATE_OPCODE(CoerceMem)
+DELEGATE_OPCODE(VerifyParamCallable)
+DELEGATE_OPCODE(VerifyRetCallable)
+DELEGATE_OPCODE(VerifyParamCls)
+DELEGATE_OPCODE(VerifyRetCls)
+DELEGATE_OPCODE(VerifyParamFail)
+DELEGATE_OPCODE(VerifyParamFailHard)
+DELEGATE_OPCODE(VerifyRetFail)
 
 #undef NOOP_OPCODE
 #undef DELEGATE_OPCODE
@@ -1304,119 +1311,6 @@ void CodeGenerator::cgInitObjProps(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgCastHelper(IRInstruction *inst,
-                                 Vreg base, int offset) {
-  Type type       = inst->typeParam();
-  bool nullable = false;
-  if (!type.isKnownDataType()) {
-    assertx(TNull <= type);
-    type -= TNull;
-    assertx(type.isKnownDataType());
-    nullable = true;
-  }
-
-  auto args = argGroup(inst);
-  args.addr(base, offset);
-
-  TCA tvCastHelper;
-  if (type <= TBool) {
-    tvCastHelper = (TCA)tvCastToBooleanInPlace;
-  } else if (type <= TInt) {
-    tvCastHelper = (TCA)tvCastToInt64InPlace;
-  } else if (type <= TDbl) {
-    tvCastHelper = (TCA)tvCastToDoubleInPlace;
-  } else if (type <= TArr) {
-    tvCastHelper = (TCA)tvCastToArrayInPlace;
-  } else if (type <= TStr) {
-    tvCastHelper = (TCA)tvCastToStringInPlace;
-  } else if (type <= TObj) {
-    tvCastHelper = nullable ?
-      (TCA)tvCastToNullableObjectInPlace :
-      (TCA)tvCastToObjectInPlace;
-    nullable = false;
-  } else if (type <= TRes) {
-    tvCastHelper = (TCA)tvCastToResourceInPlace;
-  } else {
-    not_reached();
-  }
-  assert(!nullable);
-  cgCallHelper(vmain(),
-               CallSpec::direct(reinterpret_cast<void (*)()>(tvCastHelper)),
-               kVoidDest,
-               SyncOptions::Sync,
-               args);
-}
-
-void CodeGenerator::cgCastStk(IRInstruction *inst) {
-  auto offset     = inst->extra<CastStk>()->offset;
-  auto spReg      = srcLoc(inst, 0).reg();
-
-  cgCastHelper(inst, spReg, cellsToBytes(offset.offset));
-}
-
-void CodeGenerator::cgCastMem(IRInstruction *inst) {
-  auto ptr      = srcLoc(inst, 0).reg();
-
-  cgCastHelper(inst, ptr, 0);
-}
-
-void CodeGenerator::cgCoerceHelper(IRInstruction* inst,
-                                   Vreg base, int offset,
-                                   Func const* callee, int argNum) {
-  auto& v = vmain();
-
-  Type type = inst->typeParam();
-  assertx(type.isKnownDataType());
-
-  // If the type-specific test(s) failed,
-  // fallback on actually calling the tvCoerceParamTo*() helper
-  auto args = argGroup(inst);
-  args.addr(base, offset);
-  args.imm(callee);
-  args.imm(argNum);
-
-  TCA tvCoerceHelper;
-  if (type <= TBool) {
-    tvCoerceHelper = (TCA)tvCoerceParamToBooleanOrThrow;
-  } else if (type <= TInt) {
-    tvCoerceHelper = (TCA)tvCoerceParamToInt64OrThrow;
-  } else if (type <= TDbl) {
-    tvCoerceHelper = (TCA)tvCoerceParamToDoubleOrThrow;
-  } else if (type <= TArr) {
-    tvCoerceHelper = (TCA)tvCoerceParamToArrayOrThrow;
-  } else if (type <= TStr) {
-    tvCoerceHelper = (TCA)tvCoerceParamToStringOrThrow;
-  } else if (type <= TObj) {
-    tvCoerceHelper = (TCA)tvCoerceParamToObjectOrThrow;
-  } else if (type <= TRes) {
-    tvCoerceHelper = (TCA)tvCoerceParamToResourceOrThrow;
-  } else {
-    not_reached();
-  }
-
-  cgCallHelper(v,
-    CallSpec::direct(reinterpret_cast<void (*)()>(tvCoerceHelper)),
-    kVoidDest,
-    SyncOptions::Sync,
-    args
-  );
-}
-
-void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
-  auto extra      = inst->extra<CoerceStk>();
-  auto spReg      = srcLoc(inst, 0).reg();
-  auto offset     = cellsToBytes(extra->offset.offset);
-
-  cgCoerceHelper(inst, spReg, offset, extra->callee, extra->argNum);
-}
-
-void CodeGenerator::cgCoerceMem(IRInstruction *inst) {
-  auto extra      = inst->extra<CoerceMem>();
-  auto ptr        = srcLoc(inst, 0).reg();
-
-  cgCoerceHelper(inst, ptr, 0, extra->callee, extra->argNum);
-}
-
 void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   auto strReg = srcLoc(inst, 0).reg();
   auto idxReg = srcLoc(inst, 1).reg();
@@ -1965,40 +1859,6 @@ void CodeGenerator::cgDbgAssertFunc(IRInstruction* inst) {
   ifThen(v, CC_NE, sf, [&](Vout& v) {
     v << ud2{};
   });
-}
-
-void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
-  auto const objClass = inst->src(0);
-  auto const objClassReg = srcLoc(inst, 0).reg();
-  auto const constraint = inst->src(1);
-  auto const constraintReg = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  if (constraint->hasConstVal(TCls) && objClass->hasConstVal()) {
-    if (objClass->clsVal() != constraint->clsVal()) {
-      cgCallNative(v, inst);
-    }
-    return;
-  }
-  auto const sf = v.makeReg();
-  if (!constraint->hasConstVal(TCls) && objClass->hasConstVal()) {
-    // Reverse the args because cmpq can only have a constant in the LHS.
-    v << cmpq{objClassReg, constraintReg, sf};
-  } else {
-    v << cmpq{constraintReg, objClassReg, sf};
-  }
-
-  // The native call for this instruction is the slow path that does
-  // proper subtype checking. The comparison above is just to
-  // short-circuit the overhead when the Classes are an exact match.
-  ifThen(v, CC_NE, sf, [&](Vout& v) { cgCallNative(v, inst); });
-}
-
-void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
-  emitVerifyCls(inst);
-}
-
-void CodeGenerator::cgVerifyRetCls(IRInstruction* inst) {
-  emitVerifyCls(inst);
 }
 
 void CodeGenerator::cgRBTraceEntry(IRInstruction* inst) {

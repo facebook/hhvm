@@ -1054,9 +1054,14 @@ static Class* class_from_name(const String& class_name, const char* callee) {
   return cls;
 }
 
+const StaticString s_DOMNode("DOMNode");
 Variant f_simplexml_import_dom(
   const Object& node,
   const String& class_name /* = "SimpleXMLElement" */) {
+  if (!node->instanceof(s_DOMNode)) {
+    raise_warning("Invalid Nodetype to import");
+    return init_null();
+  }
   auto domnode = Native::data<DOMNode>(node);
   xmlNodePtr nodep = domnode->nodep();
 

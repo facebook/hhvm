@@ -66,15 +66,19 @@ static Variant extractValue(ResourceBundle* data,
 #undef EXTRACT_ERR
 }
 
-static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
+static void HHVM_METHOD(ResourceBundle, __construct, const Variant& localeName,
                                                      const Variant& bundleName,
                                                      bool fallback) {
-  const char *bundle = bundleName.isNull() ? nullptr :
-                       bundleName.toString().c_str();
-  auto loc = Locale::createFromName(localeOrDefault(locale.toString()).c_str());
+  auto const bundle = bundleName.isNull() ? String{}
+                                          : bundleName.toString();
+  auto const locale = Locale::createFromName(
+    localeOrDefault(localeName.toString()).c_str()
+  );
   auto data = Native::data<ResourceBundle>(this_);
+
   UErrorCode error = U_ZERO_ERROR;
-  auto rsrc = new icu::ResourceBundle(bundle, loc, error);
+  auto rsrc = new icu::ResourceBundle(bundle.c_str(), locale, error);
+
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "resourcebundle_ctor: "
                                   "Cannot load libICU resource bundle");
@@ -87,7 +91,7 @@ static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
     s_intl_error->setError(error,
       "resourcebundle_ctor: Cannot load libICU resource "
       "'%s' without fallback from %s to %s",
-      bundle ? bundle : "(default data)", loc.getName(),
+      bundle ? bundle.c_str() : "(default data)", locale.getName(),
       rsrc->getLocale(ULOC_ACTUAL_LOCALE, dummy).getName());
     delete rsrc;
     throw data->getException("%s", s_intl_error->getErrorMessage().c_str());

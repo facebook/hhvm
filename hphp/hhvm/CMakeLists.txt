@@ -41,7 +41,7 @@ endif()
 # See https://github.com/facebook/hhvm/issues/5217
 INCLUDE(CheckCXXSourceCompiles)
 set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-set(CMAKE_REQUIRED_FLAGS "-std=c++11")
+set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
 CHECK_CXX_SOURCE_COMPILES("
 #include <atomic>
 int main() {

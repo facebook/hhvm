@@ -4412,6 +4412,9 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
       newheight = newwidth * src_y / src_x;
     }
   }
+  if (newheight <= 0 || newwidth <= 0) {
+    return false;
+  }
   if (gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method)) {
     imscaled = gdImageScale(im, newwidth, newheight);
   }

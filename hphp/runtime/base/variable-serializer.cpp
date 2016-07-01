@@ -53,6 +53,7 @@ const StaticString
 static VariableSerializer::ArrayKind getKind(const ArrayData* arr) {
   if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
   if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
+  if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
   return VariableSerializer::ArrayKind::PHP;
 }
 
@@ -811,6 +812,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Vec:
         m_buf->append("Vec\n");
         break;
+      case ArrayKind::Keyset:
+        m_buf->append("Keyset\n");
+        break;
       case ArrayKind::PHP:
         m_buf->append("Array\n");
         break;
@@ -847,6 +851,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Vec:
         m_buf->append("vec (\n");
         break;
+      case ArrayKind::Keyset:
+        m_buf->append("keyset (\n");
+        break;
       case ArrayKind::PHP:
         m_buf->append("array (\n");
         break;
@@ -877,6 +884,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::Vec:
         m_buf->append("vec");
+        break;
+      case ArrayKind::Keyset:
+        m_buf->append("keyset");
         break;
       case ArrayKind::PHP:
         m_buf->append("array");
@@ -924,6 +934,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::Vec:
         m_buf->append("v:");
+        break;
+      case ArrayKind::Keyset:
+        m_buf->append("k:");
         break;
       case ArrayKind::PHP:
         m_buf->append("a:");
@@ -1414,21 +1427,16 @@ static void serializeString(const String& str, VariableSerializer* serializer) {
 
 static void serializeArrayImpl(const ArrayData* arr,
                                VariableSerializer* serializer) {
-  if (arr->isVecArray()) {
-    serializer->writeArrayHeader(
-      arr->size(),
-      true,
-      VariableSerializer::ArrayKind::Vec
-    );
+  serializer->writeArrayHeader(
+    arr->size(),
+    arr->isVectorData(),
+    getKind(arr)
+  );
+  if (arr->isVecArray() || arr->isKeyset()) {
     for (ArrayIter iter(arr); iter; ++iter) {
       serializer->writeArrayValue(iter.secondRef());
     }
   } else {
-    serializer->writeArrayHeader(
-      arr->size(),
-      arr->isVectorData(),
-      getKind(arr)
-    );
     for (ArrayIter iter(arr); iter; ++iter) {
       serializer->writeArrayKey(iter.first());
       serializer->writeArrayValue(iter.secondRef());

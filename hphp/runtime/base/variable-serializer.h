@@ -47,7 +47,7 @@ struct VariableSerializer {
     PHPOutput, //used by compiler to output scalar values into byte code
   };
 
-  enum class ArrayKind { PHP, Dict, Vec };
+  enum class ArrayKind { PHP, Dict, Vec, Keyset };
 
   /**
    * Constructor and destructor.

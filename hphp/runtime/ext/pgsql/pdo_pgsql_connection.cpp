@@ -27,7 +27,7 @@
   handleError(stmt, sqlstate(res), res.errorMessage())
 
 void ReplaceStringInPlace(std::string& subject, const std::string& search,
-    const std::string& replace) {
+  const std::string& replace) {
   size_t pos = 0;
   while ((pos = subject.find(search, pos)) != std::string::npos) {
     subject.replace(pos, search.length(), replace);
@@ -37,7 +37,8 @@ void ReplaceStringInPlace(std::string& subject, const std::string& search,
 
 /* For the convenience of drivers, this function will parse a data source
  * string, of the form "name=value; name2=value2" and populate variables
- * according to the data you pass in and array of pdo_data_src_parser structures
+ * according to the data you pass in and array of pdo_data_src_parser
+ * structures
  */
 struct pdo_data_src_parser {
   const char *optname;
@@ -205,8 +206,8 @@ const char* PDOPgSqlConnection::sqlstate(PQ::Result& result){
 }
 
 bool PDOPgSqlConnection::quoter(
-    const String& input, String &quoted, PDOParamType paramtype
-  ){
+  const String& input, String &quoted, PDOParamType paramtype
+){
   switch(paramtype){
     case PDO_PARAM_LOB:
       quoted = m_server->escapeByteA(input.data(), input.length());
@@ -313,7 +314,8 @@ int PDOPgSqlConnection::getAttribute(int64_t attr, Variant &value){
           break;
       }
       break;
-    case PDO_ATTR_SERVER_INFO: {
+    case PDO_ATTR_SERVER_INFO:
+      {
         int spid = m_server->backendPID();
 
         std::stringstream result;
@@ -378,9 +380,10 @@ bool PDOPgSqlConnection::support(SupportedMethod method){
 
 bool PDOPgSqlConnection::preparer(
   const String& sql, sp_PDOStatement *stmt, const Variant& options
-  ) {
+) {
   auto rsrc = req::make<PDOPgSqlResource>(
-      std::dynamic_pointer_cast<PDOPgSqlConnection>(shared_from_this()));
+    std::dynamic_pointer_cast<PDOPgSqlConnection>(shared_from_this())
+  );
 
   auto s = req::make<PDOPgSqlStatement>(rsrc, m_server);
 
@@ -399,7 +402,7 @@ bool PDOPgSqlConnection::preparer(
 
 void PDOPgSqlConnection::handleError(
   PDOPgSqlStatement* stmt, const char* sqlState, const char* msg
-  ){
+){
   PDOErrorType* err = &error_code;
   std::string* emsg = &err_msg;
   if(stmt != nullptr){

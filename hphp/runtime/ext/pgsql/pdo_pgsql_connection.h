@@ -24,56 +24,55 @@
 namespace HPHP {
 struct PDOPgSqlStatement;
 
-struct PDOPgSqlConnection : public PDOConnection {
+struct PDOPgSqlConnection : PDOConnection {
   friend struct PDOPgSqlStatement;
-  public:
-    PDOPgSqlConnection();
-    virtual ~PDOPgSqlConnection();
 
-    virtual bool create(const Array &options);
+  PDOPgSqlConnection();
+  virtual ~PDOPgSqlConnection();
 
-    virtual int64_t doer(const String& sql);
+  bool create(const Array &options) override;
 
-    virtual bool closer();
+  int64_t doer(const String& sql) override;
 
-    virtual bool begin();
-    virtual bool commit();
-    virtual bool rollback();
+  bool closer() override;
 
-    virtual bool checkLiveness();
+  bool begin() override;
+  bool commit() override;
+  bool rollback() override;
 
-    virtual bool quoter(
-      const String& input, String &quoted, PDOParamType paramtype
-    );
+  bool checkLiveness() override;
 
-    virtual bool support(SupportedMethod method);
+  bool quoter(
+    const String& input, String &quoted, PDOParamType paramtype
+  ) override;
 
-    virtual String lastId(const char *name);
+  bool support(SupportedMethod method) override;
 
-    virtual int getAttribute(int64_t attr, Variant &value);
-    virtual bool setAttribute(int64_t attr, const Variant &value);
+  String lastId(const char *name) override;
 
-    virtual bool fetchErr(PDOStatement *stmt, Array &info);
+  int getAttribute(int64_t attr, Variant &value) override;
+  bool setAttribute(int64_t attr, const Variant &value) override;
 
-    String pgsqlLOBCreate();
+  bool fetchErr(PDOStatement *stmt, Array &info) override;
 
-    bool preparer(
-      const String& sql, sp_PDOStatement *stmt, const Variant& options
-    ) override;
+  String pgsqlLOBCreate();
 
-  private:
-    PQ::Connection* m_server;
-    Oid pgoid;
-    ExecStatusType m_lastExec;
-    std::string err_msg;
-    bool m_emulate_prepare;
-    const char* sqlstate(PQ::Result& result);
-    void handleError(
-      PDOPgSqlStatement* stmt, const char* sqlState, const char* msg
-    );
-    bool transactionCommand(const char* command);
-    void testConnection();
+  bool preparer(
+    const String& sql, sp_PDOStatement *stmt, const Variant& options
+  ) override;
 
+private:
+  PQ::Connection* m_server;
+  Oid pgoid;
+  ExecStatusType m_lastExec;
+  std::string err_msg;
+  bool m_emulate_prepare;
+  const char* sqlstate(PQ::Result& result);
+  void handleError(
+    PDOPgSqlStatement* stmt, const char* sqlState, const char* msg
+  );
+  bool transactionCommand(const char* command);
+  void testConnection();
 };
 }
 

@@ -24,16 +24,14 @@
 
 
 namespace HPHP {
-struct PDOPgSqlResource : public PDOResource {
+struct PDOPgSqlResource : PDOResource {
+  explicit PDOPgSqlResource(std::shared_ptr<PDOPgSqlConnection> conn)
+    : PDOResource(std::dynamic_pointer_cast<PDOConnection>(conn))
+  {}
 
-  public:
-    explicit PDOPgSqlResource(std::shared_ptr<PDOPgSqlConnection> conn)
-      : PDOResource(std::dynamic_pointer_cast<PDOConnection>(conn))
-    {}
-
-    std::shared_ptr<PDOPgSqlConnection> conn() const {
-      return std::dynamic_pointer_cast<PDOPgSqlConnection>(m_conn);
-    }
+  std::shared_ptr<PDOPgSqlConnection> conn() const {
+    return std::dynamic_pointer_cast<PDOPgSqlConnection>(m_conn);
+  }
 };
 }
 

@@ -22,10 +22,10 @@
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 
 namespace HPHP {
-struct PDOPgSql : public PDODriver {
+struct PDOPgSql : PDODriver {
   PDOPgSql();
-  virtual req::ptr<PDOResource> createResourceImpl() override;
-  virtual req::ptr<PDOResource> createResource(
+  req::ptr<PDOResource> createResourceImpl() override;
+  req::ptr<PDOResource> createResource(
     const sp_PDOConnection& conn
   ) override;
 };

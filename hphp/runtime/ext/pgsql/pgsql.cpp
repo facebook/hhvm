@@ -36,11 +36,11 @@
   name.reserve(params.size()); \
   for (ArrayIter iter(params); iter; ++iter) { \
     const Variant &param = iter.secondRef(); \
-    name.push_back(param.isNull() ? nullptr : param.toString().detach()->data()); \
+    name.push_back(param.isNull() ? \
+      nullptr : param.toString().detach()->data()); \
   }
 
 namespace HPHP {
-
 namespace { // Anonymous namespace
 
 struct ScopeNonBlocking {
@@ -57,73 +57,66 @@ struct ScopeNonBlocking {
 
 struct PGSQLConnectionPool;
 
-static struct PGSQLConnectionPoolContainer {
-  private:
-    std::map<std::string, PGSQLConnectionPool*> m_pools;
-    Mutex m_lock;
+struct PGSQLConnectionPoolContainer {
+  PGSQLConnectionPoolContainer();
+  explicit PGSQLConnectionPoolContainer(PGSQLConnectionPoolContainer const&);
+  void operator=(PGSQLConnectionPoolContainer const&);
 
-  public:
-    PGSQLConnectionPoolContainer();
-    explicit PGSQLConnectionPoolContainer(PGSQLConnectionPoolContainer const&);
-    void operator=(PGSQLConnectionPoolContainer const&);
+  ~PGSQLConnectionPoolContainer();
 
-    ~PGSQLConnectionPoolContainer();
+  PGSQLConnectionPool& GetPool(const String);
+  std::vector<PGSQLConnectionPool*>& GetPools();
 
-    PGSQLConnectionPool& GetPool(const std::string);
-    std::vector<PGSQLConnectionPool *> &GetPools();
-
+private:
+  std::map<String, PGSQLConnectionPool*> m_pools;
+  Mutex m_lock;
 } s_connectionPoolContainer;
 
 struct PGSQLConnectionPool {
-  private:
-    int m_maximumConnections;
-    Mutex m_lock;
-    std::string m_connectionString;
-    std::string m_cleanedConnectionString;
-    std::queue<PQ::Connection*> m_availableConnections;
-    std::vector<PQ::Connection*> m_connections;
+  long SweepedConnections() const { return m_sweepedConnections; }
+  long OpenedConnections() const { return m_openedConnections; }
+  long RequestedConnections() const { return m_requestedConnections; }
+  long ReleasedConnections() const { return m_releasedConnections; }
+  long Errors() const { return m_errors; }
 
-    long m_sweepedConnections = 0;
-    long m_openedConnections = 0;
-    long m_requestedConnections = 0;
-    long m_releasedConnections = 0;
-    long m_errors = 0;
+  int TotalConnectionsCount() const { return m_connections.size(); }
+  int FreeConnectionsCount() const { return m_availableConnections.size(); }
 
-  public:
+  PGSQLConnectionPool(
+    String connectionString, int maximumConnections = -1
+  );
+  ~PGSQLConnectionPool();
 
+  PQ::Connection& GetConnection();
+  void Release(PQ::Connection& connection);
 
+  String GetConnectionString() const { return m_connectionString; }
+  String GetCleanedConnectionString() const {
+    return m_cleanedConnectionString;
+  }
 
-    long SweepedConnections() const { return m_sweepedConnections; }
-    long OpenedConnections() const { return m_openedConnections; }
-    long RequestedConnections() const { return m_requestedConnections; }
-    long ReleasedConnections() const { return m_releasedConnections; }
-    long Errors() const { return m_errors; }
+  void CloseAllConnections();
+  void CloseFreeConnections();
+  int MaximumConnections() const { return m_maximumConnections; }
+  void SweepConnection(PQ::Connection& connection);
 
-    int TotalConnectionsCount() const { return m_connections.size(); }
-    int FreeConnectionsCount() const { return m_availableConnections.size(); }
+private:
+  int m_maximumConnections;
+  Mutex m_lock;
+  String m_connectionString;
+  String m_cleanedConnectionString;
+  std::queue<PQ::Connection*> m_availableConnections;
+  std::vector<PQ::Connection*> m_connections;
 
-    PGSQLConnectionPool(
-      std::string connectionString, int maximumConnections = -1
-    );
-    ~PGSQLConnectionPool();
-
-    PQ::Connection& GetConnection();
-    void Release(PQ::Connection& connection);
-
-    std::string GetConnectionString() const { return m_connectionString; }
-    std::string GetCleanedConnectionString() const {
-      return m_cleanedConnectionString;
-    }
-
-    void CloseAllConnections();
-    void CloseFreeConnections();
-    int MaximumConnections() const { return m_maximumConnections; }
-    void SweepConnection(PQ::Connection& connection);
+  long m_sweepedConnections = 0;
+  long m_openedConnections = 0;
+  long m_requestedConnections = 0;
+  long m_releasedConnections = 0;
+  long m_errors = 0;
 };
 
-struct PGSQL : public SweepableResourceData {
+struct PGSQL : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PGSQL);
-  public:
   static bool AllowPersistent;
   static int MaxPersistent;
   static int MaxLinks;
@@ -133,7 +126,6 @@ struct PGSQL : public SweepableResourceData {
 
   static req::ptr<PGSQL> Get(const Variant& conn_id);
 
-  public:
   explicit PGSQL(String conninfo);
   explicit PGSQL(PGSQLConnectionPool& connectionPool);
   ~PGSQL();
@@ -153,36 +145,34 @@ struct PGSQL : public SweepableResourceData {
 
   bool IsConnectionPooled() const { return m_connectionPool != nullptr; }
 
-  private:
+private:
   PQ::Connection* m_conn;
 
   PGSQLConnectionPool* m_connectionPool = nullptr;
 
-  public:
-  std::string m_conn_string;
+public:
+  String m_conn_string;
 
-  std::string m_db;
-  std::string m_user;
-  std::string m_pass;
-  std::string m_host;
-  std::string m_port;
-  std::string m_options;
+  String m_db;
+  String m_user;
+  String m_pass;
+  String m_host;
+  String m_port;
+  String m_options;
 
-  std::string m_last_notice;
+  String m_last_notice;
   void SetupInformation();
 };
 
-struct PGSQLResult : public SweepableResourceData {
+struct PGSQLResult : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PGSQLResult);
-  public:
   static req::ptr<PGSQLResult> Get(const Variant& result);
-  public:
   PGSQLResult(req::ptr<PGSQL> conn, PQ::Result res);
   ~PGSQLResult();
 
   static StaticString s_class_name;
-  virtual const String& o_getClassNameHook() const { return s_class_name; }
-  virtual bool isResource() const { return (bool)m_res; }
+  const String& o_getClassNameHook() const override { return s_class_name; }
+  bool isResource() const override { return (bool)m_res; }
 
   void close();
 
@@ -193,7 +183,7 @@ struct PGSQLResult : public SweepableResourceData {
   int getNumRows();
 
   bool convertFieldRow(const Variant& row, const Variant& field,
-      int *out_row, int *out_field, const char *fn_name = nullptr);
+    int *out_row, int *out_field, const char *fn_name = nullptr);
 
   Variant fieldIsNull(
     const Variant& row, const Variant& field, const char *fn_name = nullptr
@@ -206,9 +196,8 @@ struct PGSQLResult : public SweepableResourceData {
 
   req::ptr<PGSQL> getConn() { return m_conn; }
 
-  public:
   int m_current_row;
-  private:
+private:
   PQ::Result m_res;
   int m_num_fields;
   int m_num_rows;
@@ -259,23 +248,21 @@ void PGSQL::SetupInformation() {
 }
 
 PGSQL::PGSQL(String conninfo)
-  : m_conn_string(conninfo.data()), m_last_notice("") {
+  : m_conn_string(conninfo), m_last_notice("") {
+  m_conn = new PQ::Connection(conninfo.data());
 
-    m_conn = new PQ::Connection(conninfo.data());
-
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
-      ServerStats::Log("sql.conn", 1);
-    }
-
-    ConnStatusType st = m_conn->status();
-    if (m_conn && st == CONNECTION_OK) {
-      // Load up the fixed information
-      SetupInformation();
-    } else if (st == CONNECTION_BAD) {
-      m_conn->finish();
-    }
-
+  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    ServerStats::Log("sql.conn", 1);
   }
+
+  ConnStatusType st = m_conn->status();
+  if (m_conn && st == CONNECTION_OK) {
+    // Load up the fixed information
+    SetupInformation();
+  } else if (st == CONNECTION_BAD) {
+    m_conn->finish();
+  }
+}
 
 PGSQL::PGSQL(PGSQLConnectionPool &connectionPool)
   : m_conn_string(connectionPool.GetConnectionString()),
@@ -298,17 +285,13 @@ void PGSQL::sweep() {
 void PGSQL::ReleaseConnection() {
   if (!m_conn) return;
 
-  if (!IsConnectionPooled())
-  {
+  if (!IsConnectionPooled()) {
     m_conn->finish();
-  }
-  else
-  {
+  } else {
     m_connectionPool->Release(*m_conn);
     m_connectionPool = nullptr;
     m_conn = nullptr;
   }
-
 }
 
 req::ptr<PGSQLResult> PGSQLResult::Get(const Variant& result) {
@@ -324,8 +307,8 @@ req::ptr<PGSQLResult> PGSQLResult::Get(const Variant& result) {
 PGSQLResult::PGSQLResult(req::ptr<PGSQL> conn, PQ::Result res)
   : m_current_row(0), m_res(std::move(res)),
   m_num_fields(-1), m_num_rows(-1), m_conn(conn) {
-    m_conn->incRefCount();
-  }
+  m_conn->incRefCount();
+}
 
 void PGSQLResult::close() {
   m_res.clear();
@@ -367,8 +350,7 @@ int PGSQLResult::getNumRows() {
 }
 
 bool PGSQLResult::convertFieldRow(const Variant& row, const Variant& field,
-    int *out_row, int *out_field, const char *fn_name) {
-
+  int *out_row, int *out_field, const char *fn_name) {
   Variant actual_field;
   int actual_row;
 
@@ -390,8 +372,10 @@ bool PGSQLResult::convertFieldRow(const Variant& row, const Variant& field,
 
   if (field_number < 0 || field_number >= getNumFields()) {
     if (actual_field.isString()) {
-      raise_warning("%s(): Unknown column name \"%s\"",
-          fn_name, actual_field.asCStrRef().data());
+      raise_warning(
+        "%s(): Unknown column name \"%s\"",
+        fn_name, actual_field.asCStrRef().data()
+      );
     } else {
       raise_warning(
         "%s(): Column offset `%d` out of range", fn_name, field_number
@@ -412,8 +396,8 @@ bool PGSQLResult::convertFieldRow(const Variant& row, const Variant& field,
 }
 
 Variant PGSQLResult::fieldIsNull(
-    const Variant& row, const Variant& field, const char *fn_name
-  ) {
+  const Variant& row, const Variant& field, const char *fn_name
+) {
   int r, f;
   if (convertFieldRow(row, field, &r, &f, fn_name)) {
     return m_res.fieldIsNull(r, f) ? 1 : 0;
@@ -423,8 +407,8 @@ Variant PGSQLResult::fieldIsNull(
 }
 
 Variant PGSQLResult::getFieldVal(
-    const Variant& row, const Variant& field, const char *fn_name
-  ) {
+  const Variant& row, const Variant& field, const char *fn_name
+) {
   int r, f;
   if (convertFieldRow(row, field, &r, &f, fn_name)) {
     return getFieldVal(r, f, fn_name);
@@ -448,24 +432,18 @@ String PGSQLResult::getFieldVal(int row, int field, const char *fn_name) {
 ////////////////////////////////////////////////////////////////////////////////
 
 PGSQLConnectionPool::PGSQLConnectionPool(
-    std::string connectionString, int maximumConnections
-  ) :m_maximumConnections(maximumConnections),
+  String connectionString, int maximumConnections
+) :m_maximumConnections(maximumConnections),
   m_connectionString(connectionString),
   m_availableConnections(),
-  m_connections()
-{
-
+  m_connections() {
 }
 
-
-PGSQLConnectionPool::~PGSQLConnectionPool()
-{
+PGSQLConnectionPool::~PGSQLConnectionPool() {
   CloseAllConnections();
 }
 
-
-PQ::Connection& PGSQLConnectionPool::GetConnection()
-{
+PQ::Connection& PGSQLConnectionPool::GetConnection() {
   Lock lock(m_lock);
 
   // 1) m_availableConnections
@@ -473,19 +451,15 @@ PQ::Connection& PGSQLConnectionPool::GetConnection()
 
   m_requestedConnections++;
 
-  while (!m_availableConnections.empty())
-  {
+  while (!m_availableConnections.empty()) {
     PQ::Connection* pconn = m_availableConnections.front();
     PQ::Connection& conn = *pconn;
     m_availableConnections.pop();
 
     ConnStatusType st = conn.status();
-    if (conn && st == CONNECTION_OK)
-    {
+    if (conn && st == CONNECTION_OK) {
       return conn;
-    }
-    else if (st == CONNECTION_BAD)
-    {
+    } else if (st == CONNECTION_BAD) {
       SweepConnection(conn);
 
       conn.finish();
@@ -505,13 +479,10 @@ PQ::Connection& PGSQLConnectionPool::GetConnection()
   PQ::Connection& conn = *(new PQ::Connection(GetConnectionString()));
 
   ConnStatusType st = conn.status();
-  if (st == CONNECTION_OK)
-  {
+  if (st == CONNECTION_OK) {
     m_openedConnections++;
     m_connections.push_back(&conn);
-  }
-  else if (st == CONNECTION_BAD)
-  {
+  } else if (st == CONNECTION_BAD) {
     m_errors++;
 
     conn.finish();
@@ -519,8 +490,7 @@ PQ::Connection& PGSQLConnectionPool::GetConnection()
     raise_error("Getting connection from pool failed.");
   }
 
-  if (m_cleanedConnectionString == "")
-  {
+  if (m_cleanedConnectionString == "") {
     m_cleanedConnectionString.append("host=");
     m_cleanedConnectionString.append(conn.host());
     m_cleanedConnectionString.append(" port=");
@@ -534,8 +504,7 @@ PQ::Connection& PGSQLConnectionPool::GetConnection()
   return conn;
 }
 
-void PGSQLConnectionPool::SweepConnection(PQ::Connection& connection)
-{
+void PGSQLConnectionPool::SweepConnection(PQ::Connection& connection) {
   auto p = std::find(m_connections.begin(), m_connections.end(), &connection);
 
   if (p != m_connections.end())
@@ -544,34 +513,24 @@ void PGSQLConnectionPool::SweepConnection(PQ::Connection& connection)
   m_sweepedConnections++;
 }
 
-void PGSQLConnectionPool::Release(PQ::Connection& connection)
-{
+void PGSQLConnectionPool::Release(PQ::Connection& connection) {
   Lock lock(m_lock);
 
   m_releasedConnections++;
 
   ConnStatusType st = connection.status();
   if (connection && st == CONNECTION_OK) {
-
     m_availableConnections.push(&connection);
-
   } else if (st == CONNECTION_BAD) {
-
     connection.finish();
     SweepConnection(connection);
-
-
   }
-
-
 }
 
-void PGSQLConnectionPool::CloseAllConnections()
-{
+void PGSQLConnectionPool::CloseAllConnections() {
   Lock lock(m_lock);
 
-  while (!m_availableConnections.empty())
-  {
+  while (!m_availableConnections.empty()) {
     PQ::Connection* pconn = m_availableConnections.front();
     pconn->finish();
 
@@ -584,13 +543,10 @@ void PGSQLConnectionPool::CloseAllConnections()
   m_connections.clear();
 }
 
-
-void PGSQLConnectionPool::CloseFreeConnections()
-{
+void PGSQLConnectionPool::CloseFreeConnections() {
   Lock lock(m_lock);
 
-  while (!m_availableConnections.empty())
-  {
+  while (!m_availableConnections.empty()) {
     PQ::Connection* pconn = m_availableConnections.front();
     pconn->finish();
 
@@ -598,11 +554,8 @@ void PGSQLConnectionPool::CloseFreeConnections()
   }
 }
 
-
-PGSQLConnectionPoolContainer::PGSQLConnectionPoolContainer()
-  :m_pools() {
-  }
-
+PGSQLConnectionPoolContainer::PGSQLConnectionPoolContainer() :m_pools() {
+}
 
 PGSQLConnectionPoolContainer::~PGSQLConnectionPoolContainer() {
   for (auto & any : m_pools) {
@@ -611,17 +564,14 @@ PGSQLConnectionPoolContainer::~PGSQLConnectionPoolContainer() {
   }
 }
 
-
-
 PGSQLConnectionPool& PGSQLConnectionPoolContainer::GetPool(
-  const std::string connString
+  const String connString
 ) {
   Lock lock(m_lock);
 
   auto pool = m_pools[connString];
 
-  if (!pool)
-  {
+  if (!pool) {
     pool = new PGSQLConnectionPool(connString);
 
     m_pools[connString] = pool;
@@ -630,10 +580,7 @@ PGSQLConnectionPool& PGSQLConnectionPoolContainer::GetPool(
   return *pool;
 }
 
-
-
-std::vector<PGSQLConnectionPool*>& PGSQLConnectionPoolContainer::GetPools()
-{
+std::vector<PGSQLConnectionPool*>& PGSQLConnectionPoolContainer::GetPools() {
   Lock lock(m_lock);
 
   std::vector<PGSQLConnectionPool*>* v =
@@ -650,7 +597,8 @@ std::vector<PGSQLConnectionPool*>& PGSQLConnectionPoolContainer::GetPools()
 //////////////////// Connection functions /////////////////////////
 
 static Variant HHVM_FUNCTION(pg_connect,
-    const String& connection_string, int connect_type /* = 0 */) {
+  const String& connection_string, int connect_type /* = 0 */
+) {
   auto pgsql = req::make<PGSQL>(connection_string);
 
   if (!pgsql->get()) {
@@ -661,7 +609,8 @@ static Variant HHVM_FUNCTION(pg_connect,
 
 
 static Variant HHVM_FUNCTION(pg_pconnect,
-    const String& connection_string, int connect_type /* = 0 */) {
+  const String& connection_string, int connect_type /* = 0 */
+) {
   PGSQLConnectionPool& pool =
     s_connectionPoolContainer.GetPool(connection_string.toCppString());
 
@@ -732,17 +681,13 @@ const StaticString
   s_free_connections("free_connections");
 
 static Variant HHVM_FUNCTION(pg_connection_pool_stat) {
-
-
-
   auto pools = s_connectionPoolContainer.GetPools();
 
   Array arr;
 
   int i = 0;
 
-  for (auto pool : pools)
-  {
+  for (auto pool : pools) {
     Array poolArr;
 
     String poolName(pool->GetCleanedConnectionString().c_str(), CopyString);
@@ -763,17 +708,12 @@ static Variant HHVM_FUNCTION(pg_connection_pool_stat) {
   return arr;
 }
 
-
-
 static void HHVM_FUNCTION(pg_connection_pool_sweep_free) {
-
   auto pools = s_connectionPoolContainer.GetPools();
 
-  for (auto pool : pools)
-  {
+  for (auto pool : pools) {
     pool->CloseFreeConnections();
   }
-
 }
 
 
@@ -843,7 +783,7 @@ static Variant HHVM_FUNCTION(pg_options, const Resource& connection) {
 }
 
 static Variant HHVM_FUNCTION(pg_parameter_status,
-    const Resource& connection, const String& param_name) {
+  const Resource& connection, const String& param_name) {
   auto pgsql = PGSQL::Get(connection);
 
   if (!pgsql) {
@@ -868,7 +808,7 @@ static Variant HHVM_FUNCTION(pg_client_encoding, const Resource& connection) {
 }
 
 static int64_t HHVM_FUNCTION(pg_transaction_status,
-    const Resource& connection) {
+  const Resource& connection) {
   auto pgsql = PGSQL::Get(connection);
 
   if (!pgsql) {
@@ -952,7 +892,7 @@ static int64_t HHVM_FUNCTION(pg_get_pid, const Resource& connection) {
 //////////////// Escaping Functions ///////////////////////////
 
 static String HHVM_FUNCTION(pg_escape_bytea,
-    const Resource& connection, const String& data) {
+  const Resource& connection, const String& data) {
   auto pgsql = PGSQL::Get(connection);
   if (!pgsql) {
     return null_string;
@@ -971,7 +911,7 @@ static String HHVM_FUNCTION(pg_escape_bytea,
 }
 
 static String HHVM_FUNCTION(pg_escape_identifier,
-    const Resource& connection, const String& data) {
+  const Resource& connection, const String& data) {
   auto pgsql = PGSQL::Get(connection);
   if (!pgsql) {
     return null_string;
@@ -990,7 +930,7 @@ static String HHVM_FUNCTION(pg_escape_identifier,
 }
 
 static String HHVM_FUNCTION(pg_escape_literal,
-    const Resource& connection, const String& data) {
+  const Resource& connection, const String& data) {
   auto pgsql = PGSQL::Get(connection);
   if (!pgsql) {
     return null_string;
@@ -1009,7 +949,7 @@ static String HHVM_FUNCTION(pg_escape_literal,
 }
 
 static String HHVM_FUNCTION(pg_escape_string,
-    const Resource& connection, const String& data) {
+  const Resource& connection, const String& data) {
   auto pgsql = PGSQL::Get(connection);
   if (!pgsql) {
     return null_string;
@@ -1051,7 +991,7 @@ static int64_t HHVM_FUNCTION(pg_affected_rows, const Resource& result) {
 }
 
 static Variant HHVM_FUNCTION(pg_result_status,
-    const Resource& result, int64_t type /* = PGSQL_STATUS_LONG */) {
+  const Resource& result, int64_t type /* = PGSQL_STATUS_LONG */) {
   auto res = PGSQLResult::Get(result);
 
   if (type == PGSQL_STATUS_LONG) {
@@ -1077,7 +1017,7 @@ static bool HHVM_FUNCTION(pg_free_result, const Resource& result) {
 }
 
 static bool _handle_query_result(
-    const char *fn_name, PQ::Connection &conn, PQ::Result &result) {
+  const char *fn_name, PQ::Connection &conn, PQ::Result &result) {
   if (!result) {
     const char * err = conn.errorMessage();
     raise_warning("%s(): Query failed: %s", fn_name, err);
@@ -1097,11 +1037,10 @@ static bool _handle_query_result(
     }
     return false;
   }
-
 }
 
 static Variant HHVM_FUNCTION(pg_query,
-    const Resource& connection, const String& query) {
+  const Resource& connection, const String& query) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     FAIL_RETURN;
@@ -1118,7 +1057,7 @@ static Variant HHVM_FUNCTION(pg_query,
 }
 
 static Variant HHVM_FUNCTION(pg_query_params,
-    const Resource& connection, const String& query, const Array& params) {
+  const Resource& connection, const String& query, const Array& params) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     FAIL_RETURN;
@@ -1138,7 +1077,7 @@ static Variant HHVM_FUNCTION(pg_query_params,
 }
 
 static Variant HHVM_FUNCTION(pg_prepare,
-    const Resource& connection, const String& stmtname, const String& query) {
+  const Resource& connection, const String& stmtname, const String& query) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     FAIL_RETURN;
@@ -1155,7 +1094,7 @@ static Variant HHVM_FUNCTION(pg_prepare,
 }
 
 static Variant HHVM_FUNCTION(pg_execute,
-    const Resource& connection, const String& stmtname, const Array& params) {
+  const Resource& connection, const String& stmtname, const Array& params) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     FAIL_RETURN;
@@ -1175,7 +1114,7 @@ static Variant HHVM_FUNCTION(pg_execute,
 }
 
 static bool HHVM_FUNCTION(pg_send_query,
-    const Resource& connection, const String& query) {
+  const Resource& connection, const String& query) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     return false;
@@ -1207,6 +1146,7 @@ static bool HHVM_FUNCTION(pg_send_query,
       break;
     }
     // Sleep a little as Postgres hasn't received all of the async query
+    /* sleep override */
     usleep(1000);
   }
 
@@ -1231,7 +1171,7 @@ static Variant HHVM_FUNCTION(pg_get_result, const Resource& connection) {
 }
 
 static bool HHVM_FUNCTION(pg_send_query_params,
-    const Resource& connection, const String& query, const Array& params) {
+  const Resource& connection, const String& query, const Array& params) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     return false;
@@ -1264,6 +1204,7 @@ static bool HHVM_FUNCTION(pg_send_query_params,
       break;
     }
     // Sleep a little as Postgres hasn't received all of the async query
+    /* sleep override */
     usleep(1000);
   }
 
@@ -1271,7 +1212,7 @@ static bool HHVM_FUNCTION(pg_send_query_params,
 }
 
 static bool HHVM_FUNCTION(pg_send_prepare,
-    const Resource& connection, const String& stmtname, const String& query) {
+  const Resource& connection, const String& stmtname, const String& query) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     return false;
@@ -1281,7 +1222,7 @@ static bool HHVM_FUNCTION(pg_send_prepare,
 }
 
 static bool HHVM_FUNCTION(pg_send_execute,
-    const Resource& connection, const String& stmtname, const Array& params) {
+  const Resource& connection, const String& stmtname, const Array& params) {
   auto conn = PGSQL::Get(connection);
   if (!conn) {
     return false;
@@ -1290,7 +1231,7 @@ static bool HHVM_FUNCTION(pg_send_execute,
   MAKE_STR_VECTOR(str_array, params);
 
   return conn->get().sendQueryPrepared(stmtname.data(),
-      params.size(), str_array.data());
+    params.size(), str_array.data());
 }
 
 static bool HHVM_FUNCTION(pg_cancel_query, const Resource& connection) {
@@ -1315,14 +1256,17 @@ static bool HHVM_FUNCTION(pg_cancel_query, const Resource& connection) {
 ////////////////////////
 
 static Variant HHVM_FUNCTION(pg_fetch_all_columns,
-    const Resource& result, int64_t column /* = 0 */) {
+  const Resource& result, int64_t column /* = 0 */) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     FAIL_RETURN;
   }
 
   if (column < 0 || column >= res->getNumFields()) {
-    raise_warning("pg_fetch_all_columns(): Column offset `%d` out of range", (int)column);
+    raise_warning(
+      "pg_fetch_all_columns(): Column offset `%d` out of range",
+      (int)column
+    );
     FAIL_RETURN;
   }
 
@@ -1338,9 +1282,10 @@ static Variant HHVM_FUNCTION(pg_fetch_all_columns,
 }
 
 static Variant HHVM_FUNCTION(pg_fetch_array,
-    const Resource& result,
-    const Variant& row /* = null_variant */,
-    int64_t result_type /* = PGSQL_BOTH */) {
+  const Resource& result,
+  const Variant& row /* = null_variant */,
+  int64_t result_type /* = PGSQL_BOTH */
+) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     FAIL_RETURN;
@@ -1380,7 +1325,7 @@ static Variant HHVM_FUNCTION(pg_fetch_array,
 }
 
 static Variant HHVM_FUNCTION(pg_fetch_assoc,
-    const Resource& result, const Variant& row /* = null_variant */) {
+  const Resource& result, const Variant& row /* = null_variant */) {
   return f_pg_fetch_array(result, row, PGSQL_ASSOC);
 }
 
@@ -1405,9 +1350,10 @@ static Variant HHVM_FUNCTION(pg_fetch_all, const Resource& result) {
 }
 
 static Variant HHVM_FUNCTION(pg_fetch_result,
-    const Resource& result,
-    const Variant& row /* = null_variant */,
-    const Variant& field /* = null_variant */) {
+  const Resource& result,
+  const Variant& row /* = null_variant */,
+  const Variant& field /* = null_variant */
+) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     FAIL_RETURN;
@@ -1417,16 +1363,17 @@ static Variant HHVM_FUNCTION(pg_fetch_result,
 }
 
 static Variant HHVM_FUNCTION(pg_fetch_row,
-    const Resource& result, const Variant& row /* = null_variant */) {
+  const Resource& result, const Variant& row /* = null_variant */) {
   return f_pg_fetch_array(result, row, PGSQL_NUM);
 }
 
 ///////////////////// Field information //////////////////////////
 
 static Variant HHVM_FUNCTION(pg_field_is_null,
-    const Resource& result,
-    const Variant& row,
-    const Variant& field /* = null_variant */) {
+  const Resource& result,
+  const Variant& row,
+  const Variant& field /* = null_variant */
+) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     FAIL_RETURN;
@@ -1436,7 +1383,8 @@ static Variant HHVM_FUNCTION(pg_field_is_null,
 }
 
 static Variant HHVM_FUNCTION(pg_field_name,
-    const Resource& result, int64_t field_number) {
+  const Resource& result, int64_t field_number
+) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     FAIL_RETURN;
@@ -1444,7 +1392,7 @@ static Variant HHVM_FUNCTION(pg_field_name,
 
   if (field_number < 0 || field_number >= res->getNumFields()) {
     raise_warning(
-        "pg_field_name(): Column offset `%d` out of range", (int)field_number);
+      "pg_field_name(): Column offset `%d` out of range", (int)field_number);
     FAIL_RETURN;
   }
 
@@ -1458,7 +1406,7 @@ static Variant HHVM_FUNCTION(pg_field_name,
 }
 
 static int64_t HHVM_FUNCTION(pg_field_num,
-    const Resource& result, const String& field_name) {
+  const Resource& result, const String& field_name) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     return -1;
@@ -1468,9 +1416,10 @@ static int64_t HHVM_FUNCTION(pg_field_num,
 }
 
 static Variant HHVM_FUNCTION(pg_field_prtlen,
-    const Resource& result,
-    const Variant& row_number,
-    const Variant& field /* = null_variant */) {
+  const Resource& result,
+  const Variant& row_number,
+  const Variant& field /* = null_variant */
+) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     FAIL_RETURN;
@@ -1484,14 +1433,17 @@ static Variant HHVM_FUNCTION(pg_field_prtlen,
 }
 
 static Variant HHVM_FUNCTION(pg_field_size,
-    const Resource& result, int64_t field_number) {
+  const Resource& result, int64_t field_number) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
     FAIL_RETURN;
   }
 
   if (field_number < 0 || field_number > res->getNumFields()) {
-    raise_warning("pg_field_size(): Column offset `%d` out of range", (int)field_number);
+    raise_warning(
+      "pg_field_size(): Column offset `%d` out of range",
+      (int)field_number
+    );
     FAIL_RETURN;
   }
 
@@ -1499,7 +1451,7 @@ static Variant HHVM_FUNCTION(pg_field_size,
 }
 
 static Variant HHVM_FUNCTION(pg_field_table,
-    const Resource& result, int64_t field_number, bool oid_only /* = false */) {
+  const Resource& result, int64_t field_number, bool oid_only /* = false */) {
   auto res = PGSQLResult::Get(result);
 
   if (!res) {
@@ -1508,7 +1460,7 @@ static Variant HHVM_FUNCTION(pg_field_table,
 
   if (field_number < 0 || field_number > res->getNumFields()) {
     raise_warning(
-        "pg_field_table(): Column offset `%d` out of range", (int)field_number);
+      "pg_field_table(): Column offset `%d` out of range", (int)field_number);
     FAIL_RETURN;
   }
 
@@ -1541,7 +1493,7 @@ static Variant HHVM_FUNCTION(pg_field_table,
 }
 
 static Variant HHVM_FUNCTION(pg_field_type_oid,
-    const Resource& result, int64_t field_number) {
+  const Resource& result, int64_t field_number) {
   auto res = PGSQLResult::Get(result);
 
   if (!res) {
@@ -1550,7 +1502,7 @@ static Variant HHVM_FUNCTION(pg_field_type_oid,
 
   if (field_number < 0 || field_number > res->getNumFields()) {
     raise_warning(
-        "pg_field_table(): Column offset `%d` out of range", (int)field_number);
+      "pg_field_table(): Column offset `%d` out of range", (int)field_number);
     FAIL_RETURN;
   }
 
@@ -1561,7 +1513,7 @@ static Variant HHVM_FUNCTION(pg_field_type_oid,
 
 // TODO: Cache the results of this function somewhere
 static Variant HHVM_FUNCTION(pg_field_type,
-    const Resource& result, int64_t field_number) {
+  const Resource& result, int64_t field_number) {
   auto res = PGSQLResult::Get(result);
 
   if (!res) {
@@ -1570,7 +1522,7 @@ static Variant HHVM_FUNCTION(pg_field_type,
 
   if (field_number < 0 || field_number > res->getNumFields()) {
     raise_warning(
-        "pg_field_type(): Column offset `%d` out of range", (int)field_number);
+      "pg_field_type(): Column offset `%d` out of range", (int)field_number);
     FAIL_RETURN;
   }
 
@@ -1681,159 +1633,154 @@ bool PGSQL::IgnoreNotice        = false;
 bool PGSQL::LogNotice           = false;
 
 namespace { // Anonymous Namespace
-  static struct pgsqlExtension : public Extension {
-    public:
-      pgsqlExtension() : Extension("pgsql") {}
+static struct pgsqlExtension : Extension {
+  pgsqlExtension() : Extension("pgsql") {}
 
-      virtual void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
-        Hdf pgsql = hdf["PGSQL"];
+  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
+    Hdf pgsql = hdf["PGSQL"];
 
-        PGSQL::AllowPersistent =
-          Config::GetBool(ini, pgsql, "AllowPersistent", true);
-        PGSQL::MaxPersistent =
-          Config::GetInt32(ini, pgsql, "MaxPersistent", -1);
-        PGSQL::MaxLinks =
-          Config::GetInt32(ini, pgsql, "MaxLinks", -1);
-        PGSQL::AutoResetPersistent =
-          Config::GetBool(ini, pgsql, "AutoResetPersistent");
-        PGSQL::IgnoreNotice = Config::GetBool(ini, pgsql, "IgnoreNotice");
-        PGSQL::LogNotice = Config::GetBool(ini, pgsql, "LogNotice");
+    PGSQL::AllowPersistent =
+      Config::GetBool(ini, pgsql, "AllowPersistent", true);
+    PGSQL::MaxPersistent =
+      Config::GetInt32(ini, pgsql, "MaxPersistent", -1);
+    PGSQL::MaxLinks =
+      Config::GetInt32(ini, pgsql, "MaxLinks", -1);
+    PGSQL::AutoResetPersistent =
+      Config::GetBool(ini, pgsql, "AutoResetPersistent");
+    PGSQL::IgnoreNotice = Config::GetBool(ini, pgsql, "IgnoreNotice");
+    PGSQL::LogNotice = Config::GetBool(ini, pgsql, "LogNotice");
+  }
 
-      }
-
-      virtual void moduleInit() {
-
-        HHVM_FE(pg_affected_rows);
-        HHVM_FE(pg_cancel_query);
-        HHVM_FE(pg_client_encoding);
-        HHVM_FE(pg_close);
-        HHVM_FE(pg_connect);
-        HHVM_FE(pg_pconnect);
-        HHVM_FE(pg_connection_pool_stat);
-        HHVM_FE(pg_connection_pool_sweep_free);
-        HHVM_FE(pg_connection_busy);
-        HHVM_FE(pg_connection_reset);
-        HHVM_FE(pg_connection_status);
-        HHVM_FE(pg_dbname);
-        HHVM_FE(pg_escape_bytea);
-        HHVM_FE(pg_escape_identifier);
-        HHVM_FE(pg_escape_literal);
-        HHVM_FE(pg_escape_string);
-        HHVM_FE(pg_execute);
-        HHVM_FE(pg_fetch_all_columns);
-        HHVM_FE(pg_fetch_all);
-        HHVM_FE(pg_fetch_array);
-        HHVM_FE(pg_fetch_assoc);
-        HHVM_FE(pg_fetch_result);
-        HHVM_FE(pg_fetch_row);
-        HHVM_FE(pg_field_is_null);
-        HHVM_FE(pg_field_name);
-        HHVM_FE(pg_field_num);
-        HHVM_FE(pg_field_prtlen);
-        HHVM_FE(pg_field_size);
-        HHVM_FE(pg_field_table);
-        HHVM_FE(pg_field_type_oid);
-        HHVM_FE(pg_field_type);
-        HHVM_FE(pg_free_result);
-        HHVM_FE(pg_get_pid);
-        HHVM_FE(pg_get_result);
-        HHVM_FE(pg_host);
-        HHVM_FE(pg_last_error);
-        HHVM_FE(pg_last_notice);
-        HHVM_FE(pg_last_oid);
-        HHVM_FE(pg_num_fields);
-        HHVM_FE(pg_num_rows);
-        HHVM_FE(pg_options);
-        HHVM_FE(pg_parameter_status);
-        HHVM_FE(pg_ping);
-        HHVM_FE(pg_port);
-        HHVM_FE(pg_prepare);
-        HHVM_FE(pg_query_params);
-        HHVM_FE(pg_query);
-        HHVM_FE(pg_result_error_field);
-        HHVM_FE(pg_result_error);
-        HHVM_FE(pg_result_seek);
-        HHVM_FE(pg_result_status);
-        HHVM_FE(pg_send_execute);
-        HHVM_FE(pg_send_prepare);
-        HHVM_FE(pg_send_query_params);
-        HHVM_FE(pg_send_query);
-        HHVM_FE(pg_transaction_status);
-        HHVM_FE(pg_unescape_bytea);
-        HHVM_FE(pg_version);
+  void moduleInit() override {
+    HHVM_FE(pg_affected_rows);
+    HHVM_FE(pg_cancel_query);
+    HHVM_FE(pg_client_encoding);
+    HHVM_FE(pg_close);
+    HHVM_FE(pg_connect);
+    HHVM_FE(pg_pconnect);
+    HHVM_FE(pg_connection_pool_stat);
+    HHVM_FE(pg_connection_pool_sweep_free);
+    HHVM_FE(pg_connection_busy);
+    HHVM_FE(pg_connection_reset);
+    HHVM_FE(pg_connection_status);
+    HHVM_FE(pg_dbname);
+    HHVM_FE(pg_escape_bytea);
+    HHVM_FE(pg_escape_identifier);
+    HHVM_FE(pg_escape_literal);
+    HHVM_FE(pg_escape_string);
+    HHVM_FE(pg_execute);
+    HHVM_FE(pg_fetch_all_columns);
+    HHVM_FE(pg_fetch_all);
+    HHVM_FE(pg_fetch_array);
+    HHVM_FE(pg_fetch_assoc);
+    HHVM_FE(pg_fetch_result);
+    HHVM_FE(pg_fetch_row);
+    HHVM_FE(pg_field_is_null);
+    HHVM_FE(pg_field_name);
+    HHVM_FE(pg_field_num);
+    HHVM_FE(pg_field_prtlen);
+    HHVM_FE(pg_field_size);
+    HHVM_FE(pg_field_table);
+    HHVM_FE(pg_field_type_oid);
+    HHVM_FE(pg_field_type);
+    HHVM_FE(pg_free_result);
+    HHVM_FE(pg_get_pid);
+    HHVM_FE(pg_get_result);
+    HHVM_FE(pg_host);
+    HHVM_FE(pg_last_error);
+    HHVM_FE(pg_last_notice);
+    HHVM_FE(pg_last_oid);
+    HHVM_FE(pg_num_fields);
+    HHVM_FE(pg_num_rows);
+    HHVM_FE(pg_options);
+    HHVM_FE(pg_parameter_status);
+    HHVM_FE(pg_ping);
+    HHVM_FE(pg_port);
+    HHVM_FE(pg_prepare);
+    HHVM_FE(pg_query_params);
+    HHVM_FE(pg_query);
+    HHVM_FE(pg_result_error_field);
+    HHVM_FE(pg_result_error);
+    HHVM_FE(pg_result_seek);
+    HHVM_FE(pg_result_status);
+    HHVM_FE(pg_send_execute);
+    HHVM_FE(pg_send_prepare);
+    HHVM_FE(pg_send_query_params);
+    HHVM_FE(pg_send_query);
+    HHVM_FE(pg_transaction_status);
+    HHVM_FE(pg_unescape_bytea);
+    HHVM_FE(pg_version);
 
 #define C(name, value) \
-  Native::registerConstant<KindOfInt64>(\
-    makeStaticString("PGSQL_" #name), (value)\
-  )
-        // Register constants
+Native::registerConstant<KindOfInt64>(\
+makeStaticString("PGSQL_" #name), (value)\
+)
+    // Register constants
 
-        C(ASSOC, PGSQL_ASSOC);
-        C(NUM, PGSQL_NUM);
-        C(BOTH, PGSQL_BOTH);
+    C(ASSOC, PGSQL_ASSOC);
+    C(NUM, PGSQL_NUM);
+    C(BOTH, PGSQL_BOTH);
 
-        C(CONNECT_FORCE_NEW, 1);
-        C(CONNECTION_BAD, CONNECTION_BAD);
-        C(CONNECTION_OK, CONNECTION_OK);
-        C(CONNECTION_STARTED, CONNECTION_STARTED);
-        C(CONNECTION_MADE, CONNECTION_MADE);
-        C(CONNECTION_AWAITING_RESPONSE, CONNECTION_AWAITING_RESPONSE);
-        C(CONNECTION_AUTH_OK, CONNECTION_AUTH_OK);
-        C(CONNECTION_SETENV, CONNECTION_SETENV);
-        C(CONNECTION_SSL_STARTUP, CONNECTION_SSL_STARTUP);
+    C(CONNECT_FORCE_NEW, 1);
+    C(CONNECTION_BAD, CONNECTION_BAD);
+    C(CONNECTION_OK, CONNECTION_OK);
+    C(CONNECTION_STARTED, CONNECTION_STARTED);
+    C(CONNECTION_MADE, CONNECTION_MADE);
+    C(CONNECTION_AWAITING_RESPONSE, CONNECTION_AWAITING_RESPONSE);
+    C(CONNECTION_AUTH_OK, CONNECTION_AUTH_OK);
+    C(CONNECTION_SETENV, CONNECTION_SETENV);
+    C(CONNECTION_SSL_STARTUP, CONNECTION_SSL_STARTUP);
 
-        C(SEEK_SET, SEEK_SET);
-        C(SEEK_CUR, SEEK_CUR);
-        C(SEEK_END, SEEK_END);
+    C(SEEK_SET, SEEK_SET);
+    C(SEEK_CUR, SEEK_CUR);
+    C(SEEK_END, SEEK_END);
 
-        C(EMPTY_QUERY, PGRES_EMPTY_QUERY);
-        C(COMMAND_OK, PGRES_COMMAND_OK);
-        C(TUPLES_OK, PGRES_TUPLES_OK);
-        C(COPY_OUT, PGRES_COPY_OUT);
-        C(COPY_IN, PGRES_COPY_IN);
-        C(BAD_RESPONSE, PGRES_BAD_RESPONSE);
-        C(NONFATAL_ERROR, PGRES_NONFATAL_ERROR);
-        C(FATAL_ERROR, PGRES_FATAL_ERROR);
+    C(EMPTY_QUERY, PGRES_EMPTY_QUERY);
+    C(COMMAND_OK, PGRES_COMMAND_OK);
+    C(TUPLES_OK, PGRES_TUPLES_OK);
+    C(COPY_OUT, PGRES_COPY_OUT);
+    C(COPY_IN, PGRES_COPY_IN);
+    C(BAD_RESPONSE, PGRES_BAD_RESPONSE);
+    C(NONFATAL_ERROR, PGRES_NONFATAL_ERROR);
+    C(FATAL_ERROR, PGRES_FATAL_ERROR);
 
-        C(TRANSACTION_IDLE, PQTRANS_IDLE);
-        C(TRANSACTION_ACTIVE, PQTRANS_ACTIVE);
-        C(TRANSACTION_INTRANS, PQTRANS_INTRANS);
-        C(TRANSACTION_INERROR, PQTRANS_INERROR);
-        C(TRANSACTION_UNKNOWN, PQTRANS_UNKNOWN);
+    C(TRANSACTION_IDLE, PQTRANS_IDLE);
+    C(TRANSACTION_ACTIVE, PQTRANS_ACTIVE);
+    C(TRANSACTION_INTRANS, PQTRANS_INTRANS);
+    C(TRANSACTION_INERROR, PQTRANS_INERROR);
+    C(TRANSACTION_UNKNOWN, PQTRANS_UNKNOWN);
 
-        C(DIAG_SEVERITY, PG_DIAG_SEVERITY);
-        C(DIAG_SQLSTATE, PG_DIAG_SQLSTATE);
-        C(DIAG_MESSAGE_PRIMARY, PG_DIAG_MESSAGE_PRIMARY);
-        C(DIAG_MESSAGE_DETAIL, PG_DIAG_MESSAGE_DETAIL);
-        C(DIAG_MESSAGE_HINT, PG_DIAG_MESSAGE_HINT);
-        C(DIAG_STATEMENT_POSITION, PG_DIAG_STATEMENT_POSITION);
-        C(DIAG_INTERNAL_POSITION, PG_DIAG_INTERNAL_POSITION);
-        C(DIAG_INTERNAL_QUERY, PG_DIAG_INTERNAL_QUERY);
-        C(DIAG_CONTEXT, PG_DIAG_CONTEXT);
-        C(DIAG_SOURCE_FILE, PG_DIAG_SOURCE_FILE);
-        C(DIAG_SOURCE_LINE, PG_DIAG_SOURCE_LINE);
-        C(DIAG_SOURCE_FUNCTION, PG_DIAG_SOURCE_FUNCTION);
+    C(DIAG_SEVERITY, PG_DIAG_SEVERITY);
+    C(DIAG_SQLSTATE, PG_DIAG_SQLSTATE);
+    C(DIAG_MESSAGE_PRIMARY, PG_DIAG_MESSAGE_PRIMARY);
+    C(DIAG_MESSAGE_DETAIL, PG_DIAG_MESSAGE_DETAIL);
+    C(DIAG_MESSAGE_HINT, PG_DIAG_MESSAGE_HINT);
+    C(DIAG_STATEMENT_POSITION, PG_DIAG_STATEMENT_POSITION);
+    C(DIAG_INTERNAL_POSITION, PG_DIAG_INTERNAL_POSITION);
+    C(DIAG_INTERNAL_QUERY, PG_DIAG_INTERNAL_QUERY);
+    C(DIAG_CONTEXT, PG_DIAG_CONTEXT);
+    C(DIAG_SOURCE_FILE, PG_DIAG_SOURCE_FILE);
+    C(DIAG_SOURCE_LINE, PG_DIAG_SOURCE_LINE);
+    C(DIAG_SOURCE_FUNCTION, PG_DIAG_SOURCE_FUNCTION);
 
-        C(ERRORS_TERSE, PQERRORS_TERSE);
-        C(ERRORS_DEFAULT, PQERRORS_DEFAULT);
-        C(ERRORS_VERBOSE, PQERRORS_VERBOSE);
+    C(ERRORS_TERSE, PQERRORS_TERSE);
+    C(ERRORS_DEFAULT, PQERRORS_DEFAULT);
+    C(ERRORS_VERBOSE, PQERRORS_VERBOSE);
 
-        C(STATUS_LONG, PGSQL_STATUS_LONG);
-        C(STATUS_STRING, PGSQL_STATUS_STRING);
+    C(STATUS_LONG, PGSQL_STATUS_LONG);
+    C(STATUS_STRING, PGSQL_STATUS_STRING);
 
-        C(CONV_IGNORE_DEFAULT, 1);
-        C(CONV_FORCE_NULL, 2);
-        C(CONV_IGNORE_NOT_NULL, 4);
+    C(CONV_IGNORE_DEFAULT, 1);
+    C(CONV_FORCE_NULL, 2);
+    C(CONV_IGNORE_NOT_NULL, 4);
 
 #undef C
-        loadSystemlib();
-      }
-  } s_pgsql_extension;
-
+    loadSystemlib();
+  }
+} s_pgsql_extension;
 }
 
 HHVM_GET_MODULE(pgsql);
 
 ///////////////////////////////////////////////////////////////////////////////
-
 }

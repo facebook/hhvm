@@ -68,6 +68,7 @@ template<class F> void scanHeader(const Header* h,
       return h->struct_.scan(mark);
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
+    case HeaderKind::Keyset:
       return h->mixed_.scan(mark);
     case HeaderKind::Apc:
       return h->apc_.scan(mark);

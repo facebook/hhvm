@@ -67,7 +67,7 @@ struct MixedArray::Initializer {
     initEmptyAD(reinterpret_cast<MixedArray*>(&s_theEmptyDictArray),
                 HeaderKind::Dict);
     initEmptyAD(reinterpret_cast<MixedArray*>(&s_theEmptyKeysetArray),
-                HeaderKind__Keyset);
+                HeaderKind::Keyset);
   }
 };
 MixedArray::Initializer MixedArray::s_initializer;
@@ -76,7 +76,7 @@ MixedArray::Initializer MixedArray::s_initializer;
 
 ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
   assert(hk == HeaderKind::Mixed || hk == HeaderKind::Dict ||
-         hk == HeaderKind__Keyset);
+         hk == HeaderKind::Keyset);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAllocArray(scale);
@@ -211,7 +211,7 @@ ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
                                   AllocMode mode, HeaderKind dest_hk) {
   assert(dest_hk == HeaderKind::Mixed || dest_hk == HeaderKind::Dict ||
-         dest_hk == HeaderKind__Keyset);
+         dest_hk == HeaderKind::Keyset);
   auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Request ? reqAllocArray(scale)
                                            : staticAllocArray(scale);
@@ -1851,13 +1851,13 @@ MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
       tvRefcountedDecRefHelper(oldType, oldDatum);
     }
   }
-  a->m_hdr.init(HeaderKind__Keyset, 1);
+  a->m_hdr.init(HeaderKind::Keyset, 1);
   return a;
 }
 
 ArrayData* MixedArray::ToKeyset(ArrayData* ad) {
   auto a = asMixed(ad);
-  auto mixed = CopyMixed(*a, AllocMode::Request, HeaderKind__Keyset);
+  auto mixed = CopyMixed(*a, AllocMode::Request, HeaderKind::Keyset);
   return ToKeysetInPlace(mixed);
 }
 

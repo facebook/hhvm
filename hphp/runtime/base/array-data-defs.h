@@ -392,7 +392,7 @@ inline ArrayData* ArrayData::toVec() const {
 }
 
 inline ArrayData* ArrayData::toKeyset() {
-  return toDict();
+  return g_array_funcs.toKeyset[kind()](this);
 }
 
 inline void ArrayData::renumber() {

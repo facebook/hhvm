@@ -130,7 +130,7 @@ static ArrayData* ToDictNoop(ArrayData* ad) {
   return ad;
 }
 
-// static constexpr auto ToKeysetNoop = &ToDictNoop;
+static constexpr auto ToKeysetNoop = &ToDictNoop;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -147,7 +147,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     ProxyArray::entry,                          \
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
-    /* MixedArray::entry##Keyset, */ /* Keyset */     \
+    MixedArray::entry##Keyset, /* Keyset */     \
   },
 
 /*
@@ -662,7 +662,7 @@ const ArrayFunctions g_array_funcs = {
     &ProxyArray::ZSetInt,
     &MixedArray::ZSetInt,
     &ZSetIntThrow,
-    /* &ZSetIntThrow, */
+    &ZSetIntThrow,
   },
 
   {
@@ -675,7 +675,7 @@ const ArrayFunctions g_array_funcs = {
     &ProxyArray::ZSetStr,
     &MixedArray::ZSetStr,
     &ZSetStrThrow,
-    /* &ZSetStrThrow, */
+    &ZSetStrThrow,
   },
 
   {
@@ -688,7 +688,7 @@ const ArrayFunctions g_array_funcs = {
     &ProxyArray::ZAppend,
     &MixedArray::ZAppend,
     &ZAppendThrow,
-    /* &ZAppendThrow, */
+    &ZAppendThrow,
   },
 
   {
@@ -701,7 +701,7 @@ const ArrayFunctions g_array_funcs = {
     ProxyArray::ToDict,
     ToDictNoop,
     PackedArray::ToDictVec,
-    /* MixedArray::ToDictKeyset, */
+    MixedArray::ToDictKeyset,
   },
 
   /*
@@ -723,7 +723,7 @@ const ArrayFunctions g_array_funcs = {
     ProxyArray::ToKeyset,
     MixedArray::ToKeysetDict,
     PackedArray::ToKeysetVec,
-    /* ToKeysetNoop, */
+    ToKeysetNoop,
   }
 };
 
@@ -962,7 +962,7 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,9> names = {{
+  std::array<const char*,10> names = {{
     "PackedKind",
     "StructKind",
     "MixedKind",
@@ -972,7 +972,7 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "ProxyKind",
     "DictKind",
     "VecKind",
-    /* "KeysetKind" */
+    "KeysetKind"
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

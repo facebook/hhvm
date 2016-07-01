@@ -590,7 +590,7 @@ void MemoryManager::flush() {
 
 const char* header_names[] = {
   "PackedArray", "StructArray", "MixedArray", "EmptyArray", "ApcArray",
-  "GlobalsArray", "ProxyArray", "DictArray", "VecArray",
+  "GlobalsArray", "ProxyArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "Ref", "Object", "WaitHandle", "ResumableObj",
   "AwaitAllWH", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "ResumableFrame", "NativeData", "SmallMalloc", "BigMalloc", "BigObj",
@@ -666,6 +666,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Dict:
       case HeaderKind::Empty:
       case HeaderKind::VecArray:
+      case HeaderKind::Keyset:
       case HeaderKind::Globals:
       case HeaderKind::Proxy:
       case HeaderKind::Object:

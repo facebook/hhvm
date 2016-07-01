@@ -25,7 +25,7 @@ enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
   // Hack arrays
-  Dict, VecArray,
+  Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
   Object, WaitHandle, ResumableObj, AwaitAllWH,
@@ -133,7 +133,7 @@ inline bool isObjectKind(HeaderKind k) {
 }
 
 inline bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Packed && k <= HeaderKind::VecArray;
+  return k >= HeaderKind::Packed && k <= HeaderKind::Keyset;
 }
 
 enum class CollectionType : uint8_t { // Subset of possible HeaderKind values

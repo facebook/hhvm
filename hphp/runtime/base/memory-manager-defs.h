@@ -125,6 +125,7 @@ inline size_t Header::size() const {
       return StructArray::heapSize(&arr_);
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
+    case HeaderKind::Keyset:
       return mixed_.heapSize();
     case HeaderKind::Empty:
       return sizeof(ArrayData);
@@ -278,6 +279,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::Dict:
       case HeaderKind::Empty:
       case HeaderKind::VecArray:
+      case HeaderKind::Keyset:
       case HeaderKind::Apc:
       case HeaderKind::Globals:
       case HeaderKind::Proxy:

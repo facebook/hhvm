@@ -49,8 +49,6 @@ struct MixedArray final : private ArrayData,
 
   using hash_t = strhash_t;
 
-  static constexpr auto HeaderKind__Keyset = HeaderKind::Dict;
-
   /*
    * Iterator helper for kPackedKind and kMixedKind.  You can use this
    * to look at the values in the array, but not the keys unless you
@@ -178,7 +176,7 @@ struct MixedArray final : private ArrayData,
   }
 
   static ArrayData* MakeReserveKeyset(uint32_t size) {
-    return MakeReserveImpl(size, HeaderKind__Keyset);
+    return MakeReserveImpl(size, HeaderKind::Keyset);
   }
 
   static MixedArray* ToDictInPlace(ArrayData*);

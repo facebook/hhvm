@@ -130,6 +130,7 @@ retry:
 
     case ArrayData::kMixedKind:
     case ArrayData::kDictKind:
+    case ArrayData::kKeysetKind:
       return c_AwaitAllWaitHandle::FromMixedArray(MixedArray::asMixed(ad));
 
     case ArrayData::kProxyKind:

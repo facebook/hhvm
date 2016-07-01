@@ -62,9 +62,9 @@ struct ArrayData {
     kDictKind = 7,    // MixedArray without implicit conversion of integer-like
                       // string keys
     kVecKind = 8,     // Vector array (more restrictive PackedArray)
-    kKeysetKind = 7,  // MixedArray storing its keys as values, no implicit
+    kKeysetKind = 9,  // MixedArray storing its keys as values, no implicit
                       // conversions from integer-like string keys
-    kNumKinds = 9     // insert new values before kNumKinds.
+    kNumKinds = 10    // insert new values before kNumKinds.
   };
 
 protected:
@@ -566,7 +566,7 @@ ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
  */
 struct ArrayFunctions {
   // NK stands for number of array kinds.
-  static auto const NK = size_t{9};
+  static auto const NK = size_t{10};
   void (*release[NK])(ArrayData*);
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvTryGetInt[NK])(const ArrayData*, int64_t k);

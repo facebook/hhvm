@@ -4500,6 +4500,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.Null();
       return true;
     }
+
     if (op == T_ARRAY) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el);
@@ -4515,6 +4516,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     if (op == T_VEC) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el, HeaderKind::VecArray);
+      return true;
+    }
+
+    if (op == T_KEYSET) {
+      auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+      emitArrayInit(e, el, HeaderKind::Keyset);
       return true;
     }
 
@@ -5662,7 +5669,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
   case Construct::KindOfExpressionList: {
     auto el = static_pointer_cast<ExpressionList>(node);
-    if (!m_staticArrays.empty() && m_staticColType.back() == HeaderKind::VecArray) {
+    if (!m_staticArrays.empty() &&
+        (m_staticColType.back() == HeaderKind::VecArray ||
+         m_staticColType.back() == HeaderKind::Keyset)) {
       auto const nelem = el->getCount();
       for (int i = 0; i < nelem; ++i) {
         auto const expr = (*el)[i];
@@ -10125,6 +10134,8 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
       m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveDict(0)));
     } else if (k == HeaderKind::VecArray) {
       m_staticArrays.push_back(Array::attach(PackedArray::MakeReserveVec(0)));
+    } else if (k == HeaderKind::Keyset) {
+      m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveKeyset(0)));
     } else {
       m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
     }
@@ -10191,6 +10202,10 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         initArray(u->getExpression(), HeaderKind::VecArray);
         break;
       }
+      if (u->getOp() == T_KEYSET) {
+        initArray(u->getExpression(), HeaderKind::Keyset);
+        break;
+      }
       // Fall through
     }
     default: {
@@ -10210,6 +10225,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   assert(m_staticArrays.empty());
   auto const isDict = kind == HeaderKind::Dict;
   auto const isVec = kind == HeaderKind::VecArray;
+  auto const isKeyset = kind == HeaderKind::Keyset;
 
   if (el == nullptr) {
     if (isDict) {
@@ -10220,11 +10236,18 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
       e.Array(staticEmptyVecArray());
       return;
     }
+    if (isKeyset) {
+      e.Array(staticEmptyKeysetArray());
+      return;
+    }
     e.Array(staticEmptyArray());
     return;
   }
 
-  auto const scalar = isDict ? isDictScalar(el) : el->isScalar();
+  auto const scalar =
+    isDict ? isDictScalar(el) :
+    isKeyset ? isKeysetScalar(el) :
+    el->isScalar();
   if (scalar) {
     TypedValue tv;
     tvWriteUninit(&tv);
@@ -10233,19 +10256,22 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  if (isVec) {
+  if (isVec || isKeyset) {
     auto const count = el->getCount();
     for (int i = 0; i < count; i++) {
       auto expr = static_pointer_cast<Expression>((*el)[i]);
       visit(expr);
       emitConvertToCell(e);
     }
-    e.NewVecArray(count);
+    if (isVec) {
+      e.NewVecArray(count);
+    } else {
+      e.NewKeysetArray(count);
+    }
     return;
   }
 
-  auto const allowPacked =
-    !kind || (!isDict && isVectorCollection((CollectionType)*kind));
+  auto const allowPacked = !kind || isVectorCollection((CollectionType)*kind);
 
   int nElms;
   if (allowPacked && isPackedInit(el, &nElms)) {
@@ -10513,7 +10539,7 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
           }
         }
         return false;
-      } else if (u->getOp() == T_VEC) {
+      } else if (u->getOp() == T_VEC || u->getOp() == T_KEYSET) {
         auto el = static_pointer_cast<ExpressionList>(u->getExpression());
         if (el) {
           int n = el->getCount();

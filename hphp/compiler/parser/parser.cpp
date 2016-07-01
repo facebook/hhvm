@@ -921,7 +921,6 @@ void Parser::onNewObject(Token &out, Token &name, Token &args) {
 }
 
 void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
-  if (op == T_KEYSET) op = T_VEC;
   switch (op) {
   case T_INCLUDE:
   case T_INCLUDE_ONCE:

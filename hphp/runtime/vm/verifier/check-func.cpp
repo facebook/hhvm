@@ -714,6 +714,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
   case Op::NewVecArray:     // ONE(IVA),     CMANY,   ONE(CV)
+  case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CV;

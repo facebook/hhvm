@@ -204,6 +204,13 @@ void in(ISS& env, const bc::NewVecArray& op) {
   push(env, cvec_n(ty, op.arg1));
 }
 
+void in(ISS& env, const bc::NewKeysetArray& op) {
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
+    popC(env);
+  }
+  push(env, Type { BArr });
+}
+
 void in(ISS& env, const bc::NewLikeArrayL&) {
   push(env, counted_aempty());
 }

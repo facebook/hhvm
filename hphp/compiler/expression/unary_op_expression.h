@@ -75,6 +75,14 @@ private:
  */
 bool isDictScalar(ExpressionPtr exp);
 
+/*
+ * Check if the ExpressionList exp is a valid scalar initializer for a keyset.
+ *
+ * If the list contains keys that are not string nor integers, it cannot
+ * statically initialize a keyset.
+ */
+bool isKeysetScalar(ExpressionPtr exp);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

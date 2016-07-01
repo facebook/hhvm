@@ -479,9 +479,10 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
   }
 
   if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
-    auto msg = folly::format(
-      "Cannot Serialize unexpected type {}", tname(var.getType()).c_str());
-    SystemLib::throwInvalidArgumentExceptionObject(msg.str());
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::format("Cannot Serialize unexpected type {}",
+                    tname(var.getType())).str()
+    );
   }
   return 1;
 }

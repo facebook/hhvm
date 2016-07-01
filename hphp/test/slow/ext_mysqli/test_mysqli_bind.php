@@ -34,6 +34,10 @@ while($stmt->fetch()) {
   $results[] = unserialize(serialize($fields));
 }
 
+$not_stmt = 0;
+var_dump(mysqli_stmt_bind_param($not_stmt));
+var_dump(mysqli_stmt_bind_result($not_stmt));
+
 var_dump($results);
 
 $mysqli->query("DROP TABLE IF EXISTS test");

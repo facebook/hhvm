@@ -554,11 +554,11 @@ static int php_mb_parse_encoding_list(const char *value, int value_length,
 
     /* copy the value string for work */
     if (value[0]=='"' && value[value_length-1]=='"' && value_length>2) {
-      tmpstr = (char *)strndup(value+1, value_length-2);
+      tmpstr = req::strndup(value + 1, value_length - 2);
       value_length -= 2;
+    } else {
+      tmpstr = req::strndup(value, value_length);
     }
-    else
-      tmpstr = (char *)strndup(value, value_length);
     if (tmpstr == nullptr) {
       return 0;
     }
@@ -640,7 +640,7 @@ static int php_mb_parse_encoding_list(const char *value, int value_length,
       }
       ret = 0;
     }
-    free(tmpstr);
+    req::free(tmpstr);
   }
 
   return ret;
@@ -2254,11 +2254,11 @@ bool HHVM_FUNCTION(mb_parse_str,
   info.num_from_encodings     = MBSTRG(http_input_list_size);
   info.from_language          = MBSTRG(current_language);
 
-  char *encstr = strndup(encoded_string.data(), encoded_string.size());
+  char *encstr = req::strndup(encoded_string.data(), encoded_string.size());
   Array resultArr = Array::Create();
   mbfl_encoding *detected =
     _php_mb_encoding_handler_ex(&info, resultArr, encstr);
-  free(encstr);
+  req::free(encstr);
   result.assignIfRef(resultArr);
 
   MBSTRG(http_input_identify) = detected;
@@ -4251,7 +4251,7 @@ bool HHVM_FUNCTION(mb_send_mail,
   if (!to.empty()) {
     int to_len = to.size();
     if (to_len > 0) {
-      to_r = strndup(to.data(), to_len);
+      to_r = req::strndup(to.data(), to_len);
       for (; to_len; to_len--) {
         if (!isspace((unsigned char)to_r[to_len - 1])) {
           break;
@@ -4398,6 +4398,9 @@ bool HHVM_FUNCTION(mb_send_mail,
                                encoded_message.data(),
                                all_headers, cmd.data()));
   mbfl_memory_device_clear(&device);
+  if (to_r != to.data()) {
+    req::free(to_r);
+  }
   return ret;
 }
 

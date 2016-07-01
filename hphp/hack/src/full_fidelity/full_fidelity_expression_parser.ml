@@ -513,7 +513,7 @@ module WithStatementAndDeclParser
     match Token.kind token with
     | EqualGreaterThan ->
       let parser, expr2 =
-      parse_expression parser1 in
+      with_reset_precedence parser1 parse_expression in
       (parser, make_list [expr1; make_token token; expr2])
     | _ -> (parser, expr1)
 

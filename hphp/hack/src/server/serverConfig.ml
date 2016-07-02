@@ -116,6 +116,8 @@ let load config_filename options =
     tco_assume_php = bool_ "assume_php" ~default:true config;
     tco_unsafe_xhp = bool_ "unsafe_xhp" ~default:false config;
     tco_user_attrs = config_user_attributes config;
+    tco_experimental_features =
+      local_config.ServerLocalConfig.enable_experimental_tc_features
   } in
   {
     load_script = load_script;

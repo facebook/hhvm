@@ -388,12 +388,16 @@ let class_id_to_str = function
   | CIexpr _ -> assert false
   | CI (_, x) -> x
 
-let is_kvc_kind name = match name with
+let is_kvc_kind experimental_enabled p name = match name with
   | x when
     x = SN.Collections.cMap
     || x = SN.Collections.cImmMap
-    || x = SN.Collections.cStableMap
-    || x = SN.Collections.cDict -> true
+    || x = SN.Collections.cStableMap -> true
+  | x when x = SN.Collections.cDict -> begin
+    if not experimental_enabled then
+      Errors.experimental_feature p "dict";
+    true
+  end
   | _ -> false
 
 let get_kvc_kind name = match name with

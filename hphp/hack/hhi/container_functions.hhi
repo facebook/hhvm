@@ -16,9 +16,6 @@
  */
 function array_key_exists<Tk, Tv>(mixed $key, ?KeyedContainer<Tk, Tv> $search): bool;
 
-// Can construct a dict from a KeyedTraversable (such as an array).
-function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv>;
-
 function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 

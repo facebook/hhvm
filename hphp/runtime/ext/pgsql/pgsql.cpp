@@ -172,7 +172,7 @@ struct PGSQLResult : SweepableResourceData {
 
   static StaticString s_class_name;
   const String& o_getClassNameHook() const override { return s_class_name; }
-  bool isResource() const override { return (bool)m_res; }
+  bool isResource() const { return (bool)m_res; }
 
   void close();
 
@@ -476,7 +476,7 @@ PQ::Connection& PGSQLConnectionPool::GetConnection() {
   if (maxConnections > 0 && connections < maxConnections)
     raise_error("The connection pool is full, cannot open new connection.");
 
-  PQ::Connection& conn = *(new PQ::Connection(GetConnectionString()));
+  PQ::Connection& conn = *(new PQ::Connection(GetConnectionString().data()));
 
   ConnStatusType st = conn.status();
   if (st == CONNECTION_OK) {
@@ -490,15 +490,16 @@ PQ::Connection& PGSQLConnectionPool::GetConnection() {
     raise_error("Getting connection from pool failed.");
   }
 
-  if (m_cleanedConnectionString == "") {
-    m_cleanedConnectionString.append("host=");
-    m_cleanedConnectionString.append(conn.host());
-    m_cleanedConnectionString.append(" port=");
-    m_cleanedConnectionString.append(conn.port());
-    m_cleanedConnectionString.append(" user=");
-    m_cleanedConnectionString.append(conn.user());
-    m_cleanedConnectionString.append(" dbname=");
-    m_cleanedConnectionString.append(conn.db());
+  if (m_cleanedConnectionString.empty()) {
+    std::string connectionString("host=");
+    connectionString += conn.host();
+    connectionString += " port=";
+    connectionString += conn.port();
+    connectionString += " user=";
+    connectionString += conn.user();
+    connectionString += " dbname=";
+    connectionString += conn.db();
+    m_cleanedConnectionString = String(connectionString);
   }
 
   return conn;

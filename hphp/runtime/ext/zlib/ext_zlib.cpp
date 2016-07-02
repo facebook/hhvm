@@ -217,7 +217,7 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
 /* Expand a zlib stream into a String
  *
  * Starts with an optimistically sized output string of
- * input size or maxlen, whichever is less.
+ * input size or maxlen (must be >= 0), whichever is less.
  *
  * From there, grows by ~12.5% per iteration to account for expansion.
  *
@@ -226,17 +226,13 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
  */
 static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
                                        int &status) {
+  assert(maxlen >= 0);
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
   String ret;
   size_t retused = 0;
   int round = 0;
 
   do {
-    if (maxlen && (maxlen < retused)) {
-      status = Z_MEM_ERROR;
-      break;
-    }
-
     if (UNLIKELY(retsize >= kMaxSmallSize && MM().preAllocOOM(retsize + 1))) {
       VMRegAnchor _;
       assert(checkSurpriseFlags());
@@ -257,7 +253,10 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
     status = inflate(Z, Z_NO_FLUSH);
     retused = ms.size() - Z->avail_out;
     ret.setSize(retused);
-
+    if (maxlen && (maxlen < retused)) {
+      status = Z_MEM_ERROR;
+      break;
+    }
     retsize += (retsize >> 3) + 1;
   } while ((Z_BUF_ERROR == status || (Z_OK == status && Z->avail_in)) &&
            ++round < 100);

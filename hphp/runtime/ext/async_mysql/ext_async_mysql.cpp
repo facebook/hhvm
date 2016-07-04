@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <squangle/mysql_client/AsyncHelpers.h>
+#include <squangle/mysql_client/ClientPool.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -87,8 +88,18 @@ DEFINE_CONSTANT(MYSQL_TYPE_ENUM);
 DEFINE_CONSTANT(MYSQL_TYPE_GEOMETRY);
 DEFINE_CONSTANT(MYSQL_TYPE_NULL);
 
-static std::shared_ptr<am::AsyncMysqlClient> getDefaultClient() {
-  return am::AsyncMysqlClient::defaultClient();
+typedef am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>
+    AsyncMysqlClientPool;
+
+namespace {
+folly::Singleton<AsyncMysqlClientPool> clientPool([]() {
+  return new AsyncMysqlClientPool(
+      folly::make_unique<am::AsyncMysqlClientFactory>(), 2);
+});
+}
+
+static std::shared_ptr<am::AsyncMysqlClient> getClient() {
+  return folly::Singleton<AsyncMysqlClientPool>::try_get()->getClient();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -170,7 +181,7 @@ IMPLEMENT_GET_CLASS(MySSLContextProvider)
 void HHVM_STATIC_METHOD(AsyncMysqlClient,
                         setPoolsConnectionLimit,
                         int64_t limit) {
-  getDefaultClient()->setPoolsConnectionLimit(limit);
+  getClient()->setPoolsConnectionLimit(limit);
 }
 
 Object HHVM_STATIC_METHOD(AsyncMysqlClient,
@@ -187,7 +198,7 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient,
                         static_cast<std::string>(dbname),
                         static_cast<std::string>(user),
                         static_cast<std::string>(password));
-  auto op = getDefaultClient()->beginConnection(key);
+  auto op = getClient()->beginConnection(key);
   if (!sslContextProvider.isNull()) {
     auto* mysslContextProvider =
         Native::data<MySSLContextProvider>(sslContextProvider.toObject());
@@ -203,13 +214,13 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient,
 
   auto event = new AsyncMysqlConnectEvent(op);
   try {
-    op->setCallback([ event, clientPtr = getDefaultClient() ](
-        am::ConnectOperation & op) {
-      // Get current stats
-      event->setClientStats(clientPtr->collectPerfStats());
+    op->setCallback(
+        [ event, clientPtr = getClient() ](am::ConnectOperation & op) {
+          // Get current stats
+          event->setClientStats(clientPtr->collectPerfStats());
 
-      event->opFinished();
-    });
+          event->opFinished();
+        });
     op->run();
 
     return Object{event->getWaitHandle()};
@@ -226,12 +237,13 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient, adoptConnection,
   auto conn = cast<MySQLResource>(connection)->mysql();
   // mysql connection from ext/mysql/mysql_common.h
   auto raw_conn = conn->eject_mysql();
-  auto adopted = getDefaultClient()->adoptConnection(raw_conn,
-                                                     conn->m_host,
-                                                     conn->m_port,
-                                                     conn->m_database,
-                                                     conn->m_username,
-                                                     conn->m_password);
+  auto adopted = getClient()->adoptConnection(
+      raw_conn,
+      conn->m_host,
+      conn->m_port,
+      conn->m_database,
+      conn->m_username,
+      conn->m_password);
   return AsyncMysqlConnection::newInstance(std::move(adopted));
 }
 
@@ -285,8 +297,8 @@ void HHVM_METHOD(AsyncMysqlConnectionPool, __construct,
                                   ? am::ExpirationPolicy::IdleTime
                                   : am::ExpirationPolicy::Age);
   }
-  data->m_async_pool = am::AsyncConnectionPool::makePool(
-      getDefaultClient(), pool_options);
+  data->m_async_pool =
+      am::AsyncConnectionPool::makePool(getClient(), pool_options);
 }
 
 // `created_pool_connections` - Number of connections created by the pool

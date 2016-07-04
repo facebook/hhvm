@@ -240,8 +240,9 @@ function hphp_clear_unflushed(): void;
  * method.
  *
  * @return array - Returns an associative array. On success, the array will
- *    contain two keys 'file' and 'line' which indicate the filename and line
- *    number of the callsite that invoked the current function or method.
+ *    contain keys 'file', 'function', 'line' and optionally 'class' which
+ *    indicate the filename, function, line number and class name (if in class
+ *    context) of the callsite that invoked the current function or method.
  */
 <<__Native, __HipHopSpecific>>
 function hphp_debug_caller_info(): array<string, mixed>;

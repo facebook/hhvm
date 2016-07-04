@@ -83,9 +83,9 @@ ArrayData* debug_backtrace_jit(int64_t options) {
  * as the "callee", and we refer to the function that called the callee as
  * the "caller".
  *
- * This function returns an array containing two keys "file" and "line" which
- * indicate the the filename and line number where the "caller" called the
- * "callee".
+ * This function returns an array containing keys "file", "function", "line" and
+ * optionally "class" which indicate the filename, function, line number and
+ * class name (if in class context) where the "caller" called the "callee".
  */
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
   return g_context->getCallerInfo();

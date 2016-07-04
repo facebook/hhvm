@@ -389,9 +389,9 @@ let rec result_matches_expected_ty ty =
               (* if this is a function, we'll check if the return type
                * is a good result as well TODO: stop after enough levels
                * and explore methods on the objects as well *)
-              if Typing_subtype.is_sub_type env goal_type ty then true
+              if Typing_subtype.is_sub_type env ty goal_type then true
               else result_matches_expected_ty fun_.Typing_defs.ft_ret
-          | _ -> Typing_subtype.is_sub_type env goal_type ty)
+          | _ -> Typing_subtype.is_sub_type env ty goal_type)
     | _ -> false
 
 

@@ -69,7 +69,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
         | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
         | Tunresolved _ | Tobject | Tshape _)->
         expected_non_opt_type, type_var) in
-    let env = Type.sub_type p Reason.URawait env expected_type opt_ty_maybe in
+    let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type in
     env, return_type
   )
 
@@ -116,7 +116,7 @@ let gena env p ty =
     let expected_ty = r, Tarraykind AKany in
     let env =
       Errors.try_
-        (fun () -> Type.sub_type p Reason.URawait env expected_ty (r, ty))
+        (fun () -> Type.sub_type p Reason.URawait env (r, ty) expected_ty)
         (fun _ ->
           let ty_str = Typing_print.error ty in
           Errors.gena_expects_array p (Reason.to_pos r) ty_str;

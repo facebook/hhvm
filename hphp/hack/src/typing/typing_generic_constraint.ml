@@ -35,13 +35,13 @@ let check_constraint env ck cstr_ty ty =
              * cstr_ty; we merely want the type itself to be added to
              * cstr_ty's list of unresolved types. Thus we pass the
              * expanded type. *)
-            TUtils.sub_type env cstr_ty ety
+            TUtils.sub_type env ety cstr_ty
         | Ast.Constraint_super ->
             (* If cstr_ty is a Tvar, we don't want to unify that Tvar with
              * ty; we merely want the constraint itself to be added to the
              * ty's list of unresolved types. Thus we pass the expanded
              * constraint type. *)
-            TUtils.sub_type env ty ecstr_ty
+            TUtils.sub_type env ecstr_ty ty
       end
 
 let add_check_constraint_todo (env_now:Env.env) reason generic ck cstr_ty ty =

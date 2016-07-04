@@ -81,7 +81,7 @@ let resolve_types acc collated_values =
         end (fun _ -> raise Exit)
       with Timeout -> raise Timeout | _ -> try Errors.try_ begin fun () ->
         let sub ty1 env ty2 =
-          Typing_ops.sub_type Pos.none ureason env ty1 ty2 in
+          Typing_ops.sub_type Pos.none ureason env ty2 ty1 in
 
         (* Check a list of types, left to right, returning the first one that is
          * a supertype of tyl, or raising Not_found if none are suitable.

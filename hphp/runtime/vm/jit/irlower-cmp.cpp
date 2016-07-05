@@ -194,12 +194,24 @@ void cgNeqDbl(IRLS& env, const IRInstruction* inst) {
  *
  * NB: This is clearly an x64-ism, and likely needs to be done differently for
  * other architectures.
+ *
+ * ARM has condition codes that test Gt, Gte, Lt, Lte without running into
+ * "unordered" ambiguity. We can just use those directly. See convertCC()
+ * in "abi-arm.h".
  */
+#if !defined(__aarch64__)
 #define CMP_DBL_OPS         \
   CDO(Gt,   CC_A,   false)  \
   CDO(Gte,  CC_AE,  false)  \
   CDO(Lt,   CC_A,   true)   \
   CDO(Lte,  CC_AE,  true)
+#else
+#define CMP_DBL_OPS         \
+  CDO(Gt,   CC_G,   false)  \
+  CDO(Gte,  CC_GE,  false)  \
+  CDO(Lt,   CC_B,   false)  \
+  CDO(Lte,  CC_BE,  false)
+#endif
 
 #define CDO(Inst, cc, invert) \
   void cg##Inst##Dbl(IRLS& env, const IRInstruction* inst) {  \

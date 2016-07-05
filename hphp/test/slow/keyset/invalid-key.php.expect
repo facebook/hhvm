@@ -1,0 +1,21 @@
+Caught Invalid keyset key: expected a key of type int or string, null given
+Caught Invalid keyset key: expected a key of type int or string, array given
+Caught Invalid keyset key: expected a key of type int or string, stdClass given
+Caught Invalid keyset key: expected a key of type int or string, double given
+Caught Invalid keyset key: expected a key of type int or string, array given
+Caught Invalid keyset key: expected a key of type int or string, bool given
+int(1)
+string(1) "1"
+Caught Invalid keyset key: expected a key of type int or string, null given
+Caught Invalid keyset key: expected a key of type int or string, array given
+Caught Invalid keyset key: expected a key of type int or string, stdClass given
+Caught Invalid keyset key: expected a key of type int or string, double given
+int(12)
+Caught Invalid keyset key: expected a key of type int or string, array given
+Caught Invalid keyset key: expected a key of type int or string, bool given
+keyset(4) {
+  int(42)
+  int(1)
+  string(1) "1"
+  int(12)
+}

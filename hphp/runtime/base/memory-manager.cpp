@@ -195,6 +195,7 @@ MemoryManager::MemoryManager() {
 #endif
   resetStatsImpl(true);
   setMemoryLimit(std::numeric_limits<int64_t>::max());
+  resetGC(); // so each thread has unique req_num at startup
   // make the circular-lists empty.
   m_strings.next = m_strings.prev = &m_strings;
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
@@ -528,7 +529,7 @@ void MemoryManager::resetAllocator() {
   m_sweeping = false;
   m_exiting = false;
   resetStatsImpl(true);
-  updateNextGc();
+  resetGC();
   FTRACE(1, "reset: strings {}\n", nstrings);
   if (debug) resetEagerGC();
 }

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/struct-log.h"
+#include <folly/Random.h>
 
 namespace HPHP {
 
@@ -21,6 +22,10 @@ StructuredLogImpl StructuredLog::s_impl = nullptr;
 
 bool StructuredLog::enabled() {
   return s_impl != nullptr;
+}
+
+bool StructuredLog::coinflip(uint32_t rate) {
+  return enabled() && rate > 0 && folly::Random::rand32(rate) == 0;
 }
 
 void StructuredLog::enable(StructuredLogImpl impl) {

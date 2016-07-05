@@ -39,6 +39,7 @@ struct StructuredLog {
   static void enable(StructuredLogImpl impl);
   static bool enabled();
   static void log(const std::string& tableName, const StructuredLogEntry&);
+  static bool coinflip(uint32_t rate);
 
  private:
   static StructuredLogImpl s_impl;

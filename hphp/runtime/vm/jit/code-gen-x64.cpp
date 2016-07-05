@@ -265,6 +265,7 @@ DELEGATE_OPCODE(LteInt)
 DELEGATE_OPCODE(EqInt)
 DELEGATE_OPCODE(NeqInt)
 DELEGATE_OPCODE(CmpInt)
+DELEGATE_OPCODE(CheckRange)
 DELEGATE_OPCODE(GtBool)
 DELEGATE_OPCODE(GteBool)
 DELEGATE_OPCODE(LtBool)
@@ -391,6 +392,11 @@ DELEGATE_OPCODE(DefLabel)
 DELEGATE_OPCODE(Jmp)
 DELEGATE_OPCODE(JmpZero)
 DELEGATE_OPCODE(JmpNZero)
+DELEGATE_OPCODE(CheckNullptr)
+DELEGATE_OPCODE(CheckNonNull)
+DELEGATE_OPCODE(AssertNonNull)
+DELEGATE_OPCODE(CheckInit)
+DELEGATE_OPCODE(CheckInitMem)
 DELEGATE_OPCODE(ProfileSwitchDest)
 DELEGATE_OPCODE(JmpSwitchDest)
 DELEGATE_OPCODE(JmpSSwitchDest)
@@ -676,46 +682,6 @@ void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf,
                                Block* target) {
   irlower::fwdJcc(v, m_state, cc, sf, target);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
-  if (!inst->taken()) return;
-  auto reg = srcLoc(inst, 0).reg(0);
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << testq{reg, reg, sf};
-  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto taken  = inst->taken();
-  assertx(taken);
-
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << testq{srcReg, srcReg, sf};
-  emitFwdJcc(v, CC_Z, sf, taken);
-  v << copy{srcReg, dstReg};
-}
-
-void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
-  auto& v = vmain();
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const sf = v.makeReg();
-    v << testq{srcReg, srcReg, sf};
-    ifThen(v, CC_Z, sf, [&](Vout& v) {
-      v << ud2{};
-    });
-  }
-  v << copy{srcReg, dstReg};
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   return irlower::cgCallNative(v, m_state, inst);
@@ -1136,27 +1102,6 @@ void CodeGenerator::cgLdPackedArrayElemAddr(IRInstruction* inst) {
                 int(sizeof(ArrayData))], dst};
 }
 
-void CodeGenerator::cgCheckRange(IRInstruction* inst) {
-  auto val = inst->src(0);
-  auto valReg = srcLoc(inst, 0).reg();
-  auto limitReg  = srcLoc(inst, 1).reg();
-
-  auto& v = vmain();
-  ConditionCode cc;
-  auto const sf = v.makeReg();
-  if (val->hasConstVal()) {
-    // Try to put the constant in a position that can get imm-folded. A
-    // suffiently smart imm-folder could handle this for us.
-    v << cmpq{valReg, limitReg, sf};
-    cc = CC_A;
-  } else {
-    v << cmpq{limitReg, valReg, sf};
-    cc = CC_B;
-  }
-
-  v << setcc{cc, sf, dstLoc(inst, 0).reg()};
-}
-
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();
@@ -1419,36 +1364,6 @@ void CodeGenerator::cgNewColFromArray(IRInstruction* inst) {
                callDest(inst),
                SyncOptions::Sync,
                argGroup(inst).ssa(0));
-}
-
-void CodeGenerator::cgCheckInit(IRInstruction* inst) {
-  Block* taken = inst->taken();
-  assertx(taken);
-  SSATmp* src = inst->src(0);
-
-  if (!src->type().maybe(TUninit)) return;
-
-  auto typeReg = srcLoc(inst, 0).reg(1);
-  assertx(typeReg != InvalidReg);
-
-  static_assert(KindOfUninit == 0, "cgCheckInit assumes KindOfUninit == 0");
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << testb{typeReg, typeReg, sf};
-  v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
-}
-
-void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
-  Block* taken = inst->taken();
-  assertx(taken);
-  SSATmp* base = inst->src(0);
-  Type t = base->type().deref();
-  if (!t.maybe(TUninit)) return;
-  auto basereg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfUninit, basereg[TVOFF(m_type)]);
-  v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
 }
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {

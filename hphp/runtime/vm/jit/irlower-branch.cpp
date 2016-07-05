@@ -133,6 +133,8 @@ void cgJmp(IRLS& env, const IRInstruction* inst) {
   v << phijmp{target, v.makeTuple(std::move(args))};
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
 void implJmpZ(IRLS& env, const IRInstruction* inst, ConditionCode cc) {
@@ -155,6 +157,73 @@ void cgJmpZero(IRLS& env, const IRInstruction* inst) {
 }
 void cgJmpNZero(IRLS& env, const IRInstruction* inst) {
   implJmpZ(env, inst, CC_NZ);
+}
+
+void cgCheckNullptr(IRLS& env, const IRInstruction* inst) {
+  if (!inst->taken()) return;
+
+  auto src = srcLoc(env, inst, 0).reg(0);
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << testq{src, src, sf};
+  v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+void cgCheckNonNull(IRLS& env, const IRInstruction* inst) {
+  auto dst = dstLoc(env, inst, 0).reg();
+  auto src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  assertx(inst->taken());
+
+  auto const sf = v.makeReg();
+  v << testq{src, src, sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << copy{src, dst};
+}
+
+void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {
+  auto dst = dstLoc(env, inst, 0).reg();
+  auto src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    auto const sf = v.makeReg();
+    v << testq{src, src, sf};
+    ifThen(v, CC_Z, sf, [&](Vout& v) { v << ud2{}; });
+  }
+  v << copy{src, dst};
+}
+
+void cgCheckInit(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->taken());
+
+  auto const src = inst->src(0);
+  if (!src->type().maybe(TUninit)) return;
+
+  auto const type = srcLoc(env, inst, 0).reg(1);
+  assertx(type != InvalidReg);
+  auto& v = vmain(env);
+
+  static_assert(KindOfUninit == 0, "cgCheckInit assumes KindOfUninit == 0");
+
+  auto const sf = v.makeReg();
+  v << testb{type, type, sf};
+  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+void cgCheckInitMem(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->taken());
+
+  auto const src = inst->src(0);
+  if (!src->type().deref().maybe(TUninit)) return;
+
+  auto const ptr = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfUninit, ptr[TVOFF(m_type)]);
+  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

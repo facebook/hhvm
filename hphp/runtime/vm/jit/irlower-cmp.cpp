@@ -173,6 +173,29 @@ void cgCmpInt(IRLS& env, const IRInstruction* inst) {
   v << cmovq{CC_L, sf, tmp2, v.cns(-1), d};
 }
 
+void cgCheckRange(IRLS& env, const IRInstruction* inst) {
+  auto valTmp = inst->src(0);
+  auto dst = dstLoc(env, inst, 0).reg();
+  auto val = srcLoc(env, inst, 0).reg();
+  auto limit = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  ConditionCode cc;
+  auto const sf = v.makeReg();
+
+  if (valTmp->hasConstVal()) {
+    // Try to put the constant in a position that can get imm-folded.  A
+    // suffiently smart imm-folder could handle this for us.  Note that this is
+    // an arch-agnostic API bleed.
+    v << cmpq{val, limit, sf};
+    cc = CC_A;
+  } else {
+    v << cmpq{limit, val, sf};
+    cc = CC_B;
+  }
+  v << setcc{cc, sf, dst};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgEqDbl(IRLS& env, const IRInstruction* inst)  {

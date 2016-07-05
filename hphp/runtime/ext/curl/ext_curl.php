@@ -499,6 +499,7 @@ async function curl_exec(mixed $urlOrHandle): Awaitable<string> {
   } while ($status === CURLM_OK);
   $content = (string)curl_multi_getcontent($ch);
   curl_multi_remove_handle($mh, $ch);
+  curl_close($ch);
   curl_multi_close($mh);
   return $content;
 }

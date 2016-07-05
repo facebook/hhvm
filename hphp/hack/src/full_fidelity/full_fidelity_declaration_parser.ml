@@ -62,15 +62,38 @@ module WithExpressionAndStatementParser
     (parser, node)
 
   (* Declarations *)
-  let rec parse_require_multiple_directive parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
 
-  and parse_require_once_directive parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+  let rec parse_inclusion_directive parser =
+  (* SPEC:
+    inclusion-directive:
+      require-multiple-directive
+      require-once-directive
+
+    require-multiple-directive:
+      require  (  include-filename  )  ;
+      require  include-filename  ;
+
+    include-filename:
+      expression
+
+    require-once-directive:
+      require_once  (  include-filename  )  ;
+      require_once  include-filename  ;
+    *)
+
+    let (parser, require) = next_token parser in
+    let require = make_token require in
+    let (parser, left_paren) = optional_token parser LeftParen in
+    let (parser, filename) = parse_expression parser in
+    (* ERROR RECOVERY: TODO: We could detect if there is a right paren but
+       no left paren and give an error saying the left paren is missing. *)
+    let (parser, right_paren) =
+      if is_missing left_paren then (parser, (make_missing()))
+      else expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+    let result = make_inclusion_directive
+      require left_paren filename right_paren semi in
+    (parser, result)
 
   and parse_type_alias_declaration parser =
     (* TODO *)
@@ -428,8 +451,8 @@ module WithExpressionAndStatementParser
   let parse_declaration parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
-    | Require -> parse_require_multiple_directive parser
-    | Require_once -> parse_require_once_directive parser
+    | Require
+    | Require_once -> parse_inclusion_directive parser
     | Type -> parse_type_alias_declaration parser
     | Newtype -> parse_newtype_alias_declaration parser
     | Namespace -> parse_namespace_declaration parser

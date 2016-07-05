@@ -143,6 +143,13 @@ module WithToken(Token: TokenType) = struct
       attribute_values : t;
       attribute_right_paren : t
     }
+    and inclusion_directive = {
+      inclusion_require : t;
+      inclusion_left_paren : t;
+      inclusion_filename : t;
+      inclusion_right_paren : t;
+      inclusion_semicolon : t
+    }
     and compound_statement = {
       compound_left_brace : t;
       compound_statements : t;
@@ -434,7 +441,7 @@ module WithToken(Token: TokenType) = struct
     | DefaultArgumentSpecifier of default_argument_specifier
     | AttributeSpecification of attribute_specification
     | Attribute of attribute
-
+    | InclusionDirective of inclusion_directive
     | CompoundStatement of compound_statement
     | ExpressionStatement of expression_statement
     | WhileStatement of while_statement
@@ -518,6 +525,7 @@ module WithToken(Token: TokenType) = struct
       | DefaultArgumentSpecifier _ -> SyntaxKind.DefaultArgumentSpecifier
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
       | Attribute _ -> SyntaxKind.Attribute
+      | InclusionDirective _ -> SyntaxKind.InclusionDirective
       | CompoundStatement _ -> SyntaxKind.CompoundStatement
       | ExpressionStatement _ -> SyntaxKind.ExpressionStatement
       | WhileStatement _ -> SyntaxKind.WhileStatement
@@ -588,6 +596,7 @@ module WithToken(Token: TokenType) = struct
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
     let is_attribute node = kind node = SyntaxKind.Attribute
+    let is_inclusion_directive node = kind node = SyntaxKind.InclusionDirective
     let is_compound_statement node = kind node = SyntaxKind.CompoundStatement
     let is_expression_statement node =
       kind node = SyntaxKind.ExpressionStatement
@@ -706,6 +715,11 @@ module WithToken(Token: TokenType) = struct
           attribute_right_paren } ->
         [ attribute_name; attribute_left_paren; attribute_values;
           attribute_right_paren ]
+      | InclusionDirective
+        { inclusion_require; inclusion_left_paren; inclusion_filename;
+          inclusion_right_paren; inclusion_semicolon } ->
+        [ inclusion_require; inclusion_left_paren; inclusion_filename;
+          inclusion_right_paren; inclusion_semicolon ]
       | CompoundStatement
         { compound_left_brace; compound_statements; compound_right_brace } ->
         [ compound_left_brace; compound_statements; compound_right_brace ]
@@ -948,6 +962,11 @@ module WithToken(Token: TokenType) = struct
           attribute_right_paren } ->
         [ "attribute_name"; "attribute_left_paren"; "attribute_values";
           "attribute_right_paren" ]
+      | InclusionDirective
+        { inclusion_require; inclusion_left_paren; inclusion_filename;
+          inclusion_right_paren; inclusion_semicolon } ->
+        [ "inclusion_require"; "inclusion_left_paren"; "inclusion_filename";
+          "inclusion_right_paren"; "inclusion_semicolon" ]
       | CompoundStatement
         { compound_left_brace; compound_statements; compound_right_brace } ->
         [ "compound_left_brace"; "compound_statements"; "compound_right_brace" ]
@@ -1415,6 +1434,12 @@ module WithToken(Token: TokenType) = struct
         attribute_values; attribute_right_paren ] ->
         Attribute { attribute_name; attribute_left_paren; attribute_values;
           attribute_right_paren }
+      | (SyntaxKind.InclusionDirective ,
+        [ inclusion_require; inclusion_left_paren; inclusion_filename;
+          inclusion_right_paren; inclusion_semicolon ]) ->
+        InclusionDirective
+        { inclusion_require; inclusion_left_paren; inclusion_filename;
+          inclusion_right_paren; inclusion_semicolon }
       | (SyntaxKind.CompoundStatement, [ compound_left_brace;
         compound_statements; compound_right_brace ]) ->
         CompoundStatement { compound_left_brace; compound_statements;
@@ -1789,6 +1814,11 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.Attribute
         [ attribute_name; attribute_left_paren; attribute_values;
           attribute_right_paren ]
+
+      let make_inclusion_directive
+          require left_paren filename right_paren semicolon =
+        from_children SyntaxKind.InclusionDirective
+          [ require; left_paren; filename; right_paren; semicolon ]
 
       let make_compound_statement
         compound_left_brace compound_statements compound_right_brace =

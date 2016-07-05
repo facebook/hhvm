@@ -25,6 +25,7 @@ type t =
 | DefaultArgumentSpecifier
 | AttributeSpecification
 | Attribute
+| InclusionDirective
 
 (* Statements *)
 | CompoundStatement
@@ -145,6 +146,7 @@ let to_string kind =
   | FieldSpecifier -> "field_specifier"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
+  | InclusionDirective -> "inclusion_directive"
   | XHPExpression -> "xhp_expression"
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"

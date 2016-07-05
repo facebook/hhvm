@@ -309,6 +309,13 @@ let rec get_doc node =
     let values = get_doc (attribute_values x) in
     let left_part = group_doc (name ^^| left) in
     indent_block_no_space left_part values right indt
+  | InclusionDirective x ->
+    let rq = get_doc x.inclusion_require in
+    let lp = get_doc x.inclusion_left_paren in
+    let fn = get_doc x.inclusion_filename in
+    let rp = get_doc x.inclusion_right_paren in
+    let se = get_doc x.inclusion_semicolon in
+    rq ^| lp ^^^ fn ^^^ rp ^^^ se
   | CompoundStatement x ->
     let left = get_doc (compound_left_brace x) in
     let right = get_doc (compound_right_brace x) in

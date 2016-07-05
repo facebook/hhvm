@@ -20,9 +20,11 @@
 #include "hphp/runtime/base/ref-data.h"
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -258,6 +260,30 @@ void cgIsScalarType(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmpbi{KindOfString - KindOfBoolean, diff, sf};
   v << setcc{CC_BE, sf, dst};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgAssertType(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0);
+  auto const src = srcLoc(env, inst, 0);
+  copyTV(vmain(env), src, dst, inst->dst()->type());
+}
+
+void cgAssertLoc(IRLS&, const IRInstruction*) {}
+void cgAssertStk(IRLS&, const IRInstruction*) {}
+void cgHintLocInner(IRLS&, const IRInstruction*) {}
+void cgHintStkInner(IRLS&, const IRInstruction*) {}
+
+void cgProfileType(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<RDSHandleData>();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .typedValue(0);
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&TypeProfile::report),
+               kVoidDest, SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

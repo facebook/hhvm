@@ -663,17 +663,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
   return switchBoundsCheck(ival, base, nTargets);
 }
 
-void profileClassMethodHelper(MethProfile* profile,
-                              const ActRec* ar,
-                              const Class* cls) {
-  profile->reportMeth(ar, cls);
-}
-
-void profileTypeHelper(TypeProfile* profile, TypedValue newTV) {
-  auto newType = typeFromTV(&newTV);
-  profile->report(newType);
-}
-
 void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr) {
   profile->report(arr->kind());
 }

@@ -37,8 +37,6 @@ struct c_Vector;
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
-struct MethProfile;
-struct TypeProfile;
 struct ArrayKindProfile;
 struct TypeConstraint;
 
@@ -158,10 +156,6 @@ TypedValue* getSPropOrRaise(const Class* cls,
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
-
-void profileClassMethodHelper(MethProfile*, const ActRec*, const Class*);
-
-void profileTypeHelper(TypeProfile*, TypedValue);
 
 void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr);
 

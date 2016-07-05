@@ -104,6 +104,12 @@ void cgStringIsset(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NBE, sf, dst};
 }
 
+IMPL_OPCODE_CALL(ConcatStrStr);
+IMPL_OPCODE_CALL(ConcatStrInt);
+IMPL_OPCODE_CALL(ConcatIntStr);
+IMPL_OPCODE_CALL(ConcatStr3);
+IMPL_OPCODE_CALL(ConcatStr4);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

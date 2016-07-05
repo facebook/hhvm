@@ -141,15 +141,6 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
     irlower::cg##opcode(m_state, i);                  \
   }
 
-NOOP_OPCODE(DefConst)
-NOOP_OPCODE(DefFP)
-NOOP_OPCODE(AssertLoc)
-NOOP_OPCODE(Nop)
-NOOP_OPCODE(EndGuards)
-NOOP_OPCODE(ExitPlaceholder);
-NOOP_OPCODE(HintLocInner)
-NOOP_OPCODE(HintStkInner)
-NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(FinishMemberOp)
 
 CALL_OPCODE(AddElemStrKey)
@@ -158,12 +149,6 @@ CALL_OPCODE(AddNewElem)
 CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(MapAddElemC)
 CALL_OPCODE(ColAddNewElemC)
-
-CALL_OPCODE(CoerceCellToBool);
-CALL_OPCODE(CoerceCellToInt);
-CALL_OPCODE(CoerceCellToDbl);
-CALL_OPCODE(CoerceStrToDbl);
-CALL_OPCODE(CoerceStrToInt);
 
 CALL_OPCODE(ConvBoolToArr);
 CALL_OPCODE(ConvDblToArr);
@@ -196,88 +181,16 @@ CALL_OPCODE(ConvObjToStr);
 CALL_OPCODE(ConvResToStr);
 CALL_OPCODE(ConvCellToStr);
 
-CALL_OPCODE(ConcatStrStr);
-CALL_OPCODE(ConcatStrInt);
-CALL_OPCODE(ConcatIntStr);
-CALL_OPCODE(ConcatStr3);
-CALL_OPCODE(ConcatStr4);
-
-CALL_OPCODE(GtStr);
-CALL_OPCODE(GteStr);
-CALL_OPCODE(LtStr);
-CALL_OPCODE(LteStr);
-CALL_OPCODE(EqStr);
-CALL_OPCODE(NeqStr);
-CALL_OPCODE(SameStr);
-CALL_OPCODE(NSameStr);
-CALL_OPCODE(CmpStr);
-CALL_OPCODE(GtStrInt);
-CALL_OPCODE(GteStrInt);
-CALL_OPCODE(LtStrInt);
-CALL_OPCODE(LteStrInt);
-CALL_OPCODE(EqStrInt);
-CALL_OPCODE(NeqStrInt);
-CALL_OPCODE(CmpStrInt);
-CALL_OPCODE(GtObj);
-CALL_OPCODE(GteObj);
-CALL_OPCODE(LtObj);
-CALL_OPCODE(LteObj);
-CALL_OPCODE(EqObj);
-CALL_OPCODE(NeqObj);
-CALL_OPCODE(CmpObj);
-CALL_OPCODE(GtArr);
-CALL_OPCODE(GteArr);
-CALL_OPCODE(LtArr);
-CALL_OPCODE(LteArr);
-CALL_OPCODE(EqArr);
-CALL_OPCODE(NeqArr);
-CALL_OPCODE(SameArr);
-CALL_OPCODE(NSameArr);
-CALL_OPCODE(CmpArr);
-CALL_OPCODE(GtRes);
-CALL_OPCODE(GteRes);
-CALL_OPCODE(LtRes);
-CALL_OPCODE(LteRes);
-CALL_OPCODE(CmpRes);
-
-CALL_OPCODE(ThrowInvalidOperation);
-CALL_OPCODE(HasToString);
-
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewDictArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(AllocPackedArray)
 CALL_OPCODE(AllocVecArray)
-CALL_OPCODE(Clone)
-CALL_OPCODE(AllocObj)
-CALL_OPCODE(DebugBacktrace)
-CALL_OPCODE(InitThrowableFileAndLine)
-CALL_OPCODE(RegisterLiveObj)
-CALL_OPCODE(LdClsCtor)
-CALL_OPCODE(LookupClsRDS)
-CALL_OPCODE(PrintStr)
-CALL_OPCODE(PrintInt)
-CALL_OPCODE(PrintBool)
-CALL_OPCODE(DbgAssertPtr)
-CALL_OPCODE(LdSwitchDblIndex)
-CALL_OPCODE(LdSwitchStrIndex)
-CALL_OPCODE(LdSwitchObjIndex)
-CALL_OPCODE(RaiseUninitLoc)
-CALL_OPCODE(RaiseUndefProp)
-CALL_OPCODE(RaiseMissingArg)
-CALL_OPCODE(RaiseError)
-CALL_OPCODE(RaiseWarning)
-CALL_OPCODE(RaiseNotice)
-CALL_OPCODE(RaiseArrayIndexNotice)
-CALL_OPCODE(RaiseArrayKeyNotice)
-CALL_OPCODE(IncStatGrouped)
-CALL_OPCODE(MapIdx)
-CALL_OPCODE(LdClsPropAddrOrNull)
-CALL_OPCODE(LdClsPropAddrOrRaise)
-CALL_OPCODE(LdGblAddrDef)
 
-CALL_OPCODE(MethodExists)
+CALL_OPCODE(DbgAssertPtr)
+
+CALL_OPCODE(MapIdx)
 
 // Vector instruction helpers
 CALL_OPCODE(StringGet)
@@ -290,22 +203,33 @@ CALL_OPCODE(SetNewElemArray)
 CALL_OPCODE(BindNewElem)
 CALL_OPCODE(VectorIsset)
 CALL_OPCODE(PairIsset)
-CALL_OPCODE(ThrowOutOfBounds)
-CALL_OPCODE(ThrowArithmeticError)
-CALL_OPCODE(ThrowDivisionByZeroError)
-
-CALL_OPCODE(ZeroErrorLevel)
-CALL_OPCODE(RestoreErrorLevel)
 
 CALL_OPCODE(Count)
 
-CALL_OPCODE(SuspendHookE)
-CALL_OPCODE(SuspendHookR)
-CALL_OPCODE(ReturnHook)
-
-CALL_OPCODE(OODeclExists)
-
 CALL_OPCODE(GetMemoKey)
+
+DELEGATE_OPCODE(Nop)
+DELEGATE_OPCODE(DefConst)
+DELEGATE_OPCODE(EndGuards)
+DELEGATE_OPCODE(ExitPlaceholder)
+DELEGATE_OPCODE(DefFP)
+DELEGATE_OPCODE(DefSP)
+DELEGATE_OPCODE(EagerSyncVMRegs)
+DELEGATE_OPCODE(Mov)
+DELEGATE_OPCODE(Halt)
+DELEGATE_OPCODE(InterpOne)
+DELEGATE_OPCODE(InterpOneCF)
+DELEGATE_OPCODE(PrintBool)
+DELEGATE_OPCODE(PrintInt)
+DELEGATE_OPCODE(PrintStr)
+DELEGATE_OPCODE(RBTraceEntry)
+DELEGATE_OPCODE(RBTraceMsg)
+
+DELEGATE_OPCODE(IncStat)
+DELEGATE_OPCODE(IncStatGrouped)
+DELEGATE_OPCODE(IncTransCounter)
+DELEGATE_OPCODE(IncProfCounter)
+DELEGATE_OPCODE(CheckCold)
 
 DELEGATE_OPCODE(Box)
 DELEGATE_OPCODE(BoxPtr)
@@ -355,10 +279,49 @@ DELEGATE_OPCODE(LteDbl)
 DELEGATE_OPCODE(EqDbl)
 DELEGATE_OPCODE(NeqDbl)
 DELEGATE_OPCODE(CmpDbl)
+DELEGATE_OPCODE(GtStr);
+DELEGATE_OPCODE(GteStr);
+DELEGATE_OPCODE(LtStr);
+DELEGATE_OPCODE(LteStr);
+DELEGATE_OPCODE(EqStr);
+DELEGATE_OPCODE(NeqStr);
+DELEGATE_OPCODE(SameStr);
+DELEGATE_OPCODE(NSameStr);
+DELEGATE_OPCODE(CmpStr);
+DELEGATE_OPCODE(GtStrInt);
+DELEGATE_OPCODE(GteStrInt);
+DELEGATE_OPCODE(LtStrInt);
+DELEGATE_OPCODE(LteStrInt);
+DELEGATE_OPCODE(EqStrInt);
+DELEGATE_OPCODE(NeqStrInt);
+DELEGATE_OPCODE(CmpStrInt);
+DELEGATE_OPCODE(GtObj);
+DELEGATE_OPCODE(GteObj);
+DELEGATE_OPCODE(LtObj);
+DELEGATE_OPCODE(LteObj);
+DELEGATE_OPCODE(EqObj);
+DELEGATE_OPCODE(NeqObj);
 DELEGATE_OPCODE(SameObj)
 DELEGATE_OPCODE(NSameObj)
+DELEGATE_OPCODE(CmpObj);
+DELEGATE_OPCODE(GtArr);
+DELEGATE_OPCODE(GteArr);
+DELEGATE_OPCODE(LtArr);
+DELEGATE_OPCODE(LteArr);
+DELEGATE_OPCODE(EqArr);
+DELEGATE_OPCODE(NeqArr);
+DELEGATE_OPCODE(SameArr);
+DELEGATE_OPCODE(NSameArr);
+DELEGATE_OPCODE(CmpArr);
+DELEGATE_OPCODE(GtRes);
+DELEGATE_OPCODE(GteRes);
+DELEGATE_OPCODE(LtRes);
+DELEGATE_OPCODE(LteRes);
 DELEGATE_OPCODE(EqRes)
 DELEGATE_OPCODE(NeqRes)
+DELEGATE_OPCODE(CmpRes);
+DELEGATE_OPCODE(EqFunc)
+DELEGATE_OPCODE(DbgAssertFunc)
 
 DELEGATE_OPCODE(EqCls)
 DELEGATE_OPCODE(InstanceOf)
@@ -382,6 +345,12 @@ DELEGATE_OPCODE(IsNType)
 DELEGATE_OPCODE(IsTypeMem)
 DELEGATE_OPCODE(IsNTypeMem)
 DELEGATE_OPCODE(IsScalarType)
+DELEGATE_OPCODE(AssertType)
+DELEGATE_OPCODE(AssertLoc)
+DELEGATE_OPCODE(AssertStk)
+DELEGATE_OPCODE(HintLocInner)
+DELEGATE_OPCODE(HintStkInner)
+DELEGATE_OPCODE(ProfileType)
 
 DELEGATE_OPCODE(LdLoc)
 DELEGATE_OPCODE(LdLocAddr)
@@ -405,7 +374,10 @@ DELEGATE_OPCODE(LdMIStateAddr)
 DELEGATE_OPCODE(LdMBase)
 DELEGATE_OPCODE(StMBase)
 DELEGATE_OPCODE(LdGblAddr)
+DELEGATE_OPCODE(LdGblAddrDef)
 DELEGATE_OPCODE(LdPropAddr)
+DELEGATE_OPCODE(LdClsPropAddrOrNull)
+DELEGATE_OPCODE(LdClsPropAddrOrRaise)
 DELEGATE_OPCODE(LdRDSAddr)
 DELEGATE_OPCODE(LdTVAux)
 
@@ -424,10 +396,14 @@ DELEGATE_OPCODE(JmpSwitchDest)
 DELEGATE_OPCODE(JmpSSwitchDest)
 DELEGATE_OPCODE(LdSSwitchDestFast)
 DELEGATE_OPCODE(LdSSwitchDestSlow)
+DELEGATE_OPCODE(LdSwitchDblIndex)
+DELEGATE_OPCODE(LdSwitchStrIndex)
+DELEGATE_OPCODE(LdSwitchObjIndex)
 
 DELEGATE_OPCODE(ReqBindJmp)
 DELEGATE_OPCODE(ReqRetranslate)
 DELEGATE_OPCODE(ReqRetranslateOpt)
+DELEGATE_OPCODE(LdBindAddr)
 
 DELEGATE_OPCODE(LdClsCtx)
 DELEGATE_OPCODE(LdClsCctx)
@@ -436,9 +412,11 @@ DELEGATE_OPCODE(CastCtxThis)
 DELEGATE_OPCODE(CheckCtxThis)
 
 DELEGATE_OPCODE(LdClsName)
+DELEGATE_OPCODE(MethodExists)
 DELEGATE_OPCODE(LdClsMethod)
 DELEGATE_OPCODE(LdIfaceMethod)
 DELEGATE_OPCODE(LdObjInvoke)
+DELEGATE_OPCODE(HasToString)
 DELEGATE_OPCODE(LdFuncVecLen)
 DELEGATE_OPCODE(LdClsInitData)
 DELEGATE_OPCODE(CheckInitProps)
@@ -449,14 +427,22 @@ DELEGATE_OPCODE(InitSProps)
 DELEGATE_OPCODE(LdFuncNumParams)
 
 DELEGATE_OPCODE(LdObjClass)
-DELEGATE_OPCODE(ConstructInstance)
+DELEGATE_OPCODE(AllocObj)
 DELEGATE_OPCODE(NewInstanceRaw)
+DELEGATE_OPCODE(ConstructInstance)
+DELEGATE_OPCODE(Clone)
+DELEGATE_OPCODE(RegisterLiveObj)
 DELEGATE_OPCODE(InitObjProps)
 
 DELEGATE_OPCODE(LdStrLen)
 DELEGATE_OPCODE(OrdStr)
 DELEGATE_OPCODE(OrdStrIdx)
 DELEGATE_OPCODE(StringIsset)
+DELEGATE_OPCODE(ConcatStrStr);
+DELEGATE_OPCODE(ConcatStrInt);
+DELEGATE_OPCODE(ConcatIntStr);
+DELEGATE_OPCODE(ConcatStr3);
+DELEGATE_OPCODE(ConcatStr4);
 
 DELEGATE_OPCODE(BaseG)
 DELEGATE_OPCODE(PropX)
@@ -502,13 +488,17 @@ DELEGATE_OPCODE(MapIsset)
 DELEGATE_OPCODE(LdCls)
 DELEGATE_OPCODE(LdClsCached)
 DELEGATE_OPCODE(LdClsCachedSafe)
+DELEGATE_OPCODE(LookupClsRDS)
 DELEGATE_OPCODE(LdFunc)
 DELEGATE_OPCODE(LdFuncCached)
 DELEGATE_OPCODE(LdFuncCachedU)
 DELEGATE_OPCODE(LdFuncCachedSafe)
+DELEGATE_OPCODE(OODeclExists)
 
 DELEGATE_OPCODE(LdObjMethod)
 DELEGATE_OPCODE(LookupClsMethod)
+DELEGATE_OPCODE(LdClsCtor)
+DELEGATE_OPCODE(ProfileMethod)
 DELEGATE_OPCODE(LookupClsMethodCache)
 DELEGATE_OPCODE(LdClsMethodCacheFunc)
 DELEGATE_OPCODE(LdClsMethodCacheCls)
@@ -563,6 +553,28 @@ DELEGATE_OPCODE(InlineReturnNoFrame)
 DELEGATE_OPCODE(SyncReturnBC)
 DELEGATE_OPCODE(Conjure)
 DELEGATE_OPCODE(ConjureUse)
+
+DELEGATE_OPCODE(BeginCatch)
+DELEGATE_OPCODE(EndCatch)
+DELEGATE_OPCODE(UnwindCheckSideExit)
+DELEGATE_OPCODE(LdUnwinderValue)
+DELEGATE_OPCODE(DebugBacktrace)
+DELEGATE_OPCODE(InitThrowableFileAndLine)
+DELEGATE_OPCODE(ZeroErrorLevel)
+DELEGATE_OPCODE(RestoreErrorLevel)
+
+DELEGATE_OPCODE(RaiseArrayIndexNotice)
+DELEGATE_OPCODE(RaiseArrayKeyNotice)
+DELEGATE_OPCODE(RaiseError)
+DELEGATE_OPCODE(RaiseMissingArg)
+DELEGATE_OPCODE(RaiseNotice)
+DELEGATE_OPCODE(RaiseUndefProp)
+DELEGATE_OPCODE(RaiseUninitLoc)
+DELEGATE_OPCODE(RaiseWarning)
+DELEGATE_OPCODE(ThrowArithmeticError)
+DELEGATE_OPCODE(ThrowDivisionByZeroError)
+DELEGATE_OPCODE(ThrowInvalidOperation);
+DELEGATE_OPCODE(ThrowOutOfBounds)
 
 DELEGATE_OPCODE(LdStaticLoc)
 DELEGATE_OPCODE(InitStaticLoc)
@@ -630,11 +642,19 @@ DELEGATE_OPCODE(CheckSurpriseFlags)
 DELEGATE_OPCODE(CheckStackOverflow)
 DELEGATE_OPCODE(CheckSurpriseFlagsEnter)
 DELEGATE_OPCODE(CheckSurpriseAndStack)
+DELEGATE_OPCODE(SuspendHookE)
+DELEGATE_OPCODE(SuspendHookR)
+DELEGATE_OPCODE(ReturnHook)
 
 DELEGATE_OPCODE(CastStk)
 DELEGATE_OPCODE(CastMem)
 DELEGATE_OPCODE(CoerceStk)
 DELEGATE_OPCODE(CoerceMem)
+DELEGATE_OPCODE(CoerceCellToBool);
+DELEGATE_OPCODE(CoerceCellToInt);
+DELEGATE_OPCODE(CoerceCellToDbl);
+DELEGATE_OPCODE(CoerceStrToDbl);
+DELEGATE_OPCODE(CoerceStrToInt);
 DELEGATE_OPCODE(VerifyParamCallable)
 DELEGATE_OPCODE(VerifyRetCallable)
 DELEGATE_OPCODE(VerifyParamCls)
@@ -658,19 +678,6 @@ void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void CodeGenerator::cgDefSP(IRInstruction* inst) {
-  auto const sp = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  if (inst->marker().resumed()) {
-    v << defvmsp{sp};
-    return;
-  }
-
-  auto const fp = srcLoc(inst, 0).reg();
-  v << lea{fp[-cellsToBytes(inst->extra<DefSP>()->offset.offset)], sp};
-}
 
 void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
   if (!inst->taken()) return;
@@ -708,51 +715,7 @@ void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
   v << copy{srcReg, dstReg};
 }
 
-void CodeGenerator::cgAssertType(IRInstruction* inst) {
-  copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0), inst->dst()->type());
-}
-
-void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0), rvmtl()[unwinderTVOff()]);
-}
-
-void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const callType = m_state.catch_calls[inst->block()];
-  always_assert(callType != CatchCall::Uninit &&
-                "Tried to emit BeginCatch with Uninit call type. "
-                "Catch blocks must be emitted after their predecessors.");
-
-  v << landingpad{callType == CatchCall::PHP};
-  emitIncStat(v, Stats::TC_CatchTrace);
-}
-
-void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  auto& v = vmain();
-  // endCatchHelper only expects rvmtl() and rvmfp() to be live.
-  v << jmpi{mcg->ustubs().endCatchHelper, rvmtl() | rvmfp()};
-}
-
-void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmpbim{0, rvmtl()[unwinderSideExitOff()], sf};
-
-  auto done = v.makeBlock();
-  v << jcc{CC_E, sf, {done, label(inst->taken())}};
-  v = done;
-
-  // doSideExit == true, so fall through to the side exit code
-  emitIncStat(v, Stats::TC_CatchSideExit);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void CodeGenerator::cgHalt(IRInstruction* inst) {
-  vmain() << ud2{};
-}
-
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   return irlower::cgCallNative(v, m_state, inst);
@@ -785,23 +748,7 @@ void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,
   irlower::cgCallHelper(v, m_state, call, dstInfo, sync, args);
 }
 
-void CodeGenerator::cgMov(IRInstruction* inst) {
-  always_assert(inst->src(0)->numWords() == inst->dst(0)->numWords());
-  copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0), inst->dst()->type());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-
-void CodeGenerator::cgEqFunc(IRInstruction* inst) {
-  auto const dst  = dstLoc(inst, 0).reg();
-  auto const src1 = srcLoc(inst, 0).reg();
-  auto const src2 = srcLoc(inst, 1).reg();
-
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitCmpLowPtr<Func>(v, sf, src2, src1);
-  v << setcc{CC_E, sf, dst};
-}
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
@@ -1090,26 +1037,6 @@ void CodeGenerator::cgLdStrFPushCuf(IRInstruction* inst) {
             cellsToBytes(inst->extra<LdStrFPushCuf>()->offset.offset))
       .ssa(2)
   );
-}
-
-void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
-  auto const extra  = inst->extra<LdBindAddr>();
-  auto const dstReg = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  // Emit service request to smash address of SrcKey into 'addr'.
-  auto const addrPtr = v.allocData<TCA>();
-  v << bindaddr{addrPtr, extra->sk, extra->spOff};
-  v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dstReg};
-}
-
-void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
-  auto const spOff = inst->extra<EagerSyncVMRegs>()->offset;
-  auto& v = vmain();
-  auto const sync_sp = v.makeReg();
-  v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff.offset)], sync_sp};
-  emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
-                     rvmtl(), srcLoc(inst, 0).reg(), sync_sp);
 }
 
 void CodeGenerator::cgProfileArrayKind(IRInstruction* inst) {
@@ -1524,54 +1451,6 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
 }
 
-void CodeGenerator::cgCheckCold(IRInstruction* inst) {
-  Block*     taken = inst->taken();
-  TransID  transId = inst->extra<CheckCold>()->transId;
-  auto counterAddr = profData()->transCounterAddr(transId);
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << decqmlock{v.cns(counterAddr)[0], sf};
-  v << jcc{CC_LE, sf, {label(inst->next()), label(taken)}};
-}
-
-void CodeGenerator::cgInterpOne(IRInstruction* inst) {
-  auto const extra = inst->extra<InterpOne>();
-  auto const pcOff = extra->bcOff;
-  auto const spOff = extra->spOffset;
-  auto const op    = extra->opcode;
-  auto const interpOneHelper = interpOneEntryPoints[size_t(op)];
-
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
-    kVoidDest,
-    SyncOptions::None, // interpOne syncs regs manually
-    argGroup(inst)
-      .ssa(1/*fp*/)
-      .addr(srcLoc(inst, 0).reg(), cellsToBytes(spOff.offset))
-      .imm(pcOff)
-  );
-}
-
-void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
-  auto const extra = inst->extra<InterpOneCF>();
-  auto const op    = extra->opcode;
-  auto const spOff = extra->spOffset;
-  auto const pcOff = extra->bcOff;
-
-  auto& v = vmain();
-  auto const adjustedSp = v.makeReg();
-  v << lea{srcLoc(inst, 0).reg()[cellsToBytes(spOff.offset)], adjustedSp};
-  v << syncvmsp{adjustedSp};
-
-  assertx(mcg->ustubs().interpOneCFHelpers.count(op));
-
-  // We pass the Offset in the third argument register.
-  v << ldimml{pcOff, rarg(2)};
-  v << jmpi{mcg->ustubs().interpOneCFHelpers.at(op),
-            interp_one_cf_regs()};
-}
-
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   auto const data = inst->extra<NewStructData>();
   if (!RuntimeOption::EvalDisableStructArray) {
@@ -1605,76 +1484,6 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
       .dataPtr(table)
       .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
   );
-}
-
-void CodeGenerator::cgIncStat(IRInstruction *inst) {
-  auto stat = Stats::StatCounter(inst->src(0)->intVal());
-  int n = inst->src(1)->intVal();
-  bool force = inst->src(2)->boolVal();
-  emitIncStat(vmain(), stat, n, force);
-}
-
-void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
-  emitTransCounterInc(vmain());
-}
-
-void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
-  auto const transId = inst->extra<TransIDData>()->transId;
-  auto const counterAddr = profData()->transCounterAddr(transId);
-  auto& v = vmain();
-  v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
-}
-
-void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  auto data_reg = srcLoc(inst, 0).reg(0);
-  auto type_reg = srcLoc(inst, 0).reg(0);
-  irlower::emitTypeTest(
-    vmain(), m_state, inst->typeParam(), type_reg, data_reg, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      ifThen(v, ccNegate(cc), sfTaken, [&](Vout& v) {
-        v << ud2{};
-      });
-    });
-}
-
-void CodeGenerator::cgDbgAssertFunc(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  auto r0 = srcLoc(inst, 0).reg(0);
-  auto r1 = srcLoc(inst, 1).reg(0);
-  v << cmpq{r0, r1, sf};
-  ifThen(v, CC_NE, sf, [&](Vout& v) {
-    v << ud2{};
-  });
-}
-
-void CodeGenerator::cgRBTraceEntry(IRInstruction* inst) {
-  auto const& extra = *inst->extra<RBTraceEntry>();
-  auto& v = vmain();
-  auto args = argGroup(inst);
-  cgCallHelper(v,
-               CallSpec::direct(Trace::ringbufferEntryRip),
-               kVoidDest,
-               SyncOptions::None,
-               argGroup(inst)
-                 .imm(extra.type)
-                 .imm(extra.sk.toAtomicInt()));
-}
-
-void CodeGenerator::cgRBTraceMsg(IRInstruction* inst) {
-  auto const& extra = *inst->extra<RBTraceMsg>();
-  auto& v = vmain();
-  assertx(extra.msg->isStatic());
-  cgCallHelper(v,
-               CallSpec::direct(Trace::ringbufferMsg),
-               kVoidDest,
-               SyncOptions::None,
-               argGroup(inst)
-                 .immPtr(extra.msg->data())
-                 .imm(extra.msg->size())
-                 .imm(extra.type));
 }
 
 void CodeGenerator::cgCountArray(IRInstruction* inst) {
@@ -1772,29 +1581,6 @@ void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
   auto const actualOffset = StructArray::dataOffset() +
     sizeof(TypedValue) * offset;
   loadTV(vmain(), inst->dst(), dstLoc(inst, 0), array[actualOffset]);
-}
-
-void CodeGenerator::cgProfileMethod(IRInstruction* inst) {
-  auto const extra = inst->extra<ProfileMethodData>();
-  auto const sp = srcLoc(inst, 0).reg();
-
-  auto& v = vmain();
-  auto const profile = v.makeReg();
-  auto const ar = v.makeReg();
-  v << lea{rvmtl()[extra->handle], profile};
-  v << lea{sp[cellsToBytes(extra->spOffset.offset)], ar};
-  cgCallHelper(v, CallSpec::direct(profileClassMethodHelper),
-               kVoidDest, SyncOptions::None,
-               argGroup(inst).reg(profile).reg(ar).ssa(1));
-}
-
-void CodeGenerator::cgProfileType(IRInstruction* inst) {
-  auto const extra = inst->extra<RDSHandleData>();
-  auto& v = vmain();
-  auto const profile = v.makeReg();
-  v << lea{rvmtl()[extra->handle], profile};
-  cgCallHelper(v, CallSpec::direct(profileTypeHelper), kVoidDest,
-               SyncOptions::None, argGroup(inst).reg(profile).typedValue(0));
 }
 
 void CodeGenerator::cgSetOpCell(IRInstruction* inst) {

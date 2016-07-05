@@ -447,7 +447,6 @@ bool canDCE(IRInstruction* inst) {
   case IncProfCounter:
   case DbgAssertRefCount:
   case DbgAssertPtr:
-  case DbgAssertType:
   case DbgAssertFunc:
   case RBTraceEntry:
   case RBTraceMsg:

@@ -17,6 +17,7 @@
 #define incl_HPHP_TARGET_PROFILE_H_
 
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/rds.h"
 
@@ -346,12 +347,12 @@ struct TypeProfile {
   Type type; // this gets initialized with 0, which is TBottom
   static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
 
-  void report(Type newType) {
-    type |= newType;
+  void report(TypedValue tv) {
+    type |= typeFromTV(&tv);
   }
 
   static void reduce(TypeProfile& a, const TypeProfile& b) {
-    a.report(b.type);
+    a.type |= b.type;
   }
 };
 

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -47,14 +48,7 @@ void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
   emitLdObjClass(vmain(env), obj, dst);
 }
 
-void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const cls = inst->extra<ConstructInstance>()->cls;
-
-  auto const args = argGroup(env, inst).immPtr(cls);
-  cgCallHelper(vmain(env), env, CallSpec::direct(cls->instanceCtor().get()),
-               callDest(dst), SyncOptions::Sync, args);
-}
+IMPL_OPCODE_CALL(AllocObj)
 
 void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
@@ -72,6 +66,18 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, callSpec,
                callDest(dst), SyncOptions::Sync, args);
 }
+
+void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = inst->extra<ConstructInstance>()->cls;
+
+  auto const args = argGroup(env, inst).immPtr(cls);
+  cgCallHelper(vmain(env), env, CallSpec::direct(cls->instanceCtor().get()),
+               callDest(dst), SyncOptions::Sync, args);
+}
+
+IMPL_OPCODE_CALL(Clone)
+IMPL_OPCODE_CALL(RegisterLiveObj)
 
 ///////////////////////////////////////////////////////////////////////////////
 

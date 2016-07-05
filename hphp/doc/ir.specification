@@ -2119,11 +2119,6 @@ To string conversions:
   logic as DbgAssertRefCount. Internally this uses always_assert(); failures
   cause an abort (whatever always_assert does).
 
-| DbgAssertType<T>, ND, S(Cell), NF
-
-  Assert that S0 is of type T at runtime. If the assertion fails, execution is
-  aborted via a hardware exception.
-
 | DbgTraceCall<spOffset>, ND, S(FramePtr) S(StkPtr), NF
 
   When EvalHHIRGenerateAsserts is on, this instruction is inserted at the

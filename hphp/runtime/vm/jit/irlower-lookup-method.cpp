@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -132,6 +133,10 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
   v = done;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(LdClsCtor)
+
 void lookupClsMethodHelper(Class* cls, StringData* meth,
                            ActRec* ar, ActRec* fp) {
   try {
@@ -166,14 +171,29 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
 
 void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<LookupClsMethod>();
+  auto const sp = srcLoc(env, inst, 2).reg();
+
   auto const args = argGroup(env, inst)
     .ssa(0)
     .ssa(1)
-    .addr(srcLoc(env, inst, 2).reg(), cellsToBytes(extra->offset.offset))
+    .addr(sp, cellsToBytes(extra->offset.offset))
     .ssa(3);
 
   cgCallHelper(vmain(env), env, CallSpec::direct(lookupClsMethodHelper),
                callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileMethodData>();
+  auto const sp = srcLoc(env, inst, 0).reg();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .addr(sp, cellsToBytes(extra->spOffset.offset))
+    .ssa(1);
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),
+               kVoidDest, SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

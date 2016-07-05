@@ -145,6 +145,12 @@ void cgCoerceMem(IRLS& env, const IRInstruction *inst) {
   implCoerce(env, inst, ptr, 0, extra->callee, extra->argNum);
 }
 
+IMPL_OPCODE_CALL(CoerceCellToBool);
+IMPL_OPCODE_CALL(CoerceCellToInt);
+IMPL_OPCODE_CALL(CoerceCellToDbl);
+IMPL_OPCODE_CALL(CoerceStrToDbl);
+IMPL_OPCODE_CALL(CoerceStrToInt);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

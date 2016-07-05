@@ -52,6 +52,8 @@ void cgLdClsName(IRLS& env, const IRInstruction* inst) {
                dst, sizeof(LowStringPtr));
 }
 
+IMPL_OPCODE_CALL(MethodExists)
+
 void cgLdClsMethod(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = srcLoc(env, inst, 0).reg();
@@ -95,6 +97,8 @@ void cgLdObjInvoke(IRLS& env, const IRInstruction* inst) {
   v << testq{dst, dst, sf};
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
+
+IMPL_OPCODE_CALL(HasToString);
 
 void cgLdFuncVecLen(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();

@@ -290,6 +290,10 @@ void cgJmpSSwitchDest(IRLS& env, const IRInstruction* inst) {
   v << jmpr{srcLoc(env, inst, 0).reg(), cross_trace_args(marker)};
 }
 
+IMPL_OPCODE_CALL(LdSwitchDblIndex)
+IMPL_OPCODE_CALL(LdSwitchStrIndex)
+IMPL_OPCODE_CALL(LdSwitchObjIndex)
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
@@ -328,6 +332,17 @@ void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
     inst->marker().spOff(),
     cross_trace_args(inst->marker())
   };
+}
+
+void cgLdBindAddr(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdBindAddr>();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  // Emit service request to smash address of SrcKey into 'addr'.
+  auto const addrPtr = v.allocData<TCA>();
+  v << bindaddr{addrPtr, extra->sk, extra->spOff};
+  v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

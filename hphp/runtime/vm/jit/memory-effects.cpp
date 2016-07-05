@@ -1206,7 +1206,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Halt:
   case ConvBoolToInt:
   case ConvBoolToDbl:
-  case DbgAssertType:
   case DbgAssertFunc:
   case DefConst:
   case LdLocAddr:

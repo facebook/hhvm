@@ -581,7 +581,6 @@ struct RuntimeOption {
   F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
-  F(bool, DisableStructArray, true)                                     \
   F(bool, EnableCallBuiltin, true)                                      \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   F(uint32_t, ReusableTCPadding, 128)                                   \

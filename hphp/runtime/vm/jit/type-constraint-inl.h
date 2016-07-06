@@ -69,18 +69,6 @@ inline bool TypeConstraint::wantArrayKind() const {
   return m_specialized & kWantArrayKind;
 }
 
-inline TypeConstraint& TypeConstraint::setWantArrayShape() {
-  assertx(!wantClass());
-  assertx(isSpecialized());
-  setWantArrayKind();
-  m_specialized |= kWantArrayShape;
-  return *this;
-}
-
-inline bool TypeConstraint::wantArrayShape() const {
-  return m_specialized & kWantArrayShape;
-}
-
 inline TypeConstraint& TypeConstraint::setDesiredClass(const Class* cls) {
   assertx(m_specialized == 0 ||
          desiredClass()->classof(cls) || cls->classof(desiredClass()));

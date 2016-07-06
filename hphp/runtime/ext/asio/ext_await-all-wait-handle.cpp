@@ -124,10 +124,6 @@ retry:
     case ArrayData::kVecKind:
       return c_AwaitAllWaitHandle::FromPackedArray(ad);
 
-    case ArrayData::kStructKind:
-      return c_AwaitAllWaitHandle::FromStructArray(
-               StructArray::asStructArray(ad));
-
     case ArrayData::kMixedKind:
     case ArrayData::kDictKind:
     case ArrayData::kKeysetKind:
@@ -211,15 +207,6 @@ Object c_AwaitAllWaitHandle::createAAWH(T start, T stop,
 Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
   auto const start = packedData(dependencies);
   auto const stop  = start + dependencies->getSize();
-
-  return createAAWH<const TypedValue*>(start, stop,
-    [](const TypedValue* tv, UNUSED const TypedValue* limit) { return tv + 1; },
-    [](const TypedValue* tv) { return tvToCell(tv); });
-}
-
-Object c_AwaitAllWaitHandle::FromStructArray(const StructArray* dependencies) {
-  auto const start = dependencies->data();
-  auto const stop = start + dependencies->getSize();
 
   return createAAWH<const TypedValue*>(start, stop,
     [](const TypedValue* tv, UNUSED const TypedValue* limit) { return tv + 1; },

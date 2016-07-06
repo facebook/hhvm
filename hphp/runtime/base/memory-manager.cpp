@@ -590,7 +590,7 @@ void MemoryManager::flush() {
  */
 
 const char* header_names[] = {
-  "PackedArray", "StructArray", "MixedArray", "EmptyArray", "ApcArray",
+  "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
   "GlobalsArray", "ProxyArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "Ref", "Object", "WaitHandle", "ResumableObj",
   "AwaitAllWH", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
@@ -662,7 +662,6 @@ void MemoryManager::checkHeap(const char* phase) {
         if (h->str_.isProxy()) apc_strings.insert(h);
         break;
       case HeaderKind::Packed:
-      case HeaderKind::Struct:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:

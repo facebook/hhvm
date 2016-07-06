@@ -27,16 +27,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Class;
-struct Shape;
-
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Array type specialization.
  *
- * May contain an ArrayKind and/or a pointer to a RAT or a Shape.
+ * May contain an ArrayKind and/or a pointer to a RAT.
  */
 struct ArraySpec {
   /*
@@ -46,7 +43,6 @@ struct ArraySpec {
   explicit ArraySpec(ArrayData::ArrayKind kind);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
-  explicit ArraySpec(const Shape* shape);
 
   /*
    * Accessors.
@@ -59,7 +55,6 @@ struct ArraySpec {
   uintptr_t bits() const;
   folly::Optional<ArrayData::ArrayKind> kind() const;
   const RepoAuthType::Array* type() const;
-  const Shape* shape() const;
 
   /*
    * Casts.
@@ -106,7 +101,6 @@ private:
     IsBottom  = 1 << 0,
     HasKind   = 1 << 1,
     HasType   = 1 << 2,
-    HasShape  = 1 << 3,
   };
   friend SortOf operator|(SortOf, SortOf);
   friend SortOf operator&(SortOf, SortOf);

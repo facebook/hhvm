@@ -41,7 +41,6 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
   out << ":" << header_names[int(h->kind())];
   switch (h->kind()) {
     case HeaderKind::Packed:
-    case HeaderKind::Struct:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::Empty:

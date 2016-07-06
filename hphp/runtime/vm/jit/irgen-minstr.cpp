@@ -53,7 +53,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_ArrayKindProfile("ArrayKindProfile");
-const StaticString s_StructArray("StructArray");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -68,9 +67,7 @@ enum class SimpleOp {
   None,
   Array,
   ProfiledPackedArray,
-  ProfiledStructArray,
   PackedArray,
-  StructArray,
   String,
   Vector, // c_Vector* or c_ImmVector*
   Map,    // c_Map*
@@ -201,15 +198,11 @@ folly::Optional<TypeConstraint> simpleOpConstraint(SimpleOp op) {
 
     case SimpleOp::Array:
     case SimpleOp::ProfiledPackedArray:
-    case SimpleOp::ProfiledStructArray:
     case SimpleOp::String:
       return TypeConstraint(DataTypeSpecific);
 
     case SimpleOp::PackedArray:
       return TypeConstraint(DataTypeSpecialized).setWantArrayKind();
-
-    case SimpleOp::StructArray:
-      return TypeConstraint(DataTypeSpecialized).setWantArrayShape();
 
     case SimpleOp::Vector:
       return TypeConstraint(c_Vector::classof());
@@ -525,28 +518,6 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
   );
 }
 
-SSATmp* emitStructArrayGet(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->isA(TArr));
-  assertx(base->type().arrSpec().kind() == ArrayData::kStructKind);
-  assertx(base->type().arrSpec().shape());
-  assertx(key->hasConstVal(TStr));
-  assertx(key->strVal()->isStatic());
-
-  const auto keyStr = key->strVal();
-  const auto shape = base->type().arrSpec().shape();
-  auto offset = shape->offsetFor(keyStr);
-
-  if (offset == PropertyTable::kInvalidOffset) {
-    gen(env, RaiseArrayKeyNotice, key);
-    return cns(env, TInitNull);
-  }
-
-  auto res = gen(env, LdStructArrayElem, base, key);
-  auto unboxed = unbox(env, res, nullptr);
-  gen(env, IncRef, unboxed);
-  return unboxed;
-}
-
 template<class Finish>
 SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   auto const elem = profiledArrayAccess(env, base, key,
@@ -593,51 +564,6 @@ SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
         TypeConstraint(DataTypeSpecialized).setWantArrayKind()
       );
       return emitPackedArrayGet(env, base, key, finish);
-    }
-  }
-
-  // Fall back to a generic array get.
-  return emitArrayGet(env, base, key, finish);
-}
-
-template<class Finish>
-SSATmp* emitProfiledStructArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
-                                   Finish finish) {
-  TargetProfile<StructArrayProfile> prof(env.context,
-                                         env.irb->curMarker(),
-                                         s_StructArray.get());
-  if (prof.profiling()) {
-    gen(env, ProfileStructArray, RDSHandleData{prof.handle()}, base);
-    return emitArrayGet(env, base, key, finish);
-  }
-
-  if (prof.optimizing()) {
-    auto const data = prof.data(StructArrayProfile::reduce);
-    // StructArrayProfile data counts how many times a non-struct array was
-    // observed.  Zero means it was monomorphic (or never executed).
-    //
-    // It also records how many Shapes it saw. The possible values are:
-    //  0 (never executed)
-    //  1 (monomorphic)
-    //  many (polymorphic)
-    //
-    // If we never executed then we fall back to generic get. If we're
-    // monomorphic, we'll emit a check for that specific Shape. If we're
-    // polymorphic, we'll also fall back to generic get. Eventually we'd like
-    // to emit an inline cache, which should be faster than calling out of line.
-    if (base->type().maybe(Type::Array(ArrayData::kStructKind))) {
-      if (data.nonStructCount == 0 && data.isMonomorphic()) {
-        // It's safe to side-exit still because we only do these profiled array
-        // gets on the first element, with simple bases and single-element dims.
-        // See computeSimpleCollectionOp.
-        auto const exit = makeExit(env);
-        base = gen(env, CheckType, Type::Array(data.getShape()), exit, base);
-        env.irb->constrainValue(
-          base,
-          TypeConstraint(DataTypeSpecialized).setWantArrayShape()
-        );
-        return emitStructArrayGet(env, base, key);
-      }
     }
   }
 
@@ -793,12 +719,8 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
       return emitArrayGet(env, base, key, finish);
     case SimpleOp::PackedArray:
       return emitPackedArrayGet(env, base, key, finish);
-    case SimpleOp::StructArray:
-      return emitStructArrayGet(env, base, key);
     case SimpleOp::ProfiledPackedArray:
       return emitProfiledPackedArrayGet(env, base, key, finish);
-    case SimpleOp::ProfiledStructArray:
-      return emitProfiledStructArrayGet(env, base, key, finish);
     case SimpleOp::String:
       return gen(env, StringGet, base, key);
     case SimpleOp::Vector:
@@ -816,9 +738,7 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
 SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
   switch (simpleOp) {
   case SimpleOp::Array:
-  case SimpleOp::StructArray:
   case SimpleOp::ProfiledPackedArray:
-  case SimpleOp::ProfiledStructArray:
     return gen(env, ArrayIsset, base, key);
   case SimpleOp::PackedArray:
     return emitPackedArrayIsset(env, base, key);
@@ -849,23 +769,12 @@ void setWithRefImpl(IRGS& env, int32_t keyLoc, SSATmp* value) {
 SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst) {
   if (baseType <= TArr) {
     auto isPacked = false;
-    auto isStruct = false;
     if (auto arrSpec = baseType.arrSpec()) {
       isPacked = arrSpec.kind() == ArrayData::kPackedKind;
-      isStruct = arrSpec.kind() == ArrayData::kStructKind &&
-                 arrSpec.shape() != nullptr;
     }
     if (keyType <= TInt || keyType <= TStr) {
-      if (readInst) {
-        if (keyType <= TInt) {
-          return isPacked ? SimpleOp::PackedArray
-                          : SimpleOp::ProfiledPackedArray;
-        } else if (keyType.hasConstVal(TStaticStr)) {
-          if (!isStruct || !baseType.arrSpec().shape()) {
-            return SimpleOp::ProfiledStructArray;
-          }
-          return SimpleOp::StructArray;
-        }
+      if (readInst && keyType <= TInt) {
+        return isPacked ? SimpleOp::PackedArray : SimpleOp::ProfiledPackedArray;
       }
       return SimpleOp::Array;
     }
@@ -1335,7 +1244,6 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
 
   switch (simpleOp) {
     case SimpleOp::PackedArray:
-    case SimpleOp::StructArray:
     case SimpleOp::String:
       always_assert(false && "Bad SimpleOp in setElemImpl");
       break;
@@ -1350,7 +1258,6 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
 
     case SimpleOp::Array:
     case SimpleOp::ProfiledPackedArray:
-    case SimpleOp::ProfiledStructArray:
       if (auto result = emitArraySet(env, key, value)) {
         return result;
       }

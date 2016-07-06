@@ -119,7 +119,6 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
 bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
   switch (kind) {
     case ArrayData::kPackedKind:
-    case ArrayData::kStructKind:
     case ArrayData::kMixedKind:
     case ArrayData::kEmptyKind:
     case ArrayData::kVecKind:

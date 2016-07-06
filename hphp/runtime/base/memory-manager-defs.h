@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
@@ -50,7 +49,6 @@ struct Header {
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;
-    StructArray struct_;
     APCLocalArray apc_;
     ProxyArray proxy_;
     GlobalsArray globals_;
@@ -121,8 +119,6 @@ inline size_t Header::size() const {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
       return PackedArray::heapSize(&arr_);
-    case HeaderKind::Struct:
-      return StructArray::heapSize(&arr_);
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::Keyset:
@@ -274,7 +270,6 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
         ptrs.push_back(h->nativeObj());
         break;
       case HeaderKind::Packed:
-      case HeaderKind::Struct:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:

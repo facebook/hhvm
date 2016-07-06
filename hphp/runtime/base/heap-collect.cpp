@@ -343,7 +343,6 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
     case HeaderKind::Ref:
     case HeaderKind::Resource:
     case HeaderKind::Packed:
-    case HeaderKind::Struct:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::VecArray:
@@ -426,7 +425,6 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
-      case HeaderKind::Struct:
       case HeaderKind::Empty:
       case HeaderKind::VecArray:
       case HeaderKind::Keyset:
@@ -571,7 +569,6 @@ NEVER_INLINE void Marker::trace() {
 DEBUG_ONLY bool check_sweep_header(const Header* h) {
   switch (h->kind()) {
     case HeaderKind::Packed:
-    case HeaderKind::Struct:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::Empty:
@@ -643,7 +640,6 @@ NEVER_INLINE void Marker::sweep() {
     auto h = const_cast<Header*>(hdr);
     switch (h->kind()) {
       case HeaderKind::Packed:
-      case HeaderKind::Struct:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:

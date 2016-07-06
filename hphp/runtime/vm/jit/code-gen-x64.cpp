@@ -38,11 +38,8 @@
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
-//#include "hphp/runtime/base/typed-value.h"
-//#include "hphp/runtime/base/struct-array.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -1014,44 +1011,6 @@ void CodeGenerator::cgProfileArrayKind(IRInstruction* inst) {
                SyncOptions::None, argGroup(inst).reg(profile).ssa(0));
 }
 
-void CodeGenerator::cgProfileStructArray(IRInstruction* inst) {
-  auto baseReg = srcLoc(inst, 0).reg();
-  auto handle  = inst->extra<ProfileStructArray>()->handle;
-  auto& v = vmain();
-
-  auto isStruct = v.makeBlock();
-  auto shapeIsDifferent = v.makeBlock();
-  auto notStruct = v.makeBlock();
-  auto done = v.makeBlock();
-
-  auto const sf0 = v.makeReg();
-  static_assert(sizeof(HeaderKind) == 1, "");
-  v << cmpbim{ArrayData::kStructKind, baseReg[HeaderKindOffset], sf0};
-  v << jcc{CC_E, sf0, {notStruct, isStruct}};
-
-  auto const shape = v.makeReg();
-  auto const sf1 = v.makeReg();
-  v = isStruct;
-  v << load{baseReg[StructArray::shapeOffset()], shape};
-  v << cmpqm{shape, rvmtl()[handle + offsetof(StructArrayProfile, shape)], sf1};
-  v << jcc{CC_E, sf1, {shapeIsDifferent, done}};
-
-  v = shapeIsDifferent;
-  v << addlm{v.cns(uint32_t{1}),
-             rvmtl()[handle + offsetof(StructArrayProfile, numShapesSeen)],
-             v.makeReg()};
-  v << store{shape, rvmtl()[handle + offsetof(StructArrayProfile, shape)]};
-  v << jmp{done};
-
-  v = notStruct;
-  v << addlm{v.cns(uint32_t{1}),
-             rvmtl()[handle + offsetof(StructArrayProfile, nonStructCount)],
-             v.makeReg()};
-  v << jmp{done};
-
-  v = done;
-}
-
 void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   static_assert(ArrayData::sizeofSize() == 4, "");
   // We may check packed array bounds on profiled arrays for which
@@ -1368,22 +1327,6 @@ void CodeGenerator::cgNewColFromArray(IRInstruction* inst) {
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   auto const data = inst->extra<NewStructData>();
-  if (!RuntimeOption::EvalDisableStructArray) {
-    if (auto shape = Shape::create(data->keys, data->numKeys)) {
-      StructArray* (*f)(uint32_t, const TypedValue*, Shape*) =
-        &MixedArray::MakeStructArray;
-      cgCallHelper(vmain(),
-        CallSpec::direct(f),
-        callDest(inst),
-        SyncOptions::None,
-        argGroup(inst)
-          .imm(data->numKeys)
-          .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
-          .imm(shape)
-      );
-      return;
-    }
-  }
 
   auto table = vmain().allocData<const StringData*>(data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
@@ -1484,18 +1427,6 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
       return sf;
     }
   );
-}
-
-void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
-  auto const array = srcLoc(inst, 0).reg();
-  auto const key = inst->src(1)->strVal();
-  auto const shape = inst->src(0)->type().arrSpec().shape();
-  auto const offset = shape->offsetFor(key);
-  assertx(offset != PropertyTable::kInvalidOffset);
-
-  auto const actualOffset = StructArray::dataOffset() +
-    sizeof(TypedValue) * offset;
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0), array[actualOffset]);
 }
 
 void CodeGenerator::cgSetOpCell(IRInstruction* inst) {

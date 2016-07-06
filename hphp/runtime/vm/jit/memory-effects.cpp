@@ -904,10 +904,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1)
     };
 
-  case LdStructArrayElem:
-    assertx(inst.src(1)->strVal()->isStatic());
-    return PureLoad { AElemS { inst.src(0), inst.src(1)->strVal() } };
-
   case InitPackedArrayLoop:
     {
       auto const extra = inst.extra<InitPackedArrayLoop>();
@@ -1372,7 +1368,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
   case ProfileArrayKind:
-  case ProfileStructArray:
   case ProfileSwitchDest:
   case LdFuncCachedSafe:
   case LdFuncNumParams:

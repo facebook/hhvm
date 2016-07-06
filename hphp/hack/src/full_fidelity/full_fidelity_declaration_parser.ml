@@ -187,10 +187,43 @@ module WithExpressionAndStatementParser
     let (parser, token) = next_token parser in
     (parser, make_error [make_token token])
 
+  and parse_namespace_use_clause parser =
+    (* SPEC
+      namespace-use-clause:
+        qualified-name  namespace-aliasing-clauseopt
+      namespace-aliasing-clause:
+        as  name
+    *)
+    let (parser, name) = next_token parser in
+    let parser = match Token.kind name with
+    | QualifiedName
+    | Name -> parser
+    | _ ->
+      (* ERROR RECOVERY: We couldn't find the name; keep going *)
+      with_error parser SyntaxError.error1004 in
+    let name = make_token name in
+    let (parser1, as_token) = next_token parser in
+    let (parser, as_token, alias) =
+      if Token.kind as_token = As then
+        let as_token = make_token as_token in
+        let (parser, alias) = expect_token parser1 Name SyntaxError.error1004 in
+        (parser, as_token, alias)
+      else
+        (parser, (make_missing()), (make_missing())) in
+    let result = make_namespace_use_clause name as_token alias in
+    (parser, result)
+
   and parse_namespace_use_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+    (* SPEC
+      namespace-use-declaration:
+        use  namespace-use-clauses  ;
+    *)
+    let (parser, use_token) = assert_token parser Use in
+    let (parser, clauses) = parse_comma_list
+      parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
+    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+    let result = make_namespace_use use_token clauses semi in
+    (parser, result)
 
   and parse_classish_declaration parser =
     let (parser, attribute_spec) =

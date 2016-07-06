@@ -114,6 +114,16 @@ module WithToken(Token: TokenType) = struct
       alias_type : t;
       alias_semicolon : t
     }
+    and namespace_use_declaration = {
+      namespace_use : t;
+      namespace_use_clauses : t;
+      namespace_use_semicolon : t
+    }
+    and namespace_use_clause = {
+      namespace_use_name : t;
+      namespace_use_as : t;
+      namespace_use_alias : t
+    }
     and function_declaration = {
       function_attr : t;
       function_async : t;
@@ -474,6 +484,8 @@ module WithToken(Token: TokenType) = struct
     | ScriptHeader of script_header
     | Script of script
 
+    | NamespaceUseDeclaration of namespace_use_declaration
+    | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
@@ -568,6 +580,8 @@ module WithToken(Token: TokenType) = struct
       | EnumDeclaration _ -> SyntaxKind.EnumDeclaration
       | Enumerator _ -> SyntaxKind.Enumerator
       | AliasDeclaration _ -> SyntaxKind.AliasDeclaration
+      | NamespaceUseDeclaration _ -> SyntaxKind.NamespaceUseDeclaration
+      | NamespaceUseClause _ -> SyntaxKind.NamespaceUseClause
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
@@ -644,6 +658,8 @@ module WithToken(Token: TokenType) = struct
     let is_enum node = kind node = SyntaxKind.EnumDeclaration
     let is_enumerator node = kind node = SyntaxKind.Enumerator
     let is_alias node = kind node = SyntaxKind.AliasDeclaration
+    let is_namespace_use node = kind node = SyntaxKind.NamespaceUseDeclaration
+    let is_namespace_use_clause node = kind node = SyntaxKind.NamespaceUseClause
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
     let is_classish node = kind node = SyntaxKind.ClassishDeclaration
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
@@ -753,6 +769,12 @@ module WithToken(Token: TokenType) = struct
           alias_equal; alias_type; alias_semicolon } ->
         [ alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon ]
+      | NamespaceUseDeclaration
+        { namespace_use; namespace_use_clauses; namespace_use_semicolon } ->
+        [ namespace_use; namespace_use_clauses; namespace_use_semicolon ]
+      | NamespaceUseClause
+        { namespace_use_name; namespace_use_as; namespace_use_alias } ->
+        [ namespace_use_name; namespace_use_as; namespace_use_alias ]
       | FunctionDeclaration
         { function_attr; function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
@@ -1023,6 +1045,12 @@ module WithToken(Token: TokenType) = struct
           alias_equal; alias_type; alias_semicolon } ->
         [ "alias_token"; "alias_name"; "alias_constraint";
           "alias_equal"; "alias_type"; "alias_semicolon" ]
+      | NamespaceUseDeclaration
+        { namespace_use; namespace_use_clauses; namespace_use_semicolon } ->
+        [ "namespace_use"; "namespace_use_clauses"; "namespace_use_semicolon" ]
+      | NamespaceUseClause
+        { namespace_use_name; namespace_use_as; namespace_use_alias } ->
+        [ "namespace_use_name"; "namespace_use_as"; "namespace_use_alias" ]
       | FunctionDeclaration
         { function_attr; function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
@@ -1524,6 +1552,14 @@ module WithToken(Token: TokenType) = struct
         AliasDeclaration
         { alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon }
+      | (SyntaxKind.NamespaceUseDeclaration,
+        [ namespace_use; namespace_use_clauses; namespace_use_semicolon ]) ->
+        NamespaceUseDeclaration
+        { namespace_use; namespace_use_clauses; namespace_use_semicolon }
+      | (SyntaxKind.NamespaceUseClause,
+        [ namespace_use_name; namespace_use_as; namespace_use_alias ]) ->
+        NamespaceUseClause
+        { namespace_use_name; namespace_use_as; namespace_use_alias }
       | (SyntaxKind.FunctionDeclaration, [ function_attr; function_async;
         function_token; function_name; function_type_params;
         function_left_paren; function_params; function_right_paren;
@@ -1926,6 +1962,13 @@ module WithToken(Token: TokenType) = struct
       let make_alias token name constr equal ty semi =
         from_children SyntaxKind.AliasDeclaration
           [ token; name; constr; equal; ty; semi ]
+
+      let make_namespace_use use clauses semi =
+        from_children SyntaxKind.NamespaceUseDeclaration
+          [ use; clauses; semi ]
+
+      let make_namespace_use_clause name as_token alias =
+        from_children SyntaxKind.NamespaceUseClause [ name; as_token; alias ]
 
       let make_function function_attr function_async function_token
         function_name function_type_params function_left_paren function_params

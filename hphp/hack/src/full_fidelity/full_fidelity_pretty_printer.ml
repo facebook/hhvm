@@ -284,6 +284,16 @@ let rec get_doc node =
     let t = get_doc x.alias_type in
     let s = get_doc x.alias_semicolon in
     a ^| n ^| c ^| e ^| t ^^^ s
+  | NamespaceUseDeclaration x ->
+    let u = get_doc x.namespace_use in
+    let c = get_doc x.namespace_use_clauses in
+    let s = get_doc x.namespace_use_semicolon in
+    u ^| c ^^^ s
+  | NamespaceUseClause x ->
+    let n = get_doc x.namespace_use_name in
+    let a = get_doc x.namespace_use_as in
+    let l = get_doc x.namespace_use_alias in
+    n ^| a ^| l
   | FunctionDeclaration x ->
     let preface = group_doc ( get_doc (function_attr x)
                        ^| get_doc (function_async x)

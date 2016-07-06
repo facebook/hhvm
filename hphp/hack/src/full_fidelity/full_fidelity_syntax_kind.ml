@@ -18,6 +18,8 @@ type t =
 (* Declarations *)
 | ScriptHeader
 | Script
+| NamespaceUseDeclaration
+| NamespaceUseClause
 | FunctionDeclaration
 | ClassishDeclaration
 | ClassishBody
@@ -102,6 +104,8 @@ let to_string kind =
   | ListItem -> "list_item"
   | ScriptHeader -> "header"
   | Script -> "script"
+  | NamespaceUseDeclaration -> "namespace_use_declaration"
+  | NamespaceUseClause -> "namespace_use_clause"
   | FunctionDeclaration -> "function_declaration"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"

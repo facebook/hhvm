@@ -225,9 +225,7 @@ module WithExpressionAndStatementParser
     let result = make_namespace_use use_token clauses semi in
     (parser, result)
 
-  and parse_classish_declaration parser =
-    let (parser, attribute_spec) =
-      parse_attribute_specification_opt parser in
+  and parse_classish_declaration parser attribute_spec =
     let (parser, abstract, final) =
       parse_classish_modifier_opt parser in
     let (parser, token) =
@@ -549,6 +547,7 @@ module WithExpressionAndStatementParser
     match Token.kind token with
     | Async | Function ->
       parse_function_declaration parser attribute_specification
+    | Class -> parse_classish_declaration parser attribute_specification
     | _ ->
       (* TODO *)
       (parser1, make_error [make_token token])
@@ -567,7 +566,7 @@ module WithExpressionAndStatementParser
     | Interface
     | Abstract
     | Final
-    | Class -> parse_classish_declaration parser
+    | Class -> parse_classish_declaration parser(make_missing())
     | Async
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->

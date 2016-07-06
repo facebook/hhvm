@@ -168,7 +168,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Callable:
       // For "callable", if `dt' is not string/array/object we know
       // it's not compatible, otherwise more checks are required
-      return (isStringType(dt) || isArrayType(KindOfArray) ||
+      return (isStringType(dt) || isArrayType(dt) ||
               dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::Dict:

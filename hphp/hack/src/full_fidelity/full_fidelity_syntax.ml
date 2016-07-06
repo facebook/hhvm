@@ -966,7 +966,6 @@ module WithToken(Token: TokenType) = struct
           type_constant_right_type } ->
         [ type_constant_left_type; type_constant_separator;
         type_constant_right_type ]
-
       | SimpleTypeSpecifier x -> [x]
       | NullableTypeSpecifier
         { nullable_question; nullable_type } ->
@@ -1478,7 +1477,6 @@ module WithToken(Token: TokenType) = struct
     let type_arguments_left_angle x = x.type_arguments_left_angle
     let type_arguments x = x.type_arguments
     let type_arguments_right_angle x = x.type_arguments_right_angle
-
     let binary_operator_kind b =
       match syntax b.binary_operator with
       | Token token ->

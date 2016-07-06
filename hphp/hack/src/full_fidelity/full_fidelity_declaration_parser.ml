@@ -413,10 +413,15 @@ module WithExpressionAndStatementParser
       aux parser []
 
   and parse_generic_type_parameter_list_opt parser =
-    let (parser1, token) = next_token parser in
-    if (Token.kind token) = LessThan then
-      (* TODO *)
-      (parser1, make_error [make_token token])
+    let (parser1, open_angle) = next_token parser in
+    if (Token.kind open_angle) = LessThan then
+        let type_parser = TypeParser.make parser.lexer parser.errors in
+        let (type_parser, node) =
+          TypeParser.parse_generic_type_argument_list type_parser in
+        let lexer = TypeParser.lexer type_parser in
+        let errors = TypeParser.errors type_parser in
+        let parser = { lexer; errors } in
+        (parser, node)
     else
       (parser, make_missing())
 

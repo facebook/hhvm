@@ -306,3 +306,17 @@ and parse_shape_specifier parser =
   let (parser, rparen) = expect_token parser RightParen SyntaxError.error1011 in
   let result = make_shape_type_specifier shape lparen fields rparen in
   (parser, result)
+
+and parse_type_constraint_opt parser =
+  (* SPEC
+    type-constraint:
+      as  type-specifier
+  *)
+  let (parser1, constraint_as) = next_token parser in
+  if (Token.kind constraint_as) = As then
+    let constraint_as = make_token constraint_as in
+    let (parser, constraint_type) = parse_type_specifier parser1 in
+    let result = make_type_constraint constraint_as constraint_type in
+    (parser, result)
+  else
+    (parser, (make_missing()))

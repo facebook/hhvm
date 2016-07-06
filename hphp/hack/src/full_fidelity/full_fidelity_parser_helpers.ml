@@ -35,6 +35,9 @@ module WithParser(Parser : ParserType) = struct
     let (_, token) = Parser.Lexer.next_token lexer in
     token
 
+  let peek_token_kind parser =
+    Token.kind (peek_token parser)
+
   let skip_token parser =
     let (parser, _) = next_token parser in
     parser

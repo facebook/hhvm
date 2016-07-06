@@ -83,5 +83,7 @@ let error1033 = "A class member, method, type, trait usage, trait require, " ^
   "xhp attribute, xhp use, or xhp category is expected here."
 let error1034 = "A left brace is expected here."
 let error1035 = "'Class' keyword is expected here."
+let error1036 = "A '=' is expected here."
+let error1037 = "A left brace is expected here."
 
 let error2001 = "A type annotation is required in strict mode."

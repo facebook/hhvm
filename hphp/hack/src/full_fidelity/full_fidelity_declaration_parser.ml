@@ -39,6 +39,15 @@ module WithExpressionAndStatementParser
     let parser = { lexer; errors } in
     (parser, node)
 
+  let parse_type_constraint_opt parser =
+    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let (type_parser, node) =
+      TypeParser.parse_type_constraint_opt type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let parser = { lexer; errors } in
+    (parser, node)
+
   (* Expressions *)
 
   let parse_expression parser =
@@ -107,10 +116,58 @@ module WithExpressionAndStatementParser
     let (parser, token) = next_token parser in
     (parser, make_error [make_token token])
 
+  and parse_enumerator parser =
+    (* SPEC
+      enumerator:
+        enumerator-constant  =  constant-expression
+      enumerator-constant:
+        name
+      *)
+    (* TODO: Add an error to a later pass that determines the value is
+             a constant. *)
+    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
+    let (parser, equal) = expect_token parser Equal SyntaxError.error1036 in
+    let (parser, value) = parse_expression parser in
+    let result = make_enumerator name equal value in
+    (parser, result)
+
+  and parse_enumerator_list_opt parser =
+    (* SPEC
+      enumerator-list:
+        enumerator
+        enumerator-list  ;  enumerator
+    *)
+    parse_separated_list_opt
+      parser Semicolon RightBrace SyntaxError.error1004 parse_enumerator
+
   and parse_enum_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+    (*
+    enum-declaration:
+      enum  name  enum-base  type-constraint-opt  {  enumerator-list-opt  }
+    enum-base:
+      :  int
+      :  string
+    *)
+    let (parser, enum) = assert_token parser Enum in
+    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
+    let (parser, colon) = expect_token parser Colon SyntaxError.error1020 in
+    let (parser1, base) = next_token parser in
+    let (parser, base) = match Token.kind base with
+    | String
+    | Int -> (parser1, make_token base)
+    | LeftBrace ->
+      (* ERROR RECOVERY *)
+      (parser, make_missing())
+    | _ ->
+      (* ERROR RECOVERY *)
+      (parser1, make_token base) in
+    let (parser, enum_type) = parse_type_constraint_opt parser in
+    let (parser, left_brace, enumerators, right_brace) = parse_delimited_list
+      parser LeftBrace SyntaxError.error1037 RightBrace SyntaxError.error1006
+      parse_enumerator_list_opt in
+    let result = make_enum
+      enum name colon base enum_type left_brace enumerators right_brace in
+    (parser, result)
 
   and parse_namespace_declaration parser =
     (* TODO *)
@@ -245,7 +302,7 @@ module WithExpressionAndStatementParser
   and parse_attribute_list_opt parser =
     let token = peek_token parser in
     if (Token.kind token) = GreaterThanGreaterThan then
-      let parser = with_error parser SyntaxError.error1030 in
+      let parser = with_error parser SyntaxError.error1034 in
       (parser, make_missing())
     else
       (* TODO use Eric's generic comma list parse once it lands *)

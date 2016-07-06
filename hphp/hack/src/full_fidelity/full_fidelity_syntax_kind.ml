@@ -26,6 +26,8 @@ type t =
 | AttributeSpecification
 | Attribute
 | InclusionDirective
+| EnumDeclaration
+| Enumerator
 
 (* Statements *)
 | CompoundStatement
@@ -85,6 +87,7 @@ type t =
 | ClassnameTypeSpecifier
 | ShapeTypeSpecifier
 | FieldSpecifier
+| TypeConstraint
 
 let to_string kind =
   match kind with
@@ -150,9 +153,12 @@ let to_string kind =
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | FieldSpecifier -> "field_specifier"
+  | TypeConstraint -> "type_constraint"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
   | InclusionDirective -> "inclusion_directive"
+  | EnumDeclaration -> "enum_declaration"
+  | Enumerator -> "enumerator"
   | XHPExpression -> "xhp_expression"
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"

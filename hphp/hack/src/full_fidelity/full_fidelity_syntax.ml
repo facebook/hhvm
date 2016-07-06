@@ -91,6 +91,21 @@ module WithToken(Token: TokenType) = struct
       script_header : t;
       script_declarations : t
     }
+    and enum_declaration = {
+      enum_enum : t;
+      enum_name : t;
+      enum_colon : t;
+      enum_base : t;
+      enum_type : t;
+      enum_left_brace : t;
+      enum_enumerators : t;
+      enum_right_brace : t
+    }
+    and enumerator = {
+      enumerator_name : t;
+      enumerator_equal : t;
+      enumerator_value : t
+    }
     and function_declaration = {
       function_attr : t;
       function_async : t;
@@ -410,6 +425,10 @@ module WithToken(Token: TokenType) = struct
       field_init_arrow : t;
       field_init_value : t
     }
+    and type_constraint = {
+      constraint_as : t;
+      constraint_type : t
+    }
     and shape = {
       shape_shape : t;
       shape_left_paren : t;
@@ -450,6 +469,8 @@ module WithToken(Token: TokenType) = struct
     | FunctionDeclaration of function_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
+    | EnumDeclaration of enum_declaration
+    | Enumerator of enumerator
     | ParameterDeclaration of parameter_declaration
     | DefaultArgumentSpecifier of default_argument_specifier
     | AttributeSpecification of attribute_specification
@@ -510,6 +531,7 @@ module WithToken(Token: TokenType) = struct
     | ClassnameTypeSpecifier of classname_type_specifier
     | ShapeTypeSpecifier of shape
     | FieldSpecifier of field_specifier
+    | TypeConstraint of type_constraint
 
     and t = { syntax : syntax ; value : SyntaxValue.t}
 
@@ -534,6 +556,8 @@ module WithToken(Token: TokenType) = struct
       | ListItem _ -> SyntaxKind.ListItem
       | ScriptHeader _ -> SyntaxKind.ScriptHeader
       | Script _ -> SyntaxKind.Script
+      | EnumDeclaration _ -> SyntaxKind.EnumDeclaration
+      | Enumerator _ -> SyntaxKind.Enumerator
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
@@ -592,6 +616,7 @@ module WithToken(Token: TokenType) = struct
       | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
       | ShapeTypeSpecifier _ -> SyntaxKind.ShapeTypeSpecifier
       | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
+      | TypeConstraint _ -> SyntaxKind.TypeConstraint
 
     let kind node =
       to_kind (syntax node)
@@ -606,6 +631,8 @@ module WithToken(Token: TokenType) = struct
     let is_list_item node = kind node = SyntaxKind.ListItem
     let is_header node = kind node = SyntaxKind.ScriptHeader
     let is_script node = kind node = SyntaxKind.Script
+    let is_enum node = kind node = SyntaxKind.EnumDeclaration
+    let is_enumerator node = kind node = SyntaxKind.Enumerator
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
     let is_classish node = kind node = SyntaxKind.ClassishDeclaration
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
@@ -674,6 +701,7 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ShapeTypeSpecifier
     let is_field_specifier node =
       kind node = SyntaxKind.FieldSpecifier
+    let is_type_constraint node = kind node = SyntaxKind.TypeConstraint
 
     let is_separable_prefix node =
       match syntax node with
@@ -701,6 +729,14 @@ module WithToken(Token: TokenType) = struct
       | Script
         { script_header; script_declarations } ->
         [ script_header; script_declarations ]
+      | EnumDeclaration
+        { enum_enum; enum_name; enum_colon; enum_base; enum_type;
+          enum_left_brace; enum_enumerators; enum_right_brace } ->
+        [ enum_enum; enum_name; enum_colon; enum_base; enum_type;
+          enum_left_brace; enum_enumerators; enum_right_brace ]
+      | Enumerator
+        { enumerator_name; enumerator_equal; enumerator_value } ->
+        [ enumerator_name; enumerator_equal; enumerator_value ]
       | FunctionDeclaration
         { function_attr; function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
@@ -936,6 +972,9 @@ module WithToken(Token: TokenType) = struct
       | FieldSpecifier
         { field_name; field_arrow; field_type } ->
         [ field_name; field_arrow; field_type ]
+      | TypeConstraint
+        { constraint_as; constraint_type } ->
+        [ constraint_as; constraint_type ]
 
     let children_names node =
       match node.syntax with
@@ -955,6 +994,14 @@ module WithToken(Token: TokenType) = struct
       | Script
         { script_header; script_declarations } ->
         [ "script_header"; "script_declarations" ]
+      | EnumDeclaration
+        { enum_enum; enum_name; enum_colon; enum_base; enum_type;
+          enum_left_brace; enum_enumerators; enum_right_brace } ->
+        [ "enum_enum"; "enum_name"; "enum_colon"; "enum_base"; "enum_type";
+          "enum_left_brace"; "enum_enumerators"; "enum_right_brace" ]
+      | Enumerator
+        { enumerator_name; enumerator_equal; enumerator_value } ->
+        [ "enumerator_name"; "enumerator_equal"; "enumerator_value" ]
       | FunctionDeclaration
         { function_attr; function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
@@ -1198,6 +1245,10 @@ module WithToken(Token: TokenType) = struct
       | FieldSpecifier
         { field_name; field_arrow; field_type } ->
         [ "field_name"; "field_arrow"; "field_type" ]
+      | TypeConstraint
+        { constraint_as; constraint_type } ->
+        [ "constraint_as"; "constraint_type" ]
+
 
     let rec to_json node =
       let open Hh_json in
@@ -1436,6 +1487,16 @@ module WithToken(Token: TokenType) = struct
         ScriptHeader { header_less_than; header_question; header_language }
       | (SyntaxKind.Script, [ script_header; script_declarations ]) ->
         Script { script_header; script_declarations }
+      | (SyntaxKind.EnumDeclaration,
+          [ enum_enum; enum_name; enum_colon; enum_base; enum_type;
+            enum_left_brace; enum_enumerators; enum_right_brace ]) ->
+          EnumDeclaration
+          { enum_enum; enum_name; enum_colon; enum_base; enum_type;
+            enum_left_brace; enum_enumerators; enum_right_brace }
+      | (SyntaxKind.Enumerator,
+        [ enumerator_name; enumerator_equal; enumerator_value ]) ->
+        Enumerator
+        { enumerator_name; enumerator_equal; enumerator_value }
       | (SyntaxKind.FunctionDeclaration, [ function_attr; function_async;
         function_token; function_name; function_type_params;
         function_left_paren; function_params; function_right_paren;
@@ -1686,6 +1747,10 @@ module WithToken(Token: TokenType) = struct
         [ field_name; field_arrow; field_type ]) ->
         FieldSpecifier
         { field_name; field_arrow; field_type }
+      | (SyntaxKind.TypeConstraint,
+        [ constraint_as; constraint_type ]) ->
+        TypeConstraint
+        { constraint_as; constraint_type }
 
       | _ -> failwith "with_children called with wrong number of children"
 
@@ -1822,6 +1887,14 @@ module WithToken(Token: TokenType) = struct
 
       let make_script script_header script_declarations =
         from_children SyntaxKind.Script [ script_header; script_declarations ]
+
+      let make_enum
+          enum name colon base enum_type left_brace items right_brace =
+        from_children SyntaxKind.EnumDeclaration
+          [ enum; name; colon; base; enum_type; left_brace; items; right_brace ]
+
+      let make_enumerator name equal value =
+        from_children SyntaxKind.Enumerator [ name; equal; value ]
 
       let make_function function_attr function_async function_token
         function_name function_type_params function_left_paren function_params
@@ -2036,6 +2109,10 @@ module WithToken(Token: TokenType) = struct
 
       let make_field_specifier name arrow field_type =
         from_children SyntaxKind.FieldSpecifier [ name; arrow; field_type ]
+
+      let make_type_constraint constraint_as constraint_type =
+        from_children SyntaxKind.TypeConstraint
+          [ constraint_as; constraint_type ]
 
       let make_shape_type_specifier shape lparen fields rparen =
         from_children SyntaxKind.ShapeTypeSpecifier

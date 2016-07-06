@@ -260,6 +260,22 @@ let rec get_doc node =
     let right = get_doc (classish_body_right_brace x) in
     let body = get_doc (classish_body_elements x) in
     indent_block_no_space left body right indt
+  | EnumDeclaration x ->
+    let en = get_doc x.enum_enum in
+    let na = get_doc x.enum_name in
+    let co = get_doc x.enum_colon in
+    let ba = get_doc x.enum_base in
+    let ty = get_doc x.enum_type in
+    let lb = get_doc x.enum_left_brace in
+    let es = get_doc x.enum_enumerators in
+    let rb = get_doc x.enum_right_brace in
+    (* TODO: This could be a lot better. Add indentation, etc. *)
+    en ^| na ^| co ^| ba ^| ty ^| lb ^| es ^| rb
+  | Enumerator x ->
+    let n = get_doc x.enumerator_name in
+    let e = get_doc x.enumerator_equal in
+    let v = get_doc x.enumerator_value in
+    n ^| e ^| v
   | FunctionDeclaration x ->
     let preface = group_doc ( get_doc (function_attr x)
                        ^| get_doc (function_async x)
@@ -591,6 +607,10 @@ let rec get_doc node =
     let a = get_doc x.field_arrow in
     let t = get_doc x.field_type in
     n ^| a ^| t
+  | TypeConstraint x ->
+    let a = get_doc x.constraint_as in
+    let t = get_doc x.constraint_type in
+    a ^| t
   | ShapeTypeSpecifier x ->
     let sh = get_doc x.shape_shape in
     let lp = get_doc x.shape_left_paren in

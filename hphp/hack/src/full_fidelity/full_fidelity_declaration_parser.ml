@@ -417,7 +417,7 @@ module WithExpressionAndStatementParser
     if (Token.kind open_angle) = LessThan then
         let type_parser = TypeParser.make parser.lexer parser.errors in
         let (type_parser, node) =
-          TypeParser.parse_generic_type_argument_list type_parser in
+          TypeParser.parse_generic_type_parameter_list type_parser in
         let lexer = TypeParser.lexer type_parser in
         let errors = TypeParser.errors type_parser in
         let parser = { lexer; errors } in

@@ -101,7 +101,6 @@ and parse_simple_type_or_type_constant_or_generic parser =
   class-interface-trait-specifier:
     qualified-name generic-type-argument-listopt
 *)
-
 and parse_possible_generic_specifier parser =
   let (parser, name) = next_token parser in
   let (parser, arguments) = parse_generic_type_argument_list_opt parser in
@@ -109,6 +108,84 @@ and parse_possible_generic_specifier parser =
     (parser, make_simple_type_specifier (make_token name))
   else
     (parser, make_generic_type_specifier (make_token name) arguments)
+
+(* SPEC
+    generic-type-constraint-listopt:
+      generic-type-constraint
+      generic-type-constraint generic-type-constraint-listopt
+    generic-type-constraint:
+      constraint-token matched-type
+    constraint-token:
+      as
+      super
+    matched-type:
+      type-specifier
+*)
+and parse_generic_type_constraints parser =
+  let rec aux parser acc =
+    let (parser1, token) = next_token parser in
+      match (Token.kind token) with
+      | As
+      | Super ->
+        let constraint_token = make_token token in
+        let (parser, matched_type) = parse_type_specifier parser1 in
+        let type_constraint =
+          make_type_constraint constraint_token matched_type in
+        aux parser (type_constraint::acc)
+      | _ -> (* If it's correct, this is either a comma or a GreaterThan
+                If it's an error, we catch it upstream in parse_comma_list *)
+        (* Note that parser still preserves the last token *)
+        (parser, acc) in
+  let (parser, types) = aux parser [] in
+  if types = [] then (parser, make_missing()) else
+  (parser, make_list (List.rev types))
+
+(* SPEC
+  generic-type-parameter:
+    type-parameter-varianceopt type-parameter-name type-constraint-listopt
+  type-parameter-varianceopt:
+    +
+    -
+  type-parameter-name:
+    type-specifier
+*)
+and parse_type_parameter parser =
+  let token = peek_token parser in
+  let parser, variance =
+    if (Token.kind token) = Plus || (Token.kind token) = Minus then
+      let (parser, _) = next_token parser in
+      let variance = (make_token token) in
+      (parser, variance)
+    else
+      (parser, make_missing()) in
+  let (parser, type_name) = parse_type_specifier parser in
+  let (parser, constraints) = parse_generic_type_constraints parser in
+  (parser, make_type_parameter variance type_name constraints)
+
+(* SPEC
+  type-parameter-list:
+  < generic-type-parameters >
+
+  generic-type-parameters:
+    generic-type-parameter
+    generic-type-parameter, generic-type-parameter
+*)
+and parse_generic_type_parameter_list parser =
+  let (parser, open_angle) = next_token parser in
+  let open_angle = make_token open_angle in
+  let (parser, args) =  parse_comma_list parser GreaterThan
+    SyntaxError.error1007 parse_type_parameter in
+  let (parser1, close_angle) = next_token parser in
+  if (Token.kind close_angle) = GreaterThan then
+    let result = make_type_arguments open_angle args (make_token close_angle) in
+    (parser1, result)
+  else
+    (* ERROR RECOVERY: Don't eat the token that is in the place of the
+       missing > or ,.  Assume that it is the > that is missing and
+       try to parse whatever is coming after the type.  *)
+    let parser = with_error parser SyntaxError.error1014 in
+    let result = make_type_arguments open_angle args (make_missing()) in
+    (parser, result)
 
 and parse_generic_type_argument_list_opt parser =
   let token = peek_token parser in

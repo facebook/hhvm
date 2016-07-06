@@ -582,6 +582,15 @@ let rec get_doc node =
     let separator = get_doc (type_constant_separator x) in
     left ^^^ separator ^^^ right
   | SimpleTypeSpecifier x -> get_doc x
+  | TypeConstraint x ->
+    let operator = get_doc x.constraint_token in
+    let mtype = get_doc x.matched_type in
+    operator ^| mtype
+  | TypeParameter x ->
+    let variance = get_doc x.type_variance_opt in
+    let name = get_doc x.type_name in
+    let constraints = get_doc x.type_constraint_list_opt in
+    variance ^^^ name ^| constraints
   | NullableTypeSpecifier x ->
     let qm = get_doc x.nullable_question in
     let ty = get_doc x.nullable_type in
@@ -625,10 +634,6 @@ let rec get_doc node =
     let a = get_doc x.field_arrow in
     let t = get_doc x.field_type in
     n ^| a ^| t
-  | TypeConstraint x ->
-    let a = get_doc x.constraint_as in
-    let t = get_doc x.constraint_type in
-    a ^| t
   | ShapeTypeSpecifier x ->
     let sh = get_doc x.shape_shape in
     let lp = get_doc x.shape_left_paren in

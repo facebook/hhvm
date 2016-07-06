@@ -409,6 +409,15 @@ module WithToken(Token: TokenType) = struct
       vector_type : t;
       vector_right_angle : t
     }
+    and type_parameter = {
+      type_variance_opt: t;
+      type_name : t;
+      type_constraint_list_opt  : t;
+    }
+    and type_constraint_specifier = {
+      constraint_token: t;
+      matched_type: t;
+    }
     and map_type_specifier = {
       map_array : t;
       map_left_angle : t;
@@ -442,10 +451,6 @@ module WithToken(Token: TokenType) = struct
       field_init_name : t;
       field_init_arrow : t;
       field_init_value : t
-    }
-    and type_constraint = {
-      constraint_as : t;
-      constraint_type : t
     }
     and shape = {
       shape_shape : t;
@@ -542,6 +547,8 @@ module WithToken(Token: TokenType) = struct
 
     | SimpleTypeSpecifier of t
     | NullableTypeSpecifier of nullable_type_specifier
+    | TypeConstraint of type_constraint_specifier
+    | TypeParameter of type_parameter
     | TypeConstant of type_constant
     | GenericTypeSpecifier of generic_type
     | TypeArguments of type_arguments
@@ -552,7 +559,6 @@ module WithToken(Token: TokenType) = struct
     | ClassnameTypeSpecifier of classname_type_specifier
     | ShapeTypeSpecifier of shape
     | FieldSpecifier of field_specifier
-    | TypeConstraint of type_constraint
 
     and t = { syntax : syntax ; value : SyntaxValue.t}
 
@@ -630,6 +636,8 @@ module WithToken(Token: TokenType) = struct
       | XHPAttribute _ -> SyntaxKind.XHPAttribute
       | TypeConstant _ ->  SyntaxKind.TypeConstant
       | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
+      | TypeConstraint _ -> SyntaxKind.TypeConstraint
+      | TypeParameter _ -> SyntaxKind.TypeParameter
       | NullableTypeSpecifier _ -> SyntaxKind.NullableTypeSpecifier
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
       | TypeArguments _ -> SyntaxKind.TypeArguments
@@ -640,7 +648,6 @@ module WithToken(Token: TokenType) = struct
       | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
       | ShapeTypeSpecifier _ -> SyntaxKind.ShapeTypeSpecifier
       | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
-      | TypeConstraint _ -> SyntaxKind.TypeConstraint
 
     let kind node =
       to_kind (syntax node)
@@ -690,6 +697,8 @@ module WithToken(Token: TokenType) = struct
     let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
     let is_postfix_operator node = kind node = SyntaxKind.PostfixUnaryOperator
     let is_binary_operator node = kind node = SyntaxKind.BinaryOperator
+    let is_type_constraint node = kind node = SyntaxKind.TypeConstraint
+    let is_type_parameter node = kind node = SyntaxKind.TypeParameter
     let is_conditional_expression node =
       kind node = SyntaxKind.ConditionalExpression
     let is_function_call_expression node =
@@ -728,7 +737,6 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ShapeTypeSpecifier
     let is_field_specifier node =
       kind node = SyntaxKind.FieldSpecifier
-    let is_type_constraint node = kind node = SyntaxKind.TypeConstraint
 
     let is_separable_prefix node =
       match syntax node with
@@ -967,6 +975,12 @@ module WithToken(Token: TokenType) = struct
         [ type_constant_left_type; type_constant_separator;
         type_constant_right_type ]
       | SimpleTypeSpecifier x -> [x]
+      | TypeConstraint
+        { constraint_token; matched_type } ->
+        [ constraint_token; matched_type ]
+      | TypeParameter
+        { type_variance_opt; type_name; type_constraint_list_opt } ->
+        [ type_variance_opt; type_name; type_constraint_list_opt ]
       | NullableTypeSpecifier
         { nullable_question; nullable_type } ->
         [ nullable_question; nullable_type ]
@@ -1009,9 +1023,6 @@ module WithToken(Token: TokenType) = struct
       | FieldSpecifier
         { field_name; field_arrow; field_type } ->
         [ field_name; field_arrow; field_type ]
-      | TypeConstraint
-        { constraint_as; constraint_type } ->
-        [ constraint_as; constraint_type ]
 
     let children_names node =
       match node.syntax with
@@ -1249,6 +1260,11 @@ module WithToken(Token: TokenType) = struct
         [ "type_constant_left_type"; "type_constant_separator";
         "type_constant_right_type" ]
       | SimpleTypeSpecifier _ -> [ "simple_type_specifier" ]
+      | TypeParameter
+        { type_variance_opt; type_name; type_constraint_list_opt  } ->
+        [ "type_variance_opt"; "type_name"; "type_constraint_list_opt " ]
+      | TypeConstraint { constraint_token; matched_type } ->
+        [ "constraint_token"; "matched_type" ]
       | NullableTypeSpecifier
         { nullable_question; nullable_type } ->
         [ "nullable_question"; "nullable_type" ]
@@ -1293,9 +1309,6 @@ module WithToken(Token: TokenType) = struct
       | FieldSpecifier
         { field_name; field_arrow; field_type } ->
         [ "field_name"; "field_arrow"; "field_type" ]
-      | TypeConstraint
-        { constraint_as; constraint_type } ->
-        [ "constraint_as"; "constraint_type" ]
 
 
     let rec to_json node =
@@ -1477,6 +1490,11 @@ module WithToken(Token: TokenType) = struct
     let type_arguments_left_angle x = x.type_arguments_left_angle
     let type_arguments x = x.type_arguments
     let type_arguments_right_angle x = x.type_arguments_right_angle
+    let type_parameter_variance x = x.type_variance_opt
+    let type_parameter_name x = x.type_name
+    let type_parameter_constraints x = x.type_constraint_list_opt
+    let type_constraint_token x = x.constraint_token
+    let type_constraint_matched_type x = x.matched_type
     let binary_operator_kind b =
       match syntax b.binary_operator with
       | Token token ->
@@ -1770,6 +1788,13 @@ module WithToken(Token: TokenType) = struct
           type_arguments; type_arguments_right_angle ]) ->
         TypeArguments { type_arguments_left_angle;
             type_arguments; type_arguments_right_angle }
+      | (SyntaxKind.TypeParameter, [ type_variance_opt;
+          type_name; type_constraint_list_opt  ]) ->
+        TypeParameter { type_variance_opt;
+          type_name; type_constraint_list_opt  }
+      | (SyntaxKind.TypeConstraint, [ constraint_token;
+          matched_type ]) ->
+        TypeConstraint { constraint_token; matched_type }
       | (SyntaxKind.TupleTypeSpecifier,
           [ tuple_left_paren; tuple_types; tuple_right_paren ]) ->
         TupleTypeSpecifier
@@ -1808,10 +1833,6 @@ module WithToken(Token: TokenType) = struct
         [ field_name; field_arrow; field_type ]) ->
         FieldSpecifier
         { field_name; field_arrow; field_type }
-      | (SyntaxKind.TypeConstraint,
-        [ constraint_as; constraint_type ]) ->
-        TypeConstraint
-        { constraint_as; constraint_type }
 
       | _ -> failwith "with_children called with wrong number of children"
 
@@ -2137,6 +2158,14 @@ module WithToken(Token: TokenType) = struct
           [ type_constant_left_type; type_constant_separator;
           type_constant_right_type ]
 
+      let make_type_constraint constraint_token matched_type =
+        from_children SyntaxKind.TypeConstraint
+          [ constraint_token; matched_type ]
+
+      let make_type_parameter variance_opt type_name constraint_list_opt =
+        from_children SyntaxKind.TypeParameter
+          [ variance_opt; type_name; constraint_list_opt ]
+
       let make_simple_type_specifier simple_type =
         from_children SyntaxKind.SimpleTypeSpecifier [ simple_type ]
 
@@ -2181,10 +2210,6 @@ module WithToken(Token: TokenType) = struct
 
       let make_field_specifier name arrow field_type =
         from_children SyntaxKind.FieldSpecifier [ name; arrow; field_type ]
-
-      let make_type_constraint constraint_as constraint_type =
-        from_children SyntaxKind.TypeConstraint
-          [ constraint_as; constraint_type ]
 
       let make_shape_type_specifier shape lparen fields rparen =
         from_children SyntaxKind.ShapeTypeSpecifier

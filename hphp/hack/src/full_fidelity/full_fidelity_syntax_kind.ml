@@ -80,6 +80,8 @@ type t =
 (* Types *)
 | SimpleTypeSpecifier
 | NullableTypeSpecifier
+| TypeConstraint
+| TypeParameter
 | TypeConstant
 | GenericTypeSpecifier
 | TypeArguments
@@ -90,7 +92,6 @@ type t =
 | ClassnameTypeSpecifier
 | ShapeTypeSpecifier
 | FieldSpecifier
-| TypeConstraint
 
 let to_string kind =
   match kind with
@@ -149,6 +150,8 @@ let to_string kind =
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"
+  | TypeConstraint -> "type_constraint"
+  | TypeParameter -> "type_parameter"
   | NullableTypeSpecifier -> "nullable_type_specifier"
   | GenericTypeSpecifier -> "generic_type_specifier"
   | TupleTypeSpecifier -> "tuple_type_specifier"
@@ -158,7 +161,6 @@ let to_string kind =
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | FieldSpecifier -> "field_specifier"
-  | TypeConstraint -> "type_constraint"
   | TypeArguments -> "type_arguments"
   | DefaultArgumentSpecifier -> "default_argument_specifier"
   | InclusionDirective -> "inclusion_directive"

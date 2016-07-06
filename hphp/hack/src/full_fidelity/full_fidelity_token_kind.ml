@@ -68,6 +68,7 @@ type t =
 | Shape
 | Static
 | String
+| Super
 | Switch
 | This
 | Throw
@@ -218,6 +219,7 @@ let from_string keyword =
   | "shape" -> Some Shape
   | "static" -> Some Static
   | "string" -> Some String
+  | "super" -> Some Super
   | "switch" -> Some Switch
   | "this" -> Some This
   | "throw" -> Some Throw
@@ -287,6 +289,7 @@ let to_string kind =
   | Shape -> "shape"
   | Static -> "static"
   | String -> "string"
+  | Super -> "super"
   | Switch -> "switch"
   | This -> "this"
   | Throw -> "throw"

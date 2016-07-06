@@ -1087,12 +1087,11 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
 
   /*
    * Set up the callee state.
-   *
-   * We set m_thisIsAvailable to true on any object method, because we
-   * just don't inline calls to object methods with a null $this.
    */
   cur().fpValue          = calleeFP;
-  cur().thisAvailable    = target->cls() != nullptr && !target->isStatic();
+  cur().thisAvailable    = target->cls() != nullptr &&
+                           !target->isStatic() &&
+                           extra->ctx->isA(TObj);
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
   cur().bcSPOff          = FPInvOffset{target->numLocals()};
@@ -1494,7 +1493,7 @@ static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
 
   const auto ctx = inst->src(2);
   const auto ctxType = ctx->type();
-  if (ctxType < TObj && ctxType.clsSpec().exact()) return callee;
+  if (ctxType < TObj || ctxType < TCls || ctxType < TCctx) return callee;
 
   return nullptr;
 }

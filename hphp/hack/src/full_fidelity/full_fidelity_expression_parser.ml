@@ -95,11 +95,9 @@ module WithStatementAndDeclParser
     | Array -> parse_array_intrinsic_expression parser
     | LeftBracket (* TODO: ? one situation is array. any other situations? *)
       -> parse_array_creation_expression parser
-    | Shape (* TODO: Parse shape *)
+    | Shape -> parse_shape_expression parser
     | Async (* TODO: Parse lambda *)
     | Function  (* TODO: Parse local function *)
-
-
 
     | Dollar (* TODO: ? *)
     | DollarDollar (* TODO: ? *)
@@ -502,6 +500,7 @@ module WithStatementAndDeclParser
         (parser, element :: acc |> List.rev |> make_list)
     in
     aux parser []
+
   (* array-element-initializer :=
    * expression
    * expression => expression
@@ -516,5 +515,57 @@ module WithStatementAndDeclParser
       with_reset_precedence parser1 parse_expression in
       (parser, make_list [expr1; make_token token; expr2])
     | _ -> (parser, expr1)
+
+  and parse_field_initializer parser =
+    (* SPEC
+      field-initializer:
+        single-quoted-string-literal  =>  expression
+        integer-literal  =>  expression
+        qualified-name  =>  expression
+        *)
+    let (parser1, token) = next_token parser in
+    let (parser, name) = match Token.kind token with
+    | SingleQuotedStringLiteral
+    | DecimalLiteral
+    | OctalLiteral
+    | HexadecimalLiteral
+    | BinaryLiteral
+    | Name
+    | QualifiedName -> (parser1, make_token token)
+    | EqualGreaterThan ->
+      (* ERROR RECOVERY: We're missing the name. *)
+      (with_error parser SyntaxError.error1025, make_missing())
+    | _ ->
+      (* ERROR RECOVERY: We're missing the name and we have no arrow either.
+         Just eat the token and hope we get an arrow next. *)
+      (with_error parser1 SyntaxError.error1025, make_missing()) in
+    let (parser, arrow) =
+      expect_token parser EqualGreaterThan SyntaxError.error1028 in
+    let (parser, value) = with_reset_precedence parser parse_expression in
+    let result = make_field_initializer name arrow value in
+    (parser, result)
+
+  and parse_field_initializer_list_opt parser =
+    (* SPEC
+      field-initializer-list:
+        field-initializer
+        field-initializer-list    ,  field-initializer
+    *)
+    parse_comma_list_opt
+      parser RightParen SyntaxError.error1025 parse_field_initializer
+
+  and parse_shape_expression parser =
+    (* SPEC
+      shape-literal:
+        shape  (  field-initializer-list-opt  )
+    *)
+    let (parser, shape) = assert_token parser Shape in
+    let (parser, left_paren) =
+     expect_token parser LeftParen SyntaxError.error1019 in
+    let (parser, fields) = parse_field_initializer_list_opt parser in
+    let (parser, right_paren) =
+      expect_token parser RightParen SyntaxError.error1011 in
+    let result = make_shape_expression shape left_paren fields right_paren in
+    (parser, result)
 
 end

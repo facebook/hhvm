@@ -117,49 +117,6 @@ and parse_generic_type_argument_list_opt parser =
   else
     (parser, make_missing())
 
-(* This parses a comma-separated list of items that must contain at least
-   one item.  The list is terminated by a close_kind token. The item is
-   parsed by the given function. *)
-and parse_comma_list parser close_kind error parse_item =
-  let rec aux parser acc =
-    let (parser1, token) = next_token parser in
-    let kind = Token.kind token in
-    if kind = close_kind || kind = EndOfFile then
-      (* ERROR RECOVERY: If we're here and we got a close brace then
-         the list is empty; we expect at least one type. If we're here
-         at the end of the file, then we were expecting one more type. *)
-      let parser = with_error parser error in
-      (parser, ((make_missing()) :: acc))
-    else if kind = Comma then
-
-      (* ERROR RECOVERY: We're expecting a type but we got a comma.
-         Assume the type was missing, eat the comma, and move on.
-         TODO: This could be poor recovery. For example:
-
-              function bar (Foo< , int blah)
-
-        Plainly the type is missing, but the comma is not associated with
-        the type, it's associated with the formal parameter list.  *)
-
-      let parser = with_error parser1 error in
-      let item = make_list_item (make_missing()) (make_token token) in
-      aux parser (item :: acc)
-    else
-      let (parser, ty) = parse_item parser in
-      let (parser1, token) = next_token parser in
-      let kind = Token.kind token in
-      if kind = close_kind then
-        (parser, (ty :: acc))
-      else if kind = Comma then
-        let item = make_list_item ty (make_token token) in
-        aux parser1 (item :: acc)
-      else
-        (* ERROR RECOVERY: We were expecting a close brace or comma, but
-           got neither. Bail out. Caller will give an error. *)
-        (parser, (ty :: acc)) in
-  let (parser, types) = aux parser [] in
-  (parser, make_list (List.rev types))
-
 and parse_type_list parser close_kind =
   parse_comma_list parser close_kind SyntaxError.error1007 parse_type_specifier
 

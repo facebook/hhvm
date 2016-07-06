@@ -641,6 +641,20 @@ let rec get_doc node =
     let keyword = get_doc (continue_keyword x) in
     let semicolon = get_doc (continue_semicolon x) in
     keyword ^^^ semicolon
+  | FunctionStaticStatement x ->
+    let st = get_doc x.static_static in
+    let ds = get_doc x.static_declarations in
+    let se = get_doc x.static_semicolon in
+    st ^| ds ^^^ se
+  | StaticDeclarator x ->
+    let n = get_doc x.static_name in
+    let i = get_doc x.static_init in
+    group_doc (n ^| i)
+  | StaticInitializer x ->
+    let e = get_doc x.static_init_equal in
+    let v = get_doc x.static_init_value in
+    group_doc (e ^| v)
+
 (* sep is the compulsory separator separating the children in the list *)
 and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in

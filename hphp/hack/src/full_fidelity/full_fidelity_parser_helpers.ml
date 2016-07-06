@@ -77,4 +77,51 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
+
+  (* This parses a comma-separated list of items that must contain at least
+     one item.  The list is terminated by a close_kind token. The item is
+     parsed by the given function. *)
+  let parse_comma_list parser close_kind error parse_item =
+    let rec aux parser acc =
+      let (parser1, token) = next_token parser in
+      let kind = Token.kind token in
+      if kind = close_kind || kind = TokenKind.EndOfFile then
+        (* ERROR RECOVERY: If we're here and we got a close token then
+           the list is empty; we expect at least one type. If we're here
+           at the end of the file, then we were expecting one more type. *)
+        let parser = with_error parser error in
+        (parser, ((Syntax.make_missing()) :: acc))
+      else if kind = TokenKind.Comma then
+
+        (* ERROR RECOVERY: We're expecting a type but we got a comma.
+           Assume the type was missing, eat the comma, and move on.
+           TODO: This could be poor recovery. For example:
+
+                function bar (Foo< , int blah)
+
+          Plainly the type is missing, but the comma is not associated with
+          the type, it's associated with the formal parameter list.  *)
+
+        let parser = with_error parser1 error in
+        let missing = Syntax.make_missing() in
+        let token = Syntax.make_token token in
+        let list_item = Syntax.make_list_item missing token in
+        aux parser (list_item :: acc)
+      else
+        let (parser, item) = parse_item parser in
+        let (parser1, token) = next_token parser in
+        let kind = Token.kind token in
+        if kind = close_kind then
+          (parser, (item :: acc))
+        else if kind = TokenKind.Comma then
+          let token = Syntax.make_token token in
+          let list_item = Syntax.make_list_item item token in
+          aux parser1 (list_item :: acc)
+        else
+          (* ERROR RECOVERY: We were expecting a close token or comma, but
+             got neither. Bail out. Caller will give an error. *)
+          (parser, (item :: acc)) in
+    let (parser, types) = aux parser [] in
+    (parser, Syntax.make_list (List.rev types))
+
 end

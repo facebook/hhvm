@@ -343,9 +343,49 @@ module WithExpressionAndDeclParser
     (parser, make_case_statement case_token expr colon_token stmt)
 
   and parse_function_static_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+    (* SPEC
+
+    function-static-declaration:
+      static static-declarator-list  ;
+
+    static-declarator-list:
+      static-declarator
+      static-declarator-list  ,  static-declarator
+
+    *)
+    let (parser, static) = assert_token parser Static in
+    let (parser, decls) = parse_comma_list
+      parser Semicolon SyntaxError.error1008 parse_static_declarator in
+    let (parser, semicolon) =
+      expect_token parser Semicolon SyntaxError.error1010 in
+    let result = make_function_static_statement static decls semicolon in
+    (parser, result)
+
+  and parse_static_declarator parser =
+    (* SPEC
+        static-declarator:
+          variable-name  function-static-initializer-opt
+    *)
+    (* TODO: ERROR RECOVERY not very sophisticated here *)
+    let (parser, variable_name) =
+      expect_token parser Variable SyntaxError.error1008 in
+    let (parser, init) = parse_static_initializer_opt parser in
+    let result = make_static_declarator variable_name init in
+    (parser, result)
+
+  and parse_static_initializer_opt parser =
+    (* SPEC
+      function-static-initializer:
+        = const-expression
+    *)
+    let (parser1, token) = next_token parser in
+    match (Token.kind token) with
+    | Equal ->
+      (* TODO: Detect if expression is not const *)
+      let equal = make_token token in
+      let (parser, value) = parse_expression parser1 in
+      (parser, make_static_initializer equal value)
+    | _ -> (parser, make_missing())
 
   and parse_expression_statement parser =
     let (parser1, token) = next_token parser in

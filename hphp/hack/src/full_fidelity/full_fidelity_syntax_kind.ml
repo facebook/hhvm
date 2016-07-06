@@ -47,6 +47,9 @@ type t =
 | ThrowStatement
 | BreakStatement
 | ContinueStatement
+| FunctionStaticStatement
+| StaticDeclarator
+| StaticInitializer
 
 (* Expressions *)
 | LiteralExpression
@@ -120,6 +123,9 @@ let to_string kind =
   | ThrowStatement -> "throw_statement"
   | BreakStatement -> "break_statement"
   | ContinueStatement -> "continue_statement"
+  | FunctionStaticStatement -> "function_static_statement"
+  | StaticDeclarator -> "static_declarator"
+  | StaticInitializer -> "static_initializer"
   | PrefixUnaryOperator -> "prefix_unary_operator"
   | PostfixUnaryOperator -> "postfix_unary_operator"
   | BinaryOperator -> "binary_operator"

@@ -271,6 +271,19 @@ module WithToken(Token: TokenType) = struct
       continue_keyword: t;
       continue_semicolon: t
     }
+    and function_static_statement = {
+      static_static : t;
+      static_declarations : t;
+      static_semicolon: t
+    }
+    and static_declarator = {
+      static_name : t;
+      static_init : t
+    }
+    and static_initializer = {
+      static_init_equal : t;
+      static_init_value : t
+    }
     and unary_operator = {
       unary_operator : t;
       unary_operand : t
@@ -461,6 +474,9 @@ module WithToken(Token: TokenType) = struct
     | ThrowStatement of throw_statement
     | BreakStatement of break_statement
     | ContinueStatement of continue_statement
+    | FunctionStaticStatement of function_static_statement
+    | StaticInitializer of static_initializer
+    | StaticDeclarator of static_declarator
 
     | LiteralExpression of t
     | VariableExpression of t
@@ -545,6 +561,9 @@ module WithToken(Token: TokenType) = struct
       | ThrowStatement _ -> SyntaxKind.ThrowStatement
       | BreakStatement _ -> SyntaxKind.BreakStatement
       | ContinueStatement _ -> SyntaxKind.ContinueStatement
+      | FunctionStaticStatement _ -> SyntaxKind.FunctionStaticStatement
+      | StaticInitializer _ -> SyntaxKind.StaticInitializer
+      | StaticDeclarator _ -> SyntaxKind.StaticDeclarator
       | PrefixUnaryOperator _ -> SyntaxKind.PrefixUnaryOperator
       | PostfixUnaryOperator _ -> SyntaxKind.PostfixUnaryOperator
       | BinaryOperator _ -> SyntaxKind.BinaryOperator
@@ -609,6 +628,10 @@ module WithToken(Token: TokenType) = struct
     let is_catch node = kind node = SyntaxKind.CatchClause
     let is_finally node = kind node = SyntaxKind.FinallyClause
     let is_do_statement node = kind node = SyntaxKind.DoStatement
+    let is_function_static_statement node =
+      kind node = SyntaxKind.FunctionStaticStatement
+    let is_static_initializer node = kind node = SyntaxKind.StaticInitializer
+    let is_static_declarator node = kind node = SyntaxKind.StaticDeclarator
     let is_switch_statement node = kind node = SyntaxKind.SwitchStatement
     let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
     let is_postfix_operator node = kind node = SyntaxKind.PostfixUnaryOperator
@@ -795,6 +818,15 @@ module WithToken(Token: TokenType) = struct
       | ContinueStatement
         { continue_keyword; continue_semicolon } ->
         [ continue_keyword; continue_semicolon ]
+      | FunctionStaticStatement
+        { static_static; static_declarations; static_semicolon } ->
+        [ static_static; static_declarations; static_semicolon ]
+      | StaticInitializer
+        { static_init_equal; static_init_value } ->
+        [ static_init_equal; static_init_value ]
+      | StaticDeclarator
+        { static_name; static_init } ->
+        [ static_name; static_init ]
       | PrefixUnaryOperator
         { unary_operator; unary_operand } ->
         [ unary_operator; unary_operand ]
@@ -1044,6 +1076,15 @@ module WithToken(Token: TokenType) = struct
       | ContinueStatement
         { continue_keyword; continue_semicolon } ->
         [ "continue_keyword"; "continue_semicolon" ]
+      | FunctionStaticStatement
+        { static_static; static_declarations; static_semicolon } ->
+        [ "static_static"; "static_declarations"; "static_semicolon" ]
+      | StaticInitializer
+        { static_init_equal; static_init_value } ->
+        [ "static_init_equal"; "static_init_value" ]
+      | StaticDeclarator
+        { static_name; static_init } ->
+        [ "static_name"; "static_init" ]
       | PrefixUnaryOperator
         { unary_operator; unary_operand } ->
         [ "unary_operator"; "unary_operand" ]
@@ -1516,6 +1557,18 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.ContinueStatement,
           [ continue_keyword; continue_semicolon ]) ->
         ContinueStatement { continue_keyword; continue_semicolon }
+      | (SyntaxKind.FunctionStaticStatement,
+        [ static_static; static_declarations; static_semicolon ]) ->
+        FunctionStaticStatement
+        { static_static; static_declarations; static_semicolon }
+      | (SyntaxKind.StaticInitializer,
+        [ static_init_equal; static_init_value ]) ->
+        StaticInitializer
+        { static_init_equal; static_init_value }
+      | (SyntaxKind.StaticDeclarator,
+        [ static_name; static_init ]) ->
+        StaticDeclarator
+        { static_name; static_init }
       | (SyntaxKind.PrefixUnaryOperator, [ unary_operator; unary_operand ]) ->
         PrefixUnaryOperator { unary_operator; unary_operand }
       | (SyntaxKind.PostfixUnaryOperator, [ unary_operand; unary_operator ]) ->
@@ -1923,6 +1976,15 @@ module WithToken(Token: TokenType) = struct
       let make_continue_statement continue_keyword continue_semicolon =
         from_children SyntaxKind.ContinueStatement
           [ continue_keyword; continue_semicolon ]
+
+      let make_function_static_statement static decls semi =
+        from_children SyntaxKind.FunctionStaticStatement [ static; decls; semi ]
+
+      let make_static_initializer equal value =
+        from_children SyntaxKind.StaticInitializer [ equal; value ]
+
+      let make_static_declarator variable init =
+        from_children SyntaxKind.StaticDeclarator [ variable; init ]
 
       let make_type_constant type_constant_left_type type_constant_separator
           type_constant_right_type =

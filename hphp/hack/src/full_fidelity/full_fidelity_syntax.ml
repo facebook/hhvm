@@ -106,6 +106,14 @@ module WithToken(Token: TokenType) = struct
       enumerator_equal : t;
       enumerator_value : t
     }
+    and alias_declaration = {
+      alias_token : t;
+      alias_name : t;
+      alias_constraint : t;
+      alias_equal : t;
+      alias_type : t;
+      alias_semicolon : t
+    }
     and function_declaration = {
       function_attr : t;
       function_async : t;
@@ -471,6 +479,7 @@ module WithToken(Token: TokenType) = struct
     | ClassishBody of classish_body
     | EnumDeclaration of enum_declaration
     | Enumerator of enumerator
+    | AliasDeclaration of alias_declaration
     | ParameterDeclaration of parameter_declaration
     | DefaultArgumentSpecifier of default_argument_specifier
     | AttributeSpecification of attribute_specification
@@ -558,6 +567,7 @@ module WithToken(Token: TokenType) = struct
       | Script _ -> SyntaxKind.Script
       | EnumDeclaration _ -> SyntaxKind.EnumDeclaration
       | Enumerator _ -> SyntaxKind.Enumerator
+      | AliasDeclaration _ -> SyntaxKind.AliasDeclaration
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
@@ -633,6 +643,7 @@ module WithToken(Token: TokenType) = struct
     let is_script node = kind node = SyntaxKind.Script
     let is_enum node = kind node = SyntaxKind.EnumDeclaration
     let is_enumerator node = kind node = SyntaxKind.Enumerator
+    let is_alias node = kind node = SyntaxKind.AliasDeclaration
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
     let is_classish node = kind node = SyntaxKind.ClassishDeclaration
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
@@ -737,6 +748,11 @@ module WithToken(Token: TokenType) = struct
       | Enumerator
         { enumerator_name; enumerator_equal; enumerator_value } ->
         [ enumerator_name; enumerator_equal; enumerator_value ]
+      | AliasDeclaration
+        { alias_token; alias_name; alias_constraint;
+          alias_equal; alias_type; alias_semicolon } ->
+        [ alias_token; alias_name; alias_constraint;
+          alias_equal; alias_type; alias_semicolon ]
       | FunctionDeclaration
         { function_attr; function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
@@ -1002,6 +1018,11 @@ module WithToken(Token: TokenType) = struct
       | Enumerator
         { enumerator_name; enumerator_equal; enumerator_value } ->
         [ "enumerator_name"; "enumerator_equal"; "enumerator_value" ]
+      | AliasDeclaration
+        { alias_token; alias_name; alias_constraint;
+          alias_equal; alias_type; alias_semicolon } ->
+        [ "alias_token"; "alias_name"; "alias_constraint";
+          "alias_equal"; "alias_type"; "alias_semicolon" ]
       | FunctionDeclaration
         { function_attr; function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
@@ -1497,6 +1518,12 @@ module WithToken(Token: TokenType) = struct
         [ enumerator_name; enumerator_equal; enumerator_value ]) ->
         Enumerator
         { enumerator_name; enumerator_equal; enumerator_value }
+      | (SyntaxKind.AliasDeclaration,
+        [ alias_token; alias_name; alias_constraint;
+          alias_equal; alias_type; alias_semicolon ]) ->
+        AliasDeclaration
+        { alias_token; alias_name; alias_constraint;
+          alias_equal; alias_type; alias_semicolon }
       | (SyntaxKind.FunctionDeclaration, [ function_attr; function_async;
         function_token; function_name; function_type_params;
         function_left_paren; function_params; function_right_paren;
@@ -1895,6 +1922,10 @@ module WithToken(Token: TokenType) = struct
 
       let make_enumerator name equal value =
         from_children SyntaxKind.Enumerator [ name; equal; value ]
+
+      let make_alias token name constr equal ty semi =
+        from_children SyntaxKind.AliasDeclaration
+          [ token; name; constr; equal; ty; semi ]
 
       let make_function function_attr function_async function_token
         function_name function_type_params function_left_paren function_params

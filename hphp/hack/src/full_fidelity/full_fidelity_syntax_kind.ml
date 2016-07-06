@@ -28,6 +28,7 @@ type t =
 | InclusionDirective
 | EnumDeclaration
 | Enumerator
+| AliasDeclaration
 
 (* Statements *)
 | CompoundStatement
@@ -159,6 +160,7 @@ let to_string kind =
   | InclusionDirective -> "inclusion_directive"
   | EnumDeclaration -> "enum_declaration"
   | Enumerator -> "enumerator"
+  | AliasDeclaration -> "alias_declaration"
   | XHPExpression -> "xhp_expression"
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"

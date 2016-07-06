@@ -106,15 +106,28 @@ module WithExpressionAndStatementParser
       require left_paren filename right_paren semi in
     (parser, result)
 
-  and parse_type_alias_declaration parser =
-    (* TODO *)
-    let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+  and parse_alias_declaration parser =
+    (* SPEC
+      alias-declaration:
+        type  name  =  type-to-be-aliased  ;
+        newtype  name  type-constraintopt  =  type-to-be-aliased  ;
 
-  and parse_newtype_alias_declaration parser =
-    (* TODO *)
+      type-to-be-aliased:
+        type-specifier
+        qualified-name
+    *)
+
+    (* TODO: Produce an error if the "type" version has a constraint. *)
+
     let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+    let token = make_token token in
+    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
+    let (parser, constr) = parse_type_constraint_opt parser in
+    let (parser, equal) = expect_token parser Equal SyntaxError.error1029 in
+    let (parser, ty) = parse_type_specifier parser in
+    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+    let result = make_alias token name constr equal ty semi in
+    (parser, result)
 
   and parse_enumerator parser =
     (* SPEC
@@ -512,8 +525,9 @@ module WithExpressionAndStatementParser
     match (Token.kind token) with
     | Require
     | Require_once -> parse_inclusion_directive parser
-    | Type -> parse_type_alias_declaration parser
-    | Newtype -> parse_newtype_alias_declaration parser
+    | Type
+    | Newtype -> parse_alias_declaration parser
+    | Enum -> parse_enum_declaration parser
     | Namespace -> parse_namespace_declaration parser
     | Use -> parse_namespace_use_declaration parser
     | Trait
@@ -521,7 +535,6 @@ module WithExpressionAndStatementParser
     | Abstract
     | Final
     | Class -> parse_classish_declaration parser
-    | Enum -> parse_enum_declaration parser
     | Async
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->

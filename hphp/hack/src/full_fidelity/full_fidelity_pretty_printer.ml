@@ -276,6 +276,14 @@ let rec get_doc node =
     let e = get_doc x.enumerator_equal in
     let v = get_doc x.enumerator_value in
     n ^| e ^| v
+  | AliasDeclaration x ->
+    let a = get_doc x.alias_token in
+    let n = get_doc x.alias_name in
+    let c = get_doc x.alias_constraint in
+    let e = get_doc x.alias_equal in
+    let t = get_doc x.alias_type in
+    let s = get_doc x.alias_semicolon in
+    a ^| n ^| c ^| e ^| t ^^^ s
   | FunctionDeclaration x ->
     let preface = group_doc ( get_doc (function_attr x)
                        ^| get_doc (function_async x)

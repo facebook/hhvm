@@ -15,6 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
+// There are apparently two versions of toupper/tolower: the C version in
+// cctype.h and the C++ version in cctype. Make sure we include this C header
+// first to get the C version, which at least with glibc has much better
+// behaviour in a tight loop due to inlining; this makes strtoupper/strtolower
+// several times faster. See https://github.com/facebook/hhvm/issues/7133
+#include <ctype.h>
+
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"

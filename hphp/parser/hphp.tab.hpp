@@ -246,6 +246,7 @@ typedef struct YYLTYPE
 #ifndef YYTOKEN_MIN
 #define YYTOKEN_MIN 258
 #endif
+
 #ifndef YYTOKEN_MAX
 #define YYTOKEN_MAX 428
 #endif

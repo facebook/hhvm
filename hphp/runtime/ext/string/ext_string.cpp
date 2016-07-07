@@ -39,6 +39,7 @@
 #include "hphp/zend/html-table.h"
 
 #include <folly/Unicode.h>
+#include <bitset>
 #include <locale.h>
 
 namespace HPHP {
@@ -433,12 +434,20 @@ String HHVM_FUNCTION(ucwords,
   if (str.empty()) {
     return str;
   }
+
+  std::bitset<256> delimiters_set;
+  int delimiters_len = delimiters.length();
+  for (int i = 0; i < delimiters_len; i++) {
+    delimiters_set.set(delimiters[i]);
+  }
+
   String strcopy(str, CopyString);
   char* string = strcopy.mutableData();
   *string = toupper(*string);
   char last = ' ';
+
   return stringForEach<true>(strcopy.size(), strcopy, [&] (char c) {
-    char ret = delimiters.find(last) >= 0 ? toupper(c) : c;
+    char ret = delimiters_set.test(last) ? toupper(c) : c;
     last = c;
     return ret;
   });

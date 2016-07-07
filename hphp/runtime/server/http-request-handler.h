@@ -69,8 +69,7 @@ private:
                          const std::string &cmd,
                          const char *ext);
   bool executePHPRequest(Transport *transport, RequestURI &reqURI,
-                         SourceRootInfo &sourceRootInfo,
-                         bool cacheableDynamicContent);
+                         SourceRootInfo &sourceRootInfo);
 
   static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;

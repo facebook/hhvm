@@ -327,6 +327,17 @@ module WithToken(Token: TokenType) = struct
       static_init_equal : t;
       static_init_value : t
     }
+    and anonymous_function = {
+      anonymous_async : t;
+      anonymous_function : t;
+      anonymous_left_paren : t;
+      anonymous_params : t;
+      anonymous_right_paren : t;
+      anonymous_colon : t;
+      anonymous_type : t;
+      anonymous_use : t;
+      anonymous_body : t
+    }
     and unary_operator = {
       unary_operator : t;
       unary_operand : t
@@ -537,6 +548,7 @@ module WithToken(Token: TokenType) = struct
     | StaticInitializer of static_initializer
     | StaticDeclarator of static_declarator
 
+    | AnonymousFunction of anonymous_function
     | LiteralExpression of t
     | VariableExpression of t
     | QualifiedNameExpression of t
@@ -587,6 +599,7 @@ module WithToken(Token: TokenType) = struct
       match syntax with
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
+      | AnonymousFunction _ -> SyntaxKind.AnonymousFunction
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
       | VariableExpression _ -> SyntaxKind.VariableExpression
       | QualifiedNameExpression _ -> SyntaxKind.QualifiedNameExpression
@@ -668,6 +681,7 @@ module WithToken(Token: TokenType) = struct
 
     let is_missing node = kind node = SyntaxKind.Missing
     let is_token node = kind node = SyntaxKind.Token
+    let is_anonymous_function node = kind node = SyntaxKind.AnonymousFunction
     let is_literal node = kind node = SyntaxKind.LiteralExpression
     let is_variable node = kind node = SyntaxKind.VariableExpression
     let is_qualified_name node = kind node = SyntaxKind.QualifiedNameExpression
@@ -771,6 +785,13 @@ module WithToken(Token: TokenType) = struct
       | QualifiedNameExpression x -> [x]
       | Error x -> x
       | SyntaxList x -> x
+      | AnonymousFunction
+        { anonymous_async; anonymous_function; anonymous_left_paren;
+          anonymous_params; anonymous_right_paren; anonymous_colon;
+          anonymous_type; anonymous_use; anonymous_body } ->
+        [ anonymous_async; anonymous_function; anonymous_left_paren;
+          anonymous_params; anonymous_right_paren; anonymous_colon;
+          anonymous_type; anonymous_use; anonymous_body ]
       | ListItem
         { list_item; list_separator } ->
         [ list_item; list_separator ]
@@ -1057,6 +1078,13 @@ module WithToken(Token: TokenType) = struct
       | QualifiedNameExpression _ -> [ "qualified_name_expression" ]
       | Error _ -> []
       | SyntaxList _ -> []
+      | AnonymousFunction
+        { anonymous_async; anonymous_function; anonymous_left_paren;
+          anonymous_params; anonymous_right_paren; anonymous_colon;
+          anonymous_type; anonymous_use; anonymous_body } ->
+        [ "anonymous_async"; "anonymous_function"; "anonymous_left_paren";
+          "anonymous_params"; "anonymous_right_paren"; "anonymous_colon";
+          "anonymous_type"; "anonymous_use"; "anonymous_body" ]
       | ListItem
         { list_item; list_separator } ->
         [ "list_item"; "list_separator" ]
@@ -1572,6 +1600,14 @@ module WithToken(Token: TokenType) = struct
       match kind, ts with
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, x) -> SyntaxList x
+      | (SyntaxKind.AnonymousFunction,
+        [ anonymous_async; anonymous_function; anonymous_left_paren;
+          anonymous_params; anonymous_right_paren; anonymous_colon;
+          anonymous_type; anonymous_use; anonymous_body ]) ->
+        AnonymousFunction
+        { anonymous_async; anonymous_function; anonymous_left_paren;
+          anonymous_params; anonymous_right_paren; anonymous_colon;
+          anonymous_type; anonymous_use; anonymous_body }
       | (SyntaxKind.ListItem, [ list_item; list_separator ]) ->
         ListItem { list_item; list_separator }
       | (SyntaxKind.Error, x) -> Error x
@@ -1937,6 +1973,11 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.FunctionCallExpression
           [ function_call_receiver; function_call_lparen;
             function_call_arguments; function_call_rparen ]
+
+      let make_anonymous_function
+          async func left params right colon return_type uses body =
+        from_children SyntaxKind.AnonymousFunction
+          [async; func; left; params; right; colon; return_type; uses; body ]
 
       let make_parenthesized_expression
         paren_expr_left_paren paren_expr paren_expr_right_paren =

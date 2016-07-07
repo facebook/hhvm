@@ -59,6 +59,7 @@ type t =
 | StaticInitializer
 
 (* Expressions *)
+| AnonymousFunction
 | LiteralExpression
 | VariableExpression
 | QualifiedNameExpression
@@ -99,6 +100,7 @@ let to_string kind =
   match kind with
   | Missing -> "missing"
   | Token -> "token"
+  | AnonymousFunction -> "anonymous_function"
   | LiteralExpression -> "literal"
   | VariableExpression -> "variable"
   | QualifiedNameExpression -> "qualified_name"

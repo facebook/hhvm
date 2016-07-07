@@ -284,6 +284,16 @@ let rec get_doc node =
     let t = get_doc x.alias_type in
     let s = get_doc x.alias_semicolon in
     a ^| n ^| c ^| e ^| t ^^^ s
+  | NamespaceDeclaration x ->
+    let t = get_doc x.namespace_token in
+    let n = get_doc x.namespace_name in
+    let b = get_doc x.namespace_body in
+    t ^| n ^| b
+  | NamespaceBody x ->
+    let left = get_doc x.namespace_left_brace in
+    let body = get_doc x.namespace_declarations in
+    let right = get_doc x.namespace_right_brace in
+    indent_block_no_space left body right indt |> add_break
   | NamespaceUseDeclaration x ->
     let u = get_doc x.namespace_use in
     let c = get_doc x.namespace_use_clauses in

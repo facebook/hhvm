@@ -183,9 +183,51 @@ module WithExpressionAndStatementParser
     (parser, result)
 
   and parse_namespace_declaration parser =
-    (* TODO *)
+    (* SPEC
+      namespace-definition:
+        namespace  namespace-name  ;
+        namespace  namespace-name-opt  { declaration-list }
+    *)
+
+    (* TODO: Some error cases not caught by the parser that should be caught
+             in later passes:
+             (1) You cannot mix the "semi" and "compound" flavours in one script
+             (2) The declaration list may not contain a namespace decl.
+             (3) Qualified names are a superset of legal namespace names.
+    *)
+    let (parser, namespace_token) = assert_token parser Namespace in
+    let (parser1, token) = next_token parser in
+    let (parser, name) = match Token.kind token with
+    | Name
+    | QualifiedName -> (parser1, make_token token)
+    | LeftBrace -> (parser1, (make_missing()))
+    | Semicolon ->
+      (* ERROR RECOVERY Plainly the name is missing. *)
+      (with_error parser SyntaxError.error1004, (make_missing()))
+    | _ ->
+      (with_error parser1 SyntaxError.error1004, make_token token) in
+    let (parser, body) = parse_namespace_body parser in
+    let result = make_namespace namespace_token name body in
+    (parser, result)
+
+  and parse_namespace_body parser =
     let (parser, token) = next_token parser in
-    (parser, make_error [make_token token])
+    match Token.kind token with
+    | Semicolon -> (parser, make_token token)
+    | LeftBrace ->
+      let left = make_token token in
+      let (parser, body) = parse_declarations parser true in
+      let (parser, right) =
+        expect_token parser RightBrace SyntaxError.error1006 in
+      let result = make_namespace_body left body right in
+      (parser, result)
+    | _ ->
+      (* ERROR RECOVERY: Eat the offending token.
+         TODO: Better would be to attempt to recover to the list of
+         declarations? Suppose the offending token is "class" for instance? *)
+      let parser = with_error parser SyntaxError.error1038 in
+      let result = make_error [make_token token] in
+      (parser, result)
 
   and parse_namespace_use_clause parser =
     (* SPEC
@@ -545,7 +587,7 @@ module WithExpressionAndStatementParser
       parameter_list right_paren_token colon_token return_type body in
     (parser, syntax)
 
-  let parse_classish_or_function_declaration parser =
+  and parse_classish_or_function_declaration parser =
     let parser, attribute_specification =
       parse_attribute_specification_opt parser in
     let parser1, token = next_token parser in
@@ -557,7 +599,7 @@ module WithExpressionAndStatementParser
       (* TODO *)
       (parser1, make_error [make_token token])
 
-  let parse_declaration parser =
+  and parse_declaration parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
     | Require
@@ -583,11 +625,13 @@ module WithExpressionAndStatementParser
       let parser = with_error parser1 SyntaxError.error1002 in
       (parser, make_error [make_token token])
 
-  let parse_declarations parser =
+  and parse_declarations parser expect_brace =
     let rec aux parser declarations =
       let token = peek_token parser in
       match (Token.kind token) with
       | EndOfFile -> (parser, declarations)
+      | RightBrace when expect_brace ->
+        (parser, declarations)
       (* TODO: ?> tokens *)
       | _ ->
         let (parser, declaration) = parse_declaration parser in
@@ -623,7 +667,10 @@ module WithExpressionAndStatementParser
 
   let parse_script parser =
     let (parser, script_header) = parse_script_header parser in
-    let (parser, declarations) = parse_declarations parser in
+    let (parser, declarations) = parse_declarations parser false in
+    (* TODO: ERROR_RECOVERY:
+      If we are not at the end of the file, something is wrong. *)
     (parser, make_script script_header declarations)
+
 
 end

@@ -114,6 +114,16 @@ module WithToken(Token: TokenType) = struct
       alias_type : t;
       alias_semicolon : t
     }
+    and namespace_declaration = {
+      namespace_token : t;
+      namespace_name : t;
+      namespace_body : t
+    }
+    and namespace_body = {
+      namespace_left_brace : t;
+      namespace_declarations : t;
+      namespace_right_brace : t
+    }
     and namespace_use_declaration = {
       namespace_use : t;
       namespace_use_clauses : t;
@@ -489,6 +499,8 @@ module WithToken(Token: TokenType) = struct
     | ScriptHeader of script_header
     | Script of script
 
+    | NamespaceDeclaration of namespace_declaration
+    | NamespaceBody of namespace_body
     | NamespaceUseDeclaration of namespace_use_declaration
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
@@ -586,6 +598,8 @@ module WithToken(Token: TokenType) = struct
       | EnumDeclaration _ -> SyntaxKind.EnumDeclaration
       | Enumerator _ -> SyntaxKind.Enumerator
       | AliasDeclaration _ -> SyntaxKind.AliasDeclaration
+      | NamespaceDeclaration _ -> SyntaxKind.NamespaceDeclaration
+      | NamespaceBody _ -> SyntaxKind.NamespaceBody
       | NamespaceUseDeclaration _ -> SyntaxKind.NamespaceUseDeclaration
       | NamespaceUseClause _ -> SyntaxKind.NamespaceUseClause
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
@@ -665,6 +679,8 @@ module WithToken(Token: TokenType) = struct
     let is_enum node = kind node = SyntaxKind.EnumDeclaration
     let is_enumerator node = kind node = SyntaxKind.Enumerator
     let is_alias node = kind node = SyntaxKind.AliasDeclaration
+    let is_namespace node = kind node = SyntaxKind.NamespaceDeclaration
+    let is_namespace_body node = kind node = SyntaxKind.NamespaceBody
     let is_namespace_use node = kind node = SyntaxKind.NamespaceUseDeclaration
     let is_namespace_use_clause node = kind node = SyntaxKind.NamespaceUseClause
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
@@ -777,6 +793,14 @@ module WithToken(Token: TokenType) = struct
           alias_equal; alias_type; alias_semicolon } ->
         [ alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon ]
+      | NamespaceDeclaration
+        { namespace_token; namespace_name; namespace_body } ->
+        [ namespace_token; namespace_name; namespace_body ]
+      | NamespaceBody
+        { namespace_left_brace; namespace_declarations;
+          namespace_right_brace } ->
+        [ namespace_left_brace; namespace_declarations;
+          namespace_right_brace ]
       | NamespaceUseDeclaration
         { namespace_use; namespace_use_clauses; namespace_use_semicolon } ->
         [ namespace_use; namespace_use_clauses; namespace_use_semicolon ]
@@ -1055,6 +1079,14 @@ module WithToken(Token: TokenType) = struct
           alias_equal; alias_type; alias_semicolon } ->
         [ "alias_token"; "alias_name"; "alias_constraint";
           "alias_equal"; "alias_type"; "alias_semicolon" ]
+      | NamespaceDeclaration
+        { namespace_token; namespace_name; namespace_body } ->
+        [ "namespace_token"; "namespace_name"; "namespace_body" ]
+      | NamespaceBody
+        { namespace_left_brace; namespace_declarations;
+          namespace_right_brace } ->
+        [ "namespace_left_brace"; "namespace_declarations";
+          "namespace_right_brace" ]
       | NamespaceUseDeclaration
         { namespace_use; namespace_use_clauses; namespace_use_semicolon } ->
         [ "namespace_use"; "namespace_use_clauses"; "namespace_use_semicolon" ]
@@ -1568,6 +1600,17 @@ module WithToken(Token: TokenType) = struct
         AliasDeclaration
         { alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon }
+
+      | (SyntaxKind.NamespaceDeclaration,
+        [ namespace_token; namespace_name; namespace_body ]) ->
+        NamespaceDeclaration
+        { namespace_token; namespace_name; namespace_body }
+      | (SyntaxKind.NamespaceBody,
+        [ namespace_left_brace; namespace_declarations;
+          namespace_right_brace ]) ->
+        NamespaceBody
+        { namespace_left_brace; namespace_declarations;
+          namespace_right_brace }
       | (SyntaxKind.NamespaceUseDeclaration,
         [ namespace_use; namespace_use_clauses; namespace_use_semicolon ]) ->
         NamespaceUseDeclaration
@@ -1981,6 +2024,14 @@ module WithToken(Token: TokenType) = struct
       let make_alias token name constr equal ty semi =
         from_children SyntaxKind.AliasDeclaration
           [ token; name; constr; equal; ty; semi ]
+
+      let make_namespace token name body =
+        from_children SyntaxKind.NamespaceDeclaration
+          [ token; name; body ]
+
+      let make_namespace_body left decls right =
+        from_children SyntaxKind.NamespaceBody
+          [ left; decls; right ]
 
       let make_namespace_use use clauses semi =
         from_children SyntaxKind.NamespaceUseDeclaration

@@ -315,7 +315,7 @@ bool Package::parseImpl(const char *fileName) {
         std::string content {
           std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
         };
-        MD5 md5{string_md5(content.data(), content.size()).c_str()};
+        MD5 md5{string_md5(content)};
 
         std::unique_ptr<UnitEmitter> ue{
           assemble_string(content.data(), content.size(), fileName, md5)

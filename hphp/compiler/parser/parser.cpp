@@ -179,7 +179,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
       m_nsAliasTable(getAutoAliasedClasses(),
                      [&] { return getAliasFlags(); }) {
   auto const md5str = mangleUnitMd5(scanner.getMd5());
-  MD5 md5 = MD5(md5str.c_str());
+  auto const md5 = MD5{md5str};
 
   m_file = std::make_shared<FileScope>(m_fileName, fileSize, md5);
 

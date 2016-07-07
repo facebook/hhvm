@@ -52,7 +52,7 @@ static ArrayDataMap s_arrayDataMap;
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
                                                        size_t sz) {
-  return MD5(string_md5(str, sz).c_str());
+  return MD5(string_md5(folly::StringPiece{str, sz}));
 }
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {

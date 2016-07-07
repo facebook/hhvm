@@ -153,10 +153,10 @@ void Scanner::computeMd5() {
   always_assert(length != -1 &&
                 length <= std::numeric_limits<int32_t>::max());
   m_stream->seekg(0, std::ios::beg);
-  char *ptr = (char*)malloc(length);
+  auto const ptr = (char*)malloc(length);
   m_stream->read(ptr, length);
   m_stream->seekg(startpos, std::ios::beg);
-  m_md5 = string_md5(ptr, length);
+  m_md5 = string_md5(folly::StringPiece{ptr, length});
   free(ptr);
 }
 

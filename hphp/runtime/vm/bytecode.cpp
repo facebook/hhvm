@@ -4972,7 +4972,7 @@ OPTBLD_INLINE void iopEval(PC& pc) {
     "%s(%d)(%s" EVAL_FILENAME_SUFFIX,
     vm->getContainingFileName()->data(),
     vm->getLine(),
-    string_md5(code.data(), code.size()).c_str()
+    string_md5(code.slice()).c_str()
   );
   Unit* unit = vm->compileEvalString(prefixedCode.get(), evalFilename.c_str());
   if (!RuntimeOption::EvalJitEvaledCode) {

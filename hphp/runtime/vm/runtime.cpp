@@ -198,10 +198,6 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
   return compile_string(s, sz, fname);
 }
 
-void assertTv(const TypedValue* tv) {
-  always_assert(tvIsPlausible(*tv));
-}
-
 int init_closure(ActRec* ar, TypedValue* sp) {
   auto closure = c_Closure::fromObject(ar->getThis());
 

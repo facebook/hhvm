@@ -185,8 +185,6 @@ CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(AllocPackedArray)
 CALL_OPCODE(AllocVecArray)
 
-CALL_OPCODE(DbgAssertPtr)
-
 CALL_OPCODE(MapIdx)
 
 // Vector instruction helpers

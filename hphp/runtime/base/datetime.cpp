@@ -441,7 +441,7 @@ void DateTime::setTime(int hour, int minute, int second) {
 void DateTime::setTimezone(req::ptr<TimeZone> timezone) {
   if (timezone) {
     m_tz = timezone->cloneTimeZone();
-    if (m_tz.get() && m_tz->get()) {
+    if (m_tz.get()) {
       timelib_set_timezone(m_time.get(), m_tz->get());
       timelib_unixtime2local(m_time.get(), m_time->sse);
     }

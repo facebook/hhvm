@@ -17,7 +17,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function add(DateInterval $interval): DateTime;
+  function add(DateInterval $interval): mixed;
 
   <<__Native>>
   function __construct(string $time = "now",
@@ -49,7 +49,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function diff(mixed $datetime2, mixed $absolute = false): DateInterval;
+  function diff(mixed $datetime2, mixed $absolute = false): mixed;
 
   /**
    * Returns date formatted according to given format.
@@ -182,7 +182,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function setTimezone(DateTimeZone $timezone): DateTime;
+  function setTimezone(DateTimeZone $timezone): mixed;
 
   /**
    * Subtract an interval from a datetime object
@@ -194,7 +194,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function sub(DateInterval $interval): DateTime;
+  function sub(DateInterval $interval): mixed;
 
   <<__Native>>
   function __sleep(): array;
@@ -252,7 +252,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getOffset(DateTimeInterface $datetime): int;
+  function getOffset(DateTimeInterface $datetime): mixed;
 
   /**
    * @return array - Returns numerically indexed array containing associative
@@ -368,7 +368,7 @@ class DateInterval {
 <<__ParamCoerceModeFalse, __Native>>
 function checkdate(int $month, int $day, int $year): bool;
 
-function date_add(DateTime $datetime, DateInterval $interval): DateTime {
+function date_add(DateTime $datetime, DateInterval $interval): mixed {
   return $datetime->add($interval);
 }
 
@@ -451,7 +451,7 @@ function date_isodate_set(DateTime $datetime,
 }
 
 <<__ParamCoerceModeFalse, __Native>>
-function date_format(DateTime $datetime, string $format): string;
+function date_format(DateTime $datetime, string $format): mixed;
 
 <<__ParamCoerceModeFalse>>
 function date_modify(DateTime $datetime, string $modify): void {
@@ -469,7 +469,7 @@ function date_modify(DateTime $datetime, string $modify): void {
 function date_parse(string $date): mixed;
 
 <<__ParamCoerceModeFalse>>
-function date_sub(DateTime $datetime, DateInterval $interval): DateTime {
+function date_sub(DateTime $datetime, DateInterval $interval): mixed {
   return $datetime->sub($interval);
 }
 
@@ -556,7 +556,7 @@ function date_timestamp_set(DateTime $datetime, int $timestamp): DateTime {
 }
 
 <<__ParamCoerceModeFalse>>
-function date_timezone_set(DateTime $datetime, DateTimeZone $timezone): void {
+function date_timezone_set(DateTime $datetime, DateTimeZone $timezone): mixed {
   return $datetime->setTimezone($timezone);
 }
 

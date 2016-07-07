@@ -32,14 +32,13 @@ namespace HPHP { namespace jit {
 
 template<typename T>
 inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
-  switch (arch()) {
-    case Arch::X64:
-    case Arch::ARM:
-      return x64::detail::emitTLSAddr(v, datum);
-    case Arch::PPC64:
-      return ppc64::detail::emitTLSAddr(v, datum);
-  }
+#if defined __x86_64__ || defined __aarch64__
+  return x64::detail::emitTLSAddr(v, datum);
+#elif defined __powerpc64__
+  return ppc64::detail::emitTLSAddr(v, datum);
+#else
   not_reached();
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

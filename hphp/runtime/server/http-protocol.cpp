@@ -172,17 +172,13 @@ static void PrepareEnv(Array& env, Transport *transport) {
   if (RuntimeOption::EvalJit) {
     env.set(s_HHVM_JIT, 1);
   }
-  switch (arch()) {
-  case Arch::X64:
-    env.set(s_HHVM_ARCH, "x64");
-    break;
-  case Arch::ARM:
-    env.set(s_HHVM_ARCH, "arm");
-    break;
-  case Arch::PPC64:
-    env.set(s_HHVM_ARCH, "ppc64");
-    break;
-  }
+#ifdef __x86_64__
+  env.set(s_HHVM_ARCH, "x64");
+#elif defined __aarch64__
+  env.set(s_HHVM_ARCH, "arm");
+#elif defined __powerpc64__
+  env.set(s_HHVM_ARCH, "ppc64");
+#endif
 
   bool isServer = RuntimeOption::ServerExecutionMode();
   if (isServer) {

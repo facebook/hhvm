@@ -48,15 +48,11 @@ template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
                     Destroy destroy, bool unlikelyDestroy) {
   auto const sf = v.makeReg();
-  switch (arch()) {
-    case Arch::X64:
-    case Arch::PPC64:
-      v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
-      break;
-    case Arch::ARM:
-      v << cmplims{1, data[FAST_REFCOUNT_OFFSET], sf};
-      break;
-  }
+#if defined __x86_64__ || defined __powerpc64__
+  v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+#elif defined __aarch64__
+  v << cmplims{1, data[FAST_REFCOUNT_OFFSET], sf};
+#endif
   ifThenElse(
     v, vcold, CC_E, sf,
     destroy,

@@ -72,17 +72,13 @@ void genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
 
 void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
   auto const abi = jit::abi(kind);
-  switch (arch()) {
-    case Arch::X64:
-      optimizeX64(unit, abi, regAlloc);
-      break;
-    case Arch::ARM:
-      optimizeARM(unit, abi, regAlloc);
-      break;
-    case Arch::PPC64:
-      optimizePPC64(unit, abi, regAlloc);
-      break;
-  }
+#ifdef __x86_64__
+  optimizeX64(unit, abi, regAlloc);
+#elif defined __aarch64__
+  optimizeARM(unit, abi, regAlloc);
+#elif defined __powerpc64__
+  optimizePPC64(unit, abi, regAlloc);
+#endif
 }
 
 }

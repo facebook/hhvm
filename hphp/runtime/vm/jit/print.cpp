@@ -251,36 +251,31 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
   assertx(begin <= end);
   bool const dumpIR = dumpIREnabled(kExtraLevel);
 
-  switch (arch()) {
-    case Arch::X64: {
-      Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                    .printEncoding(dumpIR)
-                    .color(color(ANSI_COLOR_BROWN)));
-      disasm.disasm(os, begin, end);
-      return;
-    }
-
-    case Arch::ARM: {
-      vixl::Decoder dec;
-      vixl::PrintDisassembler disasm(os, kIndent + 4, dumpIR,
-                                     color(ANSI_COLOR_BROWN));
-      dec.AppendVisitor(&disasm);
-      for (; begin < end; begin += vixl::kInstructionSize) {
-        dec.Decode(vixl::Instruction::Cast(begin));
-      }
-      return;
-    }
-
-    case Arch::PPC64: {
-      ppc64_asm::Disassembler disasm(dumpIR, true, kIndent + 4,
-                                      color(ANSI_COLOR_BROWN));
-      for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
-        disasm.disassembly(os, begin);
-      }
-      return;
-    }
+#ifdef __x86_64__
+  Disasm disasm(Disasm::Options().indent(kIndent + 4)
+                .printEncoding(dumpIR)
+                .color(color(ANSI_COLOR_BROWN)));
+  disasm.disasm(os, begin, end);
+  return;
+#elif defined __aarch64__
+  vixl::Decoder dec;
+  vixl::PrintDisassembler disasm(os, kIndent + 4, dumpIR,
+                                 color(ANSI_COLOR_BROWN));
+  dec.AppendVisitor(&disasm);
+  for (; begin < end; begin += vixl::kInstructionSize) {
+    dec.Decode(vixl::Instruction::Cast(begin));
   }
+  return;
+#elif defined __powerpc64__
+  ppc64_asm::Disassembler disasm(dumpIR, true, kIndent + 4,
+                                 color(ANSI_COLOR_BROWN));
+  for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
+    disasm.disassembly(os, begin);
+  }
+  return;
+#else
   not_reached();
+#endif
 }
 
 template <typename T>

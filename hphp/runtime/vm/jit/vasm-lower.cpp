@@ -82,24 +82,21 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
                     v.makeTuple(std::move(argDests))};
     }
   };
-  switch (arch()) {
-    case Arch::X64:
-    case Arch::PPC64:
-      doArgs(vargs.args, rarg);
-      break;
-    case Arch::ARM:
-      if (vargs.indirect) {
-        if (vargs.args.size() > 0) {
-          // First arg is a pointer to storage for the return value.
-          v << copy{vargs.args[0], rret_indirect()};
-          VregList rem(vargs.args.begin() + 1, vargs.args.end());
-          doArgs(rem, rarg);
-          needsCopy = true;
-        }
-      } else {
-        doArgs(vargs.args, rarg);
-      }
+#if defined __x86_64__ || defined __powerpc64__
+  doArgs(vargs.args, rarg);
+#elif defined __aarch64__
+  if (vargs.indirect) {
+    if (vargs.args.size() > 0) {
+      // First arg is a pointer to storage for the return value.
+      v << copy{vargs.args[0], rret_indirect()};
+      VregList rem(vargs.args.begin() + 1, vargs.args.end());
+      doArgs(rem, rarg);
+      needsCopy = true;
+    }
+  } else {
+    doArgs(vargs.args, rarg);
   }
+#endif
   doArgs(vargs.simdArgs, rarg_simd);
 
   // Emit the appropriate call instruction sequence.

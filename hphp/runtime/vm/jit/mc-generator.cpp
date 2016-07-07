@@ -1160,29 +1160,25 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
   }
 
   auto const isJcc = [&] {
-    switch (arch()) {
-      case Arch::X64: {
-        x64::DecodedInstruction di(toSmash);
-        return (di.isBranch() && !di.isJmp());
+#ifdef __x86_64__
+    x64::DecodedInstruction di(toSmash);
+    return (di.isBranch() && !di.isJmp());
+#elif defined __aarch64__
+    using namespace vixl;
+    struct JccDecoder : public Decoder {
+      void VisitConditionalBranch(Instruction* inst) override {
+        cc = true;
       }
-
-      case Arch::ARM: {
-        using namespace vixl;
-        struct JccDecoder : public Decoder {
-          void VisitConditionalBranch(Instruction* inst) override {
-            cc = true;
-          }
-          bool cc = false;
-        };
-        JccDecoder decoder;
-        decoder.Decode(Instruction::Cast(toSmash));
-        return decoder.cc;
-      }
-
-      case Arch::PPC64:
-        always_assert(false);
-    }
+      bool cc = false;
+    };
+    JccDecoder decoder;
+    decoder.Decode(Instruction::Cast(toSmash));
+    return decoder.cc;
+#elif defined __powerpc64__
+    always_assert(false);
+#else
     not_reached();
+#endif
   }();
 
   if (isJcc) {

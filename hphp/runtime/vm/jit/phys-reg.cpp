@@ -37,27 +37,25 @@ int PhysReg::getNumSIMD() {
 }
 
 std::string show(PhysReg r) {
-  switch (arch()) {
-    case Arch::X64:
-      return r.type() == PhysReg::GP   ? reg::regname(Reg64(r)) :
-             r.type() == PhysReg::SIMD ? reg::regname(RegXMM(r)) :
-          /* r.type() == PhysReg::SF)  ? */ reg::regname(RegSF(r));
+#ifdef __x86_64__
+  return r.type() == PhysReg::GP   ? reg::regname(Reg64(r)) :
+         r.type() == PhysReg::SIMD ? reg::regname(RegXMM(r)) :
+      /* r.type() == PhysReg::SF)  ? */ reg::regname(RegSF(r));
+#elif defined __aarch64__
+  if (r.isSF()) return "SF";
 
-    case Arch::ARM:
-      if (r.isSF()) return "SF";
-
-      return folly::to<std::string>(
-        r.isGP() ? (vixl::Register(r).size() == vixl::kXRegSize ? 'x' : 'w')
-                 : (vixl::FPRegister(r).size() == vixl::kSRegSize ? 's' : 'd'),
-        ((vixl::CPURegister)r).code()
-      );
-
-    case Arch::PPC64:
-      return r.type() == PhysReg::GP   ? ppc64_asm::reg::regname(Reg64(r)) :
-             r.type() == PhysReg::SIMD ? ppc64_asm::reg::regname(RegXMM(r)) :
-          /* r.type() == PhysReg::SF)  ? */ ppc64_asm::reg::regname(RegSF(r));
-  }
+  return folly::to<std::string>(
+    r.isGP() ? (vixl::Register(r).size() == vixl::kXRegSize ? 'x' : 'w')
+             : (vixl::FPRegister(r).size() == vixl::kSRegSize ? 's' : 'd'),
+    ((vixl::CPURegister)r).code()
+  );
+#elif defined __powerpc64__
+  return r.type() == PhysReg::GP   ? ppc64_asm::reg::regname(Reg64(r)) :
+         r.type() == PhysReg::SIMD ? ppc64_asm::reg::regname(RegXMM(r)) :
+      /* r.type() == PhysReg::SF)  ? */ ppc64_asm::reg::regname(RegSF(r));
+#else
   not_reached();
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

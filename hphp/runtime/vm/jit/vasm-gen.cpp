@@ -83,20 +83,16 @@ Vauto::~Vauto() {
       Trace::Bump bumper{Trace::printir, 10};
 
       auto const abi = jit::abi(m_kind);
-      switch (arch()) {
-        case Arch::X64:
-          optimizeX64(unit(), abi, true /* regalloc */);
-          emitX64(unit(), m_text, m_fixups, nullptr);
-          break;
-        case Arch::ARM:
-          optimizeARM(unit(), abi, true /* regalloc */);
-          emitARM(unit(), m_text, m_fixups, nullptr);
-          break;
-        case Arch::PPC64:
-          optimizePPC64(unit(), abi, true /* regalloc */);
-          emitPPC64(unit(), m_text, m_fixups, nullptr);
-          break;
-      }
+#ifdef __x86_64__
+      optimizeX64(unit(), abi, true /* regalloc */);
+      emitX64(unit(), m_text, m_fixups, nullptr);
+#elif defined __aarch64__
+      optimizeARM(unit(), abi, true /* regalloc */);
+      emitARM(unit(), m_text, m_fixups, nullptr);
+#elif defined __powerpc__
+      optimizePPC64(unit(), abi, true /* regalloc */);
+      emitPPC64(unit(), m_text, m_fixups, nullptr);
+#endif
       return;
     }
   }

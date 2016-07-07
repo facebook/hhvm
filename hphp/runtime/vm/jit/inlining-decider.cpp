@@ -195,7 +195,10 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
   if (m_disabled) return false;
 
   // TODO(#3331014): We have this hack until more ARM codegen is working.
-  if (arch() == Arch::ARM) return false;
+
+#ifdef __aarch64__
+  return false;
+#else
 
   // We can only inline at normal FCalls.
   if (callSK.op() != Op::FCall &&
@@ -217,6 +220,7 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
   }
 
   return true;
+#endif
 }
 
 namespace {

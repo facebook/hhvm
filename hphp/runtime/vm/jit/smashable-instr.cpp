@@ -17,9 +17,13 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#ifdef __aarch64__
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
+#elif defined __x86_64__
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
+#elif defined __powerpc64__
 #include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"
+#endif
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"

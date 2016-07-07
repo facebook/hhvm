@@ -17,6 +17,13 @@ let shutdown_client (_ic, oc) =
     close_out oc
   with _ -> ()
 
+let shutdown_persistent_client fd =
+  let oc = Unix.out_channel_of_descr fd in
+  try
+    Unix.shutdown fd Unix.SHUTDOWN_ALL;
+    close_out oc
+  with _ -> ()
+
 type file_input =
   | FileName of string
   | FileContent of string

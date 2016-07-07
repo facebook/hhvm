@@ -304,6 +304,7 @@ let type_check genv env =
     failed_parsing = Relative_path.Set.union failed_naming failed_parsing;
     failed_decl = failed_decl;
     failed_check = failed_check;
+    persistent_client_fd = old_env.persistent_client_fd;
   } in
   new_env, total_rechecked_count
 

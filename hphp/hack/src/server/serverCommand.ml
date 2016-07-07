@@ -9,8 +9,17 @@
  *)
 
 open Utils
+open ServerEnv
 
 module TLazyHeap = Typing_lazy_heap
+
+type connection_type =
+  | Persistent
+  | Non_persistent
+
+type connection_response =
+  | Persistent_client_connected
+  | Persistent_client_alredy_exists
 
 type 'a command =
   | Rpc of 'a ServerRpc.t
@@ -35,12 +44,20 @@ let rpc : type a. Timeout.in_channel * out_channel -> a ServerRpc.t -> a
   flush oc;
   Timeout.input_value ic
 
+let rpc_persistent oc cmd =
+  Marshal.to_channel oc (Rpc cmd) [];
+  flush oc
+
 let stream_request oc cmd =
   Marshal.to_channel oc (Stream cmd) [];
   flush oc
 
 let connect_debug oc =
   Marshal.to_channel oc Debug [];
+  flush oc
+
+let send_connection_type oc t =
+  Marshal.to_channel oc t [];
   flush oc
 
 (****************************************************************************)
@@ -165,10 +182,32 @@ let read_client_msg ic =
     ~on_timeout: (fun _ -> raise Read_command_timeout)
     ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
 
+let read_connection_type ic =
+  Timeout.with_timeout
+    ~timeout:1
+    ~on_timeout: (fun _ -> raise Read_command_timeout)
+    ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
+
+let get_persistent_fds env =
+  match env.persistent_client_fd with
+  | Some fd -> fd
+  | None ->
+    failwith ("Persistent channel not found!")
+
+let read_persistent_client_msg fd =
+  let ic = Timeout.in_channel_of_descr fd in
+  Timeout.with_timeout
+    ~timeout:1
+    ~on_timeout: (fun _ -> raise Read_command_timeout)
+    ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
+
 let send_response_to_client (ic, oc) response =
   Marshal.to_channel oc response [];
   flush oc;
   ServerUtils.shutdown_client (ic, oc)
+
+let send_response_to_persistent_client out_fd response =
+  Marshal_tools.to_fd_with_preamble out_fd response
 
 let handle genv env (ic, oc) =
   let msg = read_client_msg ic in
@@ -184,3 +223,21 @@ let handle genv env (ic, oc) =
   | Debug ->
     genv.ServerEnv.debug_channels <- Some (ic, oc);
     ServerDebug.say_hello genv
+
+let handle_persistent genv env fd =
+  let msg = read_persistent_client_msg fd in
+  let new_env =
+  (match msg with
+  | Rpc cmd ->
+      let t = Unix.gettimeofday () in
+      let response = ServerRpc.handle genv env cmd in
+      let cmd_string = ServerRpc.to_string cmd in
+      HackEventLogger.handled_command cmd_string t;
+      send_response_to_persistent_client fd response;
+      if cmd = ServerRpc.KILL then ServerUtils.die_nicely ();
+      env
+  | Stream _ ->
+    failwith ("Stream message is not supported in persistent connection")
+  | Debug ->
+    failwith ("Debug message is not supported in persistent connection")) in
+  new_env

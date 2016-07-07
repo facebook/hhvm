@@ -94,4 +94,5 @@ let make_env config =
     failed_parsing = Relative_path.Set.empty;
     failed_decl    = Relative_path.Set.empty;
     failed_check   = Relative_path.Set.empty;
+    persistent_client_fd = None;
   }

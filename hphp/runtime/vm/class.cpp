@@ -304,6 +304,16 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   fermeture->m_invoke->rescope(ctx, attrs);
   fermeture->m_scoped = true;
 
+  if (ctx != nullptr &&
+      !RuntimeOption::RepoAuthoritative &&
+      !classHasPersistentRDS(ctx)) {
+    // If the context Class might be destroyed, we need to do extra accounting
+    // so that we can drop all clones scoped to it at the time of destruction.
+    ctx->allocExtraData();
+    ctx->m_extra.raw()->m_clonesWithThisScope.push_back(
+      ScopedCloneBackref { ClassPtr(template_cls), attrs });
+  }
+
   InstanceBits::ifInitElse(
     [&] { fermeture->setInstanceBits();
           if (this != fermeture.get()) scopedClones[key] = fermeture; },
@@ -421,6 +431,44 @@ void Class::releaseRefs() {
   if (m_extra) {
     auto xtra = m_extra.raw();
     xtra->m_usedTraits.clear();
+
+    if (xtra->m_clonesWithThisScope.size() > 0) {
+      WriteLock l(s_scope_cache_mutex);
+
+      // Purge all references to scoped closure clones that are scoped to
+      // `this'---there is no way anyone can find them at this point.
+      for (auto const& cloneref : xtra->m_clonesWithThisScope) {
+        auto const template_cls = cloneref.template_cls;
+        auto const attrs = cloneref.ctx_attrs;
+
+        auto const invoke = template_cls->m_invoke;
+
+        if (invoke->cls() == this && attrs == AttrNone) {
+          // We only hijack the `template_cls' as a clone for static rescopings
+          // (which are signified by AttrNone).  To undo this, we need to make
+          // sure that /no/ scoping will match with that of `template_cls'.  In
+          // the presence of dynamic closure binding, there is no context Class
+          // which is sufficient, so slap on a sentinel Attr for this express
+          // purpose.
+          invoke->rescope(template_cls.get(), invoke->attrs() | AttrUnscoped);
+          // We explicitly decline to reset template_cls->m_scoped.  This lets
+          // us simplify some assertions in rescope(), gives us a nice sanity
+          // check for debugging, and avoids having to play around too much
+          // with how Func::rescope() works, at the cost of preventing the
+          // template from being scoped again.  This should only happen outside
+          // of RepoAuthoritative mode while code is being modified, so the
+          // extra memory usage is not a substantial concern.
+        } else {
+          assertx(template_cls->m_extra);
+          auto& scopedClones = template_cls->m_extra.raw()->m_scopedClones;
+
+          auto const key = CloneScope { this, attrs };
+          assertx(scopedClones.count(key));
+          scopedClones.erase(key);
+        }
+      }
+    }
+    xtra->m_clonesWithThisScope.clear();
   }
 }
 

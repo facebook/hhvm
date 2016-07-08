@@ -257,6 +257,16 @@ struct Class : AtomicCountable {
   using ScopedClonesMap = hphp_hash_map<CloneScope,ClassPtr,CloneScope::hash>;
 
   /*
+   * A reference to a scoped clone of a Closure subclass.  We omit the Class
+   * ctx, since we only use this struct when the ctx is `this'.
+   */
+  struct ScopedCloneBackref {
+    ClassPtr template_cls;
+    /* LowPtr<Class> ctx_cls = this; */
+    Attr ctx_attrs;
+  };
+
+  /*
    * We store the length of vectors of methods, parent classes and interfaces.
    *
    * In lowptr builds, we limit all of these quantities to 2^16-1 to save
@@ -1020,6 +1030,12 @@ private:
      * @see: rescope()
      */
     ScopedClonesMap m_scopedClones;
+
+    /*
+     * List of references to Closure subclasses whose scoped Class context is
+     * `this'.
+     */
+    std::vector<ScopedCloneBackref> m_clonesWithThisScope;
 
     /*
      * Objects with the <<__NativeData("T")>> UA are allocated with extra space

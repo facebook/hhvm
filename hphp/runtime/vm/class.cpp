@@ -269,7 +269,7 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   template_cls->allocExtraData();
   auto& scopedClones = template_cls->m_extra.raw()->m_scopedClones;
 
-  auto const key = reinterpret_cast<uintptr_t>(ctx) | uintptr_t(attrs) << 32;
+  auto const key = CloneScope { ctx, attrs };
 
   auto const try_cache = [&] {
     auto it = scopedClones.find(key);

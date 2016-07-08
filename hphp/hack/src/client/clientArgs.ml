@@ -195,20 +195,6 @@ let parse_check_args cmd =
       " (mode) prints a list of all related classes or methods to the given class";
     "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
       " (mode) show human-readable type info for the given name; output is not meant for machine parsing";
-    "--remove-dead-fixme",
-        Arg.Int begin fun code ->
-        mode := match !mode with
-          | None -> Some (MODE_REMOVE_DEAD_FIXMES [code])
-          | Some (MODE_REMOVE_DEAD_FIXMES codel) ->
-            Some (MODE_REMOVE_DEAD_FIXMES (code :: codel))
-          | _ -> raise (Arg.Bad "only a single mode should be specified")
-        end,
-      " (mode) remove dead HH_FIXME for specified error code " ^
-      "(first do hh_client restart)";
-    "--remove-dead-fixmes",
-        Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
-      " (mode) remove dead HH_FIXME for any error code < 5000 " ^
-      "(first do hh_client restart)";
     "--lint", Arg.Rest begin fun fn ->
         mode := match !mode with
           | None -> Some (MODE_LINT [fn])

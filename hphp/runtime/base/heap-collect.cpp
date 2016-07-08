@@ -407,7 +407,11 @@ Marker::operator()(const void* start, size_t len) {
 }
 
 inline int64_t cpu_micros() {
+#ifdef RUSAGE_THREAD
   return Timer::GetRusageMicros(Timer::TotalCPU, Timer::Thread);
+#else
+  return 0;
+#endif
 }
 
 // initially parse the heap to find valid objects and initialize metadata.

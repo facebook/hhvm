@@ -60,6 +60,7 @@ type t =
 
 (* Expressions *)
 | AnonymousFunction
+| AnonymousFunctionUseClause
 | LiteralExpression
 | VariableExpression
 | QualifiedNameExpression
@@ -101,6 +102,7 @@ let to_string kind =
   | Missing -> "missing"
   | Token -> "token"
   | AnonymousFunction -> "anonymous_function"
+  | AnonymousFunctionUseClause -> "anonymous_function_use_clause"
   | LiteralExpression -> "literal"
   | VariableExpression -> "variable"
   | QualifiedNameExpression -> "qualified_name"

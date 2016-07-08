@@ -338,6 +338,12 @@ module WithToken(Token: TokenType) = struct
       anonymous_use : t;
       anonymous_body : t
     }
+    and anonymous_use = {
+      anonymous_use_token : t;
+      anonymous_use_left_paren : t;
+      anonymous_use_variables : t;
+      anonymous_use_right_paren : t
+    }
     and unary_operator = {
       unary_operator : t;
       unary_operand : t
@@ -549,6 +555,7 @@ module WithToken(Token: TokenType) = struct
     | StaticDeclarator of static_declarator
 
     | AnonymousFunction of anonymous_function
+    | AnonymousFunctionUseClause of anonymous_use
     | LiteralExpression of t
     | VariableExpression of t
     | QualifiedNameExpression of t
@@ -600,6 +607,7 @@ module WithToken(Token: TokenType) = struct
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
       | AnonymousFunction _ -> SyntaxKind.AnonymousFunction
+      | AnonymousFunctionUseClause _ -> SyntaxKind.AnonymousFunctionUseClause
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
       | VariableExpression _ -> SyntaxKind.VariableExpression
       | QualifiedNameExpression _ -> SyntaxKind.QualifiedNameExpression
@@ -682,6 +690,8 @@ module WithToken(Token: TokenType) = struct
     let is_missing node = kind node = SyntaxKind.Missing
     let is_token node = kind node = SyntaxKind.Token
     let is_anonymous_function node = kind node = SyntaxKind.AnonymousFunction
+    let is_anonymous_function_use_clause node =
+      kind node = SyntaxKind.AnonymousFunctionUseClause
     let is_literal node = kind node = SyntaxKind.LiteralExpression
     let is_variable node = kind node = SyntaxKind.VariableExpression
     let is_qualified_name node = kind node = SyntaxKind.QualifiedNameExpression
@@ -792,6 +802,11 @@ module WithToken(Token: TokenType) = struct
         [ anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
           anonymous_type; anonymous_use; anonymous_body ]
+      | AnonymousFunctionUseClause
+        { anonymous_use_token; anonymous_use_left_paren;
+          anonymous_use_variables; anonymous_use_right_paren } ->
+        [ anonymous_use_token; anonymous_use_left_paren;
+          anonymous_use_variables; anonymous_use_right_paren ]
       | ListItem
         { list_item; list_separator } ->
         [ list_item; list_separator ]
@@ -1085,6 +1100,11 @@ module WithToken(Token: TokenType) = struct
         [ "anonymous_async"; "anonymous_function"; "anonymous_left_paren";
           "anonymous_params"; "anonymous_right_paren"; "anonymous_colon";
           "anonymous_type"; "anonymous_use"; "anonymous_body" ]
+      | AnonymousFunctionUseClause
+        { anonymous_use_token; anonymous_use_left_paren;
+          anonymous_use_variables; anonymous_use_right_paren } ->
+        [ "anonymous_use_token"; "anonymous_use_left_paren";
+          "anonymous_use_variables"; "anonymous_use_right_paren" ]
       | ListItem
         { list_item; list_separator } ->
         [ "list_item"; "list_separator" ]
@@ -1608,6 +1628,12 @@ module WithToken(Token: TokenType) = struct
         { anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
           anonymous_type; anonymous_use; anonymous_body }
+      | (SyntaxKind.AnonymousFunctionUseClause,
+        [ anonymous_use_token; anonymous_use_left_paren;
+          anonymous_use_variables; anonymous_use_right_paren ]) ->
+        AnonymousFunctionUseClause
+        { anonymous_use_token; anonymous_use_left_paren;
+          anonymous_use_variables; anonymous_use_right_paren }
       | (SyntaxKind.ListItem, [ list_item; list_separator ]) ->
         ListItem { list_item; list_separator }
       | (SyntaxKind.Error, x) -> Error x
@@ -1978,6 +2004,10 @@ module WithToken(Token: TokenType) = struct
           async func left params right colon return_type uses body =
         from_children SyntaxKind.AnonymousFunction
           [async; func; left; params; right; colon; return_type; uses; body ]
+
+      let make_anonymous_function_use_clause use_token left vars right =
+        from_children SyntaxKind.AnonymousFunctionUseClause
+          [ use_token; left; vars; right ]
 
       let make_parenthesized_expression
         paren_expr_left_paren paren_expr paren_expr_right_paren =

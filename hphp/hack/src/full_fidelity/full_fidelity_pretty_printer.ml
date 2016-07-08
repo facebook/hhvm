@@ -497,26 +497,31 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part expr right indt in
     handle_switch start_block x
     (* group_doc (start_block ^| statement) *)
-
-    | AnonymousFunction x ->
-      let async = get_doc x.anonymous_async in
-      let fn = get_doc x.anonymous_function in
-      let left = get_doc x.anonymous_left_paren in
-      let params = get_doc x.anonymous_params in
-      let right = get_doc x.anonymous_right_paren in
-      let colon = get_doc x.anonymous_colon in
-      let return_type = get_doc x.anonymous_type in
-      let preface = group_doc ( async ^| fn ) in
-      let parameters = indent_block_no_space left params right indt in
-      let type_declaration = group_doc (colon ^| return_type) in
-      let uses = get_doc x.anonymous_use in
-      let body = x.anonymous_body in
-      let before_body =
-        group_doc (
-          group_doc ( group_doc preface ^^| parameters )
-          ^| type_declaration ^| uses
-        ) in
-        handle_compound_inline_brace before_body body missing
+  | AnonymousFunction x ->
+    let async = get_doc x.anonymous_async in
+    let fn = get_doc x.anonymous_function in
+    let left = get_doc x.anonymous_left_paren in
+    let params = get_doc x.anonymous_params in
+    let right = get_doc x.anonymous_right_paren in
+    let colon = get_doc x.anonymous_colon in
+    let return_type = get_doc x.anonymous_type in
+    let preface = group_doc ( async ^| fn ) in
+    let parameters = indent_block_no_space left params right indt in
+    let type_declaration = group_doc (colon ^| return_type) in
+    let uses = get_doc x.anonymous_use in
+    let body = x.anonymous_body in
+    let before_body =
+      group_doc (
+        group_doc ( group_doc preface ^^| parameters )
+        ^| type_declaration ^| uses
+      ) in
+      handle_compound_inline_brace before_body body missing
+  | AnonymousFunctionUseClause x ->
+    let u = get_doc x.anonymous_use_token in
+    let l = get_doc x.anonymous_use_left_paren in
+    let v = get_doc x.anonymous_use_variables in
+    let r = get_doc x.anonymous_use_right_paren in
+    u ^| l ^^^ v ^^^ r
   | PrefixUnaryOperator x ->
     let op = unary_operator x in
     if is_separable_prefix op then

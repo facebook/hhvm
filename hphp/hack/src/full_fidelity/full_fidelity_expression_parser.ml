@@ -16,6 +16,7 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Operator = Full_fidelity_operator
 module PrecedenceParser = Full_fidelity_precedence_parser
+module TypeParser = Full_fidelity_type_parser
 
 open TokenKind
 open Syntax
@@ -27,6 +28,31 @@ module WithStatementAndDeclParser
 
   include PrecedenceParser
   include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
+
+  let parse_type_specifier parser =
+    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let parser = { parser with lexer; errors } in
+    (parser, node)
+
+  let parse_parameter_list_opt parser =
+    let decl_parser = DeclParser.make parser.lexer parser.errors in
+    let (decl_parser, node) = DeclParser.parse_parameter_list_opt decl_parser in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let parser = { parser with lexer; errors } in
+    (parser, node)
+
+  let parse_compound_statement parser =
+    let statement_parser = StatementParser.make parser.lexer parser.errors in
+    let (statement_parser, node) =
+      StatementParser.parse_compound_statement statement_parser in
+    let lexer = StatementParser.lexer statement_parser in
+    let errors = StatementParser.errors statement_parser in
+    let parser = { parser with lexer; errors } in
+    (parser, node)
 
   let rec parse_expression parser =
     let (parser, term) = parse_term parser in
@@ -96,8 +122,8 @@ module WithStatementAndDeclParser
     | LeftBracket (* TODO: ? one situation is array. any other situations? *)
       -> parse_array_creation_expression parser
     | Shape -> parse_shape_expression parser
-    | Async (* TODO: Parse lambda *)
-    | Function  (* TODO: Parse local function *)
+    | Function -> parse_anon parser
+    | Async   (* TODO: anon or lambda *)
 
     | Dollar (* TODO: ? *)
     | DollarDollar (* TODO: ? *)
@@ -566,6 +592,73 @@ module WithStatementAndDeclParser
     let (parser, right_paren) =
       expect_token parser RightParen SyntaxError.error1011 in
     let result = make_shape_expression shape left_paren fields right_paren in
+    (parser, result)
+
+  and parse_anon_return_type parser =
+    let (parser, noreturn) = optional_token parser Noreturn in
+    if is_missing noreturn then
+      parse_type_specifier parser
+    else
+      (parser, noreturn)
+
+  and parse_variable parser =
+    (* Note that the use clause is a list of variable *tokens, not
+       *expressions*. *)
+    expect_token parser Variable SyntaxError.error1008
+
+  and parse_variable_list parser =
+    (* SPEC:
+      use-variable-name-list:
+        variable-name
+        use-variable-name-list  ,  variable-name
+    *)
+    parse_comma_list_opt
+      parser RightParen SyntaxError.error1025 parse_variable
+
+  and parse_anon_use_opt parser =
+    (* SPEC:
+      anonymous-function-use-clause:
+        use  (  use-variable-name-list  )
+    *)
+    let (parser, use_token) = optional_token parser Use in
+    if is_missing use_token then
+      (parser, use_token)
+    else
+      let (parser, left_paren) =
+       expect_token parser LeftParen SyntaxError.error1019 in
+      let (parser, variables) = parse_variable_list parser in
+      let (parser, right_paren) =
+        expect_token parser RightParen SyntaxError.error1011 in
+      let result = make_anonymous_function_use_clause use_token
+        left_paren variables right_paren in
+      (parser, result)
+
+  and parse_anon parser =
+    (* SPEC
+      anonymous-function-creation-expression:
+        async-opt  function
+        ( anonymous-function-parameter-declaration-list-opt  )
+        anonymous-function-return-opt
+        anonymous-function-use-clauseopt
+        compound-statement
+    *)
+    let (parser, async) = optional_token parser Async in
+    let (parser, fn) = assert_token parser Function in
+    let (parser, left_paren) =
+     expect_token parser LeftParen SyntaxError.error1019 in
+    let (parser, params) = parse_parameter_list_opt parser in
+    let (parser, right_paren) =
+      expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, colon) = optional_token parser Colon in
+    let (parser, return_type) =
+      if is_missing colon then
+        (parser, (make_missing()))
+      else
+        parse_anon_return_type parser in
+    let (parser, use_clause) = parse_anon_use_opt parser in
+    let (parser, body) = parse_compound_statement parser in
+    let result = make_anonymous_function async fn left_paren params
+      right_paren colon return_type use_clause body in
     (parser, result)
 
 end

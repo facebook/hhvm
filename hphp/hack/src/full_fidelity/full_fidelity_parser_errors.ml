@@ -20,6 +20,8 @@ type accumulator = {
 }
 
 let parameter_errors node is_strict =
+  (* TODO: We need the parent here; in strict mode it is legal for the type
+           to be missing if the param is an anonymous method param. *)
   match syntax node with
   | ParameterDeclaration p ->
     if is_strict && is_missing (param_type p) then

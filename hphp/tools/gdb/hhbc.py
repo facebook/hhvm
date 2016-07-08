@@ -177,7 +177,7 @@ class HHBC(object):
                 # Try to print out literal strings.
                 if immtype == V('HPHP::SA') and unit.curunit is not None:
                     litstr = lookup_litstr(info['value'], unit.curunit)
-                    info['value'] = rawptr(litstr)['m_data']
+                    info['value'] = string_data_val(rawptr(litstr))
             else:
                 info['size'] = 0
                 info['value'] = None

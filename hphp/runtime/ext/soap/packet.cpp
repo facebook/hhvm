@@ -220,13 +220,15 @@ bool parse_packet_soap(SoapClient *obj, const char *buffer,
 
       tmp = get_node(fault->children, "faultstring");
       if (tmp != nullptr && tmp->children != nullptr) {
-        Variant zv = master_to_zval(get_conversion(KindOfString), tmp);
+        Variant zv =
+          master_to_zval(get_conversion(dataTypeToSoap(KindOfString)), tmp);
         faultstring = zv.toString();
       }
 
       tmp = get_node(fault->children, "faultactor");
       if (tmp != nullptr && tmp->children != nullptr) {
-        Variant zv = master_to_zval(get_conversion(KindOfString), tmp);
+        Variant zv =
+          master_to_zval(get_conversion(dataTypeToSoap(KindOfString)), tmp);
         faultactor = zv.toString();
       }
 
@@ -248,7 +250,8 @@ bool parse_packet_soap(SoapClient *obj, const char *buffer,
         /* TODO: lang attribute */
         tmp = get_node(tmp->children,"Text");
         if (tmp != nullptr && tmp->children != nullptr) {
-          Variant zv = master_to_zval(get_conversion(KindOfString), tmp);
+          Variant zv =
+            master_to_zval(get_conversion(dataTypeToSoap(KindOfString)), tmp);
           faultstring = zv.toString();
         }
       }

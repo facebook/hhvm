@@ -166,7 +166,7 @@ let parallel_resolve_types workers collated =
       ~job:resolve_types
       ~neutral:Relative_path.Map.empty
       ~merge:merge_resolved_result
-      ~next:(Bucket.make values)
+      ~next:(MultiWorker.next workers values)
   in
   result
 
@@ -226,7 +226,7 @@ let parallel_suggest_files workers fast =
       ~job:suggest_files_worker
       ~neutral:[]
       ~merge:(List.rev_append)
-      ~next:(Bucket.make fnl)
+      ~next:(MultiWorker.next workers fnl)
   in
   result
 

@@ -79,7 +79,7 @@ let go (workers:Worker.t list option) ~bucket_size tcopt fast =
       ~job:decl_files
       ~neutral
       ~merge:merge_decl
-      ~next:(Bucket.make ~max_size:bucket_size fast_l)
+      ~next:(MultiWorker.next ~max_size:bucket_size workers fast_l)
   in
   TypeDeclarationStore.clear();
   result

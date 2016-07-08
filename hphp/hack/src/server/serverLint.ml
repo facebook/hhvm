@@ -77,7 +77,7 @@ let go genv env fnl =
         ~job:(lint env.tcopt)
         ~merge:List.rev_append
         ~neutral:[]
-        ~next:(Bucket.make fnl)
+        ~next:(MultiWorker.next genv.workers fnl)
     else
       lint env.tcopt [] fnl in
   let errs = List.sort begin fun x y ->

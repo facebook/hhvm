@@ -206,7 +206,7 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
         ~job:load_and_otf_decl_files
         ~neutral:otf_neutral
         ~merge:merge_on_the_fly
-        ~next:(Bucket.make ~max_size:bucket_size fnl)
+        ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
     let to_redecl, to_recheck =
       MultiWorker.call
@@ -214,7 +214,7 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
         ~job:load_and_compute_deps
         ~neutral:compute_deps_neutral
         ~merge:merge_compute_deps
-        ~next:(Bucket.make ~max_size:bucket_size fnl)
+        ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
     OnTheFlyStore.clear();
     errors, failed, to_redecl, to_recheck

@@ -120,7 +120,7 @@ let parallel_check workers tcopt fnl =
       ~job:load_and_check_files
       ~neutral
       ~merge:Decl_service.merge_decl
-      ~next:(Bucket.make fnl)
+      ~next:(MultiWorker.next workers fnl)
   in
   TypeCheckStore.clear();
   result

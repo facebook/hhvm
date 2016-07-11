@@ -66,9 +66,11 @@ namespace __SystemLib {
       $alias_len = $this->bytesToInt($pos, 4);
       $this->alias = $this->substr($pos, $alias_len);
       $metadata_len = $this->bytesToInt($pos, 4);
-      $this->metadata = unserialize(
-        $this->substr($pos, $metadata_len)
-      );
+      if ($metadata_len > 0) {
+        $this->metadata = unserialize(
+          $this->substr($pos, $metadata_len)
+        );
+      }
       $this->parseFileInfo($count, $pos);
       if ($pos != $start + $len + 4) {
         throw new PharException(

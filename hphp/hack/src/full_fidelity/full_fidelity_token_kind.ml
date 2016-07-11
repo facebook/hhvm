@@ -158,6 +158,7 @@ type t =
 | XHPElementName
 | XHPStringLiteral
 | XHPBody
+| XHPComment
 | SlashGreaterThan
 | LessThanSlash
 
@@ -381,5 +382,6 @@ let to_string kind =
   | XHPElementName -> "XHP_element_name"
   | XHPStringLiteral -> "XHP_string_literal"
   | XHPBody -> "XHP_body"
+  | XHPComment -> "XHP_comment"
   | SlashGreaterThan -> "/>"
   | LessThanSlash -> "</"

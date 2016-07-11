@@ -126,11 +126,14 @@ let test_data = [
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_attribute_spec" test_minimal;
   make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_array_key_value_precedence" test_minimal;
+    ~preprocess_exp:remove_whitespace
+    "test_array_key_value_precedence" test_minimal;
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_enum" test_minimal;
   make_test_case_from_files
     ~preprocess_exp:remove_whitespace "test_class_with_attributes" test_minimal;
+  make_test_case_from_files
+    ~preprocess_exp:remove_whitespace "test_xhp" test_minimal;
   {
     name = "test_mode_1";
     source = "<?hh   ";

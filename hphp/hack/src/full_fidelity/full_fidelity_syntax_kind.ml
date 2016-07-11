@@ -80,6 +80,7 @@ type t =
 | XHPExpression
 | XHPOpen
 | XHPAttribute
+| XHPClose
 
 (* Types *)
 | SimpleTypeSpecifier
@@ -178,3 +179,4 @@ let to_string kind =
   | XHPExpression -> "xhp_expression"
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"
+  | XHPClose -> "xhp_close"

@@ -111,8 +111,9 @@ module WithStatementAndDeclParser
     | LeftParen ->
       parse_parenthesized_or_lambda_expression parser
 
-    | LessThan -> (* TODO: XHP *)
-      (parser1, make_token token)
+    | LessThan ->
+        parse_possible_xhp_expression parser
+
     | Class -> (* TODO When is this legal? *)
       (parser1, make_token token)
 
@@ -428,6 +429,7 @@ module WithStatementAndDeclParser
     let syntax = make_listlike_expression
       (make_token keyword_token) left_paren members right_paren in
     (parser, syntax)
+
   and parse_list_expression_list parser =
     let rec aux parser acc =
       let (parser1, token) = next_token parser in
@@ -661,4 +663,134 @@ module WithStatementAndDeclParser
       right_paren colon return_type use_clause body in
     (parser, result)
 
+  and parse_braced_expression parser =
+    let (parser, left_brace) = next_token parser in
+    let precedence = parser.precedence in
+    let parser = with_precedence parser 0 in
+    let (parser, expression) = parse_expression parser in
+    let (parser, right_brace) =
+      expect_token parser RightBrace SyntaxError.error1006 in
+    let parser = with_precedence parser precedence in
+    let node =
+      make_braced_expression (make_token left_brace) expression right_brace in
+    (parser, node)
+
+  and parse_xhp_attribute parser name =
+    let (parser1, token, _) = next_xhp_element_token parser in
+    if (Token.kind token) != Equal then
+      let node = make_xhp_attr name (make_missing()) (make_missing()) in
+      let parser = with_error parser SyntaxError.error1016 in
+      (* ERROR RECOVERY: The = is missing; assume that the name belongs
+         to the attribute, but that the remainder is missing, and start
+         looking for the next attribute. *)
+      (parser, node)
+    else
+      let equal = make_token token in
+      let (parser2, token, text) = next_xhp_element_token parser1 in
+      match (Token.kind token) with
+      | XHPStringLiteral ->
+        let node = make_xhp_attr name equal (make_token token) in
+        (parser2, node)
+      | LeftBrace ->
+        let (parser, expr) = parse_braced_expression parser1 in
+        let node = make_xhp_attr name equal expr in
+        (parser, node)
+      | _ ->
+        (* ERROR RECOVERY: The expression is missing; assume that the "name ="
+           belongs to the attribute and start looking for the next attribute. *)
+        let node = make_xhp_attr name equal (make_missing()) in
+        let parser = with_error parser1 SyntaxError.error1017 in
+        (parser, node)
+
+  and parse_xhp_attributes parser =
+    let rec aux parser acc =
+      let (parser1, token, _) = next_xhp_element_token parser in
+      if (Token.kind token) = XHPElementName then
+        (* TODO: The name cannot contain - or : -- give an error if it does. *)
+        let (parser, attr) = parse_xhp_attribute parser1 (make_token token) in
+        aux parser (attr :: acc)
+      else
+        (parser, acc) in
+    let (parser, attrs) = aux parser [] in
+    (parser, make_list (List.rev attrs))
+
+  and parse_xhp_body parser =
+    let rec aux acc parser =
+      let (parser1, token) = next_xhp_body_token parser in
+      match Token.kind token with
+      | XHPComment
+      | XHPBody -> aux ((make_token token) :: acc) parser1
+      | LeftBrace ->
+        let (parser, expr) = parse_braced_expression parser in
+        aux (expr :: acc) parser
+      | XHPElementName ->
+        let (parser, expr) = parse_possible_xhp_expression parser in
+        aux (expr :: acc) parser
+      | _ -> (parser, acc) in
+    let (parser, body_elements) = aux [] parser in
+    (parser, make_list (List.rev body_elements))
+
+  and parse_xhp_close parser _ =
+    let (parser1, less_than_slash, _) = next_xhp_element_token parser in
+    if (Token.kind less_than_slash) = LessThanSlash then
+      let (parser2, name, name_text) = next_xhp_element_token parser1 in
+      if (Token.kind name) = XHPElementName then
+        (* TODO: Check that the given and name_text are the same. *)
+        let (parser3, greater_than, _) = next_xhp_element_token parser2 in
+        if (Token.kind greater_than) = GreaterThan then
+          (parser3, make_xhp_close (make_token less_than_slash)
+            (make_token name) (make_token greater_than))
+        else
+          (* ERROR RECOVERY: *)
+          let parser = with_error parser2 SyntaxError.error1039 in
+          (parser, make_xhp_close
+            (make_token less_than_slash) (make_token name) (make_missing()))
+      else
+        (* ERROR RECOVERY: *)
+        let parser = with_error parser1 SyntaxError.error1039 in
+        (parser, make_xhp_close
+          (make_token less_than_slash) (make_missing()) (make_missing()))
+    else
+      (* ERROR RECOVERY: We probably got a < without a following / or name.
+         TODO: For now we'll just bail out. We could use a more
+         sophisticated strategy here. *)
+      let parser = with_error parser1 SyntaxError.error1026 in
+      (parser, make_xhp_close
+        (make_token less_than_slash) (make_missing()) (make_missing()))
+
+  and parse_xhp_expression parser name name_text =
+    let (parser, attrs) = parse_xhp_attributes parser in
+    let (parser1, token, _) = next_xhp_element_token parser in
+    match (Token.kind token) with
+    | SlashGreaterThan ->
+      let xhp_open = make_xhp_open name attrs (make_token token) in
+      let xhp = make_xhp xhp_open (make_missing()) (make_missing()) in
+      (parser1, xhp)
+    | GreaterThan ->
+      let xhp_open = make_xhp_open name attrs (make_token token) in
+      let (parser, xhp_body) = parse_xhp_body parser1 in
+      let (parser, xhp_close) = parse_xhp_close parser name_text in
+      let xhp = make_xhp xhp_open xhp_body xhp_close in
+      (parser, xhp)
+    | _ ->
+      (* ERROR RECOVERY: Assume the unexpected token belongs to whatever
+         comes next. *)
+      let xhp_open = make_xhp_open name attrs (make_missing()) in
+      let xhp = make_xhp xhp_open (make_missing()) (make_missing()) in
+      let parser = with_error parser SyntaxError.error1013 in
+      (parser, xhp)
+
+  and parse_possible_xhp_expression parser =
+    (* We got a < token where an expression was expected. *)
+    let (parser, token, text) = next_xhp_element_token parser in
+    if (Token.kind token) = XHPElementName then
+      parse_xhp_expression parser (make_token token) text
+    else
+      (* ERROR RECOVERY
+      Hard to say what to do here. We are expecting an expression;
+      we could simply produce an error for the < and call that the
+      expression. Or we could assume the the left side of an inequality is
+      missing, give a missing node for the left side, and parse the
+      remainder as the right side. We'll go for the former for now. *)
+      (with_error parser SyntaxError.error1015, (make_token token))
 end

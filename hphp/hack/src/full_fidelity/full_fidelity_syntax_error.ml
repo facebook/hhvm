@@ -42,6 +42,7 @@ let error0010 = "A single quote is expected here."
 let error0011 = "A newline is expected here."
 let error0012 = "This string literal is not terminated."
 let error0013 = "This XHP body is not terminated."
+let error0014 = "This XHP comment is not terminated."
 
 (* Syntactic errors *)
 let error1001 = "A source file must begin with '<?hh'."
@@ -86,5 +87,6 @@ let error1035 = "'Class' keyword is expected here."
 let error1036 = "A '=' is expected here."
 let error1037 = "A left brace is expected here."
 let error1038 = "A namespace body is expected here."
+let error1039 = "A closing XHP tag is expected here."
 
 let error2001 = "A type annotation is required in strict mode."

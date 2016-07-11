@@ -410,11 +410,6 @@ module WithToken(Token: TokenType) = struct
       xhp_open_attrs : t;
       xhp_open_right_angle : t;
     }
-    and xhp_embedded_expression = {
-      xhp_embed_open_brace : t;
-      xhp_embed_expr : t;
-      xhp_embed_close_brace : t;
-    }
     and xhp_expression = {
       xhp_open : t;
       xhp_body : t;
@@ -575,6 +570,7 @@ module WithToken(Token: TokenType) = struct
     | XHPExpression of xhp_expression
     | XHPOpen of xhp_open
     | XHPAttribute of xhp_attribute
+    | XHPClose of xhp_close
 
     | SimpleTypeSpecifier of t
     | NullableTypeSpecifier of nullable_type_specifier
@@ -668,6 +664,7 @@ module WithToken(Token: TokenType) = struct
       | ArrayIntrinsicExpression _ -> SyntaxKind.ArrayIntrinsicExpression
       | XHPExpression _ -> SyntaxKind.XHPExpression
       | XHPOpen _ -> SyntaxKind.XHPOpen
+      | XHPClose _ -> SyntaxKind.XHPClose
       | XHPAttribute _ -> SyntaxKind.XHPAttribute
       | TypeConstant _ ->  SyntaxKind.TypeConstant
       | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
@@ -1026,6 +1023,9 @@ module WithToken(Token: TokenType) = struct
       | XHPOpen
         { xhp_open_name; xhp_open_attrs; xhp_open_right_angle } ->
         [ xhp_open_name; xhp_open_attrs; xhp_open_right_angle ]
+      | XHPClose
+        { xhp_close_left_angle; xhp_close_name; xhp_close_right_angle } ->
+        [ xhp_close_left_angle; xhp_close_name; xhp_close_right_angle ]
       | XHPAttribute
         { xhp_attr_name; xhp_attr_equal; xhp_attr_expr } ->
         [ xhp_attr_name; xhp_attr_equal; xhp_attr_expr ]
@@ -1331,6 +1331,9 @@ module WithToken(Token: TokenType) = struct
       | XHPOpen
         { xhp_open_name; xhp_open_attrs; xhp_open_right_angle } ->
         [ "xhp_open_name"; "xhp_open_attrs"; "xhp_open_right_angle" ]
+      | XHPClose
+        { xhp_close_left_angle; xhp_close_name; xhp_close_right_angle } ->
+        [ "xhp_close_left_angle"; "xhp_close_name"; "xhp_close_right_angle" ]
       | XHPAttribute
         { xhp_attr_name; xhp_attr_equal; xhp_attr_expr } ->
         [ "xhp_attr_name"; "xhp_attr_equal"; "xhp_attr_expr" ]
@@ -1559,6 +1562,9 @@ module WithToken(Token: TokenType) = struct
     let xhp_open_name x = x.xhp_open_name
     let xhp_open_attrs x = x.xhp_open_attrs
     let xhp_open_right_angle x = x.xhp_open_right_angle
+    let xhp_close_left_angle x = x.xhp_close_left_angle
+    let xhp_close_name x = x.xhp_close_name
+    let xhp_close_right_angle x = x.xhp_close_right_angle
     let xhp_attr_name x = x.xhp_attr_name
     let xhp_attr_equal x = x.xhp_attr_equal
     let xhp_attr_expr x = x.xhp_attr_expr
@@ -1875,6 +1881,9 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.XHPOpen, [ xhp_open_name; xhp_open_attrs;
           xhp_open_right_angle ]) ->
         XHPOpen { xhp_open_name; xhp_open_attrs; xhp_open_right_angle }
+      | (SyntaxKind.XHPClose, [ xhp_close_left_angle; xhp_close_name;
+          xhp_close_right_angle ]) ->
+        XHPClose { xhp_close_left_angle; xhp_close_name; xhp_close_right_angle }
       | (SyntaxKind.XHPAttribute, [ xhp_attr_name; xhp_attr_equal;
           xhp_attr_expr ]) ->
         XHPAttribute { xhp_attr_name; xhp_attr_equal; xhp_attr_expr }
@@ -2060,6 +2069,11 @@ module WithToken(Token: TokenType) = struct
       let make_xhp_open xhp_open_name xhp_open_attrs xhp_open_right_angle =
         from_children SyntaxKind.XHPOpen
           [xhp_open_name; xhp_open_attrs; xhp_open_right_angle ]
+
+      let make_xhp_close
+          xhp_close_left_angle xhp_close_name xhp_close_right_angle =
+        from_children SyntaxKind.XHPClose
+          [xhp_close_left_angle; xhp_close_name; xhp_close_right_angle ]
 
       let make_xhp_attr xhp_attr_name xhp_attr_equal xhp_attr_expr =
         from_children SyntaxKind.XHPAttribute

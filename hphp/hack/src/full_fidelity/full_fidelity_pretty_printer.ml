@@ -600,7 +600,7 @@ let rec get_doc node =
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in
     let right = get_doc (xhp_close x) in
-    indent_block_no_space left expr right indt
+    left ^^^ expr ^^^ right
   | XHPOpen x ->
     let name = get_doc (xhp_open_name x) in
     let attrs = get_doc (xhp_open_attrs x) in
@@ -611,6 +611,11 @@ let rec get_doc node =
     let equals = get_doc (xhp_attr_equal x) in
     let expr = get_doc (xhp_attr_expr x) in
     group_doc (group_doc (name ^^| equals) ^^| expr)
+  | XHPClose x ->
+    let left = get_doc (xhp_close_left_angle x) in
+    let name = get_doc (xhp_close_name x) in
+    let right = get_doc (xhp_close_right_angle x) in
+    left ^^^ name ^^^ right
   | TypeConstant x ->
     let left = get_doc (type_constant_left_type x) in
     let right = get_doc (type_constant_right_type x) in

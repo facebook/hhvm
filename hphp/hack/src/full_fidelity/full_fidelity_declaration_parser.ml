@@ -200,7 +200,7 @@ module WithExpressionAndStatementParser
     let (parser, name) = match Token.kind token with
     | Name
     | QualifiedName -> (parser1, make_token token)
-    | LeftBrace -> (parser1, (make_missing()))
+    | LeftBrace -> (parser, (make_missing()))
     | Semicolon ->
       (* ERROR RECOVERY Plainly the name is missing. *)
       (with_error parser SyntaxError.error1004, (make_missing()))

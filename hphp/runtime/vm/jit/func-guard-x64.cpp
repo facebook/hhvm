@@ -94,8 +94,9 @@ bool funcGuardMatches(TCA guard, const Func* func) {
 }
 
 void clobberFuncGuard(TCA guard, const Func* func) {
-  return isSmall(func) ? smashCmpq(guard, 0)
-                       : smashMovq(guard, 0);
+  auto const ifunc = reinterpret_cast<uintptr_t>(func);
+  return isSmall(func) ? smashCmpq(guard, ifunc | 1)
+                       : smashMovq(guard, ifunc | 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

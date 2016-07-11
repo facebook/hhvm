@@ -7,7 +7,7 @@ $opts = array(
       "User-Agent: Composer/source PHP 5.5.99)",
     ),
     'tls' => array(
-      "allow_self_signed"=>TRUE
+      "verify_peer_name"=>TRUE
     )
   )
 );

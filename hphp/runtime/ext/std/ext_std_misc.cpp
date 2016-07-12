@@ -152,7 +152,6 @@ void StandardExtension::threadInitMisc() {
 
 static void bindTokenConstants();
 static int get_user_token_id(int internal_id);
-const StaticString s_T_PAAMAYIM_NEKUDOTAYIM("T_PAAMAYIM_NEKUDOTAYIM");
 
 #define PHP_MAJOR_VERSION_5 5
 #define PHP_MINOR_VERSION_5 6
@@ -207,11 +206,9 @@ void StandardExtension::initMisc() {
       makeStaticString("ZEND_THREAD_SAFE"),
       true
     );
-
     Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
     Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
-    Native::registerConstant<KindOfInt64>(
-        makeStaticString("PHP_MAXPATHLEN"), MAXPATHLEN);
+    HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
     Native::registerConstant<KindOfBoolean>(makeStaticString("PHP_DEBUG"),
       #if DEBUG
         true
@@ -220,8 +217,7 @@ void StandardExtension::initMisc() {
       #endif
      );
     bindTokenConstants();
-    Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
-                                          get_user_token_id(T_DOUBLE_COLON));
+    HHVM_RC_INT(T_PAAMAYIM_NEKUDOTAYIM, get_user_token_id(T_DOUBLE_COLON));
 
     HHVM_RC_INT(UPLOAD_ERR_OK,         0);
     HHVM_RC_INT(UPLOAD_ERR_INI_SIZE,   1);
@@ -959,8 +955,7 @@ Variant HHVM_FUNCTION(SystemLib_min2, const Variant& value1,
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 #define YYTOKEN_MAP static void bindTokenConstants()
-#define YYTOKEN(num, name) Native::registerConstant<KindOfInt64> \
-  (makeStaticString(#name), get_user_token_id(num));
+#define YYTOKEN(num, name) HHVM_RC_INT(name, get_user_token_id(num));
 
 #include "hphp/parser/hphp.tab.hpp" // nolint
 

@@ -354,7 +354,7 @@ Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length /* = 0 */) {
   return HHVM_FN(fread)(zp, length);
 }
 Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
-                              int64_t whence /* = k_SEEK_SET */) {
+                              int64_t whence /* = SEEK_SET */) {
   return HHVM_FN(fseek)(zp, offset, whence);
 }
 Variant HHVM_FUNCTION(gztell, const Resource& zp) {

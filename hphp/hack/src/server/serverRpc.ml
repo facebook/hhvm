@@ -44,6 +44,7 @@ type _ t =
   | FORMAT : string * int * int -> string Format_hack.return t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
+  | ECHO_FOR_TEST : string -> string t
 
 let handle : type a. genv -> env -> a t -> a =
   fun genv env -> function
@@ -107,6 +108,8 @@ let handle : type a. genv -> env -> a t -> a =
            (ServerArgs.ai_mode genv.options) env.tcopt
     | AI_QUERY json ->
         Ai.QueryService.go json
+    | ECHO_FOR_TEST msg ->
+        msg
 
 let to_string : type a. a t -> _ = function
   | STATUS -> "STATUS"
@@ -139,3 +142,4 @@ let to_string : type a. a t -> _ = function
   | GET_DEFINITION_BY_ID _ -> "GET_DEFINITION_BY_ID"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
   | AI_QUERY _ -> "AI_QUERY"
+  | ECHO_FOR_TEST _ -> "ECHO_FOR_TEST"

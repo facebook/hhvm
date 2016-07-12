@@ -145,7 +145,6 @@ std::pair<int, double> sizeOfArray(
   auto arrKind = props->kind();
   if (
     arrKind != ArrayData::ArrayKind::kPackedKind &&
-    arrKind != ArrayData::ArrayKind::kStructKind &&
     arrKind != ArrayData::ArrayKind::kMixedKind &&
     arrKind != ArrayData::ArrayKind::kEmptyKind &&
     arrKind != ArrayData::ArrayKind::kVecKind
@@ -229,14 +228,6 @@ std::pair<int, double> sizeOfArray(
       iter = PackedArray::IterAdvance(props, iter);
       if (stack) stack->pop_back();
     }
-  } else if (props->isStruct()) {
-    FTRACE(2, "Iterating struct array\n");
-    while (iter != pos_limit) {
-      if (stack) stack->push_back("StructIndex");
-      handle_dense_array_item();
-      iter = StructArray::IterAdvance(props, iter);
-      if (stack) stack->pop_back();
-    }
   }
 
   return std::make_pair(size, sized);
@@ -297,13 +288,6 @@ void stringsOfArray(
     while (iter != pos_limit) {
       handle_dense_array_item();
       iter = PackedArray::IterAdvance(props, iter);
-    }
-    path->pop_back();
-  } else if (props->isStruct()) {
-    path->push_back(std::string("[]"));
-    while (iter != pos_limit) {
-      handle_dense_array_item();
-      iter = StructArray::IterAdvance(props, iter);
     }
     path->pop_back();
   }

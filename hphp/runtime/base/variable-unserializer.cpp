@@ -47,12 +47,13 @@ namespace HPHP {
 
 namespace {
 
-enum class ArrayKind { PHP, Dict, Vec };
+enum class ArrayKind { PHP, Dict, Vec, Keyset };
 
 void unserializeVariant(Variant&, VariableUnserializer* unserializer,
                         UnserializeMode mode = UnserializeMode::Value);
 Array unserializeArray(VariableUnserializer*, ArrayKind);
 Array unserializeVec(VariableUnserializer*);
+Array unserializeKeyset(VariableUnserializer*);
 String unserializeString(VariableUnserializer*, char delimiter0 = '"',
                          char delimiter1 = '"');
 void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
@@ -199,6 +200,11 @@ void throwVecRefValue() {
 [[noreturn]] NEVER_INLINE
 void throwDictRefValue() {
   throw Exception("Dicts cannot contain references");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwKeysetValue() {
+  throw Exception("Keysets can only contain integers and strings");
 }
 }
 
@@ -770,6 +776,14 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
+  case 'k':
+    {
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
+      auto a = unserializeKeyset(uns);
+      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+    }
+    return; // array has '}' terminating
   case 'L':
     {
       int64_t id = uns->readInt();
@@ -1006,6 +1020,7 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
     switch (kind) {
     case ArrayKind::Dict: return DictInit(0).toArray();
     case ArrayKind::PHP:  return Array::Create(); // static empty array
+    case ArrayKind::Keyset:
     case ArrayKind::Vec: not_reached();
     }
   }
@@ -1026,6 +1041,7 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
     switch (kind) {
     case ArrayKind::Dict: return DictInit(size).toArray();
     case ArrayKind::PHP:  return ArrayInit(size, ArrayInit::Mixed{}).toArray();
+    case ArrayKind::Keyset:
     case ArrayKind::Vec: not_reached();
     }
     not_reached();
@@ -1103,6 +1119,48 @@ Array unserializeVec(VariableUnserializer* uns) {
   check_request_surprise_unlikely();
   uns->expectChar('}');
   return arr;
+}
+
+Array unserializeKeyset(VariableUnserializer* uns) {
+  int64_t size = uns->readInt();
+  uns->expectChar(':');
+  uns->expectChar('{');
+  if (size == 0) {
+    uns->expectChar('}');
+    return Array::CreateKeyset();
+  }
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+  auto const scale = computeScaleFromSize(size);
+  auto const allocsz = computeAllocBytes(scale);
+
+  // For large arrays, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+
+  // Pre-allocate an ArrayData of the given size, to avoid escalation in the
+  // middle, which breaks references.
+  auto ad = MixedArray::MakeReserveKeyset(size);
+  for (int64_t i = 0; i < size; i++) {
+    Variant value;
+    unserializeVariant(value, uns);
+    auto const type = value.getRawType();
+    if (UNLIKELY(!isStringType(type) && !isIntType(type))) {
+      throwKeysetValue();
+    }
+    ad->append(*value.asCell(), false);
+    if (i < (size - 1)) {
+      auto lastChar = uns->peekBack();
+      if ((lastChar != ';' && lastChar != '}')) {
+        throwUnterminatedElement();
+      }
+    }
+  }
+  check_request_surprise_unlikely();
+  uns->expectChar('}');
+  return Array::attach(ad);
 }
 
 String unserializeString(VariableUnserializer* uns, char delimiter0 /* = '"' */,

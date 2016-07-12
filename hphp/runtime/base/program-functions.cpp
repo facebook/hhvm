@@ -737,8 +737,10 @@ NEVER_INLINE void copyFunc(void* dst, void* src, uint32_t sz = 64) {
 NEVER_INLINE void copyHashFuncs() {
 #ifdef __OPTIMIZE__
   if (IsSSEHashSupported()) {
+#ifdef NO_M_DATA
     copyFunc(getMethodPtr(&HPHP::StringData::hashHelper),
              reinterpret_cast<void*>(g_hashHelper_crc), 64);
+#endif // NO_M_DATA
     typedef strhash_t (*HashFunc) (const char*, uint32_t);
     auto hash_func = [](HashFunc x) {
       return reinterpret_cast<void*>(x);

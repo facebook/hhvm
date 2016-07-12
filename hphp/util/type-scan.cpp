@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "type-scan.h"
+#include "hphp/util/type-scan.h"
 
 #include <cstdio>
 #include <dlfcn.h>

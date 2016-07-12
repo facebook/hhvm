@@ -27,7 +27,7 @@ let check_fulfillment env impls (parent_pos, req_ty) =
       ()
     | Some impl_ty ->
       ignore @@ Typing_ops.sub_type_decl parent_pos Reason.URclass_req env
-        req_ty impl_ty
+        impl_ty req_ty
 
 let check_class env tc =
   match tc.tc_kind with

@@ -241,15 +241,46 @@ void cgLdGblAddr(IRLS& env, const IRInstruction* inst) {
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
+IMPL_OPCODE_CALL(LdGblAddrDef)
+
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
   vmain(env) << lea{obj[inst->extra<LdPropAddr>()->offsetBytes], dst};
 }
 
+IMPL_OPCODE_CALL(LdClsPropAddrOrNull)
+IMPL_OPCODE_CALL(LdClsPropAddrOrRaise)
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgLdRDSAddr(IRLS& env, const IRInstruction* inst) {
   auto const handle = inst->extra<LdRDSAddr>()->handle;
   vmain(env) << lea{rvmtl()[handle], dstLoc(env, inst, 0).reg()};
+}
+
+void cgLdTVAux(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  auto const tv = srcLoc(env, inst, 0);
+  assertx(tv.hasReg(1));
+  auto const type = tv.reg(1);
+
+  auto& v = vmain(env);
+  v << shrqi{32, type, dst, v.makeReg()};
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    auto const extra = inst->extra<LdTVAux>();
+    auto const mask = -extra->valid - 1;
+
+    if (mask) {
+      auto const sf = v.makeReg();
+      v << testqi{mask, dst, sf};
+      ifThen(v, CC_NZ, sf, [](Vout& v) {
+        v << ud2{};
+      });
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

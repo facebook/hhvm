@@ -312,10 +312,10 @@ Md5Digest::Md5Digest(const char *arg, int arg_len) {
   PHP_MD5Final(digest, &context);
 }
 
-std::string string_md5(const char* s, int len) {
-  Md5Digest md5(s, len);
-  const auto rawLen = sizeof(md5.digest);
-  const auto hexLen = 2*rawLen;
+std::string string_md5(folly::StringPiece s) {
+  Md5Digest md5(s.begin(), s.size());
+  auto constexpr rawLen = sizeof(md5.digest);
+  auto constexpr hexLen = 2*rawLen;
   char hex[hexLen+1];
   string_bin2hex((char*)md5.digest, rawLen, hex);
   return std::string(hex, hexLen);

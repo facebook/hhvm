@@ -391,6 +391,10 @@ inline ArrayData* ArrayData::toVec() const {
   return g_array_funcs.toVec[kind()](this);
 }
 
+inline ArrayData* ArrayData::toKeyset() {
+  return g_array_funcs.toKeyset[kind()](this);
+}
+
 inline void ArrayData::renumber() {
   return g_array_funcs.renumber[kind()](this);
 }

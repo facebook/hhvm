@@ -3727,6 +3727,7 @@ Variant HHVM_METHOD(DOMDocument, save,
 
 Variant HHVM_METHOD(DOMDocument, saveHTMLFile,
                     const String& file) {
+  VMRegAnchor _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0;
@@ -3771,6 +3772,7 @@ Variant HHVM_METHOD(DOMDocument, saveHTML,
 Variant save_html_or_xml(DOMNode* obj,
                          bool as_xml,
                          const Object& node /* = null_object */) {
+  VMRegAnchor _;
   xmlDocPtr docp = (xmlDocPtr)obj->nodep();
   xmlBufferPtr buf;
   xmlChar *mem;

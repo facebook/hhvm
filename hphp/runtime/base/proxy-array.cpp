@@ -358,6 +358,12 @@ ArrayData* ProxyArray::ToVec(const ArrayData* ad) {
   return const_cast<ArrayData*>(ad);
 }
 
+ArrayData* ProxyArray::ToKeyset(ArrayData* ad) {
+  auto r = innerArr(ad)->toKeyset();
+  reseatable(ad, r);
+  return ad;
+}
+
 void ProxyArray::Renumber(ArrayData* ad) {
   innerArr(ad)->renumber();
 }

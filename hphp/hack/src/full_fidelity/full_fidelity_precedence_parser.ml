@@ -41,3 +41,13 @@ let with_reset_precedence parser parse_function =
   let (parser, result) = parse_function parser in
   let parser = with_precedence parser old_precedence in
   (parser, result)
+
+let next_xhp_element_token parser =
+  let (lexer, token, text) = Lexer.next_xhp_element_token parser.lexer in
+  let parser = { parser with lexer } in
+  (parser, token, text)
+
+let next_xhp_body_token parser =
+  let (lexer, token) = Lexer.next_xhp_body_token parser.lexer in
+  let parser = { parser with lexer } in
+  (parser, token)

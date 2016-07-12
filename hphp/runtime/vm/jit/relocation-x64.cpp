@@ -372,20 +372,20 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
      * Similar to fixups - this is a return address so get
      * the address returned to.
      */
-    if (CTCA adjusted = rel.adjustedAddressBefore(ct.first)) {
+    if (auto const adjusted = rel.adjustedAddressBefore(ct.first)) {
       ct.first = adjusted;
     }
     /*
      * But the target is an instruction, so skip over any nops
      * that might have been inserted (eg for alignment).
      */
-    if (TCA adjusted = rel.adjustedAddressAfter(ct.second)) {
+    if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
       ct.second = adjusted;
     }
   }
 
   for (auto& jt : meta.jmpTransIDs) {
-    if (TCA adjusted = rel.adjustedAddressAfter(jt.first)) {
+    if (auto const adjusted = rel.adjustedAddressAfter(jt.first)) {
       jt.first = adjusted;
     }
   }
@@ -489,8 +489,8 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
       if (auto fixup = mcg->fixupMap().findFixup(start)) {
         meta.fixups.emplace_back(start, *fixup);
       }
-      if (auto ct = mcg->catchTraceMap().find(start)) {
-        meta.catches.emplace_back(start, *ct);
+      if (auto ct = mcg->catchTraceMap().find(mcg->code().toOffset(start))) {
+        meta.catches.emplace_back(start, mcg->code().toAddr(*ct));
       }
     }
   }

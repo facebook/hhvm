@@ -874,6 +874,14 @@ class Redis {
     'pttl' => [ 'format' => 'k', 'return' => 'Long' ],
     'restore' => [ 'format' => 'kls', 'return' => 'Boolean' ],
 
+    //Geospatial
+    'geoadd' => [ 'format' => 'kdds', 'return' => 'Long' ],
+    'geodist' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'String' ],
+    'geohash' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Vector' ],
+    'geopos' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+    'georadius' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+    'georadiusbymember' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+
     // Hashes
     'hdel' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Long' ],
     'hexists' => [ 'format' => 'ks', 'return' => '1' ],
@@ -1270,6 +1278,9 @@ class Redis {
     }
 
     if ($type === self::TYPE_MULTIBULK) {
+      if ($resp === '-1') {
+          return '';
+      }
       $ret = [];
       $lineNo = 0;
       $count = (int) $resp;

@@ -807,8 +807,6 @@ interface Countable {
   public function count(): int;
 }
 
-abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}
-
 interface RecursiveIterator<Tv> extends Iterator<Tv> {
   public function getChildren(): this;
   public function hasChildren(): bool;

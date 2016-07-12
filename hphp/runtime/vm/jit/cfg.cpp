@@ -204,8 +204,11 @@ bool removeUnreachable(IRUnit& unit) {
     for (auto it = preds.begin(); it != preds.end(); ) {
       auto* inst = it->inst();
       ++it;
-
       if (!visited.test(inst->block()->id())) {
+        if (it != preds.end() && it->inst() == inst) {
+          ++it;
+        }
+
         ITRACE(3, "removing unreachable B{}\n", inst->block()->id());
         inst->setNext(nullptr);
         inst->setTaken(nullptr);

@@ -1,0 +1,19 @@
+(script(header((<))((?))((name)(end_of_line)))
+(function_declaration
+  (missing)(missing)((function)(whitespace))((name))(missing)((lparen))
+  (missing)((rparen)(whitespace))(missing)(missing)
+  (compound_statement(
+    ({)(end_of_line))
+    (return_statement
+      ((whitespace)(return)(whitespace))
+      (object_creation_expression
+        ((new)(whitespace))
+        ((name))
+        ((lparen))
+        (list
+          (literal((decimal_literal)))
+          ((,)(whitespace))
+          (literal((decimal_literal))))
+        ((rparen)))
+        ((;)(end_of_line)))
+    ((})))))

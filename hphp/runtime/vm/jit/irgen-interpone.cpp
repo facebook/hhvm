@@ -451,6 +451,7 @@ void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitContUnsetDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
+void emitNewKeysetArray(IRGS& env, int32_t)   { INTERP }
 void emitHighInvalid(IRGS& env)               { std::abort(); }
 
 //////////////////////////////////////////////////////////////////////

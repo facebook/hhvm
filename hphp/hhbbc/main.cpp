@@ -210,8 +210,10 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   SCOPE_EXIT { Repo::shutdown(); };
 
   if (Repo::get().global().UsedHHBBC) {
-    throw std::runtime_error("This hhbc repo has already been "
-      "optimized by hhbbc");
+    throw std::runtime_error(
+      "This hhbc repo has already been optimized by hhbbc.\n"
+      "Re-running hhbbc is known to be buggy, and will corrupt your repo."
+    );
   }
 
   return parallel::map(

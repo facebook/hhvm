@@ -116,13 +116,13 @@ void Link<T,N>::markUninit() const {
 
 template <class T, bool N>
 void Link<T,N>::initWith(const T& val) const {
-  new (get()) T{val};
+  new (get()) T(val);
   if (isNormal()) markInit();
 }
 
 template <class T, bool N>
 void Link<T,N>::initWith(T&& val) const {
-  new (get()) T{std::move(val)};
+  new (get()) T(std::move(val));
   if (isNormal()) markInit();
 }
 

@@ -358,13 +358,31 @@ Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params) {
   return invoke(name.data(), params);
 }
 
-Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj, const String& cls,
-                                          const String& name, const Variant& params) {
+Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
+                                          const String& cls,
+                                          const String& name,
+                                          const Variant& params) {
   if (obj.isNull()) {
     return invoke_static_method(cls, name, params);
   }
-  ObjectData *o = obj.toObject().get();
-  return o->o_invoke(name, params);
+
+  // Get the CallCtx this way instead of using vm_decode_function() because
+  // vm_decode_function() has no way to specify a class independent from the
+  // class::function being called.
+  // Note that this breaks the rules for name lookup (for protected and private)
+  // but that's okay because so does Zend's implementation.
+  CallCtx ctx;
+  ctx.cls = Unit::loadClass(cls.get());
+  ctx.this_ = obj.toObject().get();
+  ctx.invName = nullptr;
+  ctx.func = ctx.cls->lookupMethod(name.get());
+  if (!ctx.func) {
+    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+  }
+
+  Variant ret;
+  g_context->invokeFunc(ret.asTypedValue(), ctx, params);
+  return ret;
 }
 
 Object HHVM_FUNCTION(hphp_create_object, const String& name, const Variant& params) {

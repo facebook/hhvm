@@ -81,7 +81,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
 #define DArrVec        return false; // fixed type
-#define DArrElem       assertx(inst->is(LdStructArrayElem, ArrayGet));    \
+#define DArrElem       assertx(inst->is(ArrayGet));           \
                          return typeMightRelax(inst->src(0));
 #define DCol           return false; // fixed in bytecode
 #define DThis          return false; // fixed type from ctx class

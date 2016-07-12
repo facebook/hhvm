@@ -204,11 +204,11 @@ let parse_check_args cmd =
           | _ -> raise (Arg.Bad "only a single mode should be specified")
         end,
       " (mode) remove dead HH_FIXME for specified error code " ^
-      "(first do hh_client restart)";
+      "(first do hh_client restart --no-load)";
     "--remove-dead-fixmes",
         Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
       " (mode) remove dead HH_FIXME for any error code < 5000 " ^
-      "(first do hh_client restart)";
+      "(first do hh_client restart --no-load)";
     "--lint", Arg.Rest begin fun fn ->
         mode := match !mode with
           | None -> Some (MODE_LINT [fn])

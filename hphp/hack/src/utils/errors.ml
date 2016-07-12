@@ -586,6 +586,9 @@ let internal_error pos msg =
 let unimplemented_feature pos msg =
   add 0 pos ("Feature not implemented: " ^ msg)
 
+let experimental_feature pos msg =
+  add 0 pos ("Cannot use experimental feature: " ^ msg)
+
 (*****************************************************************************)
 (* Parsing errors. *)
 (*****************************************************************************)

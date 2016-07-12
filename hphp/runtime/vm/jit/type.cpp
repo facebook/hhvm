@@ -17,9 +17,6 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/base/shape.h"
-#include "hphp/runtime/base/struct-array.h"
-#include "hphp/runtime/base/struct-array-defs.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -211,9 +208,6 @@ std::string Type::toString() const {
       if (auto const ty = arrSpec.type()) {
         str += folly::to<std::string>(':', show(*ty));
       }
-      if (auto const shape = arrSpec.shape()) {
-        str += folly::to<std::string>(":", show(*shape));
-      }
       parts.push_back(str);
       t -= TAnyArr;
     } else {
@@ -358,10 +352,6 @@ static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
         }
       }
     }
-  }
-
-  if (arr->isStruct()) {
-    if (StructArray::asStructArray(arr)->shape() == spec.shape()) return true;
   }
 
   return false;
@@ -541,10 +531,6 @@ Type typeFromTV(const TypedValue* tv) {
   }
 
   if (isArrayType(tv->m_type)) {
-    auto const ar = tv->m_data.parr;
-    if (ar->kind() == ArrayData::kStructKind) {
-      return Type::Array(StructArray::asStructArray(ar)->shape());
-    }
     return Type::Array(tv->m_data.parr->kind());
   }
 

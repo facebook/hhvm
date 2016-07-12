@@ -7,14 +7,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
- module Token = Full_fidelity_minimal_token
- module Syntax = Full_fidelity_minimal_syntax
- module SyntaxKind = Full_fidelity_syntax_kind
- module TokenKind = Full_fidelity_token_kind
- module SyntaxError = Full_fidelity_syntax_error
- module Lexer = Full_fidelity_lexer
+module Token = Full_fidelity_minimal_token
+module Syntax = Full_fidelity_minimal_syntax
+module SyntaxKind = Full_fidelity_syntax_kind
+module TokenKind = Full_fidelity_token_kind
+module SyntaxError = Full_fidelity_syntax_error
 
 module type ParserType = sig
+  module Lexer : Full_fidelity_lexer_sig.Lexer_S
   type t
   val errors : t -> SyntaxError.t list
   val with_errors : t -> SyntaxError.t list -> t
@@ -26,14 +26,17 @@ module WithParser(Parser : ParserType) = struct
 
   let next_token parser =
     let lexer = Parser.lexer parser in
-    let (lexer, token) = Lexer.next_token lexer in
+    let (lexer, token) = Parser.Lexer.next_token lexer in
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
   let peek_token parser =
     let lexer = Parser.lexer parser in
-    let (_, token) = Lexer.next_token lexer in
+    let (_, token) = Parser.Lexer.next_token lexer in
     token
+
+  let peek_token_kind parser =
+    Token.kind (peek_token parser)
 
   let skip_token parser =
     let (parser, _) = next_token parser in
@@ -43,8 +46,8 @@ module WithParser(Parser : ParserType) = struct
     (* TODO: Should be able to express errors on whole syntax node. *)
     (* TODO: Is this even right? Won't this put the error on the trivia? *)
     let lexer = Parser.lexer parser in
-    let start_offset = Lexer.start_offset lexer in
-    let end_offset = Lexer.end_offset lexer in
+    let start_offset = Parser.Lexer.start_offset lexer in
+    let end_offset = Parser.Lexer.end_offset lexer in
     let error = SyntaxError.make start_offset end_offset message in
     let errors = Parser.errors parser in
     Parser.with_errors parser (error :: errors)
@@ -73,8 +76,96 @@ module WithParser(Parser : ParserType) = struct
   let next_token_as_name parser =
     (* TODO: This isn't right.  Pass flags to the lexer. *)
     let lexer = Parser.lexer parser in
-    let (lexer, token) = Lexer.next_token_as_name lexer in
+    let (lexer, token) = Parser.Lexer.next_token_as_name lexer in
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
+
+  (* This helper method parses a list of the form
+
+    open_token item separator_token item ... close_token
+
+    * We assume that open_token has already been consumed.
+    * We do not consume the close_token.
+    * The given error will be produced if an expected item is missing.
+    * The caller is responsible for producing an error if the close_token
+      is missing.
+    * We expect at least one item.
+    * If the list of items is empty then a Missing node is returned.
+    * If the list of items is a singleton then the item is returned.
+    * Otherwise, a list of the form (item, separator) ... item is returned.
+*)
+
+  let parse_separated_list parser separator_kind close_kind error parse_item =
+    let rec aux parser acc =
+      let (parser1, token) = next_token parser in
+      let kind = Token.kind token in
+      if kind = close_kind || kind = TokenKind.EndOfFile then
+        (* ERROR RECOVERY: If we're here and we got a close brace then
+           the list is empty; we expect at least one item. If we're here
+           at the end of the file, then we were expecting one more item. *)
+        let parser = with_error parser error in
+        let item = Syntax.make_missing() in
+        (parser, (item :: acc))
+      else if kind = separator_kind then
+
+        (* ERROR RECOVERY: We're expecting an item but we got a comma.
+           Assume the item was missing, eat the comma, and move on.
+           TODO: This could be poor recovery. For example:
+
+                function bar (Foo< , int blah)
+
+          Plainly the type arg is missing, but the comma is not associated with
+          the type argument list, it's associated with the formal
+          parameter list.  *)
+
+        let parser = with_error parser1 error in
+        let item = Syntax.make_missing() in
+        let separator = Syntax.make_token token in
+        let list_item = Syntax.make_list_item item separator  in
+        aux parser (list_item :: acc)
+      else
+        let (parser, item) = parse_item parser in
+        let (parser1, token) = next_token parser in
+        let kind = Token.kind token in
+        if kind = close_kind then
+          (parser, (item :: acc))
+        else if kind = separator_kind then
+          let separator = Syntax.make_token token in
+          let list_item = Syntax.make_list_item item separator in
+          aux parser1 (list_item :: acc)
+        else
+          (* ERROR RECOVERY: We were expecting a close or separator, but
+             got neither. Bail out. Caller will give an error. *)
+          (parser, (item :: acc)) in
+    let (parser, items) = aux parser [] in
+    (parser, Syntax.make_list (List.rev items))
+
+  let parse_separated_list_opt
+      parser separator_kind close_kind error parse_item =
+    let token = peek_token parser in
+    let kind = Token.kind token in
+    if kind = close_kind then
+      (parser, Syntax.make_missing())
+    else
+      parse_separated_list parser separator_kind close_kind error parse_item
+
+  let parse_comma_list parser =
+    parse_separated_list parser TokenKind.Comma
+
+  let parse_comma_list_opt parser =
+    parse_separated_list_opt parser TokenKind.Comma
+
+  let parse_semi_list parser =
+    parse_separated_list parser TokenKind.Semicolon
+
+  let parse_semi_list_opt parser =
+    parse_separated_list_opt parser TokenKind.Semicolon
+
+  let parse_delimited_list
+      parser left_kind left_error right_kind right_error parse_items =
+    let (parser, left) = expect_token parser left_kind left_error in
+    let (parser, items) = parse_items parser in
+    let (parser, right) = expect_token parser right_kind right_error in
+    (parser, left, items, right)
 
 end

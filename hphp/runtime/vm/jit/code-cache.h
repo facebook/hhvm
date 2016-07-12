@@ -46,6 +46,9 @@ namespace HPHP { namespace jit {
 struct CodeCache {
   struct View;
 
+  static constexpr uint32_t kNullptrOffset =
+    std::numeric_limits<uint32_t>::max();
+
   /* Code block sizes read from configs. */
   static uint64_t AHotSize;
   static uint64_t ASize;
@@ -84,7 +87,22 @@ struct CodeCache {
   size_t totalUsed() const;
 
   CodeAddress base() const { return m_base; }
-  bool isValidCodeAddress(CodeAddress addr) const;
+  CodeAddress toAddr(uint32_t offset) const {
+    if (offset == kNullptrOffset) return nullptr;
+
+    auto const addr = m_base + offset;
+    assert_flog(addr >= m_base && addr < m_base + kNullptrOffset,
+                "{} outside [{}, {})", addr, m_base, m_base + kNullptrOffset);
+    return addr;
+  }
+  uint32_t toOffset(ConstCodeAddress addr) const {
+    if (addr == nullptr) return kNullptrOffset;
+
+    assert_flog(addr >= m_base && addr < m_base + kNullptrOffset,
+                "{} outside [{}, {})", addr, m_base, m_base + kNullptrOffset);
+    return addr - m_base;
+  }
+  bool isValidCodeAddress(ConstCodeAddress addr) const;
 
   /*
    * Prevent or allow writing to the code section of this CodeCache.

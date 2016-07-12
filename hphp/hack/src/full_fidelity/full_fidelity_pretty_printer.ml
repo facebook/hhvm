@@ -213,6 +213,97 @@ let rec get_doc node =
                       (x |> header_language |> get_doc |> add_break)
   | Script x -> group_doc ( get_doc (script_header x)
                      ^| get_doc (script_declarations x) )
+  | ClassishDeclaration x ->
+    let attr = add_break (get_doc (classish_attr x)) in
+
+    let preface = group_doc (
+      get_doc (classish_abstract x) ^|
+      get_doc (classish_final x) ^|
+      get_doc (classish_token x)
+    ) in
+
+    let name_and_generics =
+      let name = get_doc (classish_name x) in
+      let type_params = get_doc (classish_type_params x) in
+      group_doc (indent_doc name type_params indt)
+    in
+
+    let extends =
+      let extends_token = get_doc (classish_extends x) in
+      let extends_list = get_doc (classish_extends_list x) in
+      group_doc (indent_doc extends_token extends_list indt)
+    in
+
+    let implements =
+      let implements_token = get_doc (classish_implements x) in
+      let implements_list = get_doc (classish_implements_list x) in
+      group_doc (indent_doc implements_token implements_list indt)
+    in
+
+    let body = get_doc (classish_body x) in
+
+    (* TODO: Make this better *)
+    attr ^^^
+    group_doc (
+      group_doc (
+        preface ^|
+        name_and_generics
+      ) ^|
+      group_doc (
+        extends ^|
+        implements
+      ) ^|
+      body
+    )
+  | ClassishBody x ->
+    let left = get_doc (classish_body_left_brace x) in
+    let right = get_doc (classish_body_right_brace x) in
+    let body = get_doc (classish_body_elements x) in
+    indent_block_no_space left body right indt
+  | EnumDeclaration x ->
+    let en = get_doc x.enum_enum in
+    let na = get_doc x.enum_name in
+    let co = get_doc x.enum_colon in
+    let ba = get_doc x.enum_base in
+    let ty = get_doc x.enum_type in
+    let lb = get_doc x.enum_left_brace in
+    let es = get_doc x.enum_enumerators in
+    let rb = get_doc x.enum_right_brace in
+    (* TODO: This could be a lot better. Add indentation, etc. *)
+    en ^| na ^| co ^| ba ^| ty ^| lb ^| es ^| rb
+  | Enumerator x ->
+    let n = get_doc x.enumerator_name in
+    let e = get_doc x.enumerator_equal in
+    let v = get_doc x.enumerator_value in
+    n ^| e ^| v
+  | AliasDeclaration x ->
+    let a = get_doc x.alias_token in
+    let n = get_doc x.alias_name in
+    let c = get_doc x.alias_constraint in
+    let e = get_doc x.alias_equal in
+    let t = get_doc x.alias_type in
+    let s = get_doc x.alias_semicolon in
+    a ^| n ^| c ^| e ^| t ^^^ s
+  | NamespaceDeclaration x ->
+    let t = get_doc x.namespace_token in
+    let n = get_doc x.namespace_name in
+    let b = get_doc x.namespace_body in
+    t ^| n ^| b
+  | NamespaceBody x ->
+    let left = get_doc x.namespace_left_brace in
+    let body = get_doc x.namespace_declarations in
+    let right = get_doc x.namespace_right_brace in
+    indent_block_no_space left body right indt |> add_break
+  | NamespaceUseDeclaration x ->
+    let u = get_doc x.namespace_use in
+    let c = get_doc x.namespace_use_clauses in
+    let s = get_doc x.namespace_use_semicolon in
+    u ^| c ^^^ s
+  | NamespaceUseClause x ->
+    let n = get_doc x.namespace_use_name in
+    let a = get_doc x.namespace_use_as in
+    let l = get_doc x.namespace_use_alias in
+    n ^| a ^| l
   | FunctionDeclaration x ->
     let preface = group_doc ( get_doc (function_attr x)
                        ^| get_doc (function_async x)
@@ -250,6 +341,25 @@ let rec get_doc node =
     let def_equal = get_doc (default_equal x) in
     let def_value = get_doc (default_value x) in
     group_doc (def_equal ^| def_value)
+  | AttributeSpecification x ->
+    let left = get_doc (attribute_spec_left_double_angle x) in
+    let right = get_doc (attribute_spec_right_double_angle x) in
+    let specs = get_doc (attribute_spec_attribute_list x) in
+    indent_block_no_space left specs right indt
+  | Attribute x ->
+    let name = get_doc (attribute_name x) in
+    let left = get_doc (attribute_left_paren x) in
+    let right = get_doc (attribute_right_paren x) in
+    let values = get_doc (attribute_values x) in
+    let left_part = group_doc (name ^^| left) in
+    indent_block_no_space left_part values right indt
+  | InclusionDirective x ->
+    let rq = get_doc x.inclusion_require in
+    let lp = get_doc x.inclusion_left_paren in
+    let fn = get_doc x.inclusion_filename in
+    let rp = get_doc x.inclusion_right_paren in
+    let se = get_doc x.inclusion_semicolon in
+    rq ^| lp ^^^ fn ^^^ rp ^^^ se
   | CompoundStatement x ->
     let left = get_doc (compound_left_brace x) in
     let right = get_doc (compound_right_brace x) in
@@ -387,6 +497,31 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part expr right indt in
     handle_switch start_block x
     (* group_doc (start_block ^| statement) *)
+  | AnonymousFunction x ->
+    let async = get_doc x.anonymous_async in
+    let fn = get_doc x.anonymous_function in
+    let left = get_doc x.anonymous_left_paren in
+    let params = get_doc x.anonymous_params in
+    let right = get_doc x.anonymous_right_paren in
+    let colon = get_doc x.anonymous_colon in
+    let return_type = get_doc x.anonymous_type in
+    let preface = group_doc ( async ^| fn ) in
+    let parameters = indent_block_no_space left params right indt in
+    let type_declaration = group_doc (colon ^| return_type) in
+    let uses = get_doc x.anonymous_use in
+    let body = x.anonymous_body in
+    let before_body =
+      group_doc (
+        group_doc ( group_doc preface ^^| parameters )
+        ^| type_declaration ^| uses
+      ) in
+      handle_compound_inline_brace before_body body missing
+  | AnonymousFunctionUseClause x ->
+    let u = get_doc x.anonymous_use_token in
+    let l = get_doc x.anonymous_use_left_paren in
+    let v = get_doc x.anonymous_use_variables in
+    let r = get_doc x.anonymous_use_right_paren in
+    u ^| l ^^^ v ^^^ r
   | PrefixUnaryOperator x ->
     let op = unary_operator x in
     if is_separable_prefix op then
@@ -408,6 +543,12 @@ let rec get_doc node =
     let alt = get_doc (conditional_alternative x) in
     (* TODO: Could this be improved? *)
     group_doc ( tst ^| qm ^| con ^| col ^| alt )
+  | FunctionCallExpression x ->
+    let receiver = get_doc x.function_call_receiver in
+    let lparen = get_doc x.function_call_lparen in
+    let args = get_doc x.function_call_arguments in
+    let rparen = get_doc x.function_call_rparen in
+    receiver ^^^ lparen ^^^ args ^^^ rparen
   | ParenthesizedExpression x ->
     let left = get_doc (paren_expr_left_paren x) in
     let right = get_doc (paren_expr_right_paren x) in
@@ -425,11 +566,41 @@ let rec get_doc node =
     let members = get_doc (listlike_members x) in
     let left = group_doc (keyword ^| left_paren) in
     indent_block_no_space left members right_paren indt
+  | ObjectCreationExpression x ->
+    let n = get_doc x.object_creation_new in
+    let c = get_doc x.object_creation_class in
+    let l = get_doc x.object_creation_lparen in
+    let a = get_doc x.object_creation_arguments in
+    let r = get_doc x.object_creation_rparen in
+    n ^| c ^^^ l ^^^ a ^^^ r
+  | FieldInitializer x ->
+    let n = get_doc x.field_init_name in
+    let a = get_doc x.field_init_arrow in
+    let v = get_doc x.field_init_value in
+    n ^| a ^| v
+  | ShapeExpression x ->
+    let sh = get_doc x.shape_shape in
+    let lp = get_doc x.shape_left_paren in
+    let fs = get_doc x.shape_fields in
+    let rp = get_doc x.shape_right_paren in
+    sh ^| lp ^^^ fs ^^^ rp
+  | ArrayCreationExpression x ->
+    let left_bracket = get_doc (array_creation_left_bracket x) in
+    let right_bracket = get_doc (array_creation_right_bracket x) in
+    let members = get_doc (array_creation_members x) in
+    indent_block_no_space left_bracket members right_bracket indt
+  | ArrayIntrinsicExpression x ->
+    let keyword = get_doc (array_intrinsic_keyword x) in
+    let left = get_doc (array_intrinsic_left_paren x) in
+    let right = get_doc (array_intrinsic_right_paren x) in
+    let members = get_doc (array_intrinsic_members x) in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in
     let right = get_doc (xhp_close x) in
-    indent_block_no_space left expr right indt
+    left ^^^ expr ^^^ right
   | XHPOpen x ->
     let name = get_doc (xhp_open_name x) in
     let attrs = get_doc (xhp_open_attrs x) in
@@ -440,12 +611,26 @@ let rec get_doc node =
     let equals = get_doc (xhp_attr_equal x) in
     let expr = get_doc (xhp_attr_expr x) in
     group_doc (group_doc (name ^^| equals) ^^| expr)
+  | XHPClose x ->
+    let left = get_doc (xhp_close_left_angle x) in
+    let name = get_doc (xhp_close_name x) in
+    let right = get_doc (xhp_close_right_angle x) in
+    left ^^^ name ^^^ right
   | TypeConstant x ->
     let left = get_doc (type_constant_left_type x) in
     let right = get_doc (type_constant_right_type x) in
     let separator = get_doc (type_constant_separator x) in
     left ^^^ separator ^^^ right
   | SimpleTypeSpecifier x -> get_doc x
+  | TypeConstraint x ->
+    let operator = get_doc x.constraint_token in
+    let mtype = get_doc x.matched_type in
+    operator ^| mtype
+  | TypeParameter x ->
+    let variance = get_doc x.type_variance_opt in
+    let name = get_doc x.type_name in
+    let constraints = get_doc x.type_constraint_list_opt in
+    variance ^^^ name ^| constraints
   | NullableTypeSpecifier x ->
     let qm = get_doc x.nullable_question in
     let ty = get_doc x.nullable_type in
@@ -478,6 +663,23 @@ let rec get_doc node =
     let ret = get_doc x.closure_return_type in
     let orp = get_doc x.closure_outer_right_paren in
     olp ^^^ fnc ^^| ilp ^^^ pts ^^^ irp ^^^ col ^^^ ret ^^^ orp
+  | ClassnameTypeSpecifier x ->
+    let cn = get_doc x.classname_classname in
+    let la = get_doc x.classname_left_angle in
+    let ty = get_doc x.classname_type in
+    let ra = get_doc x.classname_right_angle in
+    cn ^^^ la ^^^ ty ^^^ ra
+  | FieldSpecifier x ->
+    let n = get_doc x.field_name in
+    let a = get_doc x.field_arrow in
+    let t = get_doc x.field_type in
+    n ^| a ^| t
+  | ShapeTypeSpecifier x ->
+    let sh = get_doc x.shape_shape in
+    let lp = get_doc x.shape_left_paren in
+    let fs = get_doc x.shape_fields in
+    let rp = get_doc x.shape_right_paren in
+    sh ^| lp ^^^ fs ^^^ rp
   | TypeArguments x ->
     let left = get_doc (type_arguments_left_angle x) in
     let right = get_doc (type_arguments_right_angle x) in
@@ -522,6 +724,20 @@ let rec get_doc node =
     let keyword = get_doc (continue_keyword x) in
     let semicolon = get_doc (continue_semicolon x) in
     keyword ^^^ semicolon
+  | FunctionStaticStatement x ->
+    let st = get_doc x.static_static in
+    let ds = get_doc x.static_declarations in
+    let se = get_doc x.static_semicolon in
+    st ^| ds ^^^ se
+  | StaticDeclarator x ->
+    let n = get_doc x.static_name in
+    let i = get_doc x.static_init in
+    group_doc (n ^| i)
+  | StaticInitializer x ->
+    let e = get_doc x.static_init_equal in
+    let v = get_doc x.static_init_value in
+    group_doc (e ^| v)
+
 (* sep is the compulsory separator separating the children in the list *)
 and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in

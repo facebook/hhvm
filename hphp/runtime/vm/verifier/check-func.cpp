@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/verifier/check.h"
 
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/native.h"
 
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -494,7 +494,7 @@ bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
 
 bool FuncChecker::checkImmVSA(PC& pc, PC const instr) {
   auto const len = decode_raw<int32_t>(pc);
-  if (len < 1 || len > StructArray::MaxMakeSize) {
+  if (len < 1 || len > MixedArray::MaxStructMakeSize) {
     error("invalid length of immedate VSA vector %d at offset %d\n",
           len, offset(pc));
     throw unknown_length{};
@@ -714,6 +714,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
   case Op::NewVecArray:     // ONE(IVA),     CMANY,   ONE(CV)
+  case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CV;

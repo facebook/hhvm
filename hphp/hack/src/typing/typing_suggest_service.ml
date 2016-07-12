@@ -81,7 +81,7 @@ let resolve_types acc collated_values =
         end (fun _ -> raise Exit)
       with Timeout -> raise Timeout | _ -> try Errors.try_ begin fun () ->
         let sub ty1 env ty2 =
-          Typing_ops.sub_type Pos.none ureason env ty1 ty2 in
+          Typing_ops.sub_type Pos.none ureason env ty2 ty1 in
 
         (* Check a list of types, left to right, returning the first one that is
          * a supertype of tyl, or raising Not_found if none are suitable.
@@ -166,7 +166,7 @@ let parallel_resolve_types workers collated =
       ~job:resolve_types
       ~neutral:Relative_path.Map.empty
       ~merge:merge_resolved_result
-      ~next:(Bucket.make values)
+      ~next:(MultiWorker.next workers values)
   in
   result
 
@@ -226,7 +226,7 @@ let parallel_suggest_files workers fast =
       ~job:suggest_files_worker
       ~neutral:[]
       ~merge:(List.rev_append)
-      ~next:(Bucket.make fnl)
+      ~next:(MultiWorker.next workers fnl)
   in
   result
 

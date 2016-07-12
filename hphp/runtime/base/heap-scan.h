@@ -64,10 +64,9 @@ template<class F> void scanHeader(const Header* h,
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
       return PackedArray::scan(&h->arr_, mark);
-    case HeaderKind::Struct:
-      return h->struct_.scan(mark);
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
+    case HeaderKind::Keyset:
       return h->mixed_.scan(mark);
     case HeaderKind::Apc:
       return h->apc_.scan(mark);
@@ -237,9 +236,9 @@ template<class F> void scanRds(F& mark, rds::Header* rds) {
   markSection(rds::persistentSection());
   // php stack TODO #6509338 exactly scan the php stack.
   mark.where(RootKind::PhpStack);
-  auto stack_end = (TypedValue*)rds->vmRegs.stack.getStackHighAddress();
+  auto stack_end = rds->vmRegs.stack.getStackHighAddress();
   auto sp = rds->vmRegs.stack.top();
-  mark(sp, (stack_end - sp) * sizeof(*sp));
+  mark(sp, stack_end);
 }
 
 template<class F>

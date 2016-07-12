@@ -158,12 +158,6 @@ inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind,
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
 {}
 
-inline ArraySpec::ArraySpec(const Shape* shape)
-  : m_sort(HasKind | HasShape)
-  , m_kind(ArrayData::kStructKind)
-  , m_ptr(reinterpret_cast<uintptr_t>(shape))
-{}
-
 inline folly::Optional<ArrayData::ArrayKind> ArraySpec::kind() const {
   auto kind = static_cast<ArrayData::ArrayKind>(m_kind);
   return (m_sort & HasKind) ? folly::make_optional(kind) : folly::none;
@@ -172,12 +166,6 @@ inline folly::Optional<ArrayData::ArrayKind> ArraySpec::kind() const {
 inline const RepoAuthType::Array* ArraySpec::type() const {
   return (m_sort & HasType)
     ? reinterpret_cast<const RepoAuthType::Array*>(m_ptr)
-    : nullptr;
-}
-
-inline const Shape* ArraySpec::shape() const {
-  return (m_sort & HasShape)
-    ? reinterpret_cast<const Shape*>(m_ptr)
     : nullptr;
 }
 

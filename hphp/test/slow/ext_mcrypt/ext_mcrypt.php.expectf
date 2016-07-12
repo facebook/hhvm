@@ -38,6 +38,8 @@ Deprecated: Function mcrypt_ofb() is deprecated in %s/test/slow/ext_mcrypt/ext_m
 bool(true)
 bool(true)
 bool(true)
+
+Warning: mcrypt_get_block_size() expects exactly 2 parameters, 1 given in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 109
 bool(true)
 bool(true)
 bool(true)

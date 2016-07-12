@@ -13,10 +13,15 @@ open Hh_json
 
 let to_json x =
   JSON_Array (List.map x begin function (symbol, definition) ->
-    let definition_pos, definition_span = Option.value_map definition
+    let definition_pos, definition_span, definition_id =
+      Option.value_map definition
       ~f:(fun x -> Pos.json x.SymbolDefinition.pos,
-                   Pos.multiline_json x.SymbolDefinition.span)
-      ~default:(JSON_Null, JSON_Null)
+                   Pos.multiline_json x.SymbolDefinition.span,
+                   x.SymbolDefinition.id)
+      ~default:(JSON_Null, JSON_Null, None)
+    in
+    let definition_id = Option.value_map definition_id
+      ~f:(fun x -> JSON_String x) ~default:JSON_Null
     in
     JSON_Object [
       "name",           JSON_String symbol.SymbolOccurrence.name;
@@ -25,6 +30,7 @@ let to_json x =
       "pos",            Pos.json (symbol.SymbolOccurrence.pos);
       "definition_pos", definition_pos;
       "definition_span", definition_span;
+      "definition_id", definition_id;
     ]
   end)
 

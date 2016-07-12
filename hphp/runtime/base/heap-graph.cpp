@@ -169,6 +169,11 @@ struct PtrFilter: F {
     for (; s < e; s++) F::ambig(*s);
   }
 
+  void operator()(const void* start, const void* end) {
+    assert(uintptr_t(end) >= uintptr_t(start));
+    return (*this)(start, uintptr_t(end) - uintptr_t(start));
+  }
+
  private:
   bool inRds(const void* vp) {
     auto p = reinterpret_cast<const char*>(vp);

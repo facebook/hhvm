@@ -28,8 +28,6 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/shape.h"
-#include "hphp/runtime/base/struct-array.h"
 
 namespace HPHP {
 
@@ -299,7 +297,7 @@ ArrayData* EmptyArray::PlusEq(ArrayData*, const ArrayData* elems) {
 
 ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
   // Packed arrays don't need renumbering, so don't make a copy.
-  if (elems->isPackedLayout() || elems->isStruct()) {
+  if (elems->isPackedLayout()) {
     elems->incRefCount();
     return const_cast<ArrayData*>(elems);
   }
@@ -332,6 +330,10 @@ ArrayData* EmptyArray::ToDict(ArrayData*) {
 
 ArrayData* EmptyArray::ToVec(const ArrayData*) {
   return staticEmptyVecArray();
+}
+
+ArrayData* EmptyArray::ToKeyset(ArrayData*) {
+  return staticEmptyKeysetArray();
 }
 
 //////////////////////////////////////////////////////////////////////

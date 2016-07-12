@@ -155,8 +155,12 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
   Config::Bind(NoTTLPrefix, ini, config, "Server.APC.NoTTLPrefix");
 
+#ifdef NO_M_DATA
+  Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill", true);
+#else
   Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
                RuntimeOption::ServerExecutionMode());
+#endif
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
@@ -166,6 +170,12 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 }
 
 void apcExtension::moduleInit() {
+#ifdef NO_M_DATA
+  if (!UseUncounted) {
+    Logger::Error("Server.APC.MemModelTreadmill=false ignored in lowptr build");
+    UseUncounted = true;
+  }
+#endif // NO_M_DATA
   if (UseFileStorage) {
     // We use 32 bits to represent offset into a chunk, so don't make it too
     // large.
@@ -250,7 +260,11 @@ int apcExtension::FileStorageAdviseOutPeriod = 1800;
 std::string apcExtension::FileStorageFlagKey = "_madvise_out";
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;
+#ifdef NO_M_DATA
+bool apcExtension::UseUncounted = true;
+#else
 bool apcExtension::UseUncounted = false;
+#endif
 bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years
 bool apcExtension::EnableCLI = true;

@@ -198,7 +198,7 @@ let parallel_find_refs workers fileinfo_l target =
     ~job:(find_refs None target)
     ~neutral:([])
     ~merge:(List.rev_append)
-    ~next:(Bucket.make fileinfo_l)
+    ~next:(MultiWorker.next workers fileinfo_l)
 
 let get_definitions tcopt = function
   | IMember (Class_set classes, Method method_name) ->

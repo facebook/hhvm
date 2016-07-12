@@ -18,6 +18,17 @@ module Rewriter = Full_fidelity_rewriter.WithSyntax(MinimalSyntax)
 
 open Core
 
+let rewrite_tree_no_trivia node =
+  let rewrite _nl n =
+    match MinimalSyntax.syntax n with
+      | MinimalSyntax.Token t ->
+        let kind = MinimalToken.kind t in
+        let width = MinimalToken.width t in
+        let token = MinimalToken.make kind width [] [] in
+        (MinimalSyntax.make_token token, true)
+      | _ -> (n, false) in
+  Rewriter.parented_rewrite_post rewrite node
+
 let rewrite_tree_no_whitespace node =
   let filter_whitespace trivia_list =
     List.filter
@@ -38,11 +49,7 @@ let rewrite_tree_no_whitespace node =
           (filter_whitespace (leading t))
           (filter_whitespace (trailing t))
         ) in
-        let value = MinimalToken.full_width token in
-        (MinimalSyntax.make
-          (MinimalSyntax.Token token)
-          (MinimalSyntax.MinimalSyntaxValue.make value),
-        true)
+        (MinimalSyntax.make_token token, true)
       | _ -> (n, false)
      in
      ret

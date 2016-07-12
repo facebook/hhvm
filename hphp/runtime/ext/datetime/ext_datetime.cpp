@@ -78,8 +78,23 @@ IMPLEMENT_THREAD_LOCAL(DateGlobals, s_date_globals);
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 
-const StaticString s_data("data");
-const StaticString s_getTimestamp("getTimestamp");
+static const StaticString
+  s_data("data"),
+  s_getTimestamp("getTimestamp"),
+  s_DateTimeInterface("DateTimeInterface"),
+  s_DateTimeZone("DateTimeZone"),
+  s_DateInterval("DateInterval"),
+  s_DateTime("DateTime");
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void raise_argument_warning(const char* func,
+                                   int param,
+                                   const StaticString& expected,
+                                   const Object& given) {
+  raise_warning("%s() expects parameter %d to be %s, %s given",
+                func, param, expected.c_str(), given.get()->classname_cstr());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // DateTime
@@ -87,28 +102,23 @@ const StaticString s_getTimestamp("getTimestamp");
 Class* DateTimeData::s_class = nullptr;
 const StaticString DateTimeData::s_className("DateTime");
 
-Object HHVM_METHOD(DateTime, add,
-                   const Object& interval) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
-  data->m_dt->add(DateIntervalData::unwrap(interval));
-  return Object(this_);
-}
-
 void HHVM_METHOD(DateTime, __construct,
                  const String& time /*= "now"*/,
                  const Variant& timezone /*= null_variant*/) {
-  const Object& obj_timezone = timezone.isNull()
-                             ? null_object
-                             : timezone.toObject();
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  data->m_dt = req::make<DateTime>(TimeStamp::Current(),
-                                      DateTimeZoneData::unwrap(obj_timezone));
+  auto tz = TimeZone::Current();
+  if (!timezone.isNull()) {
+    const Object& obj_timezone = timezone.toObject();
+    tz = DateTimeZoneData::unwrap(obj_timezone);
+    if (!tz) throw_invalid_object_type(obj_timezone);
+  }
+  data->m_dt = req::make<DateTime>(TimeStamp::Current(), tz);
   if (!time.empty()) {
-    data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone));
+    data->m_dt->fromString(time, tz);
   } else if (!timezone.isNull()) {
-    // We still have to tell the underlying DateTime the timezone incase they
+    // We still have to tell the underlying DateTime the timezone in case they
     // call setTimestamp or something else later
-    data->m_dt->setTimezone(DateTimeZoneData::unwrap(obj_timezone));
+    data->m_dt->setTimezone(tz);
   }
 }
 
@@ -116,34 +126,39 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
                            const String& format,
                            const String& time,
                            const Variant& timezone /*= null_variant */) {
-  const Object& obj_timezone = timezone.isNull()
-                             ? null_object
-                             : timezone.toObject();
+  auto tz = TimeZone::Current();
+  if (!timezone.isNull()) {
+    const Object& obj_timezone = timezone.toObject();
+    if (!obj_timezone.instanceof(s_DateTimeZone)) {
+      raise_argument_warning("DateTime::createFromFormat", 3, s_DateTimeZone,
+                             obj_timezone);
+      return false;
+    }
+    tz = DateTimeZoneData::unwrap(obj_timezone);
+  }
   Object obj{DateTimeData::getClass()};
   DateTimeData* data = Native::data<DateTimeData>(obj);
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
   data->m_dt = req::make<DateTime>(curr, false);
-  if (!data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone),
-                              format.data(), false)) {
+  if (!data->m_dt->fromString(time, tz, format.data(), false)) {
     return false;
   }
 
   return obj;
 }
 
-static const StaticString s_DateTimeInterface("DateTimeInterface");
-
-Object HHVM_METHOD(DateTime, diff,
-                   const Variant& datetime2,
-                   const Variant& absolute) {
+Variant HHVM_METHOD(DateTime, diff,
+                    const Variant& datetime2,
+                    const Variant& absolute) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
   const Object obj_datetime2 = datetime2.toObject();
   if (!obj_datetime2.instanceof(s_DateTimeInterface)) {
-    throw_invalid_object_type(obj_datetime2->getClassName().data());
+    raise_argument_warning("DateTime::diff", 1, s_DateTimeInterface,
+                           obj_datetime2);
+    return false;
   }
-  return DateIntervalData::wrap(data->m_dt->diff(
-                                DateTimeData::unwrap(obj_datetime2),
-                                absolute.toBoolean()));
+  auto dt = DateTimeData::unwrap(obj_datetime2);
+  return DateIntervalData::wrap(data->m_dt->diff(dt, absolute.toBoolean()));
 }
 
 String HHVM_METHOD(DateTime, format,
@@ -232,17 +247,39 @@ Object HHVM_METHOD(DateTime, setTimestamp,
   return Object(this_);
 }
 
-Object HHVM_METHOD(DateTime, setTimezone,
-                   const Object& timezone) {
+Variant HHVM_METHOD(DateTime, setTimezone,
+                    const Object& timezone) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
+  if (!timezone.instanceof(s_DateTimeZone)) {
+    raise_argument_warning("DateTime::setTimezone", 1, s_DateTimeZone,
+                           timezone);
+    return false;
+  }
   data->m_dt->setTimezone(DateTimeZoneData::unwrap(timezone));
   return Object(this_);
 }
 
-Object HHVM_METHOD(DateTime, sub,
-                   const Object& interval) {
+Variant HHVM_METHOD(DateTime, add,
+                    const Object& interval) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  data->m_dt->sub(DateIntervalData::unwrap(interval));
+  if (!interval.instanceof(s_DateInterval)) {
+    raise_argument_warning("DateTime::add", 1, s_DateInterval, interval);
+    return false;
+  }
+  auto di = DateIntervalData::unwrap(interval);
+  data->m_dt->add(di);
+  return Object(this_);
+}
+
+Variant HHVM_METHOD(DateTime, sub,
+                    const Object& interval) {
+  DateTimeData* data = Native::data<DateTimeData>(this_);
+  if (!interval.instanceof(s_DateInterval)) {
+    raise_argument_warning("DateTime::sub", 1, s_DateInterval, interval);
+    return false;
+  }
+  auto di = DateIntervalData::unwrap(interval);
+  data->m_dt->sub(di);
   return Object(this_);
 }
 
@@ -360,11 +397,16 @@ String HHVM_METHOD(DateTimeZone, getName) {
   return data->getName();
 }
 
-int64_t HHVM_METHOD(DateTimeZone, getOffset,
+Variant HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime) {
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
   bool error;
-  int64_t ts = DateTimeData::unwrap(datetime)->toTimeStamp(error);
+  if (!datetime.instanceof(s_DateTime)) {
+    raise_argument_warning("DateTimeZone::getOffset", 1, s_DateTime, datetime);
+    return false;
+  }
+  auto dt = DateTimeData::unwrap(datetime);
+  int64_t ts = dt->toTimeStamp(error);
   return data->m_tz->offset(ts);
 }
 
@@ -772,9 +814,15 @@ Variant HHVM_FUNCTION(date_create,
                       const Variant& time /* = null_string */,
                       const Variant& timezone /* = null_variant */) {
   const String& str_time = time.isNull() ? null_string : time.toString();
-  const Object& obj_timezone = timezone.isNull()
-                             ? null_object
-                             : timezone.toObject();
+  auto tz = TimeZone::Current();
+  if (!timezone.isNull()) {
+    const Object& obj_timezone = timezone.toObject();
+    if (!obj_timezone.instanceof(s_DateTimeZone)) {
+      raise_argument_warning("date_create", 2, s_DateTimeZone, obj_timezone);
+      return false;
+    }
+    tz = DateTimeZoneData::unwrap(obj_timezone);
+  }
   Object ret{DateTimeData::getClass()};
   // Don't set the time here because it will throw if it is bad
   HHVM_MN(DateTime, __construct)(ret.get());
@@ -783,17 +831,21 @@ Variant HHVM_FUNCTION(date_create,
     return ret;
   }
   auto dt = DateTimeData::unwrap(ret);
-  auto tz = DateTimeZoneData::unwrap(obj_timezone);
   if (!dt->fromString(str_time, tz, nullptr, false)) {
     return false;
   }
   return ret;
 }
 
-String HHVM_FUNCTION(date_format,
-                     const Object& datetime,
-                     const String& format) {
-  return DateTimeData::unwrap(datetime)->toString(format, false);
+Variant HHVM_FUNCTION(date_format,
+                      const Object& datetime,
+                      const String& format) {
+  if (!datetime.instanceof(s_DateTimeInterface)) {
+    raise_argument_warning("date_format", 1, s_DateTimeInterface, datetime);
+    return false;
+  }
+  auto dt = DateTimeData::unwrap(datetime);
+  return dt->toString(format, false);
 }
 
 Variant HHVM_FUNCTION(date_parse,
@@ -836,10 +888,6 @@ Variant date_sunrise_sunset(int64_t numArgs,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-static const StaticString
-  s_DateTimeZone("DateTimeZone"),
-  s_DateTime("DateTime");
 
 #define DATE_ATOM "Y-m-d\\TH:i:sP"
 #define DATE_COOKIE "l, d-M-y H:i:s T"

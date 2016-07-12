@@ -18,6 +18,7 @@ type t = {
   load_mini_script_timeout: int; (* in seconds *)
   type_decl_bucket_size: int;
   enable_on_nfs: bool;
+  enable_experimental_tc_features: bool;
   lazy_decl: bool;
   io_priority: int;
   cpu_priority: int;
@@ -31,6 +32,9 @@ let default = {
   load_mini_script_timeout = 20;
   type_decl_bucket_size = 1000;
   enable_on_nfs = false;
+  (** Default true here is for tests. Default when reading from a hhconfig
+   * file is false. See load_ *)
+  enable_experimental_tc_features = true;
   lazy_decl = false;
   io_priority = 7;
   cpu_priority = 10;
@@ -50,6 +54,8 @@ let load_ fn =
   let use_watchman = bool_ "use_watchman" ~default:false config in
   let use_mini_state = bool_ "use_mini_state" ~default:false config in
   let enable_on_nfs = bool_ "enable_on_nfs" ~default:false config in
+  let enable_experimental_tc_features =
+    bool_ "enable_experimental_tc_features" ~default:false config in
   let lazy_decl = bool_ "lazy_decl" ~default:false config in
   let load_mini_script_timeout =
     int_ "load_mini_script_timeout" ~default:20 config in
@@ -73,6 +79,7 @@ let load_ fn =
     load_mini_script_timeout;
     type_decl_bucket_size;
     enable_on_nfs;
+    enable_experimental_tc_features;
     lazy_decl;
     io_priority;
     cpu_priority;

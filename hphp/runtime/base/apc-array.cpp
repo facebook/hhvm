@@ -95,8 +95,6 @@ APCHandle* APCArray::MakeUncountedArray(ArrayData* array) {
     ArrayData* data = PackedArray::MakeUncounted(array, sizeof(APCTypedValue));
     auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
     value = new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
-  } else if (array->isStruct()) {
-    not_reached(); // Analogous to other arrays, if we ever revive structs.
   } else {
     ArrayData* data = MixedArray::MakeUncounted(array, sizeof(APCTypedValue));
     auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;

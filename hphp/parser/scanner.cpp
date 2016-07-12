@@ -153,10 +153,10 @@ void Scanner::computeMd5() {
   always_assert(length != -1 &&
                 length <= std::numeric_limits<int32_t>::max());
   m_stream->seekg(0, std::ios::beg);
-  char *ptr = (char*)malloc(length);
+  auto const ptr = (char*)malloc(length);
   m_stream->read(ptr, length);
   m_stream->seekg(startpos, std::ios::beg);
-  m_md5 = string_md5(ptr, length);
+  m_md5 = string_md5(folly::StringPiece{ptr, length});
   free(ptr);
 }
 
@@ -373,6 +373,7 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
       case T_ARRAY:
       case T_DICT:
       case T_VEC:
+      case T_KEYSET:
       case T_FUNCTION:
       case T_DOUBLE_ARROW:
       case T_DOUBLE_COLON:
@@ -463,6 +464,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_ARRAY:
       case T_DICT:
       case T_VEC:
+      case T_KEYSET:
       case T_CALLABLE:
       case T_UNRESOLVED_TYPE:
       case T_UNRESOLVED_NEWTYPE:
@@ -615,6 +617,7 @@ static bool isValidClassConstantName(int tokid) {
   case T_CATCH:
   case T_DICT:
   case T_VEC:
+  case T_KEYSET:
     return true;
   default:
     return false;

@@ -324,7 +324,6 @@ void XDebugServer::pollSocketLoop() {
       log("Polling thread received: %s\n", m_bufferCur);
       auto cmd = parseCommand();
       if (cmd->getCommandStr() != "break") {
-        delete cmd;
         continue;
       }
 
@@ -334,9 +333,7 @@ void XDebugServer::pollSocketLoop() {
       // ourselves.  The request thread will unpause us when it exits its
       // command loop.
       m_pollingState.store(PollingState::Pause);
-
-      auto const old = m_break.exchange(cmd);
-      always_assert(old == nullptr);
+      setNewBreak(cmd);
 
       // Force request thread to run in the interpreter, and hit
       // XDebugHook::onOpcode().
@@ -588,7 +585,6 @@ void XDebugServer::deinitDbgp() {
   }
 
   req::free(m_buffer);
-  delete m_lastCommand;
 }
 
 void XDebugServer::sendMessage(xdebug_xml_node& xml) {
@@ -735,9 +731,6 @@ bool XDebugServer::doCommandLoop() {
     try {
       // Parse the command and store it as the last command.
       auto cmd = parseCommand();
-      if (m_lastCommand != nullptr) {
-        delete m_lastCommand;
-      }
       m_lastCommand = cmd;
 
       // Try to handle the command.  Possibly send a response.
@@ -783,7 +776,7 @@ bool XDebugServer::readInput() {
   return true;
 }
 
-XDebugCommand* XDebugServer::parseCommand() {
+std::shared_ptr<XDebugCommand> XDebugServer::parseCommand() {
   assert(m_bufferAvail > 0);
 
   log("<- %s\n", m_bufferCur);

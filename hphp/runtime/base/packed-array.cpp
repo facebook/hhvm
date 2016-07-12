@@ -1160,6 +1160,11 @@ ArrayData* PackedArray::ToVec(const ArrayData* adIn) {
   return ad;
 }
 
+ArrayData* PackedArray::ToKeyset(ArrayData* ad) {
+  auto mixed = ad->cowCheck() ? ToMixedCopy(ad) : ToMixed(ad);
+  return MixedArray::ToKeysetInPlace(mixed);
+}
+
 void PackedArray::OnSetEvalScalar(ArrayData* ad) {
   assert(checkInvariants(ad));
   auto ptr = packedData(ad);

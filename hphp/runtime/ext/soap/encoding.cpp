@@ -242,32 +242,8 @@ static void set_ns_and_type(xmlNodePtr node, encodeType* type);
 encodeStatic s_defaultEncoding[] = {
   {UNKNOWN_TYPE, "", "", guess_zval_convert, guess_xml_convert},
 
-  {KindOfUninit, "nil", XSI_NAMESPACE,
+  {SOAP_ENC_NULL_DT, SOAP_ENC_NULL_DT_STRING, XSI_NAMESPACE,
    to_zval_null, to_xml_null},
-  {KindOfNull, "nil", XSI_NAMESPACE,
-   to_zval_null, to_xml_null},
-  {KindOfBoolean, XSD_BOOLEAN_STRING, XSD_NAMESPACE,
-   to_zval_bool, to_xml_bool},
-  {KindOfInt64, XSD_INT_STRING, XSD_NAMESPACE,
-   to_zval_long, to_xml_long},
-  {KindOfDouble, XSD_FLOAT_STRING, XSD_NAMESPACE,
-   to_zval_double, to_xml_double},
-  {KindOfPersistentString, XSD_STRING_STRING, XSD_NAMESPACE,
-   to_zval_string, to_xml_string},
-  {KindOfString, XSD_STRING_STRING, XSD_NAMESPACE,
-   to_zval_string, to_xml_string},
-  {KindOfArray, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE,
-   to_zval_array, guess_array_map},
-  {KindOfPersistentArray, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE,
-   to_zval_array, guess_array_map},
-  {KindOfObject, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE,
-   to_zval_object, to_xml_object},
-  {KindOfArray, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE,
-   to_zval_array, guess_array_map},
-  {KindOfPersistentArray, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE,
-   to_zval_array, guess_array_map},
-  {KindOfObject, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE,
-   to_zval_object, to_xml_object},
 
   {XSD_STRING, XSD_STRING_STRING, XSD_NAMESPACE,
    to_zval_string, to_xml_string},
@@ -373,10 +349,18 @@ encodeStatic s_defaultEncoding[] = {
    to_zval_object, to_xml_object},
   {SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE,
    to_zval_array, to_xml_array},
+  {SOAP_ENC_ARRAY_DT, SOAP_ENC_ARRAY_DT_STRING, SOAP_1_1_ENC_NAMESPACE,
+   to_zval_array, guess_array_map},
   {SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE,
    to_zval_object, to_xml_object},
   {SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE,
    to_zval_array, to_xml_array},
+  {SOAP_ENC_ARRAY_DT, SOAP_ENC_ARRAY_DT_STRING, SOAP_1_2_ENC_NAMESPACE,
+   to_zval_array, guess_array_map},
+  {SOAP_ENC_INT_DT, SOAP_ENC_INT_DT_STRING, XSD_NAMESPACE,
+   to_zval_long, to_xml_long},
+  {SOAP_ENC_DOUBLE_DT, SOAP_ENC_DOUBLE_DT_STRING, XSD_NAMESPACE,
+   to_zval_double, to_xml_double},
 
   /* support some of the 1999 data types */
   {XSD_STRING, XSD_STRING_STRING, XSD_1999_NAMESPACE,
@@ -1472,9 +1456,7 @@ static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
              details.sdl_type->kind == XSD_TYPEKIND_RESTRICTION ||
              details.sdl_type->kind == XSD_TYPEKIND_EXTENSION) &&
             (details.sdl_type->encode == nullptr ||
-             (!isArrayDataType(
-                 (DataType)details.sdl_type->encode->details.type) &&
-              details.sdl_type->encode->details.type != SOAP_ENC_ARRAY))) {
+             !isSoapArrayType(details.sdl_type->encode->details.type))) {
           ret = to_zval_object_ex(&sdlType->encode->details, data, ce);
         } else {
           ret = master_to_zval_int(sdlType->encode, data);
@@ -1911,8 +1893,9 @@ xmlNodePtr to_xml_object(encodeType* type, const Variant& data_, int style,
       for (ArrayIter iter(prop); iter; ++iter) {
         Variant key = iter.first();
         Variant zprop = iter.second();
-        xmlNodePtr property = master_to_xml(get_conversion(zprop.getType()),
-                                            zprop, style, xmlParam);
+        xmlNodePtr property = master_to_xml(
+          get_conversion(dataTypeToSoap(zprop.getType())),
+          zprop, style, xmlParam);
         if (key.isString()) {
           String skey = key.toString();
           const char *prop_name;
@@ -1950,7 +1933,7 @@ xmlNodePtr guess_array_map(encodeType* type, const Variant& data, int style,
     }
   }
   if (!enc) {
-    enc = get_conversion(KindOfNull);
+    enc = get_conversion(dataTypeToSoap(KindOfNull));
   }
 
   return master_to_xml(enc, data, style, parent);
@@ -2059,8 +2042,10 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
         xmlNodePtr xparam;
         if (!zdata.isNull()) {
           if (enc == nullptr) {
-            xparam = master_to_xml(get_conversion(zdata.getType()), zdata,
-                                   style, xmlParam);
+            xparam = master_to_xml(
+              get_conversion(dataTypeToSoap(zdata.getType())), zdata,
+              style, xmlParam
+            );
           } else {
             xparam = master_to_xml(enc, zdata, style, xmlParam);
           }
@@ -2570,8 +2555,10 @@ static xmlNodePtr to_xml_map(encodeType* type, const Variant& data, int style,
         xmlNodeSetContentLen(key, BAD_CAST(skey.data()), skey.size());
       }
 
-      xparam = master_to_xml(get_conversion(temp_data.getType()), temp_data,
-                             style, item);
+      xparam = master_to_xml(
+        get_conversion(dataTypeToSoap(temp_data.getType())),
+        temp_data, style, item
+      );
       xmlNodeSetName(xparam, BAD_CAST("value"));
     }
   }
@@ -2621,7 +2608,7 @@ static Variant to_zval_map(encodeType* type, xmlNodePtr data) {
 /* Unknown encode/decode */
 static xmlNodePtr guess_xml_convert(encodeType* type, const Variant& data,
                                     int style, xmlNodePtr parent) {
-  encodePtr  enc = get_conversion(data.getType());
+  encodePtr  enc = get_conversion(dataTypeToSoap(data.getType()));
   xmlNodePtr ret = master_to_xml_int(enc, data, style, parent, false);
 /*
   if (style == SOAP_LITERAL && SOAP_GLOBAL(sdl)) {
@@ -2641,10 +2628,10 @@ static Variant guess_zval_convert(encodeType* type, xmlNodePtr data) {
   data = check_and_resolve_href(data);
 
   if (data == nullptr) {
-    enc = get_conversion(KindOfNull);
+    enc = get_conversion(dataTypeToSoap(KindOfNull));
   } else if (data->properties &&
              get_attribute_ex(data->properties, "nil", XSI_NAMESPACE)) {
-    enc = get_conversion(KindOfNull);
+    enc = get_conversion(dataTypeToSoap(KindOfNull));
   } else {
     tmpattr = get_attribute_ex(data->properties,"type", XSI_NAMESPACE);
     if (tmpattr != nullptr) {
@@ -3018,9 +3005,7 @@ Variant sdl_guess_convert_zval(encodeType* enc, xmlNodePtr data) {
   case XSD_TYPEKIND_COMPLEX:
   case XSD_TYPEKIND_RESTRICTION:
   case XSD_TYPEKIND_EXTENSION:
-    if (type->encode &&
-        (isArrayDataType((DataType)type->encode->details.type) ||
-         type->encode->details.type == SOAP_ENC_ARRAY)) {
+    if (type->encode && isSoapArrayType(type->encode->details.type)) {
       return to_zval_array(enc, data);
     }
     return to_zval_object(enc, data);
@@ -3084,9 +3069,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeType* enc, const Variant& data,
   case XSD_TYPEKIND_COMPLEX:
   case XSD_TYPEKIND_RESTRICTION:
   case XSD_TYPEKIND_EXTENSION:
-    if (type->encode &&
-        (isArrayDataType((DataType)type->encode->details.type) ||
-         type->encode->details.type == SOAP_ENC_ARRAY)) {
+    if (type->encode && isSoapArrayType(type->encode->details.type)) {
       return to_xml_array(enc, data, style, parent);
     } else {
       return to_xml_object(enc, data, style, parent);
@@ -3320,10 +3303,7 @@ static encodePtr get_array_type(xmlNodePtr node, const Variant& array,
       cur_stype = nullptr;
       cur_ns = nullptr;
     } else {
-      cur_type = tmp.getType();
-      if (cur_type == KindOfPersistentString) {
-        cur_type = KindOfString;
-      }
+      cur_type = dataTypeToSoap(tmp.getType());
       cur_stype = nullptr;
       cur_ns = nullptr;
     }

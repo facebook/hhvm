@@ -57,6 +57,13 @@ void cgLdClsCctx(IRLS& env, const IRInstruction* inst) {
   emitLdClsCctx(vmain(env), cctx, dst);
 }
 
+void cgConvClsToCctx(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << orqi{1, cls, dst, v.makeReg()};
+}
+
 void cgCastCtxThis(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << copy{srcLoc(env, inst, 0).reg(),

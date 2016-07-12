@@ -18,8 +18,12 @@
 
 #include "hphp/runtime/vm/func.h"
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/data-block.h"
@@ -63,10 +67,20 @@ void clobberFuncGuards(const Func* func) {
                                          : kNumFixedPrologues;
 
   for (auto i = 0; i < numPrologues; ++i) {
-    auto const guard = funcGuardFromPrologue(func->getPrologue(i), func);
-    if (funcGuardMatches(guard, func)) {
-      clobberFuncGuard(guard, func);
-    }
+    auto const prologue = func->getPrologue(i);
+
+    auto const guard = funcGuardFromPrologue(prologue, func);
+    if (!funcGuardMatches(guard, func)) continue;
+
+    // Clobber the guard so it never passes.
+    clobberFuncGuard(guard, func);
+
+    // Also smash the prologue to trap---this is helpful for catching bugs that
+    // cause us to vault past the guard of stale code.
+    auto& cb = mcg->code().blockFor(prologue);
+    CodeCursor(cb, prologue);
+    DataBlock dummy;
+    vwrap(cb, dummy, [&](Vout& v) { v << ud2{}; });
   }
 }
 

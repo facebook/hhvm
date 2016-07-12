@@ -12,7 +12,7 @@ array(1) {
       }
       ["tls"]=>
       array(1) {
-        ["allow_self_signed"]=>
+        ["verify_peer_name"]=>
         bool(true)
       }
     }

@@ -125,7 +125,9 @@ req::ptr<StringData> String::buildString(int64_t n) {
 String::String(int64_t n) : m_str(buildString(n)) { }
 
 void formatPhpDblStr(char **pbuf, double n) {
-  if (n == 0.0) n = 0.0; // so to avoid "-0" output
+  if (RuntimeOption::EnableHipHopSyntax && n == 0.0) {
+    n = 0.0; // so to avoid "-0" output
+  }
   vspprintf(pbuf, 0, "%.*G", 14, n);
 }
 

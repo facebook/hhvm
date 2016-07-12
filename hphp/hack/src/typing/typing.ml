@@ -197,7 +197,7 @@ let rec check_memoizable env param (pname, ty) =
     let env, is_container =
       Errors.try_
         (fun () ->
-          SubType.sub_type env container_type ty, true)
+          SubType.sub_type env ty container_type, true)
         (fun _ -> env, false) in
     if is_container then
       check_memoizable env param (pname, type_param)
@@ -205,7 +205,7 @@ let rec check_memoizable env param (pname, ty) =
       let r, _ = ty in
       let memoizable_type =
         r, Tclass ((Pos.none, SN.Classes.cIMemoizeParam), []) in
-      if SubType.is_sub_type env memoizable_type ty
+      if SubType.is_sub_type env ty memoizable_type
       then ()
       else
         let ty_str = Typing_print.error (snd ty) in
@@ -293,7 +293,7 @@ let rec bind_param env (_, ty1) param =
     | Some ty -> ty
   in
   Typing_suggest.save_param (param.param_name) env ty1 ty2;
-  let env = Type.sub_type param.param_pos Reason.URhint env ty1 ty2 in
+  let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1 in
   Env.set_local env (Local_id.get param.param_name) ty1
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
@@ -378,14 +378,14 @@ and fun_implicit_return env pos ret _b = function
      * "void" type *)
     let rty = Reason.Rno_return pos, Tprim Nast.Tvoid in
     Typing_suggest.save_return env ret rty;
-    Type.sub_type pos Reason.URreturn env ret rty
+    Type.sub_type pos Reason.URreturn env rty ret
   | Ast.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
     let r = Reason.Rno_return_async pos in
     let rty = r, Tclass ((pos, SN.Classes.cAwaitable), [r, Tprim Nast.Tvoid]) in
     Typing_suggest.save_return env ret rty;
-    Type.sub_type pos Reason.URreturn env ret rty
+    Type.sub_type pos Reason.URreturn env rty ret
 
 and block env stl =
   List.fold_left stl ~f:stmt ~init:env
@@ -442,7 +442,7 @@ and stmt env = function
         | Ast.FAsync -> (Reason.Rwitness p, Tclass ((p, SN.Classes.cAwaitable), [(Reason.Rwitness p, Tprim Tvoid)])) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
-      let env = Type.sub_type p Reason.URreturn env expected_return rty in
+      let env = Type.sub_type p Reason.URreturn env rty expected_return in
       env
   | Return (p, Some e) ->
       let pos = fst e in
@@ -472,7 +472,7 @@ and stmt env = function
         | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
         | Tanon (_, _) | Tobject | Tshape _) ->
           Typing_suggest.save_return env expected_return rty;
-          let env = Type.sub_type pos Reason.URreturn env expected_return rty in
+          let env = Type.sub_type pos Reason.URreturn env rty expected_return in
           env
       )
   | Do (b, e) as st ->
@@ -554,7 +554,7 @@ and stmt env = function
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let env, ty2 = as_expr env (fst e1) e2 in
-      let env = Type.sub_type (fst e1) Reason.URforeach env ty2 ety1 in
+      let env = Type.sub_type (fst e1) Reason.URforeach env ety1 ty2 in
       let alias_depth =
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env = Env.in_loop env begin
@@ -640,8 +640,8 @@ and case_list_ parent_lenv ty env = function
     let ty_num = (Reason.Rnone, Tprim Nast.Tnum) in
     let ty_arraykey = (Reason.Rnone, Tprim Nast.Tarraykey) in
     let both_are_sub_types env tprim ty1 ty2 =
-      (SubType.is_sub_type env tprim ty1) &&
-      (SubType.is_sub_type env tprim ty2) in
+      (SubType.is_sub_type env ty1 tprim) &&
+      (SubType.is_sub_type env ty2 tprim) in
     if Nast_terminality.Terminal.block env b then
       let env, ty2 = expr env e in
       let env, _ =
@@ -1268,7 +1268,7 @@ and expr_
         | Ast.FSync | Ast.FAsync ->
             failwith "Parsing should never allow this" in
       let env =
-        Type.sub_type p (Reason.URyield) env (Env.get_return env) rty in
+        Type.sub_type p (Reason.URyield) env rty (Env.get_return env) in
       let env = Env.forget_members env p in
       env, (Reason.Ryield_send p, Toption send)
   | Await e ->
@@ -1345,7 +1345,7 @@ and expr_
               obj_get ~is_method:false ~nullsafe:None env obj cid
                 (fst namepstr, name) (fun x -> x) in
             let ureason = Reason.URxhp (class_.tc_name, snd namepstr) in
-            Type.sub_type valp ureason env declty valty
+            Type.sub_type valp ureason env valty declty
           end ~init:env in
           env, obj
         end
@@ -1391,7 +1391,7 @@ and anon_bind_param params env (param_name, ty as pname_ty) =
       | Some h ->
           let env, h = Phase.hint_locl env h in
           let pos = Reason.to_pos (fst ty) in
-          let env = Type.sub_type pos Reason.URparam env h ty in
+          let env = Type.sub_type pos Reason.URparam env ty h in
           (* Closures are allowed to have explicit type-hints. When
            * that is the case we should check that the argument passed
            * is compatible with the type-hint.
@@ -1422,7 +1422,7 @@ and anon_check_param env param =
       let env, hty = Phase.hint_locl env hty in
       let env, paramty = Env.get_local env (Local_id.get param.param_name) in
       let hint_pos = Reason.to_pos (fst hty) in
-      let env = Type.sub_type hint_pos Reason.URhint env hty paramty in
+      let env = Type.sub_type hint_pos Reason.URhint env paramty hty in
       env
 
 and anon_make tenv p f =
@@ -1543,7 +1543,7 @@ and new_object ~check_not_abstract p env c el uel =
            * for generic and dependent types to be correctly carried
            * through the 'new $foo()' iff the constructed obj_ty is a
            * supertype of the variable-dictated c_ty *)
-          let env = SubType.sub_type env obj_ty c_ty in
+          let env = SubType.sub_type env c_ty obj_ty in
           env, c_ty
   )
 
@@ -1583,7 +1583,7 @@ and uninstantiable_error reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
 
 and exception_ty pos env ty =
   let exn_ty = Reason.Rthrow pos, Tclass ((pos, SN.Classes.cException), []) in
-  Type.sub_type pos (Reason.URthrow) env exn_ty ty
+  Type.sub_type pos (Reason.URthrow) env ty exn_ty
 
 and shape_field_pos = function
   | SFlit (p, _) -> p
@@ -1759,7 +1759,7 @@ and assign p env e1 ty2 =
         | ty -> [ty]
       in
       let env = List.fold_left real_type_list ~f:begin fun env real_type ->
-        Type.sub_type p (Reason.URassign) env real_type ety2
+        Type.sub_type p (Reason.URassign) env ety2 real_type
       end ~init:env in
       (match e1 with
       | _, Obj_get ((_, This | _, Lvar _ as obj),
@@ -1816,7 +1816,7 @@ and assign_simple pos env e1 ty2 =
   let ty2 = check_valid_rvalue pos env ty2 in
 
   let env, ty2 = TUtils.unresolved env ty2 in
-  let env = Type.sub_type pos (Reason.URassign) env ty1 ty2 in
+  let env = Type.sub_type pos (Reason.URassign) env ty2 ty1 in
   env, ty2
 
 and array_field_value env = function
@@ -1948,7 +1948,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
        (match el, uel with
          | [(_, Array_get (ea, Some _))], [] ->
            let env, ty = expr env ea in
-           if List.exists ~f:(fun super -> SubType.is_sub_type env super ty) [
+           if List.exists ~f:(fun super -> SubType.is_sub_type env ty super) [
              (Reason.Rnone, (Tclass ((Pos.none, SN.Collections.cDict),
                [(Reason.Rnone, Tany); (Reason.Rnone, Tany)])));
              (Reason.Rnone, Tarraykind AKany)
@@ -2015,7 +2015,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                     (Pos.none, SN.Collections.cKeyedContainer), [tk; tv]
                   )
                 ) in
-                let env = SubType.sub_type env keyed_container ety in
+                let env = SubType.sub_type env ety keyed_container in
                 let env, tv = get_value_type env tv in
                 env, (r, Tarraykind (AKmap (
                   (explain_array_filter tk),
@@ -2029,7 +2029,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                       (Pos.none, SN.Collections.cContainer), [tv]
                     )
                   ) in
-                  let env = SubType.sub_type env container ety in
+                  let env = SubType.sub_type env ety container in
                   let env, tv = get_value_type env tv in
                   env, (r, Tarraykind (AKmap (
                     (explain_array_filter (r, Tprim Tarraykey)),
@@ -2134,7 +2134,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                       (fty.ft_pos, SN.Collections.cConstVector), [tv]
                     )
                   ) in
-                  let env = SubType.sub_type env vector x in
+                  let env = SubType.sub_type env x vector in
                   env, (fun tr -> (r, Tarraykind (
                     AKvec(tr)
                   ))) in
@@ -2145,7 +2145,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                       (fty.ft_pos, SN.Collections.cKeyedContainer), [tk; tv]
                     )
                   ) in
-                  let env = SubType.sub_type env keyed_container x in
+                  let env = SubType.sub_type env x keyed_container in
                   env, (fun tr -> (r, Tarraykind (AKmap (
                     tk,
                     tr
@@ -2157,7 +2157,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                       (fty.ft_pos, SN.Collections.cContainer), [tv]
                     )
                   ) in
-                  let env = SubType.sub_type env container x in
+                  let env = SubType.sub_type env x container in
                   env, (fun tr -> (r, Tarraykind (AKmap (
                     (r, Tprim Tarraykey),
                     tr)))) in
@@ -2395,7 +2395,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       env, (fst ety1, Tunresolved tyl)
   | Tarraykind (AKvec ty) ->
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-      let env = Type.sub_type p Reason.index_array env ty1 ty2 in
+      let env = Type.sub_type p Reason.index_array env ty2 ty1 in
       env, ty
   | Tclass ((_, cn) as id, argl)
     when cn = SN.Collections.cVector
@@ -2404,7 +2404,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
         | [ty] -> ty
         | _ -> arity_error id; Reason.Rwitness p, Tany in
       let ty1 = Reason.Ridx_vector (fst e2), Tprim Tint in
-      let env = Type.sub_type p (Reason.index_class cn) env ty1 ty2 in
+      let env = Type.sub_type p (Reason.index_class cn) env ty2 ty1 in
       env, ty
   | Tclass ((_, cn) as id, argl)
       when cn = SN.Collections.cMap
@@ -2441,7 +2441,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
             let any = (Reason.Rwitness p, Tany) in
             any, any
       in
-      let env = Type.sub_type p (Reason.index_class cn) env k ty2 in
+      let env = Type.sub_type p (Reason.index_class cn) env ty2 k in
       env, v
   | Tclass ((_, cn) as id, argl)
       when not is_lvalue &&
@@ -2467,7 +2467,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
             begin match IMap.get index fields with
               | Some ty ->
                   let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-                  let env = Type.sub_type p Reason.index_array env ty1 ty2 in
+                  let env = Type.sub_type p Reason.index_array env ty2 ty1 in
                   env, Some ty
               | None -> env, None
             end
@@ -3193,7 +3193,7 @@ and unpack_expr env e_tyl e =
     let unpack_r = Reason.Runpack_param pos in
     let container_ty = (unpack_r, Tclass ((pos, SN.Collections.cContainer),
                                           [unpack_r, Tany])) in
-    let env = Type.sub_type pos Reason.URparam env container_ty ety in
+    let env = Type.sub_type pos Reason.URparam env ety container_ty in
     env, e_tyl, false
   )
 
@@ -3300,12 +3300,12 @@ and call_param todos env (name, x) ((pos, _ as e), arg_ty) =
   match arg_ty with
   | _, Tanon _ ->
       todos := (fun env ->
-                Type.sub_type pos Reason.URparam env x arg_ty) :: !todos;
+                Type.sub_type pos Reason.URparam env arg_ty x) :: !todos;
       env
   | _, (Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tunresolved _ | Tobject | Tshape _) ->
-    Type.sub_type pos Reason.URparam env x dep_ty
+    Type.sub_type pos Reason.URparam env dep_ty x
 
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
@@ -3326,7 +3326,8 @@ and unop p env uop ty =
   | Ast.Uplus
   | Ast.Uminus ->
       (* math operators work with int or floats, so we call sub_type *)
-      let env = Type.sub_type p Reason.URnone env (Reason.Rarith p, Tprim Tnum) ty in
+      let env = Type.sub_type p Reason.URnone env ty
+        (Reason.Rarith p, Tprim Tnum) in
       env, ty
   | Ast.Uref ->
       (* We basically just ignore references in non-strict files *)
@@ -3337,7 +3338,8 @@ and unop p env uop ty =
 and binop in_cond p env bop p1 ty1 p2 ty2 =
   let expand_num_type env p ty =
     let env, ty = TUtils.fold_unresolved env ty in
-    let env = Type.sub_type p Reason.URnone env (Reason.Rarith p, Tprim Tnum) ty in
+    let env = Type.sub_type p Reason.URnone env ty
+        (Reason.Rarith p, Tprim Tnum) in
     let env, ety = Env.expand_type env ty in
     (env, ety) in
   match bop with
@@ -3361,8 +3363,8 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
               | AKmap _ -> AKmap (a_sup, b_sup)
               | _ -> assert false
           ) in
-          let env = Type.sub_type p1 Reason.URnone env res_ty ety1 in
-          let env = Type.sub_type p2 Reason.URnone env res_ty ety2 in
+          let env = Type.sub_type p1 Reason.URnone env ety1 res_ty in
+          let env = Type.sub_type p2 Reason.URnone env ety2 res_ty in
           env, res_ty
       | (_, Tarraykind _), (_, Tarraykind (AKshape _)) ->
         let env, ty2 = Typing_arrays.downcast_aktypes env ty2 in
@@ -3384,10 +3386,10 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
   | Ast.Minus | Ast.Star ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, ty2 = TUtils.fold_unresolved env ty2 in
-      let env = Type.sub_type p1 Reason.URnone env
-        (Reason.Rarith p1, Tprim Tnum) ty1 in
-      let env = Type.sub_type p2 Reason.URnone env
-        (Reason.Rarith p2, Tprim Tnum) ty2 in
+      let env = Type.sub_type p1 Reason.URnone env ty1
+        (Reason.Rarith p1, Tprim Tnum) in
+      let env = Type.sub_type p2 Reason.URnone env ty2
+        (Reason.Rarith p2, Tprim Tnum) in
       let env, ety1 = Env.expand_type env ty1 in
       let env, ety2 = Env.expand_type env ty2 in
       (match ety1, ety2 with
@@ -3434,8 +3436,10 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
         ), _ -> env, (Reason.Rarith_ret p, Tprim Tnum)
       )
   | Ast.Percent ->
-      let env = Type.sub_type p Reason.URnone env (Reason.Rarith p1, Tprim Tint) ty1 in
-      let env = Type.sub_type p Reason.URnone env (Reason.Rarith p1, Tprim Tint) ty2 in
+      let env = Type.sub_type p Reason.URnone env ty1
+        (Reason.Rarith p1, Tprim Tint) in
+      let env = Type.sub_type p Reason.URnone env ty2
+        (Reason.Rarith p1, Tprim Tint) in
       env, (Reason.Rarith_ret p, Tprim Tint)
   | Ast.Xor ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -3444,16 +3448,20 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
       let env, ety2 = Env.expand_type env ty2 in
       (match ety1, ety2 with
       | (_, Tprim Tbool), _ | _, (_, Tprim Tbool) ->
-          let env, _ = Type.unify p Reason.URnone env ty1 (Reason.Rlogic_ret p1, Tprim Tbool) in
-          let env, _ = Type.unify p Reason.URnone env ty2 (Reason.Rlogic_ret p1, Tprim Tbool) in
+          let env, _ = Type.unify p Reason.URnone env ty1
+            (Reason.Rlogic_ret p1, Tprim Tbool) in
+          let env, _ = Type.unify p Reason.URnone env ty2
+            (Reason.Rlogic_ret p1, Tprim Tbool) in
           env, (Reason.Rlogic_ret p, Tprim Tbool)
       | (_, (Tany | Tmixed | Tarraykind _ | Toption _
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         )
         ), _ ->
-          let env, _ = Type.unify p Reason.URnone env ty1 (Reason.Rarith p1, Tprim Tint) in
-          let env, _ = Type.unify p Reason.URnone env ty2 (Reason.Rarith p1, Tprim Tint) in
+          let env, _ = Type.unify p Reason.URnone env ty1
+            (Reason.Rarith p1, Tprim Tint) in
+          let env, _ = Type.unify p Reason.URnone env ty2
+            (Reason.Rarith p1, Tprim Tint) in
           env, (Reason.Rarith_ret p, Tprim Tint)
       )
   | Ast.Eqeq  | Ast.Diff  ->
@@ -3468,7 +3476,7 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
       let ty_datetime =
         (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTime), [])) in
       let both_sub ty =
-        SubType.is_sub_type env ty ty1 && SubType.is_sub_type env ty ty2 in
+        SubType.is_sub_type env ty1 ty && SubType.is_sub_type env ty2 ty in
       if both_sub ty_num || both_sub ty_string || both_sub ty_datetime
       then env, (Reason.Rcomp p, Tprim Tbool)
       else
@@ -3484,8 +3492,10 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
   | Ast.BArbar ->
       env, (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Amp | Ast.Bar | Ast.Ltlt | Ast.Gtgt ->
-      let env = Type.sub_type p Reason.URnone env (Reason.Rbitwise p1, Tprim Tint) ty1 in
-      let env = Type.sub_type p Reason.URnone env (Reason.Rbitwise p2, Tprim Tint) ty2 in
+      let env = Type.sub_type p Reason.URnone env ty1
+        (Reason.Rbitwise p1, Tprim Tint) in
+      let env = Type.sub_type p Reason.URnone env ty2
+        (Reason.Rbitwise p2, Tprim Tint) in
       env, (Reason.Rbitwise_ret p, Tprim Tint)
   | Ast.Eq _ ->
       assert false
@@ -3666,7 +3676,7 @@ and condition env tparamet =
           (match class_ with
             | None -> env, (Reason.Rwitness ivar_pos, Tobject)
             | Some _class ->
-              if SubType.is_sub_type env obj_ty x_ty
+              if SubType.is_sub_type env x_ty obj_ty
               then
                 (* If the right side of the `instanceof` object is
                  * a super type of what we already knew. In this case,
@@ -3792,9 +3802,9 @@ and check_implements_tparaml (env: Env.env) ht =
           let cstr = Inst.instantiate subst cstr in
           match ck with
           | Ast.Constraint_as ->
-            ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
-          | Ast.Constraint_super ->
             ignore (Type.sub_type_decl p Reason.URnone env ty cstr)
+          | Ast.Constraint_super ->
+            ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
         end
       end class_.tc_tparams paraml
 
@@ -3966,7 +3976,7 @@ and typeconst_def env {
   let env, cstr = opt Phase.hint_locl env c_tconst_constraint in
   let env, ty = opt Phase.hint_locl env c_tconst_type in
   ignore(
-    Option.map2 cstr ty ~f:(Type.sub_type pos Reason.URtypeconst_cstr env)
+    Option.map2 ty cstr ~f:(Type.sub_type pos Reason.URtypeconst_cstr env)
   )
 
 and class_const_def env (h, id, e) =
@@ -3979,7 +3989,7 @@ and class_const_def env (h, id, e) =
   match e with
     | Some e ->
       let env, ty' = expr env e in
-      ignore (Type.sub_type (fst id) Reason.URhint env ty ty');
+      ignore (Type.sub_type (fst id) Reason.URhint env ty' ty);
       ty'
     | None -> ty
 
@@ -4036,7 +4046,7 @@ and class_var_def env ~is_static c cv =
           else env in
       let cty = TI.instantiable_hint env cty in
       let env, cty = Phase.localize_with_self env cty in
-      let _ = Type.sub_type p Reason.URhint env cty ty in
+      let _ = Type.sub_type p Reason.URhint env ty cty in
       ()
 
 and method_def env m =
@@ -4115,7 +4125,7 @@ and typedef_def typedef =
     | Some tcstr ->
       let cstr = TI.instantiable_hint env tcstr in
       let env, cstr = Phase.localize_with_self env cstr in
-      ignore @@ Typing_ops.sub_type t_pos Reason.URnewtype_cstr env cstr ty
+      ignore @@ Typing_ops.sub_type t_pos Reason.URnewtype_cstr env ty cstr
     | _ -> ()
   end;
   match hint with

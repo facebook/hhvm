@@ -68,6 +68,7 @@ type t =
 | Shape
 | Static
 | String
+| Super
 | Switch
 | This
 | Throw
@@ -157,6 +158,7 @@ type t =
 | XHPElementName
 | XHPStringLiteral
 | XHPBody
+| XHPComment
 | SlashGreaterThan
 | LessThanSlash
 
@@ -218,6 +220,7 @@ let from_string keyword =
   | "shape" -> Some Shape
   | "static" -> Some Static
   | "string" -> Some String
+  | "super" -> Some Super
   | "switch" -> Some Switch
   | "this" -> Some This
   | "throw" -> Some Throw
@@ -287,6 +290,7 @@ let to_string kind =
   | Shape -> "shape"
   | Static -> "static"
   | String -> "string"
+  | Super -> "super"
   | Switch -> "switch"
   | This -> "this"
   | Throw -> "throw"
@@ -378,5 +382,6 @@ let to_string kind =
   | XHPElementName -> "XHP_element_name"
   | XHPStringLiteral -> "XHP_string_literal"
   | XHPBody -> "XHP_body"
+  | XHPComment -> "XHP_comment"
   | SlashGreaterThan -> "/>"
   | LessThanSlash -> "</"

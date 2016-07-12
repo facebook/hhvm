@@ -41,9 +41,12 @@ struct XDebugCommand {
    * and returns a new XDebugCommand corresponding to the given string.  This is
    * how commands should be created.
    */
-  static XDebugCommand* fromString(XDebugServer& server,
-                                   const String& cmdStr,
-                                   const Array& args);
+  static std::shared_ptr<XDebugCommand> fromString(
+    XDebugServer& server,
+    const String& cmdStr,
+    const Array& args
+  );
+
   /*
    * Internal constructor used by fromString.  It should never be called
    * explicitly.  This is where arguments should be parsed.  Note that php5

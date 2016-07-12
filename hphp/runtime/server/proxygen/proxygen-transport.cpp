@@ -221,6 +221,8 @@ void ProxygenTransport::onHeadersComplete(
       auto host = headers.getSingleOrEmpty(HTTP_HEADER_HOST);
       if (auto vhost = VirtualHost::Resolve(host)) {
         max_post = vhost->getMaxPostSize();
+      } else {
+        max_post = RuntimeOption::MaxPostSize;
       }
     }
     auto post_too_big = false;

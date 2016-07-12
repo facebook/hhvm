@@ -668,6 +668,7 @@ static int yylex(YYSTYPE* token, HPHP::Location* loc, Parser* _p) {
 %token T_ARRAY
 %token T_DICT
 %token T_VEC
+%token T_KEYSET
 %token T_CALLABLE
 %token T_CLASS_C
 %token T_METHOD_C
@@ -794,6 +795,7 @@ ident_no_semireserved:
   | T_ENUM                             { $$ = $1;}
   | T_DICT                             { $$ = $1;}
   | T_VEC                              { $$ = $1;}
+  | T_KEYSET                           { $$ = $1;}
 ;
 
 ident_for_class_const:
@@ -1985,6 +1987,7 @@ expr_no_variable:
   | array_literal                      { $$ = $1; }
   | dict_literal                       { $$ = $1; }
   | vec_literal                        { $$ = $1; }
+  | keyset_literal                     { $$ = $1; }
   | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
@@ -2227,30 +2230,42 @@ static_dict_literal_ae:
 ;
 
 vec_literal:
-    T_VEC '[' vec_expr_list ']' { _p->onVec($$, $3); }
+    T_VEC '[' vec_ks_expr_list ']' { _p->onVec($$, $3); }
 ;
 
 static_vec_literal:
-    T_VEC '[' static_vec_expr_list ']' { _p->onVec($$, $3); }
+    T_VEC '[' static_vec_ks_expr_list ']' { _p->onVec($$, $3); }
 ;
 
 static_vec_literal_ae:
-    T_VEC '[' static_vec_expr_list_ae ']' { _p->onVec($$, $3); }
+    T_VEC '[' static_vec_ks_expr_list_ae ']' { _p->onVec($$, $3); }
 ;
 
-vec_expr_list:
+keyset_literal:
+    T_KEYSET '[' vec_ks_expr_list ']'     { _p->onKeyset($$, $3); }
+;
+
+static_keyset_literal:
+    T_KEYSET '[' static_vec_ks_expr_list ']' { _p->onKeyset($$, $3); }
+;
+
+static_keyset_literal_ae:
+    T_KEYSET '[' static_vec_ks_expr_list_ae ']' { _p->onKeyset($$, $3); }
+;
+
+vec_ks_expr_list:
     expr_list
     possible_comma                     { $$ = $1;}
   |                                    { $$.reset();}
 ;
 
-static_vec_expr_list:
+static_vec_ks_expr_list:
     static_expr_list
     possible_comma                     { $$ = $1;}
   |                                    { $$.reset();}
 ;
 
-static_vec_expr_list_ae:
+static_vec_ks_expr_list_ae:
     static_scalar_ae_list
     possible_comma                     { $$ = $1;}
   |                                    { $$.reset();}
@@ -2281,6 +2296,7 @@ dim_expr_base:
     array_literal                      { $$ = $1;}
   | dict_literal                       { $$ = $1;}
   | vec_literal                        { $$ = $1;}
+  | keyset_literal                     { $$ = $1;}
   | class_constant                     { $$ = $1;}
   | lambda_or_closure_with_parens      { $$ = $1;}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
@@ -2553,6 +2569,7 @@ static_expr:
     static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_dict_literal                { $$ = $1;}
   | static_vec_literal                 { $$ = $1;}
+  | static_keyset_literal              { $$ = $1;}
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
   | '(' static_expr ')'                { $$ = $2;}
@@ -2704,6 +2721,7 @@ static_scalar_ae:
     static_shape_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY); }
   | static_dict_literal_ae             { $$ = $1;}
   | static_vec_literal_ae              { $$ = $1;}
+  | static_keyset_literal_ae           { $$ = $1;}
 ;
 
 static_scalar_ae_list:

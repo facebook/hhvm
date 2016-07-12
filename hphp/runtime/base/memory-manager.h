@@ -358,6 +358,8 @@ struct FreeNode {
   HeaderWord<> hdr;
   uint32_t& size() { return hdr.hi32; }
   uint32_t size() const { return hdr.hi32; }
+  static FreeNode* InitFrom(void* addr, uint32_t size, HeaderKind);
+  static FreeNode* UninitFrom(void* addr, FreeNode* next);
 };
 
 // header for HNI objects with NativeData payloads. see native-data.h
@@ -821,6 +823,7 @@ struct MemoryManager {
    * Run the experimental collector.
    */
   void collect(const char* phase);
+  void resetGC();
   void updateNextGc();
 
   /*

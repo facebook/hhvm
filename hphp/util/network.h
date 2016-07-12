@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_NETWORK_H_
 #define incl_HPHP_NETWORK_H_
 
+#include <cstdlib>
 #include <string>
-#include <stdlib.h>
 
 #include <folly/IPAddress.h>
 #include <folly/portability/Sockets.h>

@@ -43,7 +43,6 @@ struct MixedArray;
 enum class IterNextIndex : uint16_t {
   ArrayPacked = 0,
   ArrayMixed,
-  ArrayStruct,
   Array,
   Vector,
   ImmVector,

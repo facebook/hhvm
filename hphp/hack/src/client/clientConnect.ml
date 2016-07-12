@@ -128,14 +128,15 @@ let print_wait_msg ?(first_call=false) start_time tail_env =
 let rec wait_for_server_hello ic env retries start_time tail_env first_call =
   match retries with
   | Some n when n < 0 ->
-      Printf.eprintf "\nError: Ran out of retries, giving up!\n";
+      Option.iter tail_env
+        (fun t -> Printf.eprintf "\nError: Ran out of retries, giving up!\n");
       raise Exit_status.(Exit_with Out_of_retries)
   | Some _
   | None -> ();
   let readable, _, _  = Unix.select
     [Timeout.descr_of_in_channel ic] [] [Timeout.descr_of_in_channel ic] 1.0 in
   if readable = [] then (
-    print_wait_msg ~first_call start_time tail_env;
+    Option.iter tail_env (fun t -> print_wait_msg ~first_call start_time t);
     wait_for_server_hello ic env (Option.map retries (fun x -> x - 1))
       start_time tail_env false
   ) else
@@ -144,7 +145,7 @@ let rec wait_for_server_hello ic env retries start_time tail_env first_call =
       | "Hello" ->
         ()
       | _ ->
-        print_wait_msg ~first_call start_time tail_env;
+        Option.iter tail_env (fun t -> print_wait_msg ~first_call start_time t);
         wait_for_server_hello ic env (Option.map retries (fun x -> x - 1))
           start_time tail_env false
       )
@@ -180,7 +181,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   | Result.Ok (ic, oc) ->
       if env.to_ide then SMUtils.send_ide_client_type oc SMUtils.Request;
       (try begin
-        wait_for_server_hello ic env retries start_time tail_env true;
+        wait_for_server_hello ic env retries start_time (Some tail_env) true;
         if Tty.spinner_used () then
           Tty.print_clear_line stderr
       end
@@ -255,10 +256,12 @@ let connect env =
   let start_time = Unix.time () in
   let tail_env = Tail.create_env log_file in
   try
-    let res = connect ~first_attempt:true env env.retries start_time tail_env in
+    let (ic, oc) =
+      connect ~first_attempt:true env env.retries start_time tail_env in
     Tail.close_env tail_env;
     HackEventLogger.client_established_connection start_time;
-    res
+    ServerCommand.send_connection_type oc ServerCommand.Non_persistent;
+    (ic, oc)
   with
   | e ->
     HackEventLogger.client_establish_connection_exception e;

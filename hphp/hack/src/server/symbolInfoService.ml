@@ -63,7 +63,7 @@ let parallel_helper workers filetuple_l =
     ~job:helper
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(Bucket.make filetuple_l)
+    ~next:(MultiWorker.next workers filetuple_l)
 
 (* Format result from '(fun_calls * symbol_types) list' raw result into *)
 (* 'fun_calls list, symbol_types list' and store in SymbolInfoService.result *)

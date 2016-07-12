@@ -195,9 +195,7 @@ folly::Optional<String> readFileAsString(const StringData* path) {
 
 CachedUnit createUnitFromString(const char* path,
                                 const String& contents) {
-  auto const md5 = MD5 {
-    mangleUnitMd5(string_md5(contents.data(), contents.size())).c_str()
-  };
+  auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()))};
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, md5)) {
     return CachedUnit { unit.release(), rds::allocBit() };
@@ -454,7 +452,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces();
-  return string_md5(t.c_str(), t.size());
+  return string_md5(t);
 }
 
 size_t numLoadedUnits() {

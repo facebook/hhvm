@@ -446,8 +446,6 @@ bool canDCE(IRInstruction* inst) {
   case IncStatGrouped:
   case IncProfCounter:
   case DbgAssertRefCount:
-  case DbgAssertPtr:
-  case DbgAssertType:
   case DbgAssertFunc:
   case RBTraceEntry:
   case RBTraceMsg:
@@ -520,11 +518,9 @@ bool canDCE(IRInstruction* inst) {
   case IssetElem:
   case EmptyElem:
   case ProfileArrayKind:
-  case ProfileStructArray:
   case ProfileType:
   case ProfileMethod:
   case CheckPackedArrayBounds:
-  case LdStructArrayElem:
   case LdVectorSize:
   case VectorDoCow:
   case VectorHasImmCopy:

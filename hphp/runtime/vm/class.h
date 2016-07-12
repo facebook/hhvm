@@ -34,6 +34,7 @@
 #include "hphp/util/default-ptr.h"
 #include "hphp/util/hash-map-typedefs.h"
 
+#include <folly/Hash.h>
 #include <folly/Range.h>
 
 #include <list>
@@ -225,7 +226,45 @@ struct Class : AtomicCountable {
                               const PreClass::ClassRequirement*, true, int>;
 
   using TraitAliasVec = std::vector<PreClass::TraitAliasRule::NamePair>;
-  using ScopedClonesMap = hphp_hash_map<uintptr_t,ClassPtr>;
+
+  /*
+   * Scope context for a Closure subclass.
+   */
+  struct CloneScope {
+    LowPtr<Class> ctx;
+    Attr attrs;
+
+    bool operator==(CloneScope o) const { return ctx == o.ctx &&
+                                                 attrs == o.attrs; }
+    bool operator!=(CloneScope o) const { return !(*this == o); }
+
+    struct hash {
+      size_t operator()(CloneScope cs) const {
+        return folly::hash::hash_combine(
+          cs.ctx.get(),
+          static_cast<uint32_t>(cs.attrs)
+        );
+      }
+    };
+  };
+
+  /*
+   * Map from a Closure subclass C's scope context to the appropriately scoped
+   * clone of C.
+   *
+   * @see: Class::ExtraData::m_scopedClones
+   */
+  using ScopedClonesMap = hphp_hash_map<CloneScope,ClassPtr,CloneScope::hash>;
+
+  /*
+   * A reference to a scoped clone of a Closure subclass.  We omit the Class
+   * ctx, since we only use this struct when the ctx is `this'.
+   */
+  struct ScopedCloneBackref {
+    ClassPtr template_cls;
+    /* LowPtr<Class> ctx_cls = this; */
+    Attr ctx_attrs;
+  };
 
   /*
    * We store the length of vectors of methods, parent classes and interfaces.
@@ -983,14 +1022,20 @@ private:
     /*
      * Cache for Closure subclass scopings.
      *
-     * Only meaningful when `this' is an unscoped subclass of Closure.  When we
-     * need to create a closure in the scope of a Class C (and with attrs A),
-     * we clone `this', rescope its __invoke() appropriately, and then cache
-     * the (C,A) => clone binding here.
+     * Only meaningful when `this' is the "template" for a family of Closure
+     * subclasses.  When we need to create a closure in the scope of a Class C
+     * (and with attrs A), we clone `this', rescope its __invoke()
+     * appropriately, and then cache the (C,A) => clone binding here.
      *
      * @see: rescope()
      */
     ScopedClonesMap m_scopedClones;
+
+    /*
+     * List of references to Closure subclasses whose scoped Class context is
+     * `this'.
+     */
+    std::vector<ScopedCloneBackref> m_clonesWithThisScope;
 
     /*
      * Objects with the <<__NativeData("T")>> UA are allocated with extra space

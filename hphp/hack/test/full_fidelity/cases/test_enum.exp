@@ -1,0 +1,21 @@
+(script
+  (header((<))((?))((name)(end_of_line)))
+  (enum_declaration
+    ((enum)(whitespace))
+    ((name)(whitespace))
+    ((:)(whitespace))
+    ((int)(whitespace))
+    (missing)
+    (({)(whitespace))
+    (list
+      (list_item
+        (enumerator
+          ((name)(whitespace))
+          ((=)(whitespace))
+          (literal((decimal_literal))))
+        ((;)(whitespace)))
+      (enumerator
+        ((name)(whitespace))
+        ((=)(whitespace))
+        (literal((decimal_literal)(whitespace)))))
+    ((}))))

@@ -562,7 +562,7 @@ bool ProxygenServer::initialCertHandler(const std::string &server_name,
     return true;
   }
   try {
-    proxygen::SSLContextConfig sslCtxConfig;
+    wangle::SSLContextConfig sslCtxConfig;
     sslCtxConfig.setCertificate(cert_file, key_file, "");
     sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
     sslCtxConfig.sniNoMatchFn =
@@ -585,7 +585,7 @@ bool ProxygenServer::dynamicCertHandler(const std::string &server_name,
                                         const std::string &key_file,
                                         const std::string &cert_file) {
   try {
-    proxygen::SSLContextConfig sslCtxConfig;
+    wangle::SSLContextConfig sslCtxConfig;
     sslCtxConfig.setCertificate(cert_file, key_file, "");
     sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
     sslCtxConfig.sniNoMatchFn =

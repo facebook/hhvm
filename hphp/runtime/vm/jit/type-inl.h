@@ -331,20 +331,12 @@ inline Type Type::Array(const RepoAuthType::Array* rat) {
   return Type(TArr, ArraySpec(rat));
 }
 
-inline Type Type::Array(const Shape* shape) {
-  return Type(TArr, ArraySpec(shape));
-}
-
 inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
   return Type(TStaticArr, ArraySpec(kind));
 }
 
 inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
   return Type(TStaticArr, ArraySpec(rat));
-}
-
-inline Type Type::StaticArray(const Shape* shape) {
-  return Type(TStaticArr, ArraySpec(shape));
 }
 
 inline Type Type::SubObj(const Class* cls) {

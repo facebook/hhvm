@@ -119,7 +119,6 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
 bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
   switch (kind) {
     case ArrayData::kPackedKind:
-    case ArrayData::kStructKind:
     case ArrayData::kMixedKind:
     case ArrayData::kEmptyKind:
     case ArrayData::kVecKind:
@@ -371,11 +370,25 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
 SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {
   auto const srcCtx = inst->src(0);
   if (srcCtx->isA(TCctx)) return srcCtx;
+  if (srcCtx->isA(TObj)) {
+    auto const callee = inst->src(1)->funcVal();
+    if (callee->isStatic()) {
+      auto const cls = gen(env, LdObjClass, srcCtx);
+      return gen(env, ConvClsToCctx, cls);
+    }
+    gen(env, IncRef, srcCtx);
+    return srcCtx;
+  }
   return nullptr;
 }
 
 SSATmp* simplifyConvClsToCctx(State& env, const IRInstruction* inst) {
-  auto* srcInst = inst->src(0)->inst();
+  auto const src = inst->src(0);
+  if (src->hasConstVal(TCls)) {
+    return cns(env, ConstCctx::cctx(src->clsVal()));
+  }
+
+  auto const srcInst = src->inst();
   if (srcInst->is(LdClsCctx)) return srcInst->src(0);
   return nullptr;
 }

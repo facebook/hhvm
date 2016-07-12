@@ -50,10 +50,12 @@ void CGMeta::process_only(
 
   auto& ctm = mcg->catchTraceMap();
   for (auto const& pair : catches) {
-    if (auto pos = ctm.find(pair.first)) {
-      *pos = pair.second;
+    auto const key = mcg->code().toOffset(pair.first);
+    auto const val = mcg->code().toOffset(pair.second);
+    if (auto pos = ctm.find(key)) {
+      *pos = val;
     } else {
-      ctm.insert(pair.first, pair.second);
+      ctm.insert(key, val);
     }
   }
   catches.clear();

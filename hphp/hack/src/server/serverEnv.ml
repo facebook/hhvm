@@ -46,6 +46,7 @@ type env = {
     failed_parsing : Relative_path.Set.t;
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;
+    persistent_client_fd : Unix.file_descr option;
   }
 
 let file_filter f =

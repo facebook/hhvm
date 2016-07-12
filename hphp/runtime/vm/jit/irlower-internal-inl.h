@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/struct-array.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -165,13 +164,6 @@ void emitSpecializedTypeTest(Vout& v, IRLS& env, Type type, Loc dataSrc,
     static_assert(sizeof(HeaderKind) == 1, "");
     v << cmpbim{*arrSpec.kind(), data[HeaderKindOffset], sf};
     doJcc(CC_E, sf);
-
-    if (arrSpec.kind() == ArrayData::kStructKind && arrSpec.shape()) {
-      auto sf2 = v.makeReg();
-      auto offset = StructArray::shapeOffset();
-      v << cmpqm{v.cns(arrSpec.shape()), data[offset], sf2};
-      doJcc(CC_E, sf2);
-    }
   }
 }
 

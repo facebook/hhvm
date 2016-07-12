@@ -73,7 +73,6 @@ struct TypeConstraint {
   // Specialization.
 
   static constexpr uint8_t kWantArrayKind = 0x1;
-  static constexpr uint8_t kWantArrayShape = 0x2;
 
   /*
    * Is this TypeConstraint for a specialized type?
@@ -87,15 +86,6 @@ struct TypeConstraint {
    */
   TypeConstraint& setWantArrayKind();
   bool wantArrayKind() const;
-
-  /*
-   * Set or check the kWantArrayShape bit in 'm_specialized'.  kWantArrayShape
-   * implies kWantArrayKind.
-   *
-   * @requires: isSpecialized()
-   */
-  TypeConstraint& setWantArrayShape();
-  bool wantArrayShape() const;
 
   /*
    * Set, check, or return the specialized Class.

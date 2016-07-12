@@ -1,0 +1,14 @@
+(script(header((<))((?))((name)(end_of_line)))
+(classish_declaration(
+attribute_specification((<<))
+(list(
+list_item(attribute((name))(missing)(missing)(missing))((,)(whitespace)))
+(list_item(attribute((name))((lparen))(missing)
+((rparen)(whitespace)))(missing)))((>>)(whitespace)))
+(missing)(missing)
+((class)(whitespace))((name)(whitespace))(missing)
+((extends)(whitespace))
+(simple_type_specifier((name)(whitespace)))
+((implements)(whitespace))
+(simple_type_specifier((name)(whitespace)))
+(classish_body(({))(missing)((})))))

@@ -20,17 +20,10 @@
 #include <stdint.h>
 #include <type_traits>
 
-#include <folly/Portability.h>
-#include <folly/portability/Asm.h>
-
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-inline void compiler_membar( ) {
-  folly::asm_volatile_memory();
-}
 
 template<class T>
 inline void assert_address_is_atomically_accessible(T* address) {

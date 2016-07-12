@@ -291,7 +291,6 @@ std::set<std::string> RuntimeOption::AllowedFiles;
 hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
-std::set<std::string> RuntimeOption::StaticFileGenerators;
 std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 
 bool RuntimeOption::WhitelistExec = false;
@@ -1592,7 +1591,6 @@ void RuntimeOption::Load(
 
     Config::Bind(StaticFileExtensions, ini, config, "StaticFile.Extensions",
                  staticFileDefault);
-    Config::Bind(StaticFileGenerators, ini, config, "StaticFile.Generators");
 
     auto matches_callback = [] (const IniSettingMap &ini_m, const Hdf &hdf_m,
                                 const std::string &ini_m_key) {

@@ -34,9 +34,8 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
 
   // It's possible to subtype RAT::Array types, but it's potentially O(n), so
   // we just don't do it.
-  return (!rhs.kind()  || lhs.kind()  == rhs.kind()) &&
-         (!rhs.type()  || lhs.type()  == rhs.type()) &&
-         (!rhs.shape() || lhs.shape() == rhs.shape());
+  return (!rhs.kind() || lhs.kind() == rhs.kind()) &&
+         (!rhs.type() || lhs.type() == rhs.type());
 }
 
 ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
@@ -49,9 +48,6 @@ ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
   // "unspecialized") unless they are equal.
   auto new_kind = lhs.kind() == rhs.kind() ? lhs.kind() : folly::none;
   auto new_type = lhs.type() == rhs.type() ? lhs.type() : nullptr;
-
-  // If the shapes were nontrivial and equal, the specs would be equal.
-  assertx(!lhs.shape() || lhs.shape() != rhs.shape());
 
   // Nontrivial kind /and/ type unions would imply equal kinds and types.
   assertx(!new_kind || !new_type);
@@ -78,25 +74,18 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
 
   // If the default value is returned, it might mean either Bottom or Top, so
   // we need more checks.
-  auto new_kind  = NEW_COMPONENT(kind,  folly::none);
-  auto new_type  = NEW_COMPONENT(type,  nullptr);
-  auto new_shape = NEW_COMPONENT(shape, nullptr);
+  auto new_kind = NEW_COMPONENT(kind, folly::none);
+  auto new_type = NEW_COMPONENT(type, nullptr);
 
 #undef NEW_COMPONENT
 
-  if ((!new_kind  && lhs.kind()) ||
-      (!new_shape && lhs.shape())) {
+  if (!new_kind && lhs.kind()) {
     // If there's no new_x, but lhs.x() is nontrivial, then rhs.x() is not
     // equal to it and also nontrivial.  The intersection is thus Bottom.
     //
     // Note that we ignore this check for type(), because we don't subtype RAT
     // types precisely.
     return Bottom;
-  }
-
-  if (new_shape && new_kind == ArrayData::kStructKind) {
-    // We could potentially be dropping a type, but that's okay.
-    return ArraySpec(new_shape);
   }
 
   if (new_kind && new_type) {

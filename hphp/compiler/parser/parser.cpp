@@ -179,7 +179,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
       m_nsAliasTable(getAutoAliasedClasses(),
                      [&] { return getAliasFlags(); }) {
   auto const md5str = mangleUnitMd5(scanner.getMd5());
-  MD5 md5 = MD5(md5str.c_str());
+  auto const md5 = MD5{md5str};
 
   m_file = std::make_shared<FileScope>(m_fileName, fileSize, md5);
 
@@ -588,8 +588,10 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "server_warmup_status" ||
            stripped == "dict" ||
            stripped == "vec" ||
+           stripped == "keyset" ||
            stripped == "is_vec" ||
-           stripped == "is_dict"
+           stripped == "is_dict" ||
+           stripped == "is_keyset"
           )) {
         funcName = "HH\\" + stripped;
       }
@@ -984,6 +986,10 @@ void Parser::onDict(Token &out, Token &pairs) {
 
 void Parser::onVec(Token& out, Token& exprs) {
   onUnaryOpExp(out, exprs, T_VEC, true);
+}
+
+void Parser::onKeyset(Token& out, Token& exprs) {
+  onUnaryOpExp(out, exprs, T_KEYSET, true);
 }
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,

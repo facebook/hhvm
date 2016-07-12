@@ -94,10 +94,10 @@ let check_types_for_const env parent_type class_type =
     | Tgeneric (_, [(Ast.Constraint_as, fty_parent)]),
       Tgeneric (_, [(Ast.Constraint_as, fty_child)]) ->
       (* redeclaration of an abstract constant *)
-      ignore (Phase.sub_type_decl env fty_parent fty_child)
+      ignore (Phase.sub_type_decl env fty_child fty_parent)
     | Tgeneric (_, [(Ast.Constraint_as, fty_parent)]), _ ->
       (* const definition constrained by parent abstract const *)
-      ignore (Phase.sub_type_decl env fty_parent class_type)
+      ignore (Phase.sub_type_decl env class_type fty_parent)
     | _, Tgeneric(_, _) ->
       (* Trying to override concrete type with an abstract one *)
       let pos = Reason.to_pos (fst class_type) in
@@ -154,7 +154,8 @@ let check_override env ?(ignore_fun_return = false)
           (not ignore_fun_return) &&
           (class_known || check_partially_known_method_returns)
         ) in
-      let check (r1, ft1) (r2, ft2) () = ignore(subtype_funs env r1 ft1 r2 ft2) in
+      let check (r1, ft1) (r2, ft2) () =
+        ignore(subtype_funs env r2 ft2 r1 ft1) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         (Reason.to_pos r_child) class_ class_elt.ce_origin
     | fty_parent, fty_child ->
@@ -284,14 +285,14 @@ let tconst_subsumption env parent_typeconst child_typeconst =
     then Some (Option.value child_typeconst.ttc_constraint ~default)
     else child_typeconst.ttc_constraint in
   ignore @@ Option.map2
-    parent_typeconst.ttc_constraint
     child_cstr
+    parent_typeconst.ttc_constraint
     ~f:(sub_type_decl pos Reason.URsubsume_tconst_cstr env);
 
   (* Check that the child's assigned type satisifies parent constraint *)
   ignore @@ Option.map2
-    parent_typeconst.ttc_constraint
     child_typeconst.ttc_type
+    parent_typeconst.ttc_constraint
     ~f:(sub_type_decl parent_pos Reason.URtypeconst_cstr env);
 
   (* If the parent cannot be overridden, we unify the types otherwise we ensure
@@ -299,7 +300,7 @@ let tconst_subsumption env parent_typeconst child_typeconst =
   let check x y =
     if is_final
     then ignore(unify_decl pos Reason.URsubsume_tconst_assign env x y)
-    else ignore(sub_type_decl pos Reason.URsubsume_tconst_assign env x y) in
+    else ignore(sub_type_decl pos Reason.URsubsume_tconst_assign env y x) in
   ignore @@ Option.map2
     parent_typeconst.ttc_type
     child_typeconst.ttc_type

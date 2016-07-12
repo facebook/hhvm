@@ -23,6 +23,8 @@ def sizeof(container):
         return impl['_M_finish'] - impl['_M_start']
     elif t == 'std::priority_queue':
         return sizeof(container['c'])
+    elif t == 'std::unordered_map' or t == 'HPHP::hphp_hash_map':
+        return container['_M_h']['_M_element_count']
     elif t == 'HPHP::FixedStringMap':
         return container['m_extra']
     elif t == 'HPHP::IndexedStringMap':
@@ -50,5 +52,7 @@ class SizeOfCommand(gdb.Command):
 
         if size is not None:
             gdbprint(size)
+        else:
+            print('sizeof: Unrecognized container.')
 
 SizeOfCommand()

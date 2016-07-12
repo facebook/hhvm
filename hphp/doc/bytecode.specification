@@ -1067,7 +1067,13 @@ NewVecArray <num elems>   [C..C]  ->  [C:Arr]
 
   New vector array. Creates a new vector array from the top %1 cells on the
   stack, pops those cells, then pushes the new array onto the stack. Elements
-  are pushed on the stack in array insertion order.
+  should be pushed on the stack in array insertion order.
+
+NewKeysetArray <num elems>    [C..C]  ->  [C:Arr]
+
+  New array in keyset mode. Creates a new keyset array from the top %1 cells on
+  the stack, pops those cells, then pushes the new keyset onto the stack.
+  Elements should be pushed on the stack in insertion order.
 
 AddElemC    [C C C]  ->  [C:Arr]
 

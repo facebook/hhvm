@@ -120,7 +120,12 @@ def _crc32q(crc, quad):
 def string_data_val(val, keep_case=True):
     """Convert an HPHP::StringData[*] to a Python string."""
 
-    s = val['m_data'].string('utf-8', 'ignore', val['m_len'])
+    if V('HPHP::use_lowptr'):
+        data = (deref(val).address + 1).cast(T('char').pointer())
+    else:
+        data = val['m_data']
+
+    s = data.string('utf-8', 'ignore', val['m_len'])
     return s if keep_case else s.lower()
 
 

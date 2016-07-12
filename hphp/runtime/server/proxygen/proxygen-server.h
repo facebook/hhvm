@@ -23,7 +23,7 @@
 #include "hphp/runtime/server/server.h"
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>
 #include <proxygen/lib/services/WorkerThread.h>
-#include <proxygen/lib/ssl/SSLContextConfig.h>
+#include <wangle/ssl/SSLContextConfig.h>
 #include <folly/io/async/NotificationQueue.h>
 
 #include <algorithm>
@@ -219,7 +219,7 @@ struct ProxygenServer : Server,
   HPHPWorkerThread m_worker;
   proxygen::AcceptorConfiguration m_httpConfig;
   proxygen::AcceptorConfiguration m_httpsConfig;
-  proxygen::SSLContextConfig m_sslCtxConfig;
+  wangle::SSLContextConfig m_sslCtxConfig;
   std::unique_ptr<HPHPSessionAcceptor> m_httpAcceptor;
   std::unique_ptr<HPHPSessionAcceptor> m_httpsAcceptor;
 

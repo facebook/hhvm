@@ -114,7 +114,7 @@ struct FPIEnt {
  *              +--------------------------------+ high address
  *
  */
-struct Func {
+struct Func final {
   friend struct FuncEmitter;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -931,8 +931,6 @@ struct Func {
    * Reset a specific prologue, or all prologues.
    */
   void resetPrologue(int numParams);
-  void resetPrologues();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]
@@ -1119,8 +1117,6 @@ private:
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
   };
 
-  typedef AtomicSharedPtr<SharedData> SharedDataPtr;
-
   /*
    * SharedData accessors for internal use.
    */
@@ -1238,8 +1234,8 @@ private:
   bool m_hasPrivateAncestor : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};
-  Unit* m_unit;
-  SharedDataPtr m_shared;
+  Unit* const m_unit;
+  AtomicSharedPtr<SharedData> m_shared;
   // Initialized by Func::finishedEmittingParams.  The least significant bit is
   // 1 if the last param is not variadic; the 31 most significant bits are the
   // total number of params (including the variadic param).

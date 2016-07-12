@@ -374,7 +374,7 @@ static xmlNodePtr php_sxe_get_first_node(SimpleXMLElement* sxe,
 }
 
 xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe) {
-  assert(sxe->instanceof(SimpleXMLElement_classof()));
+  if (!sxe->instanceof(SimpleXMLElement_classof())) return nullptr;
   auto data = Native::data<SimpleXMLElement>(sxe.get());
   return php_sxe_get_first_node(data, data->nodep());
 }
@@ -1166,9 +1166,15 @@ static const Class* class_from_name(const String& class_name,
   return cls;
 }
 
+const StaticString s_DOMNode("DOMNode");
+
 static Variant HHVM_FUNCTION(simplexml_import_dom,
-  const Object& node,
-  const String& class_name /* = "SimpleXMLElement" */) {
+                             const Object& node,
+                             const String& class_name) {
+  if (!node->instanceof(s_DOMNode)) {
+    raise_warning("Invalid Nodetype to import");
+    return init_null();
+  }
   auto domnode = Native::data<DOMNode>(node);
   xmlNodePtr nodep = domnode->nodep();
 

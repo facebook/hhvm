@@ -171,6 +171,13 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
     xdebug_xml_add_attribute(xml, "state", "disabled");
   }
 
+  // Whether the breakpoint is resolved or not.
+  xdebug_xml_add_attribute(
+    xml,
+    "resolved",
+    bp.resolved ? "resolved" : "unresolved"
+  );
+
   // Add the hit condition and count
   switch (bp.hitCondition) {
     case XDebugBreakpoint::HitCondition::GREATER_OR_EQUAL:
@@ -1642,18 +1649,21 @@ bool XDebugCommand::handle(xdebug_xml_node& response) {
   return shouldContinue();
 }
 
-XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
-                                         const String& cmdStr,
-                                         const Array& args) {
+
+/*static*/ std::shared_ptr<XDebugCommand> XDebugCommand::fromString(
+  XDebugServer& server,
+  const String& cmdStr,
+  const Array& args
+) {
   // Match will be set true once there is a match.
   auto match = false;
   auto cmd_cpp = cmdStr.toCppString();
 
   // Check each command
-  XDebugCommand* cmd;
+  std::shared_ptr<XDebugCommand> cmd;
   #define COMMAND(name, className)                                             \
     if (!match && cmd_cpp == name) {                                           \
-      cmd = new className(server, cmdStr, args);                               \
+      cmd = std::make_shared<className>(server, cmdStr, args);                 \
       match = true;                                                            \
     }
   COMMANDS
@@ -1669,7 +1679,6 @@ XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
   XDebugReason reason;
   server.getStatus(status, reason);
   if (!cmd->isValidInStatus(status)) {
-    delete cmd;
     throw_exn(Error::CommandUnavailable);
   }
   return cmd;

@@ -92,6 +92,10 @@ public:
     return Array(ArrayData::CreateDict(), NoIncRef{});
   }
 
+  static Array CreateKeyset() {
+    return Array(ArrayData::CreateKeyset(), NoIncRef{});
+  }
+
   static Array Create(const Variant& value) {
     return Array(ArrayData::Create(value), NoIncRef{});
   }
@@ -139,6 +143,12 @@ public:
   Array toDict() const {
     if (!m_arr) return CreateDict();
     auto new_arr = m_arr->toDict();
+    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
+  }
+
+  Array toKeyset() const {
+    if (!m_arr) return CreateKeyset();
+    auto new_arr = m_arr->toKeyset();
     return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
   }
 

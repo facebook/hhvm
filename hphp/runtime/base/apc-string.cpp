@@ -27,20 +27,22 @@ APCString::MakeSharedString(APCKind kind, StringData* data) {
   auto const mem    = std::malloc(size);
   auto apcStr       = new (mem) APCString(kind);
 
-  apcStr->m_str.m_data        = reinterpret_cast<char*>(apcStr + 1);
+  auto const chars  = reinterpret_cast<char*>(apcStr + 1);
+#ifndef NO_M_DATA
+  apcStr->m_str.m_data = chars;
+#endif
   apcStr->m_str.m_hdr.init(cc, HeaderKind::String, UncountedValue);
   apcStr->m_str.m_len         = len; // don't store hash
 
-  apcStr->m_str.m_data[len] = 0;
-  assert(apcStr == reinterpret_cast<APCString*>(apcStr->m_str.m_data) - 1);
-  auto const mcret = memcpy(apcStr->m_str.m_data, data->data(), len);
+  assert(apcStr == reinterpret_cast<APCString*>(chars) - 1);
+  auto const mcret = memcpy(chars, data->data(), len + 1);
   apcStr = reinterpret_cast<APCString*>(mcret) - 1;
   // Recalculating apcStr from mcret avoids a spill.
 
   apcStr->m_str.preCompute();
 
   assert(apcStr->m_str.m_hash != 0);
-  assert(apcStr->m_str.m_data[len] == 0);
+  assert(apcStr->m_str.data()[len] == 0);
   assert(apcStr->m_str.isUncounted());
   assert(apcStr->m_str.isFlat());
   assert(apcStr->m_str.checkSane());

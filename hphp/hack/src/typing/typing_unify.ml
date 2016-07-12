@@ -65,7 +65,7 @@ and unify_unwrapped env ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 =
       let str_ty = Typing_print.error ty_ in
       let r = Reason.Rcoerced (p1, env.Env.pos, str_ty) in
       let env = List.fold_left tyl
-        ~f:(fun env x -> TUtils.sub_type env ty x) ~init:env in
+        ~f:(fun env x -> TUtils.sub_type env x ty) ~init:env in
       env, (r, ty_)
   | (_, Toption ty1), _ when unwrappedToption1 ->
       unify_unwrapped env unwrappedToption1 ty1 unwrappedToption2 ty2
@@ -237,9 +237,11 @@ and unify_ env r1 ty1 r2 ty2 =
         )
   | _, Tabstract (AKdependent (_, _), Some (_, Tclass _)) ->
       unify_ env r2 ty2 r1 ty1
-  | (Ttuple _ as ty), Tarraykind (AKany | AKempty)
-  | Tarraykind (AKany | AKempty), (Ttuple _ as ty) ->
+
+  | (Ttuple _ as ty), Tarraykind AKany
+  | Tarraykind AKany, (Ttuple _ as ty) ->
       env, ty
+
   | Ttuple tyl1, Ttuple tyl2 ->
       let size1 = List.length tyl1 in
       let size2 = List.length tyl2 in

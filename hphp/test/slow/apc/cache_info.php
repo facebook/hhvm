@@ -36,7 +36,7 @@ class C {}
 apc_add('key3', new C);
 echo "4 keys\n";
 $info = apc_cache_info('user');
-checkInfo($info, 90, 14, 4, true);
+checkInfo($info, 85, 14, 4, true);
 dumpKeys($info);
 
 $info = apc_cache_info('filehits');

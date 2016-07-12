@@ -30,15 +30,14 @@ inline bool chrcaseeq(char left, char right) {
   char k = left ^ right;
   if (k == 0) return true;
   if (k != 32) return false;
-  k = left | right;
-  return (k >= 'a' && k <= 'z');
+  return isalpha(left);
 }
 
 // chrcasecmp performs a case insensitive comparison and returns < 0 if left
 // is less than right, > 0 if left is greater than right, and 0 if the
 // characters are equal
 inline int chrcasecmp(char left, char right) {
-  if (left == right) return 0;
+  if (chrcaseeq(left, right)) return 0;
   if (left >= 'A' && left <= 'Z') left += 32;
   if (right >= 'A' && right <= 'Z') right += 32;
   return (int)(unsigned char)left - (int)(unsigned char)right;

@@ -13,48 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/shape.h"
 
-namespace HPHP {
+#ifndef incl_HPHP_STRING_DATA_MACROS_H_
+#define incl_HPHP_STRING_DATA_MACROS_H_
 
-std::atomic<size_t> Shape::s_totalShapes;
+#ifdef USE_LOWPTR
+#define NO_M_DATA 1
+#endif
 
-Shape::Shape()
-  : m_size(0)
-  , m_capacity(0)
-{
-}
-
-Shape::Shape(const Shape& from)
-  : m_size(from.m_size)
-  , m_capacity(from.m_capacity)
-  , m_table(from.m_table)
-{
-}
-
-Shape* Shape::emptyShape() {
-  static Shape empty;
-  return &empty;
-}
-
-Shape* Shape::create() {
-  return new Shape();
-}
-
-Shape* Shape::clone(Shape* from) {
-  return new Shape(*from);
-}
-
-std::string show(const Shape& shape) {
-  auto ret = std::string{};
-  ret += "{";
-  assert(shape.size() >= 1);
-  folly::format(&ret, "\"{}\"", shape.keyForOffset(0));
-  for (uint32_t i = 1; i < shape.size(); ++i) {
-    folly::format(&ret, ", \"{}\"", shape.keyForOffset(i));
-  }
-  ret += "}";
-  return ret;
-}
-
-}
+#endif

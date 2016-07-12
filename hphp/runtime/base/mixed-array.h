@@ -30,8 +30,6 @@ namespace HPHP {
 
 struct ArrayInit;
 struct MemoryProfile;
-struct Shape;
-struct StructArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -175,9 +173,14 @@ struct MixedArray final : private ArrayData,
     return MakeReserveImpl(size, HeaderKind::Dict);
   }
 
-  static ArrayData* ConvertToDict(ArrayData* ad);
+  static ArrayData* MakeReserveKeyset(uint32_t size) {
+    return MakeReserveImpl(size, HeaderKind::Keyset);
+  }
 
   static MixedArray* ToDictInPlace(ArrayData*);
+  static MixedArray* ToKeysetInPlace(ArrayData*);
+
+  static ArrayData* MakeKeyset(uint32_t size, const TypedValue* values);
 
   /*
    * Allocate a new, empty, request-local array with the same mode as
@@ -194,8 +197,6 @@ struct MixedArray final : private ArrayData,
    */
   static MixedArray* MakeStruct(uint32_t size, const StringData* const* keys,
                                const TypedValue* values);
-  static StructArray* MakeStructArray(uint32_t size, const TypedValue* values,
-                                      Shape*);
 
   /*
    * Allocate an uncounted MixedArray and copy the values from the
@@ -300,12 +301,16 @@ public:
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
+  template <class AppendFunc>
+  static ArrayData* AppendWithRefNoRef(ArrayData*, const Variant& v, bool copy,
+                                       AppendFunc append);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToDict(ArrayData*);
+  static ArrayData* ToKeyset(ArrayData*);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
@@ -372,6 +377,7 @@ public:
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
   static constexpr auto EscalateDict = &Escalate;
   static constexpr auto ToVecDict = ToVec;
+  static constexpr auto ToKeysetDict = &ToKeyset;
 
   static ArrayData* LvalIntRefDict(ArrayData*, int64_t, Variant*&, bool);
   static ArrayData* LvalStrRefDict(ArrayData*, StringData*, Variant*&, bool);
@@ -380,6 +386,65 @@ public:
   static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
   static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
+
+  static constexpr auto NvTryGetIntKeyset = &NvTryGetIntDict;
+  static constexpr auto NvGetIntKeyset = &NvGetInt;
+  static constexpr auto NvTryGetStrKeyset = &NvTryGetStrDict;
+  static constexpr auto NvGetStrKeyset = &NvGetStr;
+  static constexpr auto ReleaseKeyset = &Release;
+  static constexpr auto NvGetKeyKeyset = &NvGetKey;
+  static constexpr auto VsizeKeyset = &Vsize;
+  static constexpr auto GetValueRefKeyset = &GetValueRef;
+  static constexpr auto IsVectorDataKeyset = &IsVectorData;
+  static constexpr auto ExistsIntKeyset = &ExistsInt;
+  static constexpr auto ExistsStrKeyset = &ExistsStr;
+  static constexpr auto RemoveIntKeyset = &RemoveInt;
+  static constexpr auto RemoveStrKeyset = &RemoveStr;
+  static constexpr auto IterBeginKeyset = &IterBegin;
+  static constexpr auto IterLastKeyset = &IterLast;
+  static constexpr auto IterEndKeyset = &IterEnd;
+  static constexpr auto IterAdvanceKeyset = &IterAdvance;
+  static constexpr auto IterRewindKeyset = &IterRewind;
+  static constexpr auto ValidMArrayIterKeyset = ValidMArrayIter;
+  static constexpr auto AdvanceMArrayIterKeyset = &AdvanceMArrayIter;
+  static constexpr auto EscalateForSortKeyset = &EscalateForSort;
+  static constexpr auto KsortKeyset = &Ksort;
+  static constexpr auto SortKeyset = &Sort;
+  static constexpr auto AsortKeyset = &Asort;
+  static constexpr auto UksortKeyset = &Uksort;
+  static constexpr auto UsortKeyset = &Usort;
+  static constexpr auto UasortKeyset = &Uasort;
+  static constexpr auto CopyKeyset = &Copy;
+  static constexpr auto CopyWithStrongIteratorsKeyset =
+    &CopyWithStrongIterators;
+  static constexpr auto CopyStaticKeyset = &CopyStatic;
+  static constexpr auto PopKeyset = &Pop;
+  static constexpr auto DequeueKeyset = &Dequeue;
+  static constexpr auto PrependKeyset = &Prepend;
+  static constexpr auto OnSetEvalScalarKeyset = &OnSetEvalScalar;
+  static constexpr auto EscalateKeyset = &Escalate;
+  static constexpr auto ToVecKeyset = ToVec;
+  static constexpr auto ToDictKeyset = &ToDict;
+
+  static constexpr auto LvalIntRefKeyset = &LvalIntRefDict;
+  static constexpr auto LvalStrRefKeyset = &LvalStrRefDict;
+  static constexpr auto LvalNewRefKeyset = &LvalNewRefDict;
+  static constexpr auto SetRefIntKeyset = &SetRefIntDict;
+  static constexpr auto SetRefStrKeyset = &SetRefStrDict;
+  static constexpr auto AppendRefKeyset = &AppendRefDict;
+
+  static ArrayData* AppendKeyset(ArrayData*, Cell v, bool);
+  static ArrayData* PlusEqKeyset(ArrayData*, const ArrayData*);
+  static ArrayData* MergeKeyset(ArrayData*, const ArrayData*);
+  static ArrayData* AppendWithRefKeyset(ArrayData*, const Variant&, bool);
+  static ArrayData* SetIntKeyset(ArrayData*, int64_t, Cell, bool);
+  static ArrayData* SetStrKeyset(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* AddIntKeyset(ArrayData*, int64_t, Cell, bool);
+  static ArrayData* AddStrKeyset(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* LvalIntKeyset(ArrayData*, int64_t, Variant*&, bool);
+  static ArrayData* LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool);
+  static ArrayData* LvalNewKeyset(ArrayData*, Variant*&, bool);
+  static void RenumberKeyset(ArrayData*);
 
 private:
   MixedArray* copyMixed() const;
@@ -411,6 +476,7 @@ public:
   static constexpr uint32_t MaxMask = MaxHashSize - 1;
   static constexpr uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
   static constexpr uint32_t MaxMakeSize = 4 * SmallSize;
+  static constexpr uint32_t MaxStructMakeSize = 64;
 
   uint32_t iterLimit() const { return m_used; }
 
@@ -435,7 +501,6 @@ private:
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
-  friend struct StructArray;
   friend struct HashCollection;
   friend struct BaseMap;
   friend struct c_Map;
@@ -507,7 +572,8 @@ private:
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
   static ArrayData* ArrayPlusEqGeneric(ArrayData*,
-    MixedArray*, const ArrayData*, size_t);
+    MixedArray*, const ArrayData*, size_t, bool);
+  static ArrayData* ArrayPlusEqImpl(ArrayData*, const ArrayData*, bool);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
@@ -581,6 +647,7 @@ private:
   template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
+  template <class K> ArrayData* updateMove(K k, Cell data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
   ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
@@ -676,8 +743,8 @@ public:
   template<class F> void scan(F&) const; // in mixed-array-defs.h
 
 private:
-  struct DictInitializer;
-  static DictInitializer s_initializer;
+  struct Initializer;
+  static Initializer s_initializer;
 
   // Some of these are packed into qword-sized unions so we can
   // combine stores during initialization. (gcc won't do it on its own.)
@@ -704,10 +771,15 @@ ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
 extern std::aligned_storage<
   computeAllocBytes(1),
   folly::constexpr_max(alignof(MixedArray), size_t(16))
->::type s_theEmptyDictArray;
+>::type s_theEmptyDictArray, s_theEmptyKeysetArray;
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
   void* vp = &s_theEmptyDictArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
+  void* vp = &s_theEmptyKeysetArray;
   return static_cast<ArrayData*>(vp);
 }
 

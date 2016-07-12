@@ -56,11 +56,9 @@
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -1901,7 +1899,7 @@ OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
 }
 
 OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
-  assert(n > 0 && n <= StructArray::MaxMakeSize);
+  assert(n > 0 && n <= MixedArray::MaxStructMakeSize);
   req::vector<const StringData*> names;
   names.reserve(n);
   auto unit = vmfp()->m_func->unit();
@@ -1911,18 +1909,11 @@ OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
   }
 
   // This constructor moves values, no inc/decref is necessary.
-  ArrayData* a;
-  Shape* shape;
-  if (!RuntimeOption::EvalDisableStructArray &&
-      (shape = Shape::create(names.data(), n))) {
-    a = MixedArray::MakeStructArray(n, vmStack().topC(), shape);
-  } else {
-    a = MixedArray::MakeStruct(
-      n,
-      names.data(),
-      vmStack().topC()
-    )->asArrayData();
-  }
+  auto a = MixedArray::MakeStruct(
+    n,
+    names.data(),
+    vmStack().topC()
+  )->asArrayData();
   vmStack().ndiscard(n);
   vmStack().pushArrayNoRc(a);
 }
@@ -1930,6 +1921,13 @@ OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
 OPTBLD_INLINE void iopNewVecArray(intva_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = PackedArray::MakeVec(n, vmStack().topC());
+  vmStack().ndiscard(n);
+  vmStack().pushArrayNoRc(a);
+}
+
+OPTBLD_INLINE void iopNewKeysetArray(intva_t n) {
+  // This constructor moves values, no inc/decref is necessary.
+  auto* a = MixedArray::MakeKeyset(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushArrayNoRc(a);
 }
@@ -4974,7 +4972,7 @@ OPTBLD_INLINE void iopEval(PC& pc) {
     "%s(%d)(%s" EVAL_FILENAME_SUFFIX,
     vm->getContainingFileName()->data(),
     vm->getLine(),
-    string_md5(code.data(), code.size()).c_str()
+    string_md5(code.slice()).c_str()
   );
   Unit* unit = vm->compileEvalString(prefixedCode.get(), evalFilename.c_str());
   if (!RuntimeOption::EvalJitEvaledCode) {

@@ -205,7 +205,7 @@ size_t CodeCache::totalUsed() const {
   return ret;
 }
 
-bool CodeCache::isValidCodeAddress(CodeAddress addr) const {
+bool CodeCache::isValidCodeAddress(ConstCodeAddress addr) const {
     return addr >= m_base && addr < m_base + m_codeSize;
 }
 

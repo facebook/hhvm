@@ -99,9 +99,9 @@ static int gettime_helper(clockid_t which_clock, struct timespec *tp) {
   tp->tv_nsec = tv.tv_usec * 1000;
   return ret;
 #else
-  static int vdso_usable = Vdso::ClockGetTime(which_clock, tp);
-  if (vdso_usable == 0) {
-    return Vdso::ClockGetTime(which_clock, tp);
+  static bool vdso_usable = vdso::clock_gettime(which_clock, tp) == 0;
+  if (vdso_usable) {
+    return vdso::clock_gettime(which_clock, tp);
   }
   return clock_gettime(which_clock, tp);
 #endif

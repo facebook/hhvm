@@ -1,2 +1,2 @@
 
-Catchable fatal error: Argument 1 passed to Bobble::frob() must be an instance of string, int given in %s/test/quick/param-type.php on line 7
+Catchable fatal error: Argument 1 passed to Bobble::frob() must be an instance of string, int given in %s/test/quick/param-type.php on line 13

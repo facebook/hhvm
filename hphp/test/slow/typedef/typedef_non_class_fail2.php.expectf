@@ -1,2 +1,2 @@
 
-Catchable fatal error: Argument 1 passed to woot() must be an instance of Point, null given in %s on line 10
+Catchable fatal error: Argument 1 passed to woot() must be an instance of Point, null given in %s on line 13

@@ -15,8 +15,8 @@
 */
 
 #include "hphp/util/compatibility.h"
+
 #include "hphp/util/assertions.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/vdso.h"
 
 #include <cstdarg>
@@ -67,8 +67,7 @@ int dprintf(int fd, const char *format, ...) {
 
 int pipe2(int pipefd[2], int flags) {
   if (flags & ~O_CLOEXEC) {
-    Logger::Error("Unknown flag passed to pipe2 compatibility layer");
-    abort();
+    always_assert(!"Unknown flag passed to pipe2 compatibility layer");
   }
 
   if (pipe(pipefd) < 0) {

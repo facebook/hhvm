@@ -124,10 +124,11 @@ module WithStatementAndDeclParser
       -> parse_array_creation_expression parser
     | Shape -> parse_shape_expression parser
     | Function -> parse_anon parser
+    | DollarDollar ->
+      (parser1, make_pipe_variable_expression (make_token token))
     | Async   (* TODO: anon or lambda *)
 
     | Dollar (* TODO: ? *)
-    | DollarDollar (* TODO: ? *)
 
 
     (* TODO: Array *)

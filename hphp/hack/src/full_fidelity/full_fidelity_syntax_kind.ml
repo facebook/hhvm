@@ -64,6 +64,7 @@ type t =
 | LiteralExpression
 | VariableExpression
 | QualifiedNameExpression
+| PipeVariableExpression
 | PrefixUnaryOperator
 | PostfixUnaryOperator
 | BinaryOperator
@@ -107,6 +108,7 @@ let to_string kind =
   | LiteralExpression -> "literal"
   | VariableExpression -> "variable"
   | QualifiedNameExpression -> "qualified_name"
+  | PipeVariableExpression -> "pipe_variable"
   | Error -> "error"
   | SyntaxList -> "list"
   | ListItem -> "list_item"

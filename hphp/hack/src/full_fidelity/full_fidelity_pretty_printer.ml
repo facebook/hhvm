@@ -204,7 +204,8 @@ let rec get_doc node =
   | Token x -> from_token x
   | LiteralExpression x
   | VariableExpression x
-  | QualifiedNameExpression x -> get_doc x
+  | QualifiedNameExpression x
+  | PipeVariableExpression x -> get_doc x
   | Error x -> get_from_children x
   | SyntaxList x -> get_from_children x
   | ListItem x -> (get_doc x.list_item) ^^^ (get_doc x.list_separator)

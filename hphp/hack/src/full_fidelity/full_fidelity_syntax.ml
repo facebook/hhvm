@@ -554,6 +554,7 @@ module WithToken(Token: TokenType) = struct
     | LiteralExpression of t
     | VariableExpression of t
     | QualifiedNameExpression of t
+    | PipeVariableExpression of t
     | PrefixUnaryOperator of unary_operator
     | PostfixUnaryOperator of unary_operator
     | BinaryOperator of binary_operator
@@ -607,6 +608,7 @@ module WithToken(Token: TokenType) = struct
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
       | VariableExpression _ -> SyntaxKind.VariableExpression
       | QualifiedNameExpression _ -> SyntaxKind.QualifiedNameExpression
+      | PipeVariableExpression _ -> SyntaxKind.PipeVariableExpression
       | Error _ -> SyntaxKind.Error
       | SyntaxList _ -> SyntaxKind.SyntaxList
       | ListItem _ -> SyntaxKind.ListItem
@@ -692,6 +694,7 @@ module WithToken(Token: TokenType) = struct
     let is_literal node = kind node = SyntaxKind.LiteralExpression
     let is_variable node = kind node = SyntaxKind.VariableExpression
     let is_qualified_name node = kind node = SyntaxKind.QualifiedNameExpression
+    let is_pipe_variable node = kind node = SyntaxKind.PipeVariableExpression
     let is_error node = kind node = SyntaxKind.Error
     let is_list node = kind node = SyntaxKind.SyntaxList
     let is_list_item node = kind node = SyntaxKind.ListItem
@@ -790,6 +793,7 @@ module WithToken(Token: TokenType) = struct
       | LiteralExpression x -> [x]
       | VariableExpression x -> [x]
       | QualifiedNameExpression x -> [x]
+      | PipeVariableExpression x -> [x]
       | Error x -> x
       | SyntaxList x -> x
       | AnonymousFunction
@@ -1091,6 +1095,7 @@ module WithToken(Token: TokenType) = struct
       | LiteralExpression _ -> [ "literal_expression" ]
       | VariableExpression _ -> [ "variable_expression" ]
       | QualifiedNameExpression _ -> [ "qualified_name_expression" ]
+      | PipeVariableExpression _ -> ["pipe_variable_expression"]
       | Error _ -> []
       | SyntaxList _ -> []
       | AnonymousFunction
@@ -1646,6 +1651,7 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.LiteralExpression, [x]) -> LiteralExpression x
       | (SyntaxKind.VariableExpression, [x]) -> VariableExpression x
       | (SyntaxKind.QualifiedNameExpression,[x]) -> QualifiedNameExpression x
+      | (SyntaxKind.PipeVariableExpression, [x]) -> PipeVariableExpression x
       | (SyntaxKind.SimpleTypeSpecifier, [x]) -> SimpleTypeSpecifier x
       | (SyntaxKind.ScriptHeader,
         [ header_less_than; header_question; header_language ]) ->
@@ -2359,6 +2365,9 @@ module WithToken(Token: TokenType) = struct
 
       let make_qualified_name_expression name =
         from_children SyntaxKind.QualifiedNameExpression [ name ]
+
+      let make_pipe_variable_expression variable =
+        from_children SyntaxKind.PipeVariableExpression [ variable ]
 
     end (* WithValueBuilder *)
   end (* WithSyntaxValue *)

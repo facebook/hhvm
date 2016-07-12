@@ -92,7 +92,7 @@ constexpr const Index kIndexUnknownNoPtrs = 1;
 // Various ugly internal implementation details put here not to muddle the
 // external interface. Look in here if you're interested in implementation
 // comments.
-#include "type-scan-detail.h"
+#include "hphp/util/type-scan-detail.h"
 
 namespace HPHP { namespace type_scan { namespace Action {
 

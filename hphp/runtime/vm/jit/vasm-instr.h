@@ -317,7 +317,6 @@ struct Vunit;
   O(mfcr, Inone, Un, D(d))\
   O(mflr, Inone, Un, D(d))\
   O(mfvsrd, Inone, U(s), D(d))\
-  O(movlk, Inone, UH(s,d), DH(d,s))\
   O(mtlr, Inone, U(s), Dn)\
   O(mtvsrd, Inone, U(s), D(d))\
   O(stdcx, Inone, U(s) U(d), Dn)\
@@ -1143,6 +1142,9 @@ struct subsb { Vreg8 s0, s1, d; VregSF sf; };
 /*
  * ppc64 intrinsics.
  */
+struct extrb { Vreg8 s; Vreg8 d; };   // Extract and zeros the upper bits
+struct extsb { Vreg64 s; Vreg64 d; }; // Extend byte sign
+struct extsw { Vreg64 s; Vreg64 d; }; // Extend word sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };
@@ -1151,21 +1153,12 @@ struct mfcr { Vreg64 d; };
 struct mflr { Vreg64 d; };
 struct mfvsrd { Vreg128 s; Vreg64 d; };
 struct xscvdpsxds { Vreg128 s, d; };
-// move 32bits into a register and keep the higher 32bits
-struct movlk { Vreg64 s, d; };
 struct mtlr { Vreg64 s; };
 struct mtvsrd { Vreg64 s; Vreg128 d; };
 struct stdcx { Vreg64 s; Vptr d; };
 struct xscvsxddp { Vreg128 s, d; };
 struct xxlxor { Vreg128 s0, s1, d; };
 struct xxpermdi { Vreg128 s0, s1, d; };
-
-// Extract and zeros the upper bits
-struct extrb { Vreg8 s; Vreg8 d; };
-
-// Extend byte sign
-struct extsb { Vreg64 s; Vreg64 d; };
-struct extsw { Vreg64 s; Vreg64 d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

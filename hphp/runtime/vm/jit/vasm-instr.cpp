@@ -211,7 +211,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::mfcr:
     case Vinstr::mflr:
     case Vinstr::mfvsrd:
-    case Vinstr::movlk:
     case Vinstr::mtlr:
     case Vinstr::mtvsrd:
     case Vinstr::stdcx:

@@ -1281,6 +1281,8 @@ void lowerForPPC64(Vout& v, tailcallphp& inst) {
 // Lower movs to copy
 void lowerForPPC64(Vout& v, movtqb& inst) { v << copy{inst.s, inst.d}; }
 void lowerForPPC64(Vout& v, movtql& inst) { v << copy{inst.s, inst.d}; }
+void lowerForPPC64(Vout& v, movtdb& inst) { v << copy{inst.s, inst.d}; }
+void lowerForPPC64(Vout& v, movtdq& inst) { v << copy{inst.s, inst.d}; }
 
 // Lower all movzb* to extrb as ppc64 always sign extend the unused bits of reg.
 void lowerForPPC64(Vout& v, movzbl& i)    { v << extrb{i.s, Reg8(i.d)}; }

@@ -50,14 +50,15 @@ let add
   severity
   pos
   message =
-  if !Errors.is_hh_fixme pos code then () else begin
-    let lint =
-      { code; severity; pos; message; bypass_changed_lines; autofix } in
-    match !lint_list with
-    | Some lst -> lint_list := Some (lint :: lst)
+  match !lint_list with
+    | Some lst ->
+      if !Errors.is_hh_fixme pos code then () else begin
+        let lint =
+          { code; severity; pos; message; bypass_changed_lines; autofix } in
+        lint_list := Some (lint :: lst)
+      end
     (* by default, we ignore lint errors *)
     | None -> ()
-  end
 
 let to_absolute ({pos; _} as lint) =
   {lint with pos = Pos.to_absolute pos}

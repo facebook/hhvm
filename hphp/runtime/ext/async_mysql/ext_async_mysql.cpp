@@ -144,6 +144,21 @@ double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
   return data->m_values.callbackDelayMicrosAvg;
 }
 
+double HHVM_METHOD(AsyncMysqlClientStats, ioThreadBusyMicrosAvg) {
+  auto* data = Native::data<AsyncMysqlClientStats>(this_);
+  return data->m_values.ioThreadBusyTime;
+}
+
+double HHVM_METHOD(AsyncMysqlClientStats, ioThreadIdleMicrosAvg) {
+  auto* data = Native::data<AsyncMysqlClientStats>(this_);
+  return data->m_values.ioThreadIdleTime;
+}
+
+int64_t HHVM_METHOD(AsyncMysqlClientStats, notificationQueueSize) {
+  auto* data = Native::data<AsyncMysqlClientStats>(this_);
+  return data->m_values.notificationQueueSize;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // MySSLContextProvider
 MySSLContextProvider::MySSLContextProvider(
@@ -1524,6 +1539,10 @@ static struct AsyncMysqlExtension final : Extension {
 
     HHVM_ME(AsyncMysqlClientStats, ioEventLoopMicrosAvg);
     HHVM_ME(AsyncMysqlClientStats, callbackDelayMicrosAvg);
+
+    HHVM_ME(AsyncMysqlClientStats, ioThreadBusyMicrosAvg);
+    HHVM_ME(AsyncMysqlClientStats, ioThreadIdleMicrosAvg);
+    HHVM_ME(AsyncMysqlClientStats, notificationQueueSize);
     Native::registerNativeDataInfo<AsyncMysqlClientStats>(
         AsyncMysqlClientStats::s_className.get());
 

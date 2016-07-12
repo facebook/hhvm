@@ -624,6 +624,12 @@ void throw_object(const Object& e) {
   throw req::root<Object>(e);
 }
 
+#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8))
+void throw_object(Object&& e) {
+  throw req::root<Object>(std::move(e));
+}
+#endif
+
 /*
  * This function is used when another thread is segfaulting---we just
  * want to wait forever to give it a chance to write a stacktrace file

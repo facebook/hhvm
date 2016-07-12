@@ -616,8 +616,16 @@ void MemoryManager::initHole() {
 void MemoryManager::initFree() {
   initHole();
   for (auto i = 0; i < kNumSmallSizes; i++) {
-    for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->hdr.init(HeaderKind::Free, smallIndex2Size(i));
+    auto size = smallIndex2Size(i);
+    auto n = m_freelists[i].head;
+    for (; n && n->hdr.kind != HeaderKind::Free; n = n->next) {
+      n->hdr.init(HeaderKind::Free, size);
+    }
+    if (debug) {
+      // ensure the freelist tail is already initialized.
+      for (; n; n = n->next) {
+        assert(n->hdr.kind == HeaderKind::Free && n->size() == size);
+      }
     }
   }
 }
@@ -745,7 +753,8 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
     assert((fragBytes & kSmallSizeAlignMask) == 0);
     unsigned fragInd = smallSize2Index(fragBytes + 1) - 1;
     uint32_t fragUsable = smallIndex2Size(fragInd);
-    void* frag = (void*)(uintptr_t(rem) + remBytes - fragUsable);
+    auto frag = FreeNode::InitFrom((char*)rem + remBytes - fragUsable,
+                                   fragUsable, HeaderKind::Hole);
     FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
               "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
               (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
@@ -766,8 +775,10 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
   assert((tailBytes & kSmallSizeAlignMask) == 0);
   assert((splitUsable & kSmallSizeAlignMask) == 0);
   assert(nSplit * splitUsable <= tailBytes);
+  assert(splitUsable == smallIndex2Size(splitInd));
   for (uint32_t i = nSplit; i--;) {
-    void* split = (void*)(uintptr_t(tail) + i * splitUsable);
+    auto split = FreeNode::InitFrom((char*)tail + i * splitUsable,
+                                    splitUsable, HeaderKind::Hole);
     FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
               "split={}, splitUsable={}, splitInd={}\n", tail,
               (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
@@ -1264,9 +1275,9 @@ void ContiguousHeap::reset() {
       int requestCount = RuntimeOption::HeapResetCountBase;
 
       // Assumption : low and high water mark are power of 2 aligned
-      for( auto resetStep = RuntimeOption::HeapHighWaterMark / 2 ;
-           resetStep > m_heapUsage ;
-           resetStep /= 2 ) {
+      for (auto resetStep = RuntimeOption::HeapHighWaterMark / 2;
+           resetStep > m_heapUsage;
+           resetStep /= 2) {
         requestCount *= RuntimeOption::HeapResetCountMultiple;
       }
       if (requestCount <= m_requestCount) {

@@ -103,16 +103,28 @@ inline void* MemoryManager::FreeList::maybePop() {
   return ret;
 }
 
+inline FreeNode*
+FreeNode::InitFrom(void* addr, uint32_t size, HeaderKind kind) {
+  auto node = static_cast<FreeNode*>(addr);
+  node->hdr.init(kind, size);
+  return node;
+}
+
+inline FreeNode*
+FreeNode::UninitFrom(void* addr, FreeNode* next) {
+  // The extra store to initialize a HeaderKind::Free here would be expensive.
+  // Instead, initFree() initializes free headers just before iterating
+  auto node = static_cast<FreeNode*>(addr);
+  node->next = next;
+  return node;
+}
+
 inline void MemoryManager::FreeList::push(void* val, size_t size) {
   FTRACE(4, "FreeList::push({}, {}), prev head = {}\n", val, size, head);
   auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
   static_assert(kMaxSmallSize <= kMaxFreeSize, "");
   assert(size > 0 && size <= kMaxFreeSize);
-  auto const node = static_cast<FreeNode*>(val);
-  node->next = head;
-  // The extra store to initialize a free header here is expensive.
-  // Instead, initFree() initializes all free headers just before iterating
-  head = node;
+  head = FreeNode::UninitFrom(val, head);
 }
 
 //////////////////////////////////////////////////////////////////////

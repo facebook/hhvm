@@ -1,6 +1,6 @@
 <?php
 
-$utf8dn = "www.fußball.com";
+$utf8dn = "www.fu\xc3\x9fball.com";
 $ret = idn_to_ascii(
   $utf8dn, 
   IDNA_NONTRANSITIONAL_TO_ASCII, 

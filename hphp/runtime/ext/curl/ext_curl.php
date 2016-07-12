@@ -457,13 +457,15 @@ namespace HH\Asio {
  *
  * @param $urlOrHandle - An existing cURL handle or a URL as a `string`. String
  *                       URLs will create a default cURL GET handle.
+ * @param $closeHandleIfHandle - Close cURL handle inside wrapper
  * @return Awaitable<string> - An `Awaitable` representing the `string` result
  *                             of the cURL request.
  *
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-async function curl_exec(mixed $urlOrHandle, bool $closeHandleIfHandle = false): Awaitable<string> {
+async function curl_exec(mixed $urlOrHandle,
+                         bool $closeHandleIfHandle = false): Awaitable<string> {
   if (is_string($urlOrHandle)) {
     $ch = curl_init($urlOrHandle);
   } else if (is_resource($urlOrHandle) &&
@@ -500,14 +502,7 @@ async function curl_exec(mixed $urlOrHandle, bool $closeHandleIfHandle = false):
   $content = (string)curl_multi_getcontent($ch);
   curl_multi_remove_handle($mh, $ch);
 
-  /* Orvid
-   * We should probably only be closing the handle here if we created the handle
-   * in the first place; If the handle was passed in, we shouldn't be closing it.
-   *
-   * wake-up-neo
-   * Also we need a convenient solution for "return await curl_exec($ch)",
-   * I believe we should close the handle here by an extra argument.
-   */
+  /* close handle if string was passed or argument */
   if (is_string($urlOrHandle) || ($closeHandleIfHandle === true)) {
     curl_close($ch);
   }

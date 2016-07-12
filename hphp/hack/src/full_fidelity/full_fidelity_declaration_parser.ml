@@ -39,6 +39,14 @@ module WithExpressionAndStatementParser
     let parser = { lexer; errors } in
     (parser, node)
 
+  let parse_return_type parser =
+    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let (type_parser, node) = TypeParser.parse_return_type type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let parser = { lexer; errors } in
+    (parser, node)
+
   let parse_type_constraint_opt parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
     let (type_parser, node) =
@@ -466,13 +474,6 @@ module WithExpressionAndStatementParser
         (parser, node)
     else
       (parser, make_missing())
-
-  and parse_return_type parser =
-    let (parser1, token) = next_token parser in
-    if (Token.kind token) = Noreturn then
-      (parser1, make_token token)
-    else
-      parse_type_specifier parser
 
   and parse_return_type_hint_opt parser =
     let (parser1, colon_token) = next_token parser in

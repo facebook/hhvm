@@ -29,9 +29,9 @@ module WithStatementAndDeclParser
   include PrecedenceParser
   include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
 
-  let parse_type_specifier parser =
+  let parse_return_type parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
-    let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
+    let (type_parser, node) = TypeParser.parse_return_type type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
     let parser = { parser with lexer; errors } in
@@ -596,13 +596,6 @@ module WithStatementAndDeclParser
     let result = make_shape_expression shape left_paren fields right_paren in
     (parser, result)
 
-  and parse_anon_return_type parser =
-    let (parser, noreturn) = optional_token parser Noreturn in
-    if is_missing noreturn then
-      parse_type_specifier parser
-    else
-      (parser, noreturn)
-
   and parse_variable parser =
     (* Note that the use clause is a list of variable *tokens, not
        *expressions*. *)
@@ -656,7 +649,7 @@ module WithStatementAndDeclParser
       if is_missing colon then
         (parser, (make_missing()))
       else
-        parse_anon_return_type parser in
+        parse_return_type parser in
     let (parser, use_clause) = parse_anon_use_opt parser in
     let (parser, body) = parse_compound_statement parser in
     let result = make_anonymous_function async fn left_paren params

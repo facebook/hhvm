@@ -397,3 +397,10 @@ and parse_type_constraint_opt parser =
     (parser, result)
   else
     (parser, (make_missing()))
+
+let parse_return_type parser =
+  let (parser1, token) = next_token parser in
+  if (Token.kind token) = Noreturn then
+    (parser1, make_token token)
+  else
+    parse_type_specifier parser

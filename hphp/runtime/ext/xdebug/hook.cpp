@@ -45,33 +45,6 @@ using BreakType = XDebugBreakpoint::Type;
 
 namespace {
 
-/* Finds the SourceLoc that most tightly fits a line in a unit. */
-SourceLoc tightestLoc(const Unit* unit, int line) {
-  auto const contained = [&] (SourceLoc loc) {
-    return loc.line0 <= line && line <= loc.line1;
-  };
-
-  auto const size = [] (SourceLoc loc) -> size_t {
-    return loc.line1 - loc.line0 + 1;
-  };
-
-  // Will be a huge unsigned value under size().
-  SourceLoc best;
-  best.line0 = 1;
-  best.line1 = -1;
-
-  for (auto const& ent : getSourceLocTable(unit)) {
-    if (contained(ent.val()) && size(ent.val()) < size(best)) {
-      best = ent.val();
-
-      // If the Sourceloc neatly fits on a single line (hopefully the common
-      // case), then bail out early.
-      if (size(best) == 1) break;
-    }
-  }
-  return best;
-}
-
 // Helper that adds the given function breakpoint corresponding to the given
 // function and id as a breakpoint. If a duplicate breakpoint already exists,
 // it is overwritten.
@@ -146,14 +119,38 @@ const Unit* find_unit(String filename) {
 }
 
 bool calibrateBreakpointLine(const Unit* unit, int& line) {
-  // Calibrate the line to nearest line with code.
-  auto nearestLine = unit->getNearestLineWithCode(line);
-  if (nearestLine <= 0) {
-    // Can't find source code for the new line.
-    return false;
+  auto const size = [] (const SourceLoc& loc) -> size_t {
+    return loc.line1 - loc.line0 + 1;
+  };
+
+  auto const rank = [&] (const SourceLoc& loc) {
+    auto distance = loc.line1 - line;
+    // loc is completely above input line, ignore it.
+    if (distance < 0) {
+      return 0.0;
+    }
+    // Favor SourceLoc whose ending line is close to input line.
+    return 10.0 / (distance + 1) + 1.0 / size(loc);
+  };
+
+  SourceLoc best;
+  best.line0 = -1;
+  best.line1 = -1;
+  auto bestRank = rank(best);
+
+  for (auto const& ent : getSourceLocTable(unit)) {
+    auto curRank = rank(ent.val());
+    if (curRank > bestRank) {
+      best = ent.val();
+      bestRank = curRank;
+
+      // If the Sourceloc neatly fits on a single line (hopefully the common
+      // case), then bail out early.
+      if (best.line0 == line && size(best) == 1) break;
+    }
   }
-  // Figure out the canonical line number for the breakpoint.
-  line = tightestLoc(unit, nearestLine).line1;
+  line = best.line1;
+
   return true;
 }
 

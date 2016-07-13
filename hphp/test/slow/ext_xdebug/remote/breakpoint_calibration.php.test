@@ -1,0 +1,20 @@
+<?hh
+
+class MyClass {
+  public function increment(int $x): int {
+
+    echo 'Enter increment';
+
+    try {
+      $foo = 100;
+
+      $bar = 200;
+    } catch (Exception $e) {
+      echo 'test_exception';
+    }
+
+    return $x + 300;
+  }
+}
+
+(new MyClass())->increment(5);

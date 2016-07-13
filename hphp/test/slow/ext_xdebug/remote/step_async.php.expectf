@@ -7,19 +7,22 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="1"><xdebug:message lineno="20" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
 (cmd) step_over -i 2
-<?xml version="1.0" encoding="iso-8859-1"?>
+non_blocking_async<?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="2"><xdebug:message lineno="21" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
 (cmd) step_over -i 3
-Before calling foo()<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="3"><xdebug:message lineno="23" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
-(cmd) step_over -i 4
-Caught exception in foo()<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="4"><xdebug:message lineno="26" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
-(cmd) step_over -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="5"><xdebug:message lineno="25" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="3"><xdebug:message lineno="22" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
+(cmd) step_over -i 4
+Before calling foo()<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="4"><xdebug:message lineno="24" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
+(cmd) step_over -i 5
+Caught exception in foo()<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="5"><xdebug:message lineno="27" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
 (cmd) step_over -i 6
-Caught exception in test_async()<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="6"><xdebug:message lineno="27" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="6"><xdebug:message lineno="26" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
 (cmd) step_over -i 7
+Caught exception in test_async()<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="7"><xdebug:message lineno="28" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
+(cmd) step_over -i 8
 Exit test_async

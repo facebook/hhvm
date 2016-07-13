@@ -262,6 +262,11 @@ enum SystemRegister {
           (0x4 << CRn_offset) |
           (0x4 << CRm_offset) |
           (0x0 << SysOp2_offset)) >> ImmSystemRegister_offset,
+  FPSR = ((0x1 << SysO0_offset) |
+          (0x3 << SysOp1_offset) |
+          (0x4 << CRn_offset) |
+          (0x4 << CRm_offset) |
+          (0x1 << SysOp2_offset)) >> ImmSystemRegister_offset,
   TPIDR_EL0 = ((0x1 << SysO0_offset) |
                (0x3 << SysOp1_offset) |
                (0xd << CRn_offset) |

@@ -214,7 +214,6 @@ struct Vgen {
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
   void emit(const cvtsi2sd& i) { a->Scvtf(D(i.d), X(i.s)); }
-  void emit(const cvttsd2siq& i) { a->Fcvtzs(X(i.d), D(i.s)); }
   void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, SetFlags); }
   void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, SetFlags); }
   void emit(const decqmlock& i);
@@ -301,6 +300,7 @@ struct Vgen {
   void emit(const cmplims& i);
   void emit(const cmpsds& i);
   void emit(const fabs& i) { a->Fabs(D(i.d), D(i.s)); }
+  void emit(const fcvtzs& i) {a->Fcvtzs(X(i.d), D(i.s));}
   void emit(const lslwi& i);
   void emit(const lslwis& i);
   void emit(const lslxi& i);
@@ -1256,6 +1256,35 @@ Y(incqm, incq, load, store, m)
 Y(incwm, incw, loadw, storew, m)
 
 #undef Y
+
+void lower(Vunit& unit, cvttsd2siq& i, Vlabel b, size_t idx) {
+  lower_impl(unit, b, idx, [&] (Vout& v) {
+  auto fpsr = v.makeReg();
+  auto res = v.makeReg();
+  auto const sf = v.makeReg();
+  auto err = v.makeReg();
+  auto tmp1 = v.makeReg();
+  auto tmp2 = v.makeReg();
+
+  // Clear FPSR IOC flag
+  v << mrs{FPSR, tmp1};
+  v << andqi{~0x01, tmp1, tmp2, sf};
+  v << msr{tmp2, FPSR};
+
+  // Load error value
+  v << ldimmq{0x8000000000000000, err};
+
+  // Do ARM64's double to signed int64 conversion.
+  v << fcvtzs{i.s, res};
+
+  // Check if there was a conversion error
+  v << mrs{FPSR, fpsr};
+  v << testqi{1, fpsr, sf};
+
+  // Move converted value or error
+  v << cmovq{CC_NZ, sf, res, err, i.d};
+  });
+}
 
 void lower(Vunit& u, stubunwind& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {

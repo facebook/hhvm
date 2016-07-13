@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "debug-parser.h"
+#include "hphp/tools/debug-parser/debug-parser.h"
 
 #include <folly/Format.h>
 

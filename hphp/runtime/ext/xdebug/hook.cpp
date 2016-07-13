@@ -546,6 +546,19 @@ void XDebugHook::onFlowBreak(const Unit* unit, int line) {
   }
 }
 
+void sendBreakpointResolvedNotify(int id, const XDebugBreakpoint& bp) {
+  auto server = XDEBUG_GLOBAL(Server);
+  if (server == nullptr || !server->m_supportsNotify) {
+    return;
+  }
+  auto notify = xdebug_xml_node_init("notify");
+  SCOPE_EXIT { xdebug_xml_node_dtor(notify); };
+
+  xdebug_xml_add_attribute(notify, "name", "breakpoint_resolved");
+  xdebug_xml_add_child(notify, breakpoint_xml_node(id, bp));
+  server->sendMessage(*notify);
+}
+
 void XDebugHook::onFileLoad(Unit* unit) {
   // Translate the unit filename to match xdebug's internal format
   String unit_path(const_cast<StringData*>(unit->filepath()));
@@ -553,7 +566,8 @@ void XDebugHook::onFileLoad(Unit* unit) {
 
   // Loop over all unmatched breakpoints
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
-    auto& bp = BREAKPOINT_MAP.at(*iter);
+    auto id = *iter;
+    auto& bp = BREAKPOINT_MAP.at(id);
     if (bp.type != BreakType::LINE || bp.fileName != filename) {
       ++iter;
       continue;
@@ -566,10 +580,12 @@ void XDebugHook::onFileLoad(Unit* unit) {
     // in the dbgp protocol at this point. php5 xdebug doesn't do anything,
     // so we just cleanup
     if (phpAddBreakPointLine(unit, bp.line)) {
-      add_line_breakpoint(*iter, bp, unit);
+      add_line_breakpoint(id, bp, unit);
+      bp.resolved = true;
+      sendBreakpointResolvedNotify(id, bp);
       iter = UNMATCHED.erase(iter);
     } else {
-      BREAKPOINT_MAP.erase(*iter);
+      BREAKPOINT_MAP.erase(id);
       iter = UNMATCHED.erase(iter);
     }
   }

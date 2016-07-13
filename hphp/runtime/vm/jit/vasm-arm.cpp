@@ -249,6 +249,7 @@ struct Vgen {
   void emit(const movl& i) { a->Mov(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Sxtb(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzbw& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movzbq& i) { a->Uxtb(X(i.d), W(i.s).X()); }
   void emit(const movzlq& i) { a->Uxtw(X(i.d), W(i.s).X()); }
@@ -316,6 +317,7 @@ struct Vgen {
   void emit(const popp& i);
   void emit(const pushp& i);
   void emit(const subsb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), SetFlags); }
+  void emit(const uxth& i) { a->Uxth(W(i.d), W(i.s)); }
 
   void emit_nop() { a->Nop(); }
 
@@ -1324,6 +1326,20 @@ void lower(Vunit& u, pushm& i, Vlabel b, size_t z) {
   });
 }
 
+void lower(Vunit& u, movtdb& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto d = v.makeReg();
+    v << copy{i.s, d};
+    v << movtqb{d, i.d};
+  });
+}
+
+void lower(Vunit& u, movtdq& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    v << copy{i.s, i.d};
+  });
+}
+
 void lower(Vunit& u, cmpb& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
     auto s0 = v.makeReg();
@@ -1341,6 +1357,23 @@ void lower(Vunit& u, cmpbi& i, Vlabel b, size_t z) {
     v << cmpli{i.s0, s1, i.sf};
   });
 }
+
+#define Y(vasm_opc, conv_opc, load_opc, cmp_opc)        \
+void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(u, b, z, [&] (Vout& v) {                   \
+    auto s0 = v.makeReg();                              \
+    v << conv_opc{i.s0, s0};                            \
+    lowerVptr(i.s1, v);                                 \
+    auto s1 = v.makeReg();                              \
+    v << load_opc{i.s1, s1};                            \
+    v << cmp_opc{s0, s1, i.sf};                         \
+  });                                                   \
+}
+
+Y(cmpbm, movzbl, loadb, cmpl)
+Y(cmpwm, uxth, loadw, cmpl)
+
+#undef Y
 
 void lower(Vunit& u, testb& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {

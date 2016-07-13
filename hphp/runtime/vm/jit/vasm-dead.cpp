@@ -185,6 +185,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::testwim:
     case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
+    case Vinstr::uxth:
     case Vinstr::xorb:
     case Vinstr::xorbi:
     case Vinstr::xorl:

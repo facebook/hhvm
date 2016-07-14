@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -104,7 +105,7 @@ bool beginInlining(IRGS& env,
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
-  data.ctx           = ctx;
+  data.ctx           = target->isClosureBody() ? nullptr : ctx;
   data.retSPOff      = prevSPOff;
   data.spOffset      = calleeAROff;
   data.numNonDefault = numParams;
@@ -126,19 +127,7 @@ bool beginInlining(IRGS& env,
   for (unsigned i = 0; i < numParams; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
   }
-  const bool hasVariadicArg = target->hasVariadicCaptureParam();
-  for (unsigned i = numParams; i < target->numLocals() - hasVariadicArg; ++i) {
-    /*
-     * Here we need to be generating hopefully-dead stores to initialize
-     * non-parameter locals to KindOfUninit in case we have to leave the trace.
-     */
-    stLocRaw(env, i, calleeFP, cns(env, TUninit));
-  }
-  if (hasVariadicArg) {
-    auto argNum = target->numLocals() - 1;
-    always_assert(numParams <= argNum);
-    stLocRaw(env, argNum, calleeFP, cns(env, staticEmptyArray()));
-  }
+  emitPrologueLocals(env, numParams, target, ctx);
 
   return true;
 }

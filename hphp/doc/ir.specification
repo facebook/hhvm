@@ -2643,7 +2643,7 @@ fields of that struct for holding intermediate values.
   Store S1 to the m_this/m_cls field in the frame pointer S0.
 
   If InitCtx appears in an IR unit, it must dominate all occurrences of LdCtx
-  and LdCctx.
+  and LdCctx with the same FramePtr.
 
 | CheckSurpriseFlagsEnter<func,argc>, ND, S(FramePtr), Er
 

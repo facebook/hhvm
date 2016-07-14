@@ -130,39 +130,43 @@ bool checkBlock(Block* b) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Check some invariants around InitCtx:
- * 1. At most one should exist in a given unit.
- * 2. If present, InitCtx must dominate all occurrences of LdCtx and LdCctx.
+ * Check some invariants around InitCtx(fp):
+ * 1. For each fp, at most one should exist in a given unit.
+ * 2. If present, InitCtx must dominate all occurrences of LdCtx and LdCctx
+ *    with the same fp.
  */
 bool DEBUG_ONLY checkInitCtxInvariants(const IRUnit& unit) {
   auto const blocks = rpoSortCfg(unit);
 
-  const Block* init_ctx_block = nullptr;
+  jit::hash_map<SSATmp*, Block*> init_ctx_blocks;
 
   for (auto& blk : blocks) {
     for (auto& inst : blk->instrs()) {
       if (!inst.is(InitCtx)) continue;
+      auto& init_ctx_block = init_ctx_blocks[inst.src(0)];
       if (init_ctx_block) return false;
       init_ctx_block = blk;
     }
   }
 
-  if (!init_ctx_block) return true;
+  if (init_ctx_blocks.empty()) return true;
 
   auto const rpoIDs = numberBlocks(unit, blocks);
   auto const idoms = findDominators(unit, blocks, rpoIDs);
 
   for (auto& blk : blocks) {
-    bool found_init_ctx = false;
+    SSATmp* init_ctx_src = nullptr;
 
     for (auto& inst : blk->instrs()) {
       if (inst.is(InitCtx)) {
-        found_init_ctx = true;
+        init_ctx_src = inst.src(0);
         continue;
       }
       if (!inst.is(LdCtx, LdCctx)) continue;
 
-      if (init_ctx_block == blk && !found_init_ctx) return false;
+      auto const init_ctx_block = init_ctx_blocks[inst.src(0)];
+      if (!init_ctx_block) continue;
+      if (init_ctx_block == blk && init_ctx_src != inst.src(0)) return false;
       if (!dominates(init_ctx_block, blk, idoms)) return false;
     }
   }

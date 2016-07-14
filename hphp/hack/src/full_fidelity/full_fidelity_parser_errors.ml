@@ -28,9 +28,22 @@ let matches_first f items =
 let parent_is_function parents =
   matches_first is_function parents
 
+let is_bad_xhp_attribute_name name =
+  (String.contains name ':') || (String.contains name '-')
+
+let xhp_errors node _parents =
+(* An attribute name cannot contain - or :, but we allow this in the lexer
+   because it's easier to have one rule for tokenizing both attribute and
+   element names. *)
+  match syntax node with
+  |  XHPAttribute attr when
+    (is_bad_xhp_attribute_name (PositionedSyntax.text attr.xhp_attr_name)) ->
+      let s = start_offset attr.xhp_attr_name in
+      let e = end_offset attr.xhp_attr_name in
+      [ SyntaxError.make s e SyntaxError.error2002 ]
+  | _ -> [ ]
+
 let parameter_errors node parents is_strict =
-  (* TODO: We need the parent here; in strict mode it is legal for the type
-           to be missing if the param is an anonymous method param. *)
   match syntax node with
   | ParameterDeclaration p ->
     if is_strict &&
@@ -60,7 +73,8 @@ let find_syntax_errors node is_strict =
   let folder acc node parents =
     let param_errors = parameter_errors node parents is_strict in
     let func_errors = function_errors node parents is_strict in
-    let errors = func_errors @ param_errors @ acc.errors in
+    let x_errors = xhp_errors node parents in
+    let errors = func_errors @ param_errors @ acc.errors @ x_errors in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   acc.errors

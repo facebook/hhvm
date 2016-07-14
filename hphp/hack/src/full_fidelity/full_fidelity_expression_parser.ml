@@ -700,7 +700,6 @@ module WithStatementAndDeclParser
     let rec aux parser acc =
       let (parser1, token, _) = next_xhp_element_token parser in
       if (Token.kind token) = XHPElementName then
-        (* TODO: The name cannot contain - or : -- give an error if it does. *)
         let (parser, attr) = parse_xhp_attribute parser1 (make_token token) in
         aux parser (attr :: acc)
       else

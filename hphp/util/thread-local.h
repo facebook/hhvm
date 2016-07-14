@@ -17,11 +17,13 @@
 #ifndef incl_HPHP_THREAD_LOCAL_H_
 #define incl_HPHP_THREAD_LOCAL_H_
 
+#include <cerrno>
 #include <pthread.h>
-#include "hphp/util/exception.h"
-#include <errno.h>
-#include <folly/String.h>
 #include <type_traits>
+
+#include <folly/String.h>
+
+#include "hphp/util/exception.h"
 
 namespace HPHP {
 

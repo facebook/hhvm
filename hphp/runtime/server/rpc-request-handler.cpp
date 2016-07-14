@@ -16,26 +16,28 @@
 
 #include "hphp/runtime/server/rpc-request-handler.h"
 
-#include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/server/access-log.h"
-#include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
-#include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/request-uri.h"
+#include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/util/process.h"
-#include "hphp/runtime/server/satellite-server.h"
+#include "hphp/util/stack-trace.h"
 
 #include <folly/ScopeGuard.h>
 

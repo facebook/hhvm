@@ -18,23 +18,25 @@
 #include <signal.h>
 #include <fstream>
 
-#include "hphp/runtime/debugger/debugger_command.h"
-#include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/debugger/cmd/all.h"
+#include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/util/text-color.h"
-#include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/runtime/base/config.h"
+#include "hphp/util/text-art.h"
+#include "hphp/util/text-color.h"
+
 #include <boost/scoped_ptr.hpp>
 #include <folly/Conv.h>
 

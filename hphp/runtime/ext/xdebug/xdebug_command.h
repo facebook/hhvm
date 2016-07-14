@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/xdebug/status.h"
 
+#include <memory>
 #include <string>
 
 namespace HPHP {

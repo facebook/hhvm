@@ -16,12 +16,11 @@
 #ifndef incl_HPHP_EXCEPTION_H_
 #define incl_HPHP_EXCEPTION_H_
 
-#include <string>
+#include <cstdarg>
 #include <stdexcept>
-#include <stdarg.h>
+#include <string>
 
 #include "hphp/util/portability.h"
-#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

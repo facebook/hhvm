@@ -38,11 +38,13 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+
 #include "hphp/util/alloc.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/network.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/timer.h"
 
 namespace HPHP {

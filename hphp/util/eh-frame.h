@@ -32,7 +32,7 @@
 #include <dwarf.h>
 #include <libdwarf.h>
 #else
-#include "hphp/runtime/vm/debug/eh-frame-msvc.h"
+#include "hphp/util/eh-frame-msvc.h"
 #endif
 
 namespace HPHP {

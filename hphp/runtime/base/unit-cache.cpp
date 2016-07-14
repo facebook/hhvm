@@ -169,6 +169,14 @@ int64_t timespecCompare(const struct timespec& l,
 }
 #endif
 
+uint64_t g_units_seen_count = 0;
+
+bool stressUnitCache() {
+  if (RuntimeOption::EvalStressUnitCacheFreq <= 0) return false;
+  if (RuntimeOption::EvalStressUnitCacheFreq == 1) return true;
+  return ++g_units_seen_count % RuntimeOption::EvalStressUnitCacheFreq == 0;
+}
+
 bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
   // If the cached unit is null, we always need to consider it out of date (in
   // case someone created the file).  This case should only happen if something
@@ -183,7 +191,8 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
          timespecCompare(cu.ctime, s.st_ctim) < 0 ||
 #endif
          cu.ino != s.st_ino ||
-         cu.devId != s.st_dev;
+         cu.devId != s.st_dev ||
+         stressUnitCache();
 }
 
 folly::Optional<String> readFileAsString(const StringData* path) {

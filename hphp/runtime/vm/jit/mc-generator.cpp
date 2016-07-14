@@ -862,7 +862,8 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc, TransKind kind) {
                cs = loc.coldStart(), ce = loc.coldEnd(),
                fs = loc.frozenStart(), fe = loc.frozenEnd(),
                oldStart = start;
-    bool did_relocate = relocateNewTranslation(loc, code, fixups, &start);
+
+    auto const did_relocate = relocateNewTranslation(loc, code, fixups, &start);
 
     if (did_relocate) {
       FTRACE_MOD(reusetc, 1,
@@ -914,7 +915,8 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc, TransKind kind) {
   }
 
 
-  recordGdbTranslation(funcBody, func, code.main(), aStart, false, true);
+  recordGdbTranslation(funcBody, func, code.main(), loc.mainStart(),
+                       false, true);
   recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
 
   return start;
@@ -1431,8 +1433,11 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
       // We need to be able to reclaim the function prologues once the unit
       // associated with this function is treadmilled-- so record all of the
       // callers that will need to be re-smashed
+      //
+      // Additionally for profiled calls we need to remove them from the main
+      // and guard caller maps.
       if (RuntimeOption::EvalEnableReusableTC) {
-        if (debug || !isImmutable) {
+        if (debug || is_profiled || !isImmutable) {
           auto metaLock = lockMetadata();
           recordFuncCaller(func, toSmash, isImmutable,
                            is_profiled, calledPrologNumArgs);
@@ -1614,14 +1619,15 @@ bool mcGenUnit(TransEnv& env, CodeCache::View code, CGMeta& fixups) {
  * a hole reclaimed from dead code. Returns true if the translation was
  * relocated and false otherwise.
  */
-bool tryRelocateNewTranslation(SrcKey sk, TransLoc& loc,
+void tryRelocateNewTranslation(SrcKey sk, TransLoc& loc,
                                CodeCache::View code, CGMeta& fixups) {
-  if (!RuntimeOption::EvalEnableReusableTC) return false;
+  if (!RuntimeOption::EvalEnableReusableTC) return;
 
   TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
              cs = loc.coldStart(), ce = loc.coldEnd(),
              fs = loc.frozenStart(), fe = loc.frozenEnd();
-  bool did_relocate = relocateNewTranslation(loc, code, fixups);
+
+  auto const did_relocate = relocateNewTranslation(loc, code, fixups);
 
   if (did_relocate) {
     FTRACE_MOD(reusetc, 1,
@@ -1639,9 +1645,6 @@ bool tryRelocateNewTranslation(SrcKey sk, TransLoc& loc,
                sk.func()->fullName()->data(), sk.func()->getFuncId(),
                sk.offset(), ms, me, cs, ce, fs, fe);
   }
-
-  assertx(did_relocate == (loc.mainStart() != ms));
-  return did_relocate;
 }
 
 /*

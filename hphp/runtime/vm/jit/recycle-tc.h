@@ -77,8 +77,6 @@ struct SrcRec;
  * that a prologue is reused-- additionally any information in ProfData will
  * need to be erased before a translation with a call to a Proflogue is
  * reclaimed.
- *
- * Precondition: Translator::WriteLease().amOwner()
  */
 void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
                       bool profiled, int numArgs);
@@ -87,16 +85,12 @@ void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
  * When a function is treadmilled its bytecode may no longer be available,
  * keep a table of associated SrcRecs to be reclaimed as it will be impossible
  * to walk the bytecode stream to search the SrcDB.
- *
- * Precondition: Translator::WriteLease().amOwner()
  */
 void recordFuncSrcRec(const Func* func, SrcRec* rec);
 
 /*
  * Record a prologue associated with a function so that it may be reclaimed
  * when the function is treadmilled.
- *
- * Precondition: Translator::WriteLease().amOwner()
  */
 void recordFuncPrologue(const Func* func, TransLoc loc);
 
@@ -106,8 +100,6 @@ void recordFuncPrologue(const Func* func, TransLoc loc);
  * When a translation is reclaimed we remove all annotations from all SrcRecs
  * containing IBs from the translation so that they cannot be inadvertantly
  * smashed in the process of replaceOldTranslations()
- *
- * Precondition: MCGenerator::canWrite()
  */
 void recordJump(TCA toSmash, SrcRec* sr);
 

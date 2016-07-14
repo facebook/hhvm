@@ -394,6 +394,7 @@ function get_options($argv) {
     'no-clean' => '',
     'list-tests' => '',
     'relocate:' => '',
+    'recycle-tc:' => '',
     'hhvm-binary-path:' => 'b:',
     'typechecker' => '',
     'hhserver-binary-path:' => '',
@@ -444,6 +445,11 @@ function get_options($argv) {
 
   if (isset($options['repo']) && isset($options['hhas-round-trip'])) {
     echo "repo and hhas-round-trip are mutually exclusive options\n";
+    exit(1);
+  }
+
+  if (isset($options['relocate']) && isset($options['recycle-tc'])) {
+    echo "relocate and recycle-tc are mutually exclusive options\n";
     exit(1);
   }
 
@@ -614,6 +620,11 @@ function list_tests($files, $options) {
     $args[] = $options['relocate'];
   }
 
+  if (isset($options['recycle-tc'])) {
+    $args[] = '--recycle-tc';
+    $args[] = $options['recycle-tc'];
+  }
+
   foreach (find_tests($files, $options) as $test) {
     print Status::jsonEncode(array(
       'args' => implode(' ', $args),
@@ -713,6 +724,12 @@ function hhvm_cmd_impl() {
     $args[] = '-vEval.JitAHotSize=6000000';
     $args[] = '-vEval.HotFuncCount=0';
     $args[] = '-vEval.PerfRelocate='.$options['relocate'];
+  }
+
+  if (isset($options['recycle-tc'])) {
+    $args[] = '--count='.$options['recycle-tc'];
+    $args[] = '-vEval.StressUnitCacheFreq=1';
+    $args[] = '-vEval.EnableReusableTC=true';
   }
 
   if (!isset($options['cores'])) {
@@ -1516,7 +1533,15 @@ function run_config_post($outputs, $test, $options) {
     return true;
   }
 
-  $repeats = isset($options['relocate']) ? $options['relocate'] * 2 : 0;
+  $repeats = 0;
+
+  if (isset($options['relocate'])) {
+    $repeats = $options['relocate'] * 2;
+  }
+
+  if (isset($options['recycle-tc'])) {
+    $repeats = $options['recycle-tc'];
+  }
 
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file === null || $type === null) {
@@ -1679,7 +1704,7 @@ function run_test($options, $test) {
 
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-  if (isset($options['relocate']) &&
+  if ((isset($options['relocate']) || isset($options['recycle-tc'])) &&
       preg_match('/ --count[ =].* --count[ =]/', $hhvm)) {
     return 'skip';
   }

@@ -1645,7 +1645,6 @@ void ExecutionContext::requestExit() {
 
   manageAPCHandle();
   syncGdbState();
-  jit::mcg->requestExit();
   vmStack().requestExit();
   profileRequestEnd();
   EventHook::Disable();

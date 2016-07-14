@@ -723,9 +723,9 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
 
   TCA mainStartRel, coldStartRel, frozenStartRel;
 
-  TCA mainStart   = loc.mainStart();
-  TCA coldStart   = loc.coldCodeStart();
-  TCA frozenStart = loc.frozenCodeStart();
+  const TCA mainStart   = loc.mainStart();
+  const TCA coldStart   = loc.coldCodeStart();
+  const TCA frozenStart = loc.frozenCodeStart();
 
   size_t mainSize   = loc.mainSize();
   size_t coldSize   = loc.coldSize();
@@ -812,7 +812,8 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
     if (coldStartRel != loc.coldStart()) {
       clearRange(loc.coldStart(), loc.coldEnd());
     }
-    if (frozenStartRel != loc.frozenStart()) {
+    if (frozenStartRel != loc.frozenStart() &&
+        loc.frozenStart() != loc.coldStart()) {
       clearRange(loc.frozenStart(), loc.frozenEnd());
     }
   }
@@ -839,7 +840,11 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
 
   relocateStubs(loc, frozenStartRel + sizeof(uint32_t), frozenEndRel, relStubs,
                 cache, fixups);
-  return asm_count != 0;
+
+  return
+    mainStart != mainStartRel ||
+    coldStart != coldStartRel ||
+    frozenStart != frozenStartRel;
 }
 
 //////////////////////////////////////////////////////////////////////

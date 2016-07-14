@@ -2328,6 +2328,10 @@ void hphp_session_exit() {
   // finishes.
   Treadmill::finishRequest();
 
+  // The treadmill must be flushed before profData is reset as the data may
+  // be read during cleanup if EvalEnableReuseTC = true
+  jit::mcg->requestExit();
+
   TI().onSessionExit();
 
   {

@@ -217,6 +217,8 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
   a.Br(rAsm);
   a.bind(&target_data);
   a.dc64(us.enterTCExit);
+
+  __builtin___clear_cache(start, cb.frontier());
   return start;
 }
 

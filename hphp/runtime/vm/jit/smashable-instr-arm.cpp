@@ -58,6 +58,7 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
   a.    dc64 (imm);
   a.    bind (&after_data);
 
+  __builtin___clear_cache(start, cb.frontier());
   return start;
 }
 
@@ -88,6 +89,7 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
   a.    Ldr  (rAsm, &target_data);
   a.    Blr  (rAsm);
 
+  __builtin___clear_cache(start, cb.frontier());
   return start;
 }
 
@@ -104,6 +106,7 @@ TCA emitSmashableJmpImpl(CodeBlock& cb, TCA target) {
   a.    bind (&target_data);
   a.    dc64 (target);
 
+  __builtin___clear_cache(start, cb.frontier());
   return start;
 }
 
@@ -130,6 +133,7 @@ TCA emitSmashableJccImpl(CodeBlock& cb, TCA target, ConditionCode cc) {
   emitSmashableJmpImpl(cb, target);
   a.    bind (&after_data);
 
+  __builtin___clear_cache(start, cb.frontier());
   return start;
 }
 

@@ -94,24 +94,29 @@ let function_errors node _parents is_strict =
   | _ -> [ ]
 
 let statement_errors node parents =
-  match syntax node with
-  | CaseStatement _ when not (statement_directly_in_switch parents) ->
-    let s = start_offset node in
-    let e = end_offset node in
-    [ SyntaxError.make s e SyntaxError.error2003 ]
-  | DefaultStatement _ when not (statement_directly_in_switch parents) ->
-    let s = start_offset node in
-    let e = end_offset node in
-    [ SyntaxError.make s e SyntaxError.error2004 ]
-  | BreakStatement _ when not (break_is_legal parents) ->
-    let s = start_offset node in
-    let e = end_offset node in
-    [ SyntaxError.make s e SyntaxError.error2005 ]
-  | ContinueStatement _ when not (continue_is_legal parents) ->
-    let s = start_offset node in
-    let e = end_offset node in
-    [ SyntaxError.make s e SyntaxError.error2006 ]
-  | _ -> [ ]
+  let result = match syntax node with
+  | CaseStatement _
+    when not (statement_directly_in_switch parents) ->
+    Some (node, SyntaxError.error2003)
+  | DefaultStatement _
+    when not (statement_directly_in_switch parents) ->
+    Some (node, SyntaxError.error2004)
+  | BreakStatement _
+    when not (break_is_legal parents) ->
+    Some (node, SyntaxError.error2005)
+  | ContinueStatement _
+    when not (continue_is_legal parents) ->
+    Some (node, SyntaxError.error2006)
+  | TryStatement { catch_clauses; finally_clause; _ }
+    when (is_missing catch_clauses) && (is_missing finally_clause) ->
+    Some (node, SyntaxError.error2007)
+  | _ -> None in
+  match result with
+  | None -> [ ]
+  | Some (error_node, error_message) ->
+    let s = start_offset error_node in
+    let e = end_offset error_node in
+    [ SyntaxError.make s e error_message ]
 
 let find_syntax_errors node is_strict =
   let folder acc node parents =

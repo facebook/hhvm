@@ -289,7 +289,8 @@ module WithExpressionAndDeclParser
     let (parser, try_compound_stmt) = parse_compound_statement parser in
     let (parser, catch_clauses) = parse_catch_clauses parser in
     let (parser, finally_clause) = parse_finally_clause_opt parser in
-    (* TODO ERROR RECOVERY: give an error for missing both catch and finally *)
+    (* If the catch and finally are both missing then we give an error in
+       a later pass. *)
     let syntax = make_try_statement try_keyword_token try_compound_stmt
       catch_clauses finally_clause in
     (parser, syntax)

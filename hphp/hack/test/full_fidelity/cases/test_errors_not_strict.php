@@ -15,4 +15,8 @@ function bar() : void {
     if ($c) continue; // no error
     $x = function($b) { break; }; // error
   }
+  try {} catch {} // no error
+  try {} finally {} // no error
+  try {} // error
+
 }

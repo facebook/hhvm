@@ -5,3 +5,4 @@
 (10,3)-(10,12) A default statement may only appear directly inside a switch.
 (12,3)-(12,8) A break statement may only appear inside a switch or loop.
 (16,25)-(16,30) A break statement may only appear inside a switch or loop.
+(20,3)-(20,8) A try statement requires a catch or a finally clause.

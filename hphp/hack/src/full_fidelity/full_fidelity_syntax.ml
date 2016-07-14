@@ -720,6 +720,7 @@ module WithToken(Token: TokenType) = struct
     let is_compound_statement node = kind node = SyntaxKind.CompoundStatement
     let is_expression_statement node =
       kind node = SyntaxKind.ExpressionStatement
+    let is_for_statement node = kind node = SyntaxKind.ForStatement
     let is_foreach_statement node = kind node = SyntaxKind.ForeachStatement
     let is_while_statement node = kind node = SyntaxKind.WhileStatement
     let is_if_statement node = kind node = SyntaxKind.IfStatement
@@ -777,6 +778,12 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ShapeTypeSpecifier
     let is_field_specifier node =
       kind node = SyntaxKind.FieldSpecifier
+
+    let is_loop_statement node =
+      is_for_statement node ||
+      is_foreach_statement node ||
+      is_while_statement node ||
+      is_do_statement node
 
     let is_separable_prefix node =
       match syntax node with

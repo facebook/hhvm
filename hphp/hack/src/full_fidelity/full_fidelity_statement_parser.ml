@@ -295,12 +295,14 @@ module WithExpressionAndDeclParser
     (parser, syntax)
 
   and parse_break_statement parser =
+    (* We detect if we are not inside a switch or loop in a later pass. *)
     let (parser, break_token) = assert_token parser Break in
     let (parser, semi_token) =
       expect_token parser Semicolon SyntaxError.error1010 in
     (parser, make_break_statement break_token semi_token)
 
   and parse_continue_statement parser =
+    (* We detect if we are not inside a loop in a later pass. *)
     let (parser, continue_token) = assert_token parser Continue in
     let (parser, semi_token) =
       expect_token parser Semicolon SyntaxError.error1010 in

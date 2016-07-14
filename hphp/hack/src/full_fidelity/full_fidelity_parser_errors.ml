@@ -37,6 +37,21 @@ let statement_directly_in_switch parents =
     true
   | _ -> false
 
+let rec break_is_legal parents =
+  match parents with
+  | h :: _ when is_anonymous_function h -> false
+  | h :: _ when is_switch_statement h -> true
+  | h :: _ when is_loop_statement h -> true
+  | _ :: t -> break_is_legal t
+  | [] -> false
+
+let rec continue_is_legal parents =
+  match parents with
+  | h :: _ when is_anonymous_function h -> false
+  | h :: _ when is_loop_statement h -> true
+  | _ :: t -> continue_is_legal t
+  | [] -> false
+
 let is_bad_xhp_attribute_name name =
   (String.contains name ':') || (String.contains name '-')
 
@@ -78,31 +93,34 @@ let function_errors node _parents is_strict =
       [ ]
   | _ -> [ ]
 
-let case_errors node parents =
+let statement_errors node parents =
   match syntax node with
   | CaseStatement _ when not (statement_directly_in_switch parents) ->
     let s = start_offset node in
     let e = end_offset node in
     [ SyntaxError.make s e SyntaxError.error2003 ]
-  | _ -> [ ]
-
-let default_errors node parents =
-  match syntax node with
   | DefaultStatement _ when not (statement_directly_in_switch parents) ->
     let s = start_offset node in
     let e = end_offset node in
     [ SyntaxError.make s e SyntaxError.error2004 ]
+  | BreakStatement _ when not (break_is_legal parents) ->
+    let s = start_offset node in
+    let e = end_offset node in
+    [ SyntaxError.make s e SyntaxError.error2005 ]
+  | ContinueStatement _ when not (continue_is_legal parents) ->
+    let s = start_offset node in
+    let e = end_offset node in
+    [ SyntaxError.make s e SyntaxError.error2006 ]
   | _ -> [ ]
 
 let find_syntax_errors node is_strict =
   let folder acc node parents =
-    let param_errors = parameter_errors node parents is_strict in
-    let func_errors = function_errors node parents is_strict in
-    let x_errors = xhp_errors node parents in
-    let c_errors = case_errors node parents in
-    let d_errors = default_errors node parents in
-    let errors = func_errors @ param_errors @ acc.errors @
-      x_errors @ c_errors @ d_errors in
+    let param_errs = parameter_errors node parents is_strict in
+    let func_errs = function_errors node parents is_strict in
+    let xhp_errs = xhp_errors node parents in
+    let statement_errs = statement_errors node parents in
+    let errors = acc.errors @ param_errs @ func_errs @
+      xhp_errs @ statement_errs in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
-  acc.errors
+  List.sort SyntaxError.compare acc.errors

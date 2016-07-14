@@ -27,6 +27,13 @@ let to_positioned_string error offset_to_position =
   let (el, ec) = offset_to_position error.end_offset in
   Printf.sprintf "(%d,%d)-(%d,%d) %s" sl sc el ec error.message
 
+let compare err1 err2 =
+  if err1.start_offset < err2.start_offset then -1
+  else if err1.start_offset > err2.start_offset then 1
+  else if err1.end_offset < err2.end_offset then -1
+  else if err1.end_offset > err2.end_offset then 1
+  else 0
+
 (* Lexical errors *)
 let error0001 = "A hexadecimal literal needs at least one digit."
 let error0002 = "A binary literal needs at least one digit."
@@ -93,3 +100,5 @@ let error2001 = "A type annotation is required in strict mode."
 let error2002 = "An XHP attribute name may not contain '-' or ':'."
 let error2003 = "A case statement may only appear directly inside a switch."
 let error2004 = "A default statement may only appear directly inside a switch."
+let error2005 = "A break statement may only appear inside a switch or loop."
+let error2006 = "A continue statement may only appear inside a loop."

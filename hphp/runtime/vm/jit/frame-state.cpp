@@ -672,6 +672,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case IterInitK:
   case WIterInitK:
+  case MIterInitK:
     // kill the locals to which this instruction stores iter's key and value
     killIterLocals({inst->extra<IterData>()->keyId,
                     inst->extra<IterData>()->valId});
@@ -679,12 +680,14 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case IterInit:
   case WIterInit:
+  case MIterInit:
     // kill the local to which this instruction stores iter's value
     killIterLocals({inst->extra<IterData>()->valId});
     break;
 
   case IterNextK:
   case WIterNextK:
+  case MIterNextK:
     // kill the locals to which this instruction stores iter's key and value
     killIterLocals({inst->extra<IterData>()->keyId,
                     inst->extra<IterData>()->valId});
@@ -692,6 +695,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case IterNext:
   case WIterNext:
+  case MIterNext:
     // kill the local to which this instruction stores iter's value
     killIterLocals({inst->extra<IterData>()->valId});
     break;

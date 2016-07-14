@@ -38,7 +38,7 @@ let run_test (file : Relative_path.t) : unit =
 let _ =
   begin
   let fname = Sys.argv.(1) in
-  let _handle = SharedMem.init_default () in
+  let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   Hhi.set_hhi_root_for_unit_test (Path.make "/tmp/hhi");
   run_test (Relative_path.create Relative_path.Dummy fname);
   end

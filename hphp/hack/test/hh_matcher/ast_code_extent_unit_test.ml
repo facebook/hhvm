@@ -253,7 +253,7 @@ let test_suite =
     ))
 
 let main () =
-  let _handle = SharedMem.(init_default ()) in
+  let _handle = SharedMem.(init GlobalConfig.default_sharedmem_config) in
   OUnit.run_test_tt_main test_suite
 
 let _ = main ()

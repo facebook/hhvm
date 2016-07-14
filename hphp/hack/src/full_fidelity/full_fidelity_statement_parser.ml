@@ -326,7 +326,7 @@ module WithExpressionAndDeclParser
     (parser, make_throw_statement throw_token expr semi_token)
 
   and parse_default_label_statement parser =
-    (* TODO: Only valid inside switch *)
+    (* We detect if we are not inside a switch in a later pass. *)
     let (parser, default_token) = assert_token parser Default in
     let (parser, colon_token) =
       expect_token parser Colon SyntaxError.error1020 in
@@ -334,7 +334,7 @@ module WithExpressionAndDeclParser
     (parser, make_default_statement default_token colon_token stmt)
 
   and parse_case_label_statement parser =
-    (* TODO: Only valid inside switch *)
+    (* We detect if we are not inside a switch in a later pass. *)
     let (parser, case_token) = assert_token parser Case in
     let (parser, expr) = parse_expression parser in
     let (parser, colon_token) =

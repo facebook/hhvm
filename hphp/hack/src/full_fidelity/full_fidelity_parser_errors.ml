@@ -28,6 +28,15 @@ let matches_first f items =
 let parent_is_function parents =
   matches_first is_function parents
 
+let statement_directly_in_switch parents =
+  match parents with
+  | l :: c :: s :: _ when (is_compound_statement c) && (is_list l) &&
+    (is_switch_statement s) ->
+    true
+  | c :: s :: _ when (is_compound_statement c) && (is_switch_statement s) ->
+    true
+  | _ -> false
+
 let is_bad_xhp_attribute_name name =
   (String.contains name ':') || (String.contains name '-')
 
@@ -69,12 +78,31 @@ let function_errors node _parents is_strict =
       [ ]
   | _ -> [ ]
 
+let case_errors node parents =
+  match syntax node with
+  | CaseStatement _ when not (statement_directly_in_switch parents) ->
+    let s = start_offset node in
+    let e = end_offset node in
+    [ SyntaxError.make s e SyntaxError.error2003 ]
+  | _ -> [ ]
+
+let default_errors node parents =
+  match syntax node with
+  | DefaultStatement _ when not (statement_directly_in_switch parents) ->
+    let s = start_offset node in
+    let e = end_offset node in
+    [ SyntaxError.make s e SyntaxError.error2004 ]
+  | _ -> [ ]
+
 let find_syntax_errors node is_strict =
   let folder acc node parents =
     let param_errors = parameter_errors node parents is_strict in
     let func_errors = function_errors node parents is_strict in
     let x_errors = xhp_errors node parents in
-    let errors = func_errors @ param_errors @ acc.errors @ x_errors in
+    let c_errors = case_errors node parents in
+    let d_errors = default_errors node parents in
+    let errors = func_errors @ param_errors @ acc.errors @
+      x_errors @ c_errors @ d_errors in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   acc.errors

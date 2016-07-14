@@ -1,1 +1,3 @@
 (8,22)-(8,28) An XHP attribute name may not contain '-' or ':'.
+(9,3)-(9,13) A case statement may only appear directly inside a switch.
+(10,3)-(10,12) A default statement may only appear directly inside a switch.

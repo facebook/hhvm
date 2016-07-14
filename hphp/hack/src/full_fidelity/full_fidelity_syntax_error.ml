@@ -91,3 +91,5 @@ let error1039 = "A closing XHP tag is expected here."
 
 let error2001 = "A type annotation is required in strict mode."
 let error2002 = "An XHP attribute name may not contain '-' or ':'."
+let error2003 = "A case statement may only appear directly inside a switch."
+let error2004 = "A default statement may only appear directly inside a switch."

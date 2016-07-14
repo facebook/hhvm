@@ -30,6 +30,8 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
+
 #include <folly/MoveWrapper.h>
 
 namespace HPHP { namespace jit {
@@ -94,7 +96,13 @@ void clearTCMaps(TCA start, TCA end) {
   auto& catchMap = mcg->catchTraceMap();
   auto const profData = jit::profData();
   while (start < end) {
-    x64::DecodedInstruction di (start);
+#if defined(__powerpc64__)
+    ppc64_asm::DecodedInstruction di(start);
+#elif defined(__x86_64__)
+    x64::DecodedInstruction di(start);
+#else
+    not_implemented();
+#endif
     if (profData && di.isBranch()) {
       profData->clearJmpTransID(start);
     }

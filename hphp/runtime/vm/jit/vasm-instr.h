@@ -226,6 +226,7 @@ struct Vunit;
   O(lead, I(s), Un, D(d))\
   /* copies */\
   O(movb, Inone, UH(s,d), DH(d,s))\
+  O(movw, Inone, UH(s,d), DH(d,s))\
   O(movl, Inone, UH(s,d), DH(d,s))\
   O(movzbw, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
@@ -1028,6 +1029,7 @@ struct lead { VdataPtr<void> s; Vreg64 d; };
  */
 // moves
 struct movb { Vreg8 s, d; };
+struct movw { Vreg16 s, d; };
 struct movl { Vreg32 s, d; };
 // zero-extended s to d
 struct movzbw { Vreg8 s; Vreg16 d; };

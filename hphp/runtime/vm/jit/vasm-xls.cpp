@@ -36,6 +36,8 @@
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/ppc64-asm/asm-ppc64.h"
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <folly/Format.h>
@@ -323,7 +325,7 @@ struct VxlsContext {
         tmp = vixl::x17; // also used as tmp1 by MacroAssembler
         break;
       case Arch::PPC64:
-        not_implemented();
+        tmp = ppc64_asm::reg::v29;
         break;
     }
     this->abi.simdUnreserved -= tmp;

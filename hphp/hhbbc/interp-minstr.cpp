@@ -70,7 +70,7 @@ bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
 
 bool keyCouldBeWeird(Type key) {
   return key.couldBe(TObj) || key.couldBe(TArr) || key.couldBe(TVec) ||
-    key.couldBe(TDict);
+    key.couldBe(TDict) || key.couldBe(TKeyset);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -181,14 +181,21 @@ template<typename R, typename B, typename... T>
 typename std::enable_if<
   !std::is_same<R, Type>::value,
   folly::Optional<Type>
->::type vec_or_dict_op(
+>::type hack_array_op(
   ISS& env,
   R opV(B, const T&...),
   R opD(B, const T&...),
+  R opK(B, const T&...),
   T... args) {
   auto const base = env.state.base.type;
-  if (!base.subtypeOf(TVec) && !base.subtypeOf(TDict)) return folly::none;
-  auto res = base.subtypeOf(TVec) ? opV(base, args...) : opD(base, args...);
+  if (!base.subtypeOf(TVec) && !base.subtypeOf(TDict) &&
+      !base.subtypeOf(TKeyset)) {
+    return folly::none;
+  }
+  auto res =
+    base.subtypeOf(TVec) ? opV(base, args...) :
+    base.subtypeOf(TDict) ? opD(base, args...) :
+    opK(base, args...);
   // TODO: we cannot support unreachable() in the middle of a minstr sequence
   // right now as it causes problems in the verifier when we fall out of the
   // fault funclet before the minstr is complete.
@@ -204,17 +211,20 @@ template<typename R, typename B, typename... T>
 typename std::enable_if<
   std::is_same<R, Type>::value,
   folly::Optional<Type>
->::type vec_or_dict_op(
+>::type hack_array_op(
   ISS& env,
   R opV(B, const T&...),
   R opD(B, const T&...),
+  R opK(B, const T&...),
   T... args) {
   auto const base = env.state.base.type;
-  if (!base.subtypeOf(TVec) && !base.subtypeOf(TDict)) return folly::none;
-  return base.subtypeOf(TVec) ? opV(base, args...) : opD(base, args...);
+  if (base.subtypeOf(TVec)) return opV(base, args...);
+  if (base.subtypeOf(TDict)) return opD(base, args...);
+  if (base.subtypeOf(TKeyset)) return opK(base, args...);
+  return folly::none;
 }
 #define hack_array_do(env, op, ...) \
-  vec_or_dict_op(env, vec_ ## op, dict_ ## op, ##__VA_ARGS__)
+  hack_array_op(env, vec_ ## op, dict_ ## op, keyset_ ## op, ##__VA_ARGS__)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -387,10 +397,13 @@ Type currentChainType(ISS& env, Type val) {
     } else if (it->first.subtypeOf(TVec)) {
       val = vec_set(it->first, it->second, val).first;
       if (val == TBottom) val = TVec;
-    } else {
-      assert(it->first.subtypeOf(TDict));
+    } else if (it->first.subtypeOf(TDict)) {
       val = dict_set(it->first, it->second, val).first;
       if (val == TBottom) val = TDict;
+    } else {
+      assert(it->first.subtypeOf(TKeyset));
+      val = keyset_set(it->first, it->second, val).first;
+      if (val == TBottom) val = TKeyset;
     }
   }
   return val;
@@ -411,6 +424,9 @@ Type resolveArrayChain(ISS& env, Type val) {
     } else if (arr.subtypeOf(TDict)) {
       val = dict_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TDict;
+    } else if (arr.subtypeOf(TKeyset)) {
+      val = keyset_set(std::move(arr), key, val).first;
+      if (val == TBottom) val = TKeyset;
     } else {
       assert(arr.subtypeOf(TArr));
       val = array_set(std::move(arr), key, val);
@@ -480,6 +496,9 @@ void handleBaseElemU(ISS& env) {
   if (ty.couldBe(TDict)) {
     ty = union_of(ty, TDict);
   }
+  if (ty.couldBe(TKeyset)) {
+    ty = union_of(ty, TKeyset);
+  }
   if (ty.couldBe(TSStr)) {
     ty = loosen_statics(env.state.base.type);
   }
@@ -506,7 +525,10 @@ void handleBaseElemD(ISS& env) {
 
   // When the base is actually a subtype of array, we handle it in the callers
   // of these functions.
-  if (ty.subtypeOf(TArr) || ty.subtypeOf(TVec) || ty.subtypeOf(TDict)) return;
+  if (ty.subtypeOf(TArr) || ty.subtypeOf(TVec) || ty.subtypeOf(TDict) ||
+      ty.subtypeOf(TKeyset)) {
+    return;
+  }
 
   if (elemMustPromoteToArr(ty)) {
     ty = counted_aempty();
@@ -537,6 +559,9 @@ void handleBaseElemD(ISS& env) {
   }
   if (ty.couldBe(TDict)) {
     ty = union_of(ty, TDict);
+  }
+  if (ty.couldBe(TKeyset)) {
+    ty = union_of(ty, TKeyset);
   }
 }
 
@@ -715,6 +740,7 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
 
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   if (isDefine) {
     handleInThisElemD(env);
     handleInSelfElemD(env);
@@ -724,7 +750,7 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
     auto const couldDoChain =
       (mustBeInFrame(env.state.base) ||
        env.state.base.loc == BaseLoc::LocalArrChain) &&
-      (env.state.base.type.subtypeOf(TArr) || isvec || isdict);
+      (env.state.base.type.subtypeOf(TArr) || isvec || isdict || iskeyset);
 
     if (couldDoChain) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
@@ -779,10 +805,11 @@ void miNewElem(ISS& env) {
 
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   auto const couldDoChain =
     (mustBeInFrame(env.state.base) ||
      env.state.base.loc == BaseLoc::LocalArrChain) &&
-    (env.state.base.type.subtypeOf(TArr) || isvec || isdict);
+    (env.state.base.type.subtypeOf(TArr) || isvec || isdict || iskeyset);
   if (couldDoChain) {
     auto par = [&] () -> std::pair<Type, Type> {
       auto ty = hack_array_do(env, newelem, TInitNull);
@@ -798,7 +825,7 @@ void miNewElem(ISS& env) {
     return;
   }
 
-  if (env.state.base.type.subtypeOf(TArr) || isvec || isdict) {
+  if (env.state.base.type.subtypeOf(TArr) || isvec || isdict || iskeyset) {
     moveBase(env, Base { TInitNull, BaseLoc::PostElem, env.state.base.type });
     return;
   }
@@ -1002,8 +1029,9 @@ void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
   }
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   if (env.state.base.loc == BaseLoc::LocalArrChain) {
-    if (env.state.base.type.subtypeOf(TArr) || isvec || isdict) {
+    if (env.state.base.type.subtypeOf(TArr) || isvec || isdict || iskeyset) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       env.state.base.type = ty;
     }
@@ -1032,8 +1060,9 @@ void miFinalVGetElem(ISS& env, int32_t nDiscard, Type key) {
   handleBaseElemD(env);
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   pessimisticFinalElemD(env, key, TInitGen);
-  if (isvec || isdict) {
+  if (isvec || isdict || iskeyset) {
     unreachable(env);
     push(env, TBottom);
     return;
@@ -1085,12 +1114,14 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
    */
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   auto const isWeird = keyCouldBeWeird(key) ||
                        (!env.state.base.type.subtypeOf(TArr) &&
                         !env.state.base.type.subtypeOf(TObj) &&
                         !mustBeEmptyish(env.state.base.type) &&
                         !isvec &&
-                        !isdict);
+                        !isdict &&
+                        !iskeyset);
   auto makeNotWeird = [&] (Type key) {
     if (isvec) return key.couldBe(TInt) ? TInt : TBottom;
     if (!key.couldBe(TInt)) return key.couldBe(TStr) ? TStr : TBottom;
@@ -1103,11 +1134,11 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       push(env, isWeird ? TInitCell : t1);
       return;
     }
-    if (isvec || isdict) {
+    if (isvec || isdict || iskeyset) {
       auto ty = hack_array_do(env, set, key, t1);
       assert(ty);
       env.state.base.type = *ty;
-      // Vec and Dict throw on weird keys
+      // Vec, Dict, and Keysets throw on weird keys
       auto pushTy = isWeird ? makeNotWeird(t1) : t1;
       if (pushTy == TBottom) unreachable(env);
       push(env, pushTy);
@@ -1121,7 +1152,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       push(env, isWeird ? TInitCell : t1);
       return;
     }
-    if (isvec || isdict) {
+    if (isvec || isdict || iskeyset) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       env.state.base.type = t1;
       push(env, isWeird ? makeNotWeird(t1) : t1);
@@ -1184,8 +1215,9 @@ void miFinalBindElem(ISS& env, int32_t nDiscard, Type key) {
   handleBaseElemD(env);
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   pessimisticFinalElemD(env, key, TInitGen);
-  if (isvec || isdict) {
+  if (isvec || isdict || iskeyset) {
     unreachable(env);
     push(env, TBottom);
     return;
@@ -1242,8 +1274,9 @@ void miFinalVGetNewElem(ISS& env, int32_t nDiscard) {
   handleBaseNewElem(env);
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   pessimisticFinalNewElem(env, TInitGen);
-  if (isvec || isdict) {
+  if (isvec || isdict || iskeyset) {
     unreachable(env);
     push(env, TBottom);
     return;
@@ -1322,8 +1355,9 @@ void miFinalBindNewElem(ISS& env, int32_t nDiscard) {
   handleBaseNewElem(env);
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   pessimisticFinalNewElem(env, TInitGen);
-  if (isvec || isdict) {
+  if (isvec || isdict || iskeyset) {
     unreachable(env);
     push(env, TBottom);
     return;
@@ -1334,8 +1368,9 @@ void miFinalBindNewElem(ISS& env, int32_t nDiscard) {
 void miFinalSetWithRef(ISS& env) {
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
+  auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
   moveBase(env, folly::none);
-  if (!isvec && !isdict) {
+  if (!isvec && !isdict && !iskeyset) {
     killLocals(env);
     killThisProps(env);
     killSelfProps(env);

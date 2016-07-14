@@ -1534,6 +1534,7 @@ Type context_sensitive_return_type(const Index& index,
   if (contextType.strictSubtypeOf(TArr)) return callInsensitiveType;
   if (contextType.strictSubtypeOf(TVec)) return callInsensitiveType;
   if (contextType.strictSubtypeOf(TDict)) return callInsensitiveType;
+  if (contextType.strictSubtypeOf(TKeyset)) return callInsensitiveType;
 
   /*
    * Note: it may seem like the context sensitive return type should

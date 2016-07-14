@@ -450,6 +450,14 @@ std::string show(Type t) {
   case BCDictN:      ret = "CDictN";   break;
   case BDictE:       ret = "DictE";    break;
   case BDictN:       ret = "DictN";    break;
+  case BSKeyset:     ret = "SKeyset";  break;
+  case BCKeyset:     ret = "CKeyset";  break;
+  case BSKeysetE:    ret = "SKeysetE"; break;
+  case BCKeysetE:    ret = "CKeysetE"; break;
+  case BSKeysetN:    ret = "SKeysetN"; break;
+  case BCKeysetN:    ret = "CKeysetN"; break;
+  case BKeysetE:     ret = "KeysetE";  break;
+  case BKeysetN:     ret = "KeysetN";  break;
 
   case BNull:        ret = "Null";     break;
   case BNum:         ret = "Num";      break;
@@ -458,6 +466,7 @@ std::string show(Type t) {
   case BArr:         ret = "Arr";      break;
   case BVec:         ret = "Vec";      break;
   case BDict:        ret = "Dict";     break;
+  case BKeyset:      ret = "Keyset";   break;
 
   case BOptTrue:     ret = "?True";    break;
   case BOptFalse:    ret = "?False";   break;
@@ -498,6 +507,15 @@ std::string show(Type t) {
   case BOptDictE:    ret = "?DictE";   break;
   case BOptDictN:    ret = "?DictN";   break;
   case BOptDict:     ret = "?Dict";    break;
+  case BOptSKeysetE: ret = "?SKeysetE";break;
+  case BOptCKeysetE: ret = "?CKeysetE";break;
+  case BOptSKeysetN: ret = "?SKeysetN";break;
+  case BOptCKeysetN: ret = "?CKeysetN";break;
+  case BOptSKeyset:  ret = "?SKeyset"; break;
+  case BOptCKeyset:  ret = "?CKeyset"; break;
+  case BOptKeysetE:  ret = "?KeysetE"; break;
+  case BOptKeysetN:  ret = "?KeysetN"; break;
+  case BOptKeyset:   ret = "?Keyset";  break;
 
   case BInitPrim:    ret = "InitPrim"; break;
   case BPrim:        ret = "Prim";     break;
@@ -522,10 +540,12 @@ std::string show(Type t) {
   case DataTag::ArrMapN:
   case DataTag::Dict:
   case DataTag::Vec:
+  case DataTag::Keyset:
     break;
   case DataTag::VecVal:
   case DataTag::DictVal:
   case DataTag::ArrVal:
+  case DataTag::KeysetVal:
     folly::toAppend("~", &ret);
     break;
   case DataTag::Str:
@@ -541,6 +561,7 @@ std::string show(Type t) {
   case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
   case DataTag::VecVal:
   case DataTag::DictVal:
+  case DataTag::KeysetVal:
   case DataTag::ArrVal:
     ret += array_string(t.m_data.aval);
     break;
@@ -621,6 +642,12 @@ std::string show(Type t) {
     } else {
       ret += folly::sformat("([{}])", show(t.m_data.vec->val));
     }
+    break;
+  case DataTag::Keyset:
+    ret += folly::format(
+      "([{}])",
+      show(t.m_data.keyset->keyval)
+    ).str();
     break;
   }
 

@@ -661,7 +661,8 @@ bool pushesActRec(Op opcode) {
 
 void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
   if (ad->isVecArray()) out << "vec(";
-  if (ad->isDict()) out << "dict(";
+  else if (ad->isDict()) out << "dict(";
+  else if (ad->isKeyset()) out << "keyset(";
   else out << "array(";
   if (!ad->empty()) {
     bool comma = false;

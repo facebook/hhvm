@@ -54,8 +54,7 @@ constexpr Arch arch() {
       case Arch::ARM:                                                 \
         return arm::MSVC_GLUE(func, (__VA_ARGS__));                   \
       case Arch::PPC64:                                               \
-        not_implemented();                                            \
-        break;                                                        \
+        return ppc64::MSVC_GLUE(func, (__VA_ARGS__));                 \
     }                                                                 \
     not_reached();                                                    \
   }())

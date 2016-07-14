@@ -62,12 +62,7 @@ bool loadsCell(Opcode op) {
   case CGetElem:
   case VGetElem:
   case ArrayIdx:
-    switch (arch()) {
-    case Arch::X64: return true;
-    case Arch::ARM: return true;
-    case Arch::PPC64: not_implemented(); break;
-    }
-    not_reached();
+    return true;
 
   default:
     return false;
@@ -83,7 +78,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   switch (arch()) {
   case Arch::X64: break;
   case Arch::ARM: break;
-  case Arch::PPC64: not_implemented(); break;
+  case Arch::PPC64: return false;
   }
 
   // If this function returns true for an operand, then the register allocator
@@ -113,25 +108,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 
   auto inst = tmp.inst();
   auto opc = inst->op();
-
-  auto const forceStkPtrs = [&] {
-    switch (arch()) {
-    case Arch::X64: return false;
-    case Arch::ARM: return false;
-    case Arch::PPC64: not_implemented(); break;
-    }
-    not_reached();
-  }();
-
-  if (forceStkPtrs && tmp.isA(TStkPtr)) {
-    assert_flog(
-      opc == DefSP ||
-      opc == Mov,
-      "unexpected StkPtr dest from {}",
-      opcodeName(opc)
-    );
-    return rvmsp();
-  }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rvmfp().
@@ -217,12 +193,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::calls:
     case Vinstr::callstub:
       defs = abi.all() - (abi.calleeSaved | rvmfp());
-
-      switch (arch()) {
-        case Arch::ARM: break;
-        case Arch::X64: break;
-        case Arch::PPC64: not_implemented(); break;
-      }
       break;
 
     case Vinstr::callfaststub:
@@ -230,22 +200,12 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
 
     case Vinstr::callphp:
-      defs = abi.all();
-      switch (arch()) {
-        case Arch::ARM: defs -= rvmtl(); break;
-        case Arch::X64: defs -= rvmtl(); break;
-        case Arch::PPC64: not_implemented(); break;
-      }
+      defs = abi.all() - RegSet(rvmtl());
       break;
 
     case Vinstr::callarray:
     case Vinstr::contenter:
-      defs = abi.all() - RegSet(rvmfp());
-      switch (arch()) {
-        case Arch::ARM: defs -= rvmtl(); break;
-        case Arch::X64: defs -= rvmtl(); break;
-        case Arch::PPC64: not_implemented(); break;
-      }
+      defs = abi.all() - (rvmfp() | rvmtl());
       break;
 
     case Vinstr::cqo:

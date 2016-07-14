@@ -123,6 +123,8 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
+
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1180,7 +1182,8 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
       }
 
       case Arch::PPC64:
-        always_assert(false);
+        ppc64_asm::DecodedInstruction di(toSmash);
+        return (di.isBranch() && !di.isJmp());
     }
     not_reached();
   }();
@@ -1821,10 +1824,7 @@ MCGenerator::MCGenerator()
 
   s_jitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
-  // Do not initialize JIT stubs for PPC64 - port under development
-#if !defined(__powerpc64__)
   m_ustubs.emitAll(m_code, m_debugInfo);
-#endif
 
   // Write an .eh_frame section that covers the whole TC.
   EHFrameWriter ehfw;

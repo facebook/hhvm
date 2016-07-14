@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/align.h"
 
 #include "hphp/runtime/vm/jit/align-arm.h"
+#include "hphp/runtime/vm/jit/align-ppc64.h"
 #include "hphp/runtime/vm/jit/align-x64.h"
 
 #include "hphp/util/arch.h"

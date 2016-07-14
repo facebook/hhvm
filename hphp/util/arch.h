@@ -46,19 +46,22 @@ constexpr Arch arch() {
  *
  * We need to specify the return type explicitly, or else we may drop refs.
  */
+#ifdef __aarch64__
 #define ARCH_SWITCH_CALL(func, ...)                                   \
   ([&]() -> decltype(x64::func(__VA_ARGS__)) {                        \
-    switch (arch()) {                                                 \
-      case Arch::X64:                                                 \
-        return x64::MSVC_GLUE(func, (__VA_ARGS__));                   \
-      case Arch::ARM:                                                 \
-        return arm::MSVC_GLUE(func, (__VA_ARGS__));                   \
-      case Arch::PPC64:                                               \
-        not_implemented();                                            \
-        break;                                                        \
-    }                                                                 \
-    not_reached();                                                    \
+    return arm::MSVC_GLUE(func, (__VA_ARGS__));                       \
   }())
+#elif defined __x86_64__
+#define ARCH_SWITCH_CALL(func, ...)                                   \
+  ([&]() -> decltype(x64::func(__VA_ARGS__)) {                        \
+    return x64::MSVC_GLUE(func, (__VA_ARGS__));                       \
+  }())
+#else
+#define ARCH_SWITCH_CALL(func, ...)                                   \
+  ([&]() -> decltype(x64::func(__VA_ARGS__)) {                        \
+    not_implemented();                                                \
+  }())
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

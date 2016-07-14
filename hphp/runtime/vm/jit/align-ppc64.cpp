@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/runtime/vm/jit/align-ppc64.h"
 
 #include "hphp/runtime/vm/jit/align-internal.h"
@@ -88,3 +90,5 @@ const AlignInfo& alignment_info(Alignment alignment) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

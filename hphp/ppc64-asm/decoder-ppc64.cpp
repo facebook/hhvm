@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 
 #include <cassert>
@@ -447,3 +449,5 @@ DecoderInfo* Decoder::decode(PPC64Instr instr) {
 }
 
 } // namespace ppc64_ams
+
+#endif

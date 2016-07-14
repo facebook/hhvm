@@ -309,16 +309,9 @@ void RelocationInfo::rewind(TCA start, TCA end) {
 //////////////////////////////////////////////////////////////////////
 
 void liveRelocate(int time) {
-  switch (arch()) {
-  case Arch::X64:
-    break;
-  case Arch::ARM:
-    // Relocation is not supported on arm.
-    return;
-  case Arch::PPC64:
-    // Relocation is not implemented on ppc64.
-    return;
-  }
+#if defined __powerpc64__ || __aarch64__
+  return;
+#endif
 
   auto relocMap = mcg->debugInfo()->getRelocMap();
   if (!relocMap) return;

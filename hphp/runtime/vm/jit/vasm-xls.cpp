@@ -315,17 +315,13 @@ struct VxlsContext {
     : abi(abi)
     , sp(rsp())
   {
-    switch (arch()) {
-      case Arch::X64:
-        tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
-        break;
-      case Arch::ARM:
-        tmp = vixl::x17; // also used as tmp1 by MacroAssembler
-        break;
-      case Arch::PPC64:
-        not_implemented();
-        break;
-    }
+#ifdef __x86_64__
+    tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
+#elif defined __aarch64__
+    tmp = vixl::x17; // also used as tmp1 by MacroAssembler
+#else
+    not_implemented();
+#endif
     this->abi.simdUnreserved -= tmp;
     this->abi.simdReserved |= tmp;
     assertx(!abi.gpUnreserved.contains(sp));
@@ -2461,8 +2457,7 @@ void optimize(Vunit& unit, lea& inst, Vlabel b, size_t i, F sf_live) {
 void optimizeSFLiveness(Vunit& unit, const VxlsContext& ctx,
                         const jit::vector<Variable*>& variables) {
   // Currently, all our optimizations are only relevant on x64.
-  if (arch() != Arch::X64) return;
-
+#ifdef __x86_64__
   // sf_var is the physical SF register, computed from the union of VregSF
   // registers by computeLiveness() and buildIntervals().
   auto const sf_var = variables[VregSF(RegSF{0})];
@@ -2491,6 +2486,7 @@ void optimizeSFLiveness(Vunit& unit, const VxlsContext& ctx,
       }
     }
   }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

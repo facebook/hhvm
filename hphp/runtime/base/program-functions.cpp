@@ -616,17 +616,13 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     if (RuntimeOption::EvalJit) {
       envArr.set(s_HHVM_JIT, 1);
     }
-    switch (arch()) {
-    case Arch::X64:
-      envArr.set(s_HHVM_ARCH, "x64");
-      break;
-    case Arch::ARM:
-      envArr.set(s_HHVM_ARCH, "arm");
-      break;
-    case Arch::PPC64:
-      envArr.set(s_HHVM_ARCH, "ppc64");
-      break;
-    }
+#ifdef __x86_64__
+    envArr.set(s_HHVM_ARCH, "x64");
+#elif defined __aarch64__
+    envArr.set(s_HHVM_ARCH, "arm");
+#elif defined __powerpc64__
+    envArr.set(s_HHVM_ARCH, "ppc64");
+#endif
     php_global_set(s__ENV, envArr);
   }
 

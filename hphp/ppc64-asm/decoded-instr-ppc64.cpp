@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
 #include <folly/Format.h>
@@ -69,3 +71,5 @@ HPHP::jit::ConditionCode DecodedInstruction::jccCondCode() const {
 }
 
 }
+
+#endif

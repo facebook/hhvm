@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __powerpc64__
+
 #include "hphp/ppc64-asm/dasm-ppc64.h"
 
 #include <folly/Format.h>
@@ -54,3 +56,5 @@ void Disassembler::disassembly(std::ostream& out, uint8_t* instr) {
 }
 
 } // namespace ppc64_asm
+
+#endif

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/unwind-arm.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -39,3 +41,5 @@ vixl::Instruction* simulatorExceptionHook(vixl::Simulator* sim,
 }
 
 }}}
+
+#endif

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 
 #include "hphp/runtime/base/execution-context.h"
@@ -223,3 +225,5 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

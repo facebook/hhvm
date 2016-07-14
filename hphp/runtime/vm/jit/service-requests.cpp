@@ -213,77 +213,69 @@ size_t stub_size() {
   // The extra args are the request type and the stub address.
   constexpr auto kTotalArgs = kMaxArgs + 2;
 
-  switch (arch()) {
-    case Arch::X64:
-      return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
-    case Arch::ARM:
-      return kTotalArgs * arm::kMovLen + arm::kLeaVmSpLen;
-    case Arch::PPC64:
-      not_implemented();
-  }
-  not_reached();
+#ifdef __x86_64__
+  return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
+#elif defined __aarch64__
+  return kTotalArgs * arm::kMovLen + arm::kLeaVmSpLen;
+#else
+  not_implemented();
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 FPInvOffset extract_spoff(TCA stub) {
-  switch (arch()) {
-    case Arch::X64:
-      { HPHP::jit::x64::DecodedInstruction instr(stub);
+#ifdef __x86_64__
+  HPHP::jit::x64::DecodedInstruction instr(stub);
 
-        // If it's not a lea, vasm optimized a lea{rvmfp, rvmsp} to a mov, so
-        // the offset was 0.
-        if (!instr.isLea()) return FPInvOffset{0};
+  // If it's not a lea, vasm optimized a lea{rvmfp, rvmsp} to a mov, so
+  // the offset was 0.
+  if (!instr.isLea()) return FPInvOffset{0};
 
-        auto const offBytes = safe_cast<int32_t>(instr.offset());
-        always_assert((offBytes % sizeof(Cell)) == 0);
-        return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+  auto const offBytes = safe_cast<int32_t>(instr.offset());
+  always_assert((offBytes % sizeof(Cell)) == 0);
+  return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+
+#elif defined __aarch64__
+  struct Decoder : public vixl::Decoder {
+    void VisitAddSubImmediate(vixl::Instruction* inst) {
+      // For immediate operands, shift can be '0' or '12'
+      int64_t immed =
+        inst->ImmAddSub() << ((inst->ShiftAddSub() == 1) ? 12 : 0);
+      switch (inst->Mask(vixl::AddSubOpMask)) {
+        case vixl::ADD: offset = immed; break;
+        case vixl::SUB: offset = -immed; break;
+        default: break;
       }
-
-    case Arch::ARM:
-      {
-        struct Decoder : public vixl::Decoder {
-          void VisitAddSubImmediate(vixl::Instruction* inst) {
-            // For immediate operands, shift can be '0' or '12'
-            int64_t immed =
-              inst->ImmAddSub() << ((inst->ShiftAddSub() == 1) ? 12 : 0);
-            switch (inst->Mask(vixl::AddSubOpMask)) {
-              case vixl::ADD: offset = immed; break;
-              case vixl::SUB: offset = -immed; break;
-              default: break;
-            }
-          }
-          void VisitMoveWideImmediate(vixl::Instruction* inst) {
-            // For wide moves, shift can be 0, 16, 32 or 64
-            int64_t immed = safe_cast<int64_t>(
-              inst->ImmMoveWide() << (inst->ShiftMoveWide() << 4));
-            switch (inst->Mask(vixl::MoveWideImmediateMask)) {
-              case vixl::MOVN_w:
-              case vixl::MOVN_x:
-                immed = safe_cast<int64_t>(~immed);
-                break;
-            }
-            offset = immed;
-          }
-          folly::Optional<int32_t> offset;
-        };
-        Decoder decoder;
-        decoder.Decode((vixl::Instruction*)(stub));
-
-        // 'lea' becomes
-        //   a. 'add dst, base, #imm' or
-        //   b. 'mov r, #imm'
-        //      'add dst, base, r'
-        // FIXME: Return '0' if vasm optimizes 'lea' to 'mov'
-        if (!decoder.offset) return FPInvOffset{0};
-        always_assert(decoder.offset && (*decoder.offset % sizeof(Cell)) == 0);
-        return FPInvOffset{-(*decoder.offset / int32_t{sizeof(Cell)})};
+    }
+    void VisitMoveWideImmediate(vixl::Instruction* inst) {
+      // For wide moves, shift can be 0, 16, 32 or 64
+      int64_t immed =
+        safe_cast<int64_t>(inst->ImmMoveWide() << (inst->ShiftMoveWide() << 4));
+      switch (inst->Mask(vixl::MoveWideImmediateMask)) {
+        case vixl::MOVN_w:
+        case vixl::MOVN_x:
+          immed = safe_cast<int64_t>(~immed);
+          break;
       }
+      offset = immed;
+    }
+    folly::Optional<int32_t> offset;
+  };
+  Decoder decoder;
+  decoder.Decode((vixl::Instruction*)(stub));
 
-    case Arch::PPC64:
-      not_implemented();
-  }
-  not_reached();
+  // 'lea' becomes
+  //   a. 'add dst, base, #imm' or
+  //   b. 'mov r, #imm'
+  //      'add dst, base, r'
+  // FIXME: Return '0' if vasm optimizes 'lea' to 'mov'
+  if (!decoder.offset) return FPInvOffset{0};
+  always_assert(decoder.offset && (*decoder.offset % sizeof(Cell)) == 0);
+  return FPInvOffset{-(*decoder.offset / int32_t{sizeof(Cell)})};
+#else
+  not_implemented();
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

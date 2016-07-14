@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/align-arm.h"
 
 #include "hphp/runtime/vm/jit/align-internal.h"
@@ -81,3 +83,5 @@ void align(CodeBlock& cb, CGMeta* meta,
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
+
+#endif

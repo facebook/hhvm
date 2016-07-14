@@ -297,7 +297,9 @@ bool shouldTrySingletonInline(const RegionDesc& region,
   if (!RuntimeOption::RepoAuthoritative) return false;
 
   // I don't really want to inline my arm, thanks.
-  if (arch() != Arch::X64) return false;
+#ifndef __x86_64__
+  return false;
+#else
 
   // Don't inline if we're retranslating due to a side-exit from an
   // inlined call.
@@ -311,6 +313,7 @@ bool shouldTrySingletonInline(const RegionDesc& region,
   }
 
   return true;
+#endif
 }
 
 /*

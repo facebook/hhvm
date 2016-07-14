@@ -107,17 +107,13 @@ void bindDataPtrs(Vunit& vunit, DataBlock& data) {
 }
 
 void emit(const Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
-  switch (arch()) {
-    case Arch::X64:
-      emitX64(vunit, vtext, meta, ai);
-      break;
-    case Arch::ARM:
-      emitARM(vunit, vtext, meta, ai);
-      break;
-    case Arch::PPC64:
-      emitPPC64(vunit, vtext, meta, ai);
-      break;
-  }
+#ifdef __x86_64__
+  emitX64(vunit, vtext, meta, ai);
+#elif defined __aarch64__
+  emitARM(vunit, vtext, meta, ai);
+#elif defined __powerpc64__
+  emitPPC64(vunit, vtext, meta, ai);
+#endif
 }
 
 }
@@ -135,10 +131,14 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   CodeBlock cold;
   CodeBlock* frozen = &code.frozen();
 
-  auto const do_relocate = arch() == Arch::X64 &&
+  auto const do_relocate =
+#ifdef __x86_64__
     !RuntimeOption::EvalEnableReusableTC &&
     RuntimeOption::EvalJitRelocationSize &&
     cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3);
+#else
+    false;
+#endif
 
   // If code relocation is supported and enabled, set up temporary code blocks.
   if (do_relocate) {

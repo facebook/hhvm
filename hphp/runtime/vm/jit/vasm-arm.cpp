@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef __aarch64__
+
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -1536,3 +1538,5 @@ void emitARM(const Vunit& unit, Vtext& text, CGMeta& fixups,
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
+
+#endif

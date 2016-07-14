@@ -98,10 +98,8 @@ void clearTCMaps(TCA start, TCA end) {
   while (start < end) {
 #if defined(__powerpc64__)
     ppc64_asm::DecodedInstruction di(start);
-#elif defined(__x86_64__)
-    x64::DecodedInstruction di(start);
 #else
-    not_implemented();
+    x64::DecodedInstruction di(start);
 #endif
     if (profData && di.isBranch()) {
       profData->clearJmpTransID(start);

@@ -1095,6 +1095,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().fpValue          = calleeFP;
   cur().thisAvailable    = target->cls() != nullptr &&
                            !target->isStatic() &&
+                           extra->ctx &&
                            extra->ctx->isA(TObj);
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;

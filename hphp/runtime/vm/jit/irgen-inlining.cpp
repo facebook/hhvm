@@ -75,10 +75,12 @@ bool beginInlining(IRGS& env,
     if (isFPushFunc(info.fpushOpc)) {
       return nullptr;
     }
-    constexpr int32_t adjust = AROFF(m_this) / sizeof(Cell);
-    IRSPRelOffset ctxOff = calleeAROff + adjust;
-    auto const ret = gen(env, LdStk, TCtx, IRSPRelOffsetData{ctxOff}, sp(env));
-    return gen(env, AssertType, info.ctxType, ret);
+    if (info.ctxType <= TObj) {
+      constexpr int32_t adjust = AROFF(m_this) / sizeof(Cell);
+      IRSPRelOffset ctxOff = calleeAROff + adjust;
+      return gen(env, LdStk, info.ctxType, IRSPRelOffsetData{ctxOff}, sp(env));
+    }
+    return nullptr;
   }();
 
   // If the ctx was extracted from SpillFrame it may be a TCls, otherwise it

@@ -1,0 +1,65 @@
+bad variant:
+bool(false)
+
+leading hyphen, but no details arg:
+bool(false)
+
+empty domain:
+bool(false)
+array(3) {
+  ["result"]=>
+  string(0) ""
+  ["isTransitionalDifferent"]=>
+  bool(false)
+  ["errors"]=>
+  int(1)
+}
+bool(true)
+
+domain too long (max allowed 253, trailing hyphen ignored):
+bool(false)
+array(3) {
+  ["result"]=>
+  %s
+  ["isTransitionalDifferent"]=>
+  bool(false)
+  ["errors"]=>
+  int(4)
+}
+bool(true)
+
+buffer overflow:
+bool(false)
+array(0) {
+}
+bool(true)
+
+BiDi and CONTEXTJ errors:
+bool(false)
+array(3) {
+  ["result"]=>
+  string(11) "xn--ghb413k"
+  ["isTransitionalDifferent"]=>
+  bool(true)
+  ["errors"]=>
+  int(6144)
+}
+bool(true)
+
+reverse, invalid Punycode:
+bool(false)
+array(3) {
+  ["result"]=>
+  string(8) "xn--0�"
+  ["isTransitionalDifferent"]=>
+  bool(false)
+  ["errors"]=>
+  int(256)
+}
+bool(true)
+
+reverse, buffer overflow:
+bool(false)
+array(0) {
+}
+bool(true)

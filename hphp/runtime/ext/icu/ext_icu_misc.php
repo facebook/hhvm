@@ -52,9 +52,12 @@ function intl_is_failure(int $errorCode): bool;
  *                       transitional mechanisms of UTS #46 either has or
  *                       would have changed the result and 'errors',
  *                       which is an int representing a bitset of the error
- *                       constants IDNA_ERROR_*.
+ *                       constants IDNA_ERROR_*. In exceptional cases this
+ *                       parameter can be empty array, then use
+ *                       intl_get_error_code() to get info about error.
  *
- * @return mixed - Domain name encoded in ASCII-compatible form.
+ * @return mixed - Domain name encoded in ASCII-compatible form
+ *                 or FALSE on failure.
  */
 <<__Native>>
 function idn_to_ascii(string $domain,
@@ -77,9 +80,11 @@ function idn_to_ascii(string $domain,
  *                       transitional mechanisms of UTS #46 either has or
  *                       would have changed the result and 'errors',
  *                       which is an int representing a bitset of the error
- *                       constants IDNA_ERROR_*.
+ *                       constants IDNA_ERROR_*. In exceptional cases this
+ *                       parameter can be empty array, then use
+ *                       intl_get_error_code() to get info about error.
  *
- * @return mixed - Domain name in unicode
+ * @return mixed - Domain name in unicode or FALSE on failure.
  */
 <<__Native>>
 function idn_to_utf8(string $domain,

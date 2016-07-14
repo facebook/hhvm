@@ -683,6 +683,7 @@ other_files = (
     '/ext/dom/tests/xinclude.xml',
     '/ext/exif/tests/bug34704.jpg',
     '/ext/exif/tests/bug48378.jpeg',
+    '/ext/exif/tests/bug50845.jpg',
     '/ext/exif/tests/bug60150.jpg',
     '/ext/exif/tests/bug62523_1.jpg',
     '/ext/exif/tests/bug62523_2.jpg',

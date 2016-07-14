@@ -104,7 +104,8 @@ module WithToken(Token: TokenType) = struct
     and enumerator = {
       enumerator_name : t;
       enumerator_equal : t;
-      enumerator_value : t
+      enumerator_value : t;
+      enumerator_semicolon : t
     }
     and alias_declaration = {
       alias_token : t;
@@ -830,8 +831,10 @@ module WithToken(Token: TokenType) = struct
         [ enum_enum; enum_name; enum_colon; enum_base; enum_type;
           enum_left_brace; enum_enumerators; enum_right_brace ]
       | Enumerator
-        { enumerator_name; enumerator_equal; enumerator_value } ->
-        [ enumerator_name; enumerator_equal; enumerator_value ]
+        { enumerator_name; enumerator_equal; enumerator_value;
+          enumerator_semicolon } ->
+        [ enumerator_name; enumerator_equal; enumerator_value;
+          enumerator_semicolon ]
       | AliasDeclaration
         { alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon } ->
@@ -1132,8 +1135,10 @@ module WithToken(Token: TokenType) = struct
         [ "enum_enum"; "enum_name"; "enum_colon"; "enum_base"; "enum_type";
           "enum_left_brace"; "enum_enumerators"; "enum_right_brace" ]
       | Enumerator
-        { enumerator_name; enumerator_equal; enumerator_value } ->
-        [ "enumerator_name"; "enumerator_equal"; "enumerator_value" ]
+        { enumerator_name; enumerator_equal; enumerator_value;
+          enumerator_semicolon } ->
+        [ "enumerator_name"; "enumerator_equal"; "enumerator_value";
+          "enumerator_semicolon" ]
       | AliasDeclaration
         { alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon } ->
@@ -1672,9 +1677,11 @@ module WithToken(Token: TokenType) = struct
           { enum_enum; enum_name; enum_colon; enum_base; enum_type;
             enum_left_brace; enum_enumerators; enum_right_brace }
       | (SyntaxKind.Enumerator,
-        [ enumerator_name; enumerator_equal; enumerator_value ]) ->
+        [ enumerator_name; enumerator_equal; enumerator_value;
+          enumerator_semicolon ]) ->
         Enumerator
-        { enumerator_name; enumerator_equal; enumerator_value }
+        { enumerator_name; enumerator_equal; enumerator_value;
+          enumerator_semicolon }
       | (SyntaxKind.AliasDeclaration,
         [ alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon ]) ->
@@ -2116,8 +2123,8 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.EnumDeclaration
           [ enum; name; colon; base; enum_type; left_brace; items; right_brace ]
 
-      let make_enumerator name equal value =
-        from_children SyntaxKind.Enumerator [ name; equal; value ]
+      let make_enumerator name equal value semicolon =
+        from_children SyntaxKind.Enumerator [ name; equal; value; semicolon ]
 
       let make_alias token name constr equal ty semi =
         from_children SyntaxKind.AliasDeclaration

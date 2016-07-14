@@ -140,7 +140,7 @@ module WithExpressionAndStatementParser
   and parse_enumerator parser =
     (* SPEC
       enumerator:
-        enumerator-constant  =  constant-expression
+        enumerator-constant  =  constant-expression ;
       enumerator-constant:
         name
       *)
@@ -149,17 +149,34 @@ module WithExpressionAndStatementParser
     let (parser, name) = expect_token parser Name SyntaxError.error1004 in
     let (parser, equal) = expect_token parser Equal SyntaxError.error1036 in
     let (parser, value) = parse_expression parser in
-    let result = make_enumerator name equal value in
+    let (parser, semicolon) =
+      expect_token parser Semicolon SyntaxError.error1010 in
+    let result = make_enumerator name equal value semicolon in
     (parser, result)
 
   and parse_enumerator_list_opt parser =
     (* SPEC
       enumerator-list:
         enumerator
-        enumerator-list  ;  enumerator
+        enumerator-list   enumerator
     *)
-    parse_separated_list_opt
-      parser Semicolon RightBrace SyntaxError.error1004 parse_enumerator
+    let rec aux acc parser =
+      let token = peek_token parser in
+      match Token.kind token with
+      | RightBrace -> (parser, make_list (List.rev acc))
+      | EndOfFile ->
+        (* ERROR RECOVERY: reach end of file, expect brace of enumerator *)
+        let parser = with_error parser SyntaxError.error1040 in
+        (parser, make_error [make_token token])
+      | _ ->
+        let (parser, enumerator) = parse_enumerator parser in
+        aux (enumerator :: acc) parser
+    in
+    let token = peek_token parser in
+    match Token.kind token with
+    | RightBrace -> parser, make_missing ()
+    | _ -> aux [] parser
+
 
   and parse_enum_declaration parser =
     (*

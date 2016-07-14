@@ -276,7 +276,8 @@ let rec get_doc node =
     let n = get_doc x.enumerator_name in
     let e = get_doc x.enumerator_equal in
     let v = get_doc x.enumerator_value in
-    n ^| e ^| v
+    let semicolon = get_doc x.enumerator_semicolon in
+    n ^| e ^| v ^^^ semicolon
   | AliasDeclaration x ->
     let a = get_doc x.alias_token in
     let n = get_doc x.alias_name in

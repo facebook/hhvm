@@ -459,7 +459,7 @@ Object AsyncMysqlConnection::query(
   int64_t timeout_micros /* = -1 */) {
 
   verifyValidConnection();
-  auto* clientPtr = m_conn->client();
+  auto* clientPtr = static_cast<am::AsyncMysqlClient*>(m_conn->client());
   auto op = am::Connection::beginQuery(std::move(m_conn), query);
   if (timeout_micros < 0) {
     timeout_micros = mysqlExtension::ReadTimeout * 1000;
@@ -589,7 +589,7 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
     queries_vec.emplace_back(am::Query::unsafe(
         static_cast<std::string>(iter.second().toString().data())));
   }
-  auto* clientPtr = data->m_conn->client();
+  auto* clientPtr = static_cast<am::AsyncMysqlClient*>(data->m_conn->client());
   auto op = am::Connection::beginMultiQuery(std::move(data->m_conn),
                                             std::move(queries_vec));
   if (timeout_micros < 0) {

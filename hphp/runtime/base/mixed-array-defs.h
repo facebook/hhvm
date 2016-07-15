@@ -115,7 +115,8 @@ inline void MixedArray::initHash(int32_t* hash, uint32_t scale) {
     : "+r"(offset) : "r"(hash) : "xmm0"
   );
 #else
-  wordfill(hash, Empty, HashSize(scale));
+  static_assert(Empty == -1, "Cannot use wordfillones().");
+  wordfillones(hash, HashSize(scale));
 #endif
 }
 

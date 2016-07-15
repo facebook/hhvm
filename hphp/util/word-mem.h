@@ -227,17 +227,17 @@ T* wordcpy(T* to, const T* from, size_t numT) {
 }
 
 /*
- * Like Memset, but operates on words at a time.
+ * Fills a memory area with ones, 8 bytes at a time.
  */
 template<class T>
-T* wordfill(T* ptr, T value, size_t numT) {
+T* wordfillones(T* ptr, size_t numT) {
   assert(numT < std::numeric_limits<int64_t>::max() &&
          (numT * sizeof(T)) % 8 == 0);
   assert(numT != 0);
   auto numWords = numT * sizeof(T) / 8;
   auto d = (int64_t*)ptr;
   do {
-    *d++ = (int64_t)value;
+    *d++ = -1;
   } while (--numWords);
   return ptr;
 }

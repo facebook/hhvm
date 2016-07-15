@@ -43,29 +43,13 @@ module WithExpressionAndStatementParser
     parse_in_type_parser parser TypeParser.parse_possible_generic_specifier
 
   let parse_type_specifier parser =
-    let type_parser = TypeParser.make parser.lexer parser.errors in
-    let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
-    let lexer = TypeParser.lexer type_parser in
-    let errors = TypeParser.errors type_parser in
-    let parser = { lexer; errors } in
-    (parser, node)
+    parse_in_type_parser parser TypeParser.parse_type_specifier
 
   let parse_return_type parser =
-    let type_parser = TypeParser.make parser.lexer parser.errors in
-    let (type_parser, node) = TypeParser.parse_return_type type_parser in
-    let lexer = TypeParser.lexer type_parser in
-    let errors = TypeParser.errors type_parser in
-    let parser = { lexer; errors } in
-    (parser, node)
+    parse_in_type_parser parser TypeParser.parse_return_type
 
   let parse_type_constraint_opt parser =
-    let type_parser = TypeParser.make parser.lexer parser.errors in
-    let (type_parser, node) =
-      TypeParser.parse_type_constraint_opt type_parser in
-    let lexer = TypeParser.lexer type_parser in
-    let errors = TypeParser.errors type_parser in
-    let parser = { lexer; errors } in
-    (parser, node)
+    parse_in_type_parser parser TypeParser.parse_type_constraint_opt
 
   (* Expressions *)
 

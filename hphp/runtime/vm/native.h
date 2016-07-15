@@ -292,6 +292,7 @@ struct IndirectReturn {
   IndirectReturn() {}
   // Make sure the indirect return value is never copied and RVO kicked in
   IndirectReturn(const IndirectReturn&) { always_assert(false); }
+  IndirectReturn& operator=(const IndirectReturn&) = delete;
   ~IndirectReturn() {}
 };
 

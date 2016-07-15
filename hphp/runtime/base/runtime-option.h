@@ -399,6 +399,7 @@ struct RuntimeOption {
   static bool PHP7_ScalarTypes;
   static bool PHP7_EngineExceptions;
   static bool PHP7_Substr;
+  static bool PHP7_InfNanFloatParse;
   static bool PHP7_UVS;
 
   static int64_t HeapSizeMB;

@@ -25,6 +25,7 @@ type t =
 | FunctionDeclaration
 | ClassishDeclaration
 | ClassishBody
+| TraitUse
 | ParameterDeclaration
 | DefaultArgumentSpecifier
 | AttributeSpecification
@@ -121,6 +122,7 @@ let to_string kind =
   | FunctionDeclaration -> "function_declaration"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"
+  | TraitUse -> "trait_use"
   | ParameterDeclaration -> "parameter_declaration"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"

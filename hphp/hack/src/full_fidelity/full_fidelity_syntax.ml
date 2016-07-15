@@ -166,6 +166,11 @@ module WithToken(Token: TokenType) = struct
       classish_body_elements : t;
       classish_body_right_brace : t;
     }
+    and trait_use = {
+      trait_use_token : t;
+      trait_use_name_list : t;
+      trait_use_semicolon : t;
+    }
     and parameter_declaration = {
       param_attr : t;
       param_type : t;
@@ -519,6 +524,7 @@ module WithToken(Token: TokenType) = struct
     | FunctionDeclaration of function_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
+    | TraitUse of trait_use
     | EnumDeclaration of enum_declaration
     | Enumerator of enumerator
     | AliasDeclaration of alias_declaration
@@ -625,6 +631,7 @@ module WithToken(Token: TokenType) = struct
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
+      | TraitUse _ -> SyntaxKind.TraitUse
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | DefaultArgumentSpecifier _ -> SyntaxKind.DefaultArgumentSpecifier
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
@@ -711,6 +718,7 @@ module WithToken(Token: TokenType) = struct
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
     let is_classish node = kind node = SyntaxKind.ClassishDeclaration
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
+    let is_trait_use node = kind node = SyntaxKind.TraitUse
     let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
     let is_default_arg_specifier node =
       kind node = SyntaxKind.DefaultArgumentSpecifier
@@ -875,6 +883,9 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ classish_body_left_brace; classish_body_elements;
           classish_body_right_brace ]
+      | TraitUse
+        { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
+        [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]
       | ParameterDeclaration
         { param_attr; param_type; param_name; param_default } ->
         [ param_attr; param_type; param_name; param_default ]
@@ -1181,6 +1192,9 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ "classish_body_left_brace"; "classish_body_elements";
           "classish_body_right_brace" ]
+      | TraitUse
+        { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
+        [ "trait_use_token"; "trait_use_name_list"; "trait_use_semicolon"; ]
       | ParameterDeclaration
         { param_attr; param_type; param_name; param_default } ->
         [ "param_attr"; "param_type"; "param_name"; "param_default" ]
@@ -1458,6 +1472,9 @@ module WithToken(Token: TokenType) = struct
     let classish_body_left_brace x = x.classish_body_left_brace
     let classish_body_elements x = x.classish_body_elements
     let classish_body_right_brace x = x.classish_body_right_brace
+    let trait_use_token x = x.trait_use_token
+    let trait_use_name_list x = x.trait_use_name_list
+    let trait_use_semicolon x = x.trait_use_semicolon
     let param_attr x = x.param_attr
     let param_type x = x.param_type
     let param_name x = x.param_name
@@ -1731,6 +1748,9 @@ module WithToken(Token: TokenType) = struct
         ClassishBody {
           classish_body_left_brace; classish_body_elements;
           classish_body_right_brace }
+      | (SyntaxKind.TraitUse,
+        [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]) ->
+        TraitUse { trait_use_token; trait_use_name_list; trait_use_semicolon; }
       | (SyntaxKind.ParameterDeclaration, [ param_attr; param_type; param_name;
         param_default ]) ->
         ParameterDeclaration { param_attr; param_type; param_name;
@@ -2153,21 +2173,26 @@ module WithToken(Token: TokenType) = struct
         function_type_params; function_left_paren; function_params;
         function_right_paren; function_colon; function_type; function_body ]
 
-    let make_classish classish_attr classish_abstract classish_final
-      classish_token classish_name classish_type_params classish_extends
-      classish_extends_list classish_implements classish_implements_list
-      classish_body =
-      from_children SyntaxKind.ClassishDeclaration [
-        classish_attr; classish_abstract; classish_final; classish_token;
-        classish_name; classish_type_params; classish_extends;
-        classish_extends_list; classish_implements; classish_implements_list;
-        classish_body ]
+      let make_classish classish_attr classish_abstract classish_final
+        classish_token classish_name classish_type_params classish_extends
+        classish_extends_list classish_implements classish_implements_list
+        classish_body =
+        from_children SyntaxKind.ClassishDeclaration [
+          classish_attr; classish_abstract; classish_final; classish_token;
+          classish_name; classish_type_params; classish_extends;
+          classish_extends_list; classish_implements; classish_implements_list;
+          classish_body ]
 
-    let make_classish_body classish_body_left_brace classish_body_elements
-      classish_body_right_brace =
-      from_children SyntaxKind.ClassishBody [
-        classish_body_left_brace; classish_body_elements;
-        classish_body_right_brace ]
+      let make_classish_body classish_body_left_brace classish_body_elements
+        classish_body_right_brace =
+        from_children SyntaxKind.ClassishBody [
+          classish_body_left_brace; classish_body_elements;
+          classish_body_right_brace ]
+
+      let make_trait_use trait_use_token trait_use_name_list
+        trait_use_semicolon =
+        from_children SyntaxKind.TraitUse [
+          trait_use_token; trait_use_name_list; trait_use_semicolon; ]
 
       let make_parameter_declaration
         param_attr param_type param_name param_default =

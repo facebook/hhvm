@@ -31,6 +31,17 @@ module WithExpressionAndStatementParser
 
   (* Types *)
 
+  let parse_in_type_parser parser type_parser_function =
+    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let (type_parser, node) = type_parser_function type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let parser = { lexer; errors } in
+    (parser, node)
+
+  let parse_possible_generic_specifier parser =
+    parse_in_type_parser parser TypeParser.parse_possible_generic_specifier
+
   let parse_type_specifier parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
@@ -377,6 +388,9 @@ module WithExpressionAndStatementParser
       match (Token.kind token) with
       | RightBrace
       | EndOfFile -> (parser, acc)
+      | Use ->
+          let (parser, classish_use) = parse_trait_use parser in
+          aux parser (classish_use :: acc)
       | _ ->
           (* TODO *)
         let (parser, token) = next_token parser in
@@ -386,6 +400,31 @@ module WithExpressionAndStatementParser
     let (parser, classish_elements) = aux parser [] in
     let classish_elements = List.rev classish_elements in
     (parser, make_list classish_elements)
+
+
+  (* SPEC:
+    trait-use-clause:
+      use  trait-name-list  ;
+
+    trait-name-list:
+      qualified-name  generic-type-parameter-listopt
+      trait-name-list  ,  qualified-name  generic-type-parameter-listopt
+  *)
+  and parse_trait_use parser =
+    let (parser, use_token) = assert_token parser Use in
+    let (parser, trait_name_list) = parse_comma_list
+      parser Semicolon SyntaxError.error1004 parse_trait_name in
+    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+    (parser, make_trait_use use_token trait_name_list semi)
+
+  and parse_trait_name parser =
+    let (parser1, token) = next_token parser in
+    match (Token.kind token) with
+    | Name
+    | QualifiedName -> parse_possible_generic_specifier parser
+    | _ ->
+       let parser = with_error parser1 SyntaxError.error1004 in
+       (parser, make_error [make_token token])
 
   (* SPEC:
     attribute_specification := << attribute_list >>

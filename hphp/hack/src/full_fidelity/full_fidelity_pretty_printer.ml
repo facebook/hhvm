@@ -261,6 +261,11 @@ let rec get_doc node =
     let right = get_doc (classish_body_right_brace x) in
     let body = get_doc (classish_body_elements x) in
     indent_block_no_space left body right indt
+  | TraitUse x ->
+    let use = get_doc (trait_use_token x) in
+    let name_list = get_doc (trait_use_name_list x) in
+    let semi = get_doc (trait_use_semicolon x) in
+    use ^| name_list ^^^ semi
   | EnumDeclaration x ->
     let en = get_doc x.enum_enum in
     let na = get_doc x.enum_name in

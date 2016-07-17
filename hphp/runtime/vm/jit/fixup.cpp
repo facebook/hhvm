@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/data-block.h"
-#include "hphp/vixl/a64/simulator-a64.h"
 
 namespace HPHP { namespace jit {
 
@@ -107,63 +106,6 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
   // OK, we've exhausted the entire actRec chain.  We are only
   // invoking ::fixup() from contexts that were known to be called out
   // of the TC, so this cannot happen.
-  always_assert(false);
-}
-
-void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
-  TRACE(1, "fixup(begin):\n");
-
-  auto isVMFrame = [] (ActRec* ar, const vixl::Simulator* sim) {
-    // If this assert is failing, you may have forgotten a sync point somewhere
-    assertx(ar);
-    bool ret =
-      uintptr_t(ar) - s_stackLimit >= s_stackSize &&
-      !sim->is_on_stack(ar);
-    assertx(!ret || isValidVMStackAddress(ar) || ar->resumed());
-    return ret;
-  };
-
-  // For each nested simulator (corresponding to nested VM invocations), look at
-  // its PC to find a potential fixup key.
-  //
-  // Callstack walking is necessary, because we may get called from a
-  // uniqueStub.
-  for (int i = ec->m_activeSims.size() - 1; i >= 0; --i) {
-    auto const* sim = ec->m_activeSims[i];
-    auto const fp = arm::x2a(arm::rvmfp());
-    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(fp.code()));
-    auto tca = reinterpret_cast<TCA>(sim->pc());
-    TRACE(2, "considering frame %p, %p\n", rbp, tca);
-
-    while (rbp && !isVMFrame(rbp, sim)) {
-      tca = reinterpret_cast<TCA>(rbp->m_savedRip);
-      rbp = rbp->m_sfp;
-    }
-
-    if (!rbp) continue;
-
-    auto const ent = m_fixups.find(mcg->code().toOffset(tca));
-    if (!ent) {
-      continue;
-    }
-
-    if (ent->isIndirect()) {
-      not_implemented();
-    }
-
-    VMRegs regs;
-    regsFromActRec(tca, rbp, ent->fixup, &regs);
-    TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\b",
-          regs.fp->m_func->name()->data(),
-          regs.fp, regs.sp, regs.pc);
-    auto& vmRegs = vmRegsUnsafe();
-    vmRegs.fp = const_cast<ActRec*>(regs.fp);
-    vmRegs.pc = reinterpret_cast<PC>(regs.pc);
-    vmRegs.stack.top() = regs.sp;
-    return;
-  }
-
-  // This shouldn't be reached.
   always_assert(false);
 }
 

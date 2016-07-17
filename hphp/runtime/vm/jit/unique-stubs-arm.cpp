@@ -27,7 +27,6 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
-#include "hphp/runtime/vm/jit/unwind-arm.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"

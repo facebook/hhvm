@@ -1101,7 +1101,7 @@ std::string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   }
 
   StackTrace st(hexencoded);
-  std::vector<std::shared_ptr<StackTrace::Frame>> frames;
+  std::vector<std::shared_ptr<StackFrameExtra>> frames;
   st.get(frames);
 
   std::ostringstream out;

@@ -521,10 +521,6 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  if (callee->isMethod() && !(info.ctxType < TObj) && !(info.ctxType < TCls)) {
-    return nullptr;
-  }
-
   if (retry.inlineBlacklist.find(psk) != retry.inlineBlacklist.end()) {
     return nullptr;
   }

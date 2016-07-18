@@ -1493,14 +1493,7 @@ static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
   const auto funcTmp = inst->src(1);
   if (!funcTmp->hasConstVal(TFunc)) return nullptr;
 
-  const auto callee = funcTmp->funcVal();
-  if (!callee->isMethod()) return callee;
-
-  const auto ctx = inst->src(2);
-  const auto ctxType = ctx->type();
-  if (ctxType < TObj || ctxType < TCls || ctxType < TCctx) return callee;
-
-  return nullptr;
+  return funcTmp->funcVal();
 }
 
 void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,

@@ -64,9 +64,9 @@ struct MockProxygenServer : ProxygenServer {
   std::list<ResponseMessage> m_messageQueue;
 };
 
-std::unique_ptr<HTTPMessage> getGetRequest() {
+std::unique_ptr<HTTPMessage> getRequest(HTTPMethod type) {
   auto req = folly::make_unique<HTTPMessage>();
-  req->setMethod(HTTPMethod::GET);
+  req->setMethod(type);
   req->setHTTPVersion(1, 1);
   req->setURL("/");
   return req;
@@ -97,7 +97,7 @@ struct ProxygenTransportTest : testing::Test {
       .WillOnce(Invoke([] (std::shared_ptr<ProxygenTransport> transport) {
             transport->setEnqueued();
           }));
-    auto req = getGetRequest();
+    auto req = getRequest(HTTPMethod::GET);
     m_transport->onHeadersComplete(std::move(req));
     m_transport->onEOM();
   }
@@ -161,6 +161,25 @@ struct ProxygenTransportTest : testing::Test {
   MockProxygenServer m_server;
   MockHTTPTransaction m_txn;
   std::shared_ptr<ProxygenTransport> m_transport;
+};
+
+struct ProxygenTransportRepostTest : ProxygenTransportTest {
+
+  // Initiates a simple GET request to the transport
+  void SetUp() override {
+  }
+
+  void TearDown() override {
+    auto transport = m_transport.get();
+    if (!transport) {
+      return;
+    }
+    transport->detachTransaction();
+    EXPECT_EQ(m_transport.use_count(), 1);
+  }
+
+
+
 };
 
 TEST_F(ProxygenTransportTest, basic) {
@@ -272,6 +291,66 @@ TEST_F(ProxygenTransportTest, push_abort) {
   m_transport->pushResourceBody(id, nullptr, 0, true);
   m_server.deliverMessages();
   sendResponse("12345");
+}
+
+TEST_F(ProxygenTransportRepostTest, no_body) {
+  InSequence enforceOrder;
+  auto req = getRequest(HTTPMethod::POST);
+
+  EXPECT_CALL(m_txn, sendHeaders(_));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->beginPartialPostEcho();
+  m_transport->onEOM();
+}
+
+TEST_F(ProxygenTransportRepostTest, mid_body) {
+  InSequence enforceOrder;
+  auto req = getRequest(HTTPMethod::POST);
+  auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
+  auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
+
+  EXPECT_CALL(m_txn, sendHeaders(_));
+  EXPECT_CALL(m_txn, sendBody(_))
+    .Times(2);
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->onBody(std::move(body1));
+  m_transport->beginPartialPostEcho();
+  m_transport->onBody(std::move(body2));
+  m_transport->onEOM();
+}
+
+TEST_F(ProxygenTransportRepostTest, after_body) {
+  InSequence enforceOrder;
+  auto req = getRequest(HTTPMethod::POST);
+  auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
+  auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
+
+  EXPECT_CALL(m_txn, sendHeaders(_));
+  EXPECT_CALL(m_txn, sendBody(_));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->onBody(std::move(body1));
+  m_transport->onBody(std::move(body2));
+  m_transport->beginPartialPostEcho();
+  m_transport->onEOM();
+}
+
+TEST_F(ProxygenTransportRepostTest, mid_body_abort) {
+  InSequence enforceOrder;
+  auto req = getRequest(HTTPMethod::POST);
+  auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
+  auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
+
+  EXPECT_CALL(m_txn, sendHeaders(_));
+  EXPECT_CALL(m_txn, sendBody(_))
+    .Times(2);
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->onBody(std::move(body1));
+  m_transport->beginPartialPostEcho();
+  m_transport->onBody(std::move(body2));
+  m_transport->abort();
 }
 
 }

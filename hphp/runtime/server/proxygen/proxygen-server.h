@@ -180,6 +180,8 @@ struct ProxygenServer : Server,
   // These functions can only be called from the m_worker thread
   void stopListening(bool hard = false);
 
+  void returnPartialPosts();
+
   void abortPendingTransports();
 
   void doShutdown();

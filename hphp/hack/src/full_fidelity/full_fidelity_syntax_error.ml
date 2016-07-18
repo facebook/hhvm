@@ -104,3 +104,5 @@ let error2004 = "A default statement may only appear directly inside a switch."
 let error2005 = "A break statement may only appear inside a switch or loop."
 let error2006 = "A continue statement may only appear inside a loop."
 let error2007 = "A try statement requires a catch or a finally clause."
+let error2008 = "The first statement inside a switch statement must " ^
+  "be a case or default."

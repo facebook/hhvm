@@ -37,6 +37,28 @@ let statement_directly_in_switch parents =
     true
   | _ -> false
 
+let first_statement compound =
+  match syntax compound with
+  | CompoundStatement { compound_statements; _ } ->
+    begin
+      match syntax compound_statements with
+      | Missing -> None (* Empty block *)
+      | SyntaxList (first :: _ ) -> Some first
+      | _ -> Some compound_statements (* Singleton statement in a block *)
+    end
+  | _ -> None
+
+let switch_first_is_label compound =
+  match first_statement compound with
+  | None -> true
+  | Some statement ->
+    begin
+      match syntax statement with
+      | DefaultStatement _
+      | CaseStatement _ -> true
+      | _ -> false
+    end
+
 let rec break_is_legal parents =
   match parents with
   | h :: _ when is_anonymous_function h -> false
@@ -110,6 +132,9 @@ let statement_errors node parents =
   | TryStatement { catch_clauses; finally_clause; _ }
     when (is_missing catch_clauses) && (is_missing finally_clause) ->
     Some (node, SyntaxError.error2007)
+  | SwitchStatement { switch_compound_statement; _ }
+    when not (switch_first_is_label switch_compound_statement) ->
+    Some (switch_compound_statement, SyntaxError.error2008)
   | _ -> None in
   match result with
   | None -> [ ]

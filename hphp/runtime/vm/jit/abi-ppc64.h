@@ -44,15 +44,24 @@ constexpr PhysReg rsp()        { return ppc64_asm::reg::r27; }
 constexpr PhysReg rfuncln()    { return ppc64_asm::reg::r0;  }
 // optional in function linkage/function entry address at global entry point
 constexpr PhysReg rfuncentry() { return ppc64_asm::reg::r12; }
-// TOC ("Table of Contents")
-// Section that combines the functions of the GOT and the small data section.
-// GOT ("Global Offset Table")
-// Section used to hold addresses for position independent code.
-// The TOC section is accessed via the dedicated TOC pointer register, r2.
+
+/*
+ * TOC ("Table of Contents")
+ * Section that combines the functions of the GOT and the small data section.
+ *
+ * GOT ("Global Offset Table")
+ * Section used to hold addresses for position independent code.
+ *
+ * The TOC section is accessed via the dedicated TOC pointer register, r2.
+ */
 constexpr PhysReg rtoc()       { return ppc64_asm::reg::r2;  }
-// The native stack frame pointer, which has to be handled according to ABI.
-// As PPC64 has no stack pointer nor push/pop operations, it can't be replaced
-// by rsp() register as it should be pointing to the current frame.
+
+/*
+ * The native stack frame pointer, which has to be handled according to ABI.
+ *
+ * As PPC64 has no stack pointer nor push/pop operations, it can't be replaced
+ * by rsp() register as it should be pointing to the current frame.
+ */
 constexpr PhysReg rsfp()       { return ppc64_asm::reg::r1;  }
 
 /*
@@ -72,11 +81,11 @@ constexpr PhysReg rthreadptr() { return ppc64_asm::reg::r13; }
  */
 constexpr PhysReg rone()       { return ppc64_asm::reg::r28; }
 
-inline RegSet vm_regs_no_sp()  { return rvmfp() | rvmtl(); }
-inline RegSet vm_regs_with_sp(){ return vm_regs_no_sp() | rvmsp(); }
+inline RegSet vm_regs_no_sp()   { return rvmfp() | rvmtl(); }
+inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
 
-constexpr PhysReg rret_data()  { return ppc64_asm::reg::r3; }
-constexpr PhysReg rret_type()  { return ppc64_asm::reg::r4; }
+constexpr PhysReg rret_data() { return ppc64_asm::reg::r3; }
+constexpr PhysReg rret_type() { return ppc64_asm::reg::r4; }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);

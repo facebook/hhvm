@@ -1158,13 +1158,9 @@ Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void const_load_set(const String& key, const Variant& value) {
-  // legacy entry point, no longer used.
-}
-
 EXTERNALLY_VISIBLE
 void const_load() {
-  // legacy entry point, no longer used.
+  // TODO(8117903): Unused; remove after updating www side.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

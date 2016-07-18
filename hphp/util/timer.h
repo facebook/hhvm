@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
  * Timing execution of block of codes.
  */
 struct Timer {
@@ -72,6 +72,8 @@ private:
   int64_t measure() const;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct SlowTimer {
   SlowTimer(int64_t msThreshold, const char *location, const char *info);
   ~SlowTimer();
@@ -84,6 +86,17 @@ private:
   std::string m_location;
   std::string m_info;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+extern __thread int64_t s_extra_request_microseconds;
+
+int gettime(clockid_t, struct timespec*);
+
+/*
+ * Computes the difference between two timespec objects in microseconds.
+ */
+int64_t gettime_diff_us(const timespec&, const timespec&);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

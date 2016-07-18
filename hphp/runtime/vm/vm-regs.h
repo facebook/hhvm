@@ -131,6 +131,11 @@ inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
   vmpc() = ar->unit()->at(pcOff);
 }
 
+/*
+ * Return the first VM frame that is a parent of this function's call frame.
+ */
+ActRec* callerFrameHelper();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -234,13 +239,12 @@ struct VMRegGuard {
 
 namespace detail {
 
-inline ActRec* regAnchorFP(Offset* pc = nullptr) {
+inline ActRec* regAnchorFP(ActRec* cur, Offset* pc = nullptr) {
   // In builtins, m_fp points to the caller's frame if called through
   // FCallBuiltin, else it points to the builtin's frame, in which case,
   // getPrevVMState() gets the caller's frame.  In addition, we need to skip
   // over php-defined builtin functions in order to find the true context.
   auto const context = g_context.getNoCheck();
-  auto cur = vmfp();
   if (pc) *pc = cur->m_func->unit()->offsetOf(vmpc());
   while (cur && cur->skipFrame()) {
     cur = context->getPrevVMState(cur, pc);
@@ -248,11 +252,10 @@ inline ActRec* regAnchorFP(Offset* pc = nullptr) {
   return cur;
 }
 
-inline ActRec* regAnchorFPForArgs() {
+inline ActRec* regAnchorFPForArgs(ActRec* cur) {
   // Like regAnchorFP, but only account for FCallBuiltin
-  auto const context = g_context.getNoCheck();
-  ActRec* cur = vmfp();
   if (cur && cur->m_func->isCPPBuiltin()) {
+    auto const context = g_context.getNoCheck();
     cur = context->getPrevVMState(cur);
   }
   return cur;
@@ -261,22 +264,39 @@ inline ActRec* regAnchorFPForArgs() {
 }
 
 /*
- * VM helper to retrieve the frame pointer from the TC.  This is a common need
- * for extensions.
+ * VM helper to retrieve the current vm frame pointer without ensuring
+ * the vm state is clean.
+ *
+ * This is a common need for extensions.
+ */
+inline ActRec* GetCallerFrame() {
+  auto fp = tl_regState == VMRegState::CLEAN ? vmfp() : callerFrameHelper();
+  return detail::regAnchorFP(fp);
+}
+
+inline ActRec* GetCallerFrameForArgs() {
+  auto fp = tl_regState == VMRegState::CLEAN ? vmfp() : callerFrameHelper();
+  return detail::regAnchorFPForArgs(fp);
+}
+
+/*
+ * VM helper to clean the vm state, and retrieve the current vm frame
+ * pointer.
+ *
+ * This is a common need for extensions.
  */
 struct CallerFrame : public VMRegAnchor {
-  template<class... Args>
-  ActRec* operator()(Args&&... args) {
-    return detail::regAnchorFP(std::forward<Args>(args)...);
+  ActRec* operator()(Offset* pc = nullptr) {
+    return detail::regAnchorFP(vmfp(), pc);
   }
-  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(); }
+  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(vmfp()); }
 };
 
 struct EagerCallerFrame : public EagerVMRegAnchor {
   ActRec* operator()() {
-    return detail::regAnchorFP();
+    return detail::regAnchorFP(vmfp());
   }
-  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(); }
+  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(vmfp()); }
 };
 
 #define SYNC_VM_REGS_SCOPED() \

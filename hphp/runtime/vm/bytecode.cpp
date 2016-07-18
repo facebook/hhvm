@@ -144,16 +144,6 @@ using jit::TCA;
 #define OPTBLD_FLT_INLINE   INLINE_FLATTEN
 #endif
 
-bool isVMFrame(const ActRec* ar) {
-  assert(ar);
-  // Determine whether the frame pointer is outside the native stack, cleverly
-  // using a single unsigned comparison to do both halves of the bounds check.
-  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
-  assert(!ret || isValidVMStackAddress(ar) ||
-         (ar->m_func->validate(), ar->resumed()));
-  return ret;
-}
-
 template <>
 Class* arGetContextClassImpl<false>(const ActRec* ar) {
   if (ar == nullptr) {

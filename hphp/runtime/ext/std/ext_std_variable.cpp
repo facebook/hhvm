@@ -375,8 +375,7 @@ static bool modify_extract_name(VarEnv* v,
     if (name == s_this) {
       // Only disallow $this when inside a non-static method, or a static method
       // that has defined $this (matches Zend)
-      CallerFrame cf;
-      const Func* func = arGetContextFunc(cf());
+      auto const func = arGetContextFunc(GetCallerFrame());
 
       if (func && func->isMethod() && v->lookup(s_this.get()) != nullptr) {
         return false;

@@ -94,11 +94,10 @@ const StaticString
   s_colon2("::");
 
 bool is_callable(const Variant& v) {
-  CallerFrame cf;
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
-  const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
+  const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
                                            invName, false);
   if (invName != nullptr) {
     decRefStr(invName);

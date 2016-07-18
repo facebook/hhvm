@@ -100,8 +100,7 @@ String HHVM_FUNCTION(create_function, const String& args, const String& code) {
 
 ALWAYS_INLINE
 static Variant func_get_arg_impl(int arg_num) {
-  CallerFrame cf;
-  ActRec* ar = cf.actRecForArgs();
+  auto const ar = GetCallerFrameForArgs();
 
   if (ar == nullptr) {
     return false;

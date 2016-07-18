@@ -342,8 +342,7 @@ static Class* getClassByName(const char* name, int len) {
       raise_fatal_error("Cannot access parent");
     }
   } else if (len == 6 && !memcmp(name, "static", 6)) {
-    CallerFrame cf;
-    auto ar = cf();
+    auto const ar = GetCallerFrame();
     if (ar) {
       if (ar->hasThis()) {
         cls = ar->getThis()->getVMClass();

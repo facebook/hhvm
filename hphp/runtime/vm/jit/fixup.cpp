@@ -24,7 +24,32 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+
+bool isVMFrame(const ActRec* ar) {
+  assert(ar);
+  // Determine whether the frame pointer is outside the native stack, cleverly
+  // using a single unsigned comparison to do both halves of the bounds check.
+  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
+  assert(!ret || isValidVMStackAddress(ar) ||
+         (ar->m_func->validate(), ar->resumed()));
+  return ret;
+}
+
+ActRec* callerFrameHelper() {
+  DECLARE_FRAME_POINTER(frame);
+
+  auto rbp = frame->m_sfp;
+  while (true) {
+    assertx(rbp && rbp != rbp->m_sfp && "Missing fixup for native call");
+    if (isVMFrame(rbp)) {
+      return rbp;
+    }
+    rbp = rbp->m_sfp;
+  }
+}
+
+namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -72,18 +97,15 @@ const Fixup* FixupMap::findFixup(CTCA tca) const {
   return &ent->fixup;
 }
 
-void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
+void FixupMap::fixupWork(ExecutionContext* ec, ActRec* nextRbp) const {
   assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
 
-  auto nextRbp = rbp;
-  rbp = 0;
-
-  do {
-    rbp = nextRbp;
-    assertx(rbp && "Missing fixup for native call");
+  while (true) {
+    auto const rbp = nextRbp;
     nextRbp = rbp->m_sfp;
+    assertx(nextRbp && nextRbp != rbp && "Missing fixup for native call");
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
     if (isVMFrame(nextRbp)) {
@@ -101,12 +123,7 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
         return;
       }
     }
-  } while (rbp && rbp != nextRbp);
-
-  // OK, we've exhausted the entire actRec chain.  We are only
-  // invoking ::fixup() from contexts that were known to be called out
-  // of the TC, so this cannot happen.
-  always_assert(false);
+  }
 }
 
 void FixupMap::fixup(ExecutionContext* ec) const {

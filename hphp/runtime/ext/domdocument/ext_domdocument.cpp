@@ -1259,7 +1259,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   }
   ctxp->namespaces = ns;
   ctxp->nsNr = nsnbr;
-  CallerFrame cf;
+  VMRegAnchor _;
   xpathobjp = xmlXPathEvalExpression((xmlChar*)expr.data(), ctxp);
   ctxp->node = nullptr;
   if (ns != nullptr) {

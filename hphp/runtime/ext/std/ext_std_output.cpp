@@ -263,8 +263,7 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
 
 // __SystemLib\print_hashbang
 void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
-  CallerFrame cf;
-  auto ar = cf();
+  auto const ar = GetCallerFrame();
 
   if (ar->m_func->name()->empty() && RuntimeOption::ClientExecutionMode()) {
     // If run in cli mode, print nothing in the lowest pseudomain

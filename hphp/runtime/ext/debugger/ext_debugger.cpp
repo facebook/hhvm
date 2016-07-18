@@ -48,7 +48,7 @@ void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
           condition, g_context->m_dbgNoBreak);
     return;
   }
-  CallerFrame cf;
+  VMRegAnchor _;
   Debugger::InterruptVMHook(HardBreakPoint);
   if (RuntimeOption::EvalJit && DEBUGGER_FORCE_INTR) {
     TRACE(5, "switch mode\n");

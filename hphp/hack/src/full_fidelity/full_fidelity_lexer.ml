@@ -631,6 +631,7 @@ let scan_token in_type lexer =
   | ('^', '=', _) -> (advance lexer 2, TokenKind.CaratEqual)
   | ('^', _, _) -> (advance lexer 1, TokenKind.Carat)
   | ('|', '=', _) -> (advance lexer 2, TokenKind.BarEqual)
+  | ('|', '>', _) -> (advance lexer 2, TokenKind.BarGreaterThan)
   | ('|', '|', _) -> (advance lexer 2, TokenKind.BarBar)
   | ('|', _, _) -> (advance lexer 1, TokenKind.Bar)
   | ('&', '=', _) -> (advance lexer 2, TokenKind.AmpersandEqual)

@@ -64,6 +64,10 @@ struct RuntimeOption {
     return strcmp(ExecutionMode, "cli") == 0;
   }
 
+  static bool GcSamplingEnabled() {
+    return EvalEnableGC && EvalGCSampleRate > 0;
+  }
+
   static void ReadSatelliteInfo(
     const IniSettingMap& ini,
     const Hdf& hdf,
@@ -599,7 +603,6 @@ public:
 #define F(type, name, unused) \
   static type Eval ## name;
   EVALFLAGS()
-
 #undef F
 
   static bool RecordCodeCoverage;

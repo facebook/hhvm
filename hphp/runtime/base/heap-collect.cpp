@@ -809,6 +809,7 @@ void collectImpl(const char* phase) {
     if (t_surprise_filter.test(pc)) return;
     t_surprise_filter.insert(pc);
     TRACE(2, "eager gc %s at %p\n", phase, pc);
+    phase = "eager";
   } else {
     TRACE(2, "normal gc %s at %p\n", phase, vmpc());
   }
@@ -818,6 +819,9 @@ void collectImpl(const char* phase) {
   mkr.traceRoots();
   mkr.trace();
   mkr.sweep();
+  if (t_gc_num == 0) {
+    t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+  }
   if (t_enable_samples) logCollection(phase, mkr);
   ++t_gc_num;
 }
@@ -827,7 +831,6 @@ void collectImpl(const char* phase) {
 void MemoryManager::resetGC() {
   t_req_num = ++g_req_num;
   t_gc_num = 0;
-  t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
   updateNextGc();
 }
 

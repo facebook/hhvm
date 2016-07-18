@@ -155,6 +155,25 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
       raise_warning("Unable to create temporary file");
       return nullptr;
     }
+
+    file->getData()->m_mode = [mode] {
+      if (mode.empty()) {
+        return "w+b";
+      }
+      for (auto c : mode.slice()) {
+        switch (c) {
+          case '+':
+          case 'w':
+          case 'a':
+          case 'x':
+          case 'c':
+            return "w+b";
+          default:
+            break;
+        }
+      }
+      return "rb";
+    }();
     return file;
   }
 

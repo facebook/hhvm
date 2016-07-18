@@ -162,8 +162,11 @@ req::ptr<File> File::Open(const String& filename, const String& mode,
   auto file = wrapper->open(filename, mode, options, rcontext);
   if (file) {
     file->m_data->m_name = filename.data();
-    file->m_data->m_mode = mode.data();
     file->m_streamContext = rcontext;
+    // Let the wrapper set the mode itself if needed.
+    if (file->m_data->m_mode.empty()) {
+      file->m_data->m_mode = mode.data();
+    }
   }
   return file;
 }

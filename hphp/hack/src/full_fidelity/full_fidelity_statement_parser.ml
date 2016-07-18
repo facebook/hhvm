@@ -387,7 +387,7 @@ module WithExpressionAndDeclParser
       (* TODO: Detect if expression is not const *)
       let equal = make_token token in
       let (parser, value) = parse_expression parser1 in
-      (parser, make_static_initializer equal value)
+      (parser, make_simple_initializer equal value)
     | _ -> (parser, make_missing())
 
   and parse_expression_statement parser =

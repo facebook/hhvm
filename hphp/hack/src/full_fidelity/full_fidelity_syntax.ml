@@ -115,6 +115,16 @@ module WithToken(Token: TokenType) = struct
       alias_type : t;
       alias_semicolon : t
     }
+    and property_declaration = {
+      prop_modifiers : t;
+      prop_type : t;
+      prop_declarators : t;
+      prop_semicolon : t
+    }
+    and property_declarator = {
+      prop_name : t;
+      prop_init : t
+    }
     and namespace_declaration = {
       namespace_token : t;
       namespace_name : t;
@@ -329,9 +339,9 @@ module WithToken(Token: TokenType) = struct
       static_name : t;
       static_init : t
     }
-    and static_initializer = {
-      static_init_equal : t;
-      static_init_value : t
+    and simple_initializer = {
+      simple_init_equal : t;
+      simple_init_value : t
     }
     and anonymous_function = {
       anonymous_async : t;
@@ -528,6 +538,8 @@ module WithToken(Token: TokenType) = struct
     | EnumDeclaration of enum_declaration
     | Enumerator of enumerator
     | AliasDeclaration of alias_declaration
+    | PropertyDeclaration of property_declaration
+    | PropertyDeclarator of property_declarator
     | ParameterDeclaration of parameter_declaration
     | DefaultArgumentSpecifier of default_argument_specifier
     | AttributeSpecification of attribute_specification
@@ -553,7 +565,7 @@ module WithToken(Token: TokenType) = struct
     | BreakStatement of break_statement
     | ContinueStatement of continue_statement
     | FunctionStaticStatement of function_static_statement
-    | StaticInitializer of static_initializer
+    | SimpleInitializer of simple_initializer
     | StaticDeclarator of static_declarator
 
     | AnonymousFunction of anonymous_function
@@ -624,6 +636,8 @@ module WithToken(Token: TokenType) = struct
       | EnumDeclaration _ -> SyntaxKind.EnumDeclaration
       | Enumerator _ -> SyntaxKind.Enumerator
       | AliasDeclaration _ -> SyntaxKind.AliasDeclaration
+      | PropertyDeclaration _ -> SyntaxKind.PropertyDeclaration
+      | PropertyDeclarator _ -> SyntaxKind.PropertyDeclarator
       | NamespaceDeclaration _ -> SyntaxKind.NamespaceDeclaration
       | NamespaceBody _ -> SyntaxKind.NamespaceBody
       | NamespaceUseDeclaration _ -> SyntaxKind.NamespaceUseDeclaration
@@ -657,7 +671,7 @@ module WithToken(Token: TokenType) = struct
       | BreakStatement _ -> SyntaxKind.BreakStatement
       | ContinueStatement _ -> SyntaxKind.ContinueStatement
       | FunctionStaticStatement _ -> SyntaxKind.FunctionStaticStatement
-      | StaticInitializer _ -> SyntaxKind.StaticInitializer
+      | SimpleInitializer _ -> SyntaxKind.SimpleInitializer
       | StaticDeclarator _ -> SyntaxKind.StaticDeclarator
       | PrefixUnaryOperator _ -> SyntaxKind.PrefixUnaryOperator
       | PostfixUnaryOperator _ -> SyntaxKind.PostfixUnaryOperator
@@ -711,6 +725,10 @@ module WithToken(Token: TokenType) = struct
     let is_enum node = kind node = SyntaxKind.EnumDeclaration
     let is_enumerator node = kind node = SyntaxKind.Enumerator
     let is_alias node = kind node = SyntaxKind.AliasDeclaration
+    let is_property_declaration node =
+      kind node = SyntaxKind.PropertyDeclaration
+    let is_property_declarator node =
+      kind node = SyntaxKind.PropertyDeclarator
     let is_namespace node = kind node = SyntaxKind.NamespaceDeclaration
     let is_namespace_body node = kind node = SyntaxKind.NamespaceBody
     let is_namespace_use node = kind node = SyntaxKind.NamespaceUseDeclaration
@@ -741,7 +759,7 @@ module WithToken(Token: TokenType) = struct
     let is_do_statement node = kind node = SyntaxKind.DoStatement
     let is_function_static_statement node =
       kind node = SyntaxKind.FunctionStaticStatement
-    let is_static_initializer node = kind node = SyntaxKind.StaticInitializer
+    let is_simple_initializer node = kind node = SyntaxKind.SimpleInitializer
     let is_static_declarator node = kind node = SyntaxKind.StaticDeclarator
     let is_switch_statement node = kind node = SyntaxKind.SwitchStatement
     let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
@@ -848,6 +866,12 @@ module WithToken(Token: TokenType) = struct
           alias_equal; alias_type; alias_semicolon } ->
         [ alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon ]
+      | PropertyDeclaration
+        { prop_modifiers; prop_type; prop_declarators; prop_semicolon } ->
+        [ prop_modifiers; prop_type; prop_declarators; prop_semicolon ]
+      | PropertyDeclarator
+        { prop_name; prop_init } ->
+        [ prop_name; prop_init ]
       | NamespaceDeclaration
         { namespace_token; namespace_name; namespace_body } ->
         [ namespace_token; namespace_name; namespace_body ]
@@ -985,9 +1009,9 @@ module WithToken(Token: TokenType) = struct
       | FunctionStaticStatement
         { static_static; static_declarations; static_semicolon } ->
         [ static_static; static_declarations; static_semicolon ]
-      | StaticInitializer
-        { static_init_equal; static_init_value } ->
-        [ static_init_equal; static_init_value ]
+      | SimpleInitializer
+        { simple_init_equal; simple_init_value } ->
+        [ simple_init_equal; simple_init_value ]
       | StaticDeclarator
         { static_name; static_init } ->
         [ static_name; static_init ]
@@ -1155,6 +1179,12 @@ module WithToken(Token: TokenType) = struct
           alias_equal; alias_type; alias_semicolon } ->
         [ "alias_token"; "alias_name"; "alias_constraint";
           "alias_equal"; "alias_type"; "alias_semicolon" ]
+      | PropertyDeclaration
+        { prop_modifiers; prop_type; prop_declarators; prop_semicolon } ->
+        [ "prop_modifiers"; "prop_type"; "prop_declarators"; "prop_semicolon" ]
+      | PropertyDeclarator
+        { prop_name; prop_init } ->
+        [ "prop_name"; "prop_init" ]
       | NamespaceDeclaration
         { namespace_token; namespace_name; namespace_body } ->
         [ "namespace_token"; "namespace_name"; "namespace_body" ]
@@ -1296,9 +1326,9 @@ module WithToken(Token: TokenType) = struct
       | FunctionStaticStatement
         { static_static; static_declarations; static_semicolon } ->
         [ "static_static"; "static_declarations"; "static_semicolon" ]
-      | StaticInitializer
-        { static_init_equal; static_init_value } ->
-        [ "static_init_equal"; "static_init_value" ]
+      | SimpleInitializer
+        { simple_init_equal; simple_init_value } ->
+        [ "simple_init_equal"; "simple_init_value" ]
       | StaticDeclarator
         { static_name; static_init } ->
         [ "static_name"; "static_init" ]
@@ -1705,7 +1735,14 @@ module WithToken(Token: TokenType) = struct
         AliasDeclaration
         { alias_token; alias_name; alias_constraint;
           alias_equal; alias_type; alias_semicolon }
-
+      | (SyntaxKind.PropertyDeclaration,
+        [ prop_modifiers; prop_type; prop_declarators; prop_semicolon ]) ->
+        PropertyDeclaration
+        { prop_modifiers; prop_type; prop_declarators; prop_semicolon }
+      | (SyntaxKind.PropertyDeclarator,
+        [prop_name; prop_init ]) ->
+        PropertyDeclarator
+        { prop_name; prop_init }
       | (SyntaxKind.NamespaceDeclaration,
         [ namespace_token; namespace_name; namespace_body ]) ->
         NamespaceDeclaration
@@ -1852,10 +1889,10 @@ module WithToken(Token: TokenType) = struct
         [ static_static; static_declarations; static_semicolon ]) ->
         FunctionStaticStatement
         { static_static; static_declarations; static_semicolon }
-      | (SyntaxKind.StaticInitializer,
-        [ static_init_equal; static_init_value ]) ->
-        StaticInitializer
-        { static_init_equal; static_init_value }
+      | (SyntaxKind.SimpleInitializer,
+        [ simple_init_equal; simple_init_value ]) ->
+        SimpleInitializer
+        { simple_init_equal; simple_init_value }
       | (SyntaxKind.StaticDeclarator,
         [ static_name; static_init ]) ->
         StaticDeclarator
@@ -2150,6 +2187,14 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.AliasDeclaration
           [ token; name; constr; equal; ty; semi ]
 
+      let make_property_declaration mods ty decls semi =
+        from_children SyntaxKind.PropertyDeclaration
+        [ mods; ty; decls; semi ]
+
+      let make_property_declarator name equal value =
+        from_children SyntaxKind.PropertyDeclarator
+        [ name; equal; value ]
+
       let make_namespace token name body =
         from_children SyntaxKind.NamespaceDeclaration
           [ token; name; body ]
@@ -2327,8 +2372,8 @@ module WithToken(Token: TokenType) = struct
       let make_function_static_statement static decls semi =
         from_children SyntaxKind.FunctionStaticStatement [ static; decls; semi ]
 
-      let make_static_initializer equal value =
-        from_children SyntaxKind.StaticInitializer [ equal; value ]
+      let make_simple_initializer equal value =
+        from_children SyntaxKind.SimpleInitializer [ equal; value ]
 
       let make_static_declarator variable init =
         from_children SyntaxKind.StaticDeclarator [ variable; init ]

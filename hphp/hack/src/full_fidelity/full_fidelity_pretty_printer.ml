@@ -291,6 +291,16 @@ let rec get_doc node =
     let t = get_doc x.alias_type in
     let s = get_doc x.alias_semicolon in
     a ^| n ^| c ^| e ^| t ^^^ s
+  | PropertyDeclaration x ->
+    let m = get_doc x.prop_modifiers in
+    let t = get_doc x.prop_type in
+    let d = get_doc x.prop_declarators in
+    let s = get_doc x.prop_semicolon in
+    m ^| t ^| d ^^^ s
+  | PropertyDeclarator x ->
+    let n = get_doc x.prop_name in
+    let i = get_doc x.prop_init in
+    n ^| i
   | NamespaceDeclaration x ->
     let t = get_doc x.namespace_token in
     let n = get_doc x.namespace_name in
@@ -740,9 +750,9 @@ let rec get_doc node =
     let n = get_doc x.static_name in
     let i = get_doc x.static_init in
     group_doc (n ^| i)
-  | StaticInitializer x ->
-    let e = get_doc x.static_init_equal in
-    let v = get_doc x.static_init_value in
+  | SimpleInitializer x ->
+    let e = get_doc x.simple_init_equal in
+    let v = get_doc x.simple_init_value in
     group_doc (e ^| v)
 
 (* sep is the compulsory separator separating the children in the list *)

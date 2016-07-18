@@ -34,6 +34,8 @@ type t =
 | EnumDeclaration
 | Enumerator
 | AliasDeclaration
+| PropertyDeclaration
+| PropertyDeclarator
 
 (* Statements *)
 | CompoundStatement
@@ -57,7 +59,7 @@ type t =
 | ContinueStatement
 | FunctionStaticStatement
 | StaticDeclarator
-| StaticInitializer
+| SimpleInitializer
 
 (* Expressions *)
 | AnonymousFunction
@@ -147,7 +149,7 @@ let to_string kind =
   | ContinueStatement -> "continue_statement"
   | FunctionStaticStatement -> "function_static_statement"
   | StaticDeclarator -> "static_declarator"
-  | StaticInitializer -> "static_initializer"
+  | SimpleInitializer -> "simple_initializer"
   | PrefixUnaryOperator -> "prefix_unary_operator"
   | PostfixUnaryOperator -> "postfix_unary_operator"
   | BinaryOperator -> "binary_operator"
@@ -180,6 +182,8 @@ let to_string kind =
   | EnumDeclaration -> "enum_declaration"
   | Enumerator -> "enumerator"
   | AliasDeclaration -> "alias_declaration"
+  | PropertyDeclaration -> "property_declaration"
+  | PropertyDeclarator -> "property_declarator"
   | XHPExpression -> "xhp_expression"
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"

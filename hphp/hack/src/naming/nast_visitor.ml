@@ -47,7 +47,7 @@ class type ['a] nast_visitor_type = object
   method on_as_expr : 'a -> as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
   method on_shape : 'a -> expr ShapeMap.t -> 'a
-  method on_valCollection : 'a -> string -> expr list -> 'a
+  method on_valCollection : 'a -> Nast.vc_kind -> expr list -> 'a
   method on_keyValCollection : 'a -> Nast.kvc_kind -> field list -> 'a
   method on_this : 'a -> 'a
   method on_id : 'a -> sid -> 'a

@@ -10,3 +10,4 @@
  */
 
 abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}
+abstract final class keyset<T as arraykey> implements Indexish<T, T> {}

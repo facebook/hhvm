@@ -847,14 +847,14 @@ and expr_
         let unify_key = Type.unify p Reason.URarray_key in
         let env, key = List.fold_left_env env keys ~init:key ~f:unify_key in
         env, (Reason.Rwitness p, Tarraykind (AKmap (key, value)))
-  | ValCollection (name, el) ->
+  | ValCollection (kind, el) ->
       let env, x = Env.fresh_unresolved_type env in
       let env, tyl = List.map_env env el expr in
       let env, tyl = List.map_env env tyl Typing_env.unbind in
       let env, tyl = List.map_env env tyl TUtils.unresolved in
       let env, v =
         List.fold_left_env env tyl ~init:x ~f:(Type.unify p Reason.URvector) in
-      let tvector = Tclass ((p, name), [v]) in
+      let tvector = Tclass ((p, vc_kind_to_name kind), [v]) in
       let ty = Reason.Rwitness p, tvector in
       env, ty
   | KeyValCollection (kind, l) ->
@@ -1951,6 +1951,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
            if List.exists ~f:(fun super -> SubType.is_sub_type env ty super) [
              (Reason.Rnone, (Tclass ((Pos.none, SN.Collections.cDict),
                [(Reason.Rnone, Tany); (Reason.Rnone, Tany)])));
+             (Reason.Rnone, (Tclass ((Pos.none, SN.Collections.cKeyset),
+               [(Reason.Rnone, Tany)])));
              (Reason.Rnone, Tarraykind AKany)
            ] then env
            else begin
@@ -2407,19 +2409,25 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       let env = Type.sub_type p (Reason.index_class cn) env ty2 ty1 in
       env, ty
   | Tclass ((_, cn) as id, argl)
-      when cn = SN.Collections.cMap
-      || cn = SN.Collections.cStableMap
-      || cn = SN.Collections.cDict ->
-      let (k, v) = match argl with
-        | [k; v] -> (k, v)
-        | _ ->
-            arity_error id;
-            let any = (Reason.Rwitness p, Tany) in
-            any, any
-      in
-      let env, ty2 = TUtils.unresolved env ty2 in
-      let env, _ = Type.unify p (Reason.index_class cn) env k ty2 in
-      env, v
+    when cn = SN.Collections.cMap
+    || cn = SN.Collections.cStableMap
+    || cn = SN.Collections.cDict
+    || cn = SN.Collections.cKeyset ->
+      if cn = SN.Collections.cKeyset && is_lvalue then begin
+        Errors.keyset_set p (Reason.to_pos (fst ety1));
+        env, (Reason.Rwitness p, Tany)
+      end else
+        let (k, v) = match argl with
+          | [t] when cn = SN.Collections.cKeyset -> (t, t)
+          | [k; v] when cn <> SN.Collections.cKeyset -> (k, v)
+          | _ ->
+              arity_error id;
+              let any = (Reason.Rwitness p, Tany) in
+              any, any
+        in
+        let env, ty2 = TUtils.unresolved env ty2 in
+        let env, _ = Type.unify p (Reason.index_class cn) env k ty2 in
+        env, v
   (* Certain container/collection types are intended to be immutable/const,
    * thus they should never appear as a lvalue when indexing i.e.
    *
@@ -2588,7 +2596,8 @@ and array_append p env ty1 =
     | Tclass ((_, n), [ty])
         when n = SN.Collections.cVector
         || n = SN.Collections.cSet
-        || n = SN.Collections.cVec ->
+        || n = SN.Collections.cVec
+        || n = SN.Collections.cKeyset ->
         env, ty
     | Tclass ((_, n), [])
         when n = SN.Collections.cVector || n = SN.Collections.cSet ->

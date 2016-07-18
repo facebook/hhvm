@@ -1710,12 +1710,10 @@ module Make (GetLocals : GetLocals) = struct
     | Collection (id, l) -> begin
       let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
       match cn with
-        | x when
-            x = SN.Collections.cVector
-            || x = SN.Collections.cImmVector
-            || x = SN.Collections.cSet
-            || x = SN.Collections.cImmSet ->
-          N.ValCollection (cn, (List.map l (afield_value env cn)))
+        | x when N.is_vc_kind
+          (TypecheckerOptions.experimental_features (fst env).tcopt) p x ->
+          N.ValCollection ((N.get_vc_kind cn),
+            (List.map l (afield_value env cn)))
         | x when N.is_kvc_kind
           (TypecheckerOptions.experimental_features (fst env).tcopt) p x ->
           N.KeyValCollection ((N.get_kvc_kind cn),

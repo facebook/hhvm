@@ -2945,7 +2945,7 @@ Class::TMIOps::findTraitClass(const Class* cls,
 
 void Class::applyTraitRules(TMIData& tmid) {
   for (auto const& precRule : m_preClass->traitPrecRules()) {
-    tmid.applyPrecRule(precRule);
+    tmid.applyPrecRule(precRule, this);
   }
   for (auto const& aliasRule : m_preClass->traitAliasRules()) {
     tmid.applyAliasRule(aliasRule, this);

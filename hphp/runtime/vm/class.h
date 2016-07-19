@@ -1129,6 +1129,8 @@ private:
                                   const StringData* traitName);
     static void errorDuplicateMethod(const Class* cls,
                                      const StringData* methName);
+    static void errorInconsistentInsteadOf(const Class* cls,
+                                           const StringData* methName);
   };
 
   friend struct TMIOps;

@@ -100,6 +100,7 @@ namespace HPHP {
  *    void errorUnknownTrait(prec_type rule, const String& traitName);
  *    void errorUnknownTrait(alias_type rule, const String& traitName);
  *    void errorDuplicateMethod(Context ctx, const String& methName);
+ *    void errorInconsistentInsteadOf(Context ctx, const String& methName);
  * }
  */
 template <class TraitMethod,
@@ -167,7 +168,8 @@ struct TraitMethodImportData {
   /*
    * Apply a precedence ("insteadof") rule to the import data set.
    */
-  void applyPrecRule(typename Ops::prec_type rule);
+  template <class Context>
+  void applyPrecRule(typename Ops::prec_type rule, Context ctx);
 
   /*
    * Apply an alias ("as") rule to the import data set.

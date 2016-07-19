@@ -91,9 +91,10 @@ template <class TraitMethod,
           class String,
           class StringHash,
           class StringEq>
+template <typename Context>
 inline void
 TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
-::applyPrecRule(typename Ops::prec_type rule) {
+::applyPrecRule(typename Ops::prec_type rule, Context ctx) {
   auto methName          = Ops::precMethodName(rule);
   auto selectedTraitName = Ops::precSelectedTraitName(rule);
   auto otherTraitNames   = Ops::precOtherTraitNames(rule);
@@ -102,6 +103,11 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
   if (it == m_dataForName.end()) {
     Ops::errorUnknownMethod(rule);
     return;
+  }
+
+  if (otherTraitNames.find(selectedTraitName) != otherTraitNames.end()) {
+    Ops::errorInconsistentInsteadOf(Ops::findTraitClass(ctx, selectedTraitName),
+                                    methName);
   }
 
   bool foundSelectedTrait = false;
@@ -122,8 +128,11 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
   if (!foundSelectedTrait) {
     Ops::errorUnknownTrait(rule, selectedTraitName);
   }
-  if (otherTraitNames.size()) {
-    Ops::errorUnknownTrait(rule, *otherTraitNames.begin());
+  for (auto const& traitName : otherTraitNames) {
+    auto trait = Ops::findTraitClass(ctx, traitName);
+    if (Ops::findTraitMethod(ctx, trait, methName)) {
+      Ops::errorUnknownTrait(rule, traitName);
+    }
   }
 }
 

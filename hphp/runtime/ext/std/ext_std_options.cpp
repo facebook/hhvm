@@ -18,10 +18,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/utsname.h>
 #include <pwd.h>
 #include <algorithm>
 #include <vector>
+
+#ifndef _WIN32
+#include <sys/utsname.h>
+#endif
 
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
@@ -927,13 +930,73 @@ String HHVM_FUNCTION(php_sapi_name) {
   return RuntimeOption::ExecutionMode;
 }
 
-const StaticString s_s("s");
-const StaticString s_r("r");
-const StaticString s_n("n");
-const StaticString s_v("v");
-const StaticString s_m("m");
+#ifdef _WIN32
+const char* php_get_edition_name(DWORD majVer, DWORD minVer);
+folly::Optional<String> php_get_windows_name();
+String php_get_windows_cpu();
+#endif
+
+const StaticString
+  s_s("s"),
+  s_r("r"),
+  s_n("n"),
+  s_v("v"),
+  s_m("m");
 
 Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
+#ifdef _WIN32
+  if (mode == s_s) {
+    return s_Windows_NT;
+  } else if (mode == s_r) {
+    DWORD dwVersion = GetVersion();
+    DWORD dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
+    DWORD dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
+    return folly::sformat("{}.{}", dwMajorVersion, dwMinorVersion);
+  } else if (mode == s_n) {
+    DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
+    char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
+
+    GetComputerName(ComputerName, &dwSize);
+    return String(ComputerName, dwSize, CopyString);
+  } else if (mode == s_v) {
+    DWORD dwVersion = GetVersion();
+    auto dwBuild = (DWORD)(HIWORD(dwVersion));
+    auto winVer = php_get_windows_name();
+    if (!winVer.hasValue()) {
+      return folly::sformat("build {}", dwBuild);
+    }
+    return folly::sformat("build {} ({})", dwBuild, winVer.value());
+  } else if (mode == s_m) {
+    return php_get_windows_cpu();
+  } else {
+    auto winVer = php_get_windows_name();
+
+    DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
+    char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
+    GetComputerName(ComputerName, &dwSize);
+
+    DWORD dwVersion = GetVersion();
+    DWORD dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
+    DWORD dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
+    DWORD dwBuild = (DWORD)(HIWORD(dwVersion));
+
+    if (dwMajorVersion == 6 && dwMinorVersion == 2 && winVer.hasValue()) {
+      if (strncmp(winVer.value().c_str(), "Windows 8.1", 11) == 0 ||
+          strncmp(winVer.value().c_str(), "Windows Server 2012 R2", 22) == 0) {
+        dwMinorVersion = 3;
+      }
+    }
+
+    return folly::sformat("Windows NT {} {}.{} build {} ({}) {}",
+      ComputerName,
+      dwMajorVersion,
+      dwMinorVersion,
+      dwBuild,
+      winVer.hasValue() ? winVer.value().c_str() : "unknown",
+      php_get_windows_cpu()
+    );
+  }
+#else
   struct utsname buf;
   if (uname((struct utsname *)&buf) == -1) {
     return init_null();
@@ -956,6 +1019,7 @@ Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
              buf.machine);
     return String(tmp_uname, CopyString);
   }
+#endif
 }
 
 static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {

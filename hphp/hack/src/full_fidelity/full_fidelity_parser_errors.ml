@@ -25,6 +25,164 @@ let matches_first f items =
   | h :: _ when f h -> true
   | _ -> false
 
+(* test a node is a syntaxlist and that the list contains an element
+ * satisfying a given predicate *)
+let list_contains_predicate p node =
+  match syntax node with
+  | SyntaxList lst ->
+    List.exists p lst
+  | _ -> false
+
+(* test a node is a syntaxlist and that the list contains multiple elements
+ * satisfying a given predicate *)
+let list_contains_multiple_predicate p node =
+  match syntax node with
+  | SyntaxList lst ->
+    let count_fun acc el = if p el then acc + 1 else acc in
+    (List.fold_left count_fun 0 lst) > 1
+  | _ -> false
+
+let list_contains_duplicate node =
+  let module SyntaxMap = Map.Make (
+    struct
+      type t = PositionedSyntax.t
+      let compare a b = Pervasives.compare (syntax a) (syntax b)
+    end
+  ) in
+  match syntax node with
+  | SyntaxList lst ->
+    let check_fun (tbl, acc) el =
+      if SyntaxMap.mem el tbl then (tbl, true)
+      else (SyntaxMap.add el () tbl, acc)
+    in
+    let (_, result) = List.fold_left check_fun (SyntaxMap.empty, false) lst in
+    result
+  | _ ->  false
+
+(* tests whether the methodish contains a modifier that satisfies [p] *)
+let methodish_modifier_contains_helper p node =
+  match syntax node with
+  | MethodishDeclaration syntax ->
+    let node = methodish_modifiers syntax in
+    (list_contains_predicate p node || p node)
+  | _ -> false
+
+(* tests whether the methodish contains > 1 modifier that satisfies [p] *)
+let methodish_modifier_multiple_helper p node =
+  match syntax node with
+  | MethodishDeclaration syntax ->
+    let node = methodish_modifiers syntax in
+    list_contains_multiple_predicate p node
+  | _ -> false
+
+(* test the methodish node contains the Final keyword *)
+let methodish_contains_final node =
+  methodish_modifier_contains_helper is_final node
+
+(* test the methodish node contains the Abstract keyword *)
+let methodish_contains_abstract node =
+  methodish_modifier_contains_helper is_abstract node
+
+(* test the methodish node contains the Static keyword *)
+let methodish_contains_static node =
+  methodish_modifier_contains_helper is_static node
+
+(* test the methodish node contains the Private keyword *)
+let methodish_contains_private node =
+  methodish_modifier_contains_helper is_private node
+
+(* test the methodish node contains any visibility modifiers *)
+let methodish_contains_visibility node =
+  let is_visibility x =
+    is_public x || is_private x || is_protected x in
+  methodish_modifier_contains_helper is_visibility node
+
+let is_visibility x =
+  is_public x || is_private x || is_protected x
+
+(* test the methodish node contains any non-visibility modifiers *)
+let methodish_contains_non_visibility node =
+  let is_non_visibility x = not (is_visibility x) in
+  methodish_modifier_contains_helper is_non_visibility node
+
+(* checks if a methodish decl has multiple visibility modifiers *)
+let methodish_multiple_visibility node =
+  methodish_modifier_multiple_helper is_visibility node
+
+(* Given a function declaration header, confirm that it is a constructor
+ * and that the methodish containing it has a static keyword *)
+let class_constructor_has_static node parents =
+  let label = function_name node in
+  (is_construct label) && (matches_first methodish_contains_static parents)
+
+(* Given a function declaration header, confirm that it is NOT a constructor
+ * and that the header containing it has visibility modifiers in parameters
+ *)
+let class_non_constructor_has_visibility_param node parents =
+  let label = function_name node in
+  let params = function_params node in
+  let has_visibility node =
+    match syntax node with
+    | ParameterDeclaration node ->
+      node |> param_visibility |> is_missing |> not
+    | _ -> false
+  in
+  ( not (is_construct label)) &&
+  ( list_contains_predicate has_visibility params ||
+    has_visibility params)
+
+(* Given a function declaration header, confirm that it is a destructor
+ * and that the methodish containing it has non-empty parameters *)
+let class_destructor_has_param node parents =
+  let label = function_name node in
+  let param = function_params node in
+  (is_destruct label) && not (is_missing param)
+
+(* Given a function declaration header, confirm that it is a destructor
+ * and that the methodish containing it has non-visibility modifiers *)
+let class_destructor_has_non_visibility_modifier node parents =
+  let label = function_name node in
+  (is_destruct label) &&
+  (matches_first methodish_contains_non_visibility parents)
+
+(* whether a methodish has duplicate modifiers *)
+let methodish_duplicate_modifier node =
+  match syntax node with
+  | MethodishDeclaration syntax ->
+    let modifiers = methodish_modifiers syntax in
+    list_contains_duplicate modifiers
+  | _ -> false
+
+(* whether a methodish decl has body *)
+let methodish_has_body node =
+  match syntax node with
+  | MethodishDeclaration syntax ->
+    let body = methodish_function_body syntax in
+    not (is_missing body)
+  | _ -> false
+
+(* Test whether node is an abstract method with a body.
+ * Here node is the methodish node *)
+let methodish_abstract_with_body node =
+  let is_abstract = methodish_contains_abstract node in
+  let has_body = methodish_has_body node in
+  is_abstract && has_body
+
+(* Test whether node is a non-abstract method without a body.
+ * Here node is the methodish node *)
+let methodish_non_abstract_without_body node =
+  let non_abstract = not (methodish_contains_abstract node) in
+  let not_has_body = not (methodish_has_body node) in
+  non_abstract && not_has_body
+
+(* Test whether node is an abstract method with either private or final modifier
+ *)
+let methodish_abstract_conflict_with_private_or_final node =
+  let is_abstract = methodish_contains_abstract node in
+  let has_private = methodish_contains_private node in
+  let has_final = methodish_contains_final node in
+  is_abstract && (has_private || has_final)
+
 let parent_is_function parents =
   matches_first is_function parents
 
@@ -89,6 +247,70 @@ let xhp_errors node _parents =
       [ SyntaxError.make s e SyntaxError.error2002 ]
   | _ -> [ ]
 
+(* helper since there are so many kinds of errors *)
+let produce_error acc check node error =
+  if check node then
+    let s = start_offset node in
+    let e = end_offset node in
+    (SyntaxError.make s e error) :: acc
+  else acc
+
+let produce_error_parents acc check node parents error =
+  if check node parents then
+    let s = start_offset node in
+    let e = end_offset node in
+    (SyntaxError.make s e error) :: acc
+  else acc
+
+(* use [check] to check properties of function *)
+let function_header_check_helper check node parents =
+  match syntax node with
+  | FunctionDeclarationHeader node -> check node parents
+  | _ -> false
+
+let produce_error_for_header acc check node error =
+  produce_error_parents acc (function_header_check_helper check) node error
+
+let methodish_errors node parents =
+  match syntax node with
+  (* TODO how to narrow the range of error *)
+  | FunctionDeclarationHeader _ ->
+    let errors = [] in
+    let errors =
+      produce_error_for_header errors class_constructor_has_static node
+      parents SyntaxError.error2009 in
+    let errors =
+      produce_error_for_header errors class_non_constructor_has_visibility_param
+      node parents SyntaxError.error2010 in
+    let errors =
+      produce_error_for_header errors class_destructor_has_param node parents
+      SyntaxError.error2011 in
+    let errors =
+      produce_error_for_header errors
+      class_destructor_has_non_visibility_modifier node parents
+      SyntaxError.error2012 in
+    errors
+  | MethodishDeclaration _ ->
+    let errors = [] in
+    let errors =
+      produce_error errors methodish_multiple_visibility node
+      SyntaxError.error2008 in
+    let errors =
+      produce_error errors methodish_duplicate_modifier node
+      SyntaxError.error2013 in
+    let errors =
+      produce_error errors methodish_abstract_with_body node
+      SyntaxError.error2014 in
+    let errors =
+      produce_error errors methodish_non_abstract_without_body node
+      SyntaxError.error2015 in
+    let errors =
+      produce_error errors methodish_abstract_conflict_with_private_or_final
+      node SyntaxError.error2016 in
+    errors
+  | _ -> [ ]
+
+
 let parameter_errors node parents is_strict =
   match syntax node with
   | ParameterDeclaration p ->
@@ -105,7 +327,9 @@ let parameter_errors node parents is_strict =
 let function_errors node _parents is_strict =
   match syntax node with
   | FunctionDeclarationHeader f ->
-    if is_strict && is_missing (function_type f) then
+    let label = function_name f in
+    let is_function = not (is_construct label) && not (is_destruct label) in
+    if is_strict && is_missing (function_type f) && is_function then
       (* Where do we want to report the error? Probably on the right paren. *)
       let rparen = function_right_paren f in
       let s = start_offset rparen in
@@ -149,8 +373,9 @@ let find_syntax_errors node is_strict =
     let func_errs = function_errors node parents is_strict in
     let xhp_errs = xhp_errors node parents in
     let statement_errs = statement_errors node parents in
+    let methodish_errs = methodish_errors node parents in
     let errors = acc.errors @ param_errs @ func_errs @
-      xhp_errs @ statement_errs in
+      xhp_errs @ statement_errs @ methodish_errs in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

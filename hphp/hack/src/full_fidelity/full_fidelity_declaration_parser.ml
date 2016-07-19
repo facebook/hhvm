@@ -363,6 +363,20 @@ module WithExpressionAndStatementParser
       | Use ->
           let (parser, classish_use) = parse_trait_use parser in
           aux parser (classish_use :: acc)
+      | Abstract
+      | Static
+      | Public
+      | Protected
+      | Private
+      | Final ->
+        (* Parse methods. TODO: not only methods can start with these tokens *)
+        let (parser, syntax) = parse_methodish parser (make_missing ()) in
+        aux parser (syntax :: acc)
+      | LessThanLessThan ->
+        (* Parse methods. TODO: not only methods can start with these tokens *)
+        let (parser, attr) = parse_attribute_specification_opt parser in
+        let (parser, syntax) = parse_methodish parser attr in
+        aux parser (syntax :: acc)
       | _ ->
           (* TODO *)
         let (parser, token) = next_token parser in
@@ -608,7 +622,8 @@ module WithExpressionAndStatementParser
        at parse time but rather by a later pass. *)
     let (parser, async_token) = optional_token parser Async in
     let (parser, function_token) = expect_function parser in
-    let (parser, name) = expect_name parser in
+    let (parser, label) =
+      parse_function_label parser in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
     let (parser, left_paren_token) = expect_left_paren parser in
@@ -617,9 +632,82 @@ module WithExpressionAndStatementParser
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
     let syntax = make_function_header async_token
-      function_token name generic_type_parameter_list left_paren_token
+      function_token label generic_type_parameter_list left_paren_token
       parameter_list right_paren_token colon_token return_type in
     (parser, syntax)
+
+  (* a function label is either a function name, a __construct label, or a
+   * __destruct label *)
+  and parse_function_label parser =
+    let parser, token = next_token parser in
+    match Token.kind token with
+    | Name | Construct | Destruct -> (parser, make_token token)
+    | _ ->
+      (* ERRPR RECOVERY *)
+      let parser = with_error parser SyntaxError.error1044 in
+      let error = make_error [make_token token] in
+      (parser, error)
+  (* SPEC
+      method-declaration:
+        attribute-spec-opt method-modifiers function-definition
+        attribute-spec-opt method-modifiers function-definition-header ;
+      method-modifiers:
+        method-modifier
+        method-modifiers method-modifier
+      method-modifier:
+        visibility-modifier (i.e. private, public, protected)
+        static
+        abstract
+        final
+   *)
+
+  and parse_methodish parser attribute_spec =
+    let (parser, modifiers) = parse_methodish_modifiers parser in
+    let (parser, header) = parse_function_declaration_header parser in
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | LeftBrace ->
+      let (parser, body) = parse_compound_statement parser in
+      let syntax =
+        make_methodish attribute_spec modifiers header body (make_missing ())in
+      (parser, syntax)
+    | Semicolon ->
+      let semicolon = make_token token in
+      let syntax =
+        make_methodish attribute_spec modifiers header (make_missing())
+        semicolon in
+      (parser1, syntax)
+    | _ ->
+      (* ERROR RECOVERY: skip to the next token *)
+      let parser = with_error parser1 SyntaxError.error1041 in
+      (parser, make_error [make_token token])
+
+  (* TODO it is unclear what the modifier requirements are. Specifically, is it
+   * required for constructors and destructors to have a visibility modifier?
+   * Does the order of the modifiers matter? *)
+  and parse_methodish_modifiers parser =
+    let rec aux acc parser =
+      (* In reality some modifiers cannot occur together, check this in a later
+       * pass *)
+      let (parser1, token) = next_token parser in
+      match Token.kind token with
+      | EndOfFile ->
+        (* ERROR RECOVERY it is likely that the function header is missing *)
+        let parser = with_error parser SyntaxError.error1043 in
+        (parser, make_list (List.rev acc))
+      | Abstract
+      | Static
+      | Public
+      | Protected
+      | Private
+      | Final ->
+        let modifier = make_token token in
+        aux (modifier :: acc) parser1
+      | _ ->
+        (* Not a modifier, end parsing modifiers *)
+        (parser, make_list (List.rev acc))
+    in
+    aux [] parser
 
   and parse_classish_or_function_declaration parser =
     let parser, attribute_specification =

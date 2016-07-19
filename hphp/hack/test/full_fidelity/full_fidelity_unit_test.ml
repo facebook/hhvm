@@ -121,7 +121,9 @@ let minimal_tests =
     "test_class_with_attributes";
     "test_xhp";
     "test_namespace";
-    "test_empty_class"
+    "test_empty_class";
+    "test_class_method_declaration";
+    "test_constructor_destructor";
   ] ~f:mapper
 
 let test_data = minimal_tests @

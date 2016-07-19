@@ -829,10 +829,22 @@ module WithToken(Token: TokenType) = struct
         | _ -> true) end
       | _ -> true
 
-    let is_semicolon node =
+    let is_specific_token kind node =
       match syntax node with
-      | Token t -> Token.kind t = Full_fidelity_token_kind.Semicolon
+      | Token t -> Token.kind t = kind
       | _ -> false
+
+
+    let is_semicolon = is_specific_token Full_fidelity_token_kind.Semicolon
+    let is_name = is_specific_token Full_fidelity_token_kind.Name
+    let is_construct = is_specific_token Full_fidelity_token_kind.Construct
+    let is_destruct = is_specific_token Full_fidelity_token_kind.Destruct
+    let is_static = is_specific_token Full_fidelity_token_kind.Static
+    let is_private = is_specific_token Full_fidelity_token_kind.Private
+    let is_public = is_specific_token Full_fidelity_token_kind.Public
+    let is_protected = is_specific_token Full_fidelity_token_kind.Protected
+    let is_abstract = is_specific_token Full_fidelity_token_kind.Abstract
+    let is_final = is_specific_token Full_fidelity_token_kind.Final
 
     let children node =
       match node.syntax with
@@ -2265,7 +2277,7 @@ module WithToken(Token: TokenType) = struct
         function_type_params; function_left_paren; function_params;
         function_right_paren; function_colon; function_type ]
 
-      let make_method methodish_attr methodish_modifiers
+      let make_methodish methodish_attr methodish_modifiers
         methodish_function_decl_header methodish_function_body
         methodish_semicolon =
         from_children SyntaxKind.MethodishDeclaration

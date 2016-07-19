@@ -1,6 +1,9 @@
 (script(header((<))((?))((name)(end_of_line)))
-(function_declaration(missing)(missing)((function)(whitespace))((name))(missing)
-((lparen))(missing)((rparen)(whitespace))(missing)(missing)
+(function_declaration
+(missing)
+(function_declaration_header
+(missing)((function)(whitespace))((name))(missing)
+((lparen))(missing)((rparen)(whitespace))(missing)(missing))
 (compound_statement(({)(end_of_line))(list(
   foreach_statement((whitespace)
     (foreach)(whitespace))(

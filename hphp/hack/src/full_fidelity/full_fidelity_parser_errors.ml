@@ -104,7 +104,7 @@ let parameter_errors node parents is_strict =
 
 let function_errors node _parents is_strict =
   match syntax node with
-  | FunctionDeclaration f ->
+  | FunctionDeclarationHeader f ->
     if is_strict && is_missing (function_type f) then
       (* Where do we want to report the error? Probably on the right paren. *)
       let rparen = function_right_paren f in

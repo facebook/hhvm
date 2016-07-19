@@ -107,31 +107,34 @@ let f_params env node = match Syntax.syntax node with
 
 let functionDeclaration env node decl =
   let open Ast in
-  let f_mode = f_mode env.mode in
-  let f_tparams = f_tparams env decl.function_type_params in
-  let f_ret = f_ret env decl.function_type in
-  let f_ret_by_ref = f_ret_by_ref env decl.function_type in
-  let f_name = f_name env decl.function_name in
-  let f_params = f_params env decl.function_params in
-  let f_body = f_body env decl.function_body in
-  (** TODOs *)
-  let f_user_attributes = [] in
-  let f_fun_kind = Ast.FSync in
-  let f_namespace = Namespace_env.empty in
-  let f_span = pos node in
-  {
-    f_mode = f_mode;
-    f_tparams = f_tparams;
-    f_ret = f_ret;
-    f_ret_by_ref = f_ret_by_ref;
-    f_name = f_name;
-    f_params = f_params;
-    f_body = f_body;
-    f_user_attributes = f_user_attributes;
-    f_fun_kind = f_fun_kind;
-    f_namespace = f_namespace;
-    f_span = f_span;
-  }
+  match Syntax.syntax decl.function_declaration_header with
+  | FunctionDeclarationHeader header ->
+    let f_mode = f_mode env.mode in
+    let f_tparams = f_tparams env header.function_type_params in
+    let f_ret = f_ret env header.function_type in
+    let f_ret_by_ref = f_ret_by_ref env header.function_type in
+    let f_name = f_name env header.function_name in
+    let f_params = f_params env header.function_params in
+    let f_body = f_body env decl.function_body in
+    (** TODOs *)
+    let f_user_attributes = [] in
+    let f_fun_kind = Ast.FSync in
+    let f_namespace = Namespace_env.empty in
+    let f_span = pos node in
+    {
+      f_mode = f_mode;
+      f_tparams = f_tparams;
+      f_ret = f_ret;
+      f_ret_by_ref = f_ret_by_ref;
+      f_name = f_name;
+      f_params = f_params;
+      f_body = f_body;
+      f_user_attributes = f_user_attributes;
+      f_fun_kind = f_fun_kind;
+      f_namespace = f_namespace;
+      f_span = f_span;
+    }
+  | _ -> assert false (* TODO what to do when AST from new parser is wrong *)
 
 (** Top-level declarations, excluding the header.
  *

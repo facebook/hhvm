@@ -146,7 +146,11 @@ module WithToken(Token: TokenType) = struct
       namespace_use_alias : t
     }
     and function_declaration = {
-      function_attr : t;
+      function_attribute_spec : t;
+      function_declaration_header : t;
+      function_body : t
+    }
+    and function_declaration_header = {
       function_async : t;
       function_token : t;
       function_name : t;
@@ -156,7 +160,6 @@ module WithToken(Token: TokenType) = struct
       function_right_paren : t;
       function_colon : t;
       function_type : t;
-      function_body : t
     }
     and classish_declaration = {
       classish_attr : t;
@@ -183,6 +186,7 @@ module WithToken(Token: TokenType) = struct
     }
     and parameter_declaration = {
       param_attr : t;
+      param_visibility : t;
       param_type : t;
       param_name : t;
       param_default : t
@@ -528,6 +532,7 @@ module WithToken(Token: TokenType) = struct
     | NamespaceUseDeclaration of namespace_use_declaration
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
+    | FunctionDeclarationHeader of function_declaration_header
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
     | TraitUse of trait_use
@@ -638,6 +643,7 @@ module WithToken(Token: TokenType) = struct
       | NamespaceUseDeclaration _ -> SyntaxKind.NamespaceUseDeclaration
       | NamespaceUseClause _ -> SyntaxKind.NamespaceUseClause
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
+      | FunctionDeclarationHeader _ -> SyntaxKind.FunctionDeclarationHeader
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | TraitUse _ -> SyntaxKind.TraitUse
@@ -879,12 +885,16 @@ module WithToken(Token: TokenType) = struct
         { namespace_use_name; namespace_use_as; namespace_use_alias } ->
         [ namespace_use_name; namespace_use_as; namespace_use_alias ]
       | FunctionDeclaration
-        { function_attr; function_async; function_token; function_name;
+        { function_attribute_spec; function_declaration_header; function_body}
+        ->
+        [ function_attribute_spec; function_declaration_header; function_body]
+      | FunctionDeclarationHeader
+        { function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
-          function_right_paren; function_colon; function_type; function_body} ->
-        [ function_attr; function_async; function_token; function_name;
+          function_right_paren; function_colon; function_type } ->
+        [ function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
-          function_right_paren; function_colon; function_type; function_body]
+          function_right_paren; function_colon; function_type ]
       | ClassishDeclaration
         { classish_attr; classish_abstract; classish_final; classish_token;
           classish_name; classish_type_params; classish_extends;
@@ -903,8 +913,9 @@ module WithToken(Token: TokenType) = struct
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]
       | ParameterDeclaration
-        { param_attr; param_type; param_name; param_default } ->
-        [ param_attr; param_type; param_name; param_default ]
+        { param_attr; param_visibility; param_type; param_name; param_default }
+        ->
+        [ param_attr; param_visibility; param_type; param_name; param_default ]
       | AttributeSpecification
         { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
           attribute_spec_right_double_angle } ->
@@ -1189,14 +1200,16 @@ module WithToken(Token: TokenType) = struct
         { namespace_use_name; namespace_use_as; namespace_use_alias } ->
         [ "namespace_use_name"; "namespace_use_as"; "namespace_use_alias" ]
       | FunctionDeclaration
-        { function_attr; function_async; function_token; function_name;
+        { function_attribute_spec; function_declaration_header; function_body }
+        -> [ "function_attribute_spec"; "function_declaration_header";
+        "function_body" ]
+      | FunctionDeclarationHeader
+        { function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
-          function_right_paren; function_colon; function_type;
-          function_body} ->
-        [ "function_attr"; "function_async"; "function_token"; "function_name";
+          function_right_paren; function_colon; function_type; } ->
+        [ "function_async"; "function_token"; "function_name";
           "function_type_params"; "function_left_paren"; "function_params";
-          "function_right_paren"; "function_colon"; "function_type";
-          "function_body" ]
+          "function_right_paren"; "function_colon"; "function_type"; ]
       | ClassishDeclaration
         { classish_attr; classish_abstract; classish_final; classish_token;
           classish_name; classish_type_params; classish_extends;
@@ -1215,8 +1228,10 @@ module WithToken(Token: TokenType) = struct
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ "trait_use_token"; "trait_use_name_list"; "trait_use_semicolon"; ]
       | ParameterDeclaration
-        { param_attr; param_type; param_name; param_default } ->
-        [ "param_attr"; "param_type"; "param_name"; "param_default" ]
+        { param_attr; param_visibility; param_type; param_name; param_default }
+        ->
+        [ "param_attr"; "param_visibility"; "param_type"; "param_name";
+          "param_default" ]
       | AttributeSpecification
         { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
           attribute_spec_right_double_angle } ->
@@ -1463,7 +1478,6 @@ module WithToken(Token: TokenType) = struct
     let header_less_than x = x.header_less_than
     let header_question x = x.header_question
     let header_language x = x.header_language
-    let function_attr x = x.function_attr
     let function_async x = x.function_async
     let function_token x = x.function_token
     let function_name x = x.function_name
@@ -1473,6 +1487,8 @@ module WithToken(Token: TokenType) = struct
     let function_right_paren x = x.function_right_paren
     let function_colon x = x.function_colon
     let function_type x = x.function_type
+    let function_attribute_spec x = x.function_attribute_spec
+    let function_declaration_header x = x.function_declaration_header
     let function_body x = x.function_body
     let classish_attr x = x.classish_attr
     let classish_abstract x = x.classish_abstract
@@ -1492,6 +1508,7 @@ module WithToken(Token: TokenType) = struct
     let trait_use_name_list x = x.trait_use_name_list
     let trait_use_semicolon x = x.trait_use_semicolon
     let param_attr x = x.param_attr
+    let param_visibility x = x.param_visibility
     let param_type x = x.param_type
     let param_name x = x.param_name
     let param_default x = x.param_default
@@ -1745,14 +1762,18 @@ module WithToken(Token: TokenType) = struct
         [ namespace_use_name; namespace_use_as; namespace_use_alias ]) ->
         NamespaceUseClause
         { namespace_use_name; namespace_use_as; namespace_use_alias }
-      | (SyntaxKind.FunctionDeclaration, [ function_attr; function_async;
+      | (SyntaxKind.FunctionDeclaration,
+        [ function_attribute_spec; function_declaration_header; function_body ])
+        -> FunctionDeclaration
+        { function_attribute_spec; function_declaration_header; function_body }
+      | (SyntaxKind.FunctionDeclarationHeader, [ function_async;
         function_token; function_name; function_type_params;
         function_left_paren; function_params; function_right_paren;
-        function_colon; function_type; function_body]) ->
-            FunctionDeclaration { function_attr; function_async;
+        function_colon; function_type ]) ->
+            FunctionDeclarationHeader { function_async;
               function_token; function_name; function_type_params;
               function_left_paren; function_params; function_right_paren;
-              function_colon; function_type; function_body }
+              function_colon; function_type }
       | (SyntaxKind.ClassishDeclaration,
         [ classish_attr; classish_abstract; classish_final; classish_token;
           classish_name; classish_type_params; classish_extends;
@@ -1772,10 +1793,10 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.TraitUse,
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]) ->
         TraitUse { trait_use_token; trait_use_name_list; trait_use_semicolon; }
-      | (SyntaxKind.ParameterDeclaration, [ param_attr; param_type; param_name;
-        param_default ]) ->
-        ParameterDeclaration { param_attr; param_type; param_name;
-          param_default }
+      | (SyntaxKind.ParameterDeclaration, [ param_attr; param_visibility;
+        param_type; param_name; param_default ]) ->
+        ParameterDeclaration { param_attr; param_visibility; param_type;
+          param_name; param_default }
       | SyntaxKind.AttributeSpecification, [ attribute_spec_left_double_angle;
         attribute_spec_attribute_list; attribute_spec_right_double_angle ] ->
         AttributeSpecification { attribute_spec_left_double_angle;
@@ -2191,13 +2212,19 @@ module WithToken(Token: TokenType) = struct
       let make_namespace_use_clause name as_token alias =
         from_children SyntaxKind.NamespaceUseClause [ name; as_token; alias ]
 
-      let make_function function_attr function_async function_token
+      let make_function function_attribute_spec function_declaration_header
+        function_body =
+        from_children SyntaxKind.FunctionDeclaration
+          [ function_attribute_spec; function_declaration_header;
+          function_body ]
+
+      let make_function_header function_async function_token
         function_name function_type_params function_left_paren function_params
-        function_right_paren function_colon function_type function_body =
-      from_children SyntaxKind.FunctionDeclaration [
-        function_attr; function_async; function_token; function_name;
+        function_right_paren function_colon function_type =
+      from_children SyntaxKind.FunctionDeclarationHeader [
+        function_async; function_token; function_name;
         function_type_params; function_left_paren; function_params;
-        function_right_paren; function_colon; function_type; function_body ]
+        function_right_paren; function_colon; function_type ]
 
       let make_classish classish_attr classish_abstract classish_final
         classish_token classish_name classish_type_params classish_extends
@@ -2221,9 +2248,10 @@ module WithToken(Token: TokenType) = struct
           trait_use_token; trait_use_name_list; trait_use_semicolon; ]
 
       let make_parameter_declaration
-        param_attr param_type param_name param_default =
+        param_attr param_visibility param_type param_name param_default =
         from_children SyntaxKind.ParameterDeclaration
-          [ param_attr; param_type; param_name; param_default ]
+          [ param_attr; param_visibility; param_type; param_name;
+          param_default ]
 
       let make_attribute_specification attribute_spec_left_double_angle
         attribute_spec_attribute_list attribute_spec_right_double_angle =

@@ -1,6 +1,6 @@
 (script(header((<))((?))((name)(end_of_line)))
-(function_declaration(
-attribute_specification((<<))
+(function_declaration
+(attribute_specification((<<))
 (list(
 list_item(attribute((name))
 ((lparen))(missing)((rparen)))((,)(whitespace)))
@@ -19,8 +19,9 @@ list_item(literal((decimal_literal)))((,)(whitespace)))
 ((rparen)))
 (missing)))
 ((>>)(whitespace)))
+(function_declaration_header
 (missing)
 ((function)(whitespace))((name))(missing)
 ((lparen))(missing)((rparen)
-(whitespace))(missing)(missing)
+(whitespace))(missing)(missing))
 (compound_statement(({))(missing)((})))))

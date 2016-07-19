@@ -564,6 +564,7 @@ module WithExpressionAndStatementParser
        In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
     let (parser, attrs) = parse_attribute_specification_opt parser in
+    let (parser, visibility) = parse_visibility_modifier_opt parser in
     let token = peek_token parser in
     let (parser, type_specifier) =
       if (Token.kind token) = Variable then (parser, make_missing())
@@ -571,8 +572,15 @@ module WithExpressionAndStatementParser
     let (parser, variable_name) = expect_variable parser in
     let (parser, default) = parse_default_argument_specifier_opt parser in
     let syntax =
-      make_parameter_declaration attrs type_specifier variable_name default in
+      make_parameter_declaration attrs visibility type_specifier variable_name
+      default in
     (parser, syntax)
+
+  and parse_visibility_modifier_opt parser =
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Public | Protected | Private -> (parser1, make_token token)
+    | _ -> (parser, make_missing())
 
   (* SPEC
             default-argument-specifier:
@@ -588,11 +596,16 @@ module WithExpressionAndStatementParser
     | _ -> (parser, make_missing())
 
   and parse_function_declaration parser attribute_specification =
+    let (parser, header) =
+      parse_function_declaration_header parser in
+    let (parser, body) = parse_compound_statement parser in
+    let syntax = make_function attribute_specification header body in
+    (parser, syntax)
+
+  and parse_function_declaration_header parser =
     (* ERROR RECOVERY
        In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
-    (* let (parser, attribute_specification) =
-      parse_attribute_specification_opt parser in *)
     let (parser, async_token) = optional_token parser Async in
     let (parser, function_token) = expect_function parser in
     let (parser, name) = expect_name parser in
@@ -603,10 +616,9 @@ module WithExpressionAndStatementParser
     let (parser, right_paren_token) = expect_right_paren parser in
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
-    let (parser, body) = parse_compound_statement parser in
-    let syntax = make_function attribute_specification async_token
+    let syntax = make_function_header async_token
       function_token name generic_type_parameter_list left_paren_token
-      parameter_list right_paren_token colon_token return_type body in
+      parameter_list right_paren_token colon_token return_type in
     (parser, syntax)
 
   and parse_classish_or_function_declaration parser =

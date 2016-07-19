@@ -2,30 +2,29 @@
   (header((<))((?))((name)(end_of_line)))
     (function_declaration
       (missing)
-      (missing)
-      ((delimited_comment)(whitespace)(function)(whitespace))
-      ((name))
-      (missing)
-      ((lparen))
-      (missing)
-      ((rparen)(whitespace))
-      (missing)
-      (missing)
-      (compound_statement
-        (({)(end_of_line))
-          (expression_statement
-            (binary_operator
-              (variable((whitespace)(variable)(whitespace)))
-              ((=)(whitespace))
-              (binary_operator
-                (parenthesized_expression
-                  ((lparen))
-                  (binary_operator
-                    (literal((decimal_literal)(whitespace)))
-                    ((+)(whitespace))
-                    (variable((variable))))
-                  ((rparen)(whitespace)))
-                ((*)(whitespace))
-                (variable((variable)))))
+      (function_declaration_header
+        (missing)
+        ((delimited_comment)(whitespace)(function)(whitespace))
+        ((name))(missing)
+        ((lparen))(missing)
+        ((rparen)(whitespace))
+        (missing)
+        (missing)
+      )
+    (compound_statement
+      (({)(end_of_line))
+        (expression_statement(
+          binary_operator(variable((whitespace)(variable)(whitespace)))
+          ((=)(whitespace))
+          (binary_operator
+            (parenthesized_expression
+              ((lparen))
+              (binary_operator(
+                literal((decimal_literal)(whitespace)))
+                ((+)(whitespace))
+                (variable((variable))))
+              ((rparen)(whitespace)))
+              ((*)(whitespace))
+              (variable((variable)))))
             ((;)(end_of_line)))
-        ((})))))
+          ((})))))

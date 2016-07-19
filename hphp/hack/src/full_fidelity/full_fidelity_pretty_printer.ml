@@ -322,9 +322,14 @@ let rec get_doc node =
     let l = get_doc x.namespace_use_alias in
     n ^| a ^| l
   | FunctionDeclaration x ->
-    let preface = group_doc ( get_doc (function_attr x)
-                       ^| get_doc (function_async x)
-                       ^| get_doc (function_token x) ) in
+      let attr = get_doc (function_attribute_spec x) in
+      let header = get_doc (function_declaration_header x) in
+      let body = function_body x in
+      let after_attr = handle_compound_inline_brace header body missing in
+      group_doc (attr ^| after_attr)
+  | FunctionDeclarationHeader x ->
+    let preface = group_doc ( get_doc (function_async x)
+                              ^| get_doc (function_token x)) in
     let name_and_generics =
       let type_params = get_doc (function_type_params x) in
       let name = get_doc (function_name x) in
@@ -341,19 +346,19 @@ let rec get_doc node =
       let fun_type = get_doc (function_type x) in
       group_doc (fun_colon ^| fun_type)
     in
-    let body = function_body x in
-    let before_body =
-      group_doc (
-        group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
-        ^| type_declaration
-      ) in
-      handle_compound_inline_brace before_body body missing
+    group_doc (
+      group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
+      ^| type_declaration
+    )
   | ParameterDeclaration x ->
     let attr = get_doc (param_attr x) in
+    let visibility = get_doc (param_visibility x) in
     let parameter_type = get_doc (param_type x) in
     let parameter_name = get_doc (param_name x) in
     let parameter_default = get_doc (param_default x) in
-    group_doc (attr ^| parameter_type ^| parameter_name ^| parameter_default)
+    group_doc
+      ( attr ^| visibility ^| parameter_type ^| parameter_name
+      ^| parameter_default )
   | AttributeSpecification x ->
     let left = get_doc (attribute_spec_left_double_angle x) in
     let right = get_doc (attribute_spec_right_double_angle x) in

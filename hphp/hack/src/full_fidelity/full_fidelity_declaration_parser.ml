@@ -599,7 +599,7 @@ module WithExpressionAndStatementParser
     | Equal ->
       (* TODO: Detect if expression is not const *)
       let (parser, default_value) = parse_expression parser1 in
-      (parser, make_default_argument_specifier (make_token token) default_value)
+      (parser, make_simple_initializer (make_token token) default_value)
     | _ -> (parser, make_missing())
 
   and parse_function_declaration parser attribute_specification =

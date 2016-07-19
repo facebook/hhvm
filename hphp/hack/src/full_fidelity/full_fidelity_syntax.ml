@@ -187,10 +187,6 @@ module WithToken(Token: TokenType) = struct
       param_name : t;
       param_default : t
     }
-    and default_argument_specifier = {
-      default_equal : t;
-      default_value : t
-    }
     and attribute_specification = {
       attribute_spec_left_double_angle : t;
       attribute_spec_attribute_list : t;
@@ -541,7 +537,6 @@ module WithToken(Token: TokenType) = struct
     | PropertyDeclaration of property_declaration
     | PropertyDeclarator of property_declarator
     | ParameterDeclaration of parameter_declaration
-    | DefaultArgumentSpecifier of default_argument_specifier
     | AttributeSpecification of attribute_specification
     | Attribute of attribute
     | InclusionDirective of inclusion_directive
@@ -647,7 +642,6 @@ module WithToken(Token: TokenType) = struct
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | TraitUse _ -> SyntaxKind.TraitUse
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
-      | DefaultArgumentSpecifier _ -> SyntaxKind.DefaultArgumentSpecifier
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
       | Attribute _ -> SyntaxKind.Attribute
       | InclusionDirective _ -> SyntaxKind.InclusionDirective
@@ -738,8 +732,6 @@ module WithToken(Token: TokenType) = struct
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
     let is_trait_use node = kind node = SyntaxKind.TraitUse
     let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
-    let is_default_arg_specifier node =
-      kind node = SyntaxKind.DefaultArgumentSpecifier
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
     let is_attribute node = kind node = SyntaxKind.Attribute
@@ -913,9 +905,6 @@ module WithToken(Token: TokenType) = struct
       | ParameterDeclaration
         { param_attr; param_type; param_name; param_default } ->
         [ param_attr; param_type; param_name; param_default ]
-      | DefaultArgumentSpecifier
-        { default_equal; default_value } ->
-        [ default_equal; default_value ]
       | AttributeSpecification
         { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
           attribute_spec_right_double_angle } ->
@@ -1228,9 +1217,6 @@ module WithToken(Token: TokenType) = struct
       | ParameterDeclaration
         { param_attr; param_type; param_name; param_default } ->
         [ "param_attr"; "param_type"; "param_name"; "param_default" ]
-      | DefaultArgumentSpecifier
-        { default_equal; default_value } ->
-        [ "default_equal"; "default_value" ]
       | AttributeSpecification
         { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
           attribute_spec_right_double_angle } ->
@@ -1509,8 +1495,6 @@ module WithToken(Token: TokenType) = struct
     let param_type x = x.param_type
     let param_name x = x.param_name
     let param_default x = x.param_default
-    let default_equal x = x.default_equal
-    let default_value x = x.default_value
     let attribute_spec_left_double_angle x = x.attribute_spec_left_double_angle
     let attribute_spec_attribute_list x = x.attribute_spec_attribute_list
     let attribute_spec_right_double_angle x =
@@ -1792,9 +1776,6 @@ module WithToken(Token: TokenType) = struct
         param_default ]) ->
         ParameterDeclaration { param_attr; param_type; param_name;
           param_default }
-      | (SyntaxKind.DefaultArgumentSpecifier, [ default_equal;
-        default_value ]) ->
-        DefaultArgumentSpecifier { default_equal; default_value }
       | SyntaxKind.AttributeSpecification, [ attribute_spec_left_double_angle;
         attribute_spec_attribute_list; attribute_spec_right_double_angle ] ->
         AttributeSpecification { attribute_spec_left_double_angle;
@@ -2243,10 +2224,6 @@ module WithToken(Token: TokenType) = struct
         param_attr param_type param_name param_default =
         from_children SyntaxKind.ParameterDeclaration
           [ param_attr; param_type; param_name; param_default ]
-
-      let make_default_argument_specifier default_equal default_value =
-        from_children SyntaxKind.DefaultArgumentSpecifier
-          [ default_equal; default_value ]
 
       let make_attribute_specification attribute_spec_left_double_angle
         attribute_spec_attribute_list attribute_spec_right_double_angle =

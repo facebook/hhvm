@@ -27,7 +27,6 @@ type t =
 | ClassishBody
 | TraitUse
 | ParameterDeclaration
-| DefaultArgumentSpecifier
 | AttributeSpecification
 | Attribute
 | InclusionDirective
@@ -177,7 +176,6 @@ let to_string kind =
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | TypeArguments -> "type_arguments"
-  | DefaultArgumentSpecifier -> "default_argument_specifier"
   | InclusionDirective -> "inclusion_directive"
   | EnumDeclaration -> "enum_declaration"
   | Enumerator -> "enumerator"

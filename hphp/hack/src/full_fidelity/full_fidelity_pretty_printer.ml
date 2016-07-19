@@ -354,10 +354,6 @@ let rec get_doc node =
     let parameter_name = get_doc (param_name x) in
     let parameter_default = get_doc (param_default x) in
     group_doc (attr ^| parameter_type ^| parameter_name ^| parameter_default)
-  | DefaultArgumentSpecifier x ->
-    let def_equal = get_doc (default_equal x) in
-    let def_value = get_doc (default_value x) in
-    group_doc (def_equal ^| def_value)
   | AttributeSpecification x ->
     let left = get_doc (attribute_spec_left_double_angle x) in
     let right = get_doc (attribute_spec_right_double_angle x) in

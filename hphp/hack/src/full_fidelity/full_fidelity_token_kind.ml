@@ -29,8 +29,10 @@ type t =
 | Classname
 | Clone
 | Const
+| Construct
 | Continue
 | Default
+| Destruct
 | Do
 | Echo
 | Else
@@ -179,8 +181,10 @@ let from_string keyword =
   | "classname" -> Some Classname
   | "clone" -> Some Clone
   | "const" -> Some Const
+  | "__construct" -> Some Construct
   | "continue" -> Some Continue
   | "default" -> Some Default
+  | "__destruct" -> Some Destruct
   | "do" -> Some Do
   | "echo" -> Some Echo
   | "else" -> Some Else
@@ -251,8 +255,10 @@ let to_string kind =
   | Classname -> "classname"
   | Clone -> "clone"
   | Const -> "const"
+  | Construct -> "__construct"
   | Continue -> "continue"
   | Default -> "default"
+  | Destruct -> "__destruct"
   | Do -> "do"
   | Echo -> "echo"
   | Else -> "else"

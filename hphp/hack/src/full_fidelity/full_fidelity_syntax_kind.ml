@@ -24,6 +24,7 @@ type t =
 | NamespaceUseClause
 | FunctionDeclaration
 | FunctionDeclarationHeader
+| MethodishDeclaration
 | ClassishDeclaration
 | ClassishBody
 | TraitUse
@@ -123,6 +124,7 @@ let to_string kind =
   | NamespaceUseClause -> "namespace_use_clause"
   | FunctionDeclaration -> "function_declaration"
   | FunctionDeclarationHeader -> "function_declaration_header"
+  | MethodishDeclaration -> "methodish_declaration"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"
   | TraitUse -> "trait_use"

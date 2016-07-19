@@ -350,6 +350,17 @@ let rec get_doc node =
       group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
       ^| type_declaration
     )
+  | MethodishDeclaration x ->
+    let methodish_attr = get_doc (methodish_attr x) in
+    let methodish_modifiers = get_doc (methodish_modifiers x) in
+    let function_header = get_doc (methodish_function_decl_header x) in
+    let body_node = methodish_function_body x in
+    let semicolon = get_doc (methodish_semicolon x) in
+    let before_body = group_doc (methodish_modifiers ^| function_header) in
+    let after_attr =
+      handle_compound_inline_brace before_body body_node missing in
+    let after_attr = after_attr ^^^ semicolon in
+    group_doc (methodish_attr ^| after_attr)
   | ParameterDeclaration x ->
     let attr = get_doc (param_attr x) in
     let visibility = get_doc (param_visibility x) in

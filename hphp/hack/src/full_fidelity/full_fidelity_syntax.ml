@@ -161,6 +161,14 @@ module WithToken(Token: TokenType) = struct
       function_colon : t;
       function_type : t;
     }
+    and methodish_declaration = {
+        methodish_attr : t;
+        methodish_modifiers : t;
+        methodish_function_decl_header : t;
+        (* Only one of function body and semicolon can be used *)
+        methodish_function_body : t;
+        methodish_semicolon : t;
+    }
     and classish_declaration = {
       classish_attr : t;
       classish_abstract : t;
@@ -533,6 +541,7 @@ module WithToken(Token: TokenType) = struct
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
     | FunctionDeclarationHeader of function_declaration_header
+    | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
     | TraitUse of trait_use
@@ -644,6 +653,7 @@ module WithToken(Token: TokenType) = struct
       | NamespaceUseClause _ -> SyntaxKind.NamespaceUseClause
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
       | FunctionDeclarationHeader _ -> SyntaxKind.FunctionDeclarationHeader
+      | MethodishDeclaration _ -> SyntaxKind.MethodishDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | TraitUse _ -> SyntaxKind.TraitUse
@@ -734,6 +744,7 @@ module WithToken(Token: TokenType) = struct
     let is_namespace_use node = kind node = SyntaxKind.NamespaceUseDeclaration
     let is_namespace_use_clause node = kind node = SyntaxKind.NamespaceUseClause
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
+    let is_method node = kind node = SyntaxKind.MethodishDeclaration
     let is_classish node = kind node = SyntaxKind.ClassishDeclaration
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
     let is_trait_use node = kind node = SyntaxKind.TraitUse
@@ -818,6 +829,11 @@ module WithToken(Token: TokenType) = struct
         | _ -> true) end
       | _ -> true
 
+    let is_semicolon node =
+      match syntax node with
+      | Token t -> Token.kind t = Full_fidelity_token_kind.Semicolon
+      | _ -> false
+
     let children node =
       match node.syntax with
       | Missing -> []
@@ -895,6 +911,11 @@ module WithToken(Token: TokenType) = struct
         [ function_async; function_token; function_name;
           function_type_params; function_left_paren; function_params;
           function_right_paren; function_colon; function_type ]
+      | MethodishDeclaration
+        { methodish_attr; methodish_modifiers; methodish_function_decl_header;
+          methodish_function_body; methodish_semicolon } ->
+        [ methodish_attr; methodish_modifiers; methodish_function_decl_header;
+          methodish_function_body; methodish_semicolon ]
       | ClassishDeclaration
         { classish_attr; classish_abstract; classish_final; classish_token;
           classish_name; classish_type_params; classish_extends;
@@ -1210,6 +1231,12 @@ module WithToken(Token: TokenType) = struct
         [ "function_async"; "function_token"; "function_name";
           "function_type_params"; "function_left_paren"; "function_params";
           "function_right_paren"; "function_colon"; "function_type"; ]
+      | MethodishDeclaration
+        { methodish_attr; methodish_modifiers; methodish_function_decl_header;
+          methodish_function_body; methodish_semicolon } ->
+        [ "methodish_attr"; "methodish_modifiers";
+          "methodish_function_decl_header"; "methodish_function_body";
+          "methodish_semicolon" ]
       | ClassishDeclaration
         { classish_attr; classish_abstract; classish_final; classish_token;
           classish_name; classish_type_params; classish_extends;
@@ -1490,6 +1517,12 @@ module WithToken(Token: TokenType) = struct
     let function_attribute_spec x = x.function_attribute_spec
     let function_declaration_header x = x.function_declaration_header
     let function_body x = x.function_body
+    let methodish_attr x = x.methodish_attr
+    let methodish_modifiers x = x.methodish_modifiers
+    let methodish_function_decl_header x = x.methodish_function_decl_header
+    let methodish_function_body x =
+      x.methodish_function_body
+    let methodish_semicolon x = x.methodish_semicolon
     let classish_attr x = x.classish_attr
     let classish_abstract x = x.classish_abstract
     let classish_final x = x.classish_final
@@ -1774,6 +1807,12 @@ module WithToken(Token: TokenType) = struct
               function_token; function_name; function_type_params;
               function_left_paren; function_params; function_right_paren;
               function_colon; function_type }
+      | (SyntaxKind.MethodishDeclaration,
+        [ methodish_attr; methodish_modifiers; methodish_function_decl_header;
+          methodish_function_body; methodish_semicolon ]) ->
+        MethodishDeclaration { methodish_attr; methodish_modifiers;
+          methodish_function_decl_header; methodish_function_body;
+          methodish_semicolon }
       | (SyntaxKind.ClassishDeclaration,
         [ classish_attr; classish_abstract; classish_final; classish_token;
           classish_name; classish_type_params; classish_extends;
@@ -2226,15 +2265,22 @@ module WithToken(Token: TokenType) = struct
         function_type_params; function_left_paren; function_params;
         function_right_paren; function_colon; function_type ]
 
-      let make_classish classish_attr classish_abstract classish_final
-        classish_token classish_name classish_type_params classish_extends
-        classish_extends_list classish_implements classish_implements_list
-        classish_body =
-        from_children SyntaxKind.ClassishDeclaration [
-          classish_attr; classish_abstract; classish_final; classish_token;
-          classish_name; classish_type_params; classish_extends;
-          classish_extends_list; classish_implements; classish_implements_list;
-          classish_body ]
+      let make_method methodish_attr methodish_modifiers
+        methodish_function_decl_header methodish_function_body
+        methodish_semicolon =
+        from_children SyntaxKind.MethodishDeclaration
+          [ methodish_attr; methodish_modifiers; methodish_function_decl_header;
+            methodish_function_body; methodish_semicolon ]
+
+    let make_classish classish_attr classish_abstract classish_final
+      classish_token classish_name classish_type_params classish_extends
+      classish_extends_list classish_implements classish_implements_list
+      classish_body =
+      from_children SyntaxKind.ClassishDeclaration [
+        classish_attr; classish_abstract; classish_final; classish_token;
+        classish_name; classish_type_params; classish_extends;
+        classish_extends_list; classish_implements; classish_implements_list;
+        classish_body ]
 
       let make_classish_body classish_body_left_brace classish_body_elements
         classish_body_right_brace =

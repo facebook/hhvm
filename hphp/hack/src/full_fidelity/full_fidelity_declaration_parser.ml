@@ -103,8 +103,8 @@ module WithExpressionAndStatementParser
        no left paren and give an error saying the left paren is missing. *)
     let (parser, right_paren) =
       if is_missing left_paren then (parser, (make_missing()))
-      else expect_token parser RightParen SyntaxError.error1011 in
-    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+      else expect_right_paren parser in
+    let (parser, semi) = expect_semicolon parser in
     let result = make_inclusion_directive
       require left_paren filename right_paren semi in
     (parser, result)
@@ -124,11 +124,11 @@ module WithExpressionAndStatementParser
 
     let (parser, token) = next_token parser in
     let token = make_token token in
-    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
+    let (parser, name) = expect_name parser in
     let (parser, constr) = parse_type_constraint_opt parser in
-    let (parser, equal) = expect_token parser Equal SyntaxError.error1029 in
+    let (parser, equal) = expect_equal parser in
     let (parser, ty) = parse_type_specifier parser in
-    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+    let (parser, semi) = expect_semicolon parser in
     let result = make_alias token name constr equal ty semi in
     (parser, result)
 
@@ -141,11 +141,10 @@ module WithExpressionAndStatementParser
       *)
     (* TODO: Add an error to a later pass that determines the value is
              a constant. *)
-    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
-    let (parser, equal) = expect_token parser Equal SyntaxError.error1036 in
+    let (parser, name) = expect_name parser in
+    let (parser, equal) = expect_equal parser in
     let (parser, value) = parse_expression parser in
-    let (parser, semicolon) =
-      expect_token parser Semicolon SyntaxError.error1010 in
+    let (parser, semicolon) = expect_semicolon parser  in
     let result = make_enumerator name equal value semicolon in
     (parser, result)
 
@@ -182,8 +181,8 @@ module WithExpressionAndStatementParser
       :  string
     *)
     let (parser, enum) = assert_token parser Enum in
-    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
-    let (parser, colon) = expect_token parser Colon SyntaxError.error1020 in
+    let (parser, name) = expect_name parser in
+    let (parser, colon) = expect_colon parser in
     let (parser1, base) = next_token parser in
     let (parser, base) = match Token.kind base with
     | String
@@ -237,8 +236,7 @@ module WithExpressionAndStatementParser
     | LeftBrace ->
       let left = make_token token in
       let (parser, body) = parse_declarations parser true in
-      let (parser, right) =
-        expect_token parser RightBrace SyntaxError.error1006 in
+      let (parser, right) = expect_right_brace parser in
       let result = make_namespace_body left body right in
       (parser, result)
     | _ ->
@@ -256,19 +254,12 @@ module WithExpressionAndStatementParser
       namespace-aliasing-clause:
         as  name
     *)
-    let (parser, name) = next_token parser in
-    let parser = match Token.kind name with
-    | QualifiedName
-    | Name -> parser
-    | _ ->
-      (* ERROR RECOVERY: We couldn't find the name; keep going *)
-      with_error parser SyntaxError.error1004 in
-    let name = make_token name in
+    let (parser, name) = expect_qualified_name parser in
     let (parser1, as_token) = next_token parser in
     let (parser, as_token, alias) =
       if Token.kind as_token = As then
         let as_token = make_token as_token in
-        let (parser, alias) = expect_token parser1 Name SyntaxError.error1004 in
+        let (parser, alias) = expect_name parser1 in
         (parser, as_token, alias)
       else
         (parser, (make_missing()), (make_missing())) in
@@ -283,7 +274,7 @@ module WithExpressionAndStatementParser
     let (parser, use_token) = assert_token parser Use in
     let (parser, clauses) = parse_comma_list
       parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
-    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+    let (parser, semi) = expect_semicolon parser in
     let result = make_namespace_use use_token clauses semi in
     (parser, result)
 
@@ -292,8 +283,7 @@ module WithExpressionAndStatementParser
       parse_classish_modifier_opt parser in
     let (parser, token) =
       parse_classish_token parser in
-    let (parser, name) =
-      expect_token parser Name SyntaxError.error1004 in
+    let (parser, name) = expect_name parser in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
     let (parser, classish_extends, classish_extends_list) =
@@ -356,12 +346,10 @@ module WithExpressionAndStatementParser
     (parser, make_list qualified_name_list)
 
   and parse_classish_body parser =
-    let (parser, left_brace_token) =
-      expect_token parser LeftBrace SyntaxError.error1034 in
+    let (parser, left_brace_token) = expect_left_brace parser in
     let (parser, classish_element_list) =
       parse_classish_element_list_opt parser in
-    let (parser, right_brace_token) =
-      expect_token parser RightBrace SyntaxError.error1006 in
+    let (parser, right_brace_token) = expect_right_brace parser in
     let syntax = make_classish_body
       left_brace_token classish_element_list right_brace_token in
     (parser, syntax)
@@ -398,7 +386,7 @@ module WithExpressionAndStatementParser
     let (parser, use_token) = assert_token parser Use in
     let (parser, trait_name_list) = parse_comma_list
       parser Semicolon SyntaxError.error1004 parse_trait_name in
-    let (parser, semi) = expect_token parser Semicolon SyntaxError.error1010 in
+    let (parser, semi) = expect_semicolon parser in
     (parser, make_trait_use use_token trait_name_list semi)
 
   and parse_trait_name parser =
@@ -427,8 +415,7 @@ module WithExpressionAndStatementParser
     let (parser1, token) = next_token parser in
     if (Token.kind token) = LessThanLessThan then
       let (parser, attr_list) = parse_attribute_list_opt parser1 in
-      let (parser, right) =
-        expect_token parser GreaterThanGreaterThan SyntaxError.error1029 in
+      let (parser, right) = expect_right_double_angle parser in
       (parser, make_attribute_specification (make_token token) attr_list right)
     else
       (parser, make_missing())
@@ -461,14 +448,13 @@ module WithExpressionAndStatementParser
       aux parser []
 
   and parse_attribute parser =
-    let (parser, name) = expect_token parser Name SyntaxError.error1004 in
+    let (parser, name) = expect_name parser in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | LeftParen ->
       let left = make_token token in
       let parser, values = parse_attribute_values_opt parser1 in
-      let parser, right =
-        expect_token parser RightParen SyntaxError.error1011 in
+      let parser, right = expect_right_paren parser in
       parser, make_attribute name left values right
     | _ ->
       let left = make_missing () in
@@ -582,8 +568,7 @@ module WithExpressionAndStatementParser
     let (parser, type_specifier) =
       if (Token.kind token) = Variable then (parser, make_missing())
       else parse_type_specifier parser in
-    let (parser, variable_name) =
-      expect_token parser Variable SyntaxError.error1008 in
+    let (parser, variable_name) = expect_variable parser in
     let (parser, default) = parse_default_argument_specifier_opt parser in
     let syntax =
       make_parameter_declaration attrs type_specifier variable_name default in
@@ -609,17 +594,13 @@ module WithExpressionAndStatementParser
     (* let (parser, attribute_specification) =
       parse_attribute_specification_opt parser in *)
     let (parser, async_token) = optional_token parser Async in
-    let (parser, function_token) =
-      expect_token parser Function SyntaxError.error1003 in
-    let (parser, name) =
-      expect_token parser Name SyntaxError.error1004 in
+    let (parser, function_token) = expect_function parser in
+    let (parser, name) = expect_name parser in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
-    let (parser, left_paren_token) =
-      expect_token parser LeftParen SyntaxError.error1004 in
+    let (parser, left_paren_token) = expect_left_paren parser in
     let (parser, parameter_list) = parse_parameter_list_opt parser in
-    let (parser, right_paren_token) =
-      expect_token parser RightParen SyntaxError.error1004 in
+    let (parser, right_paren_token) = expect_right_paren parser in
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
     let (parser, body) = parse_compound_statement parser in

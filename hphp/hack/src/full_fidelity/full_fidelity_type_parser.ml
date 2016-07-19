@@ -216,8 +216,7 @@ and parse_generic_type_argument_list parser =
 and parse_array_type_specifier parser =
   let (parser, array_token) = next_token parser in
   let array_token = make_token array_token in
-  let (parser, left_angle) =
-    expect_token parser LessThan SyntaxError.error1021 in
+  let (parser, left_angle) = expect_left_angle parser in
   (* ERROR RECOVERY: We could improve error recovery by detecting
      array<,  and marking the key type as missing. *)
   let (parser, key_type) = parse_type_specifier parser in
@@ -232,8 +231,7 @@ and parse_array_type_specifier parser =
     let (parser, comma) = next_token parser in
     let comma = make_token comma in
     let (parser, value_type) = parse_type_specifier parser in
-    let (parser, right_angle) =
-      expect_token parser GreaterThan SyntaxError.error1013 in
+    let (parser, right_angle) = expect_right_angle parser in
     let result = make_map_type_specifier array_token left_angle key_type
       comma value_type right_angle in
     (parser, result)
@@ -264,20 +262,18 @@ and parse_closure_type_specifier parser =
   let olp = make_token olp in
   let (parser, fnc) = next_token parser in
   let fnc = make_token fnc in
-  let (parser, ilp) = expect_token parser LeftParen SyntaxError.error1019 in
+  let (parser, ilp) = expect_left_paren parser in
   let (parser1, token) = next_token parser in
   let (parser, pts, irp) =
     if (Token.kind token) = RightParen then
       (parser1, (make_missing()), (make_token token))
     else
       let (parser, pts) = parse_type_list parser RightParen in
-      let (parser, irp) =
-        expect_token parser RightParen SyntaxError.error1011 in
+      let (parser, irp) = expect_right_paren parser in
       (parser, pts, irp) in
-  let (parser, col) = expect_token parser Colon SyntaxError.error1020 in
+  let (parser, col) = expect_colon parser in
   let (parser, ret) = parse_type_specifier parser in
-  let (parser, orp) =
-    expect_token parser RightParen SyntaxError.error1011 in
+  let (parser, orp) = expect_right_paren parser in
   let result = make_closure_type_specifier olp fnc ilp pts irp col ret orp in
   (parser, result)
 
@@ -320,16 +316,9 @@ and parse_classname_type_specifier parser =
   (* TODO ERROR RECOVERY is unsophisticated here. *)
   let (parser, classname) = next_token parser in
   let classname = make_token classname in
-  let (parser, left_angle) =
-    expect_token parser LessThan SyntaxError.error1021 in
-  let (parser, classname_type) = next_token parser in
-  let parser = match Token.kind classname_type with
-  | QualifiedName
-  | Name -> parser
-  | _ -> with_error parser SyntaxError.error1004 in
-  let classname_type = make_token classname_type in
-  let (parser, right_angle) =
-    expect_token parser GreaterThan SyntaxError.error1013 in
+  let (parser, left_angle) = expect_left_angle parser in
+  let (parser, classname_type) = expect_qualified_name parser in
+  let (parser, right_angle) = expect_right_angle parser in
   let result = make_classname_type_specifier
     classname left_angle classname_type right_angle in
   (parser, result)
@@ -349,8 +338,7 @@ and parse_field_specifier parser =
   | Name -> parser
   | _ -> with_error parser SyntaxError.error1025 in
   let name = make_token name in
-  let (parser, arrow) =
-    expect_token parser EqualGreaterThan SyntaxError.error1028 in
+  let (parser, arrow) = expect_arrow parser in
   let (parser, field_type) = parse_type_specifier parser in
   let result = make_field_specifier name arrow field_type in
   (parser, result)
@@ -378,9 +366,9 @@ and parse_shape_specifier parser =
   (* TODO: ERROR RECOVERY is not very sophisticated here. *)
   let (parser, shape) = next_token parser in
   let shape = make_token shape in
-  let (parser, lparen) = expect_token parser LeftParen SyntaxError.error1019 in
+  let (parser, lparen) = expect_left_paren parser in
   let (parser, fields) = parse_field_list_opt parser in
-  let (parser, rparen) = expect_token parser RightParen SyntaxError.error1011 in
+  let (parser, rparen) = expect_right_paren parser in
   let result = make_shape_type_specifier shape lparen fields rparen in
   (parser, result)
 

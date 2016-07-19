@@ -57,7 +57,6 @@ let error1002 = "An inclusion directive or type, function, " ^
                 "namespace or use declaration is expected here."
 let error1003 = "The 'function' keyword is expected here."
 let error1004 = "A name is expected here."
-let error1005 = "A block of statements is expected here."
 let error1006 = "A right brace is expected here."
 let error1007 = "A type specifier is expected here."
 let error1008 = "A variable name is expected here."

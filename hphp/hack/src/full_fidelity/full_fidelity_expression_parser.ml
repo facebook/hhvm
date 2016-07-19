@@ -268,11 +268,9 @@ module WithStatementAndDeclParser
     *)
     let (parser, new_token) = next_token parser in
     let (parser, designator) = parse_designator parser in
-    let (parser, left_paren) =
-     expect_token parser LeftParen SyntaxError.error1019 in
+    let (parser, left_paren) = expect_left_paren parser in
     let (parser, args) = parse_expression_list_opt parser in
-    let (parser, right_paren) =
-      expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, right_paren) = expect_right_paren parser in
     let result = make_object_creation_expression (make_token new_token)
       designator left_paren args right_paren in
     (parser, result)
@@ -284,8 +282,7 @@ module WithStatementAndDeclParser
     *)
     let (parser, left_paren) = next_token parser in
     let (parser, args) = parse_expression_list_opt parser in
-    let (parser, right_paren) =
-      expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, right_paren) = expect_right_paren parser in
     let result = make_function_call_expression receiver (make_token left_paren)
       args right_paren in
     parse_remaining_expression parser result
@@ -294,8 +291,7 @@ module WithStatementAndDeclParser
     (*TODO: Does not yet deal with lambdas *)
     let (parser, left_paren) = next_token parser in
     let (parser, expression) = with_reset_precedence parser parse_expression in
-    let (parser, right_paren) =
-      expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, right_paren) = expect_right_paren parser in
     let syntax =
       make_parenthesized_expression
         (make_token left_paren) expression right_paren in
@@ -412,8 +408,7 @@ module WithStatementAndDeclParser
       (parser, make_missing())
     else
       with_reset_precedence parser parse_expression in
-    let (parser, colon) =
-      expect_token parser Colon SyntaxError.error1020 in
+    let (parser, colon) = expect_colon parser in
     let (parser, alternative) = with_reset_precedence parser parse_expression in
     let result = make_conditional_expression
       test question consequence colon alternative in
@@ -421,12 +416,10 @@ module WithStatementAndDeclParser
 
   and parse_list_expression parser =
     let parser, keyword_token = next_token parser in
-    let parser, left_paren =
-      expect_token parser LeftParen SyntaxError.error1019 in
+    let parser, left_paren = expect_left_paren parser in
     let parser, members =
       with_reset_precedence parser parse_list_expression_list in
-    let parser, right_paren =
-      expect_token parser RightParen SyntaxError.error1011 in
+    let parser, right_paren = expect_right_paren parser in
     let syntax = make_listlike_expression
       (make_token keyword_token) left_paren members right_paren in
     (parser, syntax)
@@ -468,21 +461,17 @@ module WithStatementAndDeclParser
   and parse_array_intrinsic_expression parser =
     let (parser, array_keyword) =
       assert_token parser Array in
-    let (parser, left_paren) =
-      expect_token parser LeftParen SyntaxError.error1019 in
+    let (parser, left_paren) = expect_left_paren parser in
     let (parser, members) = parse_array_initializer_opt parser true in
-    let (parser, right_paren) =
-      expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, right_paren) = expect_right_paren parser in
     let syntax = make_array_intrinsic_expression array_keyword left_paren
       members right_paren in
     (parser, syntax)
   (* array_creation_expression := [ array-initializer-opt ] *)
   and parse_array_creation_expression parser =
-    let (parser, left_bracket) =
-      expect_token parser LeftBracket SyntaxError.error1026 in
+    let (parser, left_bracket) = expect_left_bracket parser in
     let (parser, members) = parse_array_initializer_opt parser false in
-    let (parser, right_bracket) =
-      expect_token parser RightBracket SyntaxError.error1032 in
+    let (parser, right_bracket) = expect_right_bracket parser in
     let syntax = make_array_creation_expression left_bracket
       members right_bracket in
     (parser, syntax)
@@ -568,8 +557,7 @@ module WithStatementAndDeclParser
       (* ERROR RECOVERY: We're missing the name and we have no arrow either.
          Just eat the token and hope we get an arrow next. *)
       (with_error parser1 SyntaxError.error1025, make_missing()) in
-    let (parser, arrow) =
-      expect_token parser EqualGreaterThan SyntaxError.error1028 in
+    let (parser, arrow) = expect_arrow parser in
     let (parser, value) = with_reset_precedence parser parse_expression in
     let result = make_field_initializer name arrow value in
     (parser, result)
@@ -589,18 +577,11 @@ module WithStatementAndDeclParser
         shape  (  field-initializer-list-opt  )
     *)
     let (parser, shape) = assert_token parser Shape in
-    let (parser, left_paren) =
-     expect_token parser LeftParen SyntaxError.error1019 in
+    let (parser, left_paren) = expect_left_paren parser in
     let (parser, fields) = parse_field_initializer_list_opt parser in
-    let (parser, right_paren) =
-      expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, right_paren) = expect_right_paren parser in
     let result = make_shape_expression shape left_paren fields right_paren in
     (parser, result)
-
-  and parse_variable parser =
-    (* Note that the use clause is a list of variable *tokens, not
-       *expressions*. *)
-    expect_token parser Variable SyntaxError.error1008
 
   and parse_variable_list parser =
     (* SPEC:
@@ -609,7 +590,7 @@ module WithStatementAndDeclParser
         use-variable-name-list  ,  variable-name
     *)
     parse_comma_list_opt
-      parser RightParen SyntaxError.error1025 parse_variable
+      parser RightParen SyntaxError.error1025 expect_variable
 
   and parse_anon_use_opt parser =
     (* SPEC:
@@ -620,11 +601,9 @@ module WithStatementAndDeclParser
     if is_missing use_token then
       (parser, use_token)
     else
-      let (parser, left_paren) =
-       expect_token parser LeftParen SyntaxError.error1019 in
+      let (parser, left_paren) = expect_left_paren parser in
       let (parser, variables) = parse_variable_list parser in
-      let (parser, right_paren) =
-        expect_token parser RightParen SyntaxError.error1011 in
+      let (parser, right_paren) = expect_right_paren parser in
       let result = make_anonymous_function_use_clause use_token
         left_paren variables right_paren in
       (parser, result)
@@ -640,11 +619,9 @@ module WithStatementAndDeclParser
     *)
     let (parser, async) = optional_token parser Async in
     let (parser, fn) = assert_token parser Function in
-    let (parser, left_paren) =
-     expect_token parser LeftParen SyntaxError.error1019 in
+    let (parser, left_paren) = expect_left_paren parser in
     let (parser, params) = parse_parameter_list_opt parser in
-    let (parser, right_paren) =
-      expect_token parser RightParen SyntaxError.error1011 in
+    let (parser, right_paren) = expect_right_paren parser in
     let (parser, colon) = optional_token parser Colon in
     let (parser, return_type) =
       if is_missing colon then
@@ -662,8 +639,7 @@ module WithStatementAndDeclParser
     let precedence = parser.precedence in
     let parser = with_precedence parser 0 in
     let (parser, expression) = parse_expression parser in
-    let (parser, right_brace) =
-      expect_token parser RightBrace SyntaxError.error1006 in
+    let (parser, right_brace) = expect_right_brace parser in
     let parser = with_precedence parser precedence in
     let node =
       make_braced_expression (make_token left_brace) expression right_brace in

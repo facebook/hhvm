@@ -96,46 +96,36 @@ let test_errors source =
   Printf.sprintf "%s" (String.concat "\n" errors)
 
 
-let test_data = [
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_simple" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_conditional" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_statements" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_for_statements" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_try_statement" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_list_expression" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_list_precedence" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_foreach_statements" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_types" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_types_type_const" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_object_creation" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_function_call" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_array_expression" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_attribute_spec" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace
-    "test_array_key_value_precedence" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_enum" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_class_with_attributes" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_xhp" test_minimal;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_namespace" test_minimal;
+let minimal_tests =
+  let mapper testname =
+    make_test_case_from_files
+      ~preprocess_exp:remove_whitespace testname test_minimal in
+  List.map
+  [
+    "test_simple";
+    "test_simple";
+    "test_conditional";
+    "test_statements";
+    "test_for_statements";
+    "test_try_statement";
+    "test_list_precedence";
+    "test_foreach_statements";
+    "test_types";
+    "test_types_type_const";
+    "test_object_creation";
+    "test_function_call";
+    "test_array_expression";
+    "test_attribute_spec";
+    "test_array_key_value_precedence";
+    "test_enum";
+    "test_class_with_attributes";
+    "test_xhp";
+    "test_namespace";
+    "test_empty_class"
+  ] ~f:mapper
+
+let test_data = minimal_tests @
+[
   {
     name = "test_mode_1";
     source = "<?hh   ";
@@ -175,9 +165,7 @@ let test_data = [
   make_test_case_from_files "test_errors_not_strict" test_errors;
   make_test_case_from_files "test_errors_strict" test_errors;
   make_test_case_from_files "test_no_errors_strict" test_errors;
-  make_test_case_from_files "test_statement_errors" test_errors;
-  make_test_case_from_files
-    ~preprocess_exp:remove_whitespace "test_empty_class" test_minimal;
+  make_test_case_from_files "test_statement_errors" test_errors
 ]
 
 let driver test () =

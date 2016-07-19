@@ -675,9 +675,8 @@ void apc_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!apcExtension::ForceConstLoadToAPC) {
-    if (apcExtension::EnableConstLoad && info && info->use_const) return;
-  }
+  bool readOnly = apcExtension::EnableConstLoad && info && info->use_const;
+  if (readOnly && info->a_name) Logger::FInfo("const archive {}", info->a_name);
   auto& s = apc_store();
   SnapshotBuilder* snap = apcExtension::PrimeLibraryUpgradeDest.empty() ?
     nullptr : &s_snapshotBuilder;
@@ -694,6 +693,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = k;
+        item.readOnly = readOnly;
         s.constructPrime(*v++, item);
         if (UNLIKELY(snap != nullptr)) snap->addInt(v[-1], item);
         k += int_lens[i + 2] + 1; // skip \0
@@ -715,6 +715,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = k;
+        item.readOnly = readOnly;
         switch (*v++) {
           case 0:
             s.constructPrime(false, item);
@@ -749,6 +750,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += string_lens[i + i + 2] + 1; // skip \0
         // Strings would be copied into APC anyway.
         String value(p, string_lens[i + i + 3], CopyString);
@@ -773,6 +775,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += object_lens[i + i + 2] + 1; // skip \0
         String value(p, object_lens[i + i + 3], CopyString);
         s.constructPrime(value, item, true);
@@ -795,6 +798,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += thrift_lens[i + i + 2] + 1; // skip \0
         String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
@@ -822,6 +826,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += other_lens[i + i + 2] + 1; // skip \0
         String value(p, other_lens[i + i + 3], CopyString);
         Variant v = unserialize_from_string(value);

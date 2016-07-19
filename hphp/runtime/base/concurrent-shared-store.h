@@ -56,6 +56,7 @@ struct StoreValue {
     , expire{o.expire}
     , dataSize{o.dataSize}
     , kind(o.kind)
+    , readOnly(o.readOnly)
     , c_time{o.c_time}
     , mtime{o.mtime}
     // Copy everything except the lock
@@ -112,7 +113,8 @@ struct StoreValue {
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;  // Only valid if data is an APCHandle*.
-  char padding[11];  // Make APCMap nodes cache-line sized (it static_asserts).
+  bool readOnly{false}; // Set for primed entries that will never change.
+  char padding[10];  // Make APCMap nodes cache-line sized (it static_asserts).
   uint32_t c_time{0}; // Modification time
   uint32_t mtime{0}; // Creation time
 };
@@ -176,12 +178,12 @@ struct EntryInfo {
  */
 struct ConcurrentTableSharedStore {
   struct KeyValuePair {
-    KeyValuePair() : value(nullptr), sAddr(nullptr) {}
+    KeyValuePair() : value(nullptr), sAddr(nullptr), readOnly(false) {}
     const char* key;
     APCHandle* value;
     char* sAddr;
     int32_t sSize;
-    int len;
+    bool readOnly;
     bool inMem() const { return value != nullptr; }
   };
 

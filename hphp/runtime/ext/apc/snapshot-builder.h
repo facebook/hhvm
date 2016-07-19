@@ -80,10 +80,16 @@ struct SnapshotBuilder {
 
  private:
   void add(StringBasedType type, const String& v, KeyValuePair item) {
+    // Keys of readOnly entries are tagged with an extra NUL byte, for easy
+    // compatibility: an old HHVM reading a snapshot generated with a new HHVM
+    // will simply ignores these extra NULs. Conversely, old snapshots never
+    // have superfluous NUL bytes, so no entries will be considered readOnly.
+    std::string key(item.key);
+    if (item.readOnly) key += '\0';
     if (item.inMem()) {
-      m_stringMem[type].emplace_back(item.key, v.slice().toString());
+      m_stringMem[type].emplace_back(key, v.slice().toString());
     } else {
-      m_stringDisk.emplace_back(item.key, item);
+      m_stringDisk.emplace_back(key, item);
     }
   }
   void add(CharBasedType type, KeyValuePair item) {

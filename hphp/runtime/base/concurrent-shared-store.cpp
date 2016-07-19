@@ -528,6 +528,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
         : VariableUnserializer::Type::Serialize;
 
     VariableUnserializer vu(sAddr, sval->getSerializedSize(), sType);
+    if (sval->readOnly) vu.setReadOnly();
     Variant v = vu.unserialize();
     auto const pair = APCHandle::Create(v, sval->isSerializedObj(),
       APCHandleLevel::Outer, false);
@@ -861,6 +862,7 @@ void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
       sval.expire   = 0;
     }
 
+    acc->second.readOnly = apcExtension::EnableConstLoad && item.readOnly;
     if (item.inMem()) {
       APCStats::getAPCStats().addAPCValue(item.value, item.sSize, true);
       acc->second.set(item.value, 0);

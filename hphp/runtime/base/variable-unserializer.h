@@ -56,6 +56,12 @@ struct VariableUnserializer {
     const Array& options = null_array);
 
   /*
+   * Optimize for output that is expected to be immortal and immutable.
+   */
+  void setReadOnly() { m_readOnly = true; }
+  bool readOnly() const { return m_readOnly; }
+
+  /*
    * Main API; unserialize the buffer and return as a Variant.
    */
   Variant unserialize();
@@ -149,6 +155,7 @@ private:
   void check() const;
 
   Type m_type;
+  bool m_readOnly;
   const char* m_buf;
   const char* m_end;
   req::vector<RefInfo> m_refs;

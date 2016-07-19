@@ -242,6 +242,7 @@ VariableUnserializer::VariableUnserializer(
   bool allowUnknownSerializableClass,
   const Array& options)
     : m_type(type)
+    , m_readOnly(false)
     , m_buf(str)
     , m_end(str + len)
     , m_unknownSerializable(allowUnknownSerializableClass)
@@ -1175,7 +1176,9 @@ String unserializeString(VariableUnserializer* uns, char delimiter0 /* = '"' */,
   uns->expectChar(':');
   uns->expectChar(delimiter0);
   auto r = uns->readStr(size);
-  auto str = String::attach(StringData::Make(r, CopyString));
+  auto str = String::attach(uns->readOnly() ?
+                            makeStaticString(r) :
+                            StringData::Make(r, CopyString));
   uns->expectChar(delimiter1);
   return str;
 }

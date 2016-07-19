@@ -44,12 +44,25 @@ constexpr PhysReg rsp()        { return ppc64_asm::reg::r27; }
 constexpr PhysReg rfuncln()    { return ppc64_asm::reg::r0;  }
 // optional in function linkage/function entry address at global entry point
 constexpr PhysReg rfuncentry() { return ppc64_asm::reg::r12; }
-// TOC ("Table of Contents")
-// Section that combines the functions of the GOT and the small data section.
-// GOT ("Global Offset Table")
-// Section used to hold addresses for position independent code.
-// The TOC section is accessed via the dedicated TOC pointer register, r2.
+
+/*
+ * TOC ("Table of Contents")
+ * Section that combines the functions of the GOT and the small data section.
+ *
+ * GOT ("Global Offset Table")
+ * Section used to hold addresses for position independent code.
+ *
+ * The TOC section is accessed via the dedicated TOC pointer register, r2.
+ */
 constexpr PhysReg rtoc()       { return ppc64_asm::reg::r2;  }
+
+/*
+ * The native stack frame pointer, which has to be handled according to ABI.
+ *
+ * As PPC64 has no stack pointer nor push/pop operations, it can't be replaced
+ * by rsp() register as it should be pointing to the current frame.
+ */
+constexpr PhysReg rsfp()       { return ppc64_asm::reg::r1;  }
 
 /*
  * Thread pointer, used to access the thread local storage section.

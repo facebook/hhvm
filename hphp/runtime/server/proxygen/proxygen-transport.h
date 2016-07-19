@@ -140,11 +140,6 @@ struct ProxygenTransport final
   std::string getHTTPVersion() const override;
 
   /**
-   * Has the client received an EOM yet?
-   */
-  bool getClientComplete();
-
-  /**
    * Get http request size.
    */
   size_t getRequestSize() const override;
@@ -270,7 +265,6 @@ struct ProxygenTransport final
 
   void messageAvailable(ResponseMessage&& message);
 
-  void beginPartialPostEcho();
   /**
    * The transaction is aborted when there are errors, or during
    * shutdown when the server has stopped enqueuing requests, or
@@ -331,9 +325,6 @@ struct ProxygenTransport final
 
   bool m_firstBody{false};
   bool m_enqueued{false};
-  // Set to true when sending a partial post back to
-  // the slb due to impending server death
-  bool m_repost{false};
   std::unique_ptr<folly::IOBuf> m_currentBodyBuf;
   proxygen::HTTPMessage m_response;
   bool m_sendStarted{false};

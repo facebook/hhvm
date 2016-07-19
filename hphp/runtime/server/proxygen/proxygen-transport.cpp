@@ -270,9 +270,6 @@ void ProxygenTransport::onHeadersComplete(
     }
   }
 
-  if (m_repost) {
-   beginPartialPostEcho();
-  }
   if (!bufferRequest()) {
     m_server->onRequest(shared_from_this());
   } // otherwise we wait for EOM
@@ -284,11 +281,7 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
   m_requestBodyLength += chain->computeChainDataLength();
   if (bufferRequest()) {
     CHECK(!m_enqueued);
-    if (m_repost) {
-      m_clientTxn->sendBody(std::move(chain));
-    } else {
-      m_bodyData.append(std::move(chain));
-    }
+    m_bodyData.append(std::move(chain));
   } else {
     Lock lock(this);
     m_bodyData.append(std::move(chain));
@@ -304,10 +297,6 @@ void ProxygenTransport::onEOM() noexcept {
   VLOG(4) << *m_clientTxn << "received eom";
   if (bufferRequest()) {
     CHECK(!m_enqueued);
-    if (m_repost) {
-      m_clientTxn->sendEOM();
-      return;
-    }
     if (!m_bodyData.empty()) {
       // TODO: let's remove gratuitous mallocs and copies please
       m_currentBodyBuf = m_bodyData.move();
@@ -415,10 +404,6 @@ const void *ProxygenTransport::getMorePostData(size_t &size) {
 
 Transport::Method ProxygenTransport::getMethod() {
   return m_method;
-}
-
-bool ProxygenTransport::getClientComplete() {
-  return m_clientComplete;
 }
 
 const char *ProxygenTransport::getExtendedMethod() {
@@ -720,24 +705,6 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
   m_server->putResponseMessage(
     ResponseMessage(shared_from_this(), ResponseMessage::Type::BODY,
                     id, false, data, size, eom));
-}
-
-void ProxygenTransport::beginPartialPostEcho() {
-  if (!bufferRequest() || m_repost) {
-    return;
-  }
-  CHECK(!m_enqueued);
-  m_repost = true;
-  HTTPMessage response;
-  response.setStatusCode(RuntimeOption::ServerPartialPostStatusCode);
-  response.setStatusMessage("Partial post");
-  response.getHeaders() = m_request->getHeaders();
-  response.getHeaders().add(
-      proxygen::HTTP_HEADER_X_FB_POST_ECHO_REQUEST, "partial_post");
-  m_clientTxn->sendHeaders(response);
-  if (!m_bodyData.empty()) {
-    m_clientTxn->sendBody(m_bodyData.move());
-  }
 }
 
 void ProxygenTransport::abort() {

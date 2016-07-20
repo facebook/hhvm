@@ -2526,16 +2526,17 @@ function main($argv) {
     print_failure($argv, $results, $options);
   }
 
-
-  Status::sayColor("\nTotal time for all executed tests as run: ",
-                   Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::getOverallEndTime() -
-                   Status::getOverallStartTime()));
-  Status::sayColor("Total time for all executed tests if run serially: ",
-                   Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::addTestTimesSerial()));
+  if (!isset($options['fbmake'])) {
+    Status::sayColor("\nTotal time for all executed tests as run: ",
+                     Status::BLUE,
+                     sprintf("%.2fs\n",
+                     Status::getOverallEndTime() -
+                     Status::getOverallStartTime()));
+    Status::sayColor("Total time for all executed tests if run serially: ",
+                     Status::BLUE,
+                     sprintf("%.2fs\n",
+                     Status::addTestTimesSerial()));
+  }
 
   return $return_value;
 }

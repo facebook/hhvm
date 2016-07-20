@@ -22,11 +22,16 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
+
+#include <grp.h>
+#include <pwd.h>
+#include <sys/stat.h>
 
 namespace HPHP {
 
@@ -559,8 +564,8 @@ void Repo::initCentral() {
   // Try the equivalent of "$HOME/.hhvm.hhbc", but look up the home directory
   // in the password database.
   {
-    struct passwd pwbuf;
-    struct passwd* pwbufp;
+    passwd pwbuf;
+    passwd* pwbufp;
     long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize != -1) {
       auto buf = new char[bufsize];
@@ -620,6 +625,65 @@ std::string Repo::insertSchema(const char* path) {
   return result;
 }
 
+/*
+ * Convert the permission bits from the given stat struct to an ls-style
+ * rwxrwxrwx format.
+ */
+static std::string showPermissions(const struct stat& s) {
+  static const std::pair<int, char> bits[] = {
+    {S_IRUSR, 'r'}, {S_IWUSR, 'w'}, {S_IXUSR, 'x'},
+    {S_IRGRP, 'r'}, {S_IWGRP, 'w'}, {S_IXGRP, 'x'},
+    {S_IROTH, 'r'}, {S_IWOTH, 'w'}, {S_IXOTH, 'x'},
+  };
+  std::string ret;
+  ret.reserve(sizeof(bits) / sizeof(bits[0]));
+
+  for (auto pair : bits) {
+    ret += (s.st_mode & pair.first) ? pair.second : '-';
+  }
+  return ret;
+}
+
+/*
+ * Return the name of the user with the given id.
+ */
+static std::string uidName(uid_t uid) {
+#ifndef _WIN32
+  auto bufLen = sysconf(_SC_GETPW_R_SIZE_MAX);
+  if (bufLen == -1) bufLen = 1024;
+  auto buf = folly::make_unique<char[]>(bufLen);
+  passwd pw;
+  passwd* result;
+
+  auto err = getpwuid_r(uid, &pw, buf.get(), bufLen, &result);
+  if (err != 0) return folly::errnoStr(errno).toStdString();
+  if (result == nullptr) return "user does not exist";
+  return pw.pw_name;
+#else
+  return "<unsupported>";
+#endif
+}
+
+/*
+ * Return the name of the group with the given id.
+ */
+static std::string gidName(gid_t gid) {
+#ifndef _WIN32
+  auto bufLen = sysconf(_SC_GETGR_R_SIZE_MAX);
+  if (bufLen == -1) bufLen = 1024;
+  auto buf = folly::make_unique<char[]>(bufLen);
+  group grp;
+  group* result;
+
+  auto err = getgrgid_r(gid, &grp, buf.get(), bufLen, &result);
+  if (err != 0) return folly::errnoStr(errno).toStdString();
+  if (result == nullptr) return "group does not exist";
+  return grp.gr_name;
+#else
+  return "<unsupported>";
+#endif
+}
+
 bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
   std::string repoPath = insertSchema(rawPath);
   // SQLITE_OPEN_NOMUTEX specifies that the connection be opened such
@@ -659,8 +723,18 @@ bool Repo::openCentral(const char* rawPath, std::string& errorMsg) {
       !centralWritable) {
     TRACE(1, "Repo::initSchema() failed for candidate central repo '%s'\n",
              repoPath.c_str());
-    errorMsg = folly::format("Failed to initialize schema in {}: {}",
-                             repoPath, errorMsg).str();
+    struct stat repoStat;
+    std::string statStr;
+    if (stat(repoPath.c_str(), &repoStat) == 0) {
+      statStr = folly::sformat("{} {}:{}",
+                               showPermissions(repoStat),
+                               uidName(repoStat.st_uid),
+                               gidName(repoStat.st_gid));
+    } else {
+      statStr = folly::errnoStr(errno).toStdString();
+    }
+    errorMsg = folly::format("Failed to initialize schema in {}({}): {}",
+                             repoPath, statStr, errorMsg).str();
     return false;
   }
   m_centralRepo = repoPath;

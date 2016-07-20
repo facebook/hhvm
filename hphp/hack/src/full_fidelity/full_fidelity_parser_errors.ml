@@ -92,7 +92,7 @@ let methodish_contains_private node =
   methodish_modifier_contains_helper is_private node
 
 (* test the methodish node contains any visibility modifiers *)
-let methodish_contains_visibility node =
+let _methodish_contains_visibility node =
   let is_visibility x =
     is_public x || is_private x || is_protected x in
   methodish_modifier_contains_helper is_visibility node

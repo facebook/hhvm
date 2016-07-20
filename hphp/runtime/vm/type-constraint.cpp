@@ -261,6 +261,8 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
         return tv->m_data.parr->isDict();
       case AnnotAction::VecCheck:
         return tv->m_data.parr->isVecArray();
+      case AnnotAction::KeysetCheck:
+        return tv->m_data.parr->isKeyset();
       case AnnotAction::ObjectCheck: break;
     }
     assert(result == AnnotAction::ObjectCheck);
@@ -311,6 +313,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
     case AnnotMetaType::ArrayKey:
     case AnnotMetaType::Dict:
     case AnnotMetaType::Vec:
+    case AnnotMetaType::Keyset:
       // Self and Parent should never happen, because type
       // aliases are not allowed to use those MetaTypes
       return false;
@@ -358,6 +361,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         case MetaType::ArrayKey:
         case MetaType::Dict:
         case MetaType::Vec:
+        case MetaType::Keyset:
           return false;
         case MetaType::Mixed:
           // We assert'd at the top of this function that the
@@ -384,6 +388,8 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
       return tv->m_data.parr->isDict();
     case AnnotAction::VecCheck:
       return tv->m_data.parr->isVecArray();
+    case AnnotAction::KeysetCheck:
+      return tv->m_data.parr->isKeyset();
     case AnnotAction::ObjectCheck:
       assert(isObject());
       return checkTypeAliasNonObj(tv);
@@ -402,7 +408,11 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfPersistentString:
     case KindOfString:        return "string";
     case KindOfPersistentArray:
-    case KindOfArray:         return "array";
+    case KindOfArray:
+      if (tv->m_data.parr->isVecArray()) return "vec";
+      if (tv->m_data.parr->isDict()) return "dict";
+      if (tv->m_data.parr->isKeyset()) return "keyset";
+      return "array";
     case KindOfObject:        return tv->m_data.pobj->getClassName().c_str();
     case KindOfResource:
       return tv->m_data.pres->data()->o_getClassName().c_str();

@@ -534,7 +534,7 @@ void getFunctionPointers(const BuiltinFunctionInfo& info,
 static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   using T = NativeSig::Type;
 
-  if (tc.isDict() || tc.isVec()) {
+  if (tc.isDict() || tc.isVec() || tc.isKeyset()) {
     return ty == T::Array || ty == T::ArrayArg;
   }
 

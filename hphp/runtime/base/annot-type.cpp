@@ -79,6 +79,7 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "callable",     AnnotType::Callable },
       { "HH\\dict",     AnnotType::Dict },
       { "HH\\vec",      AnnotType::Vec },
+      { "HH\\keyset",   AnnotType::Keyset },
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
       mapPair.first[makeStaticString(pairs[i].name)] = pairs[i].type;

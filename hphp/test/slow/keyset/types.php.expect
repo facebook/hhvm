@@ -1,0 +1,34 @@
+keyset(8) {
+  string(1) "x"
+  string(1) "y"
+  string(7) "keyset1"
+  string(7) "keyset2"
+  string(7) "keyset3"
+  string(7) "keyset4"
+  string(7) "arr-str"
+  int(10)
+}
+ERROR: string(81) "Argument 1 passed to take_keyset1() must be an instance of HH\keyset, array given"
+ERROR: string(82) "Value returned from function take_keyset1() must be of type HH\keyset, array given"
+ERROR: string(81) "Argument 1 passed to take_keyset2() must be an instance of HH\keyset, array given"
+ERROR: string(82) "Value returned from function take_keyset2() must be of type HH\keyset, array given"
+ERROR: string(81) "Argument 1 passed to take_keyset3() must be an instance of HH\keyset, array given"
+ERROR: string(82) "Value returned from function take_keyset3() must be of type HH\keyset, array given"
+ERROR: string(81) "Argument 1 passed to take_keyset4() must be an instance of HH\keyset, array given"
+ERROR: string(82) "Value returned from function take_keyset4() must be of type HH\keyset, array given"
+array(7) {
+  ["a"]=>
+  string(1) "b"
+  [0]=>
+  string(7) "keyset1"
+  [1]=>
+  string(7) "keyset2"
+  [2]=>
+  string(7) "keyset3"
+  [3]=>
+  string(7) "keyset4"
+  [4]=>
+  string(7) "arr-str"
+  [5]=>
+  int(10)
+}

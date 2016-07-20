@@ -1435,6 +1435,7 @@ void Parser::checkClassDeclName(const std::string& name) {
       case AnnotType::ArrayKey:
       case AnnotType::Dict:
       case AnnotType::Vec:
+      case AnnotType::Keyset:
         if (!RuntimeOption::PHP7_ScalarTypes &&
             !m_scanner.isHHSyntaxEnabled() && !isHHNamespace) {
           // If HH syntax is not enabled and we're not in the HH namespace,
@@ -2569,6 +2570,8 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(TypeStructure),
     HH_ONLY_TYPE(dict),
     HH_ONLY_TYPE(vec),
+    // TODO: see task 12287758
+    // HH_ONLY_TYPE(keyset),
 
     HH_ONLY_TYPE(Awaitable),
     HH_ONLY_TYPE(AsyncGenerator),

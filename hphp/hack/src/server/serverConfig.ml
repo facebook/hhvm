@@ -117,7 +117,7 @@ let load config_filename options =
     tco_unsafe_xhp = bool_ "unsafe_xhp" ~default:false config;
     tco_user_attrs = config_user_attributes config;
     tco_experimental_features =
-      local_config.ServerLocalConfig.enable_experimental_tc_features
+      bool_ "enable_experimental_tc_features" ~default:false config;
   } in
   {
     load_script = load_script;

@@ -45,6 +45,7 @@ const StaticString
   s_array("array"),
   s_dict("dict"),
   s_vec("vec"),
+  s_keyset("keyset"),
   s_NULL("NULL"),
   s_null("null");
 
@@ -61,6 +62,7 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.isArray()) {
     if (v.toArray()->isDict()) return s_dict;
     if (v.toArray()->isVecArray()) return s_vec;
+    if (v.toArray()->isKeyset()) return s_keyset;
   }
   return getDataTypeString(v.getType());
 }
@@ -140,6 +142,10 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
   return is_dict(v);
+}
+
+bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
+  return is_keyset(v);
 }
 
 bool HHVM_FUNCTION(is_object, const Variant& v) {
@@ -515,6 +521,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(is_array);
   HHVM_FALIAS(HH\\is_vec, HH_is_vec);
   HHVM_FALIAS(HH\\is_dict, HH_is_dict);
+  HHVM_FALIAS(HH\\is_keyset, HH_is_keyset);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

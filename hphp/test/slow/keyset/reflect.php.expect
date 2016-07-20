@@ -1,0 +1,25 @@
+string(9) "HH\keyset"
+bool(false)
+string(17) "HH\keyset<HH\int>"
+bool(false)
+string(6) "HH\int"
+bool(false)
+string(12) "Foo::Tkeyset"
+string(17) "HH\keyset<HH\int>"
+bool(false)
+string(20) "HH\keyset<HH\string>"
+bool(false)
+string(22) "HH\keyset<HH\arraykey>"
+array(2) {
+  ["kind"]=>
+  int(21)
+  ["generic_types"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
+string(6) "keyset"

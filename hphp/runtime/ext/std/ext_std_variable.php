@@ -239,4 +239,9 @@ namespace HH {
    */
   <<__Native, __ParamCoerceModeFalse>>
   function is_dict(mixed $var): bool;
+
+  /* Finds whether the given variable is a keyset.
+   */
+  <<__Native, __ParamCoerceModeFalse>>
+  function is_keyset(mixed $var): bool;
 }

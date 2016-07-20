@@ -299,6 +299,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   if (!strcasecmp(m_name.c_str(), "HH\\vec")) {
     return TypeStructure::Kind::T_vec;
   }
+  if (!strcasecmp(m_name.c_str(), "HH\\keyset")) {
+    return TypeStructure::Kind::T_keyset;
+  }
   if (m_typevar) {
     return TypeStructure::Kind::T_typevar;
   }
@@ -386,6 +389,7 @@ Array TypeAnnotation::getScalarArrayRep() const {
   case TypeStructure::Kind::T_array:
   case TypeStructure::Kind::T_dict:
   case TypeStructure::Kind::T_vec:
+  case TypeStructure::Kind::T_keyset:
     if (m_typeArgs) {
       rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
     }

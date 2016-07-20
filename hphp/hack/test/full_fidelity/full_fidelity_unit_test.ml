@@ -123,7 +123,7 @@ let minimal_tests =
     "test_namespace";
     "test_empty_class";
     "test_class_method_declaration";
-    "test_constructor_destructor";
+    "test_constructor_destructor"
   ] ~f:mapper
 
 let test_data = minimal_tests @

@@ -192,6 +192,12 @@ module WithToken(Token: TokenType) = struct
       trait_use_name_list : t;
       trait_use_semicolon : t;
     }
+    and require_clause = {
+      require_token : t;
+      require_kind : t;
+      require_name : t;
+      require_semicolon : t
+    }
     and parameter_declaration = {
       param_attr : t;
       param_visibility : t;
@@ -545,6 +551,7 @@ module WithToken(Token: TokenType) = struct
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
     | TraitUse of trait_use
+    | RequireClause of require_clause
     | EnumDeclaration of enum_declaration
     | Enumerator of enumerator
     | AliasDeclaration of alias_declaration
@@ -657,6 +664,7 @@ module WithToken(Token: TokenType) = struct
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | TraitUse _ -> SyntaxKind.TraitUse
+      | RequireClause _ -> SyntaxKind.RequireClause
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
       | Attribute _ -> SyntaxKind.Attribute
@@ -748,6 +756,7 @@ module WithToken(Token: TokenType) = struct
     let is_classish node = kind node = SyntaxKind.ClassishDeclaration
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
     let is_trait_use node = kind node = SyntaxKind.TraitUse
+    let is_require_clause node = kind node = SyntaxKind.RequireClause
     let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
@@ -945,6 +954,9 @@ module WithToken(Token: TokenType) = struct
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]
+      | RequireClause
+        { require_token; require_kind; require_name; require_semicolon } ->
+        [ require_token; require_kind; require_name; require_semicolon ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1266,6 +1278,9 @@ module WithToken(Token: TokenType) = struct
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ "trait_use_token"; "trait_use_name_list"; "trait_use_semicolon"; ]
+      | RequireClause
+        { require_token; require_kind; require_name; require_semicolon } ->
+        [ "require_token"; "require_kind"; "require_name"; "require_semicolon" ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1848,6 +1863,10 @@ module WithToken(Token: TokenType) = struct
         param_type; param_name; param_default ]) ->
         ParameterDeclaration { param_attr; param_visibility; param_type;
           param_name; param_default }
+      | (SyntaxKind.RequireClause,
+        [ require_token; require_kind; require_name; require_semicolon ]) ->
+        RequireClause
+        { require_token; require_kind; require_name; require_semicolon }
       | SyntaxKind.AttributeSpecification, [ attribute_spec_left_double_angle;
         attribute_spec_attribute_list; attribute_spec_right_double_angle ] ->
         AttributeSpecification { attribute_spec_left_double_angle;
@@ -2304,6 +2323,9 @@ module WithToken(Token: TokenType) = struct
         trait_use_semicolon =
         from_children SyntaxKind.TraitUse [
           trait_use_token; trait_use_name_list; trait_use_semicolon; ]
+
+      let make_require_clause require kind name semi =
+        from_children SyntaxKind.RequireClause [ require; kind; name; semi ]
 
       let make_parameter_declaration
         param_attr param_visibility param_type param_name param_default =

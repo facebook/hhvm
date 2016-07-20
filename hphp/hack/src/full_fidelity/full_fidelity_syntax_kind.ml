@@ -28,6 +28,7 @@ type t =
 | ClassishDeclaration
 | ClassishBody
 | TraitUse
+| RequireClause
 | ParameterDeclaration
 | AttributeSpecification
 | Attribute
@@ -128,6 +129,7 @@ let to_string kind =
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"
   | TraitUse -> "trait_use"
+  | RequireClause -> "require_clause"
   | ParameterDeclaration -> "parameter_declaration"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"

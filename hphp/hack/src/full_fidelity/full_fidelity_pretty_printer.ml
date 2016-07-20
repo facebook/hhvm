@@ -266,6 +266,12 @@ let rec get_doc node =
     let name_list = get_doc (trait_use_name_list x) in
     let semi = get_doc (trait_use_semicolon x) in
     use ^| name_list ^^^ semi
+  | RequireClause x ->
+    let r = get_doc x.require_token in
+    let k = get_doc x.require_kind in
+    let n = get_doc x.require_name in
+    let s = get_doc x.require_semicolon in
+    r ^| k ^| n ^^^ s
   | EnumDeclaration x ->
     let en = get_doc x.enum_enum in
     let na = get_doc x.enum_name in

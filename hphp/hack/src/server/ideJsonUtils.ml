@@ -18,85 +18,102 @@ open Utils
 let server_busy_error_code = 1
 let invalid_call_error_code = 2
 
-let string_positions_to_ints line column =
+let string_positions_to_content_pos line column =
   try
-    int_of_string line, int_of_string column
+    {
+      line = int_of_string line;
+      column = int_of_string column
+    }
   with Failure "int_of_string" -> raise Not_found
 
 (**
- * During transition from hh_client based to persistent connection based
- * operation we will initially just dump command line arguments into an "args"
- * array as is, so for example:
- *
- *   hh_client --auto-complete "some text"
- *
- * becomes:
+ * For persistent connection we read json bundle from client/editor, so an auto
+ * -complete call may looks loke:
  *
  * {
+ *   "protocol" : "name_of_protocol"
  *   "id" = <some_number>,
  *   "type" = "call",
- *   "args" = ["--auto-complete", "some text"]
+ *   "method" = "auto_complete"
+ *   "args" = {
+ *       "filename" : "somename.php",
+ *       "position" : {
+ *          "line" : <some_number>,
+ *          "column" : <some_number>}
+ *       }
  * }
- * This function translates those args into a call_type structure.
+ *
+ * This function translates those command and args into a call_type structure.
 *)
-let args_to_call = function
-  | [JSON_String "--auto-complete"; JSON_String content] ->
-    Auto_complete_call content
-  | [JSON_String "--identify-function"; JSON_String pos; JSON_String content] ->
-    let tpos = Str.split (Str.regexp ":") pos in
-    let line, char =
-      try
-         match tpos with
-         | [line; char] ->
-             int_of_string line, int_of_string char
-         | _ -> raise Not_found
-      with _ -> raise Not_found in
-    Identify_function_call (content, line, char)
-  | [JSON_String "--search"; JSON_String content] -> Search_call content
-  | [] -> Status_call
-  | [JSON_String "--find-refs"; JSON_String s] ->
-    let open FindRefsService in
-    begin match Str.split (Str.regexp "::") s with
-      | class_name :: method_name :: _ ->
-        Find_refs_call (Member (class_name, Method method_name))
-      | function_name :: _ ->
-        Find_refs_call (Function function_name)
-      | _ -> raise Not_found
-    end
-  | [JSON_String "--find-class-refs"; JSON_String s] ->
-    Find_refs_call (FindRefsService.Class s)
-  | [JSON_String "--color"; JSON_String path]
-  | [JSON_String "--colour"; JSON_String path] ->
-    Colour_call path
-  | [JSON_String "--find-lvar-refs";
-     JSON_String content;
-     JSON_Number line;
-     JSON_Number column
-    ] ->
-      let line, column = string_positions_to_ints line column in
-      Find_lvar_refs_call (content, line, column)
-  | [JSON_String "--type-at-pos";
-     JSON_String content;
-     JSON_Number line;
-     JSON_Number column
-    ] ->
-      let line, column = string_positions_to_ints line column in
-      Type_at_pos_call (content, line, column)
-  | [JSON_String "--format";
-     JSON_String content;
-     JSON_Number start;
-     JSON_Number end_
-    ] ->
-      let start, end_ = string_positions_to_ints start end_ in
-      Format_call (content, start, end_)
-  | [JSON_String "--get-method-name";
-     JSON_String content;
-     JSON_Number line;
-     JSON_Number column
-    ] ->
-      let line, column = string_positions_to_ints line column in
-      Get_method_name_call (content, line, column)
-  | [JSON_String "--outline"; JSON_String content] -> Outline_call content
+let to_call cmd args =
+  let get_field fields field_name =
+    match List.find fields (fun (x, _) -> x = field_name) with
+    | Some (_, x) -> Some x
+    | None -> None in
+
+  let get_filename () =
+    match get_field args "filename" with
+    | Some (JSON_String path) -> path
+    | _ -> raise Not_found in
+
+  let parse_position pos =
+    let line = match get_field pos "line" with
+      | Some (JSON_Number line) -> line
+      | _ -> raise Not_found in
+    let column = match get_field pos "column" with
+      | Some (JSON_Number column) -> column
+      | _ -> raise Not_found in
+    string_positions_to_content_pos line column in
+
+  let parse_span span =
+    let st = match get_field span "start" with
+      | Some (JSON_Object st) -> st
+      | _ -> raise Not_found in
+    let st = parse_position st in
+    let ed = match get_field span "end" with
+      | Some (JSON_Object ed) -> ed
+      | _ -> raise Not_found in
+    let ed = parse_position ed in
+    st, ed in
+
+  let parse_edit edit =
+    let span = match get_field edit "span" with
+      | Some (JSON_Object span) -> span
+      | _ -> raise Not_found in
+    let st, ed = parse_span span in
+    let text = match get_field edit "text" with
+      | Some (JSON_String text) -> text
+      | _ -> raise Not_found in
+    {st; ed; text} in
+
+  let parse_edits : json list -> code_edit list = fun edits ->
+    List.fold ~init:[] ~f:(fun l e ->
+      let edit = match e with
+      | JSON_Object edit -> edit
+      | _ -> raise Not_found in
+      l @ [parse_edit edit]) edits in
+
+  match cmd with
+  | "getCompletions" ->
+    let path = get_filename () in
+    let pos = match get_field args "position" with
+      | Some (JSON_Object pos) -> pos
+      | _ -> raise Not_found in
+    let pos = parse_position pos in
+    Auto_complete_call (path, pos)
+  | "open" ->
+    Open_file_call (get_filename ())
+  | "close" ->
+    Close_file_call (get_filename ())
+  | "edit" ->
+    let path = get_filename () in
+    let edits = match get_field args "edits" with
+      | Some (JSON_Array edits) -> edits
+      | _ -> raise Not_found in
+    let edits = parse_edits edits in
+    Edit_file_call (path, edits)
+  | "disconnect" ->
+    Disconnect_call
   | _ -> raise Not_found
 
 let call_of_string s =
@@ -112,6 +129,15 @@ let call_of_string s =
     match List.find fields (fun (x, _) -> x = field_name) with
     | Some (_, x) -> Some x
     | None -> None in
+
+  let check_protocol_field fields =
+    match get_field fields "protocol" with
+    | Some protocol -> begin match protocol with
+      | JSON_String "service_framework3_rpc" -> Ok ()
+      | JSON_String _ -> Error `Unknown_protocol
+      | _ -> Error `Protocol_not_string
+    end
+    | None -> Error `No_protocol in
 
   let get_id_field fields =
     match get_field fields "id" with
@@ -131,34 +157,45 @@ let call_of_string s =
     end
     | None -> Error `No_type in
 
-  (* Client sometimes asks for JSON version, but in persistent connection mode
-   * that's the only version, so filter it out *)
-  let strip_json_args args = List.filter args begin function
-    | JSON_String "--json" -> false
-    | _ -> true end in
+  let get_method_field fields =
+    match get_field fields "method" with
+    | Some cmd -> begin match cmd with
+      | JSON_String c -> Ok c
+      | _ ->  Error `Method_not_string
+    end
+    | None -> Error `No_method in
 
-  let get_call id fields =
+  let get_call id cmd fields =
     match get_field fields "args" with
-    | Some (JSON_Array args) ->
+    | Some (JSON_Object args) ->
       begin
         try
-          Ok (Call (id, args_to_call (strip_json_args args)))
+          Ok (Call (id, to_call cmd args))
         with Not_found -> Error (`Call_not_recognized id)
       end
-    | Some _ -> Error (`Args_not_an_array id)
+    | Some _ -> Error (`Args_not_an_object id)
     | _ -> Error (`No_args id) in
 
   match
     (get_object_fields s) >>= fun fields ->
+    (check_protocol_field fields) >>= fun _ ->
     (get_id_field fields) >>= fun id ->
     (get_type_field fields) >>= fun _type ->
-    (get_call id fields)
+    (get_method_field fields) >>= fun cmd ->
+    (get_call id cmd fields)
   with
   | Ok x -> x
   | Error `Syntax_error e -> Parsing_error ("Invalid JSON: " ^ e)
   | Error `Not_object -> Parsing_error "Expected JSON object"
+  | Error `No_protocol ->
+    Parsing_error "Request object must have protocol field"
+  | Error `Protocol_not_string ->
+    Parsing_error "Protocol field must be a string"
+  | Error `Unknown_protocol -> Parsing_error "Unknown protocol"
   | Error `No_id -> Parsing_error "Request object must have id field"
   | Error `Id_not_int -> Parsing_error "id field must be an integer"
+  | Error `No_method -> Parsing_error "Request object must have method field"
+  | Error `Method_not_string -> Parsing_error "Method field must be a string"
   | Error `No_type -> Parsing_error "Request object must have type field"
   | Error `Message_type_not_string ->
     Parsing_error "Type field must be a string"
@@ -166,8 +203,8 @@ let call_of_string s =
     Parsing_error "Message type not recognized"
   | Error `No_args id ->
     Invalid_call (id, "Request object must have an args field")
-  | Error `Args_not_an_array id ->
-    Invalid_call (id, "Args field must be an array")
+  | Error `Args_not_an_object id ->
+    Invalid_call (id, "Args field must be an object")
   | Error `Call_not_recognized id -> Invalid_call (id, "Call not recognized")
 
 let build_response_json id result_field =

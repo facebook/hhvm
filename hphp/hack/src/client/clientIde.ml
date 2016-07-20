@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
 *)
+open IdeJson
 
 module SMUtils = ServerMonitorUtils
 
@@ -100,7 +101,15 @@ let main env =
     | `None -> ()
     | `Stdin ->
       let request = read_request () in
-      ServerCommand.rpc_persistent oc @@ ServerRpc.ECHO_FOR_TEST request;
+      begin
+      match IdeJsonUtils.call_of_string request with
+      | Call (id, call) ->
+        print_endline @@ to_string call
+      | Invalid_call (id, msg) ->
+        print_endline msg
+      | Parsing_error msg ->
+        print_endline msg
+      end
     | `Server ->
       let res = try read_server_message in_fd with
         | Marshal_tools.Reading_Preamble_Exception

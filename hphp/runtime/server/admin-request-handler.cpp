@@ -364,7 +364,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "free-mem") {
-      pid_t pid = Process::GetProcessId();
+      auto pid = getpid();
       const auto before = Process::GetProcessRSS(pid);
       std::string errStr;
       if (purge_all(&errStr)) {

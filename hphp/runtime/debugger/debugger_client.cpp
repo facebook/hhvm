@@ -39,6 +39,7 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <folly/Conv.h>
+#include <folly/portability/Unistd.h>
 
 #define USE_VARARGS
 #define PREFER_STDARG
@@ -701,8 +702,8 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
   loadConfig();
 
   if (m_scriptMode) {
-    print("running in script mode, pid=%d\n",
-        (int32_t)Process::GetProcessId());
+    print("running in script mode, pid=%" PRId64 "\n",
+          (int64_t)getpid());
   }
 
   if (!options.cmds.empty()) {

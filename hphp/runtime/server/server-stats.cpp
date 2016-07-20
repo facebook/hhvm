@@ -23,11 +23,12 @@
 #include <list>
 #include <iostream>
 
-#include <folly/json.h>
 #include <folly/Conv.h>
 #include <folly/FBVector.h>
 #include <folly/Range.h>
 #include <folly/String.h>
+#include <folly/json.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -567,7 +568,7 @@ void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
   w->beginObject("status");
 
   w->beginObject("process");
-  w->writeEntry("id", (int64_t)Process::GetProcessId());
+  w->writeEntry("id", (int64_t)getpid());
   w->writeEntry("build", RuntimeOption::BuildId);
 
   w->writeEntry("compiler", compilerId().begin());

@@ -27,6 +27,7 @@
 #include <folly/String.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/hdf.h"
@@ -1651,7 +1652,7 @@ void RuntimeOption::Load(
                  "Debug.CoreDumpReportDirectory", CoreDumpReportDirectory);
     std::ostringstream stack_trace_stream;
     stack_trace_stream << CoreDumpReportDirectory << "/stacktrace."
-                       << Process::GetProcessId() << ".log";
+                       << (int64_t)getpid() << ".log";
     StackTraceFilename = stack_trace_stream.str();
 
     Config::Bind(StackTraceTimeout, ini, config, "Debug.StackTraceTimeout", 0);

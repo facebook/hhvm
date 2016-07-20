@@ -41,6 +41,7 @@
 
 #include <folly/Conv.h>
 #include <folly/Format.h>
+#include <folly/portability/Unistd.h>
 
 #include <sys/types.h>
 #include <signal.h>
@@ -460,7 +461,7 @@ void HttpServer::createPid() {
   if (!RuntimeOption::PidFile.empty()) {
     FILE * f = fopen(RuntimeOption::PidFile.c_str(), "w");
     if (f) {
-      pid_t pid = Process::GetProcessId();
+      auto const pid = getpid();
       char buf[64];
       snprintf(buf, sizeof(buf), "%" PRId64, (int64_t)pid);
       fwrite(buf, strlen(buf), 1, f);
@@ -614,7 +615,7 @@ void HttpServer::CheckMemAndWait(bool final) {
   if (!RuntimeOption::StopOldServer) return;
   if (RuntimeOption::OldServerWait <= 0) return;
 
-  auto const pid = Process::GetProcessId();
+  auto const pid = getpid();
   auto const rssNeeded = RuntimeOption::ServerRSSNeededMb;
   auto const factor = RuntimeOption::CacheFreeFactor;
   do {
@@ -657,7 +658,7 @@ void HttpServer::dropCache() {
 }
 
 void HttpServer::checkMemory() {
-  int64_t used = Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
+  int64_t used = Process::GetProcessRSS(getpid()) * 1024 * 1024;
   if (RuntimeOption::MaxRSS > 0 && used > RuntimeOption::MaxRSS) {
     Logger::Error(
       "ResourceLimit.MaxRSS %" PRId64 " reached %" PRId64 " used, exiting",

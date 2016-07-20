@@ -32,6 +32,7 @@
 #include <iterator>
 #include <vector>
 #include <folly/Range.h>
+#include <folly/portability/Unistd.h>
 #include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
@@ -742,7 +743,7 @@ constexpr bool kHaveTypeIds =
 
 StructuredLogEntry logCommon() {
   StructuredLogEntry sample;
-  sample.setInt("pid", Process::GetProcessId());
+  sample.setInt("pid", (int64_t)getpid());
   sample.setInt("req_num", t_req_num);
   // MemoryUsageStats
   sample.setInt("max_usage", t_pre_stats.maxUsage);

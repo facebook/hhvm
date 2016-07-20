@@ -110,7 +110,7 @@ void MemoryManager::threadStatsInit() {
   //   cactiveLimit == s_cactiveLimitCeiling - headRoom
   // where
   //   s_cactiveLimitCeiling == MemTotal - footprint
-  size_t footprint = Process::GetCodeFootprint(Process::GetProcessId());
+  size_t footprint = Process::GetCodeFootprint(getpid());
   size_t MemTotal  = 0;
 #ifndef __APPLE__
   size_t pageSize = size_t(sysconf(_SC_PAGESIZE));

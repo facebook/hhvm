@@ -20,13 +20,15 @@
 #include <string>
 #include <vector>
 
+#include <folly/portability/Unistd.h>
+
 #include <sys/types.h>
 #ifdef _MSC_VER
 # include <windows.h>
 #else
 # include <sys/syscall.h>
-# include <unistd.h>
 #endif
+
 #include <pthread.h>
 
 namespace HPHP {
@@ -86,27 +88,13 @@ struct Process {
   static std::string GetHostName();
 
   /**
-   * Process identifier.
-   */
-  static pid_t GetProcessId() {
-    return getpid();
-  }
-
-  /**
-   * Parent's process identifier.
-   */
-  static pid_t GetParentProcessId() {
-    return getppid();
-  }
-
-  /**
    * Get command line with a process ID.
    */
   static std::string GetCommandLine(pid_t pid);
 
   /**
    * Check if the current process is being run under GDB.  Will return false if
-   * we're unable to read /proc/{Process::GetProcessId()}/status.
+   * we're unable to read /proc/{getpid()}/status.
    */
   static bool IsUnderGDB();
 
@@ -169,7 +157,7 @@ struct Process {
    * Are we in the main thread still?
    */
   static bool IsInMainThread() {
-    return Process::GetThreadPid() == Process::GetProcessId();
+    return Process::GetThreadPid() == getpid();
   }
 
   /**

@@ -31,6 +31,8 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
+
+#include <folly/portability/Unistd.h>
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace HPHP {
@@ -537,7 +539,7 @@ void ProxygenServer::reportShutdownStatus() {
                 getQueuedJobs(),
                 getLibEventConnectionCount(),
                 m_pendingTransports.size(),
-                Process::GetProcessRSS(Process::GetProcessId()));
+                Process::GetProcessRSS(getpid()));
   m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
 }
 

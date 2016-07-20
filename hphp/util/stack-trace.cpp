@@ -555,7 +555,7 @@ void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
   assert(fd >= 0);
 
   dprintf(fd, "Host: %s\n",Process::GetHostName().c_str());
-  dprintf(fd, "ProcessID: %u\n", Process::GetProcessId());
+  dprintf(fd, "ProcessID: %" PRId64 "\n", (int64_t)getpid());
   dprintf(fd, "ThreadID: %" PRIx64"\n", (int64_t)Process::GetThreadId());
   dprintf(fd, "ThreadPID: %u\n", Process::GetThreadPid());
   dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());

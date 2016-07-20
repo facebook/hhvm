@@ -456,7 +456,7 @@ std::string Process::GetCommandLine(pid_t pid) {
 }
 
 bool Process::IsUnderGDB() {
-  auto const cmdStr = GetCommandLine(GetParentProcessId());
+  auto const cmdStr = GetCommandLine(getppid());
   auto const cmdPiece = folly::StringPiece{cmdStr};
 
   if (cmdPiece.empty()) return false;

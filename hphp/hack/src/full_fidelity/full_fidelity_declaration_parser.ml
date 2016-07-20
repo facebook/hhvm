@@ -377,6 +377,11 @@ module WithExpressionAndStatementParser
         let (parser, attr) = parse_attribute_specification_opt parser in
         let (parser, syntax) = parse_methodish parser attr in
         aux parser (syntax :: acc)
+      | Require ->
+          (* TODO: Give an error if these are found where they should not be,
+             TODO: in a later pass. *)
+         let (parser, require) = parse_require_clause parser in
+         aux parser (require :: acc)
       | _ ->
           (* TODO *)
         let (parser, token) = next_token parser in
@@ -387,6 +392,26 @@ module WithExpressionAndStatementParser
     let classish_elements = List.rev classish_elements in
     (parser, make_list classish_elements)
 
+  and parse_require_clause parser =
+    (* SPEC
+        require-extends-clause:
+          require  extends  qualified-name  ;
+
+        require-implements-clause:
+          require  implements  qualified-name  ;
+    *)
+    (* ERROR RECOVERY: Detect if the implements/extends, name and semi are
+       missing. *)
+    let (parser, req) = assert_token parser Require in
+    let (parser1, req_kind_token) = next_token parser in
+    let (parser, req_kind) = match Token.kind req_kind_token with
+    | Implements
+    | Extends -> (parser1, make_token req_kind_token)
+    | _ -> (with_error parser SyntaxError.error1045, make_missing()) in
+    let (parser, name) = expect_qualified_name parser in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_require_clause req req_kind name semi in
+    (parser, result)
 
   (* SPEC:
     trait-use-clause:

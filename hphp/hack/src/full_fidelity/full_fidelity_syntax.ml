@@ -198,6 +198,17 @@ module WithToken(Token: TokenType) = struct
       require_name : t;
       require_semicolon : t
     }
+    and const_declaration = {
+      const_abstract : t;
+      const_token : t;
+      const_type_specifier : t;
+      const_declarator_list : t;
+      const_semicolon : t;
+    }
+    and constant_declarator = {
+      constant_declarator_name : t;
+      constant_declarator_initializer : t;
+    }
     and parameter_declaration = {
       param_attr : t;
       param_visibility : t;
@@ -552,6 +563,8 @@ module WithToken(Token: TokenType) = struct
     | ClassishBody of classish_body
     | TraitUse of trait_use
     | RequireClause of require_clause
+    | ConstDeclaration of const_declaration
+    | ConstantDeclarator of constant_declarator
     | EnumDeclaration of enum_declaration
     | Enumerator of enumerator
     | AliasDeclaration of alias_declaration
@@ -665,6 +678,8 @@ module WithToken(Token: TokenType) = struct
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | TraitUse _ -> SyntaxKind.TraitUse
       | RequireClause _ -> SyntaxKind.RequireClause
+      | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
+      | ConstantDeclarator _ -> SyntaxKind.ConstantDeclarator
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
       | Attribute _ -> SyntaxKind.Attribute
@@ -757,6 +772,8 @@ module WithToken(Token: TokenType) = struct
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
     let is_trait_use node = kind node = SyntaxKind.TraitUse
     let is_require_clause node = kind node = SyntaxKind.RequireClause
+    let is_const_declaration node = kind node = SyntaxKind.ConstDeclaration
+    let is_constant_declarator node = kind node = SyntaxKind.ConstantDeclarator
     let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
@@ -957,6 +974,14 @@ module WithToken(Token: TokenType) = struct
       | RequireClause
         { require_token; require_kind; require_name; require_semicolon } ->
         [ require_token; require_kind; require_name; require_semicolon ]
+      | ConstDeclaration
+        { const_abstract; const_token; const_type_specifier;
+          const_declarator_list; const_semicolon; } ->
+        [ const_abstract; const_token; const_type_specifier;
+          const_declarator_list; const_semicolon; ]
+      | ConstantDeclarator
+        { constant_declarator_name; constant_declarator_initializer; } ->
+        [ constant_declarator_name; constant_declarator_initializer; ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1281,6 +1306,14 @@ module WithToken(Token: TokenType) = struct
       | RequireClause
         { require_token; require_kind; require_name; require_semicolon } ->
         [ "require_token"; "require_kind"; "require_name"; "require_semicolon" ]
+      | ConstDeclaration
+        { const_abstract; const_token; const_type_specifier;
+          const_declarator_list; const_semicolon; } ->
+        [ "const_abstract"; "const_token"; "const_type_specifier";
+          "const_declarator_list"; "const_semicolon"; ]
+      | ConstantDeclarator
+        { constant_declarator_name; constant_declarator_initializer; } ->
+        [ "constant_declarator_name"; "constant_declarator_initializer"; ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1567,6 +1600,13 @@ module WithToken(Token: TokenType) = struct
     let trait_use_token x = x.trait_use_token
     let trait_use_name_list x = x.trait_use_name_list
     let trait_use_semicolon x = x.trait_use_semicolon
+    let const_abstract x = x.const_abstract
+    let const_token x = x.const_token
+    let const_type_specifier x = x.const_type_specifier
+    let const_declarator_list x = x.const_declarator_list
+    let const_semicolon x = x.const_semicolon
+    let constant_declarator_name x = x.constant_declarator_name
+    let constant_declarator_initializer x = x.constant_declarator_initializer
     let param_attr x = x.param_attr
     let param_visibility x = x.param_visibility
     let param_type x = x.param_type
@@ -1859,6 +1899,15 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.TraitUse,
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]) ->
         TraitUse { trait_use_token; trait_use_name_list; trait_use_semicolon; }
+      | (SyntaxKind.ConstDeclaration,
+        [ const_abstract; const_token; const_type_specifier;
+          const_declarator_list; const_semicolon; ]) ->
+        ConstDeclaration { const_abstract; const_token; const_type_specifier;
+          const_declarator_list; const_semicolon; }
+      | (SyntaxKind.ConstantDeclarator,
+        [ constant_declarator_name; constant_declarator_initializer; ]) ->
+        ConstantDeclarator { constant_declarator_name;
+          constant_declarator_initializer; }
       | (SyntaxKind.ParameterDeclaration, [ param_attr; param_visibility;
         param_type; param_name; param_default ]) ->
         ParameterDeclaration { param_attr; param_visibility; param_type;
@@ -2327,6 +2376,17 @@ module WithToken(Token: TokenType) = struct
       let make_require_clause require kind name semi =
         from_children SyntaxKind.RequireClause [ require; kind; name; semi ]
 
+      let make_const_declaration const_abstract const_token const_type_specifier
+        const_declarator_list const_semicolon =
+        from_children SyntaxKind.ConstDeclaration [
+          const_abstract; const_token; const_type_specifier;
+          const_declarator_list; const_semicolon; ]
+
+      let make_constant_declarator constant_declarator_name
+        constant_declarator_initializer =
+        from_children SyntaxKind.ConstantDeclarator
+          [ constant_declarator_name; constant_declarator_initializer; ]
+
       let make_parameter_declaration
         param_attr param_visibility param_type param_name param_default =
         from_children SyntaxKind.ParameterDeclaration
@@ -2515,6 +2575,7 @@ module WithToken(Token: TokenType) = struct
             closure_inner_left_paren; closure_parameter_types;
             closure_inner_right_paren; closure_colon; closure_return_type;
             closure_outer_right_paren ]
+
       let make_classname_type_specifier classname left classname_type right =
         from_children SyntaxKind.ClassnameTypeSpecifier
           [ classname; left; classname_type; right ]

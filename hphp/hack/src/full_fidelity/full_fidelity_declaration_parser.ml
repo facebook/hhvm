@@ -363,6 +363,10 @@ module WithExpressionAndStatementParser
       | Use ->
           let (parser, classish_use) = parse_trait_use parser in
           aux parser (classish_use :: acc)
+      | Const ->
+          let (parser, const) =
+            parse_const_declaration parser (make_missing ()) in
+          aux parser (const :: acc)
       | Abstract
       | Static
       | Public
@@ -436,6 +440,40 @@ module WithExpressionAndStatementParser
     | _ ->
        let parser = with_error parser1 SyntaxError.error1004 in
        (parser, make_error [make_token token])
+
+  (* SPEC:
+    const-declaration:
+      abstract_opt  const  type-specifier_opt  constant-declarator-list  ;
+    constant-declarator-list:
+      constant-declarator
+      constant-declarator-list  ,  constant-declarator
+    constant-declarator:
+      name  constant-initializer_opt
+    constant-initializer:
+      =  const-expression
+  *)
+  and parse_const_declaration parser abstr =
+    let (parser, const_token) = assert_token parser Const in
+    let next_token_is_type =
+      peek_token_kind (skip_token parser) = Name ||
+      peek_token_kind (skip_token parser) = GreaterThan
+    in
+
+    let (parser, type_spec) = if next_token_is_type then
+      parse_type_specifier parser
+    else
+      parser, make_missing ()
+    in
+
+    let (parser, const_list) = parse_comma_list
+      parser Semicolon SyntaxError.error1004 parse_constant_declarator in
+    let (parser, semi) = expect_semicolon parser in
+    (parser, make_const_declaration abstr const_token type_spec const_list semi)
+
+  and parse_constant_declarator parser =
+    let (parser, const_name) = expect_name parser in
+    let (parser, initializer_) = parse_simple_initializer parser in
+    (parser, make_constant_declarator const_name initializer_)
 
   (* SPEC:
     attribute_specification := << attribute_list >>
@@ -609,7 +647,7 @@ module WithExpressionAndStatementParser
       if (Token.kind token) = Variable then (parser, make_missing())
       else parse_type_specifier parser in
     let (parser, variable_name) = expect_variable parser in
-    let (parser, default) = parse_default_argument_specifier_opt parser in
+    let (parser, default) = parse_simple_initializer parser in
     let syntax =
       make_parameter_declaration attrs visibility type_specifier variable_name
       default in
@@ -622,10 +660,13 @@ module WithExpressionAndStatementParser
     | _ -> (parser, make_missing())
 
   (* SPEC
-            default-argument-specifier:
-              =  const-expression
+    default-argument-specifier:
+      =  const-expression
+
+    constant-initializer:
+      =  const-expression
   *)
-  and parse_default_argument_specifier_opt parser =
+  and parse_simple_initializer parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
     | Equal ->

@@ -272,6 +272,17 @@ let rec get_doc node =
     let n = get_doc x.require_name in
     let s = get_doc x.require_semicolon in
     r ^| k ^| n ^^^ s
+  | ConstDeclaration x ->
+    let abstr = get_doc (const_abstract x) in
+    let token = get_doc (const_token x) in
+    let ty = get_doc (const_type_specifier x) in
+    let lst = get_doc (const_declarator_list x) in
+    let semi = get_doc (const_semicolon x) in
+    group_doc (abstr ^| token ^| ty ) ^| lst ^^^ semi
+  | ConstantDeclarator x ->
+    let name = get_doc (constant_declarator_name x) in
+    let init = get_doc (constant_declarator_initializer x) in
+    group_doc (name ^| init)
   | EnumDeclaration x ->
     let en = get_doc x.enum_enum in
     let na = get_doc x.enum_name in

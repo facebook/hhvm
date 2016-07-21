@@ -172,14 +172,18 @@ let handle_persistent_connection_ genv env fd =
   with
   | Sys_error("Broken pipe") | ServerCommand.Read_command_timeout ->
     shutdown_persistent_client fd;
-    { env with persistent_client_fd = None }
+    {env with
+    persistent_client_fd = None;
+    edited_files = SMap.empty}
   | e ->
     let msg = Printexc.to_string e in
     EventLogger.master_exception msg;
     Printf.fprintf stderr "Error: %s\n%!" msg;
     Printexc.print_backtrace stderr;
     shutdown_persistent_client fd;
-    { env with persistent_client_fd = None }
+    {env with
+    persistent_client_fd = None;
+    edited_files = SMap.empty}
 
 let handle_persistent_connection genv env fd =
   ServerIdle.stamp_connection ();

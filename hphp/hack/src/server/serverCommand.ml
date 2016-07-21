@@ -44,9 +44,12 @@ let rpc : type a. Timeout.in_channel * out_channel -> a ServerRpc.t -> a
   flush oc;
   Timeout.input_value ic
 
-let rpc_persistent oc cmd =
+let rpc_persistent : type a. out_channel -> a ServerRpc.t -> a
+= fun oc cmd ->
   Marshal.to_channel oc (Rpc cmd) [];
-  flush oc
+  flush oc;
+  let fd = Unix.descr_of_out_channel oc in
+  Marshal_tools.from_fd_with_preamble fd
 
 let stream_request oc cmd =
   Marshal.to_channel oc (Stream cmd) [];
@@ -214,7 +217,7 @@ let handle genv env (ic, oc) =
   match msg with
   | Rpc cmd ->
       let t = Unix.gettimeofday () in
-      let response = ServerRpc.handle genv env cmd in
+      let _, response = ServerRpc.handle genv env cmd in
       let cmd_string = ServerRpc.to_string cmd in
       HackEventLogger.handled_command cmd_string t;
       send_response_to_client (ic, oc) response;
@@ -230,12 +233,14 @@ let handle_persistent genv env fd =
   (match msg with
   | Rpc cmd ->
       let t = Unix.gettimeofday () in
-      let response = ServerRpc.handle genv env cmd in
+      let new_env, response = ServerRpc.handle genv env cmd in
       let cmd_string = ServerRpc.to_string cmd in
       HackEventLogger.handled_command cmd_string t;
       send_response_to_persistent_client fd response;
       if cmd = ServerRpc.KILL then ServerUtils.die_nicely ();
-      env
+      if cmd = ServerRpc.DISCONNECT
+        then ServerUtils.shutdown_persistent_client fd;
+      new_env
   | Stream _ ->
     failwith ("Stream message is not supported in persistent connection")
   | Debug ->

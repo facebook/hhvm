@@ -22,16 +22,6 @@ type call_type =
 
 type response_type =
   | Auto_complete_response of Hh_json.json
-  | Identify_function_response of string
-  | Search_call_response of Hh_json.json
-  | Status_response of Hh_json.json
-  | Find_refs_response of FindRefsService.result
-  | Colour_response of Hh_json.json
-  | Find_lvar_refs_response of Pos.t list
-  | Type_at_pos_response of Pos.absolute option * string option
-  | Format_response of string Format_hack.return
-  | Get_method_name_response of (Relative_path.t SymbolOccurrence.t) option
-  | Outline_response of (Pos.absolute * string * string) list
 
 type parsing_result =
   (* Parsing_error means that message was unrecoverably mangled (eg. no ID, or

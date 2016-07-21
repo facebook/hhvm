@@ -13,7 +13,6 @@ open Core
 open Hh_json
 open Result
 open Result.Monad_infix
-open Utils
 open File_content
 
 let server_busy_error_code = 1
@@ -210,61 +209,15 @@ let call_of_string s =
 
 let build_response_json id result_field =
   JSON_Object [
+    ("protocol", JSON_String "service_framework3_rpc");
     ("type", JSON_String "response");
-    ("id", JSON_Number (string_of_int id));
+    ("id", int_ id);
     ("result", result_field);
   ]
 
 let json_string_of_response id response =
   let result_field = match response with
     | Auto_complete_response r -> r
-    | Identify_function_response s -> JSON_String s
-    | Search_call_response r -> r
-    | Status_response r -> r
-    | Find_refs_response r -> ServerFindRefs.to_json r
-    | Colour_response r -> r
-    | Find_lvar_refs_response pos_list ->
-      let res_list = List.map pos_list (compose Pos.json Pos.to_absolute) in
-      JSON_Object [
-        "positions",      JSON_Array res_list;
-        "internal_error", JSON_Bool false
-      ]
-    | Type_at_pos_response (pos, ty) -> ServerInferType.to_json pos ty
-    | Format_response result ->
-      let error_text, result, is_error = match result with
-        | Format_hack.Disabled_mode -> "Php_or_decl", "", false
-        | Format_hack.Parsing_error _ -> "Parsing_error", "", false
-        | Format_hack.Internal_error -> "", "", true
-        | Format_hack.Success s -> "", s, false
-      in
-      JSON_Object [
-        "error_message",  JSON_String error_text;
-        "result",         JSON_String result;
-        "internal_error", JSON_Bool is_error;
-      ]
-    | Get_method_name_response result ->
-      begin match result with
-      | Some res ->
-        let result_type =
-          match res.SymbolOccurrence.type_ with
-          | SymbolOccurrence.Class -> "class"
-          | SymbolOccurrence.Method _ -> "method"
-          | SymbolOccurrence.Function -> "function"
-          | SymbolOccurrence.LocalVar -> "local"
-          | SymbolOccurrence.Property _ -> "property"
-          | SymbolOccurrence.ClassConst _ -> "class_const"
-          | SymbolOccurrence.Typeconst _ -> "typeconst"
-          | SymbolOccurrence.GConst -> "global_const"
-        in
-        JSON_Object [
-          "name",        JSON_String res.SymbolOccurrence.name;
-          "result_type", JSON_String result_type;
-          "pos",         Pos.json (Pos.to_absolute res.SymbolOccurrence.pos);
-        ]
-      | _ -> JSON_Object []
-      end
-    | Outline_response result ->
-      FileOutline.to_json_legacy result
   in
   json_to_string (build_response_json id result_field)
 

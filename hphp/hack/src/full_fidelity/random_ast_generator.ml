@@ -13,16 +13,16 @@ module type AstGenerator = sig
   val generate : int -> string
 end
 
-module Make (G : Hack_grammar_descriptor.Grammar) : AstGenerator = struct
+module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator = struct
   type t = G.nonterm
 
   module NontermCount = struct
-    type t = G.nonterm * int
+    type t = string * int
     let compare = compare
   end
   module PostfixCount = struct
     (* key is non-terminal, index of rule, offset position in rule, length *)
-    type t = G.nonterm * int * int * int
+    type t = string * int * int * int
     let compare = compare
   end
   module CountMem = Map.Make(NontermCount)
@@ -64,19 +64,24 @@ module Make (G : Hack_grammar_descriptor.Grammar) : AstGenerator = struct
 
   (* get the result of f and memoize the result *)
   let handle_count_mem mem key f =
-    if CountMem.mem key mem.count_mem
-    then (mem, CountMem.find key mem.count_mem)
+    let (nonterm, count) = key in
+    let name = G.nonterm_to_string nonterm in
+    let new_key = (name, count) in
+    if CountMem.mem new_key mem.count_mem
+    then (mem, CountMem.find new_key mem.count_mem)
     else
     let (mem, ret) = f mem key in
-    (put_count key ret mem, ret)
+    (put_count new_key ret mem, ret)
 
   (* get the result of f and memoize the result *)
   let handle_postfix_mem mem key f =
-    if PostfixMem.mem key mem.post_mem
-    then (mem, PostfixMem.find key mem.post_mem)
+    let (nonterm, index, pos, count) = key in
+    let new_key = (G.nonterm_to_string nonterm, index, pos, count) in
+    if PostfixMem.mem new_key mem.post_mem
+    then (mem, PostfixMem.find new_key mem.post_mem)
     else
     let (mem, ret) = f mem key in
-    (put_postfix key ret mem, ret)
+    (put_postfix new_key ret mem, ret)
 
   (* Given nonterminal and expected string length, return a list of values,
    * for element for each rule starting with nonterm, with element valued at

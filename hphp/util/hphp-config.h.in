@@ -1,0 +1,93 @@
+#ifndef incl_HPHP_UTIL_HPHP_CONFIG_H_
+#define incl_HPHP_UTIL_HPHP_CONFIG_H_
+
+#ifndef FACEBOOK
+# define HPHP_OSS 1
+#endif
+
+/* Forced defines. These won't change. */
+/* Define if built-in ELF support is used for ext_fileinfo */
+#define BUILTIN_ELF 1
+/* Define for ELF core file support in ext_fileinfo */
+#define ELFCORE 1
+
+/* HHVM requires zlib, and we use a bundled version if it isn't present
+ * on the build system, so we definitely have this.
+ */
+#define HAVE_LIBZ 1
+
+/**
+ * These headers are known to be present because they are either required
+ * for HHVM itself, or else are provided by a bundled component when not
+ * present on the build system.
+ */
+#define HAVE_ZLIB_H 1
+
+/**
+ * These functions are known to be present because they are either required
+ * for HHVM itself, or else are provided by a bundled component when not
+ * present on the build system.
+ */
+// None for now.
+
+/**
+ * Everything below here should be separated into one section for CMake
+ * and one for non-CMake builds done by FB.
+ *)
+ * If you add any defines here or in HHVMGenerateConfig.cmake, you must make
+ * sure to update the non-CMake side. If you are not sure if a particular
+ * define should be present, ask your FB reviewer.
+ */
+
+#ifdef USE_CMAKE
+#cmakedefine ENABLE_AVX2 1
+#cmakedefine ENABLE_ZEND_COMPAT 1
+#cmakedefine EXECUTION_PROFILER 1
+#else
+/* #undef ENABLE_AVX2 */
+# define ENABLE_ZEND_COMPAT 1
+/* #undef EXECUTION_PROFILER */
+#endif
+
+/* Checked Headers */
+#ifdef USE_CMAKE
+${HHVM_HEADERS_FOUND_DEFINE_STRING}
+#else
+# define HAVE_INTTYPES_H 1
+# define HAVE_LIMITS_H 1
+# define HAVE_UTIME_H 1
+# define HAVE_WCHAR_H 1
+# define HAVE_WCTYPE_H 1
+# define HAVE_SYS_MMAN_H 1
+/* #undef HAVE_SYS_UTIME_H */
+#endif
+
+/* Checked Functions */
+#ifdef USE_CMAKE
+${HHVM_FUNCTIONS_FOUND_DEFINE_STRING}
+#else
+# define HAVE_GETLINE 1
+# define HAVE_MBRTOWC 1
+# define HAVE_MKSTEMP 1
+# define HAVE_MMAP 1
+# define HAVE_STRERROR 1
+/* #undef HAVE_STRLCPY */
+# define HAVE_STRTOF 1
+# define HAVE_STRTOUL 1
+# define HAVE_UTIME 1
+# define HAVE_UTIMES 1
+#endif
+
+#ifdef USE_CMAKE
+${HHVM_COMPILES_DEFINE_STRING}
+#else
+# define HAVE_TM_ISDST 1
+# define HAVE_STRUCT_TM_TM_GMTOFF 1
+# define HAVE_STRUCT_TM_TM_ZONE 1
+# define HAVE_DAYLIGHT 1
+/* #undef MAJOR_IN_MKDEV */
+/* #undef MAJOR_IN_SYSMACROS */
+# define HAVE_VISIBILITY 1
+#endif
+
+#endif

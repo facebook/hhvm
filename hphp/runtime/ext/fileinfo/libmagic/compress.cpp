@@ -32,7 +32,8 @@
  *  uncompress(method, old, n, newch) - uncompress old into new,
  *              using method, return sizeof new
  */
-#include "config.h"
+#include "hphp/util/hphp-config.h"
+
 #include "file.h"
 
 #ifndef lint

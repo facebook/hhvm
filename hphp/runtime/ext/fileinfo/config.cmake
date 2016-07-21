@@ -20,7 +20,6 @@ HHVM_DEFINE_EXTENSION("fileinfo"
   HEADERS
     libmagic/cdf.h
     libmagic/compat.h
-    libmagic/config.h
     libmagic/elfclass.h
     libmagic/file.h
     libmagic/magic.h

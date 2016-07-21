@@ -34,7 +34,8 @@
 #define __file_h__
 
 #include "compat.h"
-#include "config.h"
+
+#include "hphp/util/hphp-config.h"
 
 #define SIZE_T_FORMAT "z"
 #ifdef _MSC_VER

@@ -45,6 +45,8 @@
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
+#include "hphp/util/hphp-config.h"
+
 #ifdef ENABLE_ZEND_COMPAT
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
 #endif

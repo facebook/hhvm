@@ -23,6 +23,7 @@
 #include <unordered_map>
 
 #include "hphp/system/systemlib.h"
+#include "hphp/util/hphp-config.h"
 #include "hphp/util/string-vsnprintf.h"
 
 #include "hphp/runtime/base/array-init.h"

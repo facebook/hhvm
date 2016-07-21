@@ -23,6 +23,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/hphp-config.h"
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"

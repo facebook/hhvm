@@ -78,6 +78,7 @@
 #include "hphp/util/capability.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/hphp-config.h"
 #ifndef _MSC_VER
 #include "hphp/util/light-process.h"
 #endif

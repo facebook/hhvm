@@ -15,6 +15,7 @@ Makefile
 /runtime/ir-opcode-generated.h
 /util/generated-compiler-id.txt
 /util/generated-repo-schema-id.txt
+/util/hphp-config.h
 
 # precompiled headers
 *_cotire.cmake

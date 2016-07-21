@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
+
+#include "hphp/util/hphp-config.h"
 #ifdef ENABLE_EXTENSION_PDO_SQLITE
 #include "hphp/runtime/ext/pdo_sqlite/pdo_sqlite.h"
 #endif

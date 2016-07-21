@@ -1,4 +1,5 @@
 #include "hphp/util/etch-helpers.h"
+#include "hphp/util/hphp-config.h"
 
 #if defined(__x86_64__) && defined(ENABLE_AVX2) && !defined(__APPLE__)
 	.file	"memset-x64-avx2.S"

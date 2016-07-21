@@ -39,9 +39,6 @@
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#ifdef ENABLE_EXTENSION_MYSQL
-#include "hphp/runtime/ext/mysql/mysql_stats.h"
-#endif
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -50,12 +47,17 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/hphp-config.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/timer.h"
+
+#ifdef ENABLE_EXTENSION_MYSQL
+#include "hphp/runtime/ext/mysql/mysql_stats.h"
+#endif
 
 #include <folly/Conv.h>
 #include <folly/Random.h>

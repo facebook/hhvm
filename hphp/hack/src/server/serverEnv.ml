@@ -43,10 +43,16 @@ type env = {
     files_info     : FileInfo.t Relative_path.Map.t;
     tcopt          : TypecheckerOptions.t;
     errorl         : Errors.t;
+    (* Keeps list of files containing parsing errors in the last iteration. File
+     * need to be rechecked will also join this list during typecheck *)
     failed_parsing : Relative_path.Set.t;
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;
     persistent_client_fd : Unix.file_descr option;
+    (* The map from full path to synchronized file contents *)
+    edited_files   : File_content.t SMap.t;
+    (* The list of full path of synchronized files need to be type checked *)
+    files_to_check : SSet.t;
   }
 
 let file_filter f =

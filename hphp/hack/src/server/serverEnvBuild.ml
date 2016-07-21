@@ -99,4 +99,6 @@ let make_env config =
     failed_decl    = Relative_path.Set.empty;
     failed_check   = Relative_path.Set.empty;
     persistent_client_fd = None;
+    edited_files   = SMap.empty;
+    files_to_check = SSet.empty;
   }

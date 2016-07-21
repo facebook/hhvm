@@ -13,22 +13,11 @@
 
 type call_id = int
 
-type content_pos = {
-  line : int;
-  column : int;
-}
-
-type code_edit = {
-  st : content_pos;
-  ed : content_pos;
-  text : string;
-}
-
 type call_type =
-  | Auto_complete_call of string * content_pos
+  | Auto_complete_call of string * File_content.content_pos
   | Open_file_call of string
   | Close_file_call of string
-  | Edit_file_call of string * (code_edit list)
+  | Edit_file_call of string * (File_content.code_edit list)
   | Disconnect_call
 
 type response_type =

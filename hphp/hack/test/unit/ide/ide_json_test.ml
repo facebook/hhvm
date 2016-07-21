@@ -11,6 +11,7 @@
 open Hh_json
 open IdeJson
 open IdeJsonUtils
+open File_content
 
 let test_invalid_json () =
   let msg = "aaaa" in

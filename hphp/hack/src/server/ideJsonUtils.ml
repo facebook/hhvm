@@ -14,6 +14,7 @@ open Hh_json
 open Result
 open Result.Monad_infix
 open Utils
+open File_content
 
 let server_busy_error_code = 1
 let invalid_call_error_code = 2

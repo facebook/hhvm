@@ -306,6 +306,8 @@ let type_check genv env =
     failed_decl = failed_decl;
     failed_check = failed_check;
     persistent_client_fd = old_env.persistent_client_fd;
+    edited_files = old_env.edited_files;
+    files_to_check = old_env.files_to_check;
   } in
   new_env, total_rechecked_count
 

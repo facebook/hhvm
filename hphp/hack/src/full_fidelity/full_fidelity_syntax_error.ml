@@ -118,6 +118,9 @@ let error2012 = "A Destructor can only have visibility modifiers."
 let error2013 = "A method declaration cannot have duplicate modifiers."
 let error2014 = "An abstract method cannot have a method body."
 let error2015 = "A non-abstract method must have a body."
-let error2016 = "An abstract method cannot be final or static."
+let error2016 = "A method cannot be both abstract and private."
 let error2017 =
   "A method declaration cannot have multiple visibility modifiers."
+let error2018 =
+  "A constructor or destructor cannot have non void type annotations."
+let error2019 = "A method cannot be both abstract and final."

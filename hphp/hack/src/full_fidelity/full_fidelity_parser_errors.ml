@@ -46,7 +46,10 @@ let list_contains_duplicate node =
   let module SyntaxMap = Map.Make (
     struct
       type t = PositionedSyntax.t
-      let compare a b = Pervasives.compare (syntax a) (syntax b)
+      let compare a b = match syntax a, syntax b with
+      | Token x, Token y ->
+        Full_fidelity_positioned_token.(compare (kind x) (kind y))
+      | _, _ -> Pervasives.compare a b
     end
   ) in
   match syntax node with
@@ -90,12 +93,6 @@ let methodish_contains_static node =
 (* test the methodish node contains the Private keyword *)
 let methodish_contains_private node =
   methodish_modifier_contains_helper is_private node
-
-(* test the methodish node contains any visibility modifiers *)
-let _methodish_contains_visibility node =
-  let is_visibility x =
-    is_public x || is_private x || is_protected x in
-  methodish_modifier_contains_helper is_visibility node
 
 let is_visibility x =
   is_public x || is_private x || is_protected x
@@ -145,6 +142,20 @@ let class_destructor_has_non_visibility_modifier node parents =
   (is_destruct label) &&
   (matches_first methodish_contains_non_visibility parents)
 
+(* check that a constructor or a destructor is type annotated *)
+let class_constructor_destructor_has_non_void_type node parents =
+  let label = function_name node in
+  let type_ano = function_type node in
+  let function_colon = function_colon node in
+  let is_missing = is_missing type_ano && is_missing function_colon in
+  let is_void = match syntax type_ano with
+    | SimpleTypeSpecifier spec ->
+      is_void spec
+    | _ -> false
+  in
+  (is_construct label || is_destruct label) &&
+  not (is_missing || is_void)
+
 (* whether a methodish has duplicate modifiers *)
 let methodish_duplicate_modifier node =
   match syntax node with
@@ -175,13 +186,21 @@ let methodish_non_abstract_without_body node =
   let not_has_body = not (methodish_has_body node) in
   non_abstract && not_has_body
 
-(* Test whether node is an abstract method with either private or final modifier
+(* Test whether node is a method that is both abstract and private
  *)
-let methodish_abstract_conflict_with_private_or_final node =
+let methodish_abstract_conflict_with_private node =
   let is_abstract = methodish_contains_abstract node in
   let has_private = methodish_contains_private node in
+  is_abstract && has_private
+
+(* Test whether node is a method that is both abstract and final
+ *)
+let methodish_abstract_conflict_with_final node =
+  let is_abstract = methodish_contains_abstract node in
   let has_final = methodish_contains_final node in
-  is_abstract && (has_private || has_final)
+  is_abstract && has_final
+
+
 
 let parent_is_function parents =
   matches_first is_function parents
@@ -248,17 +267,17 @@ let xhp_errors node _parents =
   | _ -> [ ]
 
 (* helper since there are so many kinds of errors *)
-let produce_error acc check node error =
+let produce_error acc check node error error_node =
   if check node then
-    let s = start_offset node in
-    let e = end_offset node in
+    let s = start_offset error_node in
+    let e = end_offset error_node in
     (SyntaxError.make s e error) :: acc
   else acc
 
-let produce_error_parents acc check node parents error =
+let produce_error_parents acc check node parents error error_node =
   if check node parents then
-    let s = start_offset node in
-    let e = end_offset node in
+    let s = start_offset error_node in
+    let e = end_offset error_node in
     (SyntaxError.make s e error) :: acc
   else acc
 
@@ -268,45 +287,59 @@ let function_header_check_helper check node parents =
   | FunctionDeclarationHeader node -> check node parents
   | _ -> false
 
-let produce_error_for_header acc check node error =
-  produce_error_parents acc (function_header_check_helper check) node error
+let produce_error_for_header acc check node error error_node =
+  produce_error_parents acc (function_header_check_helper check) node
+    error error_node
 
 let methodish_errors node parents =
   match syntax node with
   (* TODO how to narrow the range of error *)
-  | FunctionDeclarationHeader _ ->
+  | FunctionDeclarationHeader header ->
     let errors = [] in
-    let errors =
-      produce_error_for_header errors class_constructor_has_static node
-      parents SyntaxError.error2009 in
-    let errors =
-      produce_error_for_header errors class_non_constructor_has_visibility_param
-      node parents SyntaxError.error2010 in
+    let params = function_params header in
+    let type_ano = function_type header in
     let errors =
       produce_error_for_header errors class_destructor_has_param node parents
-      SyntaxError.error2011 in
+      SyntaxError.error2011 params in
     let errors =
       produce_error_for_header errors
-      class_destructor_has_non_visibility_modifier node parents
-      SyntaxError.error2012 in
+      class_constructor_destructor_has_non_void_type
+      node parents SyntaxError.error2018 type_ano in
+    let errors =
+      produce_error_for_header errors class_non_constructor_has_visibility_param
+      node parents SyntaxError.error2010 params in
     errors
-  | MethodishDeclaration _ ->
+  | MethodishDeclaration md ->
+    let header_node = methodish_function_decl_header md in
+    let modifiers = methodish_modifiers md in
     let errors = [] in
     let errors =
+      produce_error_for_header errors class_constructor_has_static header_node
+      [node] SyntaxError.error2009 modifiers in
+    let errors =
+      produce_error_for_header errors
+      class_destructor_has_non_visibility_modifier header_node [node]
+      SyntaxError.error2012 modifiers in
+    let errors =
       produce_error errors methodish_multiple_visibility node
-      SyntaxError.error2008 in
+      SyntaxError.error2017 modifiers in
     let errors =
       produce_error errors methodish_duplicate_modifier node
-      SyntaxError.error2013 in
+      SyntaxError.error2013 modifiers in
+    let fun_body = methodish_function_body md in
     let errors =
       produce_error errors methodish_abstract_with_body node
-      SyntaxError.error2014 in
+      SyntaxError.error2014 fun_body in
+    let fun_semicolon = methodish_semicolon md in
     let errors =
       produce_error errors methodish_non_abstract_without_body node
-      SyntaxError.error2015 in
+      SyntaxError.error2015 fun_semicolon in
     let errors =
-      produce_error errors methodish_abstract_conflict_with_private_or_final
-      node SyntaxError.error2016 in
+      produce_error errors methodish_abstract_conflict_with_private
+      node SyntaxError.error2016 modifiers in
+    let errors =
+      produce_error errors methodish_abstract_conflict_with_final
+      node SyntaxError.error2019 modifiers in
     errors
   | _ -> [ ]
 

@@ -885,6 +885,7 @@ module WithToken(Token: TokenType) = struct
     let is_protected = is_specific_token Full_fidelity_token_kind.Protected
     let is_abstract = is_specific_token Full_fidelity_token_kind.Abstract
     let is_final = is_specific_token Full_fidelity_token_kind.Final
+    let is_void = is_specific_token Full_fidelity_token_kind.Void
 
     let children node =
       match node.syntax with

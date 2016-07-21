@@ -29,6 +29,14 @@ if (GOLD_FOUND AND ENABLE_LD_GOLD)
 endif()
 hphp_link(hhvm)
 
+if (ENABLE_SPLIT_DWARF)
+  if (NOT GOLD_FOUND)
+    message(FATAL_ERROR "ENABLE_SPLIT_DWARF was specified but the gold linker was not found")
+  endif()
+  message(STATUS "Enabled split DWARF files")
+  target_link_libraries(hhvm debug "-Wl,--gdb-index")
+endif()
+
 # cygwin has an issue with linking to crypt and intl
 # this is the only way the redirection stuff works
 if(CYGWIN)

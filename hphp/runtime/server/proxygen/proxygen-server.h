@@ -153,6 +153,10 @@ struct ProxygenServer : Server,
     m_pendingTransports.push_back(transport);
   }
 
+  virtual proxygen::HTTPHeaderCode getRepostHeaderName() {
+    return proxygen::HTTP_HEADER_NONE;
+  }
+
  protected:
   enum RequestPriority {
     PRIORITY_NORMAL = 0,
@@ -179,6 +183,8 @@ struct ProxygenServer : Server,
 
   // These functions can only be called from the m_worker thread
   void stopListening(bool hard = false);
+
+  void returnPartialPosts();
 
   void abortPendingTransports();
 

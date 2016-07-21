@@ -189,6 +189,7 @@ int RuntimeOption::ServerPreShutdownWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownEOMWait = 0;
 int RuntimeOption::ServerPrepareToStopTimeout = 0;
+int RuntimeOption::ServerPartialPostStatusCode = -1;
 bool RuntimeOption::StopOldServer = false;
 int RuntimeOption::OldServerWait = 30;
 int RuntimeOption::CacheFreeFactor = 50;
@@ -1330,6 +1331,8 @@ void RuntimeOption::Load(
                  "Server.ShutdownEOMWait", 0);
     Config::Bind(ServerPrepareToStopTimeout, ini, config,
                  "Server.PrepareToStopTimeout", 240);
+    Config::Bind(ServerPartialPostStatusCode, ini, config,
+                 "Server.PartialPostStatusCode", -1);
     Config::Bind(StopOldServer, ini, config, "Server.StopOld", false);
     Config::Bind(OldServerWait, ini, config, "Server.StopOldWait", 30);
     Config::Bind(ServerRSSNeededMb, ini, config, "Server.RSSNeededMb", 4096);

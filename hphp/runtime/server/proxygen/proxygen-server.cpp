@@ -400,6 +400,14 @@ void ProxygenServer::stopListening(bool hard) {
   }
 }
 
+void ProxygenServer::returnPartialPosts() {
+  for (auto& transport : m_pendingTransports) {
+    if (!transport.getClientComplete()) {
+      transport.beginPartialPostEcho();
+    }
+  }
+}
+
 void ProxygenServer::abortPendingTransports() {
   if (!m_pendingTransports.empty()) {
     Logger::Warning("aborting %lu incomplete requests",

@@ -2356,9 +2356,9 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.PropertyDeclaration
         [ mods; ty; decls; semi ]
 
-      let make_property_declarator name equal value =
+      let make_property_declarator name init =
         from_children SyntaxKind.PropertyDeclarator
-        [ name; equal; value ]
+        [ name; init ]
 
       let make_namespace token name body =
         from_children SyntaxKind.NamespaceDeclaration

@@ -355,6 +355,48 @@ module WithExpressionAndStatementParser
     (parser, syntax)
 
   and parse_classish_element_list_opt parser =
+    (* We need to identify an element of a class, trait, etc. Possibilities
+       are:
+
+       // constant-declaration:
+       const T $x = v ;
+       abstract const T $x ;
+
+       // type-constant-declaration
+       const type T = X;
+       abstract const type T;
+
+       // property-declaration:
+       public/private/protected/static T $x;
+       TODO: We may wish to parse "T $x" and give an error indicating
+       TODO: that we were expecting either const or public.
+       Note that a visibility modifier is required; static is optional;
+       any order is allowed.
+       TODO: The spec indicates that abstract is disallowed, but Hack allows
+       TODO: it; resolve this disagreement.
+
+       // method-declaration
+       <<attr>> public/private/protected/abstract/final/static async function
+       Note that a modifier is required, the attr and async are optional.
+       TODO: Hack requires a visibility modifier, unless "static" is supplied,
+       TODO: in which case the method is considered to be public.  Is this
+       TODO: desired? Resolve this disagreement with the spec.
+
+       // constructor-declaration
+       <<attr>> public/private/protected/abstract/final function __construct
+       TODO: Hack allows static constructors and requires a visibility modifier,
+       TODO: as with regular methods. Resolve this disagreement with the spec.
+
+       // destructor-declaration
+       <<attr>> public/private/protected function __destruct
+       TODO: Hack allows static, final and abstract destructors
+       TODO: as with regular methods. Resolve this disagreement with the spec.
+
+       // trait clauses
+      require  extends  qualified-name
+      require  implements  qualified-name
+
+    *)
     let rec aux parser acc =
       let token = peek_token parser in
       match (Token.kind token) with
@@ -376,13 +418,16 @@ module WithExpressionAndStatementParser
       | Protected
       | Private
       | Final ->
-        (* Parse methods. TODO: not only methods can start with these tokens *)
-        let (parser, syntax) = parse_methodish parser (make_missing ()) in
+        (* Parse methods, constructors, destructors or properties.
+        TODO: const can also start with these tokens *)
+        let attr_spec = make_missing() in
+        let (parser, syntax) = parse_methodish_or_property parser attr_spec in
         aux parser (syntax :: acc)
       | LessThanLessThan ->
-        (* Parse methods. TODO: not only methods can start with these tokens *)
+        (* Parse methods. *)
         let (parser, attr) = parse_attribute_specification_opt parser in
-        let (parser, syntax) = parse_methodish parser attr in
+        let (parser, modifiers) = parse_modifiers parser in
+        let (parser, syntax) = parse_methodish parser attr modifiers in
         aux parser (syntax :: acc)
       | Require ->
           (* TODO: Give an error if these are found where they should not be,
@@ -420,6 +465,21 @@ module WithExpressionAndStatementParser
     let result = make_require_clause req req_kind name semi in
     (parser, result)
 
+  and parse_methodish_or_property parser attribute_spec =
+    (* If there is an attribute then it cannot be a property. *)
+    (* TODO: ERROR RECOVERY: Consider whether a property with an attribute
+       TODO: ought to be (1) parsed, with an error, or (2) perhaps
+       TODO: simply make it legal? A property seems like something that could
+       TODO: reasonably have an attribute. *)
+    let (parser, modifiers) = parse_modifiers parser in
+    if is_missing attribute_spec then
+      match peek_token_kind parser with
+      | Async
+      | Function -> parse_methodish parser attribute_spec modifiers
+      | _ -> parse_property_declaration parser modifiers
+    else
+      parse_methodish parser attribute_spec modifiers
+
   (* SPEC:
     trait-use-clause:
       use  trait-name-list  ;
@@ -450,6 +510,46 @@ module WithExpressionAndStatementParser
       parse_type_const_declaration parser abstr const
     else
       parse_const_declaration parser abstr const
+
+  and parse_property_declaration parser modifiers =
+    (* SPEC:
+        property-declaration:
+          property-modifier  type-specifier  property-declarator-list  ;
+
+        property-declarator-list:
+          property-declarator
+          property-declarator-list  ,  property-declarator
+    *)
+    (* The type specifier is optional in non-strict mode and required in
+       strict mode.
+       TODO: Give an error in a later pass if the type specifier is missing
+       TODO: in strict mode. *)
+    let (parser, prop_type) = match peek_token_kind parser with
+    | Variable -> (parser, make_missing())
+    | _ -> parse_type_specifier parser in
+    let (parser, decls) = parse_comma_list
+      parser Semicolon SyntaxError.error1008 parse_property_declarator in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_property_declaration modifiers prop_type decls semi in
+    (parser, result)
+
+  and parse_property_declarator parser =
+    (* SPEC:
+      property-declarator:
+        variable-name  property-initializer-opt
+      property-initializer:
+        =  expression
+    *)
+    let (parser, name) = expect_variable parser in
+    let (parser, equal) = optional_token parser Equal in
+    if is_missing equal then
+      let result = make_property_declarator name (make_missing()) in
+      (parser, result)
+    else
+      let (parser, initial_value) = parse_expression parser in
+      let simple_init = make_simple_initializer equal initial_value in
+      let result = make_property_declarator name simple_init in
+      (parser, result)
 
   (* SPEC:
     const-declaration:
@@ -772,10 +872,10 @@ module WithExpressionAndStatementParser
     if peek_token_kind parser1 = Const then
       parse_const_or_type_const_declaration parser1 abstract
     else
-      parse_methodish parser (make_missing ())
+      let (parser, modifiers) = parse_modifiers parser in
+      parse_methodish parser (make_missing ()) modifiers
 
-  and parse_methodish parser attribute_spec =
-    let (parser, modifiers) = parse_methodish_modifiers parser in
+  and parse_methodish parser attribute_spec modifiers =
     let (parser, header) = parse_function_declaration_header parser in
     let (parser1, token) = next_token parser in
     match Token.kind token with
@@ -798,7 +898,7 @@ module WithExpressionAndStatementParser
   (* TODO it is unclear what the modifier requirements are. Specifically, is it
    * required for constructors and destructors to have a visibility modifier?
    * Does the order of the modifiers matter? *)
-  and parse_methodish_modifiers parser =
+  and parse_modifiers parser =
     let rec aux acc parser =
       (* In reality some modifiers cannot occur together, check this in a later
        * pass *)

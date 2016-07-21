@@ -364,10 +364,13 @@ module WithExpressionAndStatementParser
           let (parser, classish_use) = parse_trait_use parser in
           aux parser (classish_use :: acc)
       | Const ->
-          let (parser, const) =
+          let (parser, element) =
             parse_const_or_type_const_declaration parser (make_missing ()) in
-          aux parser (const :: acc)
-      | Abstract
+          aux parser (element :: acc)
+      | Abstract ->
+          let (parser, element) =
+            parse_methodish_or_const_or_type_const parser in
+          aux parser (element :: acc)
       | Static
       | Public
       | Protected
@@ -764,6 +767,12 @@ module WithExpressionAndStatementParser
         abstract
         final
    *)
+  and parse_methodish_or_const_or_type_const parser =
+    let (parser1, abstract) = assert_token parser Abstract in
+    if peek_token_kind parser1 = Const then
+      parse_const_or_type_const_declaration parser1 abstract
+    else
+      parse_methodish parser (make_missing ())
 
   and parse_methodish parser attribute_spec =
     let (parser, modifiers) = parse_methodish_modifiers parser in

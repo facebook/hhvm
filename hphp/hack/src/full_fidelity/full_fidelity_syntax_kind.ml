@@ -31,6 +31,7 @@ type t =
 | RequireClause
 | ConstDeclaration
 | ConstantDeclarator
+| TypeConstDeclaration
 | ParameterDeclaration
 | AttributeSpecification
 | Attribute
@@ -134,6 +135,7 @@ let to_string kind =
   | RequireClause -> "require_clause"
   | ConstDeclaration -> "const_declaration"
   | ConstantDeclarator -> "constant_declarator"
+  | TypeConstDeclaration -> "type_const_declaration"
   | ParameterDeclaration -> "parameter_declaration"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"

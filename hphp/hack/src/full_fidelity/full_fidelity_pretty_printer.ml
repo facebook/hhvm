@@ -283,6 +283,21 @@ let rec get_doc node =
     let name = get_doc (constant_declarator_name x) in
     let init = get_doc (constant_declarator_initializer x) in
     group_doc (name ^| init)
+  | TypeConstDeclaration x ->
+    let abstr = get_doc (type_const_abstract x) in
+    let const = get_doc (type_const_const_token x) in
+    let type_ = get_doc (type_const_type_token x) in
+    let name = get_doc (type_const_name x) in
+    let type_constraint = get_doc (type_const_type_constraint x) in
+    let equal = get_doc (type_const_equal x) in
+    let type_spec = get_doc (type_const_type_specifier x) in
+    let semicolon = get_doc (type_const_semicolon x) in
+    group_doc (
+      group_doc (abstr ^| const ^| type_ ^| name) ^|
+      type_constraint ^|
+      equal ^|
+      group_doc (type_spec ^^^ semicolon)
+    )
   | EnumDeclaration x ->
     let en = get_doc x.enum_enum in
     let na = get_doc x.enum_name in

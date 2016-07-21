@@ -209,6 +209,16 @@ module WithToken(Token: TokenType) = struct
       constant_declarator_name : t;
       constant_declarator_initializer : t;
     }
+    and type_const_declaration = {
+      type_const_abstract : t;
+      type_const_const_token : t;
+      type_const_type_token : t;
+      type_const_name : t;
+      type_const_type_constraint : t;
+      type_const_equal : t;
+      type_const_type_specifier : t;
+      type_const_semicolon : t;
+    }
     and parameter_declaration = {
       param_attr : t;
       param_visibility : t;
@@ -565,6 +575,7 @@ module WithToken(Token: TokenType) = struct
     | RequireClause of require_clause
     | ConstDeclaration of const_declaration
     | ConstantDeclarator of constant_declarator
+    | TypeConstDeclaration of type_const_declaration
     | EnumDeclaration of enum_declaration
     | Enumerator of enumerator
     | AliasDeclaration of alias_declaration
@@ -680,6 +691,7 @@ module WithToken(Token: TokenType) = struct
       | RequireClause _ -> SyntaxKind.RequireClause
       | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
       | ConstantDeclarator _ -> SyntaxKind.ConstantDeclarator
+      | TypeConstDeclaration _ -> SyntaxKind.TypeConstDeclaration
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
       | Attribute _ -> SyntaxKind.Attribute
@@ -774,6 +786,8 @@ module WithToken(Token: TokenType) = struct
     let is_require_clause node = kind node = SyntaxKind.RequireClause
     let is_const_declaration node = kind node = SyntaxKind.ConstDeclaration
     let is_constant_declarator node = kind node = SyntaxKind.ConstantDeclarator
+    let is_type_const_declaration node =
+      kind node = SyntaxKind.TypeConstDeclaration
     let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
@@ -982,6 +996,13 @@ module WithToken(Token: TokenType) = struct
       | ConstantDeclarator
         { constant_declarator_name; constant_declarator_initializer; } ->
         [ constant_declarator_name; constant_declarator_initializer; ]
+      | TypeConstDeclaration
+        { type_const_abstract; type_const_const_token; type_const_type_token;
+          type_const_name; type_const_type_constraint; type_const_equal;
+          type_const_type_specifier; type_const_semicolon; } ->
+        [ type_const_abstract; type_const_const_token; type_const_type_token;
+          type_const_name; type_const_type_constraint; type_const_equal;
+          type_const_type_specifier; type_const_semicolon; ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1314,6 +1335,14 @@ module WithToken(Token: TokenType) = struct
       | ConstantDeclarator
         { constant_declarator_name; constant_declarator_initializer; } ->
         [ "constant_declarator_name"; "constant_declarator_initializer"; ]
+      | TypeConstDeclaration
+        { type_const_abstract; type_const_const_token; type_const_type_token;
+          type_const_name; type_const_type_constraint; type_const_equal;
+          type_const_type_specifier; type_const_semicolon; } ->
+        [ "type_const_abstract"; "type_const_const_token";
+          "type_const_type_token"; "type_const_name";
+          "type_const_type_constraint"; "type_const_equal";
+          "type_const_type_specifier"; "type_const_semicolon"; ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1607,6 +1636,14 @@ module WithToken(Token: TokenType) = struct
     let const_semicolon x = x.const_semicolon
     let constant_declarator_name x = x.constant_declarator_name
     let constant_declarator_initializer x = x.constant_declarator_initializer
+    let type_const_abstract x = x.type_const_abstract
+    let type_const_const_token x = x.type_const_const_token
+    let type_const_type_token x = x.type_const_type_token
+    let type_const_name x = x.type_const_name
+    let type_const_type_constraint x = x.type_const_type_constraint
+    let type_const_equal x = x.type_const_equal
+    let type_const_type_specifier x = x.type_const_type_specifier
+    let type_const_semicolon x = x.type_const_semicolon
     let param_attr x = x.param_attr
     let param_visibility x = x.param_visibility
     let param_type x = x.param_type
@@ -1908,6 +1945,13 @@ module WithToken(Token: TokenType) = struct
         [ constant_declarator_name; constant_declarator_initializer; ]) ->
         ConstantDeclarator { constant_declarator_name;
           constant_declarator_initializer; }
+      | (SyntaxKind.TypeConstDeclaration,
+        [ type_const_abstract; type_const_const_token; type_const_type_token;
+          type_const_name; type_const_type_constraint; type_const_equal;
+          type_const_type_specifier; type_const_semicolon; ]) ->
+        TypeConstDeclaration { type_const_abstract; type_const_const_token;
+          type_const_type_token; type_const_name; type_const_type_constraint;
+          type_const_equal; type_const_type_specifier; type_const_semicolon; }
       | (SyntaxKind.ParameterDeclaration, [ param_attr; param_visibility;
         param_type; param_name; param_default ]) ->
         ParameterDeclaration { param_attr; param_visibility; param_type;
@@ -2386,6 +2430,14 @@ module WithToken(Token: TokenType) = struct
         constant_declarator_initializer =
         from_children SyntaxKind.ConstantDeclarator
           [ constant_declarator_name; constant_declarator_initializer; ]
+
+      let make_type_const_declaration type_const_abstract type_const_const_token
+        type_const_type_token type_const_name type_const_type_constraint
+        type_const_equal type_const_type_specifier type_const_semicolon =
+        from_children SyntaxKind.TypeConstDeclaration
+          [ type_const_abstract; type_const_const_token; type_const_type_token;
+            type_const_name; type_const_type_constraint; type_const_equal;
+            type_const_type_specifier; type_const_semicolon; ]
 
       let make_parameter_declaration
         param_attr param_visibility param_type param_name param_default =

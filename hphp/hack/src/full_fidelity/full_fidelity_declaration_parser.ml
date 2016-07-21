@@ -365,7 +365,7 @@ module WithExpressionAndStatementParser
           aux parser (classish_use :: acc)
       | Const ->
           let (parser, const) =
-            parse_const_declaration parser (make_missing ()) in
+            parse_const_or_type_const_declaration parser (make_missing ()) in
           aux parser (const :: acc)
       | Abstract
       | Static
@@ -441,6 +441,13 @@ module WithExpressionAndStatementParser
        let parser = with_error parser1 SyntaxError.error1004 in
        (parser, make_error [make_token token])
 
+  and parse_const_or_type_const_declaration parser abstr =
+    let (parser, const) = assert_token parser Const in
+    if (peek_token_kind parser) = Type then
+      parse_type_const_declaration parser abstr const
+    else
+      parse_const_declaration parser abstr const
+
   (* SPEC:
     const-declaration:
       abstract_opt  const  type-specifier_opt  constant-declarator-list  ;
@@ -452,8 +459,7 @@ module WithExpressionAndStatementParser
     constant-initializer:
       =  const-expression
   *)
-  and parse_const_declaration parser abstr =
-    let (parser, const_token) = assert_token parser Const in
+  and parse_const_declaration parser abstr const =
     let next_token_is_type =
       peek_token_kind (skip_token parser) = Name ||
       peek_token_kind (skip_token parser) = GreaterThan
@@ -468,12 +474,44 @@ module WithExpressionAndStatementParser
     let (parser, const_list) = parse_comma_list
       parser Semicolon SyntaxError.error1004 parse_constant_declarator in
     let (parser, semi) = expect_semicolon parser in
-    (parser, make_const_declaration abstr const_token type_spec const_list semi)
+    (parser, make_const_declaration abstr const type_spec const_list semi)
 
   and parse_constant_declarator parser =
     let (parser, const_name) = expect_name parser in
     let (parser, initializer_) = parse_simple_initializer parser in
     (parser, make_constant_declarator const_name initializer_)
+
+
+  (* SPEC:
+    type-constant-declaration:
+      abstract-type-constant-declaration
+      concrete-type-constant-declaration
+    abstract-type-constant-declaration:
+      abstract  const  type  name  type-constraintopt  ;
+    concrete-type-constant-declaration:
+      const  type  name  type-constraintopt  =  type-specifier  ;
+  *)
+  and parse_type_const_declaration parser abstr const =
+    (* TODO: Error handle -
+      abstract type consts only in interfaces or abstract classes
+      interfaces cannot have concrete type consts with type constraints
+    *)
+    let (parser, type_token) = assert_token parser Type in
+    let (parser, name) = expect_name parser in
+    let (parser, type_constraint) = parse_type_constraint_opt parser in
+    let (parser, equal_token, type_specifier) = if is_missing abstr then
+      let (parser, equal_token) = expect_equal parser in
+      let (parser, type_spec) = parse_type_specifier parser in
+      (parser, equal_token, type_spec)
+    else
+      (parser, make_missing (), make_missing ())
+    in
+    let (parser, semicolon) = expect_semicolon parser in
+    let syntax = make_type_const_declaration
+      abstr const type_token name type_constraint equal_token type_specifier
+      semicolon
+    in
+    (parser, syntax)
 
   (* SPEC:
     attribute_specification := << attribute_list >>

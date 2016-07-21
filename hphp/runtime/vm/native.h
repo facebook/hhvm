@@ -199,26 +199,12 @@ namespace HPHP { namespace Native {
 // using make_native-func-caller.php
 const int kMaxBuiltinArgs = 32;
 
-// t#3982283 - Our ARM code gen doesn't support stack args yet.
-// In fact, it only supports six of the eight register args.
-// Put a hard limit of five to account for the return register for now.
-constexpr int kMaxFCallBuiltinArgsARM = 5;
-
 inline int maxFCallBuiltinArgs() {
-#ifdef __AARCH64EL__
-  return kMaxFCallBuiltinArgsARM;
-#else
   return kMaxBuiltinArgs;
-#endif
 }
 
-// t#3982283 - Our ARM code gen doesn't support FP args/returns yet.
 inline bool allowFCallBuiltinDoubles() {
-#ifdef __AARCH64EL__
-  return false;
-#else
   return true;
-#endif
 }
 
 enum Attr {
@@ -307,6 +293,14 @@ using StringArg   = Native::NativeArg<StringData>;
 using ArrayArg    = Native::NativeArg<ArrayData>;
 using ResourceArg = Native::NativeArg<ResourceData>;
 using OutputArg   = Native::NativeArg<RefData>;
+
+struct IndirectReturn {
+  IndirectReturn() {}
+  // Make sure the indirect return value is never copied and RVO kicked in
+  IndirectReturn(const IndirectReturn&) { always_assert(false); }
+  IndirectReturn& operator=(const IndirectReturn&) = delete;
+  ~IndirectReturn() {}
+};
 
 namespace Native {
 

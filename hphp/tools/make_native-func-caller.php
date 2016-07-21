@@ -46,7 +46,8 @@ fwrite($fp, "static_assert(kNumSIMDRegs == " . NUM_SIMD_ARGS.
 
 $callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
               'double* SIMD, int SIMD_count';
-foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV'] as
+foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV',
+         'IndirectReturn'=>'Indirect'] as
         $ret => $name) {
   fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");
   fwrite($fp, "  switch (GP_count) {\n");

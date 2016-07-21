@@ -143,7 +143,7 @@ let handle : type a. genv -> env -> a t -> env * a =
         with Not_found ->
         let content = try Sys_utils.cat path with _ -> "" in
         of_content content in
-        let edits = [{st = pos; ed = pos; text = "AUTO332"}] in
+        let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
         let edited_fc = edit_file fc edits in
         let content = get_content edited_fc in
         env, ServerAutoComplete.auto_complete env.tcopt content

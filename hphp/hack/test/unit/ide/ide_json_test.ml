@@ -116,11 +116,18 @@ let test_call_id = 4
 let build_position_msg x y =
   {|{"line" : |} ^ x ^ {|, "column" : |} ^ y ^ "}"
 
+let build_range_msg span =
+  match span with
+  | Some (st, ed) ->
+    {|"range" : {"start" : |} ^ st ^ {|, "end" : |} ^ ed ^ {|}, |}
+  | None ->
+    ""
+
 let build_edit_msg l =
-  let edits = List.map (fun (st, ed, text) -> {|{"span" : {"start" : |} ^
-    st ^ {|, "end" : |} ^ ed ^ {|}, "text" : |} ^ text ^ "}") l in
+  let edits = List.map (fun (span, text) -> "{" ^ (build_range_msg span) ^
+    {|"text" : |} ^ text ^ "}") l in
   let edits = String.concat ", " edits in
-  {|"edits" : [|} ^ edits ^ "]"
+  {|"changes" : [|} ^ edits ^ "]"
 
 let build_call_msg cmd args =
   let args = String.concat ", " args in
@@ -158,33 +165,53 @@ let test_server_busy_reponse () =
   {|{"type":"response","id":4,"error":{"code":1,"message":"Server busy"}}|}
 
 let test_open_file_call () =
-  let msg = build_call_msg "\"open\"" [
+  let msg = build_call_msg "\"didOpenFile\"" [
     {|"filename" : "test.php"|};
   ] in
   expect_call msg (Open_file_call "test.php")
 
 let test_close_file_call () =
-  let msg = build_call_msg "\"close\"" [
+  let msg = build_call_msg "\"didCloseFile\"" [
     {|"filename" : "test.php"|};
   ] in
   expect_call msg (Close_file_call "test.php")
 
 let test_edit_file_call () =
-  let msg = build_call_msg "\"edit\"" [
+  let msg = build_call_msg "\"didChangeFile\"" [
     {|"filename" : "test.php"|};
-    build_edit_msg [(build_position_msg "0" "0"),
-    (build_position_msg "0" "2"), {|"<?hh"|};
-    (build_position_msg "2" "2"),
-    (build_position_msg "2" "4"), {|"class"|};];
+    build_edit_msg [
+    Some ((build_position_msg "0" "0"), (build_position_msg "0" "2")),
+    {|"<?hh"|};
+    Some ((build_position_msg "2" "2"), (build_position_msg "2" "4")),
+    {|"class"|};];
   ] in
-  print_endline msg;
   expect_call msg (Edit_file_call
     ("test.php",
-    [{st = {line = 0; column = 0};
-     ed = {line = 0; column = 2};
+    [{range = Some {
+        st = {line = 0; column = 0};
+        ed = {line = 0; column = 2}};
      text = "<?hh"};
-     {st = {line = 2; column = 2};
-      ed = {line = 2; column = 4};
+     {range = Some {
+        st = {line = 2; column = 2};
+        ed = {line = 2; column = 4}};
+      text = "class"};]))
+
+let test_edit_file_call2 () =
+  let msg = build_call_msg "\"didChangeFile\"" [
+    {|"filename" : "test.php"|};
+    build_edit_msg [
+    None,
+    {|"<?hh"|};
+    Some ((build_position_msg "2" "2"), (build_position_msg "2" "4")),
+    {|"class"|};];
+  ] in
+  expect_call msg (Edit_file_call
+    ("test.php",
+    [{range = None;
+     text = "<?hh"};
+     {range = Some {
+        st = {line = 2; column = 2};
+        ed = {line = 2; column = 4}};
       text = "class"};]))
 
 let test_disconnect_call () =
@@ -212,6 +239,7 @@ let tests = [
   "test_open_file_call", test_open_file_call;
   "test_close_file_call", test_close_file_call;
   "test_edit_file_call", test_edit_file_call;
+  "test_edit_file_call2", test_edit_file_call2;
   "test_disconnect_call", test_disconnect_call;
 ]
 

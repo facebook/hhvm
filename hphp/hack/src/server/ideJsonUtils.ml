@@ -46,7 +46,7 @@ let string_positions_to_content_pos line column =
  * This function translates those command and args into a call_type structure.
 *)
 let to_call cmd args =
-  let get_field fields field_name =
+  let get_field (fields : (string * json) list) (field_name : string) =
     match List.find fields (fun (x, _) -> x = field_name) with
     | Some (_, x) -> Some x
     | None -> None in
@@ -65,26 +65,25 @@ let to_call cmd args =
       | _ -> raise Not_found in
     string_positions_to_content_pos line column in
 
-  let parse_span span =
+  let parse_span : (string * json) list -> content_range = fun span ->
     let st = match get_field span "start" with
       | Some (JSON_Object st) -> st
       | _ -> raise Not_found in
-    let st = parse_position st in
+    let st : content_pos = parse_position st in
     let ed = match get_field span "end" with
       | Some (JSON_Object ed) -> ed
       | _ -> raise Not_found in
-    let ed = parse_position ed in
-    st, ed in
+    let ed : content_pos = parse_position ed in
+    {st; ed} in
 
-  let parse_edit edit =
-    let span = match get_field edit "span" with
-      | Some (JSON_Object span) -> span
-      | _ -> raise Not_found in
-    let st, ed = parse_span span in
+  let parse_edit : (string * json) list -> code_edit = fun edit ->
+    let range : content_range option = match get_field edit "range" with
+      | Some (JSON_Object span) -> Some (parse_span span)
+      | _ -> None in
     let text = match get_field edit "text" with
       | Some (JSON_String text) -> text
       | _ -> raise Not_found in
-    {st; ed; text} in
+    {range; text} in
 
   let parse_edits : json list -> code_edit list = fun edits ->
     List.fold ~init:[] ~f:(fun l e ->
@@ -101,13 +100,13 @@ let to_call cmd args =
       | _ -> raise Not_found in
     let pos = parse_position pos in
     Auto_complete_call (path, pos)
-  | "open" ->
+  | "didOpenFile" ->
     Open_file_call (get_filename ())
-  | "close" ->
+  | "didCloseFile" ->
     Close_file_call (get_filename ())
-  | "edit" ->
+  | "didChangeFile" ->
     let path = get_filename () in
-    let edits = match get_field args "edits" with
+    let edits = match get_field args "changes" with
       | Some (JSON_Array edits) -> edits
       | _ -> raise Not_found in
     let edits = parse_edits edits in

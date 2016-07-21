@@ -424,7 +424,8 @@ module WithExpressionAndStatementParser
         let (parser, syntax) = parse_methodish_or_property parser attr_spec in
         aux parser (syntax :: acc)
       | LessThanLessThan ->
-        (* Parse methods. *)
+        (* Parse "methodish" declarations: methods, ctors and dtors *)
+        (* TODO: Consider whether properties ought to allow attributes. *)
         let (parser, attr) = parse_attribute_specification_opt parser in
         let (parser, modifiers) = parse_modifiers parser in
         let (parser, syntax) = parse_methodish parser attr modifiers in
@@ -516,22 +517,20 @@ module WithExpressionAndStatementParser
         property-declaration:
           property-modifier  type-specifier  property-declarator-list  ;
 
-        property-declarator-list:
-          property-declarator
-          property-declarator-list  ,  property-declarator
-    *)
-    (* The type specifier is optional in non-strict mode and required in
-       strict mode.
-       TODO: Give an error in a later pass if the type specifier is missing
-       TODO: in strict mode. *)
-    let (parser, prop_type) = match peek_token_kind parser with
-    | Variable -> (parser, make_missing())
-    | _ -> parse_type_specifier parser in
-    let (parser, decls) = parse_comma_list
-      parser Semicolon SyntaxError.error1008 parse_property_declarator in
-    let (parser, semi) = expect_semicolon parser in
-    let result = make_property_declaration modifiers prop_type decls semi in
-    (parser, result)
+       property-declarator-list:
+         property-declarator
+         property-declarator-list  ,  property-declarator
+     *)
+     (* The type specifier is optional in non-strict mode and required in
+        strict mode. We give an error in a later pass. *)
+     let (parser, prop_type) = match peek_token_kind parser with
+     | Variable -> (parser, make_missing())
+     | _ -> parse_type_specifier parser in
+     let (parser, decls) = parse_comma_list
+       parser Semicolon SyntaxError.error1008 parse_property_declarator in
+     let (parser, semi) = expect_semicolon parser in
+     let result = make_property_declaration modifiers prop_type decls semi in
+     (parser, result)
 
   and parse_property_declarator parser =
     (* SPEC:
@@ -895,9 +894,6 @@ module WithExpressionAndStatementParser
       let parser = with_error parser1 SyntaxError.error1041 in
       (parser, make_error [make_token token])
 
-  (* TODO it is unclear what the modifier requirements are. Specifically, is it
-   * required for constructors and destructors to have a visibility modifier?
-   * Does the order of the modifiers matter? *)
   and parse_modifiers parser =
     let rec aux acc parser =
       (* In reality some modifiers cannot occur together, check this in a later

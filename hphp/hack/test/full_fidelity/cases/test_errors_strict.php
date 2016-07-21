@@ -7,3 +7,8 @@ function bar() : void {
   $x = function($b) { };
   $y = <foo:bar:blah baz-abc="123"/>; // error on baz-abc
 }
+class C
+{
+  public $x = 123; // error; type annotation is not optional in strict mode
+  public int $y = 456; // no error
+}

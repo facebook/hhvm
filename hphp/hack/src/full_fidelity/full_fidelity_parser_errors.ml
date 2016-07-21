@@ -367,6 +367,14 @@ let statement_errors node parents =
     let e = end_offset error_node in
     [ SyntaxError.make s e error_message ]
 
+let property_errors node is_strict =
+  match syntax node with
+  | PropertyDeclaration p when is_strict && is_missing (p.prop_type) ->
+      let s = start_offset node in
+      let e = end_offset node in
+      [ SyntaxError.make s e SyntaxError.error2001 ]
+  | _ -> [ ]
+
 let find_syntax_errors node is_strict =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -374,8 +382,9 @@ let find_syntax_errors node is_strict =
     let xhp_errs = xhp_errors node parents in
     let statement_errs = statement_errors node parents in
     let methodish_errs = methodish_errors node parents in
+    let property_errs = property_errors node is_strict in
     let errors = acc.errors @ param_errs @ func_errs @
-      xhp_errs @ statement_errs @ methodish_errs in
+      xhp_errs @ statement_errs @ methodish_errs @ property_errs in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

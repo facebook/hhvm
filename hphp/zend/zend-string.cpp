@@ -305,7 +305,6 @@ char *string_bin2hex(const char *input, int len, char* result) {
     result[j++] = hexconvtab[(unsigned char)input[i] & 15];
   }
   result[j] = '\0';
-  len = j;
   return result;
 }
 

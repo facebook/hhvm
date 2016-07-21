@@ -2200,3 +2200,736 @@ TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
+template<class IndirectRet>
+IndirectRet callFuncIndirectImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)())f)();
+        case 1:
+          return ((IndirectRet (*)(double))f)(SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(double,double))f)(SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t))f)(GP[0]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,double))f)(GP[0],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,double,double))f)(GP[0],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,double,double,double,double,double,double,double,double))f)(GP[0],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,double))f)(GP[0],GP[1],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 1:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0]);
+        case 2:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1]);
+        case 3:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((IndirectRet (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,double,double,double,double,double,double,double,double))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31],SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+

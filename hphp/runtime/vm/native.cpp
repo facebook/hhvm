@@ -15,9 +15,13 @@
 */
 
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/runtime.h"
+
+#include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
+
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP { namespace Native {
@@ -28,7 +32,7 @@ ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 
 static size_t numGPRegArgs() {
-#ifdef __AARCH64EL__
+#ifdef __aarch64__
   return 8; // r0-r7
 #elif defined(__powerpc64__)
   return 31;
@@ -173,14 +177,6 @@ void callFunc(const Func* func, void *ctx,
   auto const numArgs = func->numParams();
   auto retType = func->returnType();
 
-  if (!func->isReturnByValue()) {
-    if (!retType) {
-      GP_args[GP_count++] = (int64_t)&ret;
-    } else if (isBuiltinByRef(retType)) {
-      GP_args[GP_count++] = (int64_t)&ret.m_data;
-    }
-  }
-
   if (ctx) {
     GP_args[GP_count++] = (int64_t)ctx;
   }
@@ -203,7 +199,8 @@ void callFunc(const Func* func, void *ctx,
     if (func->isReturnByValue()) {
       ret = callFuncTVImpl(f, GP_args, GP_count, SIMD_args, SIMD_count);
     } else {
-      callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
+      new (&ret) Variant(callFuncIndirectImpl<Variant>(f, GP_args, GP_count,
+                                                       SIMD_args, SIMD_count));
       if (ret.m_type == KindOfUninit) {
         ret.m_type = KindOfNull;
       }
@@ -238,8 +235,15 @@ void callFunc(const Func* func, void *ctx,
     case KindOfResource:
     case KindOfRef: {
       assert(isBuiltinByRef(ret.m_type));
-      auto val = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
-      if (func->isReturnByValue()) ret.m_data.num = val;
+      if (func->isReturnByValue()) {
+        auto val = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args,
+                                     SIMD_count);
+        ret.m_data.num = val;
+      } else {
+        using T = req::ptr<StringData>;
+        new (&ret.m_data) T(callFuncIndirectImpl<T>(f, GP_args, GP_count,
+                                                    SIMD_args, SIMD_count));
+      }
       if (ret.m_data.num == 0) {
         ret.m_type = KindOfNull;
       }

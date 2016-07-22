@@ -408,6 +408,14 @@ let property_errors node is_strict =
       [ SyntaxError.make s e SyntaxError.error2001 ]
   | _ -> [ ]
 
+let expression_errors node =
+  match syntax node with
+  | SubscriptExpression s when is_left_brace s.subscript_left ->
+    let s = start_offset node in
+    let e = end_offset node in
+    [ SyntaxError.make s e SyntaxError.error2020 ]
+  | _ -> []
+
 let find_syntax_errors node is_strict =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -416,8 +424,10 @@ let find_syntax_errors node is_strict =
     let statement_errs = statement_errors node parents in
     let methodish_errs = methodish_errors node parents in
     let property_errs = property_errors node is_strict in
+    let expr_errs = expression_errors node in
     let errors = acc.errors @ param_errs @ func_errs @
-      xhp_errs @ statement_errs @ methodish_errs @ property_errs in
+      xhp_errs @ statement_errs @ methodish_errs @ property_errs @
+      expr_errs in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

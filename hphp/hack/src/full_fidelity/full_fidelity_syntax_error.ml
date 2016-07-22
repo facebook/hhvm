@@ -124,3 +124,5 @@ let error2017 =
 let error2018 =
   "A constructor or destructor cannot have non void type annotations."
 let error2019 = "A method cannot be both abstract and final."
+let error2020 = "Use of the '{}' subscript operator is deprecated; " ^
+  " use '[]' instead."

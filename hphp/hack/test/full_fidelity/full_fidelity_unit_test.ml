@@ -170,6 +170,7 @@ let test_data = minimal_tests @
   make_test_case_from_files "test_errors_strict" test_errors;
   make_test_case_from_files "test_no_errors_strict" test_errors;
   make_test_case_from_files "test_statement_errors" test_errors;
+  make_test_case_from_files "test_expression_errors" test_errors;
   make_test_case_from_files "test_errors_method" test_errors
 ]
 

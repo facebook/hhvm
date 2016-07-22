@@ -215,8 +215,8 @@ void HHVM_METHOD(SQLite3, open,
 
   if (sqlite3_open_v2(fname.data(), &data->m_raw_db, flags, nullptr)
       != SQLITE_OK) {
-    throw Exception("Unable to open database: %s",
-                    sqlite3_errmsg(data->m_raw_db));
+    SystemLib::throwExceptionObject((std::string("Unable to open database: ") +
+                                    sqlite3_errmsg(data->m_raw_db)).c_str());
   }
 
 #ifdef SQLITE_HAS_CODEC
@@ -226,8 +226,8 @@ void HHVM_METHOD(SQLite3, open,
   if (!str_encryption_key.empty() &&
       sqlite3_key(data->m_raw_db, str_encryption_key.data(),
       str_encryption_key.size()) != SQLITE_OK) {
-    throw Exception("Unable to open database: %s",
-                    sqlite3_errmsg(data->m_raw_db));
+    SystemLib::throwExceptionObject((std::string("Unable to open database: ") +
+                                    sqlite3_errmsg(data->m_raw_db)).c_str());
   }
 #endif
 }

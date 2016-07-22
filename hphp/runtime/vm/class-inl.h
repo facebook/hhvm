@@ -483,6 +483,13 @@ Class::TMIOps::errorDuplicateMethod(const Class* cls,
   raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
 }
 
+inline void
+Class::TMIOps::errorInconsistentInsteadOf(const Class* cls,
+                                          const StringData* methName) {
+  raise_error(Strings::INCONSISTENT_INSTEADOF, methName->data(),
+              cls->name()->data(), cls->name()->data());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Non-member functions.
 

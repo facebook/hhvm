@@ -22,6 +22,7 @@
 #include "hphp/util/string-vsnprintf.h"
 
 #include <folly/portability/Syslog.h>
+#include <folly/portability/Unistd.h>
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
@@ -216,7 +217,7 @@ std::pair<int, int> Logger::log(LogLevelType level, const std::string &msg,
 }
 
 void Logger::ResetPid() {
-  s_pid = Process::GetProcessId();
+  s_pid = getpid();
 }
 
 std::string Logger::GetHeader() {

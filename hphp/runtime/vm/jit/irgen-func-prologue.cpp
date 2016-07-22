@@ -51,18 +51,17 @@ namespace {
  * Set un-passed parameters to Uninit (or the empty array, for the variadic
  * capture parameter) and set up the ExtraArgs on the ActRec as needed.
  */
-void init_params(IRGS& env, uint32_t argc) {
+void init_params(IRGS& env, const Func* func, uint32_t argc) {
   /*
    * Maximum number of default-value parameter initializations to unroll.
    */
   constexpr auto kMaxParamsInitUnroll = 5;
 
-  auto const func = env.context.func;
   auto const nparams = func->numNonVariadicParams();
 
   if (argc < nparams) {
     // Too few arguments; set everything else to Uninit.
-    if (nparams - argc <= kMaxParamsInitUnroll) {
+    if (nparams - argc <= kMaxParamsInitUnroll || env.inlineLevel) {
       for (auto i = argc; i < nparams; ++i) {
         gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
       }
@@ -78,8 +77,10 @@ void init_params(IRGS& env, uint32_t argc) {
         cns(env, staticEmptyArray()));
   }
 
-  // Null out or initialize the frame's ExtraArgs.
-  gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
+  if (!env.inlineLevel) {
+    // Null out or initialize the frame's ExtraArgs.
+    gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
+  }
 }
 
 /*
@@ -89,13 +90,13 @@ void init_params(IRGS& env, uint32_t argc) {
  * closure's bound Ctx, which may be either an object or a class context.  We
  * then teleport the object onto the stack as the first local after the params.
  */
-SSATmp* juggle_closure_ctx(IRGS& env) {
-  auto const func = env.context.func;
-
+SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closureOpt) {
   assertx(func->isClosureBody());
 
   auto const closure_type = Type::ExactObj(func->implCls());
-  auto const closure = gen(env, LdClosure, closure_type, fp(env));
+  auto const closure = closureOpt ?
+    gen(env, AssertType, closure_type, closureOpt) :
+    gen(env, LdClosure, closure_type, fp(env));
 
   auto const ctx = gen(env, LdClosureCtx, closure);
   gen(env, InitCtx, fp(env), ctx);
@@ -112,8 +113,7 @@ SSATmp* juggle_closure_ctx(IRGS& env) {
  * Copy the closure's use variables from the closure object's properties onto
  * the stack.
  */
-void init_use_vars(IRGS& env, SSATmp* closure) {
-  auto const func = env.context.func;
+void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
   auto const cls = func->implCls();
   auto const nparams = func->numParams();
 
@@ -143,7 +143,7 @@ void init_use_vars(IRGS& env, SSATmp* closure) {
 /*
  * Set locals to Uninit.
  */
-void init_locals(IRGS& env) {
+void init_locals(IRGS& env, const Func* func) {
   /*
    * Maximum number of local initializations to unroll.
    *
@@ -153,7 +153,6 @@ void init_locals(IRGS& env) {
    */
   constexpr auto kMaxLocalsInitUnroll = 9;
 
-  auto const func = env.context.func;
   auto const nlocals = func->numLocals();
 
   auto num_inited = func->numParams();
@@ -278,12 +277,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
-  init_params(env, argc);
-  if (func->isClosureBody()) {
-    auto const closure = juggle_closure_ctx(env);
-    init_use_vars(env, closure);
-  }
-  init_locals(env);
+  emitPrologueLocals(env, argc, func, nullptr);
   warn_missing_args(env, argc);
 
   // Check surprise flags in the same place as the interpreter: after setting
@@ -364,6 +358,16 @@ void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void emitPrologueLocals(IRGS& env, uint32_t argc,
+                        const Func* func, SSATmp* closureOpt) {
+  init_params(env, func, argc);
+  if (func->isClosureBody()) {
+    auto const closure = juggle_closure_ctx(env, func, closureOpt);
+    init_use_vars(env, func, closure);
+  }
+  init_locals(env, func);
+}
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   if (env.context.func->isMagic()) {

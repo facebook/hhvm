@@ -31,7 +31,6 @@ std::string TypeConstraint::toString() const {
 
   if (category == DataTypeSpecialized) {
     if (wantArrayKind()) ret += ",ArrayKind";
-    if (wantArrayShape()) ret += ",ArrayShape";
     if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
     }
@@ -78,7 +77,6 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       }
       if (t < TArr && t.arrSpec()) {
         auto arrSpec = t.arrSpec();
-        if (tc.wantArrayShape() && !arrSpec.shape()) return false;
         if (tc.wantArrayKind() && !arrSpec.kind()) return false;
         return true;
       }
@@ -114,7 +112,6 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
       // We need to ask for the right kind of specialization, so grab it from
       // origTc.
       if (origTc.wantArrayKind()) newTc.setWantArrayKind();
-      if (origTc.wantArrayShape()) newTc.setWantArrayShape();
       if (origTc.wantClass()) newTc.setDesiredClass(origTc.desiredClass());
     }
 
@@ -137,7 +134,6 @@ TypeConstraint applyConstraint(TypeConstraint tc, const TypeConstraint newTc) {
   tc.category = std::max(newTc.category, tc.category);
 
   if (newTc.wantArrayKind()) tc.setWantArrayKind();
-  if (newTc.wantArrayShape()) tc.setWantArrayShape();
 
   if (newTc.wantClass()) {
     if (tc.wantClass()) {

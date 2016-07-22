@@ -38,7 +38,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # General options to pass to the C++ compiler
   set(GENERAL_CXX_OPTIONS)
   list(APPEND GENERAL_CXX_OPTIONS
-    "std=gnu++11"
+    "std=gnu++1y"
     "fno-omit-frame-pointer"
     "fno-operator-names"
     "Wall"
@@ -51,6 +51,9 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
 
   # Options to pass for release mode to the C++ compiler
   set(RELEASE_CXX_OPTIONS)
+
+  # Suboption of -g in debug mode
+  set(GDB_SUBOPTION)
 
   # Enable GCC/LLVM stack-smashing protection
   if(ENABLE_SSP)
@@ -180,21 +183,25 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     if(STATIC_CXX_LIB)
       set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
     endif()
+
+    if (ENABLE_SPLIT_DWARF)
+      set(GDB_SUBOPTION "split-dwarf")
+    endif()
   endif()
 
   # No optimizations for debug builds.
   # -Og enables some optimizations, but makes debugging harder by optimizing
   # away some functions and locals. -O0 is more debuggable.
   # -O0-ggdb was reputed to cause gdb to crash (github #4450)
-  set(CMAKE_C_FLAGS_DEBUG            "-O0 -g")
-  set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+  set(CMAKE_C_FLAGS_DEBUG            "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
   set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
   set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
   set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
-  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -w")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
+  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration -Wno-missing-field-initializers")
 
   foreach(opt ${DISABLED_NAMED_WARNINGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${opt}")

@@ -67,7 +67,7 @@ let check_const tcopt fn x =
       | Some h ->
         let declared_type = Decl_hint.hint env.Typing_env.decl_env h in
         let env, dty = Typing_phase.localize_with_self env declared_type in
-        let _env = Typing_utils.sub_type env dty value_type in
+        let _env = Typing_utils.sub_type env value_type dty in
         ()
       | None -> ()
 
@@ -120,7 +120,7 @@ let parallel_check workers tcopt fnl =
       ~job:load_and_check_files
       ~neutral
       ~merge:Decl_service.merge_decl
-      ~next:(Bucket.make fnl)
+      ~next:(MultiWorker.next workers fnl)
   in
   TypeCheckStore.clear();
   result

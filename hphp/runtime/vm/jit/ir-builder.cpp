@@ -81,7 +81,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
 #define DArrVec        return false; // fixed type
-#define DArrElem       assertx(inst->is(LdStructArrayElem, ArrayGet));    \
+#define DArrElem       assertx(inst->is(ArrayGet));           \
                          return typeMightRelax(inst->src(0));
 #define DCol           return false; // fixed in bytecode
 #define DThis          return false; // fixed type from ctx class
@@ -365,7 +365,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (func->isStatic()) {
     if (fpInst->is(DefInlineFP)) {
       auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx->hasConstVal(TCls)) {
+      if (ctx && ctx->hasConstVal(TCls)) {
         inst->convertToNop();
         return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
       }
@@ -384,7 +384,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
     // check that we haven't nuked the SSATmp
     if (!m_state.frameMaySpanCall()) {
       auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx->isA(TObj)) return ctx;
+      if (ctx && ctx->isA(TObj)) return ctx;
     }
   }
   return nullptr;

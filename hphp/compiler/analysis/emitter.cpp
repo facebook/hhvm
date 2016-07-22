@@ -119,7 +119,6 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -3730,7 +3729,7 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
   }
 }
 
-template<typename ArrayType, class Fun>
+template<uint32_t MaxMakeSize, class Fun>
 bool checkKeys(ExpressionPtr init_expr, bool check_size, Fun fun) {
   if (init_expr->getKindOf() != Expression::KindOfExpressionList) {
     return false;
@@ -3738,7 +3737,7 @@ bool checkKeys(ExpressionPtr init_expr, bool check_size, Fun fun) {
 
   auto el = static_pointer_cast<ExpressionList>(init_expr);
   int n = el->getCount();
-  if (n < 1 || (check_size && n > ArrayType::MaxMakeSize)) {
+  if (n < 1 || (check_size && n > MaxMakeSize)) {
     return false;
   }
 
@@ -3765,7 +3764,7 @@ bool checkKeys(ExpressionPtr init_expr, bool check_size, Fun fun) {
 bool isPackedInit(ExpressionPtr init_expr, int* size,
                   bool check_size = true) {
   *size = 0;
-  return checkKeys<MixedArray>(init_expr, check_size,
+  return checkKeys<MixedArray::MaxMakeSize>(init_expr, check_size,
     [&](ArrayPairExpressionPtr ap) {
       Variant key;
 
@@ -3802,7 +3801,7 @@ bool isPackedInit(ExpressionPtr init_expr, int* size,
  * all static strings with no duplicates.
  */
 bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
-  return checkKeys<StructArray>(init_expr, true,
+  return checkKeys<MixedArray::MaxStructMakeSize>(init_expr, true,
     [&](ArrayPairExpressionPtr ap) {
       auto key = ap->getName();
       if (key == nullptr || !key->isLiteralString()) return false;
@@ -4500,6 +4499,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.Null();
       return true;
     }
+
     if (op == T_ARRAY) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el);
@@ -4515,6 +4515,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     if (op == T_VEC) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el, HeaderKind::VecArray);
+      return true;
+    }
+
+    if (op == T_KEYSET) {
+      auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+      emitArrayInit(e, el, HeaderKind::Keyset);
       return true;
     }
 
@@ -5662,7 +5668,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
   case Construct::KindOfExpressionList: {
     auto el = static_pointer_cast<ExpressionList>(node);
-    if (!m_staticArrays.empty() && m_staticColType.back() == HeaderKind::VecArray) {
+    if (!m_staticArrays.empty() &&
+        (m_staticColType.back() == HeaderKind::VecArray ||
+         m_staticColType.back() == HeaderKind::Keyset)) {
       auto const nelem = el->getCount();
       for (int i = 0; i < nelem; ++i) {
         auto const expr = (*el)[i];
@@ -10125,6 +10133,8 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
       m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveDict(0)));
     } else if (k == HeaderKind::VecArray) {
       m_staticArrays.push_back(Array::attach(PackedArray::MakeReserveVec(0)));
+    } else if (k == HeaderKind::Keyset) {
+      m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveKeyset(0)));
     } else {
       m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
     }
@@ -10191,6 +10201,10 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         initArray(u->getExpression(), HeaderKind::VecArray);
         break;
       }
+      if (u->getOp() == T_KEYSET) {
+        initArray(u->getExpression(), HeaderKind::Keyset);
+        break;
+      }
       // Fall through
     }
     default: {
@@ -10210,6 +10224,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   assert(m_staticArrays.empty());
   auto const isDict = kind == HeaderKind::Dict;
   auto const isVec = kind == HeaderKind::VecArray;
+  auto const isKeyset = kind == HeaderKind::Keyset;
 
   if (el == nullptr) {
     if (isDict) {
@@ -10220,11 +10235,18 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
       e.Array(staticEmptyVecArray());
       return;
     }
+    if (isKeyset) {
+      e.Array(staticEmptyKeysetArray());
+      return;
+    }
     e.Array(staticEmptyArray());
     return;
   }
 
-  auto const scalar = isDict ? isDictScalar(el) : el->isScalar();
+  auto const scalar =
+    isDict ? isDictScalar(el) :
+    isKeyset ? isKeysetScalar(el) :
+    el->isScalar();
   if (scalar) {
     TypedValue tv;
     tvWriteUninit(&tv);
@@ -10233,19 +10255,22 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  if (isVec) {
+  if (isVec || isKeyset) {
     auto const count = el->getCount();
     for (int i = 0; i < count; i++) {
       auto expr = static_pointer_cast<Expression>((*el)[i]);
       visit(expr);
       emitConvertToCell(e);
     }
-    e.NewVecArray(count);
+    if (isVec) {
+      e.NewVecArray(count);
+    } else {
+      e.NewKeysetArray(count);
+    }
     return;
   }
 
-  auto const allowPacked =
-    !kind || (!isDict && isVectorCollection((CollectionType)*kind));
+  auto const allowPacked = !kind || isVectorCollection((CollectionType)*kind);
 
   int nElms;
   if (allowPacked && isPackedInit(el, &nElms)) {
@@ -10258,10 +10283,6 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  // Don't emit struct arrays for a collection initializers.  HashCollection
-  // can't handle that yet.  Also ignore RuntimeOption::DisableStructArray here.
-  // The VM can handle the NewStructArray bytecode when struct arrays are
-  // disabled.
   auto const allowStruct = !kind;
   std::vector<std::string> keys;
   if (allowStruct && isStructInit(el, keys)) {
@@ -10513,7 +10534,7 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
           }
         }
         return false;
-      } else if (u->getOp() == T_VEC) {
+      } else if (u->getOp() == T_VEC || u->getOp() == T_KEYSET) {
         auto el = static_pointer_cast<ExpressionList>(u->getExpression());
         if (el) {
           int n = el->getCount();

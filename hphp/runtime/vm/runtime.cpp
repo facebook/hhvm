@@ -162,16 +162,14 @@ std::string mangleSystemMd5(const std::string& fileMd5) {
     + (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
     ;
-  return string_md5(t.c_str(), t.size());
+  return string_md5(t);
 }
 
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname /* = nullptr */) {
-  auto md5string = mangleSystemMd5(string_md5(s, sz));
-  MD5 md5(md5string.c_str());
-  Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
-  if (u != nullptr) {
+  auto const md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s, sz}))};
+  if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
     return u;
   }
   // NB: fname needs to be long-lived if generating a bytecode repo because it
@@ -180,13 +178,10 @@ Unit* compile_string(const char* s,
   return g_hphp_compiler_parse(s, sz, md5, fname);
 }
 
-Unit* compile_systemlib_string(const char* s, size_t sz,
-                               const char* fname) {
+Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
-    String systemName = String("/:") + String(fname);
-    MD5 md5 {
-      mangleSystemMd5(string_md5(s, sz)).c_str()
-    };
+    String systemName = String("/:") + fname;
+    auto md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s,sz}))};
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
                              md5)) {
@@ -196,10 +191,6 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
     }
   }
   return compile_string(s, sz, fname);
-}
-
-void assertTv(const TypedValue* tv) {
-  always_assert(tvIsPlausible(*tv));
 }
 
 int init_closure(ActRec* ar, TypedValue* sp) {

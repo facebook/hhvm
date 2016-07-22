@@ -355,6 +355,7 @@ good/ext/date/tests/bug65371.php binary
 good/ext/date/tests/bug65371.php.expectf binary
 good/ext/exif/tests/bug34704.jpg binary
 good/ext/exif/tests/bug48378.jpeg binary
+good/ext/exif/tests/bug50845.jpg binary
 good/ext/exif/tests/bug60150.jpg binary
 good/ext/exif/tests/bug62523_2.jpg binary
 good/ext/exif/tests/exif_encoding_crash.jpg binary

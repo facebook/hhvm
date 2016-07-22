@@ -24,7 +24,7 @@ module Phase = Typing_phase
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super *)
-let rec subtype_funs_generic ~check_return env r_super ft_super r_sub ft_sub =
+let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
@@ -81,14 +81,17 @@ let rec subtype_funs_generic ~check_return env r_super ft_super r_sub ft_sub =
       | _ -> ()
       );
   *)
-  let env = if check_return then sub_type env ft_super.ft_ret ft_sub.ft_ret else env in
+  let env =
+    if check_return
+    then sub_type env ft_sub.ft_ret ft_super.ft_ret
+    else env in
   env
 
 (* Checking subtyping for methods is different than normal functions. Since
  * methods are declarations we do not want to instantiate their function type
  * parameters as unresolved, instead it should stay as a Tgeneric.
  *)
-and subtype_method ~check_return env r_super ft_super r_sub ft_sub =
+and subtype_method ~check_return env r_sub ft_sub r_super ft_super =
   if not ft_super.ft_abstract && ft_sub.ft_abstract then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
@@ -101,18 +104,18 @@ and subtype_method ~check_return env r_super ft_super r_sub ft_sub =
     Phase.localize_ft ~ety_env ~instantiate_tparams:false env ft_sub in
   subtype_funs_generic
     ~check_return env
-    r_super ft_super_no_tvars
     r_sub ft_sub_no_tvars
+    r_super ft_super_no_tvars
 
-and subtype_tparams env c_name variancel super_tyl children_tyl =
-  match variancel, super_tyl, children_tyl with
+and subtype_tparams env c_name variancel children_tyl super_tyl =
+  match variancel, children_tyl, super_tyl with
   | [], [], [] -> env
   | [], _, _
   | _, [], _
   | _, _, [] -> env
-  | variance :: variancel, super :: superl, child :: childrenl ->
-      let env = subtype_tparam env c_name variance super child in
-      subtype_tparams env c_name variancel superl childrenl
+  | variance :: variancel, child :: childrenl, super :: superl ->
+      let env = subtype_tparam env c_name variance child super in
+      subtype_tparams env c_name variancel childrenl superl
 
 and invariance_suggestion c_name =
   let open Naming_special_names.Collections in
@@ -124,13 +127,13 @@ and invariance_suggestion c_name =
     "\nDid you mean ConstSet instead?"
   else ""
 
-and subtype_tparam env c_name variance (r_super, _ as super) child =
+and subtype_tparam env c_name variance child (r_super, _ as super) =
   match variance with
-  | Ast.Covariant -> sub_type env super child
+  | Ast.Covariant -> sub_type env child super
   | Ast.Contravariant ->
       Errors.try_
         (fun () ->
-          Env.invert_grow_super env (fun env -> sub_type env child super))
+          Env.invert_grow_super env (fun env -> sub_type env super child))
         (fun err ->
           let pos = Reason.to_pos r_super in
           Errors.explain_contravariance pos c_name err; env)
@@ -141,15 +144,15 @@ and subtype_tparam env c_name variance (r_super, _ as super) child =
           let suggestion =
             let s = invariance_suggestion c_name in
             let try_fun = (fun () ->
-              subtype_tparam env c_name Ast.Covariant super child) in
+              subtype_tparam env c_name Ast.Covariant child super) in
             if not (s = "") && Errors.has_no_errors try_fun then s else "" in
           let pos = Reason.to_pos r_super in
           Errors.explain_invariance pos c_name suggestion err; env)
 
 (* Distinction b/w sub_type and sub_type_with_uenv similar to unify and
  * unify_with_uenv, see comment there. *)
-and sub_type env ty_super ty_sub =
-  sub_type_with_uenv env (TUEnv.empty, ty_super) (TUEnv.empty, ty_sub)
+and sub_type env ty_sub ty_super =
+  sub_type_with_uenv env (TUEnv.empty, ty_sub) (TUEnv.empty, ty_super)
 
 (**
  * Checks that ty_sub is a subtype of ty_super, and returns an env.
@@ -159,17 +162,17 @@ and sub_type env ty_super ty_sub =
  *      sub_type env ?int alpha => env where alpha==?int
  *      sub_type env int string => error
 *)
-and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
+and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   let env, ety_super =
     Env.expand_type env ty_super in
   let env, ety_sub =
     Env.expand_type env ty_sub in
 
-  match ety_super, ety_sub with
+  match ety_sub, ety_super with
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ =
         Unify.unify_unwrapped env uenv_super.TUEnv.non_null ty_super
-                              uenv_sub.TUEnv.non_null ty_sub in
+                                  uenv_sub.TUEnv.non_null ty_sub in
       env
 (****************************************************************************)
 (* ### Begin Tunresolved madness ###
@@ -194,14 +197,14 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
  * arguments had been swapped.
  *)
 (****************************************************************************)
-  | (_, Tunresolved _), (r_sub, _) when Env.grow_super env ->
+  | (r_sub, _), (_, Tunresolved _) when Env.grow_super env ->
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
       let env, _ =
         Unify.unify_unwrapped
           env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
               ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub in
       env
-  | (_, Tany), (_, Tunresolved _) when Env.grow_super env ->
+  | (_, Tunresolved _), (_, Tany) when Env.grow_super env ->
       (* This branch is necessary in the following case:
        * function foo<T as I>(T $x)
        * if I call foo with an intersection type, T is a Tvar,
@@ -214,81 +217,81 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
     fst (Unify.unify_unwrapped
         env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
             ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
-  | _, (_, Tunresolved tyl) when Env.grow_super env ->
+  |  (_, Tunresolved tyl), _ when Env.grow_super env ->
       List.fold_left tyl ~f:begin fun env x ->
-        sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x)
+        sub_type_with_uenv env (uenv_sub, x) (uenv_super, ty_super)
       end ~init:env
 (****************************************************************************)
 (* Repeat the previous 3 cases but with the super / sub order reversed *)
 (****************************************************************************)
-  | (r_super, _), (_, Tunresolved _) when not (Env.grow_super env) ->
+  | (_, Tunresolved _), (r_super, _) when not (Env.grow_super env) ->
       let ty_super = (r_super, Tunresolved [ty_super]) in
       let env, _ =
         Unify.unify_unwrapped
           env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
               ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub in
       env
-  | (_, Tunresolved _), (_, Tany) when not (Env.grow_super env) ->
+  | (_, Tany), (_, Tunresolved _) when not (Env.grow_super env) ->
     fst (Unify.unify_unwrapped
         env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
             ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
-  | (_, Tunresolved tyl), _ when not (Env.grow_super env) ->
+  | _, (_, Tunresolved tyl) when not (Env.grow_super env) ->
       List.fold_left tyl ~f:begin fun env x ->
-        sub_type_with_uenv env (uenv_super, x) (uenv_sub, ty_sub)
+        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, x)
       end ~init:env
 (****************************************************************************)
 (* OCaml doesn't inspect `when` clauses when checking pattern matching
  * exhaustiveness, so just assert false here *)
 (****************************************************************************)
-  | _, (_, Tunresolved _)
-  | (_, Tunresolved _), _ -> assert false
+  | (_, Tunresolved _), _
+  | _, (_, Tunresolved _) -> assert false
 (****************************************************************************)
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)
-  | _, (_, Tany) -> env
+  | (_, Tany), _ -> env
   (* This case is for when Tany comes from expanding an empty Tvar - it will
    * result in binding the type variable to the other type. *)
-  | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
-  | (r1, Tabstract (AKdependent d1, Some ty_super)),
-    (r2, Tabstract (AKdependent d2, Some ty_sub))
-        when d1 = d2 ->
-      let uenv_super =
-        { uenv_super with
-          TUEnv.dep_tys = (r1, d1)::uenv_super.TUEnv.dep_tys } in
+  | _, (_, Tany) -> fst (Unify.unify env ty_super ty_sub)
+  | (r_sub,   Tabstract (AKdependent d_sub, Some ty_sub)),
+    (r_super, Tabstract (AKdependent d_super, Some ty_super))
+        when d_sub = d_super ->
       let uenv_sub =
         { uenv_sub with
-          TUEnv.dep_tys = (r2, d2)::uenv_sub.TUEnv.dep_tys } in
-      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+          TUEnv.dep_tys = (r_sub, d_sub)::uenv_sub.TUEnv.dep_tys } in
+      let uenv_super =
+        { uenv_super with
+          TUEnv.dep_tys = (r_super, d_super)::uenv_super.TUEnv.dep_tys } in
+      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
   (* This is sort of a hack because our handling of Toption is highly
    * dependent on how the type is structured. When we see a bare
    * dependent type we strip it off at this point since it shouldn't be
    * relevant to subtyping any more.
    *)
-  | _, (r, Tabstract (AKdependent (`expr _, [] as d), Some ty_sub)) ->
+  | (r, Tabstract (AKdependent (`expr _, [] as d), Some ty_sub)), _ ->
       let uenv_sub =
         { uenv_sub with
           TUEnv.dep_tys = (r, d)::uenv_sub.TUEnv.dep_tys } in
-      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
-  | (_, Tabstract (AKdependent d1, _)),
-    (r, Tabstract (AKdependent d2, Some sub)) when d1 <> d2 ->
+      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+  | (r_sub, Tabstract (AKdependent d_sub, Some sub)),
+    (_,     Tabstract (AKdependent d_super, _)) when d_sub <> d_super ->
       let uenv_sub =
         { uenv_sub with
-          TUEnv.dep_tys = (r, d2)::uenv_sub.TUEnv.dep_tys } in
+          TUEnv.dep_tys = (r_sub, d_sub)::uenv_sub.TUEnv.dep_tys } in
       (* If an error occurred while subtyping, we produce a unification error
        * so we get the full information on how the dependent type was
        * generated
        *)
       Errors.try_when
         (fun () ->
-          sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, sub))
+          sub_type_with_uenv env (uenv_sub, sub) (uenv_super, ty_super))
         ~when_: begin fun () ->
-          match TUtils.get_base_type env ty_super, sub with
-          | (_, Tclass ((_, x), _)), (_, Tclass ((_, y), _)) when x = y -> false
+          match sub, TUtils.get_base_type env ty_super with
+          | (_, Tclass ((_, y), _)), (_, Tclass ((_, x), _)) when x = y -> false
           | _, _ -> true
         end
         ~do_: (fun _ -> TUtils.simplified_uerror env ty_super ty_sub)
-  | (p_super, (Tclass (x_super, tyl_super) as ty_super_)),
-      (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_)) ->
+  | (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_)),
+    (p_super, (Tclass (x_super, tyl_super) as ty_super_)) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     if cid_super = cid_sub then
       if tyl_super <> [] && List.length tyl_super = List.length tyl_sub
@@ -299,7 +302,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
             let variancel =
               List.map tc_tparams (fun (variance, _, _) -> variance)
             in
-            subtype_tparams env cid_super variancel tyl_super tyl_sub
+            subtype_tparams env cid_super variancel tyl_sub tyl_super
       else fst (Unify.unify env ety_super ety_sub)
     else begin
       let class_ = Env.get_class env cid_sub in
@@ -325,7 +328,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                       let env, req_type =
                         Phase.localize ~ety_env env req_type in
                       let _, req_ty = req_type in
-                      env, Some (sub_type env ty_super (p_sub, req_ty))
+                      env, Some (sub_type env (p_sub, req_ty) ty_super)
                     end (fun _ -> acc)
               end class_.tc_req_ancestors ~init:(env, None) in
               ret
@@ -361,7 +364,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                     from_class = None;
                   } in
                   let env, up_obj = Phase.localize ~ety_env env up_obj in
-                  sub_type env ty_super up_obj
+                  sub_type env up_obj ty_super
                 | None when class_.tc_members_fully_known ->
                   TUtils.uerror p_super ty_super_ p_sub ty_sub_;
                   env
@@ -369,29 +372,27 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
           )
       )
     end
-  | (_, Tmixed), _ -> env
-  | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
-  | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
-  | (_, Tclass ((_, coll), [tv_super])), (r, Tarraykind akind)
+  | _, (_, Tmixed) -> env
+  | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> env
+  | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> env
+  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
     when (coll = SN.Collections.cTraversable ||
         coll = SN.Collections.cContainer) ->
       (match akind with
       | AKany -> env
       | AKempty -> env
-      | AKvec tv ->
-          sub_type env tv_super tv
-      | AKmap (_, tv) ->
-          sub_type env tv_super tv
+      | AKvec tv | AKmap (_, tv) ->
+          sub_type env tv tv_super
       | AKshape fdm ->
           Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-            sub_type env ty_super ty_sub
+            sub_type env ty_sub ty_super
           end env r fdm
       | AKtuple fields ->
           Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-            sub_type env ty_super ty_sub
+            sub_type env ty_sub ty_super
           end env r fields
       )
-  | (_, Tclass ((_, coll), [tk_super; tv_super])), (r, Tarraykind akind)
+  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tk_super; tv_super]))
     when (coll = SN.Collections.cKeyedTraversable
          || coll = SN.Collections.cKeyedContainer
          || coll = SN.Collections.cIndexish) ->
@@ -399,57 +400,57 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       | AKany -> env
       | AKempty -> env
       | AKvec tv ->
-        let env = sub_type env tk_super (r, Tprim Nast.Tint) in
-        sub_type env tv_super tv
+        let env = sub_type env (r, Tprim Nast.Tint) tk_super in
+        sub_type env tv tv_super
       | AKmap (tk, tv) ->
-        let env = sub_type env tk_super tk in
-        sub_type env tv_super tv
+        let env = sub_type env tk tk_super in
+        sub_type env tv tv_super
       | AKshape fdm ->
         Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-          sub_type env ty_super ty_sub
+          sub_type env ty_sub ty_super
         end env r fdm
       | AKtuple fields ->
           Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-            sub_type env ty_super ty_sub
+            sub_type env ty_sub ty_super
           end env r fields
       )
-  | (_, Tclass ((_, stringish), _)), (_, Tprim Nast.Tstring)
+  | (_, Tprim Nast.Tstring), (_, Tclass ((_, stringish), _))
     when stringish = SN.Classes.cStringish -> env
-  | (_, Tclass ((_, xhp_child), _)), (_, Tarraykind _)
-  | (_, Tclass ((_, xhp_child), _)), (_, Tprim (Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum))
+  | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
+  | (_, Tprim (Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)), (_, Tclass ((_, xhp_child), _))
     when xhp_child = SN.Classes.cXHPChild -> env
-  | (_, (Tarraykind (AKvec ty_super))), (_, (Tarraykind (AKvec ty_sub))) ->
-      sub_type env ty_super ty_sub
-  | (_, (Tarraykind (AKmap (tk_super, tv_super)))), (_, Tarraykind AKmap (tk_sub, tv_sub)) ->
-      let env = sub_type env tk_super tk_sub in
-      sub_type env tv_super tv_sub
-  | (_, Tarraykind AKmap _), (reason, Tarraykind (AKvec elt_ty)) ->
+  | (_, (Tarraykind (AKvec ty_sub))), (_, (Tarraykind (AKvec ty_super))) ->
+      sub_type env ty_sub ty_super
+  | (_, Tarraykind AKmap (tk_sub, tv_sub)), (_, (Tarraykind (AKmap (tk_super, tv_super)))) ->
+      let env = sub_type env tk_sub tk_super in
+      sub_type env tv_sub tv_super
+  | (reason, Tarraykind (AKvec elt_ty)), (_, Tarraykind AKmap _) ->
       let int_reason = Reason.Ridx (Reason.to_pos reason, Reason.Rnone) in
       let int_type = int_reason, Tprim Nast.Tint in
-      sub_type env ty_super (reason, Tarraykind (AKmap (int_type, elt_ty)))
-  | _, (r, Tarraykind AKshape fdm_sub) ->
+      sub_type env (reason, Tarraykind (AKmap (int_type, elt_ty))) ty_super
+  | (r, Tarraykind AKshape fdm_sub), _ ->
       Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-        sub_type env ty_super ty_sub
+        sub_type env ty_sub ty_super
       end env r fdm_sub
-  | _, (r, Tarraykind AKtuple fields_sub) ->
+  | (r, Tarraykind AKtuple fields_sub), _ ->
       Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-        sub_type env ty_super ty_sub
+        sub_type env ty_sub ty_super
       end env r fields_sub
-  | (_, Toption ty_super), _ when uenv_super.TUEnv.non_null ->
-      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+  | _, (_, Toption ty_super) when uenv_super.TUEnv.non_null ->
+      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
   (* Subtype is generic parameter
    * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
    * Need to match on this *before* Toption, in order to deal with T<:?t
    *)
-  | _, (_, Tabstract (AKgeneric _, _)) ->
-    sub_generic_params SSet.empty env (uenv_super, ty_super) (uenv_sub, ty_sub)
+  | (_, Tabstract (AKgeneric _, _)), _ ->
+    sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | _, (_, Toption ty_sub) when uenv_sub.TUEnv.non_null ->
-    sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+  | (_, Toption ty_sub), _ when uenv_sub.TUEnv.non_null ->
+    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | (_, Toption ty_super), (_, Toption ty_sub) ->
+  | (_, Toption ty_sub), (_, Toption ty_super) ->
       let uenv_super = {
         TUEnv.non_null = true;
         TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
@@ -458,19 +459,19 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
         TUEnv.non_null = true;
         TUEnv.dep_tys = uenv_sub.TUEnv.dep_tys;
       } in
-      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
-  | (_, Toption ty_opt), _ ->
+      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+  | _, (_, Toption ty_opt) ->
       let uenv_super = {
         TUEnv.non_null = true;
         TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
       } in
-      sub_type_with_uenv env (uenv_super, ty_opt) (uenv_sub, ty_sub)
-  | (_, Ttuple tyl_super), (_, Ttuple tyl_sub)
+      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_opt)
+  | (_, Ttuple tyl_sub), (_, Ttuple tyl_super)
     when List.length tyl_super = List.length tyl_sub ->
-    wfold_left2 sub_type env tyl_super tyl_sub
-  | (r_super, Tfun ft_super), (r_sub, Tfun ft_sub) ->
-      subtype_funs_generic ~check_return:true env r_super ft_super r_sub ft_sub
-  | (r_super, Tfun ft), (r_sub, Tanon (anon_arity, id)) ->
+    wfold_left2 sub_type env tyl_sub tyl_super
+  | (r_sub, Tfun ft_sub), (r_super, Tfun ft_super) ->
+      subtype_funs_generic ~check_return:true env r_sub ft_sub r_super ft_super
+  | (r_sub, Tanon (anon_arity, id)), (r_super, Tfun ft)  ->
       (match Env.get_anonymous env id with
       | None ->
           Errors.anonymous_recursive_call (Reason.to_pos r_sub);
@@ -482,62 +483,62 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                     ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
           then Errors.fun_arity_mismatch p_super p_sub;
           let env, ret = anon env ft.ft_params in
-          let env = sub_type env ft.ft_ret ret in
+          let env = sub_type env ret ft.ft_ret in
           env
       )
-  | (r_super, Tshape (fields_known_super, fdm_super)),
-      (r_sub, Tshape (fields_known_sub, fdm_sub)) ->
+  | (r_sub, Tshape (fields_known_sub, fdm_sub)),
+    (r_super, Tshape (fields_known_super, fdm_super)) ->
       fst (TUtils.apply_shape
-        ~on_common_field:(fun (env, acc) _ x y -> sub_type env x y, acc)
+        ~on_common_field:(fun (env, acc) _ x y -> sub_type env y x, acc)
         ~on_missing_optional_field:(fun acc _ _ -> acc)
         (env, None)
         (r_super, fields_known_super, fdm_super)
         (r_sub, fields_known_sub, fdm_sub))
-  | (_, Tabstract (AKnewtype (name_super, tyl_super), _)),
-    (_, Tabstract (AKnewtype (name_sub, tyl_sub), _))
+  | (_, Tabstract (AKnewtype (name_sub, tyl_sub), _)),
+    (_, Tabstract (AKnewtype (name_super, tyl_super), _))
     when name_super = name_sub ->
       let td = Env.get_typedef env name_super in
       begin match td with
         | Some {td_tparams; _} ->
           let variancel =
             List.map td_tparams (fun (variance, _, _) -> variance) in
-          subtype_tparams env name_super variancel tyl_super tyl_sub
+          subtype_tparams env name_super variancel tyl_sub tyl_super
         | _ -> env
       end
-  | _, (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some x)) ->
+  | (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some x)), _ ->
       Errors.try_
         (fun () ->
           fst @@ Unify.unify env ty_super ty_sub
         )
-        (fun _ -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x))
-  | _, (r, Tabstract (AKdependent d, Some ty)) ->
+        (fun _ -> sub_type_with_uenv env (uenv_sub, x) (uenv_super, ty_super))
+  | (r, Tabstract (AKdependent d, Some ty)), _ ->
       Errors.try_
         (fun () -> fst (Unify.unify env ty_super ty_sub))
         (fun _ ->
           let uenv_sub =
             { uenv_sub with
               TUEnv.dep_tys = (r, d)::uenv_sub.TUEnv.dep_tys } in
-          sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty))
+          sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
 
   (* Supertype is generic parameter
    * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
    *)
-  | (_, Tabstract (AKgeneric _, _)), _ ->
-    sub_generic_params SSet.empty env (uenv_super, ty_super) (uenv_sub, ty_sub)
+  | _, (_, Tabstract (AKgeneric _, _)) ->
+    sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | (_, (Tarraykind _ | Tprim _ | Tvar _
+  | _, (_, (Tarraykind _ | Tprim _ | Tvar _
     | Tabstract (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tobject | Tshape _ | Tclass (_, _))
-    ), _ -> fst (Unify.unify env ty_super ty_sub)
+    ) -> fst (Unify.unify env ty_super ty_sub)
 
-and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
+and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
-  match  ety_super, ety_sub with
+  match ety_sub, ety_super with
 
   (* Subtype is generic parameter *)
-  | _, (r_sub, Tabstract (AKgeneric name_sub, opt_sub_cstr)) ->
+  | (r_sub, Tabstract (AKgeneric name_sub, opt_sub_cstr)), _ ->
     let default () =
          (* If we've seen this type parameter before then we must have gone
          * round a cycle so we fail
@@ -559,8 +560,8 @@ and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
             | ty::tyl ->
               Errors.try_
               (fun () ->
-                sub_generic_params seen env (uenv_super, ty_super)
-                                            (uenv_sub, ty))
+                sub_generic_params seen env (uenv_sub, ty)
+                                            (uenv_super, ty_super))
               (fun l ->
                (* Right now we report constraint failure based on the last
                 * error. This should change when we start supporting
@@ -585,7 +586,7 @@ and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
             TUEnv.non_null = true;
             TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
           } in
-          sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
+          sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super))
           (fun _ ->
               default ())
 
@@ -593,7 +594,7 @@ and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
     end
 
   (* Supertype is generic parameter *)
-  | (r_super, Tabstract (AKgeneric name_super, _)), _ ->
+  | _, (r_super, Tabstract (AKgeneric name_super, _)) ->
     (* If we've seen this type parameter before then we must have gone
      * round a cycle so we fail
      *)
@@ -612,8 +613,8 @@ and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
 
         | ty::tyl ->
           Errors.try_
-            (fun () -> sub_generic_params seen env (uenv_super, ty)
-                                                   (uenv_sub, ty_sub))
+            (fun () -> sub_generic_params seen env (uenv_sub, ty_sub)
+                                                   (uenv_super, ty))
           (fun l ->
            (* Right now we report constraint failure based on the last
             * error. This should change when we start supporting
@@ -625,11 +626,11 @@ and sub_generic_params seen env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       in try_bounds (Env.get_lower_bounds env name_super)
 
   | _, _ ->
-    sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-and is_sub_type env ty_super ty_sub =
+and is_sub_type env ty_sub ty_super =
   Errors.try_
-    (fun () -> ignore(sub_type env ty_super ty_sub); true)
+    (fun () -> ignore(sub_type env ty_sub ty_super); true)
     (fun _ -> false)
 
 and sub_string p env ty2 =

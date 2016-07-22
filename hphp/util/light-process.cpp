@@ -42,6 +42,7 @@
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 

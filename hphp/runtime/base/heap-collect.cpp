@@ -21,13 +21,18 @@
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/process.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/type-scan.h"
+#include "hphp/util/cycles.h"
+#include "hphp/util/timer.h"
 
 #include <algorithm>
 #include <iterator>
 #include <vector>
 #include <folly/Range.h>
+#include <folly/portability/Unistd.h>
 #include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
@@ -50,6 +55,7 @@ struct Marker {
                                      RuntimeOption::EvalJitTargetCacheSize)}
   {}
   void init();
+  void traceRoots();
   void trace();
   void sweep();
 
@@ -71,6 +77,10 @@ struct Marker {
 
   // mark ambiguous pointers in the range [start,start+len)
   void operator()(const void* start, size_t len);
+  void operator()(const void* start, const void* end) {
+    assert(uintptr_t(end) >= uintptr_t(start));
+    return (*this)(start, uintptr_t(end) - uintptr_t(start));
+  }
 
   // classes containing exact pointers
   void operator()(const String&);
@@ -167,13 +177,16 @@ private:
       type_scan::hasNonConservative() &&
       tyindex == type_scan::kIndexUnknown;
   }
+public:
+  Counter allocd_, marked_, ambig_, freed_, unknown_; // bytes
+  Counter cscanned_roots_, cscanned_; // bytes
+  size_t init_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
 private:
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
   folly::Range<const char*> rds_; // full mmap'd rds section.
-  std::vector<const Header*> unknowns_; // objects with unknown type_scan type
-  Counter total_;        // bytes allocated in heap
+  std::vector<const Header*> unknown_objects_; // objs w/ unknown typescan id
 };
 
 // mark the object at p, return true if first time.
@@ -331,7 +344,6 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
     case HeaderKind::Ref:
     case HeaderKind::Resource:
     case HeaderKind::Packed:
-    case HeaderKind::Struct:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::VecArray:
@@ -384,6 +396,7 @@ Marker::operator()(const void* start, size_t len) {
   constexpr uintptr_t M{7}; // word size - 1
   auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
+  cscanned_ += uintptr_t(e) - uintptr_t(s);
   for (; s < e; s++) {
     checkedEnqueue(
       // Mask off the upper 16-bits to handle things like
@@ -394,12 +407,22 @@ Marker::operator()(const void* start, size_t len) {
   }
 }
 
+inline int64_t cpu_micros() {
+#ifdef RUSAGE_THREAD
+  return Timer::GetRusageMicros(Timer::TotalCPU, Timer::Thread);
+#else
+  return 0;
+#endif
+}
+
 // initially parse the heap to find valid objects and initialize metadata.
 NEVER_INLINE void Marker::init() {
+  auto const t0 = cpu_micros();
+  SCOPE_EXIT { init_us_ = cpu_micros() - t0; };
   MM().forEachHeader([&](Header* h) {
     if (h->kind() == HeaderKind::Free) return;
     h->hdr_.marks = GCBits::Unmarked;
-    total_ += h->size();
+    allocd_ += h->size();
     switch (h->kind()) {
       case HeaderKind::Apc:
       case HeaderKind::Globals:
@@ -407,7 +430,6 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
-      case HeaderKind::Struct:
       case HeaderKind::Empty:
       case HeaderKind::VecArray:
       case HeaderKind::Keyset:
@@ -418,7 +440,7 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Resource:
         ptrs_.insert(h);
         if (typeIndexIsUnknown(h->res_.typeIndex())) {
-          unknowns_.emplace_back(h);
+          unknown_objects_.emplace_back(h);
         }
         break;
       case HeaderKind::Object:
@@ -454,7 +476,7 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::BigMalloc:
         ptrs_.insert(h);
         if (typeIndexIsUnknown(h->malloc_.typeIndex())) {
-          unknowns_.emplace_back(h);
+          unknown_objects_.emplace_back(h);
         }
         break;
       case HeaderKind::ResumableObj:
@@ -471,9 +493,16 @@ NEVER_INLINE void Marker::init() {
   ptrs_.prepare();
 }
 
-NEVER_INLINE void Marker::trace() {
+NEVER_INLINE void Marker::traceRoots() {
+  auto const t0 = cpu_micros();
+  SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
   scanRoots(*this);
+  cscanned_roots_ = cscanned_;
+}
 
+NEVER_INLINE void Marker::trace() {
+  auto const t0 = cpu_micros();
+  SCOPE_EXIT { mark_us_ = cpu_micros() - t0; };
   const auto process_worklist = [this](){
     while (!work_.empty()) {
       auto h = work_.back();
@@ -512,8 +541,11 @@ NEVER_INLINE void Marker::trace() {
    * things via non-conservative means.
    */
   if (RuntimeOption::EvalEnableGCTypeScan && type_scan::hasNonConservative()) {
-    for (const auto* h : unknowns_) {
+    auto const t0 = cpu_micros();
+    SCOPE_EXIT { unknown_us_ = cpu_micros() - t0; };
+    for (const auto* h : unknown_objects_) {
       if (!mark(h, GCBits::CMark)) continue;
+      unknown_ += h->size();
       switch (h->kind()) {
         case HeaderKind::Resource:
           assert(typeIndexIsUnknown(h->res_.typeIndex()));
@@ -533,6 +565,8 @@ NEVER_INLINE void Marker::trace() {
     // The conservative scans may have added more items to the
     // worklist, so drain it again.
     process_worklist();
+  } else {
+    unknown_us_ = 0;
   }
 }
 
@@ -540,7 +574,6 @@ NEVER_INLINE void Marker::trace() {
 DEBUG_ONLY bool check_sweep_header(const Header* h) {
   switch (h->kind()) {
     case HeaderKind::Packed:
-    case HeaderKind::Struct:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::Empty:
@@ -590,12 +623,11 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
   return true;
 }
 
-thread_local size_t t_poor_collections;
-
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
 NEVER_INLINE void Marker::sweep() {
-  Counter marked, ambig, freed;
+  auto const t0 = cpu_micros();
+  SCOPE_EXIT { sweep_us_ = cpu_micros() - t0; };
   auto& mm = MM();
   const bool use_quarantine = RuntimeOption::EvalQuarantine;
   if (use_quarantine) mm.beginQuarantine();
@@ -603,8 +635,8 @@ NEVER_INLINE void Marker::sweep() {
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
     assert(check_sweep_header(hdr));
     if (hdr->hdr_.marks != GCBits::Unmarked) {
-      if (hdr->hdr_.marks & GCBits::Mark) marked += h_size;
-      else if (hdr->hdr_.marks & GCBits::CMark) ambig += h_size;
+      if (hdr->hdr_.marks & GCBits::Mark) marked_ += h_size;
+      else if (hdr->hdr_.marks & GCBits::CMark) ambig_ += h_size;
       return; // continue foreach loop
     }
     // when freeing objects below, do not run their destructors! we don't
@@ -613,7 +645,6 @@ NEVER_INLINE void Marker::sweep() {
     auto h = const_cast<Header*>(hdr);
     switch (h->kind()) {
       case HeaderKind::Packed:
-      case HeaderKind::Struct:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:
@@ -623,7 +654,7 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::Proxy:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
-        freed += h_size;
+        freed_ += h_size;
         mm.objFree(h, h_size);
         break;
       case HeaderKind::Object:
@@ -638,7 +669,7 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::ImmSet:
       case HeaderKind::ResumableFrame:
       case HeaderKind::NativeData: {
-        freed += h_size;
+        freed_ += h_size;
         auto obj = h->obj();
         if (obj->getAttribute(ObjectData::HasDynPropArr)) {
           // dynPropTable is a req::hash_map, so this will req::free junk
@@ -648,11 +679,11 @@ NEVER_INLINE void Marker::sweep() {
         break;
       }
       case HeaderKind::Apc:
-        freed += h_size;
+        freed_ += h_size;
         h->apc_.reap(); // also frees localCache and atomic-dec APCArray
         break;
       case HeaderKind::String:
-        freed += h_size;
+        freed_ += h_size;
         h->str_.release(); // also maybe atomic-dec APCString
         break;
       case HeaderKind::SmallMalloc:
@@ -669,15 +700,6 @@ NEVER_INLINE void Marker::sweep() {
         break;
     }
   });
-  if (freed.count > 1 && Trace::moduleEnabledRelease(Trace::gc, 1)) {
-    Trace::traceRelease(
-      "gc total kb %lu marked %lu ambig %lu free %.1f after %lu poor\n",
-                        total_.bytes/1024, marked.bytes/1024, ambig.bytes/1024,
-                        freed.bytes/1024.0, t_poor_collections);
-    t_poor_collections = 0;
-  } else if (freed.count == 0) {
-    t_poor_collections++;
-  }
 }
 
 template<size_t NBITS> struct BloomFilter {
@@ -704,6 +726,82 @@ private:
 thread_local bool t_eager_gc{false};
 thread_local BloomFilter<256*1024> t_surprise_filter;
 
+// Structured Logging
+
+thread_local std::atomic<size_t> g_req_num;
+__thread size_t t_gc_num, t_req_num; // nth collection in this request.
+__thread bool t_enable_samples;
+__thread size_t t_trigger;
+__thread MemoryUsageStats t_pre_stats;
+
+constexpr bool kHaveTypeIds =
+#ifdef HHVM_BUILD_TYPE_SCANNERS
+  true;
+#else
+  false;
+#endif
+
+StructuredLogEntry logCommon() {
+  StructuredLogEntry sample;
+  sample.setInt("pid", (int64_t)getpid());
+  sample.setInt("req_num", t_req_num);
+  // MemoryUsageStats
+  sample.setInt("max_usage", t_pre_stats.maxUsage);
+  sample.setInt("usage", t_pre_stats.usage());
+  sample.setInt("mm_usage", t_pre_stats.mmUsage);
+  sample.setInt("aux_usage", t_pre_stats.auxUsage);
+  sample.setInt("mm_capacity", t_pre_stats.capacity);
+  sample.setInt("peak_usage", t_pre_stats.peakUsage);
+  sample.setInt("peak_capacity", t_pre_stats.peakCap);
+  sample.setInt("total_alloc", t_pre_stats.totalAlloc);
+  return sample;
+}
+
+void logCollection(const char* phase, const Marker& mkr) {
+  // log stuff
+  if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
+    Trace::traceRelease(
+      "gc mmUsage %luM trigger %luM max %luM init %lums mark %lums "
+      "allocd %luM exact %.1f%% ambig %.1f%% free %.1fM "
+      "cscan-root %.1fM cscan-heap %.1fM\n",
+      t_pre_stats.mmUsage/1024/1024,
+      t_trigger/1024/1024,
+      t_pre_stats.maxUsage/1024/1024,
+      mkr.init_us_/1000,
+      mkr.mark_us_/1000,
+      mkr.allocd_.bytes/1024/1024,
+      100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
+      100.0 * mkr.ambig_.bytes / mkr.allocd_.bytes,
+      mkr.freed_.bytes/1024.0/1024.0,
+      mkr.cscanned_roots_.bytes/1024.0/1024.0,
+      (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0
+    );
+  }
+  auto sample = logCommon();
+  sample.setStr("phase", phase);
+  std::string scanner(!RuntimeOption::EvalEnableGCTypeScan ? "legacy" :
+                      kHaveTypeIds ? "typescan" : "ts-cons");
+  sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
+  sample.setInt("gc_num", t_gc_num);
+  // timers of gc-sub phases
+  sample.setInt("init_micros", mkr.init_us_);
+  sample.setInt("roots_micros", mkr.roots_us_);
+  sample.setInt("mark_micros", mkr.mark_us_); // includes unknown
+  sample.setInt("unknown_micros", mkr.unknown_us_);
+  sample.setInt("sweep_micros", mkr.sweep_us_);
+  // size metrics gathered during gc
+  sample.setInt("allocd_bytes", mkr.allocd_.bytes);
+  sample.setInt("marked_bytes", mkr.marked_.bytes);
+  sample.setInt("ambig_bytes", mkr.ambig_.bytes);
+  sample.setInt("unknown_bytes", mkr.unknown_.bytes);
+  sample.setInt("freed_bytes", mkr.freed_.bytes);
+  sample.setInt("trigger_bytes", t_trigger);
+  sample.setInt("cscanned_roots", mkr.cscanned_roots_.bytes);
+  sample.setInt("cscanned_heap",
+                mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes);
+  StructuredLog::log("hhvm_gc", sample);
+}
+
 void collectImpl(const char* phase) {
   VMRegAnchor _;
   if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
@@ -712,15 +810,29 @@ void collectImpl(const char* phase) {
     if (t_surprise_filter.test(pc)) return;
     t_surprise_filter.insert(pc);
     TRACE(2, "eager gc %s at %p\n", phase, pc);
+    phase = "eager";
   } else {
     TRACE(2, "normal gc %s at %p\n", phase, vmpc());
   }
+  t_pre_stats = MM().getStats();
   Marker mkr;
   mkr.init();
+  mkr.traceRoots();
   mkr.trace();
   mkr.sweep();
+  if (t_gc_num == 0) {
+    t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+  }
+  if (t_enable_samples) logCollection(phase, mkr);
+  ++t_gc_num;
 }
 
+}
+
+void MemoryManager::resetGC() {
+  t_req_num = ++g_req_num;
+  t_gc_num = 0;
+  updateNextGc();
 }
 
 void MemoryManager::resetEagerGC() {
@@ -750,6 +862,7 @@ void MemoryManager::updateNextGc() {
 
 void MemoryManager::collect(const char* phase) {
   if (!RuntimeOption::EvalEnableGC || empty()) return;
+  t_trigger = m_nextGc;
   collectImpl(phase);
   updateNextGc();
 }

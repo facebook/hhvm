@@ -27,8 +27,6 @@ type config = {
   log_level        : int;
 }
 
-val default_config : config
-
 type handle = private {
   h_fd: Unix.file_descr;
   h_global_size: int;
@@ -44,7 +42,6 @@ exception Dep_table_full
 (*****************************************************************************)
 
 val init: config -> handle
-val init_default: unit -> handle
 
 (*****************************************************************************)
 (* Connect a slave to the shared heap *)
@@ -110,6 +107,9 @@ val is_heap_overflow: unit -> bool
 (*****************************************************************************)
 
 val invalidate_caches: unit -> unit
+
+(* Size of value in GC heap *)
+val value_size: Obj.t -> int
 
 (*****************************************************************************)
 (* The signature of a shared memory hashtable.

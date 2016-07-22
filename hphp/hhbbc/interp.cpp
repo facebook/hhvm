@@ -159,9 +159,10 @@ void in(ISS& env, const bc::Array& op) {
   nothrow(env);
   auto ty = [&] {
     switch (op.arr1->kind()) {
-    case ArrayData::kDictKind: return dict_val(op.arr1);
-    case ArrayData::kVecKind:  return vec_val(op.arr1);
-    default:                   return aval(op.arr1);
+    case ArrayData::kDictKind:   return dict_val(op.arr1);
+    case ArrayData::kVecKind:    return vec_val(op.arr1);
+    case ArrayData::kKeysetKind: return keyset_val(op.arr1);
+    default:                     return aval(op.arr1);
     }
   }();
   push(env, ty);
@@ -202,6 +203,15 @@ void in(ISS& env, const bc::NewVecArray& op) {
     ty = union_of(ty, popC(env));
   }
   push(env, cvec_n(ty, op.arg1));
+}
+
+void in(ISS& env, const bc::NewKeysetArray& op) {
+  assert(op.arg1 > 0);
+  auto ty = TBottom;
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
+    ty = union_of(ty, popC(env));
+  }
+  push(env, ckeyset_n(ty));
 }
 
 void in(ISS& env, const bc::NewLikeArrayL&) {

@@ -79,6 +79,7 @@ let revive_file_info path file_info =
   } = FileInfo.simplify file_info in
   revive n_funs n_classes n_types path
 
+let path = Relative_path.default
 (* This will parse, declare and check all functions and classes in content
  * buffer.
  *
@@ -88,7 +89,6 @@ let revive_file_info path file_info =
  * original definitions can (and should) be restored using "revive".
  *)
 let declare_and_check content ~f =
-  let path = Relative_path.default in
   let tcopt = TypecheckerOptions.permissive in
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";

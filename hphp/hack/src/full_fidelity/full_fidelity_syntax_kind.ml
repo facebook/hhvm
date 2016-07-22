@@ -18,11 +18,29 @@ type t =
 (* Declarations *)
 | ScriptHeader
 | Script
+| NamespaceDeclaration
+| NamespaceBody
+| NamespaceUseDeclaration
+| NamespaceUseClause
 | FunctionDeclaration
+| FunctionDeclarationHeader
+| MethodishDeclaration
+| ClassishDeclaration
+| ClassishBody
+| TraitUse
+| RequireClause
+| ConstDeclaration
+| ConstantDeclarator
+| TypeConstDeclaration
 | ParameterDeclaration
-| DefaultArgumentSpecifier
 | AttributeSpecification
 | Attribute
+| InclusionDirective
+| EnumDeclaration
+| Enumerator
+| AliasDeclaration
+| PropertyDeclaration
+| PropertyDeclarator
 
 (* Statements *)
 | CompoundStatement
@@ -44,11 +62,17 @@ type t =
 | ThrowStatement
 | BreakStatement
 | ContinueStatement
+| FunctionStaticStatement
+| StaticDeclarator
+| SimpleInitializer
 
 (* Expressions *)
+| AnonymousFunction
+| AnonymousFunctionUseClause
 | LiteralExpression
 | VariableExpression
 | QualifiedNameExpression
+| PipeVariableExpression
 | PrefixUnaryOperator
 | PostfixUnaryOperator
 | BinaryOperator
@@ -65,10 +89,13 @@ type t =
 | XHPExpression
 | XHPOpen
 | XHPAttribute
+| XHPClose
 
 (* Types *)
 | SimpleTypeSpecifier
 | NullableTypeSpecifier
+| TypeConstraint
+| TypeParameter
 | TypeConstant
 | GenericTypeSpecifier
 | TypeArguments
@@ -84,15 +111,31 @@ let to_string kind =
   match kind with
   | Missing -> "missing"
   | Token -> "token"
+  | AnonymousFunction -> "anonymous_function"
+  | AnonymousFunctionUseClause -> "anonymous_function_use_clause"
   | LiteralExpression -> "literal"
   | VariableExpression -> "variable"
   | QualifiedNameExpression -> "qualified_name"
+  | PipeVariableExpression -> "pipe_variable"
   | Error -> "error"
   | SyntaxList -> "list"
   | ListItem -> "list_item"
   | ScriptHeader -> "header"
   | Script -> "script"
+  | NamespaceDeclaration -> "namespace_declaration"
+  | NamespaceBody -> "namespace_body"
+  | NamespaceUseDeclaration -> "namespace_use_declaration"
+  | NamespaceUseClause -> "namespace_use_clause"
   | FunctionDeclaration -> "function_declaration"
+  | FunctionDeclarationHeader -> "function_declaration_header"
+  | MethodishDeclaration -> "methodish_declaration"
+  | ClassishDeclaration -> "classish_declaration"
+  | ClassishBody -> "classish_body"
+  | TraitUse -> "trait_use"
+  | RequireClause -> "require_clause"
+  | ConstDeclaration -> "const_declaration"
+  | ConstantDeclarator -> "constant_declarator"
+  | TypeConstDeclaration -> "type_const_declaration"
   | ParameterDeclaration -> "parameter_declaration"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"
@@ -115,6 +158,9 @@ let to_string kind =
   | ThrowStatement -> "throw_statement"
   | BreakStatement -> "break_statement"
   | ContinueStatement -> "continue_statement"
+  | FunctionStaticStatement -> "function_static_statement"
+  | StaticDeclarator -> "static_declarator"
+  | SimpleInitializer -> "simple_initializer"
   | PrefixUnaryOperator -> "prefix_unary_operator"
   | PostfixUnaryOperator -> "postfix_unary_operator"
   | BinaryOperator -> "binary_operator"
@@ -130,6 +176,8 @@ let to_string kind =
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"
+  | TypeConstraint -> "type_constraint"
+  | TypeParameter -> "type_parameter"
   | NullableTypeSpecifier -> "nullable_type_specifier"
   | GenericTypeSpecifier -> "generic_type_specifier"
   | TupleTypeSpecifier -> "tuple_type_specifier"
@@ -140,7 +188,13 @@ let to_string kind =
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | TypeArguments -> "type_arguments"
-  | DefaultArgumentSpecifier -> "default_argument_specifier"
+  | InclusionDirective -> "inclusion_directive"
+  | EnumDeclaration -> "enum_declaration"
+  | Enumerator -> "enumerator"
+  | AliasDeclaration -> "alias_declaration"
+  | PropertyDeclaration -> "property_declaration"
+  | PropertyDeclarator -> "property_declarator"
   | XHPExpression -> "xhp_expression"
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"
+  | XHPClose -> "xhp_close"

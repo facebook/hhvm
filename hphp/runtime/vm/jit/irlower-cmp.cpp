@@ -16,8 +16,13 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -168,6 +173,29 @@ void cgCmpInt(IRLS& env, const IRInstruction* inst) {
   v << cmovq{CC_L, sf, tmp2, v.cns(-1), d};
 }
 
+void cgCheckRange(IRLS& env, const IRInstruction* inst) {
+  auto valTmp = inst->src(0);
+  auto dst = dstLoc(env, inst, 0).reg();
+  auto val = srcLoc(env, inst, 0).reg();
+  auto limit = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  ConditionCode cc;
+  auto const sf = v.makeReg();
+
+  if (valTmp->hasConstVal()) {
+    // Try to put the constant in a position that can get imm-folded.  A
+    // suffiently smart imm-folder could handle this for us.  Note that this is
+    // an arch-agnostic API bleed.
+    v << cmpq{val, limit, sf};
+    cc = CC_A;
+  } else {
+    v << cmpq{limit, val, sf};
+    cc = CC_B;
+  }
+  v << setcc{cc, sf, dst};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgEqDbl(IRLS& env, const IRInstruction* inst)  {
@@ -194,12 +222,24 @@ void cgNeqDbl(IRLS& env, const IRInstruction* inst) {
  *
  * NB: This is clearly an x64-ism, and likely needs to be done differently for
  * other architectures.
+ *
+ * ARM has condition codes that test Gt, Gte, Lt, Lte without running into
+ * "unordered" ambiguity. We can just use those directly. See convertCC()
+ * in "abi-arm.h".
  */
+#if !defined(__aarch64__)
 #define CMP_DBL_OPS         \
   CDO(Gt,   CC_A,   false)  \
   CDO(Gte,  CC_AE,  false)  \
   CDO(Lt,   CC_A,   true)   \
   CDO(Lte,  CC_AE,  true)
+#else
+#define CMP_DBL_OPS         \
+  CDO(Gt,   CC_G,   false)  \
+  CDO(Gte,  CC_GE,  false)  \
+  CDO(Lt,   CC_B,   false)  \
+  CDO(Lte,  CC_BE,  false)
+#endif
 
 #define CDO(Inst, cc, invert) \
   void cg##Inst##Dbl(IRLS& env, const IRInstruction* inst) {  \
@@ -231,6 +271,48 @@ void cgCmpDbl(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+IMPL_OPCODE_CALL(GtStr);
+IMPL_OPCODE_CALL(GteStr);
+IMPL_OPCODE_CALL(LtStr);
+IMPL_OPCODE_CALL(LteStr);
+IMPL_OPCODE_CALL(EqStr);
+IMPL_OPCODE_CALL(NeqStr);
+IMPL_OPCODE_CALL(SameStr);
+IMPL_OPCODE_CALL(NSameStr);
+IMPL_OPCODE_CALL(CmpStr);
+
+IMPL_OPCODE_CALL(GtStrInt);
+IMPL_OPCODE_CALL(GteStrInt);
+IMPL_OPCODE_CALL(LtStrInt);
+IMPL_OPCODE_CALL(LteStrInt);
+IMPL_OPCODE_CALL(EqStrInt);
+IMPL_OPCODE_CALL(NeqStrInt);
+IMPL_OPCODE_CALL(CmpStrInt);
+
+IMPL_OPCODE_CALL(GtObj);
+IMPL_OPCODE_CALL(GteObj);
+IMPL_OPCODE_CALL(LtObj);
+IMPL_OPCODE_CALL(LteObj);
+IMPL_OPCODE_CALL(EqObj);
+IMPL_OPCODE_CALL(NeqObj);
+IMPL_OPCODE_CALL(CmpObj);
+
+IMPL_OPCODE_CALL(GtArr);
+IMPL_OPCODE_CALL(GteArr);
+IMPL_OPCODE_CALL(LtArr);
+IMPL_OPCODE_CALL(LteArr);
+IMPL_OPCODE_CALL(EqArr);
+IMPL_OPCODE_CALL(NeqArr);
+IMPL_OPCODE_CALL(SameArr);
+IMPL_OPCODE_CALL(NSameArr);
+IMPL_OPCODE_CALL(CmpArr);
+
+IMPL_OPCODE_CALL(GtRes);
+IMPL_OPCODE_CALL(GteRes);
+IMPL_OPCODE_CALL(LtRes);
+IMPL_OPCODE_CALL(LteRes);
+IMPL_OPCODE_CALL(CmpRes);
+
 #define CMP_DATA_OPS        \
   CDO(Obj,  Same,   CC_E)   \
   CDO(Obj,  NSame,  CC_NE)  \
@@ -247,6 +329,30 @@ CMP_DATA_OPS
 #undef CDO
 
 #undef CMP_DATA_OPS
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgEqFunc(IRLS& env, const IRInstruction* inst) {
+  auto const s0 = srcLoc(env, inst, 0).reg();
+  auto const s1 = srcLoc(env, inst, 1).reg();
+  auto const d  = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+
+  emitCmpLowPtr<Func>(v, sf, s1, s0);
+  v << setcc{CC_E, sf, d};
+}
+
+void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
+  auto const s0 = srcLoc(env, inst, 0).reg(0);
+  auto const s1 = srcLoc(env, inst, 1).reg(0);
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << cmpq{s0, s1, sf};
+  ifThen(v, CC_NE, sf, [&](Vout& v) { v << ud2{}; });
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

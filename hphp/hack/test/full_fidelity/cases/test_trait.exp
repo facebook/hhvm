@@ -1,0 +1,18 @@
+(script(header((<))((?))((name)(end_of_line)))
+  (classish_declaration
+    (missing)(missing)(missing)((trait)(whitespace))((name)(whitespace))
+    (missing)(missing)(missing)(missing)(missing)
+    (classish_body
+      (({)(end_of_line))
+      (list
+        (require_clause
+          ((whitespace)(require)(whitespace))
+          ((extends)(whitespace))
+          ((name))
+          ((;)(end_of_line)))
+        (require_clause
+          ((whitespace)(require)(whitespace))
+          ((implements)(whitespace))
+          ((name))
+          ((;)(end_of_line))))
+      ((})))))

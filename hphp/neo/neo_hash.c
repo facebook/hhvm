@@ -224,7 +224,7 @@ static NEOERR *_hash_resize(NE_HASH *hash)
     return STATUS_OK;
 
   /* We always double in size */
-  new_nodes = (NE_HASHNODE **) realloc (hash->nodes, (hash->size*2) * sizeof(NE_HASHNODE));
+  new_nodes = (NE_HASHNODE **) realloc (hash->nodes, (hash->size*2) * sizeof(NE_HASHNODE *));
   if (new_nodes == NULL)
     return nerr_raise(NERR_NOMEM, "Unable to allocate memory to resize NE_HASH");
 

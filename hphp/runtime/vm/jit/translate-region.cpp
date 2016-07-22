@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -515,13 +516,8 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
 
   // Make sure the FPushOp wasn't interpreted, based on an FPushCuf, or spanned
   // another call
-  auto const info = fpiStack.back();
+  auto const& info = fpiStack.back();
   if (isFPushCuf(info.fpushOpc) || info.interp || info.spansCall) {
-    return nullptr;
-  }
-
-  // We can't inline FPushClsMethod when the callee may have a $this pointer
-  if (isFPushClsMethod(info.fpushOpc) && callee->mayHaveThis()) {
     return nullptr;
   }
 

@@ -1926,6 +1926,21 @@ ret1:
   return s0;
 }
 
+static int match(const char **sp, const char *t)
+{
+  int c, d;
+  CONST char *s = *sp;
+
+  while ((d = *t++)) {
+    if ((c = *++s) >= 'A' && c <= 'Z')
+      c += 'a' - 'A';
+    if (c != d)
+      return 0;
+  }
+  *sp = s + 1;
+  return 1;
+}
+
 double zend_strtod (CONST char *s00, const char **se)
 {
   int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
@@ -2044,8 +2059,32 @@ dig_done:
       s = s00;
   }
   if (!nd) {
-    if (!nz && !nz0)
+    if (!nz && !nz0) {
+      if (RuntimeOption::PHP7_InfNanFloatParse) {
+        /* Check for Nan and Infinity */
+        switch (c) {
+        case 'i':
+        case 'I':
+          if (match(&s, "nf")) {
+            --s;
+            if (!match(&s, "inity"))
+              ++s;
+            word0(rv) = 0x7ff00000;
+            word1(rv) = 0;
+            goto ret;
+          }
+          break;
+        case 'n':
+        case 'N':
+          if (match(&s, "an")) {
+            word0(rv) = 0x7ff80000;
+            word1(rv) = 0;
+            goto ret;
+          }
+        }
+      }
       s = s00;
+    }
     goto ret;
   }
   e1 = e -= nf;

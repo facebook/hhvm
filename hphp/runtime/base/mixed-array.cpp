@@ -23,9 +23,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/member-operations.h"
@@ -189,23 +187,6 @@ ArrayData* MixedArray::MakeKeyset(uint32_t size, const TypedValue* values) {
   return a;
 }
 
-StructArray* MixedArray::MakeStructArray(
-  uint32_t size,
-  const TypedValue* values,
-  Shape* shape
-) {
-  assert(size > 0);
-  assert(size <= CapCode::Threshold);
-  assert(shape);
-
-  // Append values by moving -- Caller assumes we update refcount.
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
-  auto ret = StructArray::createReversedValues(shape, values, size);
-  assert(ret->hasExactlyOneRef());
-  return ret;
-}
-
 // for internal use by copyStatic() and copyMixed()
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
@@ -352,7 +333,6 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
           Variant{staticEmptyArray()};
       }
       if (ad->isPackedLayout()) return Variant{PackedArray::MakeUncounted(ad)};
-      if (ad->isStruct()) return Variant{StructArray::MakeUncounted(ad)};
       return Variant{MixedArray::MakeUncounted(ad)};
     }
 

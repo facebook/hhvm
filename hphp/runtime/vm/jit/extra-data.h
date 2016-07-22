@@ -1258,7 +1258,6 @@ X(ElemMixedArrayK,              IndexData);
 X(MixedArrayGetK,               IndexData);
 X(ProfileArrayKind,             RDSHandleData);
 X(ProfileMixedArrayOffset,      RDSHandleData);
-X(ProfileStructArray,           RDSHandleData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileMethod,                ProfileMethodData);
 X(LdRDSAddr,                    RDSHandleData);

@@ -261,6 +261,9 @@ struct XDebugServer {
   /* Whether hidden members are shown. */
   bool m_showHidden{false};
 
+  /* Whether IDE supports notification or not. */
+  bool m_supportsNotify{false};
+
  private:
 
   std::shared_ptr<XDebugCommand> m_lastCommand;

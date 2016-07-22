@@ -55,10 +55,19 @@ let make_next_files genv : Relative_path.t MultiWorker.nextlist =
     (List.map ~f:(Relative_path.(create Root)))
     (genv.indexer ServerEnv.file_filter) in
   let hhi_root = Hhi.get_hhi_root () in
+  let hhi_filter = begin fun s ->
+    (FindUtils.is_php s)
+      (** If experimental disabled, we don't parse hhi files under
+       * the experimental directory. *)
+      && (TypecheckerOptions.experimental_features
+        (ServerConfig.typechecker_options genv.config)
+        || not (FindUtils.has_ancestor s "experimental"))
+
+  end in
   let next_files_hhi = compose
     (List.map ~f:(Relative_path.(create Hhi)))
     (Find.make_next_files
-       ~name:"hhi" ~filter:FindUtils.is_php hhi_root) in
+       ~name:"hhi" ~filter:hhi_filter hhi_root) in
   fun () ->
     match next_files_hhi () with
     | [] -> next_files_root ()

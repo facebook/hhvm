@@ -36,8 +36,6 @@ std::shared_ptr<T> getSingleton() {
 
 #define PHP_DIR_SEPARATOR '/'
 
-extern __thread int64_t s_extra_request_microseconds;
-
 #if defined(__APPLE__) || defined(__FreeBSD__)
 char *strndup(const char* str, size_t len);
 int dprintf(int fd, ATTRIBUTE_PRINTF_STRING const char *format, ...)
@@ -45,9 +43,6 @@ int dprintf(int fd, ATTRIBUTE_PRINTF_STRING const char *format, ...)
 typedef int clockid_t;
 int pipe2(int pipefd[2], int flags);
 #endif
-
-int gettime(clockid_t which_clock, struct timespec *tp);
-int64_t gettime_diff_us(const timespec &start, const timespec &end);
 
 /*
  * Drop the cached pages associated with the file from the file system

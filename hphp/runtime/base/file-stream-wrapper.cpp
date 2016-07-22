@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
+#include <boost/filesystem/operations.hpp>
+
 #include <memory>
 
 namespace HPHP {
@@ -92,6 +94,19 @@ req::ptr<Directory> FileStreamWrapper::opendir(const String& path) {
     return nullptr;
   }
   return dir;
+}
+
+int FileStreamWrapper::unlink(const String& path) {
+  int ret = ::unlink(File::TranslatePath(path).data());
+  if (ret != 0) {
+    raise_warning(
+      "%s(%s): %s",
+      __FUNCTION__,
+      path.c_str(),
+      folly::errnoStr(errno).c_str()
+    );
+  }
+  return ret;
 }
 
 int FileStreamWrapper::rename(const String& oldname, const String& newname) {

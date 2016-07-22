@@ -97,6 +97,7 @@ namespace HPHP {
   FEATURE("supports_postmortem", "1", "1", false)                              \
   FEATURE("show_hidden", "1",                                                  \
           xdebug_sprintf("%d", m_server.m_showHidden), true)                   \
+  FEATURE("notify_ok", "1", "1", false)                                        \
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
@@ -153,8 +154,10 @@ static Variant do_eval(const String& evalStr, int depth) {
 
 // Helper for the breakpoint commands that returns an xml node containing
 // breakpoint information
-static xdebug_xml_node* breakpoint_xml_node(int id,
-                                            const XDebugBreakpoint& bp) {
+xdebug_xml_node* breakpoint_xml_node(
+  int id,
+  const XDebugBreakpoint& bp
+) {
   // Initialize the xml node
   auto xml = xdebug_xml_node_init("breakpoint");
   xdebug_xml_add_attribute(xml, "id", id);
@@ -368,7 +371,7 @@ struct FeatureSetCmd : XDebugCommand {
     } else if (m_feature == "max_depth") {
       m_server.m_maxDepth = strtol(value_str, nullptr, 10);
     } else if (m_feature == "show_hidden") {
-      m_server.m_showHidden = strtol(value_str, nullptr, 10);
+      m_server.m_showHidden = (strtol(value_str, nullptr, 10) != 0);
     } else if (m_feature == "multiple_sessions") {
       // php5 xdebug doesn't do anything here with this value, but it is doesn't
       // throw an error, either
@@ -376,6 +379,8 @@ struct FeatureSetCmd : XDebugCommand {
       if (m_value != "iso-8859-1") {
         throw_exn(Error::EncodingNotSupported);
       }
+    } else if (m_feature == "notify_ok" ) {
+      m_server.m_supportsNotify = (strtol(value_str, nullptr, 10) != 0);
     } else {
       throw_exn(Error::InvalidArgs);
     }

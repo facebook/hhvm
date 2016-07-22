@@ -31,6 +31,7 @@
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -262,8 +263,7 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
 
 // __SystemLib\print_hashbang
 void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
-  CallerFrame cf;
-  auto ar = cf();
+  auto const ar = GetCallerFrame();
 
   if (ar->m_func->name()->empty() && RuntimeOption::ClientExecutionMode()) {
     // If run in cli mode, print nothing in the lowest pseudomain
@@ -306,20 +306,17 @@ void StandardExtension::initOutput() {
   HHVM_FE(hphp_clear_hardware_events);
   HHVM_FALIAS(__SystemLib\\print_hashbang, SystemLib_print_hashbang);
 
-#define INTCONST(v) Native::registerConstant<KindOfInt64> \
-                  (makeStaticString(#v), k_##v);
-  INTCONST(PHP_OUTPUT_HANDLER_CONT);
-  INTCONST(PHP_OUTPUT_HANDLER_WRITE);
-  INTCONST(PHP_OUTPUT_HANDLER_START);
-  INTCONST(PHP_OUTPUT_HANDLER_CLEAN);
-  INTCONST(PHP_OUTPUT_HANDLER_FLUSH);
-  INTCONST(PHP_OUTPUT_HANDLER_END);
-  INTCONST(PHP_OUTPUT_HANDLER_FINAL);
-  INTCONST(PHP_OUTPUT_HANDLER_CLEANABLE);
-  INTCONST(PHP_OUTPUT_HANDLER_FLUSHABLE);
-  INTCONST(PHP_OUTPUT_HANDLER_REMOVABLE);
-  INTCONST(PHP_OUTPUT_HANDLER_STDFLAGS);
-#undef INTCONST
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_CONT, k_PHP_OUTPUT_HANDLER_CONT);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_WRITE, k_PHP_OUTPUT_HANDLER_WRITE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_START, k_PHP_OUTPUT_HANDLER_START);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_CLEAN, k_PHP_OUTPUT_HANDLER_CLEAN);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_FLUSH, k_PHP_OUTPUT_HANDLER_FLUSH);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_END, k_PHP_OUTPUT_HANDLER_END);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_FINAL, k_PHP_OUTPUT_HANDLER_FINAL);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_CLEANABLE, k_PHP_OUTPUT_HANDLER_CLEANABLE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_FLUSHABLE, k_PHP_OUTPUT_HANDLER_FLUSHABLE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_REMOVABLE, k_PHP_OUTPUT_HANDLER_REMOVABLE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_STDFLAGS, k_PHP_OUTPUT_HANDLER_STDFLAGS);
 
   loadSystemlib("std_output");
 }

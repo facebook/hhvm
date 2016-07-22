@@ -3033,11 +3033,13 @@ and check_call_time_reference = function
 (*****************************************************************************)
 
 and is_collection env name =
-  (peek env = Tlcb) || (name = "dict" && peek env = Tlb)
+  (peek env = Tlcb) ||
+  (name = "dict" && peek env = Tlb) ||
+  (name = "keyset" && peek env = Tlb)
 
 and expr_collection env pos name =
   let sentinels = match name with
-    | x when x = "dict" -> (Tlb, Trb)
+    | x when x = "dict" || x = "keyset" -> (Tlb, Trb)
     | _ -> (Tlcb, Trcb)
   in
   let fds = collection_field_list env sentinels in

@@ -115,9 +115,9 @@ AsyncStepHandleOpcodeResult AsyncFlowStepper::handleOpcode(PC pc) {
         // Is "await" blocked?
         if (wh && !wh->isFinished()) {
           handleBlockedAwaitOpcode(pc);
-          ret = AsyncStepHandleOpcodeResult::Handled;
         }
         // else { no special action for non-blocked await. }
+        ret = AsyncStepHandleOpcodeResult::Handled;
       } else if (isCompleted(pc)) {
         reset();
         ret = AsyncStepHandleOpcodeResult::Completed;

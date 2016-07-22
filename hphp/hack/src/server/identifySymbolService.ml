@@ -102,9 +102,14 @@ let process_typeconst result_ref is_target_fun class_name tconst_name pos =
   end
 
 let process_taccess result_ref is_target_fun class_ typeconst pos =
+  (* In typing phase, this hook ends up being called for type constants
+   * in other (than the one being checked) files. We need to filter out
+   * by filename too, in order to avoid spurious results *)
+  if (Pos.filename pos = ServerIdeUtils.path) then begin
     let class_name = class_.tc_name in
     let tconst_name = (snd typeconst.ttc_name) in
     process_typeconst result_ref is_target_fun class_name tconst_name pos
+  end
 
 let process_named_class result_ref is_target_fun class_ =
   process_class_id result_ref is_target_fun class_.Nast.c_name ();

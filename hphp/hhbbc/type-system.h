@@ -204,6 +204,10 @@ enum trep : uint32_t {
   BCDictE   = 1 << 21, // counted empty dict
   BSDictN   = 1 << 22, // static non-empty dict
   BCDictN   = 1 << 23, // counted non-empty dict
+  BSKeysetE = 1 << 24, // static empty keyset
+  BCKeysetE = 1 << 25, // counted empty keyset
+  BSKeysetN = 1 << 26, // static non-empty keyset
+  BCKeysetN = 1 << 27, // counted non-empty keyset
 
   BNull     = BUninit | BInitNull,
   BBool     = BFalse | BTrue,
@@ -224,6 +228,12 @@ enum trep : uint32_t {
   BDictE    = BSDictE | BCDictE,
   BDictN    = BSDictN | BCDictN,
   BDict     = BDictE | BDictN,
+  BSKeyset  = BSKeysetE | BSKeysetN,
+  BCKeyset  = BCKeysetE | BCKeysetN,
+  BKeysetE  = BSKeysetE | BCKeysetE,
+  BKeysetN  = BSKeysetN | BCKeysetN,
+  BKeyset   = BKeysetE | BKeysetN,
+
 
   // Nullable types.
   BOptTrue     = BInitNull | BTrue,
@@ -264,13 +274,22 @@ enum trep : uint32_t {
   BOptDictE    = BInitNull | BDictE,
   BOptDictN    = BInitNull | BDictN,
   BOptDict     = BInitNull | BDict,
+  BOptSKeysetE = BInitNull | BSKeysetE,
+  BOptCKeysetE = BInitNull | BCKeysetE,
+  BOptSKeysetN = BInitNull | BSKeysetN,
+  BOptCKeysetN = BInitNull | BCKeysetN,
+  BOptSKeyset  = BInitNull | BSKeyset,
+  BOptCKeyset  = BInitNull | BCKeyset,
+  BOptKeysetE  = BInitNull | BKeysetE,
+  BOptKeysetN  = BInitNull | BKeysetN,
+  BOptKeyset   = BInitNull | BKeyset,
 
   BInitPrim = BInitNull | BBool | BNum,
   BPrim     = BInitPrim | BUninit,
-  BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict,
+  BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict,
+              BVec | BDict | BKeyset,
   BCell     = BUninit | BInitCell,
   BInitGen  = BInitCell | BRef,
   BGen      = BUninit | BInitGen,
@@ -296,6 +315,8 @@ enum class DataTag : uint8_t {
   Vec,
   DictVal,
   Dict,
+  KeysetVal,
+  Keyset,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -336,6 +357,7 @@ struct DArrMapN;
 using StructMap = boost::container::flat_map<SString,Type>;
 struct DVec;
 struct DDict;
+struct DKeyset;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -439,7 +461,7 @@ private:
     const Type&);
 
   friend struct VecKey disect_vec_key(const Type&);
-  friend struct DictKey disect_dict_key(const Type&);
+  friend struct StrictKey disect_strict_key(const Type&);
 
   friend std::pair<Type, bool> vec_elem(const Type&, const Type&);
   friend std::pair<Type, bool> vec_set(Type, const Type&, const Type&);
@@ -447,17 +469,25 @@ private:
   friend std::pair<Type, bool> dict_elem(const Type&, const Type&);
   friend std::pair<Type, bool> dict_set(Type, const Type&, const Type&);
   friend Type dict_newelem(Type, const Type&);
+  friend std::pair<Type, bool> keyset_elem(const Type&, const Type&);
+  friend std::pair<Type, bool> keyset_set(Type, const Type&, const Type&);
+  friend Type keyset_newelem(Type, const Type&);
 
   friend Type spec_vec_union(Type, Type);
   friend Type spec_dict_union(Type, Type);
+  friend Type spec_keyset_union(Type, Type);
   friend bool is_specialized_vec(const Type&);
   friend bool is_specialized_dict(const Type&);
+  friend bool is_specialized_keyset(const Type&);
   friend Type toDVecType(Type);
   friend Type toDDictType(Type);
+  friend Type toDKeysetType(Type);
   friend Type vec_val(SArray);
   friend Type dict_val(SArray);
+  friend Type keyset_val(SArray);
   template<trep t> friend Type dict_n_impl(Type, Type);
   template<trep t> friend Type vec_n_impl(Type, folly::Optional<int64_t>);
+  template<trep t> friend Type keyset_n_impl(Type);
 
 private:
   union Data {
@@ -477,6 +507,7 @@ private:
     copy_ptr<DArrMapN> amapn;
     copy_ptr<DVec> vec;
     copy_ptr<DDict> dict;
+    copy_ptr<DKeyset> keyset;
   };
 
   template<class Ret, class T, class Function>
@@ -555,6 +586,11 @@ struct DDict {
   Type val;
 };
 
+struct DKeyset {
+  explicit DKeyset(Type kv) : keyval(std::move(kv)) {}
+  Type keyval;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(y) const Type T##y = Type(B##y);
@@ -585,6 +621,10 @@ X(SDictE)
 X(CDictE)
 X(SDictN)
 X(CDictN)
+X(SKeysetE)
+X(CKeysetE)
+X(SKeysetN)
+X(CKeysetN)
 
 X(Null)
 X(Bool)
@@ -605,6 +645,11 @@ X(CDict)
 X(DictE)
 X(DictN)
 X(Dict)
+X(SKeyset)
+X(CKeyset)
+X(KeysetE)
+X(KeysetN)
+X(Keyset)
 
 X(InitPrim)
 X(Prim)
@@ -649,6 +694,15 @@ X(OptCDict)
 X(OptDictE)
 X(OptDictN)
 X(OptDict)
+X(OptSKeysetE)
+X(OptCKeysetE)
+X(OptSKeysetN)
+X(OptCKeysetN)
+X(OptSKeyset)
+X(OptCKeyset)
+X(OptKeysetE)
+X(OptKeysetN)
+X(OptKeyset)
 
 X(InitCell)
 X(Cell)
@@ -682,6 +736,7 @@ Type dval(double);
 Type aval(SArray);
 Type vec_val(SArray);
 Type dict_val(SArray);
+Type keyset_val(SArray);
 
 /*
  * Create static empty array or string types.
@@ -690,6 +745,7 @@ Type sempty();
 Type aempty();
 Type vec_empty();
 Type dict_empty();
+Type keyset_empty();
 
 /*
  * Create a reference counted empty array/vec/dict.
@@ -697,6 +753,7 @@ Type dict_empty();
 Type counted_aempty();
 Type counted_vec_empty();
 Type counted_dict_empty();
+Type counted_keyset_empty();
 
 /*
  * Create an any-countedness empty array/vec/dict type.
@@ -704,6 +761,7 @@ Type counted_dict_empty();
 Type some_aempty();
 Type some_vec_empty();
 Type some_dict_empty();
+Type some_keyset_empty();
 
 /*
  * Create types for objects or classes with some known constraint on
@@ -761,6 +819,13 @@ Type svec_n(Type, folly::Optional<int64_t>);
 Type dict_n(Type, Type);
 Type cdict_n(Type, Type);
 Type sdict_n(Type, Type);
+
+/*
+ * Keyset with key (same as value) type.
+ */
+Type keyset_n(Type);
+Type ckeyset_n(Type);
+Type skeyset_n(Type);
 
 /*
  * Create the optional version of the Type t.
@@ -981,29 +1046,32 @@ Type array_newelem(const Type& arr, const Type& val);
 std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val);
 
 /*
- * Returns the best known type for a vec|dict inner element given a type for
+ * Returns the best known type for a hack array inner element given a type for
  * the key. The type returned will be TBottom if the operation will always
  * throw, and the bool will be true if the operation will never throw.
  */
 std::pair<Type, bool> vec_elem(const Type& vec, const Type& key);
 std::pair<Type, bool> dict_elem(const Type& dict, const Type& key);
+std::pair<Type, bool> keyset_elem(const Type& keyset, const Type& key);
 
 /*
- * Perform a set operation on a vec|dict. Returns a type that represents the
- * effects of (vec|dict)[key] = val
+ * Perform a set operation on a hack array. Returns a type that represents the
+ * effects of $a[key] = val, for a hack array $a.
  *
  * The returned type will be TBottom if the operation will always throw, and
  * the bool will be true if the operation can never throw.
  */
 std::pair<Type, bool> vec_set(Type vec, const Type& key, const Type& val);
 std::pair<Type, bool> dict_set(Type dict, const Type& key, const Type& val);
+std::pair<Type, bool> keyset_set(Type keyset, const Type& key, const Type& val);
 
 /*
- * Perform a newelem operation on a (vec|dict) type. Returns a new type which
+ * Perform a newelem operation on a hack array type. Returns a new type which
  * represents the result of this operation.
  */
 Type vec_newelem(Type vec, const Type& val);
 Type dict_newelem(Type dict, const Type& val);
+Type keyset_newelem(Type keyset, const Type& val);
 
 /*
  * Return the best known key and value type for iteration of the

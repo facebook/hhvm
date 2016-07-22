@@ -209,7 +209,7 @@ void EHFrameWriter::begin_fde(CodeAddress start) {
   // contiguously, or merely be contiguous with one another, but we use an
   // unsigned value because that's what the docs say (even though libgcc seems
   // to use a signed value).
-  auto const cie_off = uint32_t(&vec[vec.size()] - &vec[m_cie.idx]);
+  auto const cie_off = uint32_t(vec.size() - m_cie.idx);
   write<uint32_t>(cie_off);
 
   // 8-byte pointer and 8-byte size describing the code range for this FDE.

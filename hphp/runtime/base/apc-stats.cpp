@@ -21,9 +21,6 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/shape.h"
-#include "hphp/runtime/base/struct-array.h"
-#include "hphp/runtime/base/struct-array-defs.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
@@ -144,18 +141,6 @@ size_t getMemSize(const ArrayData* arr) {
                 sizeof(TypedValue) * (arr->cap() - arr->m_size);
     auto const values = reinterpret_cast<const TypedValue*>(arr + 1);
     auto const last = values + arr->m_size;
-    for (auto ptr = values; ptr != last; ++ptr) {
-      size += getMemSize(ptr);
-    }
-    return size;
-  }
-  case ArrayData::ArrayKind::kStructKind: {
-    auto structArray = StructArray::asStructArray(arr);
-    auto size = sizeof(StructArray) +
-      (structArray->shape()->capacity() - structArray->size()) *
-      sizeof(TypedValue);
-    auto const values = structArray->data();
-    auto const last = values + structArray->size();
     for (auto ptr = values; ptr != last; ++ptr) {
       size += getMemSize(ptr);
     }

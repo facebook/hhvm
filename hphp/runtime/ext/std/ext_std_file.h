@@ -30,45 +30,40 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 
-#define k_STDIN (BuiltinFiles::GetSTDIN())
-#define k_STDOUT (BuiltinFiles::GetSTDOUT())
-#define k_STDERR (BuiltinFiles::GetSTDERR())
+#define PHP_FILE_USE_INCLUDE_PATH   1
+#define PHP_FILE_IGNORE_NEW_LINES   2
+#define PHP_FILE_SKIP_EMPTY_LINES   4
+#define PHP_FILE_APPEND             8
+#define PHP_FILE_NO_DEFAULT_CONTEXT 16
+
+#ifndef GLOB_ONLYDIR
+# define GLOB_ONLYDIR (1<<30)
+# define GLOB_EMULATE_ONLYDIR
+# define GLOB_FLAGMASK (~GLOB_ONLYDIR)
+#else
+# define GLOB_FLAGMASK (~0)
+#endif
+
+#define PHP_GLOB_FLAGS (0 | GLOB_BRACE | GLOB_MARK  \
+                          | GLOB_NOSORT | GLOB_NOCHECK \
+                          | GLOB_NOESCAPE | GLOB_ERR \
+                          | GLOB_ONLYDIR)
+#define PHP_GLOB_FLAGMASK (GLOB_FLAGMASK & PHP_GLOB_FLAGS)
+
 #ifdef _MSC_VER
 const StaticString s_DIRECTORY_SEPARATOR("\\");
+const StaticString s_PATH_SEPARATOR(";");
 #else
 const StaticString s_DIRECTORY_SEPARATOR("/");
+const StaticString s_PATH_SEPARATOR(":");
 #endif
-const int64_t k_FILE_USE_INCLUDE_PATH = 1;
-const int64_t k_FILE_IGNORE_NEW_LINES = 2;
-const int64_t k_FILE_SKIP_EMPTY_LINES = 4;
-const int64_t k_FILE_APPEND = 8;
-const int64_t k_FILE_NO_DEFAULT_CONTEXT = 16;
-const int64_t k_FILE_TEXT = 0;
-const int64_t k_FILE_BINARY = 0;
-const int64_t k_FNM_NOESCAPE = 2;
-const int64_t k_FNM_CASEFOLD = 16;
-const int64_t k_FNM_PERIOD = 4;
-const int64_t k_FNM_PATHNAME = 1;
-const int64_t k_GLOB_AVAILABLE_FLAGS = 9303;
-const int64_t k_GLOB_BRACE = 1024;
-const int64_t k_GLOB_ERR = 1;
-const int64_t k_GLOB_MARK = 2;
-const int64_t k_GLOB_NOCHECK = 16;
-const int64_t k_GLOB_NOESCAPE = 64;
-const int64_t k_GLOB_NOSORT = 4;
-const int64_t k_GLOB_ONLYDIR = 8192;
 const int64_t k_LOCK_SH = 1;
 const int64_t k_LOCK_EX = 2;
 const int64_t k_LOCK_UN = 3;
 const int64_t k_LOCK_NB = 4;
-const StaticString s_PATH_SEPARATOR(":");
 const int64_t k_SCANDIR_SORT_ASCENDING = 0;
 const int64_t k_SCANDIR_SORT_DESCENDING = 1;
 const int64_t k_SCANDIR_SORT_NONE = 2;
-// These are defined in stdio.h
-const int64_t k_SEEK_SET = SEEK_SET;
-const int64_t k_SEEK_CUR = SEEK_CUR;
-const int64_t k_SEEK_END = SEEK_END;
 
 constexpr int64_t k_INI_SCANNER_NORMAL = 0;
 constexpr int64_t k_INI_SCANNER_RAW = 1;
@@ -91,7 +86,7 @@ Variant HHVM_FUNCTION(pclose,
 Variant HHVM_FUNCTION(fseek,
                       const Resource& handle,
                       int64_t offset,
-                      int64_t whence = k_SEEK_SET);
+                      int64_t whence = SEEK_SET);
 bool HHVM_FUNCTION(rewind,
                    const Resource& handle);
 Variant HHVM_FUNCTION(ftell,

@@ -121,7 +121,7 @@ void smashCall(TCA inst, TCA target) {
 
   a.setFrontier(inst);
 
-  a.li64(ppc64_asm::reg::r12, reinterpret_cast<uint64_t>(target));
+  a.li64(rfuncentry(), reinterpret_cast<uint64_t>(target));
 }
 
 void smashJmp(TCA inst, TCA target) {

@@ -59,7 +59,7 @@ let idx env fty shape_ty field default =
       )
     ) in
     let env =
-      Type.sub_type (fst field) Reason.URparam env fake_shape shape_ty in
+      Type.sub_type (fst field) Reason.URparam env shape_ty fake_shape in
     match default with
       | None when TUtils.is_option env res -> env, res
       | None ->
@@ -68,7 +68,7 @@ let idx env fty shape_ty field default =
         env, (fst fty, Toption res)
       | Some (default_pos, default_ty) ->
         let env, default_ty = Typing_utils.unresolved env default_ty in
-        Type.sub_type default_pos Reason.URparam env default_ty res, res
+        Type.sub_type default_pos Reason.URparam env res default_ty, res
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env (fst field) (snd field) with

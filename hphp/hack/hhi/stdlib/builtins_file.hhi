@@ -46,6 +46,14 @@ const SEEK_END = 0;
 const INI_SCANNER_NORMAL = 0;
 const INT_SCANNER_RAW = 0;
 
+const GLOB_ERR     = 1;
+const GLOB_MARK    = 2;
+const GLOB_NOSORT  = 4;
+const GLOB_NOCHECK = 16;
+const GLOB_ESCAPE  = 64;
+const GLOB_BRACE   = 1024;
+const GLOB_ONLYDIR = 8129;
+
 function fopen($filename, $mode, $use_include_path = false, $context = null);
 function popen($command, $mode);
 function fclose($handle);

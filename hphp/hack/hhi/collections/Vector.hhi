@@ -83,14 +83,14 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function toKeysArray(): array<int>;
 
   /**
-   * Returns a deep copy of the current `Vector`.
+   * Returns a copy of the current `Vector`.
    *
    * @return - a `Vector` that is a copy of the current `Vector`.
    */
   public function toVector(): Vector<Tv>;
 
   /**
-   * Returns a deep, immutable copy (`ImmVector`) of the current `Vector`.
+   * Returns an immutable copy (`ImmVector`) of the current `Vector`.
    *
    * @return - a `Vector` that is an immutable copy of the current `Vector`.
    */
@@ -129,7 +129,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function toImmSet(): ImmSet<Tv>;
 
   /**
-   * Returns a deep, immutable copy (`ImmVector`) of the current `Vector`.
+   * Returns an immutable copy (`ImmVector`) of the current `Vector`.
    *
    * This method is interchangeable with `toImmVector()`.
    *

@@ -596,7 +596,7 @@ void ClassScope::applyTraitRules(TMIData& tmid) {
       auto rule = (*rules)[r];
       auto precStmt = dynamic_pointer_cast<TraitPrecStatement>(rule);
       if (precStmt) {
-        tmid.applyPrecRule(precStmt);
+        tmid.applyPrecRule(precStmt, this);
       } else {
         auto aliasStmt = dynamic_pointer_cast<TraitAliasStatement>(rule);
         assert(aliasStmt);

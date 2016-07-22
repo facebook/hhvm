@@ -416,6 +416,7 @@ TypedValue HHVM_FUNCTION(array_map,
                          const Variant& callback,
                          const Variant& arr1,
                          const Array& _argv) {
+  VMRegGuard _;
   CallCtx ctx;
   ctx.func = nullptr;
   if (!callback.isNull()) {

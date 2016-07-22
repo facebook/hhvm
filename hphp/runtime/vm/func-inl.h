@@ -535,12 +535,6 @@ inline int Func::getMaxNumPrologues(int numParams) {
   return numParams + 2;
 }
 
-inline void Func::resetPrologues() {
-  // Useful when killing code; forget what we've learned about the contents
-  // of the translation cache.
-  initPrologues(numParams());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 

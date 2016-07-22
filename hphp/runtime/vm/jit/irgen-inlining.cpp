@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -75,10 +76,12 @@ bool beginInlining(IRGS& env,
     if (isFPushFunc(info.fpushOpc)) {
       return nullptr;
     }
-    constexpr int32_t adjust = AROFF(m_this) / sizeof(Cell);
-    IRSPRelOffset ctxOff = calleeAROff + adjust;
-    auto const ret = gen(env, LdStk, TCtx, IRSPRelOffsetData{ctxOff}, sp(env));
-    return gen(env, AssertType, info.ctxType, ret);
+    if (info.ctxType <= TObj) {
+      constexpr int32_t adjust = AROFF(m_this) / sizeof(Cell);
+      IRSPRelOffset ctxOff = calleeAROff + adjust;
+      return gen(env, LdStk, info.ctxType, IRSPRelOffsetData{ctxOff}, sp(env));
+    }
+    return nullptr;
   }();
 
   // If the ctx was extracted from SpillFrame it may be a TCls, otherwise it
@@ -102,7 +105,7 @@ bool beginInlining(IRGS& env,
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
-  data.ctx           = ctx;
+  data.ctx           = target->isClosureBody() ? nullptr : ctx;
   data.retSPOff      = prevSPOff;
   data.spOffset      = calleeAROff;
   data.numNonDefault = numParams;
@@ -124,19 +127,7 @@ bool beginInlining(IRGS& env,
   for (unsigned i = 0; i < numParams; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
   }
-  const bool hasVariadicArg = target->hasVariadicCaptureParam();
-  for (unsigned i = numParams; i < target->numLocals() - hasVariadicArg; ++i) {
-    /*
-     * Here we need to be generating hopefully-dead stores to initialize
-     * non-parameter locals to KindOfUninit in case we have to leave the trace.
-     */
-    stLocRaw(env, i, calleeFP, cns(env, TUninit));
-  }
-  if (hasVariadicArg) {
-    auto argNum = target->numLocals() - 1;
-    always_assert(numParams <= argNum);
-    stLocRaw(env, argNum, calleeFP, cns(env, staticEmptyArray()));
-  }
+  emitPrologueLocals(env, numParams, target, ctx);
 
   return true;
 }

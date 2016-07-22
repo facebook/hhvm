@@ -110,7 +110,7 @@ void MemoryManager::threadStatsInit() {
   //   cactiveLimit == s_cactiveLimitCeiling - headRoom
   // where
   //   s_cactiveLimitCeiling == MemTotal - footprint
-  size_t footprint = Process::GetCodeFootprint(Process::GetProcessId());
+  size_t footprint = Process::GetCodeFootprint(getpid());
   size_t MemTotal  = 0;
 #ifndef __APPLE__
   size_t pageSize = size_t(sysconf(_SC_PAGESIZE));
@@ -195,6 +195,7 @@ MemoryManager::MemoryManager() {
 #endif
   resetStatsImpl(true);
   setMemoryLimit(std::numeric_limits<int64_t>::max());
+  resetGC(); // so each thread has unique req_num at startup
   // make the circular-lists empty.
   m_strings.next = m_strings.prev = &m_strings;
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
@@ -528,7 +529,7 @@ void MemoryManager::resetAllocator() {
   m_sweeping = false;
   m_exiting = false;
   resetStatsImpl(true);
-  updateNextGc();
+  resetGC();
   FTRACE(1, "reset: strings {}\n", nstrings);
   if (debug) resetEagerGC();
 }
@@ -589,7 +590,7 @@ void MemoryManager::flush() {
  */
 
 const char* header_names[] = {
-  "PackedArray", "StructArray", "MixedArray", "EmptyArray", "ApcArray",
+  "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
   "GlobalsArray", "ProxyArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "Ref", "Object", "WaitHandle", "ResumableObj",
   "AwaitAllWH", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
@@ -615,8 +616,16 @@ void MemoryManager::initHole() {
 void MemoryManager::initFree() {
   initHole();
   for (auto i = 0; i < kNumSmallSizes; i++) {
-    for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->hdr.init(HeaderKind::Free, smallIndex2Size(i));
+    auto size = smallIndex2Size(i);
+    auto n = m_freelists[i].head;
+    for (; n && n->hdr.kind != HeaderKind::Free; n = n->next) {
+      n->hdr.init(HeaderKind::Free, size);
+    }
+    if (debug) {
+      // ensure the freelist tail is already initialized.
+      for (; n; n = n->next) {
+        assert(n->hdr.kind == HeaderKind::Free && n->size() == size);
+      }
     }
   }
 }
@@ -661,7 +670,6 @@ void MemoryManager::checkHeap(const char* phase) {
         if (h->str_.isProxy()) apc_strings.insert(h);
         break;
       case HeaderKind::Packed:
-      case HeaderKind::Struct:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Empty:
@@ -745,7 +753,8 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
     assert((fragBytes & kSmallSizeAlignMask) == 0);
     unsigned fragInd = smallSize2Index(fragBytes + 1) - 1;
     uint32_t fragUsable = smallIndex2Size(fragInd);
-    void* frag = (void*)(uintptr_t(rem) + remBytes - fragUsable);
+    auto frag = FreeNode::InitFrom((char*)rem + remBytes - fragUsable,
+                                   fragUsable, HeaderKind::Hole);
     FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
               "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
               (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
@@ -766,8 +775,10 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
   assert((tailBytes & kSmallSizeAlignMask) == 0);
   assert((splitUsable & kSmallSizeAlignMask) == 0);
   assert(nSplit * splitUsable <= tailBytes);
+  assert(splitUsable == smallIndex2Size(splitInd));
   for (uint32_t i = nSplit; i--;) {
-    void* split = (void*)(uintptr_t(tail) + i * splitUsable);
+    auto split = FreeNode::InitFrom((char*)tail + i * splitUsable,
+                                    splitUsable, HeaderKind::Hole);
     FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
               "split={}, splitUsable={}, splitInd={}\n", tail,
               (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
@@ -1264,9 +1275,9 @@ void ContiguousHeap::reset() {
       int requestCount = RuntimeOption::HeapResetCountBase;
 
       // Assumption : low and high water mark are power of 2 aligned
-      for( auto resetStep = RuntimeOption::HeapHighWaterMark / 2 ;
-           resetStep > m_heapUsage ;
-           resetStep /= 2 ) {
+      for (auto resetStep = RuntimeOption::HeapHighWaterMark / 2;
+           resetStep > m_heapUsage;
+           resetStep /= 2) {
         requestCount *= RuntimeOption::HeapResetCountMultiple;
       }
       if (requestCount <= m_requestCount) {

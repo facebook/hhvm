@@ -1,10 +1,10 @@
-vec(4) {
+keyset(4) {
   int(1)
   string(1) "1"
   int(2)
   string(1) "2"
 }
-vec(4) {
+keyset(4) {
   int(1)
   string(1) "1"
   int(2)
@@ -14,7 +14,7 @@ array(1) {
   ["TestAttr"]=>
   array(1) {
     [0]=>
-    vec(2) {
+    keyset(2) {
       int(1)
       string(1) "1"
     }

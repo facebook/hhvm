@@ -1,10 +1,13 @@
 (script(header((<))((?))((name)(end_of_line)))
-(function_declaration(missing)(missing)
+(function_declaration
+(missing)
+(function_declaration_header
+(missing)
 ((function)(whitespace))((name))(missing)
 ((lparen))
-(parameter_declaration(missing)
+(parameter_declaration(missing)(missing)
 (type_constant(type_constant((self))((::))((name)))((::))((name)(whitespace)))
 ((variable))(missing))
 ((rparen))
-(missing)(missing)
+(missing)(missing))
 (compound_statement(({))(missing)((})))))

@@ -108,6 +108,7 @@ const StaticString
   s_ssl("ssl"),
   s_tls("tls"),
   s_verify_peer("verify_peer"),
+  s_verify_peer_name("verify_peer_name"),
   s_capath("capath"),
   s_cafile("cafile"),
   s_local_cert("local_cert"),
@@ -138,6 +139,9 @@ int HttpClient::request(const char* verb,
   curl_easy_setopt(cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
   curl_easy_setopt(cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
   curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,    1);
+  // For libcurl the VERIFYHOST "true"/enabled value is '2', NOT '1'!
+  // If libcurl is built with NSS, VERIFYPEER =0 forces VERIFYHOST to =0
+  curl_easy_setopt(cp, CURLOPT_SSL_VERIFYHOST,    2);
   curl_easy_setopt(cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
   curl_easy_setopt(cp, CURLOPT_USE_SSL, m_use_ssl);
   curl_easy_setopt(cp, CURLOPT_SSLVERSION, m_sslversion);
@@ -234,6 +238,12 @@ int HttpClient::request(const char* verb,
     if (ssl.exists(s_verify_peer)) {
       curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,
                        ssl[s_verify_peer].toBoolean());
+    }
+    if (ssl.exists(s_verify_peer_name)) {
+      // For libcurl VERIFYHOST the enable/"true" value is '2', NOT '1'!
+      curl_easy_setopt(cp, CURLOPT_SSL_VERIFYHOST,
+                       ssl[s_verify_peer_name].toBoolean() ? \
+                       2 : 0);
     }
     if (ssl.exists(s_capath)) {
       curl_easy_setopt(cp, CURLOPT_CAPATH,

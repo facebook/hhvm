@@ -42,6 +42,7 @@ enum class AnnotMetaType : uint8_t {
   ArrayKey = 6,
   Dict = 7,
   Vec = 8,
+  Keyset = 9,
 };
 
 enum class AnnotType : uint16_t {
@@ -63,6 +64,7 @@ enum class AnnotType : uint16_t {
   ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8 | (uint8_t)KindOfUninit,
   Dict     = (uint16_t)AnnotMetaType::Dict << 8     | (uint8_t)KindOfUninit,
   Vec      = (uint16_t)AnnotMetaType::Vec << 8      | (uint8_t)KindOfUninit,
+  Keyset   = (uint16_t)AnnotMetaType::Keyset << 8   | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -108,7 +110,8 @@ enum class AnnotAction {
   ObjectCheck,
   CallableCheck,
   DictCheck,
-  VecCheck
+  VecCheck,
+  KeysetCheck
 };
 
 /*
@@ -168,7 +171,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Callable:
       // For "callable", if `dt' is not string/array/object we know
       // it's not compatible, otherwise more checks are required
-      return (isStringType(dt) || isArrayType(KindOfArray) ||
+      return (isStringType(dt) || isArrayType(dt) ||
               dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::Dict:
@@ -177,6 +180,9 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Vec:
       // Requires an array specialization check
       return isArrayType(dt) ? AnnotAction::VecCheck : AnnotAction::Fail;
+    case AnnotMetaType::Keyset:
+      // Requires an array specialization check
+      return isArrayType(dt) ? AnnotAction::KeysetCheck : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       break;
   }

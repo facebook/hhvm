@@ -85,6 +85,7 @@
 #include <caml/alloc.h>
 #include <caml/fail.h>
 #include <caml/unixsupport.h>
+#include <caml/intext.h>
 
 #include <assert.h>
 
@@ -539,6 +540,17 @@ void memfd_init(char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
       if (memfd < 0) {
           uerror("shm_open", Nothing);
       }
+
+      // shm_open sets FD_CLOEXEC automatically. This is undesirable, because
+      // we want this fd to be open for other processes, so that they can
+      // reconnect to the shared memory.
+      int fcntl_flags = fcntl(memfd, F_GETFD);
+      if (fcntl_flags == -1) {
+        printf("Error with fcntl(memfd): %s\n", strerror(errno));
+        uerror("fcntl", Nothing);
+      }
+      // Unset close-on-exec
+      fcntl(memfd, F_SETFD, fcntl_flags & ~FD_CLOEXEC);
     }
 #endif
     if (memfd < 0) {
@@ -649,7 +661,7 @@ static void memfd_reserve(char * mem, size_t sz) {
 #else
 
 static void memfd_reserve(char *mem, size_t sz) {
-  if(posix_fallocate(memfd, (uint64_t)(mem - shared_mem), sz)) {
+  if(posix_fallocate(memfd, (uint64_t)mem, sz)) {
     raise_out_of_shared_memory();
   }
 }
@@ -1506,19 +1518,33 @@ value hh_mem(value key) {
 }
 
 /*****************************************************************************/
-/* Returns the value associated to a given key. The key MUST be present. */
+/* Returns the value associated to a given key, and deserialize it. */
+/* The key MUST be present. */
 /*****************************************************************************/
-CAMLprim value hh_get(value key) {
+CAMLprim value hh_get_and_deserialize(value key) {
   CAMLparam1(key);
   CAMLlocal1(result);
 
   unsigned int slot = find_slot(key);
   assert(hashtbl[slot].hash == get_hash(key));
   size_t size = *(size_t*)(hashtbl[slot].addr - sizeof(size_t));
-  result = caml_alloc_string(size);
-  memcpy(String_val(result), hashtbl[slot].addr, size);
+  result = caml_input_value_from_block(hashtbl[slot].addr, size);
 
   CAMLreturn(result);
+}
+
+/*****************************************************************************/
+/* Returns the size of the value associated to a given key. */
+/* The key MUST be present. */
+/*****************************************************************************/
+CAMLprim value hh_get_size(value key) {
+  CAMLparam1(key);
+
+  unsigned int slot = find_slot(key);
+  assert(hashtbl[slot].hash == get_hash(key));
+  size_t size = *(size_t*)(hashtbl[slot].addr - sizeof(size_t));
+
+  CAMLreturn(Long_val(size));
 }
 
 /*****************************************************************************/

@@ -30,8 +30,6 @@ namespace HPHP {
 
 struct ArrayInit;
 struct MemoryProfile;
-struct Shape;
-struct StructArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -199,8 +197,6 @@ struct MixedArray final : private ArrayData,
    */
   static MixedArray* MakeStruct(uint32_t size, const StringData* const* keys,
                                const TypedValue* values);
-  static StructArray* MakeStructArray(uint32_t size, const TypedValue* values,
-                                      Shape*);
 
   /*
    * Allocate an uncounted MixedArray and copy the values from the
@@ -480,6 +476,7 @@ public:
   static constexpr uint32_t MaxMask = MaxHashSize - 1;
   static constexpr uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
   static constexpr uint32_t MaxMakeSize = 4 * SmallSize;
+  static constexpr uint32_t MaxStructMakeSize = 64;
 
   uint32_t iterLimit() const { return m_used; }
 
@@ -504,7 +501,6 @@ private:
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
-  friend struct StructArray;
   friend struct HashCollection;
   friend struct BaseMap;
   friend struct c_Map;

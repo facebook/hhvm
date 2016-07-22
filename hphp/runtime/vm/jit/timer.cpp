@@ -49,7 +49,7 @@ int64_t getCPUTimeNanos() {
   if (!RuntimeOption::EvalJitTimer) return -1;
 
 #ifdef CLOCK_THREAD_CPUTIME_ID
-  auto const ns = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+  auto const ns = vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
   if (ns != -1) return ns;
 #endif
 

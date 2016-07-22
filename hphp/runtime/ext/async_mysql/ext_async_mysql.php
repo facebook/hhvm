@@ -592,6 +592,39 @@ class AsyncMysqlClientStats {
    */
   <<__HipHopSpecific, __Native>>
   function callbackDelayMicrosAvg() : float;
+
+  /**
+   * Average of reported busy time in the client's IO thread.
+   *
+   * This returns an exponentially-smoothed average.
+   *
+   * @return - A `float` representing the average busy time of this
+   *           MySQL client's IO Thread.
+   */
+  <<__HipHopSpecific, __Native>>
+  function ioThreadBusyMicrosAvg() : float;
+
+  /**
+   * Average of reported idle time in the client's IO thread.
+   *
+   * This returns an exponentially-smoothed average.
+   *
+   * @return - A `float` representing the average busy time of this
+   *           MySQL client's IO Thread.
+   */
+  <<__HipHopSpecific, __Native>>
+  function ioThreadIdleMicrosAvg() : float;
+
+  /**
+   * Size of this client's event base notification queue.
+   * Value is collected at the end of the operation.
+   *
+   * @return - A `int` representing the size of notification queue of this
+   *           MySQL client's IO Thread.
+   */
+  <<__HipHopSpecific, __Native>>
+  function notificationQueueSize() : int;
+
 }
 
 /**

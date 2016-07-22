@@ -50,7 +50,7 @@ void HHVM_FUNCTION(xhprof_enable, int64_t flags/* = 0 */,
 
   bool missingClockGetTimeNS = true;
 #ifdef CLOCK_THREAD_CPUTIME_ID
-  missingClockGetTimeNS = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
+  missingClockGetTimeNS = vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID) == -1;
 #endif
 
   if (missingClockGetTimeNS) {

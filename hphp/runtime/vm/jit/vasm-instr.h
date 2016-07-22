@@ -226,6 +226,7 @@ struct Vunit;
   O(lead, I(s), Un, D(d))\
   /* copies */\
   O(movb, Inone, UH(s,d), DH(d,s))\
+  O(movw, Inone, UH(s,d), DH(d,s))\
   O(movl, Inone, UH(s,d), DH(d,s))\
   O(movzbw, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
@@ -306,6 +307,7 @@ struct Vunit;
   O(popp, Inone, Un, D(d0) D(d1))\
   O(pushp, Inone, U(s0) U(s1), Dn)\
   O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
+  O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
   O(extrb, Inone, UH(s,d), DH(d,s))\
   O(extsb, Inone, UH(s,d), DH(d,s))\
@@ -317,7 +319,6 @@ struct Vunit;
   O(mfcr, Inone, Un, D(d))\
   O(mflr, Inone, Un, D(d))\
   O(mfvsrd, Inone, U(s), D(d))\
-  O(movlk, Inone, UH(s,d), DH(d,s))\
   O(mtlr, Inone, U(s), Dn)\
   O(mtvsrd, Inone, U(s), D(d))\
   O(stdcx, Inone, U(s) U(d), Dn)\
@@ -1027,6 +1028,7 @@ struct lead { VdataPtr<void> s; Vreg64 d; };
  */
 // moves
 struct movb { Vreg8 s, d; };
+struct movw { Vreg16 s, d; };
 struct movl { Vreg32 s, d; };
 // zero-extended s to d
 struct movzbw { Vreg8 s; Vreg16 d; };
@@ -1139,10 +1141,14 @@ struct orsw { Vreg32 s0, s1, d; VregSF sf; };
 struct popp { Vreg64 d0, d1; };
 struct pushp { Vreg64 s0, s1; };
 struct subsb { Vreg8 s0, s1, d; VregSF sf; };
+struct uxth { Vreg16 s; Vreg32 d; };
 
 /*
  * ppc64 intrinsics.
  */
+struct extrb { Vreg8 s; Vreg8 d; };   // Extract and zeros the upper bits
+struct extsb { Vreg64 s; Vreg64 d; }; // Extend byte sign
+struct extsw { Vreg64 s; Vreg64 d; }; // Extend word sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };
@@ -1151,21 +1157,12 @@ struct mfcr { Vreg64 d; };
 struct mflr { Vreg64 d; };
 struct mfvsrd { Vreg128 s; Vreg64 d; };
 struct xscvdpsxds { Vreg128 s, d; };
-// move 32bits into a register and keep the higher 32bits
-struct movlk { Vreg64 s, d; };
 struct mtlr { Vreg64 s; };
 struct mtvsrd { Vreg64 s; Vreg128 d; };
 struct stdcx { Vreg64 s; Vptr d; };
 struct xscvsxddp { Vreg128 s, d; };
 struct xxlxor { Vreg128 s0, s1, d; };
 struct xxpermdi { Vreg128 s0, s1, d; };
-
-// Extract and zeros the upper bits
-struct extrb { Vreg8 s; Vreg8 d; };
-
-// Extend byte sign
-struct extsb { Vreg64 s; Vreg64 d; };
-struct extsw { Vreg64 s; Vreg64 d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

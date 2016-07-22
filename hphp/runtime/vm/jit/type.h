@@ -35,7 +35,6 @@ namespace HPHP {
 struct ArrayData;
 struct Class;
 struct Func;
-struct Shape;
 struct StringData;
 struct TypedValue;
 
@@ -567,14 +566,12 @@ public:
    */
   static Type Array(ArrayData::ArrayKind kind);
   static Type Array(const RepoAuthType::Array* rat);
-  static Type Array(const Shape* shape);
 
   /*
    * Return a specialized TStaticArr.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
-  static Type StaticArray(const Shape* shape);
 
   /*
    * Return a specialized TObj.

@@ -147,6 +147,9 @@ enum Attr {
   // Is this an HNI builtin?            //       |          |         //
   AttrNative               = (1 << 23), //       |          |    X    //
                                         //       |          |         //
+  // Is this a closure __invoke method with an invalid scope?         //
+  AttrUnscoped             = (1 << 24), //       |          |    X    //
+                                        //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
   // all constant arguments.            //       |          |         //
   AttrIsFoldable           = (1 << 26), //       |          |    X    //

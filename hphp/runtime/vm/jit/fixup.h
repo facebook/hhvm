@@ -158,7 +158,6 @@ struct FixupMap {
 
   void fixup(ExecutionContext* ec) const;
   void fixupWork(ExecutionContext* ec, ActRec* rbp) const;
-  void fixupWorkSimulated(ExecutionContext* ec) const;
 
   static bool eagerRecord(const Func* func);
 

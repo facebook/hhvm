@@ -153,6 +153,14 @@
 #define SOAP_ENC_ARRAY_STRING "Array"
 #define SOAP_ENC_OBJECT 301
 #define SOAP_ENC_OBJECT_STRING "Struct"
+#define SOAP_ENC_INT_DT 302
+#define SOAP_ENC_INT_DT_STRING XSD_INT_STRING
+#define SOAP_ENC_DOUBLE_DT 303
+#define SOAP_ENC_DOUBLE_DT_STRING XSD_FLOAT_STRING
+#define SOAP_ENC_ARRAY_DT 304
+#define SOAP_ENC_ARRAY_DT_STRING SOAP_ENC_ARRAY_STRING
+#define SOAP_ENC_NULL_DT 305
+#define SOAP_ENC_NULL_DT_STRING "nil"
 
 #define WSDL_NAMESPACE "http://schemas.xmlsoap.org/wsdl/"
 #define WSDL_NS_PREFIX "wsdl"
@@ -176,6 +184,7 @@
 #define WSDL_DIME_CLOSED \
   "http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout"
 
+#define INVALID_TYPE 999997
 #define UNKNOWN_TYPE 999998
 #define END_KNOWN_TYPES 999999
 
@@ -248,14 +257,29 @@ extern encodeStatic s_defaultEncoding[];
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static_assert(
-  XSD_STRING  > kMaxDataType,
-  "Overlap between SOAP types and DataTypes"
-);
-
-constexpr bool isArrayDataType(int t) {
-  return t <= kMaxDataType && isArrayType((DataType)t);
+inline int dataTypeToSoap(DataType dt) {
+  switch (dt) {
+    case KindOfUninit:
+    case KindOfNull:    return SOAP_ENC_NULL_DT;
+    case KindOfBoolean: return XSD_BOOLEAN;
+    case KindOfInt64:   return SOAP_ENC_INT_DT;
+    case KindOfDouble:  return SOAP_ENC_DOUBLE_DT;
+    case KindOfPersistentString:
+    case KindOfString:  return XSD_STRING;
+    case KindOfPersistentArray:
+    case KindOfArray:   return SOAP_ENC_ARRAY_DT;
+    case KindOfObject:  return SOAP_ENC_OBJECT;
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:   return INVALID_TYPE;
+  }
+  return INVALID_TYPE;
 }
+
+inline bool isSoapArrayType(int t) {
+  return t == SOAP_ENC_ARRAY || t == SOAP_ENC_ARRAY_DT;
+}
+
 }
 
 #endif

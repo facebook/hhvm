@@ -232,7 +232,9 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
     vwrap(cb, data, [&] (Vout& v) {
       // Not doing it directly as rret(0) == rarg(0) on ppc64
       Vreg ret_addr = v.makeReg();
-      v << lea{rsp()[ppc64_asm::exittc_position_on_frame], ret_addr};
+
+      // exittc address pushed on calltc/resumetc.
+      v << copy{rsp(), ret_addr};
 
       // We need to spill the return registers around the assert call.
       v << push{rret(0)};
@@ -246,15 +248,20 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
     });
   }
 
+  // Discard the exittc address pushed on calltc/resumetc for balancing the
+  // stack next.
+  a.addi(rsp(), rsp(), 8);
+
   // Reinitialize r1 for the external code found after enterTCExit's stubret
-  a.mr(ppc64_asm::reg::r1, rsp());
+  a.addi(rsfp(), rsp(), 8);
 
   // r31 should have the same value as caller's r1. Loading it soon on stubret.
   // (this corrupts the backchain, but it's not relevant as this frame will be
   // destroyed soon)
-  a.std(ppc64_asm::reg::r1, rsp()[0]);
+  a.std(rsfp(), rsp()[8]);
 
-  // Simply go to enterTCExit
+  // Emulate a ret to enterTCExit without actually doing one to avoid
+  // unbalancing the return stack buffer.
   a.branchAuto(TCA(mcg->ustubs().enterTCExit));
   return start;
 }

@@ -875,7 +875,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsTypeMem:
   case CheckTypeMem:
   case CheckInitMem:
-  case DbgAssertPtr:
     return may_load_store(pointee(inst.src(0)), AEmpty);
 
   //////////////////////////////////////////////////////////////////////
@@ -903,10 +902,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AElemI { inst.src(0), inst.extra<InitPackedArray>()->index },
       inst.src(1)
     };
-
-  case LdStructArrayElem:
-    assertx(inst.src(1)->strVal()->isStatic());
-    return PureLoad { AElemS { inst.src(0), inst.src(1)->strVal() } };
 
   case InitPackedArrayLoop:
     {
@@ -1206,7 +1201,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Halt:
   case ConvBoolToInt:
   case ConvBoolToDbl:
-  case DbgAssertType:
   case DbgAssertFunc:
   case DefConst:
   case LdLocAddr:
@@ -1373,7 +1367,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
   case ProfileArrayKind:
-  case ProfileStructArray:
   case ProfileSwitchDest:
   case LdFuncCachedSafe:
   case LdFuncNumParams:

@@ -99,7 +99,7 @@ let find_extended_classes_in_files_parallel tcopt workers target_class_name
         tcopt target_class_name mthds target_class_pos)
       ~merge:(List.rev_append)
       ~neutral:([])
-      ~next:(Bucket.make classes)
+      ~next:(MultiWorker.next workers classes)
   else
     find_extended_classes_in_files tcopt
         target_class_name mthds target_class_pos [] classes

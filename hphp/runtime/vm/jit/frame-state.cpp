@@ -672,6 +672,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case IterInitK:
   case WIterInitK:
+  case MIterInitK:
     // kill the locals to which this instruction stores iter's key and value
     killIterLocals({inst->extra<IterData>()->keyId,
                     inst->extra<IterData>()->valId});
@@ -679,12 +680,14 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case IterInit:
   case WIterInit:
+  case MIterInit:
     // kill the local to which this instruction stores iter's value
     killIterLocals({inst->extra<IterData>()->valId});
     break;
 
   case IterNextK:
   case WIterNextK:
+  case MIterNextK:
     // kill the locals to which this instruction stores iter's key and value
     killIterLocals({inst->extra<IterData>()->keyId,
                     inst->extra<IterData>()->valId});
@@ -692,6 +695,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case IterNext:
   case WIterNext:
+  case MIterNext:
     // kill the local to which this instruction stores iter's value
     killIterLocals({inst->extra<IterData>()->valId});
     break;
@@ -1087,12 +1091,12 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
 
   /*
    * Set up the callee state.
-   *
-   * We set m_thisIsAvailable to true on any object method, because we
-   * just don't inline calls to object methods with a null $this.
    */
   cur().fpValue          = calleeFP;
-  cur().thisAvailable    = target->cls() != nullptr && !target->isStatic();
+  cur().thisAvailable    = target->cls() != nullptr &&
+                           !target->isStatic() &&
+                           extra->ctx &&
+                           extra->ctx->isA(TObj);
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
   cur().bcSPOff          = FPInvOffset{target->numLocals()};
@@ -1489,14 +1493,7 @@ static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
   const auto funcTmp = inst->src(1);
   if (!funcTmp->hasConstVal(TFunc)) return nullptr;
 
-  const auto callee = funcTmp->funcVal();
-  if (!callee->isMethod()) return callee;
-
-  const auto ctx = inst->src(2);
-  const auto ctxType = ctx->type();
-  if (ctxType < TObj && ctxType.clsSpec().exact()) return callee;
-
-  return nullptr;
+  return funcTmp->funcVal();
 }
 
 void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,

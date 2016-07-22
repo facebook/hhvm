@@ -69,6 +69,9 @@ inline bool is_vec(const Variant& v) {
 inline bool is_dict(const Variant& v) {
   return v.isArray() && v.toCArrRef()->isDict();
 }
+inline bool is_keyset(const Variant& v) {
+  return v.isArray() && v.toCArrRef()->isKeyset();
+}
 
 inline bool is_object(const Variant& var) {
   if (!var.is(KindOfObject)) {
@@ -148,8 +151,8 @@ Object create_object(const String& s, const Array &params, bool init = true);
 Object init_object(const String& s, const Array &params, ObjectData* o);
 
 [[noreturn]] void throw_object(const Object& e);
-#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8) || __GNUC_PATCHLEVEL__ >= 2)
-// gcc-4.8.1 has a bug that causes incorrect code if we
+#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8))
+// gcc-4.8 has a bug that causes incorrect code if we
 // define this function.
 [[noreturn]] void throw_object(Object&& e);
 #endif

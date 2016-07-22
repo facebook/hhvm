@@ -739,7 +739,9 @@ private:
 };
 
 const StaticString
+  s_class("class"),
   s_file("file"),
+  s_function("function"),
   s_line("line"),
   s_php_errormsg("php_errormsg");
 
@@ -1365,35 +1367,46 @@ int ExecutionContext::getLine() {
 
 Array ExecutionContext::getCallerInfo() {
   VMRegAnchor _;
-  Array result = Array::Create();
-  ActRec* ar = vmfp();
+  auto ar = vmfp();
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
   }
-  while (ar->m_func->name()->isame(s_call_user_func.get())
-         || ar->m_func->name()->isame(s_call_user_func_array.get())) {
+  while (ar->func()->name()->isame(s_call_user_func.get())
+         || ar->func()->name()->isame(s_call_user_func_array.get())) {
     ar = getPrevVMState(ar);
     if (ar == nullptr) {
-      return result;
+      return empty_array();
     }
   }
 
   Offset pc = 0;
   ar = getPrevVMState(ar, &pc);
   while (ar != nullptr) {
-    if (!ar->m_func->name()->isame(s_call_user_func.get())
-        && !ar->m_func->name()->isame(s_call_user_func_array.get())) {
-      Unit* unit = ar->m_func->unit();
+    if (!ar->func()->name()->isame(s_call_user_func.get())
+        && !ar->func()->name()->isame(s_call_user_func_array.get())) {
+      auto const unit = ar->func()->unit();
       int lineNumber;
       if ((lineNumber = unit->getLineNumber(pc)) != -1) {
-        result.set(s_file, unit->filepath()->data(), true);
-        result.set(s_line, lineNumber);
-        return result;
+        auto const cls = ar->func()->cls();
+        if (cls != nullptr && !ar->func()->isClosureBody()) {
+          return make_map_array(
+            s_class, const_cast<StringData*>(cls->name()),
+            s_file, const_cast<StringData*>(unit->filepath()),
+            s_function, const_cast<StringData*>(ar->func()->name()),
+            s_line, lineNumber
+          );
+        } else {
+          return make_map_array(
+            s_file, const_cast<StringData*>(unit->filepath()),
+            s_function, const_cast<StringData*>(ar->func()->name()),
+            s_line, lineNumber
+          );
+        }
       }
     }
     ar = getPrevVMState(ar, &pc);
   }
-  return result;
+  return empty_array();
 }
 
 ActRec* ExecutionContext::getFrameAtDepth(int frame) {
@@ -1632,7 +1645,6 @@ void ExecutionContext::requestExit() {
 
   manageAPCHandle();
   syncGdbState();
-  jit::mcg->requestExit();
   vmStack().requestExit();
   profileRequestEnd();
   EventHook::Disable();

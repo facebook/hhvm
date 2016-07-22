@@ -33,7 +33,7 @@
 
 #include "hphp/util/assertions.h"
 
-#include "debug-parser.h"
+#include "hphp/tools/debug-parser/debug-parser.h"
 
 /*
  * Debug parser for DWARF (using libdwarf)

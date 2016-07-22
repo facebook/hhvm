@@ -197,7 +197,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       ifThen(
         env,
         [&] (Block* taken) {
-          gen(env, CheckType, Type::Array(ArrayData::kDictKind), taken, val);
+          gen(env, CheckType, arrTy, taken, val);
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
@@ -226,6 +226,10 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     }
     case AnnotAction::VecCheck: {
       checkSpecializedArray(Type::Array(ArrayData::kVecKind));
+      return;
+    }
+    case AnnotAction::KeysetCheck: {
+      checkSpecializedArray(Type::Array(ArrayData::kKeysetKind));
       return;
     }
     case AnnotAction::ObjectCheck:

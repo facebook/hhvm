@@ -241,11 +241,18 @@ void cgLdGblAddr(IRLS& env, const IRInstruction* inst) {
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
+IMPL_OPCODE_CALL(LdGblAddrDef)
+
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
   vmain(env) << lea{obj[inst->extra<LdPropAddr>()->offsetBytes], dst};
 }
+
+IMPL_OPCODE_CALL(LdClsPropAddrOrNull)
+IMPL_OPCODE_CALL(LdClsPropAddrOrRaise)
+
+///////////////////////////////////////////////////////////////////////////////
 
 void cgLdRDSAddr(IRLS& env, const IRInstruction* inst) {
   auto const handle = inst->extra<LdRDSAddr>()->handle;

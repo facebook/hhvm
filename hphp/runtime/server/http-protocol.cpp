@@ -23,6 +23,7 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/text-util.h"
 
 #include "hphp/runtime/base/array-init.h"

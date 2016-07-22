@@ -22,11 +22,18 @@
 
 #include <cstdint>
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP { namespace jit {
+
+struct SSATmp;
+
+namespace irgen {
 
 struct IRGS;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void emitPrologueLocals(IRGS& env, uint32_t argc,
+                        const Func* func, SSATmp* closureOpt);
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
 

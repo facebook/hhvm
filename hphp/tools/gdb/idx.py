@@ -45,7 +45,7 @@ def unordered_map_at(umap, key, hasher=None):
 
     node = bucket['_M_nxt']
 
-    value_type = T(str(umap.type) + '::value_type').pointer()
+    value_type = T(str(rawtype(umap.type)) + '::value_type').pointer()
 
     while node != 0x0:
         # Hashtable nodes contain only a pointer to the next node in the

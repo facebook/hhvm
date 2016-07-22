@@ -284,12 +284,20 @@ and kvc_kind = [
   | `ImmMap
   | `Dict ]
 
+and vc_kind = [
+  | `Vector
+  | `ImmVector
+  | `Set
+  | `ImmSet
+  | `Pair
+  | `Keyset ]
+
 and expr = Pos.t * expr_
 and expr_ =
   | Any
   | Array of afield list
   | Shape of expr ShapeMap.t
-  | ValCollection of string * expr list
+  | ValCollection of vc_kind * expr list
   | KeyValCollection of kvc_kind * field list
   | This
   | Id of sid
@@ -388,12 +396,16 @@ let class_id_to_str = function
   | CIexpr _ -> assert false
   | CI (_, x) -> x
 
-let is_kvc_kind name = match name with
+let is_kvc_kind experimental_enabled p name = match name with
   | x when
     x = SN.Collections.cMap
     || x = SN.Collections.cImmMap
-    || x = SN.Collections.cStableMap
-    || x = SN.Collections.cDict -> true
+    || x = SN.Collections.cStableMap -> true
+  | x when x = SN.Collections.cDict -> begin
+    if not experimental_enabled then
+      Errors.experimental_feature p "dict";
+    true
+  end
   | _ -> false
 
 let get_kvc_kind name = match name with
@@ -409,3 +421,33 @@ let kvc_kind_to_name kind = match kind with
   | `Map -> SN.Collections.cMap
   | `ImmMap -> SN.Collections.cImmMap
   | `Dict -> SN.Collections.cDict
+
+let is_vc_kind experimental_enabled p name =
+  name = SN.Collections.cVector ||
+  name = SN.Collections.cImmVector ||
+  name = SN.Collections.cSet ||
+  name = SN.Collections.cImmSet ||
+  (if name = SN.Collections.cKeyset then begin
+    if not experimental_enabled then
+      Errors.experimental_feature p "keyset";
+    true
+  end else false)
+
+let get_vc_kind name = match name with
+  | x when x = SN.Collections.cVector -> `Vector
+  | x when x = SN.Collections.cImmVector -> `ImmVector
+  | x when x = SN.Collections.cSet -> `Set
+  | x when x = SN.Collections.cImmSet -> `ImmSet
+  | x when x = SN.Collections.cKeyset -> `Keyset
+  | _ -> begin
+    Errors.internal_error Pos.none ("Invalid ValueCollection name: "^name);
+    `Set
+  end
+
+let vc_kind_to_name kind = match kind with
+  | `Vector -> SN.Collections.cVector
+  | `ImmVector -> SN.Collections.cImmVector
+  | `Set -> SN.Collections.cSet
+  | `ImmSet -> SN.Collections.cImmSet
+  | `Keyset -> SN.Collections.cKeyset
+  | `Pair -> SN.Collections.cPair

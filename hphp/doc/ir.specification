@@ -2112,18 +2112,6 @@ To string conversions:
   Assert that S0 has a valid refcount. If S0 has a reference counted type and
   its count is implausible then execute a hardware trap instruction.
 
-| DbgAssertPtr, ND, S(PtrToGen), NF
-
-  Assert that S0 points to plausible TypedValue. If the TypedValue is a type
-  with a _count field, check that the count field is plausible using the same
-  logic as DbgAssertRefCount. Internally this uses always_assert(); failures
-  cause an abort (whatever always_assert does).
-
-| DbgAssertType<T>, ND, S(Cell), NF
-
-  Assert that S0 is of type T at runtime. If the assertion fails, execution is
-  aborted via a hardware exception.
-
 | DbgTraceCall<spOffset>, ND, S(FramePtr) S(StkPtr), NF
 
   When EvalHHIRGenerateAsserts is on, this instruction is inserted at the
@@ -2556,11 +2544,6 @@ fields of that struct for holding intermediate values.
 
   Profile the array kind of S0.
 
-| ProfileStructArray, ND, S(Arr), NF
-
-  Profile type of array S0 (i.e. whether it is a StructArray or some other kind
-  and if it is a StructArray what Shapes it saw).
-
 | ProfileType, ND, S(Gen), NF
 
   Profile the type of S0.
@@ -2568,12 +2551,6 @@ fields of that struct for holding intermediate values.
 | ProfileMethod<rdsHandle,spOff>, ND, S(StkPtr) S(Cls,Nullptr), NF
 
   Profile the Func in the ActRec that was just pushed onto the stack.
-
-| LdStructArrayElem, DArrElem, AK(Struct) S(StaticStr), NF
-
-  Loads the element of the struct array in S0 at offset S1. This instruction
-  assumes that the key for that particular offset was already present in the
-  array, which previous guards should guarantee.
 
 | CheckPackedArrayBounds, ND, AK(Packed) S(Int), B
 
@@ -2666,7 +2643,7 @@ fields of that struct for holding intermediate values.
   Store S1 to the m_this/m_cls field in the frame pointer S0.
 
   If InitCtx appears in an IR unit, it must dominate all occurrences of LdCtx
-  and LdCctx.
+  and LdCctx with the same FramePtr.
 
 | CheckSurpriseFlagsEnter<func,argc>, ND, S(FramePtr), Er
 

@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -53,7 +52,7 @@ static ArrayDataMap s_arrayDataMap;
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
                                                        size_t sz) {
-  return MD5(string_md5(str, sz).c_str());
+  return MD5(string_md5(folly::StringPiece{str, sz}));
 }
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
@@ -139,7 +138,6 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
 
 #define DISPATCH(entry)                         \
   { PackedArray::entry,                         \
-    StructArray::entry,                         \
     MixedArray::entry,                          \
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
@@ -654,7 +652,6 @@ const ArrayFunctions g_array_funcs = {
    */
   {
     &PackedArray::ZSetInt,
-    &StructArray::ZSetInt,
     &MixedArray::ZSetInt,
     &ZSetIntThrow,
     &ZSetIntThrow,
@@ -667,7 +664,6 @@ const ArrayFunctions g_array_funcs = {
 
   {
     &PackedArray::ZSetStr,
-    &StructArray::ZSetStr,
     &MixedArray::ZSetStr,
     &ZSetStrThrow,
     &ZSetStrThrow,
@@ -680,7 +676,6 @@ const ArrayFunctions g_array_funcs = {
 
   {
     &PackedArray::ZAppend,
-    &StructArray::ZAppend,
     &MixedArray::ZAppend,
     &ZAppendThrow,
     &ZAppendThrow,
@@ -693,7 +688,6 @@ const ArrayFunctions g_array_funcs = {
 
   {
     PackedArray::ToDict,
-    StructArray::ToDict,
     MixedArray::ToDict,
     EmptyArray::ToDict,
     ToDictThrow,
@@ -715,7 +709,6 @@ const ArrayFunctions g_array_funcs = {
 
   {
     PackedArray::ToKeyset,
-    StructArray::ToKeyset,
     MixedArray::ToKeyset,
     EmptyArray::ToKeyset,
     ToKeysetThrow,
@@ -962,9 +955,8 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,10> names = {{
+  std::array<const char*,9> names = {{
     "PackedKind",
-    "StructKind",
     "MixedKind",
     "EmptyKind",
     "ApcKind",

@@ -35,7 +35,11 @@ let make_genv options config local_config handle =
     | Some watchman ->
       let indexer filter =
         let files = Watchman.get_all_files watchman in
-        Bucket.make ~max_size:1000 (List.filter filter files) in
+        Bucket.make
+          ~num_workers:GlobalConfig.nbr_procs
+          ~max_size:1000
+          (List.filter filter files)
+      in
       let notifier () = Watchman.get_changes watchman in
       HackEventLogger.set_use_watchman ();
       (* We don't have an easy way to wait for watchman's init crawl to
@@ -94,4 +98,7 @@ let make_env config =
     failed_parsing = Relative_path.Set.empty;
     failed_decl    = Relative_path.Set.empty;
     failed_check   = Relative_path.Set.empty;
+    persistent_client_fd = None;
+    edited_files   = SMap.empty;
+    files_to_check = SSet.empty;
   }

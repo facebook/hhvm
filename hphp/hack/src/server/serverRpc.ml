@@ -10,6 +10,7 @@
 
 open Core
 open ServerEnv
+open File_content
 
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
@@ -44,69 +45,113 @@ type _ t =
   | FORMAT : string * int * int -> string Format_hack.return t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
+  | ECHO_FOR_TEST : string -> string t
+  | OPEN_FILE : string -> unit t
+  | CLOSE_FILE : string -> unit t
+  | EDIT_FILE : string * (code_edit list) -> unit t
+  | IDE_AUTOCOMPLETE : string * content_pos -> AutocompleteService.result t
+  | DISCONNECT : unit t
 
-let handle : type a. genv -> env -> a t -> a =
+let handle : type a. genv -> env -> a t -> env * a =
   fun genv env -> function
     | STATUS ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
         let el = Errors.get_sorted_error_list env.errorl in
-        List.map ~f:Errors.to_absolute el
-    | COVERAGE_LEVELS fn -> ServerColorFile.go env fn
+        env, List.map ~f:Errors.to_absolute el
+    | COVERAGE_LEVELS fn -> env, ServerColorFile.go env fn
     | INFER_TYPE (fn, line, char) ->
-        ServerInferType.go env (fn, line, char)
+        env, ServerInferType.go env (fn, line, char)
     | AUTOCOMPLETE content ->
-        ServerAutoComplete.auto_complete env.tcopt content
+        env, ServerAutoComplete.auto_complete env.tcopt content
     | IDENTIFY_FUNCTION (content, line, char) ->
-        ServerIdentifyFunction.go_absolute content line char env.tcopt
+        env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | OUTLINE content ->
-        FileOutline.outline content
+        env, FileOutline.outline content
     | GET_DEFINITION_BY_ID id ->
-        Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
+        env, Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
           SymbolDefinition.to_absolute
     | METHOD_JUMP (class_, find_children) ->
-      MethodJumps.get_inheritance env.tcopt class_ ~find_children
+      env, MethodJumps.get_inheritance env.tcopt class_ ~find_children
         env.files_info genv.workers
     | FIND_DEPENDENT_FILES file_list ->
-        Ai.ServerFindDepFiles.go genv.workers file_list
+        env, Ai.ServerFindDepFiles.go genv.workers file_list
           (ServerArgs.ai_mode genv.options)
     | FIND_REFS find_refs_action ->
         if ServerArgs.ai_mode genv.options = None then
-          ServerFindRefs.go find_refs_action genv env
+          env, ServerFindRefs.go find_refs_action genv env
         else
-          Ai.ServerFindRefs.go find_refs_action genv env
+          env, Ai.ServerFindRefs.go find_refs_action genv env
     | IDE_FIND_REFS (content, line, char) ->
-        ServerFindRefs.go_from_file (content, line, char) genv env
+        env, ServerFindRefs.go_from_file (content, line, char) genv env
     | IDE_HIGHLIGHT_REFS (content, line, char) ->
-        ServerHighlightRefs.go (content, line, char) env.tcopt
-    | REFACTOR refactor_action -> ServerRefactor.go refactor_action genv env
+        env, ServerHighlightRefs.go (content, line, char) env.tcopt
+    | REFACTOR refactor_action ->
+        env, ServerRefactor.go refactor_action genv env
     | REMOVE_DEAD_FIXMES codes ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
-      ServerRefactor.get_fixme_patches codes env
+      env, ServerRefactor.get_fixme_patches codes env
     | DUMP_SYMBOL_INFO file_list ->
-        SymbolInfoService.go genv.workers file_list env
+        env, SymbolInfoService.go genv.workers file_list env
     | DUMP_AI_INFO file_list ->
-        Ai.InfoService.go Typing_check_utils.check_defs genv.workers
+        env, Ai.InfoService.go Typing_check_utils.check_defs genv.workers
           file_list (ServerArgs.ai_mode genv.options) env.tcopt
     | ARGUMENT_INFO (contents, line, col) ->
-        ServerArgumentInfo.go contents line col
-    | SEARCH (query, type_) -> ServerSearch.go genv.workers query type_
-    | COVERAGE_COUNTS path -> ServerCoverageMetric.go path genv env
-    | LINT fnl -> ServerLint.go genv env fnl
-    | LINT_ALL code -> ServerLint.lint_all genv env code
-    | CREATE_CHECKPOINT x -> ServerCheckpoint.create_checkpoint x
-    | RETRIEVE_CHECKPOINT x -> ServerCheckpoint.retrieve_checkpoint x
-    | DELETE_CHECKPOINT x -> ServerCheckpoint.delete_checkpoint x
-    | STATS -> Stats.get_stats ()
-    | KILL -> ()
+        env, ServerArgumentInfo.go contents line col
+    | SEARCH (query, type_) -> env, ServerSearch.go genv.workers query type_
+    | COVERAGE_COUNTS path -> env, ServerCoverageMetric.go path genv env
+    | LINT fnl -> env, ServerLint.go genv env fnl
+    | LINT_ALL code -> env, ServerLint.lint_all genv env code
+    | CREATE_CHECKPOINT x -> env, ServerCheckpoint.create_checkpoint x
+    | RETRIEVE_CHECKPOINT x -> env, ServerCheckpoint.retrieve_checkpoint x
+    | DELETE_CHECKPOINT x -> env, ServerCheckpoint.delete_checkpoint x
+    | STATS -> env, Stats.get_stats ()
+    | KILL -> env, ()
     | FIND_LVAR_REFS (content, line, char) ->
-        ServerFindLocals.go content line char
+        env, ServerFindLocals.go content line char
     | FORMAT (content, from, to_) ->
-        ServerFormat.go content from to_
+        env, ServerFormat.go content from to_
     | TRACE_AI action ->
-        Ai.TraceService.go action Typing_check_utils.check_defs
+        env, Ai.TraceService.go action Typing_check_utils.check_defs
            (ServerArgs.ai_mode genv.options) env.tcopt
     | AI_QUERY json ->
-        Ai.QueryService.go json
+        env, Ai.QueryService.go json
+    | ECHO_FOR_TEST msg ->
+        env, msg
+    | OPEN_FILE path ->
+        let content =
+          try Sys_utils.cat path with _ -> "" in
+        let fc = of_content ~content in
+        let edited_files_ = (SMap.add path fc env.edited_files) in
+        let new_env = {env with edited_files = edited_files_} in
+        new_env, ()
+    | CLOSE_FILE path ->
+        let edited_files_ = SMap.remove path env.edited_files in
+        let new_env = {env with edited_files = edited_files_} in
+        new_env, ()
+    | EDIT_FILE (path, edits) ->
+        let fc = try SMap.find_unsafe path env.edited_files
+        with Not_found ->
+          let content = try Sys_utils.cat path with _ -> "" in
+          of_content ~content in
+        let edited_fc = edit_file fc edits in
+        let edited_files_ = (SMap.add path edited_fc env.edited_files) in
+        let new_env = {env with edited_files = edited_files_} in
+        new_env, ()
+    | IDE_AUTOCOMPLETE (path, pos) ->
+        let fc = try
+        SMap.find_unsafe path env.edited_files
+        with Not_found ->
+        let content = try Sys_utils.cat path with _ -> "" in
+        of_content content in
+        let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
+        let edited_fc = edit_file fc edits in
+        let content = get_content edited_fc in
+        env, ServerAutoComplete.auto_complete env.tcopt content
+    | DISCONNECT ->
+        let new_env = {env with
+        persistent_client_fd = None;
+        edited_files = SMap.empty} in
+        new_env, ()
 
 let to_string : type a. a t -> _ = function
   | STATUS -> "STATUS"
@@ -139,3 +184,9 @@ let to_string : type a. a t -> _ = function
   | GET_DEFINITION_BY_ID _ -> "GET_DEFINITION_BY_ID"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
   | AI_QUERY _ -> "AI_QUERY"
+  | ECHO_FOR_TEST _ -> "ECHO_FOR_TEST"
+  | OPEN_FILE _ -> "OPEN_FILE"
+  | CLOSE_FILE _ -> "CLOSE_FILE"
+  | EDIT_FILE _ -> "EDIT_FILE"
+  | IDE_AUTOCOMPLETE _ -> "IDE_AUTOCOMPLETE"
+  | DISCONNECT -> "DISCONNECT"

@@ -1,21 +1,21 @@
 <?hh
 
-function take_keyset1(keyset $foo): keyset {
+function take_keyset1(HH\keyset $foo): HH\keyset {
   $foo[] = "keyset1";
   return $foo;
 }
 
-function take_keyset2(keyset<Foo> $bar): keyset<Foo> {
+function take_keyset2(HH\keyset<Foo> $bar): HH\keyset<Foo> {
   $bar[] = "keyset2";
   return $bar;
 }
 
-function take_keyset3(keyset<Foo,> $baz): keyset<Foo,> {
+function take_keyset3(HH\keyset<Foo,> $baz): HH\keyset<Foo,> {
   $baz[] = "keyset3";
   return $baz;
 }
 
-function take_keyset4(keyset<Foo, Bar> $biz): keyset<Foo, Bar> {
+function take_keyset4(HH\keyset<Foo, Bar> $biz): HH\keyset<Foo, Bar> {
   $biz[] = "keyset4";
   return $biz;
 }
@@ -27,11 +27,10 @@ function take_array(array $arr): array {
 }
 
 function main() {
-  $d = keyset["x", "y"];
+  $k = keyset["x", "y"];
   $a = array("a" => "b");
 
-/*
-  take_keyset1($d)
+  take_keyset1($k)
     |> take_keyset2($$)
     |> take_keyset3($$)
     |> take_keyset4($$)
@@ -44,7 +43,6 @@ function main() {
     |> take_keyset4($$)
     |> take_array($$)
     |> var_dump($$);
-*/
 }
 
 set_error_handler(

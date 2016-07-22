@@ -169,8 +169,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   assert(propVals->size() == numDeclProps);
 
   // For visibility checks
-  CallerFrame cf;
-  auto ctx = arGetContextClass(cf());
+  auto ctx = arGetContextClass(GetCallerFrame());
 
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
@@ -203,8 +202,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
   if (object.isNull()) {
     // No arg passed.
     String ret;
-    CallerFrame cf;
-    auto cls = arGetContextClassImpl<true>(cf());
+    auto cls = arGetContextClassImpl<true>(GetCallerFrame());
     if (cls) {
       ret = String(cls->nameStr());
     }
@@ -239,8 +237,7 @@ Variant HHVM_FUNCTION(get_called_class) {
 Variant HHVM_FUNCTION(get_parent_class,
                       const Variant& object /* = null_variant */) {
   if (object.isNull()) {
-    CallerFrame cf;
-    Class* cls = arGetContextClass(cf());
+    Class* cls = arGetContextClass(GetCallerFrame());
     if (cls && cls->parent()) {
       return String(cls->parentStr());
     }

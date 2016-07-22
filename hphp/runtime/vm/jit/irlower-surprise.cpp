@@ -143,6 +143,10 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
   env.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
+IMPL_OPCODE_CALL(SuspendHookE)
+IMPL_OPCODE_CALL(SuspendHookR)
+IMPL_OPCODE_CALL(ReturnHook)
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

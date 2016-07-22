@@ -304,6 +304,8 @@ void SrcRec::replaceOldTranslations() {
   if (RuntimeOption::EvalEnableReusableTC) {
     auto trans = folly::makeMoveWrapper(std::move(translations));
     Treadmill::enqueue([trans]() mutable {
+      auto codeLock = mcg->lockCode();
+      auto metaLock = mcg->lockMetadata();
       for (auto& loc : *trans) {
         reclaimTranslation(loc);
       }

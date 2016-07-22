@@ -122,7 +122,7 @@ let test_suite =
 
 let main () =
   EventLogger.init (Daemon.devnull ()) 0.0;
-  let _handle = SharedMem.init_default () in
+  let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   run_test_tt_main test_suite
 
 let _ = main ()

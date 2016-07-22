@@ -16,8 +16,13 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -32,7 +37,9 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -124,6 +131,69 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::Sync, args);
   v << jmp{done};
   v = done;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(LdClsCtor)
+
+void lookupClsMethodHelper(Class* cls, StringData* meth,
+                           ActRec* ar, ActRec* fp) {
+  try {
+    const Func* f;
+    auto const obj = fp->hasThis() ? fp->getThis() : nullptr;
+    auto const ctx = fp->m_func->cls();
+    auto const res = g_context->lookupClsMethod(f, cls, meth, obj, ctx, true);
+
+    if (res == LookupResult::MethodFoundNoThis ||
+        res == LookupResult::MagicCallStaticFound) {
+      ar->setClass(cls);
+    } else {
+      assertx(obj);
+      assertx(res == LookupResult::MethodFoundWithThis ||
+              res == LookupResult::MagicCallFound);
+      obj->incRefCount();
+      ar->setThis(obj);
+    }
+
+    ar->m_func = f;
+
+    if (res == LookupResult::MagicCallFound ||
+        res == LookupResult::MagicCallStaticFound) {
+      ar->setMagicDispatch(meth);
+      meth->incRefCount();
+    }
+  } catch (...) {
+    *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
+    throw;
+  }
+}
+
+void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LookupClsMethod>();
+  auto const sp = srcLoc(env, inst, 2).reg();
+
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .ssa(1)
+    .addr(sp, cellsToBytes(extra->offset.offset))
+    .ssa(3);
+
+  cgCallHelper(vmain(env), env, CallSpec::direct(lookupClsMethodHelper),
+               callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileMethodData>();
+  auto const sp = srcLoc(env, inst, 0).reg();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .addr(sp, cellsToBytes(extra->spOffset.offset))
+    .ssa(1);
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),
+               kVoidDest, SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,12 +25,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(disable_inlining, const Variant& function) {
-  CallerFrame cf;
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
-  const HPHP::Func* f = vm_decode_function(function, cf(), false, obj, cls,
-                                               invName, false);
+  const HPHP::Func* f = vm_decode_function(function, GetCallerFrame(),
+                                           false, obj, cls, invName, false);
   if (f == nullptr || f->isAbstract()) {
     raise_warning("disable_inlining(): undefined function");
     return;

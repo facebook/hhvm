@@ -49,9 +49,8 @@ const RegSet kGPCalleeSaved =
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
 const RegSet kGPReserved =
-  reg::r2 | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm | reg::r1 |
+  rtoc() | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm | rsfp() |
   rfuncln() | rfuncentry() | rthreadptr() | rone() | r_svcreq_stub();
-  // Reserve the r2 TOC register to avoid changing it
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 

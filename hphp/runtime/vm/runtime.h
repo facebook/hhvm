@@ -241,9 +241,6 @@ typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
 
 extern CompileStringFn g_hphp_compiler_parse;
 
-// always_assert tv is a plausible TypedValue*
-void assertTv(const TypedValue* tv);
-
 // returns the number of things it put on sp
 int init_closure(ActRec* ar, TypedValue* sp);
 

@@ -184,6 +184,7 @@ struct TypeConstraint {
   bool isObject()   const { return m_type == Type::Object; }
   bool isDict()     const { return m_type == Type::Dict; }
   bool isVec()      const { return m_type == Type::Vec; }
+  bool isKeyset()   const { return m_type == Type::Keyset; }
 
   AnnotType type()  const { return m_type; }
 

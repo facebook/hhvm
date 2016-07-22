@@ -96,10 +96,9 @@ bool vm_decode_function_cufiter(const Variant& function,
                                 CufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
-  CallerFrame cf;
   StringData* invName = nullptr;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
-  const HPHP::Func* func = vm_decode_function(function, cf(), false,
+  const HPHP::Func* func = vm_decode_function(function, GetCallerFrame(), false,
                                               obj, cls, invName, false);
   if (func == nullptr) {
     return false;

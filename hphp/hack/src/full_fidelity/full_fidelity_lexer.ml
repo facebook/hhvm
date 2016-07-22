@@ -453,6 +453,113 @@ let scan_docstring_literal lexer =
       with_error lexer SyntaxError.error0011 in
   (lexer, kind)
 
+let scan_xhp_label lexer =
+  (* An XHP label has the same grammar as a Hack name. *)
+  let (lexer, _) = scan_name lexer in
+  lexer
+
+let rec scan_xhp_element_name lexer =
+  (* An XHP element name is a sequence of one or more XHP labels each separated
+     by a single : or -. *)
+  let lexer = scan_xhp_label lexer in
+  let ch0 = peek_char lexer 0 in
+  let ch1 = peek_char lexer 1 in
+  if ch0 = ':' || ch0 = '-' then
+    begin
+      if is_name_nondigit ch1 then
+        scan_xhp_element_name (advance lexer 1)
+      else
+        let lexer = with_error lexer SyntaxError.error0008 in
+        (advance lexer 1, TokenKind.Error)
+    end
+  else
+    (lexer, TokenKind.XHPElementName)
+
+let scan_xhp_string_literal lexer =
+  (* XHP string literals are just straight up "find the closing quote"
+     strings.  TODO: What about newlines embedded? *)
+  let rec aux lexer =
+    let ch0 = peek_char lexer 0 in
+    let ch1 = peek_char lexer 1 in
+    match (ch0, ch1) with
+      | ('\000', _) ->
+        if at_end lexer then
+          let lexer = with_error lexer SyntaxError.error0012 in
+          (lexer, TokenKind.XHPStringLiteral)
+        else
+          let lexer = with_error lexer SyntaxError.error0006 in
+          aux (advance lexer 1)
+
+      | ('"', _) -> (advance lexer 1, TokenKind.XHPStringLiteral)
+      | _ -> aux (advance lexer 1) in
+  aux (advance lexer 1)
+
+(* Note that this does not scan an XHP body *)
+let scan_xhp_token lexer =
+  (* TODO: HHVM requires that there be no trivia between < and name in an
+     opening tag, but does allow trivia between </ and name in a closing tag.
+     Consider allowing trivia in an opening tag. *)
+  let ch0 = peek_char lexer 0 in
+  let ch1 = peek_char lexer 1 in
+  match (ch0, ch1) with
+  | ('{', _) -> (advance lexer 1, TokenKind.LeftBrace)
+  | ('}', _) -> (advance lexer 1, TokenKind.RightBrace)
+  | ('=', _) -> (advance lexer 1, TokenKind.Equal)
+  | ('<', '/') -> (advance lexer 2, TokenKind.LessThanSlash)
+  | ('<', _) ->
+    if is_name_nondigit ch1 then scan_xhp_element_name (advance lexer 1)
+    else (advance lexer 1, TokenKind.LessThan)
+  | ('"', _) -> scan_xhp_string_literal lexer
+  | ('/', '>') -> (advance lexer 2, TokenKind.SlashGreaterThan)
+  | ('>', _) -> (advance lexer 1, TokenKind.GreaterThan)
+  | _ ->
+    if ch0 = invalid && at_end lexer then
+      (lexer, TokenKind.EndOfFile)
+    else if is_name_nondigit ch0 then
+      scan_xhp_element_name lexer
+    else
+      let lexer = with_error lexer SyntaxError.error0006 in
+      (advance lexer 1, TokenKind.Error)
+
+let scan_xhp_comment lexer =
+  let rec aux lexer =
+    let ch0 = peek_char lexer 0 in
+    let ch1 = peek_char lexer 1 in
+    let ch2 = peek_char lexer 2 in
+    match (ch0, ch1, ch2) with
+    | ('\000', _, _) -> with_error lexer SyntaxError.error0014
+    | ('-', '-', '>') -> (advance lexer 3)
+    | _ -> aux (advance lexer 1) in
+  aux (advance lexer 4)
+
+let scan_xhp_body lexer =
+  let rec aux lexer =
+    let ch = peek_char lexer 0 in
+    match ch with
+      | '\000' ->
+        if at_end lexer then
+          let lexer = with_error lexer SyntaxError.error0013 in
+          lexer
+        else
+          let lexer = with_error lexer SyntaxError.error0006 in
+          aux (advance lexer 1)
+      | '{'
+      | '<' -> lexer
+      | _ -> aux (advance lexer 1) in
+  let ch0 = peek_char lexer 0 in
+  let ch1 = peek_char lexer 1 in
+  let ch2 = peek_char lexer 2 in
+  let ch3 = peek_char lexer 3 in
+  match (ch0, ch1, ch2, ch3) with
+  | ('\000', _, _, _) when at_end lexer -> (lexer, TokenKind.EndOfFile)
+  | ('{', _, _, _) -> (advance lexer 1, TokenKind.LeftBrace)
+  | ('<', '!', '-', '-') -> (scan_xhp_comment lexer, TokenKind.XHPComment)
+  | ('<', '/', _, _) -> (advance lexer 2, TokenKind.LessThanSlash)
+  | ('<', _, _, _) ->
+    if is_name_nondigit ch1 then scan_xhp_element_name (advance lexer 1)
+    else (advance lexer 1, TokenKind.LessThan)
+  | _ -> ((aux lexer), TokenKind.XHPBody)
+
 let scan_token in_type lexer =
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
@@ -524,6 +631,7 @@ let scan_token in_type lexer =
   | ('^', '=', _) -> (advance lexer 2, TokenKind.CaratEqual)
   | ('^', _, _) -> (advance lexer 1, TokenKind.Carat)
   | ('|', '=', _) -> (advance lexer 2, TokenKind.BarEqual)
+  | ('|', '>', _) -> (advance lexer 2, TokenKind.BarGreaterThan)
   | ('|', '|', _) -> (advance lexer 2, TokenKind.BarBar)
   | ('|', _, _) -> (advance lexer 1, TokenKind.Bar)
   | ('&', '=', _) -> (advance lexer 2, TokenKind.AmpersandEqual)
@@ -652,40 +760,96 @@ let scan_trailing_trivia lexer =
   let (lexer, trivia_list) = aux lexer [] in
   (lexer, List.rev trivia_list)
 
-let scan_token_and_trivia scanner lexer as_name =
+let as_keyword kind lexer =
+  if kind = TokenKind.Name then
+    let text = current_text lexer in
+    match TokenKind.from_string text with
+    | Some keyword -> keyword
+    | _ -> TokenKind.Name
+  else
+    kind
+
+(* scanner takes a lexer, returns a lexer and a kind *)
+let scan_token_and_leading_trivia scanner as_name lexer  =
   (* Get past the leading trivia *)
   let (lexer, leading) = scan_leading_trivia lexer in
   (* Remember where we were when we started this token *)
   let lexer = start_new_lexeme lexer in
   let (lexer, kind) = scanner lexer in
-  let kind = if (not as_name) && kind = TokenKind.Name then
-    let text = current_text lexer in
-    match TokenKind.from_string text with
-    | Some keyword -> keyword
-    | _ -> kind
-  else kind in
+  let kind = if as_name then kind else as_keyword kind lexer in
   let w = width lexer in
+  (lexer, kind, w, leading)
+
+(* scanner takes a lexer, returns a lexer and a kind *)
+let scan_token_and_trivia scanner as_name lexer  =
+  let (lexer, kind, w, leading) =
+    scan_token_and_leading_trivia scanner as_name lexer in
   let (lexer, trailing) = scan_trailing_trivia lexer in
   (lexer, Token.make kind w leading trailing)
 
-let scan_next_token scanner lexer as_name =
+(* tokenizer takes a lexer, returns a lexer and a token *)
+let scan_assert_progress tokenizer lexer  =
   let original_remaining = remaining lexer in
-  let (lexer, token) = scan_token_and_trivia scanner lexer as_name in
+  let (lexer, token) = tokenizer lexer in
   let new_remaining = remaining lexer in
-  assert (new_remaining < original_remaining ||
+  if (new_remaining < original_remaining ||
     original_remaining = 0 &&
     new_remaining = 0 &&
-    (Token.kind token) = TokenKind.EndOfFile);
-  (lexer, token)
+    (Token.kind token) = TokenKind.EndOfFile) then
+      (lexer, token)
+  else begin
+    let message = Printf.sprintf
+      "failed to make progress at %d\n" lexer.offset in
+    print_endline message;
+    assert false
+  end
+
+let scan_next_token scanner as_name lexer =
+  let tokenizer = scan_token_and_trivia scanner as_name in
+  scan_assert_progress tokenizer lexer
 
 (* Entrypoints *)
-(* TODO: Combine these into passing flags? *)
+(* TODO: Instead of passing Boolean flags, create a flags enum? *)
 
 let next_token lexer =
-  scan_next_token (scan_token false) lexer false
+  scan_next_token (scan_token false) false lexer
 
 let next_token_as_name lexer =
-  scan_next_token (scan_token false) lexer true
+  scan_next_token (scan_token false) true lexer
 
 let next_token_in_type lexer =
-  scan_next_token (scan_token true) lexer false
+  scan_next_token (scan_token true) false lexer
+
+let next_xhp_element_token lexer =
+  (* XHP elements have whitespace, newlines and Hack comments. *)
+  let tokenizer lexer =
+    let (lexer, kind, w, leading) =
+      scan_token_and_leading_trivia scan_xhp_token true lexer in
+    (* We cannot scan trivia after a > or /> because the next thing
+       might be part of an XHP body, and that's not trivia, it's body
+       text.
+
+       TODO: If we are at the outermost > or /> in an XHP expression then the
+       trailing trivia *should* be associated with the token. *)
+    match kind with
+    | TokenKind.GreaterThan
+    | TokenKind.SlashGreaterThan ->
+      (lexer, Token.make kind w leading [])
+    | _ ->
+      let (lexer, trailing) = scan_trailing_trivia lexer in
+      (lexer, Token.make kind w leading trailing) in
+  let (lexer, token) = scan_assert_progress tokenizer lexer in
+  let token_width = Token.width token in
+  let trailing_width = Token.trailing_width token in
+  let token_start_offset = lexer.offset - trailing_width - token_width in
+  let token_text = SourceText.sub lexer.text token_start_offset token_width in
+  (lexer, token, token_text)
+
+let next_xhp_body_token lexer =
+  (* XHP bodies do not have whitespace, newlines or Hack comments. *)
+  let scanner lexer =
+    let lexer = start_new_lexeme lexer in
+    let (lexer, kind) = scan_xhp_body lexer in
+    let w = width lexer in
+    (lexer, Token.make kind w [] []) in
+  scan_assert_progress scanner lexer

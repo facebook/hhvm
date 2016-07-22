@@ -19,6 +19,7 @@
 #include <folly/Likely.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/util/hphp-config.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -45,6 +46,7 @@ const StaticString
   s_array("array"),
   s_dict("dict"),
   s_vec("vec"),
+  s_keyset("keyset"),
   s_NULL("NULL"),
   s_null("null");
 
@@ -61,6 +63,7 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.isArray()) {
     if (v.toArray()->isDict()) return s_dict;
     if (v.toArray()->isVecArray()) return s_vec;
+    if (v.toArray()->isKeyset()) return s_keyset;
   }
   return getDataTypeString(v.getType());
 }
@@ -140,6 +143,10 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
   return is_dict(v);
+}
+
+bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
+  return is_keyset(v);
 }
 
 bool HHVM_FUNCTION(is_object, const Variant& v) {
@@ -375,8 +382,7 @@ static bool modify_extract_name(VarEnv* v,
     if (name == s_this) {
       // Only disallow $this when inside a non-static method, or a static method
       // that has defined $this (matches Zend)
-      CallerFrame cf;
-      const Func* func = arGetContextFunc(cf());
+      auto const func = arGetContextFunc(GetCallerFrame());
 
       if (func && func->isMethod() && v->lookup(s_this.get()) != nullptr) {
         return false;
@@ -492,18 +498,15 @@ void HHVM_FUNCTION(SystemLib_parse_str,
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define EXTR_CONST(v) Native::registerConstant<KindOfInt64> \
-                                   (makeStaticString("EXTR_" #v), EXTR_##v);
-
 void StandardExtension::initVariable() {
-  EXTR_CONST(IF_EXISTS);
-  EXTR_CONST(OVERWRITE);
-  EXTR_CONST(PREFIX_ALL);
-  EXTR_CONST(PREFIX_IF_EXISTS);
-  EXTR_CONST(PREFIX_INVALID);
-  EXTR_CONST(PREFIX_SAME);
-  EXTR_CONST(REFS);
-  EXTR_CONST(SKIP);
+  HHVM_RC_INT_SAME(EXTR_IF_EXISTS);
+  HHVM_RC_INT_SAME(EXTR_OVERWRITE);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_ALL);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_IF_EXISTS);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_INVALID);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_SAME);
+  HHVM_RC_INT_SAME(EXTR_REFS);
+  HHVM_RC_INT_SAME(EXTR_SKIP);
 
   HHVM_FE(is_null);
   HHVM_FE(is_bool);
@@ -519,6 +522,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(is_array);
   HHVM_FALIAS(HH\\is_vec, HH_is_vec);
   HHVM_FALIAS(HH\\is_dict, HH_is_dict);
+  HHVM_FALIAS(HH\\is_keyset, HH_is_keyset);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

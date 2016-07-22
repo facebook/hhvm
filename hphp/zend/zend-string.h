@@ -17,10 +17,12 @@
 #ifndef incl_HPHP_UTIL_ZEND_STRING_H_
 #define incl_HPHP_UTIL_ZEND_STRING_H_
 
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <stdint.h>
 #include <string>
+
+#include <folly/Range.h>
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -49,7 +51,8 @@ struct Md5Digest {
   Md5Digest(const char* s, int len);
   uint8_t digest[16];
 };
-std::string string_md5(const char* s, int len);
+
+std::string string_md5(folly::StringPiece);
 
 /*
  * Convert input[len] to a malloced, nul-terminated, lowercase, hex string

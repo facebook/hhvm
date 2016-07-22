@@ -60,8 +60,6 @@ struct DateTimeData {
   static const StaticString s_className;
 };
 
-Object HHVM_METHOD(DateTime, add,
-                   const Object& interval);
 void HHVM_METHOD(DateTime, __construct,
                  const String& time = "now",
                  const Variant& timezone = null_variant);
@@ -69,9 +67,9 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
                            const String& format,
                            const String& time,
                            const Variant& timezone /*= null_variant */);
-Object HHVM_METHOD(DateTime, diff,
-                   const Variant& datetime2,
-                   const Variant& absolute);
+Variant HHVM_METHOD(DateTime, diff,
+                    const Variant& datetime2,
+                    const Variant& absolute);
 String HHVM_METHOD(DateTime, format,
                    const Variant& format);
 Array HHVM_STATIC_METHOD(DateTime, getLastErrors);
@@ -94,10 +92,12 @@ Object HHVM_METHOD(DateTime, setTime,
                    int64_t second /*= 0*/);
 Object HHVM_METHOD(DateTime, setTimestamp,
                    int64_t unixtimestamp);
-Object HHVM_METHOD(DateTime, setTimezone,
-                   const Object& timezone);
-Object HHVM_METHOD(DateTime, sub,
-                   const Object& interval);
+Variant HHVM_METHOD(DateTime, setTimezone,
+                    const Object& timezone);
+Variant HHVM_METHOD(DateTime, add,
+                    const Object& interval);
+Variant HHVM_METHOD(DateTime, sub,
+                    const Object& interval);
 Array HHVM_METHOD(DateTime, __sleep);
 void HHVM_METHOD(DateTime, __wakeup);
 Array HHVM_METHOD(DateTime, __debuginfo);
@@ -144,7 +144,7 @@ void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone);
 Array HHVM_METHOD(DateTimeZone, getLocation);
 String HHVM_METHOD(DateTimeZone, getName);
-int64_t HHVM_METHOD(DateTimeZone, getOffset,
+Variant HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime);
 Array HHVM_METHOD(DateTimeZone, getTransitions,
                   int64_t timestamp_begin = k_PHP_INT_MIN,
@@ -234,14 +234,11 @@ bool HHVM_FUNCTION(checkdate,
 Variant HHVM_FUNCTION(date_create,
                       const Variant& time = null_variant,
                       const Variant& timezone = null_variant);
-String HHVM_FUNCTION(date_format,
-                     const Object& datetime,
-                     const String& format);
+Variant HHVM_FUNCTION(date_format,
+                      const Object& datetime,
+                      const String& format);
 Variant HHVM_FUNCTION(date_parse,
                       const String& date);
-Object HHVM_FUNCTION(date_sub,
-                     const Object& datetime,
-                     const Object& interval);
 
 ///////////////////////////////////////////////////////////////////////////////
 // sun

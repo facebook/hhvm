@@ -478,9 +478,10 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
   }
 
   if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
-    auto msg = folly::format(
-      "Cannot Serialize unexpected type {}", tname(var.getType()).c_str());
-    SystemLib::throwInvalidArgumentExceptionObject(msg.str());
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::format("Cannot Serialize unexpected type {}",
+                    tname(var.getType())).str()
+    );
   }
   return 1;
 }
@@ -1157,13 +1158,9 @@ Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void const_load_set(const String& key, const Variant& value) {
-  // legacy entry point, no longer used.
-}
-
 EXTERNALLY_VISIBLE
 void const_load() {
-  // legacy entry point, no longer used.
+  // TODO(8117903): Unused; remove after updating www side.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

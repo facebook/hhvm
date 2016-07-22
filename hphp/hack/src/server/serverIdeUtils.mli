@@ -8,6 +8,10 @@
  *
  *)
 
+(* When typechecking a content buffer in IDE mode,
+* this is the path that will be assigned to it *)
+val path: Relative_path.t
+
 (* Runs the typecheck phase on a single file. *)
 val check_file_input :
   TypecheckerOptions.t ->

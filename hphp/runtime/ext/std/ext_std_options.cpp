@@ -18,10 +18,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/utsname.h>
 #include <pwd.h>
 #include <algorithm>
 #include <vector>
+
+#ifndef _WIN32
+#include <sys/utsname.h>
+#endif
 
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
@@ -47,21 +50,13 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_SLASH_TMP("/tmp");
 const StaticString s_ZEND_VERSION("2.4.99");
-
-const int64_t k_INFO_GENERAL       = (1<<0);
-const int64_t k_INFO_CREDITS       = (1<<0);
-const int64_t k_INFO_CONFIGURATION = (1<<0);
-const int64_t k_INFO_MODULES       = (1<<0);
-const int64_t k_INFO_ENVIRONMENT   = (1<<0);
-const int64_t k_INFO_VARIABLES     = (1<<0);
-const int64_t k_INFO_LICENSE       = (1<<0);
-const int64_t k_INFO_ALL           = 0x7FFFFFFF;
 
 const int64_t k_ASSERT_ACTIVE      = 1;
 const int64_t k_ASSERT_CALLBACK    = 2;
@@ -935,13 +930,73 @@ String HHVM_FUNCTION(php_sapi_name) {
   return RuntimeOption::ExecutionMode;
 }
 
-const StaticString s_s("s");
-const StaticString s_r("r");
-const StaticString s_n("n");
-const StaticString s_v("v");
-const StaticString s_m("m");
+#ifdef _WIN32
+const char* php_get_edition_name(DWORD majVer, DWORD minVer);
+folly::Optional<String> php_get_windows_name();
+String php_get_windows_cpu();
+#endif
+
+const StaticString
+  s_s("s"),
+  s_r("r"),
+  s_n("n"),
+  s_v("v"),
+  s_m("m");
 
 Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
+#ifdef _WIN32
+  if (mode == s_s) {
+    return s_Windows_NT;
+  } else if (mode == s_r) {
+    DWORD dwVersion = GetVersion();
+    DWORD dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
+    DWORD dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
+    return folly::sformat("{}.{}", dwMajorVersion, dwMinorVersion);
+  } else if (mode == s_n) {
+    DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
+    char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
+
+    GetComputerName(ComputerName, &dwSize);
+    return String(ComputerName, dwSize, CopyString);
+  } else if (mode == s_v) {
+    DWORD dwVersion = GetVersion();
+    auto dwBuild = (DWORD)(HIWORD(dwVersion));
+    auto winVer = php_get_windows_name();
+    if (!winVer.hasValue()) {
+      return folly::sformat("build {}", dwBuild);
+    }
+    return folly::sformat("build {} ({})", dwBuild, winVer.value());
+  } else if (mode == s_m) {
+    return php_get_windows_cpu();
+  } else {
+    auto winVer = php_get_windows_name();
+
+    DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
+    char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
+    GetComputerName(ComputerName, &dwSize);
+
+    DWORD dwVersion = GetVersion();
+    DWORD dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
+    DWORD dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
+    DWORD dwBuild = (DWORD)(HIWORD(dwVersion));
+
+    if (dwMajorVersion == 6 && dwMinorVersion == 2 && winVer.hasValue()) {
+      if (strncmp(winVer.value().c_str(), "Windows 8.1", 11) == 0 ||
+          strncmp(winVer.value().c_str(), "Windows Server 2012 R2", 22) == 0) {
+        dwMinorVersion = 3;
+      }
+    }
+
+    return folly::sformat("Windows NT {} {}.{} build {} ({}) {}",
+      ComputerName,
+      dwMajorVersion,
+      dwMinorVersion,
+      dwBuild,
+      winVer.hasValue() ? winVer.value().c_str() : "unknown",
+      php_get_windows_cpu()
+    );
+  }
+#else
   struct utsname buf;
   if (uname((struct utsname *)&buf) == -1) {
     return init_null();
@@ -964,6 +1019,7 @@ Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
              buf.machine);
     return String(tmp_uname, CopyString);
   }
+#endif
 }
 
 static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {
@@ -1269,27 +1325,21 @@ void StandardExtension::initOptions() {
   HHVM_FE(zend_version);
   HHVM_FE(version_compare);
 
-#define INFO(v) Native::registerConstant<KindOfInt64> \
-                  (makeStaticString("INFO_" #v), k_INFO_##v);
-  INFO(GENERAL);
-  INFO(CREDITS);
-  INFO(CONFIGURATION);
-  INFO(MODULES);
-  INFO(ENVIRONMENT);
-  INFO(VARIABLES);
-  INFO(LICENSE);
-  INFO(ALL);
-#undef INFO
+  HHVM_RC_INT(INFO_GENERAL, 1 << 0);
+  HHVM_RC_INT(INFO_CREDITS, 1 << 0);
+  HHVM_RC_INT(INFO_CONFIGURATION, 1 << 0);
+  HHVM_RC_INT(INFO_MODULES, 1 << 0);
+  HHVM_RC_INT(INFO_ENVIRONMENT, 1 << 0);
+  HHVM_RC_INT(INFO_VARIABLES, 1 << 0);
+  HHVM_RC_INT(INFO_LICENSE, 1 << 0);
+  HHVM_RC_INT(INFO_ALL, 0x7FFFFFFF);
 
-#define ASSERTCONST(v) Native::registerConstant<KindOfInt64> \
-                  (makeStaticString("ASSERT_" #v), k_ASSERT_##v);
-  ASSERTCONST(ACTIVE);
-  ASSERTCONST(CALLBACK);
-  ASSERTCONST(BAIL);
-  ASSERTCONST(WARNING);
-  ASSERTCONST(QUIET_EVAL);
-  ASSERTCONST(EXCEPTION);
-#undef ASSERTCONST
+  HHVM_RC_INT(ASSERT_ACTIVE, k_ASSERT_ACTIVE);
+  HHVM_RC_INT(ASSERT_CALLBACK, k_ASSERT_CALLBACK);
+  HHVM_RC_INT(ASSERT_BAIL, k_ASSERT_BAIL);
+  HHVM_RC_INT(ASSERT_WARNING, k_ASSERT_WARNING);
+  HHVM_RC_INT(ASSERT_QUIET_EVAL, k_ASSERT_QUIET_EVAL);
+  HHVM_RC_INT(ASSERT_EXCEPTION, k_ASSERT_EXCEPTION);
 
   loadSystemlib("std_options");
 }

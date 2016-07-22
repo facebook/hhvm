@@ -243,7 +243,6 @@ std::string getNodesConnectionName(
 
     switch (h->kind()) {
       // Known generalized cases that don't really need pointer kind
-      case HeaderKind::Struct: // Not implemented yet
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Keyset:

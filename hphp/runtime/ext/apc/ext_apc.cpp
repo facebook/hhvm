@@ -638,29 +638,6 @@ void apc_load(int thread) {
     s_snapshotBuilder.writeToFile(upgradeDest);
   }
 
-  if (apcExtension::EnableConstLoad) {
-#ifdef USE_JEMALLOC
-    size_t allocated_before = 0;
-    size_t allocated_after = 0;
-    if (mallctl) {
-      mallctlWrite<uint64_t>("epoch", 1);
-      mallctlRead("stats.allocated", &allocated_before);
-      // Ignore the first result because it may be inaccurate due to internal
-      // allocation.
-      mallctlWrite<uint64_t>("epoch", 1);
-      mallctlRead("stats.allocated", &allocated_before);
-    }
-#endif
-    apc_load_func(handle, "_hphp_const_load_all")();
-#ifdef USE_JEMALLOC
-    if (mallctl) {
-      mallctlWrite<uint64_t>("epoch", 1);
-      mallctlRead("stats.allocated", &allocated_after);
-      s_const_map_size = allocated_after - allocated_before;
-    }
-#endif
-  }
-
   // We've copied all the data out, so close it out.
   dlclose(handle);
 #endif
@@ -674,9 +651,6 @@ size_t get_const_map_size() {
   return s_const_map_size;
 }
 
-//define in ext_fb.cpp
-extern void const_load_set(const String& key, const Variant& value);
-
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming (always with compressed data).
 
@@ -689,133 +663,7 @@ void const_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
-  {
-    int count = int_lens[0];
-    int len = int_lens[1];
-    if (count) {
-      char *keys = gzdecode(int_keys, len);
-      if (keys == nullptr) throw Exception("bad compressed const archive.");
-      ScopedMem holder(keys);
-      const char *k = keys;
-      long long* v = int_values;
-      for (int i = 0; i < count; i++) {
-        String key(k, int_lens[i + 2], CopyString);
-        int64_t value = *v++;
-        const_load_set(key, value);
-        k += int_lens[i + 2] + 1;
-      }
-      assert((k - keys) == len);
-    }
-  }
-  {
-    int count = char_lens[0];
-    int len = char_lens[1];
-    if (count) {
-      char *keys = gzdecode(char_keys, len);
-      if (keys == nullptr) throw Exception("bad compressed const archive.");
-      ScopedMem holder(keys);
-      const char *k = keys;
-      char *v = char_values;
-      for (int i = 0; i < count; i++) {
-        String key(k, char_lens[i + 2], CopyString);
-        Variant value;
-        switch (*v++) {
-        case 0: value = false; break;
-        case 1: value = true; break;
-        case 2: value = uninit_null(); break;
-        default:
-          throw Exception("bad const archive, unknown char type");
-        }
-        const_load_set(key, value);
-        k += char_lens[i + 2] + 1;
-      }
-      assert((k - keys) == len);
-    }
-  }
-  {
-    int count = string_lens[0] / 2;
-    int len = string_lens[1];
-    if (count) {
-      char *decoded = gzdecode(strings, len);
-      if (decoded == nullptr) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, string_lens[i + i + 2], CopyString);
-        p += string_lens[i + i + 2] + 1;
-        String value(p, string_lens[i + i + 3], CopyString);
-        const_load_set(key, value);
-        p += string_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
-  // unserialize_from_string object is extremely slow here;
-  // currently turned off: no objects in haste_maps.
-  if (false) {
-    int count = object_lens[0] / 2;
-    int len = object_lens[1];
-    if (count) {
-      char *decoded = gzdecode(objects, len);
-      if (decoded == nullptr) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, object_lens[i + i + 2], CopyString);
-        p += object_lens[i + i + 2] + 1;
-        String value(p, object_lens[i + i + 3], CopyString);
-        const_load_set(key, unserialize_from_string(value));
-        p += object_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
-  {
-    int count = thrift_lens[0] / 2;
-    int len = thrift_lens[1];
-    if (count) {
-      char *decoded = gzdecode(thrifts, len);
-      if (decoded == nullptr) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, thrift_lens[i + i + 2], CopyString);
-        p += thrift_lens[i + i + 2] + 1;
-        String value(p, thrift_lens[i + i + 3], CopyString);
-        Variant success;
-        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
-        if (same(success, false)) {
-          throw Exception("bad apc archive, fb_unserialize failed");
-        }
-        const_load_set(key, v);
-        p += thrift_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
-  {//Would we use others[]?
-    int count = other_lens[0] / 2;
-    int len = other_lens[1];
-    if (count) {
-      char *decoded = gzdecode(others, len);
-      if (decoded == nullptr) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, other_lens[i + i + 2], CopyString);
-        p += other_lens[i + i + 2] + 1;
-        String value(p, other_lens[i + i + 3], CopyString);
-        Variant v = unserialize_from_string(value);
-        if (same(v, false)) {
-          throw Exception("bad apc archive, unserialize_from_string failed");
-        }
-        const_load_set(key, v);
-        p += other_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
+  // TODO(8117903): Unused; remove after updating www side.
 }
 
 EXTERNALLY_VISIBLE
@@ -827,9 +675,8 @@ void apc_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!apcExtension::ForceConstLoadToAPC) {
-    if (apcExtension::EnableConstLoad && info && info->use_const) return;
-  }
+  bool readOnly = apcExtension::EnableConstLoad && info && info->use_const;
+  if (readOnly && info->a_name) Logger::FInfo("const archive {}", info->a_name);
   auto& s = apc_store();
   SnapshotBuilder* snap = apcExtension::PrimeLibraryUpgradeDest.empty() ?
     nullptr : &s_snapshotBuilder;
@@ -846,6 +693,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = k;
+        item.readOnly = readOnly;
         s.constructPrime(*v++, item);
         if (UNLIKELY(snap != nullptr)) snap->addInt(v[-1], item);
         k += int_lens[i + 2] + 1; // skip \0
@@ -867,6 +715,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = k;
+        item.readOnly = readOnly;
         switch (*v++) {
           case 0:
             s.constructPrime(false, item);
@@ -901,6 +750,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += string_lens[i + i + 2] + 1; // skip \0
         // Strings would be copied into APC anyway.
         String value(p, string_lens[i + i + 3], CopyString);
@@ -925,6 +775,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += object_lens[i + i + 2] + 1; // skip \0
         String value(p, object_lens[i + i + 3], CopyString);
         s.constructPrime(value, item, true);
@@ -947,6 +798,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += thrift_lens[i + i + 2] + 1; // skip \0
         String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
@@ -974,6 +826,7 @@ void apc_load_impl_compressed
       for (int i = 0; i < count; i++) {
         auto& item = vars[i];
         item.key = p;
+        item.readOnly = readOnly;
         p += other_lens[i + i + 2] + 1; // skip \0
         String value(p, other_lens[i + i + 3], CopyString);
         Variant v = unserialize_from_string(value);

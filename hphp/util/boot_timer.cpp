@@ -17,6 +17,8 @@
 
 #include <cassert>
 
+#include <folly/portability/Unistd.h>
+
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/struct-log.h"
@@ -34,7 +36,7 @@ ResourceUsage ResourceUsage::sinceEpoch() {
     std::chrono::duration_cast<TimeUnit>(
       std::chrono::microseconds(
         HPHP::Timer::GetRusageMicros(Timer::TotalCPU, Timer::Self))),
-    Process::GetProcessRSS((pid_t)Process::GetProcessId()));
+    Process::GetProcessRSS(getpid()));
 }
 
 std::string ResourceUsage::toString() const {

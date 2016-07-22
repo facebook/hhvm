@@ -138,6 +138,7 @@ module CheckInstantiability = struct
         | Some {tc_kind = Ast.Cabstract; tc_final = true;
                 tc_name; tc_pos; _}
             when tc_name <> SN.Collections.cDict
+            && tc_name <> SN.Collections.cKeyset
             && tc_name <> SN.Collections.cVec ->
           Errors.uninstantiable_class usage_pos tc_pos tc_name []
         | _ -> ()) in

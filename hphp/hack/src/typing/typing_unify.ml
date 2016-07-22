@@ -65,7 +65,7 @@ and unify_unwrapped env ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 =
       let str_ty = Typing_print.error ty_ in
       let r = Reason.Rcoerced (p1, env.Env.pos, str_ty) in
       let env = List.fold_left tyl
-        ~f:(fun env x -> TUtils.sub_type env ty x) ~init:env in
+        ~f:(fun env x -> TUtils.sub_type env x ty) ~init:env in
       env, (r, ty_)
   | (_, Toption ty1), _ when unwrappedToption1 ->
       unify_unwrapped env unwrappedToption1 ty1 unwrappedToption2 ty2

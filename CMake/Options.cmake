@@ -1,15 +1,12 @@
 #set(CMAKE_BUILD_TYPE Debug)
 
 option(ALWAYS_ASSERT "Enabled asserts in a release build" OFF)
-option(DEBUG_MEMORY_LEAK "Allow easier debugging of memory leaks" OFF)
-option(DEBUG_APC_LEAK "Allow easier debugging of apc leaks" OFF)
 option(ENABLE_SSP "Enabled GCC/LLVM stack-smashing protection" OFF)
 option(STATIC_CXX_LIB "Statically link libstd++ and libgcc." OFF)
-option(ENABLE_AVX2 "Enable AVX2 instructions for Haswell arch in gcc build" OFF)
+option(ENABLE_AVX2 "Enable the use of AVX2 instructions" OFF)
 option(ENABLE_FASTCGI "Enable the FastCGI interface." ON)
 
 option(EXECUTION_PROFILER "Enable the execution profiler" OFF)
-option(ENABLE_FULL_SETLINE "Enable full setline function for debugger and code-coverage" OFF)
 
 option(USE_JEMALLOC "Use jemalloc" ON)
 option(ENABLE_HHPROF "Enable HHProf" OFF)
@@ -33,6 +30,8 @@ option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
 option(ENABLE_ASYNC_MYSQL "Build the async_mysql extension" ON)
 option(ENABLE_MCROUTER "Build the mcrouter library and extension" ON)
 option(ENABLE_PROXYGEN_SERVER "Build the Proxygen HTTP server" ON)
+
+option(ENABLE_SPLIT_DWARF "Reduce linker memory usage by putting debugging information into .dwo files" OFF)
 
 IF (NOT DEFAULT_CONFIG_DIR)
   set(DEFAULT_CONFIG_DIR "/etc/hhvm/" CACHE STRING

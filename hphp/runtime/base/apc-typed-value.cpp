@@ -16,7 +16,6 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
@@ -81,8 +80,6 @@ void APCTypedValue::deleteUncounted() {
       this->~APCTypedValue();
       PackedArray::ReleaseUncounted(arr, sizeof(APCTypedValue));
       return;  // Uncounted PackedArray frees the joint allocation.
-    } else if (m_data.arr->isStruct()) {
-      StructArray::ReleaseUncounted(m_data.arr);
     } else {
       auto arr = m_data.arr;
       this->~APCTypedValue();

@@ -50,8 +50,10 @@
 #include <folly/portability/Dirent.h>
 #include <folly/portability/SysFile.h>
 
-#include <glob.h>
 #include <sys/types.h>
+
+#ifndef _MSC_VER
+#include <glob.h>
 #if defined(__FreeBSD__) || defined(__APPLE__)
 # include <sys/mount.h>
 #else
@@ -61,15 +63,13 @@
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
+#endif
+
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 #include <vector>
 
-#define REGISTER_CONSTANT(name, value)                                         \
-  Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
-
-#define REGISTER_STRING_CONSTANT(name, value)       \
-  Native::registerConstant<KindOfPersistentString>( \
-      makeStaticString(#name), value.get())
+namespace fs = boost::filesystem;
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   auto f = dyn_cast_or_null<File>(handle);              \
@@ -114,6 +114,40 @@
     return false;                                         \
   }                                                       \
 
+#define CHECK_BOOST(dest, func, path)                     \
+  boost::system::error_code ec;                           \
+  dest = func(path.toCppString(), ec);                    \
+  if (ec) {                                               \
+    raise_warning(                                        \
+      "%s(): %s",                                         \
+      __FUNCTION__ + 2,                                   \
+      ec.message().c_str()                                \
+    );                                                    \
+    return false;                                         \
+  }                                                       \
+
+#define CHECK_BOOST_SILENT(dest, func, path)              \
+  boost::system::error_code ec;                           \
+  dest = func(path.toCppString(), ec);                    \
+  if (ec) {                                               \
+    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
+      ec.message().c_str()                                \
+    );                                                    \
+    return false;                                         \
+  }                                                       \
+
+#define CHECK_BOOST_ASSIGN(func, path, arg)               \
+  boost::system::error_code ec;                           \
+  func(path.toCppString(), arg, ec);                      \
+  if (ec) {                                               \
+    raise_warning(                                        \
+      "%s(): %s",                                         \
+      __FUNCTION__ + 2,                                   \
+      ec.message().c_str()                                \
+    );                                                    \
+    return false;                                         \
+  }                                                       \
+
 // libxml/xpathInternals.h defines CHECK_ERROR,
 // we need to undef it first
 #ifdef CHECK_ERROR
@@ -121,26 +155,6 @@
 #endif
 #define CHECK_ERROR(ret)                                 \
   check_error(__FUNCTION__, __LINE__, (ret))
-
-#define PHP_FILE_USE_INCLUDE_PATH   1
-#define PHP_FILE_IGNORE_NEW_LINES   2
-#define PHP_FILE_SKIP_EMPTY_LINES   4
-#define PHP_FILE_APPEND             8
-#define PHP_FILE_NO_DEFAULT_CONTEXT 16
-
-#ifndef GLOB_ONLYDIR
-# define GLOB_ONLYDIR (1<<30)
-# define GLOB_EMULATE_ONLYDIR
-# define GLOB_FLAGMASK (~GLOB_ONLYDIR)
-#else
-# define GLOB_FLAGMASK (~0)
-#endif
-
-#define PHP_GLOB_FLAGS (0 | GLOB_BRACE | GLOB_MARK  \
-                          | GLOB_NOSORT | GLOB_NOCHECK \
-                          | GLOB_NOESCAPE | GLOB_ERR \
-                          | GLOB_ONLYDIR)
-#define PHP_GLOB_FLAGMASK (GLOB_FLAGMASK & PHP_GLOB_FLAGS)
 
 namespace HPHP {
 
@@ -252,8 +266,10 @@ Array stat_impl(struct stat *stat_sb) {
   ret.append((int64_t)stat_sb->st_atime);
   ret.append((int64_t)stat_sb->st_mtime);
   ret.append((int64_t)stat_sb->st_ctime);
+#ifndef _MSC_VER
   ret.append((int64_t)stat_sb->st_blksize);
   ret.append((int64_t)stat_sb->st_blocks);
+#endif
   ret.set(s_dev,     (int64_t)stat_sb->st_dev);
   ret.set(s_ino,     (int64_t)stat_sb->st_ino);
   ret.set(s_mode,    (int64_t)stat_sb->st_mode);
@@ -265,8 +281,10 @@ Array stat_impl(struct stat *stat_sb) {
   ret.set(s_atime,   (int64_t)stat_sb->st_atime);
   ret.set(s_mtime,   (int64_t)stat_sb->st_mtime);
   ret.set(s_ctime,   (int64_t)stat_sb->st_ctime);
+#ifndef _MSC_VER
   ret.set(s_blksize, (int64_t)stat_sb->st_blksize);
   ret.set(s_blocks,  (int64_t)stat_sb->st_blocks);
+#endif
   return ret.toArray();
 }
 
@@ -326,7 +344,7 @@ Variant HHVM_FUNCTION(pclose,
 Variant HHVM_FUNCTION(fseek,
                       const Resource& handle,
                       int64_t offset,
-                      int64_t whence /* = k_SEEK_SET */) {
+                      int64_t whence /* = SEEK_SET */) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->seek(offset, whence)) ? 0 : -1;
 }
@@ -1341,10 +1359,10 @@ Variant HHVM_FUNCTION(pathinfo,
 Variant HHVM_FUNCTION(disk_free_space,
                       const String& directory) {
   CHECK_PATH(directory, 1);
-  struct statfs buf;
+  fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_SYSTEM(statfs(translated.c_str(), &buf));
-  return (double)buf.f_bsize * (double)buf.f_bavail;
+  CHECK_BOOST(sb, fs::space, translated);
+  return (double)sb.free;
 }
 
 Variant HHVM_FUNCTION(diskfreespace,
@@ -1356,10 +1374,10 @@ Variant HHVM_FUNCTION(diskfreespace,
 Variant HHVM_FUNCTION(disk_total_space,
                       const String& directory) {
   CHECK_PATH(directory, 1);
-  struct statfs buf;
+  fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_SYSTEM(statfs(translated.c_str(), &buf));
-  return (double)buf.f_bsize * (double)buf.f_blocks;
+  CHECK_BOOST(sb, fs::space, translated);
+  return (double)sb.capacity;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1382,154 +1400,132 @@ bool HHVM_FUNCTION(chmod,
   return true;
 }
 
-static int get_uid(const Variant& user) {
+static bool do_chown(const String& filename,
+                     const Variant& user,
+                     bool islChown,
+                     const char* funcName) {
+  // If filename points to a user file, invoke UserStreamWrapper::chown(..)
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    if (user.isInteger()) {
+      return usw->chown(filename, user.toInt64());
+    } else if (user.isString()) {
+      return usw->chown(filename, user.toString());
+    }
+    raise_warning("%s(): parameter 2 should be string or integer, %s given",
+      funcName, getDataTypeString(user.getType()).c_str());
+    return false;
+  }
+
+#ifdef WIN32
+  return false;
+#else
   int uid;
   if (user.isString()) {
     String suser = user.toString();
     struct passwd *pw = getpwnam(suser.data());
     if (!pw) {
       Logger::Verbose("%s/%d: Unable to find uid for %s",
-                      __FUNCTION__, __LINE__, suser.data());
-      return -1;
+        __FUNCTION__, __LINE__, suser.data());
+      raise_warning("%s(): Unable to find uid for %s", funcName,
+        user.toString().c_str());
+      return false;
     }
     uid = pw->pw_uid;
   } else {
     uid = user.toInt32();
   }
-  return uid;
+
+  if (islChown) {
+    CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
+  } else {
+    CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
+  }
+  return true;
+#endif
 }
 
 bool HHVM_FUNCTION(chown,
                    const String& filename,
                    const Variant& user) {
   CHECK_PATH_FALSE(filename, 1);
-
-  // If filename points to a user file, invoke UserStreamWrapper::chown(..)
-  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  auto usw = dynamic_cast<UserStreamWrapper*>(w);
-  if (usw != nullptr) {
-    if (user.isInteger()) {
-      return usw->chown(filename, user.toInt64());
-    } else if (user.isString()) {
-      return usw->chown(filename, user.toString());
-    }
-    raise_warning("chown(): parameter 2 should be string or integer, %s given",
-                  getDataTypeString(user.getType()).c_str());
-    return false;
-  }
-
-  int uid = get_uid(user);
-  if (uid == -1) {
-    raise_warning("chown(): Unable to find uid for %s",
-                  user.toString().c_str());
-    return false;
-  }
-  CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
-  return true;
+  return do_chown(filename, user, false, "chown");
 }
 
 bool HHVM_FUNCTION(lchown,
                    const String& filename,
                    const Variant& user) {
+#ifdef WIN32
+  return false;
+#else
   CHECK_PATH_FALSE(filename, 1);
+  return do_chown(filename, user, true, "lchown");
+#endif
+}
 
-  // If filename points to a user file, invoke UserStreamWrapper::chown(..)
+static bool do_chgrp(const String& filename,
+                     const Variant& group,
+                     bool islChgrp,
+                     const char* funcName) {
+  // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {
-    if (user.isInteger()) {
-      return usw->chown(filename, user.toInt64());
-    } else if (user.isString()) {
-      return usw->chown(filename, user.toString());
+    if (group.isInteger()) {
+      return usw->chgrp(filename, group.toInt64());
+    } else if (group.isString()) {
+      return usw->chgrp(filename, group.toString());
     }
-    raise_warning("lchown(): parameter 2 should be string or integer, %s given",
-                  getDataTypeString(user.getType()).c_str());
+    raise_warning("%s(): parameter 2 should be string or integer, %s given",
+      funcName, getDataTypeString(group.getType()).c_str());
     return false;
   }
 
-  int uid = get_uid(user);
-  if (uid == -1) {
-    raise_warning("lchown(): Unable to find uid for %s",
-                  user.toString().c_str());
-    return false;
-  }
-  CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
-  return true;
-}
-
-static int get_gid(const Variant& group) {
+#ifdef WIN32
+  return false;
+#else
   int gid;
   if (group.isString()) {
     String sgroup = group.toString();
     struct group *gr = getgrnam(sgroup.data());
     if (!gr) {
       Logger::Verbose("%s/%d: Unable to find gid for %s",
-                      __FUNCTION__, __LINE__, sgroup.data());
-      return -1;
+        __FUNCTION__, __LINE__, sgroup.data());
+      raise_warning("%s(): Unable to find gid for %s", funcName,
+        group.toString().c_str());
+      return false;
     }
     gid = gr->gr_gid;
   } else {
     gid = group.toInt32();
   }
-  return gid;
+
+  if (islChgrp) {
+    CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
+  } else {
+    CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
+  }
+  return true;
+#endif
 }
 
 bool HHVM_FUNCTION(chgrp,
                    const String& filename,
                    const Variant& group) {
   CHECK_PATH_FALSE(filename, 1);
-
-  // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
-  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  auto usw = dynamic_cast<UserStreamWrapper*>(w);
-  if (usw != nullptr) {
-    if (group.isInteger()) {
-      return usw->chgrp(filename, group.toInt64());
-    } else if (group.isString()) {
-      return usw->chgrp(filename, group.toString());
-    }
-    raise_warning("chgrp(): parameter 2 should be string or integer, %s given",
-                  getDataTypeString(group.getType()).c_str());
-    return false;
-  }
-
-  int gid = get_gid(group);
-  if (gid == -1) {
-    raise_warning("chgrp(): Unable to find gid for %s",
-                  group.toString().c_str());
-    return false;
-  }
-  CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
-  return true;
+  return do_chgrp(filename, group, false, "chgrp");
 }
 
 bool HHVM_FUNCTION(lchgrp,
                    const String& filename,
                    const Variant& group) {
+#ifdef WIN32
+  return false;
+#else
   CHECK_PATH_FALSE(filename, 1);
-
-  // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
-  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  auto usw = dynamic_cast<UserStreamWrapper*>(w);
-  if (usw != nullptr) {
-    if (group.isInteger()) {
-      return usw->chgrp(filename, group.toInt64());
-    } else if (group.isString()) {
-      return usw->chgrp(filename, group.toString());
-    }
-    raise_warning("lchgrp(): parameter 2 should be string or integer, %s given",
-                  getDataTypeString(group.getType()).c_str());
-    return false;
-  }
-
-  int gid = get_gid(group);
-  if (gid == -1) {
-    raise_warning("lchgrp(): Unable to find gid for %s",
-                  group.toString().c_str());
-    return false;
-  }
-  CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
-  return true;
+  return do_chgrp(filename, group, true, "lchgrp");
+#endif
 }
 
 bool HHVM_FUNCTION(touch,
@@ -1564,6 +1560,10 @@ bool HHVM_FUNCTION(touch,
     fclose(f);
   }
 
+#ifdef _MSC_VER
+  CHECK_BOOST_ASSIGN(fs::last_write_time, translated, mtime);
+  // Windows doesn't have an access time to set.
+#else
   if (mtime == 0 && atime == 0) {
     // It is important to pass nullptr so that the OS sets mtime and atime
     // to the current time with maximum precision (more precise then seconds)
@@ -1574,6 +1574,7 @@ bool HHVM_FUNCTION(touch,
     newtime.modtime = mtime;
     CHECK_SYSTEM(utime(translated.data(), &newtime));
   }
+#endif
 
   return true;
 }
@@ -1656,8 +1657,8 @@ bool HHVM_FUNCTION(link,
                    const String& link) {
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
-  CHECK_SYSTEM(::link(File::TranslatePath(target).data(),
-                      File::TranslatePath(link).data()));
+  CHECK_BOOST_ASSIGN(fs::create_hard_link, File::TranslatePath(target),
+                     File::TranslatePath(link).toCppString());
   return true;
 }
 
@@ -1666,8 +1667,15 @@ bool HHVM_FUNCTION(symlink,
                    const String& link) {
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
-  CHECK_SYSTEM(symlink(File::TranslatePathKeepRelative(target).data(),
-                       File::TranslatePath(link).data()));
+  if (HHVM_FN(is_dir)(target)) {
+    CHECK_BOOST_ASSIGN(fs::create_directory_symlink,
+                       File::TranslatePathKeepRelative(target),
+                       File::TranslatePath(link).toCppString());
+  } else {
+    CHECK_BOOST_ASSIGN(fs::create_symlink,
+                       File::TranslatePathKeepRelative(target),
+                       File::TranslatePath(link).toCppString());
+  }
   return true;
 }
 
@@ -1893,6 +1901,7 @@ bool HHVM_FUNCTION(chdir,
   return false;
 }
 
+#ifndef WIN32
 bool HHVM_FUNCTION(chroot,
                    const String& directory) {
   CHECK_PATH_FALSE(directory, 1);
@@ -1900,6 +1909,7 @@ bool HHVM_FUNCTION(chroot,
   CHECK_SYSTEM(chdir("/"));
   return true;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2069,38 +2079,39 @@ const StaticString
   s_STDERR("STDERR");
 
 void StandardExtension::initFile() {
+  HHVM_RC_STR(DIRECTORY_SEPARATOR, s_DIRECTORY_SEPARATOR);
+  HHVM_RC_STR(PATH_SEPARATOR, s_PATH_SEPARATOR);
 
-  REGISTER_STRING_CONSTANT(DIRECTORY_SEPARATOR, s_DIRECTORY_SEPARATOR);
-  REGISTER_CONSTANT(FILE_USE_INCLUDE_PATH, k_FILE_USE_INCLUDE_PATH);
-  REGISTER_CONSTANT(FILE_IGNORE_NEW_LINES, k_FILE_IGNORE_NEW_LINES);
-  REGISTER_CONSTANT(FILE_SKIP_EMPTY_LINES, k_FILE_SKIP_EMPTY_LINES);
-  REGISTER_CONSTANT(FILE_APPEND, k_FILE_APPEND);
-  REGISTER_CONSTANT(FILE_NO_DEFAULT_CONTEXT, k_FILE_NO_DEFAULT_CONTEXT);
-  REGISTER_CONSTANT(FILE_TEXT, k_FILE_TEXT);
-  REGISTER_CONSTANT(FILE_BINARY, k_FILE_BINARY);
-  REGISTER_CONSTANT(FNM_NOESCAPE, k_FNM_NOESCAPE);
-  REGISTER_CONSTANT(FNM_CASEFOLD, k_FNM_CASEFOLD);
-  REGISTER_CONSTANT(FNM_PERIOD, k_FNM_PERIOD);
-  REGISTER_CONSTANT(FNM_PATHNAME, k_FNM_PATHNAME);
-  REGISTER_CONSTANT(GLOB_AVAILABLE_FLAGS, k_GLOB_AVAILABLE_FLAGS);
-  REGISTER_CONSTANT(GLOB_BRACE, k_GLOB_BRACE);
-  REGISTER_CONSTANT(GLOB_ERR, k_GLOB_ERR);
-  REGISTER_CONSTANT(GLOB_MARK, k_GLOB_MARK);
-  REGISTER_CONSTANT(GLOB_NOCHECK, k_GLOB_NOCHECK);
-  REGISTER_CONSTANT(GLOB_NOESCAPE, k_GLOB_NOESCAPE);
-  REGISTER_CONSTANT(GLOB_NOSORT, k_GLOB_NOSORT);
-  REGISTER_CONSTANT(GLOB_ONLYDIR, k_GLOB_ONLYDIR);
-  REGISTER_CONSTANT(LOCK_SH, k_LOCK_SH);
-  REGISTER_CONSTANT(LOCK_EX, k_LOCK_EX);
-  REGISTER_CONSTANT(LOCK_UN, k_LOCK_UN);
-  REGISTER_CONSTANT(LOCK_NB, k_LOCK_NB);
-  REGISTER_STRING_CONSTANT(PATH_SEPARATOR, s_PATH_SEPARATOR);
-  REGISTER_CONSTANT(SCANDIR_SORT_ASCENDING, k_SCANDIR_SORT_ASCENDING);
-  REGISTER_CONSTANT(SCANDIR_SORT_DESCENDING, k_SCANDIR_SORT_DESCENDING);
-  REGISTER_CONSTANT(SCANDIR_SORT_NONE, k_SCANDIR_SORT_NONE);
-  REGISTER_CONSTANT(SEEK_SET, k_SEEK_SET);
-  REGISTER_CONSTANT(SEEK_CUR, k_SEEK_CUR);
-  REGISTER_CONSTANT(SEEK_END, k_SEEK_END);
+  HHVM_RC_INT(FILE_USE_INCLUDE_PATH, PHP_FILE_USE_INCLUDE_PATH);
+  HHVM_RC_INT(FILE_IGNORE_NEW_LINES, PHP_FILE_IGNORE_NEW_LINES);
+  HHVM_RC_INT(FILE_SKIP_EMPTY_LINES, PHP_FILE_SKIP_EMPTY_LINES);
+  HHVM_RC_INT(FILE_APPEND, PHP_FILE_APPEND);
+  HHVM_RC_INT(FILE_NO_DEFAULT_CONTEXT, PHP_FILE_NO_DEFAULT_CONTEXT);
+  HHVM_RC_INT(FILE_TEXT, 0);
+  HHVM_RC_INT(FILE_BINARY, 0);
+  HHVM_RC_INT_SAME(FNM_NOESCAPE);
+  HHVM_RC_INT_SAME(FNM_CASEFOLD);
+  HHVM_RC_INT_SAME(FNM_PERIOD);
+  HHVM_RC_INT_SAME(FNM_PATHNAME);
+  HHVM_RC_INT(GLOB_AVAILABLE_FLAGS, PHP_GLOB_FLAGS);
+  HHVM_RC_INT_SAME(GLOB_BRACE);
+  HHVM_RC_INT_SAME(GLOB_ERR);
+  HHVM_RC_INT_SAME(GLOB_MARK);
+  HHVM_RC_INT_SAME(GLOB_NOCHECK);
+  HHVM_RC_INT_SAME(GLOB_NOESCAPE);
+  HHVM_RC_INT_SAME(GLOB_NOSORT);
+  HHVM_RC_INT_SAME(GLOB_ONLYDIR);
+  HHVM_RC_INT(LOCK_SH, k_LOCK_SH);
+  HHVM_RC_INT(LOCK_EX, k_LOCK_EX);
+  HHVM_RC_INT(LOCK_UN, k_LOCK_UN);
+  HHVM_RC_INT(LOCK_NB, k_LOCK_NB);
+
+  HHVM_RC_INT(SCANDIR_SORT_ASCENDING, k_SCANDIR_SORT_ASCENDING);
+  HHVM_RC_INT(SCANDIR_SORT_DESCENDING, k_SCANDIR_SORT_DESCENDING);
+  HHVM_RC_INT(SCANDIR_SORT_NONE, k_SCANDIR_SORT_NONE);
+  HHVM_RC_INT_SAME(SEEK_SET);
+  HHVM_RC_INT_SAME(SEEK_CUR);
+  HHVM_RC_INT_SAME(SEEK_END);
 
   Native::registerConstant(s_STDIN.get(),  BuiltinFiles::GetSTDIN);
   Native::registerConstant(s_STDOUT.get(), BuiltinFiles::GetSTDOUT);
@@ -2198,7 +2209,9 @@ void StandardExtension::initFile() {
   HHVM_FE(dirname);
   HHVM_FE(getcwd);
   HHVM_FE(chdir);
+#ifndef WIN32
   HHVM_FE(chroot);
+#endif
   HHVM_FE(dir);
   HHVM_FE(opendir);
   HHVM_FE(readdir);

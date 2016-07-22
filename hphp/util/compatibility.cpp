@@ -15,9 +15,8 @@
 */
 
 #include "hphp/util/compatibility.h"
+
 #include "hphp/util/assertions.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/vdso.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -27,8 +26,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <folly/portability/SysTime.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,8 +64,7 @@ int dprintf(int fd, const char *format, ...) {
 
 int pipe2(int pipefd[2], int flags) {
   if (flags & ~O_CLOEXEC) {
-    Logger::Error("Unknown flag passed to pipe2 compatibility layer");
-    abort();
+    always_assert(!"Unknown flag passed to pipe2 compatibility layer");
   }
 
   if (pipe(pipefd) < 0) {
@@ -87,51 +83,6 @@ int pipe2(int pipefd[2], int flags) {
   return 0;
 }
 #endif
-
-static int gettime_helper(clockid_t which_clock, struct timespec *tp) {
-#if defined(__CYGWIN__) || defined(_MSC_VER)
-  // let's bypass trying to load vdso
-  return clock_gettime(which_clock, tp);
-#elif defined(__APPLE__) || defined(__FreeBSD__)
-  // XXX: OSX doesn't support realtime so we ignore which_clock
-  struct timeval tv;
-  int ret = gettimeofday(&tv, nullptr);
-  tp->tv_sec = tv.tv_sec;
-  tp->tv_nsec = tv.tv_usec * 1000;
-  return ret;
-#else
-  static int vdso_usable = Vdso::ClockGetTime(which_clock, tp);
-  if (vdso_usable == 0) {
-    return Vdso::ClockGetTime(which_clock, tp);
-  }
-  return clock_gettime(which_clock, tp);
-#endif
-}
-
-__thread int64_t s_extra_request_microseconds;
-int gettime(clockid_t which_clock, struct timespec* tp) {
-  auto ret = gettime_helper(which_clock, tp);
-#ifdef CLOCK_THREAD_CPUTIME_ID
-  if (which_clock == CLOCK_THREAD_CPUTIME_ID) {
-    always_assert(tp->tv_nsec < 1000000000);
-
-    tp->tv_sec += s_extra_request_microseconds / 1000000;
-    auto res = tp->tv_nsec + (s_extra_request_microseconds % 1000000) * 1000;
-    if (res > 1000000000) {
-      res -= 1000000000;
-      tp->tv_sec += 1;
-    }
-    tp->tv_nsec = res;
-  }
-#endif
-  return ret;
-}
-
-int64_t gettime_diff_us(const timespec &start, const timespec &end) {
-  int64_t dsec = end.tv_sec - start.tv_sec;
-  int64_t dnsec = end.tv_nsec - start.tv_nsec;
-  return dsec * 1000000 + dnsec / 1000;
-}
 
 int fadvise_dontneed(int fd, off_t len) {
 #if defined(__FreeBSD__) || defined(__APPLE__) || defined(_MSC_VER)

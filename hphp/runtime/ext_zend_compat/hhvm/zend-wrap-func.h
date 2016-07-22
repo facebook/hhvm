@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_EXT_ZEND_COMPAT_H_
 #define incl_HPHP_EXT_ZEND_COMPAT_H_
 
+#include "hphp/util/hphp-config.h"
+
 #ifdef ENABLE_ZEND_COMPAT
 
 #include "hphp/runtime/vm/bytecode.h"

@@ -83,6 +83,7 @@ inline void UnaryOpExpression::ctorInit() {
   case T_ARRAY:
   case T_DICT:
   case T_VEC:
+  case T_KEYSET:
   default:
     break;
   }
@@ -137,6 +138,22 @@ bool isDictScalar(ExpressionPtr exp) {
   return true;
 }
 
+bool isKeysetScalar(ExpressionPtr exp) {
+  if (!exp) return true;
+  assertx(exp->is(Expression::KindOfExpressionList));
+
+  auto list = static_pointer_cast<ExpressionList>(exp);
+  assertx(list->getListKind() == ExpressionList::ListKindParam);
+
+  for (int i = 0; i < list->getCount(); ++i) {
+    Variant val;
+    auto& item = (*list)[i];
+    if (!item || !item->getScalarValue(val)) return false;
+    if (!val.isString() && !val.isInteger()) return false;
+  }
+  return true;
+}
+
 bool UnaryOpExpression::isScalar() const {
   switch (m_op) {
   case '!':
@@ -148,6 +165,8 @@ bool UnaryOpExpression::isScalar() const {
   case T_ARRAY:
   case T_VEC:
     return (!m_exp || m_exp->isScalar());
+  case T_KEYSET:
+    return isKeysetScalar(m_exp);
   case T_DICT:
     return isDictScalar(m_exp);
   default:
@@ -188,6 +207,7 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
   case T_ARRAY:
   case T_DICT:
   case T_VEC:
+  case T_KEYSET:
     return m_exp && m_exp->containsDynamicConstant(ar);
   default:
     break;
@@ -210,6 +230,13 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
     if (m_op == T_VEC) {
       if (m_exp->getScalarValue(value)) {
         value = value.toArray().toVec();
+        return true;
+      }
+      return false;
+    }
+    if (m_op == T_KEYSET) {
+      if (m_exp->getScalarValue(value)) {
+        value = value.toArray().toKeyset();
         return true;
       }
       return false;
@@ -470,6 +497,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_ARRAY:         cg_printf("array(");        break;
     case T_DICT:          cg_printf("dict[");         break;
     case T_VEC:           cg_printf("vec[");          break;
+    case T_KEYSET:        cg_printf("keyset[");       break;
     case T_PRINT:         cg_printf("print ");        break;
     case T_ISSET:         cg_printf("isset(");        break;
     case T_EMPTY:         cg_printf("empty(");        break;
@@ -499,6 +527,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_EVAL:          cg_printf(")");  break;
     case T_DICT:          cg_printf("]");  break;
     case T_VEC:           cg_printf("]");  break;
+    case T_KEYSET:        cg_printf("]");  break;
     default:
       break;
     }

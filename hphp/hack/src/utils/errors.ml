@@ -577,6 +577,7 @@ module Typing                               = struct
   let attribute_too_few_arguments           = 4153 (* DONT MODIFY!!!! *)
   let reference_expr                        = 4154 (* DONT MODIFY!!!! *)
   let unification_cycle                     = 4155 (* DONT MODIFY!!!! *)
+  let keyset_set                            = 4156 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -585,6 +586,9 @@ let internal_error pos msg =
 
 let unimplemented_feature pos msg =
   add 0 pos ("Feature not implemented: " ^ msg)
+
+let experimental_feature pos msg =
+  add 0 pos ("Cannot use experimental feature: " ^ msg)
 
 (*****************************************************************************)
 (* Parsing errors. *)
@@ -1520,7 +1524,8 @@ let isset_empty_in_strict pos name =
 
 let unset_nonidx_in_strict pos msgs =
   add_list Typing.unset_nonidx_in_strict
-    ([pos, "In strict mode, unset is banned except on array or dict indexing"] @
+    ([pos, "In strict mode, unset is banned except on array, keyset, "^
+           "or dict indexing"] @
      msgs)
 
 let unpacking_disallowed_builtin_function pos name =
@@ -1544,11 +1549,18 @@ let undefined_field p name =
   add Typing.undefined_field p ("The field "^name^" is undefined")
 
 let array_access pos1 pos2 ty =
-  add_list Typing.array_access ((pos1,
-    "This is not an object of type KeyedContainer, this is "^ty) ::
-            if pos2 != Pos.none
-            then [pos2, "You might want to check this out"]
-            else [])
+  add_list Typing.array_access
+    ((pos1, "This is not an object of type KeyedContainer, this is "^ty) ::
+     if pos2 != Pos.none
+     then [pos2, "You might want to check this out"]
+     else [])
+
+let keyset_set pos1 pos2 =
+  add_list Typing.keyset_set
+    ((pos1, "Keysets entries cannot be set, use append instead.") ::
+     if pos2 != Pos.none
+     then [pos2, "You might want to check this out"]
+     else [])
 
 let array_append pos1 pos2 ty =
   add_list Typing.array_append

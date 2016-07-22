@@ -107,7 +107,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   template<typename T, typename F1, typename F2>
   static Object createAAWH(T start, T stop, F1 iterNext, F2 getCell);
   static Object FromPackedArray(const ArrayData* dependencies);
-  static Object FromStructArray(const StructArray* dependencies);
   static Object FromMixedArray(const MixedArray* dependencies);
   static Object FromMap(const BaseMap* dependencies);
   static Object FromVector(const BaseVector* dependencies);

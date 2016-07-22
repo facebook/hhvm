@@ -1,0 +1,48 @@
+array(3) {
+  ["file"]=>
+  string(%d) "%shphp_debug_caller_info.php"
+  ["function"]=>
+  string(3) "bar"
+  ["line"]=>
+  int(8)
+}
+array(4) {
+  ["class"]=>
+  string(3) "Baz"
+  ["file"]=>
+  string(%d) "%shphp_debug_caller_info.php"
+  ["function"]=>
+  string(5) "smeth"
+  ["line"]=>
+  int(13)
+}
+array(4) {
+  ["class"]=>
+  string(3) "Baz"
+  ["file"]=>
+  string(%d) "%shphp_debug_caller_info.php"
+  ["function"]=>
+  string(5) "imeth"
+  ["line"]=>
+  int(17)
+}
+array(4) {
+  ["class"]=>
+  string(3) "Baz"
+  ["file"]=>
+  string(%d) "%shphp_debug_caller_info.php"
+  ["function"]=>
+  string(5) "smeth"
+  ["line"]=>
+  int(13)
+}
+array(4) {
+  ["class"]=>
+  string(3) "Baz"
+  ["file"]=>
+  string(%d) "%shphp_debug_caller_info.php"
+  ["function"]=>
+  string(5) "imeth"
+  ["line"]=>
+  int(17)
+}

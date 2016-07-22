@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/xdebug/status.h"
 
+#include <memory>
 #include <string>
 
 namespace HPHP {
@@ -30,6 +31,7 @@ struct String;
 struct XDebugServer;
 
 struct xdebug_xml_node;
+struct XDebugBreakpoint;
 
 /*
  * Base class of all commands.  An instance of an xdebug command is alive until
@@ -101,6 +103,11 @@ private:
   std::string m_commandStr;
   std::string m_transactionId;
 };
+
+xdebug_xml_node* breakpoint_xml_node(
+  int id,
+  const XDebugBreakpoint& bp
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 }

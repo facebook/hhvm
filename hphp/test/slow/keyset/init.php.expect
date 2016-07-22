@@ -1,10 +1,10 @@
-string(3) "bar"
-vec(0) {
+bool(false)
+keyset(0) {
 }
-vec(1) {
+keyset(1) {
   string(3) "bar"
 }
-vec(3) {
+keyset(3) {
   string(5) "apple"
   string(6) "orange"
   string(5) "hello"

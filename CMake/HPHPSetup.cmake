@@ -1,5 +1,7 @@
 include(Options)
 
+set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug RelWithDebInfo)
+
 # Do this until cmake has a define for ARMv8
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
@@ -26,7 +28,6 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
    )
 
 if (ENABLE_ZEND_COMPAT)
-  add_definitions("-DENABLE_ZEND_COMPAT=1")
   list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
 endif()
 
@@ -198,24 +199,8 @@ else()
   message("Generating Release build")
 endif()
 
-if(DEBUG_MEMORY_LEAK)
-  add_definitions(-DDEBUG_MEMORY_LEAK=1)
-endif()
-
-if(DEBUG_APC_LEAK)
-  add_definitions(-DDEBUG_APC_LEAK=1)
-endif()
-
 if(ALWAYS_ASSERT)
   add_definitions(-DALWAYS_ASSERT=1)
-endif()
-
-if(EXECUTION_PROFILER)
-  add_definitions(-DEXECUTION_PROFILER=1)
-endif()
-
-if(ENABLE_FULL_SETLINE)
-  add_definitions(-DENABLE_FULL_SETLINE=1)
 endif()
 
 if(APPLE OR FREEBSD OR CYGWIN OR MSVC OR MINGW)
@@ -248,10 +233,6 @@ if(DISABLE_HARDWARE_COUNTERS OR NOT LINUX)
   add_definitions(-DNO_HARDWARE_COUNTERS=1)
 endif ()
 
-if(ENABLE_AVX2)
-  add_definitions(-DENABLE_AVX2=1)
-endif()
-
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 
@@ -260,50 +241,12 @@ add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
 add_definitions(-DDEFAULT_CONFIG_DIR="${DEFAULT_CONFIG_DIR}")
 
-if (NOT LIBSQLITE3_INCLUDE_DIR)
-  include_directories("${TP_DIR}/libsqlite3")
-endif()
-
-if (NOT DOUBLE_CONVERSION_LIBRARY)
-  include_directories("${TP_DIR}/double-conversion/src")
-endif()
-
-if (NOT LZ4_LIBRARY)
-  include_directories("${TP_DIR}/lz4")
-endif()
-
-if (NOT LIBZIP_INCLUDE_DIR_ZIP)
-  include_directories("${TP_DIR}/libzip")
-  add_definitions("-DZIP_EXTERN=")
-endif()
-
-if (NOT PCRE_LIBRARY)
-  include_directories("${TP_DIR}/pcre")
-  add_definitions("-DPCRE_STATIC=1")
-endif()
-
-if (NOT FASTLZ_LIBRARY)
-  include_directories("${TP_DIR}/fastlz")
-endif()
-
-include_directories("${TP_DIR}/timelib")
-include_directories("${TP_DIR}/libafdt/src")
-add_definitions("-DMBFL_STATIC")
-include_directories("${TP_DIR}/libmbfl")
-include_directories("${TP_DIR}/libmbfl/mbfl")
-include_directories("${TP_DIR}/libmbfl/filters")
-include_directories("${TP_DIR}/proxygen/src")
-if (ENABLE_MCROUTER)
-  include_directories("${TP_DIR}/mcrouter/src")
-endif()
-
+add_definitions(-DHAVE_INTTYPES_H)
 add_definitions(-DNO_LIB_GFLAGS)
-include_directories("${TP_DIR}/folly")
-include_directories("${TP_DIR}/folly/src")
-include_directories("${TP_DIR}/thrift/src")
-include_directories("${TP_DIR}/wangle/src")
-include_directories("${TP_DIR}/brotli/src")
 include_directories(${TP_DIR})
-
-include_directories(${HPHP_HOME}/hphp)
-include_directories(${HPHP_HOME})
+if (THIRD_PARTY_INCLUDE_PATHS)
+  include_directories(${THIRD_PARTY_INCLUDE_PATHS})
+  add_definitions(${THIRD_PARTY_DEFINITIONS})
+  include_directories(${HPHP_HOME}/hphp)
+  include_directories(${HPHP_HOME})
+endif()

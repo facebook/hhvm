@@ -19,7 +19,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   # I'm sorry, but facebook's internal repo has the top level dir stored inside
   # of hphp/, so we need to pull that one in first if it exists
   CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
-  set(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  get_filename_component(HPHP_HOME "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
   set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/facebook/CMake"
                         "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/CMake"
                         ${CMAKE_MODULE_PATH})
@@ -28,6 +28,9 @@ endif()
 
 include(HPHPSetup)
 include(FollySetup)
+include(HHVMGenerateConfig)
+HHVM_GENERATE_CONFIG("${CMAKE_CURRENT_BINARY_DIR}/util/hphp-config.h")
+
 if (ENABLE_COTIRE)
   include(cotire)
   FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)

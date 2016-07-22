@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-constexpr size_t kFuncCountHint = 1200000;
+constexpr size_t kFuncCountHint = 1750000;
 
 /*
  * AtomicVector is a simple vector intended for use by many concurrent readers

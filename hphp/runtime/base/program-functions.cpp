@@ -78,6 +78,7 @@
 #include "hphp/util/capability.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/hphp-config.h"
 #ifndef _MSC_VER
 #include "hphp/util/light-process.h"
 #endif
@@ -1101,7 +1102,7 @@ std::string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   }
 
   StackTrace st(hexencoded);
-  std::vector<std::shared_ptr<StackTrace::Frame>> frames;
+  std::vector<std::shared_ptr<StackFrameExtra>> frames;
   st.get(frames);
 
   std::ostringstream out;
@@ -2327,6 +2328,10 @@ void hphp_session_exit() {
   // its possible they are scheduled to be destroyed after this request
   // finishes.
   Treadmill::finishRequest();
+
+  // The treadmill must be flushed before profData is reset as the data may
+  // be read during cleanup if EvalEnableReuseTC = true
+  jit::mcg->requestExit();
 
   TI().onSessionExit();
 

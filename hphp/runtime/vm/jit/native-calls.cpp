@@ -447,9 +447,6 @@ static CallMap s_callMap {
     {OODeclExists, &Unit::classExists, DSSA, SSync,
                      {{SSA, 0}, {SSA, 1}, extra(&ClassKindData::kind)}},
 
-    /* debug assert helpers */
-    {DbgAssertPtr, assertTv, DNone, SNone, {{SSA, 0}}},
-
     /* surprise flag support */
     {SuspendHookE, &EventHook::onFunctionSuspendE, DNone, SSync,
                             {{SSA, 0}, {SSA, 1}}},

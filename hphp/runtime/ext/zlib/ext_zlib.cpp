@@ -24,7 +24,10 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
 #include <folly/String.h>
@@ -214,7 +217,7 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
 /* Expand a zlib stream into a String
  *
  * Starts with an optimistically sized output string of
- * input size or maxlen, whichever is less.
+ * input size or maxlen (must be >= 0), whichever is less.
  *
  * From there, grows by ~12.5% per iteration to account for expansion.
  *
@@ -223,25 +226,37 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
  */
 static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
                                        int &status) {
+  assert(maxlen >= 0);
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
-  String ret(retsize + 1, ReserveString);
+  String ret;
   size_t retused = 0;
   int round = 0;
 
   do {
-    if (maxlen && (maxlen < retused)) {
-      status = Z_MEM_ERROR;
-      break;
+    if (UNLIKELY(retsize >= kMaxSmallSize && MM().preAllocOOM(retsize + 1))) {
+      VMRegAnchor _;
+      assert(checkSurpriseFlags());
+      handle_request_surprise();
     }
 
-    auto const ms = ret.reserve(retsize + 1);
+    auto const ms = [&]() -> folly::MutableStringPiece {
+      if (!ret.get()) {
+        ret = String(retsize + 1, ReserveString);
+        return ret.bufferSlice();
+      }
+      return ret.reserve(retsize + 1);
+    }();
+
     auto retbuf = ms.data();
     Z->avail_out = ms.size() - retused;
     Z->next_out = (Bytef *) (retbuf + retused);
     status = inflate(Z, Z_NO_FLUSH);
     retused = ms.size() - Z->avail_out;
     ret.setSize(retused);
-
+    if (maxlen && (maxlen < retused)) {
+      status = Z_MEM_ERROR;
+      break;
+    }
     retsize += (retsize >> 3) + 1;
   } while ((Z_BUF_ERROR == status || (Z_OK == status && Z->avail_in)) &&
            ++round < 100);
@@ -273,22 +288,21 @@ static Variant hhvm_zlib_decode(const String& data,
   Z.zfree = (free_func) hhvm_zlib_free;
 
 retry_raw_inflate:
+  SCOPE_EXIT { inflateEnd(&Z); };
+
   int status = inflateInit2(&Z, enc);
   if (Z_OK == status) {
     Z.next_in = (Bytef*)data.c_str();
     Z.avail_in = data.size() + 1;
     String ret = hhvm_zlib_inflate_rounds(&Z, maxlen, status);
     if (status == Z_STREAM_END) {
-      inflateEnd(&Z);
       return ret;
     }
     if ((status == Z_DATA_ERROR) &&
         (k_ZLIB_ENCODING_ANY == enc)) {
-       inflateEnd(&Z);
       enc = k_ZLIB_ENCODING_RAW;
       goto retry_raw_inflate;
     }
-    inflateEnd(&Z);
   }
 
   raise_warning("%s", zError(status));
@@ -340,7 +354,7 @@ Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length /* = 0 */) {
   return HHVM_FN(fread)(zp, length);
 }
 Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
-                              int64_t whence /* = k_SEEK_SET */) {
+                              int64_t whence /* = SEEK_SET */) {
   return HHVM_FN(fseek)(zp, offset, whence);
 }
 Variant HHVM_FUNCTION(gztell, const Resource& zp) {

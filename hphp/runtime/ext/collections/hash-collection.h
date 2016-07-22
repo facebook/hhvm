@@ -625,7 +625,8 @@ struct HashCollection : ObjectData {
   }
 
   static void initHash(int32_t* table, size_t tableSize) {
-    wordfill(table, Empty, tableSize);
+    static_assert(Empty == -1, "Cannot use wordfillones().");
+    wordfillones(table, tableSize);
   }
 
   [[noreturn]] void throwTooLarge();

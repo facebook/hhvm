@@ -1,0 +1,2 @@
+\\ Repo mode fails with an unknown method 'A::foo' error before
+\\ checking for the inconsistent insteadof.

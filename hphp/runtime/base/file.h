@@ -64,6 +64,7 @@ struct FileData {
 
  private:
   friend struct File;
+  friend struct PhpStreamWrapper;
   int m_fd{-1};      // file descriptor
   bool m_isLocal{false}; // is this on the local disk?
   bool m_closed{false}; // whether close() was called

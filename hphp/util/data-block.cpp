@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "data-block.h"
+#include "hphp/util/data-block.h"
 
 namespace HPHP {
 

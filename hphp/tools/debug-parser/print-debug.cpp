@@ -19,7 +19,7 @@
 
 #include <boost/program_options.hpp>
 
-#include "debug-parser.h"
+#include "hphp/tools/debug-parser/debug-parser.h"
 
 /*
  * Simple program which provides a command-line interface to the debug-info

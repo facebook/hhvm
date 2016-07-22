@@ -4443,6 +4443,9 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
       newheight = newwidth * src_y / src_x;
     }
   }
+  if (newheight <= 0 || newwidth <= 0) {
+    return false;
+  }
   if (gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method)) {
     imscaled = gdImageScale(im, newwidth, newheight);
   }
@@ -6582,12 +6585,12 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       }
 
       fpos = ImageInfo->infile->tell();
-      ImageInfo->infile->seek(offset_val, SEEK_SET);
+      ImageInfo->infile->seek(displacement+offset_val, SEEK_SET);
       fgot = ImageInfo->infile->tell();
-      if (fgot!=offset_val) {
+      if (fgot!=displacement+offset_val) {
         if (outside) IM_FREE(outside);
         raise_warning("Wrong file pointer: 0x%08lX != 0x%08lX",
-                        fgot, offset_val);
+                        fgot, displacement+offset_val);
         return 0;
       }
       String str = ImageInfo->infile->read(byte_count);

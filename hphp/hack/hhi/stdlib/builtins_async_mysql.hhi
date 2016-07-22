@@ -90,6 +90,9 @@ class AsyncMysqlClientStats {
   public function __construct() { }
   public function ioEventLoopMicrosAvg() : float {}
   public function callbackDelayMicrosAvg() : float {}
+  public function ioThreadBusyMicrosAvg() : float {}
+  public function ioThreadIdleMicrosAvg() : float {}
+  public function notificationQueueSize() : int {}
 }
 
 class AsyncMysqlConnection {

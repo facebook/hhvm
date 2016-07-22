@@ -116,6 +116,15 @@ bool SnapshotLoader::tryInitializeFromFile(const char* filename) {
 
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 
+static void setKey(folly::StringPiece key, KeyValuePair& item) {
+  // Key is C string...
+  item.key = key.begin();
+  auto keySize = key.size();
+  // ...with an optional extra NUL byte to tag it as readOnly
+  // (see SnapshotBuilder::add).
+  item.readOnly = (keySize > 0) && (key[keySize - 1] == '\0');
+}
+
 void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   // This could share code with apc_load_impl_compressed, but that function
   // should go away together with the shared object format.
@@ -126,7 +135,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   {
     std::vector<KeyValuePair> ints(read32());
     for (auto& item : ints) {
-      item.key = readString().begin();
+      setKey(readString(), item);
       s.constructPrime(read64(), item);
     }
     all.insert(all.end(), ints.begin(), ints.end());
@@ -134,7 +143,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   {
     std::vector<KeyValuePair> chars(read32());
     for (auto& item : chars) {
-      item.key = readString().begin();
+      setKey(readString(), item);
       switch (static_cast<SnapshotBuilder::CharBasedType>(read<char>())) {
         case SnapshotBuilder::kSnapFalse:
           s.constructPrime(false, item);
@@ -158,7 +167,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
     auto type = static_cast<SnapshotBuilder::StringBasedType>(i);
     std::vector<KeyValuePair> items(read32());
     for (auto& item : items) {
-      item.key = readString().begin();
+      setKey(readString(), item);
       auto data = readString();
       String value(data.begin(), data.size(), CopyString);
       switch (type) {
@@ -196,7 +205,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
     const char* disk = m_begin + header().diskOffset;
     std::vector<KeyValuePair> items(read32());
     for (auto& item : items) {
-      item.key = readString().begin();
+      setKey(readString(), item);
       item.sSize = read32();
       item.sAddr = const_cast<char*>(disk);
       disk += abs(item.sSize) + 1;  // \0

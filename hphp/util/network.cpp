@@ -21,12 +21,9 @@
 #include <sys/utsname.h>
 #endif
 
-#include <folly/String.h>
 #include <folly/IPAddress.h>
+#include <folly/String.h>
 #include <folly/portability/Sockets.h>
-
-#include "hphp/util/lock.h"
-#include "hphp/util/process.h"
 
 namespace HPHP {
 

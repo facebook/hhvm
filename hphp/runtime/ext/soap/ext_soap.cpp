@@ -1362,15 +1362,19 @@ static xmlDocPtr serialize_response_call(
         }
       }
       if (!obj->o_get("faultstring").toString().empty()) {
-        xmlNodePtr node = master_to_xml(get_conversion(KindOfString),
-                                        obj->o_get("faultstring"), SOAP_LITERAL,
-                                        param);
+        xmlNodePtr node = master_to_xml(
+          get_conversion(dataTypeToSoap(KindOfString)),
+          obj->o_get("faultstring"), SOAP_LITERAL,
+          param
+        );
         xmlNodeSetName(node, BAD_CAST("faultstring"));
       }
       if (!obj->o_get("faultactor").toString().empty()) {
-        xmlNodePtr node = master_to_xml(get_conversion(KindOfString),
-                                        obj->o_get("faultactor"), SOAP_LITERAL,
-                                        param);
+        xmlNodePtr node = master_to_xml(
+          get_conversion(dataTypeToSoap(KindOfString)),
+          obj->o_get("faultactor"), SOAP_LITERAL,
+          param
+        );
         xmlNodeSetName(node, BAD_CAST("faultactor"));
       }
       detail_name = "detail";
@@ -1393,8 +1397,11 @@ static xmlDocPtr serialize_response_call(
       }
       if (!obj->o_get("faultstring").toString().empty()) {
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Reason"), nullptr);
-        node = master_to_xml(get_conversion(KindOfString), obj->o_get("faultstring"),
-                             SOAP_LITERAL, node);
+        node = master_to_xml(
+          get_conversion(dataTypeToSoap(KindOfString)),
+          obj->o_get("faultstring"),
+          SOAP_LITERAL, node
+        );
         xmlNodeSetName(node, BAD_CAST("Text"));
         xmlSetNs(node, ns);
       }
@@ -1654,9 +1661,7 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
   case XSD_TYPEKIND_COMPLEX:
   case XSD_TYPEKIND_RESTRICTION:
   case XSD_TYPEKIND_EXTENSION:
-    if (type->encode &&
-        (isArrayDataType((DataType)type->encode->details.type) ||
-         type->encode->details.type == SOAP_ENC_ARRAY)) {
+    if (type->encode && isSoapArrayType(type->encode->details.type)) {
       sdlAttributeMap::iterator iter;
       sdlExtraAttributeMap::iterator iterExtra;
       if (!type->attributes.empty() &&

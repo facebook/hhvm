@@ -404,8 +404,8 @@ private:
     using prec_type  = TraitPrecStatementPtr;
     using alias_type = TraitAliasStatementPtr;
 
-    static bool strEmpty(const std::string& str)    { return str.empty(); }
-    static std::string clsName(ClassScopePtr cls)   {
+    static bool strEmpty(const std::string& str) { return str.empty(); }
+    static std::string clsName(ClassScopePtr cls) {
       return cls->getOriginalName();
     }
 
@@ -479,6 +479,16 @@ private:
         Compiler::MethodInMultipleTraits,
         Strings::METHOD_IN_MULTIPLE_TRAITS,
         methName.c_str()
+      );
+    }
+    static void errorInconsistentInsteadOf(const ClassScopePtr& cs,
+                                           const std::string& methName) {
+      cs->getStmt()->analysisTimeFatal(
+        Compiler::InconsistentInsteadOf,
+        Strings::INCONSISTENT_INSTEADOF,
+        methName.c_str(),
+        cs->getOriginalName().c_str(),
+        cs->getOriginalName().c_str()
       );
     }
   };

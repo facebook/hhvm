@@ -45,33 +45,6 @@ using BreakType = XDebugBreakpoint::Type;
 
 namespace {
 
-/* Finds the SourceLoc that most tightly fits a line in a unit. */
-SourceLoc tightestLoc(const Unit* unit, int line) {
-  auto const contained = [&] (SourceLoc loc) {
-    return loc.line0 <= line && line <= loc.line1;
-  };
-
-  auto const size = [] (SourceLoc loc) -> size_t {
-    return loc.line1 - loc.line0 + 1;
-  };
-
-  // Will be a huge unsigned value under size().
-  SourceLoc best;
-  best.line0 = 1;
-  best.line1 = -1;
-
-  for (auto const& ent : getSourceLocTable(unit)) {
-    if (contained(ent.val()) && size(ent.val()) < size(best)) {
-      best = ent.val();
-
-      // If the Sourceloc neatly fits on a single line (hopefully the common
-      // case), then bail out early.
-      if (size(best) == 1) break;
-    }
-  }
-  return best;
-}
-
 // Helper that adds the given function breakpoint corresponding to the given
 // function and id as a breakpoint. If a duplicate breakpoint already exists,
 // it is overwritten.
@@ -146,14 +119,38 @@ const Unit* find_unit(String filename) {
 }
 
 bool calibrateBreakpointLine(const Unit* unit, int& line) {
-  // Calibrate the line to nearest line with code.
-  auto nearestLine = unit->getNearestLineWithCode(line);
-  if (nearestLine <= 0) {
-    // Can't find source code for the new line.
-    return false;
+  auto const size = [] (const SourceLoc& loc) -> size_t {
+    return loc.line1 - loc.line0 + 1;
+  };
+
+  auto const rank = [&] (const SourceLoc& loc) {
+    auto distance = loc.line1 - line;
+    // loc is completely above input line, ignore it.
+    if (distance < 0) {
+      return 0.0;
+    }
+    // Favor SourceLoc whose ending line is close to input line.
+    return 10.0 / (distance + 1) + 1.0 / size(loc);
+  };
+
+  SourceLoc best;
+  best.line0 = -1;
+  best.line1 = -1;
+  auto bestRank = rank(best);
+
+  for (auto const& ent : getSourceLocTable(unit)) {
+    auto curRank = rank(ent.val());
+    if (curRank > bestRank) {
+      best = ent.val();
+      bestRank = curRank;
+
+      // If the Sourceloc neatly fits on a single line (hopefully the common
+      // case), then bail out early.
+      if (best.line0 == line && size(best) == 1) break;
+    }
   }
-  // Figure out the canonical line number for the breakpoint.
-  line = tightestLoc(unit, nearestLine).line1;
+  line = best.line1;
+
   return true;
 }
 
@@ -549,6 +546,19 @@ void XDebugHook::onFlowBreak(const Unit* unit, int line) {
   }
 }
 
+void sendBreakpointResolvedNotify(int id, const XDebugBreakpoint& bp) {
+  auto server = XDEBUG_GLOBAL(Server);
+  if (server == nullptr || !server->m_supportsNotify) {
+    return;
+  }
+  auto notify = xdebug_xml_node_init("notify");
+  SCOPE_EXIT { xdebug_xml_node_dtor(notify); };
+
+  xdebug_xml_add_attribute(notify, "name", "breakpoint_resolved");
+  xdebug_xml_add_child(notify, breakpoint_xml_node(id, bp));
+  server->sendMessage(*notify);
+}
+
 void XDebugHook::onFileLoad(Unit* unit) {
   // Translate the unit filename to match xdebug's internal format
   String unit_path(const_cast<StringData*>(unit->filepath()));
@@ -556,7 +566,8 @@ void XDebugHook::onFileLoad(Unit* unit) {
 
   // Loop over all unmatched breakpoints
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
-    auto& bp = BREAKPOINT_MAP.at(*iter);
+    auto id = *iter;
+    auto& bp = BREAKPOINT_MAP.at(id);
     if (bp.type != BreakType::LINE || bp.fileName != filename) {
       ++iter;
       continue;
@@ -569,10 +580,12 @@ void XDebugHook::onFileLoad(Unit* unit) {
     // in the dbgp protocol at this point. php5 xdebug doesn't do anything,
     // so we just cleanup
     if (phpAddBreakPointLine(unit, bp.line)) {
-      add_line_breakpoint(*iter, bp, unit);
+      add_line_breakpoint(id, bp, unit);
+      bp.resolved = true;
+      sendBreakpointResolvedNotify(id, bp);
       iter = UNMATCHED.erase(iter);
     } else {
-      BREAKPOINT_MAP.erase(*iter);
+      BREAKPOINT_MAP.erase(id);
       iter = UNMATCHED.erase(iter);
     }
   }

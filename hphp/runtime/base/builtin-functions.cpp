@@ -94,11 +94,10 @@ const StaticString
   s_colon2("::");
 
 bool is_callable(const Variant& v) {
-  CallerFrame cf;
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
-  const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
+  const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
                                            invName, false);
   if (invName != nullptr) {
     decRefStr(invName);
@@ -624,7 +623,7 @@ void throw_object(const Object& e) {
   throw req::root<Object>(e);
 }
 
-#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8) || __GNUC_PATCHLEVEL__ >= 2)
+#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8))
 void throw_object(Object&& e) {
   throw req::root<Object>(std::move(e));
 }

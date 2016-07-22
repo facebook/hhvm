@@ -22,6 +22,8 @@
 #include "hphp/runtime/version.h"
 #include "hphp/util/process.h"
 
+#include <folly/portability/Unistd.h>
+
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -174,7 +176,7 @@ void CmdThread::debuggerInfo(InfoVec &info) {
   Add(info, "Host",       Process::GetHostName());
   Add(info, "Binary",     Process::GetAppName());
   Add(info, "Version",    HHVM_VERSION);
-  Add(info, "Process ID", FormatNumber("%lld", Process::GetProcessId()));
+  Add(info, "Process ID", FormatNumber("%" PRId64, (int64_t)getpid()));
   Add(info, "Thread ID",  FormatNumber("0x%llx", (int64_t)Process::GetThreadId()));
 }
 

@@ -53,18 +53,17 @@ struct ArrayData {
   // kNumKinds-1 since we use these values to index into a table.
   enum ArrayKind : uint8_t {
     kPackedKind = 0,  // PackedArray with keys in range [0..size)
-    kStructKind = 1,  // StructArray with static string keys
-    kMixedKind = 2,   // MixedArray arbitrary int or string keys, maybe holes
-    kEmptyKind = 3,   // The singleton static empty array
-    kApcKind = 4,     // APCLocalArray
-    kGlobalsKind = 5, // GlobalsArray
-    kProxyKind = 6,   // ProxyArray
-    kDictKind = 7,    // MixedArray without implicit conversion of integer-like
+    kMixedKind = 1,   // MixedArray arbitrary int or string keys, maybe holes
+    kEmptyKind = 2,   // The singleton static empty array
+    kApcKind = 3,     // APCLocalArray
+    kGlobalsKind = 4, // GlobalsArray
+    kProxyKind = 5,   // ProxyArray
+    kDictKind = 6,    // MixedArray without implicit conversion of integer-like
                       // string keys
-    kVecKind = 8,     // Vector array (more restrictive PackedArray)
-    kKeysetKind = 9,  // MixedArray storing its keys as values, no implicit
+    kVecKind = 7,     // Vector array (more restrictive PackedArray)
+    kKeysetKind = 8,  // MixedArray storing its keys as values, no implicit
                       // conversions from integer-like string keys
-    kNumKinds = 10    // insert new values before kNumKinds.
+    kNumKinds = 9     // insert new values before kNumKinds.
   };
 
 protected:
@@ -179,7 +178,6 @@ public:
   bool noCopyOnWrite() const;
 
   bool isPacked() const { return kind() == kPackedKind; }
-  bool isStruct() const { return kind() == kStructKind; }
   bool isMixed() const { return kind() == kMixedKind; }
   bool isApcArray() const { return kind() == kApcKind; }
   bool isGlobalsArray() const { return kind() == kGlobalsKind; }
@@ -498,7 +496,6 @@ protected:
   friend struct PackedArray;
   friend struct EmptyArray;
   friend struct MixedArray;
-  friend struct StructArray;
   friend struct BaseVector;
   friend struct c_Vector;
   friend struct c_ImmVector;
@@ -520,7 +517,6 @@ protected:
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
-static_assert(ArrayData::kStructKind == uint8_t(HeaderKind::Struct), "");
 static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
 static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
@@ -566,7 +562,7 @@ ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
  */
 struct ArrayFunctions {
   // NK stands for number of array kinds.
-  static auto const NK = size_t{10};
+  static auto const NK = size_t{9};
   void (*release[NK])(ArrayData*);
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvTryGetInt[NK])(const ArrayData*, int64_t k);

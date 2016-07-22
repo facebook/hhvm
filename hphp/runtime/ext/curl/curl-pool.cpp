@@ -5,6 +5,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/timer.h"
 
 #include <folly/portability/Time.h>
 

@@ -194,6 +194,7 @@ let builtins =
   "interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}\n"^
   "abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}\n"^
   "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"^
+  "abstract final class keyset<T as arraykey> implements Indexish<T, T> {}\n"^
   "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"^
   "function meth_caller(string $cls_name, string $meth_name);\n"
 
@@ -589,7 +590,7 @@ let main_hack ({filename; mode; no_builtins;} as opts) =
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init (Daemon.devnull ()) 0.0;
-  let _handle = SharedMem.init_default () in
+  let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
   Hhi.set_hhi_root_for_unit_test tmp_hhi;
   match mode with

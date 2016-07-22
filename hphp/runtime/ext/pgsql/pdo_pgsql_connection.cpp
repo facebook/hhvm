@@ -212,7 +212,6 @@ bool PDOPgSqlConnection::quoter(
     case PDO_PARAM_LOB:
       quoted = m_server->escapeByteA(input.data(), input.length());
       return true;
-      break;
     default:
       // http://www.postgresql.org/message-id/14249.1273943612@sss.pgh.pa.us +
       // space for the two surrounding quotes

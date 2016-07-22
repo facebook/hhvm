@@ -191,7 +191,7 @@ void HHVM_METHOD(SQLite3, __construct,
 
 void SQLite3::validate() const {
   if (!m_raw_db) {
-    throw Exception("SQLite3 object was not initialized");
+    SystemLib::throwExceptionObject("SQLite3 object was not initialized");
   }
 }
 
@@ -202,7 +202,7 @@ void HHVM_METHOD(SQLite3, open,
                  const Variant& encryption_key /* = null */) {
   auto *data = Native::data<SQLite3>(this_);
   if (data->m_raw_db) {
-    throw Exception("Already initialized DB Object");
+    SystemLib::throwExceptionObject("Already initialized DB Object");
   }
 
   String fname;
@@ -529,7 +529,7 @@ void HHVM_METHOD(SQLite3Stmt, __construct,
 
 void SQLite3Stmt::validate() const {
   if (!m_raw_stmt) {
-    throw Exception("SQLite3Stmt object was not initialized");
+    SystemLib::throwExceptionObject("SQLite3Stmt object was not initialized");
   }
 }
 
@@ -693,7 +693,7 @@ SQLite3Result::SQLite3Result() : m_stmt(nullptr) {
 
 void SQLite3Result::validate() const {
   if (!m_stmt) {
-    throw Exception("SQLite3Result object was not initialized");
+    SystemLib::throwExceptionObject("SQLite3Result object was not initialized");
   }
   m_stmt->validate();
 }

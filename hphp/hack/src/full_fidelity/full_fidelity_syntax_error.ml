@@ -110,11 +110,12 @@ let error2005 = "A break statement may only appear inside a switch or loop."
 let error2006 = "A continue statement may only appear inside a loop."
 let error2007 = "A try statement requires a catch or a finally clause."
 let error2008 = "The first statement inside a switch statement must " ^
-  "be a case or default."
-let error2009 = "A Class constructor cannot be static."
-let error2010 = "Non-constructor parameters cannot have visibility modifiers."
-let error2011 = "A Destructor must have empty parameter."
-let error2012 = "A Destructor can only have visibility modifiers."
+  "be a case or default label statement."
+let error2009 = "A constructor cannot be static."
+let error2010 = "Parameters cannot have visibility modifiers (except in " ^
+  "parameter lists of constructors)."
+let error2011 = "A destructor must have an empty parameter list."
+let error2012 = "A destructor can only have visibility modifiers."
 let error2013 = "A method declaration cannot have duplicate modifiers."
 let error2014 = "An abstract method cannot have a method body."
 let error2015 = "A non-abstract method must have a body."
@@ -122,7 +123,7 @@ let error2016 = "A method cannot be both abstract and private."
 let error2017 =
   "A method declaration cannot have multiple visibility modifiers."
 let error2018 =
-  "A constructor or destructor cannot have non void type annotations."
+  "A constructor or destructor cannot have a non-void type annotation."
 let error2019 = "A method cannot be both abstract and final."
 let error2020 = "Use of the '{}' subscript operator is deprecated; " ^
   " use '[]' instead."

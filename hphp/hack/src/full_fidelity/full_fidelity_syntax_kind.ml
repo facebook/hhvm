@@ -86,6 +86,7 @@ type t =
 | FieldInitializer
 | ArrayCreationExpression
 | ArrayIntrinsicExpression
+| SubscriptExpression
 | XHPExpression
 | XHPOpen
 | XHPAttribute
@@ -173,6 +174,7 @@ let to_string kind =
   | ShapeExpression -> "shape_expression"
   | FieldInitializer -> "field_initializer"
   | ArrayCreationExpression -> "array_creation_expression"
+  | SubscriptExpression -> "subscript_expression"
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"

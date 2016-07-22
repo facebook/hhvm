@@ -657,6 +657,12 @@ let rec get_doc node =
     let members = get_doc (array_intrinsic_members x) in
     let left_part = group_doc (keyword ^^| left) in
     indent_block_no_space left_part members right indt
+  | SubscriptExpression x ->
+    let receiver = get_doc x.subscript_receiver in
+    let left = get_doc x.subscript_left in
+    let index = get_doc x.subscript_index in
+    let right = get_doc x.subscript_right in
+    receiver ^^^ left ^^^ index ^^^ right
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in

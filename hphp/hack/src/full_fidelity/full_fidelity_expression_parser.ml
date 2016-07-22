@@ -120,7 +120,7 @@ module WithStatementAndDeclParser
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
-    | LeftBracket (* TODO: ? one situation is array. any other situations? *)
+    | LeftBracket
       -> parse_array_creation_expression parser
     | Shape -> parse_shape_expression parser
     | Function -> parse_anon parser
@@ -202,10 +202,37 @@ module WithStatementAndDeclParser
     | MinusMinus -> parse_postfix_unary parser term
     | LeftParen -> parse_function_call parser term
     | LeftBracket
-    | LeftBrace -> (* TODO indexers *) (* TODO: Produce an error for brace *)
-      (parser1, make_token token)
+    | LeftBrace -> parse_subscript parser term
     | Question -> parse_conditional_expression parser1 term (make_token token)
     | _ -> (parser, term)
+
+  and parse_subscript parser term =
+    (* SPEC
+      subscript-expression:
+        postfix-expression  [  expression-opt  ]
+        postfix-expression  {  expression-opt  }   [Deprecated form]
+    *)
+    (* TODO: Produce an error for brace case in a later pass *)
+    let (parser, left) = next_token parser in
+    let (parser1, right) = next_token parser in
+    match (Token.kind left, Token.kind right) with
+    | (LeftBracket, RightBracket)
+    | (LeftBrace, RightBrace) ->
+      let left = make_token left in
+      let index = make_missing() in
+      let right = make_token right in
+      let result = make_subscript_expression term left index right in
+      (parser1, result)
+    | _ ->
+    begin
+      let (parser, index) = with_reset_precedence parser parse_expression in
+      let (parser, right) = match Token.kind left with
+      | LeftBracket -> expect_right_bracket parser
+      | _ -> expect_right_brace parser in
+      let left = make_token left in
+      let result = make_subscript_expression term left index right in
+      (parser, result)
+    end
 
   and parse_designator parser =
     (* SPEC

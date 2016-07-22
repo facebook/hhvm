@@ -925,6 +925,8 @@ module WithExpressionAndStatementParser
     match Token.kind token with
     | Async | Function ->
       parse_function_declaration parser attribute_specification
+    | Abstract
+    | Final
     | Class -> parse_classish_declaration parser attribute_specification
     | _ ->
       (* TODO *)

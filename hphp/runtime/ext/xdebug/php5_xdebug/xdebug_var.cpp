@@ -670,6 +670,8 @@ void xdebug_var_export_text_ansi(
     );
     break;
   }
+  case KindOfPersistentArray:
+    /* fallthrough */
   case KindOfArray: {
     auto const& arr = v.toCArrRef();
 

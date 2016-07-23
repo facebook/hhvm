@@ -51,7 +51,6 @@ namespace HPHP { namespace jit {
 namespace {
 
 enum class TranslateResult {
-  Failure,
   Retry,
   Success
 };
@@ -890,8 +889,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
       result = irGenRegionImpl(irgs, region, retry, inl,
                                budgetBCInstrs, 1, &annotations);
     } catch (const FailedTraceGen& e) {
-      FTRACE(2, "irGenRegion failed with {}\n", e.what());
-      result = TranslateResult::Failure;
+      always_assert_flog(false, "irGenRegion failed with {}\n", e.what());
     }
     assertx(budgetBCInstrs >= 0);
     FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
@@ -972,7 +970,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
       );
     } catch (const FailedTraceGen& e) {
       FTRACE(2, "irGenInlineRegion failed with {}\n", e.what());
-      result = TranslateResult::Failure;
+      always_assert_flog(false, "irGenInlineRegion failed with {}\n", e.what());
     }
 
     if (result == TranslateResult::Success) {

@@ -62,16 +62,6 @@ bool beginInlining(IRGS& env,
   );
 
   auto const& info = fpiStack.back();
-  if (info.func && info.func != target) {
-    // Its possible that we have an "FCallD T2 meth" guarded by eg an
-    // InstanceOfD T2, and that we know the object has type T1, and we
-    // also know that T1::meth exists. The FCallD is actually
-    // unreachable, but we might not have figured that out yet - so we
-    // could be trying to inline T1::meth while the fpiStack has
-    // T2::meth.
-    return false;
-  }
-
   always_assert(!isFPushCuf(info.fpushOpc) && !info.interp);
 
   // NB: the arguments were just popped from the VM stack above, so the VM
@@ -103,6 +93,12 @@ bool beginInlining(IRGS& env,
                       IRSPRelOffsetData{calleeAROff}, sp(env));
     gen(env, DbgAssertFunc, arFunc, cns(env, target));
   }
+
+  auto fpiFunc = fpiStack.back().func;
+  always_assert_flog(fpiFunc == nullptr || fpiFunc == target,
+                     "fpiFunc = {}  ;  target = {}",
+                     fpiFunc ? fpiFunc->fullName()->data() : "null",
+                     target  ? target->fullName()->data()  : "null");
 
   gen(env, BeginInlining, IRSPRelOffsetData{calleeAROff}, sp(env));
 
@@ -136,7 +132,7 @@ bool beginInlining(IRGS& env,
   return true;
 }
 
-bool conjureBeginInlining(IRGS& env,
+void conjureBeginInlining(IRGS& env,
                           const Func* func,
                           Type thisType,
                           const std::vector<Type>& args,
@@ -154,7 +150,7 @@ bool conjureBeginInlining(IRGS& env,
     push(env, gen(env, Conjure, argType));
   }
 
-  return beginInlining(
+  beginInlining(
     env,
     numParams,
     func,

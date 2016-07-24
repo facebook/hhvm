@@ -258,10 +258,8 @@ void endInlining(IRGS& env);
  *
  * Simulating the inlining measures the cost of pushing a dummy frame (or not if
  * we are able to elide it) and any effects that may have on alias analysis.
- *
- * Returns false if the inlined region would be invalid for inlining
  */
-bool conjureBeginInlining(IRGS& env,
+void conjureBeginInlining(IRGS& env,
                           const Func* func,
                           Type thisType,
                           const std::vector<Type>& args,

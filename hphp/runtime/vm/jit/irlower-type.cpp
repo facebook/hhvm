@@ -265,17 +265,9 @@ void cgIsScalarType(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgAssertType(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-  auto const& dtype = inst->dst()->type();
-  if (dtype == TBottom) {
-    v << ud2();
-    v = v.makeBlock();
-    return;
-  }
-
   auto const dst = dstLoc(env, inst, 0);
   auto const src = srcLoc(env, inst, 0);
-  copyTV(v, src, dst, dtype);
+  copyTV(vmain(env), src, dst, inst->dst()->type());
 }
 
 void cgAssertLoc(IRLS&, const IRInstruction*) {}

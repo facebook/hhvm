@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/array/ext_array.h"
 
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
@@ -1250,6 +1251,7 @@ static int php_count_recursive(const Array& array) {
     Variant value = iter.second();
     if (value.isArray()) {
       const Array& arr_value = value.asCArrRef();
+      check_recursion_throw();
       cnt += php_count_recursive(arr_value);
     }
   }

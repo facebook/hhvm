@@ -217,11 +217,6 @@ let methodish_abstract_conflict_with_final node =
   let has_final = methodish_contains_final node in
   is_abstract && has_final
 
-
-
-let parent_is_function parents =
-  matches_first is_function parents
-
 let statement_directly_in_switch parents =
   match parents with
   | l :: c :: s :: _ when (is_compound_statement c) && (is_list l) &&
@@ -252,6 +247,13 @@ let switch_first_is_label compound =
       | CaseStatement _ -> true
       | _ -> false
     end
+
+let rec parameter_type_is_required parents =
+  match parents with
+  | h :: _ when is_function h -> true
+  | h :: _ when is_anonymous_function h -> false (* TODO: Lambda? *)
+  | _ :: t -> parameter_type_is_required t
+  | [] -> false
 
 let rec break_is_legal parents =
   match parents with
@@ -360,18 +362,14 @@ let methodish_errors node parents =
     errors
   | _ -> [ ]
 
-
 let parameter_errors node parents is_strict =
   match syntax node with
-  | ParameterDeclaration p ->
-    if is_strict &&
-        (parent_is_function parents) &&
-        is_missing (param_type p) then
+  | ParameterDeclaration p
+    when is_strict && (is_missing p.param_type) &&
+    (parameter_type_is_required parents) ->
       let s = start_offset node in
       let e = end_offset node in
       [ SyntaxError.make s e SyntaxError.error2001 ]
-    else
-      [ ]
   | _ -> [ ]
 
 let function_errors node _parents is_strict =

@@ -726,32 +726,37 @@ module WithExpressionAndStatementParser
     else
       (parser, make_missing(), make_missing())
 
+  and parse_parameter_list parser =
    (* SPEC
       parameter-list:
           ...
           parameter-declaration-list
+          parameter-declaration-list  ,
           parameter-declaration-list  ,  ...
 
         parameter-declaration-list:
           parameter-declaration
           parameter-declaration-list  ,  parameter-declaration
-  *)
-  and parse_parameter_list parser =
-    (* TODO: Update this to produce a sequence of list_item elements. *)
+    *)
+    (* TODO: We do not yet allow the trailing comma. Fix this in three stages:
+       (1) Make the separated-list parsing code handle trailing commas.
+       (2) Update this algorithm to use that code.
+       (3) Add an error checking pass that ensures that the "..." parameter
+           only appears at the end, and is not trailed by a comma. *)
     let rec aux parser parameters =
       let (parser, parameter) = parse_parameter parser in
-      let parameters = parameter :: parameters in
       let (parser1, token) = next_token parser in
       match (Token.kind token) with
       | Comma ->
-        aux parser1 ((make_token token) :: parameters )
+        let item = make_list_item parameter (make_token token) in
+        aux parser1 (item :: parameters)
       | RightParen ->
-        (parser, parameters)
+        (parser, (parameter :: parameters))
       | EndOfFile
       | _ ->
         (* ERROR RECOVERY TODO: How to recover? *)
         let parser = with_error parser SyntaxError.error1009 in
-        (parser, parameters) in
+        (parser, (parameter :: parameters)) in
     let (parser, parameters) = aux parser [] in
     (parser, make_list (List.rev parameters))
 

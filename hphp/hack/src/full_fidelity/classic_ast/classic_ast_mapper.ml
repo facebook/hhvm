@@ -64,7 +64,7 @@ let hint _env node = match Syntax.syntax node with
   | _ ->
       None
 
-let f_param _env acc node =
+let rec f_param _env acc node =
   let open Ast in
   match Syntax.syntax node with
   | ParameterDeclaration record ->
@@ -91,6 +91,7 @@ let f_param _env acc node =
     }
     in
     acc @ [result]
+  | ListItem item -> f_param _env acc item.list_item
   | _ ->
     (** TODO: Error instead of failing silently. *)
     acc

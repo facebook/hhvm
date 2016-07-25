@@ -128,7 +128,21 @@ let minimal_tests =
     "test_type_const";
   ] ~f:mapper
 
-let test_data = minimal_tests @
+let error_tests =
+  let mapper testname =
+    make_test_case_from_files testname test_errors in
+  List.map
+  [
+    "test_errors_not_strict";
+    "test_errors_strict";
+    "test_no_errors_strict";
+    "test_statement_errors";
+    "test_expression_errors";
+    "test_errors_method";
+    "test_declaration_errors"
+  ] ~f:mapper
+
+let test_data = minimal_tests @ error_tests @
 [
   {
     name = "test_mode_1";
@@ -165,13 +179,7 @@ let test_data = minimal_tests @
     source = "<?hh//";
     expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
     test_function = test_mode;
-  };
-  make_test_case_from_files "test_errors_not_strict" test_errors;
-  make_test_case_from_files "test_errors_strict" test_errors;
-  make_test_case_from_files "test_no_errors_strict" test_errors;
-  make_test_case_from_files "test_statement_errors" test_errors;
-  make_test_case_from_files "test_expression_errors" test_errors;
-  make_test_case_from_files "test_errors_method" test_errors
+  }
 ]
 
 let driver test () =

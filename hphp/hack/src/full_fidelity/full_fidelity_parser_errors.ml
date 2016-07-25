@@ -9,9 +9,11 @@
  *)
 
 module PositionedSyntax = Full_fidelity_positioned_syntax
+module PositionedToken = Full_fidelity_positioned_token
 module SyntaxUtilities =
   Full_fidelity_syntax_utilities.WithSyntax(PositionedSyntax)
 module SyntaxError = Full_fidelity_syntax_error
+module TokenKind = Full_fidelity_token_kind
 
 open PositionedSyntax
 
@@ -61,6 +63,21 @@ let list_contains_duplicate node =
     let (_, result) = List.fold_left check_fun (SyntaxMap.empty, false) lst in
     result
   | _ ->  false
+
+let token_kind node =
+  match syntax node with
+  | Token t -> Some (PositionedToken.kind t)
+  | _ -> None
+
+let rec containing_classish_kind parents =
+  match parents with
+  | [] -> None
+  | h :: t ->
+    begin
+      match syntax h with
+      | ClassishDeclaration c -> token_kind c.classish_token
+      | _ -> containing_classish_kind t
+    end
 
 (* tests whether the methodish contains a modifier that satisfies [p] *)
 let methodish_modifier_contains_helper p node =
@@ -416,6 +433,24 @@ let expression_errors node =
     [ SyntaxError.make s e SyntaxError.error2020 ]
   | _ -> []
 
+let require_errors node parents =
+  match syntax node with
+  | RequireClause p ->
+    begin
+      match (containing_classish_kind parents, token_kind p.require_kind) with
+      | (Some TokenKind.Class, Some TokenKind.Extends) ->
+        let s = start_offset node in
+        let e = end_offset node in
+        [ SyntaxError.make s e SyntaxError.error2029 ]
+      | (Some TokenKind.Interface, Some TokenKind.Implements)
+      | (Some TokenKind.Class, Some TokenKind.Implements) ->
+        let s = start_offset node in
+        let e = end_offset node in
+        [ SyntaxError.make s e SyntaxError.error2030 ]
+      | _ -> []
+    end
+  | _ -> [ ]
+
 let find_syntax_errors node is_strict =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -425,9 +460,10 @@ let find_syntax_errors node is_strict =
     let methodish_errs = methodish_errors node parents in
     let property_errs = property_errors node is_strict in
     let expr_errs = expression_errors node in
+    let require_errs = require_errors node parents in
     let errors = acc.errors @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
-      expr_errs in
+      expr_errs @ require_errs in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

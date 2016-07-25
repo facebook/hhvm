@@ -127,3 +127,6 @@ let error2018 =
 let error2019 = "A method cannot be both abstract and final."
 let error2020 = "Use of the '{}' subscript operator is deprecated; " ^
   " use '[]' instead."
+
+let error2029 = "Only traits and interfaces may use 'require extends'."
+let error2030 = "Only traits may use 'require implements'."

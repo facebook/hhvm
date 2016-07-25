@@ -431,8 +431,8 @@ module WithExpressionAndStatementParser
         let (parser, syntax) = parse_methodish parser attr modifiers in
         aux parser (syntax :: acc)
       | Require ->
-          (* TODO: Give an error if these are found where they should not be,
-             TODO: in a later pass. *)
+          (* We give an error if these are found where they should not be,
+             in a later pass. *)
          let (parser, require) = parse_require_clause parser in
          aux parser (require :: acc)
       | _ ->

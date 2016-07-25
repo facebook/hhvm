@@ -159,21 +159,23 @@ module WithParser(Parser : ParserType) = struct
     * Otherwise, a list of the form (item, separator) ... item is returned.
 *)
 
-  let parse_separated_list parser separator_kind close_kind error parse_item =
+  let parse_separated_list parser separator_kind allow_trailing
+      close_kind error parse_item =
     let rec aux parser acc =
+      (* At this point we are expecting an item followed by a separator,
+         a close, or, if trailing separators are allowed, both *)
       let (parser1, token) = next_token parser in
       let kind = Token.kind token in
       if kind = close_kind || kind = TokenKind.EndOfFile then
-        (* ERROR RECOVERY: If we're here and we got a close brace then
-           the list is empty; we expect at least one item. If we're here
-           at the end of the file, then we were expecting one more item. *)
+        (* ERROR RECOVERY: We expected an item but we found a close or
+           the end of the file. Make the item "missing" and give an error. *)
         let parser = with_error parser error in
         let item = Syntax.make_missing() in
         (parser, (item :: acc))
       else if kind = separator_kind then
 
-        (* ERROR RECOVERY: We're expecting an item but we got a comma.
-           Assume the item was missing, eat the comma, and move on.
+        (* ERROR RECOVERY: We expected an item but we got a separator.
+           Assume the item was missing, eat the separator, and move on.
            TODO: This could be poor recovery. For example:
 
                 function bar (Foo< , int blah)
@@ -188,6 +190,9 @@ module WithParser(Parser : ParserType) = struct
         let list_item = Syntax.make_list_item item separator  in
         aux parser (list_item :: acc)
       else
+
+        (* We got neither a close nor a separator; hopefully we're going
+           to parse an item followed by a close or separator. *)
         let (parser, item) = parse_item parser in
         let (parser1, token) = next_token parser in
         let kind = Token.kind token in
@@ -196,7 +201,13 @@ module WithParser(Parser : ParserType) = struct
         else if kind = separator_kind then
           let separator = Syntax.make_token token in
           let list_item = Syntax.make_list_item item separator in
-          aux parser1 (list_item :: acc)
+          let acc = list_item :: acc in
+          (* We got an item followed by a separator; what if the thing
+             that comes next is a close? *)
+          if allow_trailing && (peek_token_kind parser1) = close_kind then
+            (parser1, acc)
+          else
+            aux parser1 acc
         else
           (* ERROR RECOVERY: We were expecting a close or separator, but
              got neither. Bail out. Caller will give an error. *)
@@ -205,25 +216,26 @@ module WithParser(Parser : ParserType) = struct
     (parser, Syntax.make_list (List.rev items))
 
   let parse_separated_list_opt
-      parser separator_kind close_kind error parse_item =
+      parser separator_kind allow_trailing close_kind error parse_item =
     let token = peek_token parser in
     let kind = Token.kind token in
     if kind = close_kind then
       (parser, Syntax.make_missing())
     else
-      parse_separated_list parser separator_kind close_kind error parse_item
+      parse_separated_list
+        parser separator_kind allow_trailing close_kind error parse_item
 
   let parse_comma_list parser =
-    parse_separated_list parser TokenKind.Comma
+    parse_separated_list parser TokenKind.Comma false
 
   let parse_comma_list_opt parser =
-    parse_separated_list_opt parser TokenKind.Comma
+    parse_separated_list_opt parser TokenKind.Comma false
 
   let parse_semi_list parser =
-    parse_separated_list parser TokenKind.Semicolon
+    parse_separated_list parser TokenKind.Semicolon false
 
   let parse_semi_list_opt parser =
-    parse_separated_list_opt parser TokenKind.Semicolon
+    parse_separated_list_opt parser TokenKind.Semicolon false
 
   let parse_delimited_list
       parser left_kind left_error right_kind right_error parse_items =

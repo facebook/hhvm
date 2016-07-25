@@ -241,10 +241,14 @@ module WithExpressionAndDeclParser
       | Missing -> (parser_catch, catch_token)
       | _ ->
       (* catch  (  parameter-declaration-list  )  compound-statement *)
-        let (parser_catch, left_paren) = expect_left_paren parser_catch in
-        let (parser_catch, param_decl) =
+        let (parser_catch, left_paren, param_decl, right_paren) =
           parse_parameter_list_opt parser_catch in
-        let (parser_catch, right_paren) = expect_right_paren parser_catch in
+        (* TODO: Give an error if the parameter declaration list contains
+           ... or contains more than one element. *)
+        (* SPEC ISSUE: Why does the spec say both that the catch clause takes
+           a list of parameters, and that the list must have exactly one
+           element? Why not say that the catch clause takes a parameter
+           declaration and be done with it? *)
         let (parser_catch, compound_stmt) =
           parse_compound_statement parser_catch in
         let catch_clause = make_catch_clause catch_token left_paren param_decl
@@ -410,12 +414,11 @@ module WithExpressionAndDeclParser
 
 and parse_parameter_list_opt parser =
   let declaration_parser = DeclParser.make parser.lexer parser.errors in
-  let (declaration_parser, node) =
+  let (declaration_parser, left, node, right) =
     DeclParser.parse_parameter_list_opt declaration_parser in
   let lexer = DeclParser.lexer declaration_parser in
   let errors = DeclParser.errors declaration_parser in
   let parser = make lexer errors in
-  (parser, node)
-
+  (parser, left, node, right)
 
 end

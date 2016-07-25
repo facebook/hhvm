@@ -228,8 +228,14 @@ module WithParser(Parser : ParserType) = struct
   let parse_comma_list parser =
     parse_separated_list parser TokenKind.Comma false
 
+  let parse_comma_list_allow_trailing parser =
+    parse_separated_list parser TokenKind.Comma true
+
   let parse_comma_list_opt parser =
     parse_separated_list_opt parser TokenKind.Comma false
+
+  let parse_comma_list_opt_allow_trailing parser =
+    parse_separated_list_opt parser TokenKind.Comma true
 
   let parse_semi_list parser =
     parse_separated_list parser TokenKind.Semicolon false
@@ -243,5 +249,21 @@ module WithParser(Parser : ParserType) = struct
     let (parser, items) = parse_items parser in
     let (parser, right) = expect_token parser right_kind right_error in
     (parser, left, items, right)
+
+  let parse_parenthesized_list parser parse_items =
+    parse_delimited_list parser TokenKind.LeftParen SyntaxError.error1019
+      TokenKind.RightParen SyntaxError.error1011 parse_items
+
+  let parse_parenthesized_comma_list_opt parser parse_item =
+    let parse_items parser =
+      parse_comma_list_opt
+        parser TokenKind.RightParen SyntaxError.error1011 parse_item in
+    parse_parenthesized_list parser parse_items
+
+  let parse_parenthesized_comma_list_opt_allow_trailing parser parse_item =
+    let parse_items parser =
+      parse_comma_list_opt_allow_trailing
+        parser TokenKind.RightParen SyntaxError.error1011 parse_item in
+    parse_parenthesized_list parser parse_items
 
 end

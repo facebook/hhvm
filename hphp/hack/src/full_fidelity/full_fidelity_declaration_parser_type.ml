@@ -13,5 +13,6 @@ module type DeclarationParserType = sig
   val lexer : t -> Full_fidelity_lexer.t
   val errors : t -> Full_fidelity_syntax_error.t list
   val parse_script : t -> t * Full_fidelity_minimal_syntax.t
-  val parse_parameter_list_opt : t -> t * Full_fidelity_minimal_syntax.t
+  val parse_parameter_list_opt : t -> t * Full_fidelity_minimal_syntax.t *
+    Full_fidelity_minimal_syntax.t * Full_fidelity_minimal_syntax.t
 end

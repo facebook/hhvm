@@ -726,9 +726,10 @@ module WithExpressionAndStatementParser
     else
       (parser, make_missing(), make_missing())
 
-  and parse_parameter_list parser =
-   (* SPEC
-      parameter-list:
+  and parse_parameter_list_opt parser =
+    (* TODO: allow trailing comma *)
+      (* SPEC
+        parameter-list:
           ...
           parameter-declaration-list
           parameter-declaration-list  ,
@@ -737,44 +738,18 @@ module WithExpressionAndStatementParser
         parameter-declaration-list:
           parameter-declaration
           parameter-declaration-list  ,  parameter-declaration
-    *)
-    (* TODO: We do not yet allow the trailing comma. Fix this in three stages:
-       (1) Make the separated-list parsing code handle trailing commas.
-       (2) Update this algorithm to use that code.
-       (3) Add an error checking pass that ensures that the "..." parameter
-           only appears at the end, and is not trailed by a comma. *)
-    let rec aux parser parameters =
-      let (parser, parameter) = parse_parameter parser in
-      let (parser1, token) = next_token parser in
-      match (Token.kind token) with
-      | Comma ->
-        let item = make_list_item parameter (make_token token) in
-        aux parser1 (item :: parameters)
-      | RightParen ->
-        (parser, (parameter :: parameters))
-      | EndOfFile
-      | _ ->
-        (* ERROR RECOVERY TODO: How to recover? *)
-        let parser = with_error parser SyntaxError.error1009 in
-        (parser, (parameter :: parameters)) in
-    let (parser, parameters) = aux parser [] in
-    (parser, make_list (List.rev parameters))
-
-  and parse_parameter_list_opt parser =
-    let token = peek_token parser in
-    if (Token.kind token) = RightParen then (parser, make_missing())
-    else parse_parameter_list parser
+     *)
+     (* This function parses the parens as well. *)
+     (* TODO: Add an error checking pass that ensures that the "..." parameter
+              only appears at the end, and is not trailed by a comma. *)
+      parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =
+
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
-    | DotDotDot ->
-      (parser1, make_token token)
-    | Comma ->
-      (* ERROR RECOVERY *)
-      (parser, make_missing())
-    | _ ->
-      parse_parameter_declaration parser
+    | DotDotDot -> (parser1, make_token token)
+    | _ -> parse_parameter_declaration parser
 
   (* SPEC
     parameter-declaration:
@@ -782,8 +757,7 @@ module WithExpressionAndStatementParser
       default-argument-specifieropt
   *)
   and parse_parameter_declaration parser =
-    (* ERROR RECOVERY
-       In strict mode, we require a type specifier. This error is not caught
+    (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
     let (parser, attrs) = parse_attribute_specification_opt parser in
     let (parser, visibility) = parse_visibility_modifier_opt parser in
@@ -828,8 +802,12 @@ module WithExpressionAndStatementParser
     (parser, syntax)
 
   and parse_function_declaration_header parser =
-    (* ERROR RECOVERY
-       In strict mode, we require a type specifier. This error is not caught
+    (* SPEC
+      function-definition-header:
+        attribute-specification-opt  asyncopt  function  name  /
+        generic-type-parameter-list-opt  (  parameter-listopt  ) :  return-type
+    *)
+    (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
     let (parser, async_token) = optional_token parser Async in
     let (parser, function_token) = expect_function parser in
@@ -837,9 +815,8 @@ module WithExpressionAndStatementParser
       parse_function_label parser in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
-    let (parser, left_paren_token) = expect_left_paren parser in
-    let (parser, parameter_list) = parse_parameter_list_opt parser in
-    let (parser, right_paren_token) = expect_right_paren parser in
+    let (parser, left_paren_token, parameter_list, right_paren_token) =
+      parse_parameter_list_opt parser in
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
     let syntax = make_function_header async_token

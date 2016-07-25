@@ -39,11 +39,12 @@ module WithStatementAndDeclParser
 
   let parse_parameter_list_opt parser =
     let decl_parser = DeclParser.make parser.lexer parser.errors in
-    let (decl_parser, node) = DeclParser.parse_parameter_list_opt decl_parser in
+    let (decl_parser, right, params, left ) =
+      DeclParser.parse_parameter_list_opt decl_parser in
     let lexer = DeclParser.lexer decl_parser in
     let errors = DeclParser.errors decl_parser in
     let parser = { parser with lexer; errors } in
-    (parser, node)
+    (parser, right, params, left)
 
   let parse_compound_statement parser =
     let statement_parser = StatementParser.make parser.lexer parser.errors in
@@ -646,9 +647,10 @@ module WithStatementAndDeclParser
     *)
     let (parser, async) = optional_token parser Async in
     let (parser, fn) = assert_token parser Function in
-    let (parser, left_paren) = expect_left_paren parser in
-    let (parser, params) = parse_parameter_list_opt parser in
-    let (parser, right_paren) = expect_right_paren parser in
+    let (parser, left_paren, params, right_paren) =
+      parse_parameter_list_opt parser in
+    (* TODO: Give an error in a later pass if ... is used in an anonymous
+       function parameter list *)
     let (parser, colon) = optional_token parser Colon in
     let (parser, return_type) =
       if is_missing colon then

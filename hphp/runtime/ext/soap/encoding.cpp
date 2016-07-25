@@ -451,9 +451,10 @@ void whiteSpace_collapse(xmlChar* str) {
 
 static encodePtr find_encoder_by_type_name(sdl *sdl, const char *type) {
   if (sdl) {
-    encodeMap::const_iterator iter = sdl->encoders.find(type);
-    if (iter != sdl->encoders.end()) {
-      return iter->second;
+    for (const auto& e : sdl->encoders) {
+      if (strcmp(e.second->details.type_str.c_str(), type) == 0) {
+        return e.second;
+      }
     }
   }
   return encodePtr();

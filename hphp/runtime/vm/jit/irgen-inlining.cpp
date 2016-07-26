@@ -137,17 +137,23 @@ void conjureBeginInlining(IRGS& env,
                           Type thisType,
                           const std::vector<Type>& args,
                           ReturnTarget returnTarget) {
+  auto conjure = [&](Type t) {
+    return (t.hasConstVal() ||
+            t.subtypeOfAny(TNullptr, TInitNull, TUninit)) ?
+      cns(env, t) : gen(env, Conjure, t);
+  };
+
   auto const numParams = args.size();
   fpushActRec(
     env,
     cns(env, func),
-    thisType != TBottom ? gen(env, Conjure, thisType) : nullptr,
+    thisType != TBottom ? conjure(thisType) : nullptr,
     numParams,
     nullptr /* invName */
   );
 
   for (auto const argType : args) {
-    push(env, gen(env, Conjure, argType));
+    push(env, conjure(argType));
   }
 
   beginInlining(

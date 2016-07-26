@@ -284,16 +284,40 @@ void emitCheckThis(IRGS& env) {
 }
 
 void emitBareThis(IRGS& env, BareThisOp subop) {
-  if (!curClass(env)) {
+  auto const ctx = ldCtx(env);
+  if (!ctx->type().maybe(TObj)) {
+    if (subop == BareThisOp::NoNotice) {
+      push(env, cns(env, TInitNull));
+      return;
+    }
+    assertx(subop != BareThisOp::NeverNull);
     interpOne(env, TInitNull, 0); // will raise notice and push null
     return;
   }
-  auto const ctx = gen(env, LdCtx, fp(env));
+
+  if (subop == BareThisOp::NoNotice) {
+    auto thiz = cond(env,
+                     [&](Block* taken) {
+                       gen(env, CheckCtxThis, taken, ctx);
+                     },
+                     [&] {
+                       auto t = gen(env, CastCtxThis, ctx);
+                       gen(env, IncRef, t);
+                       return t;
+                     },
+                     [&] {
+                       return cns(env, TInitNull);
+                     });
+    push(env, thiz);
+    return;
+  }
+
   if (subop == BareThisOp::NeverNull) {
     env.irb->fs().setThisAvailable();
   } else {
     gen(env, CheckCtxThis, makeExitSlow(env), ctx);
   }
+
   pushIncRef(env, gen(env, CastCtxThis, ctx));
 }
 

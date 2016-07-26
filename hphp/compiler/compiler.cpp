@@ -42,6 +42,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/process-exec.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
 
@@ -847,7 +848,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
                            buf.c_str(), exe.c_str(), 0 };
     std::string out;
-    ret = Process::Exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
+    ret = proc::exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
   }
 
   return ret;

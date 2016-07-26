@@ -19,7 +19,7 @@
 #include "hphp/compiler/option.h"
 
 #include "hphp/util/async-func.h"
-#include "hphp/util/process.h"
+#include "hphp/util/process-exec.h"
 
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
@@ -32,8 +32,6 @@
 #include "hphp/runtime/server/server.h"
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
 
 #include <fstream>
 #include <memory>
@@ -41,6 +39,7 @@
 #include <vector>
 
 #include <folly/Conv.h>
+#include <folly/portability/Sockets.h>
 
 using namespace HPHP;
 
@@ -195,7 +194,7 @@ void TestServer::RunServer() {
 
   // replace __HHVM__
   argv[0] = HHVM_PATH;
-  Process::Exec(argv[0], argv, nullptr, out, &err);
+  proc::exec(argv[0], argv, nullptr, out, &err);
 }
 
 void TestServer::StopServer() {
@@ -231,7 +230,7 @@ void TestServer::KillServer() {
   std::string out, err;
   const char *argv[] = {"kill", buf, nullptr};
   for (int i = 0; i < 10; i++) {
-    auto ret = Process::Exec(argv[0], argv, nullptr, out, &err);
+    auto ret = proc::exec(argv[0], argv, nullptr, out, &err);
     if (ret) {
       return;
     }
@@ -240,7 +239,7 @@ void TestServer::KillServer() {
   // Last resort
   const char *argv9[] = {"kill", "-9", buf, nullptr};
   for (int i = 0; i < 10; i++) {
-    auto ret = Process::Exec(argv9[0], argv9, nullptr, out, &err);
+    auto ret = proc::exec(argv9[0], argv9, nullptr, out, &err);
     if (ret) {
       return;
     }

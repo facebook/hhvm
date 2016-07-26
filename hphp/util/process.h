@@ -33,32 +33,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// helper class
-
-struct CPipe {
-  CPipe()  { m_fds[0] = m_fds[1] = 0;}
-  ~CPipe() { close();}
-
-  bool open()  { close(); return !pipe(m_fds);}
-  void close() {
-    for (int i = 0; i <= 1; i++) {
-      if (m_fds[i]) {
-        ::close(m_fds[i]);
-        m_fds[i] = 0;
-      }
-    }
-  }
-
-  int getIn() const  { return m_fds[1];}
-  int getOut() const { return m_fds[0];}
-  int detachIn()  { int fd = m_fds[1]; m_fds[1] = 0; return fd;}
-  int detachOut() { int fd = m_fds[0]; m_fds[0] = 0; return fd;}
-  bool dupIn2(int fd) { return dup2(m_fds[1], fd) >= 0;}
-  bool dupOut2(int fd) { return dup2(m_fds[0], fd) >= 0;}
-
-private:
-  int m_fds[2];
-};
 
 struct MemInfo {
   int64_t freeMb{-1};

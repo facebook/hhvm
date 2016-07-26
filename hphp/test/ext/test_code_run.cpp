@@ -19,7 +19,7 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/util/process.h"
+#include "hphp/util/process-exec.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -51,7 +51,7 @@ bool TestCodeRun::postTest() {
 bool TestCodeRun::CleanUp() {
   std::string out, err;
   const char *argv[] = {"", nullptr};
-  Process::Exec("runtime/tmp/cleanup.sh", argv, nullptr, out, &err);
+  proc::exec("runtime/tmp/cleanup.sh", argv, nullptr, out, &err);
   if (!err.empty()) {
     printf("Failed to clean up runtime/tmp: %s\n", err.c_str());
     return false;
@@ -124,7 +124,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
                            "-dapc.enable_cli=1",
                            fullPath.c_str(), nullptr};
     std::string err;
-    Process::Exec(php_path, nowarnings ? argv2 : argv1, nullptr, expected, &err);
+    proc::exec(php_path, nowarnings ? argv2 : argv1, nullptr, expected, &err);
     if (!err.empty() && nowarnings) {
       printf("%s:%d\nParsing: [%s]\nFailed to run %s: %s\n",
              file, line, input, fullPath.c_str(), err.c_str());
@@ -147,7 +147,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
                           repoarg.c_str(),
                           jitarg.c_str(),
                           nullptr};
-    Process::Exec(HHVM_PATH, argv, nullptr, actual, &err);
+    proc::exec(HHVM_PATH, argv, nullptr, actual, &err);
 
     if (perfMode) {
       std::string sinput = input;

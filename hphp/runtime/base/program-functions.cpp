@@ -82,7 +82,7 @@
 #ifndef _MSC_VER
 #include "hphp/util/light-process.h"
 #endif
-#include "hphp/util/process.h"
+#include "hphp/util/process-exec.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/shm-counter.h"
@@ -1645,7 +1645,7 @@ static int execute_program_impl(int argc, char** argv) {
     if (!opened_logs) {
       Logger::Error("Log file not specified under daemon mode.\n\n");
     }
-    Process::Daemonize();
+    proc::daemonize();
   }
 
   if (RuntimeOption::ServerExecutionMode()) {

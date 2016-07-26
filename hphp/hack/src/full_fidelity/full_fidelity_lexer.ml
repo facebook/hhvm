@@ -146,14 +146,13 @@ and scan_name_or_qualified_name lexer =
   if (peek_char lexer 0) = '\\' then
     scan_qualified_name lexer
   else
-    let (lexer, kind) = scan_name lexer in
+    let lexer = scan_name_impl lexer in
     if (peek_char lexer 0) = '\\' then
       scan_qualified_name lexer
     else
-      (lexer, kind)
+      (lexer, TokenKind.Name)
 and scan_name lexer =
-  assert (is_name_nondigit (peek_char lexer 0));
-  let lexer = skip_name_end (advance lexer 1) in
+  let lexer = scan_name_impl lexer in
   if (peek_char lexer 0) = '\\' then
     (* ERROR RECOVERY: Assume that a qualfied name was meant. *)
     (* TODO: This is poor recovery for the case where we're scanning
@@ -162,6 +161,9 @@ and scan_name lexer =
     scan_qualified_name lexer
   else
     (lexer, TokenKind.Name)
+and scan_name_impl lexer =
+  assert (is_name_nondigit (peek_char lexer 0));
+  skip_name_end (advance lexer 1)
 
 let scan_variable lexer =
   assert('$' = peek_char lexer 0);

@@ -29,6 +29,9 @@
 #include "hphp/util/network.h"
 #include "hphp/util/timer.h"
 
+#include <folly/FileUtil.h>
+#include <folly/Range.h>
+
 #include <fcntl.h>
 #include <netinet/tcp.h>
 #include <poll.h>
@@ -588,24 +591,35 @@ void XDebugServer::deinitDbgp() {
 }
 
 void XDebugServer::sendMessage(xdebug_xml_node& xml) {
-  auto constexpr XML_MSG_HEADER =
+  constexpr folly::StringPiece header =
     "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
+  constexpr folly::StringPiece delimiter("\0", 1);
 
   auto const message = xdebug_xml_return_node(&xml);
-  auto const message_len = message.size() + strlen(XML_MSG_HEADER);
 
   log("-> %s\n\n", message.data());
   logFlush();
 
-  StringBuffer buf;
-  buf.append(static_cast<int64_t>(message_len));
-  buf.append('\0');
-  buf.append(XML_MSG_HEADER);
-  buf.append(message);
-  buf.append('\0');
+  // Slice off the last '>' in the closing tag, verify message ends with closing
+  // tag.
+  auto const slice = message.slice().subpiece(0, message.size() - 1);
+  always_assert(slice.endsWith(xml.tag));
 
-  write(m_socket, buf.data(), buf.size());
-  return;
+  auto const lenStr = folly::to<std::string>(message.size() + header.size());
+
+  auto const makeIovec = [] (folly::StringPiece piece) {
+    return iovec { const_cast<char*>(piece.data()), piece.size() };
+  };
+
+  std::array<iovec, 5> buffers = {
+    makeIovec(lenStr),
+    makeIovec(delimiter),
+    makeIovec(header),
+    makeIovec(message.slice()),
+    makeIovec(delimiter)
+  };
+
+  folly::writevFull(m_socket, buffers.data(), buffers.size());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

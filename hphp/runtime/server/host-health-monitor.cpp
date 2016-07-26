@@ -53,7 +53,7 @@ void HostHealthMonitor::addMetric(IHealthMonitorMetric* metric) {
 }
 
 void IHealthMonitorMetric::registerSelf() {
-  s_health_monitor.get()->addMetric(this);
+  folly::Singleton<HostHealthMonitor>::try_get()->addMetric(this);
 }
 
 void HostHealthMonitor::start() {
@@ -68,8 +68,10 @@ void HostHealthMonitor::start() {
   m_monitor_func->start();
   // Make sure the thread is gone after hphp_process_exit().  The node
   // is intentionally leaked.
-  new InitFiniNode([] { s_health_monitor.get()->waitForEnd(); },
-                   InitFiniNode::When::ProcessExit);
+  new InitFiniNode(
+    [] { folly::Singleton<HostHealthMonitor>::try_get()->waitForEnd(); },
+    InitFiniNode::When::ProcessExit
+  );
 }
 
 void HostHealthMonitor::stop() {

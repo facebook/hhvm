@@ -182,14 +182,25 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     varEnv->enterFP(curFP, vmfp());
   }
 
-  auto const func = unit->getMain();
+  ObjectData* thiz = nullptr;
+  Class* cls = nullptr;
+  Class* ctx = curFP->func()->cls();
+  if (ctx) {
+    if (curFP->hasThis()) {
+      thiz = curFP->getThis();
+      cls = thiz->getVMClass();
+    } else {
+      cls = curFP->getClass();
+    }
+  }
+  auto const func = unit->getMain(ctx);
   TypedValue retVal;
   g_context->invokeFunc(
     &retVal,
     func,
     init_null_variant,
-    curFP->hasThis() ? curFP->getThis() : nullptr,
-    nullptr,
+    thiz,
+    cls,
     varEnv,
     nullptr,
     ExecutionContext::InvokePseudoMain

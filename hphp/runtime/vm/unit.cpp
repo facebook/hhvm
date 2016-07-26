@@ -639,7 +639,7 @@ struct FrameRestore {
       ActRec &tmp = *vmStack().allocA();
       tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
-      tmp.m_func = preClass->unit()->getMain();
+      tmp.m_func = preClass->unit()->getMain(nullptr);
       tmp.m_soff = !fp
         ? 0
         : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
@@ -1684,8 +1684,9 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
                 // local scope.
               }
             }
-            g_context->invokeFunc(&ret, unit->getMain(), init_null_variant,
-                                    nullptr, nullptr, ve);
+            g_context->invokeFunc(&ret, unit->getMain(nullptr),
+                                  init_null_variant,
+                                  nullptr, nullptr, ve);
             tvRefcountedDecRef(&ret);
           } else {
             Stats::inc(Stats::PseudoMain_SkipDeep);
@@ -1882,7 +1883,7 @@ std::string Unit::toString() const {
 // Other methods.
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
-  auto entry = getMain()->getEntry();
+  auto entry = getMain(nullptr)->getEntry();
   auto pc = entry;
   // String <id>; Fatal;
   // ^^^^^^
@@ -1908,7 +1909,7 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
     return false;
   }
 
-  auto pc = getMain()->getEntry();
+  auto pc = getMain(nullptr)->getEntry();
 
   // String <id>
   decode_op(pc);

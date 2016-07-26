@@ -256,7 +256,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       if (unit) {
         if (initial) {
           TypedValue retval;
-          ec->invokeFunc(&retval, unit->getMain(), init_null_variant,
+          ec->invokeFunc(&retval, unit->getMain(nullptr), init_null_variant,
                          nullptr, nullptr, nullptr, nullptr,
                          ExecutionContext::InvokePseudoMain);
           tvRefcountedDecRef(&retval);

@@ -213,7 +213,7 @@ bool UnitChecker::checkFuncs() {
     ok &= checkFunc(func, m_verbose);
   });
 
-  if (!multi && m_unit->getMain() != pseudo) {
+  if (!multi && m_unit->getMain(nullptr) != pseudo) {
     error("%s", "funcs and unit disagree on what is the pseudo-main\n");
     ok = false;
   }

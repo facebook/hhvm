@@ -586,7 +586,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     }
     mi->mergeableObj(ix++) = func;
   }
-  assert(u->getMain()->isPseudoMain());
+  assert(u->getMain(nullptr)->isPseudoMain());
   if (!mi->m_firstHoistableFunc) {
     mi->m_firstHoistableFunc =  ix;
   }

@@ -1480,7 +1480,7 @@ bool ExecutionContext::setHeaderCallback(const Variant& callback) {
 void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
   checkHHConfig(unit);
 
-  auto const func = unit->getMain();
+  auto const func = unit->getMain(nullptr);
   invokeFunc(retval, func, init_null_variant, nullptr, nullptr,
              m_globalVarEnv, nullptr, InvokePseudoMain);
 }
@@ -2096,7 +2096,7 @@ const Variant& ExecutionContext::getEvaledArg(const StringData* val,
   assert(unit != nullptr);
   Variant v;
   // Default arg values are not currently allowed to depend on class context.
-  g_context->invokeFunc((TypedValue*)&v, unit->getMain(),
+  g_context->invokeFunc((TypedValue*)&v, unit->getMain(nullptr),
                           init_null_variant, nullptr, nullptr, nullptr, nullptr,
                           InvokePseudoMain);
   Variant &lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
@@ -2239,7 +2239,7 @@ StrNR ExecutionContext::createFunction(const String& args,
   //
   // We have to eval now to emulate this behavior.
   TypedValue retval;
-  invokeFunc(&retval, unit->getMain(), init_null_variant,
+  invokeFunc(&retval, unit->getMain(nullptr), init_null_variant,
              nullptr, nullptr, nullptr, nullptr,
              InvokePseudoMain);
 
@@ -2374,7 +2374,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assert(m_nesting == 0);
   assert(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
-  ar->m_func = s_debuggerDummy->getMain();
+  ar->m_func = s_debuggerDummy->getMain(nullptr);
   ar->initNumArgs(0);
   ar->setThis(nullptr);
   ar->setReturnVMExit();

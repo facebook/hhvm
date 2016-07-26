@@ -474,7 +474,7 @@ public:
    * We clone the toplevel pseudomain for each context class and cache the
    * results in m_pseudoMainCache.
    */
-  Func* getMain(Class* cls = nullptr) const;
+  Func* getMain(Class* cls) const;
 
   /*
    * The first hoistable Func in the Unit.

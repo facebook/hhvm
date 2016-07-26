@@ -1389,12 +1389,14 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
             prefixedCode += ";";
             Unit* unit = g_context->compileEvalString(prefixedCode.get());
             Variant v;
-            Func* func = unit->getMain();
+            auto const ar = GetCallerFrame();
+            auto const thiz = ar->hasThis() ? ar->getThis() : nullptr;
+            auto const cls = thiz ? thiz->getVMClass() :
+              ar->hasClass() ? ar->getClass() : nullptr;
+            Func* func = unit->getMain(ar->func()->cls());
             g_context->invokeFunc(v.asTypedValue(), func, init_null_variant,
-                                    g_context->getThis(),
-                                    g_context->getContextClass(), nullptr,
-                                    nullptr,
-                                    ExecutionContext::InvokePseudoMain);
+                                  thiz, cls, nullptr, nullptr,
+                                  ExecutionContext::InvokePseudoMain);
             eval_result = std::move(v).toString();
 
             result.resize(result_len);

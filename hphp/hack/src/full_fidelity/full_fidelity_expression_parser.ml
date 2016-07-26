@@ -110,7 +110,7 @@ module WithStatementAndDeclParser
       parse_prefix_unary_expression parser
 
     | LeftParen ->
-      parse_parenthesized_or_lambda_expression parser
+      parse_cast_or_parenthesized_or_lambda_expression parser
 
     | LessThan ->
         parse_possible_xhp_expression parser
@@ -313,14 +313,65 @@ module WithStatementAndDeclParser
       args right_paren in
     parse_remaining_expression parser result
 
-  and parse_parenthesized_or_lambda_expression parser =
-    (*TODO: Does not yet deal with lambdas *)
-    let (parser, left_paren) = next_token parser in
+  and parse_cast_or_parenthesized_or_lambda_expression parser =
+    (* We need to disambiguate between casts, lambdas and ordinary
+      parenthesized expressions. There are only four possible casts:
+      (int), (float), (bool) and (string), so those are the easiest
+      to detect.  Lambdas are a lot harder; a lambda which begins
+      with a left paren could be:
+      (<<foo>> $bar) ==> ...
+      ($bar) ==> ...
+      ($bar, $blah) ==> ...
+      (int $bar) ==> ...
+   *)
+
+    if is_cast_expression parser then
+      parse_cast_expression parser
+    else if is_lambda_expression parser then
+      parse_lambda_expression parser
+    else
+      parse_parenthesized_expression parser
+
+  and is_cast_expression parser =
+    let (parser, left_paren) = assert_token parser LeftParen in
+    let (parser, type_token) = next_token parser in
+    match Token.kind type_token with
+    | Bool
+    | Interface
+    | Float
+    | String ->
+      peek_token_kind parser = RightParen
+    | _ -> false
+
+  and parse_cast_expression parser =
+    (* SPEC:
+      cast-expression:
+        (  cast-type  ) unary-expression
+      cast-type: one of
+        bool  int  float  string
+    *)
+    (* We don't get here unless we have a legal cast, thanks to the
+       previous call to is_cast_expression. *)
+    let (parser, left) = assert_token parser LeftParen in
+    let (parser, cast_type) = next_token parser in
+    let cast_type = make_token cast_type in
+    let (parser, right) = assert_token parser RightParen in
+    let (parser, operand) = parse_expression parser in
+    let result = make_cast_expression left cast_type right operand in
+    (parser, result)
+
+  and is_lambda_expression parser =
+    false (* TODO *)
+
+  and parse_lambda_expression parser =
+    (parser, make_missing()) (* TODO *)
+
+  and parse_parenthesized_expression parser =
+    let (parser, left_paren) = assert_token parser LeftParen in
     let (parser, expression) = with_reset_precedence parser parse_expression in
     let (parser, right_paren) = expect_right_paren parser in
     let syntax =
-      make_parenthesized_expression
-        (make_token left_paren) expression right_paren in
+      make_parenthesized_expression left_paren expression right_paren in
     (parser, syntax)
 
   and parse_postfix_unary parser term =

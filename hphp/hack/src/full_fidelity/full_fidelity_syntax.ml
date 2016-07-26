@@ -457,6 +457,10 @@ module WithToken(Token: TokenType) = struct
       subscript_index : t;
       subscript_right : t
     }
+    and echo_intrinsic_expression = {
+      echo_intrinsic_token : t;
+      echo_intrinsic_expression_list : t;
+    }
     and xhp_attribute = {
       xhp_attr_name : t;
       xhp_attr_equal : t;
@@ -634,6 +638,7 @@ module WithToken(Token: TokenType) = struct
     | ArrayCreationExpression of array_creation_expression
     | ArrayIntrinsicExpression of array_intrinsic_expression
     | SubscriptExpression of subscript_expression
+    | EchoIntrinsicExpression of echo_intrinsic_expression
     | XHPExpression of xhp_expression
     | XHPOpen of xhp_open
     | XHPAttribute of xhp_attribute
@@ -739,6 +744,7 @@ module WithToken(Token: TokenType) = struct
       | ArrayCreationExpression _ -> SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression _ -> SyntaxKind.ArrayIntrinsicExpression
       | SubscriptExpression _ -> SyntaxKind.SubscriptExpression
+      | EchoIntrinsicExpression _ -> SyntaxKind.EchoIntrinsicExpression
       | XHPExpression _ -> SyntaxKind.XHPExpression
       | XHPOpen _ -> SyntaxKind.XHPOpen
       | XHPClose _ -> SyntaxKind.XHPClose
@@ -842,6 +848,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ArrayIntrinsicExpression
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
+    let is_echo_intrinsic_expression node =
+      kind node = SyntaxKind.EchoIntrinsicExpression
     let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
     let is_xhp_open node = kind node = SyntaxKind.XHPOpen
     let is_xhp_attribute node = kind node = SyntaxKind.XHPAttribute
@@ -1174,6 +1182,9 @@ module WithToken(Token: TokenType) = struct
           subscript_index; subscript_right } ->
         [ subscript_receiver; subscript_left;
           subscript_index; subscript_right ]
+      | EchoIntrinsicExpression
+        { echo_intrinsic_token; echo_intrinsic_expression_list; } ->
+        [ echo_intrinsic_token; echo_intrinsic_expression_list; ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ xhp_open; xhp_body; xhp_close ]
@@ -1525,6 +1536,9 @@ module WithToken(Token: TokenType) = struct
           subscript_index; subscript_right } ->
         [ "subscript_receiver"; "subscript_left";
           "subscript_index"; "subscript_right" ]
+      | EchoIntrinsicExpression
+        { echo_intrinsic_token; echo_intrinsic_expression_list; } ->
+        [ "echo_intrinsic_token"; "echo_intrinsic_expression_list"; ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ "xhp_open"; "xhp_body"; "xhp_close" ]
@@ -1780,6 +1794,8 @@ module WithToken(Token: TokenType) = struct
     let array_intrinsic_left_paren x = x.array_intrinsic_left_paren
     let array_intrinsic_members x = x.array_intrinsic_members
     let array_intrinsic_right_paren x = x.array_intrinsic_right_paren
+    let echo_intrinsic_token x = x.echo_intrinsic_token
+    let echo_intrinsic_expression_list x = x.echo_intrinsic_expression_list
     let xhp_open x = x.xhp_open
     let xhp_body x = x.xhp_body
     let xhp_close x = x.xhp_close
@@ -2146,6 +2162,10 @@ module WithToken(Token: TokenType) = struct
         SubscriptExpression
         { subscript_receiver; subscript_left;
           subscript_index; subscript_right }
+      | (SyntaxKind.EchoIntrinsicExpression,
+        [ echo_intrinsic_token; echo_intrinsic_expression_list; ]) ->
+        EchoIntrinsicExpression
+          { echo_intrinsic_token; echo_intrinsic_expression_list; }
       | (SyntaxKind.XHPExpression, [ xhp_open; xhp_body; xhp_close ]) ->
         XHPExpression { xhp_open; xhp_body; xhp_close }
       | (SyntaxKind.XHPOpen, [ xhp_open_name; xhp_open_attrs;
@@ -2336,6 +2356,11 @@ module WithToken(Token: TokenType) = struct
       let make_subscript_expression receiver left index right =
         from_children SyntaxKind.SubscriptExpression
         [ receiver; left; index; right ]
+
+      let make_echo_intrinsic_expression
+        echo_intrinsic_token echo_intrinsic_expression_list =
+        from_children SyntaxKind.EchoIntrinsicExpression
+          [ echo_intrinsic_token; echo_intrinsic_expression_list; ]
 
       let make_xhp xhp_open xhp_body xhp_close =
         from_children SyntaxKind.XHPExpression [xhp_open; xhp_body; xhp_close ]

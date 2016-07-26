@@ -1249,7 +1249,7 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
 }
 
 /////////////////////////////////////////////////////////////////////////
-//Contiguous Heap
+// ContiguousHeap.
 
 void ContiguousHeap::reset() {
   m_requestCount++;

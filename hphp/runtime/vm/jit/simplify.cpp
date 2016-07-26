@@ -2788,9 +2788,12 @@ bool canSimplifyAssertType(const IRInstruction* inst,
 //////////////////////////////////////////////////////////////////////
 
 SimplifyResult simplify(IRUnit& unit,
-                        const IRInstruction* origInst,
+                        IRInstruction* origInst,
                         bool typesMightRelax) {
   auto env = State { unit, typesMightRelax };
+
+  constProp(unit, origInst, typesMightRelax);
+
   auto const newDst = simplifyWork(env, origInst);
 
   assertx(validate(env, newDst, origInst));
@@ -2929,6 +2932,19 @@ void simplifyPass(IRUnit& unit) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void constProp(IRUnit& unit, IRInstruction* inst, bool typesMightRelax) {
+  for (auto& src : inst->srcs()) {
+    if (!src->inst()->is(DefConst)) {
+      if (src->hasConstVal() ||
+          src->type().subtypeOfAny(TNullptr, TInitNull, TUninit)) {
+        if (!typesMightRelax || !irgen::typeMightRelax(src)) {
+          src = unit.cns(src->type());
+        }
+      }
+    }
+  }
+}
 
 void copyProp(IRInstruction* inst) {
   for (auto& src : inst->srcs()) {

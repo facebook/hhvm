@@ -62,7 +62,7 @@ struct SimplifyResult {
   jit::vector<IRInstruction*> instrs;
   SSATmp* dst;
 };
-SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
+SimplifyResult simplify(IRUnit&, IRInstruction*, bool typesMightRelax);
 
 /*
  * Instruction stream modifying simplification routine.
@@ -110,6 +110,11 @@ bool canSimplifyAssertType(const IRInstruction* inst,
  * More complicated copy-propagation is performed in the Simplifier.
  */
 void copyProp(IRInstruction*);
+
+/*
+ * Replace inputs with known values with constants
+ */
+void constProp(IRUnit&, IRInstruction*, bool typesMightRelax);
 
 //////////////////////////////////////////////////////////////////////
 

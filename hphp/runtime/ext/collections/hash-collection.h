@@ -653,6 +653,7 @@ struct HashCollection : ObjectData {
   // *not* contain any references.  WARNING: does not update intLikeStrKeys
   void replaceArray(ArrayData* adata) {
     auto* oldAd = m_arr;
+    dropImmCopy();
     m_arr = MixedArray::asMixed(adata);
     adata->incRefCount();
     m_size = adata->size();

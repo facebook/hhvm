@@ -396,6 +396,19 @@ module WithToken(Token: TokenType) = struct
       anonymous_use_variables : t;
       anonymous_use_right_paren : t
     }
+    and lambda_expression = {
+      lambda_async : t;
+      lambda_signature : t;
+      lambda_arrow : t;
+      lambda_body : t
+    }
+    and lambda_signature = {
+      lambda_left_paren : t;
+      lambda_params : t;
+      lambda_right_paren : t;
+      lambda_colon : t;
+      lambda_type : t
+    }
     and cast_expression = {
       cast_left_paren : t;
       cast_type : t;
@@ -626,6 +639,8 @@ module WithToken(Token: TokenType) = struct
     | StaticDeclarator of static_declarator
 
     | CastExpression of cast_expression
+    | LambdaExpression of lambda_expression
+    | LambdaSignature of lambda_signature
     | AnonymousFunction of anonymous_function
     | AnonymousFunctionUseClause of anonymous_use
     | LiteralExpression of t
@@ -683,6 +698,8 @@ module WithToken(Token: TokenType) = struct
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
       | CastExpression _ -> SyntaxKind.CastExpression
+      | LambdaExpression _ -> SyntaxKind.LambdaExpression
+      | LambdaSignature _ -> SyntaxKind.LambdaSignature
       | AnonymousFunction _ -> SyntaxKind.AnonymousFunction
       | AnonymousFunctionUseClause _ -> SyntaxKind.AnonymousFunctionUseClause
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
@@ -779,6 +796,8 @@ module WithToken(Token: TokenType) = struct
     let is_missing node = kind node = SyntaxKind.Missing
     let is_token node = kind node = SyntaxKind.Token
     let is_cast_expression node = kind node = SyntaxKind.CastExpression
+    let is_lambda_expression node = kind node = SyntaxKind.LambdaExpression
+    let is_lambda_signature node = kind node = SyntaxKind.LambdaSignature
     let is_anonymous_function node = kind node = SyntaxKind.AnonymousFunction
     let is_anonymous_function_use_clause node =
       kind node = SyntaxKind.AnonymousFunctionUseClause
@@ -929,6 +948,14 @@ module WithToken(Token: TokenType) = struct
       | CastExpression
         { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
         [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]
+      | LambdaExpression
+        { lambda_async; lambda_signature; lambda_arrow; lambda_body } ->
+        [ lambda_async; lambda_signature; lambda_arrow; lambda_body ]
+      | LambdaSignature
+        { lambda_left_paren; lambda_params; lambda_right_paren;
+          lambda_colon; lambda_type } ->
+        [ lambda_left_paren; lambda_params; lambda_right_paren;
+          lambda_colon; lambda_type ]
       | AnonymousFunction
         { anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
@@ -1279,6 +1306,14 @@ module WithToken(Token: TokenType) = struct
       | CastExpression
         { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
         [ "cast_left_paren"; "cast_type"; "cast_right_paren"; "cast_operand" ]
+      | LambdaExpression
+        { lambda_async; lambda_signature; lambda_arrow; lambda_body } ->
+        [ "lambda_async"; "lambda_signature"; "lambda_arrow"; "lambda_body" ]
+      | LambdaSignature
+        { lambda_left_paren; lambda_params; lambda_right_paren;
+          lambda_colon; lambda_type } ->
+        [ "lambda_left_paren"; "lambda_params"; "lambda_right_paren";
+          "lambda_colon"; "lambda_type" ]
       | AnonymousFunction
         { anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
@@ -1883,6 +1918,16 @@ module WithToken(Token: TokenType) = struct
         [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]) ->
         CastExpression
         { cast_left_paren; cast_type; cast_right_paren; cast_operand }
+      | (SyntaxKind.LambdaExpression,
+        [ lambda_async; lambda_signature; lambda_arrow; lambda_body ]) ->
+        LambdaExpression
+        { lambda_async; lambda_signature; lambda_arrow; lambda_body }
+      | (SyntaxKind.LambdaSignature,
+        [ lambda_left_paren; lambda_params; lambda_right_paren;
+          lambda_colon; lambda_type ]) ->
+        LambdaSignature
+        { lambda_left_paren; lambda_params; lambda_right_paren;
+          lambda_colon; lambda_type }
       | (SyntaxKind.AnonymousFunction,
         [ anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
@@ -2321,6 +2366,14 @@ module WithToken(Token: TokenType) = struct
       let make_cast_expression left cast_type right operand =
         from_children SyntaxKind.CastExpression
           [ left; cast_type; right; operand ]
+
+      let make_lambda_expression async signature arrow body =
+        from_children SyntaxKind.LambdaExpression
+          [async; signature; arrow; body ]
+
+      let make_lambda_signature left params right colon lambda_type =
+        from_children SyntaxKind.LambdaSignature
+        [ left; params; right; colon; lambda_type ]
 
       let make_anonymous_function
           async func left params right colon return_type uses body =

@@ -68,6 +68,8 @@ type t =
 
 (* Expressions *)
 | CastExpression
+| LambdaExpression
+| LambdaSignature
 | AnonymousFunction
 | AnonymousFunctionUseClause
 | LiteralExpression
@@ -115,6 +117,8 @@ let to_string kind =
   | Missing -> "missing"
   | Token -> "token"
   | CastExpression -> "cast_expression"
+  | LambdaExpression -> "lambda_expression"
+  | LambdaSignature -> "lambda_signature"
   | AnonymousFunction -> "anonymous_function"
   | AnonymousFunctionUseClause -> "anonymous_function_use_clause"
   | LiteralExpression -> "literal"

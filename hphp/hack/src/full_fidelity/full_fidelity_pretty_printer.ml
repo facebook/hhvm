@@ -566,6 +566,19 @@ let rec get_doc node =
     let r = get_doc x.cast_right_paren in
     let o = get_doc x.cast_operand in
     group_doc (l ^^^ t ^^^ r ^^^ o)
+  | LambdaExpression x ->
+    let async = get_doc x.lambda_async in
+    let signature = get_doc x.lambda_signature in
+    let arrow = get_doc x.lambda_arrow in
+    let body = get_doc x.lambda_body in
+    group_doc (async ^| signature ^| arrow ^| body)
+  | LambdaSignature x ->
+    let left = get_doc x.lambda_left_paren in
+    let params = get_doc x.lambda_params in
+    let right = get_doc x.lambda_right_paren in
+    let colon = get_doc x.lambda_colon in
+    let ty = get_doc x.lambda_type in
+    group_doc (left ^| params ^| right ^| colon ^| ty)
   | AnonymousFunction x ->
     let async = get_doc x.anonymous_async in
     let fn = get_doc x.anonymous_function in

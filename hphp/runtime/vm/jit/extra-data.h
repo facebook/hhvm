@@ -212,22 +212,6 @@ struct IfaceMethodData : IRExtraData {
 };
 
 /*
- * Func pointer.
- */
-struct FuncData : IRExtraData {
-  explicit FuncData(const Func* func) : func(func) {}
-
-  std::string show() const {
-    return folly::to<std::string>(func->fullName()->data());
-  }
-
-  bool equals(FuncData o) const { return func == o.func; }
-  size_t hash() const { return std::hash<const Func*>()(func); }
-
-  const Func* func;
-};
-
-/*
  * Func with argument index.
  */
 struct FuncArgData : IRExtraData {
@@ -842,23 +826,6 @@ struct LdFuncCachedUData : IRExtraData {
 
   const StringData* name;
   const StringData* fallback;
-};
-
-/*
- * The name of a class, and the expected Class* at runtime.
- */
-struct CheckDefinedClsData : IRExtraData {
-  CheckDefinedClsData(const StringData* clsName, const Class* cls)
-    : clsName(clsName)
-    , cls(cls)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(clsName->data());
-  }
-
-  const StringData* clsName;
-  const Class* cls;
 };
 
 /*

@@ -18,6 +18,8 @@ string(3) "ABC"
 string(3) "Abc"
 string(3) "aBC"
 string(7) "Abc Def"
+string(7) "Abc def"
+string(9) "Abc%cD%ce%cF"
 string(26) "Test paragraph. Other text"
 string(57) "<p>Test paragraph.</p> <a href="#fragment">Other text</a>"
 string(3) "abc"
@@ -210,7 +212,7 @@ int(0)
 int(7)
 bool(false)
 
-Warning: Empty delimiter in %s on line 378
+Warning: Empty delimiter in %s on line 379
 bool(false)
 int(7)
 int(7)

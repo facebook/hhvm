@@ -31,7 +31,8 @@ var_dump(ucfirst("abc"));
 var_dump(lcfirst("ABC"));
 
 var_dump(ucwords("abc def"));
-
+var_dump(ucwords("abc def", ""));
+var_dump(ucwords("abc\xa0d\xa1e\xa2f", "\xa0\xa2"));
 $text = "<p>Test paragraph.</p><!-- Comment --> ".
   "<a href=\"#fragment\">Other text</a>";
 var_dump(strip_tags($text));

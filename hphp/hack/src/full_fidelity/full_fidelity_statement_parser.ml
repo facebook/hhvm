@@ -14,14 +14,14 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
+module TypeParser = Full_fidelity_type_parser
 module SimpleParser = Full_fidelity_simple_parser.WithLexer(Full_fidelity_lexer)
 
 open TokenKind
 open Syntax
 
-module WithExpressionAndDeclParser
-  (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType)
-  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType) :
+module WithExpressionParser
+  (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType) :
   Full_fidelity_statement_parser_type.StatementParserType = struct
 
   include SimpleParser
@@ -240,19 +240,17 @@ module WithExpressionAndDeclParser
       match syntax catch_token with
       | Missing -> (parser_catch, catch_token)
       | _ ->
-      (* catch  (  parameter-declaration-list  )  compound-statement *)
-        let (parser_catch, left_paren, param_decl, right_paren) =
-          parse_parameter_list_opt parser_catch in
-        (* TODO: Give an error if the parameter declaration list contains
-           ... or contains more than one element. *)
-        (* SPEC ISSUE: Why does the spec say both that the catch clause takes
-           a list of parameters, and that the list must have exactly one
-           element? Why not say that the catch clause takes a parameter
-           declaration and be done with it? *)
+      (* SPEC
+        catch  (  type-specification variable-name  )  compound-statement
+      *)
+        let (parser_catch, left_paren) = expect_left_paren parser_catch in
+        let (parser_catch, catch_type) = parse_type_specifier parser_catch in
+        let (parser_catch, catch_var) = expect_variable parser_catch in
+        let (parser_catch, right_paren) = expect_right_paren parser_catch in
         let (parser_catch, compound_stmt) =
           parse_compound_statement parser_catch in
-        let catch_clause = make_catch_clause catch_token left_paren param_decl
-          right_paren compound_stmt in
+        let catch_clause = make_catch_clause catch_token left_paren
+          catch_type catch_var right_paren compound_stmt in
         (parser_catch, catch_clause)
     in
     let parse_finally_clause_opt parser_f =
@@ -412,13 +410,13 @@ module WithExpressionAndDeclParser
     let parser = make lexer errors in
     (parser, node)
 
-and parse_parameter_list_opt parser =
-  let declaration_parser = DeclParser.make parser.lexer parser.errors in
-  let (declaration_parser, left, node, right) =
-    DeclParser.parse_parameter_list_opt declaration_parser in
-  let lexer = DeclParser.lexer declaration_parser in
-  let errors = DeclParser.errors declaration_parser in
+and parse_type_specifier parser =
+  let type_parser = TypeParser.make parser.lexer parser.errors in
+  let (type_parser, node) =
+    TypeParser.parse_type_specifier type_parser in
+  let lexer = TypeParser.lexer type_parser in
+  let errors = TypeParser.errors type_parser in
   let parser = make lexer errors in
-  (parser, left, node, right)
+  (parser, node)
 
 end

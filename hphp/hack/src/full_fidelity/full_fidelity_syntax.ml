@@ -289,7 +289,8 @@ module WithToken(Token: TokenType) = struct
     and catch_clause = {
       catch_keyword: t;
       catch_left_paren: t;
-      catch_params: t;
+      catch_type: t;
+      catch_variable: t;
       catch_right_paren: t;
       catch_compound_statement: t;
     }
@@ -1081,10 +1082,11 @@ module WithToken(Token: TokenType) = struct
       | TryStatement {try_keyword; try_compound_statement; catch_clauses;
                       finally_clause} ->
         [try_keyword; try_compound_statement; catch_clauses; finally_clause]
-      | CatchClause {catch_keyword; catch_left_paren; catch_params;
-                     catch_right_paren; catch_compound_statement} ->
-        [catch_keyword; catch_left_paren; catch_params; catch_right_paren;
-         catch_compound_statement]
+      | CatchClause
+        { catch_keyword; catch_left_paren; catch_type; catch_variable;
+          catch_right_paren; catch_compound_statement} ->
+        [ catch_keyword; catch_left_paren; catch_type; catch_variable;
+          catch_right_paren; catch_compound_statement]
       | FinallyClause {finally_keyword; finally_compound_statement} ->
         [finally_keyword; finally_compound_statement]
       | DoStatement
@@ -1434,10 +1436,11 @@ module WithToken(Token: TokenType) = struct
                       finally_clause} ->
         ["try_keyword"; "try_compound_statement"; "catch_clauses";
         "finally_clause"]
-      | CatchClause {catch_keyword; catch_left_paren; catch_params;
-                     catch_right_paren; catch_compound_statement} ->
-        ["catch_keyword"; "catch_left_paren"; "catch_params";
-        "catch_right_paren"; "catch_compound_statement"]
+      | CatchClause
+        { catch_keyword; catch_left_paren; catch_type; catch_variable;
+          catch_right_paren; catch_compound_statement} ->
+        [ "catch_keyword"; "catch_left_paren"; "catch_type"; "catch_variable";
+          "catch_right_paren"; "catch_compound_statement" ]
       | FinallyClause {finally_keyword; finally_compound_statement} ->
         ["finally_keyword"; "finally_compound_statement"]
       | DoStatement
@@ -1744,11 +1747,6 @@ module WithToken(Token: TokenType) = struct
     let try_compound_statement x = x.try_compound_statement
     let try_catch_clauses x = x.catch_clauses
     let try_finally_clause x = x.finally_clause
-    let catch_keyword x = x.catch_keyword
-    let catch_left_paren x = x.catch_left_paren
-    let catch_params x = x.catch_params
-    let catch_right_paren x = x.catch_right_paren
-    let catch_compound_statement x = x.catch_compound_statement
     let finally_keyword x = x.finally_keyword
     let finally_compound_statement x = x.finally_compound_statement
     let do_keyword x = x.do_keyword
@@ -2057,10 +2055,12 @@ module WithToken(Token: TokenType) = struct
         catch_clauses; finally_clause] ->
         TryStatement {try_keyword; try_compound_statement; catch_clauses;
           finally_clause}
-      | SyntaxKind.CatchClause, [catch_keyword; catch_left_paren; catch_params;
-        catch_right_paren; catch_compound_statement] ->
-        CatchClause {catch_keyword; catch_left_paren; catch_params;
-          catch_right_paren; catch_compound_statement}
+      | SyntaxKind.CatchClause,
+        [ catch_keyword; catch_left_paren; catch_type; catch_variable;
+          catch_right_paren; catch_compound_statement ] ->
+        CatchClause
+        { catch_keyword; catch_left_paren; catch_type; catch_variable;
+          catch_right_paren; catch_compound_statement }
       | SyntaxKind.FinallyClause, [finally_keyword;
         finally_compound_statement] ->
         FinallyClause {finally_keyword; finally_compound_statement}
@@ -2581,11 +2581,9 @@ module WithToken(Token: TokenType) = struct
           from_children SyntaxKind.TryStatement
           [ try_keyword; try_compound_statement; catch_clauses; finally_clause ]
 
-      let make_catch_clause catch_keyword catch_left_paren catch_params
-        catch_right_paren catch_compound_statement =
+      let make_catch_clause keyword left catch_type catch_var right body =
         from_children SyntaxKind.CatchClause
-          [ catch_keyword; catch_left_paren; catch_params; catch_right_paren;
-          catch_compound_statement ]
+          [ keyword; left; catch_type; catch_var; right; body ]
 
       let make_finally_clause finally_keyword finally_compound_statement =
         from_children SyntaxKind.FinallyClause

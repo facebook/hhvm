@@ -479,13 +479,15 @@ let rec get_doc node =
     group_doc (try_part ^| catch_clauses ^| finally_clause)
     |> add_break
   | CatchClause x ->
-    let keyword = get_doc (catch_keyword x) in
-    let left = get_doc (catch_left_paren x) in
-    let params = get_doc (catch_params x) in
-    let right = get_doc (catch_right_paren x) in
-    let stmt = catch_compound_statement x in
+    let keyword = get_doc x.catch_keyword in
+    let left = get_doc x.catch_left_paren in
+    let ty = get_doc x.catch_type in
+    let var = get_doc x.catch_variable in
+    let param = ty ^| var in
+    let right = get_doc x.catch_right_paren in
+    let stmt = x.catch_compound_statement in
     let front_part = group_doc (keyword ^| left) in
-    let before_stmt = indent_block_no_space front_part params right indt in
+    let before_stmt = indent_block_no_space front_part param right indt in
     handle_compound_brace_prefix_indent before_stmt stmt indt
     |> add_break
   | FinallyClause x ->

@@ -256,7 +256,7 @@ and p_catch_clauses = "CatchClauses", fun () -> [
   [NonTerm p_catch_clauses; NonTerm p_catch_clause]]
 
 and p_catch_clause = "CatchClause", fun () -> [
-  [catch; left_paren; NonTerm p_parameter_declaration_list;
+  [catch; left_paren; NonTerm p_type_spec; NonTerm p_variable_name;
     right_paren; NonTerm p_compound_statement]]
 
 and p_if_statement = "IfStatement", fun () -> [

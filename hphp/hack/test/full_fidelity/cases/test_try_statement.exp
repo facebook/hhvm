@@ -12,10 +12,13 @@
         (expression_statement
           (postfix_unary_operator(variable((whitespace)(variable)))((++)))
           ((;)(end_of_line)))((whitespace)(})(end_of_line)))
-      (catch_clause((whitespace)(catch)(whitespace))
-        ((lparen))(parameter_declaration(missing)(missing)
-        (simple_type_specifier ((name)(whitespace)))
-        ((variable))(missing))((rparen))(compound_statement(({)(end_of_line))
+      (catch_clause
+        ((whitespace)(catch)(whitespace))
+        ((lparen))
+        (simple_type_specifier((name)(whitespace)))
+        ((variable))
+        ((rparen))
+        (compound_statement(({)(end_of_line))
           (expression_statement(variable((whitespace)(variable)))
           ((;)(end_of_line)))((whitespace)(})(end_of_line))))
       (finally_clause((whitespace)(finally)(whitespace))

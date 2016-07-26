@@ -23,8 +23,8 @@ module rec ExpressionParser :
                                   (StatementParser) (DeclParser)
 and StatementParser :
   Full_fidelity_statement_parser_type.StatementParserType =
-  Full_fidelity_statement_parser.WithExpressionAndDeclParser
-                                 (ExpressionParser) (DeclParser)
+  Full_fidelity_statement_parser.WithExpressionParser
+                                 (ExpressionParser)
 and DeclParser :
   Full_fidelity_declaration_parser_type.DeclarationParserType =
   Full_fidelity_declaration_parser.WithExpressionAndStatementParser

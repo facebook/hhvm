@@ -123,7 +123,7 @@ FILE *Cronolog::getOutputFile() {
 
   /* We need to open a new file under a mutex. */
   {
-    Lock lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     if ((time_now >= m_nextPeriod)) {
       /* the current period has finished */
 

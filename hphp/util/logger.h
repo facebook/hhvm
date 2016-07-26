@@ -18,8 +18,8 @@
 #define incl_HPHP_LOGGER_H_
 
 #include <atomic>
+#include <cstdarg>
 #include <string>
-#include <stdarg.h>
 
 #include "hphp/util/cronolog.h"
 #include "hphp/util/log-file-flusher.h"

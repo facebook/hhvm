@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
-#include "hphp/util/mutex.h"
+#include "hphp/util/lock.h"
 
 #include <folly/portability/Unistd.h>
 

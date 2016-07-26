@@ -16,9 +16,9 @@
 
 #include "hphp/util/hdf.h"
 
-#include <boost/algorithm/string/predicate.hpp>
+#include <mutex>
 
-#include "hphp/util/lock.h"
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,11 +27,11 @@ namespace HPHP {
  * Helper class storing HDF raw pointer and reference counts on it.
  */
 struct HdfRaw {
-  static Mutex HdfMutex;
+  static std::mutex HdfMutex;
 
   HdfRaw() : m_hdf(nullptr), m_count(1) {
     // ClearSilver is not thread-safe when calling hdf_init(), so guarding it.
-    Lock lock(HdfMutex);
+    std::lock_guard<std::mutex> lock(HdfMutex);
     Hdf::CheckNeoError(hdf_init(&m_hdf));
     assert(m_hdf);
   }
@@ -48,7 +48,7 @@ struct HdfRaw {
   void dec() { assert(m_count > 0); if (--m_count == 0) { delete this;}}
 };
 
-Mutex HdfRaw::HdfMutex;
+std::mutex HdfRaw::HdfMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors

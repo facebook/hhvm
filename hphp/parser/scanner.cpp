@@ -17,6 +17,7 @@
 
 #include <fstream>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/zend/zend-string.h"

@@ -24,10 +24,11 @@
 
 #include <boost/container/flat_set.hpp>
 
-#include "hphp/util/exception.h"
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/util/functional.h"
 #include "hphp/neo/neo_hdf.h"
+
+#include "hphp/util/exception.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

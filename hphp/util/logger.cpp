@@ -15,11 +15,12 @@
 */
 #include "hphp/util/logger.h"
 
-#include "hphp/util/stack-trace.h"
-#include "hphp/util/process.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/text-color.h"
+#include "hphp/util/process.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/util/text-color.h"
 
 #include <folly/portability/Syslog.h>
 #include <folly/portability/Unistd.h>

@@ -26,6 +26,7 @@
 #include <folly/Format.h>
 #include <folly/portability/Unistd.h>
 #include "hphp/util/cache/magic-numbers.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

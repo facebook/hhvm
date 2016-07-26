@@ -20,9 +20,9 @@
 #include <atomic>
 #include <string>
 #include <cstdio>
+#include <mutex>
 
 #include "hphp/util/cronoutils.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/log-file-flusher.h"
 
 namespace HPHP {
@@ -65,7 +65,7 @@ public:
   FILE *m_prevFile;
   FILE *m_file;
   LogFileFlusher flusher;
-  Mutex m_mutex;
+  std::mutex m_mutex;
 
 private:
   Cronolog(const Cronolog &); // suppress

@@ -56,9 +56,6 @@
 # If the value is ON, then the dependency is optional, and the build should
 # not fail if the dependency can't be resolved.
 
-include(CheckFunctionExists)
-include(HPHPFunctions)
-include(Options)
 
 # function HHVM_DEFINE_EXTENSION:
 # This is the function that each individual extension will call. It
@@ -313,6 +310,13 @@ endfunction()
 
 # Call after all of the calls to HHVM_DEFINE_EXTENSION are complete.
 #
+# This will append the files of the enabled extensions to the following variables:
+# C_SOURCES: C Source Files
+# CXX_SOURCES: C++ Source Files
+# H_SOURCES: C/C++ Header Files
+# ASM_SOURCES: asm source files appropriate for the current compiler.
+# PHP_SOURCES: PHP files representing the various extensions' systemlib.
+#
 # This will also add the appropriate libraries, include directories, and
 # defines for the enabled extensions' dependencies.
 function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
@@ -336,6 +340,13 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
         math(EXPR i2 "${i2} + 1")
       endwhile()
 
+      HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES(${HHVM_EXTENSION_${i}_ROOT_DIR}
+        ${HHVM_EXTENSION_${i}_SOURCE_FILES}
+        ${HHVM_EXTENSION_${i}_HEADER_FILES}
+        ${HHVM_EXTENSION_${i}_SYSTEMLIB}
+      )
+      add_definitions("-DENABLE_EXTENSION_${upperExtName}")
+
       if (HHVM_EXTENSION_${i}_REQUIRED)
         set(ENABLE_EXTENSION_${upperExtName} ON CACHE INTERNAL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
       else()
@@ -347,26 +358,6 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
       endif()
       message("Not building the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
       set(ENABLE_EXTENSION_${upperExtName} OFF CACHE BOOL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
-    endif()
-    math(EXPR i "${i} + 1")
-  endwhile()
-endfunction()
-
-# This will append the files of the enabled extensions to the following variables:
-# C_SOURCES: C Source Files
-# CXX_SOURCES: C++ Source Files
-# HEADER_SOURCES: C/C++ Header Files
-# ASM_SOURCES: asm source files appropriate for the current compiler.
-# PHP_SOURCES: PHP files representing the various extensions' systemlib.
-function (HHVM_EXTENSION_BUILD_SOURCE_LISTS)
-  set(i 0)
-  while (i LESS HHVM_EXTENSION_COUNT)
-    if (${HHVM_EXTENSION_${i}_ENABLED_STATE} EQUAL 1)
-      HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES(${HHVM_EXTENSION_${i}_ROOT_DIR}
-        ${HHVM_EXTENSION_${i}_SOURCE_FILES}
-        ${HHVM_EXTENSION_${i}_HEADER_FILES}
-        ${HHVM_EXTENSION_${i}_SYSTEMLIB}
-      )
     endif()
     math(EXPR i "${i} + 1")
   endwhile()

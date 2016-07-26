@@ -29,15 +29,20 @@ type ObjprofStringStats = shape(
   'path' => string,
 );
 
-
 <<__Native>>
-function objprof_get_data(): array<string, ObjprofObjectStats>;
+function objprof_get_data(
+  int $flags = OBJPROF_FLAGS_DEFAULT,
+  array $exclude_list = array(),
+): array<string, ObjprofObjectStats>;
 
 <<__Native>>
 function objprof_get_strings(int $min_dup): array<string, ObjprofStringStats>;
 
 <<__Native>>
-function objprof_get_paths(): array<string, ObjprofObjectStats>;
+function objprof_get_paths(
+  int $flags = OBJPROF_FLAGS_DEFAULT,
+  array $exclude_list = array(),
+): array<string, ObjprofObjectStats>;
 
 <<__Native>>
 function thread_memory_stats(): array<string, int>;

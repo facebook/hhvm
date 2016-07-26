@@ -244,6 +244,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
 
   gd.arrayTypeTable.repopulate(*arrTable);
+  // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
   Repo::get().saveGlobalData(gd);
 }
 
@@ -300,7 +301,7 @@ int main(int argc, char** argv) try {
   Repo::shutdown();
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
-  compile_repo();
+  compile_repo(); // NOTE: errors ignored
   return 0;
 }
 

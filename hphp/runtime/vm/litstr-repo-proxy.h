@@ -20,23 +20,25 @@
 #include <cstdlib>
 
 #include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/repo-status.h"
 
 namespace HPHP {
 
 struct LitstrRepoProxy : RepoProxy {
   explicit LitstrRepoProxy(Repo& repo);
   ~LitstrRepoProxy() {}
-  void createSchema(int repoId, RepoTxn& txn);
+  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
   void load();
 
   struct InsertLitstrStmt : RepoProxy::Stmt {
     InsertLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, Id litstrId, const StringData* litstr);
+    // throws(RepoExc)
   };
 
   struct GetLitstrsStmt : RepoProxy::Stmt {
     GetLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get();
+    RepoStatus get();
   };
 
 public:

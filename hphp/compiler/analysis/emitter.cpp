@@ -11214,6 +11214,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
 
       ue.reset(emitHHBCUnitEmitter(ar, fsp, md5));
     }
+    // NOTE: Repo errors are ignored!
     Repo::get().commitUnit(ue.get(), unitOrigin);
 
     auto unit = ue->create();

@@ -408,8 +408,8 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   Repo& repo = Repo::get();
   try {
     RepoTxn txn(repo);
-    bool err = insert(unitOrigin, txn);
-    if (!err) {
+    RepoStatus err = insert(unitOrigin, txn);
+    if (err == RepoStatus::success) {
       txn.commit();
     }
   } catch (RepoExc& re) {
@@ -422,12 +422,12 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   }
 }
 
-bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
+RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   Repo& repo = Repo::get();
   UnitRepoProxy& urp = repo.urp();
   int repoId = Repo::get().repoIdForNewUnit(unitOrigin);
   if (repoId == RepoIdInvalid) {
-    return true;
+    return RepoStatus::error;
   }
   m_repoId = repoId;
 
@@ -485,19 +485,19 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
         SourceLoc& e = m_sourceLocTab[i].second;
         Offset endOff = i < m_sourceLocTab.size() - 1
-                          ? m_sourceLocTab[i + 1].first
-                          : m_bclen;
+                            ? m_sourceLocTab[i + 1].first
+                            : m_bclen;
 
         urp.insertUnitSourceLoc[repoId]
            .insert(txn, usn, endOff, e.line0, e.char0, e.line1, e.char1);
       }
     }
-    return false;
+    return RepoStatus::success;
   } catch (RepoExc& re) {
     TRACE(3, "Failed to commit '%s' (0x%016" PRIx64 "%016" PRIx64 ") to '%s': %s\n",
              m_filepath->data(), m_md5.q[0], m_md5.q[1],
              repo.repoName(repoId).c_str(), re.msg().c_str());
-    return true;
+    return RepoStatus::error;
   }
 }
 
@@ -773,21 +773,21 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
 }
 
-bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
-                               const std::string& name,
-                               const MD5& md5) {
+RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
+                                     const std::string& name,
+                                     const MD5& md5) {
   ue.m_filepath = makeStaticString(name);
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (!getUnit[repoId].get(ue, md5)) {
+    if (getUnit[repoId].get(ue, md5) == RepoStatus::success) {
       break;
     }
   }
   if (repoId < 0) {
     TRACE(3, "No repo contains '%s' (0x%016" PRIx64  "%016" PRIx64 ")\n",
              name.c_str(), md5.q[0], md5.q[1]);
-    return false;
+    return RepoStatus::error;
   }
   try {
     getUnitLitstrs[repoId].get(ue);
@@ -802,24 +802,24 @@ bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
           PRIx64 ") from '%s': %s\n",
           name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
           re.msg().c_str());
-    return false;
+    return RepoStatus::error;
   }
   TRACE(3, "Repo loaded '%s' (0x%016" PRIx64 "%016" PRIx64 ") from '%s'\n",
            name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str());
-  return true;
+  return RepoStatus::success;
 }
 
 std::unique_ptr<UnitEmitter>
 UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
   auto ue = folly::make_unique<UnitEmitter>(md5);
-  if (!loadHelper(*ue, name, md5)) ue.reset();
+  if (loadHelper(*ue, name, md5) == RepoStatus::error) ue.reset();
   return ue;
 }
 
 std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
-  if (!loadHelper(ue, name, md5)) return nullptr;
+  if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {
@@ -876,8 +876,7 @@ void UnitRepoProxy::InsertUnitStmt
   unitSn = query.getInsertedRowid();
 }
 
-bool UnitRepoProxy::GetUnitStmt
-                  ::get(UnitEmitter& ue, const MD5& md5) {
+RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const MD5& md5) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -891,7 +890,7 @@ bool UnitRepoProxy::GetUnitStmt
     query.bindMd5("@md5", md5);
     query.step();
     if (!query.row()) {
-      return true;
+      return RepoStatus::error;
     }
     int64_t unitSn;                     /**/ query.getInt64(0, unitSn);
     int preloadPriority;                /**/ query.getInt(1, preloadPriority);
@@ -906,9 +905,9 @@ bool UnitRepoProxy::GetUnitStmt
 
     txn.commit();
   } catch (RepoExc& re) {
-    return true;
+    return RepoStatus::error;
   }
-  return false;
+  return RepoStatus::success;
 }
 
 void UnitRepoProxy::InsertUnitLitstrStmt
@@ -1142,8 +1141,9 @@ void UnitRepoProxy::InsertUnitSourceLocStmt
   query.exec();
 }
 
-bool UnitRepoProxy::GetSourceLocTabStmt
-     ::get(int64_t unitSn, SourceLocTable& sourceLocTab) {
+RepoStatus
+UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
+                                        SourceLocTable& sourceLocTab) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -1159,7 +1159,7 @@ bool UnitRepoProxy::GetSourceLocTabStmt
     do {
       query.step();
       if (!query.row()) {
-        return true;
+        return RepoStatus::error;
       }
       Offset pastOffset;
       query.getOffset(0, pastOffset);
@@ -1173,9 +1173,9 @@ bool UnitRepoProxy::GetSourceLocTabStmt
     } while (!query.done());
     txn.commit();
   } catch (RepoExc& re) {
-    return true;
+    return RepoStatus::error;
   }
-  return false;
+  return RepoStatus::success;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

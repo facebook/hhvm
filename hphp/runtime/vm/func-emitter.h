@@ -106,7 +106,7 @@ struct FuncEmitter {
   /*
    * Commit this function to a repo.
    */
-  void commit(RepoTxn& txn) const;
+  void commit(RepoTxn& txn) const; // throws(RepoExc)
 
   /*
    * Instantiate a runtime Func*.
@@ -330,18 +330,18 @@ struct FuncRepoProxy : public RepoProxy {
 
   explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn);
+  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
 
   struct InsertFuncStmt : public RepoProxy::Stmt {
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
                 RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
-                const StringData* name, bool top);
+                const StringData* name, bool top); // throws(RepoExc)
   };
 
   struct GetFuncsStmt : public RepoProxy::Stmt {
     GetFuncsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
 
   InsertFuncStmt insertFunc[RepoIdCount];

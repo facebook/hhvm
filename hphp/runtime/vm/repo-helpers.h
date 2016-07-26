@@ -70,7 +70,7 @@ struct RepoStmt {
   void finalize();
  public:
   bool prepared() const { return (m_stmt != nullptr); }
-  void prepare(const std::string& sql);
+  void prepare(const std::string& sql); // throws(RepoExc)
   void reset();
   Repo& repo() const { return m_repo; }
   sqlite3_stmt*& get() { return m_stmt; }
@@ -110,11 +110,11 @@ struct RepoQuery {
   void bindInt64(const char* paramName, int64_t val);
   void bindNull(const char* paramName);
 
-  void step();
+  void step(); // throws(RepoExc)
   bool row() const { return m_row; }
   bool done() const { return m_done; }
   void reset();
-  void exec();
+  void exec(); // throws(RepoExc)
 
   // rowid() returns the row id associated with the most recent successful
   // insert.  Thus the rowid is irrelevant for non-insert queries.
@@ -124,21 +124,24 @@ struct RepoQuery {
   bool isDouble(int iCol);
   bool isInt(int iCol);
   bool isNull(int iCol);
-  void getBlob(int iCol, const void*& blob, size_t& size);
-  BlobDecoder getBlob(int iCol);
-  void getMd5(int iCol, MD5& md5);
-  void getTypedValue(int iCol, TypedValue& tv);
-  void getText(int iCol, const char*& text);
-  void getText(int iCol, const char*& text, size_t& size);
-  void getStaticString(int iCol, StringData*& s);
-  void getStdString(int iCol, std::string& s);
-  void getDouble(int iCol, double& val);
-  void getInt(int iCol, int& val);
-  void getId(int iCol, Id& id);
-  void getOffset(int iCol, Offset& offset);
-  void getAttr(int iCol, Attr& attrs);
-  void getBool(int iCol, bool& b);
-  void getInt64(int iCol, int64_t& val);
+
+  // Get the column value as the named type. If the value cannot be converted
+  // into the named type then an error is thrown.
+  void getBlob(int iCol, const void*& blob, size_t& size); // throws(RepoExc)
+  BlobDecoder getBlob(int iCol); // throws(RepoExc)
+  void getMd5(int iCol, MD5& md5); // throws(RepoExc)
+  void getTypedValue(int iCol, TypedValue& tv); // throws(RepoExc)
+  void getText(int iCol, const char*& text); // throws(RepoExc)
+  void getText(int iCol, const char*& text, size_t& size); // throws(RepoExc)
+  void getStaticString(int iCol, StringData*& s); // throws(RepoExc)
+  void getStdString(int iCol, std::string& s); // throws(RepoExc)
+  void getDouble(int iCol, double& val); // throws(RepoExc)
+  void getInt(int iCol, int& val); // throws(RepoExc)
+  void getId(int iCol, Id& id); // throws(RepoExc)
+  void getOffset(int iCol, Offset& offset); // throws(RepoExc)
+  void getAttr(int iCol, Attr& attrs); // throws(RepoExc)
+  void getBool(int iCol, bool& b); // throws(RepoExc)
+  void getInt64(int iCol, int64_t& val); // throws(RepoExc)
 
  protected:
   RepoStmt& m_stmt;
@@ -153,7 +156,7 @@ struct RepoQuery {
  * you tell it not to.  Call .commit() when you want things to stay.
  */
 struct RepoTxn {
-  explicit RepoTxn(Repo& repo);
+  explicit RepoTxn(Repo& repo); // throws(RepoExc)
   ~RepoTxn();
 
   RepoTxn(const RepoTxn&) = delete;
@@ -166,16 +169,16 @@ struct RepoTxn {
    * basic exception safety guarantee, even though the whole point is
    * to behave transactionally. ;)
    */
-  void prepare(RepoStmt& stmt, const std::string& sql);
-  void exec(const std::string& sQuery);
-  void commit();
+  void prepare(RepoStmt& stmt, const std::string& sql); // throws(RepoExc)
+  void exec(const std::string& sQuery); // throws(RepoExc)
+  void commit(); // throws(RepoExc)
 
   bool error() const { return m_error; }
 
  private:
   friend struct RepoTxnQuery;
-  void step(RepoQuery& query);
-  void exec(RepoQuery& query);
+  void step(RepoQuery& query); // throws(RepoExc)
+  void exec(RepoQuery& query); // throws(RepoExc)
   void rollback(); // nothrow
 
   Repo& m_repo;
@@ -188,8 +191,8 @@ struct RepoTxnQuery : RepoQuery {
     : RepoQuery(stmt), m_txn(txn) {
   }
 
-  void step();
-  void exec();
+  void step(); // throws(RepoExc)
+  void exec(); // throws(RepoExc)
 
  private:
   RepoTxn& m_txn;

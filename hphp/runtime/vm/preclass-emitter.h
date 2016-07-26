@@ -218,7 +218,7 @@ struct PreClassEmitter {
   }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
 
-  void commit(RepoTxn& txn) const;
+  void commit(RepoTxn& txn) const; // throws(RepoExc)
 
   PreClass* create(Unit& unit) const;
 
@@ -275,18 +275,18 @@ struct PreClassRepoProxy : RepoProxy {
 
   explicit PreClassRepoProxy(Repo& repo);
   ~PreClassRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn);
+  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
 
   struct InsertPreClassStmt : public RepoProxy::Stmt {
     InsertPreClassStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const PreClassEmitter& pce, RepoTxn& txn, int64_t unitSn,
                 Id preClassId, const StringData* name,
-                PreClass::Hoistable hoistable);
+                PreClass::Hoistable hoistable); // throws(RepoExc)
   };
 
   struct GetPreClassesStmt : public RepoProxy::Stmt {
     GetPreClassesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
 
   InsertPreClassStmt insertPreClass[RepoIdCount];

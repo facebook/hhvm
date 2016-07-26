@@ -223,7 +223,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("program", value<std::string>(&po.program)->default_value("program"),
      "final program name to use")
     ("args", value<std::string>(&po.programArgs), "program arguments")
-    ("inputs,i", value<std::vector<std::string>>(&po.inputs), "input file names")
+    ("inputs,i", value<std::vector<std::string>>(&po.inputs),
+     "input file names")
     ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
     ("include-path",
@@ -823,6 +824,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   }
 
   Timer timer(Timer::WallTime, type);
+  // NOTE: Repo errors are ignored!
   Compiler::emitAllHHBC(std::move(ar));
 
   if (!po.syncDir.empty()) {

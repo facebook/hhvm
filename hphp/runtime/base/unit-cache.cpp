@@ -107,9 +107,9 @@ CachedUnit lookupUnitRepoAuth(const StringData* path) {
      * this.
      */
     MD5 md5;
-    if (!Repo::get().findFile(path->data(),
-                              RuntimeOption::SourceRoot,
-                              md5)) {
+    if (Repo::get().findFile(path->data(),
+                             RuntimeOption::SourceRoot,
+                             md5) == RepoStatus::error) {
       return acc->second;
     }
 

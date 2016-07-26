@@ -41,10 +41,14 @@ void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 void LitstrRepoProxy::load() {
   for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (!getLitstrs(repoId).get()) {
+    // Return success on the first loaded repo.  In the case of an error we
+    // continue on to the next repo.
+    if (getLitstrs(repoId).get() == RepoStatus::success) {
       break;
     }
   }
+
+  // No repos were loadable.  This is normal for non-repo-authoritative repos.
 }
 
 void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
@@ -62,7 +66,7 @@ void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
   query.exec();
 }
 
-bool LitstrRepoProxy::GetLitstrsStmt::get() {
+RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
   RepoTxn txn(m_repo);
   try {
     if (!prepared()) {
@@ -84,9 +88,9 @@ bool LitstrRepoProxy::GetLitstrsStmt::get() {
     LitstrTable::get().setNamedEntityPairTable(std::move(namedInfo));
     txn.commit();
   } catch (RepoExc& re) {
-    return true;
+    return RepoStatus::error;
   }
-  return false;
+  return RepoStatus::success;
 }
 
 }

@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/repo-status.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -66,7 +67,7 @@ struct UnitEmitter {
   /*
    * Insert this unit in a repo as part of transaction `txn'.
    */
-  bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
+  RepoStatus insert(UnitOrigin unitOrigin, RepoTxn& txn);
 
   /*
    * Instatiate a runtime Unit*.
@@ -449,14 +450,15 @@ struct UnitRepoProxy : public RepoProxy {
 
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn);
+  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
   std::unique_ptr<Unit> load(const std::string& name, const MD5& md5);
   std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
                                            const MD5& md5);
 
   void insertUnitLineTable(int repoId, RepoTxn& txn, int64_t unitSn,
-                           LineTable& lineTable);
+                           LineTable& lineTable); // throws(RepoExc)
   void getUnitLineTable(int repoId, int64_t unitSn, LineTable& lineTable);
+  // throws(RepoExc)
 
   struct InsertUnitStmt : public RepoProxy::Stmt {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -465,48 +467,48 @@ struct UnitRepoProxy : public RepoProxy {
                 int64_t& unitSn,
                 const MD5& md5,
                 const unsigned char* bc,
-                size_t bclen);
+                size_t bclen); // throws(RepoExc)
   };
   struct GetUnitStmt : public RepoProxy::Stmt {
     GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(UnitEmitter& ue, const MD5& md5);
+    RepoStatus get(UnitEmitter& ue, const MD5& md5);
   };
   struct InsertUnitLitstrStmt : public RepoProxy::Stmt {
     InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
-                const StringData* litstr);
+                const StringData* litstr); // throws(RepoExc)
   };
   struct GetUnitLitstrsStmt : public RepoProxy::Stmt {
     GetUnitLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
   struct InsertUnitArrayStmt : public RepoProxy::Stmt {
     InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                const std::string& array);
+                const std::string& array); // throws(RepoExc)
   };
   struct GetUnitArraysStmt : public RepoProxy::Stmt {
     GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
   struct InsertUnitMergeableStmt : public RepoProxy::Stmt {
     InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn,
                 int ix, Unit::MergeKind kind,
-                Id id, TypedValue* value);
+                Id id, TypedValue* value); // throws(RepoExc)
   };
   struct GetUnitMergeablesStmt : public RepoProxy::Stmt {
     GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
   struct InsertUnitSourceLocStmt : public RepoProxy::Stmt {
     InsertUnitSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset, int line0,
-                int char0, int line1, int char1);
+                int char0, int line1, int char1); // throws(RepoExc)
   };
   struct GetSourceLocTabStmt : public RepoProxy::Stmt {
     GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, SourceLocTable& sourceLocTab);
+    RepoStatus get(int64_t unitSn, SourceLocTable& sourceLocTab);
   };
 
 #define URP_IOP(o) URP_OP(Insert##o, insert##o)
@@ -529,7 +531,7 @@ struct UnitRepoProxy : public RepoProxy {
 #undef URP_OP
 
 private:
-  bool loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
+  RepoStatus loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

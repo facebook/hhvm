@@ -184,7 +184,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
     auto md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s,sz}))};
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
-                             md5)) {
+                             md5) == RepoStatus::success) {
       if (auto u = Repo::get().loadUnit(fname, md5)) {
         return u.release();
       }

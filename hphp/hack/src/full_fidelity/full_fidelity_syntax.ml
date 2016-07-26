@@ -395,6 +395,12 @@ module WithToken(Token: TokenType) = struct
       anonymous_use_variables : t;
       anonymous_use_right_paren : t
     }
+    and cast_expression = {
+      cast_left_paren : t;
+      cast_type : t;
+      cast_right_paren : t;
+      cast_operand : t
+    }
     and unary_operator = {
       unary_operator : t;
       unary_operand : t
@@ -618,6 +624,7 @@ module WithToken(Token: TokenType) = struct
     | SimpleInitializer of simple_initializer
     | StaticDeclarator of static_declarator
 
+    | CastExpression of cast_expression
     | AnonymousFunction of anonymous_function
     | AnonymousFunctionUseClause of anonymous_use
     | LiteralExpression of t
@@ -674,6 +681,7 @@ module WithToken(Token: TokenType) = struct
       match syntax with
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
+      | CastExpression _ -> SyntaxKind.CastExpression
       | AnonymousFunction _ -> SyntaxKind.AnonymousFunction
       | AnonymousFunctionUseClause _ -> SyntaxKind.AnonymousFunctionUseClause
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
@@ -769,6 +777,7 @@ module WithToken(Token: TokenType) = struct
 
     let is_missing node = kind node = SyntaxKind.Missing
     let is_token node = kind node = SyntaxKind.Token
+    let is_cast_expression node = kind node = SyntaxKind.CastExpression
     let is_anonymous_function node = kind node = SyntaxKind.AnonymousFunction
     let is_anonymous_function_use_clause node =
       kind node = SyntaxKind.AnonymousFunctionUseClause
@@ -916,6 +925,9 @@ module WithToken(Token: TokenType) = struct
       | PipeVariableExpression x -> [x]
       | Error x -> x
       | SyntaxList x -> x
+      | CastExpression
+        { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
+        [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]
       | AnonymousFunction
         { anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
@@ -1262,6 +1274,9 @@ module WithToken(Token: TokenType) = struct
       | PipeVariableExpression _ -> ["pipe_variable_expression"]
       | Error _ -> []
       | SyntaxList _ -> []
+      | CastExpression
+        { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
+        [ "cast_left_paren"; "cast_type"; "cast_right_paren"; "cast_operand" ]
       | AnonymousFunction
         { anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
@@ -1866,6 +1881,10 @@ module WithToken(Token: TokenType) = struct
       match kind, ts with
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, x) -> SyntaxList x
+      | (SyntaxKind.CastExpression,
+        [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]) ->
+        CastExpression
+        { cast_left_paren; cast_type; cast_right_paren; cast_operand }
       | (SyntaxKind.AnonymousFunction,
         [ anonymous_async; anonymous_function; anonymous_left_paren;
           anonymous_params; anonymous_right_paren; anonymous_colon;
@@ -2298,6 +2317,10 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.FunctionCallExpression
           [ function_call_receiver; function_call_lparen;
             function_call_arguments; function_call_rparen ]
+
+      let make_cast_expression left cast_type right operand =
+        from_children SyntaxKind.CastExpression
+          [ left; cast_type; right; operand ]
 
       let make_anonymous_function
           async func left params right colon return_type uses body =

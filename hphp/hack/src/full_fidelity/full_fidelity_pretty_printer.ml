@@ -558,6 +558,12 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part expr right indt in
     handle_switch start_block x
     (* group_doc (start_block ^| statement) *)
+  | CastExpression x ->
+    let l = get_doc x.cast_left_paren in
+    let t = get_doc x.cast_type in
+    let r = get_doc x.cast_right_paren in
+    let o = get_doc x.cast_operand in
+    group_doc (l ^^^ t ^^^ r ^^^ o)
   | AnonymousFunction x ->
     let async = get_doc x.anonymous_async in
     let fn = get_doc x.anonymous_function in

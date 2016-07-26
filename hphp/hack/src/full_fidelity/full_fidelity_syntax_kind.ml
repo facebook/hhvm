@@ -67,6 +67,7 @@ type t =
 | SimpleInitializer
 
 (* Expressions *)
+| CastExpression
 | AnonymousFunction
 | AnonymousFunctionUseClause
 | LiteralExpression
@@ -113,6 +114,7 @@ let to_string kind =
   match kind with
   | Missing -> "missing"
   | Token -> "token"
+  | CastExpression -> "cast_expression"
   | AnonymousFunction -> "anonymous_function"
   | AnonymousFunctionUseClause -> "anonymous_function_use_clause"
   | LiteralExpression -> "literal"

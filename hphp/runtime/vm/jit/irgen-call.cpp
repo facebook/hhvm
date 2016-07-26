@@ -103,7 +103,8 @@ const Func* findCuf(Op op,
   bool magicCall = false;
   const Func* f = lookupImmutableMethod(
     cls, sname, magicCall, /* staticLookup = */ true, ctxFunc, isExact);
-  if (!f || (forward && !ctx->classof(f->cls()))) {
+  if (!f || (!isExact && !f->isImmutableFrom(cls))) return nullptr;
+  if (forward && !ctx->classof(f->cls())) {
     /*
      * To preserve the invariant that the lsb class
      * is an instance of the context class, we require
@@ -249,41 +250,6 @@ void fpushObjMethodInterfaceFunc(
   return;
 }
 
-
-const Func* lookupNonExactFuncForFPushObjMethod(
-  IRGS& env,
-  const Class* baseClass,
-  const StringData* methodName
-) {
-  if (!baseClass) return nullptr;
-
-  const Func* func = nullptr;
-  auto const res = g_context->lookupObjMethod(func, baseClass, methodName,
-                                              curClass(env), /* raise */false);
-
-  if (res != LookupResult::MethodFoundWithThis &&
-      res != LookupResult::MethodFoundNoThis) {
-    // Method lookup did not find anything.
-    return nullptr;
-  }
-
-  /*
-   * If we found the func in baseClass and it's private, this would have already
-   * been handled as an exact Func.
-   */
-  assertx(!(func->attrs() & AttrPrivate));
-
-  /*
-   * If we found the func in the baseClass and it's not private, any
-   * derived class must have a func that matches in staticness
-   * and is at least as accessible (and in particular, you can't
-   * override a public/protected method with a private method).  In
-   * this case, we emit code to dynamically lookup the method given
-   * the Object and the method slot, which is the same as func's.
-   */
-  return func;
-}
-
 void fpushObjMethodNonExactFunc(
   IRGS& env,
   SSATmp* obj,
@@ -322,26 +288,26 @@ void fpushObjMethodWithBaseClass(
   bool exactClass
 ) {
   bool magicCall = false;
-  if (auto const exactFunc = lookupImmutableMethod(
+  if (auto const func = lookupImmutableMethod(
         baseClass, methodName, magicCall,
         /* staticLookup: */ false, curFunc(env), exactClass)) {
-    fpushObjMethodExactFunc(env, obj,
-                            exactClass ? baseClass : nullptr,
-                            exactFunc,
-                            magicCall ? methodName : nullptr,
-                            numParams);
+    if (exactClass ||
+        func->attrs() & AttrPrivate ||
+        func->isImmutableFrom(baseClass)) {
+      fpushObjMethodExactFunc(env, obj,
+                              exactClass ? baseClass : nullptr,
+                              func,
+                              magicCall ? methodName : nullptr,
+                              numParams);
+      return;
+    }
+    fpushObjMethodNonExactFunc(env, obj, baseClass, func, numParams);
     return;
   }
 
   if (auto const func =
       lookupInterfaceFuncForFPushObjMethod(env, baseClass, methodName)) {
     fpushObjMethodInterfaceFunc(env, obj, func, numParams);
-    return;
-  }
-
-  if (auto const nonExactFunc = lookupNonExactFuncForFPushObjMethod(
-      env, baseClass, methodName)) {
-    fpushObjMethodNonExactFunc(env, obj, baseClass, nonExactFunc, numParams);
     return;
   }
 
@@ -858,26 +824,43 @@ void emitFPushObjMethodD(IRGS& env,
   PUNT(FPushObjMethodD-nonObj);
 }
 
+bool fpushClsMethodKnown(IRGS& env,
+                         int32_t numParams,
+                         const StringData* methodName,
+                         SSATmp* ctx,
+                         const Class *baseClass,
+                         bool exact) {
+  bool magicCall = false;
+  auto const func = lookupImmutableMethod(baseClass,
+                                          methodName,
+                                          magicCall,
+                                          true /* staticLookup */,
+                                          curFunc(env),
+                                          exact);
+  if (!func) return false;
+
+  auto const objOrCls = ldCtxForClsMethod(env, func, ctx, baseClass);
+  auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
+    cns(env, func) :
+    gen(env, LdClsMethod, ctx, cns(env, -(func->methodSlot() + 1)));
+
+  fpushActRec(env,
+              funcTmp,
+              objOrCls,
+              numParams,
+              magicCall ? methodName : nullptr);
+  return true;
+}
+
 void emitFPushClsMethodD(IRGS& env,
                          int32_t numParams,
                          const StringData* methodName,
                          const StringData* className) {
   auto const baseClass  = Unit::lookupClassOrUniqueClass(className);
-  bool magicCall        = false;
 
-  if (auto const func = lookupImmutableMethod(baseClass,
-                                              methodName,
-                                              magicCall,
-                                              true /* staticLookup */,
-                                              curFunc(env),
-                                              true /* isExact */)) {
-    auto const clsTmp = ldCls(env, cns(env, baseClass->name()));
-    auto const objOrCls = ldCtxForClsMethod(env, func, clsTmp, baseClass);
-    fpushActRec(env,
-                cns(env, func),
-                objOrCls,
-                numParams,
-                func && magicCall ? methodName : nullptr);
+  if (baseClass &&
+      fpushClsMethodKnown(env, numParams,
+                          methodName, cns(env, baseClass), baseClass, true)) {
     return;
   }
 
@@ -927,8 +910,10 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   if (methVal->hasConstVal()) {
     auto const methodName = methVal->strVal();
     const Class* cls = nullptr;
-    if (clsVal->hasConstVal()) {
-      cls = clsVal->clsVal();
+    bool exact = false;
+    if (auto clsSpec = clsVal->type().clsSpec()) {
+      cls = clsSpec.cls();
+      exact = clsSpec.exact();
     } else if (clsVal->inst()->is(LdClsCtx, LdClsCctx)) {
       /*
        * Optimize FPushClsMethod when the method is a known static
@@ -943,20 +928,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
     }
 
     if (cls) {
-      const Func* func;
-      auto res =
-        g_context->lookupClsMethod(func,
-                                   cls,
-                                   methodName,
-                                   nullptr,
-                                   cls,
-                                   false);
-      if (res == LookupResult::MethodFoundNoThis && func->isStatic()) {
-        auto funcTmp = clsVal->hasConstVal() || func->isImmutableFrom(cls) ?
-          cns(env, func) :
-          gen(env, LdClsMethod, clsVal, cns(env, -(func->methodSlot() + 1)));
-
-        fpushActRec(env, funcTmp, clsVal, numParams, nullptr);
+      if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls, exact)) {
         return;
       }
     }

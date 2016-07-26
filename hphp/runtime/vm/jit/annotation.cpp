@@ -43,8 +43,13 @@ const Func* lookupDirectFunc(SrcKey const sk,
       pushOp == Op::FPushClsMethodD ||
       pushOp == Op::FPushClsMethodF;
     auto const isStatic = isExact || pushOp == Op::FPushClsMethod;
-    return lookupImmutableMethod(cls, fname, magic,
-                                 isStatic, sk.func(), isExact);
+    auto const func = lookupImmutableMethod(cls, fname, magic,
+                                            isStatic, sk.func(), isExact);
+    if (func &&
+        !isExact &&
+        !func->isImmutableFrom(cls) &&
+        (isStatic || !(func->attrs() & AttrPrivate))) return nullptr;
+    return func;
   }
   auto const func = Unit::lookupFunc(fname);
   if (func && func->isNameBindingImmutable(sk.unit())) {

@@ -1327,7 +1327,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   if (res == LookupResult::MethodNotFound) return nullptr;
 
-  if (func->isAbstract()) return nullptr;
+  if (func->isAbstract() && exactClass) return nullptr;
 
   assertx(res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MethodFoundNoThis ||
@@ -1350,16 +1350,12 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
         // there might be a derived class which defines the method
         return nullptr;
       }
-    } else if (!exactClass) {
-      if (!func->isImmutableFrom(cls)) return nullptr;
     }
   } else if (!exactClass && !(func->attrs() & AttrPrivate)) {
     if (magicCall) {
       if (!(cls->attrs() & AttrNoOverride)) {
         return nullptr;
       }
-    } else if (!func->isImmutableFrom(cls)) {
-      return nullptr;
     }
   }
   return func;

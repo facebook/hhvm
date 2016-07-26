@@ -21,12 +21,14 @@ let print_error error = error
 
 let parse_and_print filename =
   let file = Relative_path.create Relative_path.Dummy filename in
-  let source_file = SourceText.from_file file in
-  let syntax_tree = SyntaxTree.make source_file in
+  let source_text = SourceText.from_file file in
+  let syntax_tree = SyntaxTree.make source_text in
 
   let errors = SyntaxTree.errors syntax_tree in
-  (* TODO: Errors do not know positions, just offsets. *)
-  let printer err = Printf.printf "%s\n" (SyntaxError.to_string err) in
+  let printer err = Printf.printf "%s\n" (
+    SyntaxError.to_positioned_string
+      err (SourceText.offset_to_position source_text)
+  ) in
   let str = Debug.dump_full_fidelity syntax_tree in
   let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
   let pretty = Full_fidelity_pretty_printer.pretty_print editable in
@@ -36,7 +38,7 @@ let parse_and_print filename =
   Printf.printf "Pretty print result:\n%s" pretty;
   Printf.printf "\n----\n";
   Printf.printf "parse:\n";
-  List.iter printer errors;
+  List.iter printer (List.sort SyntaxError.compare errors);
   Printf.printf "%s" str;
   Printf.printf "\n----\n";
   let errorl, result =
@@ -49,7 +51,7 @@ let parse_and_print filename =
     exit 1
   end;
   let str = Debug.dump_ast (Ast.AProgram result.Parser_hack.ast) in
-  Printf.printf "%s" str
+  Printf.printf "%s\n" str
 
 let main filename =
   EventLogger.init (Daemon.devnull ()) 0.0;

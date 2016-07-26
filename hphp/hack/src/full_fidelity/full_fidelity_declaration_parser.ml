@@ -562,9 +562,21 @@ module WithExpressionAndStatementParser
       =  const-expression
   *)
   and parse_const_declaration parser abstr const =
+    (* After abstract and const, the next synatx could be a type spec or a
+     * constant-declarator.
+     * In both cases, the syntax starts with a name. Thus the immediate next
+     * token is useless to distinguish between the two cases.
+     * Thus, we skip the immediate next token, and look at the following one.
+     * There are three cases:
+     * 1. There is no type. If there is no type, in constant-declarator, After
+     *    the name there should be an equal sign.
+     * 2. There is a simple type. A simple type is just one token, thus the
+     *    token after needs to be a name belonging to constant-declarator.
+     * 3. There is a generic type, then the token should be '<' .
+     *)
     let next_token_is_type =
       peek_token_kind (skip_token parser) = Name ||
-      peek_token_kind (skip_token parser) = GreaterThan
+      peek_token_kind (skip_token parser) = LessThan
     in
 
     let (parser, type_spec) = if next_token_is_type then

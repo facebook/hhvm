@@ -31,13 +31,12 @@
 #endif
 
 #include <folly/Conv.h>
+#include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
 #include <boost/filesystem.hpp>
 
-#include "hphp/util/logger.h"
-#include "hphp/util/async-func.h"
 #include "hphp/util/text-color.h"
 
 namespace HPHP {

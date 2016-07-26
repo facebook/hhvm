@@ -159,51 +159,9 @@ struct Process {
    * Get current user's home directory.
    */
   static std::string GetHomeDirectory();
-
-public:
-  /**
-   * Execute an external program.
-   *
-   * @param   path   binary file's full path
-   * @param   argv   argument array
-   * @param   in     stdin
-   * @param   out    stdout
-   * @param   err    stderr; NULL for don't care
-   * @return         true if program was executed, even if there was stderr;
-   *                 false if anything failed and unable to run the specified
-   *                 program
-   */
-  static bool Exec(const char *path, const char *argv[], const char *in,
-                   std::string &out, std::string *err = nullptr,
-                   bool color = false);
-
-  /**
-   * Execute an external program.
-   *
-   * @param   cmd    command line
-   * @param   outf   save stdout to this file
-   * @param   errf   save stderr to this file
-   * @return         exit code of the program
-   */
-  static int Exec(const std::string &cmd, const std::string &outf,
-                  const std::string &errf);
-
-  /**
-   * Daemonize current process.
-   */
-  static void Daemonize(const char *stdoutFile = "/dev/null",
-                        const char *stderrFile = "/dev/null");
-
-private:
-  static int Exec(const char *path, const char *argv[], int *fdin, int *fdout,
-                  int *fderr
-#ifdef _MSC_VER
-                  , PROCESS_INFORMATION* procInfo
-#endif
-                 );
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PROCESS_H_
+#endif

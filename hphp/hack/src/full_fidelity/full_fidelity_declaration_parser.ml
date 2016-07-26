@@ -727,7 +727,6 @@ module WithExpressionAndStatementParser
       (parser, make_missing(), make_missing())
 
   and parse_parameter_list_opt parser =
-    (* TODO: allow trailing comma *)
       (* SPEC
         parameter-list:
           ...

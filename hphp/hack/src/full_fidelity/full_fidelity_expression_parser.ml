@@ -706,17 +706,20 @@ module WithStatementAndDeclParser
     (* SPEC
       anonymous-function-creation-expression:
         async-opt  function
-        ( anonymous-function-parameter-declaration-list-opt  )
+        ( anonymous-function-parameter-list-opt  )
         anonymous-function-return-opt
         anonymous-function-use-clauseopt
         compound-statement
     *)
+    (* An anonymous function's formal parameter list is the same as a named
+       function's formal parameter list except that types are optional.
+       The "..." syntax and trailing commas are supported. We'll simply
+       parse an optional parameter list; it already takes care of making the
+       type annotations optional. *)
     let (parser, async) = optional_token parser Async in
     let (parser, fn) = assert_token parser Function in
     let (parser, left_paren, params, right_paren) =
       parse_parameter_list_opt parser in
-    (* TODO: Give an error in a later pass if ... is used in an anonymous
-       function parameter list *)
     let (parser, colon) = optional_token parser Colon in
     let (parser, return_type) =
       if is_missing colon then

@@ -21,6 +21,52 @@ type accumulator = {
   errors : SyntaxError.t list;
 }
 
+(* Turns a syntax node into a list of nodes; if it is a separated syntax
+   list then the separators are filtered from the resulting list. *)
+let syntax_to_list include_separators node  =
+  let rec aux acc syntax_list =
+    match syntax_list with
+    | [] -> acc
+    | h :: t ->
+      begin
+        match syntax h with
+        | ListItem { list_item; list_separator } ->
+          let acc = list_item :: acc in
+          let acc =
+            if include_separators then (list_separator :: acc ) else acc in
+          aux acc t
+        | _ -> aux (h :: acc) t
+      end in
+  match syntax node with
+  | Missing -> [ ]
+  | SyntaxList s -> List.rev (aux [] s)
+  | ListItem { list_item; list_separator } ->
+    if include_separators then [ list_item; list_separator ] else [ list_item ]
+  | _ -> [ node ]
+
+let syntax_to_list_no_separators = syntax_to_list false
+let syntax_to_list_with_separators = syntax_to_list true
+
+(* If an ellipsis appears in a position other than the last element in the
+   list then return it. *)
+let misplaced_ellipsis params =
+  let rec aux params =
+    match params with
+    | []
+    | _ :: [] -> None
+    | h :: _ when is_ellipsis h -> Some h
+    | _ :: t -> aux t in
+  aux (syntax_to_list_no_separators params)
+
+(* If a list ends with an ellipsis followed by a comma, return it *)
+let ends_with_ellipsis_comma params =
+  let rec aux params =
+    match params with
+    | [] -> None
+    | x :: y :: [] when is_ellipsis x && is_comma y -> Some y
+    | _ :: t -> aux t in
+  aux (syntax_to_list_with_separators params)
+
 (* True or false: the first item in this list matches the predicate? *)
 let matches_first f items =
   match items with
@@ -362,6 +408,23 @@ let methodish_errors node parents =
     errors
   | _ -> [ ]
 
+let params_errors params =
+  let errors = match misplaced_ellipsis params with
+  | None -> []
+  | Some ellipsis ->
+    let s = start_offset ellipsis in
+    let e = end_offset ellipsis in
+    [ SyntaxError.make s e SyntaxError.error2021 ] in
+  if errors = [] then
+    match ends_with_ellipsis_comma params with
+    | None -> []
+    | Some comma ->
+      let s = start_offset comma in
+      let e = end_offset comma in
+      [ SyntaxError.make s e SyntaxError.error2022 ]
+  else
+    errors
+
 let parameter_errors node parents is_strict =
   match syntax node with
   | ParameterDeclaration p
@@ -370,7 +433,11 @@ let parameter_errors node parents is_strict =
       let s = start_offset node in
       let e = end_offset node in
       [ SyntaxError.make s e SyntaxError.error2001 ]
-  | _ -> [ ]
+  | FunctionDeclarationHeader { function_params; _ } ->
+    params_errors function_params
+  | AnonymousFunction { anonymous_params; _ } ->
+    params_errors anonymous_params
+  | _ -> []
 
 let function_errors node _parents is_strict =
   match syntax node with

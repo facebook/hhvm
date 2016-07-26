@@ -19,4 +19,7 @@ class E {
   public function __destruct () : E {}
   public function __construct () : void {}
   public function __destruct () : void {}
+  public function f (...) : void {} // no errors
+  public function f (...,) : void {} // error; trailing comma illegal
+  public function f (..., int $x) : void {} // error; ... must be at end
 }

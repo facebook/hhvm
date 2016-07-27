@@ -191,7 +191,7 @@ void HHVM_METHOD(SQLite3, __construct,
 
 void SQLite3::validate() const {
   if (!m_raw_db) {
-    throw Exception("SQLite3 object was not initialized");
+    SystemLib::throwExceptionObject("SQLite3 object was not initialized");
   }
 }
 
@@ -202,7 +202,7 @@ void HHVM_METHOD(SQLite3, open,
                  const Variant& encryption_key /* = null */) {
   auto *data = Native::data<SQLite3>(this_);
   if (data->m_raw_db) {
-    throw Exception("Already initialized DB Object");
+    SystemLib::throwExceptionObject("Already initialized DB Object");
   }
 
   String fname;
@@ -215,8 +215,8 @@ void HHVM_METHOD(SQLite3, open,
 
   if (sqlite3_open_v2(fname.data(), &data->m_raw_db, flags, nullptr)
       != SQLITE_OK) {
-    throw Exception("Unable to open database: %s",
-                    sqlite3_errmsg(data->m_raw_db));
+    SystemLib::throwExceptionObject((std::string("Unable to open database: ") +
+                                    sqlite3_errmsg(data->m_raw_db)).c_str());
   }
 
 #ifdef SQLITE_HAS_CODEC
@@ -226,8 +226,8 @@ void HHVM_METHOD(SQLite3, open,
   if (!str_encryption_key.empty() &&
       sqlite3_key(data->m_raw_db, str_encryption_key.data(),
       str_encryption_key.size()) != SQLITE_OK) {
-    throw Exception("Unable to open database: %s",
-                    sqlite3_errmsg(data->m_raw_db));
+    SystemLib::throwExceptionObject((std::string("Unable to open database: ") +
+                                    sqlite3_errmsg(data->m_raw_db)).c_str());
   }
 #endif
 }
@@ -529,7 +529,7 @@ void HHVM_METHOD(SQLite3Stmt, __construct,
 
 void SQLite3Stmt::validate() const {
   if (!m_raw_stmt) {
-    throw Exception("SQLite3Stmt object was not initialized");
+    SystemLib::throwExceptionObject("SQLite3Stmt object was not initialized");
   }
 }
 
@@ -693,7 +693,7 @@ SQLite3Result::SQLite3Result() : m_stmt(nullptr) {
 
 void SQLite3Result::validate() const {
   if (!m_stmt) {
-    throw Exception("SQLite3Result object was not initialized");
+    SystemLib::throwExceptionObject("SQLite3Result object was not initialized");
   }
   m_stmt->validate();
 }

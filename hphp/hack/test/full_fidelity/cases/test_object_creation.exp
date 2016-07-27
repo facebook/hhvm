@@ -10,7 +10,7 @@
       ((whitespace)(return)(whitespace))
       (object_creation_expression
         ((new)(whitespace))
-        ((name))
+        (qualified_name((name)))
         ((lparen))
         (list
           (literal((decimal_literal)))

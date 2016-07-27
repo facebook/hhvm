@@ -244,7 +244,8 @@ module WithStatementAndDeclParser
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Name
-    | QualifiedName
+    | QualifiedName ->
+      (parser1, make_qualified_name_expression (make_token token))
     | Variable
     | Static -> parser1, (make_token token)
     | LeftParen ->

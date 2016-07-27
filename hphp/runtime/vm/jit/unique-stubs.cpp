@@ -53,6 +53,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vtune-jit.h"
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
@@ -1105,8 +1106,8 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  us.enterTCExit = vwrap(cb, data, [&] (Vout& v) {
+TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
+  return vwrap(cb, data, [&] (Vout& v) {
     // Eagerly save VM regs and realign the native stack.
     storeVMRegs(v);
 
@@ -1134,7 +1135,9 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Perform a native return.
     v << stubret{RegSet(), true};
   });
+}
 
+TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignJmpTarget(cb);
 
   auto const sp       = rarg(0);
@@ -1338,9 +1341,10 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
     return hotBlock.available() > 512 ? hotBlock : main;
   };
 
-  enterTCHelper = decltype(enterTCHelper)(emitEnterTCHelper(main, data, *this));
+#define ADD(name, stub) name = decltype(name)(add(#name, (stub), code, dbg))
+  ADD(enterTCExit,   emitEnterTCExit(main, data, *this));
+  ADD(enterTCHelper, emitEnterTCHelper(main, data, *this));
 
-#define ADD(name, stub) name = add(#name, (stub), code, dbg)
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, emitHandleSRHelper(cold, data));
   ADD(endCatchHelper, emitEndCatchHelper(frozen, data, *this));
@@ -1410,6 +1414,19 @@ TCA UniqueStubs::add(const char* name, TCA start,
   if (!RuntimeOption::EvalJitNoGdb) {
     dbg.recordStub(Debug::TCRange(start, end, &cb == &code.cold()),
                    folly::sformat("HHVM::{}", name));
+  }
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportHelperToVtune(folly::sformat("HHVM::{}", name).c_str(),
+                        start,
+                        end);
+  }
+  if (RuntimeOption::EvalPerfPidMap) {
+    dbg.recordPerfMap(Debug::TCRange(start, end, &cb == &code.cold()),
+                      SrcKey{},
+                      nullptr,
+                      false,
+                      false, 
+                      folly::sformat("HHVM::{}", name));
   }
 
   auto const newStub = StubRange{name, start, end};

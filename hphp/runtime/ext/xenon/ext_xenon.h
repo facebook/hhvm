@@ -38,7 +38,7 @@
   Instead, Xenon has a pthread waiting for the semaphore.  When the semaphore
   is set in the handler, it wakes, sets the Xenon Surprise flag for every
   thread - this is the flash.
-  There are is a mechanism that hooks the enter/exit of every PHP function,
+  There is a mechanism that hooks the enter/exit of every PHP function,
   using the Surprise flags leverages that mechanism and calls logging.
   At this point, if the flag is set for this thread, the PHP and async stack
   will be logged for that thread.

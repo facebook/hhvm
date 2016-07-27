@@ -26,19 +26,22 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
+
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -62,8 +65,6 @@
 #include <folly/Conv.h>
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
-
-#include <boost/lexical_cast.hpp>
 
 #include <fstream>
 #include <string>
@@ -233,6 +234,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    (same as /stats.xml)\n"
         "/stats.html:      show server stats in HTML\n"
         "    (same as /stats.xml)\n"
+
+        "/xenon-snap:      generate a Xenon snapshot, which is logged later\n"
 
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
@@ -480,6 +483,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "dump-apc", 8) == 0 &&
         handleDumpCacheRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "xenon-snap", 10) == 0) {
+      static int64_t s_lastSampleTime = 0;
+      auto const current = TimeStamp::Current();
+      if (current > s_lastSampleTime) {
+        s_lastSampleTime = current;
+        Xenon::getInstance().surpriseAll();
+      }
+      transport->sendString("a Xenon sample will be collected\n", 200);
       break;
     }
     if (strncmp(cmd.c_str(), "const-ss", 8) == 0 &&

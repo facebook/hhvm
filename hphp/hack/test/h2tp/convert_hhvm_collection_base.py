@@ -149,6 +149,7 @@ UNSUPPORTED_INPUTS = {
         'concat.php',
         'empty_vector.php',
         'imm-iteration-bug.php',
+        'vector-addall.php',
     ],
     'PHP files are not supported': [
         'iterator-clone-bug.php',

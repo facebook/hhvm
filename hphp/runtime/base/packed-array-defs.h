@@ -63,21 +63,21 @@ void PackedArray::scan(const ArrayData* a, Marker& mark) {
   }
 }
 
-template <class F>
+template <class F, bool inc>
 void PackedArray::IterateV(ArrayData* arr, F fn) {
   auto elm = packedData(arr);
-  arr->incRefCount();
-  SCOPE_EXIT { decRefArr(arr); };
+  if (inc) arr->incRefCount();
+  SCOPE_EXIT { if (inc) decRefArr(arr); };
   for (auto i = arr->m_size; i--; elm++) {
     if (ArrayData::call_helper(fn, elm)) break;
   }
 }
 
-template <class F>
+template <class F, bool inc>
 void PackedArray::IterateKV(ArrayData* arr, F fn) {
   auto elm = packedData(arr);
-  arr->incRefCount();
-  SCOPE_EXIT { decRefArr(arr); };
+  if (inc) arr->incRefCount();
+  SCOPE_EXIT { if (inc) decRefArr(arr); };
   TypedValue key;
   key.m_data.num = 0;
   key.m_type = KindOfInt64;

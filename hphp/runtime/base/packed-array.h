@@ -214,8 +214,10 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* MakeFromVec(ArrayData* adIn, bool copy);
 
   // Fast iteration
-  template <class F> static void IterateV(ArrayData* arr, F fn);
-  template <class F> static void IterateKV(ArrayData* arr, F fn);
+  template <class F, bool inc = true>
+  static void IterateV(ArrayData* arr, F fn);
+  template <class F, bool inc = true>
+  static void IterateKV(ArrayData* arr, F fn);
 
 private:
   static ArrayData* Grow(ArrayData*);

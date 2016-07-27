@@ -698,12 +698,14 @@ bool IterateV(const TypedValue& it,
   if (LIKELY(isArrayType(it.m_type))) {
     adata = it.m_data.parr;
    do_array:
+    adata->incRefCount();
+    SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
     if (adata->empty()) return true;
     if (adata->isPacked()) {
-      PackedArray::IterateV(adata, arrFn);
+      PackedArray::IterateV<ArrFn, false>(adata, arrFn);
     } else if (adata->isMixed()) {
-      MixedArray::IterateV(MixedArray::asMixed(adata), arrFn);
+      MixedArray::IterateV<ArrFn, false>(MixedArray::asMixed(adata), arrFn);
     } else {
       for (ArrayIter iter(adata); iter; ++iter) {
         if (ArrayData::call_helper(arrFn, iter.secondRef().asTypedValue())) {
@@ -774,12 +776,14 @@ bool IterateKV(const TypedValue& it,
   if (LIKELY(isArrayType(it.m_type))) {
     adata = it.m_data.parr;
    do_array:
+    adata->incRefCount();
+    SCOPE_EXIT { decRefArr(adata); };
     if (preArrFn(adata)) return true;
     if (adata->empty()) return true;
     if (adata->isMixed()) {
-      MixedArray::IterateKV(MixedArray::asMixed(adata), arrFn);
+      MixedArray::IterateKV<ArrFn, false>(MixedArray::asMixed(adata), arrFn);
     } else if (adata->isPacked()) {
-      PackedArray::IterateKV(adata, arrFn);
+      PackedArray::IterateKV<ArrFn, false>(adata, arrFn);
     } else {
       for (ArrayIter iter(adata); iter; ++iter) {
         if (ArrayData::call_helper(arrFn,

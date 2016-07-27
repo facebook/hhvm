@@ -233,32 +233,6 @@ module WithStatementAndDeclParser
       (parser, result)
     end
 
-  and parse_designator parser =
-    (* SPEC
-      class-type-designator:
-        static
-        qualified-name
-        variable-name
-    *)
-
-    let (parser1, token) = next_token parser in
-    match Token.kind token with
-    | Name
-    | QualifiedName ->
-      (parser1, make_qualified_name_expression (make_token token))
-    | Variable
-    | Static -> parser1, (make_token token)
-    | LeftParen ->
-      (* ERROR RECOVERY: We have "new (", so the type is almost certainly
-         missing. Mark the type as missing, don't eat the token, and we'll
-         try to parse the parameter list. *)
-      (with_error parser SyntaxError.error1027, (make_missing()))
-    | _ ->
-      (* ERROR RECOVERY: We have "new " followed by something not recognizable
-         as a type name. Take the token as the name and hope that what follows
-         is the parameter list. *)
-      (with_error parser1 SyntaxError.error1027, (make_token token))
-
   and parse_expression_list parser =
     (* SPEC
       argument-expression-list:
@@ -292,14 +266,41 @@ module WithStatementAndDeclParser
     (* SPEC
       object-creation-expression:
         new  class-type-designator  (  argument-expression-listopt  )
+
+      class-type-designator:
+        static
+        qualified-name
+        variable-name
     *)
     let (parser, new_token) = next_token parser in
-    let (parser, designator) = parse_designator parser in
-    let (parser, left_paren) = expect_left_paren parser in
-    let (parser, args) = parse_expression_list_opt parser in
-    let (parser, right_paren) = expect_right_paren parser in
+    let (parser1, token) = next_token parser in
+    (* TODO: handle error reporting:
+      not all types of expressions are allowed
+      dynamic calls are not allowed in strict mode
+    *)
+    let (parser, designator, left, args, right) = match Token.kind token with
+    | Static ->
+        let (parser, designator) = parser1, (make_token token) in
+        let (parser, lparen) = expect_left_paren parser in
+        let (parser, args) = parse_expression_list_opt parser in
+        let (parser, rparen) = expect_right_paren parser in
+        (parser, designator, lparen, args, rparen)
+    | _ ->
+      let (parser, expr) = parse_expression parser in
+      match syntax expr with
+        | FunctionCallExpression fce -> (
+            parser,
+            fce.function_call_receiver,
+            fce.function_call_lparen,
+            fce.function_call_arguments,
+            fce.function_call_rparen
+          )
+        | _ ->
+          (parser, expr, make_missing(), make_missing(), make_missing())
+    in
+
     let result = make_object_creation_expression (make_token new_token)
-      designator left_paren args right_paren in
+      designator left args right in
     (parser, result)
 
   and parse_function_call parser receiver =

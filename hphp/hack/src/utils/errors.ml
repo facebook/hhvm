@@ -578,6 +578,7 @@ module Typing                               = struct
   let reference_expr                        = 4154 (* DONT MODIFY!!!! *)
   let unification_cycle                     = 4155 (* DONT MODIFY!!!! *)
   let keyset_set                            = 4156 (* DONT MODIFY!!!! *)
+  let eq_incompatible_types                 = 4157 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1952,6 +1953,11 @@ let trivial_strict_not_nullable_compare_null p result type_reason =
   let msg = "This expression is always "^result in
   add_list Typing.not_nullable_compare_null_trivial
     ((p, msg) :: type_reason)
+
+let eq_incompatible_types p left right =
+  let msg = "This equality test has incompatible types" in
+  add_list Typing.eq_incompatible_types
+    ((p, msg) :: left @ right)
 
 let void_usage p void_witness =
   let msg = "You are using the return value of a void function" in

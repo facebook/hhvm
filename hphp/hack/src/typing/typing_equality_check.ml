@@ -35,13 +35,27 @@ let trivial_comparison_error p bop (r1, ty1) (r2, ty2) trail1 trail2 =
     (Reason.to_string ("This is " ^ tys2) r2)
     trail1 trail2
 
+let eq_incompatible_types p (r1, ty1) (r2, ty2) =
+  let tys1 = Typing_print.error ty1 in
+  let tys2 = Typing_print.error ty2 in
+  Errors.eq_incompatible_types p
+    (Reason.to_string ("This is " ^ tys1) r1)
+    (Reason.to_string ("This is " ^ tys2) r2)
+
 let rec assert_nontrivial p bop env ty1 ty2 =
   let ety_env = Phase.env_with_self env in
   let _, ty1 = Env.expand_type env ty1 in
-  let _, ty1, trail1 = TDef.force_expand_typedef ~ety_env env ty1 in
+  let _, ety1, trail1 = TDef.force_expand_typedef ~ety_env env ty1 in
   let _, ty2 = Env.expand_type env ty2 in
-  let _, ty2, trail2 = TDef.force_expand_typedef ~ety_env env ty2 in
+  let _, ety2, trail2 = TDef.force_expand_typedef ~ety_env env ty2 in
   match ty1, ty2 with
+  (* Disallow `===` on distinct abstract enum types. *)
+  (* Future: consider putting this in typed lint not type checking *)
+  | (_, Tabstract (AKenum e1, None)), (_, Tabstract (AKenum e2, None)) ->
+    if e1=e2 then ()
+    else eq_incompatible_types p ety1 ety2
+  | _ ->
+  match ety1, ety2 with
   | (_, Tprim N.Tnum),               (_, Tprim (N.Tint | N.Tfloat))
   | (_, Tprim (N.Tint | N.Tfloat)),  (_, Tprim N.Tnum) -> ()
   | (_, Tprim N.Tarraykey),          (_, Tprim (N.Tint | N.Tstring))

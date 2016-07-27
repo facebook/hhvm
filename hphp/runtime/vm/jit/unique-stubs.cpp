@@ -1341,9 +1341,13 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
     return hotBlock.available() > 512 ? hotBlock : main;
   };
 
-#define ADD(name, stub) name = decltype(name)(add(#name, (stub), code, dbg))
+#define ADD(name, stub) name = add(#name, (stub), code, dbg)
   ADD(enterTCExit,   emitEnterTCExit(main, data, *this));
-  ADD(enterTCHelper, emitEnterTCHelper(main, data, *this));
+  enterTCHelper =
+    decltype(enterTCHelper)(add("enterTCHelper",
+                                emitEnterTCHelper(main, data, *this),
+                                code,
+                                dbg));
 
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, emitHandleSRHelper(cold, data));

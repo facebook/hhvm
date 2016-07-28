@@ -248,7 +248,7 @@ struct XDebugHook : DebuggerHook {
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
 
- private:
+private:
   explicit XDebugHook() {}
   ~XDebugHook() {}
 };

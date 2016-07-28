@@ -627,5 +627,16 @@ PCFilter* getFlowFilter() {
   return &RID().m_flowFilter;
 }
 
+String getCurrentFilePath(int* pLine) {
+  VMRegAnchor anchor;
+  auto pc = vmpc();
+  auto const unit = vmfp()->func()->unit();
+  if (pLine != nullptr) {
+    *pLine = unit->getLineNumber(unit->offsetOf(pc));
+  }
+  auto const filepath = const_cast<StringData*>(unit->filepath());
+  return File::TranslatePath(String(filepath));
+}
+
 /////////////////////////////////////////////////////////////////////////
 }

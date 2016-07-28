@@ -108,6 +108,15 @@ struct XDebugServer {
   /* Sends the passed xml message to the client. */
   void sendMessage(xdebug_xml_node& xml);
 
+  /* Sends response to last parsed command. */
+  void sendResponse(xdebug_xml_node& xml);
+
+  /* Send xml response message for input error to the client. */
+  void sendErrorMessage(
+    const std::shared_ptr<XDebugCommand>& cmd,
+    XDebugError code
+  );
+
   /* Adds the xdebug xmlns to the node. */
   void addXmlns(xdebug_xml_node& node);
 
@@ -141,21 +150,14 @@ struct XDebugServer {
                   const Variant& message,
                   int line);
 
-  /*
-   * Gets the result of 'm_break', and clears it.
-   */
-  std::shared_ptr<XDebugCommand> getAndClearBreak() {
-    std::lock_guard<std::mutex> guard(m_breakCmdMtx);
-    auto const cmd = m_break;
-    m_break = nullptr;
-    return cmd;
+  void processAsyncCommandQueue();
+  bool processCommand(const std::shared_ptr<XDebugCommand>& cmd);
+
+  void addNewCommand(const std::shared_ptr<XDebugCommand>& cmd) {
+    std::lock_guard<std::mutex> guard(m_asyncCommandQueueMtx);
+    m_asyncCommandQueue.emplace_back(cmd);
   }
 
-  void setNewBreak(const std::shared_ptr<XDebugCommand>& cmd) {
-    std::lock_guard<std::mutex> guard(m_breakCmdMtx);
-    always_assert(m_break == nullptr);
-    m_break = cmd;
-  }
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -195,6 +197,11 @@ struct XDebugServer {
    * error.
    */
   bool doCommandLoop();
+
+  /*
+   * Add the last parsed command if it is available.
+   */
+  void addLastCommandIfAvailable(xdebug_xml_node& node);
 
   /*
    * Reads the input from the client until a null character is received.
@@ -265,8 +272,7 @@ struct XDebugServer {
   bool m_supportsNotify{false};
 
  private:
-
-  std::shared_ptr<XDebugCommand> m_lastCommand;
+  std::vector<std::shared_ptr<XDebugCommand>> m_lastCommands;
   char* m_buffer{nullptr};
   char* m_bufferCur{nullptr};
   size_t m_bufferAvail{0};
@@ -279,11 +285,14 @@ struct XDebugServer {
   /* Mutex that protects the socket. */
   std::recursive_mutex m_pollingMtx;
 
-  /* Mutex that protects m_break. */
-  std::mutex m_breakCmdMtx;
+  /* Mutex that protects m_asyncCommandQueue. */
+  std::mutex m_asyncCommandQueueMtx;
 
-  /* The "break" command that gets read by the polling thread is stored here. */
-  std::shared_ptr<XDebugCommand> m_break;
+  /*
+   * The async commands queue that gets read by the polling thread but
+   * processed by request thread.
+   */
+  std::vector<std::shared_ptr<XDebugCommand>> m_asyncCommandQueue;
 
   /* The request thread sets this to tell the polling thread what to do. */
   std::atomic<PollingState> m_pollingState{PollingState::Run};

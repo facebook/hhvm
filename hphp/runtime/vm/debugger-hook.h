@@ -253,6 +253,8 @@ StackDepthDisposition getStackDisposition(int baseline);
 PCFilter* getBreakPointFilter();
 PCFilter* getFlowFilter();
 
+String getCurrentFilePath(int* pLine);
+
 }
 
 #endif

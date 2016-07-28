@@ -566,8 +566,7 @@ struct BreakCmd : XDebugCommand {
   ~BreakCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    // If we got here, then we were already paused.
-    m_server.addStatus(xml);
+    xdebug_xml_add_attribute(&xml, "success", "1");
   }
 };
 

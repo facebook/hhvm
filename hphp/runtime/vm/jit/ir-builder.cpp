@@ -357,36 +357,40 @@ SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
-  auto const fpInst = inst->src(0)->inst();
-
   // Change LdCtx in static functions to LdCctx, or if we're inlining try to
   // fish out a constant context.
   auto const func = inst->marker().func();
-  if (func->isStatic()) {
-    if (fpInst->is(DefInlineFP)) {
-      auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx && ctx->hasConstVal(TCls)) {
-        inst->convertToNop();
-        return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
-      }
+  auto const ctx = [&]() -> SSATmp* {
+    auto ret = m_state.ctx();
+    if (!ret) return nullptr;
+    if (ret->inst()->is(DefConst)) return ret;
+    if (ret->hasConstVal() ||
+        ret->type().subtypeOfAny(TInitNull, TUninit, TNullptr)) {
+      return m_unit.cns(ret->type());
     }
+    if (!m_state.frameMaySpanCall()) return ret;
+    return nullptr;
+  }();
 
+  if (ctx) {
+    if (ctx->hasConstVal(TCls)) {
+      return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
+    }
+    if (ctx->isA(TCls)) {
+      return gen(ConvClsToCctx, ctx);
+    }
+    if (ctx->isA(TCtx)) {
+      return ctx;
+    }
+  }
+
+  if (func->isStatic()) {
     // ActRec->m_cls of a static function is always a valid class pointer with
     // the bottom bit set
     auto const src = inst->src(0);
-    inst->convertToNop();
     return gen(LdCctx, src);
   }
 
-  if (fpInst->is(DefInlineFP)) {
-    // TODO(#5623596): this optimization required for correctness in refcount
-    // opts right now.
-    // check that we haven't nuked the SSATmp
-    if (!m_state.frameMaySpanCall()) {
-      auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx && ctx->isA(TObj)) return ctx;
-    }
-  }
   return nullptr;
 }
 

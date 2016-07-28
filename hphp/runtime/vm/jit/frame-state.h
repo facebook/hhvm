@@ -163,10 +163,15 @@ struct FrameState {
   bool needRatchet{false};
 
   /*
-   * m_thisAvailable tracks whether the current frame is known to have a
+   * thisAvailable tracks whether the current frame is known to have a
    * non-null $this pointer.
    */
   bool thisAvailable{false};
+
+  /*
+   * ctx tracks the current ActRec's this/ctx field
+   */
+  SSATmp* ctx{nullptr};
 
   /*
    * frameMaySpan is true iff a Call instruction has been seen on any path
@@ -323,6 +328,7 @@ struct FrameStateMgr final {
   const Func* func()              const { return cur().curFunc; }
   SSATmp*     fp()                const { return cur().fpValue; }
   SSATmp*     sp()                const { return cur().spValue; }
+  SSATmp*     ctx()               const { return cur().ctx; }
   FPInvOffset irSPOff()           const { return cur().irSPOff; }
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
   SSATmp*     memberBaseValue()   const { return cur().mbase.value; }

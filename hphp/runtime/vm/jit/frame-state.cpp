@@ -381,7 +381,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   switch (inst->op()) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
   case InlineReturn:   trackInlineReturn(); break;
-
+  case InitCtx: {
+    always_assert(!cur().ctx);
+    cur().ctx = inst->src(1);
+    break;
+  }
   case Call:
     {
       auto const extra = inst->extra<Call>();
@@ -1097,6 +1101,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
                            !target->isStatic() &&
                            extra->ctx &&
                            extra->ctx->isA(TObj);
+  cur().ctx              = extra->ctx;
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
   cur().bcSPOff          = FPInvOffset{target->numLocals()};

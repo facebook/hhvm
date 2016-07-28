@@ -81,6 +81,17 @@ bool beginInlining(IRGS& env,
 
   auto ctx = [&] () -> SSATmp* {
     if (info.ctx) {
+      if (info.ctx->isA(TNullptr)) {
+        // We get a TNullptr either because its not a method,
+        // or because we looked up the method dynamically.
+        // In the former, we don't need to set the ctx, and
+        // in the latter, we must not set the ctx, since
+        // it is guaranteed to be incorrect.
+        return nullptr;
+      }
+      if (info.ctx->type() <= info.ctxType) {
+        return info.ctx;
+      }
       return gen(env, AssertType, info.ctxType, info.ctx);
     }
     if (isFPushFunc(info.fpushOpc)) {

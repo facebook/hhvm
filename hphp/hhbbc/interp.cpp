@@ -80,6 +80,8 @@ void in(ISS& env, const bc::PopR&) {
   popR(env);
 }
 
+void in(ISS& env, const bc::EntryNop&) { nothrow(env); }
+
 void in(ISS& env, const bc::Dup& op) {
   nothrow(env);
   auto const val = popC(env);

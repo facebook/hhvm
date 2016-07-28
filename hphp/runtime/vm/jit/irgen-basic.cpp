@@ -471,6 +471,7 @@ void emitNullUninit(IRGS& env) { push(env, cns(env, TUninit)); }
 //////////////////////////////////////////////////////////////////////
 
 void emitNop(IRGS&)                {}
+void emitEntryNop(IRGS&)           {}
 void emitBoxRNop(IRGS& env) {
   assertTypeStack(env, BCSPRelOffset{0}, TBoxedCell);
 }

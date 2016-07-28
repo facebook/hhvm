@@ -577,6 +577,7 @@ bool isAlwaysNop(Op op) {
   case Op::Nop:
   case Op::UnboxRNop:
   case Op::RGetCNop:
+  case Op::EntryNop:
     return true;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
@@ -996,6 +997,7 @@ bool dontGuardAnyInputs(Op op) {
   // These are instructions that are always interp-one'd, or are always no-ops.
   case Op::LowInvalid:
   case Op::Nop:
+  case Op::EntryNop:
   case Op::Box:
   case Op::BoxR:
   case Op::BoxRNop:

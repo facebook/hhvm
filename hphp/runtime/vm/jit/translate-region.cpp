@@ -173,6 +173,10 @@ bool blockHasUnprocessedPred(
  */
 void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
   if (sk.offset() != func->base()) return;
+
+  // The assertions inserted here are only valid if the first bytecode
+  // instruction does not have unprocessed predecessors.  This invariant is
+  // ensured by the emitter using an EntryNop instruction when necessary.
   for (auto& pinfo : func->params()) {
     if (pinfo.hasDefaultValue()) return;
   }

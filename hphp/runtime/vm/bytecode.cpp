@@ -1744,6 +1744,9 @@ OPTBLD_INLINE void iopHighInvalid() {
 OPTBLD_INLINE void iopNop() {
 }
 
+OPTBLD_INLINE void iopEntryNop() {
+}
+
 OPTBLD_INLINE void iopPopA() {
   vmStack().popA();
 }

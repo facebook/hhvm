@@ -464,16 +464,20 @@ public:
 };
 
 struct Label {
+  enum class NoEntryNopFlag {};
   Label() : m_off(InvalidAbsoluteOffset) {}
   explicit Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
-    set(e);
+    set(e, true);
+  }
+  Label(Emitter& e, NoEntryNopFlag) : m_off(InvalidAbsoluteOffset) {
+    set(e, false);
   }
   Offset getAbsoluteOffset() const { return m_off; }
   // Sets the Label to the bytecode offset of given by e,
   // fixes up any instructions that have already been
   // emitted that reference this Label, and fixes up the
   // EmitterVisitor's jump target info
-  void set(Emitter& e);
+  void set(Emitter& e, bool emitNopAtEntry = true);
   // If a Label is has not been set, it is the Emitter's
   // resposibility to call bind on the Label each time it
   // prepares to emit an instruction that uses the Label
@@ -1981,14 +1985,21 @@ void SymbolicStack::popFDesc() {
   m_fdescCount -= kNumActRecCells;
 }
 
-void Label::set(Emitter& e) {
+void Label::set(Emitter& e, bool emitNopAtEntry /* = true */) {
+  auto const off = e.getUnitEmitter().bcPos();
   if (isSet()) {
     InvariantViolation(
       "Label::set was called more than once on the same "
       "Label; originally set to %d; now %d",
       m_off,
-      e.getUnitEmitter().bcPos());
+      off);
     return;
+  }
+  EmitterVisitor& ev = e.getEmitterVisitor();
+  if (emitNopAtEntry && ev.getFuncEmitter()->base == off) {
+    // Make sure there are no jumps to the base of functions.
+    // The JIT relies on this in some analysis.
+    e.getUnitEmitter().emitOp(OpEntryNop);
   }
   m_off = e.getUnitEmitter().bcPos();
   // Fix up any forward jumps that reference to this Label
@@ -1996,7 +2007,6 @@ void Label::set(Emitter& e) {
       m_emittedOffs.begin(); it != m_emittedOffs.end(); ++it) {
     e.getUnitEmitter().emitInt32(m_off - it->first, it->second);
   }
-  EmitterVisitor& ev = e.getEmitterVisitor();
   if (!m_emittedOffs.empty()) {
     // If there were forward jumps that referenced this Label,
     // compare the the eval stack from the first foward jump we
@@ -8091,7 +8101,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   Emitter e(meth, m_ue, *this);
   FuncFinisher ff(this, e, fe, 0);
-  Label topOfBody(e);
+  Label topOfBody(e, Label::NoEntryNopFlag{});
 
   Offset base = m_ue.bcPos();
 
@@ -8351,7 +8361,7 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
 
   Emitter e(meth, m_ue, *this);
   FuncFinisher ff(this, e, m_curFunc);
-  Label topOfBody(e);
+  Label topOfBody(e, Label::NoEntryNopFlag{});
   emitMethodPrologue(e, meth);
 
   if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {

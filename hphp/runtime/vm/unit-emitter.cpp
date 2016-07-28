@@ -343,8 +343,9 @@ void UnitEmitter::recordSourceLocation(const Location::Range& sLoc,
            "source location offsets must be added to UnitEmitter in "
            "increasing order");
   } else {
-    // First record added should be for bytecode offset zero.
-    assert(start == 0);
+    // First record added should be for bytecode offset zero or very rarely one
+    // when the source starts with a label and a Nop is inserted.
+    assert(start == 0 || start == 1);
   }
   m_sourceLocTab.push_back(std::make_pair(start, newLoc));
 }

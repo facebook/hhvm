@@ -343,6 +343,7 @@ constexpr int32_t kMaxConcatN = 4;
 #define OPCODES \
   O(LowInvalid,      NA,               NOV,             NOV,        NF) \
   O(Nop,             NA,               NOV,             NOV,        NF) \
+  O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
   O(PopA,            NA,               ONE(AV),         NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \

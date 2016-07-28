@@ -796,6 +796,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
           // Don't emit the FCall
           skipTrans = true;
+        } else {
+          inl.registerEndInlining(callee);
         }
       }
 
@@ -956,8 +958,10 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irb.startBlock(entry, false /* hasUnprocPred */);
-    irgen::conjureBeginInlining(irgs, func, ctxType, argTypes,
-                                irgen::ReturnTarget{returnBlock});
+    if (!irgen::conjureBeginInlining(irgs, func, ctxType, argTypes,
+                                     irgen::ReturnTarget{returnBlock})) {
+      return nullptr;
+    }
 
     int32_t budgetBcInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
     try {

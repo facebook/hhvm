@@ -425,7 +425,7 @@ SSATmp* commutativeImpl(State& env,
   if (auto simp = constImpl(env, src1, src2, op)) return simp;
 
   // Canonicalize constants to the right.
-  if (src1->hasConstVal() && src2->type().hasConstVal()) {
+  if (src1->hasConstVal() && !src2->type().hasConstVal()) {
     return gen(env, opcode, src2, src1);
   }
 

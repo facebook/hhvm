@@ -69,6 +69,11 @@ private:
 struct BootStats {
   // Creates a new instance and starts the timer
   static void start();
+  // Returns seconds since epoch when start() was called, or 0 if never called.
+  static int64_t startTimestamp() {
+    auto s = std::chrono::duration_cast<std::chrono::seconds>(s_start.wall());
+    return s.count();
+  }
   // Stops the timer and logs information
   static void done();
   // Computes the time elapsed from start or from the previous call to this

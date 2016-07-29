@@ -246,7 +246,7 @@ function server_is_prepared_to_stop(): bool;
 function server_health_level(): int;
 
 /**
- * Returns the time that the http server has been running.
+ * Returns the time that the http server has been accepting connections.
  *
  * @return int - number of seconds the server has been running.  -1 if
  * server is not started.
@@ -254,5 +254,15 @@ function server_health_level(): int;
  */
 <<__HipHopSpecific, __Native>>
 function server_uptime(): int;
+
+/**
+ * Returns the timestamp when the http server process was started.
+ *
+ * @return int - number of seconds since epoch when process started.  0 if
+ * server is not started.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_process_start_time(): int;
 
 }

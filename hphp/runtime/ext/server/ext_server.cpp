@@ -28,6 +28,7 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/util/boot_timer.h"
 
 namespace HPHP {
 
@@ -59,6 +60,7 @@ static struct ServerExtension final : Extension {
     HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
     HHVM_FALIAS(HH\\server_health_level, server_health_level);
     HHVM_FALIAS(HH\\server_uptime, server_uptime);
+    HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
 
     loadSystemlib();
   }
@@ -274,6 +276,11 @@ int64_t HHVM_FUNCTION(server_uptime) {
   int64_t nSeconds = time(nullptr) - HttpServer::StartTime;
   if (nSeconds < 0) nSeconds = 0;
   return nSeconds;
+}
+
+int64_t HHVM_FUNCTION(server_process_start_time) {
+  // Returns 0 when not running in server mode.
+  return BootStats::startTimestamp();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -74,6 +74,7 @@ bool HHVM_FUNCTION(server_is_stopping);
 bool HHVM_FUNCTION(server_is_prepared_to_stop);
 int64_t HHVM_FUNCTION(server_health_level);
 int64_t HHVM_FUNCTION(server_uptime);
+int64_t HHVM_FUNCTION(server_process_start_time);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

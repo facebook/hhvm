@@ -21,13 +21,76 @@ and p_declaration_list = "DeclarationList", fun () -> [
   [NonTerm p_declaration_list; NonTerm p_declaration]]
 (* TODO complete declaration. *)
 and p_declaration = "Declaration", fun () -> [
+  (* [NonTerm p_trait_declaration];
+  [NonTerm p_interface_declaration]; *)
   [NonTerm p_function_definition];
   [NonTerm p_namespace_use_declaration];
   [NonTerm p_namespace_definition];
   [NonTerm p_class_declaration];
   [NonTerm p_alias_declaration];
   [NonTerm p_inclusion_directive];
-  [NonTerm p_enum_declaration]]
+  [NonTerm p_enum_declaration];
+]
+
+and p_trait_declaration= "TraitDeclaration", fun () ->
+  let attr_opt = power_set [NonTerm p_attribute_spec] in
+  let trait_and_name = [[trait; name]] in
+  let generic_and_base = power_set [NonTerm p_generic_type_parameter_list;
+    NonTerm p_class_interface_clause] in
+  let left_brace = [[left_brace]] in
+  let right_brace = [[right_brace]] in
+  let member =
+    power_set [NonTerm p_trait_use_clauses; NonTerm p_trait_member_declarations]
+  in
+  let (@@) lst1 lst2 = cross lst1 lst2 (@) in
+  attr_opt @@ trait_and_name @@ generic_and_base @@ left_brace @@ member @@
+    right_brace
+
+and p_trait_member_declarations = "TraitMemberDeclarations", fun () -> [
+  [NonTerm p_require_extends_clause];
+  [NonTerm p_require_implements_clause];
+  [NonTerm p_property_declaration];
+  [NonTerm p_method_declaration];
+  [NonTerm p_constructor_declaration];
+  [NonTerm p_destructor_declaration];
+]
+
+and p_interface_declaration= "InterfaceDeclaration", fun () ->
+  let attr_opt = power_set [NonTerm p_attribute_spec] in
+  let interface_and_name = [[interface; name]] in
+  let generic_and_base = power_set [NonTerm p_generic_type_parameter_list;
+    NonTerm p_interface_base_clause] in
+  let left_brace = [[left_brace]] in
+  let right_brace = [[right_brace]] in
+  let member = power_set [NonTerm p_interface_member_declarations] in
+  let (@@) lst1 lst2 = cross lst1 lst2 (@) in
+  attr_opt @@ interface_and_name @@ generic_and_base @@ left_brace @@ member @@
+    right_brace
+
+and p_interface_base_clause = "InterfaceBaseClause", fun () -> [
+  [extends; qualified_name; NonTerm p_generic_argument];
+  [NonTerm p_interface_base_clause; comma; qualified_name;
+    NonTerm p_generic_argument];
+]
+
+and p_interface_member_declarations = "InterfaceMemberDeclarations", fun () -> [
+  [NonTerm p_interface_member_declaration];
+  [NonTerm p_interface_member_declarations;
+    NonTerm p_interface_member_declaration];
+]
+
+and p_interface_member_declaration = "InterfaceMemberDeclaration", fun () -> [
+  [NonTerm p_require_extends_clause];
+  (* [NonTerm p_const_declaration]; *)
+  [NonTerm p_method_declaration];
+  [NonTerm p_type_constant_decl];
+]
+
+and p_require_extends_clause = "RequireExtendsClause", fun () ->
+  [[require; extends; qualified_name; semicolon]]
+
+and p_require_implements_clause = "RequireImplementsClause", fun () ->
+  [[require; implements; qualified_name; semicolon]]
 
 and p_namespace_definition = "NamespaceDefinition", fun () -> [
   (* TODO generate "namespace-name" of the form name\name\name *)

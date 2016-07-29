@@ -119,6 +119,9 @@ module WithParser(Parser : ParserType) = struct
   let expect_arrow parser =
     expect_token parser TokenKind.EqualGreaterThan SyntaxError.error1028
 
+  let expect_lambda_arrow parser =
+    expect_token parser TokenKind.EqualEqualGreaterThan SyntaxError.error1046
+
   let expect_as parser =
     expect_token parser TokenKind.As SyntaxError.error1023
 

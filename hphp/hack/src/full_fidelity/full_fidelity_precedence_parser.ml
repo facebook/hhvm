@@ -21,7 +21,7 @@ let make lexer errors =
   { lexer; errors; precedence = 0 }
 
 let errors parser =
-  parser.errors
+  parser.errors @ (Lexer.errors parser.lexer)
 
 let with_errors parser errors =
   { parser with errors }

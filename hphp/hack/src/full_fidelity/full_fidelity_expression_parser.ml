@@ -69,6 +69,12 @@ module WithStatementAndDeclParser
     let offset1 = Lexer.start_offset (lexer parser) in
     if offset1 = offset then None else Some (parser, expr)
 
+  and parses_without_error parser f =
+    let old_errors = List.length (errors parser) in
+    let (parser, result) = f parser in
+    let new_errors = List.length(errors parser) in
+    old_errors = new_errors
+
   and parse_term parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
@@ -89,8 +95,7 @@ module WithStatementAndDeclParser
       (* TODO: Parse interior *)
       -> (parser1, make_literal_expression (make_token token))
 
-    | Variable ->
-        (parser1, make_variable_expression (make_token token))
+    | Variable -> parse_variable_or_lambda parser
 
     | Name
     | QualifiedName ->
@@ -127,7 +132,8 @@ module WithStatementAndDeclParser
     | Function -> parse_anon parser
     | DollarDollar ->
       (parser1, make_pipe_variable_expression (make_token token))
-    | Async   (* TODO: anon or lambda *)
+    | Async ->
+      parse_anon_or_lambda parser
 
     | Dollar (* TODO: ? *)
 
@@ -194,9 +200,6 @@ module WithStatementAndDeclParser
     (* TODO: "and" "or" "xor" *)
       parse_remaining_binary_operator parser term
 
-    | EqualEqualGreaterThan ->
-      (* TODO parse lambda *)
-      (parser1, make_token token)
     | PlusPlus
     | MinusMinus -> parse_postfix_unary parser term
     | LeftParen -> parse_function_call parser term
@@ -315,18 +318,16 @@ module WithStatementAndDeclParser
       args right_paren in
     parse_remaining_expression parser result
 
-  and parse_cast_or_parenthesized_or_lambda_expression parser =
-    (* We need to disambiguate between casts, lambdas and ordinary
-      parenthesized expressions. There are only four possible casts:
-      (int), (float), (bool) and (string), so those are the easiest
-      to detect.  Lambdas are a lot harder; a lambda which begins
-      with a left paren could be:
-      (<<foo>> $bar) ==> ...
-      ($bar) ==> ...
-      ($bar, $blah) ==> ...
-      (int $bar) ==> ...
-   *)
+  and parse_variable_or_lambda parser =
+    let (parser1, variable) = assert_token parser Variable in
+    if peek_token_kind parser1 = EqualEqualGreaterThan then
+      parse_lambda_expression parser
+    else
+      (parser1, make_variable_expression variable)
 
+  and parse_cast_or_parenthesized_or_lambda_expression parser =
+  (* We need to disambiguate between casts, lambdas and ordinary
+    parenthesized expressions. *)
     if is_cast_expression parser then
       parse_cast_expression parser
     else if is_lambda_expression parser then
@@ -335,6 +336,10 @@ module WithStatementAndDeclParser
       parse_parenthesized_expression parser
 
   and is_cast_expression parser =
+    (* We have a left paren in hand and wish to know whether we are parsing a
+       cast, lambda or parenthesized expression. There are only four possible
+       cast prefixes: (int), (float), (bool) and (string), so those are the
+       easiest to detect. *)
     let (parser, left_paren) = assert_token parser LeftParen in
     let (parser, type_token) = next_token parser in
     match Token.kind type_token with
@@ -364,10 +369,70 @@ module WithStatementAndDeclParser
     (parser, result)
 
   and is_lambda_expression parser =
-    false (* TODO *)
+    (* We have a left paren in hand and we already know we're not in a cast.
+       We need to know whether this is a parenthesized expression or the
+       signature of a lambda.
+
+       There are a number of difficulties. For example, we cannot simply
+       check to see if a colon follows the expression:
+
+       $a = $b ? ($x) : ($y)              ($x) is parenthesized expression
+       $a = $b ? ($x) : int ==> 1 : ($y)  ($x) is lambda signature
+
+       ERROR RECOVERY:
+
+       What we'll do here is simply attempt to parse a lambda formal parameter
+       list. If we manage to do so *without error*, and the thing which follows
+       is ==>, then this is definitely a lambda. If those conditions are not
+       met then we assume we have a parenthesized expression in hand.
+
+       TODO: There could be situations where we have good evidence that a
+       lambda is intended but these conditions are not met. Consider
+       a more sophisticated recovery strategy.
+    *)
+    let sig_and_arrow parser =
+      let (parser, signature) = parse_lambda_signature parser in
+      expect_lambda_arrow parser in
+    parses_without_error parser sig_and_arrow
 
   and parse_lambda_expression parser =
-    (parser, make_missing()) (* TODO *)
+    (* SPEC
+      lambda-expression:
+        async-opt  lambda-function-signature  ==>  lambda-body
+    *)
+    let (parser, async) = optional_token parser Async in
+    let (parser, signature) = parse_lambda_signature parser in
+    let (parser, arrow) = expect_lambda_arrow parser in
+    let (parser, body) = parse_lambda_body parser in
+    let result = make_lambda_expression async signature arrow body in
+    (parser, result)
+
+  and parse_lambda_signature parser =
+    (* SPEC:
+      lambda-function-signature:
+        variable-name
+        (  anonymous-function-parameter-declaration-list-opt  ) /
+          anonymous-function-return-opt
+    *)
+    let (parser1, token) = next_token parser in
+    if Token.kind token = Variable then
+      (parser1, make_token token)
+    else
+      let (parser, left, params, right) = parse_parameter_list_opt parser in
+      let (parser, colon, return_type) = parse_optional_return parser in
+      let result = make_lambda_signature left params right colon return_type in
+      (parser, result)
+
+  and parse_lambda_body parser =
+    (* SPEC:
+      lambda-body:
+        expression
+        compound-statement
+    *)
+    if peek_token_kind parser = LeftBrace then
+      parse_compound_statement parser
+    else
+      with_reset_precedence parser parse_expression
 
   and parse_parenthesized_expression parser =
     let (parser, left_paren) = assert_token parser LeftParen in
@@ -689,6 +754,13 @@ module WithStatementAndDeclParser
     parse_comma_list_opt
       parser RightParen SyntaxError.error1025 expect_variable
 
+  and parse_anon_or_lambda parser =
+    let (parser1, _) = assert_token parser Async in
+    if peek_token_kind parser1 = Function then
+      parse_anon parser
+    else
+      parse_lambda_expression parser
+
   and parse_anon_use_opt parser =
     (* SPEC:
       anonymous-function-use-clause:
@@ -704,6 +776,16 @@ module WithStatementAndDeclParser
       let result = make_anonymous_function_use_clause use_token
         left_paren variables right_paren in
       (parser, result)
+
+  and parse_optional_return parser =
+    (* Parse an optional "colon-folowed-by-return-type" *)
+    let (parser, colon) = optional_token parser Colon in
+    let (parser, return_type) =
+      if is_missing colon then
+        (parser, (make_missing()))
+      else
+        parse_return_type parser in
+    (parser, colon, return_type)
 
   and parse_anon parser =
     (* SPEC
@@ -723,12 +805,7 @@ module WithStatementAndDeclParser
     let (parser, fn) = assert_token parser Function in
     let (parser, left_paren, params, right_paren) =
       parse_parameter_list_opt parser in
-    let (parser, colon) = optional_token parser Colon in
-    let (parser, return_type) =
-      if is_missing colon then
-        (parser, (make_missing()))
-      else
-        parse_return_type parser in
+    let (parser, colon, return_type) = parse_optional_return parser in
     let (parser, use_clause) = parse_anon_use_opt parser in
     let (parser, body) = parse_compound_statement parser in
     let result = make_anonymous_function async fn left_paren params

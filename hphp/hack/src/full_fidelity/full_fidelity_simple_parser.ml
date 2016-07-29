@@ -22,7 +22,7 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
     { lexer; errors }
 
   let errors parser =
-    parser.errors
+    parser.errors @ (Lexer.errors parser.lexer)
 
   let with_errors parser errors =
     { parser with errors }

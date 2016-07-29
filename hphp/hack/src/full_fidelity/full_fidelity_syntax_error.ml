@@ -101,6 +101,7 @@ let error1042 = "A visibility modifier, static, abstract, or final keyword is "^
 let error1043 = "A function header is expected here."
 let error1044 = "A name, __construct, or __destruct keyword is expected here."
 let error1045 = "An 'extends' or 'implements' keyword is expected here."
+let error1046 = "A lambda arrow ('==>') is expected here."
 
 let error2001 = "A type annotation is required in strict mode."
 let error2002 = "An XHP attribute name may not contain '-' or ':'."

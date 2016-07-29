@@ -81,7 +81,7 @@ and p_interface_member_declarations = "InterfaceMemberDeclarations", fun () -> [
 
 and p_interface_member_declaration = "InterfaceMemberDeclaration", fun () -> [
   [NonTerm p_require_extends_clause];
-  (* [NonTerm p_const_declaration]; *)
+  [NonTerm p_const_declaration];
   [NonTerm p_method_declaration];
   [NonTerm p_type_constant_decl];
 ]
@@ -195,7 +195,7 @@ and p_class_member_declarations = "ClassMemberDeclarations", fun () -> [
 
 and p_class_member_declaration = "ClassMemberDeclaration", fun () ->
   [
-  (* [NonTerm p_const_declaration]; *)
+  [NonTerm p_const_declaration];
   [NonTerm p_property_declaration];
   [NonTerm p_method_declaration];
   [NonTerm p_constructor_declaration];

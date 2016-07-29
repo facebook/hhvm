@@ -562,33 +562,22 @@ module WithExpressionAndStatementParser
       =  const-expression
   *)
   and parse_const_declaration parser abstr const =
-    (* After abstract and const, the next synatx could be a type spec or a
-     * constant-declarator.
-     * In both cases, the syntax starts with a name. Thus the immediate next
-     * token is useless to distinguish between the two cases.
-     * Thus, we skip the immediate next token, and look at the following one.
-     * There are three cases:
-     * 1. There is no type. If there is no type, in constant-declarator, After
-     *    the name there should be an equal sign.
-     * 2. There is a simple type. A simple type is just one token, thus the
-     *    token after needs to be a name belonging to constant-declarator.
-     * 3. There is a generic type, then the token should be '<' .
-     *)
-    let next_token_is_type =
-      peek_token_kind (skip_token parser) = Name ||
-      peek_token_kind (skip_token parser) = LessThan
-    in
-
-    let (parser, type_spec) = if next_token_is_type then
+    let (parser, type_spec) = if is_type_in_const parser then
       parse_type_specifier parser
     else
       parser, make_missing ()
     in
-
     let (parser, const_list) = parse_comma_list
       parser Semicolon SyntaxError.error1004 parse_constant_declarator in
     let (parser, semi) = expect_semicolon parser in
     (parser, make_const_declaration abstr const type_spec const_list semi)
+
+  and is_type_in_const parser =
+    (* TODO Use Eric's helper here to assert length of errors *)
+    let before = List.length (errors parser) in
+    let (parser1, _) = parse_type_specifier parser in
+    let (parser1, _) = expect_name parser1 in
+    List.length (errors parser1) = before
 
   and parse_constant_declarator parser =
     let (parser, const_name) = expect_name parser in

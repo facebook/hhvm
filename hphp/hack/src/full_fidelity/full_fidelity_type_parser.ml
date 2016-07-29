@@ -31,6 +31,7 @@ let rec parse_type_specifier parser =
      a simple type specifier here. *)
   let (parser1, token) = next_token parser in
   match Token.kind token with
+  | Double (* TODO: Specification does not mention double; fix it. *)
   | Bool
   | Int
   | Float

@@ -323,13 +323,15 @@ module WithStatementAndDeclParser
 
   and is_cast_expression parser =
     (* We have a left paren in hand and wish to know whether we are parsing a
-       cast, lambda or parenthesized expression. There are only four possible
-       cast prefixes: (int), (float), (bool) and (string), so those are the
-       easiest to detect. *)
+       cast, lambda or parenthesized expression. There are only eight possible
+       cast prefixes so those are the easiest to detect. *)
     let (parser, left_paren) = assert_token parser LeftParen in
     let (parser, type_token) = next_token parser in
     match Token.kind type_token with
-    (* TODO follow hhvm and php spec to parse all possible casts *)
+    | Array
+    | Object
+    | Unset
+    | Double
     | Bool
     | Int
     | Float
@@ -343,6 +345,10 @@ module WithStatementAndDeclParser
         (  cast-type  ) unary-expression
       cast-type: one of
         bool  int  float  string
+
+      TODO: The specification needs to be updated; double, object, array
+      and unset are also legal cast types.  Note also that the spec does not
+      define "double", "unset" or "object" as keywords.
     *)
     (* We don't get here unless we have a legal cast, thanks to the
        previous call to is_cast_expression. *)

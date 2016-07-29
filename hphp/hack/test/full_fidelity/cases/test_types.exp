@@ -27,7 +27,7 @@
                       ((lparen))
                         (list
                           (list_item
-                            (simple_type_specifier((name)))
+                            (simple_type_specifier((double)))
                             ((,)(whitespace)))
                             (simple_type_specifier((string))))
                       ((rparen)))

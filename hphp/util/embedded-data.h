@@ -14,13 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef EMBEDDED_REPO_H
-#define EMBEDDED_REPO_H
+#ifndef incl_HPHP_UTIL_EMBEDDED_DATA_H_
+#define incl_HPHP_UTIL_EMBEDDED_DATA_H_
 
 #include <cstdint>
 #include <string>
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct embedded_data {
   std::string m_filename;
@@ -34,7 +36,21 @@ struct embedded_data {
 bool get_embedded_data(const char* section, embedded_data* desc,
                        const std::string& filename = "");
 
-std::string read_embedded_data(const embedded_data&);
+std::string read_embedded_data(const embedded_data& desc);
+
+/*
+ * dlopen() the embedded shared object given by `desc'.
+ *
+ * Unfortunately, there's no way to do the equivalent of dlopen() on data
+ * within another file, or even in memory.  This means we have to copy the
+ * section into a temporary file and then dlopen() that.
+ *
+ * Returns the result of dlopen() on success, else nullptr.  Also logs the
+ * failure condition with Logger on failure.
+ */
+void* dlopen_embedded_data(const embedded_data& desc, char* tmp_filename);
+
+///////////////////////////////////////////////////////////////////////////////
 
 }
 

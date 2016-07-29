@@ -21,10 +21,7 @@
 #include <memory>
 #include <vector>
 
-#include <folly/FileUtil.h>
 #include <folly/Format.h>
-#include <folly/ScopeGuard.h>
-#include <folly/portability/Unistd.h>
 
 #include "hphp/util/embedded-data.h"
 
@@ -144,65 +141,11 @@ void init() {
     throw InitException{"Unable to find embedded data"};
   }
 
-  // Unfortunately, there's no way to do the equivalent of dlopen() on data
-  // within another file, or even in memory. This means we have to copy the
-  // section into a temporary file and then dlopen() that. Annoying.
-
-  auto source_file = ::open(data.m_filename.c_str(), O_RDONLY);
-  if (source_file < 0) {
-    throw InitException{
-      folly::sformat(
-        "Unable to open \'{}\': {}",
-        data.m_filename,
-        ::strerror(errno)
-      )
-    };
-  }
-  SCOPE_EXIT { ::close(source_file); };
-
-  if (::lseek(source_file, data.m_start, SEEK_SET) < 0) {
-    throw InitException{
-      folly::sformat("Unable to seek to section: {}", ::strerror(errno))
-    };
-  }
-
+  // Link in the embedded object.
   char tmp_filename[] = "/tmp/hhvm_type_scanner_XXXXXX";
-  auto dest_file = ::mkstemp(tmp_filename);
-  if (dest_file < 0) {
-    throw InitException{
-      folly::sformat("Unable to create temporary file: {}", ::strerror(errno))
-    };
-  }
-  SCOPE_EXIT { ::unlink(tmp_filename); };
-  SCOPE_EXIT { ::close(dest_file); };
-
-  char buffer[64*1024];
-  std::size_t to_read = data.m_len;
-  while (to_read > 0) {
-    auto read = folly::readNoInt(
-      source_file,
-      buffer,
-      std::min(sizeof buffer, to_read)
-    );
-    if (read <= 0) {
-      throw InitException{
-        folly::sformat("Error reading from section: {}", ::strerror(errno))
-      };
-    }
-    if (folly::writeFull(dest_file, buffer, read) <= 0) {
-      throw InitException{
-        folly::sformat("Error writing to temporary file: {}", ::strerror(errno))
-      };
-    }
-    to_read -= read;
-  }
-
-  // Finished copying the file, now load it.
-  auto handle = dlopen(tmp_filename, RTLD_NOW);
+  auto const handle = dlopen_embedded_data(data, tmp_filename);
   if (!handle) {
-    throw InitException{
-      folly::sformat("dlopen() fails: {}", dlerror())
-    };
+    throw InitException{"Failed to dlopen embedded data"};
   }
 
   // Find the initialization function.

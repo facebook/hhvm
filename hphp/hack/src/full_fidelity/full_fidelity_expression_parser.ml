@@ -236,34 +236,17 @@ module WithStatementAndDeclParser
       parse_remaining_expression parser result
     end
 
-  and parse_expression_list parser =
+  and parse_expression_list_opt parser =
     (* SPEC
       argument-expression-list:
+        argument-expressions   ,-opt
+      argument-expressions:
         expression
-        argument-expression-list  ,  expression
+        argument-expressions  ,  expression
     *)
-
-    let rec aux parser exprs =
-      let (parser, expr) = with_reset_precedence parser parse_expression in
-      let exprs = expr :: exprs in
-      let (parser1, token) = next_token parser in
-      match (Token.kind token) with
-      | Comma ->
-        aux parser1 ((make_token token) :: exprs )
-      | RightParen ->
-        (parser, exprs)
-      | EndOfFile
-      | _ ->
-        (* ERROR RECOVERY TODO: How to recover? *)
-        let parser = with_error parser SyntaxError.error1009 in
-        (parser, exprs) in
-    let (parser, exprs) = aux parser [] in
-    (parser, make_list (List.rev exprs))
-
-  and parse_expression_list_opt parser =
-    let token = peek_token parser in
-    if (Token.kind token) = RightParen then (parser, make_missing())
-    else parse_expression_list parser
+    (* This function parses the parens as well. *)
+    let f parser = with_reset_precedence parser parse_expression in
+    parse_parenthesized_comma_list_opt_allow_trailing parser f
 
   and parse_object_creation_expression parser =
     (* SPEC
@@ -284,10 +267,8 @@ module WithStatementAndDeclParser
     let (parser, designator, left, args, right) = match Token.kind token with
     | Static ->
         let (parser, designator) = parser1, (make_token token) in
-        let (parser, lparen) = expect_left_paren parser in
-        let (parser, args) = parse_expression_list_opt parser in
-        let (parser, rparen) = expect_right_paren parser in
-        (parser, designator, lparen, args, rparen)
+        let (parser, left, args, right) = parse_expression_list_opt parser in
+        (parser, designator, left, args, right)
     | _ ->
       let (parser, expr) = parse_expression parser in
       match syntax expr with
@@ -309,13 +290,10 @@ module WithStatementAndDeclParser
   and parse_function_call parser receiver =
     (* SPEC
       function-call-expression:
-        postfix-expression  (  argument-expression-listopt  )
+        postfix-expression  (  argument-expression-list-opt  )
     *)
-    let (parser, left_paren) = next_token parser in
-    let (parser, args) = parse_expression_list_opt parser in
-    let (parser, right_paren) = expect_right_paren parser in
-    let result = make_function_call_expression receiver (make_token left_paren)
-      args right_paren in
+    let (parser, left, args, right) = parse_expression_list_opt parser in
+    let result = make_function_call_expression receiver left args right in
     parse_remaining_expression parser result
 
   and parse_variable_or_lambda parser =

@@ -13,8 +13,9 @@
         (qualified_name((name)))
         ((lparen))
         (list
-          (literal((decimal_literal)))
-          ((,)(whitespace))
+          (list_item
+            (literal((decimal_literal)))
+            ((,)(whitespace)))
           (literal((decimal_literal))))
         ((rparen)))
         ((;)(end_of_line)))

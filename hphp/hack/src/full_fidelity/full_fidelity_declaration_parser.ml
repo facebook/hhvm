@@ -486,8 +486,8 @@ module WithExpressionAndStatementParser
       use  trait-name-list  ;
 
     trait-name-list:
-      qualified-name  generic-type-parameter-listopt
-      trait-name-list  ,  qualified-name  generic-type-parameter-listopt
+      qualified-name  generic-type-argument-listopt
+      trait-name-list  ,  qualified-name  generic-type-argument-listopt
   *)
   and parse_trait_use parser =
     let (parser, use_token) = assert_token parser Use in
@@ -740,8 +740,6 @@ module WithExpressionAndStatementParser
           parameter-declaration-list  ,  parameter-declaration
      *)
      (* This function parses the parens as well. *)
-     (* TODO: Add an error checking pass that ensures that the "..." parameter
-              only appears at the end, and is not trailed by a comma. *)
       parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =

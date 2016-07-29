@@ -19,7 +19,7 @@ let rec p_script = "Script", fun () ->
 and p_declaration_list = "DeclarationList", fun () -> [
   [NonTerm p_declaration];
   [NonTerm p_declaration_list; NonTerm p_declaration]]
-(* TODO complete declaration. For now use only function definitions *)
+(* TODO complete declaration. *)
 and p_declaration = "Declaration", fun () -> [
   [NonTerm p_function_definition];
   [NonTerm p_namespace_use_declaration];
@@ -95,16 +95,16 @@ and p_namespace_use_clause = "NamespaceUseClause", fun () -> [
 and p_class_declaration = "ClassDeclaration", fun () ->
   let modifiers = [[abstract]; [final]; [abstract; final]] in
   let prefixes =
-  List.map (fun e -> (*(NonTerm p_attribute_spec) :: *) e) modifiers in
+  List.map (fun e -> (NonTerm p_attribute_spec) :: e) modifiers in
   let prefixes = List.flatten (List.map power_set prefixes) in
   let class_and_name = [term_class; name] in
-  let after_name = power_set [(*NonTerm p_generic_type_parameter_list;*)
+  let after_name = power_set [NonTerm p_generic_type_parameter_list;
     NonTerm p_class_base_clause] in
   let without_prefix = List.map (fun x -> class_and_name @ x) after_name in
   let without_interface = cross prefixes without_prefix (@) in
   let body_members =
     power_set [NonTerm p_trait_use_clauses;
-    (* NonTerm p_class_member_declarations *)] in
+    NonTerm p_class_member_declarations ] in
   let body_with_closing =
     List.map (fun x -> x @ [right_brace]) body_members in
   let before_body =
@@ -120,10 +120,10 @@ and p_trait_use_clause = "TraitUseClause", fun () ->
   [[use; NonTerm p_trait_name_list; semicolon]]
 
 and p_trait_name_list = "TraitNameList", fun () -> [
-  (*[qualified_name; NonTerm p_generic_type_parameter_list];*)
+  [qualified_name; NonTerm p_generic_argument];
   [qualified_name];
-  (*[NonTerm p_trait_name_list; comma; qualified_name;
-    NonTerm p_generic_type_parameter_list];*)
+  [NonTerm p_trait_name_list; comma; qualified_name;
+    NonTerm p_generic_argument];
   [NonTerm p_trait_name_list; comma; qualified_name]]
 
 and p_class_member_declarations = "ClassMemberDeclarations", fun () -> [
@@ -132,8 +132,111 @@ and p_class_member_declarations = "ClassMemberDeclarations", fun () -> [
 
 and p_class_member_declaration = "ClassMemberDeclaration", fun () ->
   [
-  (* TODO complete class members *)
+  (* [NonTerm p_const_declaration]; *)
+  [NonTerm p_property_declaration];
+  [NonTerm p_method_declaration];
+  [NonTerm p_constructor_declaration];
+  [NonTerm p_destructor_declaration];
   [NonTerm p_type_constant_decl]]
+
+and p_property_declaration = "PropertyDeclaration", fun () -> [
+  [NonTerm p_property_modifier; NonTerm p_type_spec;
+    NonTerm p_property_declarator_list; semicolon];
+]
+
+and p_property_declarator_list = "PropertyDeclaratorList", fun () -> [
+  [NonTerm p_property_declarator_list; comma; NonTerm p_property_declarator];
+  [NonTerm p_property_declarator];
+]
+
+and p_property_declarator = "PropertyDeclarator", fun () -> [
+  [NonTerm p_variable_name; equal; NonTerm p_expression];
+  [NonTerm p_variable_name];
+]
+
+and p_property_modifier = "PropertyModifier", fun () -> [
+  [NonTerm p_visibility_modifier];
+  [NonTerm p_visibility_modifier; static];
+  [static; NonTerm p_visibility_modifier];
+]
+
+and p_method_declaration = "MethodDeclaration", fun () -> [
+  [NonTerm p_attribute_spec; NonTerm p_method_modifiers;
+    NonTerm p_function_definition_header; NonTerm p_compound_statement];
+  [NonTerm p_method_modifiers; NonTerm p_function_definition_header;
+    NonTerm p_compound_statement];
+  [NonTerm p_attribute_spec; NonTerm p_method_modifiers;
+    NonTerm p_function_definition_header; semicolon];
+  [NonTerm p_method_modifiers; NonTerm p_function_definition_header; semicolon];
+]
+
+and p_method_modifiers = "MethodModifiers", fun () -> [
+  [NonTerm p_method_modifier];
+  [NonTerm p_method_modifiers; NonTerm p_method_modifier]
+]
+
+and p_method_modifier = "MethodModifier", fun () ->
+  [[NonTerm p_visibility_modifier]; [static]; [abstract]; [final]]
+
+and p_constructor_declaration = "ConstructorDeclaration", fun () -> [
+  [NonTerm p_attribute_spec; NonTerm p_constructor_modifiers; term_function;
+    construct; left_paren; NonTerm p_constructor_param_decl_list; right_paren;
+    NonTerm p_compound_statement];
+  [NonTerm p_attribute_spec; NonTerm p_constructor_modifiers; term_function;
+    construct; left_paren; right_paren; NonTerm p_compound_statement];
+  [NonTerm p_constructor_modifiers; term_function;
+    construct; left_paren; NonTerm p_constructor_param_decl_list; right_paren;
+    NonTerm p_compound_statement];
+  [NonTerm p_constructor_modifiers; term_function; construct; left_paren;
+    right_paren; NonTerm p_compound_statement];
+]
+
+and p_constructor_param_decl_list = "ConstructorParameterDeclList", fun () -> [
+  [NonTerm p_constructor_param_decl];
+  [NonTerm p_constructor_param_decl_list; comma;
+    NonTerm p_constructor_param_decl];
+]
+
+and p_constructor_param_decl = "ConstructorParameterDeclaration", fun () -> [
+  [NonTerm p_visibility_modifier; NonTerm p_type_spec; NonTerm p_variable_name;
+    NonTerm p_default_arg_spec];
+  [NonTerm p_visibility_modifier; NonTerm p_type_spec; NonTerm p_variable_name];
+  [NonTerm p_type_spec; NonTerm p_variable_name; NonTerm p_default_arg_spec];
+  [NonTerm p_type_spec; NonTerm p_variable_name];
+]
+
+and p_constructor_modifiers = "ConstructorModifiers", fun () -> [
+  [NonTerm p_constructor_modifier];
+  [NonTerm p_constructor_modifiers; NonTerm p_constructor_modifier];
+]
+
+and p_constructor_modifier = "ConstructorModifier", fun () ->
+  [[NonTerm p_visibility_modifier]; [abstract]; [final]]
+
+and p_destructor_declaration = "DestructorDeclaration", fun () -> [
+  [NonTerm p_attribute_spec; NonTerm p_visibility_modifier; term_function;
+    destruct; left_paren; right_paren; NonTerm p_compound_statement];
+  [NonTerm p_visibility_modifier; term_function;
+    destruct; left_paren; right_paren; NonTerm p_compound_statement];
+]
+
+and p_visibility_modifier = "VisibilityModifier", fun () ->
+  [[term_public]; [term_private]; [term_protected]]
+
+and p_const_declaration = "ConstDeclaration", fun () -> [
+  [abstract; const; NonTerm p_type_spec; NonTerm p_const_decl_list; semicolon];
+  [abstract; const; NonTerm p_const_decl_list; semicolon];
+  [const; NonTerm p_type_spec; NonTerm p_const_decl_list; semicolon];
+  [const; NonTerm p_const_decl_list; semicolon];
+]
+
+and p_const_decl_list = "ConstDeclaratorList", fun () -> [
+  [name; equal; NonTerm p_constant_expression];
+  [name];
+  [NonTerm p_const_decl_list; comma; name; equal;
+    NonTerm p_constant_expression];
+  [NonTerm p_const_decl_list; comma; name];
+]
 
 and p_type_constant_decl = "TypeConstantDeclaration", fun () -> [
   [abstract; const; term_type; name; NonTerm p_type_constraint; semicolon];
@@ -143,29 +246,31 @@ and p_type_constant_decl = "TypeConstantDeclaration", fun () -> [
   [const; term_type; name; equal; NonTerm p_type_spec; semicolon]]
 
 and p_class_interface_clause = "ClassInterfaceClause", fun () -> [
-  (* [implements; qualified_name; NonTerm p_generic_type_parameter_list]; *)
+  [implements; qualified_name; NonTerm p_generic_argument];
   [implements; qualified_name];
-  (* [NonTerm p_class_interface_clause; comma; qualified_name;
-    NonTerm p_generic_type_parameter_list] *)
+  [NonTerm p_class_interface_clause; comma; qualified_name;
+    NonTerm p_generic_argument];
   [NonTerm p_class_interface_clause; comma; qualified_name]]
 
 and p_class_base_clause = "ClassBaseClause", fun () -> [
-  (* [extends; qualified_name; NonTerm p_generic_type_parameter_list] *)
+  [extends; qualified_name; NonTerm p_generic_argument];
   [extends; qualified_name]]
 
-and p_function_definition = "FunctionDefinition", fun () ->
-  [[NonTerm p_function_definition_header; NonTerm p_compound_statement]]
+and p_function_definition = "FunctionDefinition", fun () -> [
+  [NonTerm p_attribute_spec; NonTerm p_function_definition_header;
+    NonTerm p_compound_statement];
+  [NonTerm p_function_definition_header; NonTerm p_compound_statement];
+]
 
 and p_function_definition_header = "FunctionDefinitionHeader", fun () ->
-  (* TODO *)
-  let headers = power_set [NonTerm p_attribute_spec; async] in
+  let headers = power_set [async] in
   let parameters = [
     [left_paren; right_paren];
     [left_paren; NonTerm p_parameter_list; right_paren];
-    (*[NonTerm p_generic_type_parameter_list; left_paren;
-      right_paren]; *)
-    (*[NonTerm p_generic_type_parameter_list; left_paren;
-        NonTerm p_parameter_list; right_paren] *) ]
+    [NonTerm p_generic_type_parameter_list; left_paren;
+      right_paren];
+    [NonTerm p_generic_type_parameter_list; left_paren;
+        NonTerm p_parameter_list; right_paren]]
   in
   let postfix =
     List.map (fun x -> [term_function; name]
@@ -199,7 +304,6 @@ and p_type_constraint = "TypeConstraint", fun () ->
   [[term_as; NonTerm p_type_spec]]
 
 and p_statement = "Statement", fun () -> [
-(* TODO *)
   [NonTerm p_function_static_declaration];
   [NonTerm p_compound_statement];
   [NonTerm p_labeled_statement];
@@ -337,7 +441,7 @@ and p_parameter_declaration = "ParameterDeclaration", fun () -> (* TODO *)
 and p_type_spec = "TypeSpec", fun () -> [
   [void]; [term_int]; [term_bool]; [term_float]; [arraykey]; [num];
   [resource]; [term_string]; [this]; [qualified_name]; [name]; [mixed];
-  [qualified_name; less_than; NonTerm p_generic_type_arguments; greater_than];
+  [qualified_name; NonTerm p_generic_argument];
   [classname; less_than; qualified_name; greater_than];
   [left_paren; term_function; left_paren; NonTerm p_type_spec_list;
   right_paren; colon; NonTerm p_type_spec; right_paren];
@@ -352,6 +456,9 @@ and p_type_spec = "TypeSpec", fun () -> [
   right_paren];
   [NonTerm p_type_constant_type_name];
   [term_array; less_than; NonTerm p_type_spec; greater_than]]
+
+and p_generic_argument = "GenericArgument", fun () ->
+  [[less_than; NonTerm p_generic_type_arguments; greater_than]]
 
 and p_generic_type_arguments = "GenericTypeArguments", fun () -> [
   [name];
@@ -484,11 +591,11 @@ and p_primary_expression = "PrimaryExpression", fun () -> [
   [NonTerm p_intrinsic];
   (* [NonTerm p_collection_literal]; *)
   (* [NonTerm p_tuple_literal]; *)
-  (* [NonTerm p_shape_literal]; *)
-  (* [NonTerm p_anonymous_fun_creation]; *)
+  [NonTerm p_shape_literal];
+  [NonTerm p_anonymous_fun_creation];
   (* [NonTerm p_awaitable_creation]; *)
   [left_paren; NonTerm p_expression; right_paren];
-  (*[dollar_dollar]*)]
+  [dollar_dollar]]
 
 and p_list_intrinsic = "ListIntrinsic", fun () -> [
   [term_list; left_paren; right_paren];
@@ -528,7 +635,7 @@ and p_constant_expression = "ConstantExpression", fun () -> [
   (* [NonTerm p_shape_literal]; *)]
 
 and p_intrinsic = "Intrinsic", fun () -> [
-  (* [NonTerm p_array_intrinsic]; *)
+  [NonTerm p_array_intrinsic];
   (* [NonTerm p_echo_intrinsic]; *)
   (* [NonTerm p_exit_intrinsic]; *)
   (* [invariant_intrinsic]; *) (* TODO get this back into the code *)
@@ -621,15 +728,17 @@ and p_anonymous_fun_param_decl_list = "AnonymousFunParamDeclList", fun () -> [
     NonTerm p_anonymous_fun_param_decl]]
 
 and p_anonymous_fun_param_decl = "AnonymousFunParamDecl", fun () -> [
-  (* TODO *)
   [NonTerm p_variable_name];
   [NonTerm p_variable_name; NonTerm p_default_arg_spec];
-  (* [attribute_spec; variable_name]; *)
+  [NonTerm p_attribute_spec; NonTerm p_variable_name];
   [NonTerm p_type_spec; NonTerm p_variable_name];
-  [NonTerm p_type_spec; NonTerm p_variable_name; NonTerm p_default_arg_spec];]
-  (* [attribute_spec; variable_name; default_arg_spec]; *)
-  (* [attribute_spec; type_spec; variable_name]; *)
-  (* [attribute_spec; type_spec; variable_name; default_arg_spec]] *)
+  [NonTerm p_type_spec; NonTerm p_variable_name; NonTerm p_default_arg_spec];
+  [NonTerm p_attribute_spec; NonTerm p_variable_name;
+    NonTerm p_default_arg_spec];
+  [NonTerm p_attribute_spec; NonTerm p_type_spec; NonTerm p_variable_name];
+  [NonTerm p_attribute_spec; NonTerm p_type_spec; NonTerm p_variable_name;
+    NonTerm p_default_arg_spec];
+]
 
 and p_awaitable_creation = "AwaitableCreation", fun () -> [
   [async; left_brace; right_brace];
@@ -681,14 +790,15 @@ and p_simple_assignment_expression = "SimpleAssignmentExpression", fun () ->
 
 and p_unary_expression = "UnaryExpression", fun () -> [
   [NonTerm p_postfix_expression];
-  (* [cast_expression]; *)
-  [NonTerm p_unary_prefix_expression]]
+  [NonTerm p_cast_expression];
+  [NonTerm p_unary_prefix_expression];
+]
 
 and p_unary_prefix_expression = "UnaryPrefixExpression", fun () -> [
   [plus_plus; NonTerm p_unary_expression];
   [minus_minus; NonTerm p_unary_expression];
-  (* [unary_operator; cast_expression]; *)
-  (* [at; expression]; *)
+  [NonTerm p_unary_operator; NonTerm p_cast_expression];
+  [at; NonTerm p_expression];
   [await; NonTerm p_expression]]
 
 
@@ -754,7 +864,7 @@ and p_scope_resolution_quantifier = "ScopeResolutionQuantifier", fun () -> [
 
 and p_cast_expression = "CastExpression", fun () -> [
   [left_paren; term_bool; right_paren; NonTerm p_expression];
-  [left_paren; term_int; right_paren; NonTerm p_expression];
+  (* [left_paren; term_int; right_paren; NonTerm p_expression]; *)
   [left_paren; term_float; right_paren; NonTerm p_expression];
   [left_paren; term_string; right_paren; NonTerm p_expression]]
 

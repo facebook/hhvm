@@ -920,6 +920,8 @@ module WithExpressionAndStatementParser
       parse_function_declaration parser attribute_specification
     | Abstract
     | Final
+    | Interface
+    | Trait
     | Class -> parse_classish_declaration parser attribute_specification
     | _ ->
       (* TODO *)

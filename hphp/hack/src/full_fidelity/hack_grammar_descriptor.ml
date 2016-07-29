@@ -19,10 +19,10 @@ let rec p_script = "Script", fun () ->
 and p_declaration_list = "DeclarationList", fun () -> [
   [NonTerm p_declaration];
   [NonTerm p_declaration_list; NonTerm p_declaration]]
-(* TODO complete declaration. *)
+
 and p_declaration = "Declaration", fun () -> [
-  (* [NonTerm p_trait_declaration];
-  [NonTerm p_interface_declaration]; *)
+  [NonTerm p_trait_declaration];
+  [NonTerm p_interface_declaration];
   [NonTerm p_function_definition];
   [NonTerm p_namespace_use_declaration];
   [NonTerm p_namespace_definition];
@@ -870,7 +870,7 @@ and p_postfix_expression = "PostfixExpression", fun () -> [
   [clone; NonTerm p_expression];
   [NonTerm p_object_creation_expression];
   [NonTerm p_array_creation_expression];
-  (* [NonTerm p_subscript_expression]; *)
+  [NonTerm p_subscript_expression];
   [NonTerm p_function_call_expression];
   [NonTerm p_postfix_expression; minus_greater_than; name];
   [NonTerm p_postfix_expression; minus_greater_than; NonTerm p_expression];
@@ -927,7 +927,7 @@ and p_scope_resolution_quantifier = "ScopeResolutionQuantifier", fun () -> [
 
 and p_cast_expression = "CastExpression", fun () -> [
   [left_paren; term_bool; right_paren; NonTerm p_expression];
-  (* [left_paren; term_int; right_paren; NonTerm p_expression]; *)
+  [left_paren; term_int; right_paren; NonTerm p_expression];
   [left_paren; term_float; right_paren; NonTerm p_expression];
   [left_paren; term_string; right_paren; NonTerm p_expression]]
 

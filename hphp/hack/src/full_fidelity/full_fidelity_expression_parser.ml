@@ -221,7 +221,7 @@ module WithStatementAndDeclParser
       let index = make_missing() in
       let right = make_token right in
       let result = make_subscript_expression term left index right in
-      (parser1, result)
+      parse_remaining_expression parser1 result
     | _ ->
     begin
       let (parser, index) = with_reset_precedence parser parse_expression in
@@ -230,7 +230,7 @@ module WithStatementAndDeclParser
       | _ -> expect_right_brace parser in
       let left = make_token left in
       let result = make_subscript_expression term left index right in
-      (parser, result)
+      parse_remaining_expression parser result
     end
 
   and parse_expression_list parser =
@@ -338,8 +338,9 @@ module WithStatementAndDeclParser
     let (parser, left_paren) = assert_token parser LeftParen in
     let (parser, type_token) = next_token parser in
     match Token.kind type_token with
+    (* TODO follow hhvm and php spec to parse all possible casts *)
     | Bool
-    | Interface
+    | Int
     | Float
     | String ->
       peek_token_kind parser = RightParen

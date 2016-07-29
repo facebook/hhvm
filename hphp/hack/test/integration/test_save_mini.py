@@ -141,7 +141,8 @@ class MiniStateHierarchyTests(hierarchy_tests.HierarchyTests,
 
 class LazyDeclHierarchyTests(hierarchy_tests.HierarchyTests,
         LazyDeclTestDriver, unittest.TestCase):
-    pass
+    def test_failed_decl(self):
+        super().test_failed_decl()
 
 class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
     """

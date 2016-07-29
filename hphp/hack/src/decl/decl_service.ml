@@ -22,6 +22,13 @@ type failed = Relative_path.Set.t
 (* The result expected from the service *)
 type result = Errors.t * failed
 
+type error_info = {
+  errs : failed;
+  lazy_decl_errs: failed;
+}
+(* Used for lazy typechecking *)
+type lazy_decl_result = Errors.t * error_info
+
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
 (*****************************************************************************)
@@ -39,7 +46,7 @@ end)
 (*****************************************************************************)
 
 let decl_file tcopt (errorl, failed) fn =
-  let errorl', () = Errors.do_ begin fun () ->
+  let errorl', (), _ = Errors.do_ begin fun () ->
     d ("Typing decl: "^Relative_path.to_absolute fn);
     Decl.make_env tcopt fn;
     dn "OK";
@@ -63,6 +70,13 @@ let merge_decl (errors1, failed1) (errors2, failed2) =
   Errors.merge errors1 errors2,
   Relative_path.Set.union failed1 failed2
 
+let merge_lazy_decl
+    (errors1, {errs = failed1; lazy_decl_errs = failed_decl1})
+    (errors2, {errs = failed2; lazy_decl_errs = failed_decl2}) =
+  Errors.merge errors1 errors2,
+    { errs = Relative_path.Set.union failed1 failed2;
+      lazy_decl_errs = Relative_path.Set.union failed_decl1 failed_decl2;
+    }
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
 (*****************************************************************************)

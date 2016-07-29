@@ -78,7 +78,7 @@ type match_ret =
 let parse_file file : match_ret * string * Parser_hack.parser_return =
   let abs_fn = Path.to_string file in
   let content = Sys_utils.cat abs_fn in
-  let parsing_errors, parser_output =
+  let parsing_errors, parser_output, _ =
     Errors.do_
       (fun () ->
        let rp = path_to_relative file in

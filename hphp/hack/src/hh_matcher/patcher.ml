@@ -529,7 +529,7 @@ let apply_patches
     | curpatch :: otherpatches ->
        let f_start, f_end = curpatch in
        (* f_end + 1 because hh_format runs on a weird interval *)
-       let format_errs, format_res =
+       let format_errs, format_res, _ =
          Errors.do_
            (fun () ->
             Format_hack.region

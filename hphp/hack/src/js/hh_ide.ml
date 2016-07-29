@@ -161,7 +161,7 @@ let hh_add_file fn content =
   let fn = make_path fn in
   Hashtbl.replace files fn content;
   try
-    let errors, _ = Errors.do_ begin fun () ->
+    let errors, _, _ = Errors.do_ begin fun () ->
       declare_file fn content
     end in
     Hashtbl.replace parse_errors fn (last_error (Errors.get_error_list errors))

@@ -34,7 +34,7 @@ let debug () fnl =
       let content = Sys_utils.cat (filepath :> string) in
 
       (* Checking that we can parse the output *)
-      let parsing_errors1, parser_output1 = Errors.do_ begin fun () ->
+      let parsing_errors1, parser_output1, _ = Errors.do_ begin fun () ->
         let rp =
           Relative_path.create Relative_path.Dummy (filepath :> string) in
         Parser_hack.program rp content
@@ -94,7 +94,7 @@ let debug () fnl =
       end;
 
       (* Checking that we can parse the output *)
-      let parsing_errors2, _parser_output2 = Errors.do_ begin fun () ->
+      let parsing_errors2, _parser_output2, _ = Errors.do_ begin fun () ->
         let rp = Relative_path.(create Dummy (filepath :> string)) in
         Parser_hack.program rp content
       end in

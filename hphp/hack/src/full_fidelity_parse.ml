@@ -41,7 +41,7 @@ let parse_and_print filename =
   List.iter printer (List.sort SyntaxError.compare errors);
   Printf.printf "%s" str;
   Printf.printf "\n----\n";
-  let errorl, result =
+  let errorl, result, _ =
     Errors.do_ begin fun () ->
       Parser_hack.from_file file
     end

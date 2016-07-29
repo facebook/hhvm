@@ -276,8 +276,12 @@ let type_check genv env =
   let fast = extend_fast fast files_info to_recheck in
   ServerCheckpoint.process_updates fast;
   debug_print_fast_keys genv "to_recheck" fast;
-  let errorl', failed_check =
+  let errorl', err_info =
     Typing_check_service.go genv.workers env.tcopt fast in
+  let { Decl_service.
+    errs = failed_check;
+    lazy_decl_errs = lazy_decl_failed;
+  } = err_info in
   let errorl', failed_check = match ServerArgs.ai_mode genv.options with
     | None -> errorl', failed_check
     | Some ai_opt ->
@@ -303,7 +307,7 @@ let type_check genv env =
     tcopt = env.tcopt;
     errorl = errorl;
     failed_parsing = Relative_path.Set.union failed_naming failed_parsing;
-    failed_decl = failed_decl;
+    failed_decl = Relative_path.Set.union failed_decl lazy_decl_failed;
     failed_check = failed_check;
     persistent_client_fd = old_env.persistent_client_fd;
     edited_files = old_env.edited_files;

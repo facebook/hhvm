@@ -21,7 +21,11 @@ module TypeCheckStore = GlobalStorage.Make(struct
   type t = TypecheckerOptions.t
 end)
 
-let neutral = Errors.empty, Relative_path.Set.empty
+let neutral = Errors.empty,
+  {
+    Decl_service.errs = Relative_path.Set.empty;
+    lazy_decl_errs = Relative_path.Set.empty;
+  }
 
 (*****************************************************************************)
 (* The job that will be run on the workers *)
@@ -71,23 +75,32 @@ let check_const tcopt fn x =
         ()
       | None -> ()
 
-let check_file tcopt (errors, failed) (fn, file_infos) =
+let check_file tcopt (errors, failed, decl_failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
-  let errors', () = Errors.do_ begin fun () ->
+  let errors', (), err_flags = Errors.do_ begin fun () ->
     SSet.iter (type_fun tcopt fn) n_funs;
     SSet.iter (type_class tcopt fn) n_classes;
     SSet.iter (check_typedef tcopt fn) n_types;
     SSet.iter (check_const tcopt fn) n_consts;
   end in
+  let lazy_decl_err = Errors.get_lazy_decl_flag err_flags in
   let errors = Errors.merge errors' errors in
   let failed =
     if not (Errors.is_empty errors')
     then Relative_path.Set.add failed fn
     else failed in
-  errors, failed
+  let decl_failed =
+    if lazy_decl_err
+    then Relative_path.Set.add decl_failed fn
+    else decl_failed in
+  errors, failed, decl_failed
 
-let check_files tcopt (errors, failed) fnl =
+let check_files tcopt (errors, err_info) fnl =
   SharedMem.invalidate_caches();
+  let { Decl_service.
+    errs = failed;
+    lazy_decl_errs = decl_failed;
+  } = err_info in
   let check_file =
     if !Utils.profile
     then (fun acc fn ->
@@ -100,9 +113,13 @@ let check_files tcopt (errors, failed) fnl =
       !Utils.log msg;
       result)
     else check_file tcopt in
-  let errors, failed = List.fold_left fnl
-    ~f:check_file ~init:(errors, failed) in
-  errors, failed
+  let errors, failed, decl_failed = List.fold_left fnl
+    ~f:check_file ~init:(errors, failed, decl_failed) in
+  let error_record = { Decl_service.
+    errs = failed;
+    lazy_decl_errs = decl_failed;
+  } in
+  errors, error_record
 
 let load_and_check_files acc fnl =
   let tcopt = TypeCheckStore.load() in
@@ -119,7 +136,7 @@ let parallel_check workers tcopt fnl =
       workers
       ~job:load_and_check_files
       ~neutral
-      ~merge:Decl_service.merge_decl
+      ~merge:Decl_service.merge_lazy_decl
       ~next:(MultiWorker.next workers fnl)
   in
   TypeCheckStore.clear();

@@ -39,7 +39,7 @@ let legacy_php_file_info = ref (fun fn ->
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
 let really_parse (acc, errorl, error_files) fn =
-  let errorl', {Parser_hack.file_mode; comments; ast} =
+  let errorl', {Parser_hack.file_mode; comments; ast}, _ =
     Errors.do_ begin fun () ->
       Parser_hack.from_file fn
     end

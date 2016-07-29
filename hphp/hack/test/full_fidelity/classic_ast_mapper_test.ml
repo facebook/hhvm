@@ -23,7 +23,7 @@ type test_case = {
 
 (** This actually uses the classic parser, not the full-fidelity parser. *)
 let sanity_test_classic_parser source =
-  let errorl, result =
+  let errorl, result, _ =
     Errors.do_ begin fun () ->
       Parser_hack.program (Relative_path.default) source
     end

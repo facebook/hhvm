@@ -17,6 +17,12 @@
 type failed = Relative_path.Set.t
 (* The result expected from the service *)
 type result = Errors.t * failed
+type error_info = {
+  errs : failed;
+  lazy_decl_errs: failed;
+}
+(* Used for lazy typechecking *)
+type lazy_decl_result = Errors.t * error_info
 
 (*****************************************************************************)
 (* Starts the process *)
@@ -24,3 +30,4 @@ type result = Errors.t * failed
 val go: Worker.t list option -> bucket_size:int -> TypecheckerOptions.t ->
   FileInfo.fast -> result
 val merge_decl: result -> result -> result
+val merge_lazy_decl: lazy_decl_result -> lazy_decl_result -> lazy_decl_result

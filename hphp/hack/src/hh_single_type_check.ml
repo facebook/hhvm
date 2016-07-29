@@ -555,7 +555,7 @@ let decl_and_run_mode {filename; mode; no_builtins} =
   let files_contents = file_to_files filename in
   let tcopt = TypecheckerOptions.default in
 
-  let errors, files_info = Errors.do_ begin fun () ->
+  let errors, files_info, _ = Errors.do_ begin fun () ->
     let parsed_files =
       Relative_path.Map.mapi Parser_hack.program files_contents in
     let parsed_builtins = Parser_hack.program builtins_filename builtins in

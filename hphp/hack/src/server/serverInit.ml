@@ -255,12 +255,18 @@ let type_check genv env fast t =
   if ServerArgs.ai_mode genv.options = None || not (is_check_mode genv.options)
   then begin
     let count = Relative_path.Map.cardinal fast in
-    let errorl, failed = Typing_check_service.go genv.workers env.tcopt fast in
+    let errorl, err_info =
+      Typing_check_service.go genv.workers env.tcopt fast in
+    let { Decl_service.
+      errs = failed;
+      lazy_decl_errs = lazy_decl_failed;
+    } = err_info in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.type_check_end count t;
     let env = { env with
       errorl = Errors.merge errorl env.errorl;
+      failed_decl = Relative_path.Set.union env.failed_decl lazy_decl_failed;
       failed_check = failed;
     } in
     env, (Hh_logger.log_duration "Type-check" t)

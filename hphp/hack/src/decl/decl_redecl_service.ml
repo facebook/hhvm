@@ -62,7 +62,7 @@ let get_decl_failures decl_errors fn =
   end ~init:Relative_path.Set.empty
 
 let on_the_fly_decl_file tcopt (errors, failed) fn =
-  let decl_errors, () = Errors.do_ begin fun () ->
+  let decl_errors, (), _ = Errors.do_ begin fun () ->
     Decl.make_env tcopt fn
   end in
   let failed' = get_decl_failures (Errors.get_error_list decl_errors) fn in

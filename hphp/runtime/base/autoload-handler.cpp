@@ -495,7 +495,7 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         typeRes = loadFromMapPartial(className, s_type, true, cte, typeErr);
         if (typeRes == Success) return true;
       }
-      const Variant& func = m_map.get()->get(s_failure);
+      const Variant func = m_map.get()->get(s_failure);
       // If we reach this point, then for each map either nothing was found
       // or the file we included didn't define a class or type alias with the
       // specified name, and the failure callback (if one exists) did not throw

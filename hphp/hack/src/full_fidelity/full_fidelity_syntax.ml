@@ -475,6 +475,11 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_members: t;
       array_intrinsic_right_paren: t;
     }
+    and element_initializer = {
+      element_key : t;
+      element_arrow : t;
+      element_value : t
+    }
     and subscript_expression = {
       subscript_receiver : t;
       subscript_left : t;
@@ -665,6 +670,7 @@ module WithToken(Token: TokenType) = struct
     | FieldInitializer of field_initializer
     | ArrayCreationExpression of array_creation_expression
     | ArrayIntrinsicExpression of array_intrinsic_expression
+    | ElementInitializer of element_initializer
     | SubscriptExpression of subscript_expression
     | EchoIntrinsicExpression of echo_intrinsic_expression
     | XHPExpression of xhp_expression
@@ -775,6 +781,7 @@ module WithToken(Token: TokenType) = struct
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
       | ArrayCreationExpression _ -> SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression _ -> SyntaxKind.ArrayIntrinsicExpression
+      | ElementInitializer _ -> SyntaxKind.ElementInitializer
       | SubscriptExpression _ -> SyntaxKind.SubscriptExpression
       | EchoIntrinsicExpression _ -> SyntaxKind.EchoIntrinsicExpression
       | XHPExpression _ -> SyntaxKind.XHPExpression
@@ -882,6 +889,7 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression node =
       kind node = SyntaxKind.ArrayIntrinsicExpression
+    let is_element_initializer node = kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
     let is_echo_intrinsic_expression node =
@@ -1230,6 +1238,9 @@ module WithToken(Token: TokenType) = struct
          array_intrinsic_members; array_intrinsic_right_paren } ->
        [ array_intrinsic_keyword; array_intrinsic_left_paren;
          array_intrinsic_members; array_intrinsic_right_paren ]
+      | ElementInitializer
+        { element_key; element_arrow; element_value } ->
+        [ element_key; element_arrow; element_value ]
       | SubscriptExpression
         { subscript_receiver; subscript_left;
           subscript_index; subscript_right } ->
@@ -1599,6 +1610,9 @@ module WithToken(Token: TokenType) = struct
          array_intrinsic_members; array_intrinsic_right_paren } ->
        [ "array_intrinsic_keyword"; "array_intrinsic_left_paren";
          "array_intrinsic_members"; "array_intrinsic_right_paren" ]
+     | ElementInitializer
+       { element_key; element_arrow; element_value } ->
+       [ "element_key"; "element_arrow"; "element_value" ]
       | SubscriptExpression
         { subscript_receiver; subscript_left;
           subscript_index; subscript_right } ->
@@ -2233,6 +2247,10 @@ module WithToken(Token: TokenType) = struct
         array_creation_members; array_creation_right_bracket ] ->
         ArrayCreationExpression { array_creation_left_bracket;
           array_creation_members; array_creation_right_bracket }
+      | (SyntaxKind.ElementInitializer,
+        [ element_key; element_arrow; element_value ]) ->
+        ElementInitializer
+        { element_key; element_arrow; element_value }
       | SyntaxKind.ArrayIntrinsicExpression, [ array_intrinsic_keyword;
         array_intrinsic_left_paren; array_intrinsic_members;
         array_intrinsic_right_paren ] ->
@@ -2436,6 +2454,9 @@ module WithToken(Token: TokenType) = struct
       let make_shape_expression shape lparen fields rparen =
         from_children SyntaxKind.ShapeExpression
           [ shape; lparen; fields; rparen ]
+
+      let make_element_initializer key arrow value =
+        from_children SyntaxKind.ElementInitializer [ key; arrow; value ]
 
       let make_array_creation_expression
         array_creation_left_bracket array_creation_members

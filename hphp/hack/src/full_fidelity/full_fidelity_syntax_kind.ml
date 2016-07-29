@@ -90,6 +90,7 @@ type t =
 | FieldInitializer
 | ArrayCreationExpression
 | ArrayIntrinsicExpression
+| ElementInitializer
 | SubscriptExpression
 | EchoIntrinsicExpression
 | XHPExpression
@@ -184,6 +185,7 @@ let to_string kind =
   | FieldInitializer -> "field_initializer"
   | ArrayCreationExpression -> "array_creation_expression"
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
+  | ElementInitializer -> "element_initializer"
   | SubscriptExpression -> "subscript_expression"
   | EchoIntrinsicExpression -> "echo_intrinsic_expression"
   | TypeConstant -> "type_constant"

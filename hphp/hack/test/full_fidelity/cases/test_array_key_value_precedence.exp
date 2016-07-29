@@ -14,8 +14,8 @@ prefix_unary_operator((whitespace)
 (array_intrinsic_expression(
 (array)(whitespace))
 ((lparen))
-(list_item(
-list(variable((variable)(whitespace)))
+(list_item
+(element_initializer(variable((variable)(whitespace)))
 ((=>)(whitespace))
 (binary_operator(
 qualified_name((name)(whitespace)))

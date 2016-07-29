@@ -682,6 +682,11 @@ let rec get_doc node =
     let members = get_doc (array_intrinsic_members x) in
     let left_part = group_doc (keyword ^^| left) in
     indent_block_no_space left_part members right indt
+  | ElementInitializer x ->
+    let k = get_doc x.element_key in
+    let a = get_doc x.element_arrow in
+    let v = get_doc x.element_value in
+    k ^| a ^| v
   | SubscriptExpression x ->
     let receiver = get_doc x.subscript_receiver in
     let left = get_doc x.subscript_left in

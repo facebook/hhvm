@@ -671,18 +671,16 @@ module WithStatementAndDeclParser
    * expression
    * expression => expression
    *)
-   (* TODO: We return either an expression or a list consisting of the
-   two expressions and the arrow. This seems a bit bogus; we might want
-   to make a syntax node for the expression arrow expression production. *)
   and parse_array_element_init parser =
     let parser, expr1 =
       with_reset_precedence parser parse_expression in
     let parser1, token = next_token parser in
     match Token.kind token with
     | EqualGreaterThan ->
-      let parser, expr2 =
-      with_reset_precedence parser1 parse_expression in
-      (parser, make_list [expr1; make_token token; expr2])
+      let parser, expr2 = with_reset_precedence parser1 parse_expression in
+      let arrow = make_token token in
+      let result = make_element_initializer expr1 arrow expr2 in
+      (parser, result)
     | _ -> (parser, expr1)
 
   and parse_field_initializer parser =

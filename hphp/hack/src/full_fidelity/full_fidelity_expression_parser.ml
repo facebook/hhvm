@@ -100,7 +100,7 @@ module WithStatementAndDeclParser
     | Name
     | QualifiedName ->
         (parser1, make_qualified_name_expression (make_token token))
-
+    | Yield -> parse_yield_expression parser
     | Exclamation
     | PlusPlus
     | MinusMinus
@@ -109,7 +109,6 @@ module WithStatementAndDeclParser
     | Plus
     | Ampersand
     | Await
-    | Yield
     | Clone
     | At ->
       parse_prefix_unary_expression parser
@@ -302,6 +301,15 @@ module WithStatementAndDeclParser
       parse_lambda_expression parser
     else
       (parser1, make_variable_expression variable)
+
+  and parse_yield_expression parser =
+    (* SPEC:
+      yield  array-element-initializer
+    *)
+    let (parser, token) = assert_token parser Yield in
+    let (parser, operand) = parse_array_element_init parser in
+    let result = make_yield_expression token operand in
+    (parser, result)
 
   and parse_cast_or_parenthesized_or_lambda_expression parser =
   (* We need to disambiguate between casts, lambdas and ordinary
@@ -627,7 +635,7 @@ module WithStatementAndDeclParser
    * array-element-initializer , array-initializer-list *)
   and parse_array_init_list parser is_intrinsic =
     let rec aux parser acc =
-      let parser, element = parse_array_element_init_opt parser in
+      let parser, element = parse_array_element_init parser in
       let parser1, token = next_token parser in
       match Token.kind token with
       | Comma ->
@@ -663,7 +671,10 @@ module WithStatementAndDeclParser
    * expression
    * expression => expression
    *)
-  and parse_array_element_init_opt parser =
+   (* TODO: We return either an expression or a list consisting of the
+   two expressions and the arrow. This seems a bit bogus; we might want
+   to make a syntax node for the expression arrow expression production. *)
+  and parse_array_element_init parser =
     let parser, expr1 =
       with_reset_precedence parser parse_expression in
     let parser1, token = next_token parser in

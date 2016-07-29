@@ -13,7 +13,6 @@ open Full_fidelity_token_kind
 type t =
 | IndexingOperator
 | FunctionCallOperator
-| YieldOperator
 | AwaitOperator
 | PipeOperator
 | ConditionalQuestionOperator
@@ -87,7 +86,6 @@ let precedence operator =
   (* TODO: variable operator $ *)
   match operator with
 
-  | YieldOperator
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
   | DivisionAssignmentOperator | ExponentiationAssignmentOperator
@@ -130,7 +128,7 @@ let associativity operator =
   | EqualOperator | StrictEqualOperator | NotEqualOperator
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
-  | YieldOperator | NewOperator | CloneOperator | AwaitOperator
+  | NewOperator | CloneOperator | AwaitOperator
     -> NotAssociative
 
   | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
@@ -164,7 +162,6 @@ let associativity operator =
 
 let prefix_unary_from_token token =
   match token with
-  | Yield -> YieldOperator
   | Await -> AwaitOperator
   | Exclamation -> LogicalNotOperator
   | Tilde -> NotOperator
@@ -346,7 +343,6 @@ let to_string kind =
   match kind with
   | IndexingOperator -> "indexing"
   | FunctionCallOperator -> "function_call"
-  | YieldOperator -> "yield"
   | AwaitOperator -> "await"
   | PipeOperator -> "pipe"
   | ConditionalQuestionOperator -> "conditional"

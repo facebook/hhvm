@@ -67,6 +67,7 @@ type t =
 | SimpleInitializer
 
 (* Expressions *)
+| YieldExpression
 | CastExpression
 | LambdaExpression
 | LambdaSignature
@@ -116,6 +117,7 @@ let to_string kind =
   match kind with
   | Missing -> "missing"
   | Token -> "token"
+  | YieldExpression -> "yield_expression"
   | CastExpression -> "cast_expression"
   | LambdaExpression -> "lambda_expression"
   | LambdaSignature -> "lambda_signature"

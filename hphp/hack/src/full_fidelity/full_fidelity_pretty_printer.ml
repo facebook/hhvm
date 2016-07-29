@@ -560,6 +560,10 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part expr right indt in
     handle_switch start_block x
     (* group_doc (start_block ^| statement) *)
+  | YieldExpression x ->
+    let y = get_doc x.yield_token in
+    let o = get_doc x.yield_operand in
+    group_doc (y ^| o)
   | CastExpression x ->
     let l = get_doc x.cast_left_paren in
     let t = get_doc x.cast_type in

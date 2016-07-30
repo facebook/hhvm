@@ -746,14 +746,14 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       TCA end = start + size;
       std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
 
-      if (!RuntimeOption::EvalJitNoGdb) {
+      if (!RuntimeOption::EvalJitNoGdb && jit::mcg) {
         jit::mcg->debugInfo()->recordStub(Debug::TCRange(start, end, false),
                                           name);
       }
       if (RuntimeOption::EvalJitUseVtuneAPI) {
         HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
       }
-      if (RuntimeOption::EvalPerfPidMap) {
+      if (RuntimeOption::EvalPerfPidMap && jit::mcg) {
         jit::mcg->debugInfo()->recordPerfMap(Debug::TCRange(start, end, false),
                                              SrcKey{},
                                              nullptr,

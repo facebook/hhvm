@@ -309,6 +309,31 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       (match class_ with
         | None -> env
         | Some class_ ->
+          let ety_env =
+            (* We handle the case where a generic A<T> is used as A *)
+            let tyl_sub =
+              if tyl_sub = [] && not (Env.is_strict env)
+              then List.map class_.tc_tparams (fun _ -> (p_sub, Tany))
+              else tyl_sub
+            in
+            if List.length class_.tc_tparams <> List.length tyl_sub
+            then
+              Errors.expected_tparam
+                (Reason.to_pos p_sub) (List.length class_.tc_tparams);
+            (* NOTE: We rely on the fact that we fold all ancestors of
+             * ty_sub in its class_type so we will never hit this case
+             * again. If this ever changes then we would need to store
+             * ty_sub as the 'this_ty' in the uenv and be careful to
+             * thread it through.
+             *
+             * This is covered by test/typecheck/this_tparam2.php
+            *)
+            {
+              type_expansions = [];
+              substs = Subst.make class_.tc_tparams tyl_sub;
+              this_ty = ExprDepTy.apply uenv_sub.TUEnv.dep_tys ty_sub;
+              from_class = None;
+            } in
           let subtype_req_ancestor =
             if class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cinterface then
               (* a trait is never the runtime type, but it can be used
@@ -319,12 +344,6 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
                   | _, Some _ -> acc
                   | env, None ->
                     Errors.try_ begin fun () ->
-                      let ety_env = {
-                        type_expansions = [];
-                        substs = SMap.empty;
-                        this_ty = ExprDepTy.apply uenv_sub.TUEnv.dep_tys ty_sub;
-                        from_class = None;
-                      } in
                       let env, req_type =
                         Phase.localize ~ety_env env req_type in
                       let _, req_ty = req_type in
@@ -339,31 +358,8 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
               let up_obj = SMap.get cid_super class_.tc_ancestors in
               match up_obj with
                 | Some up_obj ->
-                  (* We handle the case where a generic A<T> is used as A *)
-                  let tyl_sub =
-                    if tyl_sub = [] && not (Env.is_strict env)
-                    then List.map class_.tc_tparams (fun _ -> (p_sub, Tany))
-                    else tyl_sub
-                  in
-                  if List.length class_.tc_tparams <> List.length tyl_sub
-                  then
-                    Errors.expected_tparam
-                      (Reason.to_pos p_sub) (List.length class_.tc_tparams);
-                  (* NOTE: We rely on the fact that we fold all ancestors of
-                   * ty_sub in its class_type so we will never hit this case
-                   * again. If this ever changes then we would need to store
-                   * ty_sub as the 'this_ty' in the uenv and be careful to
-                   * thread it through.
-                   *
-                   * This is covered by test/typecheck/this_tparam2.php
-                   *)
-                  let ety_env = {
-                    type_expansions = [];
-                    substs = Subst.make class_.tc_tparams tyl_sub;
-                    this_ty = ExprDepTy.apply uenv_sub.TUEnv.dep_tys ty_sub;
-                    from_class = None;
-                  } in
-                  let env, up_obj = Phase.localize ~ety_env env up_obj in
+                  let env, up_obj =
+                    Phase.localize ~ety_env env up_obj in
                   sub_type env up_obj ty_super
                 | None when class_.tc_members_fully_known ->
                   TUtils.uerror p_super ty_super_ p_sub ty_sub_;

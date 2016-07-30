@@ -66,8 +66,8 @@ void StoreValue::set(APCHandle* v, int64_t ttl) {
 }
 
 bool StoreValue::expired() const {
-  // When data is right(), expire is not valid to read, instead it's a lock.
-  if (!data.left()) return false;
+  // For primed values, 'expire' is not valid to read.
+  if (c_time == 0) return false;
   return expire && time(nullptr) >= expire;
 }
 

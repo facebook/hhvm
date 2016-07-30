@@ -99,9 +99,10 @@ struct StoreValue {
 
   /*
    * Each entry in APC is either an APCHandle or a pointer to serialized prime
-   * data.  All primed keys have an expiration time of zero, but make use of a
+   * data.  All primed values have an expiration time of zero, but make use of a
    * lock during their initial file-data-to-APCHandle conversion, so these two
-   * fields are unioned.
+   * fields are unioned.  Note that 'expire' may not be safe to read even if
+   * data.left() is valid, due to non-atomicity of updates; use 'expired()'.
    *
    * Note: expiration, creation, and modification times are stored unsigned
    * in 32-bits as seconds since the Epoch to save cache-line space.
@@ -115,8 +116,8 @@ struct StoreValue {
   APCKind kind;  // Only valid if data is an APCHandle*.
   bool readOnly{false}; // Set for primed entries that will never change.
   char padding[10];  // Make APCMap nodes cache-line sized (it static_asserts).
-  uint32_t c_time{0}; // Modification time
-  uint32_t mtime{0}; // Creation time
+  uint32_t c_time{0}; // Creation time; 0 for primed values
+  uint32_t mtime{0}; // Modification time
 };
 
 //////////////////////////////////////////////////////////////////////

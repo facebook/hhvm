@@ -1,0 +1,2 @@
+<?hh
+trait pJuCHSHz { use sSDRrB ; use bYPTkUCbT < gQs > , eEvk , sO < nTZ , lMAbOfOm , arraykey > , lLznW ; use lDfZU , cGoTvKz < cGlumvEE > ; use eBeodVMoP , bUMxBz < aLbnQ , dU , nEQQ , bool , bool > ; use oQERqPbm < qEk , arraykey , array < bool > , array < ( num , array < classname < kMdn > , this :: yXicUE > , float ) , mixed > > , bZGpNi ; require extends rEeHf ; }

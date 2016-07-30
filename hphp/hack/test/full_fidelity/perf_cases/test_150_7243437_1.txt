@@ -1,0 +1,2 @@
+<?hh
+function dMHazS < + gT as shape ( 'single string' => mixed ) , fLcxADT as self :: iIIi , - jZQH , kU as int , jJVixkOQe > ( ( array < uTxEK > , array < int , ? shape ( ) > ) $hOkMChxT , << jBo ( ) >> resource $eAVO = ( int ) ( ( ( await new cMLYo ( ( new aFfvTuOW ( $bOf -= ( int ) ( string ) 42.42 ) ) ) instanceof hG ) ) ) == ( ( ( + ( bool ) ~ ( int ) ( ( $nNhO ) ? ( "heredoc" ) : ( $jMnIM ) ) ) ? ( - ( float ) ( $tYUKRKs -- ) -> ( ( new iYZazRrq ( ) ) ) ) : ( await $nXLWp = ( $tWPOnDy = @ - ( bool ) $sPRK = $rSDwN ( $tIaZmgq ) [ $gTxEUG ] ) ) ) ) ) : resource { }

@@ -1,0 +1,2 @@
+<?hh
+<< sUhzl ( ) >> trait cDn < bSc , + pUh , oDW , - tI > { use jQWzA < this , pVYgNltnP > ; protected static array < nGgpIahT :: jIBfesX , arraykey > $pGlHWxUOj , $zWSYEuF = 42.42 , $yUkd = await ( $hYiri -- ) ; }

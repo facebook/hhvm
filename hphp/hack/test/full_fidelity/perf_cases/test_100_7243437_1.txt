@@ -1,0 +1,2 @@
+<?hh
+interface hUBruqO < zTfusMV , qUdPx > extends sWCT < tS , oNeMlvyHg , resource > { << tPvFv , qEQitYpaH ( ( ( ( $xTU = ( $wUYDdPFmJ &= @ list ( $nIBoOx ) ) ) ) ? : ( ( ( $gN += ( $xPd %= clone clone $mKapATKiL ) instanceof $eKiNmZzCz ) ) ? : ( ( ( ( ( ( $vOv ) ) >> ( ( $zXyWYE ) ) instanceof $pWnIsS ) ) instanceof $sXxHkpukX ) ) ) ) ) , gVLUN ( "heredoc" , ( new $gM ( ) -> ( new static ( $pHpIu ^= array ( ) ) ) ) ) , pIK >> protected static abstract async function tLKcGhiq < + eRtBwp as num , - fYwPOEzSS , + aVAq as float , iOFSc > ( ) : num ; }

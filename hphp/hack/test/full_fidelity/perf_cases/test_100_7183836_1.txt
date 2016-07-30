@@ -1,0 +1,2 @@
+<?hh
+namespace mNGW { enum dCRoOyQYc : string as array < yJROvNt < aGifCHM , fRnWtH > > { } << jCc >> interface fBGlArCNh { } trait zJHGlFIpe < uSZ as xNiW < ( function ( ) : ( function ( ) : array < classname < xFGVN > > ) ) , fNCzpfwz > , - rVd as arraykey , + oHx as eVYVHP > implements cJKINb < this , jJEnNrX > , vMhVPDSR , zGpw , gRsSz < fUlQRHrdk , num > , xFegiIQf , uLgDgUOy < this , yIyNzSslM > , gErdlOuVx { use kXUFX ; use oEIx ; } require ( 'single string' ) ; enum lK : string { } }

@@ -1,0 +1,2 @@
+<?hh
+async function lSpcy < + eTo > ( shape ( 'single string' => float ) $sAxlDXIh = ( int ) $pCCy = ( string ) $hNC = ( $uVP -- ) [ $fFpwMT .= $yKPhodFq ] ) : mixed { foreach ( $iNKUhALc = list ( $eQCUb , $uXymZfIhk , $hQmsVw ) await as ( ( ( float ) function ( ) : bool { } ) ) != ( ( ( ( @ shape ( ) instanceof $cOZF ) ) ) !== ( ( ( + ( string ) $iEvjpJEzy ) ? : ( ( $rWy instanceof mH ) ) ) ) ) => list ( ) ) return ( ( 42.42 instanceof lJzsN ) ) ; }

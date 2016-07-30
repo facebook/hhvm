@@ -1,0 +1,2 @@
+<?hh
+require_once "double string" ;

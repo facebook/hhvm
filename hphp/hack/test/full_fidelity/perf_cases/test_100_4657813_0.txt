@@ -1,0 +1,2 @@
+<?hh
+<< jK ( ) >> trait vL { use sXUbHUFm < tKnvvlCpS > ; use tHHkR < ( function ( ) : ( function ( ) : arraykey ) ) , this , this , hVlclZN , ( bool , array < shape ( ) > , ( function ( arraykey , yQWYCfifk < this :: uYTfVZ > , array < shape ( 'single string' => classname < vYBDdvRvW > ) > , classname < aNs > ) : string ) ) , xLMZ , ( function ( oVJigBm , void ) : array < ( function ( resource , xCxhhLa < bool > ) : mixed ) , this > ) > , eUFiB ; require extends qHiQHmX ; }

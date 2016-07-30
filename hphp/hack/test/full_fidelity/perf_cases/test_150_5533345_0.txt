@@ -1,0 +1,2 @@
+<?hh
+async function pAmDAd ( << oRdgrHFa ( ) , qOc ( ) , kDda ( ) >> jU < mixed , array < resource > > $gEz = ( ( ( new oJPb ( ) -> vQ ) ? : ( ( ( $bQ -- ) ) ) <= ( ( list ( ) ) ) ) ) + ( ( ( ( int ) ( ( ( string ) ( ( ( $jJ ) ? ( "double string" ) : ( $fYThxkyU ) ) ? : ( ( "heredoc" ) ) / ( ( $rHDYstVM ) ) ) ) ) -> ( shape ( 'single string' => $sQHdVqk = ( bool ) $mGvqgkjH = ( float ) $xUsIQiyo = shape ( ) ) ) ( ) ) ? ( ( string ) $tLgTbPy |= ( $wNDyrVLkB ++ ) ) : ( ( int ) ( int ) $nRHVAuw <<= ( shape ( ) ) [ ] -> eV ) ) ) , ... ) : iNhE < lF > { ; }

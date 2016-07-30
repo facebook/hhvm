@@ -1,0 +1,2 @@
+<?hh
+trait vNbs < - sB > implements jKNF < zN , mixed > , gBU < classname < lWOPAFg > , gKl , sBeteP , ( function ( array < resource > ) : classname < rLLTUQIfw > ) > , kGtngOHoY { use bPfyvhr ; use uFCL , wWlG < ? this > , fEbnITZDp , fD < tLZscVcOa , bErW , arraykey > ; require implements aCyaRv ; }

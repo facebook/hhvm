@@ -1,0 +1,2 @@
+<?hh
+namespace { enum uYeX : int as resource { } << rCvHVxmWC , nJcm ( shape ( 'single string' => array ( clone ( [ ( ( ( ( $rKjEIm ) ) >> ( ( $eJaQEp ) ) ? ( $bVlx %= "heredoc" ) : ( await $aYmTJG /= $jTWpGVe ) ) ) => ( @ 42.42 ) ] ) -> ( shape ( 'single string' => $gCHdD -= ( string ) function ( ) : dOhcR { } , 'single string' => ~ ( float ) await ( ( bool ) $gWmvID = ( $tLfdMVPgg += $lMvlXcA ) ) , 'single string' => @ $kOUwRLBcU = $vHGSIhT ) ) ) ) ) >> function gUGSAAee ( ... ) : arraykey { } }

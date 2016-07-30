@@ -1,0 +1,2 @@
+<?hh
+<< tOycF ( ) >> trait iItG < nQirOA , + hQEJ , zXpDHIfQ , jWoBiBaha as ( function ( gUYKmFq < iTmMfZl , ( function ( classname < rFYDNh > ) : cBRppCVEM < eINBNvb , fDROjAY , bXVnjZHfy > ) > ) : mIXn ) > implements dUkd < aCyXbT > { }

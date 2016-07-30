@@ -1,0 +1,2 @@
+<?hh
+async function qZhaVyhC ( this $gDzl , << kQYGJU >> shape ( ) $gLM ) : shape ( 'single string' => int ) { ( ( bool ) $aByzk ) ; continue ; }

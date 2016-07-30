@@ -1,0 +1,2 @@
+<?hh
+<< yRZWhbmS ( ( bool ) ( ( int ) ( ( $wHoSOkTm ++ ) ) ) ) , eN ( ) >> trait eEs < + sQZ , - qMSPbd > { use yYhFPtzy < this :: rK , this , cAiFLPweI > ; require extends aJIfR ; }

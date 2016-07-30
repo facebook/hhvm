@@ -1,0 +1,2 @@
+<?hh
+<< oIoJh ( ) , kGod >> trait sRSRe < eLECSSg as ( mixed , arraykey , float , array < array < mixed , float > , bool > ) > implements xFoeQF < mixed , shape ( ) , classname < tOE > > , iDgDZ { use fL ; use nWEvPczjt < hCeHZe , void , num > , aJewH , fDNAfEo < nJRWaHTrY , sOy , ( function ( int ) : shape ( 'single string' => tTnIHwB :: eQiRUb ) ) > , tDRiZH , mFJff , rLGip , cQ < qLUBDcr , gJvliK > ; << vFyWJh ( ) , yJVWvtgUl >> public function __destruct ( ) { { } } }

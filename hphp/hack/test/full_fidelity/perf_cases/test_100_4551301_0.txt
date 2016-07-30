@@ -1,0 +1,2 @@
+<?hh
+interface hUd < - mYvEF , vTQmQ as resource > extends cFOc < eFZVLve > { const type wRWnnWT as classname < gPWQTe > = ( array < array < string , ( function ( shape ( 'single string' => int ) , string , string ) : wNTRLhmnr ) > > , ( function ( ) : shape ( 'single string' => qII , 'single string' => ( function ( ) : ( function ( resource , string , void , shape ( 'single string' => array < cGl :: oJ > ) ) : ( bool , this ) ) ) ) ) , shape ( ) , float ) ; }

@@ -1,0 +1,2 @@
+<?hh
+namespace { newtype sYA = pOizLm ; namespace { interface hPktCL < - sSjfPOgo as shape ( ) , + iReDSz > { } require_once ( 'single string' ) ; require_once "heredoc" ; } require 'single string' ; enum hHuL : int as ( ? array < arraykey , arraykey > , arraykey ) { lB = oNgLw ; tBAia = uHM ; } enum nPjLyeGL : string as ( function ( tUwtEpDks , fMPJ ) : this ) { qHhMlyhn = 42.42 ; oVWEnvkii = shape ( ) ; } interface jWkij { } }

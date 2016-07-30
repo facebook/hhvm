@@ -1,0 +1,2 @@
+<?hh
+namespace gMeNHi { require_once ( "heredoc" ) ; << yQjSx ( $bAYBkK += ( $aZtnWwW = ( $gUrtOSKw = ( $bMnZs %= new static ( ) -> ( array ( "heredoc" => $tLSNd , 42.42 => $cTAmFv ) ) ) ) ) , await clone $yHRA %= $tCMZ ) , aUEBFG >> class tXVcGW { use vM , lMeYoblVK ; } << wEFhfQMVj , eZchkaOo >> trait oMqC { use yKA < qPColXOMW , iXCq , shape ( ) , iLKUTGBW > ; } << fMzVerBl ( ) >> abstract final class qBqisu < gZ > { use tGzATDaK ; use iMaFGDq < xSEQ > , qAytM ; } }

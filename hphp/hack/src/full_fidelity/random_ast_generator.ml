@@ -13,6 +13,7 @@ module type AstGenerator = sig
   type t
   (* generate a program from the root non-terminal with given number of tokens*)
   val generate : int -> Config.t -> string
+  val generate_with_exact_count : int -> Config.t -> string * int
 end
 
 module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator = struct
@@ -223,9 +224,10 @@ module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator = struct
         if count <= 0 then
           let rec try_fun mem x len =
             let str = get_string mem x len in
-            if str = "" then try_fun mem x (len + 1) else str
+            if str = "" then try_fun mem x (len + 1) else (str, len)
           in
-          (mem, try_fun mem x short_len, short_len)
+          let (str, len) = try_fun mem x short_len in
+          (mem, str, len)
         else
           let rules = G.grammar x in
           let num_rules = List.length rules in
@@ -246,10 +248,15 @@ module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator = struct
             List.fold_left fold_fun (mem, [], 0) rule in
           mem, String.concat " " (List.rev strings), generated
 
-  let generate count config =
+  let generate_all count config =
     let memory = {count_mem = CountMem.empty; post_mem = PostfixMem.empty} in
-    (* let program = get_string memory G.start count in *)
-    let (_, program, _) =
-      get_string_simple memory (G.NonTerm G.start) count config in
+    get_string_simple memory (G.NonTerm G.start) count config
+
+  let generate count config =
+    let (_, program, _) = generate_all count config in
     Printf.sprintf "<?hh\n%s" program
+
+  let generate_with_exact_count count config =
+    let (_, program, real_count) = generate_all count config in
+    Printf.sprintf "<?hh\n%s" program, real_count
 end

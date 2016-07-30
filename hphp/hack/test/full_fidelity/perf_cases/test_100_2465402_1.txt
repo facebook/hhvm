@@ -1,0 +1,2 @@
+<?hh
+trait yCZI < - fMptQQg , - oJPur as shape ( ) , bPOA as mixed > implements rCzkhy < gGddklj > , xUksKS , gFsCNg , xOreFZ { use cBVXzkFYe < aRRYS > ; use yCnhLBR , iOQT < this :: kKjbuT > , hLNqd < ( ( function ( void ) : ( this :: kPP , aGtmZTrJY , shape ( 'single string' => iBQuWvp < gE , string > ) ) ) , array < uR < dGhnZbcq > > , ( function ( ) : array < classname < oUkPhBugp > > ) ) , cK > , nOWIGLe < hD , pXOa , rMfcGIg , mixed > ; use pLhq , wHGWS < vYktftzz > ; require extends fNnimkVy ; }

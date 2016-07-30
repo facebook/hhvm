@@ -1,0 +1,2 @@
+<?hh
+<< bWFWq >> abstract class cJ < - oVxTDruy > extends jFM < cIndpiT < eU , classname < rMDVK > , bQ > , yLo , zNVU > implements jUZQ { use jUF < ? ( function ( ( ( function ( ) : void ) , array < resource , lD > ) ) : this :: fRaMSNz ) > , kJQYvqvgp ; const type uOi = string ; }

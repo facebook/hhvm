@@ -1,0 +1,2 @@
+<?hh
+<< bHU ( ) , tJaomlHH ( $iEXFaRtS >>= ( $kQQ = ( $hViV /= ( string ) ( ( 12 instanceof nPouPI ) ) ) ) , ( $oFvjGZ *= ( $xCNMfdR *= function ( $vXDsjijsg = 42.42 , << vEAyzlG >> $tYDmCphu , << kKzuDBUEB ( ) >> $zNjFTtQ = array ( ) ) : void { } ) ) ) >> abstract final class tUKI < + aWsyTmnd > { }

@@ -1,0 +1,2 @@
+<?hh
+<< fPJOAWO , gPrVga , vTct , vV ( ) , nR ( ) , eXE ( await $oXyuA , function ( $jVBkf , $zVB ) : void { } , $dNpIQ -= ( $kQpCXQnFg *= ( $eDfB = ( string ) $gCjzZHo = @ 42.42 ) ) , ( ( [ ] instanceof $iYKtNh ) ) , $vSEJFOWKG <<= 0b101010 ) >> interface oOwTZHm < + oEs as arraykey > extends bW < eQ > , oN < qL > , wZVg < ( function ( shape ( ) ) : bool ) > , iCqDyKJlW < fFIx > , cUZojG < array < int > > { }

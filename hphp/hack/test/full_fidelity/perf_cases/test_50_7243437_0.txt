@@ -1,0 +1,2 @@
+<?hh
+<< jIsHrZJ ( ) >> trait bMSDwi < nYcBGH , - xJDP > { use jIAUQT < uDjDCEwM > , pLAfgZ ; protected function __destruct ( ) { while ( ( ( $wORRgMt [ $aKRCx ] -> bLBxz -> ( 0x16 ) ) ? ( ( $jPpRQ -= $vSQTl ) -> mZSzlojAx [ 42.42 ] ) : ( ( await $bKlkXti = ~ ( float ) $lTwAyaw ) ) < ( ( ( $yBLQx ) ? : ( 42.42 ) ) ) ) ) return ; } }

@@ -1,0 +1,2 @@
+<?hh
+interface aBRySV < + wO as qLOAwpgox , + dJogQ > extends yE < shape ( 'single string' => int ) > , uH < bCjs , string , classname < bTHznDB > , pGzjvTems > , qFwOqEpk < string , iGffGsQW < aBNTNIn > , hC > { public static function pIKXNd ( ( function ( ) : ( arraykey , ? sFVLgja ) ) $mQgrDmWaA = ( ( int ) ( ( string ) ( bool ) ( $gA ++ ) [ ] ) ) , sUObv $qXPlF , ... ) : arraykey ; }

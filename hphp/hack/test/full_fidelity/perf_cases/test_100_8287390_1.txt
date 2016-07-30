@@ -1,0 +1,2 @@
+<?hh
+<< fNKFH >> class hPOBIB < - oLgt > extends qLQu implements vW { use yCAK < mFLg > ; protected static ( function ( ? array < this , ( function ( ) : float ) > , ( string , ( function ( ) : ( function ( ) : array < num , bool > ) ) , vRWcbIPAt < iYeSSlZZ , arraykey > , this :: zRfS :: pCyzufB ) , array < arraykey , float > , string ) : rCjowTfX ) $jAaXp = ( ( 'single string' ) ? : ( ( $vVz >>= clone shape ( ) instanceof $yYUcViut ) ) ) ; }

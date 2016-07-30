@@ -413,7 +413,7 @@ Variant ArrayIter::second() {
   return obj->o_invoke_few_args(s_current, 0);
 }
 
-const Variant& ArrayIter::secondRef() {
+const Variant& ArrayIter::secondRef() const {
   if (!hasArrayData()) {
     raise_fatal_error("taking reference on iterator objects");
   }

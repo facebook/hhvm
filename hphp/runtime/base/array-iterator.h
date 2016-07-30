@@ -182,7 +182,7 @@ struct ArrayIter {
    * you need support for these cases.  And note that unlike second(),
    * secondRefPlus() will throw for non-collection types.
    */
-  const Variant& secondRef();
+  const Variant& secondRef() const;
   const Variant& secondRefPlus();
 
   // Inline version of secondRef.  Only for use in iterator helpers.

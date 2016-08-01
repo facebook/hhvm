@@ -124,8 +124,8 @@ String StringUtil::Implode(const Variant& items, const String& delim,
 
   req::vector<String> sitems;
   sitems.reserve(size);
-  int len = 0;
-  int lenDelim = delim.size();
+  size_t len = 0;
+  size_t lenDelim = delim.size();
   for (ArrayIter iter(items); iter; ++iter) {
     sitems.emplace_back(iter.second().toString());
     len += sitems.back().size() + lenDelim;

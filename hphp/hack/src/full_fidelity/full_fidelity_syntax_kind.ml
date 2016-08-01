@@ -85,6 +85,7 @@ type t =
 | ParenthesizedExpression
 | BracedExpression
 | ListExpression
+| CollectionLiteralExpression
 | ObjectCreationExpression
 | ShapeExpression
 | FieldInitializer
@@ -180,6 +181,7 @@ let to_string kind =
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"
   | ListExpression -> "list_expression"
+  | CollectionLiteralExpression -> "collection_literal_expression"
   | ObjectCreationExpression -> "object_creation_expression"
   | ShapeExpression -> "shape_expression"
   | FieldInitializer -> "field_initializer"

@@ -457,6 +457,12 @@ module WithToken(Token: TokenType) = struct
       listlike_members: t;
       listlike_right_paren: t;
     }
+    and collection_literal_expression = {
+      collection_literal_name : t;
+      collection_literal_left_brace : t;
+      collection_literal_initialization_list : t;
+      collection_literal_right_brace : t;
+    }
     and object_creation_expression = {
       object_creation_new : t;
       object_creation_class : t;
@@ -665,6 +671,7 @@ module WithToken(Token: TokenType) = struct
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
     | ListExpression of listlike_expression
+    | CollectionLiteralExpression of collection_literal_expression
     | ObjectCreationExpression of object_creation_expression
     | ShapeExpression of shape
     | FieldInitializer of field_initializer
@@ -776,6 +783,7 @@ module WithToken(Token: TokenType) = struct
       | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
       | BracedExpression _ -> SyntaxKind.BracedExpression
       | ListExpression _ -> SyntaxKind.ListExpression
+      | CollectionLiteralExpression _ -> SyntaxKind.CollectionLiteralExpression
       | ObjectCreationExpression _ -> SyntaxKind.ObjectCreationExpression
       | ShapeExpression _ -> SyntaxKind.ShapeExpression
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
@@ -881,6 +889,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ParenthesizedExpression
     let is_braced_expression node = kind node = SyntaxKind.BracedExpression
     let is_listlike_expression node = kind node = SyntaxKind.ListExpression
+    let is_collection_literal_expression node =
+      kind node = SyntaxKind.CollectionLiteralExpression
     let is_object_creation_expression node =
       kind node = SyntaxKind.ObjectCreationExpression
     let is_shape_expression node = kind node = SyntaxKind.ShapeExpression
@@ -1217,6 +1227,13 @@ module WithToken(Token: TokenType) = struct
           listlike_right_paren } ->
         [ listlike_keyword; listlike_left_paren; listlike_members;
           listlike_right_paren ]
+      | CollectionLiteralExpression
+        { collection_literal_name; collection_literal_left_brace;
+          collection_literal_initialization_list;
+          collection_literal_right_brace; } ->
+        [ collection_literal_name; collection_literal_left_brace;
+          collection_literal_initialization_list;
+          collection_literal_right_brace; ]
       | ObjectCreationExpression
         { object_creation_new; object_creation_class; object_creation_lparen;
           object_creation_arguments; object_creation_rparen } ->
@@ -1586,6 +1603,13 @@ module WithToken(Token: TokenType) = struct
           listlike_right_paren } ->
         [ "listlike_keyword"; "listlike_left_paren"; "listlike_members";
           "listlike_right_paren" ]
+      | CollectionLiteralExpression
+        { collection_literal_name; collection_literal_left_brace;
+          collection_literal_initialization_list;
+          collection_literal_right_brace; } ->
+        [ "collection_literal_name"; "collection_literal_left_brace";
+          "collection_literal_initialization_list";
+          "collection_literal_right_brace"; ]
       | ObjectCreationExpression
         { object_creation_new; object_creation_class;
           object_creation_lparen; object_creation_arguments;
@@ -1864,6 +1888,11 @@ module WithToken(Token: TokenType) = struct
     let listlike_left_paren x = x.listlike_left_paren
     let listlike_members x = x.listlike_members
     let listlike_right_paren x = x.listlike_right_paren
+    let collection_literal_name x = x.collection_literal_name
+    let collection_literal_left_brace x = x.collection_literal_left_brace
+    let collection_literal_initialization_list x =
+      x.collection_literal_initialization_list
+    let collection_literal_right_brace x = x.collection_literal_right_brace
     let array_creation_left_bracket x = x.array_creation_left_bracket
     let array_creation_members x = x.array_creation_members
     let array_creation_right_bracket x = x.array_creation_right_bracket
@@ -2229,6 +2258,14 @@ module WithToken(Token: TokenType) = struct
         listlike_members; listlike_right_paren ]) ->
         ListExpression { listlike_keyword; listlike_left_paren;
           listlike_members; listlike_right_paren }
+      | (SyntaxKind.CollectionLiteralExpression,
+        [ collection_literal_name; collection_literal_left_brace;
+          collection_literal_initialization_list;
+          collection_literal_right_brace; ]) ->
+        CollectionLiteralExpression
+        { collection_literal_name; collection_literal_left_brace;
+          collection_literal_initialization_list;
+          collection_literal_right_brace; }
       | (SyntaxKind.ObjectCreationExpression,
         [ object_creation_new; object_creation_class; object_creation_lparen;
           object_creation_arguments; object_creation_rparen ]) ->
@@ -2440,6 +2477,14 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.ListExpression
           [ listlike_keyword; listlike_left_paren; listlike_members;
           listlike_right_paren ]
+
+      let make_collection_literal_expression
+        collection_literal_name collection_literal_left_brace
+        collection_literal_initialization_list collection_literal_right_brace =
+        from_children SyntaxKind.CollectionLiteralExpression
+          [ collection_literal_name; collection_literal_left_brace;
+          collection_literal_initialization_list;
+          collection_literal_right_brace; ]
 
       let make_object_creation_expression
         object_creation_new object_creation_class object_creation_lparen

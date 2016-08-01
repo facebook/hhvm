@@ -652,6 +652,12 @@ let rec get_doc node =
     let members = get_doc (listlike_members x) in
     let left = group_doc (keyword ^| left_paren) in
     indent_block_no_space left members right_paren indt
+  | CollectionLiteralExpression x ->
+    let token = get_doc (collection_literal_name x) in
+    let left_brace = get_doc (collection_literal_left_brace x) in
+    let expression_list = get_doc (collection_literal_initialization_list x) in
+    let right_brace = get_doc (collection_literal_right_brace x) in
+    token ^| left_brace ^| expression_list ^| right_brace
   | ObjectCreationExpression x ->
     let n = get_doc x.object_creation_new in
     let c = get_doc x.object_creation_class in

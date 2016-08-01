@@ -59,6 +59,9 @@ module WithStatementAndDeclParser
     let (parser, term) = parse_term parser in
     parse_remaining_expression parser term
 
+  and parse_expression_with_reset_precedence parser =
+    with_reset_precedence parser parse_expression
+
   (* try to parse an expression. If parser cannot make progress, return None *)
   and parse_expression_optional parser ~reset_prec =
     let module Lexer = PrecedenceParser.Lexer in
@@ -99,7 +102,7 @@ module WithStatementAndDeclParser
 
     | Name
     | QualifiedName ->
-        (parser1, make_qualified_name_expression (make_token token))
+        parse_name_or_collection_literal_expression parser1 token
     | Yield -> parse_yield_expression parser
     | Exclamation
     | PlusPlus
@@ -136,7 +139,6 @@ module WithStatementAndDeclParser
 
     | Dollar (* TODO: ? *)
 
-    (* TODO: Collections *)
     (* TODO: List *)
     (* TODO: imports *)
     (* TODO: non-lowercased true false null array *)
@@ -550,6 +552,45 @@ module WithStatementAndDeclParser
     let result = make_conditional_expression
       test question consequence colon alternative in
     (parser, result)
+
+  and parse_name_or_collection_literal_expression parser token =
+    let name = make_token token in
+    match peek_token_kind parser with
+    | LeftBrace ->
+      parse_collection_literal_expression parser name
+    | _ ->
+      (parser, make_qualified_name_expression name)
+
+  and parse_collection_literal_expression parser name =
+    let parser, left_brace = assert_token parser LeftBrace in
+    let parser, initialization_list = parse_optional_initialization parser in
+    let parser, right_brace = expect_right_brace parser in
+    (* Validating the name is a collection type happens in a later phase *)
+    let syntax = make_collection_literal_expression
+      name left_brace initialization_list right_brace
+    in
+    (parser, syntax)
+
+  and parse_optional_initialization parser =
+    if peek_token_kind parser = RightBrace then
+      parser, make_missing ()
+    else
+    let parser1, expr = parse_expression parser in
+    match peek_token_kind parser1 with
+    | EqualGreaterThan ->
+      parse_comma_list_allow_trailing
+        parser RightBrace SyntaxError.error1015 parse_keyed_element_initializer
+    | _ ->
+      parse_comma_list_allow_trailing
+        parser RightBrace SyntaxError.error1015
+        parse_expression_with_reset_precedence
+
+  and parse_keyed_element_initializer parser =
+    let parser, expr1 = parse_expression_with_reset_precedence parser in
+    let parser, arrow = expect_arrow parser in
+    let parser, expr2 = parse_expression_with_reset_precedence parser in
+    let syntax = make_element_initializer expr1 arrow expr2 in
+    (parser, syntax)
 
   and parse_list_expression parser =
     let parser, keyword_token = next_token parser in

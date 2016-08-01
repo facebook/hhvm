@@ -30,12 +30,16 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/jit/relocation.h"
+
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/boot_timer.h"
+#include "hphp/util/struct-log.h"
 
 namespace HPHP {
 
@@ -56,12 +60,31 @@ void profileInit() {
  */
 
 RequestKind __thread requestKind = RequestKind::Warmup;
-static bool warmingUp;
-static std::atomic<int64_t> numRequests;
 bool __thread standardRequest = true;
-static std::atomic<bool> singleJitLock;
-static std::atomic<int> singleJitRequests;
-static std::atomic<int> relocateRequests;
+
+namespace {
+
+bool warmingUp;
+std::atomic<int64_t> numRequests;
+std::atomic<bool> singleJitLock;
+std::atomic<int> singleJitRequests;
+std::atomic<int> relocateRequests;
+
+/*
+ * RFH, or "requests served in first hour" is used as a performance metric that
+ * is affected by warmup speed as well as steady-state performance. For every
+ * element n in this list, we log a point along the RFH curve, which is the
+ * total number of requests served when server uptime hits n seconds.
+ */
+const std::vector<int64_t> rfhBuckets = {
+  30, 60, 90, 120, 150, 180, 210, 240, 270, 300,      // every 30s up to 5m
+  360, 420, 480, 540, 600,                            // every 1m up to 10m
+  600, 900, 1200, 1800, 2400, 2700, 3000, 3300, 3600, // every 5m up to 1h
+  4500, 5400, 6300, 7200,                             // every 15m up to 2h
+};
+std::atomic<size_t> nextRFH{0};
+
+}
 
 void setRelocateRequests(int32_t n) {
   relocateRequests.store(n);
@@ -199,9 +222,40 @@ void profileRequestStart() {
   }
 }
 
+static void checkRFH(int64_t finished) {
+  auto i = nextRFH.load(std::memory_order_relaxed);
+  if (i == rfhBuckets.size() || !StructuredLog::enabled()) {
+    return;
+  }
+
+  auto const uptime = f_server_uptime();
+  if (uptime == -1) return;
+  assertx(uptime >= 0);
+
+  while (i < rfhBuckets.size() && uptime >= rfhBuckets[i]) {
+    if (!nextRFH.compare_exchange_strong(i, i + 1, std::memory_order_relaxed)) {
+      // Someone else reported the sample at i. Try again with the current
+      // value of nextRFH.
+      continue;
+    }
+
+    // "bucket" and "uptime" will always be the same as long as the server
+    // retires at least one request in each second of wall time.
+    StructuredLogEntry cols;
+    cols.setInt("requests", finished);
+    cols.setInt("bucket", rfhBuckets[i]);
+    cols.setInt("uptime", uptime);
+    StructuredLog::log("hhvm_rfh", cols);
+
+    ++i;
+  }
+}
+
 void profileRequestEnd() {
   if (warmingUp) return;
-  numRequests.fetch_add(1, std::memory_order_relaxed);
+  auto const finished = numRequests.fetch_add(1, std::memory_order_relaxed) + 1;
+  checkRFH(finished);
+
   if (standardRequest &&
       singleJitRequests < RuntimeOption::EvalNumSingleJitRequests &&
       jit::Lease::mayLock(true)) {

@@ -1006,7 +1006,8 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
 
       if (subpats) {
         // Try to get the list of substrings and display a warning if failed.
-        if (pcre_get_substring_list(subject.data(), offsets, count,
+        if (offsets[1] < offsets[0] ||
+            pcre_get_substring_list(subject.data(), offsets, count,
                                     &stringlist) < 0) {
           raise_warning("Get subpatterns list failed");
           return false;
@@ -1289,7 +1290,8 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
       }
 
       const char* piece = subject.data() + start_offset;
-      if (count > 0 && (limit == -1 || limit > 0)) {
+      if (count > 0 && offsets[1] >= offsets[0] &&
+          (limit == -1 || limit > 0)) {
         if (replace_count) {
           ++*replace_count;
         }
@@ -1682,7 +1684,7 @@ Variant preg_split(const String& pattern, const String& subject,
     }
 
     /* If something matched */
-    if (count > 0) {
+    if (count > 0 && offsets[1] >= offsets[0]) {
       if (!no_empty || subject.data() + offsets[0] != last_match) {
         if (offset_capture) {
           /* Add (match, offset) pair to the return value */

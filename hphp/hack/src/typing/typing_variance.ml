@@ -367,7 +367,7 @@ and class_member tcopt root _member_name member env =
   match member.ce_visibility with
   | Vprivate _ -> env
   | _ ->
-      let reason, _ as ty = member.ce_type in
+      let lazy (reason, _ as ty) = member.ce_type in
       let pos = Reason.to_pos reason in
       let variance = make_variance Rmember pos Ast.Invariant in
       type_ tcopt root variance env ty
@@ -377,7 +377,7 @@ and class_method tcopt root _method_name method_ env =
   | Vprivate _ -> env
   | _ ->
       match method_.ce_type with
-      | _, Tfun { ft_tparams; ft_params; ft_ret; _ } ->
+      | lazy (_, Tfun { ft_tparams; ft_params; ft_ret; _ }) ->
           let env = List.fold_left ft_tparams
             ~f:begin fun env (_, (_, tparam_name), _) ->
               SMap.remove tparam_name env

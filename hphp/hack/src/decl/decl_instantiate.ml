@@ -96,8 +96,7 @@ and instantiate_ subst x =
       Tshape (fields_known, fdm)
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =
-  let x = instantiate subst x in
-  { ce with ce_type = x }
+  { ce with ce_type = lazy (instantiate subst (Lazy.force x)) }
 
 let instantiate_cc subst ({ cc_type = x; _ } as cc) =
   let x = instantiate subst x in

@@ -23,7 +23,7 @@ module SN = Naming_special_names
 module Phase = Typing_phase
 
 let member_type env member_ce =
-  let default_result = member_ce.ce_type in
+  let lazy default_result = member_ce.ce_type in
   if not member_ce.ce_is_xhp_attr then default_result
   else match default_result with
     | _, Tapply (enum_id, _)->

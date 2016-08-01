@@ -55,8 +55,10 @@ let check_visibility parent_class_elt class_elt =
   | Vprotected _ , Vprotected _
   | Vprotected _ , Vpublic       -> ()
   | _ ->
-    let parent_pos = Reason.to_pos (fst parent_class_elt.ce_type) in
-    let pos = Reason.to_pos (fst class_elt.ce_type) in
+    let lazy (parent_pos, _) = parent_class_elt.ce_type in
+    let lazy (elt_pos, _) = class_elt.ce_type in
+    let parent_pos = Reason.to_pos parent_pos in
+    let pos = Reason.to_pos elt_pos in
     let parent_vis = TUtils.string_of_visibility parent_class_elt.ce_visibility in
     let vis = TUtils.string_of_visibility class_elt.ce_visibility in
     Errors.visibility_extends vis pos parent_pos parent_vis
@@ -75,7 +77,8 @@ let check_members_implemented check_private parent_reason reason parent_members 
          * trait *)
         ()
       | _ when not (SMap.mem member_name members) ->
-        let defn_reason = Reason.to_pos (fst class_elt.ce_type) in
+        let lazy (pos, _) = class_elt.ce_type in
+        let defn_reason = Reason.to_pos pos in
         Errors.member_not_implemented member_name parent_reason reason defn_reason
       | _ -> ()
   end parent_members
@@ -149,7 +152,7 @@ let check_override env ?(ignore_fun_return = false)
   if check_vis then check_visibility parent_class_elt class_elt else ();
   if check_params then
     match parent_class_elt.ce_type, class_elt.ce_type with
-    | (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
+    | lazy (r_parent, Tfun ft_parent), lazy (r_child, Tfun ft_child) ->
       let subtype_funs = SubType.subtype_method ~check_return:(
           (not ignore_fun_return) &&
           (class_known || check_partially_known_method_returns)
@@ -158,7 +161,7 @@ let check_override env ?(ignore_fun_return = false)
         ignore(subtype_funs env r2 ft2 r1 ft1) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         (Reason.to_pos r_child) class_ class_elt.ce_origin
-    | fty_parent, fty_child ->
+    | lazy fty_parent, lazy fty_child ->
       let pos = Reason.to_pos (fst fty_child) in
       ignore (unify_decl pos Typing_reason.URnone env fty_parent fty_child)
 
@@ -227,7 +230,7 @@ let default_constructor_ce class_ =
        ce_override    = false;
        ce_synthesized = true;
        ce_visibility  = Vpublic;
-       ce_type        = r, Tfun ft;
+       ce_type        = lazy (r, Tfun ft);
        ce_origin      = name;
      }
 
@@ -239,7 +242,7 @@ let check_constructors env parent_class class_ psubst subst =
     match (fst parent_class.tc_construct), (fst class_.tc_construct) with
       | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
       | Some parent_cstr, None ->
-        let pos = fst parent_cstr.ce_type in
+        let lazy (pos, _) = parent_cstr.ce_type in
         Errors.missing_constructor (Reason.to_pos pos)
       | _, Some cstr when cstr.ce_override -> (* <<__UNSAFE_Construct>> *)
         ()

@@ -62,24 +62,24 @@ let to_class_type {
   dc_enum_type;
 } =
   let map_elements find elts = SMap.mapi begin fun name elt ->
-    let ty =
-      apply_substs dc_substs elt.elt_origin @@ find (elt.elt_origin, name) in
+    let ty = lazy begin
+      apply_substs dc_substs elt.elt_origin @@ find (elt.elt_origin, name)
+    end in
     element_to_class_elt ty elt
   end elts in
 
   let ft_to_ty ft = Reason.Rwitness ft.ft_pos, Tfun ft in
   let ft_map_elements find elts =
     map_elements (fun x -> find x |> ft_to_ty) elts in
-
   let tc_construct = match dc_construct with
     | None, consistent -> None, consistent
     | Some elt, consistent ->
-      let ty =
+      let ty = lazy begin
         elt.elt_origin |>
         Decl_heap.Constructors.find_unsafe |>
         ft_to_ty |>
         apply_substs dc_substs elt.elt_origin
-      in
+      end in
       let class_elt = element_to_class_elt ty elt in
       Some class_elt, consistent
   in

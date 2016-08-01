@@ -207,7 +207,7 @@ let get_definitions tcopt = function
       | Some class_ ->
         let add_meth meths acc = match SMap.get meths method_name with
           | Some meth when meth.ce_origin = class_.tc_name ->
-            let pos = Reason.to_pos (fst meth.ce_type) in
+            let pos = Reason.to_pos (fst @@ Lazy.force meth.ce_type) in
             (method_name, pos) :: acc
           | _ -> acc
         in

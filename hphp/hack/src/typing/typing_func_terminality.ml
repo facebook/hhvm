@@ -20,7 +20,7 @@ let get_static_meth tcopt (cls_name:string) (meth_name:string) =
   | Some { Typing_defs.tc_smethods ; _ } ->
     begin match SMap.get meth_name tc_smethods with
       | None -> None
-      | Some { Typing_defs.ce_type = (_r, Typing_defs.Tfun fty) ; _} ->
+      | Some { Typing_defs.ce_type = lazy (_r, Typing_defs.Tfun fty) ; _} ->
         Some fty
       | Some _ -> None
     end

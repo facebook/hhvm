@@ -482,8 +482,8 @@ let get_static_member is_method env class_ mid =
   ce_opt
 
 let suggest_member members mid =
-  let members = SMap.fold begin fun x ce acc ->
-    let pos = Reason.to_pos (fst ce.ce_type) in
+  let members = SMap.fold begin fun x {ce_type = lazy (r, _); _} acc ->
+    let pos = Reason.to_pos r in
     SMap.add (String.lowercase x) (pos, x) acc
   end members SMap.empty
   in

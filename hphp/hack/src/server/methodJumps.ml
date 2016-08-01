@@ -39,11 +39,13 @@ let get_overridden_methods tcopt origin_class or_mthds dest_class acc =
       let or_mthd = SMap.get or_mthds m_name in
       match or_mthd with
       | Some or_mthd when or_mthd.ce_origin = origin_class ->
+        let get_pos (lazy ty) =
+          ty |> fst |> Reason.to_pos |> Pos.to_absolute in
         {
           orig_name = m_name;
-          orig_pos = Pos.to_absolute (Reason.to_pos (fst or_mthd.ce_type));
+          orig_pos = get_pos or_mthd.ce_type;
           dest_name = m_name;
-          dest_pos = Pos.to_absolute (Reason.to_pos (fst de_mthd.ce_type));
+          dest_pos = get_pos de_mthd.ce_type;
           orig_p_name = origin_class;
           dest_p_name = dest_class.tc_name;
         } :: acc

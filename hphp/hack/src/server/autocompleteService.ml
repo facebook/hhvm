@@ -138,7 +138,7 @@ let get_class_elt_types env class_ cid elts =
   let elts = SMap.filter elts begin fun _ x ->
     Typing_visibility.is_visible env x.ce_visibility cid class_
   end in
-  SMap.map elts (fun class_elt -> class_elt.ce_type)
+  SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
 
 let autocomplete_method is_static class_ id env cid ~is_method:_ ~is_const:_ =
   if is_auto_complete (snd id)
@@ -215,7 +215,7 @@ let get_constructor_ty c =
   match (fst c.Typing_defs.tc_construct) with
     | Some elt ->
         begin match elt.ce_type with
-          | (_ as r, Tfun fun_) ->
+          | lazy (_ as r, Tfun fun_) ->
               (* We have a constructor defined, but the return type is void
                * make it the object *)
               let fun_ = { fun_ with Typing_defs.ft_ret = return_ty } in

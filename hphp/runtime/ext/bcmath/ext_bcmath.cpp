@@ -39,6 +39,15 @@ static IMPLEMENT_THREAD_LOCAL(bcmath_data, s_globals);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static int64_t adjust_scale(int64_t scale) {
+  if (scale < 0) {
+    scale = BCG(bc_precision);
+    if (scale < 0) scale = 0;
+  }
+  if ((uint64_t)scale > StringData::MaxSize) return StringData::MaxSize;
+  return scale;
+}
+
 static void php_str2num(bc_num *num, const char *str) {
   const char *p;
   if (!(p = strchr(str, '.'))) {
@@ -55,7 +64,7 @@ static bool HHVM_FUNCTION(bcscale, int64_t scale) {
 
 static String HHVM_FUNCTION(bcadd, const String& left, const String& right,
                             int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -75,7 +84,7 @@ static String HHVM_FUNCTION(bcadd, const String& left, const String& right,
 
 static String HHVM_FUNCTION(bcsub, const String& left, const String& right,
                             int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -95,7 +104,7 @@ static String HHVM_FUNCTION(bcsub, const String& left, const String& right,
 
 static int64_t HHVM_FUNCTION(bccomp, const String& left, const String& right,
                              int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num first, second;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -109,7 +118,7 @@ static int64_t HHVM_FUNCTION(bccomp, const String& left, const String& right,
 
 static String HHVM_FUNCTION(bcmul, const String& left, const String& right,
                             int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -129,7 +138,7 @@ static String HHVM_FUNCTION(bcmul, const String& left, const String& right,
 
 static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
                int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -171,7 +180,7 @@ static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
 
 static String HHVM_FUNCTION(bcpow, const String& left, const String& right,
                            int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num first, second, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -193,7 +202,7 @@ static String HHVM_FUNCTION(bcpow, const String& left, const String& right,
 
 static Variant HHVM_FUNCTION(bcpowmod, const String& left, const String& right,
                              const String& modulus, int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num first, second, mod, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -220,7 +229,7 @@ static Variant HHVM_FUNCTION(bcpowmod, const String& left, const String& right,
 
 static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
                              int64_t scale /* = -1 */) {
-  if (scale < 0) scale = BCG(bc_precision);
+  scale = adjust_scale(scale);
   bc_num result;
   bc_init_num(&result);
   SCOPE_EXIT {

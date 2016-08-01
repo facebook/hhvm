@@ -624,7 +624,7 @@ void throw_object(const Object& e) {
   throw req::root<Object>(e);
 }
 
-#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8) || __GNUC_PATCHLEVEL__ >= 2)
+#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8))
 void throw_object(Object&& e) {
   throw req::root<Object>(std::move(e));
 }

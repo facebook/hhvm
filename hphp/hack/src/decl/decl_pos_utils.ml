@@ -153,6 +153,9 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       dc_req_ancestors         = dc.dc_req_ancestors                  ;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends          ;
       dc_tparams               = List.map dc.dc_tparams type_param    ;
+      dc_substs                = SMap.map begin fun ({ sc_subst; _ } as sc) ->
+        {sc with sc_subst = SMap.map ty sc_subst}
+      end dc.dc_substs;
       dc_consts                = SMap.map class_const dc.dc_consts    ;
       dc_typeconsts            = SMap.map typeconst dc.dc_typeconsts  ;
       dc_props                 = SMap.map class_elt dc.dc_props       ;

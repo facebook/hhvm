@@ -16,9 +16,11 @@
  *)
 (*****************************************************************************)
 
+open Decl_defs
 open Typing_defs
 
 type inherited = {
+  ih_substs   : subst_context SMap.t;
   ih_cstr     : class_elt option * bool;
   ih_consts   : class_const SMap.t ;
   ih_typeconsts : typeconst_type SMap.t ;

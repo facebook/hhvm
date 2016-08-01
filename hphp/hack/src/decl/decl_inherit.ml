@@ -28,6 +28,7 @@ module Inst = Decl_instantiate
 (*****************************************************************************)
 
 type inherited = {
+  ih_substs   : subst_context SMap.t;
   ih_cstr     : class_elt option * bool (* consistency required *);
   ih_consts   : class_const SMap.t ;
   ih_typeconsts : typeconst_type SMap.t ;
@@ -38,6 +39,7 @@ type inherited = {
 }
 
 let empty = {
+  ih_substs   = SMap.empty;
   ih_cstr     = None, false;
   ih_consts   = SMap.empty;
   ih_typeconsts = SMap.empty;
@@ -176,6 +178,27 @@ let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
   in ce, cstr_consist || acc_consist
 
 let add_inherited inherited acc = {
+  ih_substs = SMap.merge begin fun _ sub old_sub ->
+    match sub, old_sub with
+    | None, None -> None
+    | Some s, None | None, Some s -> Some s
+    (* If the old subst_contexts came via required extends then we want to use
+     * the substitutios from the actual extends instead. I.e.
+     *
+     * class Base<+T> {}
+     *
+     * trait MyTrait { require extends Base<mixed>; }
+     *
+     * class Child extends Base<int> { use MyTrait; }
+     *
+     * Here the subst_context (MyTrait/[T -> mixed]) should be overrode by
+     * (Child/[T -> int]), because it's the actual extension of class Base.
+     *)
+    | Some s, Some old_s
+      when old_s.sc_from_req_extends && (not s.sc_from_req_extends) ->
+      Some s
+    | Some _, Some old_s -> Some old_s
+  end acc.ih_substs inherited.ih_substs;
   ih_cstr     = add_constructor inherited.ih_cstr acc.ih_cstr;
   ih_consts   = SMap.fold add_const inherited.ih_consts acc.ih_consts;
   ih_typeconsts =
@@ -200,14 +223,9 @@ let make_substitution pos class_name class_type class_parameters =
   check_arity pos class_name class_type class_parameters;
   Inst.make_subst class_type.dc_tparams class_parameters
 
-let constructor subst (cstr, consistent) = match cstr with
-  | None -> None, consistent
-  | Some ce ->
-    let ty = Inst.instantiate subst ce.ce_type in
-    Some {ce with ce_type = ty}, consistent
-
 let map_inherited f inh =
   {
+    ih_substs   = inh.ih_substs;
     ih_cstr     = (Option.map (fst inh.ih_cstr) f), (snd inh.ih_cstr);
     ih_typeconsts = inh.ih_typeconsts;
     ih_consts   = inh.ih_consts;
@@ -252,7 +270,6 @@ let chown_privates owner = apply_fn_to_class_elts (chown_private owner)
 
 let inherit_hack_class env c p class_name class_type argl =
   let subst = make_substitution p class_name class_type argl in
-  let instantiate = SMap.map (Inst.instantiate_ce subst) in
   let class_type =
     match class_type.dc_kind with
     | Ast.Ctrait ->
@@ -265,13 +282,19 @@ let inherit_hack_class env c p class_name class_type argl =
   let typeconsts = SMap.map (Inst.instantiate_typeconst subst)
     class_type.dc_typeconsts in
   let consts = SMap.map (Inst.instantiate_cc subst) class_type.dc_consts in
-  let props    = instantiate class_type.dc_props in
-  let sprops   = instantiate class_type.dc_sprops in
-  let methods  = instantiate class_type.dc_methods in
-  let smethods = instantiate class_type.dc_smethods in
+  let props    = class_type.dc_props in
+  let sprops   = class_type.dc_sprops in
+  let methods = class_type.dc_methods in
+  let smethods = class_type.dc_smethods in
   let cstr     = Decl_env.get_construct env class_type in
-  let cstr     = constructor subst cstr in
+  let subst_ctx = {
+    sc_subst = subst;
+    sc_class_context = snd c.c_name;
+    sc_from_req_extends = false;
+  } in
+  let substs = SMap.add class_name subst_ctx class_type.dc_substs in
   let result = {
+    ih_substs   = substs;
     ih_cstr     = cstr;
     ih_consts   = consts;
     ih_typeconsts = typeconsts;
@@ -366,6 +389,11 @@ let from_requirements env c acc reqs =
   let inherited = map_inherited
     (fun ce -> { ce with ce_synthesized = true })
     inherited in
+  let inherited =
+    { inherited with
+      ih_substs = SMap.map (fun sc -> { sc with sc_from_req_extends = true })
+          inherited.ih_substs;
+    } in
   add_inherited inherited acc
 
 let from_trait env c acc uses =

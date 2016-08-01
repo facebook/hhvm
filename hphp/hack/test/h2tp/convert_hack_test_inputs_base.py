@@ -391,6 +391,7 @@ OTHER_UNPARSEABLE_FILES = [
     'concat_untyped_with_string.php',
     'covariance7.php',
     'covariance8.php',
+    'delayed_subst2.php',
     # TODO: task 10395133
     'dict/dict_literal.php',
     'dict/dict_literal_empty.php',

@@ -388,6 +388,7 @@ and class_decl tcopt c =
     dc_name = snd c.c_name;
     dc_pos = fst c.c_name;
     dc_tparams = tparams;
+    dc_substs = inherited.Decl_inherit.ih_substs;
     dc_consts = consts;
     dc_typeconsts = typeconsts;
     dc_props = props;

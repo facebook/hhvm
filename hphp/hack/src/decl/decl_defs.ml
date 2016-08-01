@@ -10,13 +10,38 @@
 
 open Typing_defs
 
-(* The following classes are used to make sure we make no typing
- * mistake when interacting with the database. The database knows
- * how to associate a string to a string. We need to deserialize
- * the string and make sure the type is correct. By using these
- * modules, the places where there could be a typing mistake are
- * very well isolated.
-*)
+(* A substitution context contains all the information necessary for
+ * changing the type of an inherited class element to the class that is
+ * inheriting the class element. It's best illustrated via an example.
+ *
+ * class A<Ta1, Ta2> { public function test(Ta1 $x, Ta2 $y): void {} }
+ *
+ * class B<Tb> extends A<Tb, int> {}
+ *
+ * class C extends B<string> {}
+ *
+ * The method `A::test()` has the type (function(Ta1, Ta2): void) in the
+ * context of class A. However in the context of class B, it will have type
+ * (function(Tb, int): void).
+
+ * The substitution that leads to this change is [Ta1 -> Tb, Ta2 -> int],
+ * which will produce a new type in the context of class B. It's subst_context
+ * would then be:
+ *
+ * { sc_subst            = [Ta1 -> Tb, Ta2 -> int];
+ *   sc_class_context    = 'B';
+ *   sc_from_req_extends = false;
+ * }
+ *
+ * The `sc_from_req_extends` field is set to true if the context was inherited
+ * via a require extends type. This information is relevant when folding
+ * `dc_substs` during inheritance. See Decl_inherit module.
+ *)
+type subst_context = {
+  sc_subst            : decl ty SMap.t;
+  sc_class_context    : string;
+  sc_from_req_extends : bool;
+}
 
 type decl_class_type = {
   dc_need_init           : bool;
@@ -28,6 +53,8 @@ type decl_class_type = {
   dc_name                : string ;
   dc_pos                 : Pos.t ;
   dc_tparams             : decl tparam list ;
+  (* class name to the subst_context that must be applied to that class *)
+  dc_substs              : subst_context SMap.t;
   dc_consts              : class_const SMap.t;
   dc_typeconsts          : typeconst_type SMap.t;
   dc_props               : class_elt SMap.t;

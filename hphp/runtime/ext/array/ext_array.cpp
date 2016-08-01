@@ -378,10 +378,10 @@ static void php_array_merge(Array &arr1, const Array& arr2) {
   arr1.merge(arr2);
 }
 
-static bool couldRecur(const Variant& v, const Array& arr) {
+static bool couldRecur(const Variant& v, const ArrayData* arr) {
   return v.isReferenced() ||
-    arr.get()->kind() == ArrayData::kGlobalsKind ||
-    arr.get()->kind() == ArrayData::kProxyKind;
+    arr->kind() == ArrayData::kGlobalsKind ||
+    arr->kind() == ArrayData::kProxyKind;
 }
 
 static void php_array_merge_recursive(PointerSet &seen, bool check,
@@ -402,7 +402,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       Variant &v = arr1.lvalAt(key, AccessFlags::Key);
       auto subarr1 = v.toArray().copy();
       php_array_merge_recursive(seen,
-                                couldRecur(v, subarr1),
+                                couldRecur(v, subarr1.get()),
                                 subarr1,
                                 value.toArray());
       v.unset(); // avoid contamination of the value that was strongly bound
@@ -591,7 +591,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
       if (v.isArray()) {
         Array subarr1 = v.toArray();
         const ArrNR& arr_value = value.toArrNR();
-        php_array_replace_recursive(seen, couldRecur(v, subarr1),
+        php_array_replace_recursive(seen, couldRecur(v, subarr1.get()),
                                     subarr1, arr_value);
         v = subarr1;
       } else {
@@ -1215,11 +1215,19 @@ bool HHVM_FUNCTION(array_walk,
   return true;
 }
 
-static void compact(VarEnv* v, Array &ret, const Variant& var) {
+static void compact(PointerSet& seen,
+                    VarEnv* v, Array &ret, const Variant& var) {
   if (var.isArray()) {
-    for (ArrayIter iter(var.getArrayData()); iter; ++iter) {
-      compact(v, ret, iter.second());
+    auto adata = var.getArrayData();
+    auto check = couldRecur(var, adata);
+    if (check && !seen.insert(adata).second) {
+      raise_warning("compact(): recursion detected");
+      return;
     }
+    for (ArrayIter iter(adata); iter; ++iter) {
+      compact(seen, v, ret, iter.secondRef());
+    }
+    if (check) seen.erase(adata);
   } else {
     String varname = var.toString();
     if (!varname.empty() && v->lookup(varname.get()) != NULL) {
@@ -1235,8 +1243,9 @@ Array HHVM_FUNCTION(compact,
   Array ret = Array::attach(PackedArray::MakeReserve(args.size() + 1));
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
-    compact(v, ret, varname);
-    compact(v, ret, args);
+    PointerSet seen;
+    compact(seen, v, ret, varname);
+    if (!args.empty()) compact(seen, v, ret, args);
   }
   return ret;
 }
@@ -1248,8 +1257,9 @@ Array HHVM_FUNCTION(__SystemLib_compact_sl,
   Array ret = Array::attach(PackedArray::MakeReserve(args.size() + 1));
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
-    compact(v, ret, varname);
-    compact(v, ret, args);
+    PointerSet seen;
+    compact(seen, v, ret, varname);
+    if (!args.empty()) compact(seen, v, ret, args);
   }
   return ret;
 }

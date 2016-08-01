@@ -702,7 +702,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
+				if (offsets[1] < offsets[0] ||
+            pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
 					efree(subpat_names);
 					efree(offsets);
 					if (match_sets) efree(match_sets);
@@ -1139,7 +1140,8 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 
 		piece = subject + start_offset;
 
-		if (count > 0 && (limit == -1 || limit > 0)) {
+		if (count > 0 && offsets[1] >= offsets[0] &&
+        (limit == -1 || limit > 0)) {
 			if (replace_count) {
 				++*replace_count;
 			}
@@ -1588,7 +1590,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 				
 		/* If something matched */
-		if (count > 0) {
+		if (count > 0 && offsets[1] >= offsets[0]) {
 			if (!no_empty || &subject[offsets[0]] != last_match) {
 
 				if (offset_capture) {

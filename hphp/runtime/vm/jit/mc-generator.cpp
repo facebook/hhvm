@@ -52,7 +52,6 @@
 #include "hphp/util/eh-frame.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
-#include "hphp/util/meta.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/build-info.h"

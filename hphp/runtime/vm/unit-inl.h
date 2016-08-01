@@ -97,22 +97,22 @@ inline Func** Unit::MergeInfo::funcHoistableBegin() const {
 
 inline
 Unit::MergeInfo::FuncRange Unit::MergeInfo::funcs() const {
-  return FuncRange(funcBegin(), funcEnd());
+  return { funcBegin(), funcEnd() };
 }
 
 inline
 Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::mutableFuncs() const {
-  return MutableFuncRange(funcBegin(), funcEnd());
+  return { funcBegin(), funcEnd() };
 }
 
 inline
 Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::nonMainFuncs() const {
-  return MutableFuncRange(funcBegin() + 1, funcEnd());
+  return { funcBegin() + 1, funcEnd() };
 }
 
 inline
 Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::hoistableFuncs() const {
-  return MutableFuncRange(funcHoistableBegin(), funcEnd());
+  return { funcHoistableBegin(), funcEnd() };
 }
 
 inline void*& Unit::MergeInfo::mergeableObj(int idx) {
@@ -242,8 +242,12 @@ inline Unit::FuncRange Unit::funcs() const {
   return m_mergeInfo->funcs();
 }
 
-inline Unit::PreClassRange Unit::preclasses() const {
-  return PreClassRange(m_preClasses);
+inline folly::Range<PreClassPtr*> Unit::preclasses() {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
+  return { m_preClasses.data(), m_preClasses.size() };
 }
 
 inline Func* Unit::firstHoistable() const {
@@ -264,8 +268,13 @@ template<class Fn> void Unit::forEachFunc(Fn fn) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases
-inline Unit::TypeAliasRange Unit::typeAliases() const {
-  return TypeAliasRange(m_typeAliases);
+
+inline folly::Range<TypeAlias*> Unit::typeAliases() {
+  return { m_typeAliases.begin(), m_typeAliases.end() };
+}
+
+inline folly::Range<const TypeAlias*> Unit::typeAliases() const {
+  return { m_typeAliases.begin(), m_typeAliases.end() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

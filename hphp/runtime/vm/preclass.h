@@ -28,7 +28,6 @@
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/util/fixed-vector.h"
-#include "hphp/util/range.h"
 
 #include <type_traits>
 #include <unordered_set>
@@ -371,9 +370,9 @@ public:
   Type const* fields() const      { return m_##fields.accessList(); }         \
   Type*       mutable##Fields()   { return m_##fields.mutableAccessList(); }  \
   size_t      num##Fields() const { return m_##fields.size(); }               \
-  typedef IterRange<Type const*> TypeName##Range;                             \
+  using TypeName##Range = folly::Range<Type const*>;                          \
   TypeName##Range all##Fields() const {                                       \
-    return TypeName##Range(fields(), fields() + m_##fields.size());           \
+    return TypeName##Range(fields(), m_##fields.size());                      \
   }
 
   DEF_ACCESSORS(Func*, Func, methods, Methods)

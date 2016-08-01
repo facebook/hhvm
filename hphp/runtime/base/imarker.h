@@ -24,7 +24,6 @@
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/hphp-raw-ptr.h"
 #include "hphp/util/low-ptr.h"
-#include "hphp/util/range.h"
 #include "hphp/util/tiny-vector.h"
 
 #include <boost/variant.hpp>
@@ -153,11 +152,6 @@ struct IMarker {
   template <typename T>
   void operator()(const typename std::list<T>::iterator& p) {
     scan(*p, *this);
-  }
-
-  template <typename T>
-  void operator()(const IterRange<T>& r) {
-    for (const auto& elem : r) scan(elem, *this);
   }
 
   template <typename Itr>

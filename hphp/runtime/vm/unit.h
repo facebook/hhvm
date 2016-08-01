@@ -32,7 +32,6 @@
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/range.h"
 
 #include <map>
 #include <ostream>
@@ -237,8 +236,8 @@ public:
    * not mergeable, since DefFunc also uses this list as its mapping from ID's.
    */
   struct MergeInfo {
-    typedef IterRange<Func* const*> FuncRange;
-    typedef IterRange<Func**> MutableFuncRange;
+    using FuncRange = folly::Range<Func* const*>;
+    using MutableFuncRange = folly::Range<Func**>;
 
     /*
      * Allocate a new MergeInfo with `num' mergeables.
@@ -297,17 +296,15 @@ public:
   /*
    * Range types.
    */
-  typedef MergeInfo::FuncRange FuncRange;
-  typedef MergeInfo::MutableFuncRange MutableFuncRange;
-  typedef Range<std::vector<PreClassPtr>> PreClassRange;
-  typedef Range<FixedVector<TypeAlias>> TypeAliasRange;
+  using FuncRange = MergeInfo::FuncRange;
+  using MutableFuncRange = MergeInfo::MutableFuncRange;
 
   /*
    * Cache for pseudomains for this unit, keyed by Class context.
    */
-  typedef hphp_hash_map<const Class*, Func*,
-                        pointer_hash<Class>> PseudoMainCacheMap;
-
+  using PseudoMainCacheMap = hphp_hash_map<
+    const Class*, Func*, pointer_hash<Class>
+  >;
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
@@ -466,7 +463,8 @@ public:
    * Range over all Funcs or PreClasses in the Unit.
    */
   FuncRange funcs() const;
-  PreClassRange preclasses() const;
+  folly::Range<PreClassPtr*> preclasses();
+  folly::Range<const PreClassPtr*> preclasses() const;
 
   /*
    * Get a pseudomain for the Unit with the context class `cls'.
@@ -647,7 +645,9 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
-  TypeAliasRange typeAliases() const;
+  folly::Range<TypeAlias*> typeAliases();
+  folly::Range<const TypeAlias*> typeAliases() const;
+
   static const TypeAliasReq* loadTypeAlias(const StringData* name);
 
   /*

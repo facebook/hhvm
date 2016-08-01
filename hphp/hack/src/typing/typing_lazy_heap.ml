@@ -12,7 +12,8 @@ open Typing_heap
 
 let get_class tcopt x =
   match Classes.get x with
-  | Some c -> Some c
+  | Some c ->
+    Some c
   | None ->
     match Naming_heap.TypeIdHeap.get x with
     | Some (p, `Class) ->

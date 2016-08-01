@@ -9,7 +9,7 @@
  *)
 
 open Typing_defs
-open Typing_heap
+open Decl_heap
 
 module Dep = Typing_deps.Dep
 

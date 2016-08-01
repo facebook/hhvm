@@ -360,8 +360,8 @@ end
  *)
 (*****************************************************************************)
 let class_big_diff class1 class2 =
-  let class1 = Typing_pos_utils.NormalizeSig.class_type class1 in
-  let class2 = Typing_pos_utils.NormalizeSig.class_type class2 in
+  let class1 = Decl_pos_utils.NormalizeSig.class_type class1 in
+  let class2 = Decl_pos_utils.NormalizeSig.class_type class2 in
   class1.tc_need_init <> class2.tc_need_init ||
   SSet.compare class1.tc_deferred_init_members class2.tc_deferred_init_members <> 0 ||
   class1.tc_members_fully_known <> class2.tc_members_fully_known ||
@@ -423,11 +423,11 @@ let get_extend_deps cid_hash to_redecl =
 *)
 (*****************************************************************************)
 let get_fun_deps old_funs fid (to_redecl, to_recheck) =
-  match SMap.find_unsafe fid old_funs, Typing_heap.Funs.get fid with
+  match SMap.find_unsafe fid old_funs, Decl_heap.Funs.get fid with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
-   * existing declaration in the old Typing_heap that corresponds to a function
-   * `foo` in the AST. Then when the user deletes `foo`, the new Typing_heap
+   * existing declaration in the old Decl_heap that corresponds to a function
+   * `foo` in the AST. Then when the user deletes `foo`, the new Decl_heap
    * will also lack a definition of `foo`. Now we must recheck all the use
    * sites of `foo` to make sure there are no dangling references. *)
   | None, _ | _, None ->
@@ -436,8 +436,8 @@ let get_fun_deps old_funs fid (to_redecl, to_recheck) =
       let fun_name = Typing_deps.get_bazooka (Dep.FunName fid) in
       DepSet.union fun_name to_redecl, DepSet.union fun_name to_recheck
   | Some fty1, Some fty2 ->
-      let fty1 = Typing_pos_utils.NormalizeSig.fun_type fty1 in
-      let fty2 = Typing_pos_utils.NormalizeSig.fun_type fty2 in
+      let fty1 = Decl_pos_utils.NormalizeSig.fun_type fty1 in
+      let fty2 = Decl_pos_utils.NormalizeSig.fun_type fty2 in
       let is_same_signature = fty1 = fty2 in
       if is_same_signature
       then to_redecl, to_recheck
@@ -456,13 +456,13 @@ let get_funs_deps old_funs funs =
 *)
 (*****************************************************************************)
 let get_type_deps old_types tid to_recheck =
-  match SMap.find_unsafe tid old_types, Typing_heap.Typedefs.get tid with
+  match SMap.find_unsafe tid old_types, Decl_heap.Typedefs.get tid with
   | None, _ | _, None ->
       let bazooka = Typing_deps.get_bazooka (Dep.Class tid) in
       DepSet.union bazooka to_recheck
   | Some tdef1, Some tdef2 ->
-      let tdef1 = Typing_pos_utils.NormalizeSig.typedef tdef1 in
-      let tdef2 = Typing_pos_utils.NormalizeSig.typedef tdef2 in
+      let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
+      let tdef2 = Decl_pos_utils.NormalizeSig.typedef tdef2 in
       let is_same_signature = tdef1 = tdef2 in
       if is_same_signature
       then to_recheck
@@ -481,7 +481,7 @@ let get_types_deps old_types types =
 (*****************************************************************************)
 let get_gconst_deps old_gconsts cst_id (to_redecl, to_recheck) =
   let cst1 = SMap.find_unsafe cst_id old_gconsts in
-  let cst2 = Typing_heap.GConsts.get cst_id in
+  let cst2 = Decl_heap.GConsts.get cst_id in
   match cst1, cst2 with
   | None, _ | _, None ->
       let where_const_is_used = Typing_deps.get_bazooka (Dep.GConst cst_id) in
@@ -512,8 +512,8 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
   | Some class1, Some class2 when class_big_diff class1 class2 ->
       get_all_dependencies trace cid (to_redecl, to_recheck)
   | Some class1, Some class2 ->
-      let nclass1 = Typing_pos_utils.NormalizeSig.class_type class1 in
-      let nclass2 = Typing_pos_utils.NormalizeSig.class_type class2 in
+      let nclass1 = Decl_pos_utils.NormalizeSig.class_type class1 in
+      let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
       let deps, is_unchanged = ClassDiff.compare cid nclass1 nclass2 in
       let cid_hash = Typing_deps.Dep.make (Dep.Class cid) in
       if is_unchanged

@@ -158,7 +158,7 @@ and fun_decl f =
   let dep = Dep.Fun (snd f.f_name) in
   let env = {Decl_env.mode = f.f_mode; droot = Some dep} in
   let ft = fun_decl_in_env env f in
-  Typing_heap.Funs.add (snd f.f_name) ft;
+  Decl_heap.Funs.add (snd f.f_name) ft;
   ()
 
 and ret_from_fun_kind pos kind =
@@ -258,7 +258,7 @@ let rec class_decl_if_missing class_env c =
   if check_if_cyclic class_env c_name
   then ()
   else begin
-    if Typing_heap.Classes.mem cid then () else
+    if Decl_heap.Classes.mem cid then () else
       class_naming_and_decl class_env cid c
   end
 
@@ -283,7 +283,7 @@ and class_hint_decl class_env hint =
   match hint with
   | _, Happly ((_, cid), _) ->
     begin match Naming_heap.TypeIdHeap.get cid with
-      | Some (p, `Class) when not (Typing_heap.Classes.mem cid) ->
+      | Some (p, `Class) when not (Decl_heap.Classes.mem cid) ->
         (* We are supposed to redeclare the class *)
         let fn = Pos.filename p in
         let class_opt = Parser_heap.find_class_in_file fn cid in
@@ -409,7 +409,7 @@ and class_decl tcopt c =
   SMap.iter begin fun x _ ->
     Typing_deps.add_idep class_dep (Dep.Class x)
   end impl;
-  Typing_heap.Classes.add (snd c.c_name) tc
+  Decl_heap.Classes.add (snd c.c_name) tc
 
 and get_implements env ht =
   let _r, (_p, c), paraml = Decl_utils.unwrap_class_type ht in
@@ -720,7 +720,7 @@ and method_check_trait_overrides c id method_ce =
 
 let rec type_typedef_decl_if_missing tcopt typedef =
   let _, tid = typedef.Ast.t_id in
-  if Typing_heap.Typedefs.mem tid
+  if Decl_heap.Typedefs.mem tid
   then ()
   else
     type_typedef_naming_and_decl tcopt typedef
@@ -743,7 +743,7 @@ and typedef_decl tdef =
   let tdecl = {
     td_vis; td_tparams; td_constraint; td_type; td_pos;
   } in
-  Typing_heap.Typedefs.add tid tdecl;
+  Decl_heap.Typedefs.add tid tdecl;
 
 and type_typedef_naming_and_decl tcopt tdef =
   let tdef = Naming.typedef tcopt tdef in
@@ -772,7 +772,7 @@ let iconst_decl tcopt cst =
       | None ->
         Reason.Rwitness cst_pos, Tany
   in
-  Typing_heap.GConsts.add cst_name hint_ty;
+  Decl_heap.GConsts.add cst_name hint_ty;
   ()
 
 (*****************************************************************************)

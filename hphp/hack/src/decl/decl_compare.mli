@@ -9,7 +9,7 @@
  *)
 
 open Typing_deps
-open Typing_heap
+open Decl_heap
 
 val get_extend_deps : DepSet.elt -> DepSet.t -> DepSet.t
 

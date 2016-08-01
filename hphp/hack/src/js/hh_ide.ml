@@ -113,12 +113,12 @@ let declare_file fn content =
   List.iter old_funs begin fun (_, fname) ->
     Naming_heap.FunPosHeap.remove fname;
     Naming_heap.FunCanonHeap.remove (NamingGlobal.canon_key fname);
-    Typing_heap.Funs.remove fname;
+    Decl_heap.Funs.remove fname;
   end;
   List.iter old_classes begin fun (_, cname) ->
     Naming_heap.TypeIdHeap.remove cname;
     Naming_heap.TypeCanonHeap.remove (NamingGlobal.canon_key cname);
-    Typing_heap.Classes.remove cname;
+    Decl_heap.Classes.remove cname;
   end;
   try
     Autocomplete.auto_complete := false;

@@ -145,17 +145,17 @@ let compute_deps fast filel =
   let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
   let acc = DepSet.empty, DepSet.empty in
   (* Fetching everything at once is faster *)
-  let old_funs = Typing_heap.Funs.get_old_batch n_funs in
+  let old_funs = Decl_heap.Funs.get_old_batch n_funs in
   let acc = compute_funs_deps old_funs acc n_funs in
 
-  let old_types = Typing_heap.Typedefs.get_old_batch n_types in
+  let old_types = Decl_heap.Typedefs.get_old_batch n_types in
   let acc = compute_types_deps old_types acc n_types in
 
-  let old_consts = Typing_heap.GConsts.get_old_batch n_consts in
+  let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
   let acc = compute_gconsts_deps old_consts acc n_consts in
 
-  let old_classes = Typing_heap.Classes.get_old_batch n_classes in
-  let new_classes = Typing_heap.Classes.get_batch n_classes in
+  let old_classes = Decl_heap.Classes.get_old_batch n_classes in
+  let new_classes = Decl_heap.Classes.get_batch n_classes in
   let compare_classes = compute_classes_deps old_classes new_classes in
   let (to_redecl, to_recheck) = compare_classes acc n_classes in
 
@@ -229,18 +229,18 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
 (*****************************************************************************)
 
 let invalidate_heap { FileInfo.n_funs; n_classes; n_types; n_consts } =
-  Typing_heap.Funs.oldify_batch n_funs;
-  Typing_heap.Classes.oldify_batch n_classes;
-  Typing_heap.Typedefs.oldify_batch n_types;
-  Typing_heap.GConsts.oldify_batch n_consts;
+  Decl_heap.Funs.oldify_batch n_funs;
+  Decl_heap.Classes.oldify_batch n_classes;
+  Decl_heap.Typedefs.oldify_batch n_types;
+  Decl_heap.GConsts.oldify_batch n_consts;
   SharedMem.collect `gentle;
   ()
 
 let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } =
-  Typing_heap.Funs.remove_old_batch n_funs;
-  Typing_heap.Classes.remove_old_batch n_classes;
-  Typing_heap.Typedefs.remove_old_batch n_types;
-  Typing_heap.GConsts.remove_old_batch n_consts;
+  Decl_heap.Funs.remove_old_batch n_funs;
+  Decl_heap.Classes.remove_old_batch n_classes;
+  Decl_heap.Typedefs.remove_old_batch n_types;
+  Decl_heap.GConsts.remove_old_batch n_consts;
   SharedMem.collect `gentle;
   ()
 

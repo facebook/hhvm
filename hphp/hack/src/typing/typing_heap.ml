@@ -8,43 +8,49 @@
  *
  *)
 
-open Typing_defs
+module type ReadOnly = sig
+  type key
+  type t
 
-(* The following classes are used to make sure we make no typing
- * mistake when interacting with the database. The database knows
- * how to associate a string to a string. We need to deserialize
- * the string and make sure the type is correct. By using these
- * modules, the places where there could be a typing mistake are
- * very well isolated.
-*)
-
-(* Module used to represent serialized classes *)
-module Class = struct
-  type t = Typing_defs.class_type
-  let prefix = Prefix.make()
-  let description = "Class"
+  val get: key -> t option
+  val mem: key -> bool
+  val find_unsafe: key -> t
 end
 
-(* a function type *)
-module Fun = struct
-  type t = decl Typing_defs.fun_type
-  let prefix = Prefix.make()
-  let description = "Fun"
-end
+module Funs = Decl_heap.Funs
+module Typedefs = Decl_heap.Typedefs
+module GConsts = Decl_heap.GConsts
 
-module Typedef = struct
-  type t = Typing_defs.typedef_type
-  let prefix = Prefix.make()
-  let description = "Typedef"
-end
+module Classes = struct
+  module Class = struct
+    type t = Typing_defs.class_type
+    let prefix = Prefix.make()
+    let description = "ClassType"
+  end
 
-module GConst = struct
-  type t = decl ty
-  let prefix = Prefix.make()
-  let description = "GConst"
-end
+  module Cache = SharedMem.LocalCache (StringKey) (Class)
 
-module Funs = SharedMem.WithCache (StringKey) (Fun)
-module Classes = SharedMem.WithCache (StringKey) (Class)
-module Typedefs = SharedMem.WithCache (StringKey) (Typedef)
-module GConsts = SharedMem.WithCache (StringKey) (GConst)
+  type key = StringKey.t
+  type t = Class.t
+
+  let get key =
+    match Cache.get key with
+    | Some c -> Some c
+    | None ->
+      match Decl_heap.Classes.get key with
+      | Some c ->
+        Cache.add key c;
+        Some c
+      | None ->
+        None
+
+  let find_unsafe key =
+    match get key with
+    | None -> raise Not_found
+    | Some x -> x
+
+  let mem key =
+    match get key with
+    | None -> false
+    | Some _ -> true
+end

@@ -98,7 +98,7 @@ let naive_dedup req_extends =
   List.rev_filter_map req_extends begin fun (parent_pos, ty) ->
     match ty with
     | _r, Tapply (name, hl) ->
-      let hl = List.map hl Typing_pos_utils.NormalizeSig.ty in
+      let hl = List.map hl Decl_pos_utils.NormalizeSig.ty in
       begin try
         let hl' = Hashtbl.find h name in
         if List.compare ~cmp:Pervasives.compare hl hl' <> 0 then

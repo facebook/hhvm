@@ -147,3 +147,18 @@ end
 (* Same thing but with 4 layers of cache ... Useful for type-checking        *)
 (*****************************************************************************)
 module WithCache = NoCache
+
+module LocalCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
+
+  type key = UserKeyType.t
+  type value = Value.t
+
+  let add _x _y = ()
+
+  let get _x = None
+
+  let remove _x = ()
+
+  let clear () = ()
+
+end

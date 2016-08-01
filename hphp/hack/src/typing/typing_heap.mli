@@ -10,29 +10,27 @@
 
 open Typing_defs
 
-module Class : sig
-  type t = class_type
-  val prefix : Prefix.t
-  val description : string
-end
-module Fun : sig
-  type t = decl fun_type
-  val prefix : Prefix.t
-  val description : string
-end
-module Typedef :
-  sig
-    type t = typedef_type
-    val prefix : Prefix.t
-    val description : string
-  end
-module GConst : sig
-  type t = decl ty
-  val prefix : Prefix.t
-  val description : string
+module type ReadOnly = sig
+  type key
+  type t
+
+  val get: key -> t option
+  val mem: key -> bool
+  val find_unsafe: key -> t
 end
 
-module Funs : module type of SharedMem.WithCache (StringKey) (Fun)
-module Classes : module type of SharedMem.WithCache (StringKey) (Class)
-module Typedefs : module type of SharedMem.WithCache (StringKey) (Typedef)
-module GConsts : module type of SharedMem.WithCache (StringKey) (GConst)
+module Funs : ReadOnly
+  with type key = StringKey.t
+   and type t = decl fun_type
+
+module Classes : ReadOnly
+  with type key = StringKey.t
+   and type t = class_type
+
+module Typedefs : ReadOnly
+  with type key = StringKey.t
+   and type t = typedef_type
+
+module GConsts : ReadOnly
+  with type key = StringKey.t
+   and type t = decl ty

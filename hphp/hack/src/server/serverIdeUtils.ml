@@ -30,19 +30,19 @@ let report_error exn =
 let oldify_funs names =
   Naming_heap.FunPosHeap.oldify_batch names;
   Naming_heap.FunCanonHeap.oldify_batch @@ canon_set names;
-  Typing_heap.Funs.oldify_batch names;
+  Decl_heap.Funs.oldify_batch names;
   ()
 
 let oldify_classes names =
   Naming_heap.TypeIdHeap.oldify_batch names;
   Naming_heap.TypeCanonHeap.oldify_batch @@ canon_set names;
-  Typing_heap.Classes.oldify_batch names;
+  Decl_heap.Classes.oldify_batch names;
   ()
 
 let oldify_typedefs names =
   Naming_heap.TypeIdHeap.oldify_batch names;
   Naming_heap.TypeCanonHeap.oldify_batch @@ canon_set names;
-  Typing_heap.Typedefs.oldify_batch names
+  Decl_heap.Typedefs.oldify_batch names
 
 let oldify_file name =
   Parser_heap.ParserHeap.oldify_batch @@
@@ -58,17 +58,17 @@ let oldify_file_info path file_info =
   oldify_typedefs n_types
 
 let revive funs classes typedefs file_name =
-  Typing_heap.Funs.revive_batch funs;
+  Decl_heap.Funs.revive_batch funs;
   Naming_heap.FunPosHeap.revive_batch funs;
   Naming_heap.FunCanonHeap.revive_batch @@ canon_set funs;
 
-  Typing_heap.Classes.revive_batch classes;
+  Decl_heap.Classes.revive_batch classes;
   Naming_heap.TypeIdHeap.revive_batch classes;
   Naming_heap.TypeCanonHeap.revive_batch @@ canon_set classes;
 
   Naming_heap.TypeIdHeap.revive_batch typedefs;
   Naming_heap.TypeCanonHeap.revive_batch @@ canon_set typedefs;
-  Typing_heap.Typedefs.revive_batch typedefs;
+  Decl_heap.Typedefs.revive_batch typedefs;
 
   Parser_heap.ParserHeap.revive_batch @@
     Parser_heap.ParserHeap.KeySet.singleton file_name

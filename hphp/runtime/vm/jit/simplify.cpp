@@ -2023,14 +2023,9 @@ SSATmp* simplifyCheckTypeMem(State& env, const IRInstruction* inst) {
 SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
 
-  if (canSimplifyAssertType(inst, src->type(), mightRelax(env, src))) {
-    if (!src->type().maybe(inst->typeParam())) {
-      gen(env, Halt);
-      return cns(env, TBottom);
-    }
-    return src;
-  }
-  return nullptr;
+  return canSimplifyAssertType(inst, src->type(), mightRelax(env, src))
+    ? src
+    : nullptr;
 }
 
 SSATmp* simplifyCheckLoc(State& env, const IRInstruction* inst) {
@@ -2731,7 +2726,22 @@ bool canSimplifyAssertType(const IRInstruction* inst,
   auto const typeParam = inst->typeParam();
 
   if (!srcType.maybe(typeParam)) {
-    return true;
+    // If both types are boxed, this is okay and even expected as a means to
+    // update the hint for the inner type.
+    if (srcType <= TBoxedCell &&
+        typeParam <= TBoxedCell) {
+      return false;
+    }
+
+    // We got external information (probably from static analysis) that
+    // conflicts with what we've built up so far.  There's no reasonable way to
+    // continue here: we can't properly fatal the request because we can't make
+    // a catch trace or SpillStack without IRGS, and we can't punt on
+    // just this instruction because we might not be in the initial translation
+    // phase, and we can't just plow on forward since we'll probably generate
+    // malformed IR.  Since this case is very rare, just punt on the whole
+    // trace so it gets interpreted.
+    TRACE_PUNT("Invalid AssertTypeOp");
   }
 
   // Asserting in these situations doesn't add any information.

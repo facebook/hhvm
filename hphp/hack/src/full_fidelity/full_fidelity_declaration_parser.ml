@@ -64,16 +64,20 @@ module WithExpressionAndStatementParser
 
 
   (* Statements *)
-
-  let parse_compound_statement parser =
+  let parse_in_statement_parser parser statement_parser_function =
     let statement_parser = StatementParser.make parser.lexer parser.errors in
-    let (statement_parser, node) =
-      StatementParser.parse_compound_statement statement_parser in
+    let (statement_parser, node) = statement_parser_function
+       statement_parser in
     let lexer = StatementParser.lexer statement_parser in
     let errors = StatementParser.errors statement_parser in
     let parser = { lexer; errors } in
     (parser, node)
 
+  let parse_compound_statement parser =
+    parse_in_statement_parser parser StatementParser.parse_compound_statement
+
+  let parse_statement parser =
+    parse_in_statement_parser parser StatementParser.parse_statement
 
   (* Declarations *)
 
@@ -934,11 +938,7 @@ module WithExpressionAndStatementParser
     | LessThanLessThan ->
       parse_classish_or_function_declaration parser
     | _ ->
-      (* ERROR RECOVERY: Skip the token, try again. *)
-      (* TODO: Better policy would be to skip ahead to
-         the first token that makes a legal declaration. *)
-      let parser = with_error parser1 SyntaxError.error1002 in
-      (parser, make_error [make_token token])
+      parse_statement parser
 
   and parse_declarations parser expect_brace =
     let rec aux parser declarations =

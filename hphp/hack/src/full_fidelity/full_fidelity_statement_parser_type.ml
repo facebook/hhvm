@@ -14,4 +14,5 @@ module type StatementParserType = sig
   val lexer : t -> Full_fidelity_lexer.t
   val errors : t -> Full_fidelity_syntax_error.t list
   val parse_compound_statement : t -> t * Full_fidelity_minimal_syntax.t
+  val parse_statement : t -> t * Full_fidelity_minimal_syntax.t
 end

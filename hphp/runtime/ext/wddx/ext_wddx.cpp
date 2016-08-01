@@ -66,21 +66,42 @@ bool WddxPacket::serialize_value(const Variant& varVariant) {
 bool WddxPacket::recursiveAddVar(const String& varName,
                                  const Variant& varVariant,
                                  bool hasVarTag) {
+  SeenContainers seen;
+  return recursiveAddVarImpl(varName, varVariant, hasVarTag, seen);
+}
 
+bool WddxPacket::recursiveAddVarImpl(const String& varName,
+                                     const Variant& varVariant,
+                                     bool hasVarTag,
+                                     SeenContainers& seen) {
   bool isArray = varVariant.isArray();
   bool isObject = varVariant.isObject();
 
   if (isArray || isObject) {
+    Array varAsArray;
+    Object varAsObject;
+    ArrayOrObject ptr;
+    if (isArray) {
+      varAsArray = varVariant.toArray();
+      ptr = varAsArray.get();
+    }
+    if (isObject) {
+      varAsObject = varVariant.toObject();
+      varAsArray = varAsObject.toArray();
+      ptr = varAsObject.get();
+    }
+    assert(!ptr.isNull());
+    if (!seen.emplace(ptr).second) {
+      raise_warning("recursion detected");
+      return false;
+    }
+    SCOPE_EXIT { seen.erase(ptr); };
+
     if (hasVarTag) {
       m_packetString.append("<var name='");
       m_packetString.append(varName.data());
       m_packetString.append("'>");
     }
-
-    Array varAsArray;
-    Object varAsObject = varVariant.toObject();
-    if (isArray) varAsArray = varVariant.toArray();
-    if (isObject) varAsArray = varAsObject.toArray();
 
     int length = varAsArray.length();
     if (length > 0) {
@@ -99,9 +120,9 @@ bool WddxPacket::recursiveAddVar(const String& varName,
         m_packetString.append("'>");
       }
       for (ArrayIter it(varAsArray); it; ++it) {
-        Variant key = it.first();
-        Variant value = it.second();
-        recursiveAddVar(key.toString(), value, isObject);
+        auto key = it.first();
+        auto const& value = it.secondRef();
+        recursiveAddVarImpl(key.toString(), value, isObject, seen);
       }
       if (isObject) {
         m_packetString.append("</struct>");

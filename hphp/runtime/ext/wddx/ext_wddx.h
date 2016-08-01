@@ -38,7 +38,7 @@ class WddxPacket: public ResourceData {
   String packet_end();
   bool serialize_value(const Variant& varVariant);
   bool recursiveAddVar(const String& varName, const Variant& varVariant,
-                       bool hasVarTag );
+                       bool hasVarTag);
 
  private:
   String getWddxEncoded(const String& varType,
@@ -51,6 +51,17 @@ class WddxPacket: public ResourceData {
                    const String& varValue,
                    const String& varName,
                    bool hasVarTag);
+
+  using ArrayOrObject = Either<ArrayData*,ObjectData*>;
+  struct EitherHash {
+    size_t operator()(const ArrayOrObject data) const {
+      return data.toOpaque();
+    }
+  };
+  using SeenContainers = req::hash_set<ArrayOrObject, EitherHash>;
+
+  bool recursiveAddVarImpl(const String& varName, const Variant& varVariant,
+                           bool hasVarTag, SeenContainers& seen);
 
   StringBuffer m_packetString;
   bool m_packetClosed;

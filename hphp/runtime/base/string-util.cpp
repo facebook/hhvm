@@ -123,9 +123,9 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   if (size == 0) return empty_string();
 
   String* sitems = (String*)req::malloc(size * sizeof(String));
-  int len = 0;
-  int lenDelim = delim.size();
-  int i = 0;
+  size_t len = 0;
+  size_t lenDelim = delim.size();
+  size_t i = 0;
   for (ArrayIter iter(items); iter; ++iter) {
     new (&sitems[i]) String(iter.second().toString());
     len += sitems[i].size() + lenDelim;

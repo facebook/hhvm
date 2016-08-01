@@ -466,11 +466,20 @@ let get_gconst env cst_name =
 
 let get_static_member is_method env class_ mid =
   add_wclass env class_.tc_name;
-  let dep = if is_method then Dep.SMethod (class_.tc_name, mid)
-  else Dep.SProp (class_.tc_name, mid) in
-  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  if is_method then SMap.get mid class_.tc_smethods
-  else SMap.get mid class_.tc_sprops
+  let add_dep x =
+    let dep = if is_method then Dep.SMethod (x, mid)
+      else Dep.SProp (x, mid) in
+    Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  in
+  add_dep class_.tc_name;
+  (* The type of a member is stored separately in the heap. This means that
+   * any user of the member also has a dependency on the class where the member
+   * originated.
+   *)
+  let ce_opt = if is_method then SMap.get mid class_.tc_smethods
+    else SMap.get mid class_.tc_sprops in
+  Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
+  ce_opt
 
 let suggest_member members mid =
   let members = SMap.fold begin fun x ce acc ->
@@ -487,11 +496,20 @@ let suggest_static_member is_method class_ mid =
 
 let get_member is_method env class_ mid =
   add_wclass env class_.tc_name;
-  let dep = if is_method then Dep.Method (class_.tc_name, mid)
-  else Dep.Prop (class_.tc_name, mid) in
-  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  if is_method then (SMap.get mid class_.tc_methods)
-  else SMap.get mid class_.tc_props
+  let add_dep x =
+    let dep = if is_method then Dep.Method (x, mid)
+      else Dep.Prop (x, mid) in
+    Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep)
+  in
+  add_dep class_.tc_name;
+  (* The type of a member is stored separately in the heap. This means that
+   * any user of the member also has a dependency on the class where the member
+   * originated.
+   *)
+  let ce_opt = if is_method then (SMap.get mid class_.tc_methods)
+    else SMap.get mid class_.tc_props in
+  Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
+  ce_opt
 
 let suggest_member is_method class_ mid =
   let mid = String.lowercase mid in
@@ -500,8 +518,13 @@ let suggest_member is_method class_ mid =
 
 let get_construct env class_ =
   add_wclass env class_.tc_name;
-  let dep = Dep.Cstr (class_.tc_name) in
-  Option.iter env.decl_env.Decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  let add_dep x =
+    let dep = Dep.Cstr (x) in
+    Option.iter env.decl_env.Decl_env.droot
+      (fun root -> Typing_deps.add_idep root dep);
+  in
+  add_dep class_.tc_name;
+  Option.iter (fst class_.tc_construct) (fun ce -> add_dep ce.ce_origin);
   class_.tc_construct
 
 let get_todo env =

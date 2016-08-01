@@ -36,6 +36,9 @@ let oldify_funs names =
 let oldify_classes names =
   Naming_heap.TypeIdHeap.oldify_batch names;
   Naming_heap.TypeCanonHeap.oldify_batch @@ canon_set names;
+  Decl_class_elements.(
+    names |> SSet.elements |> get_for_classes |> oldify_all
+  );
   Decl_heap.Classes.oldify_batch names;
   ()
 
@@ -63,6 +66,9 @@ let revive funs classes typedefs file_name =
   Naming_heap.FunCanonHeap.revive_batch @@ canon_set funs;
 
   Decl_heap.Classes.revive_batch classes;
+  Decl_class_elements.(
+    classes |> SSet.elements |> get_for_classes |> revive_all
+  );
   Naming_heap.TypeIdHeap.revive_batch classes;
   Naming_heap.TypeCanonHeap.revive_batch @@ canon_set classes;
 

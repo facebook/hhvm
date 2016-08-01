@@ -335,6 +335,94 @@ module ClassDiff = struct
 end
 
 (*****************************************************************************)
+(* Given two classes give back the set of functions or classes that need
+ * to be rechecked because the type of their member changed
+ *)
+(*****************************************************************************)
+module ClassEltDiff = struct
+  open Decl_heap
+
+  let add_inverted_dep build_obj x _ acc =
+    DepSet.union (Typing_deps.get_ideps (build_obj x)) acc
+
+  let add_inverted_deps acc build_obj xmap =
+    SMap.fold (add_inverted_dep build_obj) xmap acc
+
+  let diff_elts (type t) (module EltHeap: SharedMem.NoCache
+      with type key = string * string
+       and type t = t
+    ) ~cid ~elts1 ~elts2 ~normalize =
+    SMap.merge begin fun name elt1 elt2 ->
+      let key = (cid, name) in
+      match elt1, elt2 with
+      | Some elt, _ | _, Some elt when elt.elt_origin = cid ->
+        begin
+          match EltHeap.get_old key, EltHeap.get key with
+          | None, _ | _, None -> Some ()
+          | Some x1, Some x2 ->
+            let ty1 = normalize x1 in
+            let ty2 = normalize x2 in
+            if ty1 = ty2
+            then None
+            else Some ()
+        end
+      | _ -> None
+    end elts1 elts2
+
+  let compare_props class1 class2 acc =
+    let cid = class1.dc_name in
+    let elts1, elts2 = class1.dc_props, class2.dc_props in
+    let diff = diff_elts (module Props) ~cid ~elts1 ~elts2
+        ~normalize:Decl_pos_utils.NormalizeSig.ty in
+    add_inverted_deps acc (fun x -> Dep.Prop (cid, x)) diff
+
+  let compare_sprops class1 class2 acc =
+    let cid = class1.dc_name in
+    let elts1, elts2 = class1.dc_sprops, class2.dc_sprops in
+    let diff = diff_elts (module StaticProps) ~cid ~elts1 ~elts2
+        ~normalize:Decl_pos_utils.NormalizeSig.ty in
+    add_inverted_deps acc (fun x -> Dep.SProp (cid, x)) diff
+
+  let compare_meths class1 class2 acc =
+    let cid = class1.dc_name in
+    let elts1, elts2 = class1.dc_methods, class2.dc_methods in
+    let diff = diff_elts (module Methods) ~cid ~elts1 ~elts2
+        ~normalize:Decl_pos_utils.NormalizeSig.fun_type in
+    add_inverted_deps acc (fun x -> Dep.Method (cid, x)) diff
+
+  let compare_smeths class1 class2 acc =
+    let cid = class1.dc_name in
+    let elts1, elts2 = class1.dc_smethods, class2.dc_smethods in
+    let diff = diff_elts (module StaticMethods) ~cid ~elts1 ~elts2
+        ~normalize:Decl_pos_utils.NormalizeSig.fun_type in
+    add_inverted_deps acc (fun x -> Dep.SMethod (cid, x)) diff
+
+  let compare_cstrs class1 class2 =
+    let cid = class1.dc_name in
+    match class1.dc_construct, class2.dc_construct with
+    | (Some elt, _), _
+    | _, (Some elt, _) when elt.elt_origin = cid ->
+      begin
+        match Constructors.get_old cid, Constructors.get cid with
+        | None, _ | _, None -> Typing_deps.get_ideps (Dep.Cstr cid)
+        | Some ft1, Some ft2 ->
+            let ft1 = Decl_pos_utils.NormalizeSig.fun_type ft1 in
+            let ft2 = Decl_pos_utils.NormalizeSig.fun_type ft2 in
+            if ft1 = ft2
+            then DepSet.empty
+            else Typing_deps.get_ideps (Dep.Cstr cid)
+      end
+    | _ -> DepSet.empty
+
+  let compare class1 class2 =
+    compare_cstrs class1 class2
+    |> compare_props class1 class2
+    |> compare_sprops class1 class2
+    |> compare_meths class1 class2
+    |> compare_smeths class1 class2
+end
+
+(*****************************************************************************)
 (* Determines if there is a "big" difference between two classes
  * What it really means: most of the time, a change in a class doesn't affect
  * the users of the class, recomputing the sub-classes is enough.
@@ -352,6 +440,7 @@ let class_big_diff class1 class2 =
   class1.dc_members_fully_known <> class2.dc_members_fully_known ||
   class1.dc_kind <> class2.dc_kind ||
   class1.dc_tparams <> class2.dc_tparams ||
+  SMap.compare class1.dc_substs class2.dc_substs <> 0 ||
   SMap.compare class1.dc_ancestors class2.dc_ancestors <> 0 ||
   List.compare ~cmp:Pervasives.compare
     class1.dc_req_ancestors class2.dc_req_ancestors <> 0 ||
@@ -501,23 +590,34 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
       let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
       let deps, is_unchanged = ClassDiff.compare cid nclass1 nclass2 in
       let cid_hash = Typing_deps.Dep.make (Dep.Class cid) in
-      if is_unchanged
-      then
-        let _, is_unchanged = ClassDiff.compare cid class1 class2 in
+      let to_redecl, to_recheck =
         if is_unchanged
-        then to_redecl, to_recheck
+        then
+          let _, is_unchanged = ClassDiff.compare cid class1 class2 in
+          if is_unchanged
+          then to_redecl, to_recheck
+          else
+            (* If we reach this case it means that class1 and class2
+             * have the same signatures, but that some of their
+             * positions differ. We therefore must redeclare the sub-classes
+             * but not recheck them.
+            *)
+            let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
+            to_redecl, to_recheck
         else
-          (* If we reach this case it means that class1 and class2
-           * have the same signatures, but that some of their
-           * positions differ. We therefore must redeclare the sub-classes
-           * but not recheck them.
-           *)
           let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
-          to_redecl, to_recheck
-      else
-        let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
-        let to_recheck = DepSet.union to_redecl to_recheck in
-        DepSet.union deps to_redecl, DepSet.union deps to_recheck
+          let to_recheck = DepSet.union to_redecl to_recheck in
+          DepSet.union deps to_redecl, DepSet.union deps to_recheck
+      in
+
+      (* This adds additional files to recheck if the type signature of a class
+       * element has changed. We do not require adding any additional redecls
+       * because the type is not folded in anyway so it won't affect any other
+       * classes.
+       *)
+      let deps = ClassEltDiff.compare class1 class2 in
+      (* TODO: should not need to add to to_redecl *)
+      DepSet.union deps to_redecl, DepSet.union deps to_recheck
 
 let get_classes_deps old_classes new_classes classes =
   SSet.fold

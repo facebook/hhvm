@@ -699,10 +699,6 @@ let rec get_doc node =
     let index = get_doc x.subscript_index in
     let right = get_doc x.subscript_right in
     receiver ^^^ left ^^^ index ^^^ right
-  | EchoIntrinsicExpression x ->
-    let echo = get_doc (echo_intrinsic_token x) in
-    let expr_list = get_doc (echo_intrinsic_expression_list x) in
-    echo ^| expr_list
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in
@@ -840,6 +836,11 @@ let rec get_doc node =
     let n = get_doc x.static_name in
     let i = get_doc x.static_init in
     group_doc (n ^| i)
+  | EchoStatement x ->
+    let echo = get_doc (echo_token x) in
+    let expr_list = get_doc (echo_expression_list x) in
+    let semicolon = get_doc (echo_semicolon x) in
+    echo ^| expr_list ^^^ semicolon
   | SimpleInitializer x ->
     let e = get_doc x.simple_init_equal in
     let v = get_doc x.simple_init_value in

@@ -64,6 +64,7 @@ type t =
 | ContinueStatement
 | FunctionStaticStatement
 | StaticDeclarator
+| EchoStatement
 | SimpleInitializer
 
 (* Expressions *)
@@ -93,7 +94,6 @@ type t =
 | ArrayIntrinsicExpression
 | ElementInitializer
 | SubscriptExpression
-| EchoIntrinsicExpression
 | XHPExpression
 | XHPOpen
 | XHPAttribute
@@ -172,6 +172,7 @@ let to_string kind =
   | ContinueStatement -> "continue_statement"
   | FunctionStaticStatement -> "function_static_statement"
   | StaticDeclarator -> "static_declarator"
+  | EchoStatement -> "echo_statement"
   | SimpleInitializer -> "simple_initializer"
   | PrefixUnaryOperator -> "prefix_unary_operator"
   | PostfixUnaryOperator -> "postfix_unary_operator"
@@ -189,7 +190,6 @@ let to_string kind =
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
   | ElementInitializer -> "element_initializer"
   | SubscriptExpression -> "subscript_expression"
-  | EchoIntrinsicExpression -> "echo_intrinsic_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | TypeConstraint -> "type_constraint"

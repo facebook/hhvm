@@ -128,7 +128,6 @@ module WithStatementAndDeclParser
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
-    | Echo -> parse_echo_intrinsic_expression parser
     | LeftBracket -> parse_array_creation_expression parser
     | Shape -> parse_shape_expression parser
     | Function -> parse_anon parser
@@ -644,23 +643,6 @@ module WithStatementAndDeclParser
     let syntax = make_array_intrinsic_expression array_keyword left_paren
       members right_paren in
     (parser, syntax)
-
-  (* SPEC:
-    echo-intrinsic:
-      echo  expression
-      echo  (  expression  )
-      echo  expression-list-two-or-more
-
-    expression-list-two-or-more:
-      expression  ,  expression
-      expression-list-two-or-more  ,  expression
-  *)
-  and parse_echo_intrinsic_expression parser =
-    let (parser, echo_token) = assert_token parser Echo in
-    let (parser, expression_list) = parse_comma_list
-      parser Semicolon SyntaxError.error1015 parse_expression
-    in
-    (parser, make_echo_intrinsic_expression echo_token expression_list)
 
   (* array_creation_expression := [ array-initializer-opt ] *)
   and parse_array_creation_expression parser =

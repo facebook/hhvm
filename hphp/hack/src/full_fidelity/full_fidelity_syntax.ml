@@ -375,6 +375,11 @@ module WithToken(Token: TokenType) = struct
       static_name : t;
       static_init : t
     }
+    and echo_statement = {
+      echo_token : t;
+      echo_expression_list: t;
+      echo_semicolon: t;
+    }
     and simple_initializer = {
       simple_init_equal : t;
       simple_init_value : t
@@ -491,10 +496,6 @@ module WithToken(Token: TokenType) = struct
       subscript_left : t;
       subscript_index : t;
       subscript_right : t
-    }
-    and echo_intrinsic_expression = {
-      echo_intrinsic_token : t;
-      echo_intrinsic_expression_list : t;
     }
     and xhp_attribute = {
       xhp_attr_name : t;
@@ -652,6 +653,7 @@ module WithToken(Token: TokenType) = struct
     | FunctionStaticStatement of function_static_statement
     | SimpleInitializer of simple_initializer
     | StaticDeclarator of static_declarator
+    | EchoStatement of echo_statement
 
     | YieldExpression of yield_expression
     | CastExpression of cast_expression
@@ -679,7 +681,6 @@ module WithToken(Token: TokenType) = struct
     | ArrayIntrinsicExpression of array_intrinsic_expression
     | ElementInitializer of element_initializer
     | SubscriptExpression of subscript_expression
-    | EchoIntrinsicExpression of echo_intrinsic_expression
     | XHPExpression of xhp_expression
     | XHPOpen of xhp_open
     | XHPAttribute of xhp_attribute
@@ -775,6 +776,7 @@ module WithToken(Token: TokenType) = struct
       | FunctionStaticStatement _ -> SyntaxKind.FunctionStaticStatement
       | SimpleInitializer _ -> SyntaxKind.SimpleInitializer
       | StaticDeclarator _ -> SyntaxKind.StaticDeclarator
+      | EchoStatement _ -> SyntaxKind.EchoStatement
       | PrefixUnaryOperator _ -> SyntaxKind.PrefixUnaryOperator
       | PostfixUnaryOperator _ -> SyntaxKind.PostfixUnaryOperator
       | BinaryOperator _ -> SyntaxKind.BinaryOperator
@@ -791,7 +793,6 @@ module WithToken(Token: TokenType) = struct
       | ArrayIntrinsicExpression _ -> SyntaxKind.ArrayIntrinsicExpression
       | ElementInitializer _ -> SyntaxKind.ElementInitializer
       | SubscriptExpression _ -> SyntaxKind.SubscriptExpression
-      | EchoIntrinsicExpression _ -> SyntaxKind.EchoIntrinsicExpression
       | XHPExpression _ -> SyntaxKind.XHPExpression
       | XHPOpen _ -> SyntaxKind.XHPOpen
       | XHPClose _ -> SyntaxKind.XHPClose
@@ -875,6 +876,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.FunctionStaticStatement
     let is_simple_initializer node = kind node = SyntaxKind.SimpleInitializer
     let is_static_declarator node = kind node = SyntaxKind.StaticDeclarator
+    let is_echo_statement node =
+      kind node = SyntaxKind.EchoStatement
     let is_switch_statement node = kind node = SyntaxKind.SwitchStatement
     let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
     let is_postfix_operator node = kind node = SyntaxKind.PostfixUnaryOperator
@@ -902,8 +905,6 @@ module WithToken(Token: TokenType) = struct
     let is_element_initializer node = kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
-    let is_echo_intrinsic_expression node =
-      kind node = SyntaxKind.EchoIntrinsicExpression
     let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
     let is_xhp_open node = kind node = SyntaxKind.XHPOpen
     let is_xhp_attribute node = kind node = SyntaxKind.XHPAttribute
@@ -1197,6 +1198,9 @@ module WithToken(Token: TokenType) = struct
       | StaticDeclarator
         { static_name; static_init } ->
         [ static_name; static_init ]
+      | EchoStatement
+        { echo_token; echo_expression_list; echo_semicolon; } ->
+        [ echo_token; echo_expression_list; echo_semicolon; ]
       | PrefixUnaryOperator
         { unary_operator; unary_operand } ->
         [ unary_operator; unary_operand ]
@@ -1263,9 +1267,6 @@ module WithToken(Token: TokenType) = struct
           subscript_index; subscript_right } ->
         [ subscript_receiver; subscript_left;
           subscript_index; subscript_right ]
-      | EchoIntrinsicExpression
-        { echo_intrinsic_token; echo_intrinsic_expression_list; } ->
-        [ echo_intrinsic_token; echo_intrinsic_expression_list; ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ xhp_open; xhp_body; xhp_close ]
@@ -1573,6 +1574,9 @@ module WithToken(Token: TokenType) = struct
       | StaticDeclarator
         { static_name; static_init } ->
         [ "static_name"; "static_init" ]
+      | EchoStatement
+        { echo_token; echo_expression_list; echo_semicolon; } ->
+        [ "echo_token"; "echo_expression_list"; "echo_semicolon"; ]
       | PrefixUnaryOperator
         { unary_operator; unary_operand } ->
         [ "unary_operator"; "unary_operand" ]
@@ -1642,9 +1646,6 @@ module WithToken(Token: TokenType) = struct
           subscript_index; subscript_right } ->
         [ "subscript_receiver"; "subscript_left";
           "subscript_index"; "subscript_right" ]
-      | EchoIntrinsicExpression
-        { echo_intrinsic_token; echo_intrinsic_expression_list; } ->
-        [ "echo_intrinsic_token"; "echo_intrinsic_expression_list"; ]
       | XHPExpression
         { xhp_open; xhp_body; xhp_close } ->
         [ "xhp_open"; "xhp_body"; "xhp_close" ]
@@ -1866,6 +1867,9 @@ module WithToken(Token: TokenType) = struct
     let break_semicolon x = x.break_semicolon
     let continue_keyword x = x.continue_keyword
     let continue_semicolon x = x.continue_semicolon
+    let echo_token x = x.echo_token
+    let echo_expression_list x = x.echo_expression_list
+    let echo_semicolon x = x.echo_semicolon
     let expr_statement_expr x = x.expr_statement_expr
     let expr_statement_semicolon x = x.expr_statement_semicolon
     let unary_operator x = x.unary_operator
@@ -1900,8 +1904,6 @@ module WithToken(Token: TokenType) = struct
     let array_intrinsic_left_paren x = x.array_intrinsic_left_paren
     let array_intrinsic_members x = x.array_intrinsic_members
     let array_intrinsic_right_paren x = x.array_intrinsic_right_paren
-    let echo_intrinsic_token x = x.echo_intrinsic_token
-    let echo_intrinsic_expression_list x = x.echo_intrinsic_expression_list
     let xhp_open x = x.xhp_open
     let xhp_body x = x.xhp_body
     let xhp_close x = x.xhp_close
@@ -2226,6 +2228,10 @@ module WithToken(Token: TokenType) = struct
         [ static_name; static_init ]) ->
         StaticDeclarator
         { static_name; static_init }
+      | (SyntaxKind.EchoStatement,
+        [ echo_token; echo_expression_list; echo_semicolon; ]) ->
+        EchoStatement
+        { echo_token; echo_expression_list; echo_semicolon; }
       | (SyntaxKind.PrefixUnaryOperator, [ unary_operator; unary_operand ]) ->
         PrefixUnaryOperator { unary_operator; unary_operand }
       | (SyntaxKind.PostfixUnaryOperator, [ unary_operand; unary_operator ]) ->
@@ -2300,10 +2306,6 @@ module WithToken(Token: TokenType) = struct
         SubscriptExpression
         { subscript_receiver; subscript_left;
           subscript_index; subscript_right }
-      | (SyntaxKind.EchoIntrinsicExpression,
-        [ echo_intrinsic_token; echo_intrinsic_expression_list; ]) ->
-        EchoIntrinsicExpression
-          { echo_intrinsic_token; echo_intrinsic_expression_list; }
       | (SyntaxKind.XHPExpression, [ xhp_open; xhp_body; xhp_close ]) ->
         XHPExpression { xhp_open; xhp_body; xhp_close }
       | (SyntaxKind.XHPOpen, [ xhp_open_name; xhp_open_attrs;
@@ -2520,11 +2522,6 @@ module WithToken(Token: TokenType) = struct
       let make_subscript_expression receiver left index right =
         from_children SyntaxKind.SubscriptExpression
         [ receiver; left; index; right ]
-
-      let make_echo_intrinsic_expression
-        echo_intrinsic_token echo_intrinsic_expression_list =
-        from_children SyntaxKind.EchoIntrinsicExpression
-          [ echo_intrinsic_token; echo_intrinsic_expression_list; ]
 
       let make_xhp xhp_open xhp_body xhp_close =
         from_children SyntaxKind.XHPExpression [xhp_open; xhp_body; xhp_close ]
@@ -2793,6 +2790,11 @@ module WithToken(Token: TokenType) = struct
 
       let make_static_declarator variable init =
         from_children SyntaxKind.StaticDeclarator [ variable; init ]
+
+      let make_echo_statement
+        echo_token echo_expression_list echo_semicolon =
+        from_children SyntaxKind.EchoStatement
+        [ echo_token; echo_expression_list; echo_semicolon; ]
 
       let make_type_constant type_constant_left_type type_constant_separator
           type_constant_right_type =

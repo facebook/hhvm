@@ -45,6 +45,7 @@ module WithExpressionParser
     | Case -> parse_case_label_statement parser
     | LeftBrace -> parse_compound_statement parser
     | Static -> parse_function_static_declaration parser
+    | Echo -> parse_echo_statement parser
     | _ -> parse_expression_statement parser
 
   (* Helper: parses ( expr ) *)
@@ -369,6 +370,26 @@ module WithExpressionParser
       let (parser, value) = parse_expression parser1 in
       (parser, make_simple_initializer equal value)
     | _ -> (parser, make_missing())
+
+  (* SPEC:
+    TODO: update the spec to reflect that echo and print must be a statement
+    echo-intrinsic:
+      echo  expression
+      echo  (  expression  )
+      echo  expression-list-two-or-more
+
+    expression-list-two-or-more:
+      expression  ,  expression
+      expression-list-two-or-more  ,  expression
+  *)
+  and parse_echo_statement parser =
+    let parser, token = assert_token parser Echo in
+    let parser, expression_list = parse_comma_list
+      parser Semicolon SyntaxError.error1015 parse_expression
+    in
+    let parser, semicolon = expect_semicolon parser in
+    let syntax = make_echo_statement token expression_list semicolon in
+    (parser, syntax)
 
   and parse_expression_statement parser =
     let (parser1, token) = next_token parser in

@@ -48,3 +48,49 @@ module Funs = SharedMem.WithCache (StringKey) (Fun)
 module Classes = SharedMem.WithCache (StringKey) (Class)
 module Typedefs = SharedMem.WithCache (StringKey) (Typedef)
 module GConsts = SharedMem.WithCache (StringKey) (GConst)
+
+module Property = struct
+  type t = decl ty
+  let prefix = Prefix.make()
+  let description = "Property"
+end
+
+module StaticProperty = struct
+  type t = decl ty
+  let prefix = Prefix.make()
+  let description = "StaticProperty"
+end
+
+module Method = struct
+  type t = decl fun_type
+  let prefix = Prefix.make()
+  let description = "Method"
+end
+
+module StaticMethod = struct
+  type t = decl fun_type
+  let prefix = Prefix.make()
+  let description = "StaticMethod"
+end
+
+module Constructor = struct
+  type t = decl fun_type
+  let prefix = Prefix.make()
+  let description = "Constructor"
+end
+
+module ClassEltKey = struct
+  type t = string * string
+  let compare (cls1, elt1) (cls2, elt2) =
+    let r = String.compare cls1 cls2 in
+    if r <> 0 then r
+    else String.compare elt1 elt2
+
+  let to_string (cls, elt) = cls ^ "::" ^ elt
+end
+
+module Props = SharedMem.WithCache (ClassEltKey) (Property)
+module StaticProps = SharedMem.WithCache (ClassEltKey) (StaticProperty)
+module Methods = SharedMem.WithCache (ClassEltKey) (Method)
+module StaticMethods = SharedMem.WithCache (ClassEltKey) (StaticMethod)
+module Constructors = SharedMem.WithCache (StringKey) (Constructor)

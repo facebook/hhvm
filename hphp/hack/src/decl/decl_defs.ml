@@ -7,7 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-
 open Typing_defs
 
 (* A substitution context contains all the information necessary for
@@ -57,14 +56,29 @@ type decl_class_type = {
   dc_substs              : subst_context SMap.t;
   dc_consts              : class_const SMap.t;
   dc_typeconsts          : typeconst_type SMap.t;
-  dc_props               : class_elt SMap.t;
-  dc_sprops              : class_elt SMap.t;
-  dc_methods             : class_elt SMap.t;
-  dc_smethods            : class_elt SMap.t;
-  dc_construct           : class_elt option * bool;
+  dc_props               : element SMap.t;
+  dc_sprops              : element SMap.t;
+  dc_methods             : element SMap.t;
+  dc_smethods            : element SMap.t;
+  dc_construct           : element option * bool;
   dc_ancestors           : decl ty SMap.t ;
   dc_req_ancestors       : requirement list;
   dc_req_ancestors_extends : SSet.t;
   dc_extends             : SSet.t;
   dc_enum_type           : enum_type option;
+}
+
+and element = {
+  elt_final : bool;
+  elt_synthesized : bool;
+
+  (* Only relevant for methods *)
+  elt_override : bool;
+  elt_abstract : bool;
+
+  (* Only relevant for properties *)
+  elt_is_xhp_attr : bool;
+
+  elt_origin : string;
+  elt_visibility : visibility;
 }

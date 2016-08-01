@@ -310,8 +310,9 @@ and class_decl tcopt c =
   let props =
     List.fold_left ~f:(class_var_decl env c) ~init:props c.c_vars in
   let m = inherited.Decl_inherit.ih_methods in
-  let m =
-    List.fold_left ~f:(method_decl_acc env c) ~init:m c.c_methods in
+  let m = List.fold_left
+      ~f:(method_decl_acc ~is_static:false env c)
+      ~init:m c.c_methods in
   let consts = inherited.Decl_inherit.ih_consts in
   let consts = List.fold_left ~f:(class_const_decl env c)
     ~init:consts c.c_consts in
@@ -324,21 +325,22 @@ and class_decl tcopt c =
   let sprops = List.fold_left c.c_static_vars ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
   let sm = List.fold_left c.c_static_methods
-    ~f:(method_decl_acc env c) ~init:sm in
+      ~f:(method_decl_acc ~is_static:true env c)
+      ~init:sm in
   SMap.iter (check_static_method m) sm;
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl env parent_cstr c in
   let has_concrete_cstr = match (fst cstr) with
     | None
-    | Some {ce_type = (_, Tfun ({ft_abstract = true; _})); _} -> false
+    | Some {elt_abstract = true; _} -> false
     | _ -> true in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
   let impl = List.map impl (Decl_hint.hint env) in
   let impl = match SMap.get SN.Members.__toString m with
-    | Some {ce_type = (_, Tfun ft); _} when cls_name <> SN.Classes.cStringish ->
+    | Some { elt_origin = cls; _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
-      let pos = ft.ft_pos in
+      let pos = method_pos ~is_static:false cls SN.Members.__toString in
       let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
       ty :: impl
     | _ -> impl
@@ -404,8 +406,12 @@ and class_decl tcopt c =
   } in
   if Ast.Cnormal = c.c_kind then
     begin
-      SMap.iter (method_check_trait_overrides c) m;
-      SMap.iter (method_check_trait_overrides c) sm;
+      SMap.iter (
+        method_check_trait_overrides ~is_static:false c
+      ) m;
+      SMap.iter (
+        method_check_trait_overrides ~is_static:true c
+      ) sm;
     end
   else ();
   SMap.iter begin fun x _ ->
@@ -439,13 +445,14 @@ and trait_exists env acc trait =
       )
     | _ -> false
 
-and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
+and check_static_method obj method_name { elt_origin = cls; _ } =
   if SMap.mem method_name obj
   then begin
-    let static_position = Reason.to_pos reason_for_type in
+    let static_method_pos = method_pos ~is_static:true cls method_name in
     let dyn_method = SMap.find_unsafe method_name obj in
-    let dyn_position = Reason.to_pos (fst dyn_method.ce_type) in
-    Errors.static_dynamic static_position dyn_position method_name
+    let dyn_method_pos =
+      method_pos ~is_static:false dyn_method.elt_origin method_name in
+    Errors.static_dynamic static_method_pos dyn_method_pos method_name
   end
   else ()
 
@@ -457,8 +464,9 @@ and constructor_decl env (pcstr, pconsist) class_ =
       class_.c_user_attributes in
   match class_.c_constructor, pcstr with
   | None, _ -> pcstr, cconsist || pconsist
-  | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
-    Errors.override_final ~parent:(Reason.to_pos r) ~child:(fst method_.m_name);
+  | Some method_, Some {elt_final = true; elt_origin; _ } ->
+    let ft = Decl_heap.Constructors.find_unsafe elt_origin in
+    Errors.override_final ~parent:(ft.ft_pos) ~child:(fst method_.m_name);
     let cstr, mconsist = build_constructor env class_ method_ in
     cstr, cconsist || mconsist || pconsist
   | Some method_, _ ->
@@ -466,16 +474,14 @@ and constructor_decl env (pcstr, pconsist) class_ =
     cstr, cconsist || mconsist || pconsist
 
 and build_constructor env class_ method_ =
-  let ty = method_decl env method_ in
+  let ft = method_decl env method_ in
   let _, class_name = class_.c_name in
   let vis = visibility class_name method_.m_visibility in
   let mconsist = method_.m_final || class_.c_kind == Ast.Cinterface in
   (* due to the requirement of calling parent::__construct, a private
    * constructor cannot be overridden *)
   let mconsist = mconsist || method_.m_visibility == Private in
-  let mconsist = match ty with
-    | (_, Tfun ({ft_abstract = true; _})) -> true
-    | _ -> mconsist in
+  let mconsist = mconsist || ft.ft_abstract in
   (* the alternative to overriding
    * UserAttributes.uaConsistentConstruct is marking the corresponding
    * 'new static()' UNSAFE, potentially impacting the safety of a large
@@ -483,14 +489,15 @@ and build_constructor env class_ method_ =
   let consist_override =
     Attrs.mem SN.UserAttributes.uaUnsafeConstruct method_.m_user_attributes in
   let cstr = {
-    ce_final = method_.m_final;
-    ce_is_xhp_attr = false;
-    ce_override = consist_override;
-    ce_synthesized = false;
-    ce_visibility = vis;
-    ce_type = ty;
-    ce_origin = class_name;
+    elt_final = method_.m_final;
+    elt_abstract = ft.ft_abstract;
+    elt_is_xhp_attr = false;
+    elt_override = consist_override;
+    elt_synthesized = false;
+    elt_visibility = vis;
+    elt_origin = class_name;
   } in
+  Decl_heap.Constructors.add class_name ft;
   Some cstr, mconsist
 
 and class_const_decl env c acc (h, id, e) =
@@ -571,25 +578,36 @@ and class_var_decl env c acc cv =
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = {
-    ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
-    ce_synthesized = false; ce_visibility = vis; ce_type = ty;
-    ce_origin = (snd c.c_name);
+  let elt = {
+    elt_final = true;
+    elt_is_xhp_attr = cv.cv_is_xhp;
+    elt_synthesized = false;
+    elt_override = false;
+    elt_abstract = false;
+    elt_visibility = vis;
+    elt_origin = (snd c.c_name);
   } in
-  let acc = SMap.add id ce acc in
+  Decl_heap.Props.add (elt.elt_origin, id) ty;
+  let acc = SMap.add id elt acc in
   acc
 
 and static_class_var_decl env c acc cv =
   let ty = match cv.cv_type with
     | None -> Reason.Rwitness (fst cv.cv_id), Tany
     | Some ty -> Decl_hint.hint env ty in
-  let id = snd cv.cv_id in
+  let id = "$" ^ snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
-             ce_synthesized = false; ce_visibility = vis; ce_type = ty;
-             ce_origin = (snd c.c_name);
-           } in
-  let acc = SMap.add ("$"^id) ce acc in
+  let elt = {
+    elt_final = true;
+    elt_is_xhp_attr = cv.cv_is_xhp;
+    elt_override = false;
+    elt_abstract = false;
+    elt_synthesized = false;
+    elt_visibility = vis;
+    elt_origin = (snd c.c_name);
+  } in
+  Decl_heap.StaticProps.add (elt.elt_origin, id) ty;
+  let acc = SMap.add id elt acc in
   if cv.cv_expr = None && FileInfo.(c.c_mode = Mstrict || c.c_mode = Mpartial)
   then begin match cv.cv_type with
     | None
@@ -663,7 +681,7 @@ and method_decl env m =
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
   in
   let tparams = List.map m.m_tparams (type_param env) in
-  let ft = {
+  {
     ft_pos      = fst m.m_name;
     ft_deprecated =
       Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
@@ -672,49 +690,97 @@ and method_decl env m =
     ft_tparams  = tparams;
     ft_params   = params;
     ft_ret      = ret;
-  } in
-  let ty = Reason.Rwitness (fst m.m_name), Tfun ft in
-  ty
+  }
 
-and method_check_override c m acc =
+and method_check_override ~is_static c m acc =
   let pos, id = m.m_name in
   let _, class_id = c.c_name in
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   if m.m_visibility = Private && override then
     Errors.private_override pos class_id id;
   match SMap.get id acc with
-    | Some { ce_final = is_final; ce_type = (r, _); _ } ->
-      if is_final then
-        Errors.override_final ~parent:(Reason.to_pos r) ~child:pos;
-      false
-    | None when override && c.c_kind = Ast.Ctrait -> true
-    | None when override ->
-      Errors.should_be_override pos class_id id;
-      false
-    | None -> false
+  | Some { elt_final = is_final; elt_origin = cls; _ } ->
+    if is_final then begin
+      let meth_pos = method_pos ~is_static cls id in
+      Errors.override_final ~parent:(meth_pos) ~child:pos
+    end;
+    false
+  | None when override && c.c_kind = Ast.Ctrait -> true
+  | None when override ->
+    Errors.should_be_override pos class_id id;
+    false
+  | None -> false
 
-and method_decl_acc env c acc m =
-  let check_override = method_check_override c m acc in
-  let ty = method_decl env m in
+and method_decl_acc ~is_static env c acc m =
+  let check_override = method_check_override ~is_static c m acc in
+  let ft = method_decl env m in
   let _, id = m.m_name in
   let vis =
     match SMap.get id acc, m.m_visibility with
-      | Some { ce_visibility = Vprotected _ as parent_vis; _ }, Protected ->
-        parent_vis
-      | _ -> visibility (snd c.c_name) m.m_visibility
+    | Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected ->
+      parent_vis
+    | _ -> visibility (snd c.c_name) m.m_visibility
   in
-  let ce = {
-    ce_final = m.m_final; ce_is_xhp_attr = false; ce_override = check_override;
-    ce_synthesized = false; ce_visibility = vis; ce_type = ty;
-    ce_origin = snd (c.c_name);
+  let elt = {
+    elt_final = m.m_final;
+    elt_is_xhp_attr = false;
+    elt_abstract = ft.ft_abstract;
+    elt_override = check_override;
+    elt_synthesized = false;
+    elt_visibility = vis;
+    elt_origin = snd (c.c_name);
   } in
-  let acc = SMap.add id ce acc in
+  let add_meth = if is_static
+    then Decl_heap.StaticMethods.add
+    else Decl_heap.Methods.add
+  in
+  add_meth (elt.elt_origin, id) ft;
+  let acc = SMap.add id elt acc in
   acc
 
-and method_check_trait_overrides c id method_ce =
-  if method_ce.ce_override then
-    Errors.override_per_trait
-      c.c_name id (Reason.to_pos (fst method_ce.ce_type))
+and method_check_trait_overrides ~is_static c id meth =
+  if meth.elt_override then begin
+    let pos = method_pos ~is_static meth.elt_origin id in
+    Errors.override_per_trait c.c_name id pos
+  end
+
+(* For the most part the declaration phase does not care about the position of
+ * methods. There are a few places that do mainly for error reporting. There
+ * are cases when the method has not been added to the Decl_heap yet, in which
+ * case we fallback to retrieving the position from the parsing AST.
+ *)
+and method_pos ~is_static class_id meth =
+  let get_meth = if is_static then
+      Decl_heap.StaticMethods.get
+    else
+    Decl_heap.Methods.get in
+  match get_meth (class_id, meth) with
+  | Some { ft_pos; _ } -> ft_pos
+  | None ->
+    try
+      match Naming_heap.TypeIdHeap.get class_id with
+      | Some (p, `Class) ->
+        let fn = Pos.filename p in
+        begin match Parser_heap.find_class_in_file fn class_id with
+          | None -> raise Not_found
+          | Some { Ast.c_body; _ } ->
+            let elt = List.find ~f:begin fun x ->
+              match x with
+              | Ast.Method {Ast.m_name = (_, name); m_kind; _ }
+                when name = meth && is_static = List.mem m_kind Ast.Static ->
+                true
+              | _ -> false
+            end c_body
+            in
+            begin match elt with
+              | Some (Ast.Method { Ast.m_name = (pos, _); _ }) -> pos
+              | _ -> raise Not_found
+            end
+        end
+      | _ -> raise Not_found
+    with
+    | Not_found -> Pos.none
+
 
 (*****************************************************************************)
 (* Dealing with typedefs *)

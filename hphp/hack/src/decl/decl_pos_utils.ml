@@ -158,12 +158,11 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       end dc.dc_substs;
       dc_consts                = SMap.map class_const dc.dc_consts    ;
       dc_typeconsts            = SMap.map typeconst dc.dc_typeconsts  ;
-      dc_props                 = SMap.map class_elt dc.dc_props       ;
-      dc_sprops                = SMap.map class_elt dc.dc_sprops      ;
-      dc_methods               = SMap.map class_elt dc.dc_methods     ;
-      dc_smethods              = SMap.map class_elt dc.dc_smethods    ;
-      dc_construct             = Option.map (fst dc.dc_construct) class_elt,
-                                   (snd dc.dc_construct);
+      dc_props                 = dc.dc_props                          ;
+      dc_sprops                = dc.dc_sprops                         ;
+      dc_methods               = dc.dc_methods                        ;
+      dc_smethods              = dc.dc_smethods                       ;
+      dc_construct             = dc.dc_construct                      ;
       dc_ancestors             = SMap.map ty dc.dc_ancestors          ;
       dc_enum_type             = Option.map dc.dc_enum_type enum_type ;
     }

@@ -21,13 +21,13 @@ open Typing_defs
 
 type inherited = {
   ih_substs   : subst_context SMap.t;
-  ih_cstr     : class_elt option * bool;
+  ih_cstr     : element option * bool;
   ih_consts   : class_const SMap.t ;
   ih_typeconsts : typeconst_type SMap.t ;
-  ih_props    : class_elt SMap.t ;
-  ih_sprops   : class_elt SMap.t ;
-  ih_methods  : class_elt SMap.t ;
-  ih_smethods : class_elt SMap.t ;
+  ih_props    : element SMap.t ;
+  ih_sprops   : element SMap.t ;
+  ih_methods  : element SMap.t ;
+  ih_smethods : element SMap.t ;
 }
 
 (* Builds the inherited type *)

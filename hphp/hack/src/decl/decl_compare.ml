@@ -200,16 +200,6 @@ module CompareTypes = struct
     let acc = constraints_ acc x1 x2 in
     acc
 
-  and class_elt (subst, same) celt1 celt2 =
-    let same = same && celt1.ce_visibility = celt2.ce_visibility in
-    let same = same && celt1.ce_final = celt2.ce_final in
-    let same = same && celt1.ce_is_xhp_attr = celt2.ce_is_xhp_attr in
-    let same = same && celt1.ce_override = celt2.ce_override in
-    let same = same && celt1.ce_synthesized = celt2.ce_synthesized in
-    ty (subst, same) celt1.ce_type celt2.ce_type
-
-  and members acc m1 m2 = smap class_elt acc m1 m2
-
   and class_const (subst, same) c1 c2 =
     let same = same && c1.cc_synthesized = c2.cc_synthesized in
     ty (subst, same) c1.cc_type c2.cc_type
@@ -228,12 +218,6 @@ module CompareTypes = struct
     ty_opt acc tc1.ttc_type tc2_ttc_type
 
   and typeconsts acc tc1 tc2 = smap typeconst acc tc1 tc2
-
-  and constructor acc c1 c2 =
-    let subst, same = match (fst c1), (fst c2) with
-      | Some x1, Some x2 -> class_elt acc x1 x2
-      | _ -> acc
-    in subst, same && (snd c1 = snd c2)
 
   and req_ancestry acc imp1 imp2 =
     if List.length imp1 <> List.length imp2
@@ -260,17 +244,17 @@ module CompareTypes = struct
       c1.dc_name = c2.dc_name &&
       SSet.compare c1.dc_deferred_init_members c2.dc_deferred_init_members = 0 &&
       SSet.compare c1.dc_extends c2.dc_extends = 0 &&
-      SSet.compare c1.dc_req_ancestors_extends c2.dc_req_ancestors_extends = 0
+      SSet.compare c1.dc_req_ancestors_extends c2.dc_req_ancestors_extends = 0 &&
+      SMap.compare c1.dc_methods c2.dc_methods = 0 &&
+      SMap.compare c1.dc_smethods c2.dc_smethods = 0 &&
+      SMap.compare c1.dc_props c2.dc_props = 0 &&
+      SMap.compare c1.dc_sprops c2.dc_sprops = 0 &&
+      c1.dc_construct = c2.dc_construct
     in
     let acc = subst, same in
     let acc = tparam_list acc c1.dc_tparams c2.dc_tparams in
     let acc = class_consts acc c1.dc_consts c2.dc_consts in
-    let acc = members acc c1.dc_props c2.dc_props in
-    let acc = members acc c1.dc_sprops c2.dc_sprops in
-    let acc = members acc c1.dc_methods c2.dc_methods in
-    let acc = members acc c1.dc_smethods c2.dc_smethods in
     let acc = typeconsts acc c1.dc_typeconsts c2.dc_typeconsts in
-    let acc = constructor acc c1.dc_construct c2.dc_construct in
     let acc = req_ancestry acc c1.dc_req_ancestors c2.dc_req_ancestors in
     let acc = ancestry acc c1.dc_ancestors c2.dc_ancestors in
     let acc = cmp_opt enum_type acc c1.dc_enum_type c2.dc_enum_type in

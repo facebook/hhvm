@@ -61,6 +61,7 @@ type t =
 | Num
 | Object
 | Parent
+| Print
 | Private
 | Protected
 | Public
@@ -218,6 +219,7 @@ let from_string keyword =
   | "num" -> Some Num
   | "object" -> Some Object
   | "parent" -> Some Parent
+  | "print" -> Some Print
   | "private" -> Some Private
   | "protected" -> Some Protected
   | "public" -> Some Public
@@ -293,6 +295,7 @@ let to_string kind =
   | Num -> "num"
   | Object -> "object"
   | Parent -> "parent"
+  | Print -> "print"
   | Private -> "private"
   | Protected -> "protected"
   | Public -> "public"

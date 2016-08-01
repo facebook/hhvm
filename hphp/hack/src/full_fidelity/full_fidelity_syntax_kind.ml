@@ -69,6 +69,7 @@ type t =
 
 (* Expressions *)
 | YieldExpression
+| PrintExpression
 | CastExpression
 | LambdaExpression
 | LambdaSignature
@@ -120,6 +121,7 @@ let to_string kind =
   | Missing -> "missing"
   | Token -> "token"
   | YieldExpression -> "yield_expression"
+  | PrintExpression -> "print_expression"
   | CastExpression -> "cast_expression"
   | LambdaExpression -> "lambda_expression"
   | LambdaSignature -> "lambda_signature"

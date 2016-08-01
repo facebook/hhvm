@@ -424,6 +424,10 @@ module WithToken(Token: TokenType) = struct
       yield_token : t;
       yield_operand : t
     }
+    and print_expression = {
+      print_token : t;
+      print_expr : t;
+    }
     and unary_operator = {
       unary_operator : t;
       unary_operand : t
@@ -656,6 +660,7 @@ module WithToken(Token: TokenType) = struct
     | EchoStatement of echo_statement
 
     | YieldExpression of yield_expression
+    | PrintExpression of print_expression
     | CastExpression of cast_expression
     | LambdaExpression of lambda_expression
     | LambdaSignature of lambda_signature
@@ -717,6 +722,7 @@ module WithToken(Token: TokenType) = struct
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
       | YieldExpression _ -> SyntaxKind.YieldExpression
+      | PrintExpression _ -> SyntaxKind.PrintExpression
       | CastExpression _ -> SyntaxKind.CastExpression
       | LambdaExpression _ -> SyntaxKind.LambdaExpression
       | LambdaSignature _ -> SyntaxKind.LambdaSignature
@@ -818,6 +824,7 @@ module WithToken(Token: TokenType) = struct
     let is_missing node = kind node = SyntaxKind.Missing
     let is_token node = kind node = SyntaxKind.Token
     let is_yield_expression node = kind node = SyntaxKind.YieldExpression
+    let is_print_expression node = kind node = SyntaxKind.PrintExpression
     let is_cast_expression node = kind node = SyntaxKind.CastExpression
     let is_lambda_expression node = kind node = SyntaxKind.LambdaExpression
     let is_lambda_signature node = kind node = SyntaxKind.LambdaSignature
@@ -976,6 +983,9 @@ module WithToken(Token: TokenType) = struct
       | YieldExpression
         { yield_token; yield_operand } ->
         [ yield_token; yield_operand ]
+      | PrintExpression
+        { print_token; print_expr; } ->
+        [ print_token; print_expr; ]
       | CastExpression
         { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
         [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]
@@ -1347,6 +1357,9 @@ module WithToken(Token: TokenType) = struct
       | YieldExpression
         { yield_token; yield_operand } ->
         [ "yield_token"; "yield_operand" ]
+      | PrintExpression
+        { print_token; print_expr; } ->
+        [ "print_token"; "print_expr"; ]
       | CastExpression
         { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
         [ "cast_left_paren"; "cast_type"; "cast_right_paren"; "cast_operand" ]
@@ -1888,6 +1901,8 @@ module WithToken(Token: TokenType) = struct
     let braced_expr_left_brace x = x.braced_expr_left_brace
     let braced_expr x = x.braced_expr
     let braced_expr_right_brace x = x.braced_expr_right_brace
+    let print_token x = x.print_token
+    let print_expr x = x.print_expr
     let listlike_keyword x = x.listlike_keyword
     let listlike_left_paren x = x.listlike_left_paren
     let listlike_members x = x.listlike_members
@@ -1978,6 +1993,9 @@ module WithToken(Token: TokenType) = struct
         [ yield_token; yield_operand ]) ->
         YieldExpression
         { yield_token; yield_operand }
+      | (SyntaxKind.PrintExpression,
+        [ print_token; print_expr; ]) ->
+        PrintExpression { print_token; print_expr; }
       | (SyntaxKind.CastExpression,
         [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]) ->
         CastExpression
@@ -2441,6 +2459,10 @@ module WithToken(Token: TokenType) = struct
 
       let make_yield_expression token operand =
         from_children SyntaxKind.YieldExpression [ token; operand ]
+
+      let make_print_expression print_token print_expr =
+        from_children SyntaxKind.PrintExpression
+          [ print_token; print_expr; ]
 
       let make_cast_expression left cast_type right operand =
         from_children SyntaxKind.CastExpression

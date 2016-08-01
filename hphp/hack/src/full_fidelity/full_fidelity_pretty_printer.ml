@@ -564,6 +564,10 @@ let rec get_doc node =
     let y = get_doc x.yield_token in
     let o = get_doc x.yield_operand in
     group_doc (y ^| o)
+  | PrintExpression x ->
+    let t = get_doc x.print_token in
+    let e = get_doc x.print_expr in
+    group_doc (t ^| e)
   | CastExpression x ->
     let l = get_doc x.cast_left_paren in
     let t = get_doc x.cast_type in

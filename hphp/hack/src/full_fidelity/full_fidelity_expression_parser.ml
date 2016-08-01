@@ -104,6 +104,7 @@ module WithStatementAndDeclParser
     | QualifiedName ->
         parse_name_or_collection_literal_expression parser1 token
     | Yield -> parse_yield_expression parser
+    | Print -> parse_print_expression parser
     | Exclamation
     | PlusPlus
     | MinusMinus
@@ -311,6 +312,18 @@ module WithStatementAndDeclParser
     let (parser, operand) = parse_array_element_init parser in
     let result = make_yield_expression token operand in
     (parser, result)
+
+  and parse_print_expression parser =
+    (* SPEC:
+      TODO: this is the php spec and the hhvm yac grammar,
+      update the github spec
+
+      print expr
+    *)
+    let (parser, token) = assert_token parser Print in
+    let (parser, expr) = parse_expression parser in
+    let syntax = make_print_expression token expr in
+    (parser, syntax)
 
   and parse_cast_or_parenthesized_or_lambda_expression parser =
   (* We need to disambiguate between casts, lambdas and ordinary

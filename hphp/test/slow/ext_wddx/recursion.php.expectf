@@ -1,0 +1,6 @@
+
+Warning: recursion detected in %s/recursion.php on line 2
+string(%d) "<wddxPacket version='1.0'><header/><data><struct><var name='php_class_name'><string>Closure$;%s$%s$</string></var></struct></data></wddxPacket>"
+
+Warning: recursion detected in %s/recursion.php on line 6
+string(87) "<wddxPacket version='1.0'><header/><data><array length='1'></array></data></wddxPacket>"

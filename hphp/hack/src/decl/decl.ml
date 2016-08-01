@@ -15,6 +15,7 @@
  *)
 (*****************************************************************************)
 open Core
+open Decl_defs
 open Nast
 open Typing_defs
 open Typing_deps
@@ -89,9 +90,9 @@ let add_grand_parents_or_traits parent_pos class_nast acc parent_type =
   let class_pos = fst class_nast.c_name in
   let class_kind = class_nast.c_kind in
   if not is_trait
-  then check_extend_kind parent_pos parent_type.tc_kind class_pos class_kind;
-  let extends = SSet.union extends parent_type.tc_extends in
-  extends, parent_type.tc_members_fully_known && is_complete, is_trait
+  then check_extend_kind parent_pos parent_type.dc_kind class_pos class_kind;
+  let extends = SSet.union extends parent_type.dc_extends in
+  extends, parent_type.dc_members_fully_known && is_complete, is_trait
 
 let get_class_parent_or_trait env class_nast (parents, is_complete, is_trait)
     hint =
@@ -378,27 +379,27 @@ and class_decl tcopt c =
   let has_own_cstr = has_concrete_cstr && (None <> c.c_constructor) in
   let deferred_members = Decl_init_check.class_ ~has_own_cstr env c in
   let tc = {
-    tc_final = c.c_final;
-    tc_abstract = is_abstract;
-    tc_need_init = has_concrete_cstr;
-    tc_deferred_init_members = deferred_members;
-    tc_members_fully_known = ext_strict;
-    tc_kind = c.c_kind;
-    tc_name = snd c.c_name;
-    tc_pos = fst c.c_name;
-    tc_tparams = tparams;
-    tc_consts = consts;
-    tc_typeconsts = typeconsts;
-    tc_props = props;
-    tc_sprops = sprops;
-    tc_methods = m;
-    tc_smethods = sm;
-    tc_construct = cstr;
-    tc_ancestors = impl;
-    tc_extends = extends;
-    tc_req_ancestors = req_ancestors;
-    tc_req_ancestors_extends = req_ancestors_extends;
-    tc_enum_type = enum;
+    dc_final = c.c_final;
+    dc_abstract = is_abstract;
+    dc_need_init = has_concrete_cstr;
+    dc_deferred_init_members = deferred_members;
+    dc_members_fully_known = ext_strict;
+    dc_kind = c.c_kind;
+    dc_name = snd c.c_name;
+    dc_pos = fst c.c_name;
+    dc_tparams = tparams;
+    dc_consts = consts;
+    dc_typeconsts = typeconsts;
+    dc_props = props;
+    dc_sprops = sprops;
+    dc_methods = m;
+    dc_smethods = sm;
+    dc_construct = cstr;
+    dc_ancestors = impl;
+    dc_extends = extends;
+    dc_req_ancestors = req_ancestors;
+    dc_req_ancestors_extends = req_ancestors_extends;
+    dc_enum_type = enum;
   } in
   if Ast.Cnormal = c.c_kind then
     begin
@@ -419,11 +420,11 @@ and get_implements env ht =
       (* The class lives in PHP land *)
       SMap.singleton c ht
   | Some class_ ->
-      let subst = Inst.make_subst class_.tc_tparams paraml in
+      let subst = Inst.make_subst class_.dc_tparams paraml in
       let sub_implements =
         SMap.map
           (fun ty -> Inst.instantiate subst ty)
-          class_.tc_ancestors
+          class_.dc_ancestors
       in
       SMap.add c ht sub_implements
 
@@ -604,18 +605,18 @@ and visibility cid = function
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
-and typeconst_ty_decl pos c_name tc_name ~is_abstract =
+and typeconst_ty_decl pos c_name dc_name ~is_abstract =
   let r = Reason.Rwitness pos in
   let tsid = pos, SN.FB.cTypeStructure in
-  let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [pos, tc_name])]) in
+  let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [pos, dc_name])]) in
   let ts_ty = if is_abstract
-    then r, Tgeneric (c_name^"::"^tc_name, [(Ast.Constraint_as, ts_ty)])
+    then r, Tgeneric (c_name^"::"^dc_name, [(Ast.Constraint_as, ts_ty)])
     else ts_ty in
   {
     cc_synthesized = true;
     cc_type        = ts_ty;
     cc_expr        = None;
-    cc_origin      = tc_name;
+    cc_origin      = dc_name;
   }
 
 and typeconst_decl env c (acc, acc2) {

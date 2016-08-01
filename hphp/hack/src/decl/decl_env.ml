@@ -8,8 +8,7 @@
  *
  *)
 
-open Typing_defs
-open Decl_heap
+open Decl_defs
 
 module Dep = Typing_deps.Dep
 
@@ -36,10 +35,10 @@ let add_extends_dependency env x =
 let get_class_dep env x =
   add_wclass env x;
   add_extends_dependency env x;
-  Classes.get x
+  Decl_heap.Classes.get x
 
 let get_construct env class_ =
-  add_wclass env class_.tc_name;
-  let dep = Dep.Cstr (class_.tc_name) in
+  add_wclass env class_.dc_name;
+  let dep = Dep.Cstr (class_.dc_name) in
   Option.iter env.droot (fun root -> Typing_deps.add_idep root dep);
-  class_.tc_construct
+  class_.dc_construct

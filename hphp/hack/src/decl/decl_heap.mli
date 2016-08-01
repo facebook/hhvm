@@ -9,9 +9,10 @@
  *)
 
 open Typing_defs
+open Decl_defs
 
 module Class : sig
-  type t = class_type
+  type t = decl_class_type
   val prefix : Prefix.t
   val description : string
 end

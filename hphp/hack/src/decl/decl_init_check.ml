@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Decl_defs
 open Nast
 open Typing_defs
 
@@ -24,7 +25,7 @@ let add_parent_construct c decl_env props parent_hint =
       let class_ = Decl_env.get_class_dep decl_env parent in
       (match class_ with
         | Some class_ when
-            class_.Typing_defs.tc_need_init && c.c_constructor <> None
+            class_.dc_need_init && c.c_constructor <> None
             -> SSet.add parent_init_prop props
         | _ -> props
       )
@@ -57,7 +58,7 @@ let parent_props decl_env acc c =
       let tc = Decl_env.get_class_dep decl_env parent in
       (match tc with
         | None -> acc
-        | Some { tc_deferred_init_members = members; _ } ->
+        | Some { dc_deferred_init_members = members; _ } ->
           SSet.union members acc)
     | _ -> acc
   end ~init:acc

@@ -39,8 +39,9 @@ module Classes = struct
     | None ->
       match Decl_heap.Classes.get key with
       | Some c ->
-        Cache.add key c;
-        Some c
+        let class_type = Decl_class.to_class_type c in
+        Cache.add key class_type;
+        Some class_type
       | None ->
         None
 

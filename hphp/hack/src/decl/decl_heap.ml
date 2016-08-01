@@ -9,7 +9,7 @@
  *)
 
 open Typing_defs
-
+open Decl_defs
 (* The following classes are used to make sure we make no typing
  * mistake when interacting with the database. The database knows
  * how to associate a string to a string. We need to deserialize
@@ -20,7 +20,7 @@ open Typing_defs
 
 (* Module used to represent serialized classes *)
 module Class = struct
-  type t = Typing_defs.class_type
+  type t = decl_class_type
   let prefix = Prefix.make()
   let description = "Class"
 end

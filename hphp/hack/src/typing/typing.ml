@@ -15,6 +15,7 @@
  * consistent) *)
 open Autocomplete
 open Core
+open Decl_defs
 open Nast
 open Typing_defs
 open Utils
@@ -3795,16 +3796,16 @@ and string2 env idl =
  * the type parameters. *)
 and check_implements_tparaml (env: Env.env) ht =
   let _r, (p, c), paraml = TUtils.unwrap_class_type ht in
-  let class_ = Env.get_class_dep env c in
+  let class_ = Decl_env.get_class_dep env.Env.decl_env c in
   match class_ with
   | None ->
       (* The class lives in PHP land *)
       ()
   | Some class_ ->
-      let size1 = List.length class_.tc_tparams in
+      let size1 = List.length class_.dc_tparams in
       let size2 = List.length paraml in
-      if size1 <> size2 then Errors.class_arity p class_.tc_pos c size1;
-      let subst = Inst.make_subst class_.tc_tparams paraml in
+      if size1 <> size2 then Errors.class_arity p class_.dc_pos c size1;
+      let subst = Inst.make_subst class_.dc_tparams paraml in
       iter2_shortest begin fun (_, (p, _), cstrl) ty ->
         List.iter cstrl begin fun (ck, cstr) ->
           (* Constraint might contain uses of generic type parameters *)
@@ -3815,7 +3816,7 @@ and check_implements_tparaml (env: Env.env) ht =
           | Ast.Constraint_super ->
             ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
         end
-      end class_.tc_tparams paraml
+      end class_.dc_tparams paraml
 
 (* In order to type-check a class, we need to know what "parent"
  * refers to. Sometimes people write "parent::", when that happens,
@@ -3824,7 +3825,7 @@ and check_implements_tparaml (env: Env.env) ht =
 and class_def_parent env class_def class_type =
   match class_def.c_extends with
   | (_, Happly ((_, x), _) as parent_ty) :: _ ->
-      let parent_type = Env.get_class_dep env x in
+      let parent_type = Decl_env.get_class_dep env.Env.decl_env x in
       (match parent_type with
       | Some parent_type -> check_parent class_def class_type parent_type
       | None -> ());
@@ -3843,13 +3844,13 @@ and check_parent class_def class_type parent_type =
    *)
   if class_type.tc_members_fully_known
   then check_parent_abstract position parent_type class_type;
-  if parent_type.tc_final
-  then Errors.extend_final position parent_type.tc_pos parent_type.tc_name
+  if parent_type.dc_final
+  then Errors.extend_final position parent_type.dc_pos parent_type.dc_name
   else ()
 
 and check_parent_abstract position parent_type class_type =
   let is_final = class_type.tc_final in
-  if parent_type.tc_kind = Ast.Cabstract &&
+  if parent_type.dc_kind = Ast.Cabstract &&
     (class_type.tc_kind <> Ast.Cabstract || is_final)
   then begin
     check_extend_abstract_meth ~is_final position class_type.tc_methods;

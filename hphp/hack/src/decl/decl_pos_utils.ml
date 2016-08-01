@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Decl_defs
 open Typing_defs
 
 module ShapeMap = Nast.ShapeMap
@@ -139,29 +140,29 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
   and type_param (variance, sid, x) =
     variance, string_id sid, constraint_ x
 
-  and class_type tc =
-    { tc_final                 = tc.tc_final                          ;
-      tc_need_init             = tc.tc_need_init                      ;
-      tc_deferred_init_members = tc.tc_deferred_init_members          ;
-      tc_abstract              = tc.tc_abstract                       ;
-      tc_members_fully_known   = tc.tc_members_fully_known            ;
-      tc_kind                  = tc.tc_kind                           ;
-      tc_name                  = tc.tc_name                           ;
-      tc_pos                   = tc.tc_pos                            ;
-      tc_extends               = tc.tc_extends                        ;
-      tc_req_ancestors         = tc.tc_req_ancestors                  ;
-      tc_req_ancestors_extends = tc.tc_req_ancestors_extends          ;
-      tc_tparams               = List.map tc.tc_tparams type_param    ;
-      tc_consts                = SMap.map class_const tc.tc_consts    ;
-      tc_typeconsts            = SMap.map typeconst tc.tc_typeconsts  ;
-      tc_props                 = SMap.map class_elt tc.tc_props       ;
-      tc_sprops                = SMap.map class_elt tc.tc_sprops      ;
-      tc_methods               = SMap.map class_elt tc.tc_methods     ;
-      tc_smethods              = SMap.map class_elt tc.tc_smethods    ;
-      tc_construct             = Option.map (fst tc.tc_construct) class_elt,
-                                   (snd tc.tc_construct);
-      tc_ancestors             = SMap.map ty tc.tc_ancestors          ;
-      tc_enum_type             = Option.map tc.tc_enum_type enum_type ;
+  and class_type dc =
+    { dc_final                 = dc.dc_final                          ;
+      dc_need_init             = dc.dc_need_init                      ;
+      dc_deferred_init_members = dc.dc_deferred_init_members          ;
+      dc_abstract              = dc.dc_abstract                       ;
+      dc_members_fully_known   = dc.dc_members_fully_known            ;
+      dc_kind                  = dc.dc_kind                           ;
+      dc_name                  = dc.dc_name                           ;
+      dc_pos                   = dc.dc_pos                            ;
+      dc_extends               = dc.dc_extends                        ;
+      dc_req_ancestors         = dc.dc_req_ancestors                  ;
+      dc_req_ancestors_extends = dc.dc_req_ancestors_extends          ;
+      dc_tparams               = List.map dc.dc_tparams type_param    ;
+      dc_consts                = SMap.map class_const dc.dc_consts    ;
+      dc_typeconsts            = SMap.map typeconst dc.dc_typeconsts  ;
+      dc_props                 = SMap.map class_elt dc.dc_props       ;
+      dc_sprops                = SMap.map class_elt dc.dc_sprops      ;
+      dc_methods               = SMap.map class_elt dc.dc_methods     ;
+      dc_smethods              = SMap.map class_elt dc.dc_smethods    ;
+      dc_construct             = Option.map (fst dc.dc_construct) class_elt,
+                                   (snd dc.dc_construct);
+      dc_ancestors             = SMap.map ty dc.dc_ancestors          ;
+      dc_enum_type             = Option.map dc.dc_enum_type enum_type ;
     }
 
   and enum_type te =

@@ -17,6 +17,7 @@
 (*****************************************************************************)
 
 open Core
+open Decl_defs
 open Nast
 open Typing_defs
 
@@ -190,14 +191,14 @@ let add_inherited inherited acc = {
 (*****************************************************************************)
 
 let check_arity pos class_name class_type class_parameters =
-  let arity = List.length class_type.tc_tparams in
+  let arity = List.length class_type.dc_tparams in
   if List.length class_parameters <> arity
-  then Errors.class_arity pos class_type.tc_pos class_name arity;
+  then Errors.class_arity pos class_type.dc_pos class_name arity;
   ()
 
 let make_substitution pos class_name class_type class_parameters =
   check_arity pos class_name class_type class_parameters;
-  Inst.make_subst class_type.tc_tparams class_parameters
+  Inst.make_subst class_type.dc_tparams class_parameters
 
 let constructor subst (cstr, consistent) = match cstr with
   | None -> None, consistent
@@ -235,11 +236,11 @@ let chown_private owner =
 
 let apply_fn_to_class_elts fn class_type = {
   class_type with
-  tc_typeconsts = class_type.tc_typeconsts;
-  tc_props = fn class_type.tc_props;
-  tc_sprops = fn class_type.tc_sprops;
-  tc_methods = fn class_type.tc_methods;
-  tc_smethods = fn class_type.tc_smethods;
+  dc_typeconsts = class_type.dc_typeconsts;
+  dc_props = fn class_type.dc_props;
+  dc_sprops = fn class_type.dc_sprops;
+  dc_methods = fn class_type.dc_methods;
+  dc_smethods = fn class_type.dc_smethods;
 }
 
 let filter_privates = apply_fn_to_class_elts filter_private
@@ -253,7 +254,7 @@ let inherit_hack_class env c p class_name class_type argl =
   let subst = make_substitution p class_name class_type argl in
   let instantiate = SMap.map (Inst.instantiate_ce subst) in
   let class_type =
-    match class_type.tc_kind with
+    match class_type.dc_kind with
     | Ast.Ctrait ->
         (* Change the private visibility to point to the inheriting class *)
         chown_privates (snd c.c_name) class_type
@@ -262,12 +263,12 @@ let inherit_hack_class env c p class_name class_type argl =
     | Ast.Cenum -> class_type
   in
   let typeconsts = SMap.map (Inst.instantiate_typeconst subst)
-    class_type.tc_typeconsts in
-  let consts = SMap.map (Inst.instantiate_cc subst) class_type.tc_consts in
-  let props    = instantiate class_type.tc_props in
-  let sprops   = instantiate class_type.tc_sprops in
-  let methods  = instantiate class_type.tc_methods in
-  let smethods = instantiate class_type.tc_smethods in
+    class_type.dc_typeconsts in
+  let consts = SMap.map (Inst.instantiate_cc subst) class_type.dc_consts in
+  let props    = instantiate class_type.dc_props in
+  let sprops   = instantiate class_type.dc_sprops in
+  let methods  = instantiate class_type.dc_methods in
+  let smethods = instantiate class_type.dc_smethods in
   let cstr     = Decl_env.get_construct env class_type in
   let cstr     = constructor subst cstr in
   let result = {
@@ -285,9 +286,9 @@ let inherit_hack_class env c p class_name class_type argl =
 let inherit_hack_class_constants_only p class_name class_type argl =
   let subst = make_substitution p class_name class_type argl in
   let instantiate = SMap.map (Inst.instantiate_cc subst) in
-  let consts  = instantiate class_type.tc_consts in
+  let consts  = instantiate class_type.dc_consts in
   let typeconsts = SMap.map (Inst.instantiate_typeconst subst)
-    class_type.tc_typeconsts in
+    class_type.dc_typeconsts in
   let result = { empty with
     ih_consts   = consts;
     ih_typeconsts = typeconsts;
@@ -302,7 +303,7 @@ let inherit_hack_xhp_attrs_only p class_name class_type argl =
   let props =
     SMap.fold begin fun name class_elt acc ->
       if class_elt.ce_is_xhp_attr then SMap.add name class_elt acc else acc
-    end class_type.tc_props SMap.empty in
+    end class_type.dc_props SMap.empty in
   let props = SMap.map (Inst.instantiate_ce subst) props in
   let result = { empty with ih_props = props; } in
   result

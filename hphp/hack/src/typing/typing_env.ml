@@ -443,8 +443,6 @@ let get_enum env x =
 
 let is_enum env x = get_enum env x <> None
 
-let get_class_dep env = Decl_env.get_class_dep env.decl_env
-
 let get_typeconst env class_ mid =
   add_wclass env class_.tc_name;
   let dep = Dep.Const (class_.tc_name, mid) in
@@ -500,7 +498,11 @@ let suggest_member is_method class_ mid =
   let members = if is_method then class_.tc_methods else class_.tc_props in
   suggest_member members mid
 
-let get_construct env = Decl_env.get_construct env.decl_env
+let get_construct env class_ =
+  add_wclass env class_.tc_name;
+  let dep = Dep.Cstr (class_.tc_name) in
+  Option.iter env.decl_env.Decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  class_.tc_construct
 
 let get_todo env =
   env.todo

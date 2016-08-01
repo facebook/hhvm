@@ -9,20 +9,21 @@
  *)
 
 open Core
+open Decl_defs
 open Nast
 open Typing_defs
 
 module Inst = Decl_instantiate
 
 let check_arity pos class_name class_type class_parameters =
-  let arity = List.length class_type.tc_tparams in
+  let arity = List.length class_type.dc_tparams in
   if List.length class_parameters <> arity
-  then Errors.class_arity pos class_type.tc_pos class_name arity;
+  then Errors.class_arity pos class_type.dc_pos class_name arity;
   ()
 
 let make_substitution pos class_name class_type class_parameters =
   check_arity pos class_name class_type class_parameters;
-  Inst.make_subst class_type.tc_tparams class_parameters
+  Inst.make_subst class_type.dc_tparams class_parameters
 
 (* Accumulate requirements so that we can successfully check the bodies
  * of trait methods / check that classes satisfy these requirements *)
@@ -42,7 +43,7 @@ let flatten_parent_class_reqs env class_nast
     let subst =
       make_substitution parent_pos parent_name parent_type parent_params in
     let req_ancestors =
-      List.rev_map_append parent_type.tc_req_ancestors req_ancestors
+      List.rev_map_append parent_type.dc_req_ancestors req_ancestors
         begin fun (_p, ty) ->
           let ty = Inst.instantiate subst ty in
           parent_pos, ty
@@ -54,7 +55,7 @@ let flatten_parent_class_reqs env class_nast
       req_ancestors, SSet.empty
     | Ast.Ctrait | Ast.Cinterface ->
       let req_ancestors_extends = SSet.union
-        parent_type.tc_req_ancestors_extends req_ancestors_extends in
+        parent_type.dc_req_ancestors_extends req_ancestors_extends in
       req_ancestors, req_ancestors_extends
     | Ast.Cenum -> assert false
 
@@ -72,13 +73,13 @@ let declared_class_req env (requirements, req_extends) hint =
   | None -> (* The class lives in PHP : error?? *)
     requirements, req_extends
   | Some parent_type -> (* The parent class lives in Hack *)
-    let req_extends = SSet.union parent_type.tc_extends req_extends in
+    let req_extends = SSet.union parent_type.dc_extends req_extends in
     (* the req may be of an interface that has reqs of its own; the
      * flattened ancestry required by *those* reqs need to be added
      * in to, e.g., interpret accesses to protected functions inside
      * traits *)
     let req_extends =
-      SSet.union parent_type.tc_req_ancestors_extends req_extends in
+      SSet.union parent_type.dc_req_ancestors_extends req_extends in
     requirements, req_extends
 
 (* Cheap hack: we cannot do unification / subtyping in the decl phase because

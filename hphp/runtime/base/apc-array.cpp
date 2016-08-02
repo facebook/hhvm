@@ -109,8 +109,8 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {
   auto p = malloc(size);
   auto ret = new (p) APCArray(static_cast<size_t>(num_elems));
 
+  size_t i = 0;
   try {
-    size_t i = 0;
     for (ArrayIter it(arr); !it.end(); it.next()) {
       auto val = APCHandle::Create(it.secondRef(), false,
                                    APCHandleLevel::Inner, unserializeObj);
@@ -119,6 +119,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {
     }
     assert(i == num_elems);
   } catch (...) {
+    ret->m_size = i;
     delete ret;
     throw;
   }

@@ -452,7 +452,7 @@ static inline uint64_t pgoThresholdDefault() {
 
 static inline bool evalJitDefault() {
 // Disable JIT for PPC64 - Port under development
-#if defined(__CYGWIN__) || defined(_MSC_VER) || defined(__powerpc64__)
+#if defined(__CYGWIN__) || defined(_MSC_VER)
   return false;
 #else
   return true;

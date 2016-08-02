@@ -234,8 +234,9 @@ template<class F> void scanRds(F& mark, rds::Header* rds) {
   markSection(rds::normalSection());
   mark.where(RootKind::RdsLocal);
   markSection(rds::localSection());
-  mark.where(RootKind::RdsPersistent);
-  markSection(rds::persistentSection());
+  // RDS Persistent section should not contain pointers to any request
+  // allocated memory.
+
   // php stack TODO #6509338 exactly scan the php stack.
   mark.where(RootKind::PhpStack);
   auto stack_end = rds->vmRegs.stack.getStackHighAddress();

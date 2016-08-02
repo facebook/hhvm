@@ -774,14 +774,29 @@ module WithStatementAndDeclParser
     let result = make_shape_expression shape left_paren fields right_paren in
     (parser, result)
 
+  and parse_use_variable parser =
+    (* TODO: Is it better that this returns the variable as a *token*, or
+    as an *expression* that consists of the token? We do the former. *)
+    let (parser, ampersand) = optional_token parser Ampersand in
+    let (parser, variable) = expect_variable parser in
+    if is_missing ampersand then
+      (parser, variable)
+    else
+      let result = make_prefix_unary_operator ampersand variable in
+      (parser, result)
+
   and parse_variable_list parser =
     (* SPEC:
       use-variable-name-list:
         variable-name
         use-variable-name-list  ,  variable-name
     *)
+    (* TODO: Strict mode requires that it be a list of variables; in
+       non-strict mode we allow variables to be decorated with a leading
+       & to indicate they are captured by reference. We need to give an
+       error in a later pass for this. *)
     parse_comma_list_opt
-      parser RightParen SyntaxError.error1025 expect_variable
+      parser RightParen SyntaxError.error1025 parse_use_variable
 
   and parse_anon_or_lambda parser =
     let (parser1, _) = assert_token parser Async in

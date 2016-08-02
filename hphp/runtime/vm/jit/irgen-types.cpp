@@ -272,6 +272,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     if (RuntimeOption::RepoAuthoritative && td &&
         tc.namedEntity()->isPersistentTypeAlias() &&
         td->klass) {
+      assertx(classHasPersistentRDS(td->klass));
       clsName = td->klass->name();
       knownConstraint = td->klass;
     } else {

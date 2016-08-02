@@ -1099,7 +1099,7 @@ void Unit::defTypeAlias(Id id) {
       raise_error("The type %s is already defined to an incompatible type",
                   thisType->name->data());
     };
-    if (thisType->attrs & AttrPersistent) {
+    if (nameList->isPersistentTypeAlias()) {
       // We may have cached the fully resolved type in a previous request.
       if (resolveTypeAlias(thisType) != *current) {
         raiseIncompatible();
@@ -1119,20 +1119,26 @@ void Unit::defTypeAlias(Id id) {
     return;
   }
 
+  auto resolved = resolveTypeAlias(thisType);
+  if (resolved.invalid) {
+    raise_error("Unknown type or class %s", typeName->data());
+    return;
+  }
+
   if (!nameList->m_cachedTypeAlias.bound()) {
-    auto rdsMode = (thisType->attrs & AttrPersistent)
-      ? rds::Mode::Persistent : rds::Mode::Normal;
+    auto rdsMode = [&] {
+      if (!(thisType->attrs & AttrPersistent)) return rds::Mode::Normal;
+      if (resolved.klass && !classHasPersistentRDS(resolved.klass)) {
+        return rds::Mode::Normal;
+      }
+      return rds::Mode::Persistent;
+    }();
     nameList->m_cachedTypeAlias.bind(rdsMode);
     rds::recordRds(nameList->m_cachedTypeAlias.handle(),
                    sizeof(TypeAliasReq),
                    "TypeAlias", typeName->data());
   }
 
-  auto resolved = resolveTypeAlias(thisType);
-  if (resolved.invalid) {
-    raise_error("Unknown type or class %s", typeName->data());
-    return;
-  }
   nameList->setCachedTypeAlias(resolved);
 }
 

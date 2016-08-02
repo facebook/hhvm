@@ -70,7 +70,6 @@ void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
 }
 
 const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
-  // TODO(#2103214): Support persistent type aliases.
   return m_cachedTypeAlias.bound() &&
          m_cachedTypeAlias.isInit() &&
          m_cachedTypeAlias->name

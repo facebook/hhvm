@@ -68,6 +68,10 @@ struct RuntimeOption {
     return EvalEnableGC && EvalGCSampleRate > 0;
   }
 
+  static bool JitSamplingEnabled() {
+    return EvalJit && EvalJitSampleRate > 0;
+  }
+
   static void ReadSatelliteInfo(
     const IniSettingMap& ini,
     const Hdf& hdf,
@@ -578,6 +582,7 @@ struct RuntimeOption {
   F(bool, Quarantine,                  false)                           \
   F(bool, EnableGCTypeScan,            false)                           \
   F(uint32_t, GCSampleRate,                1)                           \
+  F(uint32_t, JitSampleRate,               0)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \

@@ -739,7 +739,6 @@ TransResult MCGenerator::translate(TransArgs args) {
   if (args.allowPartial && !Translator::WriteLease().amOwner()) {
     return std::move(env);
   }
-
   timer.stop();
   return finishTranslation(std::move(env));
 }
@@ -1700,6 +1699,55 @@ void reportJitMaturity(const CodeCache& code) {
     StructuredLog::log("hhvm_warmup", cols);
   }
 }
+
+// send stats about this translation to StructuredLog
+void logTranslation(const TransEnv& env) {
+  auto nanos = Timer::getCPUTimeNanos() - env.unit->startNanos();
+  StructuredLogEntry cols;
+  auto& context = env.unit->context();
+  auto kind = show(context.kind);
+  cols.setStr("trans_kind", !debug ? kind : kind + "_debug");
+  if (context.func) {
+    cols.setStr("func", context.func->fullName()->data());
+  }
+  cols.setInt("jit_sample_rate", RuntimeOption::EvalJitSampleRate);
+  // timing info
+  cols.setInt("jit_micros", nanos / 1000);
+  // hhir stats
+  cols.setInt("max_tmps", env.unit->numTmps());
+  cols.setInt("max_blocks", env.unit->numBlocks());
+  cols.setInt("max_insts", env.unit->numInsts());
+  auto hhir_blocks = rpoSortCfg(*env.unit);
+  cols.setInt("num_blocks", hhir_blocks.size());
+  size_t num_insts = 0;
+  for (auto b : hhir_blocks) num_insts += b->instrs().size();
+  cols.setInt("num_insts", num_insts);
+  // vasm stats
+  cols.setInt("max_vreg", env.vunit->next_vr);
+  cols.setInt("max_vblocks", env.vunit->blocks.size());
+  cols.setInt("max_vcalls", env.vunit->vcallArgs.size());
+  size_t max_vinstr = 0;
+  for (auto& blk : env.vunit->blocks) max_vinstr += blk.code.size();
+  cols.setInt("max_vinstr", max_vinstr);
+  cols.setInt("num_vconst", env.vunit->constToReg.size());
+  auto vblocks = sortBlocks(*env.vunit);
+  size_t num_vinstr[kNumAreas] = {0, 0, 0};
+  size_t num_vblocks[kNumAreas] = {0, 0, 0};
+  for (auto b : vblocks) {
+    const auto& block = env.vunit->blocks[b];
+    num_vinstr[(int)block.area_idx] += block.code.size();
+    num_vblocks[(int)block.area_idx]++;
+  }
+  cols.setInt("num_vinstr_main", num_vinstr[(int)AreaIndex::Main]);
+  cols.setInt("num_vinstr_cold", num_vinstr[(int)AreaIndex::Cold]);
+  cols.setInt("num_vinstr_frozen", num_vinstr[(int)AreaIndex::Frozen]);
+  cols.setInt("num_vblocks_main", num_vblocks[(int)AreaIndex::Main]);
+  cols.setInt("num_vblocks_cold", num_vblocks[(int)AreaIndex::Cold]);
+  cols.setInt("num_vblocks_frozen", num_vblocks[(int)AreaIndex::Frozen]);
+  // finish & log
+  StructuredLog::log("hhvm_jit", cols);
+}
+
 }
 
 TCA MCGenerator::finishTranslation(TransEnv env) {
@@ -1717,6 +1765,7 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   TransLocMaker maker{code};
   maker.markStart();
 
+  // mcGenUnit emits machine code from vasm
   if (env.vunit && !mcGenUnit(env, code, fixups)) {
     // mcGenUnit() failed. Roll back, drop the unit and region, and clear
     // fixups.
@@ -1803,6 +1852,13 @@ TCA MCGenerator::finishTranslation(TransEnv env) {
   }
 
   reportJitMaturity(m_code);
+
+  if (env.unit) {
+    auto func = env.unit->context().func;
+    auto enable = func ? func->shouldSampleJit() :
+                  StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate);
+    if (enable) logTranslation(env);
+  }
 
   return loc.mainStart();
 }

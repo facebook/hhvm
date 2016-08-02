@@ -40,6 +40,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/debug.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
 #include <atomic>
@@ -78,6 +79,9 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   m_isPreFunc = false;
   m_hasPrivateAncestor = false;
   m_shared = nullptr;
+  m_shouldSampleJit = StructuredLog::coinflip(
+      RuntimeOption::EvalJitSampleRate
+  );
 }
 
 Func::~Func() {

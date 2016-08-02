@@ -36,6 +36,7 @@ IRUnit::IRUnit(TransContext context) : m_context(context)
   // For Optimize translations, the entry block's profCount is
   // adjusted later in translateRegion.
   m_entry = defBlock();
+  m_startNanos = Timer::getCPUTimeNanos();
 }
 
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {

@@ -889,6 +889,7 @@ struct Func final {
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
 
+  bool shouldSampleJit() const { return m_shouldSampleJit; }
 
   /////////////////////////////////////////////////////////////////////////////
   // JIT data.
@@ -1232,6 +1233,7 @@ private:
   mutable ClonedFlag m_cloned;
   bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
+  bool m_shouldSampleJit : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};
   Unit* const m_unit;

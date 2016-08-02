@@ -282,6 +282,10 @@ inline SSATmp* IRUnit::mainSP() const {
   return it->dst();
 }
 
+inline int64_t IRUnit::startNanos() const {
+  return m_startNanos;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> SSATmp* IRUnit::cns(T val) {

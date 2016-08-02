@@ -45,7 +45,11 @@ const TimerName s_names[] = {
 # undef TIMER_NAME
 };
 
-int64_t getCPUTimeNanos() {
+//////////////////////////////////////////////////////////////////////
+
+}
+
+int64_t Timer::getCPUTimeNanos() {
   if (!RuntimeOption::EvalJitTimer) return -1;
 
 #ifdef CLOCK_THREAD_CPUTIME_ID
@@ -59,10 +63,6 @@ int64_t getCPUTimeNanos() {
 #else
   return -1;
 #endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }
 
 Timer::Timer(Name name)

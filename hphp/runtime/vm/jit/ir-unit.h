@@ -195,6 +195,11 @@ struct IRUnit {
    */
   SSATmp* mainSP() const;
 
+  /*
+   * Return the "start" timestamp when this IRUnit was constructed.
+   */
+  int64_t startNanos() const;
+
   /////////////////////////////////////////////////////////////////////////////
 
   struct Hinter {
@@ -262,6 +267,9 @@ private:
   jit::vector<SSATmp*> m_ssaTmps;
 
   Block::Hint m_defHint = Block::Hint::Neither;
+
+  // timestamp at construction time.
+  int64_t m_startNanos;
 };
 
 //////////////////////////////////////////////////////////////////////

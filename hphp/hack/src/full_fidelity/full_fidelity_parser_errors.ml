@@ -462,6 +462,7 @@ let statement_errors node parents =
   | DefaultStatement _
     when not (statement_directly_in_switch parents) ->
     Some (node, SyntaxError.error2004)
+    (* TODO: Detect when there is more than one default. *)
   | BreakStatement _
     when not (break_is_legal parents) ->
     Some (node, SyntaxError.error2005)

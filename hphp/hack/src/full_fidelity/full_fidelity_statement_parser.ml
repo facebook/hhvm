@@ -314,18 +314,36 @@ module WithExpressionParser
     (parser, make_throw_statement throw_token expr semi_token)
 
   and parse_default_label_statement parser =
+    (* SPEC:
+      default-label:
+        default  :  statement
+    TODO: The spec is wrong; it implies that a statement must always follow
+          the default:, but in fact
+          switch($x) { default: }
+          is legal. Fix the spec. *)
     (* We detect if we are not inside a switch in a later pass. *)
     let (parser, default_token) = assert_token parser Default in
     let (parser, colon_token) = expect_colon parser in
-    let (parser, stmt) = parse_statement parser in
+    let (parser, stmt) =
+      if peek_token_kind parser = RightBrace then (parser, make_missing())
+      else parse_statement parser in
     (parser, make_default_statement default_token colon_token stmt)
 
   and parse_case_label_statement parser =
     (* We detect if we are not inside a switch in a later pass. *)
+    (* SPEC:
+      case-label:
+        case expression  :  statement
+    TODO: The spec is wrong; it implies that a statement must always follow
+          the case, but in fact
+          switch($x) { case 10: }
+          is legal. Fix the spec. *)
     let (parser, case_token) = assert_token parser Case in
     let (parser, expr) = parse_expression parser in
     let (parser, colon_token) = expect_colon parser in
-    let (parser, stmt) = parse_statement parser in
+    let (parser, stmt) =
+      if peek_token_kind parser = RightBrace then (parser, make_missing())
+      else parse_statement parser in
     (parser, make_case_statement case_token expr colon_token stmt)
 
   and parse_function_static_declaration parser =

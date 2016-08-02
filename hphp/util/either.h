@@ -169,6 +169,7 @@ struct Either {
    * Returns whether this Either contains neither left nor right.
    */
   bool isNull() const { return !(bits & ~TagBit); }
+  uintptr_t toOpaque() const { return bits; }
 
 private:
   static_assert(

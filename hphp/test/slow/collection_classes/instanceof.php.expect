@@ -46,3 +46,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
+==== Jit tests ====
+bool(false)
+bool(false)
+bool(false)

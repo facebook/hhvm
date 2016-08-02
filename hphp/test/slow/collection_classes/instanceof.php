@@ -1,4 +1,9 @@
 <?hh
+function test($v, $m, $s) {
+  if ($v instanceof MutableVector) var_dump($v == 1);
+  if ($m instanceof MutableMap) var_dump($m == 1);
+  if ($s instanceof MutableSet) var_dump($s == 1);
+}
 $vector = Vector {};
 $map = Map {};
 $set = Set {};
@@ -51,3 +56,5 @@ var_dump($pair instanceof ConstMapAccess);
 var_dump($pair instanceof ConstVector);
 var_dump($pair instanceof ConstMap);
 var_dump($pair instanceof ConstSet);
+echo "==== Jit tests ====\n";
+test($vector, $map, $set);

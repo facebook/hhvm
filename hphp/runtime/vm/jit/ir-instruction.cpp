@@ -263,12 +263,13 @@ Type arrElemReturn(const IRInstruction* inst) {
       if (idx->hasConstVal(TInt) &&
           idx->intVal() >= 0 &&
           idx->intVal() < arrTy->size()) {
-        resultType &= typeFromRAT(arrTy->packedElem(idx->intVal()));
+        resultType &= typeFromRAT(arrTy->packedElem(idx->intVal()),
+                                  inst->ctx());
       }
       break;
     }
     case T::PackedN:
-      resultType &= typeFromRAT(arrTy->elemType());
+      resultType &= typeFromRAT(arrTy->elemType(), inst->ctx());
       break;
   }
 
@@ -314,7 +315,7 @@ Type newColReturn(const IRInstruction* inst) {
   assertx(inst->is(NewCol, NewColFromArray));
   auto getColClassType = [&](CollectionType ct) -> Type {
     auto name = collections::typeToString(ct);
-    auto cls = Unit::lookupClassOrUniqueClass(name);
+    auto cls = Unit::lookupUniqueClassInContext(name, inst->ctx());
     if (cls == nullptr) return TObj;
     return Type::ExactObj(cls);
   };

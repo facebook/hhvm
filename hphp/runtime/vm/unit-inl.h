@@ -288,19 +288,23 @@ inline Class* Unit::lookupClass(const StringData* name) {
   return lookupClass(NamedEntity::get(name));
 }
 
-inline Class* Unit::lookupClassOrUniqueClass(const NamedEntity* ne) {
+inline Class* Unit::lookupUniqueClassInContext(const NamedEntity* ne,
+                                               const Class* ctx) {
   Class* cls = ne->clsList();
   if (LIKELY(cls != nullptr)) {
-    if (cls->attrs() & AttrUnique && RuntimeOption::RepoAuthoritative) {
+    if (cls->attrs() & AttrUnique) {
       return cls;
     }
-    return cls->getCached();
+    if (!ctx) return nullptr;
+    cls = cls->getCached();
+    if (cls && ctx->classof(cls)) return cls;
   }
   return nullptr;
 }
 
-inline Class* Unit::lookupClassOrUniqueClass(const StringData* name) {
-  return lookupClassOrUniqueClass(NamedEntity::get(name));
+inline Class* Unit::lookupUniqueClassInContext(const StringData* name,
+                                               const Class* ctx) {
+  return lookupUniqueClassInContext(NamedEntity::get(name), ctx);
 }
 
 inline Class* Unit::loadClass(const StringData* name) {

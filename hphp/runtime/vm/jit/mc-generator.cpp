@@ -489,10 +489,11 @@ static void populateLiveContext(RegionContext& ctx) {
 
   always_assert(ctx.func == fp->m_func);
 
+  auto const ctxClass = ctx.func->cls();
   // Track local types.
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
-      { Location::Local{i}, typeFromTV(frame_local(fp, i)) }
+      { Location::Local{i}, typeFromTV(frame_local(fp, i), ctxClass) }
     );
     FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
   }
@@ -513,7 +514,7 @@ static void populateLiveContext(RegionContext& ctx) {
     },
     [&] (const TypedValue* tv) {
       ctx.liveTypes.push_back(
-        { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv) }
+        { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv, ctxClass) }
       );
       stackOff++;
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));

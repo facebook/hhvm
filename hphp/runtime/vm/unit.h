@@ -554,15 +554,16 @@ public:
   static Class* lookupClass(const StringData* name);
 
   /*
-   * Same as lookupClass(), except that if the Class is not defined but is
-   * unique, return it anyway.
+   * Finds a class which is guaranteed to be unique in the specified
+   * context. The class has not necessarily been loaded in the
+   * current request.
    *
-   * When jitting code before a unique class is defined, we can often still
-   * burn the Class* into the TC, since it will be defined by the time the code
-   * that needs the Class* runs (via autoload or whatnot).
+   * Return nullptr if there is no such class.
    */
-  static Class* lookupClassOrUniqueClass(const NamedEntity* ne);
-  static Class* lookupClassOrUniqueClass(const StringData* name);
+  static Class* lookupUniqueClassInContext(const NamedEntity* ne,
+                                           const Class* ctx);
+  static Class* lookupUniqueClassInContext(const StringData* name,
+                                           const Class* ctx);
 
   /*
    * Look up, or autoload and define, the Class in this request with name

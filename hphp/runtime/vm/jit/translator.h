@@ -530,6 +530,9 @@ bool builtinFuncDestroysLocals(const Func* callee);
  * If exactClass is false, the class we are targeting may be a subclass of
  * cls, and the returned Func* may be overridden in a subclass.
  *
+ * Its the caller's responsibility to ensure that the Class* is usable -
+ * is AttrUnique, an instance of the ctx or guarded in some way.
+ *
  * Returns nullptr if we can't determine the Func*.
  */
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
@@ -537,11 +540,12 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   const Func* ctxFunc, bool exactClass);
 
 /*
- * If possible find the constructor for cls that would be run from the context
- * ctx if a new instance of cls were created there. If the class fails to be
- * unique, or in non-repo-authoritative mode this function will always return
- * nullptr. Additionally if the constructor is inaccessible from the given
- * context this function will return nullptr.
+ * If possible find the constructor for cls that would be run from the
+ * context ctx if a new instance of cls were created there.  If the
+ * constructor is inaccessible from the given context this function
+ * will return nullptr. It is the caller's responsibility to ensure
+ * that cls is the right Class* (ie its AttrUnique or bound to the
+ * ctx, or otherwise guaranteed by guards).
  */
 const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
 

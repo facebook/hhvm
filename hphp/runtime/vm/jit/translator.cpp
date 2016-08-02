@@ -1316,12 +1316,6 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
   auto ctx = ctxFunc->cls();
-  if (!(cls->attrs() & AttrUnique)) {
-    if (!ctx || !ctx->classof(cls)) {
-      return nullptr;
-    }
-  }
-
   const Func* func;
   LookupResult res = staticLookup ?
     g_context->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
@@ -1365,11 +1359,6 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
 const Func* lookupImmutableCtor(const Class* cls, const Class* ctx) {
   if (!cls) return nullptr;
-  if (!(cls->attrs() & AttrUnique)) {
-    if (!ctx || !ctx->classof(cls)) {
-      return nullptr;
-    }
-  }
 
   auto const func = cls->getCtor();
   if (func && !(func->attrs() & AttrPublic)) {

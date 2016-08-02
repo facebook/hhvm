@@ -183,7 +183,7 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  * so we can just burn it into the TC without using RDS.
  */
 void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
-  auto cls = Unit::lookupClassOrUniqueClass(clsName)->rescope(
+  auto cls = Unit::lookupUniqueClassInContext(clsName, nullptr)->rescope(
     const_cast<Class*>(curClass(env))
   );
   assertx(cls && (cls->attrs() & AttrUnique));

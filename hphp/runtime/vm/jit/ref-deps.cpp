@@ -64,11 +64,13 @@ ActRecState::pushFunc(const NormalizedInstruction& inst) {
     func = Unit::lookupFunc(nep.second);
   } else if (inst.op() == OpFPushCtorD) {
     Id clsId = inst.imm[1].u_SA;
-    auto const& nep = unit.lookupNamedEntityPairId(clsId);
-    auto const cls = Unit::lookupClass(nep.second);
-    auto const scopeFunc = knownFunc();
-    auto const ctx = scopeFunc ? scopeFunc->cls() : nullptr;
-    func = lookupImmutableCtor(cls, ctx);
+    auto const ctxFunc = inst.func();
+    if (ctxFunc) {
+      auto const str = unit.lookupLitstrId(clsId);
+      auto const ctx = ctxFunc->cls();
+      auto const cls = Unit::lookupUniqueClassInContext(str, ctx);
+      func = lookupImmutableCtor(cls, ctx);
+    }
   }
 
   if (func) func->validate();

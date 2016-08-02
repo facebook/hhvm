@@ -173,6 +173,17 @@ struct IRInstruction {
   BCMarker& marker();
 
   /*
+   * Return the current Func, or nullptr if not known (it should only
+   * be unknown in test code).
+   */
+  const Func* func() const;
+
+  /*
+   * Return the current Func's cls(), or nullptr if not known.
+   */
+  const Class* ctx() const;
+
+  /*
    * Check for, get, or set the instruction's optional type parameter.
    */
   bool hasTypeParam() const;

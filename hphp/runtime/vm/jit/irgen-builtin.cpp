@@ -96,11 +96,11 @@ SSATmp* is_a_impl(IRGS& env, uint32_t numArgs, bool subclassOnly) {
 
   auto const objCls = gen(env, LdObjClass, obj);
 
-  SSATmp* testCls = nullptr;
-  if (auto const cls = Unit::lookupClassOrUniqueClass(classname->strVal())) {
-    if (classIsUniqueOrCtxParent(env, cls)) testCls = cns(env, cls);
-  }
-  if (testCls == nullptr) return nullptr;
+  auto const cls = Unit::lookupUniqueClassInContext(classname->strVal(),
+                                                    curClass(env));
+  if (!cls) return nullptr;
+
+  auto const testCls = cns(env, cls);
 
   // is_a() finishes here.
   if (!subclassOnly) return gen(env, InstanceOf, objCls, testCls);

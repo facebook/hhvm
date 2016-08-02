@@ -301,7 +301,7 @@ struct TypeProfile {
   static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
 
   void report(TypedValue tv) {
-    type |= typeFromTV(&tv);
+    type |= typeFromTV(&tv, nullptr);
   }
 
   static void reduce(TypeProfile& a, const TypeProfile& b) {

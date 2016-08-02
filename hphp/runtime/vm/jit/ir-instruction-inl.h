@@ -122,6 +122,14 @@ inline BCMarker& IRInstruction::marker() {
   return m_marker;
 }
 
+inline const Func* IRInstruction::func() const {
+  return m_marker.hasFunc() ? m_marker.func() : nullptr;
+}
+
+inline const Class* IRInstruction::ctx() const {
+  return m_marker.hasFunc() ?  m_marker.func()->cls() : nullptr;
+}
+
 inline bool IRInstruction::hasTypeParam() const { return m_hasTypeParam; }
 
 inline Type IRInstruction::typeParam() const {

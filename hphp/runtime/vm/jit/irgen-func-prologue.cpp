@@ -126,7 +126,7 @@ void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
   ptrdiff_t use_var_off = sizeof(ObjectData) + cls->builtinODTailSize();
 
   for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
-    auto const ty = typeFromRAT(cls->declPropRepoAuthType(i));
+    auto const ty = typeFromRAT(cls->declPropRepoAuthType(i), func->cls());
     auto const addr = gen(
       env,
       LdPropAddr,

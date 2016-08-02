@@ -517,7 +517,7 @@ Type Type::operator-(Type rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Conversions.
 
-Type typeFromTV(const TypedValue* tv) {
+Type typeFromTV(const TypedValue* tv, const Class* ctx) {
   assertx(tv->m_type == KindOfClass || tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
@@ -526,7 +526,11 @@ Type typeFromTV(const TypedValue* tv) {
     // We only allow specialization on classes that can't be overridden for
     // now.  If this changes, then this will need to specialize on sub object
     // types instead.
-    if (!cls || !(cls->attrs() & AttrNoOverride)) return TObj;
+    if (!cls ||
+        !(cls->attrs() & AttrNoOverride) ||
+        (!(cls->attrs() & AttrUnique) && (!ctx || !ctx->classof(cls)))) {
+      return TObj;
+    }
     return Type::ExactObj(cls);
   }
 
@@ -546,7 +550,7 @@ Type typeFromTV(const TypedValue* tv) {
   return Type(outer, inner);
 }
 
-Type typeFromRAT(RepoAuthType ty) {
+Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   using T = RepoAuthType::Tag;
   switch (ty.tag()) {
     case T::OptBool:        return TBool      | TInitNull;
@@ -593,7 +597,8 @@ Type typeFromRAT(RepoAuthType ty) {
     case T::OptExactObj: {
       auto base = TObj;
 
-      if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
+      if (auto const cls = Unit::lookupUniqueClassInContext(ty.clsName(),
+                                                            ctx)) {
         if (ty.tag() == T::ExactObj || ty.tag() == T::OptExactObj) {
           base = Type::ExactObj(cls);
         } else {

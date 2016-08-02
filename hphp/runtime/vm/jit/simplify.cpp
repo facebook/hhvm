@@ -1549,7 +1549,8 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  auto const cls2 = Unit::lookupClassOrUniqueClass(src2->strVal());
+  auto const cls2 = Unit::lookupUniqueClassInContext(src2->strVal(),
+                                                     inst->ctx());
   assertx(cls2 && isInterface(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 
@@ -2988,7 +2989,7 @@ PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
   return PackedBounds::Unknown;
 }
 
-Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
+Type packedArrayElemType(SSATmp* arr, SSATmp* idx, const Class* ctx) {
   assertx(arr->isA(TArr) &&
           arr->type().arrSpec().kind() == ArrayData::kPackedKind &&
           idx->isA(TInt));
@@ -3012,18 +3013,18 @@ Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
       if (idx->hasConstVal(TInt)) {
         auto const idxVal = idx->intVal();
         if (idxVal >= 0 && idxVal < at->size()) {
-          return typeFromRAT(at->packedElem(idxVal)) & t;
+          return typeFromRAT(at->packedElem(idxVal), ctx) & t;
         }
         return TInitNull;
       }
       Type elemType = TBottom;
       for (uint32_t i = 0; i < at->size(); ++i) {
-        elemType |= typeFromRAT(at->packedElem(i));
+        elemType |= typeFromRAT(at->packedElem(i), ctx);
       }
       return elemType & t;
     }
     case RepoAuthType::Array::Tag::PackedN:
-      return typeFromRAT(at->elemType()) & t;
+      return typeFromRAT(at->elemType(), ctx) & t;
   }
   not_reached();
 }

@@ -96,7 +96,7 @@ const Func* findCuf(Op op,
     cls = ctx;
     isExact = false;
   } else {
-    cls = Unit::lookupClassOrUniqueClass(sclass);
+    cls = Unit::lookupUniqueClassInContext(sclass, ctx);
     if (!cls) return nullptr;
   }
 
@@ -739,8 +739,7 @@ void emitFPushCtor(IRGS& env, int32_t numParams) {
 void emitFPushCtorD(IRGS& env,
                     int32_t numParams,
                     const StringData* className) {
-  auto const cls = Unit::lookupClassOrUniqueClass(className);
-  bool const uniqueCls = classIsUnique(cls);
+  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   bool const persistentCls = classHasPersistentRDS(cls);
   bool const canInstantiate = canInstantiateClass(cls);
   bool const fastAlloc =
@@ -750,15 +749,13 @@ void emitFPushCtorD(IRGS& env,
 
   auto const func = lookupImmutableCtor(cls, curClass(env));
 
-  auto ssaCls = persistentCls
-    ? cns(env, cls)
-    : gen(env, LdClsCached, cns(env, className));
-  if (!ssaCls->hasConstVal() && uniqueCls) {
-    // If the Class is unique but not persistent, it's safe to use it as a
-    // const after the LdClsCached, which will throw if the class can't be
-    // defined.
-    ssaCls = cns(env, cls);
-  }
+  // We don't need to actually do the load if we have a persistent class
+  auto const cachedCls = persistentCls ? nullptr :
+    gen(env, LdClsCached, cns(env, className));
+
+  // If we know the Class*, we can use it; if its not persistent,
+  // we will have loaded it above.
+  auto const ssaCls = cls ? cns(env, cls) : cachedCls;
 
   auto const ssaFunc = func ? cns(env, func)
                             : gen(env, LdClsCtor, ssaCls, fp(env));
@@ -856,12 +853,12 @@ void emitFPushClsMethodD(IRGS& env,
                          int32_t numParams,
                          const StringData* methodName,
                          const StringData* className) {
-  auto const baseClass  = Unit::lookupClassOrUniqueClass(className);
-
-  if (baseClass &&
-      fpushClsMethodKnown(env, numParams,
-                          methodName, cns(env, baseClass), baseClass, true)) {
-    return;
+  if (auto const baseClass =
+      Unit::lookupUniqueClassInContext(className, curClass(env))) {
+    if (fpushClsMethodKnown(env, numParams,
+                            methodName, cns(env, baseClass), baseClass, true)) {
+      return;
+    }
   }
 
   auto const slowExit = makeExitSlow(env);

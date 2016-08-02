@@ -171,7 +171,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
     if (lookup.prop != kInvalidSlot) {
       isDeclared = true;
       if (RuntimeOption::RepoAuthoritative) {
-        propType = typeFromRAT(cls->declPropRepoAuthType(lookup.prop));
+        propType = typeFromRAT(cls->declPropRepoAuthType(lookup.prop), nullptr);
       }
     }
   }
@@ -254,7 +254,7 @@ SSATmp* ptrToUninit(IRGS& env) {
 }
 
 bool mightCallMagicPropMethod(MOpFlags flags, PropInfo propInfo) {
-  if (!typeFromRAT(propInfo.repoAuthType).maybe(TUninit)) {
+  if (!typeFromRAT(propInfo.repoAuthType, nullptr).maybe(TUninit)) {
     return false;
   }
   auto const cls = propInfo.baseClass;
@@ -383,7 +383,7 @@ SSATmp* emitPropSpecialized(
       env,
       LdPropAddr,
       ByteOffsetData { propInfo.offset },
-      typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
+      typeFromRAT(propInfo.repoAuthType, curClass(env)).ptr(Ptr::Prop),
       base
     );
     return checkInitProp(env, base, propAddr, key, doWarn, doDefine);
@@ -411,7 +411,7 @@ SSATmp* emitPropSpecialized(
         env,
         LdPropAddr,
         ByteOffsetData { propInfo.offset },
-        typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
+        typeFromRAT(propInfo.repoAuthType, curClass(env)).ptr(Ptr::Prop),
         obj
       );
       return checkInitProp(env, obj, propAddr, key, doWarn, doDefine);
@@ -472,7 +472,8 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
   };
 
   auto doLdElem = [&] {
-    auto const type = packedArrayElemType(base, key).ptr(Ptr::Elem);
+    auto const type = packedArrayElemType(
+      base, key, curClass(env)).ptr(Ptr::Elem);
     auto addr = gen(env, LdPackedArrayElemAddr, type, base, key);
     auto res = gen(env, LdMem, type.deref(), addr);
     auto pres = profiledType(env, res, [&] { finish(finishMe(res)); });
@@ -624,7 +625,7 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key) {
 SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   assertx(base->type().arrSpec().kind() == ArrayData::kPackedKind);
 
-  auto const type = packedArrayElemType(base, key);
+  auto const type = packedArrayElemType(base, key, curClass(env));
   if (type <= TNull) return cns(env, false);
 
   if (key->hasConstVal()) {

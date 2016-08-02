@@ -136,7 +136,7 @@ PackedBounds packedArrayBoundsStaticCheck(Type, int64_t key);
  * contexts where the bounds are not statically known, TInitNull must be
  * unioned in for correctness.)
  */
-Type packedArrayElemType(SSATmp* arr, SSATmp* idx);
+Type packedArrayElemType(SSATmp* arr, SSATmp* idx, const Class* ctx);
 
 //////////////////////////////////////////////////////////////////////
 

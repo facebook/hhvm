@@ -500,7 +500,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
 // Other common helpers
 
 inline bool classIsUnique(const Class* cls) {
-  return RuntimeOption::RepoAuthoritative && cls && (cls->attrs() & AttrUnique);
+  return cls && (cls->attrs() & AttrUnique);
 }
 
 inline bool classIsUniqueNormalClass(const Class* cls) {

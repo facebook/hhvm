@@ -37,7 +37,8 @@ const Func* lookupDirectFunc(SrcKey const sk,
                              const StringData* clsName,
                              Op pushOp) {
   if (clsName && !clsName->empty()) {
-    auto const cls = Unit::lookupClassOrUniqueClass(clsName);
+    auto const cls = Unit::lookupUniqueClassInContext(clsName,
+                                                      sk.func()->cls());
     bool magic = false;
     auto const isExact =
       pushOp == Op::FPushClsMethodD ||
@@ -60,8 +61,8 @@ const Func* lookupDirectFunc(SrcKey const sk,
 
 const Func* lookupDirectCtor(SrcKey const sk, const StringData* clsName) {
   if (clsName && !clsName->isame(s_empty.get())) {
-    auto const cls = Unit::lookupClassOrUniqueClass(clsName);
     auto const ctx = sk.func()->cls();
+    auto const cls = Unit::lookupUniqueClassInContext(clsName, ctx);
     return lookupImmutableCtor(cls, ctx);
   }
 

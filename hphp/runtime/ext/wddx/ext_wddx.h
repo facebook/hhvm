@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/util/either.h"
 
+#include <unordered_set>
+
 namespace HPHP {
 
 class WddxPacket: public ResourceData {
@@ -59,7 +61,7 @@ class WddxPacket: public ResourceData {
       return data.toOpaque();
     }
   };
-  using SeenContainers = req::hash_set<ArrayOrObject, EitherHash>;
+  using SeenContainers = std::unordered_set<ArrayOrObject, EitherHash>;
 
   bool recursiveAddVarImpl(const String& varName, const Variant& varVariant,
                            bool hasVarTag, SeenContainers& seen);

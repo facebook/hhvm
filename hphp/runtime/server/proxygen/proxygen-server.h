@@ -153,10 +153,6 @@ struct ProxygenServer : Server,
     m_pendingTransports.push_back(transport);
   }
 
-  virtual proxygen::HTTPHeaderCode getRepostHeaderName() {
-    return proxygen::HTTP_HEADER_NONE;
-  }
-
  protected:
   enum RequestPriority {
     PRIORITY_NORMAL = 0,

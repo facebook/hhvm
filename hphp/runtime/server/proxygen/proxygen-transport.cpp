@@ -723,9 +723,7 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
 }
 
 void ProxygenTransport::beginPartialPostEcho() {
-  auto repostHeaderName = m_server->getRepostHeaderName();
-  if (!bufferRequest() || m_repost ||
-      repostHeaderName != proxygen::HTTP_HEADER_NONE) {
+  if (!bufferRequest() || m_repost) {
     return;
   }
   CHECK(!m_enqueued);
@@ -733,8 +731,12 @@ void ProxygenTransport::beginPartialPostEcho() {
   HTTPMessage response;
   response.setStatusCode(RuntimeOption::ServerPartialPostStatusCode);
   response.setStatusMessage("Partial post");
-  response.getHeaders() = m_request->getHeaders();
-  response.getHeaders().add(repostHeaderName, "partial_post");
+
+  // All of the clients headers should be retained downstream,
+  // so all we need to echo back is the request body
+  auto& headers = response.getHeaders();
+  headers.add(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
+
   m_clientTxn->sendHeaders(response);
   if (!m_bodyData.empty()) {
     m_clientTxn->sendBody(m_bodyData.move());

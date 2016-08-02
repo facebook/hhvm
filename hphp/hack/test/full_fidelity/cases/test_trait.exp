@@ -8,11 +8,11 @@
         (require_clause
           ((whitespace)(require)(whitespace))
           ((extends)(whitespace))
-          ((name))
+          (simple_type_specifier((name)))
           ((;)(end_of_line)))
         (require_clause
           ((whitespace)(require)(whitespace))
           ((implements)(whitespace))
-          ((name))
+          (simple_type_specifier((name)))
           ((;)(end_of_line))))
       ((})))))

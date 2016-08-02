@@ -449,6 +449,14 @@ module WithExpressionAndStatementParser
     let classish_elements = List.rev classish_elements in
     (parser, make_list classish_elements)
 
+  and parse_qualified_name_type parser =
+    (* Here we're parsing a name followed by an optional generic type
+       argument list; if we don't have a name, give an error. *)
+    match peek_token_kind parser with
+    | Name
+    | QualifiedName -> parse_possible_generic_specifier parser
+    | _ -> expect_qualified_name parser
+
   and parse_require_clause parser =
     (* SPEC
         require-extends-clause:
@@ -457,6 +465,10 @@ module WithExpressionAndStatementParser
         require-implements-clause:
           require  implements  qualified-name  ;
     *)
+    (* TODO: The spec is incomplete; we need to be able to parse
+       require extends Foo<int>;
+       Fix the spec.
+       *)
     (* ERROR RECOVERY: Detect if the implements/extends, name and semi are
        missing. *)
     let (parser, req) = assert_token parser Require in
@@ -465,7 +477,7 @@ module WithExpressionAndStatementParser
     | Implements
     | Extends -> (parser1, make_token req_kind_token)
     | _ -> (with_error parser SyntaxError.error1045, make_missing()) in
-    let (parser, name) = expect_qualified_name parser in
+    let (parser, name) = parse_qualified_name_type parser in
     let (parser, semi) = expect_semicolon parser in
     let result = make_require_clause req req_kind name semi in
     (parser, result)
@@ -490,24 +502,15 @@ module WithExpressionAndStatementParser
       use  trait-name-list  ;
 
     trait-name-list:
-      qualified-name  generic-type-argument-listopt
-      trait-name-list  ,  qualified-name  generic-type-argument-listopt
+      qualified-name  generic-type-parameter-listopt
+      trait-name-list  ,  qualified-name  generic-type-parameter-listopt
   *)
   and parse_trait_use parser =
     let (parser, use_token) = assert_token parser Use in
     let (parser, trait_name_list) = parse_comma_list
-      parser Semicolon SyntaxError.error1004 parse_trait_name in
+      parser Semicolon SyntaxError.error1004 parse_qualified_name_type in
     let (parser, semi) = expect_semicolon parser in
     (parser, make_trait_use use_token trait_name_list semi)
-
-  and parse_trait_name parser =
-    let (parser1, token) = next_token parser in
-    match (Token.kind token) with
-    | Name
-    | QualifiedName -> parse_possible_generic_specifier parser
-    | _ ->
-       let parser = with_error parser1 SyntaxError.error1004 in
-       (parser, make_error [make_token token])
 
   and parse_const_or_type_const_declaration parser abstr =
     let (parser, const) = assert_token parser Const in
@@ -744,6 +747,8 @@ module WithExpressionAndStatementParser
           parameter-declaration-list  ,  parameter-declaration
      *)
      (* This function parses the parens as well. *)
+     (* TODO: Add an error checking pass that ensures that the "..." parameter
+              only appears at the end, and is not trailed by a comma. *)
       parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =

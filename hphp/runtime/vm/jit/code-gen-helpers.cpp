@@ -409,6 +409,8 @@ void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
 
 void emitTransCounterInc(Vout& v) {
   if (!mcg->tx().isTransDBEnabled()) return;
+  // Translator::getTransCounterAddr is not thread-safe.
+  assertx(!RuntimeOption::EvalJitConcurrently);
   auto t = v.cns(mcg->tx().getTransCounterAddr());
   v << incqmlock{*t, v.makeReg()};
 }

@@ -50,7 +50,7 @@ inline const TransRec* Translator::getTransRec(TransID transId) const {
   return &m_translations[transId];
 }
 
-inline TransID Translator::getCurrentTransID() const {
+inline size_t Translator::getNumTranslations() const {
   return m_translations.size();
 }
 

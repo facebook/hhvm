@@ -196,10 +196,9 @@ struct Translator {
   void addTranslation(const TransRec& transRec);
 
   /*
-   * Get the TransID of the current (or next, if there is no current)
-   * translation.
+   * Get the number of translations added (0 if the TransDB is not enabled).
    */
-  TransID getCurrentTransID() const;
+  size_t getNumTranslations() const;
 
   /*
    * Get the translation counter for `transId'.
@@ -209,7 +208,7 @@ struct Translator {
   uint64_t getTransCounter(TransID transId) const;
 
   /*
-   * Get a pointer to the translation counter for getCurrentTransID().
+   * Get a pointer to the translation counter for the current translation.
    *
    * Return nullptr if the TransDB is not enabled.
    */

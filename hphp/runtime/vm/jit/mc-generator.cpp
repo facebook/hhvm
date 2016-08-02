@@ -376,10 +376,15 @@ void MCGenerator::checkFreeProfData() {
   // In PGO mode, we free all the profiling data once the main area code reaches
   // its maximum usage and either the hot area is also full or all the functions
   // that were profiled have already been optimized.
+  //
+  // However, we keep the data around indefinitely in a few special modes:
+  // * Eval.EnableReusableTC
+  // * TC dumping enabled (Eval.DumpTC/DumpIR/etc.)
   if (profData() &&
       !RuntimeOption::EvalEnableReusableTC &&
       m_code.main().used() >= CodeCache::AMaxUsage &&
-      (!m_code.hotEnabled() || profData()->optimizedAllProfiledFuncs())) {
+      (!m_code.hotEnabled() || profData()->optimizedAllProfiledFuncs()) &&
+      !Translator::isTransDBEnabled()) {
     discardProfData();
   }
 }
@@ -2094,14 +2099,27 @@ bool MCGenerator::dumpTCData() {
   }
 
   if (!gzprintf(tcDataFile, "total_translations = %zu\n\n",
-                m_tx.getCurrentTransID())) {
+                m_tx.getNumTranslations())) {
     return false;
   }
 
-  for (TransID t = 0; t < m_tx.getCurrentTransID(); t++) {
-    if (gzputs(tcDataFile,
-               m_tx.getTransRec(t)->print(m_tx.getTransCounter(t)).c_str()) ==
-        -1) {
+  // Print all translations, including their execution counters. If global
+  // counters are disabled (default), fall back to using ProfData, covering
+  // only profiling translations.
+  if (!RuntimeOption::EvalJitTransCounters && Translator::isTransDBEnabled()) {
+    // Admin requests do not automatically init ProfData, so do it explicitly.
+    // No need for matching exit call; data is immortal with trans DB enabled.
+    requestInitProfData();
+  }
+  for (TransID t = 0; t < m_tx.getNumTranslations(); t++) {
+    int64_t count = 0;
+    if (RuntimeOption::EvalJitTransCounters) {
+      count = m_tx.getTransCounter(t);
+    } else if (auto prof = profData()) {
+      assertx(m_tx.getTransCounter(t) == 0);
+      count = prof->transCounter(t);
+    }
+    if (gzputs(tcDataFile, m_tx.getTransRec(t)->print(count).c_str()) == -1) {
       return false;
     }
   }

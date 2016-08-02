@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/util/either.h"
 
 namespace HPHP {
 

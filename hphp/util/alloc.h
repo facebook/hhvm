@@ -25,7 +25,6 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/logger.h"
 
 #if defined(FOLLY_SANITIZE_ADDRESS) || defined(FOLLY_SANITIZE_THREAD)
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
@@ -101,6 +100,15 @@ constexpr bool use_jemalloc =
   false
 #endif
   ;
+
+// ASAN modifies the generated code in ways that cause abnormally high C++
+// stack usage.
+constexpr size_t kStackSizeMinimum =
+#ifdef FOLLY_SANITIZE_ADDRESS
+  16 << 20;
+#else
+  8 << 20;
+#endif
 
 struct OutOfMemoryException : Exception {
   explicit OutOfMemoryException(size_t size)

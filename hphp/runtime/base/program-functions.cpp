@@ -1270,27 +1270,26 @@ static int compute_hhvm_argc(const options_description& desc,
 }
 
 /*
- * AsyncFuncImpl defines a minimum C++ stack size but that only applies to
- * threads we manually create. When the main thread will be executing PHP
- * rather than just managing a server, make sure its stack is big enough.
+ * alloc.h defines a minimum C++ stack size but that only applies to threads we
+ * manually create.  When the main thread will be executing PHP rather than just
+ * managing a server, make sure its stack is big enough.
  */
 static void set_stack_size() {
   struct rlimit rlim;
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
-  if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum
+  if (rlim.rlim_cur < kStackSizeMinimum
 #ifndef __CYGWIN__
       || rlim.rlim_cur == RLIM_INFINITY
 #endif
       ) {
 #ifdef __CYGWIN__
     Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
-                  AsyncFuncImpl::kStackSizeMinimum);
+                  kStackSizeMinimum);
 #else
-    rlim.rlim_cur = AsyncFuncImpl::kStackSizeMinimum;
+    rlim.rlim_cur = kStackSizeMinimum;
     if (setrlimit(RLIMIT_STACK, &rlim)) {
-      Logger::Error("failed to set stack limit to %zd\n",
-                    AsyncFuncImpl::kStackSizeMinimum);
+      Logger::Error("failed to set stack limit to %zd\n", kStackSizeMinimum);
     }
 #endif
   }

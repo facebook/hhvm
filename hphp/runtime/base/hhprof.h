@@ -18,7 +18,10 @@
 #define incl_HPHP_HHPROF_H_
 
 #include "hphp/util/alloc.h"
+
 #include "hphp/runtime/server/transport.h"
+
+#include <mutex>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

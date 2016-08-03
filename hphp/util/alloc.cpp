@@ -25,13 +25,16 @@
 #include <numa.h>
 #endif
 
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#endif
+
 #include <folly/Bits.h>
 #include <folly/Format.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
-#include "hphp/util/async-func.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/logger.h"
@@ -163,18 +166,16 @@ void init_stack_limits(pthread_attr_t* attr) {
   stackaddr = pthread_get_stackaddr_np(self);
   stacksize = pthread_get_stacksize_np(self);
 
-  // On OSX 10.9, we are lied to about the main thread's stack size.
-  // Set it to the minimum stack size, which is set earlier by
-  // execute_program_impl.
-  const size_t stackSizeMinimum = AsyncFuncImpl::kStackSizeMinimum;
+  // On OSX 10.9, we are lied to about the main thread's stack size.  Set it to
+  // the minimum stack size, which is set earlier by execute_program_impl.
   if (pthread_main_np() == 1) {
-    if (s_stackSize < stackSizeMinimum) {
+    if (s_stackSize < kStackSizeMinimum) {
       char osRelease[256];
       size_t osReleaseSize = sizeof(osRelease);
       if (sysctlbyname("kern.osrelease", osRelease, &osReleaseSize,
                        nullptr, 0) == 0) {
         if (atoi(osRelease) >= 13) {
-          stacksize = stackSizeMinimum;
+          stacksize = kStackSizeMinimum;
         }
       }
     }
@@ -202,9 +203,9 @@ void init_stack_limits(pthread_attr_t* attr) {
   // "stack space"), we can differentiate between the part of the native stack
   // that could conceivably be used in practice and all anonymous mmap() memory.
   if (getrlimit(RLIMIT_STACK, &rlim) == 0 && rlim.rlim_cur == RLIM_INFINITY &&
-      s_stackSize > AsyncFuncImpl::kStackSizeMinimum) {
-    s_stackLimit += s_stackSize - AsyncFuncImpl::kStackSizeMinimum;
-    s_stackSize = AsyncFuncImpl::kStackSizeMinimum;
+      s_stackSize > kStackSizeMinimum) {
+    s_stackLimit += s_stackSize - kStackSizeMinimum;
+    s_stackSize = kStackSizeMinimum;
   }
 }
 

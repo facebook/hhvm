@@ -2,6 +2,8 @@
 #include "hphp/runtime/ext/curl/curl-resource.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
 
+#include "hphp/util/compatibility.h"
+
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // CurlEventHandler

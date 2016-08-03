@@ -18,6 +18,8 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/runtime-error.h"
 
+#include "hphp/util/logger.h"
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////

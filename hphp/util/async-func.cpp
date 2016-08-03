@@ -13,12 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/util/async-func.h"
 
 #include <folly/portability/SysTime.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
+
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

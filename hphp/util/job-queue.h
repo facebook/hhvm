@@ -18,11 +18,13 @@
 #define incl_HPHP_UTIL_JOB_QUEUE_H_
 
 #include <memory>
+#include <set>
 #include <time.h>
 #include <vector>
-#include <set>
+
 #include <boost/range/adaptors.hpp>
 #include <folly/Memory.h>
+
 #include "hphp/util/alloc.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/atomic.h"

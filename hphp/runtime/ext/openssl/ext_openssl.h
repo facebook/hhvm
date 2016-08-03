@@ -201,11 +201,16 @@ Variant HHVM_FUNCTION(openssl_cipher_iv_length, const String& method);
 Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
                                        const String& password,
                                        int options = 0,
-                                       const String& iv = null_string);
+                                       const String& iv = null_string,
+                                       VRefParam tag_out = null_string,
+                                       const String& aad = null_string,
+                                       int tag_length = 16);
 Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
                                        const String& password,
                                        int options = 0,
-                                       const String& iv = null_string);
+                                       const String& iv = null_string,
+                                       const String& tag = null_string,
+                                       const String& aad = null_string);
 Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
                                       bool raw_output = false);
 Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases = false);

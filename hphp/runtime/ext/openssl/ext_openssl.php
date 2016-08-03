@@ -669,14 +669,24 @@ function openssl_random_pseudo_bytes(int $length,
 function openssl_cipher_iv_length(string $method): mixed;
 
 /* Encrypts given data with given method and key, returns a raw or base64
- * encoded string WarningThis function is currently not documented; only its
- * argument list is available.
+ * encoded string.
  * @param string $data - The data.
  * @param string $method - The cipher method.
  * @param string $password - The password.
  * @param int $options - Setting to TRUE will return as raw output data,
  * otherwise the return value is base64 encoded.
  * @param string $iv - The initialisation vector.
+ * @param string $tag_out - The authentication tag will be saved to the variable
+ * passed as a reference on successful encryption. If the encryption fails, then
+ * the variable is unchanged. The resulted tag length is the same as the length
+ * supplied in the $tag_length parameter which default to 16. For authenticated
+ * encryption modes only.
+ * @param string $aad - Additional authentication data. For authenticated
+ * encryption modes only.
+ * @param int $tag_length - The tag length can be set before the encryption and
+ * can be between 4 and 16 for GCM mode where it is the same like trimming the
+ * tag. On the other side the CCM has no such limits and also the resulted tag
+ * is different for each length. For authenticated encryption modes only.
  * @return mixed - Returns the encrypted string on success or FALSE on
  * failure.
  */
@@ -685,7 +695,10 @@ function openssl_encrypt(string $data,
                          string $method,
                          string $password,
                          int $options = 0,
-                         string $iv = ""): mixed;
+                         string $iv = "",
+                         mixed &$tag_out = null,
+                         string $aad = "",
+                         int $tag_length = 16): mixed;
 
 /* Takes a raw or base64 encoded string and decrypts it using a given method
  * and key.
@@ -695,6 +708,11 @@ function openssl_encrypt(string $data,
  * @param int $options - Setting to TRUE will take a raw encoded string,
  * otherwise a base64 string is assumed for the data parameter.
  * @param string $iv - The initialisation vector.
+ * @param string $tag - The authentication tag that will be authenticated. If
+ * it's incorrect, then the authentication fails and the function returns FALSE.
+ * For authenticated encryption modes only.
+ * @param string $aad - Additional authentication data. For authenticated
+ * encryption modes only.
  * @return mixed - The decrypted string on success or FALSE on failure.
  */
 <<__Native>>
@@ -702,7 +720,9 @@ function openssl_decrypt(string $data,
                          string $method,
                          string $password,
                          int $options = 0,
-                         string $iv = ""): mixed;
+                         string $iv = "",
+                         string $tag = "",
+                         string $aad = ""): mixed;
 
 /* Computes digest hash value for given data using given method, returns raw
  * or binhex encoded string.

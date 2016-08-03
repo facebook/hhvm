@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/logger.h"
 
+#include <folly/ScopeGuard.h>
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
 #include <openssl/err.h>
@@ -56,6 +57,14 @@ struct OpenSSLInitializer {
     OpenSSL_add_all_ciphers();
     OpenSSL_add_all_digests();
     OpenSSL_add_all_algorithms();
+
+// CCM ciphers are not added by default, so let's add them!
+#if !defined(OPENSSL_NO_AES) && defined(EVP_CIPH_CCM_MODE) && \
+    OPENSSL_VERSION_NUMBER < 0x100020000
+    EVP_add_cipher(EVP_aes_128_ccm());
+    EVP_add_cipher(EVP_aes_192_ccm());
+    EVP_add_cipher(EVP_aes_256_ccm());
+#endif
 
     ERR_load_ERR_strings();
     ERR_load_crypto_strings();
@@ -2617,22 +2626,89 @@ Variant HHVM_FUNCTION(openssl_cipher_iv_length, const String& method) {
   return EVP_CIPHER_iv_length(cipher_type);
 }
 
-static String php_openssl_validate_iv(String piv, int iv_required_len) {
-  char *iv_new;
+/* Cipher mode info */
+struct php_openssl_cipher_mode {
+  /* Whether this mode uses authenticated encryption. True, for example, with
+     the GCM and CCM modes */
+  bool is_aead;
+  /* Whether this mode is a 'single run aead', meaning that DecryptFinal doesn't
+     get called. For example, CCM mode is a single run aead mode. */
+  bool is_single_run_aead;
+  /* The OpenSSL flag to get the computed tag, if this mode is aead. */
+  int aead_get_tag_flag;
+  /* The OpenSSL flag to set the computed tag, if this mode is aead. */
+  int aead_set_tag_flag;
+  /* The OpenSSL flag to set the IV length, if this mode is aead */
+  int aead_ivlen_flag;
+};
+
+// initialize a php_openssl_cipher_mode corresponding to an EVP_CIPHER.
+static php_openssl_cipher_mode php_openssl_load_cipher_mode(
+    const EVP_CIPHER* cipher_type) {
+  php_openssl_cipher_mode mode = {};
+  switch (EVP_CIPHER_mode(cipher_type)) {
+#ifdef EVP_CIPH_GCM_MODE
+    case EVP_CIPH_GCM_MODE:
+      mode.is_aead = true;
+      mode.is_single_run_aead = false;
+      mode.aead_get_tag_flag = EVP_CTRL_GCM_GET_TAG;
+      mode.aead_set_tag_flag = EVP_CTRL_GCM_SET_TAG;
+      mode.aead_ivlen_flag = EVP_CTRL_GCM_SET_IVLEN;
+      break;
+#endif
+#ifdef EVP_CIPH_CCM_MODE
+    case EVP_CIPH_CCM_MODE:
+      mode.is_aead = true;
+      mode.is_single_run_aead = true;
+      mode.aead_get_tag_flag = EVP_CTRL_CCM_GET_TAG;
+      mode.aead_set_tag_flag = EVP_CTRL_CCM_SET_TAG;
+      mode.aead_ivlen_flag = EVP_CTRL_CCM_SET_IVLEN;
+      break;
+#endif
+    default:
+      break;
+  }
+  return mode;
+}
+
+static bool php_openssl_validate_iv(
+    String piv,
+    int iv_required_len,
+    String& out,
+    EVP_CIPHER_CTX* cipher_ctx,
+    const php_openssl_cipher_mode* mode) {
+  if (cipher_ctx == nullptr || mode == nullptr) {
+    return false;
+  }
 
   /* Best case scenario, user behaved */
   if (piv.size() == iv_required_len) {
-    return piv;
+    out = std::move(piv);
+    return true;
+  }
+
+  if (mode->is_aead) {
+    if (EVP_CIPHER_CTX_ctrl(
+            cipher_ctx, mode->aead_ivlen_flag, piv.size(), nullptr) != 1) {
+      raise_warning(
+          "Setting of IV length for AEAD mode failed, the expected length is "
+          "%d bytes",
+          iv_required_len);
+      return false;
+    }
+    out = std::move(piv);
+    return true;
   }
 
   String s = String(iv_required_len, ReserveString);
-  iv_new = s.mutableData();
+  char* iv_new = s.mutableData();
   memset(iv_new, 0, iv_required_len);
 
   if (piv.size() <= 0) {
     /* BC behavior */
     s.setSize(iv_required_len);
-    return s;
+    out = std::move(s);
+    return true;
   }
 
   if (piv.size() < iv_required_len) {
@@ -2641,7 +2717,8 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
                   piv.size(), iv_required_len);
     memcpy(iv_new, piv.data(), piv.size());
     s.setSize(iv_required_len);
-    return s;
+    out = std::move(s);
+    return true;
   }
 
   raise_warning("IV passed is %d bytes long which is longer than the %d "
@@ -2649,16 +2726,37 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
                 iv_required_len);
   memcpy(iv_new, piv.data(), iv_required_len);
   s.setSize(iv_required_len);
-  return s;
+  out = std::move(s);
+  return true;
 }
 
 Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
                                        const String& password,
                                        int options /* = 0 */,
-                                       const String& iv /* = null_string */) {
+                                       const String& iv /* = null_string */,
+                                       VRefParam tag_out /* = null_string */,
+                                       const String& aad /* = null_string */,
+                                       int tag_length /* = 16 */) {
   const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method.c_str());
   if (!cipher_type) {
     raise_warning("Unknown cipher algorithm");
+    return false;
+  }
+
+  EVP_CIPHER_CTX* cipher_ctx = EVP_CIPHER_CTX_new();
+  if (!cipher_ctx) {
+    raise_warning("Failed to create cipher context");
+    return false;
+  }
+
+  SCOPE_EXIT {
+    EVP_CIPHER_CTX_free(cipher_ctx);
+  };
+
+  php_openssl_cipher_mode mode = php_openssl_load_cipher_mode(cipher_type);
+
+  if (mode.is_aead && !tag_out.isRefData()) {
+    raise_warning("Must provide a tag_out reference when using an AEAD cipher");
     return false;
   }
 
@@ -2678,64 +2776,134 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
   }
 
   int max_iv_len = EVP_CIPHER_iv_length(cipher_type);
-  if (iv.size() <= 0 && max_iv_len > 0) {
+  if (iv.size() <= 0 && max_iv_len > 0 && !mode.is_aead) {
     raise_warning("Using an empty Initialization Vector (iv) is potentially "
                   "insecure and not recommended");
   }
 
   int result_len = 0;
-
-  String new_iv  = php_openssl_validate_iv(iv, max_iv_len);
-
   int outlen = data.size() + EVP_CIPHER_block_size(cipher_type);
   String rv = String(outlen, ReserveString);
   unsigned char *outbuf = (unsigned char*)rv.mutableData();
 
-  EVP_CIPHER_CTX cipher_ctx;
+  EVP_EncryptInit_ex(cipher_ctx, cipher_type, nullptr, nullptr, nullptr);
 
-  EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
-  if (password.size() > keylen) {
-    EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password.size());
+  String new_iv;
+  // we do this after EncryptInit because validate_iv changes cipher_ctx for
+  // aead modes (must be initialized first).
+  if (!php_openssl_validate_iv(
+          std::move(iv), max_iv_len, new_iv, cipher_ctx, &mode)) {
+    return false;
   }
-  EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, (unsigned char *)key.data(),
-                  (unsigned char *)new_iv.data());
+
+  // set the tag length for CCM mode/other modes that require tag lengths to
+  // be set.
+  if (mode.is_single_run_aead &&
+      !EVP_CIPHER_CTX_ctrl(
+          cipher_ctx, mode.aead_set_tag_flag, tag_length, nullptr)) {
+    raise_warning("Setting tag length failed");
+    return false;
+  }
+  if (password.size() > keylen &&
+      !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password.size())) {
+    raise_warning("Setting key length failed");
+    return false;
+  }
+  EVP_EncryptInit_ex(
+      cipher_ctx,
+      nullptr,
+      nullptr,
+      (unsigned char*)key.data(),
+      (unsigned char*)new_iv.data());
   if (options & k_OPENSSL_ZERO_PADDING) {
-    EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+    EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
+  }
+
+  // for single run aeads like CCM, we need to provide the length of the
+  // plaintext before providing AAD or ciphertext.
+  if (mode.is_single_run_aead &&
+      !EVP_EncryptUpdate(
+          cipher_ctx, nullptr, &result_len, nullptr, data.size())) {
+    raise_warning("Setting of data length failed");
+    return false;
+  }
+
+  // set up aad:
+  if (mode.is_aead &&
+      !EVP_EncryptUpdate(
+          cipher_ctx,
+          nullptr,
+          &result_len,
+          (unsigned char*)aad.data(),
+          aad.size())) {
+    raise_warning("Setting of additional application data failed");
+    return false;
   }
 
   // OpenSSL before 0.9.8i asserts with size < 0
   if (data.size() > 0) {
-    EVP_EncryptUpdate(&cipher_ctx, outbuf, &result_len,
+    EVP_EncryptUpdate(cipher_ctx, outbuf, &result_len,
                       (unsigned char *)data.data(), data.size());
   }
 
   outlen = result_len;
 
-  if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + result_len,
+  if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)outbuf + result_len,
                        &result_len)) {
     outlen += result_len;
     rv.setSize(outlen);
-    EVP_CIPHER_CTX_cleanup(&cipher_ctx);
+    // Get tag if possible
+    if (mode.is_aead) {
+      String tagrv = String(tag_length, ReserveString);
+      if (EVP_CIPHER_CTX_ctrl(
+              cipher_ctx,
+              mode.aead_get_tag_flag,
+              tag_length,
+              tagrv.mutableData()) == 1) {
+        tagrv.setSize(tag_length);
+        tag_out.assignIfRef(tagrv);
+      } else {
+        raise_warning("Retrieving authentication tag failed");
+        return false;
+      }
+    } else if (tag_out.isRefData()) {
+      raise_warning(
+          "The authenticated tag cannot be provided for cipher that does not"
+          " support AEAD");
+    }
+    // Return encrypted data
     if (options & k_OPENSSL_RAW_DATA) {
       return rv;
     } else {
       return StringUtil::Base64Encode(rv);
     }
   }
-
-  EVP_CIPHER_CTX_cleanup(&cipher_ctx);
   return false;
 }
 
 Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
                                        const String& password,
                                        int options /* = 0 */,
-                                       const String& iv /* = null_string */) {
+                                       const String& iv /* = null_string */,
+                                       const String& tag /* = null_string */,
+                                       const String& aad /* = null_string */) {
   const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method.c_str());
   if (!cipher_type) {
     raise_warning("Unknown cipher algorithm");
     return false;
   }
+
+  EVP_CIPHER_CTX* cipher_ctx = EVP_CIPHER_CTX_new();
+  if (!cipher_ctx) {
+    raise_warning("Failed to create cipher context");
+    return false;
+  }
+
+  SCOPE_EXIT {
+    EVP_CIPHER_CTX_free(cipher_ctx);
+  };
+
+  php_openssl_cipher_mode mode = php_openssl_load_cipher_mode(cipher_type);
 
   String decoded_data = data;
 
@@ -2759,36 +2927,104 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
   }
 
   int result_len = 0;
-
-  String new_iv  = php_openssl_validate_iv(iv,
-                                           EVP_CIPHER_iv_length(cipher_type));
-
   int outlen = decoded_data.size() + EVP_CIPHER_block_size(cipher_type);
   String rv = String(outlen, ReserveString);
   unsigned char *outbuf = (unsigned char*)rv.mutableData();
 
-  EVP_CIPHER_CTX cipher_ctx;
-  EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
-  if (password.size() > keylen) {
-    EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password.size());
+  EVP_DecryptInit_ex(cipher_ctx, cipher_type, nullptr, nullptr, nullptr);
+
+  String new_iv;
+  // we do this after DecryptInit because validate_iv changes cipher_ctx for
+  // aead modes (must be initialized first).
+  if (!php_openssl_validate_iv(
+          std::move(iv),
+          EVP_CIPHER_iv_length(cipher_type),
+          new_iv,
+          cipher_ctx,
+          &mode)) {
+    return false;
   }
-  EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, (unsigned char *)key.data(),
-                  (unsigned char *)new_iv.data());
+
+  // set the tag if required:
+  if (tag.size() > 0) {
+    if (!mode.is_aead) {
+      raise_warning(
+          "The tag is being ignored because the cipher method does not"
+          " support AEAD");
+    } else if (!EVP_CIPHER_CTX_ctrl(
+                   cipher_ctx,
+                   mode.aead_set_tag_flag,
+                   tag.size(),
+                   (unsigned char*)tag.data())) {
+      raise_warning("Setting tag for AEAD cipher decryption failed");
+      return false;
+    }
+  } else {
+    if (mode.is_aead) {
+      raise_warning("A tag should be provided when using AEAD mode");
+      return false;
+    }
+  }
+  if (password.size() > keylen &&
+      !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password.size())) {
+    raise_warning("Setting key length failed");
+    return false;
+  }
+  EVP_DecryptInit_ex(
+      cipher_ctx,
+      nullptr,
+      nullptr,
+      (unsigned char*)key.data(),
+      (unsigned char*)new_iv.data());
   if (options & k_OPENSSL_ZERO_PADDING) {
-    EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+    EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
   }
-  EVP_DecryptUpdate(&cipher_ctx, outbuf, &result_len,
-                    (unsigned char *)decoded_data.data(), decoded_data.size());
+
+  // for single run aeads like CCM, we need to provide the length of the
+  // ciphertext before providing AAD or ciphertext.
+  if (mode.is_single_run_aead &&
+      !EVP_DecryptUpdate(
+          cipher_ctx, nullptr, &result_len, nullptr, decoded_data.size())) {
+    raise_warning("Setting of data length failed");
+    return false;
+  }
+
+  // set up aad:
+  if (mode.is_aead &&
+      !EVP_DecryptUpdate(
+          cipher_ctx,
+          nullptr,
+          &result_len,
+          (unsigned char*)aad.data(),
+          aad.size())) {
+    raise_warning("Setting of additional application data failed");
+    return false;
+  }
+
+  if (!EVP_DecryptUpdate(
+          cipher_ctx,
+          outbuf,
+          &result_len,
+          (unsigned char*)decoded_data.data(),
+          decoded_data.size())) {
+    return false;
+  }
   outlen = result_len;
 
-  if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf + result_len,
-                       &result_len)) {
-    outlen += result_len;
-    EVP_CIPHER_CTX_cleanup(&cipher_ctx);
+  // if is_single_run_aead is enabled, DecryptFinal shouldn't be called.
+  // if something went wrong in this case, we would've caught it at
+  // DecryptUpdate.
+  if (mode.is_single_run_aead ||
+      EVP_DecryptFinal(
+          cipher_ctx, (unsigned char*)outbuf + result_len, &result_len)) {
+    // don't want to do this if is_single_run_aead was enabled, since we didn't
+    // make a call to EVP_DecryptFinal.
+    if (!mode.is_single_run_aead) {
+      outlen += result_len;
+    }
     rv.setSize(outlen);
     return rv;
   } else {
-    EVP_CIPHER_CTX_cleanup(&cipher_ctx);
     return false;
   }
 }

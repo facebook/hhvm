@@ -134,3 +134,5 @@ let error2022 = "An ellipsis '...' may not be followed by a comma ','."
 
 let error2029 = "Only traits and interfaces may use 'require extends'."
 let error2030 = "Only traits may use 'require implements'."
+let error2031 =
+  "A class, interface, or trait declaration cannot have duplicate modifiers."

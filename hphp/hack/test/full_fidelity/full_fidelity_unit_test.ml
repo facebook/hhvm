@@ -140,7 +140,8 @@ let error_tests =
     "test_statement_errors";
     "test_expression_errors";
     "test_errors_method";
-    "test_declaration_errors"
+    "test_declaration_errors";
+    "test_errors_class";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

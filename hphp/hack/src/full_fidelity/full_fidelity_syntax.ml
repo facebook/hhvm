@@ -171,8 +171,7 @@ module WithToken(Token: TokenType) = struct
     }
     and classish_declaration = {
       classish_attr : t;
-      classish_abstract : t;
-      classish_final : t;
+      classish_modifiers : t;
       classish_token : t;
       classish_name : t;
       classish_type_params : t;
@@ -1070,11 +1069,11 @@ module WithToken(Token: TokenType) = struct
         [ methodish_attr; methodish_modifiers; methodish_function_decl_header;
           methodish_function_body; methodish_semicolon ]
       | ClassishDeclaration
-        { classish_attr; classish_abstract; classish_final; classish_token;
+        { classish_attr; classish_modifiers; classish_token;
           classish_name; classish_type_params; classish_extends;
           classish_extends_list; classish_implements; classish_implements_list;
           classish_body } ->
-        [ classish_attr; classish_abstract; classish_final; classish_token;
+        [ classish_attr; classish_modifiers; classish_token;
           classish_name; classish_type_params; classish_extends;
           classish_extends_list; classish_implements; classish_implements_list;
           classish_body ]
@@ -1445,11 +1444,11 @@ module WithToken(Token: TokenType) = struct
           "methodish_function_decl_header"; "methodish_function_body";
           "methodish_semicolon" ]
       | ClassishDeclaration
-        { classish_attr; classish_abstract; classish_final; classish_token;
+        { classish_attr; classish_modifiers; classish_token;
           classish_name; classish_type_params; classish_extends;
           classish_extends_list; classish_implements; classish_implements_list;
           classish_body } ->
-        [ "classish_attr"; "classish_abstract"; "classish_final";
+        [ "classish_attr"; "classish_modifiers";
           "classish_token"; "classish_name"; "classish_type_params";
           "classish_extends"; "classish_extends_list"; "classish_implements";
           "classish_implements_list"; "classish_body" ]
@@ -1769,8 +1768,7 @@ module WithToken(Token: TokenType) = struct
       x.methodish_function_body
     let methodish_semicolon x = x.methodish_semicolon
     let classish_attr x = x.classish_attr
-    let classish_abstract x = x.classish_abstract
-    let classish_final x = x.classish_final
+    let classish_modifiers x = x.classish_modifiers
     let classish_token x = x.classish_token
     let classish_name x = x.classish_name
     let classish_type_params x = x.classish_type_params
@@ -2100,12 +2098,12 @@ module WithToken(Token: TokenType) = struct
           methodish_function_decl_header; methodish_function_body;
           methodish_semicolon }
       | (SyntaxKind.ClassishDeclaration,
-        [ classish_attr; classish_abstract; classish_final; classish_token;
+        [ classish_attr; classish_modifiers; classish_token;
           classish_name; classish_type_params; classish_extends;
           classish_extends_list; classish_implements; classish_implements_list;
           classish_body ]) ->
         ClassishDeclaration {
-          classish_attr; classish_abstract; classish_final; classish_token;
+          classish_attr; classish_modifiers; classish_token;
           classish_name; classish_type_params; classish_extends;
           classish_extends_list; classish_implements; classish_implements_list;
           classish_body }
@@ -2636,12 +2634,12 @@ module WithToken(Token: TokenType) = struct
           [ methodish_attr; methodish_modifiers; methodish_function_decl_header;
             methodish_function_body; methodish_semicolon ]
 
-    let make_classish classish_attr classish_abstract classish_final
+    let make_classish classish_attr classish_modifiers
       classish_token classish_name classish_type_params classish_extends
       classish_extends_list classish_implements classish_implements_list
       classish_body =
       from_children SyntaxKind.ClassishDeclaration [
-        classish_attr; classish_abstract; classish_final; classish_token;
+        classish_attr; classish_modifiers; classish_token;
         classish_name; classish_type_params; classish_extends;
         classish_extends_list; classish_implements; classish_implements_list;
         classish_body ]

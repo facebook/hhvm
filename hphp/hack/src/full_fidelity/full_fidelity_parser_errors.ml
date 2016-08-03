@@ -331,6 +331,9 @@ let xhp_errors node _parents =
       [ SyntaxError.make s e SyntaxError.error2002 ]
   | _ -> [ ]
 
+let classish_duplicate_modifiers node =
+  list_contains_duplicate node
+
 (* helper since there are so many kinds of errors *)
 let produce_error acc check node error error_node =
   if check node then
@@ -517,6 +520,17 @@ let require_errors node parents =
     end
   | _ -> [ ]
 
+let classish_errors node parents =
+  match syntax node with
+  | ClassishDeclaration c ->
+    begin
+      let modifiers = classish_modifiers c in
+      let acc = [] in
+      produce_error acc classish_duplicate_modifiers modifiers
+      SyntaxError.error2031 modifiers
+    end
+  | _ -> [ ]
+
 let find_syntax_errors node is_strict =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -527,9 +541,10 @@ let find_syntax_errors node is_strict =
     let property_errs = property_errors node is_strict in
     let expr_errs = expression_errors node in
     let require_errs = require_errors node parents in
+    let classish_errors = classish_errors node parents in
     let errors = acc.errors @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
-      expr_errs @ require_errs in
+      expr_errs @ require_errs @ classish_errors in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

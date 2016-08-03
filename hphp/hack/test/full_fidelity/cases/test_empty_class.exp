@@ -2,7 +2,6 @@
   classish_declaration
     (missing)
     (missing)
-    (missing)
     ((interface)(whitespace))
     ((name)(whitespace))
     (missing)
@@ -14,7 +13,6 @@
       (missing)
     ((})(end_of_line))))
   (classish_declaration
-    (missing)
     (missing)
     (missing)
     ((end_of_line)(trait)(whitespace))
@@ -29,8 +27,9 @@
     ((})(end_of_line))))
   (classish_declaration
     (missing)
-    ((end_of_line)(abstract)(whitespace))
-    ((final)(whitespace))
+    (list
+      ((end_of_line)(abstract)(whitespace))
+      ((final)(whitespace)))
     ((class)(whitespace))
     ((name)(whitespace))
     (missing)

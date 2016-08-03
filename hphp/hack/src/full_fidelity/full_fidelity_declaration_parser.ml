@@ -283,8 +283,8 @@ module WithExpressionAndStatementParser
     (parser, result)
 
   and parse_classish_declaration parser attribute_spec =
-    let (parser, abstract, final) =
-      parse_classish_modifier_opt parser in
+    let (parser, modifiers) =
+      parse_classish_modifiers parser in
     let (parser, token) =
       parse_classish_token parser in
     let (parser, name) = expect_name parser in
@@ -296,17 +296,24 @@ module WithExpressionAndStatementParser
       parse_classish_implements_opt parser in
     let (parser, body) = parse_classish_body parser in
     let syntax = make_classish
-      attribute_spec abstract final token name generic_type_parameter_list
+      attribute_spec modifiers token name generic_type_parameter_list
       classish_extends classish_extends_list classish_implements
       classish_implements_list
       body
     in
     (parser, syntax)
 
-  and parse_classish_modifier_opt parser =
-    let (parser, abstract) = optional_token parser Abstract in
-    let (parser, final) = optional_token parser Final in
-    (parser, abstract, final)
+  and parse_classish_modifiers parser =
+    let rec parse_classish_modifier_opt parser acc =
+      let (parser1, token) = next_token parser in
+      match Token.kind token with
+        | Abstract
+        | Final ->
+          let acc = (make_token token)::acc in
+          parse_classish_modifier_opt parser1 acc
+        | _ -> (parser, make_list (List.rev acc))
+    in
+    parse_classish_modifier_opt parser []
 
   and parse_classish_token parser =
     let (parser1, token) = next_token parser in

@@ -1,5 +1,5 @@
 (script(header((<))((?))((name)(end_of_line)))
-(classish_declaration(missing)(missing)(missing)
+(classish_declaration(missing)(missing)
 ((end_of_line)
 (class)(whitespace))((name)(whitespace))
 (missing)(missing)(missing)(missing)(missing)

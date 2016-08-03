@@ -1,6 +1,6 @@
 (script(header((<))((?))((name)(end_of_line)))
   (classish_declaration
-    (missing)(missing)(missing)((trait)(whitespace))((name)(whitespace))
+    (missing)(missing)((trait)(whitespace))((name)(whitespace))
     (missing)(missing)(missing)(missing)(missing)
     (classish_body
       (({)(end_of_line))

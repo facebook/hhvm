@@ -218,8 +218,7 @@ let rec get_doc node =
     let attr = add_break (get_doc (classish_attr x)) in
 
     let preface = group_doc (
-      get_doc (classish_abstract x) ^|
-      get_doc (classish_final x) ^|
+      get_doc (classish_modifiers x) ^|
       get_doc (classish_token x)
     ) in
 

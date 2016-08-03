@@ -235,4 +235,20 @@ void ProfData::maybeResetCounters() {
   m_countersReset.store(true, std::memory_order_release);
 }
 
+void ProfData::addTargetProfile(const ProfData::TargetProfileInfo& info) {
+  WriteLock lock{m_targetProfilesLock};
+  m_targetProfiles[info.key.transId].push_back(info);
+}
+
+std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
+  TransID transID) const {
+  ReadLock lock{m_targetProfilesLock};
+  auto it = m_targetProfiles.find(transID);
+  if (it != m_targetProfiles.end()) {
+    return it->second;
+  } else {
+    return std::vector<TargetProfileInfo>{};
+  }
+}
+
 }}

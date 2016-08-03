@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 
 #include <unordered_map>
 
@@ -190,7 +191,18 @@ TransRec::print(uint64_t profCount) const {
     acoldStart, acoldLen,
     afrozenStart, afrozenLen);
 
-  folly::format(&ret, "  annotations = {}\n", annotations.size());
+  // Prepend any target profile data to annotations list.
+  if (auto const profD = profData()) {
+    auto targetProfs = profD->getTargetProfiles(id);
+    folly::format(&ret, "  annotations = {}\n",
+                  annotations.size() + targetProfs.size());
+    for (auto const& tProf : targetProfs) {
+      folly::format(&ret, "     [\"TargetProfile {}: {}\"] = {}\n",
+                    tProf.key.bcOff, tProf.key.name->data(), tProf.debugInfo);
+    }
+  } else {
+    folly::format(&ret, "  annotations = {}\n", annotations.size());
+  }
   for (auto const& annotation : annotations) {
     folly::format(&ret, "     [\"{}\"] = {}\n",
                   annotation.first, annotation.second);

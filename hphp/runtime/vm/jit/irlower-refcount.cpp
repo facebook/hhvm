@@ -215,7 +215,7 @@ struct DecRefProfile {
 
   /*
    * The number of times this DecRef was executed.
-   * */
+   */
   uint16_t hits;
   /*
    * The number of times this DecRef made it at least as far as the static

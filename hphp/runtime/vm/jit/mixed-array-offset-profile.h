@@ -54,6 +54,7 @@ struct MixedArrayOffsetProfile {
   static void reduce(MixedArrayOffsetProfile& l,
                      const MixedArrayOffsetProfile& r);
 
+  std::string toString() const;
 private:
   /*
    * Initialize the samples.

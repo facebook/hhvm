@@ -16,7 +16,16 @@
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 
+#include "hphp/runtime/vm/jit/prof-data.h"
+
 namespace HPHP { namespace jit {
+
+void addTargetProfileInfo(const rds::Profile& key, const std::string& dbgInfo) {
+  if (auto profD = profData()) {
+    ProfData::TargetProfileInfo info{key, dbgInfo};
+    profD->addTargetProfile(info);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -155,6 +164,19 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
   if (a.curTag() == Tag::UniqueMeth && toTag(bMethVal) == Tag::BaseMeth) {
     a.setMeth(meth, Tag::BaseMeth);
   }
+}
+
+std::string MethProfile::toString() const {
+  if (auto cls = uniqueClass()) {
+    return folly::sformat("uniqueClass {}", cls->name()->data());
+  } else if (auto meth = uniqueMeth()) {
+    return folly::sformat("uniqueMeth {}", meth->fullName()->data());
+  } else if (auto meth = baseMeth()) {
+    return folly::sformat("baseMeth {}", meth->fullName()->data());
+  } else if (auto meth = interfaceMeth()) {
+    return folly::sformat("interfaceMeth {}", meth->fullName()->data());
+  }
+  return std::string("none");
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -36,6 +36,8 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
+void addTargetProfileInfo(const rds::Profile& key, const std::string& dbgInfo);
+
 /*
  * This is a utility for creating or querying a 'target profiling'
  * counter during JIT compilation.  The idea is similar to target
@@ -64,6 +66,9 @@ namespace HPHP { namespace jit {
  *      gen(ProfMyTarget, RDSHandleData { prof.handle() }, ...);
  *    }
  *
+ * The type must have a toString(...) method returning a std::string with a
+ * single human-readable line representing the state of the profile, taking
+ * the same set of extra arguments as the reduce function passed to 'data'.
  */
 template<class T>
 struct TargetProfile {
@@ -74,6 +79,7 @@ struct TargetProfile {
                 size_t extraSize = 0)
     : m_link(createLink(profTransID, kind, bcOff, name, extraSize))
     , m_kind(kind)
+    , m_key{profTransID, bcOff, name}
   {}
 
   TargetProfile(const TransContext& context,
@@ -110,6 +116,10 @@ struct TargetProfile {
     for (auto& base : rds::allTLBases()) {
       reduce(out, rds::handleToRef<T>(base, hand),
              std::forward<Args>(extraArgs)...);
+    }
+    if (RuntimeOption::EvalDumpTargetProfiles) {
+      addTargetProfileInfo(m_key,
+                           out.toString(std::forward<Args>(extraArgs)...));
     }
   }
 
@@ -170,6 +180,7 @@ private:
 private:
   rds::Link<T> const m_link;
   TransKind const m_kind;
+  rds::Profile const m_key;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -189,6 +200,8 @@ struct MethProfile {
   MethProfile(const MethProfile& other) :
       m_curMeth(other.m_curMeth),
       m_curClass(other.m_curClass) {}
+
+  std::string toString() const;
 
   const Class* uniqueClass() const {
     return curTag() == Tag::UniqueClass ? rawClass() : nullptr;
@@ -264,6 +277,12 @@ struct ArrayKindProfile {
 
   static const uint32_t kNumProfiledArrayKinds = 4;
 
+  std::string toString() const {
+    std::ostringstream out;
+    for (auto c : count) out << folly::format("{},", c);
+    return out.str();
+  }
+
   static void reduce(ArrayKindProfile& a, const ArrayKindProfile& b) {
     for (uint32_t i = 0; i < kNumProfiledArrayKinds; i++) {
       a.count[i] += b.count[i];
@@ -300,6 +319,8 @@ struct TypeProfile {
   Type type; // this gets initialized with 0, which is TBottom
   static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
 
+  std::string toString() const { return type.toString(); }
+
   void report(TypedValue tv) {
     type |= typeFromTV(&tv, nullptr);
   }
@@ -314,6 +335,12 @@ struct TypeProfile {
 struct SwitchProfile {
   SwitchProfile(const SwitchProfile&) = delete;
   SwitchProfile& operator=(const SwitchProfile&) = delete;
+
+  std::string toString(int nCases) const {
+    std::ostringstream out;
+    for (int i = 0; i < nCases; ++i) out << folly::format("{},", cases[i]);
+    return out.str();
+  }
 
   uint32_t cases[0]; // dynamically sized
 

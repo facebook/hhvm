@@ -20,6 +20,8 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/hash-map-typedefs.h"
 
+#include "hphp/runtime/base/rds.h"
+
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -464,6 +466,13 @@ struct ProfData {
     return it == m_jmpToTransID.end() ? kInvalidTransID : it->second;
   }
 
+  /*
+   * Support storing debug info about target profiles in profiling translations.
+   */
+  struct TargetProfileInfo { rds::Profile key; std::string debugInfo; };
+  void addTargetProfile(const TargetProfileInfo& info);
+  std::vector<TargetProfileInfo> getTargetProfiles(TransID transID) const;
+
 private:
   struct PrologueID {
     FuncId func;
@@ -526,6 +535,9 @@ private:
    */
   folly::AtomicHashMap<FuncId, const std::unordered_set<Offset>>
     m_blockEndOffsets;
+
+  mutable ReadWriteMutex m_targetProfilesLock;
+  std::unordered_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
 };
 
 //////////////////////////////////////////////////////////////////////

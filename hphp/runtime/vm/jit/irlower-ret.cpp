@@ -228,6 +228,10 @@ namespace {
 const StaticString s_ReleaseVV("ReleaseVV");
 
 struct ReleaseVVProfile {
+  std::string toString() const {
+    return folly::sformat("{}/{} released", released, executed);
+  }
+
   int percentReleased() const {
     return executed ? (100 * released / executed) : 0;
   };

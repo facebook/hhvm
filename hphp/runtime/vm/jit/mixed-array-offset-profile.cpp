@@ -34,6 +34,16 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::string MixedArrayOffsetProfile::toString() const {
+  if (!m_init) return std::string("uninitialized");
+  std::ostringstream out;
+  for (auto const& line : m_hits) {
+    out << folly::format("{}:{},", line.pos, line.count);
+  }
+  out << folly::format("untracked:{}", m_untracked);
+  return out.str();
+}
+
 folly::Optional<uint32_t>
 MixedArrayOffsetProfile::choose() const {
   Line hottest;

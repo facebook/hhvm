@@ -932,5 +932,8 @@ and handle_compound_brace_prefix_indent prefix statement indt =
     group_doc (indent_doc prefix (get_doc statement) indt)
 
 let pretty_print node =
-  let to_print = combine (get_doc node) in
+  let empty_string = make_simple (text "") in
+  let to_print = node |> get_doc |> add_break in
+  let to_print = to_print ^| empty_string in
+  let to_print = combine to_print in
   pretty 0 to_print

@@ -353,8 +353,10 @@ and parse_field_list parser =
     field-specifier-list:
       field-specifier
       field-specifier-list  ,  field-specifier
+    NOTE: trailing comma is allowed
   *)
-  parse_comma_list parser RightParen SyntaxError.error1025 parse_field_specifier
+  parse_comma_list_allow_trailing parser RightParen SyntaxError.error1025
+    parse_field_specifier
 
 and parse_field_list_opt parser =
   let token = peek_token parser in

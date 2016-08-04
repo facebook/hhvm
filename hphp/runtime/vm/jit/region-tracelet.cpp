@@ -576,8 +576,9 @@ RegionDescPtr form_region(Env& env) {
     auto const curIRBlock = env.irgs.irb->curBlock();
     if (!irBlockReachable(env, curIRBlock)) {
       FTRACE(1,
-        "selectTracelet: tracelet broken due to unreachable code (block {})\n",
-        curIRBlock->id());
+             "selectTracelet: tracelet broken due "
+             "to unreachable code (block {})\n",
+             curIRBlock->id());
       break;
     }
 
@@ -610,17 +611,27 @@ RegionDescPtr form_region(Env& env) {
 
     recordDependencies(env);
 
-    // Make sure that the IR unit contains a main exit corresponding
-    // to the last bytecode instruction in the region.  Note that this
-    // check has to happen before the call to truncateLiterals()
-    // because that updates the region but not the IR unit.
-    if (!env.region->blocks().back()->empty()) {
+    auto const truncate = [&] () -> bool {
+      // Make sure that the IR unit contains a main exit corresponding
+      // to the last bytecode instruction in the region.  Note that this
+      // check has to happen before the call to truncateLiterals()
+      // because that updates the region but not the IR unit.
+      if (env.region->blocks().back()->empty()) return true;
       auto lastSk = env.region->lastSrcKey();
-      always_assert_flog(findMainExitBlock(env.irgs.irb->unit(), lastSk),
-                         "No main exits found!");
-    }
+      auto const mainExit = findMainExitBlock(env.irgs.irb->unit(), lastSk);
+      always_assert_flog(mainExit, "No main exits found!");
+      /*
+       * If the last instruction is a Halt, its probably due to
+       * unreachable code. We don't want to truncate the tracelet
+       * in that case, because we could lose the assertion (eg
+       * if the Halt is due to a failed AssertRAT).
+       */
+      return !mainExit->back().is(Halt);
+    }();
 
-    truncateLiterals(env);
+    if (truncate) {
+      truncateLiterals(env);
+    }
   }
 
   return std::move(env.region);

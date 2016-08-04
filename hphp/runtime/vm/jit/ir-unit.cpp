@@ -124,6 +124,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case ThrowArithmeticError:
     case ThrowDivisionByZeroError:
     case VerifyParamFailHard:
+    case Halt:
       return instSk == sk;
 
     // The RetCtrl is generally ending a bytecode instruction, with the

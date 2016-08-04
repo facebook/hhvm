@@ -290,6 +290,10 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
          typeSrc ? typeSrc->toString() : "nullptr");
 
   if (canSimplifyAssertType(inst, oldType, typeMightRelax(oldVal))) {
+    if (!oldType.maybe(inst->typeParam())) {
+      gen(Halt);
+      return m_unit.cns(TBottom);
+    }
     return fwdGuardSource(inst);
   }
 

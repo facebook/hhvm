@@ -640,6 +640,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   assertx(!fpi.empty());
   auto const ctx = fpi.back().ctxType;
 
+  if (ctx == TBottom) return nullptr;
+
   std::vector<Type> argTypes;
   for (int i = numArgs - 1; i >= 0; --i) {
     // DataTypeGeneric is used because we're just passing the locals into the
@@ -648,6 +650,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
 
     // If we don't have sufficient type information to inline the region return
     // early
+    if (type == TBottom) return nullptr;
     if (!(type <= TCell) && !(type <= TBoxedCell) && !(type <= TCls)) {
       return nullptr;
     }

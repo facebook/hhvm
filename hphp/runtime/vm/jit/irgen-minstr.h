@@ -107,6 +107,10 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
  */
 template<class Finish>
 SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
+  if (tmp->type() <= TStkElem && tmp->type().isKnownDataType()) {
+    return tmp;
+  }
+
   TargetProfile<TypeProfile> prof(env.context, env.irb->curMarker(),
                                   makeStaticString("TypeProfile"));
 
@@ -116,7 +120,14 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
   if (!prof.optimizing()) return tmp;
 
-  Type typeToCheck = relaxToGuardable(prof.data(TypeProfile::reduce).type);
+  auto const reducedType = prof.data(TypeProfile::reduce).type;
+
+  if (reducedType == TBottom) {
+    // We got no samples
+    return tmp;
+  }
+
+  Type typeToCheck = relaxToGuardable(reducedType);
 
   if (typeToCheck == TGen) return tmp;
 

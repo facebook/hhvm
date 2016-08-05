@@ -252,6 +252,16 @@ bool MCGenerator::profileSrcKey(SrcKey sk) const {
     return false;
   }
 
+  // We have two knobs to control the number of functions we're allowed to
+  // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
+  // functions until either of these limits is exceeded. In practice we expect
+  // to hit the bytecode size limit first but we keep the request limit around
+  // as a safety net.
+  if (RuntimeOption::EvalJitProfileBCSize > 0 &&
+      profData()->profilingBCSize() >= RuntimeOption::EvalJitProfileBCSize) {
+    return false;
+  }
+
   return requestCount() <= RuntimeOption::EvalJitProfileRequests;
 }
 
@@ -288,9 +298,20 @@ TransResult MCGenerator::retranslate(TransArgs args) {
   auto kind = [&] {
     return profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
   };
-  LeaseHolder writer(Translator::WriteLease(), args.sk.func(), kind());
-  if (!writer ||
-      !shouldTranslate(args.sk.func(), kind())) {
+  args.kind = kind();
+
+  // Only start profiling new functions at their entry point. This reduces the
+  // chances of profiling the body of a function but not its entry (where we
+  // trigger retranslation) and helps remove bias towards larger functions that
+  // can cause variations in the size of code.prof.
+  if (args.kind == TransKind::Profile &&
+      !profData()->profiling(args.sk.funcID()) &&
+      !args.sk.func()->isEntry(args.sk.offset())) {
+    return nullptr;
+  }
+
+  LeaseHolder writer(Translator::WriteLease(), args.sk.func(), args.kind);
+  if (!writer || !shouldTranslate(args.sk.func(), kind())) {
     return nullptr;
   }
 
@@ -383,7 +404,8 @@ void MCGenerator::checkFreeProfData() {
   if (profData() &&
       !RuntimeOption::EvalEnableReusableTC &&
       m_code.main().used() >= CodeCache::AMaxUsage &&
-      (!m_code.hotEnabled() || profData()->optimizedAllProfiledFuncs()) &&
+      (!m_code.hotEnabled() ||
+       profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
       !Translator::isTransDBEnabled()) {
     discardProfData();
   }

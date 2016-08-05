@@ -450,7 +450,7 @@ struct RuntimeOption {
   F(uint64_t, JitMatureSize,           25 << 20)                        \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              0)                               \
-  F(int, JitThreads,                   6)                               \
+  F(int, JitThreads,                   4)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \
@@ -505,6 +505,7 @@ struct RuntimeOption {
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
+  F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \

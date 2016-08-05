@@ -209,6 +209,10 @@ void requestExitProfData() {
   tl_profData = nullptr;
 }
 
+const ProfData* globalProfData() {
+  return s_profData.load(std::memory_order_relaxed);
+}
+
 void discardProfData() {
   if (s_profData.load(std::memory_order_relaxed) == nullptr) return;
 

@@ -30,6 +30,7 @@ TRACE_SET_MOD(txlease);
 
 namespace {
 __thread bool threadCanAcquire = true;
+__thread bool threadCanAcquireConcurrent = true;
 
 AtomicVector<int64_t> s_funcOwners{kFuncCountHint,
                                    Treadmill::kInvalidThreadIdx};
@@ -53,9 +54,12 @@ bool Lease::amOwner() const {
     pthread_equal(m_owner, pthread_self());
 }
 
-bool Lease::mayLock(bool f) {
-  std::swap(threadCanAcquire, f);
-  return f;
+void Lease::mayLock(bool f) {
+  threadCanAcquire = f;
+}
+
+void Lease::mayLockConcurrent(bool f) {
+  threadCanAcquireConcurrent = f;
 }
 
 // acquire: also returns true if we are already the writer.
@@ -144,6 +148,8 @@ LeaseHolder::LeaseHolder(Lease& l, const Func* func, TransKind kind)
   , m_func{RuntimeOption::EvalJitConcurrently > 0 ? func : nullptr}
 {
   auto const need_global = m_func == nullptr || !concurrentlyJitKind(kind);
+
+  if (!need_global && !threadCanAcquireConcurrent) return;
 
   if (need_global && !m_lease.amOwner()) {
     auto const blocking = RuntimeOption::EvalJitRequireWriteLease &&

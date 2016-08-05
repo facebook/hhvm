@@ -54,7 +54,8 @@ struct Lease {
   int64_t hintKept()    const { return m_hintKept; }
   int64_t hintGrabbed() const { return m_hintGrabbed; }
 
-  static bool mayLock(bool f);
+  static void mayLock(bool f);
+  static void mayLockConcurrent(bool f);
 
 private:
   // acquire: also returns true if we are already the writer.

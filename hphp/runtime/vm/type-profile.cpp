@@ -67,6 +67,9 @@ namespace {
 bool warmingUp;
 std::atomic<int64_t> numRequests;
 std::atomic<bool> singleJitLock;
+__thread bool acquiredSingleJit = false;
+std::atomic<int> singleJitConcurrentCount;
+__thread bool acquiredSingleJitConcurrent = false;
 std::atomic<int> singleJitRequests;
 std::atomic<int> relocateRequests;
 
@@ -203,10 +206,30 @@ void profileRequestStart() {
   bool okToJit = requestKind == RequestKind::Standard;
   if (okToJit) {
     jit::Lease::mayLock(true);
+    jit::Lease::mayLockConcurrent(true);
+    assertx(!acquiredSingleJit);
+    assertx(!acquiredSingleJitConcurrent);
+
     if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
-      bool flag = false;
-      if (!singleJitLock.compare_exchange_strong(flag, true)) {
+      if (!singleJitLock.exchange(true, std::memory_order_relaxed)) {
+        acquiredSingleJit = true;
+      } else {
         jit::Lease::mayLock(false);
+      }
+
+      if (RuntimeOption::EvalJitConcurrently > 0) {
+        // The single jit lock is treated separately for translations that
+        // happen concurrently: we still give threads permission to jit one
+        // request at a time, but we allow up to Eval.JitThreads to have this
+        // permission at once.
+        auto threads = singleJitConcurrentCount.load(std::memory_order_relaxed);
+        if (threads < RuntimeOption::EvalJitThreads &&
+            singleJitConcurrentCount.compare_exchange_strong(
+              threads, threads + 1, std::memory_order_relaxed)) {
+          acquiredSingleJitConcurrent = true;
+        } else {
+          jit::Lease::mayLockConcurrent(false);
+        }
       }
     }
   }
@@ -256,12 +279,18 @@ void profileRequestEnd() {
   auto const finished = numRequests.fetch_add(1, std::memory_order_relaxed) + 1;
   checkRFH(finished);
 
-  if (standardRequest &&
-      singleJitRequests < RuntimeOption::EvalNumSingleJitRequests &&
-      jit::Lease::mayLock(true)) {
-    assert(singleJitLock);
+  if (acquiredSingleJit || acquiredSingleJitConcurrent) {
     ++singleJitRequests;
-    singleJitLock = false;
+
+    if (acquiredSingleJit) {
+      singleJitLock = false;
+      acquiredSingleJit = false;
+    }
+    if (acquiredSingleJitConcurrent) {
+      --singleJitConcurrentCount;
+      acquiredSingleJitConcurrent = false;
+    }
+
     if (RuntimeOption::ServerExecutionMode()) {
       Logger::Warning("Finished singleJitRequest %d", singleJitRequests.load());
     }

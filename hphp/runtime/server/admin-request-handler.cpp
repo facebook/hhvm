@@ -32,6 +32,7 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc-info.h"
@@ -881,6 +882,18 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("funcs", Func::nextFuncId());
     appendStat("request-count", requestCount());
     appendStat("single-jit-requests", singleJitRequestCount());
+
+    /*
+     * We're only using globalProfData() here because admin requests don't call
+     * requestInitProfData(). Normal request threads should always use
+     * profData() which provides much better guarantees about the lifetime of
+     * the returned object.
+     */
+    if (auto profData = jit::globalProfData()) {
+      appendStat("prof-funcs", profData->profilingFuncs());
+      appendStat("prof-bc", profData->profilingBCSize());
+      appendStat("opt-funcs", profData->optimizedFuncs());
+    }
 
     if (RuntimeOption::EvalEnableReusableTC) {
       mcg->code().forEachBlock([&](const char* name, const CodeBlock& a) {

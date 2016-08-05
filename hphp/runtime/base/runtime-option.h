@@ -449,7 +449,7 @@ struct RuntimeOption {
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(uint64_t, JitMatureSize,           25 << 20)                        \
   F(bool, JitTimer,                    kJitTimerDefault)                \
-  F(int, JitConcurrently,              0)                               \
+  F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \

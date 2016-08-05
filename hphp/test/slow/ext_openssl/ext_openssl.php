@@ -336,6 +336,26 @@ function test_openssl_digest() {
   VS(md5($test), openssl_digest($test, "md5"));
 }
 
+function test_openssl_encrypt_long() {
+  $pt = 'aa';
+  $method = 'aes-128-cbc';
+  $iv = str_repeat('x', 16);
+  $ct1 = openssl_encrypt($pt, $method, str_repeat('a', 19), 0, $iv);
+  $ct2 = openssl_encrypt($pt, $method, str_repeat('a', 16), 0, $iv);
+  var_dump($ct1 === $ct2);
+}
+
+function test_openssl_decrypt_long() {
+  $pt = 'aa';
+  $method = 'aes-128-cbc';
+  $iv = str_repeat('x', 16);
+  $ct = openssl_encrypt($pt, $method, str_repeat('a', 16), 0, $iv);
+  $pt1 = openssl_decrypt($ct, $method, str_repeat('a', 16), 0, $iv);
+  $pt2 = openssl_decrypt($ct, $method, str_repeat('a', 19), 0, $iv);
+  var_dump($pt1 === $pt2);
+  var_dump($pt1 === $pt);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 test_openssl_csr_export_to_file();
@@ -364,3 +384,5 @@ test_openssl_x509_parse();
 test_openssl_x509_read();
 test_openssl_encrypt();
 test_openssl_digest();
+test_openssl_encrypt_long();
+test_openssl_decrypt_long();

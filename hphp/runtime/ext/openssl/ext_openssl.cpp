@@ -2804,10 +2804,8 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
     raise_warning("Setting tag length failed");
     return false;
   }
-  if (password.size() > keylen &&
-      !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password.size())) {
-    raise_warning("Setting key length failed");
-    return false;
+  if (password.size() > keylen) {
+    EVP_CIPHER_CTX_set_key_length(cipher_ctx, password.size());
   }
   EVP_EncryptInit_ex(
       cipher_ctx,
@@ -2965,10 +2963,8 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
       return false;
     }
   }
-  if (password.size() > keylen &&
-      !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password.size())) {
-    raise_warning("Setting key length failed");
-    return false;
+  if (password.size() > keylen) {
+    EVP_CIPHER_CTX_set_key_length(cipher_ctx, password.size());
   }
   EVP_DecryptInit_ex(
       cipher_ctx,

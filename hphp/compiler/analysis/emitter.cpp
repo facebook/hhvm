@@ -4738,13 +4738,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           // Can't resolve this to a literal name at emission time
           static const StringData* fname
             = makeStaticString("get_called_class");
-          Offset fpiStart = m_ue.bcPos();
-          e.FPushFuncD(0, fname);
-          {
-            FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-          }
-          e.FCall(0);
-          e.UnboxR();
+          e.FCallBuiltin(0, 0, fname);
+          e.UnboxRNop();
           e.InstanceOf();
         } else if (s != "") {
           ClassScopeRawPtr cls = second->getClassScope();

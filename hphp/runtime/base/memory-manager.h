@@ -46,7 +46,9 @@
 #define       MAP_UNINITIALIZED 0x4000000 /* XXX Fragile. */
 
 namespace HPHP {
+
 struct APCLocalArray;
+struct Header;
 struct MemoryManager;
 struct ObjectData;
 struct ResourceData;
@@ -433,6 +435,12 @@ struct BigHeap {
    */
   template<class Fn> void iterate(Fn);
 
+  /*
+   * Find the Header* in the heap which contains `p', else nullptr if `p' is
+   * not contained in any heap allocation.
+   */
+  Header* find(const void* p);
+
  protected:
   void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 
@@ -659,6 +667,28 @@ struct MemoryManager {
   bool contains(void* p) const;
   bool checkContains(void* p) const;
 
+  /*
+   * Heap iterator methods.  `fn' takes a Header* argument.
+   *
+   * iterate(): Raw iterator loop over the headers of everything in the heap.
+   *            Skips BigObj because it's just a detail of which sub-heap we
+   *            used to allocate something based on its size, and it can prefix
+   *            almost any other header kind.  (Also skips Hole.)  Clients can
+   *            call this directly to avoid unnecessary initFree()s.
+   * forEachHeader(): Like iterate(), but with an eager initFree().
+   * forEachObject(): Iterate just the ObjectDatas, including the kinds with
+   *                  prefixes (NativeData and ResumableFrame).
+   */
+  template<class Fn> void iterate(Fn fn);
+  template<class Fn> void forEachHeader(Fn fn);
+  template<class Fn> void forEachObject(Fn fn);
+
+  /*
+   * Find the Header* in the heap which contains `p', else nullptr if `p' is
+   * not contained in any heap allocation.
+   */
+  Header* find(const void* p);
+
   /////////////////////////////////////////////////////////////////////////////
   // Stats.
 
@@ -830,22 +860,6 @@ struct MemoryManager {
   template <typename T> req::ptr<T> removeRoot(RootId token);
   template <typename F> void scanRootMaps(F& m) const;
   template <typename F> void scanSweepLists(F& m) const;
-
-  /*
-   * Heap iterator methods.  `fn' takes a Header* argument.
-   *
-   * iterate(): Raw iterator loop over the headers of everything in the heap.
-   *            Skips BigObj because it's just a detail of which sub-heap we
-   *            used to allocate something based on its size, and it can prefix
-   *            almost any other header kind.  (Also skips Hole.)  Clients can
-   *            call this directly to avoid unnecessary initFree()s.
-   * forEachHeader(): Like iterate(), but with an eager initFree().
-   * forEachObject(): Iterate just the ObjectDatas, including the kinds with
-   *                  prefixes (NativeData and ResumableFrame).
-   */
-  template<class Fn> void iterate(Fn fn);
-  template<class Fn> void forEachHeader(Fn fn);
-  template<class Fn> void forEachObject(Fn fn);
 
   /*
    * Run the experimental collector.

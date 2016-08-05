@@ -1248,7 +1248,69 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
   return {newNode + 1, newsize};
 }
 
-/////////////////////////////////////////////////////////////////////////
+/*
+ * To find `p', we sort the slabs, bisect them, then iterate the slab
+ * containing `p'.  If there is no such slab, we bisect the bigs to try to find
+ * a big containing `p'.
+ *
+ * If that fails, we return nullptr.
+ */
+Header* BigHeap::find(const void* p) {
+  std::sort(std::begin(m_slabs), std::end(m_slabs),
+    [] (const MemBlock& l, const MemBlock& r) {
+      assertx(static_cast<char*>(l.ptr) + l.size < r.ptr ||
+              static_cast<char*>(r.ptr) + r.size < l.ptr);
+      return l.ptr < r.ptr;
+    }
+  );
+
+  auto const slab = std::lower_bound(
+    std::begin(m_slabs), std::end(m_slabs), p,
+    [] (const MemBlock& slab, const void* p) {
+      return static_cast<const char*>(slab.ptr) + slab.size <= p;
+    }
+  );
+
+  if (slab != std::end(m_slabs) && slab->ptr <= p) {
+    // std::lower_bound() finds the first slab that is not less than `p'.  By
+    // our comparison predicate, a slab is less than `p' iff its entire range
+    // is below `p', so if the returned slab's start address is <= `p', then
+    // the slab must contain `p'.  Within the slab, we just do a linear search.
+    auto const slab_end = static_cast<char*>(slab->ptr) + slab->size;
+    auto h = reinterpret_cast<char*>(slab->ptr);
+    while (h < slab_end) {
+      auto const hdr = reinterpret_cast<Header*>(h);
+      auto const size = hdr->allocSize();
+      if (p < h + size) return hdr;
+      h += size;
+    }
+    // We know `p' is in the slab, so it must belong to one of the headers.
+    always_assert(false);
+  }
+
+  std::sort(std::begin(m_bigs), std::end(m_bigs));
+
+  auto const big = std::lower_bound(
+    std::begin(m_bigs), std::end(m_bigs), p,
+    [] (const MallocNode* big, const void* p) {
+      auto const h = reinterpret_cast<const Header*>(big + 1);
+      return reinterpret_cast<const char*>(big) + h->size() <= p;
+    }
+  );
+
+  if (big != std::end(m_bigs) && *big <= p) {
+    if (p < *big + 1) {
+      // `p' is part of the MallocNode.
+      return reinterpret_cast<Header*>(*big);
+    } else {
+      // `p' is part of the allocated object.
+      return reinterpret_cast<Header*>(*big + 1);
+    }
+  }
+  return nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // ContiguousHeap.
 
 void ContiguousHeap::reset() {
@@ -1484,4 +1546,7 @@ ContiguousHeap::~ContiguousHeap(){
   flush();
   // ~BigHeap releases its slabs/bigs.
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

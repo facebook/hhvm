@@ -39,34 +39,23 @@ namespace HPHP {
 
 // union of all the possible header types, and some utilities
 struct Header {
-  size_t size() const;
   HeaderKind kind() const {
     assert(unsigned(hdr_.kind) <= NumHeaderKinds);
     return hdr_.kind;
   }
-  union {
-    struct {
-      uint64_t q;
-      HeaderWord<> hdr_;
-    };
-    StringData str_;
-    ArrayData arr_;
-    MixedArray mixed_;
-    APCLocalArray apc_;
-    ProxyArray proxy_;
-    GlobalsArray globals_;
-    ObjectData obj_;
-    c_Pair pair_;
-    BaseVector vector_;
-    HashCollection hashcoll_;
-    ResourceHdr res_;
-    RefData ref_;
-    MallocNode malloc_;
-    FreeNode free_;
-    ResumableNode resumable_;
-    NativeNode native_;
-    c_AwaitAllWaitHandle awaitall_;
-  };
+
+  size_t size() const;
+
+  size_t allocSize() const {
+    // Hole and Free have exact sizes, so don't round them.
+    auto const sz = hdr_.kind == HeaderKind::Hole ||
+                    hdr_.kind == HeaderKind::Free
+      ? free_.size()
+      : MemoryManager::smallSizeClass(size());
+
+    assertx(sz % 16 == 0);
+    return sz;
+  }
 
   const Resumable* resumable() const {
     assert(kind() == HeaderKind::ResumableFrame);
@@ -115,6 +104,31 @@ struct Header {
            kind() == HeaderKind::NativeData ? nativeObj() :
            nullptr;
   }
+
+public:
+  union {
+    struct {
+      uint64_t q;
+      HeaderWord<> hdr_;
+    };
+    StringData str_;
+    ArrayData arr_;
+    MixedArray mixed_;
+    APCLocalArray apc_;
+    ProxyArray proxy_;
+    GlobalsArray globals_;
+    ObjectData obj_;
+    c_Pair pair_;
+    BaseVector vector_;
+    HashCollection hashcoll_;
+    ResourceHdr res_;
+    RefData ref_;
+    MallocNode malloc_;
+    FreeNode free_;
+    ResumableNode resumable_;
+    NativeNode native_;
+    c_AwaitAllWaitHandle awaitall_;
+  };
 };
 
 inline size_t Header::size() const {
@@ -207,15 +221,9 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
     auto const h = hdr;
 
     if (in_slabs) {
-      // Move to the next header in the slab.  Hole and Free have exact sizes,
-      // so don't round them.
-      auto size = hdr->hdr_.kind == HeaderKind::Hole ||
-                  hdr->hdr_.kind == HeaderKind::Free
-        ? hdr->free_.size()
-        : MemoryManager::smallSizeClass(hdr->size());
-      assert(size % 16 == 0);
-
-      hdr = reinterpret_cast<Header*>(reinterpret_cast<char*>(hdr) + size);
+      // Move to the next header in the slab.
+      hdr = reinterpret_cast<Header*>(reinterpret_cast<char*>(hdr) +
+                                      hdr->allocSize());
       if (hdr >= slab_end) {
         assert(hdr == slab_end && "hdr > slab_end indicates corruption");
         // move to next slab

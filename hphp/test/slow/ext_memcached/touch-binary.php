@@ -17,7 +17,7 @@ echo "TOUCH: " . $m->getResultMessage() . PHP_EOL;
 
 $m->touch($key, time() + 86400);
 echo "TOUCH: " . $m->getResultMessage() . PHP_EOL;
-
+sleep(2);
 $m->get($key);
 echo "GET: " . $m->getResultMessage() . PHP_EOL;
 

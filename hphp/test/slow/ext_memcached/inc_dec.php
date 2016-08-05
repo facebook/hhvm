@@ -17,10 +17,15 @@ $mc2->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
 $mc2->addServer('127.0.0.1', 11211);
 
 var_dump($mc2->increment(non_existant_key, 3));
-var_dump($mc2->get_multi(array(non_existant_key)));
+var_dump($mc2->getMulti(array(non_existant_key)));
 var_dump($mc2->decrement(non_existant_key, 1));
-var_dump($mc2->get_multi(array(non_existant_key)));
+var_dump($mc2->getMulti(array(non_existant_key)));
 
+// There is an issue with the return value from this section, especially as it
+// changes when memcached isn't clean - even with the delete below.
 $mc2->increment(non_existant_key, 3, 1);
-$result = $mc2->get_multi(array(non_existant_key));
+$result = $mc2->getMulti(array(non_existant_key));
 var_dump($result[non_existant_key]);
+
+// Cleanup
+$mc2->delete(non_existant_key);

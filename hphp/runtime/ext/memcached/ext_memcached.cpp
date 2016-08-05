@@ -1119,10 +1119,9 @@ memcached_return_t doVersionCallback(const memcached_st *ptr,
 
 Variant HHVM_METHOD(Memcached, getversion) {
   auto data = Native::data<MemcachedData>(this_);
-  memcached_return_t status = memcached_version(&data->m_impl->memcached);
-  if (!data->handleError(status)) return false;
+  memcached_version(&data->m_impl->memcached);
 
-  Array returnValue;
+  Array returnValue = Array::Create();
   memcached_server_function callbacks[] = { doVersionCallback };
   memcached_server_cursor(&data->m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;

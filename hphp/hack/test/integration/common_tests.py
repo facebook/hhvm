@@ -135,6 +135,14 @@ class CommonTestDriver(object):
             ], env={})
         return DebugSubscription(proc)
 
+    def connect_ide(self):
+        proc = self.proc_create([
+            hh_client,
+            'ide',
+            self.repo_dir], env={})
+        return IdeConnection(proc)
+
+
 class DebugSubscription(object):
     """
     Wraps `hh_client debug`.
@@ -157,6 +165,84 @@ class DebugSubscription(object):
                 break
             msgs[msg['name']] = msg
         return msgs
+
+
+class IdeConnection(object):
+    """
+    Wraps `hh_client ide`.
+    """
+    def __init__(self, proc):
+        self.proc = proc
+
+    def close_stdin(self):
+        self.proc.stdin.close()
+
+    def write_cmd(self, cmd):
+        self.proc.stdin.write(cmd)
+
+    def read_msg(self):
+        line = self.proc.stdout.readline()
+        return line
+
+    def get_return(self):
+        (stdout_data, stderr_data) = self.proc.communicate()
+        retcode = self.proc.wait()
+        return (stdout_data, stderr_data, retcode)
+
+    def open(self, file):
+        return(
+            '{"protocol" : "service_framework3_rpc","id" : 123,"type" : ' +
+            '"call","method" : "didOpenFile","args" : {"filename":"' +
+            file +
+            '"}}\n'
+        )
+
+    def close(self, file):
+        return(
+            '{"protocol" : "service_framework3_rpc","id" : 123,"type" : ' +
+            '"call","method" : "didCloseFile","args" : {"filename":"' +
+            file +
+            '"}}\n'
+        )
+
+    def edit(self, file, st_line, st_column, ed_line, ed_column, text):
+        return(
+            '{"protocol" : "service_framework3_rpc","id" : 456,"type" : ' +
+            '"call","method" : "didChangeFile","args" : {"filename" : "' +
+            file +
+            '","changes" : [{"range" : {"start" : {"line" : ' +
+            st_line +
+            ', "column" : ' +
+            st_column +
+            '},"end" : {"line" : ' +
+            ed_line +
+            ', "column" : ' +
+            ed_column +
+            '}},"text" : "' +
+            text +
+            '"}]}}\n'
+        )
+
+    def auto_complete(self, file, line, column):
+        return(
+            '{"protocol" : "service_framework3_rpc","id" : 789,"type" : ' +
+            '"call","method" : "getCompletions","args" : {"filename" : "' +
+            file +
+            '","position" : {"line" :' +
+            line +
+            ', "column" :' +
+            column +
+            '}}}\n'
+        )
+
+    def sleep(self):
+        return('{"protocol" : "service_framework3_rpc","id" : 000,"type" : ' +
+                '"call","method" : "sleep","args" : {}}\n')
+
+    def disconnect(self):
+        return('{"protocol" : "service_framework3_rpc","id" : 233,"type" : ' +
+                '"call","method" : "disconnect","args" : {}}')
+
 
 class CommonTests(object):
 
@@ -815,3 +901,172 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             return g() + 1;
         }
 """)
+
+    def test_ide_exit_status(self):
+        """
+        Test multiple exit status of "hh_client ide"
+        """
+
+        self.write_load_config()
+        # Test the exit status of ide call under no hh_server
+        (_, _, exit_code) = self.proc_call([hh_client, 'ide', self.repo_dir])
+        self.assertEqual(exit_code, 202, msg="Test IDE_no_server status failed")
+
+        # Test the exit status of ide call when another ide client exists
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        time.sleep(1)
+        (_, _, exit_code) = self.proc_call([hh_client, 'ide', self.repo_dir])
+        self.assertEqual(
+            exit_code,
+            207,
+            msg="Test IDE_persistent_client_already_exists status failed")
+
+        # Test ide abnormally exit. It make sure exit ide connection with EOF
+        # does not crash the server. (This is assured by the test below since
+        # ide connection cannot exit with code 0 if there is no server exists)
+        ide_con.close_stdin()
+
+        # Test the exit status of ide call when normally exit
+        ide_con = self.connect_ide()
+        ide_con.write_cmd(ide_con.disconnect())
+        (_, _, exit_code) = ide_con.get_return()
+        self.assertEqual(exit_code, 0, msg="Test normal exit status failed")
+        self.check_cmd(['No errors!'])
+
+    def test_ide_file_sync(self):
+        """
+        Test ide file sync cmds and autocomplete of "hh_client ide"
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (ide_con.open('foo_3.php') +
+                ide_con.edit('foo_3.php', '4', '24', '4', '24', 'some_') +
+                ide_con.auto_complete('foo_3.php', '4', '29') +
+                ide_con.sleep() +
+                ide_con.disconnect())
+        ide_con.write_cmd(cmd)
+        (stdout, _, exit_code) = ide_con.get_return()
+        self.assertEqual(
+            stdout,
+            '{"protocol":"service_framework3_rpc","type":"response","id":789,' +
+            '"result":[{"name":"some_long_function_name","type":"(function():' +
+            ' _)","pos":{"filename":"","line":9,"char_start":18,"char_end":40' +
+            '},"func_details":{"min_arity":0,"return_type":"_","params":[]},"' +
+            'expected_ty":false}]}\n',
+            msg="Autocomplete response content does not match"
+        )
+        self.assertEqual(
+            exit_code,
+            0,
+            msg="Exit status does not match"
+        )
+        self.check_cmd(['{root}foo_3.php:5:9,9: Expected ; (Parsing[1002])'])
+
+    def test_ide_file_sync2(self):
+        """
+        Test ide file sync cmds and autocomplete of "hh_client ide"
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (ide_con.open('foo_3.php') +
+                ide_con.edit('foo_3.php', '12', '10', '12', '10', 'function ' +
+                             'some_other_function_name() {}') +
+                ide_con.edit('foo_3.php', '4', '24', '4', '24', 'some_') +
+                ide_con.auto_complete('foo_3.php', '4', '29') +
+                ide_con.sleep() +
+                ide_con.disconnect())
+        ide_con.write_cmd(cmd)
+        (stdout, _, exit_code) = ide_con.get_return()
+        self.assertEqual(
+            stdout,
+            '{"protocol":"service_framework3_rpc","type":"response","id":789,' +
+            '"result":[{"name":"some_long_function_name","type":"(function():' +
+            ' _)","pos":{"filename":"","line":9,"char_start":18,"char_end":40' +
+            '},"func_details":{"min_arity":0,"return_type":"_","params":[]},"' +
+            'expected_ty":false},{"name":"some_other_function_name","type":"(' +
+            'function(): _)","pos":{"filename":"","line":12,"char_start":19,"' +
+            'char_end":42},"func_details":{"min_arity":0,"return_type":"_","p' +
+            'arams":[]},"expected_ty":false}]}\n',
+            msg="Autocomplete response content does not match"
+        )
+        self.assertEqual(
+            exit_code,
+            0,
+            msg="Exit status does not match"
+        )
+        self.check_cmd(['{root}foo_3.php:5:9,9: Expected ; (Parsing[1002])'])
+
+    def test_ide_consistency(self):
+        """
+        Test consistency of ide file sync cmds and autocomplete
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (ide_con.open('foo_5.php') +
+                ide_con.edit('foo_5.php', '4', '51', '4', '51',
+                             'public function frob(): void {}') +
+                ide_con.open('foo_4.php') +
+                ide_con.edit('foo_4.php', '4', '30', '4', '30',
+                             '(new ClassToBeIdentified())->') +
+                ide_con.sleep() +
+                ide_con.auto_complete('foo_4.php', '4', '59') +
+                ide_con.disconnect())
+        ide_con.write_cmd(cmd)
+        (stdout, _, exit_code) = ide_con.get_return()
+        self.assertEqual(
+            stdout[:141] + stdout[153:],
+            '{"protocol":"service_framework3_rpc","type":"respo' +
+            'nse","id":789,"result":[{"name":"frob","type":"(function(): void' +
+            ')","pos":{"filename":"/tmp/repo/foo_5.php","line":4,"char_start"' +
+            ':67,"char_end":70},"func_details":{"min_arity":0,"return_type":"' +
+            'void","params":[]},"expected_ty":false}]}\n',
+            msg="Autocomplete response content does not match"
+        )
+        self.assertEqual(
+            exit_code,
+            0,
+            msg="Exit status does not match"
+        )
+        self.check_cmd([
+            '{root}foo_4.php:4:59,59: Expected expression (Parsing[1002])'])
+
+    def test_ide_consistency_with_errors(self):
+        """
+        Test consistency of ide file sync cmds and autocomplete with errors
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (ide_con.open('foo_5.php') +
+                ide_con.edit('foo_5.php', '4', '51', '4', '51',
+                             'public function frob(): void {}thisllcauseerr') +
+                ide_con.open('foo_4.php') +
+                ide_con.edit('foo_4.php', '4', '30', '4', '30',
+                             '(new ClassToBeIdentified())->') +
+                ide_con.sleep() +
+                ide_con.auto_complete('foo_4.php', '4', '59') +
+                ide_con.disconnect())
+        ide_con.write_cmd(cmd)
+        (stdout, _, exit_code) = ide_con.get_return()
+        self.assertEqual(
+            stdout,
+            '{"protocol":"service_framework3_rpc","type":"response","id":789,' +
+            '"result":[]}\n',
+            msg="Autocomplete response content does not match"
+        )
+        self.assertEqual(
+            exit_code,
+            0,
+            msg="Exit status does not match"
+        )
+        self.check_cmd([
+            '{root}foo_4.php:4:59,59: Expected expression (Parsing[1002])',
+            '{root}foo_5.php:4:82,95: Expected modifier (Parsing[1002])'])

@@ -19,6 +19,7 @@ type call_type =
   | Close_file_call of string
   | Edit_file_call of string * (File_content.code_edit list)
   | Disconnect_call
+  | Sleep_for_test
 
 type response_type =
   | Auto_complete_response of Hh_json.json
@@ -39,3 +40,4 @@ let to_string call =
   | Close_file_call _ -> "close"
   | Edit_file_call _ -> "edit"
   | Disconnect_call -> "disconnect"
+  | Sleep_for_test -> "sleep"

@@ -113,6 +113,8 @@ let to_call cmd args =
     Edit_file_call (path, edits)
   | "disconnect" ->
     Disconnect_call
+  | "sleep" ->
+    Sleep_for_test
   | _ -> raise Not_found
 
 let call_of_string s =

@@ -112,6 +112,8 @@ match call with
 | Disconnect_call ->
   Cmd.rpc_persistent oc (Rpc.DISCONNECT);
   server_disconnected ()
+| Sleep_for_test ->
+  Unix.sleep 1
 
 let main env =
   Printexc.record_backtrace true;

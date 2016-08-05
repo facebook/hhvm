@@ -55,7 +55,7 @@ struct JitHeader {
   uint64_t flags;       /* flags */
 };
 
-enum class JitRecordType : uint8_t {
+enum class JitRecordType : uint32_t {
   JIT_CODE_LOAD,
   JIT_CODE_MOVE,
   JIT_CODE_DEBUG_INFO,

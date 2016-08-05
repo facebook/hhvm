@@ -826,7 +826,8 @@ bool fpushClsMethodKnown(IRGS& env,
                          const StringData* methodName,
                          SSATmp* ctx,
                          const Class *baseClass,
-                         bool exact) {
+                         bool exact,
+                         bool check) {
   bool magicCall = false;
   auto const func = lookupImmutableMethod(baseClass,
                                           methodName,
@@ -837,6 +838,12 @@ bool fpushClsMethodKnown(IRGS& env,
   if (!func) return false;
 
   auto const objOrCls = ldCtxForClsMethod(env, func, ctx, baseClass);
+  if (check) {
+    assertx(exact);
+    if (!classIsPersistentOrCtxParent(env, baseClass)) {
+      gen(env, LdClsCached, cns(env, baseClass->name()));
+    }
+  }
   auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
     cns(env, func) :
     gen(env, LdClsMethod, ctx, cns(env, -(func->methodSlot() + 1)));
@@ -856,7 +863,8 @@ void emitFPushClsMethodD(IRGS& env,
   if (auto const baseClass =
       Unit::lookupUniqueClassInContext(className, curClass(env))) {
     if (fpushClsMethodKnown(env, numParams,
-                            methodName, cns(env, baseClass), baseClass, true)) {
+                            methodName, cns(env, baseClass), baseClass,
+                            true, true)) {
       return;
     }
   }
@@ -925,7 +933,8 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
     }
 
     if (cls) {
-      if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls, exact)) {
+      if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
+                              exact, false)) {
         return;
       }
     }

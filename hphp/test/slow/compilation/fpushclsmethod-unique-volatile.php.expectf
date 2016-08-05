@@ -1,0 +1,6 @@
+string(4) "here"
+
+Fatal error: Class undefined: X in %s/test/slow/compilation/fpushclsmethod-unique-volatile.php on line 18
+string(4) "here"
+
+Fatal error: Class undefined: X in %s/test/slow/compilation/fpushclsmethod-unique-volatile.php on line 18

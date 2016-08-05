@@ -53,6 +53,7 @@ if (ENABLE_COTIRE)
       "${LIBC_INCLUDE_PATH}/libelf.h"
       "${LIBC_INCLUDE_PATH}/elf.h"
       "${LIBC_INCLUDE_PATH}/gelf.h"
+      "${LIBC_INCLUDE_PATH}/resolv.h"
       "${ARCH_INCLUDE_PATH}"
       "${CCLIENT_INCLUDE_PATH}"
       "${JEMALLOC_INCLUDE_DIR}/jemalloc"
@@ -63,6 +64,13 @@ if (ENABLE_COTIRE)
       "${LIBSQLITE3_INCLUDE_DIR}/sqlite3ext.h"
       "${CMAKE_SOURCE_DIR}"
       "${CMAKE_BINARY_DIR}")
+
+  # XED headers need to be wrapped in extern "C"
+  if (LibXed_INCLUDE_DIR)
+    set_property(DIRECTORY
+      APPEND PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
+        "${LibXed_INCLUDE_DIR}")
+  endif()
 endif()
 
 # Only thing to do directly in tools is install this one script. Tools also has

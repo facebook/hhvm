@@ -477,14 +477,18 @@ void emitInstanceOf(IRGS& env) {
     return;
   }
 
-  push(
-    env,
-    t2->isA(TArr) ? gen(env, InterfaceSupportsArr, t1) :
-    t2->isA(TInt) ? gen(env, InterfaceSupportsInt, t1) :
-    t2->isA(TStr) ? gen(env, InterfaceSupportsStr, t1) :
-    t2->isA(TDbl) ? gen(env, InterfaceSupportsDbl, t1) :
-    cns(env, false)
-  );
+  auto const res = [&]() -> SSATmp* {
+    if (t2->isA(TArr)) return gen(env, InterfaceSupportsArr, t1);
+    if (t2->isA(TInt)) return gen(env, InterfaceSupportsInt, t1);
+    if (t2->isA(TStr)) return gen(env, InterfaceSupportsStr, t1);
+    if (t2->isA(TDbl)) return gen(env, InterfaceSupportsDbl, t1);
+    if (!t2->type().maybe(TObj|TArr|TInt|TStr|TDbl)) return cns(env, false);
+    return nullptr;
+  }();
+
+  if (!res) PUNT(InstanceOf-Unknown);
+
+  push(env, res);
   decRef(env, t2);
   decRef(env, t1);
 }

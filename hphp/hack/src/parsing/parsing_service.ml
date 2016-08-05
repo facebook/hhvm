@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Reordered_argument_collections
 
 (*****************************************************************************)
 (* Helpers *)
@@ -112,13 +113,63 @@ let parse_parallel workers get_next =
       ~merge:merge_parse
       ~next:get_next
 
+(* sequentially parse IDE files opened by persistent connection *)
+let parse_sequential path content (acc, errorl, error_files) =
+  let fn = Relative_path.create Relative_path.Root path in
+  let errorl', {Parser_hack.file_mode; comments; ast}, _ =
+    Errors.do_ begin fun () ->
+      Parser_hack.program fn content
+    end
+  in
+  Parsing_hooks.dispatch_file_parsed_hook fn ast;
+  if file_mode <> None then begin
+    let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
+    (* AST won't be updated if there are parsing errors in IDE files *)
+    if (Errors.is_empty errorl')
+    then begin
+      let set = Relative_path.Set.add Relative_path.Set.empty fn in
+      Parser_heap.ParserHeap.remove_batch set;
+      Parser_heap.ParserHeap.write_through fn ast;
+    end;
+    let defs =
+      {FileInfo.funs; classes; typedefs; consts; comments; file_mode;
+       consider_names_just_for_autoload = false}
+    in
+    let acc = Relative_path.Map.add acc ~key:fn ~data:defs in
+    let errorl = Errors.merge errorl' errorl in
+    let error_files =
+      if Errors.is_empty errorl'
+      then error_files
+      else Relative_path.Set.add error_files fn
+    in
+    acc, errorl, error_files
+  end
+  else begin
+    let info = try !legacy_php_file_info fn with _ -> empty_file_info in
+    (* we also now keep in the file_info regular php files
+     * as we need at least their names in hack build
+     *)
+    let acc = Relative_path.Map.add acc ~key:fn ~data:info in
+    acc, errorl, error_files
+  end
+
 (*****************************************************************************)
 (* Main entry points *)
 (*****************************************************************************)
 
-let go workers ~get_next =
+let go workers files_map ~get_next =
+  let acc = parse_parallel workers get_next in
   let fast, errorl, failed_parsing =
-    parse_parallel workers get_next in
+    SMap.fold files_map ~init:acc ~f:(
+      fun path content (acc, errorl, error_files) ->
+        let fn = Relative_path.create Relative_path.Root path in
+        if FindUtils.is_php (Relative_path.suffix fn) then
+          parse_sequential path content (acc, errorl, error_files)
+        else
+          let info = empty_file_info in
+          let acc = Relative_path.Map.add acc ~key:fn ~data:info in
+          acc, errorl, error_files
+      ) in
   Parsing_hooks.dispatch_parse_task_completed_hook
     (Relative_path.Map.keys fast);
   fast, errorl, failed_parsing

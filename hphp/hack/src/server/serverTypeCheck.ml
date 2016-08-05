@@ -151,13 +151,22 @@ let remove_failed fast failed =
 (*****************************************************************************)
 
 let parsing genv env =
+  let files_map = SSet.fold env.files_to_check ~init:SMap.empty
+    ~f:(fun path map ->
+      let content = File_content.get_content @@ SMap.find_unsafe path
+        env.edited_files in
+      SMap.add map path content) in
+  let to_check = SSet.fold env.files_to_check ~init:env.failed_parsing
+    ~f:(fun path set ->
+      let fn = Relative_path.create Relative_path.Root path in
+      Relative_path.Set.add set fn) in
   Parser_heap.ParserHeap.remove_batch env.failed_parsing;
-  Fixmes.HH_FIXMES.remove_batch env.failed_parsing;
-  HackSearchService.MasterApi.clear_shared_memory env.failed_parsing;
+  Fixmes.HH_FIXMES.remove_batch to_check;
+  HackSearchService.MasterApi.clear_shared_memory to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
-    genv.workers (Relative_path.Set.elements env.failed_parsing) in
-  Parsing_service.go genv.workers ~get_next
+   genv.workers (Relative_path.Set.elements env.failed_parsing) in
+  Parsing_service.go genv.workers files_map ~get_next
 
 (*****************************************************************************)
 (* At any given point in time, we want to know what each file defines.
@@ -202,9 +211,22 @@ let hook_after_parsing = ref None
 
 let type_check genv env =
 
-  let reparse_count = Relative_path.Set.cardinal env.failed_parsing in
+  (* PREPARE FOR PARSING *)
+  let failed_parsing_ide, failed_parsing_ = Relative_path.Set.partition
+    (fun fn -> let path = Relative_path.to_absolute fn in
+      SMap.exists (fun p _ -> p = path) env.edited_files) env.failed_parsing in
+  let files_to_check_ = Relative_path.Set.fold failed_parsing_ide
+    ~init:SSet.empty ~f:(fun fn set ->
+      SSet.add set (Relative_path.to_absolute fn)) in
+  let check_now = SSet.filter files_to_check_ (fun s -> not @@
+      File_content.being_edited @@ SMap.find_unsafe s env.edited_files) in
+  let env = {env with failed_parsing = failed_parsing_;
+    files_to_check = check_now} in
+  let reparse_count = Relative_path.Set.cardinal env.failed_parsing +
+  SSet.cardinal env.files_to_check in
   Printf.eprintf "******************************************\n";
   Hh_logger.log "Files to recompute: %d" reparse_count;
+
   (* PARSING *)
   let start_t = Unix.gettimeofday () in
   let t = start_t in
@@ -311,7 +333,7 @@ let type_check genv env =
     failed_check = failed_check;
     persistent_client_fd = old_env.persistent_client_fd;
     edited_files = old_env.edited_files;
-    files_to_check = old_env.files_to_check;
+    files_to_check = SSet.empty;
   } in
   new_env, total_rechecked_count
 

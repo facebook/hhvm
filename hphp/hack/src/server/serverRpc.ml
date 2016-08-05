@@ -118,26 +118,36 @@ let handle : type a. genv -> env -> a t -> env * a =
     | ECHO_FOR_TEST msg ->
         env, msg
     | OPEN_FILE path ->
+        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
         let content =
           try Sys_utils.cat path with _ -> "" in
         let fc = of_content ~content in
         let edited_files_ = (SMap.add path fc env.edited_files) in
-        let new_env = {env with edited_files = edited_files_} in
+        let files_to_check_ = (SSet.add path env.files_to_check) in
+        let new_env = {env with edited_files = edited_files_;
+          files_to_check = files_to_check_} in
         new_env, ()
     | CLOSE_FILE path ->
+        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
         let edited_files_ = SMap.remove path env.edited_files in
-        let new_env = {env with edited_files = edited_files_} in
+        let files_to_check_ = (SSet.remove path env.files_to_check) in
+        let new_env = {env with edited_files = edited_files_;
+          files_to_check = files_to_check_} in
         new_env, ()
     | EDIT_FILE (path, edits) ->
+        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
         let fc = try SMap.find_unsafe path env.edited_files
         with Not_found ->
           let content = try Sys_utils.cat path with _ -> "" in
           of_content ~content in
         let edited_fc = edit_file fc edits in
         let edited_files_ = (SMap.add path edited_fc env.edited_files) in
-        let new_env = {env with edited_files = edited_files_} in
+        let files_to_check_ = (SSet.add path env.files_to_check) in
+        let new_env = {env with edited_files = edited_files_;
+          files_to_check = files_to_check_} in
         new_env, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
+        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
         let fc = try
         SMap.find_unsafe path env.edited_files
         with Not_found ->

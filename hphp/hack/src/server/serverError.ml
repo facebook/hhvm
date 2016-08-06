@@ -28,6 +28,12 @@ let get_errorl_json el =
                   "version", Hh_json.JSON_String Build_id.build_id_ohai;
                 ]
 
+let get_errorl_json_array errorl =
+  let el = Errors.get_sorted_error_list errorl in
+  let el = List.map ~f:Errors.to_absolute el in
+  let errors_json = List.map ~f:Errors.to_json el in
+  Hh_json.JSON_Array errors_json
+
 let print_errorl_json oc el =
   let res = get_errorl_json el in
   Hh_json.json_to_output oc res;

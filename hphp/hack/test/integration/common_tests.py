@@ -243,6 +243,14 @@ class IdeConnection(object):
         return('{"protocol" : "service_framework3_rpc","id" : 233,"type" : ' +
                 '"call","method" : "disconnect","args" : {}}')
 
+    def subscribe_diagnostic(self, id):
+        return('{"protocol" : "service_framework3_rpc","id" : ' + id +
+               ',"type" : "call","method" : "notifyDiagnostics","args" : {}}\n')
+
+    def unsubscribe_diagnostic(self, id):
+        return('{"protocol" : "service_framework3_rpc","id" : ' + id +
+               ',"type":"unsubscribe"}\n')
+
 
 class CommonTests(object):
 
@@ -1070,3 +1078,35 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         self.check_cmd([
             '{root}foo_4.php:4:59,59: Expected expression (Parsing[1002])',
             '{root}foo_5.php:4:82,95: Expected modifier (Parsing[1002])'])
+
+    def test_ide_diagnostic_subscription(self):
+        """
+        Test diagnostic subscription of ide connection
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (ide_con.subscribe_diagnostic('233') +
+                ide_con.open('foo_5.php') +
+                ide_con.edit('foo_5.php', '4', '51', '4', '51',
+                             'this will cause err') +
+                ide_con.sleep() +
+                ide_con.sleep() +
+                ide_con.disconnect())
+        ide_con.write_cmd(cmd)
+        (stdout, _, exit_code) = ide_con.get_return()
+        self.assertEqual(
+            stdout[:119] + stdout[141:],
+            '{"protocol":"service_framework3_rpc","type":"next","id":233,"err' +
+            'ors":[{"message":[{"descr":"Expected modifier","path":"foo_5.php' +
+            '","line":4,"start":51,"end":54,"code":1002}]}]}\n',
+            msg="Diagnostics response does not match"
+        )
+        self.assertEqual(
+            exit_code,
+            0,
+            msg="Exit status does not match"
+        )
+        self.check_cmd([
+            '{root}foo_5.php:4:51,54: Expected modifier (Parsing[1002])'])

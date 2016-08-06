@@ -113,6 +113,8 @@ let to_call cmd args =
     Edit_file_call (path, edits)
   | "disconnect" ->
     Disconnect_call
+  | "notifyDiagnostics" ->
+    Subscribe_diagnostic_call
   | "sleep" ->
     Sleep_for_test
   | _ -> raise Not_found
@@ -153,20 +155,24 @@ let call_of_string s =
     match get_field fields "type" with
     | Some t -> begin match t with
       | JSON_String "call" -> Ok "call"
+      | JSON_String "unsubscribe" -> Ok "unsubscribe"
       | JSON_String _ -> Error `Message_type_not_recognized
       | _ -> Error `Message_type_not_string
     end
     | None -> Error `No_type in
 
-  let get_method_field fields =
+  let get_method_field ty fields =
     match get_field fields "method" with
     | Some cmd -> begin match cmd with
       | JSON_String c -> Ok c
       | _ ->  Error `Method_not_string
     end
-    | None -> Error `No_method in
+    | None -> begin match ty with
+      | "unsubscribe" -> Ok "unsubscribe"
+      | _ -> Error `No_method
+    end in
 
-  let get_call id cmd fields =
+  let get_call id ty cmd fields =
     match get_field fields "args" with
     | Some (JSON_Object args) ->
       begin
@@ -175,15 +181,18 @@ let call_of_string s =
         with Not_found -> Error (`Call_not_recognized id)
       end
     | Some _ -> Error (`Args_not_an_object id)
-    | _ -> Error (`No_args id) in
+    | None -> begin match ty with
+      | "unsubscribe" -> Ok (Call (id, Unsubscribe_diagnostic_call))
+      | _ -> Error (`No_args id)
+    end in
 
   match
     (get_object_fields s) >>= fun fields ->
     (check_protocol_field fields) >>= fun _ ->
     (get_id_field fields) >>= fun id ->
-    (get_type_field fields) >>= fun _type ->
-    (get_method_field fields) >>= fun cmd ->
-    (get_call id cmd fields)
+    (get_type_field fields) >>= fun ty ->
+    (get_method_field ty fields) >>= fun cmd ->
+    (get_call id ty cmd fields)
   with
   | Ok x -> x
   | Error `Syntax_error e -> Parsing_error ("Invalid JSON: " ^ e)
@@ -216,11 +225,20 @@ let build_response_json id result_field =
     ("result", result_field);
   ]
 
+let build_diagnostic_json id errors =
+  JSON_Object [
+    ("protocol", JSON_String "service_framework3_rpc");
+    ("type", JSON_String "next");
+    ("id", int_ id);
+    ("errors", errors);
+  ]
+
 let json_string_of_response id response =
-  let result_field = match response with
-    | Auto_complete_response r -> r
-  in
-  json_to_string (build_response_json id result_field)
+  match response with
+  | Auto_complete_response r ->
+    json_to_string @@ build_response_json id r
+  | Diagnostic_response (id_, errors) ->
+    json_to_string @@ build_diagnostic_json id_ errors
 
 let json_string_of_error id error_code error_message  =
   json_to_string (JSON_Object [

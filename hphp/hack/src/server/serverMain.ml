@@ -103,6 +103,14 @@ module Program =
         let new_env, total_rechecked = ServerTypeCheck.check genv check_env in
         ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
                                        (Errors.get_error_list new_env.errorl);
+        if not @@ Diagnostic_subscription.is_empty new_env.diag_subscribe
+        then begin
+          let id = Diagnostic_subscription.get_id new_env.diag_subscribe in
+          let errors_json = ServerError.get_errorl_json_array new_env.errorl in
+          let res = IdeJson.Diagnostic_response (id, errors_json) in
+          let fd = ServerCommand.get_persistent_fds new_env in
+          ServerCommand.send_response_to_persistent_client fd res;
+        end;
         new_env, total_rechecked
       end
 
@@ -116,7 +124,7 @@ let sleep_and_check in_fd per_in_fd =
   let l = match per_in_fd with
   | Some fd -> [in_fd ; fd]
   | None -> [in_fd] in
-  let ready_fd_l, _, _ = Unix.select l [] [] (1.0) in
+  let ready_fd_l, _, _ = Unix.select l [] [] (0.5) in
   match ready_fd_l with
   | [_; _] -> true, true
   | [fd] -> if (fd <> in_fd) then false, true else true, false
@@ -176,7 +184,8 @@ let handle_persistent_connection_ genv env fd =
     shutdown_persistent_client fd;
     {env with
     persistent_client_fd = None;
-    edited_files = SMap.empty}
+    edited_files = SMap.empty;
+    diag_subscribe = Diagnostic_subscription.empty}
   | e ->
     let msg = Printexc.to_string e in
     EventLogger.master_exception msg;
@@ -185,7 +194,8 @@ let handle_persistent_connection_ genv env fd =
     shutdown_persistent_client fd;
     {env with
     persistent_client_fd = None;
-    edited_files = SMap.empty}
+    edited_files = SMap.empty;
+    diag_subscribe = Diagnostic_subscription.empty}
 
 let handle_persistent_connection genv env fd =
   ServerIdle.stamp_connection ();
@@ -235,7 +245,7 @@ let rec recheck_loop acc genv env =
   let raw_updates = genv.notifier () in
   let check_later, raw_updates = match acc.rechecked_batches with
   | 0 ->
-  let check_later, check_now = SSet.partition (fun s ->
+    let check_later, check_now = SSet.partition (fun s ->
       File_content.being_edited @@ SMap.find_unsafe s env.edited_files)
       env.files_to_check in
     check_later, SSet.union raw_updates check_now

@@ -151,7 +151,7 @@ let test_autocomplete_response () =
   let id = 4 in
   let response = Auto_complete_response (JSON_Array []) in
   (json_string_of_response id response) =
-  {|{"type":"response","id":4,"result":[]}|}
+  {|{"protocol":"service_framework3_rpc","type":"response","id":4,"result":[]}|}
 
 let test_invalid_call_response () =
   let id = 4 in
@@ -218,6 +218,21 @@ let test_disconnect_call () =
   let msg = build_call_msg "\"disconnect\"" [] in
   expect_call msg (Disconnect_call)
 
+let test_subscribe_call () =
+  let msg = build_call_msg "\"notifyDiagnostics\"" [] in
+  expect_call msg (Subscribe_diagnostic_call)
+
+let test_diagnostic_response () =
+  let id = 4 in
+  let response = Diagnostic_response (id, JSON_Array []) in
+  (json_string_of_response id response) =
+  {|{"protocol":"service_framework3_rpc","type":"next","id":4,"errors":[]}|}
+
+let test_unsubscribe_call () =
+  let msg =
+    {|{"protocol":"service_framework3_rpc","id":4,"type":"unsubscribe"}|} in
+  expect_call msg (Unsubscribe_diagnostic_call)
+
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;
@@ -236,11 +251,15 @@ let tests = [
   "test_args_not_object", test_args_not_object;
   "test_call_not_recognized", test_call_not_recognized;
   "test_autocomplete_call", test_autocomplete_call;
+  "test_autocomplete_response", test_autocomplete_response;
   "test_open_file_call", test_open_file_call;
   "test_close_file_call", test_close_file_call;
   "test_edit_file_call", test_edit_file_call;
   "test_edit_file_call2", test_edit_file_call2;
   "test_disconnect_call", test_disconnect_call;
+  "test_subscribe_call", test_subscribe_call;
+  "test_diagnostic_response", test_diagnostic_response;
+  "test_unsubscribe_call", test_unsubscribe_call;
 ]
 
 let () =

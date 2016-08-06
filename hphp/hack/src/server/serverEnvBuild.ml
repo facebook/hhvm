@@ -101,4 +101,5 @@ let make_env config =
     persistent_client_fd = None;
     edited_files   = SMap.empty;
     files_to_check = SSet.empty;
+    diag_subscribe = Diagnostic_subscription.empty;
   }

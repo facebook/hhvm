@@ -53,6 +53,8 @@ type env = {
     edited_files   : File_content.t SMap.t;
     (* The list of full path of synchronized files need to be type checked *)
     files_to_check : SSet.t;
+    (* The diagnostic subscription information of the current client *)
+    diag_subscribe : Diagnostic_subscription.t;
   }
 
 let file_filter f =

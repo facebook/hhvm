@@ -65,7 +65,7 @@ let connect_persistent env ~retries =
 let malformed_input () =
   raise Exit_status.(Exit_with IDE_malformed_request)
 
-let read_server_message fd : string =
+let read_server_message fd : response_type =
   Marshal_tools.from_fd_with_preamble fd
 
 let read_connection_response fd =
@@ -112,6 +112,10 @@ match call with
 | Disconnect_call ->
   Cmd.rpc_persistent oc (Rpc.DISCONNECT);
   server_disconnected ()
+| Subscribe_diagnostic_call ->
+  Cmd.rpc_persistent oc (Rpc.SUBSCRIBE_DIAGNOSTIC id)
+| Unsubscribe_diagnostic_call ->
+  Cmd.rpc_persistent oc (Rpc.UNSUBSCRIBE_DIAGNOSTIC id)
 | Sleep_for_test ->
   Unix.sleep 1
 
@@ -139,6 +143,6 @@ let main env =
         | Marshal_tools.Reading_Preamble_Exception
         | Unix.Unix_error _ -> server_disconnected ()
       in
-      write_response res;
+      write_response @@ IdeJsonUtils.json_string_of_response 0 res;
   done;
   Exit_status.exit Exit_status.No_error

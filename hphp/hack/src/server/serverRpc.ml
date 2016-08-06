@@ -51,6 +51,8 @@ type _ t =
   | EDIT_FILE : string * (code_edit list) -> unit t
   | IDE_AUTOCOMPLETE : string * content_pos -> AutocompleteService.result t
   | DISCONNECT : unit t
+  | SUBSCRIBE_DIAGNOSTIC : int -> unit t
+  | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
 
 let handle : type a. genv -> env -> a t -> env * a =
   fun genv env -> function
@@ -160,7 +162,16 @@ let handle : type a. genv -> env -> a t -> env * a =
     | DISCONNECT ->
         let new_env = {env with
         persistent_client_fd = None;
-        edited_files = SMap.empty} in
+        edited_files = SMap.empty;
+        diag_subscribe = Diagnostic_subscription.empty} in
+        new_env, ()
+    | SUBSCRIBE_DIAGNOSTIC id ->
+        let new_env =
+          {env with diag_subscribe = Diagnostic_subscription.of_id id} in
+        new_env, ()
+    | UNSUBSCRIBE_DIAGNOSTIC id ->
+        let new_env = {env with diag_subscribe =
+            Diagnostic_subscription.unsubscribe env.diag_subscribe id} in
         new_env, ()
 
 let to_string : type a. a t -> _ = function
@@ -200,3 +211,5 @@ let to_string : type a. a t -> _ = function
   | EDIT_FILE _ -> "EDIT_FILE"
   | IDE_AUTOCOMPLETE _ -> "IDE_AUTOCOMPLETE"
   | DISCONNECT -> "DISCONNECT"
+  | SUBSCRIBE_DIAGNOSTIC _ -> "SUBSCRIBE_DIAGNOSTIC"
+  | UNSUBSCRIBE_DIAGNOSTIC _ -> "UNSUBSCRIBE_DIAGNOSTIC"

@@ -334,6 +334,7 @@ let type_check genv env =
     persistent_client_fd = old_env.persistent_client_fd;
     edited_files = old_env.edited_files;
     files_to_check = SSet.empty;
+    diag_subscribe = old_env.diag_subscribe;
   } in
   new_env, total_rechecked_count
 

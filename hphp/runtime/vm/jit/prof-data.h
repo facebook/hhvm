@@ -470,10 +470,12 @@ struct ProfData {
   /*
    * Forget the TransID for the translation owning the jmp at the given address.
    */
-  void clearJmpTransID(TCA jmp) {
+  TransID clearJmpTransID(TCA jmp) {
     auto const it = m_jmpToTransID.find(jmp);
-    if (it == m_jmpToTransID.end()) return;
+    if (it == m_jmpToTransID.end()) return kInvalidTransID;
+    auto const ret = it->second;
     it->second = kInvalidTransID;
+    return ret;
   }
 
   /*

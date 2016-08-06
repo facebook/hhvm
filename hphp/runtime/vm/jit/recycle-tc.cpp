@@ -101,8 +101,12 @@ void clearTCMaps(TCA start, TCA end) {
 #else
     x64::DecodedInstruction di(start);
 #endif
-    if (profData && di.isBranch()) {
-      profData->clearJmpTransID(start);
+    if (profData && (di.isBranch() || di.isNop())) {
+      auto const id = profData->clearJmpTransID(start);
+      if (id != kInvalidTransID) {
+        ITRACE(1, "Erasing jmpTransID @ {} to {}\n",
+               start, id);
+      }
     }
     if (auto ct = catchMap.find(mcg->code().toOffset(start))) {
       // We mark nothrow with a nullptr, which will assert during unwinding,
@@ -114,7 +118,7 @@ void clearTCMaps(TCA start, TCA end) {
       if (it != s_smashedCalls.end()) {
         auto func = it->second;
         ITRACE(1, "Erasing smashed call mapping @ {} to func {} (id = {})\n",
-               start, func->fullName()->data(), func->getFuncId());
+               start, func->fullName(), func->getFuncId());
         auto dataIt = s_funcTCData[func].callers.find(start);
         if (dataIt->second.isProfiled) {
           clearProfCaller(start, func, dataIt->second.numArgs,

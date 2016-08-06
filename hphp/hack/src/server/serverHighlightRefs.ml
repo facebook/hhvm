@@ -48,19 +48,53 @@ let highlight_symbol tcopt (line, char) path file_info symbol =
   in
   List.map res Pos.to_absolute
 
+let filter_result symbols result =
+  let result = List.fold symbols ~init:result ~f:(fun result symbol ->
+    if (Pos.length symbol.SymbolOccurrence.pos >
+      Pos.length result.SymbolOccurrence.pos)
+    then result
+    else symbol) in
+  List.filter symbols ~f:(fun symbol ->
+    symbol.SymbolOccurrence.pos = result.SymbolOccurrence.pos)
+
+let compare p1 p2 =
+  let line1, start1, _ = Pos.info_pos p1 in
+  let line2, start2, _ = Pos.info_pos p2 in
+  if line1 < line2 then -1
+  else if line1 > line2 then 1
+  else if start1 < start2 then -1
+  else if start1 > start2 then 1
+  else 0
+
+let rec combine_result l l1 l2 =
+  match l1, l2 with
+  | l1, [] ->
+    l @ l1
+  | [], l2 ->
+    l @ l2
+  | h1 :: l1_, h2 :: l2_ ->
+    begin
+      match compare h1 h2 with
+      | -1 -> combine_result (l @ [h1]) l1_ l2
+      | 1 -> combine_result (l @ [h2]) l1 l2_
+      | 0 -> combine_result (l @ [h1]) l1_ l2_
+      | _ -> l
+    end
+
 let go_from_file (p, line, column) env =
   let (path, file_info, ast, symbols) = SMap.find_unsafe p env.symbols_cache in
   let symbols = List.filter symbols (fun symbol ->
     IdentifySymbolService.is_target line column symbol.SymbolOccurrence.pos) in
   match symbols with
-  (* TODO: correctly handle multiple symbols in one place instead of
-   * picking one of them *)
   | symbol::_ ->
     ServerIdeUtils.oldify_file_info path file_info;
     Parser_heap.ParserHeap.add path ast;
     let {FileInfo.funs; classes; typedefs;_} = file_info in
     NamingGlobal.make_env ~funs ~classes ~typedefs ~consts:[];
-    let res = highlight_symbol env.tcopt (line, column) path file_info symbol in
+    let symbols = filter_result symbols symbol in
+    let res = List.fold symbols ~init:[] ~f:(fun acc symbol ->
+      combine_result [] acc
+        (highlight_symbol env.tcopt (line, column) path file_info symbol)) in
     ServerIdeUtils.revive_file_info path file_info;
     res
   | _ -> []
@@ -69,9 +103,10 @@ let go (content, line, char) tcopt =
   ServerIdentifyFunction.get_occurrence_and_map content line char
     ~f:begin fun path file_info symbols ->
       match symbols with
-      (* TODO: correctly handle multiple symbols in one place instead of
-       * picking one of them *)
       | symbol::_ ->
-        highlight_symbol tcopt (line, char) path file_info symbol
+        let symbols = filter_result symbols symbol in
+        List.fold symbols ~init:[] ~f:(fun acc symbol ->
+          combine_result [] acc
+            (highlight_symbol tcopt (line, char) path file_info symbol))
       | _ -> []
     end

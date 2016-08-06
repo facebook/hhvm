@@ -9,6 +9,7 @@
  *)
 
 open Core
+open ServerEnv
 
 type result =
   ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) list
@@ -27,6 +28,15 @@ let get_occurrence_and_map content line char ~f =
     f path file_info !result
   end
 
+let get_full_occurrence_pair content =
+  let result = ref [] in
+  IdentifySymbolService.attach_full_hooks result;
+  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info ->
+    let ast = Parser_heap.ParserHeap.find_unsafe path in
+    IdentifySymbolService.detach_hooks ();
+    (path, file_info, ast, !result)
+  end
+
 let get_occurrence content line char =
   get_occurrence_and_map content line char ~f:(fun _ _ x -> x)
 
@@ -38,6 +48,21 @@ let go content line char tcopt =
       x, symbol_definition
     )
   )
+
+let go_from_file (p, line, column) env =
+  let (path, file_info, ast, symbols) = SMap.find_unsafe p env.symbols_cache in
+  let symbols = List.filter symbols (fun symbol ->
+    IdentifySymbolService.is_target line column symbol.SymbolOccurrence.pos) in
+  ServerIdeUtils.oldify_file_info path file_info;
+  Parser_heap.ParserHeap.add path ast;
+  let res = List.map symbols ~f:(fun x ->
+    let symbol_definition = ServerSymbolDefinition.go env.tcopt ast x in
+    x, symbol_definition
+  ) in
+  ServerIdeUtils.revive_file_info path file_info;
+  List.map res begin fun (x, y) ->
+    SymbolOccurrence.to_absolute x, Option.map y SymbolDefinition.to_absolute
+  end
 
 let go_absolute content line char tcopt =
   List.map (go content line char tcopt) begin fun (x, y) ->

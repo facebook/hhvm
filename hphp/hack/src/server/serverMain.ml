@@ -185,7 +185,8 @@ let handle_persistent_connection_ genv env fd =
     {env with
     persistent_client_fd = None;
     edited_files = SMap.empty;
-    diag_subscribe = Diagnostic_subscription.empty}
+    diag_subscribe = Diagnostic_subscription.empty;
+    symbols_cache = SMap.empty}
   | e ->
     let msg = Printexc.to_string e in
     EventLogger.master_exception msg;
@@ -195,7 +196,8 @@ let handle_persistent_connection_ genv env fd =
     {env with
     persistent_client_fd = None;
     edited_files = SMap.empty;
-    diag_subscribe = Diagnostic_subscription.empty}
+    diag_subscribe = Diagnostic_subscription.empty;
+    symbols_cache = SMap.empty}
 
 let handle_persistent_connection genv env fd =
   ServerIdle.stamp_connection ();

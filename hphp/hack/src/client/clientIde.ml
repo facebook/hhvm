@@ -103,6 +103,18 @@ match call with
   let result_field = (Hh_json.JSON_Array result) in
   print_endline @@ IdeJsonUtils.json_string_of_response id
     (Auto_complete_response result_field)
+| Highlight_ref_call (path, pos) ->
+  let results =
+    Cmd.rpc_persistent oc (Rpc.IDE_HIGHLIGHT_REF (path, pos)) in
+  let result_field = ClientHighlightRefs.to_json results in
+  print_endline @@ IdeJsonUtils.json_string_of_response id
+    (Highlight_ref_response result_field)
+| Identify_function_call (path, pos) ->
+  let results =
+    Cmd.rpc_persistent oc (Rpc.IDE_IDENTIFY_FUNCTION (path, pos)) in
+  let result_field = ClientGetDefinition.to_json results in
+  print_endline @@ IdeJsonUtils.json_string_of_response id
+    (Idetify_function_response result_field)
 | Open_file_call path ->
   Cmd.rpc_persistent oc (Rpc.OPEN_FILE path)
 | Close_file_call path ->

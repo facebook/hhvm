@@ -100,6 +100,20 @@ let to_call cmd args =
       | _ -> raise Not_found in
     let pos = parse_position pos in
     Auto_complete_call (path, pos)
+  | "getSourceHighlights" ->
+    let path = get_filename () in
+    let pos = match get_field args "position" with
+      | Some (JSON_Object pos) -> pos
+      | _ -> raise Not_found in
+    let pos = parse_position pos in
+    Highlight_ref_call (path, pos)
+  | "getDefinition" ->
+    let path = get_filename () in
+    let pos = match get_field args "position" with
+      | Some (JSON_Object pos) -> pos
+      | _ -> raise Not_found in
+    let pos = parse_position pos in
+    Identify_function_call (path, pos)
   | "didOpenFile" ->
     Open_file_call (get_filename ())
   | "didCloseFile" ->
@@ -236,6 +250,10 @@ let build_diagnostic_json id errors =
 let json_string_of_response id response =
   match response with
   | Auto_complete_response r ->
+    json_to_string @@ build_response_json id r
+  | Highlight_ref_response r ->
+    json_to_string @@ build_response_json id r
+  | Idetify_function_response r ->
     json_to_string @@ build_response_json id r
   | Diagnostic_response (id_, errors) ->
     json_to_string @@ build_diagnostic_json id_ errors

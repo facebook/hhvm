@@ -251,6 +251,30 @@ class IdeConnection(object):
         return('{"protocol" : "service_framework3_rpc","id" : ' + id +
                ',"type":"unsubscribe"}\n')
 
+    def highlight_ref(self, file, line, column):
+        return(
+            '{"protocol" : "service_framework3_rpc","id" : 987,"type" : ' +
+            '"call","method" : "getSourceHighlights","args" : {"filename" : "' +
+            file +
+            '","position" : {"line" :' +
+            line +
+            ', "column" :' +
+            column +
+            '}}}\n'
+        )
+
+    def identify_function(self, file, line, column):
+        return(
+            '{"protocol" : "service_framework3_rpc","id" : 987,"type" : ' +
+            '"call","method" : "getDefinition","args" : {"filename" : "' +
+            file +
+            '","position" : {"line" :' +
+            line +
+            ', "column" :' +
+            column +
+            '}}}\n'
+        )
+
 
 class CommonTests(object):
 
@@ -1110,3 +1134,63 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         )
         self.check_cmd([
             '{root}foo_5.php:4:51,54: Expected modifier (Parsing[1002])'])
+
+    def test_ide_highlight_ref(self):
+        """
+        Test highlight reference for ide files
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (ide_con.open('foo_3.php') +
+                ide_con.edit('foo_3.php', '11', '13', '11', '13',
+                             '$f = new Foo();') +
+                ide_con.highlight_ref('foo_3.php', '7', '16') +
+                ide_con.disconnect())
+        ide_con.write_cmd(cmd)
+        (stdout, _, exit_code) = ide_con.get_return()
+        self.assertEqual(
+            stdout,
+            '{"protocol":"service_framework3_rpc","type":"response","id":987,' +
+            '"result":[{"filename":"","line":10,"char_start":17,"char_end":19' +
+            '},{"filename":"","line":11,"char_start":22,"char_end":24}]}\n',
+            msg="Highlight ref result does not match"
+        )
+        self.assertEqual(
+            exit_code,
+            0,
+            msg="Exit status does not match"
+        )
+
+    def test_ide_identify_function(self):
+        """
+        Test identify function for ide files
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (ide_con.open('foo_3.php') +
+                ide_con.edit('foo_3.php', '11', '13', '11', '13',
+                             '$f = new Foo();') +
+                ide_con.identify_function('foo_3.php', '11', '23') +
+                ide_con.disconnect())
+        ide_con.write_cmd(cmd)
+        (stdout, _, exit_code) = ide_con.get_return()
+        self.assertEqual(
+            stdout,
+            '{"protocol":"service_framework3_rpc","type":"response","id":987,' +
+            '"result":[{"name":"\\\\Foo::__construct","result_type":"method",' +
+            '"pos":{"filename":"","line":11,"char_start":18,"char_end":26},"d' +
+            'efinition_pos":null,"definition_span":null,"definition_id":null}' +
+            ',{"name":"\\\\Foo","result_type":"class","pos":{"filename":"","l' +
+            'ine":11,"char_start":22,"char_end":24},"definition_pos":null,"de' +
+            'finition_span":null,"definition_id":null}]}\n',
+            msg="Identify function result does not match"
+        )
+        self.assertEqual(
+            exit_code,
+            0,
+            msg="Exit status does not match"
+        )

@@ -55,6 +55,8 @@ type env = {
     files_to_check : SSet.t;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t;
+    (* Highlight information cached for ide related commands *)
+    symbols_cache  : IdentifySymbolService.cache;
   }
 
 let file_filter f =

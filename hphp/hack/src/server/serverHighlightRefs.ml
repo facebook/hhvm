@@ -9,6 +9,7 @@
  *)
 
 open Core
+open ServerEnv
 
 type result = Pos.absolute list
 
@@ -46,6 +47,23 @@ let highlight_symbol tcopt (line, char) path file_info symbol =
     | None -> []
   in
   List.map res Pos.to_absolute
+
+let go_from_file (p, line, column) env =
+  let (path, file_info, ast, symbols) = SMap.find_unsafe p env.symbols_cache in
+  let symbols = List.filter symbols (fun symbol ->
+    IdentifySymbolService.is_target line column symbol.SymbolOccurrence.pos) in
+  match symbols with
+  (* TODO: correctly handle multiple symbols in one place instead of
+   * picking one of them *)
+  | symbol::_ ->
+    ServerIdeUtils.oldify_file_info path file_info;
+    Parser_heap.ParserHeap.add path ast;
+    let {FileInfo.funs; classes; typedefs;_} = file_info in
+    NamingGlobal.make_env ~funs ~classes ~typedefs ~consts:[];
+    let res = highlight_symbol env.tcopt (line, column) path file_info symbol in
+    ServerIdeUtils.revive_file_info path file_info;
+    res
+  | _ -> []
 
 let go (content, line, char) tcopt =
   ServerIdentifyFunction.get_occurrence_and_map content line char

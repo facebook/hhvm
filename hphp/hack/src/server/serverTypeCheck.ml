@@ -227,6 +227,10 @@ let type_check genv env =
   Printf.eprintf "******************************************\n";
   Hh_logger.log "Files to recompute: %d" reparse_count;
 
+  (* RESET HIGHLIGHTS CACHE FOR RECHECKED IDE FILES *)
+  let symbols_cache = SSet.fold env.files_to_check ~init:env.symbols_cache
+    ~f:(fun path map -> SMap.remove path map) in
+
   (* PARSING *)
   let start_t = Unix.gettimeofday () in
   let t = start_t in
@@ -335,6 +339,7 @@ let type_check genv env =
     edited_files = old_env.edited_files;
     files_to_check = SSet.empty;
     diag_subscribe = old_env.diag_subscribe;
+    symbols_cache;
   } in
   new_env, total_rechecked_count
 

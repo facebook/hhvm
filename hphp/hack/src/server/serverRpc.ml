@@ -50,6 +50,9 @@ type _ t =
   | CLOSE_FILE : string -> unit t
   | EDIT_FILE : string * (code_edit list) -> unit t
   | IDE_AUTOCOMPLETE : string * content_pos -> AutocompleteService.result t
+  | IDE_HIGHLIGHT_REF : string * content_pos -> ServerHighlightRefs.result t
+  | IDE_IDENTIFY_FUNCTION : string * content_pos ->
+      ServerIdentifyFunction.result t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
@@ -159,11 +162,50 @@ let handle : type a. genv -> env -> a t -> env * a =
         let edited_fc = edit_file fc edits in
         let content = get_content edited_fc in
         env, ServerAutoComplete.auto_complete env.tcopt content
+    | IDE_HIGHLIGHT_REF (path, {line; column}) ->
+        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
+        begin match SMap.exists (fun p _ -> p = path) env.edited_files with
+        | true ->
+          begin match SMap.exists (fun p _ -> p = path) env.symbols_cache with
+          | true ->
+            env, ServerHighlightRefs.go_from_file (path, line, column) env
+          | false ->
+            let content = File_content.get_content @@ SMap.find_unsafe path
+              env.edited_files in
+            let res = ServerIdentifyFunction.get_full_occurrence_pair content in
+            let symbols_cache_ = SMap.add path res env.symbols_cache in
+            let env = {env with symbols_cache = symbols_cache_} in
+            env, ServerHighlightRefs.go_from_file (path, line, column) env
+          end
+        | false ->
+          let content = try Sys_utils.cat path with _ -> "" in
+          env, ServerHighlightRefs.go (content, line, column) env.tcopt
+        end
+    | IDE_IDENTIFY_FUNCTION (path, {line; column}) ->
+        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
+        begin match SMap.exists (fun p _ -> p = path) env.edited_files with
+        | true ->
+          begin match SMap.exists (fun p _ -> p = path) env.symbols_cache with
+          | true ->
+            env, ServerIdentifyFunction.go_from_file (path, line, column) env
+          | false ->
+            let content = File_content.get_content @@ SMap.find_unsafe path
+              env.edited_files in
+            let res = ServerIdentifyFunction.get_full_occurrence_pair content in
+            let symbols_cache_ = SMap.add path res env.symbols_cache in
+            let env = {env with symbols_cache = symbols_cache_} in
+            env, ServerIdentifyFunction.go_from_file (path, line, column) env
+          end
+        | false ->
+          let content = try Sys_utils.cat path with _ -> "" in
+          env, ServerIdentifyFunction.go_absolute content line column env.tcopt
+        end
     | DISCONNECT ->
         let new_env = {env with
         persistent_client_fd = None;
         edited_files = SMap.empty;
-        diag_subscribe = Diagnostic_subscription.empty} in
+        diag_subscribe = Diagnostic_subscription.empty;
+        symbols_cache = SMap.empty} in
         new_env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->
         let new_env =
@@ -210,6 +252,8 @@ let to_string : type a. a t -> _ = function
   | CLOSE_FILE _ -> "CLOSE_FILE"
   | EDIT_FILE _ -> "EDIT_FILE"
   | IDE_AUTOCOMPLETE _ -> "IDE_AUTOCOMPLETE"
+  | IDE_HIGHLIGHT_REF _ -> "IDE_HIGHLIGHT_REF"
+  | IDE_IDENTIFY_FUNCTION _ -> "IDE_IDENTIFY_FUNCTION"
   | DISCONNECT -> "DISCONNECT"
   | SUBSCRIBE_DIAGNOSTIC _ -> "SUBSCRIBE_DIAGNOSTIC"
   | UNSUBSCRIBE_DIAGNOSTIC _ -> "UNSUBSCRIBE_DIAGNOSTIC"

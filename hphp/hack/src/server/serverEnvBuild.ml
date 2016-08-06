@@ -102,4 +102,5 @@ let make_env config =
     edited_files   = SMap.empty;
     files_to_check = SSet.empty;
     diag_subscribe = Diagnostic_subscription.empty;
+    symbols_cache  = SMap.empty;
   }

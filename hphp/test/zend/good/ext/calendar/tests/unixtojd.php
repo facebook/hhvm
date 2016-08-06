@@ -1,9 +1,10 @@
 <?php
-$_ENV[TZ] = UTC;
 _filter_snapshot_globals();
 
-// this line has no impact on test output on Windows
-putenv('TZ=UTC');
+// setting the environment within HHVM doesn't change timezone because the time
+// functions are not sandboxed (and the environment is virtualized).
+//putenv('TZ=UTC');
+
 // getenv('TZ') returns 'UTC' here
 // putenv (basic_functions.c) does call tzset() when the env var being put is 'TZ'
 //      -adding a call direct to GetEnvironmentVariableA just before tzset() is called to check the value of 'TZ' returns 'UTC'

@@ -2117,7 +2117,9 @@ function print_failure($argv, $results, $options) {
     if ($option === "threads") {
       // e.g., For a small number of failed tests, we don't need max threads.
       $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
-    } else if ($option === "typechecker" || $option === "verbose") {
+    } else if ($option === "typechecker" ||
+               $option === "verbose" ||
+               $option === "repo") {
       // The escapeshellarg($value) of these is 1, but there is no real value
       // associated with these two options.
       $rerun .= " --" . $option;

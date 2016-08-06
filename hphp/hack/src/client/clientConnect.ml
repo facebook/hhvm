@@ -141,7 +141,9 @@ let rec wait_for_server_hello ic env retries start_time tail_env first_call =
       start_time tail_env false
   ) else
     try
-      (match Timeout.input_line ic with
+      let fd = Timeout.descr_of_in_channel ic in
+      let msg = Marshal_tools.from_fd_with_preamble fd in
+      (match msg with
       | "Hello" ->
         ()
       | _ ->

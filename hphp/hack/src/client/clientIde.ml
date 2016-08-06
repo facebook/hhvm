@@ -93,11 +93,11 @@ let get_ready_channel server_in_fd =
   else if List.mem server_in_fd readable then `Server
   else `Stdin
 
-let handle oc id call =
+let handle conn id call =
 match call with
 | Auto_complete_call (path, pos) ->
   let raw_result =
-    Cmd.rpc_persistent oc (Rpc.IDE_AUTOCOMPLETE (path, pos)) in
+    Cmd.rpc conn (Rpc.IDE_AUTOCOMPLETE (path, pos)) in
   let result =
     List.map AutocompleteService.autocomplete_result_to_json raw_result in
   let result_field = (Hh_json.JSON_Array result) in
@@ -105,53 +105,53 @@ match call with
     (Auto_complete_response result_field)
 | Highlight_ref_call (path, pos) ->
   let results =
-    Cmd.rpc_persistent oc (Rpc.IDE_HIGHLIGHT_REF (path, pos)) in
+    Cmd.rpc conn (Rpc.IDE_HIGHLIGHT_REF (path, pos)) in
   let result_field = ClientHighlightRefs.to_json results in
   print_endline @@ IdeJsonUtils.json_string_of_response id
     (Highlight_ref_response result_field)
 | Identify_function_call (path, pos) ->
   let results =
-    Cmd.rpc_persistent oc (Rpc.IDE_IDENTIFY_FUNCTION (path, pos)) in
+    Cmd.rpc conn (Rpc.IDE_IDENTIFY_FUNCTION (path, pos)) in
   let result_field = ClientGetDefinition.to_json results in
   print_endline @@ IdeJsonUtils.json_string_of_response id
     (Idetify_function_response result_field)
 | Open_file_call path ->
-  Cmd.rpc_persistent oc (Rpc.OPEN_FILE path)
+  Cmd.rpc conn (Rpc.OPEN_FILE path)
 | Close_file_call path ->
-  Cmd.rpc_persistent oc (Rpc.CLOSE_FILE path)
+  Cmd.rpc conn (Rpc.CLOSE_FILE path)
 | Edit_file_call (path, edits) ->
-  Cmd.rpc_persistent oc (Rpc.EDIT_FILE (path, edits))
+  Cmd.rpc conn (Rpc.EDIT_FILE (path, edits))
 | Disconnect_call ->
-  Cmd.rpc_persistent oc (Rpc.DISCONNECT);
+  Cmd.rpc conn (Rpc.DISCONNECT);
   server_disconnected ()
 | Subscribe_diagnostic_call ->
-  Cmd.rpc_persistent oc (Rpc.SUBSCRIBE_DIAGNOSTIC id)
+  Cmd.rpc conn (Rpc.SUBSCRIBE_DIAGNOSTIC id)
 | Unsubscribe_diagnostic_call ->
-  Cmd.rpc_persistent oc (Rpc.UNSUBSCRIBE_DIAGNOSTIC id)
+  Cmd.rpc conn (Rpc.UNSUBSCRIBE_DIAGNOSTIC id)
 | Sleep_for_test ->
   Unix.sleep 1
 
 let main env =
   Printexc.record_backtrace true;
   let ic, oc = connect_persistent env ~retries:800 in
-  let in_fd = Timeout.descr_of_in_channel ic in
-  read_connection_response in_fd;
+  let fd = Unix.descr_of_out_channel oc in
+  read_connection_response fd;
   while true do
-    match get_ready_channel in_fd with
+    match get_ready_channel fd with
     | `None -> ()
     | `Stdin ->
       let request = read_request () in
       begin
       match IdeJsonUtils.call_of_string request with
       | Call (id, call) ->
-        handle oc id call
+        handle (ic, oc) id call
       | Invalid_call (id, msg) ->
         print_endline msg
       | Parsing_error msg ->
         print_endline msg
       end
     | `Server ->
-      let res = try read_server_message in_fd with
+      let res = try read_server_message fd with
         | Marshal_tools.Reading_Preamble_Exception
         | Unix.Unix_error _ -> server_disconnected ()
       in

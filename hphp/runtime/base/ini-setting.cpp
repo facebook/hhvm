@@ -1052,8 +1052,9 @@ bool IniSetting::FillInConstant(const std::string& name,
   // We can cheat here since we fill in constants a while after
   // runtime options are loaded.
   s_system_settings_are_set = false;
-  return IniSetting::SetSystem(name, value);
+  auto const ret = IniSetting::SetSystem(name, value);
   s_system_settings_are_set = true;
+  return ret;
 }
 
 bool IniSetting::SetSystem(const String& name, const Variant& value) {

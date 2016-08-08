@@ -13,50 +13,41 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_STRUCT_ARRAY_H_
+#define incl_HPHP_STRUCT_ARRAY_H_
 
-#ifndef incl_HPHP_HPHP_ARRAY_H_
-#define incl_HPHP_HPHP_ARRAY_H_
+#include <cstddef>
+#include <cstdint>
+#include <sys/types.h>
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/array-common.h"
-#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
-
-#include <folly/portability/Constexpr.h>
+#include "hphp/runtime/base/array-common.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct ArrayInit;
-struct MemoryProfile;
+struct Variant;
+struct RefData;
+struct ArrayData;
+struct StringData;
 
 //////////////////////////////////////////////////////////////////////
 
-struct MixedArray final : private ArrayData,
-                          type_scan::MarkCountable<MixedArray> {
-  // Load factor scaler. If S is the # of elements, C is the
-  // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
-  // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
-  // 0.875 load factor. Use powers of 2 to enable shift-divide.
-  static constexpr uint32_t LoadScale = 4;
-
-  constexpr static uint32_t HashSize(uint32_t scale) { return 4 * scale; }
-  constexpr static uint32_t Capacity(uint32_t scale) { return 3 * scale; }
-  constexpr static uint32_t Mask(uint32_t scale) { return 4 * scale - 1; }
-
-  using hash_t = strhash_t;
-
-  /*
-   * Iterator helper for kPackedKind and kMixedKind.  You can use this
-   * to look at the values in the array, but not the keys unless you
-   * know it is kMixedKind.
-   *
-   * This can be used as an optimization vs. ArrayIter, which uses
-   * indirect calls in the loop.
-   */
-  struct ValIter;
-
+/*
+ * Single element Array structure. 
+ * Do not change member function names below to maintain compatibiality 
+ * Mixed Array class usage. 
+ * The hash value for the single element stored must be generated at the time of 
+ * converting single array to mixed array.  
+ * The layout is a sub-set of Mixed Array to keep the code path of conversion from 
+ * SingleArray to SingleArray short.
+ * Do not remove any of the public methods, assert them in the definition instead.
+ * Keep the comments until the implementation is complete. 
+ */
+struct SingleArray final : public ArrayData,
+                           type_scan::MarkCountable<StructArray> {
   struct Elm {
     union {
       int64_t ikey;
@@ -110,7 +101,7 @@ struct MixedArray final : private ArrayData,
     }
 
     bool isTombstone() const {
-      return MixedArray::isTombstone(data.m_type);
+      return SingleArray::isTombstone(data.m_type);
     }
 
     template<class F> void scan(F& mark) const {
@@ -129,58 +120,33 @@ struct MixedArray final : private ArrayData,
   };
 
   static constexpr ptrdiff_t dataOff() {
-    return sizeof(MixedArray);
+    return sizeof(SingleArray);
   }
   static constexpr ptrdiff_t usedOff() {
-    return offsetof(MixedArray, m_used);
+    return offsetof(SingleArray, m_used);
   }
 
   struct ElmKey {
     ElmKey() {}
-    ElmKey(strhash_t hash, StringData* key)
-        : skey(key), hash(hash)
-      {}
+    ElmKey(StringData* key) : skey(key) {}
+    ElmKey(int64_t key) : ikey(key) {}
     union {
       StringData* skey;
       int64_t ikey;
     };
-    hash_t hash;
 
-    TYPE_SCAN_CUSTOM() {
-      if (hash < 0) scanner.enqueue(skey);
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
-    }
+    // There's no need to store a hash value for the key.
+    // The data aux field has a hash value asscoiated with it: data.hash()
+    // The array contains only a single integer/ String key. 
+    //hash_t hash;
   };
 
-  /*
+/*
    * Initialize an empty small mixed array with given field. This should be
    * inlined.
    */
-  static void InitSmall(MixedArray* a, RefCount count, uint32_t size,
+  static void InitSmall(SingleArray* a, RefCount count, uint32_t size,
                         int64_t nextIntKey);
-
-  /*
-   * Allocate a new, empty, request-local array in (mixed|dict) mode, with
-   * enough space reserved for `capacity' members.
-   *
-   * The returned array is already incref'd.
-   */
-  static ArrayData* MakeReserveMixed(uint32_t size) {
-    return MakeReserveImpl(size, HeaderKind::Mixed);
-  }
-
-  static ArrayData* MakeReserveDict(uint32_t size) {
-    return MakeReserveImpl(size, HeaderKind::Dict);
-  }
-
-  static ArrayData* MakeReserveKeyset(uint32_t size) {
-    return MakeReserveImpl(size, HeaderKind::Keyset);
-  }
-
-  static MixedArray* ToDictInPlace(ArrayData*);
-  static MixedArray* ToKeysetInPlace(ArrayData*);
-
-  static ArrayData* MakeKeyset(uint32_t size, const TypedValue* values);
 
   /*
    * Allocate a new, empty, request-local array with the same mode as
@@ -195,11 +161,13 @@ struct MixedArray final : private ArrayData,
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */
-  static MixedArray* MakeStruct(uint32_t size, const StringData* const* keys,
+  static SingleArray* MakeStruct(uint32_t size, const StringData* const* keys,
                                const TypedValue* values);
+  static StructArray* MakeStructArray(uint32_t size, const TypedValue* values,
+                                      Shape*);
 
   /*
-   * Allocate an uncounted MixedArray and copy the values from the
+   * Allocate an uncounted SingleArray and copy the values from the
    * input 'array' into the uncounted one. All values copied are made
    * uncounted as well.  An uncounted array can only contain uncounted
    * values (primitive values, uncounted or static strings and
@@ -231,15 +199,6 @@ struct MixedArray final : private ArrayData,
   using ArrayData::decWillRelease;
   using ArrayData::incRefCount;
 
-  /*
-   * MixedArray is convertible to ArrayData*, but not implicitly.
-   * This is to avoid accidentally using virtual dispatch when you
-   * already know something is Mixed.
-   *
-   * I.e., instead of doing things like mixed->nvGet(...) you want to
-   * do MixedArray::NvGetInt(adYouKnowIsMixed, ...).  This means using
-   * MixedArray*'s directly shouldn't really happen very often.
-   */
   ArrayData* asArrayData() { return this; }
   const ArrayData* asArrayData() const { return this; }
 
@@ -301,17 +260,13 @@ public:
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
-  template <class AppendFunc>
-  static ArrayData* AppendWithRefNoRef(ArrayData*, const Variant& v, bool copy,
-                                       AppendFunc append);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static ArrayData* ToDict(ArrayData*);
-  static ArrayData* ToKeyset(ArrayData*);
-  static constexpr auto ToVec = &ArrayCommon::ToVec;
+
+
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
@@ -330,128 +285,11 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static const TypedValue* NvTryGetIntDict(const ArrayData*, int64_t ki);
-  static constexpr auto NvGetIntDict = &NvGetInt;
-  static const TypedValue* NvTryGetStrDict(const ArrayData*, const StringData*);
-  static constexpr auto NvGetStrDict = &NvGetStr;
-  static constexpr auto ReleaseDict = &Release;
-  static constexpr auto NvGetKeyDict = &NvGetKey;
-  static constexpr auto SetIntDict = &SetInt;
-  static constexpr auto SetStrDict = &SetStr;
-  static constexpr auto AddIntDict = &AddInt;
-  static constexpr auto AddStrDict = &AddStr;
-  static constexpr auto VsizeDict = &Vsize;
-  static constexpr auto GetValueRefDict = &GetValueRef;
-  static constexpr auto IsVectorDataDict = &IsVectorData;
-  static constexpr auto ExistsIntDict = &ExistsInt;
-  static constexpr auto ExistsStrDict = &ExistsStr;
-  static constexpr auto LvalIntDict = &LvalInt;
-  static constexpr auto LvalStrDict = &LvalStr;
-  static constexpr auto LvalNewDict = &LvalNew;
-  static constexpr auto RemoveIntDict = &RemoveInt;
-  static constexpr auto RemoveStrDict = &RemoveStr;
-  static constexpr auto IterBeginDict = &IterBegin;
-  static constexpr auto IterLastDict = &IterLast;
-  static constexpr auto IterEndDict = &IterEnd;
-  static constexpr auto IterAdvanceDict = &IterAdvance;
-  static constexpr auto IterRewindDict = &IterRewind;
-  static constexpr auto ValidMArrayIterDict = ValidMArrayIter;
-  static constexpr auto AdvanceMArrayIterDict = &AdvanceMArrayIter;
-  static constexpr auto EscalateForSortDict = &EscalateForSort;
-  static constexpr auto KsortDict = &Ksort;
-  static constexpr auto SortDict = &Sort;
-  static constexpr auto AsortDict = &Asort;
-  static constexpr auto UksortDict = &Uksort;
-  static constexpr auto UsortDict = &Usort;
-  static constexpr auto UasortDict = &Uasort;
-  static constexpr auto CopyDict = &Copy;
-  static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
-  static constexpr auto CopyStaticDict = &CopyStatic;
-  static constexpr auto AppendDict = &Append;
-  static constexpr auto PlusEqDict = &PlusEq;
-  static constexpr auto MergeDict = &Merge;
-  static constexpr auto PopDict = &Pop;
-  static constexpr auto DequeueDict = &Dequeue;
-  static constexpr auto PrependDict = &Prepend;
-  static constexpr auto RenumberDict = &Renumber;
-  static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
-  static constexpr auto EscalateDict = &Escalate;
-  static constexpr auto ToVecDict = ToVec;
-  static constexpr auto ToKeysetDict = &ToKeyset;
-
-  static ArrayData* LvalIntRefDict(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrRefDict(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNewRefDict(ArrayData*, Variant*&, bool);
-  static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
-  static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
-
-  static constexpr auto NvTryGetIntKeyset = &NvTryGetIntDict;
-  static constexpr auto NvGetIntKeyset = &NvGetInt;
-  static constexpr auto NvTryGetStrKeyset = &NvTryGetStrDict;
-  static constexpr auto NvGetStrKeyset = &NvGetStr;
-  static constexpr auto ReleaseKeyset = &Release;
-  static constexpr auto NvGetKeyKeyset = &NvGetKey;
-  static constexpr auto VsizeKeyset = &Vsize;
-  static constexpr auto GetValueRefKeyset = &GetValueRef;
-  static constexpr auto IsVectorDataKeyset = &IsVectorData;
-  static constexpr auto ExistsIntKeyset = &ExistsInt;
-  static constexpr auto ExistsStrKeyset = &ExistsStr;
-  static constexpr auto RemoveIntKeyset = &RemoveInt;
-  static constexpr auto RemoveStrKeyset = &RemoveStr;
-  static constexpr auto IterBeginKeyset = &IterBegin;
-  static constexpr auto IterLastKeyset = &IterLast;
-  static constexpr auto IterEndKeyset = &IterEnd;
-  static constexpr auto IterAdvanceKeyset = &IterAdvance;
-  static constexpr auto IterRewindKeyset = &IterRewind;
-  static constexpr auto ValidMArrayIterKeyset = ValidMArrayIter;
-  static constexpr auto AdvanceMArrayIterKeyset = &AdvanceMArrayIter;
-  static constexpr auto EscalateForSortKeyset = &EscalateForSort;
-  static constexpr auto KsortKeyset = &Ksort;
-  static constexpr auto SortKeyset = &Sort;
-  static constexpr auto AsortKeyset = &Asort;
-  static constexpr auto UksortKeyset = &Uksort;
-  static constexpr auto UsortKeyset = &Usort;
-  static constexpr auto UasortKeyset = &Uasort;
-  static constexpr auto CopyKeyset = &Copy;
-  static constexpr auto CopyWithStrongIteratorsKeyset =
-    &CopyWithStrongIterators;
-  static constexpr auto CopyStaticKeyset = &CopyStatic;
-  static constexpr auto PopKeyset = &Pop;
-  static constexpr auto DequeueKeyset = &Dequeue;
-  static constexpr auto PrependKeyset = &Prepend;
-  static constexpr auto OnSetEvalScalarKeyset = &OnSetEvalScalar;
-  static constexpr auto EscalateKeyset = &Escalate;
-  static constexpr auto ToVecKeyset = ToVec;
-  static constexpr auto ToDictKeyset = &ToDict;
-
-  static constexpr auto LvalIntRefKeyset = &LvalIntRefDict;
-  static constexpr auto LvalStrRefKeyset = &LvalStrRefDict;
-  static constexpr auto LvalNewRefKeyset = &LvalNewRefDict;
-  static constexpr auto SetRefIntKeyset = &SetRefIntDict;
-  static constexpr auto SetRefStrKeyset = &SetRefStrDict;
-  static constexpr auto AppendRefKeyset = &AppendRefDict;
-
-  static ArrayData* AppendKeyset(ArrayData*, Cell v, bool);
-  static ArrayData* PlusEqKeyset(ArrayData*, const ArrayData*);
-  static ArrayData* MergeKeyset(ArrayData*, const ArrayData*);
-  static ArrayData* AppendWithRefKeyset(ArrayData*, const Variant&, bool);
-  static ArrayData* SetIntKeyset(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* SetStrKeyset(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* AddIntKeyset(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* AddStrKeyset(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* LvalIntKeyset(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNewKeyset(ArrayData*, Variant*&, bool);
-  static void RenumberKeyset(ArrayData*);
-
 private:
-  MixedArray* copyMixed() const;
-  MixedArray* copyMixedAndResizeIfNeeded() const;
-  MixedArray* copyMixedAndResizeIfNeededSlow() const;
+  SingleArray* copySingle() const;
+  SingleArray* copySingleAndResizeIfNeeded() const;
+  SingleArray* copySingleAndResizeIfNeededSlow() const;
   static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
-  static void CheckRefsForDict(const MixedArray*);
 
 public:
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -464,19 +302,6 @@ public:
   // Element index, with special values < 0 used for hash tables.
   static constexpr int32_t Empty      = -1;
   static constexpr int32_t Tombstone  = -2;
-
-  // Use a minimum of an 4-element hash table.  Valid range: [2..32]
-  static constexpr uint32_t LgSmallScale = 0;
-  static constexpr uint32_t SmallScale = 1 << LgSmallScale;
-  static constexpr uint32_t SmallHashSize = SmallScale * 4;
-  static constexpr uint32_t SmallMask = SmallHashSize - 1; // 3
-  static constexpr uint32_t SmallSize = SmallScale * 3;
-
-  static constexpr uint64_t MaxHashSize = uint64_t(1) << 32;
-  static constexpr uint32_t MaxMask = MaxHashSize - 1;
-  static constexpr uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
-  static constexpr uint32_t MaxMakeSize = 4 * SmallSize;
-  static constexpr uint32_t MaxStructMakeSize = 64;
 
   uint32_t iterLimit() const { return m_used; }
 
@@ -491,6 +316,8 @@ public:
 
   bool isTombstone(ssize_t pos) const;
 
+  // public functions, do not remove them
+  // hashSize() and heapSize() will return zero. 
   size_t hashSize() const;
   size_t heapSize() const;
   static constexpr size_t computeMaxElms(uint32_t tableMask);
@@ -501,7 +328,7 @@ private:
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
-  friend struct SingleArray;
+  friend struct StructArray;
   friend struct HashCollection;
   friend struct BaseMap;
   friend struct c_Map;
@@ -510,32 +337,29 @@ private:
   friend struct c_Set;
   friend struct c_ImmSet;
   friend struct c_AwaitAllWaitHandle;
-  enum class ClonePacked {};
-  enum class CloneMixed {};
 
   friend size_t getMemSize(const ArrayData*);
 
 public:
   // Safe downcast helpers
-  static MixedArray* asMixed(ArrayData* ad);
-  static const MixedArray* asMixed(const ArrayData* ad);
+  static SingleArray* asSingle(ArrayData* ad);
+  static const SingleArray* asSingle(const ArrayData* ad);
   // Fast iteration
-  template <class F, bool inc = true>
-  static void IterateV(MixedArray* arr, F fn) {
+  template <class F> static void IterateV(SingleArray* arr, F fn) {
     auto elm = arr->data();
-    if (inc) arr->incRefCount();
-    SCOPE_EXIT { if (inc) decRefArr(arr); };
+    arr->incRefCount();
+    SCOPE_EXIT { decRefArr(arr); };
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
         if (ArrayData::call_helper(fn, &elm->data)) break;
       }
     }
   }
-  template <class F, bool inc = true>
-  static void IterateKV(MixedArray* arr, F fn) {
+
+  template <class F> static void IterateKV(SingleArray* arr, F fn) {
     auto elm = arr->data();
-    if (inc) arr->incRefCount();
-    SCOPE_EXIT { if (inc) decRefArr(arr); };
+    arr->incRefCount();
+    SCOPE_EXIT { decRefArr(arr); };
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
         TypedValue key;
@@ -552,32 +376,34 @@ private:
 private:
   enum class AllocMode : bool { Request, Static };
 
-  static MixedArray* CopyMixed(const MixedArray& other, AllocMode, HeaderKind);
-  static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
+  static SingleArray* CopySingle(const SingleArray& other, AllocMode, HeaderKind);
+  // Reserve copy functionality may not be needed.  
+  static SingleArray* CopyReserve(const SingleArray* src, size_t expectedSize);
 
-  MixedArray() = delete;
-  MixedArray(const MixedArray&) = delete;
-  MixedArray& operator=(const MixedArray&) = delete;
-  ~MixedArray() = delete;
+  SingleArray() = delete;
+  SingleArray(const SingleArray&) = delete;
+  SingleArray& operator=(const SingleArray&) = delete;
+  ~SingleArray() = delete;
 
 private:
   static void initHash(int32_t* table, uint32_t scale);
   static void copyHash(int32_t* to, const int32_t* from, uint32_t scale);
-  // Copy elements as well as `m_nextKI' from one MixedArray to another.
+  // Copy elements as well as `m_nextKI' from one SingleArray to another.
   // Warning: it could copy up to 24 bytes beyond the array and thus overwrite
   // the hashtable, but it never reads/writes beyond the end of the hash
   // table.  If you use this function, make sure you copy/write the correct
   // data on the hash table afterwards.
-  static void copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
+
+  //nextKI and hashtable are not allocated for SingleArray's
+  static void copyElmsNextUnsafe(SingleArray* to, const SingleArray* from,
                                  uint32_t nElems);
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
   static ArrayData* ArrayPlusEqGeneric(ArrayData*,
-    MixedArray*, const ArrayData*, size_t, bool);
-  static ArrayData* ArrayPlusEqImpl(ArrayData*, const ArrayData*, bool);
-  static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
+    SingleArray*, const ArrayData*, size_t);
+  static ArrayData* ArrayMergeGeneric(SingleArray*, const ArrayData*);
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);
@@ -602,6 +428,8 @@ private:
 public:
   ssize_t find(int64_t ki, inthash_t h) const;
   ssize_t find(const StringData* s, strhash_t h) const;
+
+//------------------------------Remove all methods below-------------------------------------------------------
 
 private:
   // The array should already be sized for the new insertion before
@@ -641,6 +469,29 @@ private:
   bool nextInsert(Cell);
   ArrayData* nextInsertRef(Variant& data);
   ArrayData* nextInsertWithRef(const Variant& data);
+
+  /*
+   * Helper routine for inserting elements into a new array
+   * when Grow()ing the array, that also checks for potentially
+   * unbalanced entries because of hash collision.
+   */
+  static SingleArray* InsertCheckUnbalanced(SingleArray* ad, int32_t* table,
+                                           uint32_t mask,
+                                           Elm* iter, Elm* stop);
+  /*
+   * grow() increases the hash table size and the number of slots for
+   * elements by a factor of 2. grow() rebuilds the hash table, but it
+   * does not compact the elements.
+   */
+  static SingleArray* Grow(SingleArray* old, uint32_t newScale);
+
+  /**
+   * compact() does not change the hash table size or the number of slots
+   * for elements. compact() rebuilds the hash table and compacts the
+   * elements into the slots with lower addresses.
+   */
+  void compact(bool renumber);
+
   ArrayData* addVal(int64_t ki, Cell data);
   ArrayData* addVal(StringData* key, Cell data);
   ArrayData* addValNoAsserts(StringData* key, Cell data);
@@ -650,7 +501,6 @@ private:
   template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
-  template <class K> ArrayData* updateMove(K k, Cell data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
   ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
@@ -665,7 +515,7 @@ private:
     }
   }
 
-  MixedArray* copyImpl(MixedArray* target) const;
+  SingleArray* copyImpl(SingleArray* target) const;
 
   bool isFull() const;
   bool isFullPacked() const;
@@ -675,115 +525,43 @@ private:
 
   Elm& allocElm(int32_t* ei);
 
-  MixedArray* getLval(TypedValue& tv, Variant*& ret);
-  MixedArray* initRef(TypedValue& tv, Variant& v);
-  MixedArray* initLval(TypedValue& tv, Variant*& ret);
-  MixedArray* initWithRef(TypedValue& tv, const Variant& v);
-  MixedArray* moveVal(TypedValue& tv, TypedValue v);
+  SingleArray* getLval(TypedValue& tv, Variant*& ret);
+  SingleArray* initRef(TypedValue& tv, Variant& v);
+  SingleArray* initLval(TypedValue& tv, Variant*& ret);
+  SingleArray* initWithRef(TypedValue& tv, const Variant& v);
+  SingleArray* moveVal(TypedValue& tv, TypedValue v);
 
   ArrayData* zInitVal(TypedValue& tv, RefData* v);
   ArrayData* zSetVal(TypedValue& tv, RefData* v);
 
   /*
-   * Helper routine for inserting elements into a new array
-   * when Grow()ing the array, that also checks for potentially
-   * unbalanced entries because of hash collision.
+   * resize() and resizeIfNeeded() will convert the SingleArray into a 
+   * MixedArray. 
    */
-  static MixedArray* InsertCheckUnbalanced(MixedArray* ad, int32_t* table,
-                                           uint32_t mask,
-                                           Elm* iter, Elm* stop);
-  /*
-   * grow() increases the hash table size and the number of slots for
-   * elements by a factor of 2. grow() rebuilds the hash table, but it
-   * does not compact the elements.
-   */
-  static MixedArray* Grow(MixedArray* old, uint32_t newScale);
-
-  /**
-   * compact() does not change the hash table size or the number of slots
-   * for elements. compact() rebuilds the hash table and compacts the
-   * elements into the slots with lower addresses.
-   */
-  void compact(bool renumber);
-
-  /*
-   * resize() and resizeIfNeeded() will grow or compact the array as
-   * necessary to ensure that there is room for a new element and a
-   * new hash entry.
-   *
-   * resize() assumes isFull().  resizeIfNeeded() will first check if
-   * there is room for a new element and hash entry before growing or
-   * compacting the array.
-   *
-   * Both functions return the new MixedArray* to use (or the old one
-   * if they didn't need to grow).  The old MixedArray is left in a
-   * zombie state where the only legal action is to decref and then
-   * throw it away.
-   */
-  MixedArray* resize();
-  MixedArray* resizeIfNeeded();
+  SingleArray* resize();
+  // May not be necessary
+  SingleArray* resizeIfNeeded(); 
 
   Elm* data() const {
     return const_cast<Elm*>(reinterpret_cast<Elm const*>(this + 1));
   }
-
-  int32_t* hashTab() const {
-    return const_cast<int32_t*>(
-      reinterpret_cast<int32_t const*>(
-        data() + static_cast<size_t>(m_scale) * 3
-      )
-    );
-  }
-
-  uint32_t capacity() const { return Capacity(m_scale); }
-  uint32_t mask() const { return Mask(m_scale); }
-  uint32_t scale() const { return m_scale; }
 
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }
 
 public:
   template<class F> void scan(F&) const; // in mixed-array-defs.h
-
 private:
-  struct Initializer;
-  static Initializer s_initializer;
+  uint64_t m_used;   // Number of used elements (values or tombstones)
+};  // struct SingleArray
 
-  // Some of these are packed into qword-sized unions so we can
-  // combine stores during initialization. (gcc won't do it on its own.)
-  union {
-    struct {
-      uint32_t m_scale;     // size-class equal to 1/4 table size
-      uint32_t m_used;      // Number of used elements (values or tombstones)
-    };
-    uint64_t m_scale_used;
-  };
-  int64_t  m_nextKI;        // Next integer key to use for append.
-}; // struct MixedArray
 
-inline constexpr size_t MixedArray::computeMaxElms(uint32_t mask) {
-  return size_t(mask) - size_t(mask) / LoadScale;
+inline constexpr size_t SingleArray::computeMaxElms(uint32_t ) {
+  return 1;
 }
 
-ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
-  return sizeof(MixedArray) +
-         MixedArray::HashSize(scale) * sizeof(int32_t) +
-         MixedArray::Capacity(scale) * sizeof(MixedArray::Elm);
-}
-
-extern std::aligned_storage<
-  computeAllocBytes(1),
-  folly::constexpr_max(alignof(MixedArray), size_t(16))
->::type s_theEmptyDictArray, s_theEmptyKeysetArray;
-
-ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
-  void* vp = &s_theEmptyDictArray;
-  return static_cast<ArrayData*>(vp);
-}
-
-ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
-  void* vp = &s_theEmptyKeysetArray;
-  return static_cast<ArrayData*>(vp);
+ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t) {
+  return sizeof(SingleArray) + sizeof(SingleArray::Elm);
 }
 
 //////////////////////////////////////////////////////////////////////

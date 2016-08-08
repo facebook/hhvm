@@ -146,6 +146,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
     MixedArray::entry##Keyset, /* Keyset */     \
+    SingleArray::entry,                         \
   },
 
 /*
@@ -964,7 +965,8 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "ProxyKind",
     "DictKind",
     "VecKind",
-    "KeysetKind"
+    "KeysetKind",
+	"SingleKind"
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

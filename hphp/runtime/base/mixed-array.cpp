@@ -1370,6 +1370,7 @@ ArrayData* MixedArray::CopyWithStrongIterators(const ArrayData* ad) {
 const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   auto a = asMixed(ad);
   auto i = a->find(ki, hashint(ki));
+  //fprintf(stderr, "int:m_used : %d\n", a->m_used); 
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
@@ -1378,6 +1379,7 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
                                        const StringData* k) {
   auto a = asMixed(ad);
   auto i = a->find(k, k->hash());
+  //fprintf(stderr, "str:m_used : %d\n", a->m_used); 
   if (LIKELY(validPos(i))) {
     return &a->data()[i].data;
   }

@@ -62,8 +62,8 @@ struct ArrayData {
                       // string keys
     kVecKind = 7,     // Vector array (more restrictive PackedArray)
     kKeysetKind = 8,  // MixedArray storing its keys as values, no implicit
-                      // conversions from integer-like string keys
-    kNumKinds = 9     // insert new values before kNumKinds.
+	kSingleKind = 9,  // MixedArray with exactly one element
+    kNumKinds = 10     // insert new values before kNumKinds.
   };
 
 protected:
@@ -184,12 +184,13 @@ public:
   bool isProxyArray() const { return kind() == kProxyKind; }
   bool isEmptyArray() const { return kind() == kEmptyKind; }
   bool isDict() const { return kind() == kDictKind; }
+  bool isSingleArray() const { return kind() == kSingleKind; }
   bool isVecArray() const { return kind() == kVecKind; }
   bool isKeyset() const { return kind() == kKeysetKind; }
 
   bool isPackedLayout() const { return isPacked() || isVecArray(); }
 
-  bool isMixedLayout() const { return isMixed() || isDict() || isKeyset(); }
+  bool isMixedLayout() const { return isMixed() || isDict() || isKeyset()  || isSingleArray(); }
 
   /*
    * Returns whether or not this array contains "vector-like" data.

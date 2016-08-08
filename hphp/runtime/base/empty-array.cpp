@@ -148,13 +148,13 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePacked(TypedValue tv) {
 }
 
 /*
- * Helper for creating a single-element mixed array with a string key.
+ * Helper for creating a single-element single array with a string key.
  *
  * Note: the key is not already incref'd, but the value must be.
  */
 NEVER_INLINE
 std::pair<ArrayData*,TypedValue*>
-EmptyArray::MakeMixed(StringData* key, TypedValue val) {
+EmptyArray::MakeSingleArray(StringData* key, TypedValue val) {
   auto const ad = reqAllocArray(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
@@ -171,7 +171,7 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_scale == MixedArray::SmallScale);
-  assert(ad->kind() == ArrayData::kMixedKind);
+  assert(ad->kind() == ArrayData::kSingleKind);
   assert(ad->hasExactlyOneRef());
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
@@ -179,11 +179,11 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
 }
 
 /*
- * Creating a single-element mixed array with a integer key.  The
+ * Creating a single-element single array with a integer key.  The
  * value is already incref'd.
  */
 std::pair<ArrayData*,TypedValue*>
-EmptyArray::MakeMixed(int64_t key, TypedValue val) {
+EmptyArray::MakeSingleArray(int64_t key, TypedValue val) {
   auto const ad = reqAllocArray(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
   auto const data = ad->data();
@@ -198,7 +198,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   lval.m_data = val.m_data;
   lval.m_type = val.m_type;
 
-  assert(ad->kind() == ArrayData::kMixedKind);
+  assert(ad->kind() == ArrayData::kSingleKind);
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->hasExactlyOneRef());
@@ -215,7 +215,7 @@ ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell c, bool) {
   if (c.m_type == KindOfUninit) c.m_type = KindOfNull;
   tvRefcountedIncRef(&c);
   auto const ret = k == 0 ? EmptyArray::MakePacked(c)
-                          : EmptyArray::MakeMixed(k, c);
+                          : EmptyArray::MakeSingleArray(k, c);
   return ret.first;
 }
 
@@ -226,12 +226,12 @@ ArrayData* EmptyArray::SetStr(ArrayData*,
   tvRefcountedIncRef(&val);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (val.m_type == KindOfUninit) val.m_type = KindOfNull;
-  return EmptyArray::MakeMixed(k, val).first;
+  return EmptyArray::MakeSingleArray(k, val).first;
 }
 
 ArrayData* EmptyArray::LvalInt(ArrayData*, int64_t k, Variant*& retVar, bool) {
   auto const ret = k == 0 ? EmptyArray::MakePacked(make_tv<KindOfNull>())
-                          : EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
+                          : EmptyArray::MakeSingleArray(k, make_tv<KindOfNull>());
   retVar = &tvAsVariant(ret.second);
   return ret.first;
 }
@@ -240,7 +240,7 @@ ArrayData* EmptyArray::LvalStr(ArrayData*,
                                StringData* k,
                                Variant*& retVar,
                                bool) {
-  auto const ret = EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
+  auto const ret = EmptyArray::MakeSingleArray(k, make_tv<KindOfNull>());
   retVar = &tvAsVariant(ret.second);
   return ret.first;
 }
@@ -258,7 +258,7 @@ ArrayData* EmptyArray::SetRefInt(ArrayData*,
   auto ref = *var.asRef();
   tvIncRef(&ref);
   auto const ret = k == 0 ? EmptyArray::MakePacked(ref)
-                          : EmptyArray::MakeMixed(k, ref);
+                          : EmptyArray::MakeSingleArray(k, ref);
   return ret.first;
 }
 
@@ -268,7 +268,7 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*,
                                  bool) {
   auto ref = *var.asRef();
   tvIncRef(&ref);
-  return EmptyArray::MakeMixed(k, ref).first;
+  return EmptyArray::MakeSingleArray(k, ref).first;
 }
 
 ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool copy) {

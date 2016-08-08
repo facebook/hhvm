@@ -56,6 +56,19 @@ inline const TypedValueAux& Class::PropInitVec::operator[](size_t i) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
 
+inline LowPtr<Func>* Class::funcVec() const {
+  return reinterpret_cast<LowPtr<Func>*>(
+    reinterpret_cast<uintptr_t>(this) -
+    m_funcVecLen * sizeof(LowPtr<Func>)
+  );
+}
+
+inline void* Class::mallocPtr() const {
+  return reinterpret_cast<void*>(
+    reinterpret_cast<uintptr_t>(funcVec()) & ~(alignof(Class) - 1)
+  );
+}
+
 inline const LowPtr<Class>* Class::classVec() const {
   return m_classVec;
 }

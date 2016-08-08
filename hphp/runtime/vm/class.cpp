@@ -222,12 +222,19 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     funcVecLen += numTraitMethodsEstimate;
   }
 
-  auto const size = sizeof_Class
-                    + sizeof(m_classVec[0]) * classVecLen
-                    + sizeof(LowPtr<Func>) * funcVecLen;
+  // We need to pad this allocation so that the actual start of the Class is
+  // 8-byte aligned.
+  auto const mask = alignof(Class) - 1;
+  auto const funcvec_sz = sizeof(LowPtr<Func>) * funcVecLen;
+  auto const prefix_sz = (funcvec_sz + mask) & ~mask;
+
+  auto const size = sizeof_Class + prefix_sz
+                    + sizeof(m_classVec[0]) * classVecLen;
+
   auto const mem = low_malloc_data(size);
-  auto const classPtr = (void *)((uintptr_t)mem +
-                                 funcVecLen * sizeof(LowPtr<Func>));
+  auto const classPtr = reinterpret_cast<void*>(
+    reinterpret_cast<uintptr_t>(mem) + prefix_sz
+  );
   try {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
@@ -530,21 +537,6 @@ Class::Avail Class::avail(Class*& parent,
     }
   }
   return Avail::True;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Pre- and post-allocations.
-
-LowPtr<Func>* Class::funcVec() const {
-  return reinterpret_cast<LowPtr<Func>*>(
-    reinterpret_cast<uintptr_t>(this) -
-    m_funcVecLen * sizeof(LowPtr<Func>)
-  );
-}
-
-void* Class::mallocPtr() const {
-  return funcVec();
 }
 
 

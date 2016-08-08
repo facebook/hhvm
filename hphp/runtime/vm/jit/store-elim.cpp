@@ -186,9 +186,16 @@ struct TrackedStore {
   Block* pending() {
     return kind() == Pending ? static_cast<Block*>(m_ptr.ptr()) : nullptr;
   }
+  const Block* pending() const {
+    return kind() == Pending ? static_cast<const Block*>(m_ptr.ptr()) : nullptr;
+  }
   IRInstruction* processed() {
-    return kind() == Processed ? static_cast<IRInstruction*>(m_ptr.ptr()) :
-      nullptr;
+    return kind() == Processed ?
+      static_cast<IRInstruction*>(m_ptr.ptr()) : nullptr;
+  }
+  const IRInstruction* processed() const {
+    return kind() == Processed ?
+      static_cast<const IRInstruction*>(m_ptr.ptr()) : nullptr;
   }
   bool isUnseen() const {
     return kind() == Unseen;
@@ -197,7 +204,7 @@ struct TrackedStore {
     return kind() == Bad;
   }
   bool isPhi() const {
-    return kind() >= Phi && kind() != Bad;
+    return kind() >= Phi && kind() < Bad;
   }
   void set(IRInstruction* inst) { m_ptr.set(Instruction, inst); }
   void set(Block* block, uint32_t id) {
@@ -216,6 +223,17 @@ struct TrackedStore {
   }
   size_t hash() const {
     return m_ptr.tag() + intptr_t(m_ptr.ptr());
+  }
+  std::string toString() const {
+    if (isUnseen()) return "Unseen";
+    if (isBad()) return "Bad";
+    char* type;
+    if (instruction()) type = "Inst";
+    else if (isPhi()) type = "Phi";
+    else if (pending()) type = "Pending";
+    else if (processed()) type = "Processed";
+    else type = "XXX";
+    return folly::sformat("{}:0x{:x}",type, uintptr_t(m_ptr.ptr()));
   }
  private:
   Kind kind() const { return m_ptr.tag(); }
@@ -283,6 +301,7 @@ struct Global {
     , poBlockList(poSortCfg(unit))
     , ainfo(collect_aliases(unit, poBlockList))
     , blockStates(unit, BlockState{})
+    , seenStores(unit, 0)
   {}
 
   IRUnit& unit;
@@ -297,6 +316,9 @@ struct Global {
   // we do dataflow.
   StateVector<Block,BlockState> blockStates;
   jit::vector<IRInstruction*> reStores;
+  // Used to prevent cycles in find_candidate_store
+  StateVector<Block,uint32_t> seenStores;
+  uint32_t seenStoreId{0};
   bool needsReflow{false};
 };
 
@@ -934,30 +956,51 @@ void compute_anticipated(Global& genv,
     });
 }
 
+TrackedStore find_candidate_store_helper(Global& genv, TrackedStore ts,
+                                         uint32_t id) {
+  auto block = ts.block();
+  assertx(block);
+  TrackedStore ret;
+  if (genv.seenStores[block] == genv.seenStoreId) return ret;
+
+  // look for a candidate in the immediate predecessors
+  block->forEachPred([&](Block* pred) {
+      if (ret.isBad() || ret.instruction()) return;
+      auto const pred_ts =
+        genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
+      if (pred_ts.isBad() || pred_ts.instruction()) {
+        ret = pred_ts;
+        return;
+      }
+    });
+
+  if (ret.isBad() || ret.instruction()) return ret;
+
+  genv.seenStores[block] = genv.seenStoreId;
+  // recursively search the predecessors
+  block->forEachPred([&](Block* pred) {
+      if (ret.isBad() || ret.instruction()) return;
+      auto const pred_ts =
+        genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
+      if (!pred_ts.block()) {
+        always_assert_flog(pred_ts.isUnseen(),
+                           "pred_ts: {}", pred_ts.toString());
+        return;
+      }
+      ret = find_candidate_store_helper(genv, pred_ts, id);
+    });
+
+  return ret;
+}
+
 /*
  * Find a candidate store instruction; any one will do, because
  * compatibility between stores is transitive.
  */
 TrackedStore find_candidate_store(Global& genv, TrackedStore ts, uint32_t id) {
-  while (true) {
-    auto block = ts.block();
-    if (!block) return ts;
-    ts.reset();
-    block->forEachPred([&](Block* pred) {
-        if (ts.isBad()) return;
-        auto const pred_ts =
-          genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
-        if (pred_ts.isBad() || pred_ts.instruction() || !ts.instruction()) {
-          // given a choice of blocks, choose the one with higher
-          // post-order id to avoid cycles
-          if (!ts.block() || !pred_ts.block() ||
-              genv.blockStates[ts.block()].id <
-              genv.blockStates[pred_ts.block()].id) {
-            ts = pred_ts;
-          }
-        }
-      });
-  }
+  if (!ts.block()) return ts;
+  genv.seenStoreId++;
+  return find_candidate_store_helper(genv, ts, id);
 }
 
 TrackedStore combine_ts(Global& genv, uint32_t id,

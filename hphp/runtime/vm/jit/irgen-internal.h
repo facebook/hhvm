@@ -462,6 +462,8 @@ inline SSATmp* ldThis(IRGS& env) {
 }
 
 inline SSATmp* ldCtx(IRGS& env) {
+  if (!curClass(env))                return cns(env, nullptr);
+  if (!curFunc(env)->mayHaveThis())  return gen(env, LdCctx, fp(env));
   if (env.irb->fs().thisAvailable()) return ldThis(env);
   return gen(env, LdCtx, fp(env));
 }
@@ -785,19 +787,7 @@ inline void decRefLocalsInline(IRGS& env) {
 inline void decRefThis(IRGS& env) {
   if (!curFunc(env)->mayHaveThis()) return;
   auto const ctx = ldCtx(env);
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckCtxThis, taken, ctx);
-    },
-    [&] {  // Next: it's a this
-      auto const this_ = gen(env, CastCtxThis, ctx);
-      decRef(env, this_);
-    },
-    [&] {  // Taken: static context, or psuedomain w/o a $this
-      // No op.
-    }
-  );
+  decRef(env, ctx);
 }
 
 //////////////////////////////////////////////////////////////////////

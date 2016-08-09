@@ -94,14 +94,24 @@ SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closureOpt) {
   assertx(func->isClosureBody());
 
   auto const closure_type = Type::ExactObj(func->implCls());
-  auto const closure = closureOpt ?
-    gen(env, AssertType, closure_type, closureOpt) :
-    gen(env, LdClosure, closure_type, fp(env));
+  auto const closure = [&] {
+    if (!closureOpt) {
+      return gen(env, LdClosure, closure_type, fp(env));
+    }
+    if (closureOpt->hasConstVal() || closureOpt->isA(closure_type)) {
+      return closureOpt;
+    }
+    return gen(env, AssertType, closure_type, closureOpt);
+  }();
 
-  auto const ctx = gen(env, LdClosureCtx, closure);
+  auto const ctx = func->cls() ?
+    gen(env, LdClosureCtx, closure) : cns(env, nullptr);
+
   gen(env, InitCtx, fp(env), ctx);
   // We can skip the incref for static closures, which have a Cctx.
-  if (!func->isStatic()) gen(env, IncRefCtx, ctx);
+  if (func->cls() && !func->isStatic()) {
+    gen(env, IncRef, ctx);
+  }
 
   // Teleport the closure to the next local.  There's no need to incref since
   // it came from m_this.

@@ -193,12 +193,14 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
   auto const closure = allocObjFast(env, cls);
 
   auto const ctx = [&]{
-    if (!curClass(env)) return cns(env, nullptr);
-    auto const ldctx = gen(env, LdCtx, fp(env));
+    auto const ldctx = ldCtx(env);
+    if (!ldctx->type().maybe(TObj)) {
+      return ldctx;
+    }
     if (func->isStatic()) {
       return gen(env, ConvClsToCctx, gen(env, LdClsCtx, ldctx));
     }
-    gen(env, IncRefCtx, ldctx);
+    gen(env, IncRef, ldctx);
     return ldctx;
   }();
 

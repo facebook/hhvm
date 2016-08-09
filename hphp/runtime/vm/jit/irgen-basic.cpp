@@ -36,7 +36,15 @@ void implAGet(IRGS& env, SSATmp* classSrc) {
 }
 
 const StaticString s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
-void checkThis(IRGS& env, SSATmp* ctx) {
+bool checkThis(IRGS& env, SSATmp* ctx) {
+  auto fail = [&] {
+    auto const err = cns(env, s_FATAL_NULL_THIS.get());
+    gen(env, RaiseError, err);
+  };
+  if (!ctx->type().maybe(TObj)) {
+    fail();
+    return false;
+  }
   ifThen(
     env,
     [&] (Block* taken) {
@@ -44,10 +52,10 @@ void checkThis(IRGS& env, SSATmp* ctx) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const err = cns(env, s_FATAL_NULL_THIS.get());
-      gen(env, RaiseError, err);
+      fail();
     }
   );
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -222,18 +230,21 @@ void emitSetL(IRGS& env, int32_t id) {
 }
 
 void emitInitThisLoc(IRGS& env, int32_t id) {
-  if (!curClass(env)) {
+  if (!curFunc(env)->mayHaveThis()) {
     // Do nothing if this is null
     return;
   }
   auto const ldrefExit = makeExit(env);
-  auto const oldLoc    = ldLoc(env, id, ldrefExit, DataTypeCountness);
-  auto const ctx       = gen(env, LdCtx, fp(env));
-  gen(env, CheckCtxThis, makeExitSlow(env), ctx);
-  auto const this_     = gen(env, CastCtxThis, ctx);
-  gen(env, IncRef, this_);
-  stLocRaw(env, id, fp(env), this_);
-  decRef(env, oldLoc);
+  auto const ctx       = ldCtx(env);
+  ifElse(env,
+         [&] (Block* skip) { gen(env, CheckCtxThis, skip, ctx); },
+         [&] {
+           auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeCountness);
+           auto const this_  = gen(env, CastCtxThis, ctx);
+           gen(env, IncRef, this_);
+           stLocRaw(env, id, fp(env), this_);
+           decRef(env, oldLoc);
+         });
 }
 
 void emitPrint(IRGS& env) {
@@ -272,14 +283,18 @@ void emitUnbox(IRGS& env) {
 }
 
 void emitThis(IRGS& env) {
-  auto const ctx = gen(env, LdCtx, fp(env));
-  checkThis(env, ctx);
+  auto const ctx = ldCtx(env);
+  if (!checkThis(env, ctx)) {
+    // Unreachable
+    push(env, cns(env, TInitNull));
+    return;
+  }
   auto const this_ = gen(env, CastCtxThis, ctx);
   pushIncRef(env, this_);
 }
 
 void emitCheckThis(IRGS& env) {
-  auto const ctx = gen(env, LdCtx, fp(env));
+  auto const ctx = ldCtx(env);
   checkThis(env, ctx);
 }
 

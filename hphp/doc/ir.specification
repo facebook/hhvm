@@ -1597,15 +1597,11 @@ To string conversions:
   Defines D as S0. May imply register-to-register moves at code generation
   time. Does not imply an incref or any other manipulation of S0.
 
-| IncRef, ND, S(Gen), NF
+| IncRef, ND, S(Gen,Ctx), NF
 
   If S0 is a refcounted type, increment its refcount.
 
-| IncRefCtx, ND, S(Ctx), NF
-
-  If the Ctx in S0 is a $this pointer, IncRef it.
-
-| DecRef<locId>, ND, S(Gen), CRc
+| DecRef<locId>, ND, S(Gen,Ctx), CRc
 
   Decrease the reference count of S0 by one, and call a destructor for types
   that require it if it goes to zero.
@@ -1619,7 +1615,7 @@ To string conversions:
   The locId is just a hint to the runtime indicating which local variable is
   being DecRef'd, if any.
 
-| DecRefNZ, ND, S(Gen), CRc
+| DecRefNZ, ND, S(Gen,Ctx), CRc
 
   Decrease the reference count of S0 by one, do not check if it goes to zero.
   This instruction can be used for more efficient code when it is provable that
@@ -1901,7 +1897,7 @@ To string conversions:
 
   Load the context from the closure object S0 into D.
 
-| StClosureCtx, ND, S(Obj) S(Ctx), CRc
+| StClosureCtx, ND, S(Obj) S(Ctx,Nullptr), CRc
 
   Store the context represented by S1 into the closure object S0. S1 may be a
   Nullptr when there is no context (i.e. the closure is being used in a
@@ -2638,7 +2634,7 @@ fields of that struct for holding intermediate values.
   and need to be discarded, they will be decref'd and may re-enter to run
   destructors.
 
-| InitCtx, ND, S(FramePtr) S(Ctx), CRc
+| InitCtx, ND, S(FramePtr) S(Ctx,Nullptr), CRc
 
   Store S1 to the m_this/m_cls field in the frame pointer S0.
 

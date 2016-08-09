@@ -341,7 +341,7 @@ inline bool Func::isAbstract() const {
 }
 
 inline bool Func::mayHaveThis() const {
-  return isPseudoMain() || (cls() && !isStatic());
+  return cls() && !isStatic();
 }
 
 inline bool Func::isPreFunc() const {

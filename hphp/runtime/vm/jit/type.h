@@ -250,7 +250,7 @@ constexpr bool ptrSubsetOf(Ptr a, Ptr b) {
   /* Bottom and Top use IRTP to specify a custom Ptr kind */            \
   IRTP(Bottom,       Bottom, kBottom)                                   \
   IRTP(Top,          Top,    kTop)                                      \
-  IRT(Ctx,                   kObj|kCctx|kNullptr)                       \
+  IRT(Ctx,                   kObj|kCctx)                                \
   IRTP(AnyObj,       Top,    kAnyObj)                                   \
   IRTP(AnyArr,       Top,    kAnyArr)                                   \
   IRT(Counted,               kCountedStr|kCountedArr|kObj|kRes|kBoxedCell) \

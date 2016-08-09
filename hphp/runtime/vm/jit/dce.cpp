@@ -373,7 +373,6 @@ bool canDCE(IRInstruction* inst) {
   case ReqRetranslate:
   case ReqRetranslateOpt:
   case IncRef:
-  case IncRefCtx:
   case DecRef:
   case DecRefNZ:
   case DefFP:

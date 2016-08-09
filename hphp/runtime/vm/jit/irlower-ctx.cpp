@@ -75,11 +75,9 @@ void cgCheckCtxThis(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const func = inst->marker().func();
-  if (func->isPseudoMain() || !func->mayHaveThis()) {
-    // Check for a null $this pointer first.
-    auto const sf = v.makeReg();
-    v << testq{ctx, ctx, sf};
-    fwdJcc(v, env, CC_Z, sf, inst->taken());
+  if (!func->mayHaveThis()) {
+    v << jmp{label(env, inst->taken())};
+    return;
   }
 
   auto const sf = v.makeReg();

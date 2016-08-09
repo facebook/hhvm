@@ -356,14 +356,21 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  if (!func->mayHaveThis()) {
+    auto const taken = inst->taken();
+    inst->convertToNop();
+    return gen(Jmp, taken);
+  }
   if (m_state.thisAvailable()) inst->convertToNop();
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeLdCtxHelper(IRInstruction* inst) {
   // Change LdCtx in static functions to LdCctx, or if we're inlining try to
   // fish out a constant context.
   auto const func = inst->marker().func();
+  assertx(func->cls());
   auto const ctx = [&]() -> SSATmp* {
     auto ret = m_state.ctx();
     if (!ret) return nullptr;
@@ -388,11 +395,16 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
     }
   }
 
-  if (func->isStatic()) {
+  if (!func->mayHaveThis()) {
     // ActRec->m_cls of a static function is always a valid class pointer with
     // the bottom bit set
-    auto const src = inst->src(0);
-    return gen(LdCctx, src);
+    if (func->cls()->attrs() & AttrNoOverride) {
+      return m_unit.cns(ConstCctx::cctx(func->cls()));
+    }
+    if (inst->op() == LdCtx) {
+      auto const src = inst->src(0);
+      return gen(LdCctx, src);
+    }
   }
 
   return nullptr;
@@ -490,6 +502,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CoerceStk)
   X(CheckCtxThis)
   X(LdCtx)
+  X(LdCctx)
   X(LdMBase)
   default: break;
   }

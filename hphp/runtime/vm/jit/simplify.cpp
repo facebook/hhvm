@@ -302,11 +302,13 @@ SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
+  assertx(inst->marker().func()->mayHaveThis());
   if (inst->src(0)->type() <= TObj) return inst->src(0);
   return nullptr;
 }
 
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
+  assertx(inst->marker().func()->cls());
   SSATmp* ctx = inst->src(0);
   if (ctx->hasConstVal(TCctx)) {
     return cns(env, ctx->cctxVal().cls());
@@ -2098,17 +2100,6 @@ SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyIncRefCtx(State& env, const IRInstruction* inst) {
-  auto const ctx = inst->src(0);
-  if (ctx->isA(TObj)) {
-    return gen(env, IncRef, ctx);
-  } else if (!mightRelax(env, ctx) && !ctx->type().maybe(TCounted)) {
-    return gen(env, Nop);
-  }
-
-  return nullptr;
-}
-
 SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
   assertx(inst->is(JmpZero, JmpNZero));
   // Both ways go to the same block.
@@ -2628,7 +2619,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Floor)
   X(GetCtxFwdCall)
   X(IncRef)
-  X(IncRefCtx)
   X(InitObjProps)
   X(InstanceOf)
   X(InstanceOfIface)

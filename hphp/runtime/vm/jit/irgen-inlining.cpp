@@ -107,7 +107,7 @@ bool beginInlining(IRGS& env,
 
   // If the ctx was extracted from SpillFrame it may be a TCls, otherwise it
   // will be a TCtx (= TObj | TCctx | TNullptr) read from the stack
-  assertx(!ctx || ctx->type() <= (TCtx | TCls));
+  assertx(!ctx || ctx->type() <= (target->cls() ? TCtx | TCls : TNullptr));
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     auto arFunc = gen(env, LdARFuncPtr,

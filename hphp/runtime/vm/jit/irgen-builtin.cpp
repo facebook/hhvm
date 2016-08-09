@@ -1241,7 +1241,7 @@ void nativeImplInlined(IRGS& env) {
   auto const paramThis = [&] () -> SSATmp* {
     if (!callee->isMethod()) return nullptr;
     if (callee->isStatic() && !callee->isNative()) return nullptr;
-    auto ctx = gen(env, LdCtx, fp(env));
+    auto ctx = ldCtx(env);
     if (callee->isStatic()) return gen(env, LdClsCtx, ctx);
     return gen(env, CastCtxThis, ctx);
   }();
@@ -1367,7 +1367,7 @@ void emitNativeImpl(IRGS& env) {
   }
 
   auto thiz = callee->isMethod() && (!callee->isStatic() || callee->isNative())
-    ? gen(env, LdCtx, fp(env)) : nullptr;
+    ? ldCtx(env) : nullptr;
   auto const numParams = gen(env, LdARNumParams, fp(env));
 
   ifThenElse(

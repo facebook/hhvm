@@ -1247,7 +1247,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DecRefNZ:
   case AFWHBlockOn:
   case IncRef:
-  case IncRefCtx:
   case LdClosureCtx:
   case StClosureCtx:
   case StClosureArg:

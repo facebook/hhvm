@@ -32,6 +32,7 @@ type t =
 | ConstDeclaration
 | ConstantDeclarator
 | TypeConstDeclaration
+| DecoratedExpression
 | ParameterDeclaration
 | AttributeSpecification
 | Attribute
@@ -150,6 +151,7 @@ let to_string kind =
   | ConstDeclaration -> "const_declaration"
   | ConstantDeclarator -> "constant_declarator"
   | TypeConstDeclaration -> "type_const_declaration"
+  | DecoratedExpression -> "decorated_expression"
   | ParameterDeclaration -> "parameter_declaration"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"

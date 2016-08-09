@@ -392,6 +392,10 @@ let rec get_doc node =
       handle_compound_inline_brace before_body body_node missing in
     let after_attr = after_attr ^^^ semicolon in
     group_doc (methodish_attr ^| after_attr)
+  | DecoratedExpression x ->
+    let decorator = get_doc (decorated_expression_decorator x) in
+    let expression = get_doc (decorated_expression_expression x) in
+    group_doc (decorator ^^^ expression)
   | ParameterDeclaration x ->
     let attr = get_doc (param_attr x) in
     let visibility = get_doc (param_visibility x) in

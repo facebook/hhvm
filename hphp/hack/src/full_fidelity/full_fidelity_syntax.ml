@@ -218,6 +218,10 @@ module WithToken(Token: TokenType) = struct
       type_const_type_specifier : t;
       type_const_semicolon : t;
     }
+    and decorated_expression = {
+      decorated_expression_decorator: t;
+      decorated_expression_expression: t;
+    }
     and parameter_declaration = {
       param_attr : t;
       param_visibility : t;
@@ -630,6 +634,7 @@ module WithToken(Token: TokenType) = struct
     | AliasDeclaration of alias_declaration
     | PropertyDeclaration of property_declaration
     | PropertyDeclarator of property_declarator
+    | DecoratedExpression of decorated_expression
     | ParameterDeclaration of parameter_declaration
     | AttributeSpecification of attribute_specification
     | Attribute of attribute
@@ -755,6 +760,7 @@ module WithToken(Token: TokenType) = struct
       | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
       | ConstantDeclarator _ -> SyntaxKind.ConstantDeclarator
       | TypeConstDeclaration _ -> SyntaxKind.TypeConstDeclaration
+      | DecoratedExpression _ -> SyntaxKind.DecoratedExpression
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
       | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
       | Attribute _ -> SyntaxKind.Attribute
@@ -860,6 +866,8 @@ module WithToken(Token: TokenType) = struct
     let is_constant_declarator node = kind node = SyntaxKind.ConstantDeclarator
     let is_type_const_declaration node =
       kind node = SyntaxKind.TypeConstDeclaration
+    let is_decorated_expression node =
+      kind node = SyntaxKind.DecoratedExpression
     let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
@@ -1104,6 +1112,9 @@ module WithToken(Token: TokenType) = struct
         [ type_const_abstract; type_const_const_token; type_const_type_token;
           type_const_name; type_const_type_constraint; type_const_equal;
           type_const_type_specifier; type_const_semicolon; ]
+      | DecoratedExpression
+        { decorated_expression_decorator; decorated_expression_expression; } ->
+        [ decorated_expression_decorator; decorated_expression_expression; ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1480,6 +1491,9 @@ module WithToken(Token: TokenType) = struct
           "type_const_type_token"; "type_const_name";
           "type_const_type_constraint"; "type_const_equal";
           "type_const_type_specifier"; "type_const_semicolon"; ]
+      | DecoratedExpression
+        { decorated_expression_decorator; decorated_expression_expression; } ->
+        [ "decorated_expression_decorator"; "decorated_expression_expression"; ]
       | ParameterDeclaration
         { param_attr; param_visibility; param_type; param_name; param_default }
         ->
@@ -1799,6 +1813,8 @@ module WithToken(Token: TokenType) = struct
     let type_const_equal x = x.type_const_equal
     let type_const_type_specifier x = x.type_const_type_specifier
     let type_const_semicolon x = x.type_const_semicolon
+    let decorated_expression_decorator x = x.decorated_expression_decorator
+    let decorated_expression_expression x = x.decorated_expression_expression
     let param_attr x = x.param_attr
     let param_visibility x = x.param_visibility
     let param_type x = x.param_type
@@ -2133,6 +2149,10 @@ module WithToken(Token: TokenType) = struct
         TypeConstDeclaration { type_const_abstract; type_const_const_token;
           type_const_type_token; type_const_name; type_const_type_constraint;
           type_const_equal; type_const_type_specifier; type_const_semicolon; }
+      | (SyntaxKind.DecoratedExpression,
+        [ decorated_expression_decorator; decorated_expression_expression; ]) ->
+        DecoratedExpression
+        { decorated_expression_decorator; decorated_expression_expression; }
       | (SyntaxKind.ParameterDeclaration, [ param_attr; param_visibility;
         param_type; param_name; param_default ]) ->
         ParameterDeclaration { param_attr; param_visibility; param_type;
@@ -2677,6 +2697,9 @@ module WithToken(Token: TokenType) = struct
           [ type_const_abstract; type_const_const_token; type_const_type_token;
             type_const_name; type_const_type_constraint; type_const_equal;
             type_const_type_specifier; type_const_semicolon; ]
+
+      let make_decorated_expression decorator expression =
+        from_children SyntaxKind.DecoratedExpression [ decorator; expression ]
 
       let make_parameter_declaration
         param_attr param_visibility param_type param_name param_default =

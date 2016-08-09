@@ -52,16 +52,16 @@ module WithExpressionAndStatementParser
     parse_in_type_parser parser TypeParser.parse_type_constraint_opt
 
   (* Expressions *)
-
-  let parse_expression parser =
-    let expression_parser = ExpressionParser.make parser.lexer parser.errors in
-    let (expression_parser, node) =
-      ExpressionParser.parse_expression expression_parser in
-    let lexer = ExpressionParser.lexer expression_parser in
-    let errors = ExpressionParser.errors expression_parser in
+  let parse_in_expression_parser parser expression_parser_function =
+    let expr_parser = ExpressionParser.make parser.lexer parser.errors in
+    let (expr_parser, node) = expression_parser_function expr_parser in
+    let lexer = ExpressionParser.lexer expr_parser in
+    let errors = ExpressionParser.errors expr_parser in
     let parser = { lexer; errors } in
     (parser, node)
 
+  let parse_expression parser =
+    parse_in_expression_parser parser ExpressionParser.parse_expression
 
   (* Statements *)
   let parse_in_statement_parser parser statement_parser_function =
@@ -762,7 +762,10 @@ module WithExpressionAndStatementParser
 
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
-    | DotDotDot -> (parser1, make_token token)
+    | DotDotDot ->
+      let next_kind = peek_token_kind parser1 in
+      if next_kind = Variable then parse_parameter_declaration parser
+      else (parser1, make_token token)
     | _ -> parse_parameter_declaration parser
 
   (* SPEC
@@ -777,14 +780,26 @@ module WithExpressionAndStatementParser
     let (parser, visibility) = parse_visibility_modifier_opt parser in
     let token = peek_token parser in
     let (parser, type_specifier) =
-      if (Token.kind token) = Variable then (parser, make_missing())
-      else parse_type_specifier parser in
-    let (parser, variable_name) = expect_variable parser in
+      match Token.kind token with
+        | Variable | DotDotDot | Ampersand -> (parser, make_missing())
+        | _ -> parse_type_specifier parser in
+    let (parser, name) = parse_decorated_variable_opt parser in
     let (parser, default) = parse_simple_initializer parser in
     let syntax =
-      make_parameter_declaration attrs visibility type_specifier variable_name
-      default in
+      make_parameter_declaration attrs visibility type_specifier name default in
     (parser, syntax)
+
+  and parse_decorated_variable_opt parser =
+    match peek_token_kind parser with
+    | DotDotDot
+    | Ampersand -> parse_decorated_variable parser
+    | _ -> expect_variable parser
+
+  and parse_decorated_variable parser =
+    let (parser, decorator) = next_token parser in
+    let (parser, variable) = expect_variable parser in
+    let decorator = make_token decorator in
+    parser, make_decorated_expression decorator variable
 
   and parse_visibility_modifier_opt parser =
     let (parser1, token) = next_token parser in

@@ -243,11 +243,22 @@ module WithStatementAndDeclParser
         argument-expressions   ,-opt
       argument-expressions:
         expression
+        ... expression
         argument-expressions  ,  expression
     *)
     (* This function parses the parens as well. *)
-    let f parser = with_reset_precedence parser parse_expression in
+    let f parser =
+      with_reset_precedence parser parse_decorated_expression_opt in
     parse_parenthesized_comma_list_opt_allow_trailing parser f
+
+  and parse_decorated_expression_opt parser =
+    match peek_token_kind parser with
+    | DotDotDot ->
+      let (parser, dots) = next_token parser in
+      let (parser, expr) = parse_expression parser in
+      let dots = make_token dots in
+      parser, make_decorated_expression dots expr
+    | _ -> parse_expression parser
 
   and parse_object_creation_expression parser =
     (* SPEC

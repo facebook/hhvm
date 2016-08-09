@@ -261,6 +261,14 @@ bool JSON_parser(Variant &return_value, const char *data, int data_len,
     return retval;
 }
 
+void json_parser_init() {
+    // Nop
+}
+
+void json_parser_scan(IMarker& imarker) {
+    // No-op for now?
+}
+
 }
 
 #endif /* HAVE_JSONC */

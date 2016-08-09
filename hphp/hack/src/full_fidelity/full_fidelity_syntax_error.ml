@@ -137,3 +137,5 @@ let error2030 = "Only traits may use 'require implements'."
 let error2031 =
   "A class, interface, or trait declaration cannot have duplicate modifiers."
 let error2032 = "The array type is not allowed in strict mode."
+let error2033 = "Variadic parameter or argument must be the last in a" ^
+  " parameter or argument list."

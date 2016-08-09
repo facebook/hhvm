@@ -143,6 +143,7 @@ let error_tests =
     "test_declaration_errors";
     "test_errors_class";
     "test_errors_array_type";
+    "test_errors_variadic_param";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

@@ -1,0 +1,4 @@
+(3,13)-(3,17) Variadic parameter or argument must be the last in a parameter or argument list.
+(5,17)-(5,21) Variadic parameter or argument must be the last in a parameter or argument list.
+(8,4)-(8,8) Variadic parameter or argument must be the last in a parameter or argument list.
+(9,8)-(9,12) Variadic parameter or argument must be the last in a parameter or argument list.

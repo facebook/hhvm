@@ -67,8 +67,8 @@ void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
 }
 
 RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
-  RepoTxn txn(m_repo);
   try {
+    RepoTxn txn(m_repo);
     if (!prepared()) {
       std::stringstream ssSelect;
       ssSelect << "SELECT litstrId,litstr FROM "

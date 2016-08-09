@@ -184,6 +184,8 @@ struct RepoTxn {
   Repo& m_repo;
   bool m_pending;
   bool m_error;
+
+  template<class F> void rollback_guard(const char* func, F f);
 };
 
 struct RepoTxnQuery : RepoQuery {

@@ -65,13 +65,12 @@ void RepoStmt::reset() {
 // RepoTxn.
 
 RepoTxn::RepoTxn(Repo& repo)
-  : m_repo(repo), m_pending(true), m_error(false) {
-  try {
-    m_repo.begin();
-  } catch (RepoExc& re) {
-    rollback();
-    throw;
-  }
+  : m_repo(repo), m_pending(false), m_error(false) {
+  // Set m_pending AFTER calling repo.begin() so if repo.begin() fails we are
+  // prepared as 'not pending'.
+  // Don't need a rollback guard here because what would we be rolling back?
+  m_repo.begin();
+  m_pending = true;
 }
 
 RepoTxn::~RepoTxn() {
@@ -80,58 +79,52 @@ RepoTxn::~RepoTxn() {
   }
 }
 
-void RepoTxn::prepare(RepoStmt& stmt, const std::string& sql) {
+template<class F>
+void RepoTxn::rollback_guard(const char* func, F f) {
   try {
-    stmt.prepare(sql);
-  } catch (const std::exception&) {
+    f();
+  } catch (const std::exception& e) {
+    TRACE(4, "RepoTxn::%s(repo=%p) caught '%s'\n", func, &m_repo, e.what());
     rollback();
     throw;
   }
+}
+
+// Convienence wrapper to provide __func__ to rollback_guard().
+#define ROLLBACK_GUARD(f) rollback_guard(__func__, f)
+
+void RepoTxn::prepare(RepoStmt& stmt, const std::string& sql) {
+  ROLLBACK_GUARD([&] {
+      stmt.prepare(sql);
+    });
 }
 
 void RepoTxn::exec(const std::string& sQuery) {
-  try {
-    m_repo.exec(sQuery);
-  } catch (const std::exception& e) {
-    rollback();
-    TRACE(4, "RepoTxn::%s(repo=%p) caught '%s'\n",
-          __func__, &m_repo, e.what());
-    throw;
-  }
+  ROLLBACK_GUARD([&] {
+      m_repo.exec(sQuery);
+    });
 }
 
 void RepoTxn::commit() {
-  if (m_pending) {
-    try {
+  if (!m_pending) return;
+  ROLLBACK_GUARD([&] {
       m_repo.commit();
-    } catch (const std::exception& e) {
-      rollback();
-      TRACE(4, "RepoTxn::%s(repo=%p) caught '%s'\n",
-            __func__, &m_repo, e.what());
-      throw;
-    }
-    m_pending = false;
-  }
+      // Mark pending false AFTER the commit finishes so if it fails we still
+      // attempt a rollback.
+      m_pending = false;
+    });
 }
 
 void RepoTxn::step(RepoQuery& query) {
-  try {
-    query.step();
-  } catch (const std::exception&) {
-    rollback();
-    throw;
-  }
+  ROLLBACK_GUARD([&] {
+      query.step();
+    });
 }
 
 void RepoTxn::exec(RepoQuery& query) {
-  try {
-    query.exec();
-  } catch (const std::exception& e) {
-    rollback();
-    TRACE(4, "RepoTxn::%s(repo=%p) caught '%s'\n",
-          __func__, &m_repo, e.what());
-    throw;
-  }
+  ROLLBACK_GUARD([&] {
+      query.exec();
+    });
 }
 
 void RepoTxn::rollback() {
@@ -141,6 +134,8 @@ void RepoTxn::rollback() {
   m_pending = false;
   m_repo.rollback();
 }
+
+#undef ROLLBACK_GUARD
 
 //==============================================================================
 // RepoQuery.

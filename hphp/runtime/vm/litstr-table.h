@@ -28,7 +28,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct RepoTxn;
 struct StringData;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,9 +93,10 @@ struct LitstrTable {
   Id mergeLitstr(const StringData* litstr);
 
   /*
-   * Insert the table into the repo.
+   * Call onItem() for each item in the table.
    */
-  void insert(RepoTxn& txn);
+  void forEachNamedEntity(
+    std::function<void (int i, const NamedEntityPair& namedEntity)> onItem);
 
 
   /////////////////////////////////////////////////////////////////////////////

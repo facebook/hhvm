@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/litstr-table.h"
 
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
@@ -45,12 +43,10 @@ Id LitstrTable::mergeLitstr(const StringData* litstr) {
   }
 }
 
-void LitstrTable::insert(RepoTxn& txn) {
-  Repo& repo = Repo::get();
-  LitstrRepoProxy& lsrp = repo.lsrp();
-  int repoId = Repo::get().repoIdForNewUnit(UnitOrigin::File);
+void LitstrTable::forEachNamedEntity(
+  std::function<void (int i, const NamedEntityPair& namedEntity)> onItem) {
   for (int i = 0; i < m_namedInfo.size(); ++i) {
-    lsrp.insertLitstr(repoId).insert(txn, i, m_namedInfo[i].first);
+    onItem(i, m_namedInfo[i]);
   }
 }
 

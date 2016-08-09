@@ -227,7 +227,10 @@ void Repo::saveGlobalData(GlobalData newData) {
 
   // TODO(#3521039): we could just put the litstr table in the same
   // blob as the above and delete LitstrRepoProxy.
-  LitstrTable::get().insert(txn);
+  LitstrTable::get().forEachNamedEntity(
+    [this, &txn, repoId](int i, const NamedEntityPair& namedEntity) {
+      lsrp().insertLitstr(repoId).insert(txn, i, namedEntity.first);
+    });
 
   txn.commit();
 }
@@ -444,8 +447,8 @@ void Repo::txPop() {
   } else {
     // We're in the outermost transaction - so clear the rollback flag.
     m_rollback = false;
+    RepoQuery query(m_rollbackStmt);
     try {
-      RepoQuery query(m_rollbackStmt);
       query.exec();
     } catch (RepoExc& ex) {
       /*
@@ -493,7 +496,7 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
     ue->commit(unitOrigin);
   } catch (const std::exception& e) {
     TRACE(0, "unexpected exception in commitUnit: %s\n",
-             e.what());
+          e.what());
     assert(false);
   }
 }
@@ -792,6 +795,7 @@ void Repo::attachLocal(const char* path, bool isWritable) {
     exec(ssAttach.str());
     pragmas(RepoIdLocal);
   } catch (RepoExc& re) {
+    // Failed to run pragmas on local DB - ignored
     return;
   }
 

@@ -203,6 +203,16 @@ and parse_generic_type_argument_list_opt parser =
 and parse_type_list parser close_kind =
   parse_comma_list parser close_kind SyntaxError.error1007 parse_type_specifier
 
+and parse_type_or_ellipsis_list parser close_kind =
+  parse_comma_list parser close_kind SyntaxError.error1007
+  parse_type_or_ellipsis
+
+and parse_type_or_ellipsis parser =
+  let (parser1, token) = next_token parser in
+  match Token.kind token with
+  | DotDotDot -> parser1, make_token token
+  | _ -> parse_type_specifier parser
+
 and parse_generic_type_argument_list parser =
   let (parser, open_angle) = next_token parser in
   let open_angle = make_token open_angle in
@@ -278,7 +288,8 @@ and parse_closure_type_specifier parser =
     if (Token.kind token) = RightParen then
       (parser1, (make_missing()), (make_token token))
     else
-      let (parser, pts) = parse_type_list parser RightParen in
+      (* TODO add second pass checking to ensure ellipsis is the last arg *)
+      let (parser, pts) = parse_type_or_ellipsis_list parser RightParen in
       let (parser, irp) = expect_right_paren parser in
       (parser, pts, irp) in
   let (parser, col) = expect_colon parser in

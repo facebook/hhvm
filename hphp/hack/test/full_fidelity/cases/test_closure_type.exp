@@ -1,0 +1,29 @@
+(script(header((<))((?))((name)(whitespace)(single_line_comment)(end_of_line)))
+(function_declaration(missing)
+  (function_declaration_header(missing)
+  ((end_of_line)(function)(whitespace))
+  ((name)(whitespace))(missing)((lparen))
+  (parameter_declaration(missing)(missing)
+  (closure_type_specifier
+    ((lparen))
+    ((function)(whitespace))
+    ((lparen))((...))((rparen)(whitespace))((:)(whitespace))
+    (simple_type_specifier((int)))
+    ((rparen)(whitespace)))
+    ((variable))(missing))((rparen)
+    (whitespace))((:)(whitespace))
+    (simple_type_specifier((int)(whitespace))))
+  (compound_statement
+  (({)(end_of_line))
+  (expression_statement
+  (function_call_expression
+  (qualified_name
+    ((whitespace)(name)))
+    ((lparen))
+    (list(list_item(literal
+    ((decimal_literal)))
+    ((,)(whitespace)))
+    (list_item
+    (literal((decimal_literal)))
+    ((,)(whitespace)))
+    (literal((decimal_literal))))((rparen)))((;)(end_of_line)))((})))))

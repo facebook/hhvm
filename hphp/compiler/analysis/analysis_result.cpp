@@ -732,7 +732,7 @@ struct DepthFirstVisitor {
     }
     if (threadCount <= 0) threadCount = 1;
     m_data.m_dispatcher = new JobQueueDispatcher<OptWorker>(
-      threadCount, true, 0, false, this
+      threadCount, 0, false, this
     );
   }
 

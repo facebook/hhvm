@@ -28,8 +28,8 @@ namespace HPHP {
 bool Server::StackTraceOnError = true;
 ///////////////////////////////////////////////////////////////////////////////
 
-Server::Server(const std::string &address, int port, int threadCount)
-  : m_address(address), m_port(port), m_threadCount(threadCount),
+Server::Server(const std::string &address, int port)
+  : m_address(address), m_port(port),
     m_urlChecker(SatelliteServerInfo::checkMainURL) {
 }
 
@@ -37,9 +37,9 @@ Server::Server(const std::string &address, int port, int threadCount)
 
 ServerPtr ServerFactory::createServer(const std::string &address,
                                       uint16_t port,
-                                      int numThreads) {
-  ServerOptions options(address, port, numThreads);
-  return createServer(options);
+                                      int maxThreads,
+                                      int initThreads) {
+  return createServer(ServerOptions{address, port, maxThreads, initThreads});
 }
 
 ServerFactoryRegistry::ServerFactoryRegistry()
@@ -54,10 +54,11 @@ ServerFactoryRegistry *ServerFactoryRegistry::getInstance() {
 ServerPtr ServerFactoryRegistry::createServer(const std::string &type,
                                               const std::string &address,
                                               uint16_t port,
-                                              int numThreads) {
+                                              int maxThreads,
+                                              int initThreads) {
   auto factory = getInstance()->getFactory(type);
-  ServerOptions options(address, port, numThreads);
-  return factory->createServer(options);
+  return factory->createServer(
+    ServerOptions{address, port, maxThreads, initThreads});
 }
 
 void ServerFactoryRegistry::registerFactory(const std::string &name,

@@ -117,18 +117,18 @@ void HPHPWorkerThread::cleanup() {
 
 ///////////////////////////////////////////////////////////////////////////////
 ProxygenServer::ProxygenServer(
-    const ServerOptions& options
-  ) : Server(options.m_address, options.m_port, options.m_numThreads),
+  const ServerOptions& options
+  ) : Server(options.m_address, options.m_port),
       m_accept_sock(options.m_serverFD),
       m_accept_sock_ssl(options.m_sslFD),
       m_worker(&m_eventBaseManager),
-      m_dispatcher(options.m_numThreads, RuntimeOption::ServerThreadRoundRobin,
+      m_dispatcher(options.m_maxThreads,
                    RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                    RuntimeOption::ServerThreadDropStack,
                    this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                    RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
-                   kNumPriorities, RuntimeOption::QueuedJobsReleaseRate) {
-
+                   kNumPriorities, RuntimeOption::QueuedJobsReleaseRate,
+                   0, options.m_initThreads) {
   SocketAddress address;
   if (options.m_address.empty()) {
     address.setFromLocalPort(options.m_port);

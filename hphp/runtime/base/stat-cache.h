@@ -26,6 +26,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/atomic-countable.h"

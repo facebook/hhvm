@@ -17,38 +17,39 @@
 #ifndef incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 #define incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 
-#include <vector>
-#include <list>
-
 #include "hphp/util/mutex.h"
-#include "hphp/util/rank.h"
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/util/functional.h"
+#include <pthread.h>
+#include <folly/IntrusiveList.h>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * A Synchronizable object that has multiple conditional variables. The benefit
- * is, notify() can choose to notify the most recently waited conditional
- * variable for an altered scheduling that potentially wakes up a thread with
- * better thread caching.
+ * is, notify() can choose to wake up a thread that is more favorable (e.g.,
+ * one with stack/heap mapped on huge pages, or one that is recently active).
  */
 struct SynchronizableMulti {
   explicit SynchronizableMulti(int size);
-  virtual ~SynchronizableMulti();
+  virtual ~SynchronizableMulti() {}
 
+  /*
+   * Threads are notified based on their priority. The priority is decided when
+   * calling wait().
+   */
+  enum Priority {
+    High,
+    Middle,
+    Low
+  };
   /**
    * "id" is an arbitrary number that locates the conditional variable to wait
    * on.
-   *
-   * "front" means adding this thread to front of the queue while waiting.
-   * Otherwise, the thread is pushed to the back of the queue, being the last
-   * to wake up, when notify() is called.
    */
-  void wait(int id, int q, bool front);
-  bool wait(int id, int q, bool front, long seconds); // false if timed out
-  bool wait(int id, int q, bool front, long seconds, long long nanosecs);
+  void wait(int id, int q, Priority pri);
+  bool wait(int id, int q, Priority pri, long seconds); // false if timed out
+  bool wait(int id, int q, Priority pri, long seconds, long long nanosecs);
   void notify();
   void notifyAll();
   void setNumGroups(int num_groups);
@@ -57,18 +58,64 @@ struct SynchronizableMulti {
 
  private:
   Mutex m_mutex;
-  std::vector<pthread_cond_t> m_conds;
-  typedef std::list<pthread_cond_t*> CondPtrList;
-  std::vector<CondPtrList> m_cond_list_vec;
-
-  typedef std::pair<CondPtrList*, CondPtrList::iterator> CondListElem;
-  // iterators in std::list are valid even after element removal
-  typedef hphp_hash_map<pthread_cond_t*, CondListElem,
-                        pointer_hash<pthread_cond_t> > CondIterMap;
-  CondIterMap m_cond_map;
-
-  bool waitImpl(int id, int q, bool front, timespec *ts);
   int m_group;
+
+  struct alignas(64) CondVarNode {
+    pthread_cond_t m_cond;
+    folly::IntrusiveListHook m_listHook;
+
+    CondVarNode() {
+      pthread_cond_init(&m_cond, nullptr);
+    }
+    ~CondVarNode() {
+      pthread_cond_destroy(&m_cond);
+    }
+    /* implicit */ operator pthread_cond_t*() {
+      return &m_cond;
+    }
+    void unlink() {
+      m_listHook.unlink();
+    }
+  };
+
+  std::vector<CondVarNode> m_conds;
+
+  // List with push_middle, to support three priorities.  It is implemented
+  // using two intrusive lists.
+  struct alignas(64) CondVarList {
+    CondVarList() = default;
+
+    bool empty() const {
+      return m_highPriList.empty() && m_midLowPriList.empty();
+    }
+    CondVarNode& front() {
+      if (!m_highPriList.empty()) return m_highPriList.front();
+      return m_midLowPriList.front();
+    }
+    void pop_front() {
+      if (!m_highPriList.empty()) m_highPriList.pop_front();
+      else m_midLowPriList.pop_front();
+    }
+
+    void push_front(CondVarNode& c) {
+      m_highPriList.push_front(c);
+    }
+    void push_middle(CondVarNode& c) {
+      m_midLowPriList.push_front(c);
+    }
+    void push_back(CondVarNode& c) {
+      m_midLowPriList.push_back(c);
+    }
+
+   private:
+    using CondVarIList =
+      folly::IntrusiveList<CondVarNode, &CondVarNode::m_listHook>;
+    CondVarIList m_highPriList;
+    CondVarIList m_midLowPriList;
+  };
+  std::vector<CondVarList> m_cond_list_vec;
+
+  bool waitImpl(int id, int q, Priority pri, timespec *ts);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

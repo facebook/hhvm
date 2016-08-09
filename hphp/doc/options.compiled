@@ -124,7 +124,6 @@ flood error logs.
     Port = 80
     Type = proxygen | fastcgi
     ThreadCount = 50
-    ThreadRoundRobin = false   # last thread serves next
     ThreadDropCacheTimeoutSeconds = 0
     ThreadJobLIFO = false
 

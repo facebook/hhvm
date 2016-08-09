@@ -21,6 +21,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 

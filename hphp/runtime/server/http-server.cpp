@@ -92,8 +92,8 @@ HttpServer::HttpServer()
       (RuntimeOption::ServerType);
   const std::string address = RuntimeOption::ServerFileSocket.empty()
     ? RuntimeOption::ServerIP : RuntimeOption::ServerFileSocket;
-  ServerOptions options(
-      address, RuntimeOption::ServerPort, startingThreadCount);
+  ServerOptions options(address, RuntimeOption::ServerPort,
+    RuntimeOption::ServerThreadCount, startingThreadCount);
   options.m_useFileSocket = !RuntimeOption::ServerFileSocket.empty();
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;

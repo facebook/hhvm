@@ -139,7 +139,6 @@ struct RuntimeOption {
   static int ServerThreadCount;
   static int QueuedJobsReleaseRate;
   static int ServerWarmupThrottleRequestCount;
-  static bool ServerThreadRoundRobin;
   static int ServerThreadDropCacheTimeoutSeconds;
   static int ServerThreadJobLIFOSwitchThreshold;
   static int ServerThreadJobMaxQueuingMilliSeconds;
@@ -154,7 +153,6 @@ struct RuntimeOption {
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;
-  static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;
   static int PageletServerQueueLimit;
   static bool PageletServerThreadDropStack;

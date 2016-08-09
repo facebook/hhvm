@@ -158,10 +158,7 @@ public:
     virtual void serverStopped(Server* server) {}
   };
 
-  /**
-   * Constructor.
-   */
-  Server(const std::string &address, int port, int threadCount);
+  Server(const std::string &address, int port);
 
   /**
    * Set the RequestHandlerFactory that this server will use.
@@ -222,7 +219,6 @@ public:
    */
   std::string getAddress() const { return m_address;}
   int getPort() const { return m_port;}
-  int getThreadCount() const { return m_threadCount;}
 
   RunStatus getStatus() const { return m_status;}
   void setStatus(RunStatus status) { m_status = status;}
@@ -293,7 +289,6 @@ public:
 protected:
   std::string m_address;
   int m_port;
-  int m_threadCount;
   mutable Mutex m_mutex;
   RequestHandlerFactory m_handlerFactory;
   URLChecker m_urlChecker;
@@ -307,19 +302,26 @@ private:
 struct ServerOptions {
   ServerOptions(const std::string &address,
                 uint16_t port,
-                int numThreads)
+                int maxThreads,
+                int initThreads = -1)
     : m_address(address),
       m_port(port),
-      m_numThreads(numThreads),
+      m_maxThreads(maxThreads),
+      m_initThreads(initThreads),
       m_serverFD(-1),
       m_sslFD(-1),
       m_takeoverFilename(),
       m_useFileSocket(false) {
+    assert(m_maxThreads >= 0);
+    if (m_initThreads < 0 || m_initThreads > m_maxThreads) {
+      m_initThreads = m_maxThreads;
+    }
   }
 
   std::string m_address;
   uint16_t m_port;
-  int m_numThreads;
+  int m_maxThreads;
+  int m_initThreads;
   int m_serverFD;
   int m_sslFD;
   std::string m_takeoverFilename;
@@ -340,7 +342,8 @@ struct ServerFactory {
 
   ServerPtr createServer(const std::string &address,
                          uint16_t port,
-                         int numThreads);
+                         int maxThreads,
+                         int initThreads = -1);
 };
 
 /**
@@ -360,7 +363,8 @@ struct ServerFactoryRegistry {
   static ServerPtr createServer(const std::string &type,
                                 const std::string &address,
                                 uint16_t port,
-                                int numThreads);
+                                int maxThreads,
+                                int initThreads = -1);
 
   void registerFactory(const std::string &name,
                        const ServerFactoryPtr &factory);

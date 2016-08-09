@@ -10952,7 +10952,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   Compiler::ClearErrors();
 
   JobQueueDispatcher<EmitterWorker>
-    dispatcher(threadCount, true, 0, false, ar.get());
+    dispatcher(threadCount, 0, false, ar.get());
 
   auto setPreloadPriority = [&ar](const std::string& f, int p) {
     auto fs = ar->findFileScope(f);

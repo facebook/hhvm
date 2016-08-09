@@ -1052,13 +1052,13 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 ide_con.disconnect())
         ide_con.write_cmd(cmd)
         (stdout, _, exit_code) = ide_con.get_return()
-        self.assertEqual(
-            stdout[:141] + stdout[153:],
-            '{"protocol":"service_framework3_rpc","type":"respo' +
-            'nse","id":789,"result":[{"name":"frob","type":"(function(): void' +
-            ')","pos":{"filename":"/tmp/repo/foo_5.php","line":4,"char_start"' +
-            ':67,"char_end":70},"func_details":{"min_arity":0,"return_type":"' +
-            'void","params":[]},"expected_ty":false}]}\n',
+        self.assertEqualString(
+            stdout,
+            '{{"protocol":"service_framework3_rpc","type":"response","id":789' +
+            ',"result":[{{"name":"frob","type":"(function(): void)","pos":{{"' +
+            'filename":"{root}foo_5.php","line":4,"char_start":67,"char_end":' +
+            '70}},"func_details":{{"min_arity":0,"return_type":"void","params' +
+            '":[]}},"expected_ty":false}}]}}\n',
             msg="Autocomplete response content does not match"
         )
         self.assertEqual(
@@ -1120,11 +1120,11 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 ide_con.disconnect())
         ide_con.write_cmd(cmd)
         (stdout, _, exit_code) = ide_con.get_return()
-        self.assertEqual(
-            stdout[:119] + stdout[141:],
-            '{"protocol":"service_framework3_rpc","type":"next","id":233,"err' +
-            'ors":[{"message":[{"descr":"Expected modifier","path":"foo_5.php' +
-            '","line":4,"start":51,"end":54,"code":1002}]}]}\n',
+        self.assertEqualString(
+            stdout,
+            '{{"protocol":"service_framework3_rpc","type":"next","id":233,"er' +
+            'rors":[{{"message":[{{"descr":"Expected modifier","path":"{root}' +
+            'foo_5.php","line":4,"start":51,"end":54,"code":1002}}]}}]}}\n',
             msg="Diagnostics response does not match"
         )
         self.assertEqual(

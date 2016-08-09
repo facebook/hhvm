@@ -40,6 +40,12 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
             output.splitlines())
         return err
 
+    def assertEqualString(self, first, second, msg=None):
+        root = self.repo_dir + os.path.sep
+        second = second.format(root=root)
+        self.assertEqual(first, second, msg)
+
+
 class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver,
         unittest.TestCase):
     pass

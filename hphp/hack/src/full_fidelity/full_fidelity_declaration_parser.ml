@@ -971,6 +971,9 @@ module WithExpressionAndStatementParser
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->
       parse_classish_or_function_declaration parser
+      (* TODO figure out what global const differs from class const *)
+    | Const -> parse_const_declaration parser1 (make_missing ())
+              (make_token token)
     | _ ->
       parse_statement parser
 

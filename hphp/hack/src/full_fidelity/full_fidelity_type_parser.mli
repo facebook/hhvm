@@ -17,3 +17,4 @@ val parse_return_type : t -> t * Full_fidelity_minimal_syntax.t
 val parse_possible_generic_specifier : t -> t * Full_fidelity_minimal_syntax.t
 val parse_type_constraint_opt : t -> t * Full_fidelity_minimal_syntax.t
 val parse_generic_type_parameter_list: t -> t * Full_fidelity_minimal_syntax.t
+val parse_generic_parameter_list_opt: t -> t * Full_fidelity_minimal_syntax.t

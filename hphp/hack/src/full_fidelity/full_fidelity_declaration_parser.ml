@@ -39,6 +39,9 @@ module WithExpressionAndStatementParser
     let parser = { lexer; errors } in
     (parser, node)
 
+  let parse_generic_parameter_list_opt parser =
+    parse_in_type_parser parser TypeParser.parse_generic_parameter_list_opt
+
   let parse_possible_generic_specifier parser =
     parse_in_type_parser parser TypeParser.parse_possible_generic_specifier
 
@@ -122,6 +125,9 @@ module WithExpressionAndStatementParser
       type-to-be-aliased:
         type-specifier
         qualified-name
+        NOTE alias name can contain generics.
+        TODO figure out the grammar for this add add second error pass to
+        report illegal names
     *)
 
     (* TODO: Produce an error if the "type" version has a constraint. *)
@@ -129,11 +135,12 @@ module WithExpressionAndStatementParser
     let (parser, token) = next_token parser in
     let token = make_token token in
     let (parser, name) = expect_name parser in
+    let (parser, generic) = parse_generic_parameter_list_opt parser in
     let (parser, constr) = parse_type_constraint_opt parser in
     let (parser, equal) = expect_equal parser in
     let (parser, ty) = parse_type_specifier parser in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_alias token name constr equal ty semi in
+    let result = make_alias token name generic constr equal ty semi in
     (parser, result)
 
   and parse_enumerator parser =

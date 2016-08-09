@@ -188,6 +188,11 @@ and parse_generic_type_parameter_list parser =
     let result = make_type_arguments open_angle args (make_missing()) in
     (parser, result)
 
+and parse_generic_parameter_list_opt parser =
+  match peek_token_kind parser with
+  | LessThan -> parse_generic_type_parameter_list parser
+  | _ -> (parser, make_missing ())
+
 and parse_generic_type_argument_list_opt parser =
   let token = peek_token parser in
   if (Token.kind token) = LessThan then

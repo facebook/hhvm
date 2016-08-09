@@ -127,6 +127,7 @@ let minimal_tests =
     "test_trait";
     "test_type_const";
     "test_class_const";
+    "test_type_alias";
   ] ~f:mapper
 
 let error_tests =

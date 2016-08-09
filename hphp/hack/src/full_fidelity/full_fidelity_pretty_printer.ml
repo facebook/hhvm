@@ -317,11 +317,12 @@ let rec get_doc node =
   | AliasDeclaration x ->
     let a = get_doc x.alias_token in
     let n = get_doc x.alias_name in
+    let generic = get_doc x.alias_generic_parameter in
     let c = get_doc x.alias_constraint in
     let e = get_doc x.alias_equal in
     let t = get_doc x.alias_type in
     let s = get_doc x.alias_semicolon in
-    a ^| n ^| c ^| e ^| t ^^^ s
+    a ^| n ^| generic ^| c ^| e ^| t ^^^ s
   | PropertyDeclaration x ->
     let m = get_doc x.prop_modifiers in
     let t = get_doc x.prop_type in

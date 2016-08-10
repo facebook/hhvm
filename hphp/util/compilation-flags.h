@@ -39,14 +39,6 @@ constexpr bool debug =
 #endif
   ;
 
-constexpr bool contiguous_heap =
-#if CONTIGUOUS_HEAP
-  true
-#else
-  false
-#endif
-  ;
-
 constexpr bool hhvm_reuse_tc =
 #ifdef HHVM_REUSE_TC
   true

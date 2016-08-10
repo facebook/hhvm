@@ -451,49 +451,6 @@ struct BigHeap {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * ContiguousHeap handles allocations and provides a contiguous address space
- * for requests.
- *
- * To turn on build with CONTIGUOUS_HEAP = 1.
- */
-struct ContiguousHeap : BigHeap {
-  bool contains(void* ptr) const;
-
-  MemBlock allocSlab(size_t size);
-
-  MemBlock allocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock callocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock resizeBig(void* p, size_t size);
-  void freeBig(void*);
-
-  void reset();
-
-  void flush();
-
-  ~ContiguousHeap();
-
- private:
-  // Contiguous Heap Pointers
-  char* m_base = nullptr;
-  char* m_used;
-  char* m_end;
-  char* m_peak;
-  char* m_OOMMarker;
-  FreeNode m_freeList;
-
-  // Contiguous Heap Counters
-  uint32_t m_requestCount;
-  size_t m_heapUsage;
-  size_t m_contiguousHeapSize;
-
- private:
-  void* heapAlloc(size_t nbytes, size_t &cap);
-  void  createRequestHeap();
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 struct MemoryManager {
   /*
    * Lifetime managed with a ThreadLocalSingleton.  Use MM() to access
@@ -1006,11 +963,7 @@ private:
   std::vector<APCLocalArray*> m_apc_arrays;
   int64_t m_nextGc; // request gc when heap usage reaches this size
   MemoryUsageStats m_stats;
-#if CONTIGUOUS_HEAP
-  ContiguousHeap m_heap;
-#else
   BigHeap m_heap;
-#endif
   std::vector<NativeNode*> m_natives;
   SweepableList m_sweepables;
 

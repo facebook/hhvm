@@ -130,6 +130,7 @@ let minimal_tests =
     "test_type_alias";
     "test_global_constant";
     "test_closure_type";
+    "test_awaitable_creation";
   ] ~f:mapper
 
 let error_tests =

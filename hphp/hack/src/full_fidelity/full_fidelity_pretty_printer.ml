@@ -707,6 +707,10 @@ let rec get_doc node =
     let index = get_doc x.subscript_index in
     let right = get_doc x.subscript_right in
     receiver ^^^ left ^^^ index ^^^ right
+  | AwaitableCreationExpression x ->
+    let async = get_doc x.awaitable_async in
+    let stmt = x.awaitable_compound_statement in
+    handle_compound_brace_prefix_indent async stmt indt
   | XHPExpression x ->
     let left = get_doc (xhp_open x) in
     let expr = get_doc (xhp_body x) in

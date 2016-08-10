@@ -135,7 +135,7 @@ module WithStatementAndDeclParser
     | DollarDollar ->
       (parser1, make_pipe_variable_expression (make_token token))
     | Async ->
-      parse_anon_or_lambda parser
+      parse_anon_or_lambda_or_awaitable parser
 
     | Dollar (* TODO: ? *)
 
@@ -809,12 +809,26 @@ module WithStatementAndDeclParser
     parse_comma_list_opt
       parser RightParen SyntaxError.error1025 parse_use_variable
 
-  and parse_anon_or_lambda parser =
+  and parse_anon_or_lambda_or_awaitable parser =
     let (parser1, _) = assert_token parser Async in
     if peek_token_kind parser1 = Function then
       parse_anon parser
+    else if peek_token_kind parser1 = LeftBrace then
+      parse_async_block parser
     else
       parse_lambda_expression parser
+
+  and parse_async_block parser =
+    (*
+     * grammar:
+     *  awaitable-creation-expression :
+     *    async compound-statement
+     * TODO awaitable-creation-expression must not be used as the
+     *      anonymous-function-body in a lambda-expression
+     *)
+    let parser, async = assert_token parser Async in
+    let parser, stmt = parse_compound_statement parser in
+    parser, make_awaitable_creation_expression async stmt
 
   and parse_anon_use_opt parser =
     (* SPEC:

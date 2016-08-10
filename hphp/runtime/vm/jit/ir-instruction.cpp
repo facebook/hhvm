@@ -280,11 +280,11 @@ Type arrElemReturn(const IRInstruction* inst) {
 }
 
 Type thisReturn(const IRInstruction* inst) {
-  auto const func = inst->marker().func();
+  auto const func = inst->func();
 
   // If the function is a cloned closure which may have a re-bound $this which
   // is not a subclass of the context return an unspecialized type.
-  if (func->hasForeignThis()) return TObj;
+  if (!func || func->hasForeignThis()) return TObj;
 
   if (auto const cls = func->cls()) {
     return Type::SubObj(cls);
@@ -293,6 +293,18 @@ Type thisReturn(const IRInstruction* inst) {
 }
 
 Type ctxReturn(const IRInstruction* inst) {
+  auto const func = inst->func();
+  if (!func) return TCtx;
+  if (func->hasForeignThis()) {
+    return func->isStatic() ? TCctx : TCtx;
+  }
+  auto const cls = inst->ctx();
+  if (inst->is(LdCctx) || func->isStatic()) {
+    if (cls->attrs() & AttrNoOverride) {
+      return Type::cns(ConstCctx::cctx(cls));
+    }
+    return TCctx;
+  }
   return thisReturn(inst) | TCctx;
 }
 

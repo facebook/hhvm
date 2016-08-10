@@ -922,7 +922,7 @@ To string conversions:
   which must be a frame for the function in the LdCtx's marker. The result
   could be either an object representing the this pointer or a class context.
 
-| LdCctx, D(Cctx), S(FramePtr), NF
+| LdCctx, DCtx, S(FramePtr), NF
 
   Loads into D the value of the m_cls field out of the frame pointer S0. The
   compiler should generate this only if it can prove that the frame does not
@@ -1893,9 +1893,10 @@ To string conversions:
 
 15. Generators & Closures
 
-| LdClosureCtx, D(Ctx), S(Obj), NF
+| LdClosureCtx, DCtx, S(Obj), NF
 
   Load the context from the closure object S0 into D.
+  May only be used in S0's closure Func.
 
 | StClosureCtx, ND, S(Obj) S(Ctx,Nullptr), CRc
 

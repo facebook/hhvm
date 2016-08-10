@@ -170,12 +170,15 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
     return false;
   }
 
-  if (callee->cls()) {
-    if (!classHasPersistentRDS(callee->cls())) {
+  if (auto cls = callee->implCls()) {
+    if (!classHasPersistentRDS(cls)) {
+      if (callee->isClosureBody()) {
+        return callee->unit() == callSK.unit();
+      }
       // if the callee's class is not persistent, its still ok
       // to use it if we're jitting into a method of a subclass
       auto ctx = callSK.func()->cls();
-      if (!ctx || !ctx->classof(callee->cls())) {
+      if (!ctx || !ctx->classof(cls)) {
         return false;
       }
     }

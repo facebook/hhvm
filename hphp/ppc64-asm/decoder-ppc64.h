@@ -1580,7 +1580,7 @@ class Decoder : private boost::noncopyable {
    * singleton constructor, it's only called once and, when trace is enabled so
    * optimization here is not a big issue.
    */
-  NO_OPT Decoder();
+  Decoder();
 
   ~Decoder() {
     for(int i = 0; i < kDecoderSize; i++)

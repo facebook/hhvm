@@ -275,7 +275,6 @@ struct RuntimeOption {
 
   static bool Utf8izeReplace;
 
-  static std::string StartupDocument;
   static std::string RequestInitFunction;
   static std::string RequestInitDocument;
   static std::string AutoPrependFile;

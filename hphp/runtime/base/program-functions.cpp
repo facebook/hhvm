@@ -79,6 +79,7 @@
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hphp-config.h"
+#include "hphp/util/kernel-version.h"
 #ifndef _MSC_VER
 #include "hphp/util/light-process.h"
 #endif
@@ -989,6 +990,32 @@ static int start_server(const std::string &username, int xhprof) {
         BootStats::Block timer("Readahead Repo");
         auto path = RuntimeOption::RepoLocalPath.c_str();
         Logger::Info("readahead %s", path);
+#ifdef __linux__
+        // glibc doesn't have a wrapper for ioprio_set(), so we need to use
+        // syscall().  The constants here are consistent with the kernel source.
+        // See http://lxr.free-electrons.com/source/include/linux/ioprio.h
+        auto constexpr IOPRIO_CLASS_SHIFT = 13;
+        enum {
+          IOPRIO_CLASS_NONE,
+          IOPRIO_CLASS_RT,
+          IOPRIO_CLASS_BE,
+          IOPRIO_CLASS_IDLE,
+        };
+        // Set to lowest IO priority.
+        constexpr int ioprio = (IOPRIO_CLASS_IDLE << IOPRIO_CLASS_SHIFT);
+
+        // ioprio_set() is available starting kernel 2.6.13
+        KernelVersion version;
+        if (version.m_major > 2 ||
+            (version.m_major == 2 &&
+             (version.m_minor > 6 ||
+              (version.m_minor == 6 && version.m_release >= 13)))) {
+          syscall(SYS_ioprio_set,
+                  1 /* IOPRIO_WHO_PROCESS, in fact, it is this thread */,
+                  0 /* current thread */,
+                  ioprio);
+        }
+#endif
         const auto mbPerSec = RuntimeOption::RepoLocalReadaheadRate;
         if (!readahead_rate(path, mbPerSec)) {
           Logger::Error("readahead failed: %s", strerror(errno));
@@ -1058,11 +1085,6 @@ static int start_server(const std::string &username, int xhprof) {
   }
   BootStats::mark("warmup");
 
-  if (readaheadThread.get()) {
-    readaheadThread->join();
-    readaheadThread.reset();
-  }
-
   if (RuntimeOption::StopOldServer) HttpServer::StopOldServer();
 
   if (RuntimeOption::EvalEnableNuma) {
@@ -1091,6 +1113,11 @@ static int start_server(const std::string &username, int xhprof) {
 #endif
 
   HttpServer::CheckMemAndWait(true); // Final wait
+  if (readaheadThread.get()) {
+    readaheadThread->join();
+    readaheadThread.reset();
+  }
+
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();
   return 0;

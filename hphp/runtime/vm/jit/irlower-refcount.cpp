@@ -76,13 +76,20 @@ void ifNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
 template<class Then>
 void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   if (!ty.maybe(TCounted)) return;
-  if (ty.isKnownDataType()) {
+  if (ty <= TStkElem && ty.isKnownDataType()) {
     if (isRefcountedType(ty.toDataType())) then(v);
     return;
   }
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
-  unlikelyIfThen(v, vtaken, CC_NLE, sf, then);
+  auto cond = CC_NLE;
+  if (ty <= TCtx) {
+    v << testqi{1, loc.reg(0), sf};
+    cond = CC_E;
+  } else {
+    assert(ty <= TStkElem);
+    emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
+  }
+  unlikelyIfThen(v, vtaken, cond, sf, then);
 }
 
 template<class Then>

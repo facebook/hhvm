@@ -2104,7 +2104,7 @@ To string conversions:
 
   Increment the profiling counter associated with translation TransID.
 
-| DbgAssertRefCount, ND, S(Gen), NF
+| DbgAssertRefCount, ND, S(Gen,TCtx), NF
 
   Assert that S0 has a valid refcount. If S0 has a reference counted type and
   its count is implausible then execute a hardware trap instruction.

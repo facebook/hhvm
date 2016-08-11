@@ -36,7 +36,7 @@ struct DebugInfo {
                       bool inPrologue);
   void recordStub(TCRange range, const std::string&);
   void recordPerfMap(TCRange range, SrcKey sk, const Func* func, bool exit,
-                     bool inPrologue);
+                     bool inPrologue, std::string stub = "");
   void recordBCInstr(TCRange range, uint32_t op);
 
   static void recordDataMap(const void* from, const void* to,

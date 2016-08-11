@@ -25,7 +25,8 @@ namespace HPHP { namespace jit {
 // Method ids reported to Vtune JIT API should not be less than 1000 (see
 // the comment in iJIT_Method_Load structure definition.) We use 1000 for
 // trampolines and larger values for normal functions.
-static const int MIN_METHOD_ID = 1000;
+static const int MIN_HELPER_ID = 1000;
+static const int MIN_METHOD_ID = 1100;
 
 void reportTraceletToVtune(const Unit* unit,
                            const Func* func,
@@ -38,7 +39,13 @@ void reportTraceletToVtune(const Unit* unit,
   methodInfo.method_id = tr.src.funcID() + MIN_METHOD_ID;
 
   if (func && func->fullName()) {
-    methodInfo.method_name = const_cast<char *>(func->fullName()->data());
+    char *name = const_cast<char *>(func->fullName()->data());
+    if (!strcmp(name, "")) {
+      // VTune doesn't like the empty string for a name; it
+      // causes it to not record the source file either.
+      name = "__pseudoMain";
+    }
+    methodInfo.method_name = name;
   } else {
     methodInfo.method_name = const_cast<char *>("unknown");
   }
@@ -119,6 +126,23 @@ void reportTraceletToVtune(const Unit* unit,
   methodInfo.method_size = tr.acoldLen;
   methodInfo.line_number_size = coldLineMap.size();
   methodInfo.line_number_table = &coldLineMap[0];
+
+  iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, (void *)&methodInfo);
+}
+
+void reportHelperToVtune(const char *name,
+                         void *start,
+                         void *end) {
+  static unsigned int helperNumber = MIN_HELPER_ID;
+  iJIT_Method_Load methodInfo;
+  memset(&methodInfo, 0, sizeof(methodInfo));
+
+  assert(helperNumber < MIN_METHOD_ID);
+  methodInfo.method_id = helperNumber++;
+
+  methodInfo.method_name = const_cast<char *>(name);
+  methodInfo.method_load_address = start;
+  methodInfo.method_size = (char*)end - (char*)start;
 
   iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, (void *)&methodInfo);
 }

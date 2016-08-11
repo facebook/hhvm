@@ -40,6 +40,8 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/concurrent-scalable-cache.h"
 
@@ -49,6 +51,8 @@
 #endif
 
 namespace HPHP {
+
+using jit::TCA;
 
 ///////////////////////////////////////////////////////////////////////////////
 // PCREglobals definition
@@ -730,6 +734,32 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       } catch (...) {
         pcre_free(re);
         throw;
+      }
+    }
+    if (!RuntimeOption::EvalJitNoGdb ||
+        RuntimeOption::EvalJitUseVtuneAPI ||
+        RuntimeOption::EvalPerfPidMap) {
+      unsigned int size;
+      pcre_fullinfo(re, extra, PCRE_INFO_JITSIZE, &size);
+
+      TCA start = *(TCA *)(extra->executable_jit);
+      TCA end = start + size;
+      std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
+
+      if (!RuntimeOption::EvalJitNoGdb && jit::mcg) {
+        jit::mcg->debugInfo()->recordStub(Debug::TCRange(start, end, false),
+                                          name);
+      }
+      if (RuntimeOption::EvalJitUseVtuneAPI) {
+        HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
+      }
+      if (RuntimeOption::EvalPerfPidMap && jit::mcg) {
+        jit::mcg->debugInfo()->recordPerfMap(Debug::TCRange(start, end, false),
+                                             SrcKey{},
+                                             nullptr,
+                                             false,
+                                             false,
+                                             name);
       }
     }
   }

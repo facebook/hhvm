@@ -25,6 +25,9 @@ void reportTraceletToVtune(const Unit* unit,
                            const Func* func,
                            const TransRec& transRec);
 
+void reportHelperToVtune(const char *name,
+                         void *start,
+                         void *end);
 }}
 
 #endif

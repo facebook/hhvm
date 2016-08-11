@@ -182,10 +182,12 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
 }
 
 void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, const Func* func,
-                              bool exit, bool inPrologue) {
+                              bool exit, bool inPrologue, std::string name) {
   if (!m_perfMap) return;
   if (RuntimeOption::EvalProfileBC) return;
-  std::string name = lookupFunction(func, exit, inPrologue, true);
+  if (name.empty()) {
+    name = lookupFunction(func, exit, inPrologue, true);
+  }
   fprintf(m_perfMap, "%lx %x %s\n",
     reinterpret_cast<uintptr_t>(range.begin()),
     range.size(),

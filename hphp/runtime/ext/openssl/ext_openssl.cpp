@@ -1169,14 +1169,29 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
   String s = String(sealed_data.size(), ReserveString);
   unsigned char *buf = (unsigned char *)s.mutableData();
 
-  EVP_CIPHER_CTX ctx;
+  EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+  if (ctx == nullptr) {
+    raise_warning("Failed to allocate an EVP_CIPHER_CTX object");
+    return false;
+  }
+  SCOPE_EXIT {
+    EVP_CIPHER_CTX_free(ctx);
+  };
   int len1, len2;
-  if (!EVP_OpenInit(&ctx, cipher_type, (unsigned char *)env_key.data(),
-                    env_key.size(), iv_buf, pkey) ||
-      !EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)sealed_data.data(),
-                      sealed_data.size()) ||
-      !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
-      len1 + len2 == 0) {
+  if (!EVP_OpenInit(
+          ctx,
+          cipher_type,
+          (unsigned char*)env_key.data(),
+          env_key.size(),
+          iv_buf,
+          pkey) ||
+      !EVP_OpenUpdate(
+          ctx,
+          buf,
+          &len1,
+          (unsigned char*)sealed_data.data(),
+          sealed_data.size()) ||
+      !EVP_OpenFinal(ctx, buf + len1, &len2) || len1 + len2 == 0) {
     return false;
   }
   open_data.assignIfRef(s.setSize(len1 + len2));
@@ -2066,7 +2081,8 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   bool ret = true;
   int i = 0;
   String s;
-  unsigned char *buf = NULL;
+  unsigned char* buf = nullptr;
+  EVP_CIPHER_CTX* ctx = nullptr;
   for (ArrayIter iter(pub_key_ids); iter; ++iter, ++i) {
     auto okey = Key::Get(iter.second(), true);
     if (!okey) {
@@ -2079,24 +2095,29 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     eks[i] = (unsigned char *)malloc(EVP_PKEY_size(pkeys[i]) + 1);
   }
 
-  EVP_CIPHER_CTX ctx;
-  if (!EVP_EncryptInit(&ctx, cipher_type, nullptr, nullptr)) {
+  ctx = EVP_CIPHER_CTX_new();
+  if (ctx == nullptr) {
+    raise_warning("Failed to allocate an EVP_CIPHER_CTX object");
+    ret = false;
+    goto clean_exit;
+  }
+  if (!EVP_EncryptInit_ex(ctx, cipher_type, nullptr, nullptr, nullptr)) {
     ret = false;
     goto clean_exit;
   }
 
   int len1, len2;
 
-  s = String(data.size() + EVP_CIPHER_CTX_block_size(&ctx), ReserveString);
+  s = String(data.size() + EVP_CIPHER_CTX_block_size(ctx), ReserveString);
   buf = (unsigned char *)s.mutableData();
-  if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) ||
-      !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data.data(),
-                      data.size())) {
+  if (!EVP_SealInit(ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) ||
+      !EVP_SealUpdate(
+          ctx, buf, &len1, (unsigned char*)data.data(), data.size())) {
     ret = false;
     goto clean_exit;
   }
 
-  EVP_SealFinal(&ctx, buf + len1, &len2);
+  EVP_SealFinal(ctx, buf + len1, &len2);
   if (len1 + len2 > 0) {
     sealed_data.assignIfRef(s.setSize(len1 + len2));
 
@@ -2104,7 +2125,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     for (int i = 0; i < nkeys; i++) {
       eks[i][eksl[i]] = '\0';
       ekeys.append(String((char*)eks[i], eksl[i], AttachString));
-      eks[i] = NULL;
+      eks[i] = nullptr;
     }
     env_keys.assignIfRef(ekeys);
   }
@@ -2121,6 +2142,9 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     if (ret) {
       iv.assignIfRef(iv_s.setSize(iv_len));
     }
+  }
+  if (ctx != nullptr) {
+    EVP_CIPHER_CTX_free(ctx);
   }
 
   if (ret) return len1 + len2;
@@ -2846,8 +2870,8 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
 
   outlen = result_len;
 
-  if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)outbuf + result_len,
-                       &result_len)) {
+  if (EVP_EncryptFinal_ex(
+          cipher_ctx, (unsigned char*)outbuf + result_len, &result_len)) {
     outlen += result_len;
     rv.setSize(outlen);
     // Get tag if possible
@@ -3011,7 +3035,7 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
   // if something went wrong in this case, we would've caught it at
   // DecryptUpdate.
   if (mode.is_single_run_aead ||
-      EVP_DecryptFinal(
+      EVP_DecryptFinal_ex(
           cipher_ctx, (unsigned char*)outbuf + result_len, &result_len)) {
     // don't want to do this if is_single_run_aead was enabled, since we didn't
     // make a call to EVP_DecryptFinal.

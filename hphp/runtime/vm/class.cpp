@@ -263,7 +263,14 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
     bool const ctx_match = invoke->cls() == ctx;
     bool const attrs_match = (attrs == AttrNone || attrs == invoke->attrs());
 
-    return ctx_match && attrs_match ? template_cls : nullptr;
+    // The first scoping will never be for `template_cls' (since it's
+    // impossible to define a closure in the context of its own Closure
+    // subclass), so if this happens, it means that `template_cls' is in a
+    // "de-scoped" state and we shouldn't use it.  (See Class::releaseRefs().)
+    bool const ctx_override = template_cls->m_scoped &&
+                              invoke->cls() == template_cls;
+
+    return ctx_match && attrs_match && !ctx_override ? template_cls : nullptr;
   };
 
   // If the template class has already been scoped to `ctx', we're done.  This
@@ -303,6 +310,19 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   };
 
   WriteLock l(s_scope_cache_mutex);
+
+  if (fermeture->m_scoped) {
+    // We raced with someone who scoped the template_cls just as we were about
+    // to, so make a new Class.  (Note that we don't want to do this with the
+    // lock held, since it's very expensive.)
+    //
+    // This race should be far less likely than a race between two attempted
+    // first-scopings for `template_cls', which is why we don't do an test-and-
+    // set when we first check `m_scoped' before acquiring the lock.
+    s_scope_cache_mutex.release();
+    SCOPE_EXIT { s_scope_cache_mutex.acquireWrite(); };
+    fermeture = ClassPtr { newClass(m_preClass.get(), m_parent.get()) };
+  }
 
   // Check the caches again.
   if (auto cls = try_template()) return cls;
@@ -453,11 +473,16 @@ void Class::releaseRefs() {
         if (invoke->cls() == this && attrs == AttrNone) {
           // We only hijack the `template_cls' as a clone for static rescopings
           // (which are signified by AttrNone).  To undo this, we need to make
-          // sure that /no/ scoping will match with that of `template_cls'.  In
-          // the presence of dynamic closure binding, there is no context Class
-          // which is sufficient, so slap on a sentinel Attr for this express
-          // purpose.
-          invoke->rescope(template_cls.get(), invoke->attrs() | AttrUnscoped);
+          // sure that /no/ scoping will match with that of `template_cls'.  We
+          // can accomplish this by using `template_cls' itself as the context.
+          // Any instance of this closure will have its own scoped clone, and
+          // we are de-scoping `template_cls' here, so the only way to obtain
+          // it for dynamic binding is to reference it by name, which is
+          // logically private (in PHP7, it's always just "Closure").  In HHVM,
+          // this is possible by obtaining the Closure subclass's name, in
+          // which case we'll just force a fresh clone via a special-case check
+          // in Class::rescope().
+          invoke->rescope(template_cls.get(), AttrNone);
           // We explicitly decline to reset template_cls->m_scoped.  This lets
           // us simplify some assertions in rescope(), gives us a nice sanity
           // check for debugging, and avoids having to play around too much

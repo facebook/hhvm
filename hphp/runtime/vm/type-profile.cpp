@@ -80,10 +80,10 @@ std::atomic<int> relocateRequests;
  * total number of requests served when server uptime hits n seconds.
  */
 const std::vector<int64_t> rfhBuckets = {
-  30, 60, 90, 120, 150, 180, 210, 240, 270, 300,      // every 30s up to 5m
-  360, 420, 480, 540, 600,                            // every 1m up to 10m
-  600, 900, 1200, 1800, 2400, 2700, 3000, 3300, 3600, // every 5m up to 1h
-  4500, 5400, 6300, 7200,                             // every 15m up to 2h
+  30, 60, 90, 120, 150, 180, 210, 240, 270, 300,             // every 30s, to 5m
+  360, 420, 480, 540, 600,                                   // every 1m, to 10m
+  900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300, 3600, // every 5m, to 1h
+  4500, 5400, 6300, 7200,                                    // every 15m, to 2h
 };
 std::atomic<size_t> nextRFH{0};
 
@@ -256,6 +256,7 @@ static void checkRFH(int64_t finished) {
   assertx(uptime >= 0);
 
   while (i < rfhBuckets.size() && uptime >= rfhBuckets[i]) {
+    assertx(i == 0 || rfhBuckets[i - 1] < rfhBuckets[i]);
     if (!nextRFH.compare_exchange_strong(i, i + 1, std::memory_order_relaxed)) {
       // Someone else reported the sample at i. Try again with the current
       // value of nextRFH.

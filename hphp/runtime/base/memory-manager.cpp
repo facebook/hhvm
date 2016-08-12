@@ -279,9 +279,6 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // This is only set by the jemalloc stats sync which we don't enable until
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
-#ifdef USE_JEMALLOC
-    assert(m_stats.mallocDebt >= m_stats.capacity);
-#endif
 
     // The effect of this call is simply to ignore anything we've done *outside*
     // the MemoryManager allocator after we initialized to avoid attributing

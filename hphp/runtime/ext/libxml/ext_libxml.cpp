@@ -199,7 +199,7 @@ void XMLDocumentData::sweep() {
 // Callbacks and helpers
 //
 // Note that these stream callbacks may re-enter the VM via a user-defined
-// stream wrapper. The VM state should be synced using VMRegAnchor by the
+// stream wrapper. The VM state should be synced using VMRegGuard by the
 // caller, before entering libxml2.
 
 static req::ptr<File> libxml_streams_IO_open_wrapper(

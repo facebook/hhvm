@@ -640,7 +640,7 @@ void XMLWriterResource::sweep() {
 #define XMLWRITER_METHOD(return_type, method_name, ...)                        \
   static return_type HHVM_METHOD(XMLWriter, method_name,                       \
                                  CREATE_PARAMS(__VA_ARGS__)) {                 \
-    VMRegAnchor _;                                                             \
+    VMRegGuard _;                                                             \
     auto data = Native::data<XMLWriterData>(this_);                            \
     return data->method_name(EXTRACT_ARGS(__VA_ARGS__));                       \
   }                                                                            \
@@ -656,7 +656,7 @@ void XMLWriterResource::sweep() {
 #define XMLWRITER_FUNCTION(return_type, function_name, method_name, ...)       \
   static return_type HHVM_FUNCTION(function_name,                              \
                             const Resource& wr, CREATE_PARAMS(__VA_ARGS__)) {  \
-    VMRegAnchor _;                                                             \
+    VMRegGuard _;                                                             \
     CHECK_RESOURCE(resource);                                                  \
     return resource->m_writer.method_name(EXTRACT_ARGS(__VA_ARGS__));          \
   }                                                                            \
@@ -668,14 +668,14 @@ void XMLWriterResource::sweep() {
 
 #define XMLWRITER_METHOD_NO_ARGS(return_type, method_name)                     \
   static return_type HHVM_METHOD(XMLWriter, method_name) {                     \
-    VMRegAnchor _;                                                             \
+    VMRegGuard _;                                                             \
     auto data = Native::data<XMLWriterData>(this_);                            \
     return data->method_name();                                                \
   }                                                                            \
 
 #define XMLWRITER_FUNCTION_NO_ARGS(return_type, function_name, method_name)    \
   static return_type HHVM_FUNCTION(function_name, const Resource& wr) {        \
-    VMRegAnchor _;                                                             \
+    VMRegGuard _;                                                             \
     CHECK_RESOURCE(resource);                                                  \
     return resource->m_writer.method_name();                                   \
   }                                                                            \
@@ -716,7 +716,7 @@ XMLWRITER_METHOD(bool, setIndentString,
 
 static Variant HHVM_FUNCTION(xmlwriter_set_indent_string,
                              const Resource& wr, const Variant& indentString) {
-  VMRegAnchor _;
+  VMRegGuard _;
   CHECK_RESOURCE(resource);
 
   if (!indentString.isString()) {

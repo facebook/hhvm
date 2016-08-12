@@ -205,7 +205,8 @@ tc_unwind_personality(int version,
 #endif
     FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}\n",
            unwindType, ue,
-           tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
+           tl_regState == VMRegState::DIRTY ? "dirty" :
+           tl_regState == VMRegState::CLEAN ? "clean" : "guarded",
            (TCA)_Unwind_GetIP(context), exnType);
   }
 

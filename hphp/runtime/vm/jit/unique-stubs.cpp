@@ -1272,10 +1272,10 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   CGMeta meta;
 
   auto const resumeCPPUnwind = vwrap(cb, data, meta, [&] (Vout& v) {
-    static_assert(sizeof(tl_regState) == 1,
+    static_assert(sizeof(tl_regState) == 8,
                   "The following store must match the size of tl_regState.");
     auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
-    v << storebi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
+    v << storeqi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
 
     v << load{rvmtl()[unwinderExnOff()], rarg(0)};
     v << call{TCA(_Unwind_Resume), arg_regs(1), &us.endCatchHelperPast};

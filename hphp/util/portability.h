@@ -137,13 +137,9 @@
 
 #if defined(__x86_64__)
 
-# if defined(__clang__)
-#  define DECLARE_FRAME_POINTER(fp)               \
-    ActRec* fp;                                   \
-    asm volatile("mov %%rbp, %0" : "=r" (fp) ::)
-# else
-#  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
-# endif
+# define DECLARE_FRAME_POINTER(fp) \
+  auto const fp = (ActRec*) __builtin_frame_address(0)
+# define FRAME_POINTER_IS_ACCURATE
 
 #elif defined(_M_X64)
 
@@ -158,14 +154,16 @@
 # if defined(__clang__)
 #  error Clang implementation not done for ARM
 # endif
-# define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
+# define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29")
 
 #elif defined(__powerpc64__)
 
 # if defined(__clang__)
 #  error Clang implementation not done for PPC64
 # endif
-# define DECLARE_FRAME_POINTER(fp) register ActRec* fp = (ActRec*) __builtin_frame_address(0);
+# define DECLARE_FRAME_POINTER(fp) \
+  auto const fp = (ActRec*) __builtin_frame_address(0)
+# define FRAME_POINTER_IS_ACCURATE
 
 #else
 

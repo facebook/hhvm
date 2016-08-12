@@ -55,19 +55,26 @@ namespace HPHP {
  * value of tl_regState should be whenever we enter native code from translated
  * PHP code.
  *
- * GUARDED is a special DIRTY state which indicates the state is guaranteed to
- * be reset to DIRTY (via a scope guard) when returning to PHP code from a
- * native helper.
+ * Values above GUARDED_THRESHOLD are a special case of dirty which indicates
+ * that the state will be reset to DIRTY (via a scope guard) when returning to
+ * PHP code, and the actual value can be used as a start point for following the
+ * c++ callchain back into the VM. This makes it suitable for guarding callbacks
+ * through code compiled without frame pointers, and in places where we may
+ * end up needing to clean the registers multiple times.
  */
-enum class VMRegState : uint8_t {
+enum VMRegState : uintptr_t {
   CLEAN,
   DIRTY,
-  GUARDED
+  GUARDED_THRESHOLD
 };
 extern __thread VMRegState tl_regState;
 
 inline void checkVMRegState() {
   assert(tl_regState == VMRegState::CLEAN);
+}
+
+inline void checkVMRegStateGuarded() {
+  assert(tl_regState != VMRegState::DIRTY);
 }
 
 inline VMRegs& vmRegsUnsafe() {
@@ -165,7 +172,7 @@ struct VMRegAnchor {
   explicit VMRegAnchor(ActRec* ar);
 
   ~VMRegAnchor() {
-    if (m_old != VMRegState::GUARDED) {
+    if (m_old < VMRegState::GUARDED_THRESHOLD) {
       tl_regState = m_old;
     }
   }
@@ -194,14 +201,13 @@ struct EagerVMRegAnchor {
       assert(regs.stack.top() == sp);
       assert(regs.pc == pc);
     }
+    assert(tl_regState < VMRegState::GUARDED_THRESHOLD);
     m_old = tl_regState;
     tl_regState = VMRegState::CLEAN;
   }
 
   ~EagerVMRegAnchor() {
-    if (m_old != VMRegState::GUARDED) {
-      tl_regState = m_old;
-    }
+    tl_regState = m_old;
   }
 
   VMRegState m_old;
@@ -220,13 +226,34 @@ struct EagerVMRegAnchor {
  * conditional instantiations of VMRegAnchor).  It changes tl_regState to
  * GUARDED, which tells sub-scoped VMRegAnchors that they may keep it set to
  * CLEAN after they finish syncing.
+ *
+ * VMRegGuard also saves the current fp, making it suitable for guarding
+ * callbacks through library code that was compiled without frame pointers.
  */
 struct VMRegGuard {
-  VMRegGuard() : m_old(tl_regState) {
+  /*
+   * If we know the frame pointer returned by DECLARE_FRAME_POINTER is accurate,
+   * we can use ALWAYS_INLINE, and grab the frame pointer.
+   * If not, we have to use NEVER_INLINE to ensure we're one level in from the
+   * guard... but thats not quite enough because VMRegGuard::VMRegGuard is a
+   * leaf function, and so might not have a frame
+   */
+#ifdef FRAME_POINTER_IS_ACCURATE
+  ALWAYS_INLINE VMRegGuard() : m_old(tl_regState) {
     if (tl_regState == VMRegState::DIRTY) {
-      tl_regState = VMRegState::GUARDED;
+      DECLARE_FRAME_POINTER(framePtr);
+      tl_regState = (VMRegState)(uintptr_t)framePtr;
     }
   }
+#else
+  NEVER_INLINE VMRegGuard() : m_old(tl_regState) {
+    if (tl_regState == VMRegState::DIRTY) {
+      DECLARE_FRAME_POINTER(framePtr);
+      auto const fp = isVMFrame(framePtr->m_sfp) ? framePtr : framePtr->m_sfp;
+      tl_regState = (VMRegState)(uintptr_t)fp;
+    }
+  }
+#endif
   ~VMRegGuard() { tl_regState = m_old; }
 
   VMRegGuard(const VMRegGuard&) = delete;

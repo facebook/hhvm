@@ -181,10 +181,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
 }
 
 /**
- * The error handler callbacks below are called from libxml code
- * that is compiled without frame pointers, so it's necessary to do
- * SYNC_VM_REGS_SCOPED() before calling libxml code that uses these
- * error handler callbacks.
+ * The error handler callbacks below are called from libxml code that
+ * is compiled without frame pointers, so it's necessary to use a
+ * VMRegGuard before calling libxml code that uses these error handler
+ * callbacks.
  */
 
 static void php_libxml_ctx_error(void *ctx,
@@ -691,7 +691,7 @@ static xmlNsPtr dom_get_ns(xmlNodePtr nodep, const char *uri, int *errorcode,
 static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
                                      const String& source,
                                      int options) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
 
   xmlDocPtr ret = nullptr;
   xmlParserCtxtPtr ctxt = nullptr;
@@ -828,7 +828,7 @@ static bool HHVM_METHOD(DomDocument, _load, const String& source,
 
 static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
                         int64_t options, bool isFile) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
 
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -1259,7 +1259,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   }
   ctxp->namespaces = ns;
   ctxp->nsNr = nsnbr;
-  VMRegAnchor _;
+  checkVMRegStateGuarded();
   xpathobjp = xmlXPathEvalExpression((xmlChar*)expr.data(), ctxp);
   ctxp->node = nullptr;
   if (ns != nullptr) {
@@ -3690,13 +3690,13 @@ bool HHVM_METHOD(DOMDocument, registerNodeClass,
 
 bool HHVM_METHOD(DOMDocument, relaxNGValidate,
                  const String& filename) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_relaxNG_validate(data, filename, DOM_LOAD_FILE);
 }
 
 bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const String& source) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_relaxNG_validate(data, source, DOM_LOAD_STRING);
 }
@@ -3704,7 +3704,7 @@ bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const String& source) {
 Variant HHVM_METHOD(DOMDocument, save,
                     const String& file,
                     int64_t options /* = 0 */) {
-  VMRegAnchor _;
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0, saveempty = 0;
@@ -3727,7 +3727,7 @@ Variant HHVM_METHOD(DOMDocument, save,
 
 Variant HHVM_METHOD(DOMDocument, saveHTMLFile,
                     const String& file) {
-  VMRegAnchor _;
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0;
@@ -3772,7 +3772,7 @@ Variant HHVM_METHOD(DOMDocument, saveHTML,
 Variant save_html_or_xml(DOMNode* obj,
                          bool as_xml,
                          const Object& node /* = null_object */) {
-  VMRegAnchor _;
+  VMRegGuard _;
   xmlDocPtr docp = (xmlDocPtr)obj->nodep();
   xmlBufferPtr buf;
   xmlChar *mem;
@@ -3830,20 +3830,20 @@ Variant save_html_or_xml(DOMNode* obj,
 
 bool HHVM_METHOD(DOMDocument, schemaValidate,
                  const String& filename) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_schema_validate(data, filename, DOM_LOAD_FILE);
 }
 
 bool HHVM_METHOD(DOMDocument, schemaValidateSource,
                  const String& source) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_schema_validate(data, source, DOM_LOAD_STRING);
 }
 
 bool HHVM_METHOD(DOMDocument, validate) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   xmlValidCtxt *cvp;
@@ -3861,7 +3861,7 @@ bool HHVM_METHOD(DOMDocument, validate) {
 
 Variant HHVM_METHOD(DOMDocument, xinclude,
                     int64_t options /* = 0 */) {
-  VMRegAnchor _;
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int err = xmlXIncludeProcessFlags(docp, options);
@@ -5626,6 +5626,7 @@ Variant HHVM_METHOD(DOMXPath, evaluate,
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
+  VMRegGuard _;
   return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_EVALUATE,
                         registerNodeNS);
 }
@@ -5638,6 +5639,7 @@ Variant HHVM_METHOD(DOMXPath, query,
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
+  VMRegGuard _;
   return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_QUERY,
                         registerNodeNS);
 }

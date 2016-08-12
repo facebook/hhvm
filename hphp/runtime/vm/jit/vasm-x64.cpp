@@ -228,7 +228,7 @@ struct Vgen {
   void emit(const storebi& i);
   void emit(const storel& i) { a.storel(i.s, i.m); }
   void emit(const storeli& i) { a.storel(i.s, i.m); }
-  void emit(const storeqi& i) { a.storeq(i.s, i.m); }
+  void emit(const storeqi& i);
   void emit(const storesd& i) { a.movsd(i.s, i.m); }
   void emit(const storew& i) { a.storew(i.s, i.m); }
   void emit(const storewi& i) { a.storew(i.s, i.m); }
@@ -703,6 +703,10 @@ void Vgen::emit(const lea& i) {
 
 void Vgen::emit(const storebi& i) {
   prefix(a, i.m).storeb(i.s, i.m.mr());
+}
+
+void Vgen::emit(const storeqi& i) {
+  prefix(a, i.m).storeq(i.s, i.m.mr());
 }
 
 void Vgen::emit(const testwim& i) {

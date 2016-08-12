@@ -192,7 +192,9 @@ let get_persistent_fds env =
     failwith ("Persistent channel not found!")
 
 let is_persistent env fd =
-  fd = get_persistent_fds env
+  match env.persistent_client_fd with
+  | Some p_fd -> fd = p_fd
+  | None -> false
 
 let send_response_to_client fd response =
   Marshal_tools.to_fd_with_preamble fd response

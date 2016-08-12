@@ -31,7 +31,7 @@
 #include <signal.h>
 #include <time.h>
 
-#include <chrono>
+#include <folly/Random.h>
 
 namespace HPHP {
 
@@ -181,14 +181,11 @@ void Xenon::start(uint64_t msec) {
     TRACE(1, "Xenon::start periodic %ld seconds, %ld nanoseconds\n", sec, nsec);
 
     // for the initial timer, we want to stagger time for large installations
-    using namespace std::chrono;
-    unsigned int seed = time_point_cast<milliseconds>(
-      high_resolution_clock::now()).time_since_epoch().count();
-    uint64_t msecInit = msec * (rand_r(&seed) / (double)RAND_MAX);
-    time_t fSec = msecInit / 1000;
-    long fNsec = (msecInit % 1000) * 1000000;
-    TRACE(1, "Xenon::start initial %ld seconds, %ld nanoseconds\n",
-       fSec, fNsec);
+    auto const msecInit = folly::Random::rand32(static_cast<uint32_t>(msec));
+    auto const fSec = msecInit / 1000;
+    auto const fNsec = (msecInit % 1000) * 1000000;
+    TRACE(1, "Xenon::start initial %d seconds, %d nanoseconds\n",
+          fSec, fNsec);
 
     sigevent sev={};
     sev.sigev_notify = SIGEV_SIGNAL;
